@@ -52,6 +52,11 @@
 #include "lnn_net_builder.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_message.c"
+#include "trans_session_service.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
+#include "trans_channel_manager.h"
 
 using namespace testing::ext;
 
@@ -84,11 +89,28 @@ public:
 
 void TransTcpDirectMessageStaticTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
+    const IServerChannelCallBack *cb = TransServerGetChannelCb();
+    int32_t ret = TransTdcSetCallBack(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 void TransTcpDirectMessageStaticTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+    TransChannelDeinit();
+}
 
 SessionConn *TestSetSessionConn()
 {
@@ -148,16 +170,16 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, Te
     uint32_t cipherFlagWifi = FLAG_WIFI;
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlagBr);
-    EXPECT_TRUE(linkType == AUTH_LINK_TYPE_BR);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_BR);
 
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlagBle);
-    EXPECT_TRUE(linkType == AUTH_LINK_TYPE_BLE);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_BLE);
 
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlagP2p);
-    EXPECT_TRUE(linkType == AUTH_LINK_TYPE_P2P);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_P2P);
 
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlagWifi);
-    EXPECT_TRUE(linkType == AUTH_LINK_TYPE_WIFI);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_WIFI);
 
     SendFailToFlushDevice(conn);
     SoftBusFree(conn);
@@ -176,7 +198,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpened0002, TestSize.Leve
     int32_t ret;
 
     ret = NotifyChannelOpened(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -194,7 +216,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtData0003, TestSize.Le
     }
 
     ret = TransTdcPostFisrtData(conn);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 
     SoftBusFree(conn);
     conn = nullptr;
@@ -214,10 +236,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransGetLocalConfig0004, TestSize.Leve
     int32_t businessTypeMsg = BUSINESS_TYPE_MESSAGE;
 
     ret = TransGetLocalConfig(CHANNEL_TYPE_TCP_DIRECT, businessTypeByte, &localDataConfig);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransGetLocalConfig(CHANNEL_TYPE_TCP_DIRECT, businessTypeMsg, &localDataConfig);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -232,16 +254,16 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfig0005, TestSiz
 
     appInfo->peerData.dataConfig = 1;
     int32_t ret = TransTdcProcessDataConfig(appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     appInfo->businessType = BUSINESS_TYPE_FILE;
     ret = TransTdcProcessDataConfig(appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
     ret = TransTdcProcessDataConfig(appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -282,7 +304,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReply0007, TestSize.
     AppInfo *appInfo = TestSetAppInfo();
 
     ret = OpenDataBusRequestReply(appInfo, channelId, seq, flags);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -301,11 +323,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetUuidByChanId0008, TestSize.Level1)
     AppInfo *appInfo = TestSetAppInfo();
 
     ret = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     channelId = 0;
 
     ret = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -325,20 +347,20 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfig0009, TestSize.L
 
     appInfo->businessType = BUSINESS_TYPE_FILE;
     ret = TransTdcFillDataConfig(appInfo);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     appInfo->businessType = BUSINESS_TYPE_MESSAGE;
     ret = TransTdcFillDataConfig(appInfo);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->peerData.dataConfig = 0;
     ret = TransTdcFillDataConfig(appInfo);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     appInfo->peerData.dataConfig = 1;
     ret = TransTdcFillDataConfig(appInfo);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -367,8 +389,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
+    ret = TransSrvDataListInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ProcessReceivedData(channelId, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    TransSrvDataListDeinit();
 }
 
 /**
@@ -382,8 +407,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
     int32_t channelId = 1;
     int32_t ret;
 
+    ret = TransSrvDataListInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
+    TransSrvDataListDeinit();
 }
 
 /**
@@ -406,11 +434,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
 
     char *recvBuf = reinterpret_cast<char *>(tmp);
     ret = TransTdcUpdateDataBufWInfo(channelId, recvBufNull, recvLen);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     strcpy_s(recvBuf, recvLen, recvStr.c_str());
     ret = TransTdcUpdateDataBufWInfo(channelId, recvBuf, recvLen);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     SoftBusFree(tmp);
     tmp = nullptr;

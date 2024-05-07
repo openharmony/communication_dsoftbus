@@ -292,6 +292,26 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
     return false;
 }
 
+static int32_t SetP2pSocketOption(const AuthConnInfo *connInfo, ConnectOption *option)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(option, SOFTBUS_INVALID_PARAM);
+    option->type = CONNECT_TCP;
+    if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->info.ipInfo.ip) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy ip fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    option->socketOption.port = connInfo->info.ipInfo.port;
+    option->socketOption.protocol = LNN_PROTOCOL_IP;
+    option->socketOption.keepAlive = 1;
+    if (connInfo->type == AUTH_LINK_TYPE_P2P) {
+        option->socketOption.moduleId = AUTH_P2P;
+    } else {
+        option->socketOption.moduleId = connInfo->info.ipInfo.moduleId;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
@@ -318,28 +338,10 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
             option->bleOption.protocol = connInfo->info.bleInfo.protocol;
             break;
         case AUTH_LINK_TYPE_P2P:
-            option->type = CONNECT_TCP;
-            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->info.ipInfo.ip) !=
-                EOK) {
-                AUTH_LOGE(AUTH_CONN, "copy ip fail");
-                return SOFTBUS_MEM_ERR;
-            }
-            option->socketOption.port = connInfo->info.ipInfo.port;
-            option->socketOption.moduleId = AUTH_P2P;
-            option->socketOption.protocol = LNN_PROTOCOL_IP;
-            option->socketOption.keepAlive = 1;
-            break;
         case AUTH_LINK_TYPE_ENHANCED_P2P:
-            option->type = CONNECT_TCP;
-            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->info.ipInfo.ip) !=
-                EOK) {
-                AUTH_LOGE(AUTH_CONN, "copy ip fail");
+            if (SetP2pSocketOption(connInfo, option) != SOFTBUS_OK) {
                 return SOFTBUS_MEM_ERR;
             }
-            option->socketOption.port = connInfo->info.ipInfo.port;
-            option->socketOption.moduleId = connInfo->info.ipInfo.moduleId;
-            option->socketOption.protocol = LNN_PROTOCOL_IP;
-            option->socketOption.keepAlive = 1;
             break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", connInfo->type);

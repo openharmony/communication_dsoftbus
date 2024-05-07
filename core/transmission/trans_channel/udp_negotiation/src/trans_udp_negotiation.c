@@ -150,7 +150,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
         appInfo->myData.sessionName, &info);
 }
 
-int32_t NotifyUdpChannelClosed(const AppInfo *info)
+int32_t NotifyUdpChannelClosed(const AppInfo *info, int32_t messageType)
 {
     if (info == NULL) {
         TRANS_LOGE(TRANS_CTRL, "appInfo is null.");
@@ -159,7 +159,7 @@ int32_t NotifyUdpChannelClosed(const AppInfo *info)
 
     TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s.", info->myData.pkgName);
     int32_t ret = g_channelCb->OnChannelClosed(info->myData.pkgName, info->myData.pid,
-        (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
+        (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, messageType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "on channel closed failed, ret=%{public}d.", ret);
         return SOFTBUS_ERR;
@@ -293,13 +293,14 @@ static int32_t AcceptUdpChannelAsClient(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t CloseUdpChannel(AppInfo *appInfo)
+static int32_t CloseUdpChannel(AppInfo *appInfo, bool isServerSide)
 {
     TRANS_LOGI(TRANS_CTRL, "process udp channel close state");
     if (TransDelUdpChannel(appInfo->myData.channelId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "delete udp channel failed.");
     }
-    if (NotifyUdpChannelClosed(appInfo) != SOFTBUS_OK) {
+    int32_t messageType = isServerSide ? MESSAGE_TYPE_NOMAL : MESSAGE_TYPE_CLOSE_ACK;
+    if (NotifyUdpChannelClosed(appInfo, messageType) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "notify app udp channel closed failed.");
     }
     return SOFTBUS_OK;
@@ -341,7 +342,7 @@ static int32_t ProcessUdpChannelState(AppInfo *appInfo, bool isServerSide)
             return ret;
         case TYPE_UDP_CHANNEL_CLOSE:
             NotifyWifiByDelScenario(appInfo->streamType, appInfo->myData.pid);
-            ret = CloseUdpChannel(appInfo);
+            ret = CloseUdpChannel(appInfo, isServerSide);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
@@ -447,7 +448,8 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         TRANS_LOGE(TRANS_CTRL, "unpack request udp info failed.");
         return SOFTBUS_ERR;
     }
-    if (appInfo->firstTokenId != 0 && TransCheckServerAccessControl(appInfo->firstTokenId) != SOFTBUS_OK) {
+    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     appInfo->myHandleId = -1;
@@ -513,7 +515,7 @@ static void ProcessAbnormalUdpChannelState(const AppInfo *info, int32_t errCode,
         (void)NotifyUdpChannelOpenFailed(info, errCode);
         (void)TransDelUdpChannel(info->myData.channelId);
     } else if (needClose) {
-        NotifyUdpChannelClosed(info);
+        NotifyUdpChannelClosed(info, MESSAGE_TYPE_NOMAL);
         (void)TransDelUdpChannel(info->myData.channelId);
     }
 }
@@ -730,7 +732,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     return;
 EXIT_ERR:
     extra.channelType = CHANNEL_TYPE_UDP;
-    extra.requestId = requestId;
+    extra.requestId = (int32_t)requestId;
     extra.authId = authHandle.authId;
     extra.errcode = ret;
     extra.result = EVENT_STAGE_RESULT_FAILED;

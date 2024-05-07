@@ -43,6 +43,7 @@ typedef struct {
 
 typedef struct {
     ListNode handlers[LNN_EVENT_TYPE_MAX];
+    uint32_t regCnt[LNN_EVENT_TYPE_MAX];
     SoftBusMutex lock;
 } BusCenterEventCtrl;
 
@@ -238,15 +239,32 @@ static LnnEventHandlerItem *CreateEventHandlerItem(LnnEventHandler handler)
 static void NotifyEvent(const LnnEventBasicInfo *info)
 {
     LnnEventHandlerItem *item = NULL;
+    uint32_t i = 0;
 
     if (SoftBusMutexLock(&g_eventCtrl.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "lock failed in notify event");
         return;
     }
+    uint32_t count = g_eventCtrl.regCnt[info->event];
+    LnnEventHandler *handlesArray = (LnnEventHandler *)SoftBusCalloc(sizeof(LnnEventHandlerItem) * count);
+    if (handlesArray == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc failed");
+        (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+        return;
+    }
     LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[info->event], LnnEventHandlerItem, node) {
-        item->handler(info);
+        handlesArray[i] = item->handler;
+        i++;
     }
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+
+    /* process handles out of lock */
+    for (i = 0; i < count; i++) {
+        if (handlesArray[i] != NULL) {
+            handlesArray[i](info);
+        }
+    }
+    SoftBusFree(handlesArray);
 }
 
 void LnnNotifyDeviceVerified(const char *udid)
@@ -260,49 +278,44 @@ static void UpdateBroadcastInfo()
 {
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get local info failed.");
-        return;
-    }
-    if (SoftBusGetSysTimeMs() < broadcastKey.endTime) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGI(LNN_EVENT, "the broadcastKey don't need to update.");
-        return;
-    }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "get udid fail");
-        return;
-    }
-    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "generate broadcast key error.");
-        return;
-    }
-    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "generate broadcast iv error.");
-        return;
-    }
-    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
-        broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "set key error.");
-        return;
-    }
-    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
-        broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "set iv error.");
-        return;
-    }
-    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "update local broadcast key failed");
-        return;
-    }
+    do {
+        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "get local info failed.");
+            break;
+        }
+        if (SoftBusGetSysTimeMs() < broadcastKey.endTime) {
+            LNN_LOGI(LNN_EVENT, "the broadcastKey don't need to update.");
+            break;
+        }
+        if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "get udid fail");
+            break;
+        }
+        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "generate broadcast key error.");
+            break;
+        }
+        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "generate broadcast iv error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
+            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "set key error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
+            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "set iv error.");
+            break;
+        }
+        if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "update local broadcast key failed");
+            break;
+        }
+        LNN_LOGI(LNN_EVENT, "update local broadcast key success!");
+    } while (0);
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    LNN_LOGI(LNN_EVENT, "update local broadcast key success!");
 }
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
@@ -627,6 +640,16 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyLpReportEvent(SoftBusLpEventType type)
+{
+    if (type < SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY || type >= SOFTBUS_LP_EVENT_UNKNOWN) {
+        LNN_LOGW(LNN_EVENT, "bad lp event type = %{public}d", type);
+        return;
+    }
+    LnnLpReportEvent event = {.basic.event = LNN_EVENT_LP_EVENT_REPORT, .type = type};
+    NotifyEvent((const LnnEventBasicInfo *) &event);
+}
+
 void LnnNotifyNetworkIdChangeEvent(const char *networkId)
 {
     if (networkId == NULL) {
@@ -658,6 +681,7 @@ int32_t LnnInitBusCenterEvent(void)
     SoftBusMutexInit(&g_eventCtrl.lock, &mutexAttr);
     for (i = 0; i < LNN_EVENT_TYPE_MAX; ++i) {
         ListInit(&g_eventCtrl.handlers[i]);
+        g_eventCtrl.regCnt[i] = 0;
     }
     return SOFTBUS_OK;
 }
@@ -696,6 +720,7 @@ int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
         return SOFTBUS_MEM_ERR;
     }
     ListAdd(&g_eventCtrl.handlers[event], &item->node);
+    g_eventCtrl.regCnt[event]++;
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
     return SOFTBUS_OK;
 }
@@ -717,6 +742,9 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
         if (item->handler == handler) {
             ListDelete(&item->node);
             SoftBusFree(item);
+            if (g_eventCtrl.regCnt[event] > 0) {
+                g_eventCtrl.regCnt[event]--;
+            }
             break;
         }
     }

@@ -22,7 +22,7 @@
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
-#include "wifi_hid2d.h"
+#include "kits/c/wifi_hid2d.h"
 #include "securec.h"
 
 #include <stdio.h>
@@ -107,7 +107,7 @@ static void NotifyWifi(const char *ifName, const char *localMac,
         SoftBusFree(scene);
         return;
     }
-    scene->scene = finalType;
+    scene->scene = (int32_t)finalType;
     if (businessType != SM_VIDEO_TYPE) {
         scene->fps = -1;
     }

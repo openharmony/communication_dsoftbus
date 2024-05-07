@@ -110,10 +110,8 @@ void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq)
 int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data)
 {
 #define USECTONSEC 1000LL
-    if (data == NULL || SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "Lock failed");
-        return SOFTBUS_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGW(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "invalid param");
+    CONN_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BR, "lock failed");
     PendingPacket *pending = NULL;
     PendingPacket *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
@@ -184,6 +182,7 @@ int32_t ConnBrSetBrPendingPacket(uint32_t id, int64_t seq, void *data)
 
 int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "invalid param");
     int32_t peerWindows = 0;
     int64_t peerSeq = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_WINDOWS, &peerWindows) ||

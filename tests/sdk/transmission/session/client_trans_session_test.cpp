@@ -32,6 +32,11 @@
 #include "softbus_common.h"
 #include "token_setproc.h"
 #include "trans_log.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_CHANNEL_ID 1000
@@ -80,7 +85,11 @@ public:
 
 void TransClientSessionTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
     SetAceessTokenPermission("dsoftbusTransTest");
     int32_t ret = TransClientInit();
     ASSERT_EQ(ret,  SOFTBUS_OK);
@@ -88,6 +97,10 @@ void TransClientSessionTest::SetUpTestCase(void)
 
 void TransClientSessionTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
 }
 
 static int OnSessionOpened(int sessionId, int result)
@@ -217,7 +230,7 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     session->algorithm = TRANS_TEST_ALGORITHM;
     session->fileEncrypt = TRANS_TEST_FILE_ENCRYPT;
     session->crc = TRANS_TEST_CRC;
-    session->sessionState = SESSION_STATE_INIT;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
     return session;
 }
 
@@ -1056,28 +1069,5 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest30, TestSize.Level1)
     EXPECT_EQ(ret, EOK);
 
     DeleteSessionServerAndSession(g_sessionName, sessionId);
-}
-
-/**
- * @tc.name: TransClientOpenSessionTestToken
- * @tc.desc: Transmission sdk session service open session with tokenID.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionTest, TransClientOpenSessionTestToken, TestSize.Level1)
-{
-    int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    SetFirstCallerTokenID(HAP_TOKENID);
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    SetFirstCallerTokenID(NATIVE_TOKENID);
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_NE(ret, SOFTBUS_OK);
-
-    ret = RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }

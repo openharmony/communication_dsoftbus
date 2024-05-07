@@ -29,6 +29,7 @@ extern "C" {
 
 #define ADV_DATA_MAX_LEN 24
 #define RESP_DATA_MAX_LEN 26
+#define REAL_RESP_DATA_MAX_LEN 27
 #define BROADCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
 
 typedef struct {

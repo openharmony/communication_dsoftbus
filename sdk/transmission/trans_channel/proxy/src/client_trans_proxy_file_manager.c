@@ -80,8 +80,8 @@ static int32_t SendFileTransResult(int32_t channelId, uint32_t seq, int32_t resu
     return ret;
 }
 
-static int32_t UnpackFileTransResultFrame(const uint8_t *data, uint32_t len, uint32_t *seq,
-    int32_t *result, uint32_t *side)
+static int32_t UnpackFileTransResultFrame(
+    const uint8_t *data, uint32_t len, uint32_t *seq, int32_t *result, uint32_t *side)
 {
     if (seq == NULL || result == NULL || side == NULL) {
         TRANS_LOGE(TRANS_FILE, "param invalid");
@@ -94,8 +94,8 @@ static int32_t UnpackFileTransResultFrame(const uint8_t *data, uint32_t len, uin
     uint32_t magic = *(uint32_t *)data;
     uint64_t dataLen = *(uint64_t *)(data + FRAME_MAGIC_OFFSET);
     if (magic != FILE_MAGIC_NUMBER || dataLen != (FRAME_DATA_SEQ_OFFSET + sizeof(uint32_t) + sizeof(int32_t))) {
-        TRANS_LOGE(TRANS_FILE,
-            "recv ack response head fail. magic=%{public}u, dataLen=%{public}" PRIu64, magic, dataLen);
+        TRANS_LOGE(
+            TRANS_FILE, "recv ack response head fail. magic=%{public}u, dataLen=%{public}" PRIu64, magic, dataLen);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     (*seq) = (*(uint32_t *)(data + FRAME_HEAD_LEN));
@@ -119,7 +119,7 @@ static void ClearRecipientResources(FileRecipientInfo *info)
         }
 
         if (info->fileListener.socketRecvCallback != NULL) {
-            FileEvent event = {.type = FILE_EVENT_RECV_ERROR};
+            FileEvent event = { .type = FILE_EVENT_RECV_ERROR };
             info->fileListener.socketRecvCallback(info->sessionId, &event);
         } else if (info->fileListener.recvListener.OnFileTransError != NULL) {
             info->fileListener.recvListener.OnFileTransError(info->sessionId);
@@ -243,8 +243,8 @@ static int32_t UnpackAckReqAndResData(FileFrame *frame, uint32_t *startSeq, uint
     frame->magic = (*(uint32_t *)(frame->data));
     uint64_t dataLen = (*(uint64_t *)(frame->data + FRAME_MAGIC_OFFSET));
     if (frame->magic != FILE_MAGIC_NUMBER || dataLen < FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET) {
-        TRANS_LOGE(TRANS_FILE, "unpack ack head fail. magic=%{public}u, dataLen=%{public}" PRIu64,
-            frame->magic, dataLen);
+        TRANS_LOGE(
+            TRANS_FILE, "unpack ack head fail. magic=%{public}u, dataLen=%{public}" PRIu64, frame->magic, dataLen);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     frame->fileData = frame->data + FRAME_HEAD_LEN;
@@ -253,8 +253,7 @@ static int32_t UnpackAckReqAndResData(FileFrame *frame, uint32_t *startSeq, uint
     return SOFTBUS_OK;
 }
 
-static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint64_t fileOffset,
-    SendListenerInfo *info)
+static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint64_t fileOffset, SendListenerInfo *info)
 {
     int64_t len = SoftBusPreadFile(info->fd, fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, readLength, fileOffset);
     if (len <= 0) {
@@ -262,7 +261,7 @@ static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint6
         return len;
     }
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
-        uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET;
+        uint64_t dataLen = (uint64_t)len + FRAME_DATA_SEQ_OFFSET;
         fileFrame->frameLength = FRAME_HEAD_LEN + dataLen + FRAME_CRC_LEN;
         if (fileFrame->frameLength > info->packetSize) {
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
@@ -276,7 +275,12 @@ static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint6
         (*(uint16_t *)(fileFrame->fileData + dataLen)) = crc;
         info->checkSumCRC += crc;
     } else {
-        fileFrame->frameLength = FRAME_DATA_SEQ_OFFSET + len;
+        uint64_t tmp = FRAME_DATA_SEQ_OFFSET + (uint64_t)len;
+        if (tmp > UINT32_MAX) {
+            TRANS_LOGE(TRANS_FILE, "Overflow error");
+            return SOFTBUS_INVALID_NUM;
+        }
+        fileFrame->frameLength = (uint32_t)tmp;
         if (fileFrame->frameLength > info->packetSize) {
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
             return SOFTBUS_ERR;
@@ -286,15 +290,15 @@ static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint6
     return len;
 }
 
-static int64_t PackReadFileRetransData(FileFrame *fileFrame, uint32_t seq, uint64_t readLength, uint64_t fileOffset,
-    const SendListenerInfo *info)
+static int64_t PackReadFileRetransData(
+    FileFrame *fileFrame, uint32_t seq, uint64_t readLength, uint64_t fileOffset, const SendListenerInfo *info)
 {
     int64_t len = SoftBusPreadFile(info->fd, fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, readLength, fileOffset);
     if (len <= 0) {
         TRANS_LOGE(TRANS_FILE, "pread src file failed. ret=%{public}" PRId64, len);
         return len;
     }
-    uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET;
+    uint64_t dataLen = (uint64_t)len + FRAME_DATA_SEQ_OFFSET;
     fileFrame->frameLength = FRAME_HEAD_LEN + dataLen + FRAME_CRC_LEN;
     if (fileFrame->frameLength > info->packetSize) {
         TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
@@ -306,8 +310,8 @@ static int64_t PackReadFileRetransData(FileFrame *fileFrame, uint32_t seq, uint6
     (*(uint32_t *)(fileFrame->fileData)) = seq;
     (*(uint16_t *)(fileFrame->fileData + dataLen)) = crc;
 
-    int32_t ret = ProxyChannelSendFileStream(info->channelId, (char *)fileFrame->data,
-        fileFrame->frameLength, FrameIndexToType((uint64_t)seq, info->frameNum));
+    int32_t ret = ProxyChannelSendFileStream(info->channelId, (char *)fileFrame->data, fileFrame->frameLength,
+        FrameIndexToType((uint64_t)seq, info->frameNum));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "conn send buf fail ret=%{public}d", ret);
         return ret;
@@ -335,8 +339,8 @@ static int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame
         uint16_t recvCRC = (*(uint16_t *)(fileFrame->fileData + dataLen));
         uint16_t crc = RTU_CRC(fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, dataLen - FRAME_DATA_SEQ_OFFSET);
         if (crc != recvCRC) {
-            TRANS_LOGE(TRANS_FILE, "crc check fail recvCrc=%{public}u, crc=%{public}u",
-                (uint32_t)recvCRC, (uint32_t)crc);
+            TRANS_LOGE(
+                TRANS_FILE, "crc check fail recvCrc=%{public}u, crc=%{public}u", (uint32_t)recvCRC, (uint32_t)crc);
             return SOFTBUS_ERR;
         }
         *fileDataLen = dataLen;
@@ -362,7 +366,7 @@ static int32_t RetransFileFrameBySeq(const SendListenerInfo *info, int32_t seq)
         TRANS_LOGE(TRANS_FILE, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    FileFrame fileFrame = {0};
+    FileFrame fileFrame = { 0 };
     fileFrame.data = (uint8_t *)SoftBusCalloc(info->packetSize);
     if (fileFrame.data == NULL) {
         TRANS_LOGE(TRANS_FILE, "data calloc fail");
@@ -399,12 +403,11 @@ static int32_t AckResponseDataHandle(const SendListenerInfo *info, const char *d
     uint32_t startSeq = resData->startSeq;
     uint32_t seqResult = resData->seqResult;
     if (seqResult != FILE_SEND_ACK_RESULT_SUCCESS) {
-        uint32_t failSeq;
         for (int32_t i = 0; i < FILE_SEND_ACK_INTERVAL; i++) {
             if (((seqResult >> i) & 0x01) == 0x01) {
                 continue;
             }
-            failSeq = startSeq + i;
+            uint32_t failSeq = startSeq + (uint32_t)i;
             if (RetransFileFrameBySeq(info, (int32_t)failSeq) != SOFTBUS_OK) {
                 return SOFTBUS_ERR;
             }
@@ -426,8 +429,8 @@ static char *GetFullRecvPath(const char *filePath, const char *recvRootDir)
         ((rootDirLength > 0) && (recvRootDir[rootDirLength - 1] == PATH_SEPARATOR))) {
         isNeedAddSep = false;
     }
-    int32_t destFullPathLength = (int32_t)((isNeedAddSep) ? (rootDirLength + sizeof('/') + filePathLength) :
-        (rootDirLength + filePathLength));
+    int32_t destFullPathLength =
+        (int32_t)((isNeedAddSep) ? (rootDirLength + sizeof('/') + filePathLength) : (rootDirLength + filePathLength));
     char *recvFullPath = (char *)SoftBusCalloc(destFullPathLength + 1);
     if (recvFullPath == NULL) {
         TRANS_LOGE(TRANS_FILE, "recvFullPath is null");
@@ -435,7 +438,7 @@ static char *GetFullRecvPath(const char *filePath, const char *recvRootDir)
     }
     int32_t ret;
     if (isNeedAddSep) {
-        ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s%c%s", recvRootDir, PATH_SEPARATOR, filePath);
+        ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s/%s", recvRootDir, filePath);
     } else {
         ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s%s", recvRootDir, filePath);
     }
@@ -658,16 +661,16 @@ static void DelSendListenerInfo(SendListenerInfo *info)
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
 }
 
-static int32_t PackFileTransStartInfo(FileFrame *fileFrame, const char *destFile, uint64_t fileSize,
-    const SendListenerInfo *info)
+static int32_t PackFileTransStartInfo(
+    FileFrame *fileFrame, const char *destFile, uint64_t fileSize, const SendListenerInfo *info)
 {
-    if ((info == NULL) || (fileFrame == NULL) || (destFile == NULL)) {
-        TRANS_LOGW(TRANS_FILE, "invalid param.");
+    if (info == NULL || fileFrame == NULL || destFile == NULL) {
+        TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t len = (int32_t)strlen(destFile);
+    uint32_t len = strlen(destFile);
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
-        uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t);
+        uint64_t dataLen = (uint64_t)len + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t);
         fileFrame->frameLength = FRAME_HEAD_LEN + dataLen;
         if (fileFrame->frameLength > info->packetSize) {
             TRANS_LOGE(TRANS_FILE, "frameLength overSize");
@@ -716,8 +719,8 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
             return SOFTBUS_ERR;
         }
         if (fileFrame->magic != FILE_MAGIC_NUMBER || dataLen < (FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t))) {
-            TRANS_LOGE(TRANS_FILE, "start info fail magic=%{public}X dataLen=%{public}" PRIu64,
-                fileFrame->magic, dataLen);
+            TRANS_LOGE(
+                TRANS_FILE, "start info fail magic=%{public}X dataLen=%{public}" PRIu64, fileFrame->magic, dataLen);
             return SOFTBUS_ERR;
         }
         fileFrame->fileData = fileFrame->data + FRAME_HEAD_LEN;
@@ -745,7 +748,7 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         TRANS_LOGE(TRANS_FILE, "start info fail fileNameLen=%{public}" PRIu64, fileNameLen);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (fileNameData != NULL && memcpy_s(file->filePath, MAX_FILE_PATH_NAME_LEN, fileNameData, fileNameLen) != EOK)  {
+    if (fileNameData != NULL && memcpy_s(file->filePath, MAX_FILE_PATH_NAME_LEN, fileNameData, fileNameLen) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -822,13 +825,13 @@ static int32_t SendOneFrameMiddle(SendListenerInfo *info, int32_t frameType)
         info->waitSeq = (int32_t)(info->seq);
         info->waitTimeoutCount = 0;
         if (SendFileAckReqAndResData(info->channelId, info->seq - FILE_SEND_ACK_INTERVAL + 1, info->seq,
-            TRANS_SESSION_FILE_ACK_REQUEST_SENT) != SOFTBUS_OK) {
+                TRANS_SESSION_FILE_ACK_REQUEST_SENT) != SOFTBUS_OK) {
             DeletePendingPacket((uint32_t)info->sessionId, (uint64_t)info->seq);
             info->waitSeq = 0;
             return SOFTBUS_ERR;
         }
-        TRANS_LOGI(TRANS_FILE, "send ack request. channelId=%{public}d, waitSeq=%{public}d",
-            info->channelId, info->waitSeq);
+        TRANS_LOGI(
+            TRANS_FILE, "send ack request. channelId=%{public}d, waitSeq=%{public}d", info->channelId, info->waitSeq);
     }
     return SOFTBUS_OK;
 }
@@ -842,15 +845,15 @@ static int32_t SendOneFrameRear(SendListenerInfo *info, int32_t frameType)
         return SOFTBUS_OK;
     }
     int32_t ret;
-    TransPendData pendData = {0};
+    TransPendData pendData = { 0 };
     if (frameType == TRANS_SESSION_FILE_FIRST_FRAME) {
         ret = GetPendingPacketData(info->sessionId, 0, WAIT_START_ACK_TIME, true, &pendData);
         if (ret == SOFTBUS_ALREADY_TRIGGERED || ret == SOFTBUS_OK) {
             SoftBusFree(pendData.data);
             return SOFTBUS_OK;
         }
-        TRANS_LOGE(TRANS_FILE, "recv start frame respone timeout. channelId=%{public}d, ret=%{public}d",
-            info->channelId, ret);
+        TRANS_LOGE(
+            TRANS_FILE, "recv start frame respone timeout. channelId=%{public}d, ret=%{public}d", info->channelId, ret);
     } else {
         if ((uint32_t)info->waitSeq == 0) {
             return SOFTBUS_OK;
@@ -868,8 +871,7 @@ static int32_t SendOneFrameRear(SendListenerInfo *info, int32_t frameType)
             return ret;
         } else if (ret == SOFTBUS_TIMOUT) {
             info->waitTimeoutCount++;
-            if (frameType != TRANS_SESSION_FILE_LAST_FRAME &&
-                info->waitTimeoutCount <= WAIT_FRAME_ACK_TIMEOUT_COUNT) {
+            if (frameType != TRANS_SESSION_FILE_LAST_FRAME && info->waitTimeoutCount <= WAIT_FRAME_ACK_TIMEOUT_COUNT) {
                 return SOFTBUS_OK;
             }
             DeletePendingPacket(info->sessionId, (uint64_t)info->waitSeq);
@@ -891,8 +893,8 @@ static int32_t SendOneFrame(const SendListenerInfo *sendInfo, const FileFrame *f
     if (SendOneFrameFront((SendListenerInfo *)sendInfo, fileFrame->frameType) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    int32_t ret = ProxyChannelSendFileStream(sendInfo->channelId, (char *)fileFrame->data,
-        fileFrame->frameLength, fileFrame->frameType);
+    int32_t ret = ProxyChannelSendFileStream(
+        sendInfo->channelId, (char *)fileFrame->data, fileFrame->frameLength, fileFrame->frameType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "conn send buf fail ret=%{public}d", ret);
         return ret;
@@ -925,7 +927,7 @@ static int32_t SendFileCrcCheckSum(const SendListenerInfo *info)
     if (data == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    uint32_t seq = info->seq + 1; //magic(4 byte) + dataLen(8 byte) + seq(4 byte) + crc(8 byte)
+    uint32_t seq = info->seq + 1; // magic(4 byte) + dataLen(8 byte) + seq(4 byte) + crc(8 byte)
     (*(uint32_t *)data) = FILE_MAGIC_NUMBER;
     (*(uint64_t *)(data + FRAME_MAGIC_OFFSET)) = (FRAME_DATA_SEQ_OFFSET + sizeof(info->checkSumCRC));
     (*(uint32_t *)(data + FRAME_HEAD_LEN)) = seq;
@@ -944,7 +946,7 @@ static int32_t SendFileCrcCheckSum(const SendListenerInfo *info)
         return ret;
     }
     SoftBusFree(data);
-    TransPendData pendData = {0};
+    TransPendData pendData = { 0 };
     ret = GetPendingPacketData(info->sessionId, seq, WAIT_START_ACK_TIME, true, &pendData);
     if (ret == SOFTBUS_ALREADY_TRIGGERED || ret == SOFTBUS_OK) {
         SoftBusFree(pendData.data);
@@ -968,29 +970,26 @@ static int32_t UnpackFileCrcCheckSum(const FileRecipientInfo *info, FileFrame *f
         }
         fileFrame->magic = (*(uint32_t *)(fileFrame->data));
         uint64_t dataLen = (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET));
-        if ((fileFrame->magic != FILE_MAGIC_NUMBER) ||
-            (dataLen != FRAME_DATA_SEQ_OFFSET + sizeof(file->checkSumCRC))) {
-            TRANS_LOGE(TRANS_FILE,
-                "unpack crc check frame failed. magic=%{public}u, dataLen=%{public}" PRIu64, fileFrame->magic, dataLen);
+        if ((fileFrame->magic != FILE_MAGIC_NUMBER) || (dataLen != FRAME_DATA_SEQ_OFFSET + sizeof(file->checkSumCRC))) {
+            TRANS_LOGE(TRANS_FILE, "unpack crc check frame failed. magic=%{public}u, dataLen=%{public}" PRIu64,
+                fileFrame->magic, dataLen);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
         fileFrame->fileData = fileFrame->data + FRAME_HEAD_LEN;
         fileFrame->seq = (*(uint32_t *)(fileFrame->fileData));
         uint64_t recvCheckSumCRC = (*(uint64_t *)(fileFrame->fileData + FRAME_DATA_SEQ_OFFSET));
         if (recvCheckSumCRC != file->checkSumCRC) {
-            TRANS_LOGE(TRANS_FILE,
-                "crc check sum fail recvCrc=%{public}" PRIu64 ", crc=%{public}" PRIu64, recvCheckSumCRC,
-                file->checkSumCRC);
+            TRANS_LOGE(TRANS_FILE, "crc check sum fail recvCrc=%{public}" PRIu64 ", crc=%{public}" PRIu64,
+                recvCheckSumCRC, file->checkSumCRC);
             return SOFTBUS_ERR;
         }
     }
     return SOFTBUS_OK;
 }
 
-static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
-    const char *destFile, uint64_t fileSize)
+static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum, const char *destFile, uint64_t fileSize)
 {
-    FileFrame fileFrame = {0};
+    FileFrame fileFrame = { 0 };
     fileFrame.data = (uint8_t *)SoftBusCalloc(sendInfo->packetSize);
     if (fileFrame.data == NULL) {
         return SOFTBUS_ERR;
@@ -1017,9 +1016,9 @@ static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
                 TRANS_LOGE(TRANS_FILE, "read file src file failed");
                 goto EXIT_ERR;
             }
-            fileOffset += len;
-            remainedSendSize -= len;
-            sendInfo->totalInfo.bytesProcessed += len;
+            fileOffset += (uint64_t)len;
+            remainedSendSize -= (uint64_t)len;
+            sendInfo->totalInfo.bytesProcessed += (uint64_t)len;
         }
         if (SendOneFrame(sendInfo, &fileFrame) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "send one frame failed");
@@ -1075,8 +1074,8 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo *sendInfo, const char *so
     uint64_t fileSize = 0;
     uint64_t frameNum = 0;
     if (GetAndCheckFileSize(absSrcPath, &fileSize, &frameNum, sendInfo->crc, sendInfo->packetSize) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE,
-            "absSrcPath size err. channelId=%{public}d, absSrcPath=%{public}s", sendInfo->channelId, absSrcPath);
+        TRANS_LOGE(TRANS_FILE, "absSrcPath size err. channelId=%{public}d, absSrcPath=%{public}s", sendInfo->channelId,
+            absSrcPath);
         SoftBusFree(absSrcPath);
         return SOFTBUS_ERR;
     }
@@ -1127,28 +1126,28 @@ static int32_t SendSingleFile(const SendListenerInfo *sendInfo, const char *sour
         TRANS_LOGE(TRANS_FILE, "sourfile or dstfile is null");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGE(TRANS_FILE, "channelId=%{public}d, srcFile=%{public}s, dstFile=%{public}s",
+    TRANS_LOGI(TRANS_FILE, "channelId=%{public}d, srcFile=%{public}s, dstFile=%{public}s",
         sendInfo->channelId, sourceFile, destFile);
 
     int32_t ret = FileToFrameAndSendFile((SendListenerInfo *)sendInfo, sourceFile, destFile);
     ClearSendInfo((SendListenerInfo *)sendInfo);
-    TRANS_LOGI(TRANS_FILE, "channelId=%{public}d, srcFile=%{public}s, ret=%{public}d",
-        sendInfo->channelId, sourceFile, ret);
+    TRANS_LOGI(
+        TRANS_FILE, "channelId=%{public}d, srcFile=%{public}s, ret=%{public}d", sendInfo->channelId, sourceFile, ret);
     return ret;
 }
 
 static int32_t SendFileList(int32_t channelId, const char **destFile, uint32_t fileCnt)
 {
     TRANS_LOGI(TRANS_FILE, "send file list begin");
-    FileListBuffer bufferInfo = {0};
+    FileListBuffer bufferInfo = { 0 };
     int32_t ret = FileListToBuffer(destFile, fileCnt, &bufferInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "file list to buffer fail");
         return SOFTBUS_ERR;
     }
 
-    ret = ProxyChannelSendFileStream(channelId, (char *)bufferInfo.buffer, bufferInfo.bufferSize,
-        TRANS_SESSION_FILE_ALLFILE_SENT);
+    ret = ProxyChannelSendFileStream(
+        channelId, (char *)bufferInfo.buffer, bufferInfo.bufferSize, TRANS_SESSION_FILE_ALLFILE_SENT);
     SoftBusFree(bufferInfo.buffer);
     TRANS_LOGI(TRANS_FILE, "send file list ret=%{public}d", ret);
     return ret;
@@ -1215,8 +1214,8 @@ static int32_t CalcAllFilesInfo(FilesInfo *totalInfo, const char *fileList[], ui
     return SOFTBUS_OK;
 }
 
-static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *sFileList[],
-    const char *dFileList[], uint32_t fileCnt)
+static int32_t ProxyStartSendFile(
+    const SendListenerInfo *sendInfo, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     int32_t ret;
     if (CalcAllFilesInfo((FilesInfo *)&sendInfo->totalInfo, sFileList, fileCnt)) {
@@ -1227,8 +1226,8 @@ static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *
     for (uint32_t index = 0; index < fileCnt; index++) {
         ret = SendSingleFile(sendInfo, sFileList[index], dFileList[index]);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_FILE,
-                "send file failed. sendFile=%{public}s, ret=%{public}" PRId32, sFileList[index], ret);
+            TRANS_LOGE(
+                TRANS_FILE, "send file failed. sendFile=%{public}s, ret=%{public}" PRId32, sFileList[index], ret);
             return SOFTBUS_ERR;
         }
     }
@@ -1245,7 +1244,7 @@ static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *
     if (sendInfo->fileListener.socketSendCallback != NULL) {
         FileEvent event = {
             .type = FILE_EVENT_SEND_FINISH,
-            .files =  sendInfo->totalInfo.files,
+            .files = sendInfo->totalInfo.files,
             .fileCnt = sendInfo->totalInfo.fileCnt,
             .bytesProcessed = sendInfo->totalInfo.bytesProcessed,
             .bytesTotal = sendInfo->totalInfo.bytesTotal,
@@ -1337,8 +1336,7 @@ static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
     SoftBusFree(sendInfo);
 }
 
-int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[],
-    const char *dFileList[], uint32_t fileCnt)
+int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     TRANS_LOGI(TRANS_FILE, "proxy send file trans start");
     if ((fileCnt == 0) || (fileCnt > MAX_SEND_FILE_NUM)) {
@@ -1451,8 +1449,8 @@ static int32_t PutToRecvFileList(FileRecipientInfo *recipient, const SingleFileI
         TRANS_LOGE(TRANS_FILE, "memcpy file info fail");
         return SOFTBUS_MEM_ERR;
     }
-    int32_t fd = SoftBusOpenFileWithPerms(file->filePath,
-        SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
+    int32_t fd = SoftBusOpenFileWithPerms(
+        file->filePath, SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
     if (fd < 0) {
         TRANS_LOGE(TRANS_FILE, "open destFile fail");
         return SOFTBUS_FILE_ERR;
@@ -1483,7 +1481,12 @@ static FileRecipientInfo *GetRecipientNoLock(int32_t sessionId)
 
 static void ReleaseRecipientRef(FileRecipientInfo *info)
 {
-    if (info == NULL || SoftBusMutexLock(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_FILE, "param info invalid.");
+        return;
+    }
+    if (SoftBusMutexLock(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "lock failed.");
         return;
     }
     info->objRefCount--;
@@ -1547,8 +1550,8 @@ static int32_t UpdateFileReceivePath(int32_t sessionId, FileListener *fileListen
     const char *rootDir = event.UpdateRecvPath();
     char *absPath = realpath(rootDir, NULL);
     if (absPath == NULL) {
-        TRANS_LOGE(TRANS_SDK,
-            "rootDir not exist, rootDir=%{public}s, errno=%{public}d.", (rootDir == NULL ? "null" : rootDir), errno);
+        TRANS_LOGE(TRANS_SDK, "rootDir not exist, rootDir=%{public}s, errno=%{public}d.",
+            (rootDir == NULL ? "null" : rootDir), errno);
         return SOFTBUS_ERR;
     }
 
@@ -1575,7 +1578,7 @@ static FileRecipientInfo *CreateNewRecipient(int32_t sessionId, int32_t channelI
         TRANS_LOGE(TRANS_FILE, "info calloc failed");
         return NULL;
     }
-    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "get sessionId name failed");
         SoftBusFree(info);
@@ -1659,8 +1662,8 @@ static FileRecipientInfo *GetRecipientInCreateFileRef(int32_t sessionId, int32_t
         }
     }
     if (recipient->recvState != TRANS_FILE_RECV_IDLE_STATE) {
-        TRANS_LOGE(TRANS_FILE, "create file fail. recvState=%{public}d, sessionId=%{public}d",
-            sessionId, recipient->recvState);
+        TRANS_LOGE(TRANS_FILE, "create file fail. recvState=%{public}d, sessionId=%{public}d", sessionId,
+            recipient->recvState);
         (void)SoftBusMutexUnlock(&g_recvFileInfoLock.lock);
         return NULL;
     }
@@ -1758,7 +1761,7 @@ EXIT_ERR:
         (void)SendFileTransResult(channelId, 0, result, IS_RECV_RESULT);
     }
     if (recipient->fileListener.socketRecvCallback != NULL) {
-        FileEvent event = {.type = FILE_EVENT_RECV_ERROR};
+        FileEvent event = { .type = FILE_EVENT_RECV_ERROR };
         recipient->fileListener.socketRecvCallback(sessionId, &event);
     } else if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
         recipient->fileListener.recvListener.OnFileTransError(sessionId);
@@ -1782,8 +1785,8 @@ static int32_t WriteEmptyFrame(SingleFileInfo *fileInfo, int32_t count)
             return SOFTBUS_MALLOC_ERR;
         }
         for (int32_t i = 0; i < count; ++i) {
-            int64_t emptyLen = SoftBusPwriteFile(fileInfo->fileFd, emptyBuff,
-                fileInfo->oneFrameLen, fileInfo->fileOffset);
+            int64_t emptyLen =
+                SoftBusPwriteFile(fileInfo->fileFd, emptyBuff, fileInfo->oneFrameLen, fileInfo->fileOffset);
             if (emptyLen < 0 || (uint64_t)emptyLen != fileInfo->oneFrameLen) {
                 TRANS_LOGE(TRANS_FILE, "pwrite empty frame fail");
                 SoftBusFree(emptyBuff);
@@ -1812,15 +1815,18 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
     if (seq >= fileInfo->startSeq) {
         int32_t seqDiff = (int32_t)(seq - fileInfo->seq - 1);
 
-        int64_t bytesToWrite =  (int64_t)(seqDiff * fileInfo->oneFrameLen);
+        if (fileInfo->oneFrameLen > INT64_MAX || seqDiff * fileInfo->oneFrameLen > INT64_MAX) {
+            TRANS_LOGE(TRANS_FILE, "Data overflow");
+            return SOFTBUS_INVALID_NUM;
+        }
+        int64_t bytesToWrite = (int64_t)seqDiff * (int64_t)fileInfo->oneFrameLen;
         if (MAX_FILE_SIZE < bytesToWrite) {
-            TRANS_LOGE(TRANS_FILE,
-                "WriteEmptyFrame bytesToWrite is too large, bytesToWrite=%{public}" PRIu64, bytesToWrite);
+            TRANS_LOGE(
+                TRANS_FILE, "WriteEmptyFrame bytesToWrite is too large, bytesToWrite=%{public}" PRIu64, bytesToWrite);
             return SOFTBUS_ERR;
         }
-        if (fileInfo->fileOffset > (uint64_t)MAX_FILE_SIZE - bytesToWrite) {
-            TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64,
-                fileInfo->fileOffset + bytesToWrite);
+        if (fileInfo->fileOffset > (uint64_t)MAX_FILE_SIZE - (uint64_t)bytesToWrite) {
+            TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64, fileInfo->fileOffset + bytesToWrite);
             return SOFTBUS_ERR;
         }
 
@@ -1846,19 +1852,17 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
     uint32_t frameDataLength = dataLen - FRAME_DATA_SEQ_OFFSET;
 
     if (MAX_FILE_SIZE < frameDataLength) {
-        TRANS_LOGE(TRANS_FILE, "frameDataLength is too large, frameDataLen=%{public}" PRIu32,
-            frameDataLength);
+        TRANS_LOGE(TRANS_FILE, "frameDataLength is too large, frameDataLen=%{public}" PRIu32, frameDataLength);
         return SOFTBUS_ERR;
     }
 
     if (fileOffset > MAX_FILE_SIZE - frameDataLength) {
-        TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64,
-            fileOffset + frameDataLength);
+        TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64, fileOffset + frameDataLength);
         return SOFTBUS_ERR;
     }
 
-    int64_t writeLength = SoftBusPwriteFile(fileInfo->fileFd, frame->fileData + FRAME_DATA_SEQ_OFFSET,
-        dataLen - FRAME_DATA_SEQ_OFFSET, fileOffset);
+    int64_t writeLength = SoftBusPwriteFile(
+        fileInfo->fileFd, frame->fileData + FRAME_DATA_SEQ_OFFSET, dataLen - FRAME_DATA_SEQ_OFFSET, fileOffset);
     if (writeLength < 0 || (uint64_t)writeLength != dataLen - FRAME_DATA_SEQ_OFFSET) {
         TRANS_LOGE(TRANS_FILE, "pwrite file failed");
         return SOFTBUS_ERR;
@@ -1866,8 +1870,7 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
     if (seq >= fileInfo->startSeq) {
         fileInfo->fileOffset += (uint64_t)writeLength;
         if (fileInfo->fileOffset > MAX_FILE_SIZE) {
-            TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64,
-                fileInfo->fileOffset);
+            TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64, fileInfo->fileOffset);
             return SOFTBUS_ERR;
         }
         fileInfo->checkSumCRC += frame->crc;
@@ -1888,18 +1891,17 @@ static int32_t ProcessOneFrame(const FileFrame *fileFrame, uint32_t dataLen, int
         fileInfo->seq = fileFrame->seq;
 
         if (MAX_FILE_SIZE < frameDataLength) {
-            TRANS_LOGE(TRANS_FILE, "frameDataLength is too large, frameDataLen=%{public}" PRIu32,
-                frameDataLength);
+            TRANS_LOGE(TRANS_FILE, "frameDataLength is too large, frameDataLen=%{public}" PRIu32, frameDataLength);
             return SOFTBUS_ERR;
         }
 
         if (fileInfo->fileOffset > MAX_FILE_SIZE - frameDataLength) {
-            TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64,
-                fileInfo->fileOffset + frameDataLength);
+            TRANS_LOGE(
+                TRANS_FILE, "file is too large, offset=%{public}" PRIu64, fileInfo->fileOffset + frameDataLength);
             return SOFTBUS_ERR;
         }
-        int64_t writeLength = SoftBusPwriteFile(fileInfo->fileFd, fileFrame->fileData + FRAME_DATA_SEQ_OFFSET,
-            frameDataLength, fileInfo->fileOffset);
+        int64_t writeLength = SoftBusPwriteFile(
+            fileInfo->fileFd, fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, frameDataLength, fileInfo->fileOffset);
         if (writeLength != frameDataLength) {
             TRANS_LOGE(TRANS_FILE, "pwrite file failed");
             return SOFTBUS_ERR;
@@ -1944,8 +1946,8 @@ static int32_t WriteFrameToFile(int32_t sessionId, const FileFrame *fileFrame)
         };
         recipient->fileListener.socketRecvCallback(sessionId, &event);
     } else if (recipient->fileListener.recvListener.OnReceiveFileProcess != NULL) {
-        recipient->fileListener.recvListener.OnReceiveFileProcess(sessionId, fileInfo->filePath,
-            fileInfo->fileOffset, fileInfo->fileSize);
+        recipient->fileListener.recvListener.OnReceiveFileProcess(
+            sessionId, fileInfo->filePath, fileInfo->fileOffset, fileInfo->fileSize);
     }
     if (recipient->crc != APP_INFO_FILE_FEATURES_SUPPORT) {
         if ((fileFrame->frameType == TRANS_SESSION_FILE_LAST_FRAME) ||
@@ -1970,7 +1972,7 @@ EXIT_ERR:
     }
     SetRecipientRecvState(recipient, TRANS_FILE_RECV_ERR_STATE);
     if (recipient->fileListener.socketRecvCallback != NULL) {
-        FileEvent event = {.type = FILE_EVENT_RECV_ERROR};
+        FileEvent event = { .type = FILE_EVENT_RECV_ERROR };
         recipient->fileListener.socketRecvCallback(sessionId, &event);
     } else if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
         recipient->fileListener.recvListener.OnFileTransError(sessionId);
@@ -2035,7 +2037,7 @@ static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
 EXIT_ERR:
     if (ret != SOFTBUS_OK) {
         if (recipient->fileListener.socketRecvCallback != NULL) {
-            FileEvent event = {.type = FILE_EVENT_RECV_ERROR};
+            FileEvent event = { .type = FILE_EVENT_RECV_ERROR };
             recipient->fileListener.socketRecvCallback(sessionId, &event);
         } else if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
             recipient->fileListener.recvListener.OnFileTransError(sessionId);
@@ -2161,8 +2163,7 @@ static int32_t ProcessFileAckRequest(int32_t sessionId, const FileFrame *frame)
     }
     SingleFileInfo *file = &recipient->recvFileInfo;
     if (startSeq != file->startSeq) {
-        TRANS_LOGE(TRANS_FILE, "start seq not equal. startSeq=%{public}u, curSeq=%{public}u",
-            startSeq, file->startSeq);
+        TRANS_LOGE(TRANS_FILE, "start seq not equal. startSeq=%{public}u, curSeq=%{public}u", startSeq, file->startSeq);
         ReleaseRecipientRef(recipient);
         return SOFTBUS_ERR;
     }
@@ -2172,8 +2173,7 @@ static int32_t ProcessFileAckRequest(int32_t sessionId, const FileFrame *frame)
     value = (uint32_t)(file->seqResult & FILE_SEND_ACK_RESULT_SUCCESS);
     file->preSeqResult = value;
     file->seqResult = (file->seqResult >> FILE_SEND_ACK_INTERVAL);
-    int32_t ret = SendFileAckReqAndResData(recipient->channelId, startSeq, value,
-        TRANS_SESSION_FILE_ACK_RESPONSE_SENT);
+    int32_t ret = SendFileAckReqAndResData(recipient->channelId, startSeq, value, TRANS_SESSION_FILE_ACK_RESPONSE_SENT);
     TRANS_LOGI(TRANS_FILE, "send file ack response, ret=%{public}d", ret);
     ReleaseRecipientRef(recipient);
     return ret;
@@ -2219,8 +2219,8 @@ static int32_t ProcessFileAckResponse(int32_t sessionId, const FileFrame *frame)
         }
     }
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
-    TRANS_LOGE(TRANS_FILE, "recv ack response not find. sessionId=%{public}d, startSeq=%{public}u",
-        sessionId, data->startSeq);
+    TRANS_LOGE(
+        TRANS_FILE, "recv ack response not find. sessionId=%{public}d, startSeq=%{public}u", sessionId, data->startSeq);
     SoftBusFree(data);
     return SOFTBUS_NOT_FIND;
 }
@@ -2271,16 +2271,14 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
             break;
         case TRANS_SESSION_FILE_CRC_CHECK_FRAME:
             ret = ProcessCrcCheckSumData(sessionId, oneFrame);
-            TRANS_LOGI(TRANS_FILE, "process crc check sum. sessionId=%{public}d, ret=%{public}d",
-                sessionId, ret);
+            TRANS_LOGI(TRANS_FILE, "process crc check sum. sessionId=%{public}d, ret=%{public}d", sessionId, ret);
             break;
         case TRANS_SESSION_FILE_RESULT_FRAME:
             ret = ProcessFileTransResult(sessionId, oneFrame);
             break;
         case TRANS_SESSION_FILE_ALLFILE_SENT:
             ret = ProcessFileListData(sessionId, oneFrame);
-            TRANS_LOGI(TRANS_FILE, "process file list data. sessionId=%{public}d, ret=%{public}d",
-                sessionId, ret);
+            TRANS_LOGI(TRANS_FILE, "process file list data. sessionId=%{public}d, ret=%{public}d", sessionId, ret);
             break;
         default:
             TRANS_LOGE(TRANS_FILE, "frame type is invalid sessionId=%{public}d", sessionId);
@@ -2292,6 +2290,7 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
 int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type)
 {
     FileFrame oneFrame;
+    (void)memset_s(&oneFrame, sizeof(FileFrame), 0, sizeof(FileFrame));
     oneFrame.frameType = type;
     oneFrame.frameLength = len;
     oneFrame.data = (uint8_t *)data;

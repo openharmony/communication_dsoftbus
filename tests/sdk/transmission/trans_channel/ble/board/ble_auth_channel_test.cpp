@@ -221,7 +221,7 @@ static int32_t TestPublishServer()
     printf("[test]TestPublishServer enter\r\n");
     g_pInfo.mode = DISCOVER_MODE_ACTIVE;
     int32_t ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     printf("[test]TestPublishServer end\r\n");
     return ret;
 }
@@ -231,7 +231,7 @@ static int32_t TestStartDiscovery()
     printf("[test]TestStartDiscovery enter\r\n");
     g_sInfo.mode = DISCOVER_MODE_ACTIVE;
     int32_t ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     printf("[test]TestStartDiscovery end\r\n");
     return ret;
 }
@@ -240,7 +240,7 @@ static int32_t TestCreateSessionServer()
 {
     printf("[test]TestCreateSessionServer enter\r\n");
     int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     printf("[test]TestCreateSessionServer end\r\n");
     return ret;
 }
@@ -259,7 +259,7 @@ static int32_t TestSendData(const char *data, int32_t len)
 {
     printf("[test]TestSendData enter\r\n");
     int32_t  ret = SendBytes(g_sessionId, data, len);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     printf("[test]TestSendData end\r\n");
     return ret;
 }
@@ -278,7 +278,7 @@ static int32_t TestRemoveSessionServer()
 {
     printf("[test]TestRemoveSessionServer enter\r\n");
     int32_t ret = RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     printf("[test]TestRemoveSessionServer end\r\n");
     return ret;
 }

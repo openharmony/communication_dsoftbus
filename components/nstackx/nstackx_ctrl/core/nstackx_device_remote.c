@@ -248,7 +248,7 @@ static RxIface *CreateRxIface(RemoteDevice *device, const NSTACKX_InterfaceInfo 
     return rxIface;
 }
 
-static uint32_t CheckAndUpdateBusinessAll(BusinessDataAll *curInfo, const BusinessDataAll *newInfo, uint8_t *updated)
+static uint32_t CheckAndUpdateBusinessAll(BusinessDataAll *curInfo, const BusinessDataAll *newInfo, int8_t *updated)
 {
     if (newInfo->isBroadcast == NSTACKX_TRUE) {
         if (strcmp(curInfo->businessDataBroadcast, newInfo->businessDataBroadcast) != 0) {
@@ -294,13 +294,13 @@ static RemoteNode *CreateRemoteNode(RxIface *rxIface, const struct in_addr *remo
     return remoteNode;
 }
 
-static int32_t UpdateDeviceInfoBusinessData(DeviceInfo *curInfo, const DeviceInfo *newInfo, uint8_t *updated)
+static int32_t UpdateDeviceInfoBusinessData(DeviceInfo *curInfo, const DeviceInfo *newInfo, int8_t *updated)
 {
     return CheckAndUpdateBusinessAll(&curInfo->businessData, &newInfo->businessData, updated);
 }
 
 static int32_t UpdateCapabilityBitmap(DeviceInfo *curInfo, const DeviceInfo *newInfo,
-    uint8_t *updated)
+    int8_t *updated)
 {
     /* judge capabilityBitmap is or not different with new deviceInfo */
     if ((curInfo->capabilityBitmapNum != newInfo->capabilityBitmapNum) ||
@@ -324,7 +324,7 @@ static int32_t UpdateCapabilityBitmap(DeviceInfo *curInfo, const DeviceInfo *new
     return NSTACKX_EOK;
 }
 
-static int32_t UpdateDeviceInfoInner(DeviceInfo *curInfo, const DeviceInfo *newInfo, uint8_t *updated)
+static int32_t UpdateDeviceInfoInner(DeviceInfo *curInfo, const DeviceInfo *newInfo, int8_t *updated)
 {
     if (curInfo->deviceType != newInfo->deviceType) {
         DFINDER_LOGE(TAG, "deviceType is different");
@@ -365,9 +365,9 @@ static int32_t UpdateDeviceInfoInner(DeviceInfo *curInfo, const DeviceInfo *newI
 }
 
 static int32_t UpdateDeviceInfo(DeviceInfo *curInfo, const RxIface *rxIface, const DeviceInfo *newInfo,
-    uint8_t *updatedPtr)
+    int8_t *updatedPtr)
 {
-    uint8_t updated = NSTACKX_FALSE;
+    int8_t updated = NSTACKX_FALSE;
     if (UpdateDeviceInfoInner(curInfo, newInfo, &updated) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "UpdateDeviceInfoInner error");
         return NSTACKX_EFAILED;
@@ -421,7 +421,7 @@ static int32_t UpdateDeviceInfo(DeviceInfo *curInfo, const RxIface *rxIface, con
     return NSTACKX_EOK;
 }
 
-static void UpdatedByTimeout(RxIface *rxIface, uint8_t *updated)
+static void UpdatedByTimeout(RxIface *rxIface, int8_t *updated)
 {
     struct timespec cur;
     ClockGetTime(CLOCK_MONOTONIC, &cur);
@@ -433,7 +433,7 @@ static void UpdatedByTimeout(RxIface *rxIface, uint8_t *updated)
 }
 
 static int32_t UpdateRemoteNode(RemoteNode *remoteNode, RxIface *rxIface, const DeviceInfo *deviceInfo,
-    uint8_t *updated)
+    int8_t *updated)
 {
     int32_t ret = UpdateDeviceInfo(&remoteNode->deviceInfo, rxIface, deviceInfo, updated);
     if (ret == NSTACKX_EOK && (*updated == NSTACKX_FALSE)) {
@@ -443,7 +443,7 @@ static int32_t UpdateRemoteNode(RemoteNode *remoteNode, RxIface *rxIface, const 
 }
 
 #ifdef DFINDER_DISTINGUISH_ACTIVE_PASSIVE_DISCOVERY
-static void UpdateRemoteNodeChangeStateActive(UpdateState *curState, uint8_t *updated)
+static void UpdateRemoteNodeChangeStateActive(UpdateState *curState, int8_t *updated)
 {
     switch (*curState) {
         case DFINDER_UPDATE_STATE_NULL:
@@ -470,7 +470,7 @@ static void UpdateRemoteNodeChangeStateActive(UpdateState *curState, uint8_t *up
     }
 }
 
-static void UpdateRemoteNodeChangeStatePassive(UpdateState *curState, uint8_t *updated)
+static void UpdateRemoteNodeChangeStatePassive(UpdateState *curState, int8_t *updated)
 {
     switch (*curState) {
         case DFINDER_UPDATE_STATE_NULL:
@@ -498,7 +498,7 @@ static void UpdateRemoteNodeChangeStatePassive(UpdateState *curState, uint8_t *u
 }
 
 static void CheckAndUpdateRemoteNodeChangeState(RemoteNode *remoteNode,
-    const DeviceInfo *deviceInfo, uint8_t *updated)
+    const DeviceInfo *deviceInfo, int8_t *updated)
 {
     UpdateState *curState = &(remoteNode->updateState);
     if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_PASSIVE) {
@@ -621,7 +621,7 @@ static RemoteNode *CheckAndCreateRemoteNode(RxIface *rxIface,
 }
 
 int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_InterfaceInfo *interfaceInfo,
-    const struct in_addr *remoteIp, const DeviceInfo *deviceInfo, uint8_t *updated)
+    const struct in_addr *remoteIp, const DeviceInfo *deviceInfo, int8_t *updated)
 {
     RemoteDevice *device = FindRemoteDevice(g_remoteDeviceList, deviceId);
     if (device == NULL) {

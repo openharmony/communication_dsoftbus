@@ -756,6 +756,11 @@ static void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
             }
         }
     }
+    if (addr1->type == CONNECTION_ADDR_BR) {
+        LNN_LOGI(
+            LNN_BUILDER, "not disconnect all connection. fsmId=%{public}u, type=%{public}d", connFsm->id, addr1->type);
+        return;
+    }
     LNN_LOGI(LNN_BUILDER, "disconnect all connection. fsmId=%{public}u, type=%{public}d", connFsm->id, addr1->type);
     if (LnnConvertAddrToOption(addr1, &option)) {
         ConnDisconnectDeviceAllConn(&option);
@@ -2072,8 +2077,8 @@ static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networ
     if (type != LNN_INFO_TYPE_NODE_ADDR) {
         return;
     }
-    size_t addrLen = strnlen((const char *)msg, size);
-    if (addrLen != size - 1 || addrLen == 0) {
+    uint32_t addrLen = (uint32_t)strnlen((const char *)msg, size);
+    if (size == 0 || addrLen != size - 1 || addrLen == 0) {
         return;
     }
     char *anonyNetworkId = NULL;
@@ -2214,7 +2219,7 @@ static void AccountStateChangeHandler(const LnnEventBasicInfo *info)
 static void UpdateLocalNetCapability(void)
 {
     uint32_t netCapability = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get cap from local ledger fail");
         return;
     }

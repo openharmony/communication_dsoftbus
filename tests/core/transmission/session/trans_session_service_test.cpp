@@ -23,11 +23,16 @@
 #include "softbus_adapter_mem.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
 
 using namespace testing::ext;
 
 #define TRANS_TEST_INVALID_PID (-1)
 #define TRANS_TEST_INVALID_UID (-1)
+#define INVALID_SESSION_ID (-1)
 
 namespace OHOS {
 
@@ -56,11 +61,19 @@ public:
 
 void TransSessionServiceTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
 }
 
 void TransSessionServiceTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
 }
 
 /**
@@ -177,7 +190,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
     sessionPara.groupId = g_groupid;
     sessionPara.attr = &g_sessionAttr;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(transInfo);
@@ -193,7 +206,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest06, TestSize.Level1)
 {
     TransServerDeathCallback(g_pkgName, TRANS_TEST_INVALID_PID);
     int ret = TransServerInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     TransServerDeinit();
 }
 }

@@ -169,7 +169,7 @@ static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int
 
 static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
 {
-    return g_cb->OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH);
+    return g_cb->OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH, MESSAGE_TYPE_NOMAL);
 }
 
 static int32_t AuthGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)

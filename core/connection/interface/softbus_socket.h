@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 
+#include "softbus_adapter_socket.h"
 #include "softbus_conn_interface.h"
 #include "softbus_protocol_def.h"
 
@@ -38,6 +39,9 @@ extern "C" {
         __result;                                           \
     }))
 #endif
+
+#define ADDR_FEATURE_IPV6           ':'
+#define ADDR_SPLIT_IPV6             "%"
 
 enum SocketEvent {
     SOFTBUS_SOCKET_OUT,       // writable
@@ -80,7 +84,11 @@ int32_t ConnGetSocketError(int32_t fd);
 int32_t ConnGetLocalSocketPort(int32_t fd);
 int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr);
 
-int32_t ConnPreAssignPort(void);
+int32_t ConnPreAssignPort(int32_t domain);
+int32_t GetDomainByAddr(const char *addr);
+int32_t Ipv6AddrInToAddr(SoftBusSockAddrIn6 *addrIn6, char *addr, int32_t addrLen);
+int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t port);
+int32_t Ipv4AddrToAddrIn(SoftBusSockAddrIn *addrIn, const char *ip, uint16_t port);
 
 #ifdef __cplusplus
 #if __cplusplus

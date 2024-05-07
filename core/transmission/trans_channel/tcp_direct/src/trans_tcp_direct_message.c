@@ -844,8 +844,8 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     char *errDesc = NULL;
     int32_t errCode;
     int myHandleId;
-    if (conn->appInfo.firstTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(conn->appInfo.firstTokenId) != SOFTBUS_OK) {
+    if (conn->appInfo.callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(conn->appInfo.callingTokenId) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
         errDesc = (char *)"Server check acl failed";
         goto ERR_EXIT;
@@ -1089,6 +1089,10 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
 
 static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int32_t type)
 {
+    if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is NULL");
+        return SOFTBUS_NO_INIT;
+    }
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return SOFTBUS_LOCK_ERR;

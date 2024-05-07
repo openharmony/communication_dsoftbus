@@ -96,7 +96,7 @@ typedef struct {
      * @return <b>SOFTBUS_OK</b> if local listeners start successfully.
      */
     int32_t (*StopLocalListening)(const LocalListenerInfo *info);
-    bool (*CheckActiveConnection)(const ConnectOption *info);
+    bool (*CheckActiveConnection)(const ConnectOption *info, bool needOccupy);
     int32_t (*UpdateConnection)(uint32_t connectionId, UpdateOption *option);
 
     /**
@@ -106,6 +106,12 @@ typedef struct {
      * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
      */
     int32_t (*PreventConnection)(const ConnectOption *option, uint32_t time);
+
+    /**
+     * @brief Config flow control of posting data
+     * @param configuration flow control configuration of posting data
+     */
+    int32_t (*ConfigPostLimit)(const LimitConfiguration *configuration);
 } ConnectFuncInterface;
 
 #define MAGIC_NUMBER  0xBABEFACE

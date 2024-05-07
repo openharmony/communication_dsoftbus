@@ -26,6 +26,7 @@
 
 namespace OHOS {
 using testing::NiceMock;
+using testing::AtMost;
 
 class BluetoothInterface {
 public:

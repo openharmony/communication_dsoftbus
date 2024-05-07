@@ -71,7 +71,19 @@ The DSoftBus directory structure is as follows:
         /** Callback used to return the publish result. */
         void (*OnPublishResult)(int publishId, PublishResult reason);
     } IPublishCb;
-    
+
+    // Publish information.
+    typedef struct {
+        int publishId; // Publish ID.
+        DiscoverMode mode; // Discovery mode.
+        ExchangeMedium medium; // Medium used for device discovery.
+        ExchangeFreq freq; // Device discovery frequency.
+        const char *capability; // Capability of the device that can be discovered.
+        unsigned char *capabilityData; // Custom data for service publishing
+        unsigned int dataLen; // Length of the data.
+        bool ranging; // Whether to measure the distance.
+    } PublishInfo;
+
     // Publish a service.
     int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
     ```
@@ -224,17 +236,18 @@ The DSoftBus directory structure is as follows:
         void (*OnStream)(int32_t socket, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
         void (*OnFile)(int32_t socket, FileEvent *event);
         void (*OnQos)(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount);
+        void (*OnError)(int32_t socket, int32_t errCode);
     } ISocketListener;
 
     typedef enum {
         QOS_TYPE_MIN_BW,           // Minimum bandwidth.
-        QOS_TYPE_MAX_LATENCY,      // Maximum link setup latency.
-        QOS_TYPE_MIN_LATENCY,      // Minimum link setup latency.
-        QOS_TYPE_MAX_WAIT_TIMEOUT, // Maximum timeout period.
-        QOS_TYPE_MAX_BUFFER,       // Maximum buffer size.
-        QOS_TYPE_FIRST_PACKAGE,    // Size of the first packet.
+        QOS_TYPE_MAX_WAIT_TIMEOUT,      // Maximum time allowed for the bind operation.
+        QOS_TYPE_MIN_LATENCY,      // Minimum latency for link setup.
+        QOS_TYPE_RTT_LEVEL, // Level of the RTT.
+        QOS_TYPE_MAX_BUFFER,       // Maximum buffer size (reserved).
+        QOS_TYPE_FIRST_PACKAGE,    // Size of the first packet (reserved).
         QOS_TYPE_MAX_IDLE_TIMEOUT, // Maximum idle time.
-        QOS_TYPE_TRANS_RELIABILITY,// Transmission reliability.
+        QOS_TYPE_TRANS_RELIABILITY,// Transmission reliability (reserved).
         QOS_TYPE_BUTT,
     } QosType;
 
@@ -268,6 +281,44 @@ The DSoftBus directory structure is as follows:
     ```C
     // Shut down the socket.
     void Shutdown(int32_t socket);
+    ```
+
+**4. Device Management**
+
+-   **Choose the Wi-Fi keepalive mode.**
+
+1. Call **ShiftLNNGear** on the DSoftBus client to invoke the server **ShiftLNNGear** through an IPC interface. The policy management module adjusts the keepalive attributes of the long-lived TCP connection based on the policy.
+
+    ```C
+    typedef struct {
+        ModeCycle cycle;        // Interval for detecting whether the Wi-Fi connection is alive.
+        ModeDuration duration;  // Heartbeat mode duration.
+        bool wakeupFlag;        // Whether to wake up the peer device.
+        ModeAction action;      // Mode to select.
+    } GearMode;
+    
+    typedef enum {
+        /**< The heartbeat interval is 30 seconds. */
+        HIGH_FREQ_CYCLE = 30,
+        /**< The heartbeat interval is 60 seconds. */
+        MID_FREQ_CYCLE = 60,
+        /**< The heartbeat interval is 5 minutes. */
+        LOW_FREQ_CYCLE = 5 * 60,
+        /**< The heartbeat interval is 10 minutes. */
+        DEFAULT_FREQ_CYCLE = 10 * 60,
+    } ModeCycle;
+
+    // Adjust the keepalive parameters of the long-lived TCP connection based on the policy.
+    int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
+    ```
+
+2.  Set **ModeCycle** for the service, which determines the TCP keepalive duration for the device.
+
+    ```C
+    If HIGH_FREQ_CYCLE is used, the TCP keepalive duration is within 40 seconds.
+    If MID_FREQ_CYCLE is used, the actual TCP keepalive duration is within 70 seconds.
+    If LOW_FREQ_CYCLE is used, the TCP keepalive duration is within 315 seconds.
+    If DEFAULT_FREQ_CYCLE is used, the TCP keepalive duration is within 615 seconds.
     ```
 
 ## Repositories Involved

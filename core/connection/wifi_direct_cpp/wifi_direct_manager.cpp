@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "wifi_direct_manager.h"
 #include <atomic>
 #include <list>
 #include <mutex>
 #include <securec.h>
+#include "wifi_direct_manager.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_initiator.h"
@@ -27,6 +27,8 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "adapter/p2p_adapter.h"
 #include "utils/duration_statistic.h"
+#include "conn_event.h"
+#include "wifi_direct_role_option.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::recursive_mutex g_listenerLock;
@@ -39,7 +41,28 @@ static uint32_t GetRequestId()
     return g_requestId++;
 }
 
-static ListenerModule AllocateListenerModuleId()
+static void SetElementType(struct WifiDirectConnectInfo *info)
+{
+    if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
+        info->linkType = STATISTIC_P2P;
+    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
+        info->linkType = STATISTIC_HML;
+    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
+        info->linkType = STATISTIC_TRIGGER_HML;
+        info->bootLinkType = STATISTIC_NONE;
+    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
+        info->linkType = STATISTIC_TRIGGER_HML;
+    }
+
+    WifiDirectNegoChannelType type = info->negoChannel.type;
+    if (type == NEGO_CHANNEL_AUTH) {
+        info->bootLinkType = STATISTIC_WLAN;
+    } else if (type == NEGO_CHANNEL_COC) {
+        info->bootLinkType = STATISTIC_COC;
+    }
+}
+
+static int32_t AllocateListenerModuleId()
 {
     std::lock_guard lock(g_listenerModuleIdLock);
     ListenerModule moduleId = UNUSE_BUTT;
@@ -61,12 +84,12 @@ static ListenerModule AllocateListenerModuleId()
     return moduleId;
 }
 
-static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+static bool IsEnhanceP2pModuleId(int32_t moduleId)
 {
     return moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END;
 }
 
-static void FreeListenerModuleId(ListenerModule moduleId)
+static void FreeListenerModuleId(int32_t moduleId)
 {
     std::lock_guard lock(g_listenerModuleIdLock);
     if (IsEnhanceP2pModuleId(moduleId)) {
@@ -89,7 +112,28 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
     CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
-    return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
+
+    ConnEventExtra extra = { .requestId = static_cast<int32_t>(info->requestId),
+        .linkType = info->connectType,
+        .expectRole = static_cast<int32_t>(info->expectApiRole),
+        .peerIp = info->remoteMac };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
+    SetElementType(info);
+
+    int32_t ret = OHOS::SoftBus::WifiDirectRoleOption::GetInstance().GetExpectedRole(
+        info->remoteNetworkId, info->connectType, info->expectApiRole, info->isStrict);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "requestId=%{public}d, pid=%{public}d, type=%{public}d, expectRole=0x%{public}x",
+        info->requestId,
+        info->pid,
+        info->connectType,
+        info->expectApiRole);
+    ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
+    extra.errcode = ret;
+    extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+    return ret;
 }
 
 static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback)
@@ -215,7 +259,7 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     return SOFTBUS_OK;
 }
 
-static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char *remoteUuid)
+static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, remoteIp=%{public}s remoteUuid=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str(),
@@ -224,7 +268,7 @@ static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDeviceOnLine != nullptr) {
-            listener.onDeviceOnLine(remoteMac, remoteIp, remoteUuid);
+            listener.onDeviceOnLine(remoteMac, remoteIp, remoteUuid, isSource);
         }
     }
 }
@@ -252,6 +296,47 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
             listener.onLocalRoleChange(oldRole, newRole);
         }
     }
+}
+
+static void NotifyConnectedForSink(
+    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+{
+    std::lock_guard lock(g_listenerLock);
+    for (auto listener : g_listeners) {
+        if (listener.onConnectedForSink != nullptr) {
+            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+        }
+    }
+}
+
+static void NotifyDisconnectedForSink(
+    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+{
+    std::lock_guard lock(g_listenerLock);
+    for (auto listener : g_listeners) {
+        if (listener.onDisconnectedForSink != nullptr) {
+            listener.onDisconnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+        }
+    }
+}
+
+bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != NULL, true, CONN_WIFI_DIRECT, "remote networkid is null");
+    auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(!remoteUuid.empty(), true, CONN_WIFI_DIRECT, "get remote uuid failed");
+
+    auto link = OHOS::SoftBus::LinkManager::GetInstance().GetReuseLink(linkType, remoteUuid);
+    if (link == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
+        return true;
+    }
+    if (link->GetNegotiateChannel() == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "need negotiate channel");
+        return true;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "no need negotiate channel");
+    return false;
 }
 
 static bool SupportHmlTwo()
@@ -285,6 +370,7 @@ static struct WifiDirectManager g_manager = {
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
 
+    .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
@@ -298,6 +384,8 @@ static struct WifiDirectManager g_manager = {
     .notifyOnline = NotifyOnline,
     .notifyOffline = NotifyOffline,
     .notifyRoleChange = NotifyRoleChange,
+    .notifyConnectedForSink = NotifyConnectedForSink,
+    .notifyDisconnectedForSink = NotifyDisconnectedForSink,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

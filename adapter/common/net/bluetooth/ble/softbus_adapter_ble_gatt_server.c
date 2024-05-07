@@ -28,6 +28,7 @@
 #include "softbus_utils.h"
 
 #include "conn_log.h"
+#include "softbus_adapter_ble_gatt_client.h"
 
 #define WAIT_HAL_REG_TIME_MS 5 // ms
 #define WAIT_HAL_REG_RETRY 3
@@ -325,7 +326,7 @@ static int32_t GetAllManager(SoftBusGattsManager **node)
     SoftBusGattsManager *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_softBusGattsManager->list, SoftBusGattsManager, node) {
         if (memcpy_s(*node + i, sizeof(SoftBusGattsManager), it, sizeof(SoftBusGattsManager)) != EOK) {
-            CONN_LOGE(CONN_COMMON, "mem error");
+            CONN_LOGE(CONN_BLE, "mem error");
             continue;
         }
         i++;
@@ -338,6 +339,11 @@ static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdA
 {
     if (bdAddr == NULL) {
         CONN_LOGE(CONN_BLE, "invalid param");
+        return;
+    }
+
+    if (SoftbusGattcCheckExistConnectionByAddr((SoftBusBtAddr *)bdAddr)) {
+        CONN_LOGW(CONN_BLE, "ble client exist connection by addr.");
         return;
     }
 
@@ -387,14 +393,17 @@ static void BleDisconnectServerCallback(int connId, int serverId, const BdAddr *
         return;
     }
 
-    SoftBusGattsCallback callback = { 0 };
-    FindCallbackByConnId(connId, &callback);
-    if (callback.DisconnectServerCallback == NULL) {
-        CONN_LOGI(CONN_BLE, "find callback by connId %{public}d failed", connId);
+    SoftBusGattsManager *nodes = NULL;
+    int num = GetAllManager(&nodes);
+    if (num == 0 || nodes == NULL) {
+        CONN_LOGE(CONN_BLE, "get manager failed");
         return;
     }
+    for (int i = 0; i < num; i++) {
+        nodes[i].callback.DisconnectServerCallback(connId, (SoftBusBtAddr *)bdAddr);
+    }
+    SoftBusFree(nodes);
     RemoveConnId(connId);
-    callback.DisconnectServerCallback(connId, (SoftBusBtAddr *)bdAddr);
 }
 
 static void BleServiceAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle)

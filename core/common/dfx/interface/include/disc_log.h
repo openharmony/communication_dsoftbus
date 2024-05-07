@@ -33,6 +33,7 @@ typedef enum {
     DISC_USB,
     DISC_USB_ADAPTER,
     DISC_SDK,
+    DISC_BROADCAST,
     DISC_TEST,
 } DiscLogLabelEnum;
 
@@ -49,6 +50,7 @@ static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { DISC_USB,         0xd0057a8,      "DiscUsb"       },
     { DISC_USB_ADAPTER, 0xd0057a9,      "DiscUsbAdapter"},
     { DISC_SDK,         0xd0057aa,      "DiscSdk"       },
+    { DISC_BROADCAST,   0xd0057ab,      "DiscBroadcast" },
     { DISC_TEST,        DOMAIN_ID_TEST, "DiscTest"      },
 };
 

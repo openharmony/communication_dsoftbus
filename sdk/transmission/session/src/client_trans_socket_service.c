@@ -17,6 +17,7 @@
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_option.h"
 #include "inner_socket.h"
 #include "socket.h"
 #include "softbus_adapter_mem.h"
@@ -92,14 +93,32 @@ int32_t Socket(SocketInfo info)
         return ret;
     }
 
-    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
+    TRANS_LOGD(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
     return socketFd;
 }
 
 int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    TRANS_LOGI(TRANS_SDK, "Listen: socket=%{public}d", socket);
+    TRANS_LOGD(TRANS_SDK, "Listen: socket=%{public}d", socket);
     return ClientListen(socket, qos, qosCount, listener);
+}
+
+static int32_t StartBindWaitTimer(int32_t socket, const QosTV qos[], uint32_t qosCount)
+{
+#define DEFAULT_MAX_WAIT_TIMEOUT 30000 // 30s
+    int32_t maxWaitTime;
+    int32_t ret = GetQosValue(qos, qosCount, QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTime, DEFAULT_MAX_WAIT_TIMEOUT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get max wait timeout fail ret=%{public}d", ret);
+        return ret;
+    }
+
+    if (maxWaitTime <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid max wait timeout. maxWaitTime=%{public}d", maxWaitTime);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return ClientHandleBindWaitTimer(socket, (uint32_t)maxWaitTime, TIMER_ACTION_START);
 }
 
 int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
@@ -109,7 +128,16 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
         TRANS_LOGE(TRANS_SDK, "Bind failed, over session num limit");
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
-    return ClientBind(socket, qos, qosCount, listener, false);
+    int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Start timer failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    ret = ClientBind(socket, qos, qosCount, listener, false);
+    TRANS_LOGI(TRANS_SDK, "Bind end, stop timer, socket=%{public}d", socket);
+    (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
+    return ret;
 }
 
 int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
@@ -119,13 +147,26 @@ int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const IS
         TRANS_LOGE(TRANS_SDK, "Bind async failed, over session num limit");
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
-    return ClientBind(socket, qos, qosCount, listener, true);
+
+    int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Start timer failed, ret=%{public}d, socket=%{public}d", ret, socket);
+        return ret;
+    }
+
+    ret = ClientBind(socket, qos, qosCount, listener, true);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "BindAsync fail, stop timer, ret=%{public}d, socket=%{public}d", ret, socket);
+        (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
+    }
+    return ret;
 }
 
 void Shutdown(int32_t socket)
 {
     TRANS_LOGI(TRANS_SDK, "Shutdown: socket=%{public}d", socket);
-    ClientShutdown(socket);
+    (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
+    ClientShutdown(socket, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
 }
 
 int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
@@ -153,4 +194,72 @@ int32_t DBinderGrantPermission(int32_t uid, int32_t pid, const char *socketName)
 int32_t DBinderRemovePermission(const char *socketName)
 {
     return ClientRemovePermission(socketName);
+}
+
+int32_t DfsBind(int32_t socket, const ISocketListener *listener)
+{
+    return ClientDfsBind(socket, listener);
+}
+
+static int32_t CheckSocketOptParam(OptLevel level, OptType optType, void *optValue)
+{
+    if (level < 0 || level >= OPT_LEVEL_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid level.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (optType < 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid optType.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (optValue == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid optValue.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize)
+{
+    int32_t ret = CheckSocketOptParam(level, optType, optValue);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (optValueSize <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (level) {
+        case OPT_TYPE_MAX_BUFFER:
+        case OPT_TYPE_FIRST_PACKAGE:
+        case OPT_TYPE_MAX_IDLE_TIMEOUT:
+            ret = SOFTBUS_NOT_IMPLEMENT;
+            break;
+        default:
+            ret = SetExtSocketOpt(socket, level, optType, optValue, optValueSize);
+            break;
+    }
+    return ret;
+}
+
+int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
+{
+    int32_t ret = CheckSocketOptParam(level, optType, optValue);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (optValueSize == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (level) {
+        case OPT_TYPE_MAX_BUFFER:
+        case OPT_TYPE_FIRST_PACKAGE:
+        case OPT_TYPE_MAX_IDLE_TIMEOUT:
+            ret = SOFTBUS_NOT_IMPLEMENT;
+            break;
+        default:
+            ret = GetExtSocketOpt(socket, level, optType, optValue, optValueSize);
+            break;
+    }
+    return ret;
 }

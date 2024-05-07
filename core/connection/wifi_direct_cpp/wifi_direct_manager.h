@@ -16,7 +16,6 @@
 #define WIFI_DIRECT_MANAGER_H
 
 #include "common_list.h"
-#include "softbus_base_listener.h"
 #include "wifi_direct_types.h"
 
 #ifdef __cplusplus
@@ -25,20 +24,25 @@ extern "C" {
 
 struct WifiDirectStatusListener {
     void (*onLocalRoleChange)(enum WifiDirectRole oldRole, enum WifiDirectRole newRole);
-    void (*onDeviceOnLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid);
+    void (*onDeviceOnLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource);
     void (*onDeviceOffLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
+    void (*onConnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+        enum WifiDirectLinkType type);
+    void (*onDisconnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+        enum WifiDirectLinkType type);
 };
 
 struct WifiDirectManager {
     uint32_t (*getRequestId)(void);
-    ListenerModule (*allocateListenerModuleId)(void);
-    void (*freeListenerModuleId)(ListenerModule moduleId);
+    int32_t (*allocateListenerModuleId)(void);
+    void (*freeListenerModuleId)(int32_t moduleId);
 
     int32_t (*connectDevice)(struct WifiDirectConnectInfo *info, struct WifiDirectConnectCallback *callback);
     int32_t (*disconnectDevice)(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback);
     void (*registerStatusListener)(struct WifiDirectStatusListener *listener);
     int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
 
+    bool (*isNegotiateChannelNeeded)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
     bool (*isDeviceOnline)(const char *remoteMac);
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
     int32_t (*getLocalIpByRemoteIp)(const char *remoteIp, char *localIp, int32_t localIpSize);
@@ -51,9 +55,13 @@ struct WifiDirectManager {
     int32_t (*init)(void);
 
     /* for private inner usage */
-    void (*notifyOnline)(const char *remoteMac, const char *remoteIp, const char *remoteUuid);
+    void (*notifyOnline)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource);
     void (*notifyOffline)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
     void (*notifyRoleChange)(enum WifiDirectRole oldRole, enum WifiDirectRole newRole);
+    void (*notifyConnectedForSink)(
+        const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type);
+    void (*notifyDisconnectedForSink)(
+        const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type);
 };
 
 /* singleton */

@@ -39,7 +39,7 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time);
 
 void SoftbusReportTransErrorEvt(int32_t errcode);
 
-void SoftbusReportTransInfoEvt(const char*infoMsg);
+void SoftbusReportTransInfoEvt(const char *infoMsg);
 
 int32_t InitTransStatisticSysEvt(void);
 

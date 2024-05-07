@@ -87,3 +87,24 @@ if (schema_enhanced) {
   trans_session_sdk_src += schema_src
   trans_session_sdk_inc += schema_inc
 }
+
+dep_dir = "dsoftbus_enhance/sdk/transmission/session"
+enhanced_socket = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                              [
+                                "$native_source_path",
+                                "$dep_dir",
+                              ],
+                              "value")
+if (enhanced_socket) {
+  trans_session_sdk_src += [ "$dsoftbus_root_path/dsoftbus_enhance/sdk/transmission/session/src/client_trans_socket_option_ext.c" ]
+  trans_session_sdk_inc += [
+    "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+  ]
+} else {
+  trans_session_sdk_src += [ "$dsoftbus_root_path/sdk/transmission/session/src/client_trans_socket_option.c" ]
+  trans_session_sdk_inc += [
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+  ]
+}

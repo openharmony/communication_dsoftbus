@@ -30,6 +30,7 @@ struct WifiDirectCommandManager {
     void (*enqueueCommandFront)(struct WifiDirectCommand *command);
     struct WifiDirectCommand* (*dequeueCommand)(void);
     void (*removePassiveCommand)(void);
+    struct WifiDirectCommand *(*find)(bool(*checker)(struct WifiDirectCommand *));
 
     uint32_t currentCommandId;
 };
