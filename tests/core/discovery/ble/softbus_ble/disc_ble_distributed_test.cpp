@@ -126,7 +126,7 @@ HWTEST_F(DiscDistributedBleTest, TestCheckScanner001, TestSize.Level1)
 
 /*
  * @tc.name: TestScanFilter001
- * @tc.desc: Test ScanFilter should return SOFTBUS_ERR when given invalid reportInfo
+ * @tc.desc: Test ScanFilter should not return SOFTBUS_OK when given invalid reportInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -171,7 +171,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
 
 /*
  * @tc.name: TestScanFilter002
- * @tc.desc: Test ScanFilter should return SOFTBUS_ERR when given invalid reportInfo
+ * @tc.desc: Test ScanFilter should not return SOFTBUS_OK when given invalid reportInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -457,7 +457,7 @@ HWTEST_F(DiscDistributedBleTest, TestGetScannerParam001, TestSize.Level1)
 /*
  * @tc.name: TestStopScaner001
  * @tc.desc: Test StopScaner should return SOFTBUS_OK when given false g_isScanning
- *           should return SOFTBUS_ERR when given true g_isScanning and SCAN_MAX_NUM g_bleListener.scanListenerId
+ *           should not return SOFTBUS_OK when given true g_isScanning and SCAN_MAX_NUM g_bleListener.scanListenerId
  * @tc.type: FUNC
  * @tc.require:
  */

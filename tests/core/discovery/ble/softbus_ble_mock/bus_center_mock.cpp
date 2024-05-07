@@ -68,23 +68,23 @@ int32_t BusCenterMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char *out, uint32
 {
     if (key == STRING_KEY_DEV_NAME) {
         if (strcpy_s(out, outSize, deviceName.c_str()) != EOK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
         }
         return SOFTBUS_OK;
     }
     if (key == STRING_KEY_DEV_TYPE) {
         if (strcpy_s(out, outSize, TYPE_PHONE) != EOK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
         }
         return SOFTBUS_OK;
     }
     if (key == STRING_KEY_DEV_UDID) {
         if (strcpy_s(out, outSize, deviceUDID.c_str()) != EOK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
         }
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 int32_t BusCenterMock::ActionOfLnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
@@ -97,11 +97,11 @@ int32_t BusCenterMock::ActionOfLnnGetLocalByteInfo(InfoKey key, uint8_t *out, ui
 {
     if (key == BYTE_KEY_ACCOUNT_HASH) {
         if (memcpy_s(out, outSize, accountHash, SHA_256_HASH_LEN) != EOK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
         }
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 bool BusCenterMock::ActionOfLnnIsDefaultOhosAccount()
