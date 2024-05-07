@@ -1065,9 +1065,9 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_UpdateDistributedNodeInfo_Test_001, Test
     const char *udid = nullptr;
     newInfo.accountId = 18390933952;
     int32_t ret = LnnUpdateDistributedNodeInfo(&newInfo, udid);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *devUdid = "123456789";
     ret = LnnUpdateDistributedNodeInfo(&newInfo, devUdid);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
