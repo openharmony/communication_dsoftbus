@@ -29,7 +29,9 @@ ohos_unittest("LnnKVAdapterTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
-  external_deps = [ "kv_store:distributeddata_inner" ]
+  if (dsoftbus_feature_lnn_cloud_sync) {
+    external_deps = [ "kv_store:distributeddata_inner" ]
+  }
 }
 
 ohos_unittest("LnnKVAdapterWrapperTest") {
@@ -47,7 +49,9 @@ ohos_unittest("LnnKVAdapterWrapperTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
-  external_deps = [ "kv_store:distributeddata_inner" ]
+  if (dsoftbus_feature_lnn_cloud_sync) {
+    external_deps = [ "kv_store:distributeddata_inner" ]
+  }
 }
 
 ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
