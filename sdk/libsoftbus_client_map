@@ -395,6 +395,7 @@
         "ClientGetSessionNameByChannelId";
         "TransSetSocketFileListener";
         "SetSessionIsAsyncById";
+        "SetSessionInitInfoById";
         "TransSetChannelInfo";
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
