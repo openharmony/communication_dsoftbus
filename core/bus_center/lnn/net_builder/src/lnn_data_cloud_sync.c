@@ -533,7 +533,12 @@ static int32_t SplitKeyOrValue(const char *key, char splitKeyValue[][SPLIT_MAX_L
     int index = 0;
     char *infoStr = NULL;
     char *nextToken = NULL;
-    infoStr = strtok_s((char *)key, "#", &nextToken);
+    char tmp[PUT_VALUE_MAX_LEN] = {0};
+    if (strcpy_s(tmp, PUT_VALUE_MAX_LEN, key)) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s key fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    infoStr = strtok_s(tmp, "#", &nextToken);
     while (infoStr != NULL) {
         if (strcpy_s(splitKeyValue[index++], SPLIT_MAX_LEN, infoStr) != EOK) {
             LNN_LOGE(LNN_BUILDER, "strcpy_s SplitKeyOrValue fail");
