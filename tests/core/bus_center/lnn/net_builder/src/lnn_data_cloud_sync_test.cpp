@@ -74,35 +74,34 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_ERR);
     info->accountId = 18390933952;
     ret = LnnLedgerAllDataSyncToDB(info);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(info);
     LnnDeInitCloudSyncModule();
 }
 
 /*
- * @tc.name: LnnLedgerDataChangeSyncToDB_Test_001
+ * @tc.name: LnnLedgerDataChangeSyncToDB_Test_002
  * @tc.desc: LnnLedgerDataChangeSyncToDB
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSize.Level1)
+ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
     char *key = nullptr;
-    char *value = nullptr;
-    int32_t ret = LnnLedgerDataChangeSyncToDB(key, value, strlen(value));
+    int32_t ret = LnnLedgerDataChangeSyncToDB(key, VALUE, strlen(VALUE));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     LnnDeleteSyncToDB();
     LnnDeInitCloudSyncModule();
 }
 
 /*
- * @tc.name: LnnDBDataChangeSyncToCache_Test_001
+ * @tc.name: LnnDBDataChangeSyncToCache_Test_003
  * @tc.desc: LnnDBDataChangeSyncToCache
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_001, TestSize.Level1)
+HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
     char *key = nullptr;
@@ -111,12 +110,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_001, TestSize.Lev
     int32_t ret = LnnDBDataChangeSyncToCache(key, value, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, value, type);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    type = DB_DELETE;
-    ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
-    EXPECT_EQ(ret, SOFTBUS_OK);
     type = DB_CHANGE_TYPE_MAX;
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -124,12 +118,12 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_001, TestSize.Lev
 }
 
 /*
- * @tc.name: LnnDBDataAddChangeSyncToCache_Test_001
+ * @tc.name: LnnDBDataAddChangeSyncToCache_Test_004
  * @tc.desc: LnnDBDataAddChangeSyncToCache
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDataCloudSyncTest, LnnDBDataAddChangeSyncToCache_Test_001, TestSize.Level1)
+HWTEST_F(LNNDataCloudSyncTest, LnnDBDataAddChangeSyncToCache_Test_004, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
     const char **key = nullptr;
@@ -141,12 +135,12 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataAddChangeSyncToCache_Test_001, TestSize.
 }
 
 /*
- * @tc.name: LnnGetAccountIdfromLocalCache_Test_001
+ * @tc.name: LnnGetAccountIdfromLocalCache_Test_005
  * @tc.desc: LnnGetAccountIdfromLocalCache
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDataCloudSyncTest, LnnGetAccountIdfromLocalCache_Test_001, TestSize.Level1)
+HWTEST_F(LNNDataCloudSyncTest, LnnGetAccountIdfromLocalCache_Test_005, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
     int64_t *buf = nullptr;

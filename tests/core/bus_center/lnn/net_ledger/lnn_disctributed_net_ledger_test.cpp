@@ -953,7 +953,7 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_REMOTE_PTK_Test_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDeviceName_Test_001, TestSize.Level1)
+HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLUnifiedDeviceName_Test_001, TestSize.Level1)
 {
     char *udid = nullptr;
     char *name = nullptr;
@@ -971,7 +971,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDeviceName_Test_001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDefaultDeviceName_Test_001, TestSize.Level1)
+HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLUnifiedDefaultDeviceName_Test_001, TestSize.Level1)
 {
     char *udid = nullptr;
     char *name = nullptr;
@@ -989,7 +989,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDefaultDeviceName_Test_001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceNickNameByUdid_Test_001, TestSize.Level1)
+HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLDeviceNickNameByUdid_Test_001, TestSize.Level1)
 {
     char *udid = nullptr;
     char *name = nullptr;
@@ -1007,7 +1007,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceNickNameByUdid_Test_001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceStateVersion_Test_001, TestSize.Level1)
+HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLDeviceStateVersion_Test_001, TestSize.Level1)
 {
     char *udid = nullptr;
     int32_t stateVersion = 0;
@@ -1024,7 +1024,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceStateVersion_Test_001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherKey_Test_001, TestSize.Level1)
+HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLDeviceBroadcastCipherKey_Test_001, TestSize.Level1)
 {
     char *udid = nullptr;
     const char *cipherKey = "qqqqqqqqqqqq";
@@ -1041,7 +1041,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherKey_Test_001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherIv_Test_001, TestSize.Level1)
+HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLDeviceBroadcastCipherIv_Test_001, TestSize.Level1)
 {
     char *udid = nullptr;
     const char *cipherIv = "qqqqqqqqqqqq";
@@ -1058,7 +1058,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherIv_Test_001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDisctributedLedgerTest, LnnUpdateDistributedNodeInfo_Test_001, TestSize.Level1)
+HWTEST_F(LNNDisctributedLedgerTest, Lnn_UpdateDistributedNodeInfo_Test_001, TestSize.Level1)
 {
     NodeInfo newInfo;
     memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -1068,6 +1068,6 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnUpdateDistributedNodeInfo_Test_001, TestS
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *devUdid = "123456789";
     ret = LnnUpdateDistributedNodeInfo(&newInfo, devUdid);
-    EXPECT_TRUE(ret == true);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
