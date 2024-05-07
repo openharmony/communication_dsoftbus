@@ -111,6 +111,11 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, value, type);
     EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    type = DB_DELETE;
+    ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     type = DB_CHANGE_TYPE_MAX;
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
