@@ -447,7 +447,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(root, JSON_KEY_PEER_HANDLE_ID, appInfo->peerHandleId);
-    (void)AddNumberToJsonObject(root, JSON_KEY_FIRST_TOKEN_ID, (int32_t)appInfo->firstTokenId);
+    (void)AddNumberToJsonObject(root, JSON_KEY_CALLING_TOKEN_ID, (int32_t)appInfo->callingTokenId);
     return SOFTBUS_OK;
 }
 
@@ -758,8 +758,8 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         TRANS_LOGE(TRANS_CTRL, "unpack fast data failed");
         return SOFTBUS_TRANS_PROXY_UNPACK_FAST_DATA_FAILED;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_FIRST_TOKEN_ID, (int32_t *)&appInfo->firstTokenId)) {
-        appInfo->firstTokenId = 0;
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_CALLING_TOKEN_ID, (int32_t *)&appInfo->callingTokenId)) {
+        appInfo->callingTokenId = TOKENID_NOT_SET;
     }
     return SOFTBUS_OK;
 }

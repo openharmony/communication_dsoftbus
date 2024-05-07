@@ -69,7 +69,7 @@ static int32_t GetRequestListByUdidHash(char *udidHash, bool isNeedClear,
         if (strncmp(item->udidHash, udidHash, UDID_SHORT_HASH_STR) != 0 || index >= (*num)) {
             continue;
         }
-        *(requests[index++]) = *item;
+        (*requests)[index++] = *item;
         if (!isNeedClear) {
             continue;
         }

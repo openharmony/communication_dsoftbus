@@ -800,10 +800,10 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     }
 }
 
-static void OnGroupDeleted(const char *groupId)
+static void OnGroupDeleted(const char *groupId, int32_t groupType)
 {
     if (g_groupChangeListener.onGroupDeleted != NULL) {
-        g_groupChangeListener.onGroupDeleted(groupId);
+        g_groupChangeListener.onGroupDeleted(groupId, groupType);
     }
 }
 
@@ -1915,6 +1915,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             callback->onConnOpened(requestId, authHandle);
             break;
         case AUTH_LINK_TYPE_BR:
+            /* fall-through */
         case AUTH_LINK_TYPE_BLE:
             judgeTimeOut = true;
         case AUTH_LINK_TYPE_P2P:

@@ -35,7 +35,7 @@ int32_t QueueInit(LockFreeQueue* queue, uint32_t unitNum)
         COMM_LOGE(COMM_UTILS, "queue is null");
         return QUEUE_INVAL;
     }
-    if (!IS_POWER_OF_2(unitNum)) {
+    if (unitNum < 1 || !IS_POWER_OF_2(unitNum)) {
         COMM_LOGE(COMM_UTILS, "invalid param");
         return QUEUE_INVAL;
     }
@@ -94,7 +94,7 @@ int32_t QueueCountGet(const LockFreeQueue* queue, uint32_t* count)
 
 LockFreeQueue* CreateQueue(uint32_t unitNum)
 {
-    if (!IS_POWER_OF_2(unitNum)) {
+    if (unitNum < 1 || !IS_POWER_OF_2(unitNum)) {
         return NULL;
     }
     uint32_t queueSize;

@@ -744,12 +744,10 @@ static bool SetLpParam(SensorHubServerType type,
     lpParam.scanConfig = &scanConfig;
     lpParam.rawData.advData = (unsigned char *)AssembleAdvData(&bcParam->advData,
         (uint16_t *)&lpParam.rawData.advDataLen);
-    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, SOFTBUS_BC_ADAPTER_ASSEMBLE_FAIL,
-        DISC_BLE, "assemble adv data failed");
-    int32_t result = SetBtUuidByBroadCastType(type, &lpParam.uuid);
-    if (result != SOFTBUS_OK) {
+    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, false, DISC_BLE, "assemble adv data failed");
+    if (SetBtUuidByBroadCastType(type, &lpParam.uuid) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "set bt uuid fail, advHandle=%{public}d", bcParam->advHandle);
-        return result;
+        return false;
     }
     if (bcParam->advData.rspData.payloadLen > 0 && bcParam->advData.rspData.payload != NULL) {
         lpParam.rawData.rspData = (unsigned char *)AssembleRspData(&bcParam->advData.rspData,
@@ -757,7 +755,7 @@ static bool SetLpParam(SensorHubServerType type,
         if (lpParam.rawData.rspData == NULL) {
             SoftBusFree(lpParam.rawData.advData);
             DISC_LOGE(DISC_BLE_ADAPTER, "assemble rsp data failed, advHandle=%{public}d", bcParam->advHandle);
-            return SOFTBUS_BC_ADAPTER_ASSEMBLE_FAIL;
+            return false;
         }
     }
     lpParam.filter = (BleScanNativeFilter *)SoftBusCalloc(sizeof(BleScanNativeFilter) * scanParam->filterSize);
@@ -765,7 +763,7 @@ static bool SetLpParam(SensorHubServerType type,
         SoftBusFree(lpParam.rawData.advData);
         SoftBusFree(lpParam.rawData.rspData);
         DISC_LOGE(DISC_BLE_ADAPTER, "malloc native filter failed, advHandle=%{public}d", bcParam->advHandle);
-        return SOFTBUS_MALLOC_ERR;
+        return false;
     }
     if (type == SOFTBUS_HEARTBEAT_TYPE) {
         SoftbusSetManufactureData(lpParam.filter, scanParam->filterSize);

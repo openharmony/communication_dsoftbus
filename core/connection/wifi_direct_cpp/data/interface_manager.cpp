@@ -19,6 +19,7 @@
 #include "conn_log.h"
 #include "data/interface_info.h"
 #include "link_info.h"
+#include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
@@ -54,15 +55,18 @@ bool InterfaceManager::IsInterfaceAvailable(InterfaceInfo::InterfaceType type, b
 void InterfaceManager::LockInterface(InterfaceInfo::InterfaceType type, const std::string &owner)
 {
     // ATTENTION: MUST NOT access interface lock under interface manager lock, otherwise deadlock will happen
-    CONN_LOGI(CONN_WIFI_DIRECT, "current owner=%{public}s", exclusives_[static_cast<int>(type)].owner_.c_str());
+    CONN_LOGI(CONN_WIFI_DIRECT, "current owner=%{public}s",
+        WifiDirectAnonymizeDeviceId(exclusives_[static_cast<int>(type)].owner_).c_str());
     exclusives_[static_cast<int>(type)].lock_.lock();
     exclusives_[static_cast<int>(type)].owner_ = owner;
-    CONN_LOGI(CONN_WIFI_DIRECT, "success, owner=%{public}s", exclusives_[static_cast<int>(type)].owner_.c_str());
+    CONN_LOGI(CONN_WIFI_DIRECT, "success owner=%{public}s",
+        WifiDirectAnonymizeDeviceId(exclusives_[static_cast<int>(type)].owner_).c_str());
 }
 
 void InterfaceManager::UnlockInterface(InterfaceInfo::InterfaceType type)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "current owner=%{public}s", exclusives_[static_cast<int>(type)].owner_.c_str());
+    CONN_LOGI(CONN_WIFI_DIRECT, "current owner=%{public}s",
+        WifiDirectAnonymizeDeviceId(exclusives_[static_cast<int>(type)].owner_).c_str());
     // ATTENTION: MUST NOT access interface lock under interface manager lock, otherwise deadlock will happen
     exclusives_[static_cast<int>(type)].lock_.unlock();
     exclusives_[static_cast<int>(type)].owner_ = "";

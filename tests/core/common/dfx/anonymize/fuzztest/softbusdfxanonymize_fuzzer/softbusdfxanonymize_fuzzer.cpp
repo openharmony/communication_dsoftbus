@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,26 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdint>
-#include "access_control.h"
-#include "softbus_error_code.h"
 
-int32_t TransCheckClientAccessControl(const char *peerNetworkId)
-{
-    (void)peerNetworkId;
-    return SOFTBUS_OK;
-}
-int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
-{
-    (void)firstCallingId;
-    return SOFTBUS_OK;
-}
-uint32_t TransACLGetFirstTokenID()
-{
-    return SOFTBUS_OK;
-}
+#include "softbusdfxanonymize_fuzzer.h"
 
-uint32_t TransACLGetCallingTokenID()
+#include <string>
+#include "anonymizer.h"
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    return SOFTBUS_OK;
+    std::string str(reinterpret_cast<const char *>(data), size);
+
+    char *anonymized = nullptr;
+    Anonymize(str.c_str(), &anonymized);
+    AnonymizeWrapper(anonymized);
+    AnonymizeFree(anonymized);
+    return 0;
 }

@@ -282,7 +282,7 @@ static void OnGroupDeleted(const char *groupInfo)
     }
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupDeleted, type=%{public}d", info.groupType);
     if (g_dataChangeListener.onGroupDeleted != NULL) {
-        g_dataChangeListener.onGroupDeleted(info.groupId);
+        g_dataChangeListener.onGroupDeleted(info.groupId, info.groupType);
     }
 }
 

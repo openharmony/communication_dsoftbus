@@ -23,9 +23,12 @@
 #include "softbus_access_token_test.h"
 #include "softbus_error_code.h"
 #include "softbus_hisysevt_transreporter.h"
-#include "softbus_server.h"
 #include "softbus_server_frame.h"
 #include "system_ability_definition.h"
+#include "securec.h"
+#define private public
+#include "softbus_server_stub.h"
+#include "softbus_server.h"
 
 namespace OHOS {
 constexpr size_t FOO_MAX_LEN = 1024;
@@ -939,6 +942,60 @@ bool SoftbusRegisterServiceFuzzTest(const uint8_t* data, size_t size)
     if (object->SendRequest(MANAGE_REGISTER_SERVICE, datas, reply, option) != ERR_NONE) {
         return false;
     }
+    return true;
+}
+
+bool CheckOpenSessionPermissionFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return false;
+    }
+    #define SESSION_NAME_SIZE_MAX 256
+    #define DEVICE_ID_SIZE_MAX 65
+    #define GROUP_ID_SIZE_MAX 128
+    if (size < GROUP_ID_SIZE_MAX) {
+        return false;
+    }
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return false;
+    }
+    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    if (object == nullptr) {
+        return false;
+    }
+    SetAceessTokenPermission("SoftBusServerStubTest");
+    char mySessionName[SESSION_NAME_SIZE_MAX] = "com.test.trans.session";
+    char peerSessionName[SESSION_NAME_SIZE_MAX] = "com.test.trans.session.sendfile";
+    char peerDeviceId[DEVICE_ID_SIZE_MAX] = "com.test.trans.session.sendfile";
+    char groupId[GROUP_ID_SIZE_MAX] = "com.test.trans.session.sendfile";
+
+    if (memcpy_s(peerDeviceId, DEVICE_ID_SIZE_MAX, reinterpret_cast<const char*>(data), DEVICE_ID_SIZE_MAX - 1)
+        != EOK) {
+        return false;
+    }
+    peerDeviceId[DEVICE_ID_SIZE_MAX - 1] = '\0';
+
+    if (memcpy_s(groupId, GROUP_ID_SIZE_MAX, reinterpret_cast<const char*>(data), GROUP_ID_SIZE_MAX - 1)
+        != EOK) {
+        return false;
+    }
+    groupId[GROUP_ID_SIZE_MAX - 1] = '\0';
+    SessionAttribute attr;
+    attr.dataType = 1;
+    attr.linkTypeNum = 0;
+    SessionParam param = {
+        .sessionName = mySessionName,
+        .peerSessionName = peerSessionName,
+        .peerDeviceId = peerDeviceId,
+        .groupId = groupId,
+        .attr = &attr,
+    };
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->CheckOpenSessionPermission(&param);
     return true;
 }
 

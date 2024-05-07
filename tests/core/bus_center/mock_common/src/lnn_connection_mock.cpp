@@ -75,9 +75,9 @@ int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
     return GetConnInterface()->ConnPostBytes(connectionId, data);
 }
 
-bool CheckActiveConnection(const ConnectOption *option)
+bool CheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
-    return GetConnInterface()->CheckActiveConnection(option);
+    return GetConnInterface()->CheckActiveConnection(option, needOccupy);
 }
 
 int32_t ConnStartLocalListening(const LocalListenerInfo *info)

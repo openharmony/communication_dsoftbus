@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#define MAX_LANE_REQ_ID_NUM 1024
+#define MAX_LANE_REQ_ID_NUM 4096
 #define MAX_LANE_ID_NUM 1024
 #define NET_IF_NAME_MAX_LEN 16
 
