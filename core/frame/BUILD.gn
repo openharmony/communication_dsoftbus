@@ -251,6 +251,7 @@ if (defined(ohos_lite)) {
         "device_auth:deviceauth_sdk",
         "hilog:libhilog",
         "ipc:ipc_core",
+        "kv_store:distributeddata_inner",
         "safwk:system_ability_fwk",
         "samgr:samgr_proxy",
       ]

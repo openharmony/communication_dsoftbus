@@ -676,4 +676,37 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest13, TestS
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
 }
+
+/**
+ * @tc.name: TransClientSessionCallbackTest14
+ * @tc.desc: HandleAsyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest14, TestSize.Level1)
+{
+    SocketLifecycleData lifecycle;
+    lifecycle.bindErrCode = 0;
+    int32_t ret = HandleAsyncBindSuccess(1, NULL, &lifecycle);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest15
+ * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest15, TestSize.Level1)
+{
+    SocketLifecycleData lifecycle;
+    lifecycle.sessionState = SESSION_STATE_CANCELLING;
+    lifecycle.bindErrCode = SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT;
+    int32_t ret = HandleSyncBindSuccess(1, &lifecycle);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT);
+
+    lifecycle.sessionState = SESSION_STATE_INIT;
+    ret = HandleSyncBindSuccess(1, &lifecycle);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
 }

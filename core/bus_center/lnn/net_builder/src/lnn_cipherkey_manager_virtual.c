@@ -86,3 +86,9 @@ int32_t LnnUpdateLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey)
     (void)broadcastKey;
     return SOFTBUS_OK;
 }
+
+int32_t LnnGetLocalBroadcastCipherInfo(CloudSyncInfo *info)
+{
+    (void)info;
+    return SOFTBUS_OK;
+}

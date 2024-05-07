@@ -96,8 +96,13 @@ static bool MatchEmpty(const char *str, uint32_t len)
 static bool MatchIpAddr(const char *str, uint32_t len)
 {
     static const uint32_t DOT_NUM_MAX = 3;
-    static const uint32_t NUM_LEN_MAX = 3;
-    static const uint32_t NUM_LEN_MIN = 1;
+    static const int32_t NUM_LEN_MAX = 3;
+    static const int32_t NUM_LEN_MIN = 1;
+    static const uint32_t IP_ADDR_MAX_LEN = 15;
+
+    if (len > IP_ADDR_MAX_LEN) {
+        return false;
+    }
 
     for (uint32_t i = 0; i < len; ++i) {
         if (!IsNum(str[i]) && !IsDot(str[i])) {
