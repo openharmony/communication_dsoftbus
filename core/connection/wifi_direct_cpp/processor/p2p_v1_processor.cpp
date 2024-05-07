@@ -28,6 +28,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_scheduler_factory.h"
+#include "bus_center_manager.h"
 
 namespace OHOS::SoftBus {
 std::map<std::string, P2pV1Processor::ProcessorState> P2pV1Processor::stateNameMapping = {
@@ -532,6 +533,9 @@ int P2pV1Processor::CreateLinkAsNone()
             break;
         case WIFI_DIRECT_API_ROLE_GC:
             expectedRole = WifiDirectRole::WIFI_DIRECT_ROLE_GC;
+            break;
+        case WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_GC:
+            expectedRole = WifiDirectRole::WIFI_DIRECT_ROLE_AUTO;
             break;
         default:
             CONN_LOGE(CONN_WIFI_DIRECT, "illegal expected role, role=%{public}d", expectApiRole);
@@ -1340,6 +1344,39 @@ int P2pV1Processor::ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<Ne
     return SOFTBUS_OK;
 }
 
+void P2pV1Processor::SyncLnnInfoForP2p(const std::string &localMac, const std::string &remoteMac)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    enum WifiDirectRole myRole = WIFI_DIRECT_ROLE_NONE;
+
+    InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&myRole](const InterfaceInfo &interface) {
+        myRole = WifiDirectUtils::ToWifiDirectRole(interface.GetRole());
+        return SOFTBUS_OK;
+    });
+
+    CONN_LOGI(CONN_WIFI_DIRECT, "myRole=%{public}d", myRole);
+    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, myRole);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn p2p role failed");
+    }
+    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, localMac.data());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn my mac failed");
+    }
+    if (myRole == WIFI_DIRECT_ROLE_GC) {
+        ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, remoteMac.data());
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "set lnn go mac failed");
+        }
+    } else {
+        ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, "");
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "set lnn go mac failed");
+        }
+    }
+    LnnSyncP2pInfo();
+}
+
 int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
 {
     auto isRemoteWideBandSupported = msg.GetLegacyP2pWideBandSupported();
@@ -1446,6 +1483,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     ret = OpenAuthConnection(msg, channel);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "open auth connection failed, error=%{public}d", ret);
+    SyncLnnInfoForP2p(localMac, remoteMac);
     return SOFTBUS_OK;
 }
 
@@ -1535,6 +1573,7 @@ int P2pV1Processor::ReuseLink(const std::shared_ptr<ConnectCommand> &command, In
         WifiDirectLink dlink {};
         link.GenerateLink(requestId, pid, dlink);
         command->OnSuccess(dlink);
+        Terminate();
         return SOFTBUS_OK;
     }
 
