@@ -18,7 +18,6 @@
 #include "softbus_errcode.h"
 #include <cstdint>
 #include <string>
-#include <string>
 
 using namespace std;
 using namespace testing::ext;
