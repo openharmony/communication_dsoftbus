@@ -884,10 +884,24 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest25, TestSiz
 {
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ret = ReCreateSessionServerToServer();
+
+    ret = ReCreateSessionServerToServer(NULL);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
+    ListNode sessionServerList;
+    ListInit(&sessionServerList);
+    ret = ReCreateSessionServerToServer(&sessionServerList);
     EXPECT_EQ(ret,  SOFTBUS_OK);
+
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
+
+    SessionServerInfo *infoNode = NULL;
+    SessionServerInfo *infoNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
+        ListDelete(&infoNode->node);
+        SoftBusFree(infoNode);
+    }
 }
 
 /**
@@ -924,7 +938,17 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest27, TestSiz
 {
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ClientCleanAllSessionWhenServerDeath();
+
+    ListNode sessionServerList;
+    ListInit(&sessionServerList);
+    ClientCleanAllSessionWhenServerDeath(&sessionServerList);
+    SessionServerInfo *infoNode = NULL;
+    SessionServerInfo *infoNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
+        ListDelete(&infoNode->node);
+        SoftBusFree(infoNode);
+    }
+
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -934,7 +958,15 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest27, TestSiz
     session->channelType = CHANNEL_TYPE_UDP;
     ret = ClientAddNewSession(g_sessionName, session);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ClientCleanAllSessionWhenServerDeath();
+
+    ClientCleanAllSessionWhenServerDeath(&sessionServerList);
+    infoNode = NULL;
+    infoNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
+        ListDelete(&infoNode->node);
+        SoftBusFree(infoNode);
+    }
+
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
 }
@@ -1332,11 +1364,21 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest41, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest42, TestSize.Level1)
 {
-    int32_t ret = ReCreateSessionServerToServer();
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+    ListNode sessionServerList;
+    ListInit(&sessionServerList);
+    int32_t ret = ReCreateSessionServerToServer(&sessionServerList);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
     ClientTransOnLinkDown(NULL, ROUTE_TYPE_ALL);
     ClientTransOnLinkDown(g_networkId, ROUTE_TYPE_ALL);
-    ClientCleanAllSessionWhenServerDeath();
+
+    ClientCleanAllSessionWhenServerDeath(&sessionServerList);
+    SessionServerInfo *infoNode = NULL;
+    SessionServerInfo *infoNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
+        ListDelete(&infoNode->node);
+        SoftBusFree(infoNode);
+    }
+
     PermissionStateChange(g_pkgName, 0);
 }
 
