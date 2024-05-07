@@ -40,7 +40,7 @@ namespace {
 using OHOS::BluetoothMock;
 using BtState = OHOS::BluetoothMock::BtState;
 
-constexpr int64_t SLEEP_TIME = 50;
+constexpr int64_t SLEEP_TIME = 200;
 
 const std::function<void(void)> BT_STATE_FSM[BtState::BT_STATE_BUTT][BtState::BT_STATE_BUTT] = {
     // BT_STATE_OFF
@@ -49,8 +49,8 @@ const std::function<void(void)> BT_STATE_FSM[BtState::BT_STATE_BUTT][BtState::BT
         nullptr,
         // BT_STATE_OFF -> BT_STATE_ON
         []() {
-            EnableBr();
-            EnableBle();
+            std::thread(EnableBle).detach();
+            std::thread(EnableBr).detach();
         },
         // BT_STATE_OFF -> BT_STATE_RESTRICT
         nullptr,
@@ -59,8 +59,8 @@ const std::function<void(void)> BT_STATE_FSM[BtState::BT_STATE_BUTT][BtState::BT
     {
         // BT_STATE_ON -> BT_STATE_OFF
         []() {
-            DisableBr();
-            DisableBle();
+            std::thread(DisableBr).detach();
+            std::thread(DisableBle).detach();
         },
         // BT_STATE_ON -> BT_STATE_ON
         nullptr,

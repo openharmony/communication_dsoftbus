@@ -94,6 +94,13 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 bool LnnSetDlPtk(const char *networkId, const char *remotePtk);
 bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr);
 int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType);
+bool LnnSetDLUnifiedDeviceName(const char *udid, const char *name);
+bool LnnSetDLUnifiedDefaultDeviceName(const char *udid, const char *name);
+bool LnnSetDLDeviceNickNameByUdid(const char *udid, const char *name);
+bool LnnSetDLDeviceStateVersion(const char *udid, int32_t stateVersion);
+int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid);
+bool LnnSetDLDeviceBroadcastCipherKey(const char *udid, const char *cipherKey);
+bool LnnSetDLDeviceBroadcastCipherIv(const char *udid, const char *cipherIv);
 #ifdef __cplusplus
 }
 #endif

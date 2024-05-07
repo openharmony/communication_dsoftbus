@@ -24,6 +24,7 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
+#include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_huks_utils.h"
@@ -162,6 +163,8 @@ static void LnnRestoreLocalDeviceInfo()
 
 int32_t LnnInitNetLedgerDelay(void)
 {
+    LnnLoadLocalDeviceAccountIdInfo();
+    LnnInitCloudSyncModule();
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
         return SOFTBUS_ERR;
@@ -181,6 +184,7 @@ void LnnDeinitNetLedger(void)
     LnnDeinitLocalLedger();
     LnnDeinitHuksInterface();
     LnnDeinitMetaNodeExtLedger();
+    LnnDeInitCloudSyncModule();    
 }
 
 static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *info, uint32_t infoLen)

@@ -438,7 +438,7 @@ static char *GetFullRecvPath(const char *filePath, const char *recvRootDir)
     }
     int32_t ret;
     if (isNeedAddSep) {
-        ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s%c%s", recvRootDir, PATH_SEPARATOR, filePath);
+        ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s/%s", recvRootDir, filePath);
     } else {
         ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s%s", recvRootDir, filePath);
     }
@@ -2290,6 +2290,7 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
 int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type)
 {
     FileFrame oneFrame;
+    (void)memset_s(&oneFrame, sizeof(FileFrame), 0, sizeof(FileFrame));
     oneFrame.frameType = type;
     oneFrame.frameLength = len;
     oneFrame.data = (uint8_t *)data;

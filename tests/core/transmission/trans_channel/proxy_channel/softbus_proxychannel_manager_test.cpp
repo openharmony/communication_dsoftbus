@@ -759,7 +759,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseProxyChannelTest002, Tes
     TransProxyProcessResetMsg(msg);
 
     ret = TransProxyCloseProxyChannel(channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 
     channelId = TEST_MESSAGE_CHANNEL_ID;
     ret = TransProxyCloseProxyChannel(channelId);

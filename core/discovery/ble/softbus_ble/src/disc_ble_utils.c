@@ -453,7 +453,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
         reportInfo->packet.bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "payload=NULL is invalid");
     uint16_t bcLen = reportInfo->packet.bcData.payloadLen;
     uint16_t rspLen = reportInfo->packet.rspData.payloadLen;
-    if (bcLen > ADV_DATA_MAX_LEN || bcLen < POS_TLV || rspLen > RESP_DATA_MAX_LEN) {
+    if (bcLen > ADV_DATA_MAX_LEN || bcLen < POS_TLV || rspLen > REAL_RESP_DATA_MAX_LEN) {
         DISC_LOGE(DISC_BLE, "get discovery adv data fail");
         return SOFTBUS_INVALID_PARAM;
     }

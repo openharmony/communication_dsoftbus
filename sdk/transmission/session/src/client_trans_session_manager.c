@@ -1310,13 +1310,6 @@ static int32_t ClientTransGetUdpIp(int32_t channelId, char *myIp, int32_t ipLen)
 // determine connection type based on IP
 static bool ClientTransCheckHmlIp(const char *ip)
 {
-    char ipSeg[NETWORK_ID_LEN] = {0};
-    if (strncpy_s(ipSeg, sizeof(ipSeg), ip, sizeof(ipSeg) - 1) == EOK) {
-        TRANS_LOGI(TRANS_SDK, "ipSeg=%{public}s", ipSeg);
-    } else {
-        TRANS_LOGW(TRANS_SDK, "strncpy_s ipSeg failed");
-    }
-
     if (strncmp(ip, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
         return true;
     }
@@ -1771,6 +1764,21 @@ static SessionInfo *GetSocketExistSession(const SessionParam *param, bool isEncy
     return NULL;
 }
 
+static void ClientInitSession(SessionInfo *session, const SessionParam *param)
+{
+    session->sessionId = INVALID_SESSION_ID;
+    session->channelId = INVALID_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_BUTT;
+    session->isServer = false;
+    session->role = SESSION_ROLE_INIT;
+    session->isEnable = false;
+    session->info.flag = param->attr->dataType;
+    session->info.streamType = param->attr->attr.streamAttr.streamType;
+    session->isEncrypt = true;
+    session->isAsync = false;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
+}
+
 static SessionInfo *CreateNewSocketSession(const SessionParam *param)
 {
     SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
@@ -1815,17 +1823,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
         return NULL;
     }
 
-    session->sessionId = INVALID_SESSION_ID;
-    session->channelId = INVALID_CHANNEL_ID;
-    session->channelType = CHANNEL_TYPE_BUTT;
-    session->isServer = false;
-    session->role = SESSION_ROLE_INIT;
-    session->isEnable = false;
-    session->info.flag = param->attr->dataType;
-    session->info.streamType = param->attr->attr.streamAttr.streamType;
-    session->isEncrypt = true;
-    session->isAsync = false;
-    session->lifecycle.sessionState = SESSION_STATE_INIT;
+    ClientInitSession(session, param);
     return session;
 }
 
@@ -2660,8 +2658,8 @@ int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState,
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
 
-    TRANS_LOGI(TRANS_SDK, "socket state change:%{public}d -> %{public}d. socket=%{public}d", sessionNode->lifecycle.sessionState,
-        sessionState, sessionId);
+    TRANS_LOGI(TRANS_SDK, "socket state change:%{public}d -> %{public}d. socket=%{public}d",
+        sessionNode->lifecycle.sessionState, sessionState, sessionId);
     sessionNode->lifecycle.sessionState = sessionState;
     if (sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGW(TRANS_SDK, "set socket to cancelling, socket=%{public}d, errCode=%{public}d", sessionId, optional);
