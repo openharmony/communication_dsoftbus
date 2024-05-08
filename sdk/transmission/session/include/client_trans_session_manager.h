@@ -241,6 +241,7 @@ inline bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
 int32_t ClientWaitSyncBind(int32_t socket);
 int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode);
 void AddSessionStateClosing(void);
+int32_t SetSessionInitInfoById(int32_t sessionId);
 #ifdef __cplusplus
 }
 #endif

@@ -296,11 +296,6 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     TransUpdateSocketChannelInfoBySession(
         param->sessionName, param->sessionId, transInfo->channelId, transInfo->channelType);
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
-    if (state == CORE_SESSION_STATE_CANCELLING) {
-        TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
-        goto EXIT_CANCEL;
-    }
     TransSetSocketChannelStateByChannel(
         transInfo->channelId, transInfo->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     if (((ChannelType)transInfo->channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {

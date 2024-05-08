@@ -52,7 +52,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->crc = channel->crc;
     session->dataConfig = channel->dataConfig;
     session->isAsync = false;
-    session->lifecycle.sessionState = SESSION_STATE_OPENED;
+    session->lifecycle.sessionState = SESSION_STATE_CALLBACK_FINISHED;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
@@ -164,7 +164,7 @@ static int32_t HandleAsyncBindSuccess(
     }
     if (lifecycle->sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGW(TRANS_SDK, "session is cancelling, no need call back");
-        return lifecycle->bindErrCode;
+        return SOFTBUS_OK;
     }
     ret = SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED, 0);
     if (ret != SOFTBUS_OK) {
@@ -191,7 +191,7 @@ static int32_t HandleSyncBindSuccess(int32_t sessionId, const SocketLifecycleDat
     if (lifecycle->sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGW(
             TRANS_SDK, "socket=%{public}d is cancelling, bindErrCode=%{public}d", sessionId, lifecycle->bindErrCode);
-        return lifecycle->bindErrCode;
+        return SOFTBUS_OK;
     }
 
     int32_t ret = ClientSignalSyncBind(sessionId, 0);

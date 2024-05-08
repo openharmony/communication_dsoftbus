@@ -492,7 +492,6 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
     TransInfo transInfo = { .channelId = INVALID_CHANNEL_ID, .channelType = CHANNEL_TYPE_BUTT};
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    CoreSessionState state = CORE_SESSION_STATE_INIT;
     int32_t ret = TransGetConnectOptByConnInfo(connInnerInfo, &connOpt);
     if (ret != SOFTBUS_OK) {
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, timeStart);
@@ -518,12 +517,6 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
         goto EXIT_ERR;
     }
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
-    if (state == CORE_SESSION_STATE_CANCELLING) {
-        TRANS_LOGI(TRANS_SVC, "Cancel state laneHandle=%{public}u, close channel.", laneHandle);
-        TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
-        goto EXIT_CANCEL;
-    }
     TransSetSocketChannelStateByChannel(transInfo.channelId, transInfo.channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     if (((ChannelType)transInfo.channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
         TransFreeLane(laneHandle, param->isQosLane);
@@ -544,13 +537,6 @@ EXIT_ERR:
     TransFreeLane(laneHandle, param->isQosLane);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
-    return;
-EXIT_CANCEL:
-    TransBuildTransOpenChannelCancelEvent(extra, &transInfo, timeStart, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, *extra);
-    TransFreeLane(laneHandle, param->isQosLane);
-    (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
-    TRANS_LOGE(TRANS_SVC, "server open channel cancel");
     return;
 }
 
@@ -1216,7 +1202,7 @@ int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, u
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_OK;
-    if (!(param->isAsync)) {
+    if (!(param->isQosLane)) {
         LaneRequestOption requestOption;
         (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
         ret = GetRequestOptionBySessionParam(param, &requestOption);

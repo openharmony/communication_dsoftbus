@@ -466,19 +466,7 @@ static int32_t CheckSessionIsOpened(int32_t sessionId)
 #define SESSION_CHECK_PERIOD 200000
     int32_t i = 0;
     bool isEnable = false;
-    SocketLifecycleData lifecycle;
-    (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
-    int32_t ret = SOFTBUS_OK;
     while (i < SESSION_STATUS_CHECK_MAX_NUM) {
-        ret = GetSocketLifecycleAndSessionNameBySessionId(sessionId, NULL, &lifecycle);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "Get socket state failed, ret=%{public}d", ret);
-            return ret;
-        }
-        if (lifecycle.sessionState == SESSION_STATE_CANCELLING) {
-            TRANS_LOGI(TRANS_SDK, "session is cancelling");
-            return lifecycle.bindErrCode;
-        }
         if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &isEnable) != SOFTBUS_OK) {
             return SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED;
         }
@@ -1088,7 +1076,7 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
         SetSessionStateBySessionId(socket, SESSION_STATE_OPENED, 0);
         ret = ClientWaitSyncBind(socket);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
-            ret == SOFTBUS_OK, ret, TRANS_SDK, "CheckSessionIsOpened err, ret=%{public}d", ret);
+            ret == SOFTBUS_OK, ret, TRANS_SDK, "ClientWaitSyncBind err, ret=%{public}d", ret);
     }
     ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
@@ -1161,7 +1149,11 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         }
     } else if (lifecycle.sessionState == SESSION_STATE_OPENED ||
         lifecycle.sessionState == SESSION_STATE_CALLBACK_FINISHED) {
-        TRANS_LOGI(TRANS_SDK, "This socket state is opened, socket=%{public}d", socket);
+        if (lifecycle.sessionState == SESSION_STATE_OPENED) {
+            TRANS_LOGI(TRANS_SDK, "This socket state is opened, socket=%{public}d", socket);
+            CheckSessionIsOpened(socket);
+        }
+        TRANS_LOGI(TRANS_SDK, "This socket state is callback finish, socket=%{public}d", socket);
         int32_t channelId = INVALID_CHANNEL_ID;
         int32_t type = CHANNEL_TYPE_BUTT;
         ret = ClientGetChannelBySessionId(socket, &channelId, &type, NULL);
@@ -1178,6 +1170,7 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         if (lifecycle.sessionState == SESSION_STATE_OPENED) {
             (void)ClientSignalSyncBind(socket, cancelReason);
         }
+        SetSessionInitInfoById(socket);
     }
     if (cancelReason == SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT) {
         TRANS_LOGI(TRANS_SDK, "Bind timeout Shutdown ok, no delete socket: socket=%{public}d", socket);
@@ -1252,7 +1245,7 @@ int32_t ClientDfsBind(int32_t socket, const ISocketListener *listener)
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_SDK, "set session state failed socket=%{public}d, ret=%{public}d", socket, ret);
     ret = ClientWaitSyncBind(socket);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "CheckSessionIsOpened err, ret=%{public}d", ret);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "ClientWaitSyncBind err, ret=%{public}d", ret);
 
     ret = ClientSetSocketState(socket, 0, SESSION_ROLE_CLIENT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
