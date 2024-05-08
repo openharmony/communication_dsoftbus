@@ -201,6 +201,7 @@ NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionIn
     destroyNode->channelType = sessionNode->channelType;
     if (memcpy_s(destroyNode->sessionName, SESSION_NAME_SIZE_MAX, server->sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy_s sessionName fail.");
+        SoftBusFree(destroyNode);
         return NULL;
     }
     destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
