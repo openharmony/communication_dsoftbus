@@ -24,6 +24,7 @@ disc_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                             "value")
 
 ble_discovery_inc = [
+  "$dsoftbus_root_path/core/broadcast/common/include",
   "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
   "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/share_ble/include",
