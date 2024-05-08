@@ -393,7 +393,7 @@ static int32_t RegisterScanCallback(int32_t *scannerId, const SoftbusScanCallbac
             continue;
         }
         int ret = BleRegisterScanCallbacks(GetAdapterScanCallback(channelId), &g_scanChannel[channelId].scannerId);
-        if ( ret != OHOS_BT_STATUS_SUCCESS) {
+        if (ret != OHOS_BT_STATUS_SUCCESS) {
             DISC_LOGE(DISC_BLE_ADAPTER, "register callback failed, scannerId=%{public}u", channelId);
             SoftBusMutexUnlock(&g_scannerLock);
             return ret;
