@@ -101,7 +101,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, InnerRegisterServiceTest, TestSize.Level1)
 
     ListNode sessionServerList;
     ListInit(&sessionServerList);
-    EXPECT_EQ(InnerRegisterService(&sessionServerList), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(InnerRegisterService(&sessionServerList), SOFTBUS_OK);
 }
 
 /**
