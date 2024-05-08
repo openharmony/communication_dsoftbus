@@ -46,10 +46,13 @@ if (defined(ohos_lite)) {
   ]
   softbus_permission_deps = []
   softbus_permission_external_deps += [
-    "ability_runtime:app_manager",
     "cJSON:cjson",
     "c_utils:utils",
   ]
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.ability_ability_runtime)) {
+    softbus_permission_external_deps += [ "ability_runtime:app_manager" ]
+  }
   if (!defined(global_parts_info) ||
       defined(global_parts_info.deviceprofile_device_info_manager)) {
     softbus_permission_external_deps += [
