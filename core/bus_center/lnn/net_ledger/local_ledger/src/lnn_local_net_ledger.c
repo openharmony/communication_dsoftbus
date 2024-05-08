@@ -325,7 +325,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
     }
 
     int64_t accountId = 0;
-    if (LnnGetAccountIdfromLocalCache(&accountId) != SOFTBUS_OK) {
+    if (LnnGetAccountIdFromLocalCache(&accountId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get accountid info from cache fail");
     }
     if (accountId == *((int64_t *)buf) && *((int64_t *)buf) != 0) {
