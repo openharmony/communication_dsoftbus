@@ -259,12 +259,8 @@ static int32_t DBDeviceBasicInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceUdid fail");
             return SOFTBUS_MEM_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_TYPE) == 0 && valueLength < DEVICE_TYPE_BUF_LEN) {
-        uint16_t typeId = 0;
-        if (LnnConvertDeviceTypeToId(value, &typeId) != SOFTBUS_OK) {
-            cacheInfo->deviceInfo.deviceTypeId = 0;
-        }
-        cacheInfo->deviceInfo.deviceTypeId = typeId;
+    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_TYPE) == 0) {
+        cacheInfo->deviceInfo.deviceTypeId = atoi(value);
     } else if (strcmp(fieldName, DEVICE_INFO_OS_TYPE) == 0) {
         cacheInfo->deviceInfo.osType = atoi(value);
     } else if (strcmp(fieldName, DEVICE_INFO_OS_VERSION) == 0 && valueLength < OS_VERSION_BUF_LEN) {
