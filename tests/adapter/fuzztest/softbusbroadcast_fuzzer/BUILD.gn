@@ -1,0 +1,101 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/test.gni")
+import("../../../../core/discovery/ble/disc_ble.gni")
+import("../../../../dsoftbus.gni")
+
+##############################fuzztest##########################################
+
+dsoftbus_root_path = "../../../.."
+
+ohos_fuzztest("SoftBusBroadcastFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/adapter/fuzztest/softbusbroadcast_fuzzer"
+
+  sources = [
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_gatt.c",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_utils.c",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/manager/src/softbus_broadcast_mgr.c",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c",
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_data_cloud_sync.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/src/lnn_local_net_ledger.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
+    "softbusbroadcast_fuzzer.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
+
+  include_dirs += ble_discovery_inc
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "os_account:os_account_innerkits",
+  ]
+
+  if (support_bluetooth &&
+      (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
+    external_deps += [ "bluetooth:btframework" ]
+  }
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
+  ]
+}
+
+###############################################################################
+group("fuzztest") {
+  testonly = true
+  deps = [ ":SoftBusBroadcastFuzzTest" ]
+}
+###############################################################################
