@@ -192,58 +192,6 @@ static int32_t ConvertNodeInfoToCloudSyncInfo(CloudSyncInfo *cloudSyncInfo, cons
     return SOFTBUS_OK;
 }
 
-static int32_t DBDataChangeSyncToCacheInternal(NodeInfo *cacheInfo, char *fieldName, const char *value,
-    size_t valueLength, const char *udid)
-{
-    LNN_LOGI(LNN_BUILDER, "DBDataChangeSyncToCacheInternal enter.");
-    if (cacheInfo == NULL || fieldName == NULL || value == NULL || udid == NULL || strlen(udid) > UDID_BUF_LEN - 1) {
-        LNN_LOGE(LNN_BUILDER, "fail:invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_KEY) == 0 && valueLength < SESSION_KEY_LENGTH) {
-        if (memcpy_s(cacheInfo->cipherInfo.key, SESSION_KEY_LENGTH, value, SESSION_KEY_LENGTH) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s cipherkey fail");
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_IV) == 0 && valueLength < BROADCAST_IV_LEN) {
-        if (memcpy_s(cacheInfo->cipherInfo.iv, BROADCAST_IV_LEN, value, BROADCAST_IV_LEN) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s cipheriv fail");
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (strcmp(fieldName, DEVICE_INFO_NETWORK_ID) == 0 && valueLength < NETWORK_ID_BUF_LEN) {
-        if (strcpy_s(cacheInfo->networkId, NETWORK_ID_BUF_LEN, value) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s networkid fail");
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (strcmp(fieldName, DEVICE_INFO_STATE_VERSION) == 0) {
-        cacheInfo->stateVersion = atoi(value);
-    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
-        if (strcpy_s(cacheInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, value) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s devicename fail");
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
-        if (strcpy_s(cacheInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, value) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s unifiedname fail");
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEFAULT_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
-        if (strcpy_s(cacheInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, value) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s unifieddefaultname fail");
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (strcmp(fieldName, DEVICE_INFO_SETTINGS_NICK_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
-        if (strcpy_s(cacheInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, value) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s nickname fail");
-            return SOFTBUS_MEM_ERR;
-        }
-    } else {
-        LNN_LOGE(LNN_BUILDER, "fail:invalid fieldname or valuelength over range");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t DBCipherInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const char *value, size_t valueLength)
 {
     LNN_LOGI(LNN_BUILDER, "DBCipherInfoSyncToCache enter.");
@@ -690,7 +638,7 @@ static void UpdateInfoToCacheAndLedger(NodeInfo *cacheInfo, char *deviceUdid, ch
         LNN_LOGE(LNN_BUILDER, "fail:invalid param");
         return;
     }
-    if (DBDataChangeSyncToCacheInternal(cacheInfo, fieldName, value, strlen(value), deviceUdid) != SOFTBUS_OK) {
+    if (DBDataChangeBatchSyncToCacheInternal(cacheInfo, fieldName, value, strlen(value), deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:DB data change sync to cache fail");
         return;
     }
@@ -740,11 +688,19 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
     }
     NodeInfo *cacheInfo = (NodeInfo *)LnnMapGet(&deviceCacheInfoMap, deviceUdid);
     if (cacheInfo == NULL) {
-        LNN_LOGI(LNN_BUILDER, "no this device info in deviceCacheInfoMap");
-        return SOFTBUS_ERR;
+        LNN_LOGI(LNN_BUILDER, "no this device info in deviceCacheInfoMap, need to insert");
+        NodeInfo newInfo = {0};
+        if (strcpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, deviceUdid) != EOK) {
+            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceudid fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        UpdateInfoToCacheAndLedger(&newInfo, deviceUdid, fieldName, trueValue);
+        if (LnnSaveRemoteDeviceInfo(&newInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "fail:Lnn save remote device info fail");
+            return SOFTBUS_ERR;
+        }
     }
-    if (cacheInfo->stateVersion >= stateVersion && stateVersion != 1) {
-        LNN_LOGI(LNN_BUILDER, "cache is up-to-date, no need to update");
+    if (cacheInfo->stateVersion > stateVersion && stateVersion != 1) {
         return SOFTBUS_OK;
     }
     cacheInfo->stateVersion = stateVersion;
