@@ -140,19 +140,19 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataAddChangeSyncToCache_Test_004, TestSize.
 }
 
 /*
- * @tc.name: LnnGetAccountIdfromLocalCache_Test_005
- * @tc.desc: LnnGetAccountIdfromLocalCache
+ * @tc.name: LnnGetAccountIdFromLocalCache_Test_005
+ * @tc.desc: LnnGetAccountIdFromLocalCache
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNDataCloudSyncTest, LnnGetAccountIdfromLocalCache_Test_005, TestSize.Level1)
+HWTEST_F(LNNDataCloudSyncTest, LnnGetAccountIdFromLocalCache_Test_005, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
     int64_t *buf = nullptr;
-    int32_t ret = LnnGetAccountIdfromLocalCache(buf);
+    int32_t ret = LnnGetAccountIdFromLocalCache(buf);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     int64_t buffer = 0;
-    ret = LnnGetAccountIdfromLocalCache(&buffer);
+    ret = LnnGetAccountIdFromLocalCache(&buffer);
     EXPECT_EQ(ret, SOFTBUS_OK);
     LnnDeInitCloudSyncModule();
 }

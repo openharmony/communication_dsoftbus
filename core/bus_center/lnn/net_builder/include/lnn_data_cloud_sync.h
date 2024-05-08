@@ -74,7 +74,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
 int32_t LnnDeleteSyncToDB(void);
 int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeType changeType);
 int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize);
-int32_t LnnGetAccountIdfromLocalCache(int64_t *buf);
+int32_t LnnGetAccountIdFromLocalCache(int64_t *buf);
 #ifdef __cplusplus
 }
 #endif
