@@ -64,8 +64,6 @@
 >**须知：** 
 >使用跨设备通信时，必须添加权限`ohos.permission.DISTRIBUTED_DATASYNC`和`ohos.permission.DISTRIBUTED_SOFTBUS_CENTER`，该权限类型为 _**dangerous**_ 。
 
->设备主动发现手机时，手机需打开超级终端的允许被“附近设备”发现开关（设置-超级终端-我的设备-允许被发现-附近设备），才能被设备发现。
-
 **1、发现**
 
 -   **发布流程**
@@ -81,10 +79,10 @@
 
     // 发布信息
     typedef struct {
-        int publishId;                  // 发现消息Id
-        DiscoverMode mode;              // 发现模式
-        ExchangeMedium medium;          // 发现媒介
-        ExchangeFreq freq;              // 发现频率
+        int publishId;                  // 发布消息Id
+        DiscoverMode mode;              // 发布模式
+        ExchangeMedium medium;          // 发布媒介
+        ExchangeFreq freq;              // 发布频率
         const char *capability;         // 被发现设备需要具备的能力
         unsigned char *capabilityData;  // 业务发布的自定义数据
         unsigned int dataLen;           // 数据长度
