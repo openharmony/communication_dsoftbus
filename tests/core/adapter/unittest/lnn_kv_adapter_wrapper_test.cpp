@@ -16,8 +16,10 @@
 #include "gtest/gtest.h"
 #include "lnn_kv_adapter_wrapper.h"
 #include "softbus_errcode.h"
+#include "softbus_adapter_mem.h"
 #include <cstdint>
 #include <string>
+#include <cstring>
 
 using namespace std;
 using namespace testing::ext;
@@ -156,6 +158,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
     char *value = nullptr;
     EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), 3, valueStr.c_str(), 3), SOFTBUS_OK);
     EXPECT_EQ(LnnGetDBData(dbId, keyStr.c_str(), 3, &value), SOFTBUS_OK);
+    SoftBusFree(value);
+    value = nullptr;
     dbId++;
     EXPECT_EQ(LnnGetDBData(dbId, keyStr.c_str(), MAX_STRING_LEN, &value), SOFTBUS_INVALID_PARAM);
     dbId = 0;
@@ -211,6 +215,13 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutBatch001, TestSize.Level1)
         .distributedSwitch = true
     };
     EXPECT_EQ(LnnPutDBDataBatch(dbId, &info), SOFTBUS_OK);
+    char *value = nullptr;
+    string SEPARATOR = "#";
+    string networkIdKey = to_string(info.accountId) + SEPARATOR + info.deviceUdid + SEPARATOR + "NETWORK_ID";
+    string expectNetworkIdValue = info.networkId + SEPARATOR + to_string(info.stateVersion);
+    LnnGetDBData(dbId, networkIdKey.c_str(), networkIdKey.length(), &value);
+    EXPECT_EQ(strcmp(value, expectNetworkIdValue.c_str()), 0);
+    SoftBusFree(value);
 }
 
 /**
