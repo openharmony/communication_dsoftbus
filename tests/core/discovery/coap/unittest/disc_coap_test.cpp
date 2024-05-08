@@ -161,7 +161,7 @@ HWTEST_F(DiscCoapTest, TestCoapPublish003, TestSize.Level1)
  * @tc.name: TestCoapPublish004
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
  *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
- *           should return SOFTBUS_ERR when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
+ *           should not return SOFTBUS_OK when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -252,7 +252,7 @@ HWTEST_F(DiscCoapTest, TestCoapStartScan002, TestSize.Level1)
  * @tc.name: TestCoapStartScan003
  * @tc.desc: Test DiscCoapStartScan and DiscCoapStopScan when should return
  *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
- *           should return SOFTBUS_ERR when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
+ *           should not return SOFTBUS_OK when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
  * @tc.type: FUNC
  * @tc.require:
  */

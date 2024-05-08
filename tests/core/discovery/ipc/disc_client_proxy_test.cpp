@@ -56,7 +56,7 @@ HWTEST_F(DiscClientProxyTest, OnDeviceFound001, TestSize.Level1)
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
-        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         ClientInfoManagerMock managerMock;
         managerMock.SetupStub();
         ExceptionBranchChecker checker("send request failed");
@@ -90,7 +90,7 @@ HWTEST_F(DiscClientProxyTest, OnDiscoverFailed001, TestSize.Level1)
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
-        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         ClientInfoManagerMock managerMock;
         managerMock.SetupStub();
         ExceptionBranchChecker checker("send request failed");
@@ -127,7 +127,7 @@ HWTEST_F(DiscClientProxyTest, DiscoverySuccess001, TestSize.Level1)
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
-        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         ClientInfoManagerMock managerMock;
         managerMock.SetupStub();
         ExceptionBranchChecker checker("send request failed");
@@ -161,7 +161,7 @@ HWTEST_F(DiscClientProxyTest, OnPublishSuccess001, TestSize.Level1)
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
-        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         ClientInfoManagerMock managerMock;
         managerMock.SetupStub();
         ExceptionBranchChecker checker("send request failed");
@@ -195,7 +195,7 @@ HWTEST_F(DiscClientProxyTest, OnPublishFail001, TestSize.Level1)
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
-        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(*objectMock, SendRequest).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         ClientInfoManagerMock managerMock;
         managerMock.SetupStub();
         ExceptionBranchChecker checker("send request failed");

@@ -411,7 +411,8 @@ static int32_t SetLocalDeviceInfo(void)
     (void)memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo));
 
     char *deviceIdStr = GetDeviceId();
-    DISC_CHECK_AND_RETURN_RET_LOGE(deviceIdStr != NULL, SOFTBUS_ERR, DISC_COAP, "get device id string failed.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(deviceIdStr != NULL, SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL, DISC_COAP,
+        "get device id string failed.");
 
     if (strcpy_s(g_localDeviceInfo->deviceId, sizeof(g_localDeviceInfo->deviceId), deviceIdStr) != EOK) {
         cJSON_free(deviceIdStr);

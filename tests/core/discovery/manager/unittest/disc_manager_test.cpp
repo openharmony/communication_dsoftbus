@@ -114,7 +114,7 @@ static int32_t DiscCoapStartDiscovery(uint32_t filterCapBitmap, uint32_t discMod
 {
     if (g_coapDiscFunc == NULL) {
         printf("g_coapDiscFunc is NULL.\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     g_subscribeOption.capabilityBitmap[0] = filterCapBitmap;
@@ -122,18 +122,18 @@ static int32_t DiscCoapStartDiscovery(uint32_t filterCapBitmap, uint32_t discMod
         case 0:
             if (g_coapDiscFunc->Subscribe(&g_subscribeOption) != 0) {
                 printf("passivce start discvoery failed.\n");
-                return SOFTBUS_ERR;
+                return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
             }
             break;
         case 1:
             if (g_coapDiscFunc->StartAdvertise(&g_subscribeOption) != 0) {
                 printf("active start discvoery failed.\n");
-                return SOFTBUS_ERR;
+                return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
             }
             break;
         default:
             printf("unsupport mode.\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     return SOFTBUS_OK;
 }
@@ -141,23 +141,23 @@ static int32_t DiscCoapStartDiscovery(uint32_t filterCapBitmap, uint32_t discMod
 static int32_t DiscCoapStopDiscovery(uint32_t filterCapBitmap, uint32_t discMode)
 {
     if (g_coapDiscFunc == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     g_subscribeOption.capabilityBitmap[0] = filterCapBitmap;
     switch (discMode) {
         case 0:
             if (g_coapDiscFunc->Unsubscribe(&g_subscribeOption) != 0) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
             }
             break;
         case 1:
             if (g_coapDiscFunc->StopAdvertise(&g_subscribeOption) != 0) {
-                return SOFTBUS_ERR;
+                return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
             }
             break;
         default:
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     return SOFTBUS_OK;
 }
@@ -166,7 +166,7 @@ static int32_t DiscCoapUnpulbishService(uint32_t pubCapBitmap, uint32_t publishM
 {
     if (g_coapDiscFunc == NULL) {
         printf("g_coapDiscFunc is NULL.\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     g_publishOption.capabilityBitmap[0] = pubCapBitmap;
@@ -174,18 +174,18 @@ static int32_t DiscCoapUnpulbishService(uint32_t pubCapBitmap, uint32_t publishM
         case 0:
             if (g_coapDiscFunc->StopScan(&g_publishOption) != 0) {
                 printf("passive unpublish failed.\n");
-                return SOFTBUS_ERR;
+                return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
             }
             break;
         case 1:
             if (g_coapDiscFunc->Unpublish(&g_publishOption) != 0) {
                 printf("active unpublish failed.\n");
-                return SOFTBUS_ERR;
+                return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
             }
             break;
         default:
             printf("unsupport mode.\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     return SOFTBUS_OK;
 }
