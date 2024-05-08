@@ -102,7 +102,7 @@ typedef struct {
 } LaneResource;
 
 typedef struct {
-    void (*OnLaneLinkSuccess)(uint32_t reqId, const LaneLinkInfo *linkInfo);
+    void (*OnLaneLinkSuccess)(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo);
     void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
 } LaneLinkCb;
 

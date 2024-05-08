@@ -424,7 +424,7 @@ static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const La
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     linkInfo.type = LANE_BR;
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -640,7 +640,7 @@ static int32_t LaneLinkOfBleReuseCommon(uint32_t reqId, const LinkRequest *reqIn
         linkInfo.type = LANE_BLE;
     }
     ConnBleReturnConnection(&connection);
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -698,7 +698,7 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
     linkInfo.linkInfo.ble.protoType = BLE_GATT;
     linkInfo.linkInfo.ble.psm = 0;
     linkInfo.type = LANE_BLE;
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -717,7 +717,7 @@ static int32_t LaneLinkOfGattDirect(uint32_t reqId, const LinkRequest *reqInfo, 
     }
     linkInfo.type = LANE_BLE_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_GATT;
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -763,7 +763,7 @@ static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     if (memcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, ipAddr, MAX_SOCKET_ADDR_LEN) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -967,7 +967,7 @@ static int32_t LaneLinkOfCoc(uint32_t reqId, const LinkRequest *reqInfo, const L
     }
     linkInfo.linkInfo.ble.protoType = BLE_COC;
     linkInfo.type = LANE_COC;
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -987,7 +987,7 @@ static int32_t LaneLinkOfCocDirect(uint32_t reqId, const LinkRequest *reqInfo, c
     linkInfo.type = LANE_COC_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_COC;
 
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
