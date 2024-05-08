@@ -59,15 +59,19 @@ static void PrintSocketInfo(const SocketInfo *info)
 {
     char *tmpMyName = NULL;
     char *tmpPeerName = NULL;
+    char *tmpPeerNetworkId = NULL;
     char *tmpPkgName = NULL;
     Anonymize(info->name, &tmpMyName);
     Anonymize(info->peerName, &tmpPeerName);
+    Anonymize(info->peerNetworkId, &tmpPeerNetworkId);
     Anonymize(info->pkgName, &tmpPkgName);
     TRANS_LOGI(TRANS_SDK,
-        "Socket: mySessionName=%{public}s, peerSessionName=%{public}s, pkgName=%{public}s, dataType=%{public}d",
-        tmpMyName, tmpPeerName, tmpPkgName, info->dataType);
+        "Socket: mySessionName=%{public}s, peerSessionName=%{public}s, peerNetworkId=%{public}s, "
+        "pkgName=%{public}s, dataType=%{public}d",
+        tmpMyName, tmpPeerName, tmpPeerNetworkId, tmpPkgName, info->dataType);
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
+    AnonymizeFree(tmpPeerNetworkId);
     AnonymizeFree(tmpPkgName);
 }
 

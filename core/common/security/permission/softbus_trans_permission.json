@@ -393,7 +393,8 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.harmonyos.security.devicesec",
+    "SESSION_NAME": "com.*security.devicesec",
+    "REGEXP": "true",
     "DEVID": "UDID",
     "SEC_LEVEL": "public",
     "APP_INFO": [
