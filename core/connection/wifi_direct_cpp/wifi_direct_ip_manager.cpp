@@ -32,7 +32,6 @@ static constexpr int32_t GROUP_LENGTH = 4;
 static constexpr int32_t EIGHT = 8;
 static constexpr int32_t TWO_DIVISION = 2;
 static constexpr int32_t IPV6_PREFIX = 64;
-
 static constexpr char HML_IP_PREFIX[] = "172.30.";
 static constexpr char HML_IP_SOURCE_SUFFIX[] = ".2";
 static constexpr char HML_IP_SINK_SUFFIX[] = ".1";
@@ -136,11 +135,9 @@ int32_t WifiDirectIpManager::ConfigIpv4(
 
     int32_t ret = AddInterfaceAddress(interface, localIpStr, local.GetPrefixLength());
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "add ip failed");
-    ips_.insert(localIpStr);
 
     ret = AddStaticArp(interface, remoteIpStr, remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "add static arp failed");
-    arps_[remoteIpStr] = remoteMac;
     return SOFTBUS_OK;
 }
 
@@ -159,13 +156,11 @@ void WifiDirectIpManager::ReleaseIpv4(
     if (DeleteInterfaceAddress(interface, localIpStr, local.GetPrefixLength()) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "delete ip failed. ip=%{public}s", WifiDirectAnonymizeIp(localIpStr).c_str());
     }
-    ips_.erase(localIpStr);
 
     if (DeleteStaticArp(interface, remoteIpStr, remoteMac) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. remoteIp=%{public}s, remoteMac=%{public}s",
             WifiDirectAnonymizeIp(remoteIpStr).c_str(), WifiDirectAnonymizeMac(remoteMac).c_str());
     }
-    arps_.erase(remoteIpStr);
 }
 
 int32_t WifiDirectIpManager::AddInterfaceAddress(
@@ -237,27 +232,5 @@ int32_t WifiDirectIpManager::GetNetworkDestination(const std::string &ipString, 
     destination = ipString.substr(0, pos) + ".0/24";
     CONN_LOGI(CONN_WIFI_DIRECT, "destination=%{public}s", WifiDirectAnonymizeIp(destination).c_str());
     return SOFTBUS_OK;
-}
-
-void WifiDirectIpManager::ClearAllIpv4(const std::string &interface)
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s", interface.c_str());
-    for (const std::string &ipString : ips_) {
-        Ipv4Info localIp(ipString);
-        if (DeleteInterfaceAddress(interface, ipString, localIp.GetPrefixLength()) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "delete ip failed. ip=%{public}s", WifiDirectAnonymizeIp(ipString).c_str());
-        }
-        ips_.erase(ipString);
-    }
-
-    for (const auto &remote : arps_) {
-        const auto &remoteIp = remote.first;
-        const auto &remoteMac = remote.second;
-        if (DeleteStaticArp(interface, remoteIp, remoteMac) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. remoteIp=%{public}s, remoteMac=%{public}s",
-                WifiDirectAnonymizeIp(remoteIp).c_str(), WifiDirectAnonymizeIp(remoteMac).c_str());
-        }
-        arps_.erase(remoteIp);
-    }
 }
 } // namespace OHOS::SoftBus
