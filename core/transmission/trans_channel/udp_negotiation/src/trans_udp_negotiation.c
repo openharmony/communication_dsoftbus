@@ -594,6 +594,9 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
             extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
             extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
         }
+        if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo.masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+            extra.localUdid = nodeInfo.masterUdid;
+        }
         extra.socketName = info.myData.sessionName;
         extra.peerChannelId = info.peerData.channelId;
         extra.result = EVENT_STAGE_RESULT_OK;

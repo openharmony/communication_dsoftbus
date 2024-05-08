@@ -78,6 +78,7 @@ typedef struct {
     const char *peerNetworkId; // PEER_NET_ID
     const char *peerUdid;      // PEER_UDID
     const char *peerDevVer;    // PEER_DEV_VER
+    const char *localUdid;     // LOCAL_UDID
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG
     const char *firstTokenName; // FIRST_TOKEN_NAME
