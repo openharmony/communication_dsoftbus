@@ -257,6 +257,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
     TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     TransSetFirstTokenInfo(appInfo, &extra);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
@@ -392,16 +393,10 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
         return channelId;
     }
     char callerPkg[PKG_NAME_SIZE_MAX] = {0};
-    (void)TransGetPkgNameBySessionName(sessionName, callerPkg, PKG_NAME_SIZE_MAX);
-    TransEventExtra extra = {
-        .calleePkg = NULL,
-        .callerPkg = callerPkg,
-        .socketName = sessionName,
-        .peerNetworkId = NULL,
-        .channelType = CHANNEL_TYPE_AUTH,
-        .linkType = connOpt->type,
-        .result = EVENT_STAGE_RESULT_OK
-    };
+    char localUdid[UDID_BUF_LEN] = {0};
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    TransBuildOpenAuthChannelStartEvent(&extra, sessionName, connOpt, localUdid, callerPkg);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     if (connOpt->type == CONNECT_TCP) {
         if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId, reqId) != SOFTBUS_OK) {

@@ -832,6 +832,9 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
         extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
     }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo.masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra.localUdid = nodeInfo.masterUdid;
+    }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
         char *tmpName = NULL;
