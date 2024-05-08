@@ -1108,21 +1108,6 @@ int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, u
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
-static int32_t ClientCheckSocketState(const ClientSessionServer *serverNode, const SessionInfo *sessionNode)
-{
-    if (!serverNode->listener.isSocketListener) {
-        return SOFTBUS_OK;
-    }
-
-    if (sessionNode->lifecycle.sessionState != SESSION_STATE_CANCELLING) {
-        return SOFTBUS_OK;
-    }
-
-    TRANS_LOGW(TRANS_SDK, "socket=%{public}d is cancelling, bindErrCode=%{public}d", sessionNode->sessionId,
-        sessionNode->lifecycle.bindErrCode);
-    return sessionNode->lifecycle.bindErrCode;
-}
-
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId)
 {
     if ((channel == NULL) || (sessionId == NULL)) {
@@ -1151,12 +1136,6 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
             if ((sessionNode->channelId == channel->channelId) &&
                 (sessionNode->channelType == (ChannelType)(channel->channelType))) {
-                int32_t ret = ClientCheckSocketState(serverNode, sessionNode);
-                if (ret != SOFTBUS_OK) {
-                    TRANS_LOGE(TRANS_SDK, "check fail socket=%{public}d , ret=%{public}d", sessionNode->sessionId, ret);
-                    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
-                    return ret;
-                }
                 sessionNode->peerPid = channel->peerPid;
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;
@@ -2330,7 +2309,7 @@ static void ClientCheckWaitTimeOut(SessionInfo *sessionNode, int32_t waitOutSock
     sessionNode->lifecycle.waitTime += TIMER_TIMEOUT;
     if (sessionNode->lifecycle.maxWaitTime == 0 ||
         sessionNode->lifecycle.waitTime <= sessionNode->lifecycle.maxWaitTime) {
-        TRANS_LOGI(TRANS_SDK, "no wait timeout, socket=%{public}d", sessionNode->sessionId);
+        TRANS_LOGD(TRANS_SDK, "no wait timeout, socket=%{public}d", sessionNode->sessionId);
         return;
     }
 
@@ -2599,6 +2578,43 @@ int32_t SetSessionIsAsyncById(int32_t sessionId, bool isAsync)
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
+int32_t SetSessionInitInfoById(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId");
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "entry list not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                sessionNode->isEnable = false;
+                sessionNode->channelId = INVALID_CHANNEL_ID;
+                sessionNode->channelType = CHANNEL_TYPE_BUTT;
+                (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+}
+
 int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
 {
     if (sessionName == NULL || sessionId <= 0) {
@@ -2801,7 +2817,7 @@ int32_t ClientWaitSyncBind(int32_t socket)
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     TRANS_LOGI(TRANS_SDK, "socket=%{public}d is enable", socket);
-    return SOFTBUS_OK;
+    return sessionNode->lifecycle.bindErrCode;
 }
 
 int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode)
