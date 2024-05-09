@@ -32,12 +32,13 @@ int32_t BusCenterServerProxyInit(void);
 void BusCenterServerProxyDeInit(void);
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum);
 int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
-int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len);
+int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+    uint32_t len);
 int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
 int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName);
 int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName);
 int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel);
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen);
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen);
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
