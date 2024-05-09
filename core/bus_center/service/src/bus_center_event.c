@@ -54,6 +54,8 @@ typedef enum {
 } NotifyType;
 
 #define NETWORK_ID_UPDATE_DELAY_TIME (60 * 60 * 1000 * 24) // 24 hour
+#define NETWORK_ID_MAX_TTL (7 * 60 * 60 * 1000 * 24) // 7 * 24 hour
+#define NETWORK_ID_MIN_UPDATE_DELAY_TIME (5 * 60 * 1000) // 5min
 
 static BusCenterEventCtrl g_eventCtrl;
 static SoftBusHandler g_notifyHandler = {"NotifyHandler", NULL, NULL};
@@ -274,6 +276,29 @@ void LnnNotifyDeviceVerified(const char *udid)
     RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
 }
 
+static uint64_t GetNetworkIdUpdateTime()
+{
+    int64_t networkIdTimestamp = 0;
+    int64_t nowTime = 0;
+    uint64_t delayTime = 0;
+    nowTime = SoftBusGetSysTimeMs();
+    if (LnnGetLocalNum64Info(NUM_KEY_NETWORK_ID_TIMESTAMP, &networkIdTimestamp) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "get local networkIdTimestamp fail");
+        return NETWORK_ID_UPDATE_DELAY_TIME;
+    }
+    int64_t diff = networkIdTimestamp + NETWORK_ID_MAX_TTL - nowTime;
+    if (diff <= NETWORK_ID_MIN_UPDATE_DELAY_TIME) {
+        delayTime = NETWORK_ID_MIN_UPDATE_DELAY_TIME;
+    } else if (diff <= NETWORK_ID_UPDATE_DELAY_TIME) {
+        delayTime = diff;
+    } else {
+        delayTime = NETWORK_ID_UPDATE_DELAY_TIME;
+    }
+    LNN_LOGI(LNN_EVENT, "networkId update delayTime=%{public}" PRId64 ", nowTime=%{public}" PRId64
+        ", networkIdTimestamp=%{public}" PRId64, delayTime, nowTime, networkIdTimestamp);
+    return delayTime;
+}
+
 static void UpdateBroadcastInfo()
 {
     BroadcastCipherKey broadcastKey;
@@ -348,7 +373,7 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
         LNN_LOGI(LNN_EVENT, "no online devices, post networkId update event");
         UpdateBroadcastInfo();
         RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
-        (void)PostNotifyMessageDelay(NOTIFY_NETWORKID_UPDATE, NETWORK_ID_UPDATE_DELAY_TIME);
+        (void)PostNotifyMessageDelay(NOTIFY_NETWORKID_UPDATE, GetNetworkIdUpdateTime());
     }
     if (isOnline) {
         LNN_LOGI(LNN_EVENT, "online process, remove networkId update event");
