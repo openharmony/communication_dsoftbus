@@ -331,10 +331,10 @@ void ConnBrOccupy(ConnBrConnection *connection)
         "lock failed, connId=%{public}u", connection->connectionId);
     ConnRemoveMsgFromLooper(
         &g_brConnectionAsyncHandler, MSG_CONNECTION_OCCUPY_RELEASE, connection->connectionId, 0, NULL);
-    int32_t res = ConnPostMsgToLooper(&g_brConnectionAsyncHandler,
+    int32_t ret = ConnPostMsgToLooper(&g_brConnectionAsyncHandler,
         MSG_CONNECTION_OCCUPY_RELEASE, connection->connectionId, 0, NULL, WAIT_TIMEOUT_OCCUPY);
-    if (res != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BR, "post msg failed, connId=%{public}u, err=%{public}d", connection->connectionId, res);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGW(CONN_BR, "post msg failed, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
         (void)SoftBusMutexUnlock(&connection->lock);
         return;
     }
@@ -578,19 +578,19 @@ static int32_t BrOnReferenceRequest(uint32_t connectionId, ReferenceCount *refer
     if (delta < 0 && isOccupied) {
         CONN_LOGI(CONN_BR, "is occupied, request process later, connectionId=%{public}u", connectionId);
         ReferenceCount *referenceParam = (ReferenceCount *)SoftBusMalloc(sizeof(ReferenceCount));
-        if (referenceParam != NULL) {
+        if (referenceParam == NULL) {
             CONN_LOGE(CONN_BR, "malloc buffer failed, connectionId=%{public}u", connectionId);
             return SOFTBUS_MALLOC_ERR;
         }
         referenceParam->delta = delta;
         referenceParam->peerRc = peerRc;
 
-        int32_t res = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_PEER_RC,
+        int32_t ret = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_PEER_RC,
             connectionId, 0, referenceParam, WAIT_TIMEOUT_TRY_AGAIN);
-        if (res != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "post msg failed, connectionId=%{public}u, error=%{public}d", connectionId, res);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "post msg failed, connectionId=%{public}u, error=%{public}d", connectionId, ret);
             SoftBusFree(referenceParam);
-            return status;
+            return ret;
         }
         return SOFTBUS_OK;
     }
