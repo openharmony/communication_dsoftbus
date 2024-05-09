@@ -41,6 +41,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/network/lnn_lwip_monitor.c",
         "$adapter_bus_center_path/network/lnn_netlink_monitor_virtual.c",
         "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
+        "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
@@ -54,6 +55,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/network/lnn_lwip_monitor_virtual.c",
         "$adapter_bus_center_path/network/lnn_netlink_monitor.c",
         "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
+        "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
@@ -73,6 +75,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/network/lnn_lwip_monitor_virtual.c",
         "$adapter_bus_center_path/network/lnn_netlink_monitor_virtual.c",
         "$adapter_bus_center_path/platform/lnn_product_monitor.c",
+        "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
