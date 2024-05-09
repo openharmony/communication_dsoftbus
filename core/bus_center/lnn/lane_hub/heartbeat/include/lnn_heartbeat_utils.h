@@ -115,7 +115,7 @@ typedef struct {
 #define ENABLE_WIFI_CAP (1 << 3)
 
 typedef struct {
-    int32_t (*OnDataLevelChanged)(const char *networkId, const DataLevelInfo *dataLevelInfo);
+    int32_t (*onDataLevelChanged)(const char *networkId, const DataLevelInfo *dataLevelInfo);
 } IDataLevelChangeCallback;
 
 typedef bool (*VisitHbTypeCb)(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data);

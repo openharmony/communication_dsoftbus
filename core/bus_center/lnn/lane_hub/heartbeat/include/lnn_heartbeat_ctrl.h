@@ -42,9 +42,9 @@ void LnnHbOnTrustedRelationReduced(void);
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);
 
-int32_t LnnTriggerDataLevelHeartBeat();
+int32_t LnnTriggerDataLevelHeartBeat(void);
 void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
-void LnnUnregDataLevelChangeCb();
+void LnnUnregDataLevelChangeCb(void);
 
 #ifdef __cplusplus
 }

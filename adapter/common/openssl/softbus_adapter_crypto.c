@@ -212,7 +212,7 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptFinal_ex fail.");
         goto EXIT;
     }
-    if (plainLen > INT32_MAX - outLen) {
+    if ((int32_t)plainLen > INT32_MAX - outLen) {
         COMM_LOGE(COMM_ADAPTER, "outLen convert overflow.");
         goto EXIT;
     }
