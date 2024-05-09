@@ -350,6 +350,10 @@ int32_t KVAdapter::CloudSync()
         }
         status = kvStorePtr_->CloudSync(nullptr);
     }
+    if (status == DistributedKv::Status::CLOUD_DISABLED) {
+        LNN_LOGE(LNN_LEDGER, "cloud sync disabled, ret: %{public}d", status);
+        return SOFTBUS_KV_CLOUD_DISABLED;
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         LNN_LOGE(LNN_LEDGER, "cloud sync failed, ret: %{public}d", status);
         return SOFTBUS_KV_CLOUD_SYNC_FAIL;
