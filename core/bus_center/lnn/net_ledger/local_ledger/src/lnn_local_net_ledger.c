@@ -374,6 +374,17 @@ static int32_t LocalUpdateBleStartTime(const void *buf)
     return SOFTBUS_OK;
 }
 
+static int32_t LocalUpdateNetworkIdTimeStamp(const void *buf)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->networkIdTimestamp = *((int64_t *)buf);
+    LNN_LOGD(LNN_LEDGER, "local networkId timeStamp=%{public}" PRId64, info->networkIdTimestamp);
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetDeviceName(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -867,6 +878,15 @@ static int32_t LocalGetNodeBleStartTime(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LocalGetNetworkIdTimeStamp(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(int64_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int64_t *)buf) = g_localNetLedger.localInfo.networkIdTimestamp;
+    return SOFTBUS_OK;
+}
+
 static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
 {
     char devType[DEVICE_TYPE_BUF_LEN] = TYPE_UNKNOWN;
@@ -1076,12 +1096,30 @@ static int32_t UpdateNickName(const void *name)
     return SOFTBUS_OK;
 }
 
+int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_localNetLedger.localInfo.networkIdTimestamp = time;
+    LNN_LOGE(LNN_LEDGER, "update local networkId timeStamp=%{public}" PRId64, time);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalNetworkId(const void *id)
 {
     if (ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(g_localNetLedger.localInfo.networkId, &anonyNetworkId);
+    g_localNetLedger.localInfo.networkIdTimestamp = SoftBusGetSysTimeMs();
+    LNN_LOGI(LNN_LEDGER, "networkId change, reset networkId=%{public}s, networkIdTimestamp=%{public}" PRId64,
+        anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore();
+    AnonymizeFree(anonyNetworkId);
     if (g_localNetLedger.localInfo.accountId == 0) {
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_ERR;
@@ -1621,6 +1659,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
     {BYTE_KEY_BROADCAST_CIPHER_IV, BROADCAST_IV_LEN, LlGetCipherInfoIv, UpdateLocalCipherInfoIv},
+    {NUM_KEY_NETWORK_ID_TIMESTAMP, sizeof(int64_t), LocalGetNetworkIdTimeStamp, LocalUpdateNetworkIdTimeStamp},
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
     {BYTE_KEY_STATIC_CAPABILITY, STATIC_CAP_LEN, LlGetStaticCapability, LlUpdateStaticCapability},
 };
