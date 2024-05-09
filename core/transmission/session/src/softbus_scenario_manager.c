@@ -107,7 +107,7 @@ static void NotifyWifi(const char *ifName, const char *localMac,
         SoftBusFree(scene);
         return;
     }
-    scene->scene = finalType;
+    scene->scene = (int32_t)finalType;
     if (businessType != SM_VIDEO_TYPE) {
         scene->fps = -1;
     }

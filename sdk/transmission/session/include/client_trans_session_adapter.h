@@ -27,8 +27,9 @@ int32_t CreateSocket(const char *pkgName, const char *sessionName);
 int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId);
 int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
 int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync);
-void ClientShutdown(int32_t socket);
+void ClientShutdown(int32_t socket, int32_t cancelReason);
 int32_t GetSocketMtuSize(int32_t socket, uint32_t *mtuSize);
+int32_t ClientDfsBind(int32_t socket, const ISocketListener *listener);
 #ifdef __cplusplus
 }
 #endif

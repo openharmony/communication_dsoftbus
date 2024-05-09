@@ -720,7 +720,7 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
     {
         connOpt.bleOption.protocol = BLE_PROTOCOL_ANY;
     }
-    return CheckActiveConnection(&connOpt);
+    return CheckActiveConnection(&connOpt, true);
 }
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
@@ -783,7 +783,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
     if (type == AUTH_LINK_TYPE_P2P) {
         local.socketOption.moduleId = AUTH_P2P;
     } else if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
-        local.socketOption.moduleId = GetWifiDirectManager()->allocateListenerModuleId();
+        local.socketOption.moduleId = (ListenerModule)(GetWifiDirectManager()->allocateListenerModuleId());
         AUTH_CHECK_AND_RETURN_RET_LOGE(local.socketOption.moduleId < UNUSE_BUTT, SOFTBUS_ERR, AUTH_CONN,
                                        "alloc listener module id failed");
     } else {
@@ -792,7 +792,13 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
     }
 
     int32_t realPort = ConnStartLocalListening(&local);
-    AUTH_CHECK_AND_RETURN_RET_LOGE(realPort > 0, SOFTBUS_ERR, AUTH_CONN, "start local listening failed");
+    if (realPort <= 0) {
+        if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+            GetWifiDirectManager()->freeListenerModuleId(local.socketOption.moduleId);
+        }
+        AUTH_LOGE(AUTH_CONN, "start local listening failed");
+        return SOFTBUS_ERR;
+    }
     AUTH_LOGI(AUTH_CONN, "moduleId=%{public}u, port=%{public}d", local.socketOption.moduleId, realPort);
     *moduleId = local.socketOption.moduleId;
     return realPort;

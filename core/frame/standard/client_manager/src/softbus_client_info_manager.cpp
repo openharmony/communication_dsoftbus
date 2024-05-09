@@ -88,7 +88,7 @@ sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::s
 sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::string &pkgName, int32_t pid)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
-    COMM_LOGI(COMM_SVC, "GetSoftbusClientProxy, pid=%{public}d, pkgname=%{public}s", pid, pkgName.c_str());
+    COMM_LOGD(COMM_SVC, "GetSoftbusClientProxy, pid=%{public}d, pkgname=%{public}s", pid, pkgName.c_str());
     ClientObjRange range = clientObjectMap_.equal_range(pkgName);
     auto iter = std::find_if(range.first, range.second, [&pid](auto iter) {return pid == iter.second.first;});
     if (iter != range.second) {

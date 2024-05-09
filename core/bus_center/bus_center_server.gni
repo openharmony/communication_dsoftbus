@@ -92,7 +92,6 @@ if (defined(ohos_lite)) {
   bus_center_server_inc += [
     "$dsoftbus_root_path/core/bus_center/ipc/$os_type/include",
     "$dsoftbus_root_path/sdk/frame/$os_type/include",
-    "//utils/system/safwk/native/include",
   ]
 
   if (dsoftbus_feature_ex_kits) {

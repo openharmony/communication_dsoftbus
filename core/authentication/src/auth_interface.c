@@ -29,6 +29,7 @@
 #include "bus_center_manager.h"
 #include "customized_security_protocol.h"
 #include "lnn_decision_db.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -173,6 +174,24 @@ void AuthCloseConn(AuthHandle authHandle)
     }
     AuthMetaCloseConn(authHandle.authId);
 }
+int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+{
+    if (networkId == NULL || callback == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return AuthAllocLane(networkId, authRequestId, callback);
+}
+
+void AuthFreeConn(const AuthHandle *authHandle)
+{
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authHandle is null");
+        return;
+    }
+    AuthFreeLane(authHandle);
+    DelAuthReqInfoByAuthHandle(authHandle);
+}
 
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
@@ -218,6 +237,55 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
         return AuthMetaGetIdByUuid(uuid, type, isServer);
     }
     return AuthDeviceGetIdByUuid(uuid, type, isServer);
+}
+
+int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, int32_t index,
+    AuthHandle *authHandle)
+{
+    if (connInfo == NULL || authHandle == NULL) {
+        AUTH_LOGE(AUTH_CONN, "param is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SOFTBUS_OK;
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    switch (connInfo->type) {
+        case AUTH_LINK_TYPE_WIFI:
+            ret = LnnGetRemoteNodeInfoByKey(connInfo->info.ipInfo.ip, &info);
+            if (ret != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by ip failed, ret=%{public}d", ret);
+                return ret;
+            }
+            break;
+        case AUTH_LINK_TYPE_BLE:
+            if (LnnGetNetworkIdByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, networkId,
+                sizeof(networkId)) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "get networkId fail");
+                return SOFTBUS_NOT_FIND;
+            }
+            ret = LnnGetRemoteNodeInfoByKey(networkId, &info);
+            if (ret != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by networkId failed, ret=%{public}d", ret);
+                return ret;
+            }
+            break;
+        case AUTH_LINK_TYPE_BR:
+            ret = LnnGetRemoteNodeInfoByKey(connInfo->info.brInfo.brMac, &info);
+            if (ret != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "get remote nodeInfo by brMac failed, ret=%{public}d", ret);
+                return ret;
+            }
+            break;
+        default:
+            AUTH_LOGE(AUTH_CONN, "unknown connType. type=%{public}d", connInfo->type);
+            return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsSupportFeatureByCapaBit(info.feature, BIT_SUPPORT_NORMALIZED_LINK)) {
+        AUTH_LOGE(AUTH_CONN, "not support normalize");
+        return SOFTBUS_AUTH_NOT_SUPPORT_NORMALIZE;
+    }
+    return AuthDeviceGetAuthHandleByIndex(info.deviceInfo.deviceUdid, isServer, index, authHandle);
 }
 
 static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeInfo, uint32_t requestId,

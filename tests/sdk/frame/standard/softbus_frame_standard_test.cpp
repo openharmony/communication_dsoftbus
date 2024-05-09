@@ -93,11 +93,15 @@ void SoftBusServerProxyFrameTest::TearDownTestCase()
  */
 HWTEST_F(SoftBusServerProxyFrameTest, InnerRegisterServiceTest, TestSize.Level1)
 {
-    EXPECT_EQ(InnerRegisterService(), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(InnerRegisterService(NULL), SOFTBUS_INVALID_PARAM);
 
     EXPECT_EQ(ServerProxyInit(), SOFTBUS_OK);
     EXPECT_EQ(InitSoftBus("SoftBusServerProxyFrameTest"), SOFTBUS_OK);
-    EXPECT_EQ(InnerRegisterService(), SOFTBUS_OK);
+    EXPECT_EQ(InnerRegisterService(NULL), SOFTBUS_INVALID_PARAM);
+
+    ListNode sessionServerList;
+    ListInit(&sessionServerList);
+    EXPECT_EQ(InnerRegisterService(&sessionServerList), SOFTBUS_OK);
 }
 
 /**

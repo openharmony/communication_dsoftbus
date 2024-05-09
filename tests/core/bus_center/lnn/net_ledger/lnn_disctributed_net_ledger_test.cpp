@@ -946,4 +946,128 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_REMOTE_PTK_Test_001, TestSize.Level1)
     ret = DlGetRemotePtk(networkId, nullptr, STATIC_CAP_LEN + 1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: LnnSetDLUnifiedDeviceName_Test_001
+ * @tc.desc: LnnSetDLUnifiedDeviceName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDeviceName_Test_001, TestSize.Level1)
+{
+    char *udid = nullptr;
+    char *name = nullptr;
+    bool ret = LnnSetDLUnifiedDeviceName(udid, name);
+    EXPECT_TRUE(ret == false);
+    const char *devUdid = "123456789";
+    const char *devName = "devicename";
+    ret = LnnSetDLUnifiedDeviceName(devUdid, devName);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: LnnSetDLUnifiedDefaultDeviceName_Test_001
+ * @tc.desc: LnnSetDLUnifiedDefaultDeviceName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDefaultDeviceName_Test_001, TestSize.Level1)
+{
+    char *udid = nullptr;
+    char *name = nullptr;
+    bool ret = LnnSetDLUnifiedDefaultDeviceName(udid, name);
+    EXPECT_TRUE(ret == false);
+    const char *devUdid = "111111111";
+    const char *devName = "devdefaultdevicename";
+    ret = LnnSetDLUnifiedDefaultDeviceName(devUdid, devName);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: LnnSetDLDeviceNickNameByUdid_Test_001
+ * @tc.desc: LnnSetDLDeviceNickNameByUdid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceNickNameByUdid_Test_001, TestSize.Level1)
+{
+    char *udid = nullptr;
+    char *name = nullptr;
+    bool ret = LnnSetDLDeviceNickNameByUdid(udid, name);
+    EXPECT_TRUE(ret == false);
+    const char *devUdid = "2222222222";
+    const char *devName = "deviceNickname";
+    ret = LnnSetDLDeviceNickNameByUdid(devUdid, devName);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: LnnSetDLDeviceStateVersion_Test_001
+ * @tc.desc: LnnSetDLDeviceStateVersion
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceStateVersion_Test_001, TestSize.Level1)
+{
+    char *udid = nullptr;
+    int32_t stateVersion = 0;
+    bool ret = LnnSetDLDeviceStateVersion(udid, stateVersion);
+    EXPECT_TRUE(ret == false);
+    const char *devUdid = "3333333333";
+    ret = LnnSetDLDeviceStateVersion(devUdid, stateVersion);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: LnnSetDLDeviceBroadcastCipherKey_Test_001
+ * @tc.desc: LnnSetDLDeviceBroadcastCipherKey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherKey_Test_001, TestSize.Level1)
+{
+    char *udid = nullptr;
+    const char *cipherKey = "qqqqqqqqqqqq";
+    bool ret = LnnSetDLDeviceBroadcastCipherKey(udid, cipherKey);
+    EXPECT_TRUE(ret == false);
+    const char *devUdid = "123456789";
+    ret = LnnSetDLDeviceBroadcastCipherKey(devUdid, cipherKey);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: LnnSetDLDeviceBroadcastCipherIv_Test_001
+ * @tc.desc: LnnSetDLDeviceBroadcastCipherIv
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherIv_Test_001, TestSize.Level1)
+{
+    char *udid = nullptr;
+    const char *cipherIv = "qqqqqqqqqqqq";
+    bool ret = LnnSetDLDeviceBroadcastCipherIv(udid, cipherIv);
+    EXPECT_TRUE(ret == false);
+    const char *devUdid = "123456789";
+    ret = LnnSetDLDeviceBroadcastCipherIv(devUdid, cipherIv);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: LnnUpdateDistributedNodeInfo_Test_001
+ * @tc.desc: LnnUpdateDistributedNodeInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnUpdateDistributedNodeInfo_Test_001, TestSize.Level1)
+{
+    NodeInfo newInfo;
+    memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    const char *udid = nullptr;
+    newInfo.accountId = 18390933952;
+    int32_t ret = LnnUpdateDistributedNodeInfo(&newInfo, udid);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    const char *devUdid = "123456789";
+    ret = LnnUpdateDistributedNodeInfo(&newInfo, devUdid);
+    EXPECT_TRUE(ret == true);
+}
 } // namespace OHOS

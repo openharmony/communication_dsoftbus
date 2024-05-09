@@ -110,8 +110,9 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
         LNN_LOGE(LNN_BUILDER, "LnnGetNetIfTypeByName error");
         return;
     }
+    static uint32_t callCount = 0;
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGE(LNN_BUILDER, "network addr changed, netifType=%{public}d", type);
+        LNN_LOGE(LNN_BUILDER, "network addr changed, netifType=%{public}d, callCount=%{public}u", type, callCount++);
         LnnNotifyAddressChangedEvent(ifName);
     }
 }
@@ -134,9 +135,10 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     if (LnnGetNetIfTypeByName((const char *)RTA_DATA(tb[IFLA_IFNAME]), &type) != SOFTBUS_OK) {
         return;
     }
+    static uint32_t callCount = 0;
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGW(LNN_BUILDER, "link status changed, IFLA_IFNAME=%{public}s, netifType=%{public}d",
-            (const char *)RTA_DATA(tb[IFLA_IFNAME]), type);
+        LNN_LOGW(LNN_BUILDER, "link status changed, IFLA_IFNAME=%{public}s, netifType=%{public}d, callCount=%{public}u",
+            (const char *)RTA_DATA(tb[IFLA_IFNAME]), type, callCount++);
         LnnNotifyAddressChangedEvent((const char *)RTA_DATA(tb[IFLA_IFNAME]));
     }
 }

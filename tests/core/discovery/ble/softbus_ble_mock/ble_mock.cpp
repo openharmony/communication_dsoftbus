@@ -186,7 +186,7 @@ int32_t BleMock::ActionOfUnRegisterBroadcaster(int32_t bcId)
 int32_t BleMock::ActionOfStartScan(int32_t listenerId, const BcScanParams *param)
 {
     if (listenerId != SCAN_LISTENER_ID) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     isScanning = true;
@@ -200,7 +200,7 @@ int32_t BleMock::ActionOfStartScan(int32_t listenerId, const BcScanParams *param
 int32_t BleMock::ActionOfStopScan(int32_t listenerId)
 {
     if (listenerId != SCAN_LISTENER_ID) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     isScanning = false;
@@ -217,7 +217,7 @@ int32_t BleMock::ActionOfStartBroadcasting(int32_t bcId, const BroadcastParam *p
     if (isAdvertising) {
         DISC_LOGE(DISC_TEST, "already in advertising");
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     isAdvertising = !isAdvertising;
     if (advCallback) {
@@ -233,12 +233,13 @@ int32_t BleMock::ActionOfStopBroadcasting(int32_t bcId)
     if (!isAdvertising) {
         DISC_LOGE(DISC_TEST, "already has stopped");
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     if (advCallback) {
         advCallback->OnStopBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
     isAdvertising = !isAdvertising;
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -273,12 +274,13 @@ int32_t BleMock::ActionOfSetAdvDataForActiveDiscovery(int32_t bcId, const Broadc
         memcmp(packet->rspData.payload, activeDiscoveryRspData, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     if (advCallback) {
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -293,12 +295,13 @@ int32_t BleMock::ActionOfSetAdvDataForActivePublish(int32_t bcId, const Broadcas
         memcmp(packet->rspData.payload, activePublishRspData, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     if (advCallback) {
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -313,13 +316,14 @@ int32_t BleMock::ActionOfSetAdvDataForPassivePublish(int32_t bcId, const Broadca
         memcmp(packet->rspData.payload, passivePublishRspData, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     if (advCallback) {
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -335,13 +339,14 @@ int32_t BleMock::ActionOfUpdateAdvForPassivePublish(
         memcmp(packet->rspData.payload, passivePublishRspData, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     if (advCallback) {
         advCallback->OnUpdateBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -349,7 +354,7 @@ int32_t BleMock::ActionOfUpdateAdvForPassivePublish(
 int32_t BleMock::ActionOfGetBtMacAddr(SoftBusBtAddr *mac)
 {
     if (memcpy_s(mac->addr, sizeof(mac->addr), btMacAddr, sizeof(btMacAddr)) != EOK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     return SOFTBUS_OK;
 }

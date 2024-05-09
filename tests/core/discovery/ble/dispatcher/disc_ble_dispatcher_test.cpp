@@ -95,7 +95,7 @@ static int32_t PublishA(const PublishOption *option)
         g_interfaceFunCntA.publishCntA = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t StartScanA(const PublishOption *option)
@@ -104,7 +104,7 @@ static int32_t StartScanA(const PublishOption *option)
         g_interfaceFunCntA.startScanCntA = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t UnpublishA(const PublishOption *option)
@@ -113,7 +113,7 @@ static int32_t UnpublishA(const PublishOption *option)
         g_interfaceFunCntA.unpublishCntA = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t StopScanA(const PublishOption *option)
@@ -122,7 +122,7 @@ static int32_t StopScanA(const PublishOption *option)
         g_interfaceFunCntA.stopScanCntA = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t StartAdvertiseA(const SubscribeOption *option)
@@ -131,7 +131,7 @@ static int32_t StartAdvertiseA(const SubscribeOption *option)
         g_interfaceFunCntA.startAdvertiseCntA = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t SubscribeA(const SubscribeOption *option)
@@ -140,7 +140,7 @@ static int32_t SubscribeA(const SubscribeOption *option)
         g_interfaceFunCntA.subscribeCntA = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t UnsubscribeA(const SubscribeOption *option)
@@ -149,7 +149,7 @@ static int32_t UnsubscribeA(const SubscribeOption *option)
         g_interfaceFunCntA.unsubscribeCntA = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t StopAdvertiseA(const SubscribeOption *option)
@@ -158,7 +158,7 @@ static int32_t StopAdvertiseA(const SubscribeOption *option)
         g_interfaceFunCntA.stopAdvertiseCntA = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static void LinkStatusChangedA(LinkStatus status)
@@ -178,7 +178,7 @@ static int32_t PublishB(const PublishOption *option)
         g_interfaceFunCntB.publishCntB = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t StartScanB(const PublishOption *option)
@@ -187,7 +187,7 @@ static int32_t StartScanB(const PublishOption *option)
         g_interfaceFunCntB.startScanCntB = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t UnpublishB(const PublishOption *option)
@@ -196,7 +196,7 @@ static int32_t UnpublishB(const PublishOption *option)
         g_interfaceFunCntB.unpublishCntB = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t StopScanB(const PublishOption *option)
@@ -205,7 +205,7 @@ static int32_t StopScanB(const PublishOption *option)
         g_interfaceFunCntB.stopScanCntB = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t StartAdvertiseB(const SubscribeOption *option)
@@ -214,7 +214,7 @@ static int32_t StartAdvertiseB(const SubscribeOption *option)
         g_interfaceFunCntB.startAdvertiseCntB = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t SubscribeB(const SubscribeOption *option)
@@ -223,7 +223,7 @@ static int32_t SubscribeB(const SubscribeOption *option)
         g_interfaceFunCntB.subscribeCntB = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t UnsubscribeB(const SubscribeOption *option)
@@ -232,7 +232,7 @@ static int32_t UnsubscribeB(const SubscribeOption *option)
         g_interfaceFunCntB.unsubscribeCntB = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static int32_t StopAdvertiseB(const SubscribeOption *option)
@@ -241,7 +241,7 @@ static int32_t StopAdvertiseB(const SubscribeOption *option)
         g_interfaceFunCntB.stopAdvertiseCntB = 1;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
 static PublishOption g_pOption0 = {
@@ -739,7 +739,7 @@ HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "BleDispatchPublishOption001");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret = interface->Publish(&g_pOption0);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
 }
 
 /*
@@ -753,7 +753,7 @@ HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "BleDispatchSubscribeOption001");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret = interface->StartAdvertise(&g_sOption0);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
 }
 
 /*

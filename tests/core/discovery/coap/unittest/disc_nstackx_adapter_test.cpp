@@ -377,7 +377,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo001, TestSize.Le
 {
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
-	
+
     NSTACKX_DeviceInfo testNstackxDevice;
     DeviceInfo testDevice;
     ret = strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "{\"version\":\"1.0.0\"}");
@@ -442,7 +442,8 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Le
 
 /*
  * @tc.name: TestDiscCoapAdapterParseDevInfo002
- * @tc.desc: Test DiscParseDiscDevInfo should return SOFTBUS_ERR when given non-Json NSTACKX_DeviceInfo.reservedInfo
+ * @tc.desc: Test DiscParseDiscDevInfo should return SOFTBUS_PARSE_JSON_ERR
+ *           when given non-Json NSTACKX_DeviceInfo.reservedInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -465,7 +466,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo002, TestSize.Le
     ret = strcpy_s(testNstackxDevInfo.reservedInfo, sizeof(testNstackxDevInfo.reservedInfo), "test");
     EXPECT_EQ(ret, EOK);
     ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
 /*

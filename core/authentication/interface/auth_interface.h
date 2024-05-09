@@ -57,6 +57,11 @@ typedef enum {
 } AuthLinkType;
 
 typedef struct {
+    uint32_t linkTypeNum;
+    AuthLinkType linkType[AUTH_LINK_TYPE_MAX];
+} AuthLinkTypeList;
+
+typedef struct {
     AuthLinkType type;
     union {
         struct {
@@ -115,7 +120,7 @@ void AuthServerDeathCallback(const char *pkgName, int32_t pid);
 
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
-    void (*onGroupDeleted)(const char *groupId);
+    void (*onGroupDeleted)(const char *groupId, int32_t groupType);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
 } GroupChangeListener;
 
@@ -167,6 +172,8 @@ int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint6
     DiscoveryType type);
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle);
+int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, int32_t index,
+    AuthHandle *authHandle);
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
 int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta);
 int32_t AuthSetTcpKeepAlive(const AuthConnInfo *connInfo, ModeCycle cycle);
@@ -184,6 +191,9 @@ int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth);
 uint32_t AuthGetGroupType(const char *udid, const char *uuid);
 bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit);
+
+int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback);
+void AuthFreeConn(const AuthHandle *authHandle);
 
 int32_t AuthInit(void);
 void AuthDeinit(void);

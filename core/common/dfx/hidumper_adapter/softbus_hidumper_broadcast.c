@@ -28,6 +28,7 @@
 #define EVENT_BROADCAT_DUMP 0
 typedef int32_t (*BroadcastExecuteFunc)(SoftbusBroadcastDumpTask cb, uint64_t delayMillis);
 
+static bool g_isInit = false;
 static SoftBusHandler g_bcDumphandler = {0};
 static LIST_HEAD(g_bc_var_list);
 
@@ -165,6 +166,11 @@ static int32_t SoftbusBroadcastDumpLooperInit(void)
 
 int32_t SoftBusHiDumperBroadcastInit(void)
 {
+    if (g_isInit) {
+        COMM_LOGI(COMM_INIT, "already inited");
+        return SOFTBUS_OK;
+    }
+
     int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_BROADCAST_MODULE_NAME, SOFTBUS_BROADCAST_MODULE_HELP,
         &SoftBusBroadcastDumpHander);
     if (ret != SOFTBUS_OK) {
@@ -176,10 +182,12 @@ int32_t SoftBusHiDumperBroadcastInit(void)
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init broadcast hidumper looper fail");
     }
-    return ret;
+    g_isInit = true;
+    return SOFTBUS_OK;
 }
 
 void SoftBusHiDumperBroadcastDeInit(void)
 {
     SoftBusReleaseDumpVar(&g_bc_var_list);
+    g_isInit = false;
 }

@@ -210,7 +210,7 @@ int32_t SessionServiceImpl::OpenSessionCallback(int32_t sessionId)
     }
     session->SetPeerPid(static_cast<pid_t>(tmp));
 
-    TRANS_LOGI(TRANS_SDK, "Ok");
+    TRANS_LOGD(TRANS_SDK, "Ok");
     return listener->OnSessionOpened(session);
 }
 

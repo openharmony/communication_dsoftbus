@@ -26,6 +26,7 @@ ohos_unittest("TransUdpNegoTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
     "dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -186,6 +187,7 @@ ohos_unittest("TransUdpManagerTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
     "dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
 
     "$dsoftbus_root_path/interfaces/kits/common",

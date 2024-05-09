@@ -53,7 +53,7 @@ constexpr uint32_t g_printInterval = 200;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
-static int InnerRegisterService(void)
+static int InnerRegisterService(ListNode *sessionServerInfoList)
 {
     srand(time(nullptr));
     int32_t randomNum = rand();
@@ -83,7 +83,7 @@ static int InnerRegisterService(void)
         }
         SoftBusFree(clientName[i]);
     }
-    int32_t ret = ReCreateSessionServerToServer();
+    int32_t ret = ReCreateSessionServerToServer(sessionServerInfoList);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!\n");
         return ret;
@@ -185,7 +185,9 @@ void ClientDeathProcTask(void)
     TransServerProxyDeInit();
     BusCenterServerProxyDeInit();
 
-    ClientCleanAllSessionWhenServerDeath();
+    ListNode sessionServerInfoList;
+    ListInit(&sessionServerInfoList);
+    ClientCleanAllSessionWhenServerDeath(&sessionServerInfoList);
 
     while (true) {
         if (ServerProxyInit() == SOFTBUS_OK) {
@@ -196,7 +198,7 @@ void ClientDeathProcTask(void)
     DiscServerProxyInit();
     TransServerProxyInit();
     BusCenterServerProxyInit();
-    InnerRegisterService();
+    InnerRegisterService(&sessionServerInfoList);
     RestartEventNotify();
     RestartMetaNotify();
     DiscRecoveryPublish();

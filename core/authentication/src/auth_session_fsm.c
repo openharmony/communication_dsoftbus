@@ -29,6 +29,7 @@
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
 #include "lnn_event.h"
+#include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -36,7 +37,6 @@
 #define AUTH_TIMEOUT_MS (10 * 1000)
 #define TO_AUTH_FSM(ptr) CONTAINER_OF(ptr, AuthFsm, fsm)
 #define SHORT_UDID_HASH_LEN 8
-#define SHORT_UDID_HASH_HEX_LEN 17
 
 typedef enum {
     STATE_SYNC_DEVICE_ID = 0,
@@ -190,8 +190,8 @@ static int32_t ProcAuthFsm(uint32_t requestId, bool isServer, AuthFsm *authFsm)
             AUTH_LOGE(AUTH_FSM, "get auth request fail");
             return SOFTBUS_ERR;
         }
-        char udidHash[SHORT_UDID_HASH_HEX_LEN] = {0};
-        int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN,
+        char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+        int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
             (const unsigned char *)request.connInfo.info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
         if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) == SOFTBUS_OK &&
             IsNeedExchangeNetworkId(nodeInfo.authCapacity, BIT_SUPPORT_EXCHANGE_NETWORKID)) {
@@ -262,7 +262,8 @@ static void DestroyAuthFsm(AuthFsm *authFsm)
 
 static void AuthFsmDeinitCallback(FsmStateMachine *fsm)
 {
-    AUTH_LOGI(AUTH_FSM, "auth fsm deinit callback enter");
+    static uint32_t callCount = 0;
+    AUTH_LOGI(AUTH_FSM, "auth fsm deinit callback enter, callCount=%{public}u", callCount++);
     if (fsm == NULL) {
         AUTH_LOGE(AUTH_FSM, "fsm is null");
         return;
@@ -498,8 +499,8 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return ret;
     }
-    char udidShortHash[SHORT_UDID_HASH_HEX_LEN] = {0};
-    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN,
+    char udidShortHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1,
         hash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return SOFTBUS_ERR;
@@ -524,8 +525,8 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return ret;
     }
-    char udidShortHash[SHORT_UDID_HASH_HEX_LEN] = {0};
-    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN,
+    char udidShortHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1,
         hash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return SOFTBUS_ERR;
