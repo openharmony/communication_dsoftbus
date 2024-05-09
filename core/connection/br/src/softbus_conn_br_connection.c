@@ -578,7 +578,7 @@ static int32_t BrOnReferenceRequest(uint32_t connectionId, ReferenceCount *refer
     if (delta < 0 && isOccupied) {
         CONN_LOGI(CONN_BR, "is occupied, request process later, connectionId=%{public}u", connectionId);
         ReferenceCount *referenceParam = (ReferenceCount *)SoftBusMalloc(sizeof(ReferenceCount));
-        if (referenceParam != NULL) {
+        if (referenceParam == NULL) {
             CONN_LOGE(CONN_BR, "malloc buffer failed, connectionId=%{public}u", connectionId);
             return SOFTBUS_MALLOC_ERR;
         }
