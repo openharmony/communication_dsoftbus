@@ -448,7 +448,8 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         TRANS_LOGE(TRANS_CTRL, "unpack request udp info failed.");
         return SOFTBUS_ERR;
     }
-    if (appInfo->firstTokenId != 0 && TransCheckServerAccessControl(appInfo->firstTokenId) != SOFTBUS_OK) {
+    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     appInfo->myHandleId = -1;
@@ -592,6 +593,9 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
         if (LnnGetRemoteNodeInfoById(info.peerData.deviceId, CATEGORY_UUID, &nodeInfo) == SOFTBUS_OK) {
             extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
             extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
+        }
+        if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo.masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+            extra.localUdid = nodeInfo.masterUdid;
         }
         extra.socketName = info.myData.sessionName;
         extra.peerChannelId = info.peerData.channelId;

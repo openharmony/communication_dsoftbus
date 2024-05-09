@@ -230,7 +230,7 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     session->algorithm = TRANS_TEST_ALGORITHM;
     session->fileEncrypt = TRANS_TEST_FILE_ENCRYPT;
     session->crc = TRANS_TEST_CRC;
-    session->sessionState = SESSION_STATE_INIT;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
     return session;
 }
 
@@ -570,7 +570,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
     ASSERT_TRUE(session != NULL);
     session->isEnable = true;
     ret = CheckSessionIsOpened(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId);

@@ -43,8 +43,6 @@ public:
         const std::string &interface, const Ipv4Info &local, const Ipv4Info &remote, const std::string &remoteMac);
     void ReleaseIpv4(
         const std::string &interface, const Ipv4Info &local, const Ipv4Info &remote, const std::string &remoteMac);
-    void ClearAllIpv4(const std::string &interface);
-    void ClearAllIpv4OfInterface(const std::string &interface);
 
     void Lock()
     {
@@ -61,7 +59,6 @@ public:
     static constexpr int32_t LOCAL_NETWORK_ID = 99;
 
     static std::string ApplySubNet(const std::vector<Ipv4Info> &localArray, const std::vector<Ipv4Info> &remoteArray);
-    static std::vector<std::string> GetHmlAllUsedIpv4(std::initializer_list<std::vector<Ipv4Info> *> all);
     static std::bitset<EUI_64_IDENTIFIER_LEN> GetEUI64Identifier(const std::string &mac);
     static std::string BitsetToIPv6(const std::bitset<EUI_64_IDENTIFIER_LEN> &eui64Bits);
 
@@ -76,8 +73,6 @@ public:
     static int32_t DeleteStaticArp(
         const std::string &interface, const std::string &ipString, const std::string &macString);
 private:
-    std::set<std::string> ips_;
-    std::map<std::string, std::string> arps_;
     std::recursive_mutex mutex_;
 };
 } // namespace OHOS::SoftBus

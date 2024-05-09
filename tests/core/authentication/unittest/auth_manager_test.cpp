@@ -303,7 +303,7 @@ HWTEST_F(AuthManagerTest, RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001, TestSiz
     NotifyDeviceDisconnect(authHandle);
     OnDeviceNotTrusted(UDID_TEST);
     OnGroupCreated("myId", GROUP_TYPE);
-    OnGroupDeleted("myId");
+    OnGroupDeleted("myId", GROUP_TYPE);
     OnDeviceBound(UDID_TEST, "groupInfo");
     EXPECT_TRUE(RetryRegTrustDataChangeListener() == SOFTBUS_ERR);
     RemoveNotPassedAuthManagerByUdid(PEER_UID);

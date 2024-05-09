@@ -163,12 +163,12 @@ int32_t ConnBleDequeueBlock(void **msg)
             status = SOFTBUS_OK;
             break;
         }
-        CONN_LOGI(CONN_BLE, "ble queue is empty, dequeue start wait...");
         if (SoftBusCondWait(&g_sendCond, &g_bleQueueLock, NULL) != SOFTBUS_OK) {
             CONN_LOGI(CONN_BLE, "BleSendCondWait failed");
             status = SOFTBUS_ERR;
             break;
         }
+        CONN_LOGI(CONN_BLE, "ble queue wakeup.");
     } while (true);
     if (isFull) {
         (void)SoftBusCondBroadcast(&g_sendWaitCond);

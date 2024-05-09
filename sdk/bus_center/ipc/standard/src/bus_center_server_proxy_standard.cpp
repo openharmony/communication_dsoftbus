@@ -514,11 +514,12 @@ int32_t BusCenterServerProxy::RegDataLevelChangeCb(const char *pkgName)
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_REG_DATA_LEVEL_CHANGE_CB, data, reply, option) != 0) {
+    int32_t serverRet = remote->SendRequest(SERVER_REG_DATA_LEVEL_CHANGE_CB, data, reply, option);
+    if (serverRet != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        return serverRet;
     }
-    int32_t serverRet = 0;
+
     if (!reply.ReadInt32(serverRet)) {
         LNN_LOGE(LNN_EVENT, "read serverRet failed");
         return SOFTBUS_IPC_ERR;
@@ -547,11 +548,12 @@ int32_t BusCenterServerProxy::UnregDataLevelChangeCb(const char *pkgName)
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_UNREG_DATA_LEVEL_CHANGE_CB, data, reply, option) != 0) {
+    int32_t serverRet = remote->SendRequest(SERVER_UNREG_DATA_LEVEL_CHANGE_CB, data, reply, option);
+    if (serverRet != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        return serverRet;
     }
-    int32_t serverRet = 0;
+
     if (!reply.ReadInt32(serverRet)) {
         LNN_LOGE(LNN_EVENT, "read serverRet failed");
         return SOFTBUS_IPC_ERR;
@@ -581,11 +583,12 @@ int32_t BusCenterServerProxy::SetDataLevel(const DataLevel *dataLevel)
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_SET_DATA_LEVEL, data, reply, option) != 0) {
+    int32_t serverRet = remote->SendRequest(SERVER_SET_DATA_LEVEL, data, reply, option);
+    if (serverRet != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        return serverRet;
     }
-    int32_t serverRet = 0;
+
     if (!reply.ReadInt32(serverRet)) {
         LNN_LOGE(LNN_EVENT, "read serverRet failed");
         return SOFTBUS_IPC_ERR;

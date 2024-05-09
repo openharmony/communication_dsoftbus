@@ -65,7 +65,7 @@ static bool CheckPkgNameInfo(const char *pkgName)
 static int32_t AddClientPkgName(const char *pkgName)
 {
     if (!CheckPkgNameInfo(pkgName)) {
-        COMM_LOGE(COMM_SDK, "check PkgNameInfo invalid.");
+        COMM_LOGD(COMM_SDK, "check PkgNameInfo invalid.");
         return SOFTBUS_INVALID_PKGNAME;
     }
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
@@ -114,7 +114,7 @@ static int32_t ClientRegisterPkgName(const char *pkgName)
 {
     int32_t ret = AddClientPkgName(pkgName);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "AddClientPkgName failed. ret=%{public}d", ret);
+        COMM_LOGD(COMM_SDK, "AddClientPkgName failed. ret=%{public}d", ret);
         return ret;
     }
     ret = ClientRegisterService(pkgName);
@@ -259,7 +259,7 @@ int32_t InitSoftBus(const char *pkgName)
     }
     g_isInited = true;
     SoftBusMutexUnlock(&g_isInitedLock);
-    COMM_LOGI(COMM_SDK, "softbus sdk frame init success.");
+    COMM_LOGD(COMM_SDK, "softbus sdk frame init success.");
     return SOFTBUS_OK;
 EXIT:
     FreeClientPkgName();

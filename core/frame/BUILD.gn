@@ -85,9 +85,11 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
       external_deps = [ "device_auth:deviceauth_sdk" ]
+      external_deps += auth_server_ex_deps
       public_deps =
           [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       if (support_bluetooth &&
@@ -140,6 +142,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
@@ -148,6 +151,7 @@ if (defined(ohos_lite)) {
         "bounds_checking_function:libsec_shared",
         "device_auth:deviceauth_sdk",
       ]
+      external_deps += auth_server_ex_deps
       public_deps =
           [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       if (support_bluetooth &&
@@ -233,6 +237,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk:softbus_client",
     ]
     external_deps = [ "cJSON:cjson" ]
+    external_deps += auth_server_ex_deps
     public_deps = [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
     dsoftbus_server_common_external_deps =
         bus_center_server_external_deps + disc_server_external_deps +
@@ -246,6 +251,7 @@ if (defined(ohos_lite)) {
         "device_auth:deviceauth_sdk",
         "hilog:libhilog",
         "ipc:ipc_core",
+        "kv_store:distributeddata_inner",
         "safwk:system_ability_fwk",
         "samgr:samgr_proxy",
       ]
@@ -261,7 +267,10 @@ if (defined(ohos_lite)) {
         external_deps += [ "bundle_framework:appexecfwk_core" ]
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
       }
-
+      if (!defined(global_parts_info) ||
+          defined(global_parts_info.ability_ability_runtime)) {
+        cflags += [ "-DSUPPORT_ABILITY_RUNTIME" ]
+      }
       if (enhanced) {
         cflags += [ "-DENHANCED_FLAG" ]
         external_deps += [ "device_certificate_manager:device_cert_mgr_sdk" ]

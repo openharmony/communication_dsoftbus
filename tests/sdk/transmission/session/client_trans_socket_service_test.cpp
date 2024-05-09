@@ -19,6 +19,7 @@
 
 #include "inner_socket.h"
 #include "socket.h"
+#include "inner_socket.h"
 #include "softbus_error_code.h"
 
 #define SOCKET_NAME_MAX_LEN          255
@@ -192,6 +193,43 @@ HWTEST_F(TransClientSocketServiceTest, DataType001, TestSize.Level1)
         int32_t socketId = Socket(info);
         EXPECT_EQ(socketId, SOFTBUS_ERR);
     }
+}
+
+/**
+ * @tc.name: DfsBind001
+ * @tc.desc: call DfsBind function with invalid socket or listener.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, DfsBind001, TestSize.Level1)
+{
+    ISocketListener listener;
+    int32_t ret = DfsBind(-1, &listener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DfsBind(1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DfsBind(1, &listener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+static void OnShutdown(int32_t socket, ShutdownReason reason)
+{
+    return;
+}
+
+/**
+ * @tc.name: DfsBind002
+ * @tc.desc: call DfsBind function with offline socket.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, DfsBind002, TestSize.Level1)
+{
+    ISocketListener listener = { .OnShutdown = OnShutdown };
+    int32_t ret = DfsBind(1, &listener);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
 /**

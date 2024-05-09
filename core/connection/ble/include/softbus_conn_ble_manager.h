@@ -47,7 +47,7 @@ typedef struct {
     // ble address will change over time and different advertisement, so devive is identified by udid first
     char udid[UDID_BUF_LEN];
     bool fastestConnectEnable;
-    int32_t psm;
+    uint32_t psm;
     bool isSupportNetworkIdExchange;
     enum ConnBleDeviceState state;
     ListNode requests;
@@ -69,7 +69,7 @@ typedef struct {
     char addr[BT_MAC_LEN];
     char udid[UDID_BUF_LEN];
     bool fastestConnectEnable;
-    int32_t psm;
+    uint32_t psm;
     uint16_t challengeCode; /* for ble direct */
     ConnectResult result;
     ConnectStatistics statistics;

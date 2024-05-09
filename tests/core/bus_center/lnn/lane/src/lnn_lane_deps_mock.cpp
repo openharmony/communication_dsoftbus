@@ -138,7 +138,35 @@ int32_t LaneDepsInterfaceMock::ActionOfAddTrigger(ListenerModule module, int32_t
     return g_baseListener.onDataEvent(module, SOFTBUS_SOCKET_OUT, fd);
 }
 
+int32_t LaneDepsInterfaceMock::ActionOfConnOpenFailed(const AuthConnInfo *info, uint32_t requestId,
+    const AuthConnCallback *callback, bool isMeta)
+{
+    callback->onConnOpenFailed(requestId, SOFTBUS_ERR);
+    return SOFTBUS_OK;
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId,
+    const AuthConnCallback *callback, bool isMeta)
+{
+    AuthHandle authHandle = {
+        .authId = 0,
+        .type = AUTH_LINK_TYPE_P2P,
+    };
+    callback->onConnOpened(requestId, authHandle);
+    return SOFTBUS_OK;
+}
+
 extern "C" {
+int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList)
+{
+    return GetLaneDepsInterface()->GetAuthLinkTypeList(networkId, linkTypeList);
+}
+
+int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+{
+    return GetLaneDepsInterface()->AuthAllocConn(networkId, authRequestId, callback);
+}
+
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
 {
     return GetLaneDepsInterface()->LnnGetRemoteNodeInfoById(id, type, info);
@@ -217,7 +245,7 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
 
 void AuthCloseConn(AuthHandle authHandle)
 {
-    return GetLaneDepsInterface()->AuthCloseConn(authHandle);
+    GetLaneDepsInterface()->AuthCloseConn(authHandle);
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
@@ -285,7 +313,7 @@ ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtoco
 
 void ConnBleReturnConnection(ConnBleConnection **connection)
 {
-    return GetLaneDepsInterface()->ConnBleReturnConnection(connection);
+    GetLaneDepsInterface()->ConnBleReturnConnection(connection);
 }
 
 bool ConnBleDirectIsEnable(BleProtocolType protocol)
@@ -317,9 +345,9 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
     return GetLaneDepsInterface()->StartBaseClient(module, listener);
 }
 
-bool CheckActiveConnection(const ConnectOption *option)
+bool CheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
-    return GetLaneDepsInterface()->CheckActiveConnection(option);
+    return GetLaneDepsInterface()->CheckActiveConnection(option, needOccupy);
 }
 
 int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)

@@ -82,3 +82,20 @@ int32_t LnnGetUdidByBrMac(const char *brMac, char *udid, uint32_t udidLen)
     (void)udidLen;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnGetLocalCacheNodeInfo(NodeInfo *info)
+{
+    (void)info;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetRemoteCacheNodeInfo(Map *devMap)
+{
+    (void)devMap;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnLoadLocalDeviceAccountIdInfo(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}

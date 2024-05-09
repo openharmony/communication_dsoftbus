@@ -241,7 +241,7 @@ static int32_t BindTcpClientAddr(int32_t domain, int fd, const char *inputAddr)
             bindAddr = "0.0.0.0";
         }
     } else {
-        CONN_LOGI(CONN_COMMON, "using specified bind addr");
+        CONN_LOGD(CONN_COMMON, "using specified bind addr");
         bindAddr = inputAddr;
     }
     return BindLocalIP(domain, fd, bindAddr, 0);

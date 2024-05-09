@@ -27,6 +27,14 @@
 extern "C" {
 #endif
 
+#define COC_DIRECT_LATENCY      1200
+#define BR_LATENCY              2500
+#define WLAN_LATENCY            800
+#define P2P_LATENCY             1600
+#define BLE_LATENCY             1500
+#define HML_LATENCY             1500
+#define BR_REUSE_LATENCY        1000
+
 typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     bool networkDelegate;
@@ -95,7 +103,7 @@ typedef struct {
 
 typedef struct {
     void (*OnLaneLinkSuccess)(uint32_t reqId, const LaneLinkInfo *linkInfo);
-    void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason);
+    void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
 } LaneLinkCb;
 
 int32_t InitLaneLink(void);

@@ -36,6 +36,7 @@ extern "C" {
 
 #define MAX_FAST_DATA_LEN (4 * 1024)
 #define BASE64_FAST_DATA_LEN 5558
+#define TOKENID_NOT_SET 0
 
 typedef enum {
     API_UNKNOWN = 0,
@@ -123,8 +124,9 @@ typedef struct {
     int64_t connectedStart;
     const uint8_t *fastTransData;
     uint16_t fastTransDataSize;
-    uint32_t firstTokenId;
+    uint32_t callingTokenId; // for transmission access control
     bool isClient;
+    char tokenName[PKG_NAME_SIZE_MAX];
 } AppInfo;
 
 #ifdef __cplusplus

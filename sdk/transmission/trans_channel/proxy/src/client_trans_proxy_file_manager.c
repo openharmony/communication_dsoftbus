@@ -438,7 +438,7 @@ static char *GetFullRecvPath(const char *filePath, const char *recvRootDir)
     }
     int32_t ret;
     if (isNeedAddSep) {
-        ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s%c%s", recvRootDir, PATH_SEPARATOR, filePath);
+        ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s/%s", recvRootDir, filePath);
     } else {
         ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s%s", recvRootDir, filePath);
     }
@@ -1815,7 +1815,11 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
     if (seq >= fileInfo->startSeq) {
         int32_t seqDiff = (int32_t)(seq - fileInfo->seq - 1);
 
-        int64_t bytesToWrite = (int64_t)(seqDiff * fileInfo->oneFrameLen);
+        if (fileInfo->oneFrameLen > INT64_MAX || seqDiff * fileInfo->oneFrameLen > INT64_MAX) {
+            TRANS_LOGE(TRANS_FILE, "Data overflow");
+            return SOFTBUS_INVALID_NUM;
+        }
+        int64_t bytesToWrite = (int64_t)seqDiff * (int64_t)fileInfo->oneFrameLen;
         if (MAX_FILE_SIZE < bytesToWrite) {
             TRANS_LOGE(
                 TRANS_FILE, "WriteEmptyFrame bytesToWrite is too large, bytesToWrite=%{public}" PRIu64, bytesToWrite);
@@ -2286,6 +2290,7 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
 int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type)
 {
     FileFrame oneFrame;
+    (void)memset_s(&oneFrame, sizeof(FileFrame), 0, sizeof(FileFrame));
     oneFrame.frameType = type;
     oneFrame.frameLength = len;
     oneFrame.data = (uint8_t *)data;

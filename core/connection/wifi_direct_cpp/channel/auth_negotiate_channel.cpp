@@ -85,7 +85,7 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s", msg.MessageTypeToString().c_str());
     ProtocolType type { ProtocolType::JSON };
-    if (WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
+    if (WifiDirectUtils::IsLocalSupportTlv() && WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
         type = ProtocolType::TLV;
     }
     auto *protocol = WifiDirectProtocolFactory::CreateProtocol(type);
@@ -110,7 +110,7 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     ProtocolType type { ProtocolType::JSON };
     auto channel = std::make_shared<AuthNegotiateChannel>(handle);
     auto remoteDeviceId = channel->GetRemoteDeviceId();
-    if (WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId)) {
+    if (WifiDirectUtils::IsLocalSupportTlv() && WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId)) {
         type = ProtocolType::TLV;
     }
     auto *protocol = WifiDirectProtocolFactory::CreateProtocol(type);

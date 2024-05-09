@@ -18,15 +18,11 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "lnn_lane_common.h"
-#include "lnn_lane_deps_mock.h"
-#include "lnn_trans_lane_deps_mock.h"
-#include "lnn_lane_interface.h"
-#include "lnn_lane_score_virtual.c"
 #include "lnn_trans_lane.h"
-#include "message_handler.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
+
+#include "lnn_lane_deps_mock.h"
+#include "lnn_lane_score_virtual.c"
+#include "lnn_trans_lane_deps_mock.h"
 
 namespace OHOS {
 using namespace testing::ext;

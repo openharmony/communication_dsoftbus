@@ -649,9 +649,9 @@ int32_t TcpPostBytes(
         CONN_LOGE(CONN_COMMON, "TcpPostBytes failed, connectionId not found. connectionId=%{public}08x", connectionId);
         return SOFTBUS_ERR;
     }
-    uint32_t bytes = ConnSendSocketData(fd, (const char *)data, len, flag);
+    ssize_t bytes = ConnSendSocketData(fd, (const char *)data, len, flag);
     SoftBusFree(data);
-    if (bytes != len) {
+    if (bytes != (ssize_t)len) {
         CONN_LOGE(CONN_COMMON, "socket send data is mismatched");
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
@@ -746,9 +746,10 @@ static int32_t InitProperty(void)
     return SOFTBUS_OK;
 }
 
-static bool TcpCheckActiveConnection(const ConnectOption *info)
+static bool TcpCheckActiveConnection(const ConnectOption *info, bool needOccupy)
 {
     (void)info;
+    (void)needOccupy;
     return false;
 }
 

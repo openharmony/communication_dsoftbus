@@ -605,7 +605,7 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
         COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    COMM_LOGI(COMM_SDK, "OnNodeBasicInfoChangedInner type. type=%{public}d", type);
+    COMM_LOGD(COMM_SDK, "OnNodeBasicInfoChangedInner type. type=%{public}d", type);
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeBasicInfo)) {
         COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read failed! infoTypeLen=%{public}d", infoTypeLen);

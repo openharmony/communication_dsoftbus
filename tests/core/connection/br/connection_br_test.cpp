@@ -554,21 +554,36 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket002, TestSize.Level1)
 
     info.type = CONNECT_BR;
     (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.brOption.brMac);
     ret = ConnPreventConnection(&info, time);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-HWTEST_F(ConnectionBrTest, testBrPendingPacket003, TestSize.Level1)
+HWTEST_F(ConnectionBrTest, CheckActiveConnection001, TestSize.Level1)
 {
-    int ret;
     ConnectOption info;
 
     info.type = CONNECT_BR;
     info.brOption.sideType = CONN_SIDE_ANY;
     (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.brOption.brMac);
-    ret = CheckActiveConnection(&info);
+    int32_t ret = CheckActiveConnection(&info, false);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(ConnectionBrTest, CheckActiveConnection002, TestSize.Level1)
+{
+    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ASSERT_NE(nullptr, connection);
+    int32_t ret = SoftBusMutexInit(&connection->lock, NULL);
+    ASSERT_EQ(EOK, ret);
+    ret = strcpy_s(connection->addr, BT_MAC_LEN, TEST_BR_MAC);
+    EXPECT_EQ(EOK, ret);
+    ret = ConnBrSaveConnection(connection);
+    EXPECT_EQ(EOK, ret);
+    ConnectOption info;
+    info.type = CONNECT_BR;
+    info.brOption.sideType = CONN_SIDE_ANY;
+    (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    ret = CheckActiveConnection(&info, false);
     EXPECT_EQ(false, ret);
 }
 
