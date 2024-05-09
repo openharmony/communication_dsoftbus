@@ -145,12 +145,14 @@ HWTEST_F(AuthManagerTest, NEW_AND_FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     connInfo.type = AUTH_LINK_TYPE_P2P;
     PrintAuthConnInfo(&connInfo);
     PrintAuthConnInfo(nullptr);
-    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
-    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI);
-    SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
-    AuthManagerSetAuthPassed(AUTH_SEQ, &info);
     EXPECT_EQ(FindAuthManagerByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
     EXPECT_EQ(FindAuthManagerByUdid(UDID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    EXPECT_EQ(AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI), SOFTBUS_OK);
+    EXPECT_EQ(SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ), SOFTBUS_OK);
+    AuthManagerSetAuthPassed(AUTH_SEQ, &info);
+    EXPECT_NE(FindAuthManagerByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
+    EXPECT_NE(FindAuthManagerByUdid(UDID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
 }
 
 static int32_t MyUpdateFuncReturnError(AuthManager *auth1, const AuthManager *auth2, AuthLinkType type)
@@ -184,7 +186,7 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
         AUTH_LINK_TYPE_WIFI) == SOFTBUS_ERR);
     EXPECT_TRUE(UpdateAuthManagerByAuthId(AUTH_SEQ, MyUpdateFuncReturnOk, auth, AUTH_LINK_TYPE_WIFI) == SOFTBUS_OK);
     AuthConnInfo connInfo;
-    EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo), SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo), SOFTBUS_OK);
 }
 
 /*
@@ -496,13 +498,15 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
     AuthManager *auth = NewAuthManager(authHandle.authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
-    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI);
-    SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
-    AuthManagerSetAuthPassed(authHandle.authId, &info);
     EXPECT_EQ(AuthDeviceGetPreferConnInfo(UUID_TEST, &connInfo), SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL);
     EXPECT_EQ(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), false);
     EXPECT_EQ(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_P2P, false), false);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    EXPECT_EQ(AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI), SOFTBUS_OK);
+    EXPECT_EQ(SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ), SOFTBUS_OK);
+    AuthManagerSetAuthPassed(authHandle.authId, &info);
+    EXPECT_EQ(AuthDeviceGetPreferConnInfo(UUID_TEST, &connInfo), SOFTBUS_OK);
+    EXPECT_EQ(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), true);
 }
 
 /*
@@ -546,7 +550,7 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level
     EXPECT_TRUE(AuthGetLatestAuthSeqList(nullptr, authSeq,
         DISCOVERY_TYPE_COUNT) == SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(AuthGetLatestAuthSeqList("", authSeq, DISCOVERY_TYPE_COUNT), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(AuthGetLatestAuthSeqList(UDID_TEST, authSeq, DISCOVERY_TYPE_COUNT), SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_EQ(AuthGetLatestAuthSeqList(UDID_TEST, authSeq, DISCOVERY_TYPE_COUNT), SOFTBUS_OK);
     EXPECT_EQ(AuthGetLatestAuthSeqList(INVALID_UDID_TEST, authSeq,
         DISCOVERY_TYPE_COUNT), SOFTBUS_AUTH_NOT_FOUND);
 }
