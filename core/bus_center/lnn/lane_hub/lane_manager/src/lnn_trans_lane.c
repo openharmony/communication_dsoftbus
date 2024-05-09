@@ -1281,8 +1281,7 @@ static void MsgHandler(SoftBusMessage *msg)
 
 static int32_t InitLooper(void)
 {
-    char name[] = "transLaneLooper";
-    g_laneLoopHandler.name = name;
+    g_laneLoopHandler.name = "transLaneLooper";
     g_laneLoopHandler.HandleMessage = MsgHandler;
     g_laneLoopHandler.looper = GetLooper(LOOP_TYPE_LANE);
     if (g_laneLoopHandler.looper == NULL) {
