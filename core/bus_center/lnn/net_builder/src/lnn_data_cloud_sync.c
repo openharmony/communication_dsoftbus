@@ -44,7 +44,7 @@
 #define SPLIT_KEY_NUM 3
 #define SPLIT_VALUE_NUM 2
 #define PUT_VALUE_MAX_LEN 136
-
+#define UDID_HASH_HEX_LEN 16
 static int32_t g_dbId = 0;
 
 static int32_t ConvertNameInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
@@ -679,7 +679,12 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
         LNN_LOGE(LNN_BUILDER, "get remote cache node map info fail");
         return SOFTBUS_ERR;
     }
-    NodeInfo *cacheInfo = (NodeInfo *)LnnMapGet(&deviceCacheInfoMap, deviceUdid);
+    char udidHash[UDID_HASH_HEX_LEN + 1] = {0};
+    if (LnnGenerateHexStringHash((const unsigned char *)deviceUdid, udidHash, UDID_HASH_HEX_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Generate UDID HexStringHash fail");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *cacheInfo = (NodeInfo *)LnnMapGet(&deviceCacheInfoMap, udidHash);
     if (cacheInfo == NULL) {
         LNN_LOGI(LNN_BUILDER, "no this device info in deviceCacheInfoMap, need to insert");
         NodeInfo newInfo = {0};
