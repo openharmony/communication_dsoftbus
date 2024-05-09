@@ -645,7 +645,6 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
         }
     }
     if (result != 0) {
-        error = SOFTBUS_ERRNO(CONN_UNDERLAY_BLUETOOTH_MODULE_CODE) + result;
         error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
     }
     NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
