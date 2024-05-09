@@ -606,19 +606,22 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
         return;
     }
     (void)DelP2pLinkReqByReqId(type, requestId);
-    DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
+    LaneLinkType throryLinkType = reqInfo.laneRequestInfo.linkType;
+    if (reqInfo.laneRequestInfo.linkType != linkInfo->type) {
+        LNN_LOGI(LNN_LANE, "not return specified link, requestId=%{public}u", requestId);
+    }
+    DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, throryLinkType);
     int32_t ret = AddNewP2pLinkedInfo(&reqInfo, linkId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "add new p2p linked info fail, laneReqId=%{public}u ", reqInfo.laneRequestInfo.laneReqId);
+        LNN_LOGE(LNN_LANE, "add new p2p linked info fail, laneReqId=%{public}u", reqInfo.laneRequestInfo.laneReqId);
         if (reqInfo.laneRequestInfo.cb.OnLaneLinkFail != NULL) {
-            reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, ret,
-                reqInfo.laneRequestInfo.linkType);
+            reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, ret, throryLinkType);
         }
     } else {
         if (reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess != NULL) {
             LNN_LOGI(LNN_LANE, "wifidirect conn succ, laneReqId=%{public}u, linktype=%{public}d, requestId=%{public}u, "
             "linkId=%{public}d", reqInfo.laneRequestInfo.laneReqId, linkInfo->type, requestId, linkId);
-            reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess(reqInfo.laneRequestInfo.laneReqId, linkInfo);
+            reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess(reqInfo.laneRequestInfo.laneReqId, throryLinkType, linkInfo);
         }
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
