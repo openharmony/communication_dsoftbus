@@ -591,10 +591,11 @@ void BusCenterClientDeinit(void)
         LNN_LOGE(LNN_INIT, "unlock in deinit");
     }
     g_busCenterClient.dataLevelCb.OnDataLevelChanged = NULL;
+    SoftBusMutexDestroy(&g_busCenterClient.lock);
     BusCenterServerProxyDeInit();
 }
 
-int BusCenterClientInit(void)
+int32_t BusCenterClientInit(void)
 {
     if (SoftbusGetConfig(SOFTBUS_INT_MAX_NODE_STATE_CB_CNT,
         (unsigned char *)&g_maxNodeStateCbCount, sizeof(g_maxNodeStateCbCount)) != SOFTBUS_OK) {
@@ -628,7 +629,7 @@ int BusCenterClientInit(void)
 
 int32_t GetAllNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo **info, int32_t *infoNum)
 {
-    int ret = ServerIpcGetAllOnlineNodeInfo(pkgName, (void **)info, sizeof(NodeBasicInfo), infoNum);
+    int32_t ret = ServerIpcGetAllOnlineNodeInfo(pkgName, (void **)info, sizeof(NodeBasicInfo), infoNum);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server GetAllOnlineNodeInfo failed, ret=%{public}d", ret);
     }
@@ -637,7 +638,7 @@ int32_t GetAllNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo **info, int
 
 int32_t GetLocalNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo *info)
 {
-    int ret = ServerIpcGetLocalDeviceInfo(pkgName, info, sizeof(*info));
+    int32_t ret = ServerIpcGetLocalDeviceInfo(pkgName, info, sizeof(*info));
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server GetLocalNodeDeviceInfo failed, ret=%{public}d", ret);
     }
@@ -647,7 +648,7 @@ int32_t GetLocalNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo *info)
 int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId, NodeDeviceInfoKey key,
     uint8_t *info, int32_t infoLen)
 {
-    int ret = ServerIpcGetNodeKeyInfo(pkgName, networkId, key, info, infoLen);
+    int32_t ret = ServerIpcGetNodeKeyInfo(pkgName, networkId, key, info, infoLen);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server GetNodeKeyInfo failed, ret=%{public}d", ret);
     }
@@ -656,7 +657,7 @@ int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId, NodeDevi
 
 int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
-    int ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+    int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server SetNodeDataChangeFlag failed, ret=%{public}d", ret);
     }
@@ -667,7 +668,7 @@ int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback)
 {
     LNN_LOGI(LNN_STATE, "RegDataLevelChangeCbInner enter");
     g_busCenterClient.dataLevelCb = *callback;
-    int ret = ServerIpcRegDataLevelChangeCb(pkgName);
+    int32_t ret = ServerIpcRegDataLevelChangeCb(pkgName);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server RegDataLevelChangeCb failed, ret=%{public}d", ret);
     }
@@ -678,7 +679,7 @@ int32_t UnregDataLevelChangeCbInner(const char *pkgName)
 {
     LNN_LOGI(LNN_STATE, "UnregDataLevelChangeCbInner enter");
     g_busCenterClient.dataLevelCb.OnDataLevelChanged = NULL;
-    int ret = ServerIpcUnregDataLevelChangeCb(pkgName);
+    int32_t ret = ServerIpcUnregDataLevelChangeCb(pkgName);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server UnregDataLevelChangeCb failed, ret=%{public}d", ret);
     }
@@ -687,7 +688,7 @@ int32_t UnregDataLevelChangeCbInner(const char *pkgName)
 
 int32_t SetDataLevelInner(const DataLevel *dataLevel)
 {
-    int ret = ServerIpcSetDataLevel(dataLevel);
+    int32_t ret = ServerIpcSetDataLevel(dataLevel);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server SetDataLevel failed, ret=%{public}d", ret);
     }
@@ -1158,7 +1159,7 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnTimeSyncResult(const void *info, int retCode)
+int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode)
 {
     TimeSyncCallbackItem *item = NULL;
     TimeSyncResultInfo *basicInfo = (TimeSyncResultInfo *)info;
