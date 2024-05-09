@@ -495,10 +495,7 @@ static int32_t GetInfoFromSplitKey(char splitKey[][SPLIT_MAX_LEN], int64_t *acco
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (sscanf_s(splitKey[0], "%ld", accountId) <= 0) {
-        LNN_LOGE(LNN_BUILDER, "fail:sscanf_s accountId fail.");
-        return SOFTBUS_ERR;
-    }
+    *accountId = atol(splitKey[0]);
     if (strcpy_s(deviceUdid, UDID_BUF_LEN, splitKey[1]) != EOK) {
         LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceUdid fail.");
         return SOFTBUS_MEM_ERR;
@@ -695,6 +692,7 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
             LNN_LOGE(LNN_BUILDER, "fail:Lnn save remote device info fail");
             return SOFTBUS_ERR;
         }
+        return SOFTBUS_OK;
     }
     if (cacheInfo->stateVersion > stateVersion && stateVersion != 1) {
         return SOFTBUS_OK;
