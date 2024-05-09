@@ -60,7 +60,6 @@ typedef struct {
 } LocalNetLedger;
 
 static LocalNetLedger g_localNetLedger;
-static int64_t g_memAccount;
 
 static void UpdateStateVersionAndStore(void)
 {
@@ -325,6 +324,16 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         return SOFTBUS_INVALID_PARAM;
     }
 
+    int64_t accountId = 0;
+    if (LnnGetAccountIdFromLocalCache(&accountId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get accountid info from cache fail");
+    }
+    if (accountId == *((int64_t *)buf) && *((int64_t *)buf) != 0) {
+        LNN_LOGI(LNN_LEDGER, "no new accountid login");
+        info->accountId = *((int64_t *)buf);
+        return SOFTBUS_OK;
+    }
+
     if (info->accountId ==  0) {
         if (*((int64_t *)buf) == 0) {
             LNN_LOGI(LNN_LEDGER, "no accountid login, default is 0");
@@ -332,18 +341,12 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         }
         LNN_LOGI(LNN_LEDGER, "accountid login");
         info->accountId = *((int64_t *)buf);
-        if (g_memAccount != 0 && g_memAccount != *((int64_t *)buf)) {
-            LNN_LOGI(LNN_LEDGER, "accountid change");
-            info->stateVersion++;
-            if (info->stateVersion > MAX_STATE_VERSION) {
-                info->stateVersion = 1;
-            }
-        }
+        info->stateVersion++;
         if (LnnSaveLocalDeviceInfo(info) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "update all info to local store fail");
+            LNN_LOGE(LNN_LEDGER, "accountid login, update all info to local store fail");
         }
         if (LnnLedgerAllDataSyncToDB(info) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "lnn ledger all data sync to cloud fail");
+            LNN_LOGE(LNN_LEDGER, "accountid login, lnn ledger all data sync to cloud fail");
             return SOFTBUS_MEM_ERR;
         }
         return SOFTBUS_OK;
@@ -353,9 +356,10 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         LNN_LOGI(LNN_LEDGER, "accountid logout");
         if (LnnDeleteSyncToDB() != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "lnn clear local cache fail");
+            info->accountId = *((int64_t *)buf);
+            LnnSaveLocalDeviceInfo(info);
             return SOFTBUS_MEM_ERR;
         }
-        g_memAccount = info->accountId;
         info->accountId = *((int64_t *)buf);
         LnnSaveLocalDeviceInfo(info);
         return SOFTBUS_OK;
