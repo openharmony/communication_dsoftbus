@@ -74,7 +74,7 @@ int32_t LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p(const LinkRequest *req
         GTEST_LOG_(INFO) << "delay notify laneLinkSuccess after 50ms";
         std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     }
-    callback->OnLaneLinkSuccess(laneLinkReqId, &linkInfo);
+    callback->OnLaneLinkSuccess(laneLinkReqId, request->linkType, &linkInfo);
     return SOFTBUS_OK;
 }
 
