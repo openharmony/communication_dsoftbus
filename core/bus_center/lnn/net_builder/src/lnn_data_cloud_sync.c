@@ -47,6 +47,8 @@
 #define UDID_HASH_HEX_LEN 16
 static int32_t g_dbId = 0;
 
+static SoftBusMutex g_cloudSyncMutex;
+
 static int32_t ConvertNameInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
 {
     cloudSyncInfo->accountId = nodeInfo->accountId;
@@ -699,12 +701,18 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
         }
         return SOFTBUS_OK;
     }
+    if (SoftBusMutexLock(&g_cloudSyncMutex) != 0) {
+        LNN_LOGE(LNN_BUILDER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     if (cacheInfo->stateVersion > stateVersion && stateVersion != 1) {
+        (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
         return SOFTBUS_OK;
     }
     cacheInfo->stateVersion = stateVersion;
     UpdateInfoToCacheAndLedger(cacheInfo, deviceUdid, fieldName, trueValue);
     (void)LnnSaveRemoteDeviceInfo(cacheInfo);
+    (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
     return SOFTBUS_OK;
 }
 
@@ -942,6 +950,10 @@ void LnnInitCloudSyncModule(void)
         return;
     }
     g_dbId = dbId;
+    if (SoftBusMutexInit(&g_cloudSyncMutex, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Lnn Init cloud Sync mutex fail");
+        return;
+    }
 }
 
 void LnnDeInitCloudSyncModule(void)
@@ -951,4 +963,5 @@ void LnnDeInitCloudSyncModule(void)
     if (LnnDestroyKvAdapter(dbId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "DeInit Cloud Sync module fail");
     }
+    SoftBusMutexDestroy(&g_cloudSyncMutex);
 }
