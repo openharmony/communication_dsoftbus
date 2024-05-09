@@ -36,7 +36,7 @@ void SoftbusBitmapClr(uint32_t *bitmap, const uint8_t pos)
 
 void SoftbusBitmapSetBits(uint32_t *bitmap, const uint8_t start, const uint8_t nums)
 {
-    if (bitmap == NULL || start > UINT32_BITNUM || (start + nums) > UINT32_BITNUM || nums == 0) {
+    if (bitmap == NULL || start > UINT32_BITNUM || (start + nums) > UINT32_BITNUM || nums == 0 || start == 0) {
         return;
     }
     *bitmap |= (UINT32_MAX - ((((1U << ((start + nums - 1U))) - 1U)) & (~((1U << ((start - 1U))) - 1U))));
@@ -44,7 +44,7 @@ void SoftbusBitmapSetBits(uint32_t *bitmap, const uint8_t start, const uint8_t n
 
 void SoftbusBitmapClrBits(uint32_t *bitmap, const uint8_t start, const uint8_t nums)
 {
-    if (bitmap == NULL || start > UINT32_BITNUM || (start + nums) > UINT32_BITNUM || nums == 0) {
+    if (bitmap == NULL || start > UINT32_BITNUM || (start + nums) > UINT32_BITNUM || nums == 0 || start == 0) {
         return;
     }
     *bitmap &= ((((1U << ((start + nums - 1U))) - 1U)) & (~((1U << ((start - 1U))) - 1U)));

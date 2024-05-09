@@ -112,6 +112,6 @@ void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
     (void)callback;
 }
 
-void LnnUnregDataLevelChangeCb()
+void LnnUnregDataLevelChangeCb(void)
 {
 }

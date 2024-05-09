@@ -99,6 +99,6 @@ void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
     (void)callback;
 }
 
-void LnnBleHbUnregDataLevelChangeCb()
+void LnnBleHbUnregDataLevelChangeCb(void)
 {
 }
