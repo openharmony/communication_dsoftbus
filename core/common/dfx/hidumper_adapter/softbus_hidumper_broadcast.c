@@ -139,6 +139,7 @@ static void BroadcastMsgHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         COMM_LOGE(COMM_DFX, "msg is null");
+        return;
     }
 
     if (msg->what != EVENT_BROADCAT_DUMP) {
