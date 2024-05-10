@@ -1035,6 +1035,7 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/interface/include",
