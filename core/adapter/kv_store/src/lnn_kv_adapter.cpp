@@ -343,7 +343,7 @@ int32_t KVAdapter::CloudSync()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
     std::function<void(DistributedKv::ProgressDetail &&)> callback;
-    callback = CloudSyncCallback();
+    callback = CloudSyncCallback;
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
