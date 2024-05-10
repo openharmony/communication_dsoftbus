@@ -43,7 +43,7 @@ template <class T> T GetData()
 void LnnSendSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr) {
-        return false;
+        return;
     }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
@@ -60,7 +60,7 @@ void LnnSendSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
 void LnnSendP2pSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr) {
-        return false;
+        return;
     }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;

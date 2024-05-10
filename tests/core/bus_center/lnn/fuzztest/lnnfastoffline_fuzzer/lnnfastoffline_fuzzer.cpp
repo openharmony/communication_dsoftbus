@@ -43,7 +43,7 @@ template <class T> T GetData()
 void LnnSendNotTrustedInfoFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr) {
-        return false;
+        return;
     }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
