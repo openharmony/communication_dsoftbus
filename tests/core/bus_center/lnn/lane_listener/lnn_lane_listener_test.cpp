@@ -49,7 +49,7 @@ public:
     void TearDown();
 };
 
-static void RegisterStatusListener (struct WifiDirectStatusListener *listener)
+static void RegisterStatusListener(struct WifiDirectStatusListener *listener)
 {
     (void)listener;
     GTEST_LOG_(INFO) << "RegisterStatusListener start";
