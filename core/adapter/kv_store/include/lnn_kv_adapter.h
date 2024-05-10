@@ -39,6 +39,7 @@ public:
     int32_t Get(const std::string& key, std::string& value);
     int32_t DeleteKvStore();
     int32_t CloudSync();
+    static void CloudSyncCallback(DistributedKv::ProgressDetail &&detail);
 
 private:
     DistributedKv::Status GetKvStorePtr();
