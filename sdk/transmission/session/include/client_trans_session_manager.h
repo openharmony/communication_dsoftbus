@@ -61,6 +61,13 @@ typedef struct {
     uint32_t waitTime;
 } SocketLifecycleData;
 
+typedef enum {
+    ENABLE_STATUS_INIT,
+    ENABLE_STATUS_SUCCESS,
+    ENABLE_STATUS_FAILED,
+    ENABLE_STATUS_BUTT,
+} SessionEnableStatus;
+
 typedef struct {
     ListNode node;
     int32_t sessionId;
@@ -71,7 +78,7 @@ typedef struct {
     SessionRole role;
     uint32_t maxIdleTime;
     uint32_t timeout;
-    bool isEnable;
+    SessionEnableStatus enableStatus;
     int32_t peerUid;
     int32_t peerPid;
     bool isEncrypt;
@@ -133,7 +140,7 @@ int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
  * @brief Add session.
  * @return  if session already added, return SOFTBUS_TRANS_SESSION_REPEATED, else return SOFTBUS_OK or SOFTBUS_ERR.
  */
-int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled);
+int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, SessionEnableStatus *isEnabled);
 
 int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId);
 
@@ -145,7 +152,8 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
 
 int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey key);
 
-int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, bool *isEnable);
+int32_t ClientGetChannelBySessionId(
+    int32_t sessionId, int32_t *channelId, int32_t *type, SessionEnableStatus *enableStatus);
 
 int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
 
@@ -196,8 +204,8 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
 
 int32_t ClientDeleteSocketSession(int32_t sessionId);
 
-int32_t ClientAddSocketSession(const SessionParam *param, bool isEncyptedRawStream, int32_t *sessionId,
-    bool *isEnabled);
+int32_t ClientAddSocketSession(
+    const SessionParam *param, bool isEncyptedRawStream, int32_t *sessionId, SessionEnableStatus *isEnabled);
 
 int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener, bool isServer);
 
@@ -242,6 +250,7 @@ int32_t ClientWaitSyncBind(int32_t socket);
 int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode);
 void AddSessionStateClosing(void);
 int32_t SetSessionInitInfoById(int32_t sessionId);
+int32_t ClientSetEnableStatusBySocket(int32_t socket, SessionEnableStatus enableStatus);
 #ifdef __cplusplus
 }
 #endif

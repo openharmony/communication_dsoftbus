@@ -632,6 +632,10 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
 static void TransOnLaneRequestFail(uint32_t laneHandle, int32_t reason)
 {
     TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    if (reason == SOFTBUS_TIMOUT) {
+        TRANS_LOGW(TRANS_SVC, "request laneHandle=%{public}u timeout, convert to trans error code", laneHandle);
+        reason = SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT;
+    }
     int32_t ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, false, NULL, false, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
@@ -1041,9 +1045,10 @@ int32_t TransGetLaneInfoByQos(const LaneAllocInfo *allocInfo, LaneConnInfo *conn
         TRANS_LOGE(TRANS_SVC, "get lane info param error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (TransAddLaneAllocToPendingAndWaiting(*laneHandle, allocInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
-        return SOFTBUS_ERR;
+    int32_t ret = TransAddLaneAllocToPendingAndWaiting(*laneHandle, allocInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed. ret=%{public}d", ret);
+        return ret;
     }
     bool bSuccess = false;
     int32_t errCode = SOFTBUS_ERR;
