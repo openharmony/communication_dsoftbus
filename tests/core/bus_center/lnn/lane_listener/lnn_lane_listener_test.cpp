@@ -49,11 +49,21 @@ public:
     void TearDown();
 };
 
-static void
+static void RegisterStatusListener (struct WifiDirectStatusListener *listener)
+{
+    (void)listener;
+    GTEST_LOG_(INFO) << "RegisterStatusListener start";
+}
+
+static struct WifiDirectManager g_manager = {
+    .registerStatusListener = RegisterStatusListener,
+};
 
 void LNNLaneListenerTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "LNNLaneListenerTest start";
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     LnnInitLaneLooper();
     InitLaneListener();
     GTEST_LOG_(INFO) << "LNNLaneListenerTest init end";
@@ -102,6 +112,8 @@ static LaneStatusListener g_listener = {
 */
 HWTEST_F(LNNLaneListenerTest, LNN_INIT_LANE_LISTENER_001, TestSize.Level1)
 {
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     int32_t ret  = InitLaneListener();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
