@@ -14,12 +14,13 @@
 */
 
 #include <cinttypes>
+#include <functional>
 #include <mutex>
 #include <unistd.h>
 #include <vector>
 
-#include "lnn_kv_adapter.h"
 #include "anonymizer.h"
+#include "lnn_kv_adapter.h"
 #include "lnn_log.h"
 #include "softbus_errcode.h"
 
@@ -341,6 +342,8 @@ int32_t KVAdapter::DeleteKvStorePtr()
 int32_t KVAdapter::CloudSync()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
+    std::function<void(DistributedKv::ProgressDetail &&)> callback;
+    callback = CloudSyncCallback();
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
@@ -348,7 +351,7 @@ int32_t KVAdapter::CloudSync()
             LNN_LOGE(LNN_LEDGER, "kvDBPtr is null!");
             return SOFTBUS_KV_DB_PTR_NULL;
         }
-        status = kvStorePtr_->CloudSync(nullptr);
+        status = kvStorePtr_->CloudSync(callback);
     }
     if (status == DistributedKv::Status::CLOUD_DISABLED) {
         LNN_LOGE(LNN_LEDGER, "cloud sync disabled, ret: %{public}d", status);
@@ -360,6 +363,18 @@ int32_t KVAdapter::CloudSync()
     }
     LNN_LOGI(LNN_LEDGER, "cloud sync ok, ret: %{public}d", status);
     return SOFTBUS_OK;
+}
+
+void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
+{
+    auto code = detail.code;
+    auto progress = detail.progress;
+    if (progress == DistributedKv::Progress::SYNC_FINISH && code == DistributedKv::Status::SUCCESS) {
+        LNN_LOGI(LNN_LEDGER, "cloud sync succeed");
+    }
+    if (progress == DistributedKv::Progress::SYNC_FINISH && code != DistributedKv::Status::SUCCESS) {
+        LNN_LOGI(LNN_LEDGER, "cloud sync failed, code: %{public}d", code);
+    }
 }
 
 } // namespace OHOS
