@@ -54,7 +54,7 @@ constexpr char UUID_TEST2[UUID_BUF_LEN] = { 0 };
 #define LINK_TYPE          8
 #define CLIENT_PORT        6666
 #define KEEPALIVE_TIME     601
-const char *Ip = "127.0.0.1";
+const char *IP = "127.0.0.1";
 
 class AuthTest : public testing::Test {
 public:
@@ -83,9 +83,10 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     return;
 }
 
-static void OnGroupDeleted(const char *groupId)
+static void OnGroupDeleted(const char *groupId, int32_t groupType)
 {
     (void)groupId;
+    (void)groupType;
     return;
 }
 
@@ -1634,7 +1635,14 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
     uint32_t requestId = 0;
     uint64_t connId = 0;
     AuthConnInfo *connInfo = nullptr;
-    int32_t ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, connInfo, false, true);
+    AuthParam authInfo = {
+        .authSeq = GenSeq(false),
+        .requestId = requestId,
+        .connId = connId,
+        .isServer = false,
+        .isFastAuth = true,
+    };
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo authConnInfo;
     authConnInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -1644,7 +1652,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
     authConnInfo.info.ipInfo.port = 20;
     authConnInfo.info.ipInfo.authId = 1024;
     (void)strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, ip);
-    ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, &authConnInfo, false, true);
+    ret = AuthSessionStartAuth(&authInfo, &authConnInfo);
     EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
 }
 
@@ -1822,10 +1830,12 @@ HWTEST_F(AuthTest, UNPACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
     int32_t linkType = 1;
     SoftBusVersion version = SOFTBUS_OLD_V1;
     NodeInfo nodeInfo;
+    AuthSessionInfo info;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     bool isMetaAuth = false;
     DevInfoData devInfo = {msg, 0, linkType, version};
-    int32_t ret = UnpackDeviceInfoMessage(&devInfo, &nodeInfo, isMetaAuth);
+    int32_t ret = UnpackDeviceInfoMessage(&devInfo, &nodeInfo, isMetaAuth, &info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -2090,7 +2100,7 @@ HWTEST_F(AuthTest, AUTH_SET_TCP_KEEPALIVE_OPTION_Test_003, TestSize.Level1)
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
-    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
+    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), IP);
     int fd = tcp->OpenServerSocket(&info);
 
     int32_t ret = AuthSetTcpKeepAliveOption(fd, HIGH_FREQ_CYCLE);

@@ -169,7 +169,7 @@ static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int
 
 static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
 {
-    return g_cb->OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH);
+    return g_cb->OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH, MESSAGE_TYPE_NOMAL);
 }
 
 static int32_t AuthGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
@@ -327,6 +327,10 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         .channelType = CHANNEL_TYPE_AUTH,
         .authId = authId
     };
+    char localUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra.localUdid = localUdid;
+    }
     AppInfo appInfo;
     int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo, len);
     if (ret != SOFTBUS_OK) {

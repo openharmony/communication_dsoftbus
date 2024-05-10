@@ -73,6 +73,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
         WRITE_PARCEL_WITH_RET(data, FileDescriptor, channel->fd, SOFTBUS_ERR);
+        WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_ERR);
     }
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isServer, SOFTBUS_ERR);
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isEnabled, SOFTBUS_ERR);
@@ -206,40 +207,39 @@ int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t route
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(channelId)) {
         TRANS_LOGE(TRANS_CTRL, "write channel id failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(channelType)) {
         TRANS_LOGE(TRANS_CTRL, "write channel type failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteInt32(messageType)) {
+        TRANS_LOGE(TRANS_CTRL, "write message type failed");
+        return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_CLOSED, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelClosed send request failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        TRANS_LOGE(TRANS_CTRL, "OnChannelClosed read serverRet failed");
-        return SOFTBUS_ERR;
-    }
-    return serverRet;
+    return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *dataInfo,
@@ -481,5 +481,11 @@ void TransClientProxy::OnRefreshDeviceFound(const void *device, uint32_t deviceL
 {
     (void)device;
     (void)deviceLen;
+}
+
+void TransClientProxy::OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
+{
+    (void)networkId;
+    (void)dataLevelInfo;
 }
 } // namespace OHOS

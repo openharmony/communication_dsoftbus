@@ -144,7 +144,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     } else if (ret != SOFTBUS_OK) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     }
-    TRANS_LOGI(TRANS_CTRL, "on open ret=%{public}d", ret);
+    TRANS_LOGI(TRANS_CTRL, "on open, channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
 
@@ -173,7 +173,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     int8_t isServer;
 
-    if (TransProxyGetChannelIsServer(channelId, &isServer) == SOFTBUS_OK && !isServer) {
+    if ((TransProxyGetChannelIsServer(channelId, &isServer) == SOFTBUS_OK && !isServer) || appInfo->isClient) {
         TransEventExtra extra = {
             .calleePkg = NULL,
             .peerNetworkId = appInfo->peerData.deviceId,
@@ -376,7 +376,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
     if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
-        return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+        return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
     }
 
     if (info->status != PROXY_CHANNEL_STATUS_COMPLETED && info->status != PROXY_CHANNEL_STATUS_KEEPLIVEING) {

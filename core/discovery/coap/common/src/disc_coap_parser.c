@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,13 +44,13 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
     }
     char *anonymizedStr;
     Anonymize(tmpUdid, &anonymizedStr);
-    DISC_LOGI(DISC_COAP, "devId=%{public}s", anonymizedStr);
+    DISC_LOGI(DISC_COAP, "devId=%{public}s", AnonymizeWrapper(anonymizedStr));
     AnonymizeFree(anonymizedStr);
     cJSON_Delete(udidJson);
 
     int32_t ret = GenerateStrHashAndConvertToHexString((const unsigned char *)tmpUdid, HEX_HASH_LEN,
         (unsigned char *)device->devId, HEX_HASH_LEN + 1);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
         "generate udid hex hash failed, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
@@ -66,7 +66,7 @@ void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
     device->addrNum = 1;
     char *anonymizedStr;
     Anonymize(device->addr[0].info.ip.ip, &anonymizedStr);
-    DISC_LOGD(DISC_COAP, "ip=%{public}s", anonymizedStr);
+    DISC_LOGD(DISC_COAP, "ip=%{public}s", AnonymizeWrapper(anonymizedStr));
     AnonymizeFree(anonymizedStr);
 }
 
@@ -109,7 +109,7 @@ int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValu
         return SOFTBUS_OK;
     }
     DISC_LOGE(DISC_COAP, "cannot find the key: key=%{public}s", key);
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL;
 }
 
 int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
@@ -119,15 +119,15 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
     char serviceData[MAX_SERVICE_DATA_LEN] = {0};
     if (!GetJsonObjectStringItem(data, JSON_SERVICE_DATA, serviceData, sizeof(serviceData))) {
         DISC_LOGD(DISC_COAP, "parse service data failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     char port[MAX_PORT_STR_LEN] = {0};
     int32_t ret = DiscCoapParseKeyValueStr(serviceData, SERVICE_DATA_PORT, port, MAX_PORT_STR_LEN);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "parse service data failed");
-    uint32_t authPort = atoi(port);
-    if (authPort > UINT16_MAX || authPort <= 0) {
-        DISC_LOGE(DISC_COAP, "the auth port is invalid. authPort=%{public}u", authPort);
-        return SOFTBUS_ERR;
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "parse service data failed");
+    int32_t authPort = atoi(port);
+    if (authPort <= 0 || authPort > UINT16_MAX) {
+        DISC_LOGE(DISC_COAP, "the auth port is invalid. authPort=%{public}d", authPort);
+        return SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL;
     }
     device->addr[0].info.ip.port = (uint16_t)authPort;
     return SOFTBUS_OK;
@@ -148,14 +148,14 @@ void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device)
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "generate account hash failed, ret=%{public}d", ret);
 }
 
-int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData)
+int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
+    uint32_t outDataLen)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(outData != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "out data is NULL");
     if (capability != (1 << CASTPLUS_CAPABILITY_BITMAP)) {
         // only castPlus need add extra service data
         return SOFTBUS_OK;
     }
-    (void)memset_s(outData, sizeof(outData), 0, sizeof(outData));
     if (capabilityData == NULL || dataLen == 0) {
         DISC_LOGI(DISC_COAP, "no capability data, no need to fill service data");
         return SOFTBUS_OK;
@@ -174,10 +174,10 @@ int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData,
         cJSON_Delete(json);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (sprintf_s(outData, MAX_SERVICE_DATA_LEN, "%s:%s", JSON_KEY_CAST_PLUS, jsonStr) < 0) {
+    if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, jsonStr) < 0) {
         DISC_LOGE(DISC_COAP, "write cast capability data failed");
         cJSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     cJSON_Delete(json);
     return SOFTBUS_OK;

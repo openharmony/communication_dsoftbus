@@ -153,6 +153,29 @@ bool HasSessionKey(const SessionKeyList *list)
     return !IsListEmpty(list);
 }
 
+AuthLinkType GetSessionKeyTypeByIndex(const SessionKeyList *list, int32_t index)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(list, AUTH_LINK_TYPE_MAX);
+    SessionKeyItem *item = NULL;
+    uint32_t type = 0;
+    LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
+        if (item->index == index) {
+            type = item->type;
+            break;
+        }
+    }
+    if (type == 0) {
+        return AUTH_LINK_TYPE_MAX;
+    }
+    for (uint32_t i = AUTH_LINK_TYPE_WIFI; i < AUTH_LINK_TYPE_MAX; i++) {
+        if (SessionKeyHasAuthLinkType(type, (AuthLinkType)i)) {
+            AUTH_LOGI(AUTH_FSM, "auth link type=%{public}d", i);
+            return (AuthLinkType)i;
+        }
+    }
+    return AUTH_LINK_TYPE_MAX;
+}
+
 uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list, AuthLinkType type)
 {
     CHECK_NULL_PTR_RETURN_VALUE(list, 0);
@@ -263,8 +286,8 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32
     latestKey->lastUseTime = GetCurrentTimeMs();
     latestKey->useTime[type] = latestKey->lastUseTime;
     *index = latestKey->index;
-    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, type=%{public}u", latestKey->index,
-        latestKey->type);
+    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, type=%{public}u, time=%{public}" PRIu64,
+        latestKey->index, latestKey->type, latestKey->lastUseTime);
     return SOFTBUS_OK;
 }
 
@@ -310,7 +333,7 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, AuthLink
         }
         item->lastUseTime = GetCurrentTimeMs();
         item->useTime[type] = item->lastUseTime;
-        AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d", index);
+        AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, time=%{public}" PRIu64, index, item->lastUseTime);
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d, type=%{public}u", index, item->type);
@@ -354,10 +377,10 @@ void ClearSessionkeyByAuthLinkType(int64_t authId, SessionKeyList *list, AuthLin
         }
         ClearAuthLinkType(&item->type, type);
         if (item->type == 0) {
-            ListDelete(&item->node);
-            SoftBusFree(item);
             AUTH_LOGI(AUTH_FSM, "remove sessionkey, type=%{public}d, index=%{public}d, authId=%{public}" PRId64,
                 type, item->index, authId);
+            ListDelete(&item->node);
+            SoftBusFree(item);
         } else {
             UpdateLatestUseTime(item, type);
         }
@@ -506,8 +529,14 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
     if (auth == NULL) {
         return;
     }
-    if (AuthSessionStartAuth(GenSeq(false), AuthGenRequestId(),
-        auth->connId[authHandle.type], &auth->connInfo[authHandle.type], false, false) != SOFTBUS_OK) {
+    AuthParam authInfo = {
+        .authSeq = GenSeq(false),
+        .requestId = AuthGenRequestId(),
+        .connId = auth->connId[authHandle.type],
+        .isServer = false,
+        .isFastAuth = false,
+    };
+    if (AuthSessionStartAuth(&authInfo, &auth->connInfo[authHandle.type]) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64,
             authHandle.authId);
     }

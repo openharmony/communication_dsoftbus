@@ -41,7 +41,10 @@ int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
 int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList);
 
+int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
+    LanePreferredLinkList *recommendList);
+
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_SELECT_H

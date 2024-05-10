@@ -34,6 +34,7 @@ namespace OHOS {
 #define TEST_CHANNEL_INDENTITY "12345678"
 #define TEST_PKG_NAME "com.trans.proxy.test.pkgname"
 #define TEST_BUF_LEN 32
+#define TEST_AUTHID 1
 
 static int32_t m_testProxyChannelId = -1;
 
@@ -70,12 +71,14 @@ int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessio
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+int32_t TestOnChannelClosed(const char *pkgName, int32_t pid,
+    int32_t channelId, int32_t channelType, int32_t messageType)
 {
     (void)pkgName;
     (void)pid;
     (void)channelId;
     (void)channelType;
+    (void)messageType;
     TRANS_LOGI(TRANS_TEST, "TestOnChannelClosed enter.");
     return SOFTBUS_OK;
 }
@@ -154,9 +157,15 @@ void TestDelTestProxyChannel(void)
 HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
 {
     TestAddTestProxyChannel();
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    chan->myId = m_testProxyChannelId;
+    chan->channelId = m_testProxyChannelId;
+    chan->authHandle.authId = AUTH_INVALID_ID;
+    chan->appInfo.appType = APP_TYPE_NORMAL;
+    chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
 
-    int32_t ret = SetCipherOfHandshakeMsg(m_testProxyChannelId, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    int32_t ret = SetCipherOfHandshakeMsg(chan, NULL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED);
 
     TestDelTestProxyChannel();
 }
@@ -169,10 +178,16 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
 {
-    TestAddTestProxyChannel(1);
+    TestAddTestProxyChannel(TEST_AUTHID);
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    chan->myId = m_testProxyChannelId;
+    chan->channelId = m_testProxyChannelId;
+    chan->authHandle.authId = TEST_AUTHID;
+    chan->appInfo.appType = APP_TYPE_NORMAL;
+    chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
 
-    int32_t ret = SetCipherOfHandshakeMsg(m_testProxyChannelId, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    int32_t ret = SetCipherOfHandshakeMsg(chan, NULL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED);
 
     TestDelTestProxyChannel();
 }
@@ -186,7 +201,7 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
 HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
     int32_t ret = TransProxyHandshake(NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ProxyChannelInfo info;
     info.appInfo.appType = APP_TYPE_NORMAL;
@@ -197,11 +212,11 @@ HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
     info.channelId = m_testProxyChannelId;
     
     ret = TransProxyHandshake(&info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
 
     info.authHandle.authId = AUTH_INVALID_ID;
     ret = TransProxyHandshake(&info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
 
     TestDelTestProxyChannel();
 }
@@ -224,17 +239,17 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     info.channelId = m_testProxyChannelId;
 
     int32_t ret = TransProxyAckHandshake(0, NULL, SOFTBUS_ERR);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_ERR);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_OK);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     info.appInfo.appType = APP_TYPE_NORMAL;
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_ERR);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 
     TestDelTestProxyChannel();
 }
@@ -254,7 +269,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyKeepaliveTest001, TestSize.Level1)
     info.peerId = 0;
     info.authHandle.authId = AUTH_INVALID_ID;
     int32_t ret = strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
 
@@ -281,7 +296,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyKeepaliveTest002, TestSize.Level1)
     info.peerId = 0;
     info.authHandle.authId = AUTH_INVALID_ID;
     int32_t ret = strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TestAddTestProxyChannel(1);
     info.channelId = m_testProxyChannelId;
     TransProxyKeepalive(connId, &info);
@@ -308,14 +323,14 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
     info.channelId = m_testProxyChannelId;
 
     int32_t ret = TransProxyAckKeepalive(NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransProxyAckKeepalive(&info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     info.appInfo.appType = APP_TYPE_NORMAL;
     ret = TransProxyAckKeepalive(&info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TestDelTestProxyChannel();
 }
@@ -339,7 +354,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
     info.channelId = m_testProxyChannelId;
 
     int32_t ret = TransProxyAckKeepalive(&info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TestDelTestProxyChannel();
 }
@@ -362,7 +377,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest001, TestSize.Level1)
 
     TestAddTestProxyChannel();
     int ret = TransProxyResetPeer(&info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     TestDelTestProxyChannel();
 }
 
@@ -384,7 +399,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest002, TestSize.Level1)
 
     TestAddTestProxyChannel(1);
     int ret = TransProxyResetPeer(&info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     TestDelTestProxyChannel();
 }
 
@@ -431,7 +446,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessErrMsgTest001, TestSize.Level1)
     info.peerId = 0;
     info.authHandle.authId = AUTH_INVALID_ID;
     int32_t ret = strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TestAddTestProxyChannel();
 
     info.channelId = -1;
@@ -463,7 +478,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessHandshakeMsgTest001, TestSize.L
     info.peerId = 0;
     info.authHandle.authId = AUTH_INVALID_ID;
     int32_t ret = strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TestAddTestProxyChannel();
 
     ProxyMessage msg;
@@ -494,16 +509,20 @@ HWTEST_F(TransProxyChannelTest, TransProxyCreateChanInfoTest001, TestSize.Level1
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
 
+    ProxyChannelInfo *normalInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     AppInfo appInfo;
     appInfo.appType = APP_TYPE_NORMAL;
     int32_t ret = TransProxyCreateChanInfo(info, 1, &appInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    appInfo.appType = APP_TYPE_AUTH;
-    ret = TransProxyCreateChanInfo(info, 1, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    TransProxyManagerDeinitInner();
+    ProxyChannelInfo *authInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    appInfo.appType = APP_TYPE_AUTH;
+    ret = TransProxyCreateChanInfo(info, 2, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(info);
+    SoftBusFree(normalInfo);
+    SoftBusFree(authInfo);
 }
 
 /**
@@ -516,7 +535,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyTimerProcTest001, TestSize.Level1)
 {
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransProxyTimerProc();
     TransProxyManagerDeinitInner();
 }
@@ -532,7 +551,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyDestroyChannelListTest001, TestSize.Le
     TransProxyDestroyChannelList(NULL);
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ListNode destroyList;
     ListInit(&destroyList);
     TransProxyDestroyChannelList(&destroyList);
@@ -552,7 +571,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyDeathCallbackTest001, TestSize.Level1)
 
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransProxyDeathCallback(NULL, pid);
     TransProxyDeathCallback(pkgName, pid);
 
@@ -569,7 +588,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyPackMessageHeadTest001, TestSize.Level
 {
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransProxyManagerDeinitInner();
 }
 
@@ -643,4 +662,28 @@ HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
 
+/**
+ * @tc.name: ConvertConnectType2AuthLinkTypeTest001
+ * @tc.desc: Should return corresponding link type when given different connect types.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyChannelTest, ConvertConnectType2AuthLinkTypeTest001, TestSize.Level1)
+{
+    ConnectType type = CONNECT_TCP;
+    AuthLinkType ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
+    type = CONNECT_BLE;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
+    type = CONNECT_BLE_DIRECT;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
+    type = CONNECT_BR;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BR);
+    type = CONNECT_P2P;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
+}
 } // namespace OHOS

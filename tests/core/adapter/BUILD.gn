@@ -17,6 +17,39 @@ import("../../../dsoftbus.gni")
 module_output_path = "dsoftbus/core"
 dsoftbus_root_path = "../../.."
 
+ohos_unittest("LnnKVAdapterTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/lnn_kv_adapter_test.cpp" ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/adapter/kv_store/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/common/include",
+  ]
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+  external_deps = [ "kv_store:distributeddata_inner" ]
+}
+
+ohos_unittest("LnnKVAdapterWrapperTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/lnn_kv_adapter_wrapper_test.cpp" ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/adapter/kv_store/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+  ]
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+  external_deps = [ "kv_store:distributeddata_inner" ]
+}
+
 ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
   module_out_path = module_output_path
   sources = [ "unittest/dsoftbus_rsa_crypto_test.cpp" ]
@@ -57,6 +90,12 @@ ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
 group("unittest") {
   testonly = true
   deps = [ ":AdapterDsoftbusRsaCryptoTest" ]
+  if (dsoftbus_feature_lnn_cloud_sync) {
+    deps += [
+      ":LnnKVAdapterTest",
+      ":LnnKVAdapterWrapperTest",
+    ]
+  }
 }
 
 group("fuzztest") {

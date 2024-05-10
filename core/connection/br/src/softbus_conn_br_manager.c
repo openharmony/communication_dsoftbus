@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "bus_center_decision_center.h"
+#include "conn_event.h"
 #include "conn_log.h"
 #include "lnn_node_info.h"
 #include "message_handler.h"
@@ -29,7 +30,6 @@
 #include "softbus_conn_common.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
-#include "conn_event.h"
 
 enum BrServerState {
     BR_STATE_AVAILABLE,
@@ -111,8 +111,8 @@ void __attribute__((weak)) NipDisconnectDevice(uint32_t connId)
     (void)connId;
 }
 
-static void DfxRecordBrConnectFail(uint32_t reqId, uint32_t pId, ConnBrDevice *device,
-    const ConnectStatistics *statistics, int32_t reason)
+static void DfxRecordBrConnectFail(
+    uint32_t reqId, uint32_t pId, ConnBrDevice *device, const ConnectStatistics *statistics, int32_t reason)
 {
     if (statistics == NULL) {
         CONN_LOGW(CONN_BR, "statistics is null");
@@ -122,13 +122,11 @@ static void DfxRecordBrConnectFail(uint32_t reqId, uint32_t pId, ConnBrDevice *d
     CONN_LOGD(CONN_BR, "traceId=%{public}u, reason=%{public}d", statistics->connectTraceId, reason);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_FAIL, costTime, reason);
-    ConnEventExtra extra = {
-        .requestId = reqId,
+    ConnEventExtra extra = { .requestId = reqId,
         .linkType = CONNECT_BR,
         .costTime = costTime,
         .errcode = reason,
-        .result = EVENT_STAGE_RESULT_FAILED
-    };
+        .result = EVENT_STAGE_RESULT_FAILED };
     if (device != NULL) {
         extra.peerBrMac = device->addr;
     }
@@ -144,10 +142,9 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
 
     CONN_LOGD(CONN_BR, "traceId=%{public}u", statistics->connectTraceId);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
-    SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_SUCC, costTime,
-                            SOFTBUS_HISYSEVT_CONN_OK);
-    ConnEventExtra extra = {
-        .requestId = statistics->reqId,
+    SoftbusRecordConnResult(
+        pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_SUCC, costTime, SOFTBUS_HISYSEVT_CONN_OK);
+    ConnEventExtra extra = { .requestId = statistics->reqId,
         .connectionId = connection->connectionId,
         .peerBrMac = connection->addr,
         .linkType = CONNECT_BR,
@@ -186,8 +183,8 @@ static void FreeDevice(ConnBrDevice *device)
     SoftBusFree(device);
 }
 
-static int32_t NewRequest(ConnBrRequest **outRequest, uint32_t requestId, ConnectStatistics statistics,
-    const ConnectResult *result)
+static int32_t NewRequest(
+    ConnBrRequest **outRequest, uint32_t requestId, ConnectStatistics statistics, const ConnectResult *result)
 {
     ConnBrRequest *request = (ConnBrRequest *)SoftBusCalloc(sizeof(ConnBrRequest));
     if (request == NULL) {
@@ -380,13 +377,11 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         TransitionToState(BR_STATE_CONNECTING);
     } while (false);
 
-    ConnEventExtra extra = {
-        .connectionId = (int32_t)connection->connectionId,
+    ConnEventExtra extra = { .connectionId = (int32_t)connection->connectionId,
         .peerBrMac = connection->addr,
         .linkType = CONNECT_BR,
         .errcode = status,
-        .result = status == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
-    };
+        .result = status == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE_DIRECTLY, extra);
     if (status != SOFTBUS_OK) {
         ConnBrRemoveConnection(connection);
@@ -604,12 +599,10 @@ static void ServerAccepted(uint32_t connectionId)
             FreeDevice(it);
         }
     }
-    ConnEventExtra extra = {
-        .connectionId = (int32_t)connectionId,
+    ConnEventExtra extra = { .connectionId = (int32_t)connectionId,
         .peerBrMac = connection->addr,
         .linkType = CONNECT_BR,
-        .result = EVENT_STAGE_RESULT_OK
-    };
+        .result = EVENT_STAGE_RESULT_OK };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_SERVER_ACCEPTED, extra);
     ConnBrReturnConnection(&connection);
 }
@@ -651,8 +644,8 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
             result = it->result;
         }
     }
-    if (result == CONN_BR_CONNECT_UNDERLAYER_ERROR_PAGE_TIMEOUT) {
-        error = SOFTBUS_CONN_BR_UNDERLAY_PAGE_TIMEOUT_ERR;
+    if (result != 0) {
+        error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
     }
     NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
 }
@@ -771,8 +764,7 @@ static void DataReceived(ConnBrDataReceivedContext *ctx)
         SoftBusFree(ctx->data);
         return;
     }
-    CONN_LOGD(CONN_BR,
-        "connId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
+    CONN_LOGD(CONN_BR, "connId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         ctx->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
     if (head->module == MODULE_CONNECTION) {
         ReceivedControlData(connection, ctx->data + ConnGetHeadSize(), ctx->dataLen - ConnGetHeadSize());
@@ -1304,8 +1296,8 @@ ConnBrConnection *ConnBrGetConnectionByAddr(const char *addr, ConnSideType side)
 
     int32_t status = SoftBusMutexLock(&g_brManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock manager connections failed, addr=%{public}s, error=%{public}d",
-            animizeAddress, status);
+        CONN_LOGE(
+            CONN_BR, "lock manager connections failed, addr=%{public}s, error=%{public}d", animizeAddress, status);
         return NULL;
     }
 
@@ -1416,12 +1408,10 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
         SoftBusFree(ctx);
         return status;
     }
-    ConnEventExtra extra = {
-        .requestId = (int32_t)requestId,
+    ConnEventExtra extra = { .requestId = (int32_t)requestId,
         .peerBrMac = option->brOption.brMac,
         .linkType = CONNECT_BR,
-        .result = EVENT_STAGE_RESULT_OK
-    };
+        .result = EVENT_STAGE_RESULT_OK };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE, extra);
     CONN_LOGI(CONN_BR, "receive connect request, requestId=%{public}u, address=%{public}s, connectTraceId=%{public}u",
         requestId, anomizeAddress, traceId);
@@ -1438,8 +1428,8 @@ static int32_t BrDisconnectDevice(uint32_t connectionId)
     NipDisconnectDevice(connectionId);
     ConnBrReturnConnection(&connection);
     int32_t status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MGR_DISCONNECT_REQUEST, connectionId, 0, NULL, 0);
-    CONN_LOGI(CONN_BR,
-        "connId=%{public}u, address=%{public}s, status=%{public}d", connectionId, animizeAddress, status);
+    CONN_LOGI(
+        CONN_BR, "connId=%{public}u, address=%{public}s, status=%{public}d", connectionId, animizeAddress, status);
     return status;
 }
 
@@ -1489,7 +1479,7 @@ static int32_t BrStopLocalListening(const LocalListenerInfo *info)
     return ConnBrStopServer();
 }
 
-static bool BrCheckActiveConnection(const ConnectOption *option)
+static bool BrCheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, false, CONN_BR, "BrCheckActiveConnection: option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BR, false, CONN_BR,
@@ -1499,6 +1489,9 @@ static bool BrCheckActiveConnection(const ConnectOption *option)
     CONN_CHECK_AND_RETURN_RET_LOGW(
         connection != NULL, false, CONN_BR, "BrCheckActiveConnection: connection is not exist");
     bool isActive = (connection->state == BR_CONNECTION_STATE_CONNECTED);
+    if (isActive && needOccupy) {
+        ConnBrOccupy(connection);
+    }
     ConnBrReturnConnection(&connection);
     return isActive;
 }
@@ -1720,6 +1713,7 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
         .CheckActiveConnection = BrCheckActiveConnection,
         .UpdateConnection = NULL,
         .PreventConnection = BrPendConnection,
+        .ConfigPostLimit = ConnBrTransConfigPostLimit,
     };
     CONN_LOGI(CONN_INIT, "ok");
     return &connectFuncInterface;

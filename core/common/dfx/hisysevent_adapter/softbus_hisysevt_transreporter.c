@@ -102,6 +102,9 @@ static ApiNameIdMap g_apiNameIdMapTbl[] = {
     {SERVER_GET_LOCAL_DEVICE_INFO, "GetLocalDeviceInfo"},
     {SERVER_GET_NODE_KEY_INFO, "GetNodeKeyInfo"},
     {SERVER_SET_NODE_DATA_CHANGE_FLAG, "SetNodeDataChangeFlag"},
+    {SERVER_REG_DATA_LEVEL_CHANGE_CB, "RegDataChangeLevelCb"},
+    {SERVER_UNREG_DATA_LEVEL_CHANGE_CB, "UnregDataChangeLevelCb"},
+    {SERVER_SET_DATA_LEVEL, "SetDataLevel"},
     {SERVER_START_TIME_SYNC, "StartTimeSync"},
     {SERVER_STOP_TIME_SYNC, "StopTimeSync"},
     {SERVER_QOS_REPORT, "QosReport"},
@@ -286,6 +289,10 @@ static char *GetApiNameByCode(uint32_t code)
 
 void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
 {
+    if (g_calledApiInfoList == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiInfoList is null");
+        return;
+    }
     if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "SoftbusRecordCalledApiInfo lock fail");
         return;
@@ -293,6 +300,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
     char *apiName = GetApiNameByCode(code);
     if (apiName == NULL) {
         (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+        COMM_LOGE(COMM_EVENT, "GetApiNameByCode fail");
         return;
     }
 
@@ -307,6 +315,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
                 if (strcmp(apiCntNode->apiName, apiName) == 0) {
                     isApiDiff = false;
                     apiCntNode->calledtotalCnt++;
+                    COMM_LOGD(COMM_EVENT, "cmpare apiName success");
                     break;
                 }
             }
@@ -321,6 +330,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
         }
         ListAdd(&g_calledApiInfoList->list, &apiInfoNode->node);
         g_calledApiInfoList->cnt++;
+        COMM_LOGD(COMM_EVENT, "GetNewApiInfo success");
     }
     if ((isAppDiff == false) && (isApiDiff == true)) {
         apiInfoNode = NULL;
@@ -334,6 +344,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
                 }
                 ListAdd(&apiInfoNode->apiCntList, &apiCntNode->node);
                 apiInfoNode->cnt++;
+                COMM_LOGD(COMM_EVENT, "GetNewApiCnt success");
             }
         }
     }
@@ -342,6 +353,10 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
 
 void SoftbusRecordCalledApiCnt(uint32_t code)
 {
+    if (g_calledApiCntlist == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiCntlist is null");
+        return;
+    }
     if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "SoftbusRecordCalledApiCnt lock fail");
         return;
@@ -471,18 +486,11 @@ static inline void ClearOpenSessionTime(void)
 static inline int32_t InitOpenSessionEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
-    if (SoftBusMutexInit(&g_openSessionCnt.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    if (SoftBusMutexInit(&g_openSessionCnt.lock, &mutexAttr) != SOFTBUS_OK ||
+        SoftBusMutexInit(&g_openSessionTime.lock, &mutexAttr) != SOFTBUS_OK ||
+        SoftBusMutexInit(&g_openSessionKpi.lock, &mutexAttr) != SOFTBUS_OK) {
+        return SOFTBUS_DFX_INIT_FAILED;
     }
-
-    if (SoftBusMutexInit(&g_openSessionTime.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
-    if (SoftBusMutexInit(&g_openSessionKpi.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
     return SOFTBUS_OK;
 }
 
@@ -658,8 +666,13 @@ static int32_t SoftbusReportCalledAPIEvt(void)
         COMM_LOGE(COMM_EVENT, "Alloc EvtReport Msg Fail!");
         return SOFTBUS_ERR;
     }
+    if (g_calledApiInfoList == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiInfoList is null");
+        return SOFTBUS_NO_INIT;
+    }
     if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "SoftbusReportCalledAPIEvt lock fail");
+        SoftbusFreeEvtReportMsg(msg);
         return SOFTBUS_LOCK_ERR;
     }
     char appName[SOFTBUS_HISYSEVT_PARAM_LEN];
@@ -694,7 +707,12 @@ static int32_t SoftbusReportCalledAPICntEvt(void)
         COMM_LOGE(COMM_EVENT, "Alloc EvtReport Msg Fail!");
         return SOFTBUS_ERR;
     }
+    if (g_calledApiCntlist == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiCntlist is null");
+        return SOFTBUS_NO_INIT;
+    }
     if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
+        SoftbusFreeEvtReportMsg(msg);
         return SOFTBUS_LOCK_ERR;
     }
     CalledApiCntStruct *apiCntItem = NULL;
@@ -907,4 +925,6 @@ void DeinitTransStatisticSysEvt(void)
     }
     DestroySoftBusList(g_calledApiInfoList);
     DestroySoftBusList(g_calledApiCntlist);
+    g_calledApiInfoList = NULL;
+    g_calledApiCntlist = NULL;
 }

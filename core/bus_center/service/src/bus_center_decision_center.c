@@ -29,6 +29,7 @@
 
 #define HCI_ERR_BR_CONN_PAGE_TIMEOUT 0x04
 #define HCI_ERR_BR_CONN_PEER_NOT_SUPORT_SDP_RECODE 0x54
+#define HCI_ERR_BR_CONN_ACL_RECREATE 0x57
 
 #define BR_PAGETIMEOUT_OFFLINE_COUNT 3
 #define BR_SDP_NOT_SUPORT_OFFLINE_COUNT 2
@@ -47,6 +48,20 @@ typedef struct {
 
 static ExceptionConnMgr g_exceptionConnMgr;
 
+static void LeaveSpecificBrNetwork(const char *addr)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (LnnGetNetworkIdByBtMac(addr, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "networkId not found by addr");
+        return;
+    }
+
+    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_STATE, "leave br network failed, ret=%{public}d", ret);
+    }
+    LNN_LOGI(LNN_STATE, "leave br network finished");
+}
 static void LeaveSpecificBrBleNetwork(const char *addr)
 {
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
@@ -69,7 +84,12 @@ static void LeaveSpecificBrBleNetwork(const char *addr)
 
 static void HandleBrConnectException(const ConnectOption *option, int32_t errorCode)
 {
-    if (errorCode != HCI_ERR_BR_CONN_PAGE_TIMEOUT && errorCode != HCI_ERR_BR_CONN_PEER_NOT_SUPORT_SDP_RECODE) {
+    if (errorCode != HCI_ERR_BR_CONN_PAGE_TIMEOUT && errorCode != HCI_ERR_BR_CONN_PEER_NOT_SUPORT_SDP_RECODE &&
+        errorCode != HCI_ERR_BR_CONN_ACL_RECREATE) {
+        return;
+    }
+    if (errorCode == HCI_ERR_BR_CONN_ACL_RECREATE) {
+        LeaveSpecificBrNetwork(option->brOption.brMac);
         return;
     }
 

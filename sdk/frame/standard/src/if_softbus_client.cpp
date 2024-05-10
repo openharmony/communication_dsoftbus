@@ -67,7 +67,7 @@ int32_t ISoftBusClient::OnChannelMsgReceived(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-int32_t ISoftBusClient::OnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t ISoftBusClient::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
@@ -141,6 +141,11 @@ void ISoftBusClient::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
 }
 
 void ISoftBusClient::OnRefreshDeviceFound(const void *device, uint32_t deviceLen)
+{
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+}
+
+void ISoftBusClient::OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
 }

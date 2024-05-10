@@ -32,7 +32,7 @@
 
 #define ENFORCING 1
 
-#define PERMISSION_JSON_LEN 10000
+#define PERMISSION_JSON_LEN 20000
 #define TEMP_STR_MAX_LEN 128
 
 /* permission entry key */
@@ -440,7 +440,11 @@ int32_t LoadPermissionJson(const char *fileName)
     }
     int index;
     SoftBusPermissionEntry *pe = NULL;
-    SoftBusMutexLock(&g_permissionEntryList->lock);
+    if (SoftBusMutexLock(&g_permissionEntryList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "lock fail.");
+        cJSON_Delete(jsonArray);
+        return SOFTBUS_LOCK_ERR;
+    }
     for (index = 0; index < itemNum; index++) {
         cJSON *permissionEntryObeject = cJSON_GetArrayItem(jsonArray, index);
         pe = ProcessPermissionEntry(permissionEntryObeject);
@@ -474,6 +478,11 @@ void DeinitPermissionJson(void)
     SoftBusMutexLock(&g_permissionEntryList->lock);
     while (!IsListEmpty(&g_permissionEntryList->list)) {
         SoftBusPermissionEntry *item = LIST_ENTRY((&g_permissionEntryList->list)->next, SoftBusPermissionEntry, node);
+        if (item == NULL) {
+            SoftBusMutexUnlock(&g_permissionEntryList->lock);
+            COMM_LOGE(COMM_PERM, "get item is NULL");
+            return;
+        }
         ClearAppInfo(&item->appInfo);
         ListDelete(&item->node);
         SoftBusFree(item);

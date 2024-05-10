@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,8 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device);
 void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device);
 int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device);
 void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device);
-int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData);
+int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
+    uint32_t outDataLen);
 int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValue, uint32_t outLen);
 
 #ifdef __cplusplus

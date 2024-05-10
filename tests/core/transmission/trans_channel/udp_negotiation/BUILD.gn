@@ -26,6 +26,7 @@ ohos_unittest("TransUdpNegoTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
     "dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -67,7 +68,7 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/core/frame/common/include",
@@ -111,6 +112,16 @@ ohos_unittest("TransUdpNegotiationTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/core/discovery/event_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/ble/include",
   ]
 
   deps = [
@@ -176,6 +187,7 @@ ohos_unittest("TransUdpManagerTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
     "dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
 
     "$dsoftbus_root_path/interfaces/kits/common",

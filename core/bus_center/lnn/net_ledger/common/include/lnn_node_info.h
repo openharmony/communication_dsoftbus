@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,10 @@ typedef struct {
     MetaInfo metaInfo;
     uint32_t AuthTypeValue;
     uint16_t dataChangeFlag;
+    uint16_t dataDynamicLevel;
+    uint16_t dataStaticLevel;
+    uint32_t dataSwitchLevel;
+    uint16_t dataSwitchLength;
     BatteryInfo batteryInfo;
     bool isScreenOn;
     int64_t wifiVersion;
@@ -165,7 +169,7 @@ typedef struct {
     int32_t brBuffSize;
     int32_t stateVersion;
     int32_t localStateVersion;
-    int32_t groupType;
+    uint32_t groupType;
     bool initPreventFlag;
     int64_t networkIdTimestamp;
     RpaInfo rpaInfo;
@@ -217,6 +221,14 @@ int32_t LnnGetStaFrequency(const NodeInfo *info);
 int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac);
 uint16_t LnnGetDataChangeFlag(const NodeInfo *info);
 int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag);
+uint16_t LnnGetDataDynamicLevel(const NodeInfo *info);
+int32_t LnnSetDataDynamicLevel(NodeInfo *info, uint16_t dataDynamicLevel);
+uint16_t LnnGetDataStaticLevel(const NodeInfo *info);
+int32_t LnnSetDataStaticLevel(NodeInfo *info, uint16_t dataStaticLvel);
+uint32_t LnnGetDataSwitchLevel(const NodeInfo *info);
+int32_t LnnSetDataSwitchLevel(NodeInfo *info, uint32_t dataSwitchLevel);
+uint16_t LnnGetDataSwitchLength(const NodeInfo *info);
+int32_t LnnSetDataSwitchLength(NodeInfo *info, uint16_t dataSwitchLevel);
 const char *LnnGetP2pMac(const NodeInfo *info);
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
 const char *LnnGetP2pGoMac(const NodeInfo *info);

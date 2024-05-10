@@ -132,7 +132,7 @@ static void ConstructLocalInfo(void)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void NotifyWlanLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
+static void NotifyWlanLinkSuccess(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo)
 {
     EXPECT_TRUE((linkInfo->type == LANE_WLAN_2P4G) || (linkInfo->type == LANE_WLAN_5G));
     EXPECT_EQ(linkInfo->linkInfo.wlan.connInfo.port, REMOTE_SESSION_PORT);
@@ -140,21 +140,21 @@ static void NotifyWlanLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
     printf("WLAN: linkSuccess, reqId:0x%x\n", reqId);
 }
 
-static void NotifyWlanLinkFail(uint32_t reqId, int32_t reason)
+static void NotifyWlanLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType)
 {
-    printf("WLAN: reqId:0x%x, fail reason:%d\n", reqId, reason);
+    printf("WLAN: reqId:0x%x, fail reason:%d, linkType:%d\n", reqId, reason, linkType);
 }
 
-static void NotifyBrLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
+static void NotifyBrLinkSuccess(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo)
 {
     EXPECT_TRUE(linkInfo->type == LANE_BR);
     EXPECT_STREQ(linkInfo->linkInfo.br.brMac, NODE_BT_MAC);
     printf("BR: linkSuccess, reqId:0x%x\n", reqId);
 }
 
-static void NotifyBrLinkFail(uint32_t reqId, int32_t reason)
+static void NotifyBrLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType)
 {
-    printf("BR: reqId:0x%x, reason:%d\n", reqId, reason);
+    printf("BR: reqId:0x%x, fail reason:%d, linkType:%d\n", reqId, reason, linkType);
 }
 
 static const char *GetLinkType(LaneLinkType type)
@@ -387,8 +387,8 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
     allocInfo.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
     allocInfo.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
     LaneAllocListener listener = {
-        .OnLaneAllocSuccess = OnLaneRequestSuccess,
-        .OnLaneAllocFail = OnLaneRequestFail,
+        .onLaneAllocSuccess = OnLaneRequestSuccess,
+        .onLaneAllocFail = OnLaneRequestFail,
     };
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);

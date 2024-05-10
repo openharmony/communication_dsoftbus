@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "softbus_hidumper.h"
 #include "softbus_app_info.h"
 #include "softbus_hidumper_alarm.h"
+#include "softbus_hidumper_broadcast.h"
 #include "softbus_hidumper_buscenter.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_disc.h"
@@ -103,6 +104,89 @@ HWTEST_F(HidumperTest, SoftBusHiDumperInitTest001, TestSize.Level1)
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusHiDumperInitTest001, end");
 }
 
+// -------------------------------------------broadcast------------------------------------------ //
+static int32_t BroadcastVarTest1Dumper(int fd)
+{
+    COMM_LOGI(COMM_TEST, "BroadcastVarTest1Dumper called, fd=%{public}d", fd);
+    return SOFTBUS_OK;
+}
+
+static int32_t BroadcastVarTest2Dumper(int fd)
+{
+    COMM_LOGI(COMM_TEST, "BroadcastVarTest2Dumper called, fd=%{public}d", fd);
+    return SOFTBUS_OK;
+}
+
+static int32_t BroadcastVarTest3Dumper(int fd)
+{
+    COMM_LOGI(COMM_TEST, "BroadcastVarTest3Dumper called, fd=%{public}d", fd);
+    return SOFTBUS_OK;
+}
+
+/**
+ * @tc.name: SoftBusRegBroadcastVarDump001
+ * @tc.desc: Verify SoftBusRegBroadcastVarDump function, use broadcastVarArray param, return SOFTBUS_OK.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump001, TestSize.Level1)
+{
+    HiDumperVarNode testBroadcastVarArray[HIDUMPER_VAR_CASE_NUM] = {
+    {"broadcast_var_test_1", &BroadcastVarTest1Dumper},
+    {"broadcast_var_test_2", &BroadcastVarTest2Dumper},
+    {"broadcast_var_test_3", &BroadcastVarTest3Dumper},
+};
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump001, Start");
+    int32_t ret;
+    for (int i = 0; i < HIDUMPER_VAR_CASE_NUM; i++) {
+        ret = SoftBusRegBroadcastVarDump(testBroadcastVarArray[i].varName, testBroadcastVarArray[i].dumpCallback);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump001, end");
+}
+
+/**
+ * @tc.name: SoftBusRegBroadcastVarDump002
+ * @tc.desc: Verify SoftBusRegBroadcastVarDump function, first param dumpVar is NULL, return SOFTBUS_INVALID_PARAM.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump002, TestSize.Level1)
+{
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump002, Start");
+    int32_t ret = SoftBusRegBroadcastVarDump(NULL, &BroadcastVarTest1Dumper);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump002, end");
+}
+
+/**
+ * @tc.name: SoftBusRegBroadcastVarDump003
+ * @tc.desc: Verify SoftBusRegBroadcastVarDump function, second param cb is NULL, return SOFTBUS_INVALID_PARAM.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump003, TestSize.Level1)
+{
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump003, Start");
+    int32_t ret = SoftBusRegBroadcastVarDump(const_cast<char *>(g_testDumpVar), NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump003, end");
+}
+
+/**
+ * @tc.name: SoftBusRegBroadcastVarDump004
+ * @tc.desc: Verify SoftBusRegBroadcastVarDump function, first param dumpVar is NULL,
+ * second cb is null return SOFTBUS_INVALID_PARAM.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump004, TestSize.Level1)
+{
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump004, Start");
+    int32_t ret = SoftBusRegBroadcastVarDump(NULL, NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump004, end");
+}
 
 // -------------------------------------------------disc----------------------------------------- //
 static int32_t DiscVarTest1Dumper(int fd)

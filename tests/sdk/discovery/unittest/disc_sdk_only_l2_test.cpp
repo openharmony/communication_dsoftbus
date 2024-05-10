@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,8 @@
 
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
-#include "discovery_service.h"
 
 using namespace testing::ext;
-
-#define TEST_ERRO_MOUDULE       ((MODULE_LNN) + 3)
 
 namespace OHOS {
 static int g_subscribeId = 0;
@@ -68,7 +65,7 @@ static int GetPublishId(void)
 
 static SubscribeInfo g_sInfo = {
     .subscribeId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .isSameAccount = true,
@@ -80,7 +77,7 @@ static SubscribeInfo g_sInfo = {
 
 static PublishInfo g_pInfo = {
     .publishId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",

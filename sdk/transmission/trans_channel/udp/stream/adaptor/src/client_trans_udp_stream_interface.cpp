@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,24 +69,9 @@ static int32_t CreateRawStream(const std::shared_ptr<StreamAdaptor> &adaptor, co
     return SOFTBUS_OK;
 }
 
-int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamData *ext, const StreamFrameInfo *param)
+static int32_t ProcessAdaptorAndEncrypt(const StreamFrameInfo *param, const StreamData *inData,
+    std::shared_ptr<StreamAdaptor> &adaptor, std::unique_ptr<IStream> &stream, const StreamData *ext)
 {
-    if (inData == nullptr || inData->buf == nullptr || param == nullptr) {
-        TRANS_LOGE(TRANS_STREAM, "invalid argument!");
-        return SOFTBUS_ERR;
-    }
-    std::shared_ptr<StreamAdaptor> adaptor = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(g_mutex);
-        auto it = g_adaptorMap.find(channelId);
-        if (it == g_adaptorMap.end()) {
-            TRANS_LOGE(TRANS_STREAM, "adaptor not existed!");
-            return SOFTBUS_ERR;
-        }
-        adaptor = it->second;
-    }
-
-    std::unique_ptr<IStream> stream = nullptr;
     if (adaptor->GetStreamType() == RAW_STREAM) {
         int32_t ret = CreateRawStream(adaptor, inData->buf, inData->bufLen, stream);
         if (ret != SOFTBUS_OK) {
@@ -118,14 +103,39 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
                 return SOFTBUS_MEM_ERR;
             }
         }
-
         Communication::SoftBus::StreamFrameInfo outFrameInfo;
         ConvertStreamFrameInfo(param, &outFrameInfo);
         stream = IStream::MakeCommonStream(data, outFrameInfo);
     } else {
         TRANS_LOGE(TRANS_STREAM, "Do not support");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamData *ext, const StreamFrameInfo *param)
+{
+    if (inData == nullptr || inData->buf == nullptr || param == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "invalid argument inData or param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::shared_ptr<StreamAdaptor> adaptor = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(g_mutex);
+        auto it = g_adaptorMap.find(channelId);
+        if (it == g_adaptorMap.end()) {
+            TRANS_LOGE(TRANS_STREAM, "adaptor not existed!");
+            return SOFTBUS_ERR;
+        }
+        adaptor = it->second;
     }
 
+    std::unique_ptr<IStream> stream = nullptr;
+    int32_t result = ProcessAdaptorAndEncrypt(param, inData, adaptor, stream, ext);
+    if (result != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_STREAM, "obtain adapters encrypted data failed, result = %{public}d", result);
+        return result;
+    }
     if (stream == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "make stream failed, stream is nullptr");
         return SOFTBUS_ERR;
@@ -259,4 +269,3 @@ int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 
     return SOFTBUS_OK;
 }
-

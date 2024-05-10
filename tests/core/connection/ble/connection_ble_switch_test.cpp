@@ -700,7 +700,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0012, TestSize.Level1)
     optionInfo.type = CONNECT_BLE;
     optionInfo.bleOption.protocol = BLE_GATT;
     (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    bool isActive = CheckActiveConnection(&optionInfo);
+    bool isActive = CheckActiveConnection(&optionInfo, false);
     EXPECT_TRUE(isActive == false);
 };
 

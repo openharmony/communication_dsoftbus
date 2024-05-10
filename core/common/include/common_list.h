@@ -105,7 +105,7 @@ __attribute__((always_inline)) static inline bool IsListEmpty(const ListNode *no
 /* Iterate over a list of given type. */
 #define LIST_FOR_EACH_ENTRY(item, list, type, member) \
     for ((item) = LIST_ENTRY((list)->next, type, member); \
-            &(item)->member != (list); \
+            ((item) != NULL) && (&(item)->member != (list)); \
             (item) = LIST_ENTRY((item)->member.next, type, member))
 
 /* Iterate over a list safe against removal of list entry. */

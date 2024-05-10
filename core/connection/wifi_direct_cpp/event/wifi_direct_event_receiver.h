@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdint>
-#include "access_control.h"
-#include "softbus_error_code.h"
+#ifndef WIFI_DIRECT_EVENT_RECEIVER_H
+#define WIFI_DIRECT_EVENT_RECEIVER_H
 
-int32_t TransCheckClientAccessControl(const char *peerNetworkId)
-{
-    (void)peerNetworkId;
-    return SOFTBUS_OK;
+#include "wifi_direct_event_queue.h"
+#include "wifi_direct_event_sender.h"
+#include "wifi_direct_event_dispatcher.h"
+
+namespace OHOS::SoftBus {
+class WifiDirectEventReceiver {
+public:
+    operator WifiDirectEventSender()
+    {
+        return WifiDirectEventSender(&queue_);
+    }
+
+    WifiDirectEventDispatcher Wait()
+    {
+        return WifiDirectEventDispatcher(&queue_);
+    }
+
+private:
+    WifiDirectEventQueue queue_;
+};
 }
-int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
-{
-    (void)firstCallingId;
-    return SOFTBUS_OK;
-}
-uint32_t TransACLGetFirstTokenID()
-{
-    return SOFTBUS_OK;
-}
+#endif

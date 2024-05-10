@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -207,6 +207,9 @@ const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_CLOSE_CHANNEL, ServerCloseChannel },
     { SERVER_SESSION_SENDMSG, ServerSendSessionMsg },
     { SERVER_SET_NODE_DATA_CHANGE_FLAG, ServerSetNodeDataChangeFlag },
+    { SERVER_REG_DATA_LEVEL_CHANGE_CB, ServerRegDataLevelChangeCb },
+    { SERVER_UNREG_DATA_LEVEL_CHANGE_CB, ServerUnregDataLevelChangeCb },
+    { SERVER_SET_DATA_LEVEL, ServerSetDataLevel },
     { SERVER_RELEASE_RESOURCES, ServerReleaseResources },
 };
 

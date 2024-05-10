@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ public:
     int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel) override;
     int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode) override;
     int32_t OnChannelLinkDown(const char *NetworkId, int32_t routeType) override;
-    int32_t OnChannelClosed(int32_t channelId, int32_t channelType) override;
+    int32_t OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType) override;
     int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t type) override;
     virtual int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
@@ -50,6 +50,7 @@ public:
     void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
+    void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
 
 private:
     static inline BrokerDelegator<BusCenterClientProxy> delegator_;

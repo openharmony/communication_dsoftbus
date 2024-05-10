@@ -102,7 +102,7 @@ static bool HbHasActiveBrConnection(const char *networkId)
         LNN_LOGE(LNN_HEART_BEAT, "HB convert bt mac err");
         return false;
     }
-    ret = CheckActiveConnection(&option);
+    ret = CheckActiveConnection(&option, false);
     LNN_LOGD(LNN_HEART_BEAT, "HB has active bt connection=%{public}s", ret ? "true" : "false");
     return ret;
 }
@@ -129,7 +129,7 @@ static bool HbHasActiveBleConnection(const char *networkId)
         LNN_LOGE(LNN_HEART_BEAT, "HB memcpy_s udid hash err");
         return false;
     }
-    ret = CheckActiveConnection(&option);
+    ret = CheckActiveConnection(&option, false);
     LNN_LOGD(LNN_HEART_BEAT, "HB has active ble connection=%{public}s", ret ? "true" : "false");
     return ret;
 }

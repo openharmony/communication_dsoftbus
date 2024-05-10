@@ -75,7 +75,12 @@ ohos_unittest("SoftbusPermissionACLTest") {
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_single",
+      "samgr:samgr_proxy",
     ]
+    if (!defined(global_parts_info) ||
+        defined(global_parts_info.ability_ability_runtime)) {
+      external_deps += [ "ability_runtime:app_manager" ]
+    }
   } else {
     external_deps = [
       "c_utils:utils",
@@ -90,7 +95,7 @@ ohos_unittest("SoftbusPermissionACLTest") {
     ]
     sources += [ "$dsoftbus_core_path/common/security/permission/standard/access_control.cpp" ]
   } else {
-    sources += [ "$dsoftbus_core_path/common/security/permission/standard/access_control_virtual.cpp" ]
+    sources += [ "$dsoftbus_core_path/common/security/permission/standard/access_control_virtual.c" ]
   }
 }
 

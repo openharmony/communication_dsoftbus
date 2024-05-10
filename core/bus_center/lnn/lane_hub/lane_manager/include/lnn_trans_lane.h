@@ -47,8 +47,13 @@ int32_t PostDelayDestroyMessage(uint32_t laneReqId, uint64_t laneId, uint64_t de
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
 void RemoveDetectTimeoutMessage(uint32_t detectId);
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
+void RemoveDelayDestroyMessage(uint64_t laneId);
+void DelLogicAndLaneRelationship(uint64_t laneId);
+
+int32_t CtrlFree(uint32_t laneHandle);
+int32_t CtrlAlloc(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
 
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_TRANS_LANE_H

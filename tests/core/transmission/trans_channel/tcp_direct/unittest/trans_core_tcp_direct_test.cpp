@@ -49,6 +49,12 @@
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_sessionconn.c"
+#include "softbus_feature_config.h"
+#include "trans_session_service.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
+
 
 using namespace testing::ext;
 
@@ -85,11 +91,25 @@ public:
 
 void TransCoreTcpDirectTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
 }
 
 void TransCoreTcpDirectTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+    TransChannelDeinit();
+}
 
 SessionServer *TestSetPack()
 {
@@ -166,11 +186,11 @@ HWTEST_F(TransCoreTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
 {
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransTcpDirectDeinit();
 
     ret = TransTcpDirectInit(NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     TransTcpDirectDeinit();
 }
@@ -187,14 +207,14 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcDeathCallbackTest002, TestSize.Level1)
     TransTdcDeathCallback(g_pkgName, pid);
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *conn = TestSetSessionConn();
     ret = CreatSessionConnList();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcAddSessionConn(conn);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransTdcDeathCallback(g_pkgName, pid);
 
@@ -220,7 +240,6 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     int32_t channelId = 0;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     uint32_t laneHandle = 1;
-    bool isQosLane = false;
     attr.dataType = 1;
     attr.linkTypeNum = 0;
     SessionParam param = {
@@ -241,18 +260,18 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_ip, strlen(g_ip));
 
-    int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneHandle, &isQosLane);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneHandle);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PID_FAILED);
 
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     connOpt.type = CONNECT_P2P;
     ret = TransOpenDirectChannel(appInfo, &connOpt, &channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransOpenDirectChannel(NULL, &connOpt, &channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(appInfo);
 }
 
@@ -265,7 +284,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
 HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProcTest004, TestSize.Level1)
 {
     int32_t ret = TransSrvDataListInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransTdcStopSessionProc((ListenerModule)DIRECT_CHANNEL_SERVER_WIFI);
 
     TransTdcStopSessionProc((ListenerModule)ERRMOUDLE);
@@ -281,7 +300,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProcTest004, TestSize.Level1
 HWTEST_F(TransCoreTcpDirectTest, TransSrvDataListInitTest005, TestSize.Level1)
 {
     int32_t ret = TransSrvDataListInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransSrvDataListDeinit();
 }
@@ -298,10 +317,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvAddDataBufNodeTest006, TestSize.Level1)
     int32_t fd = 1;
 
     int32_t ret = TransSrvDataListInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSrvAddDataBufNode(channeId, fd);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransSrvDataListDeinit();
 }
@@ -319,10 +338,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
     TransSrvDelDataBufNode(channeId);
 
     int32_t ret = TransSrvDataListInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSrvAddDataBufNode(channeId, fd);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransSrvDelDataBufNode(channeId);
 }
@@ -360,13 +379,13 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     EXPECT_TRUE(pack != nullptr);
 
     int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     ret = VerifyP2pUnPack(NULL, const_cast<char *>(g_ip), IP_LEN, &g_port);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(json);
 }
 
@@ -402,11 +421,11 @@ HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
     uint32_t flag = 0;
 
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     authHandle.authId = INVALID_VALUE;
     ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -430,16 +449,16 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStartSessionListenerTest0012, TestSize.
     }
     info.type = CONNECT_TCP;
     int32_t ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, &info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, nullptr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransTdcStartSessionListener((ListenerModule)ERRMOUDLE, &info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_P2P);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -452,10 +471,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSetCallBackTest0013, TestSize.Level1)
 {
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTdcSetCallBack(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcSetCallBack(NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -471,20 +490,20 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcGetUidAndPidTest0015, TestSize.Level1)
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
     int32_t ret = TransSessionMgrInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionServer *newNode = TestSetPack();
     ret = TransSessionServerAddItem(newNode);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     char pkgName[PKG_NAME_SIZE_MAX_LEN] = {0};
     ret = TransTdcGetPkgName(g_sessionName, pkgName, PKG_NAME_SIZE_MAX_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcGetUidAndPid(g_sessionName, &uid, &pid);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcOnChannelOpenFailed(g_pkgName, pid, channelId, errCode);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransSessionMgrDeinit();
 }
 
@@ -500,7 +519,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
     const char *bytes = "Get Message";
     SessionConn* conn = TestSetSessionConn();
     int32_t ret = TransTdcAddSessionConn(conn);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TdcPacketHead packetHead;
     packetHead.magicNumber = MAGIC_NUMBER;
@@ -510,10 +529,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
     packetHead.dataLen = strlen(bytes);
 
     ret = TransTdcPostBytes(channelId, &packetHead, nullptr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransTdcPostBytes(channelId, &packetHead, bytes);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 }
 
 /**
@@ -528,13 +547,13 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
     int32_t fd = 1;
 
     int32_t ret = TransSrvDataListInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSrvAddDataBufNode(channelId, fd);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransSrvDataListDeinit();
 }
@@ -550,7 +569,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     int errCode = SOFTBUS_OK;
     int32_t channelId = 1;
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
@@ -567,21 +586,21 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
 
     ret = TransTdcAddSessionConn(conn);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     conn->serverSide = false;
     ret = TransSessionMgrInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionServer *newNode = TestSetPack();
     ret = TransSessionServerAddItem(newNode);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     TransSessionMgrDeinit();
     SoftBusFree(conn);
 }

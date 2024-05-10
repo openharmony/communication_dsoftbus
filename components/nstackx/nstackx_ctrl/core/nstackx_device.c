@@ -118,7 +118,7 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
         return NSTACKX_EFAILED;
     }
     const struct in_addr *remoteIp = &(deviceInfo->netChannelInfo.wifiApInfo.ip);
-    uint8_t updated = NSTACKX_FALSE;
+    int8_t updated = NSTACKX_FALSE;
     if (UpdateRemoteNodeByDeviceInfo(deviceId, &info, remoteIp, deviceInfo, &updated) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "update remote node by deviceinfo failed");
         return NSTACKX_EFAILED;
@@ -431,7 +431,7 @@ uint16_t GetSequenceNumber(uint8_t sendBcast)
     return (sendBcast) ? g_seqAll.seqBcast : g_seqAll.seqUcast;
 }
 
-void ResetSequenceNumber()
+void ResetSequenceNumber(void)
 {
     (void)memset_s(&g_seqAll, sizeof(g_seqAll), 0, sizeof(g_seqAll));
 }

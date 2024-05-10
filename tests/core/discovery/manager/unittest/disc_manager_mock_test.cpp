@@ -235,8 +235,8 @@ HWTEST_F(DiscManagerMockTest, DiscPublish002, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, Publish).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscPublish(MODULE_LNN, &info), SOFTBUS_ERR);
+        EXPECT_CALL(bleMock, Publish).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscPublish(MODULE_LNN, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     info.publishId = PUBLISH_ID1;
@@ -251,8 +251,8 @@ HWTEST_F(DiscManagerMockTest, DiscPublish002, TestSize.Level1)
     {
         CoapMock coapMock;
         coapMock.SetupStub();
-        EXPECT_CALL(coapMock, Publish).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscPublish(MODULE_LNN, &info), SOFTBUS_ERR);
+        EXPECT_CALL(coapMock, Publish).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscPublish(MODULE_LNN, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     info.publishId = PUBLISH_ID3;
@@ -325,8 +325,8 @@ HWTEST_F(DiscManagerMockTest, DiscStartScan002, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, StartScan).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscStartScan(MODULE_LNN, &info), SOFTBUS_ERR);
+        EXPECT_CALL(bleMock, StartScan).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscStartScan(MODULE_LNN, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     info.publishId = PUBLISH_ID5;
@@ -341,8 +341,8 @@ HWTEST_F(DiscManagerMockTest, DiscStartScan002, TestSize.Level1)
     {
         CoapMock coapMock;
         coapMock.SetupStub();
-        EXPECT_CALL(coapMock, StartScan).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscStartScan(MODULE_LNN, &info), SOFTBUS_ERR);
+        EXPECT_CALL(coapMock, StartScan).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscStartScan(MODULE_LNN, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     info.publishId = PUBLISH_ID7;
@@ -372,11 +372,11 @@ HWTEST_F(DiscManagerMockTest, DiscUnpublish001, TestSize.Level1)
         bleMock.SetupStub();
         CoapMock coapMock;
         coapMock.SetupStub();
-        EXPECT_CALL(bleMock, Unpublish).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_CALL(bleMock, StopScan).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(bleMock, Unpublish).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_CALL(bleMock, StopScan).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
 
-        EXPECT_EQ(DiscUnpublish(MODULE_LNN, PUBLISH_ID1), SOFTBUS_ERR);
-        EXPECT_EQ(DiscUnpublish(MODULE_LNN, PUBLISH_ID5), SOFTBUS_ERR);
+        EXPECT_EQ(DiscUnpublish(MODULE_LNN, PUBLISH_ID1), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
+        EXPECT_EQ(DiscUnpublish(MODULE_LNN, PUBLISH_ID5), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
     {
         BleMock bleMock;
@@ -451,8 +451,8 @@ HWTEST_F(DiscManagerMockTest, DiscStartAdvertise002, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, StartAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscStartAdvertise(MODULE_LNN, &info), SOFTBUS_ERR);
+        EXPECT_CALL(bleMock, StartAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscStartAdvertise(MODULE_LNN, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     info.subscribeId = SUBSCRIBE_ID1;
@@ -467,8 +467,8 @@ HWTEST_F(DiscManagerMockTest, DiscStartAdvertise002, TestSize.Level1)
     {
         CoapMock coapMock;
         coapMock.SetupStub();
-        EXPECT_CALL(coapMock, StartAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscStartAdvertise(MODULE_LNN, &info), SOFTBUS_ERR);
+        EXPECT_CALL(coapMock, StartAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscStartAdvertise(MODULE_LNN, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     info.subscribeId = SUBSCRIBE_ID3;
@@ -541,8 +541,8 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe002, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, Subscribe).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_ERR);
+        EXPECT_CALL(bleMock, Subscribe).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     info.subscribeId = SUBSCRIBE_ID5;
@@ -557,8 +557,8 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe002, TestSize.Level1)
     {
         CoapMock coapMock;
         coapMock.SetupStub();
-        EXPECT_CALL(coapMock, Subscribe).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_ERR);
+        EXPECT_CALL(coapMock, Subscribe).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     info.subscribeId = SUBSCRIBE_ID7;
@@ -586,11 +586,11 @@ HWTEST_F(DiscManagerMockTest, DiscStopAdvertise001, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, StopAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_CALL(bleMock, Unsubscribe).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(bleMock, StopAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_CALL(bleMock, Unsubscribe).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
 
-        EXPECT_EQ(DiscStopAdvertise(MODULE_LNN, SUBSCRIBE_ID1), SOFTBUS_ERR);
-        EXPECT_EQ(DiscStopAdvertise(MODULE_LNN, SUBSCRIBE_ID5), SOFTBUS_ERR);
+        EXPECT_EQ(DiscStopAdvertise(MODULE_LNN, SUBSCRIBE_ID1), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
+        EXPECT_EQ(DiscStopAdvertise(MODULE_LNN, SUBSCRIBE_ID5), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
     {
         CoapMock coapMock;
@@ -630,8 +630,8 @@ HWTEST_F(DiscManagerMockTest, DiscPublishService001, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, Publish).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscPublishService(packageName_, &info), SOFTBUS_ERR);
+        EXPECT_CALL(bleMock, Publish).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscPublishService(packageName_, &info), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
     {
         BleMock bleMock;
@@ -660,8 +660,8 @@ HWTEST_F(DiscManagerMockTest, DiscUnPublishService001, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, Unpublish).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscUnPublishService(packageName_, PUBLISH_ID8), SOFTBUS_ERR);
+        EXPECT_CALL(bleMock, Unpublish).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscUnPublishService(packageName_, PUBLISH_ID8), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     {
@@ -711,8 +711,8 @@ HWTEST_F(DiscManagerMockTest, DiscStartDiscovery001, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, StartAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscStartDiscovery(packageName_, &info, &serverCallback_), SOFTBUS_ERR);
+        EXPECT_CALL(bleMock, StartAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscStartDiscovery(packageName_, &info, &serverCallback_), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
     }
 
     {
@@ -742,8 +742,8 @@ HWTEST_F(DiscManagerMockTest, DiscStopDiscovery001, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupStub();
-        EXPECT_CALL(bleMock, StopAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
-        EXPECT_EQ(DiscStopDiscovery(packageName_, SUBSCRIBE_ID8), SOFTBUS_ERR);
+        EXPECT_CALL(bleMock, StopAdvertise).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
+        EXPECT_EQ(DiscStopDiscovery(packageName_, SUBSCRIBE_ID8), SOFTBUS_DISCOVER_TEST_CASE_ERRCODE);
         EXPECT_EQ(DiscStopDiscovery(packageName_, SUBSCRIBE_ID8), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE);
     }
 

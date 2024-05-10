@@ -114,12 +114,14 @@ int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessio
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+int32_t TestOnChannelClosed(const char *pkgName, int32_t pid,
+    int32_t channelId, int32_t channelType, int32_t messageType)
 {
     (void)pkgName;
     (void)pid;
     (void)channelId;
     (void)channelType;
+    (void)messageType;
     g_testProxyChannelClosedFlag = true;
     return SOFTBUS_OK;
 }
@@ -364,6 +366,6 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest001, Tes
     strcpy_s(sendData, SESSIONKEYSIZE, VALID_SESSIONNAME);
 
     int32_t ret = TransSendNetworkingMessage(TEST_NUMBER_25, sendData, PROXY_CHANNEL_BT_IDLE_TIMEOUT, CONN_HIGH);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 } // namespace OHOS
