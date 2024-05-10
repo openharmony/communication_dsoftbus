@@ -170,9 +170,10 @@ static void OnLaneLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType
     return;
 }
 
-static void OnLaneLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
+static void OnLaneLinkSuccess(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo)
 {
     (void)reqId;
+    (void)linkType;
     (void)linkInfo;
     return;
 }
