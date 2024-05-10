@@ -64,6 +64,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/adapter/p2p_adapter.cpp",
       "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
       "$wifi_direct_path/channel/proxy_negotiate_channel.cpp",
+      "$wifi_direct_path/channel/null_negotiate_channel.cpp",
       "$wifi_direct_path/command/connect_command.cpp",
       "$wifi_direct_path/command/command_factory.cpp",
       "$wifi_direct_path/command/disconnect_command.cpp",

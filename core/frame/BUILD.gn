@@ -267,7 +267,10 @@ if (defined(ohos_lite)) {
         external_deps += [ "bundle_framework:appexecfwk_core" ]
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
       }
-
+      if (!defined(global_parts_info) ||
+          defined(global_parts_info.ability_ability_runtime)) {
+        cflags += [ "-DSUPPORT_ABILITY_RUNTIME" ]
+      }
       if (enhanced) {
         cflags += [ "-DENHANCED_FLAG" ]
         external_deps += [ "device_certificate_manager:device_cert_mgr_sdk" ]

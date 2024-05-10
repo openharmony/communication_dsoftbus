@@ -48,7 +48,7 @@ static TypeToId g_typeToIdMap[] = {
     {TYPE_SMART_DISPLAY, TYPE_SMART_DISPLAY_ID},
 };
 
-static char g_stringTypeId[DEVICE_TYPE_MAX_LENGTH + 1] = {0};
+static __thread char g_stringTypeId[DEVICE_TYPE_MAX_LENGTH + 1] = {0};
 
 const char *LnnGetDeviceName(const DeviceBasicInfo *info)
 {

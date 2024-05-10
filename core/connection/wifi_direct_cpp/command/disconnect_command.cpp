@@ -15,6 +15,7 @@
 #include "disconnect_command.h"
 #include "conn_log.h"
 #include "channel/proxy_negotiate_channel.h"
+#include "channel/null_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "processor_selector_factory.h"
 
@@ -25,7 +26,8 @@ DisconnectCommand::DisconnectCommand(const WifiDirectDisconnectInfo &info, const
     info_.info_ = info;
     auto innerLink = LinkManager::GetInstance().GetLinkById(info_.info_.linkId);
     if (innerLink == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "not find inner link");
+        CONN_LOGE(CONN_WIFI_DIRECT, "not find inner link, prefer input null channel");
+        info_.channel_ = std::make_shared<NullNeotiateChannel>();
         return;
     }
 
@@ -33,10 +35,12 @@ DisconnectCommand::DisconnectCommand(const WifiDirectDisconnectInfo &info, const
         if (info.negoChannel.type == NEGO_CHANNEL_AUTH) {
             CONN_LOGI(CONN_WIFI_DIRECT, "prefer input auth channel");
             info_.channel_ = std::make_shared<AuthNegotiateChannel>(info.negoChannel.handle.authHandle);
-        }
-        if (info.negoChannel.type == NEGO_CHANNEL_COC) {
+        } else if (info.negoChannel.type == NEGO_CHANNEL_COC) {
             CONN_LOGI(CONN_WIFI_DIRECT, "prefer input proxy channel");
             info_.channel_ = std::make_shared<CoCProxyNegotiateChannel>(info.negoChannel.handle.channelId);
+        } else {
+            CONN_LOGI(CONN_WIFI_DIRECT, "prefer input null channel");
+            info_.channel_ = std::make_shared<NullNeotiateChannel>();
         }
         return;
     }
