@@ -686,24 +686,27 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
         LNN_LOGE(LNN_BUILDER, "Generate UDID HexStringHash fail");
         return SOFTBUS_ERR;
     }
+    if (SoftBusMutexLock(&g_cloudSyncMutex) != 0) {
+        LNN_LOGE(LNN_BUILDER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     NodeInfo *cacheInfo = (NodeInfo *)LnnMapGet(&deviceCacheInfoMap, udidHash);
     if (cacheInfo == NULL) {
         LNN_LOGI(LNN_BUILDER, "no this device info in deviceCacheInfoMap, need to insert");
         NodeInfo newInfo = {0};
         if (strcpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, deviceUdid) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceudid fail");
+            (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
             return SOFTBUS_MEM_ERR;
         }
         UpdateInfoToCacheAndLedger(&newInfo, deviceUdid, fieldName, trueValue);
         if (LnnSaveRemoteDeviceInfo(&newInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "fail:Lnn save remote device info fail");
+            (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
             return SOFTBUS_ERR;
         }
+        (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
         return SOFTBUS_OK;
-    }
-    if (SoftBusMutexLock(&g_cloudSyncMutex) != 0) {
-        LNN_LOGE(LNN_BUILDER, "lock mutex fail");
-        return SOFTBUS_LOCK_ERR;
     }
     if (cacheInfo->stateVersion > stateVersion && stateVersion != 1) {
         (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
