@@ -264,18 +264,6 @@ if (defined(ohos_lite)) {
                                    "$ble_enhanced_impl",
                                  ],
                                  "value")
-    if (enhanced_range) {
-      include_dirs += [
-        "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
-        "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/mlps/include",
-        "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/mlps/interface",
-      ]
-      sources += [
-        "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/src/softbus_adapter_mlps.cpp",
-        "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/mlps/src/mlps.cpp",
-      ]
-    }
-
     if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
       external_deps += [ "algorithm:msdp_ble_range" ]

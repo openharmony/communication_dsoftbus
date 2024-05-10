@@ -136,7 +136,7 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
+    "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/interface",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
