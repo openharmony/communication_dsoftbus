@@ -49,6 +49,8 @@ public:
     void TearDown();
 };
 
+static void
+
 void LNNLaneListenerTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "LNNLaneListenerTest start";
