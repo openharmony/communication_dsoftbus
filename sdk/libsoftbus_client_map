@@ -374,6 +374,7 @@
         "CloseAuthMetaSocket";
         "SendMetaData";
         "Socket";
+        "SetActionAddr";
         "Bind";
         "BindAsync";
         "Listen";
@@ -388,6 +389,7 @@
         "ClientAddSocketSession";
         "ClientSetListenerBySessionId";
         "ClientIpcOpenSession";
+        "ClientSetActionIdBySessionId";
         "ClientSetSocketState";
         "ClientGetSessionCallbackAdapterByName";
         "ClientGetSessionCallbackAdapterById";

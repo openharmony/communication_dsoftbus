@@ -809,6 +809,9 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
         case KEY_PEER_UID:
             *data = sessionNode->peerUid;
             break;
+        case KEY_ACTION_ID:
+            *data = (int) sessionNode->actionId;
+            break;
         default:
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             return SOFTBUS_ERR;
@@ -2069,6 +2072,42 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
         TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);
         return ret;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientSetActionIdBySessionId(int32_t sessionId, uint32_t actionId)
+{
+    if ((sessionId < 0) || actionId == 0) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+
+    int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "not found");
+        return ret;
+    }
+
+    if (sessionNode->role != SESSION_ROLE_INIT) {
+        TRANS_LOGE(TRANS_SDK, "socket in use, currentRole=%{public}d", sessionNode->role);
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        return SOFTBUS_TRANS_SOCKET_IN_USE;
+    }
+
+    sessionNode->actionId = actionId;
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
 
