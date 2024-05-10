@@ -122,6 +122,7 @@
         "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
         "//foundation/communication/dsoftbus/tests/core/broadcast:unittest",
         "//foundation/communication/dsoftbus/tests/core/bus_center:unittest",
+        "//foundation/communication/dsoftbus/tests/core/bus_center:fuzztest",
         "//foundation/communication/dsoftbus/tests/core/common:fuzztest",
         "//foundation/communication/dsoftbus/tests/core/common:unittest",
         "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",

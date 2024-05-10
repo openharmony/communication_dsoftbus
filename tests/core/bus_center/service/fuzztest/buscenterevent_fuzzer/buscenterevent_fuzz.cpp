@@ -51,10 +51,10 @@ bool LnnNotifyOnlineStateFuzzTest(const uint8_t* data, size_t size)
     g_baseFuzzPos = 0;
     bool isOnline = GetData<bool>();
     NodeBasicInfo info;
-    info.networkId = reinterpret_cast<const char*>(data);
-    
+    strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, reinterpret_cast<const char*>(data));
     LnnNotifyOnlineState(isOnline, &info);
     LnnNotifyMigrate(isOnline, &info);
+    return true;
 }
 
 bool LnnNotifyLnnRelationChangedFuzzTest(const uint8_t* data, size_t size)
@@ -89,8 +89,27 @@ bool LnnNotifyLnnRelationChangedFuzzTest(const uint8_t* data, size_t size)
 
 void LnnNotifyStateChangeEventFuzzTest(const uint8_t* data, size_t size)
 {
-    LnnNotifyBtStateChangeEvent(data);
-    LnnNotifyDifferentAccountChangeEvent(data);
+    const char *outData = reinterpret_cast<const char*>(data);
+    char *state = (char *)SoftBusMalloc(sizeof(SoftBusDifferentAccountState));
+    if (state == NULL) {
+        return;
+    }
+    if (strcpy_s(state, sizeof(SoftBusDifferentAccountState), outData) != EOK) {
+        SoftBusFree(state);
+        return;
+    }
+    char *btState = (char *)SoftBusMalloc(sizeof(SoftBusBtState));
+    if (btState == NULL) {
+        return;
+    }
+    if (strcpy_s(btState, sizeof(SoftBusBtState), outData) != EOK) {
+        SoftBusFree(btState);
+        return;
+    }
+    LnnNotifyBtStateChangeEvent(btState);
+    LnnNotifyDifferentAccountChangeEvent(state);
+    SoftBusFree(state);
+    SoftBusFree(btState);
 }
 
 bool LnnNotifyBtAclStateChangeEventFuzzTest(const uint8_t* data, size_t size)
@@ -122,7 +141,7 @@ bool LnnNotifyBtAclStateChangeEventFuzzTest(const uint8_t* data, size_t size)
     g_baseFuzzPos = 0;
     bool isLocal = GetData<bool>();
     SoftBusBtAclState state = static_cast<SoftBusBtAclState>
-    (GetData<int>() % (SOFTBUS_BR_ACL_CONNECTED - SOFTBUS_BR_ACL_DISCONNECTED + 1));
+    (GetData<int>() % (SOFTBUS_BR_ACL_DISCONNECTED - SOFTBUS_BR_ACL_CONNECTED + 1));
 
     LnnNotifyNetworkIdChangeEvent(networkId);
     LnnNotifyNodeAddressChanged(btMac, networkId, isLocal);
@@ -151,8 +170,8 @@ bool LnnNotifySingleOffLineEventFuzzTest(const uint8_t* data, size_t size)
     }
     LnnNotifySingleOffLineEvent(addr, &basicInfo);
     SoftBusFree(addr);
+    return true;
 }
-
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

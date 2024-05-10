@@ -43,14 +43,14 @@ template <class T> T GetData()
 void LnnNotifyDiscoveryDeviceFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr) {
-        return false;
+        return;
     }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
     bool isNeedConnect = GetData<bool>();
     const ConnectionAddr addr = *const_cast<ConnectionAddr *>(reinterpret_cast<const ConnectionAddr *>(data));
-    LnnNotifyDiscoveryDevice(addraddr, isNeedConnect);
+    LnnNotifyDiscoveryDevice(&addr, isNeedConnect);
 }
 
 /* Fuzzer entry point */
