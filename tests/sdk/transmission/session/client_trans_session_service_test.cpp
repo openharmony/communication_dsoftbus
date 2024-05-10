@@ -443,11 +443,11 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest07, TestSiz
     ret = ClientSetActionIdBySessionId(sessionId, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    uint32_t actionId = 10;
+    uint32_t actionId = 1024;
     ret = ClientSetActionIdBySessionId(sessionId, actionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     int actionIdRet = 0;
-    ret = ClientGetSessionIntegerDataById(1, &actionIdRet, KEY_ACTION_ID);
+    ret = ClientGetSessionIntegerDataById(sessionId, &actionIdRet, KEY_ACTION_ID);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(actionIdRet, actionId);
 
