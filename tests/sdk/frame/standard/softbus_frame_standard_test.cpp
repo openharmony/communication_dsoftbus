@@ -53,7 +53,8 @@ public:
     {
         return SOFTBUS_OK;
     }
-    int32_t OnChannelClosed([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType) override
+    int32_t OnChannelClosed([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType,
+        [[maybe_unused]] int32_t messageType) override
     {
         return SOFTBUS_OK;
     }
@@ -92,11 +93,15 @@ void SoftBusServerProxyFrameTest::TearDownTestCase()
  */
 HWTEST_F(SoftBusServerProxyFrameTest, InnerRegisterServiceTest, TestSize.Level1)
 {
-    EXPECT_EQ(InnerRegisterService(), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(InnerRegisterService(NULL), SOFTBUS_INVALID_PARAM);
 
     EXPECT_EQ(ServerProxyInit(), SOFTBUS_OK);
     EXPECT_EQ(InitSoftBus("SoftBusServerProxyFrameTest"), SOFTBUS_OK);
-    EXPECT_EQ(InnerRegisterService(), SOFTBUS_OK);
+    EXPECT_EQ(InnerRegisterService(NULL), SOFTBUS_INVALID_PARAM);
+
+    ListNode sessionServerList;
+    ListInit(&sessionServerList);
+    EXPECT_EQ(InnerRegisterService(&sessionServerList), SOFTBUS_OK);
 }
 
 /**
@@ -311,7 +316,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest001, TestSize.Leve
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);
@@ -440,14 +445,14 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelClosedInnerTest, TestSize.Level1)
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteInt32(0);
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_OK);
+    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_IPC_ERR);
 }
 
 /**

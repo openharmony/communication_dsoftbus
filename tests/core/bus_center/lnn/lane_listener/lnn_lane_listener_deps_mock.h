@@ -34,7 +34,7 @@ public:
     virtual int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid,
         const LaneLinkInfo *laneLinkInfo) = 0;
     virtual int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *infoItem, LaneResource *resourceItem) = 0;
-    virtual uint64_t ApplyLaneId(const char* activeUdid, const char* passiveUdid, LaneLinkType linkType) = 0;
+    virtual uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType) = 0;
 };
 
 class LaneListenerDepsInterfaceMock : public LaneListenerDepsInterface {
@@ -48,7 +48,7 @@ public:
     MOCK_METHOD3(PostLaneStateChangeMessage, int32_t (LaneState state, const char *peerUdid,
         const LaneLinkInfo *laneLinkInfo));
     MOCK_METHOD2(FindLaneResourceByLinkAddr, int32_t (const LaneLinkInfo *infoItem, LaneResource *resourceItem));
-    MOCK_METHOD3(ApplyLaneId, uint64_t (const char* activeUdid, const char* passiveUdid, LaneLinkType linkType));
+    MOCK_METHOD3(ApplyLaneId, uint64_t (const char *localUdid, const char *remoteUdid, LaneLinkType linkType));
 };
 } // namespace OHOS
 #endif // LNN_LANE_LISTENER_DEPS_MOCK_H

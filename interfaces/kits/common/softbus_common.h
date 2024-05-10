@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -186,6 +186,30 @@ extern "C" {
 #define DATA_CHANGE_FLAG_BUF_LEN 2
 
 /**
+ * @brief Indicates the maximum length of the database dynamic level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_DYNAMIC_LEVEL_BUF_LEN 2
+
+/**
+ * @brief Indicates the maximum length of the database static level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_STATIC_LEVEL_BUF_LEN 2
+
+/**
+ * @brief Indicates the maximum length of the database switch level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_SWITCH_LEVEL_BUF_LEN 4
+
+/**
+ * @brief Indicates the maximum length of the database switch length in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_SWITCH_LENGTH_BUF_LEN 2
+
+/**
  * @brief Indicates the maximum length of the node address.
  *
  */
@@ -249,7 +273,7 @@ typedef struct {
             BleProtocolType protocol;
             char bleMac[BT_MAC_LEN];  /**< BLE MAC address in string format */
             uint8_t udidHash[UDID_HASH_LEN];  /**< udid hash value */
-            int32_t psm;
+            uint32_t psm;
         } ble;
         /**< IPv4 or IPv6 address */
         struct IpAddr {

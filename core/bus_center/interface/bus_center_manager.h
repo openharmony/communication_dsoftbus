@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "bus_center_info_key.h"
+#include "data_level.h"
 #include "disc_manager.h"
 #include "softbus_bus_center.h"
 
@@ -48,6 +49,7 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
 int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len);
 int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info);
 int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info);
+int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info);
 int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info);
 int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info);
 int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, uint32_t len);
@@ -60,6 +62,10 @@ int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info);
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info);
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info);
 int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info);
+int32_t LnnGetLocalNumU16Info(InfoKey key, uint16_t *info);
+int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info);
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info);
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info);
 int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len);
 int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len);
 bool LnnIsLSANode(const NodeBasicInfo *info);
@@ -69,6 +75,7 @@ int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum);
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info);
 int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen);
 int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag);
+int32_t LnnSetDataLevel(const DataLevel *dataLevel);
 int32_t LnnGetNodeKeyInfoLen(int32_t key);
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len);
 int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);

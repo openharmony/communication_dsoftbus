@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,5 +144,27 @@ int32_t ClientOnRefreshDeviceFound(
         return SOFTBUS_ERR;
     }
     clientProxy->OnRefreshDeviceFound(device, deviceLen);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientOnDataLevelChanged(const char *pkgName, int32_t pid, const char *networkId,
+    const DataLevelInfo *dataLevelInfo)
+{
+    if (pkgName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (networkId == nullptr) {
+        LNN_LOGE(LNN_EVENT, "networkId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return SOFTBUS_ERR;
+    }
+    clientProxy->OnDataLevelChanged(networkId, dataLevelInfo);
     return SOFTBUS_OK;
 }

@@ -157,6 +157,7 @@ typedef struct {
     bool isSupportRpa;
     uint8_t ownIrk[SOFTBUS_IRK_LEN];
     uint8_t ownUdidHash[SOFTBUS_UDID_HASH_LEN];
+    SoftbusMacAddr localAddr;
 } SoftbusBroadcastParam;
 
 /**
@@ -176,6 +177,7 @@ typedef struct {
     uint32_t manufactureDataLength;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
+    bool advIndReport;
 } SoftBusBcScanFilter;
 
 /**

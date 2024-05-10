@@ -327,13 +327,6 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
         }
-        if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set local ip fail");
-        }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
-            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
-        }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
@@ -369,13 +362,6 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
-        }
-        if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "Client wifi set local ip fail");
-        }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
-            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
@@ -846,6 +832,9 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
         extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
     }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo.masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra.localUdid = nodeInfo.masterUdid;
+    }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
         char *tmpName = NULL;
@@ -858,8 +847,8 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     char *errDesc = NULL;
     int32_t errCode;
     int myHandleId;
-    if (conn->appInfo.firstTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(conn->appInfo.firstTokenId) != SOFTBUS_OK) {
+    if (conn->appInfo.callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(conn->appInfo.callingTokenId) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
         errDesc = (char *)"Server check acl failed";
         goto ERR_EXIT;
@@ -1103,6 +1092,10 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
 
 static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int32_t type)
 {
+    if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is NULL");
+        return SOFTBUS_NO_INIT;
+    }
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return SOFTBUS_LOCK_ERR;

@@ -69,9 +69,9 @@ static uint32_t g_recvDiscoverMsgNum;
 static MsgIdList *g_msgIdList = NULL;
 static uint8_t g_subscribeCount;
 
-static uint32_t *g_notificationIntervals = NULL;
-static uint32_t g_notificationTargetCnt = 0;
-static uint32_t g_notificationRunCnt = 0;
+static uint16_t *g_notificationIntervals = NULL;
+static uint8_t g_notificationTargetCnt = 0;
+static uint8_t g_notificationRunCnt = 0;
 static Timer *g_notificationTimer = NULL;
 
 #ifdef DFINDER_SUPPORT_SET_SCREEN_STATUS
@@ -1023,23 +1023,26 @@ static int32_t CoapPostServiceNotification(void)
     return NSTACKX_EOK;
 }
 
-static uint32_t GetNextNotificationInterval(uint32_t runCnt)
+static inline uint16_t GetNextNotificationInterval(uint8_t runCnt)
 {
-    if (runCnt >= g_notificationTargetCnt) {
-        return 0;
-    }
-    return g_notificationIntervals[runCnt];
+    return (runCnt >= g_notificationTargetCnt) ? 0 : g_notificationIntervals[runCnt];
 }
 
-void CoapServiceNotificationStop(void)
+static void ResetNotificationConfig(void)
 {
-    (void)TimerSetTimeout(g_notificationTimer, 0, NSTACKX_FALSE);
     g_notificationRunCnt = 0;
     g_notificationTargetCnt = 0;
     if (g_notificationIntervals != NULL) {
         free(g_notificationIntervals);
         g_notificationIntervals = NULL;
     }
+}
+
+void CoapServiceNotificationStop(void)
+{
+    (void)TimerSetTimeout(g_notificationTimer, 0, NSTACKX_FALSE);
+    ResetNotificationConfig();
+    DFINDER_LOGI(TAG, "caller stop send notifications, reset run cnt, target cnt all to 0");
 }
 
 static void CoapServiceNotificationTimerHandle(void *argument)
@@ -1053,15 +1056,15 @@ static void CoapServiceNotificationTimerHandle(void *argument)
         DFINDER_LOGE(TAG, "failed when post service notification");
         goto L_ERR_NOTIFICATION;
     }
-    DFINDER_LOGI(TAG, "the %u time for sending notification", g_notificationRunCnt + 1);
-    uint32_t nextInterval = GetNextNotificationInterval(++g_notificationRunCnt);
+    DFINDER_LOGI(TAG, "the %hhu time for sending notification", g_notificationRunCnt + 1);
+    uint16_t nextInterval = GetNextNotificationInterval(++g_notificationRunCnt);
     if (TimerSetTimeout(g_notificationTimer, nextInterval, NSTACKX_FALSE) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "failed to set timer for service notification");
         goto L_ERR_NOTIFICATION;
     }
     return;
 L_ERR_NOTIFICATION:
-    DFINDER_LOGE(TAG, "abort notification, tried %u request, now reset notification cnt to 0", g_notificationRunCnt);
+    DFINDER_LOGE(TAG, "abort notification, tried %hhu request, now reset notification cnt to 0", g_notificationRunCnt);
     g_notificationRunCnt = 0;
 }
 
@@ -1073,9 +1076,10 @@ static int32_t HndPostServiceNotificationEx(const coap_pdu_t *request)
         DFINDER_LOGE(TAG, "coap_get_data fail, size: %zu, coap rx buffer size: %d", size, COAP_RXBUFFER_SIZE);
         return NSTACKX_EFAILED;
     }
-    NotificationConfig *notification = (NotificationConfig *)calloc(1, sizeof(NotificationConfig));
+    NSTACKX_NotificationConfig *notification =
+        (NSTACKX_NotificationConfig *)calloc(1, sizeof(NSTACKX_NotificationConfig));
     if (notification == NULL) {
-        DFINDER_LOGE(TAG, "calloc for notification fail, size wanted: %zu", sizeof(NotificationConfig));
+        DFINDER_LOGE(TAG, "calloc for notification fail, size wanted: %zu", sizeof(NSTACKX_NotificationConfig));
         return NSTACKX_ENOMEM;
     }
     notification->msg = (char *)calloc(NSTACKX_MAX_NOTIFICATION_DATA_LEN, sizeof(char));
@@ -1233,10 +1237,7 @@ void CoapDiscoverDeinit(void)
         free(g_coapIntervalArr);
         g_coapIntervalArr = NULL;
     }
-    if (g_notificationIntervals != NULL) {
-        free(g_notificationIntervals);
-        g_notificationIntervals = NULL;
-    }
+    ResetNotificationConfig();
 }
 
 void ResetCoapDiscoverTaskCount(uint8_t isBusy)
@@ -1329,9 +1330,9 @@ void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
     }
 }
 
-int32_t LocalizeNotificationInterval(const uint32_t *intervals, const uint32_t intervalLen)
+int32_t LocalizeNotificationInterval(const uint16_t *intervals, const uint8_t intervalLen)
 {
-    uint32_t *tmp = (uint32_t *)malloc(intervalLen * sizeof(uint32_t));
+    uint16_t *tmp = (uint16_t *)calloc(intervalLen, sizeof(uint16_t));
     if (tmp != NULL) {
         if (g_notificationIntervals != NULL) {
             free(g_notificationIntervals);
@@ -1343,7 +1344,7 @@ int32_t LocalizeNotificationInterval(const uint32_t *intervals, const uint32_t i
         g_notificationTargetCnt = intervalLen;
         return NSTACKX_EOK;
     }
-    DFINDER_LOGW(TAG, "malloc for notification intervals fail, interval len %u", intervalLen);
+    DFINDER_LOGW(TAG, "calloc for notification intervals fail, interval len %hhu", intervalLen);
     if (g_notificationIntervals != NULL) {
         DFINDER_LOGW(TAG, "going to use last success notification config");
         return NSTACKX_EOK;
@@ -1359,7 +1360,7 @@ static void CoapServiceNotificationFirstTime(void)
         return;
     }
 
-    uint32_t nextInterval = GetNextNotificationInterval(++g_notificationRunCnt);
+    uint16_t nextInterval = GetNextNotificationInterval(++g_notificationRunCnt);
     if (TimerSetTimeout(g_notificationTimer, nextInterval, NSTACKX_FALSE) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "failed to set timer when doing service notification");
         return;
@@ -1374,7 +1375,7 @@ void CoapServiceNotification(void)
         return;
     }
     if (g_notificationRunCnt != 0) {
-        DFINDER_LOGI(TAG, "reset notification run cnt to 0, run cnt: %u, target cnt: %u",
+        DFINDER_LOGI(TAG, "reset notification run cnt to 0, run cnt: %hhu, target cnt: %hhu",
             g_notificationRunCnt, g_notificationTargetCnt);
         g_notificationRunCnt = 0;
         (void)TimerSetTimeout(g_notificationTimer, 0, NSTACKX_FALSE);

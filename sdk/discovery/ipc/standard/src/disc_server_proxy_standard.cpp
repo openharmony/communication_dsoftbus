@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,49 +57,49 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         DISC_LOGE(DISC_ABILITY, "remote is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_GET_REMOTE_FAILED;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         DISC_LOGE(DISC_SDK, "StartDiscovery faceToken failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(pkgName)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery pkgName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(subInfo->subscribeId)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery subInfo subscribeId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(subInfo->mode)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery subInfo mode failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(subInfo->medium)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery subInfo medium failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(subInfo->freq)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery subInfo freq failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteBool(subInfo->isSameAccount)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery subInfo isSameAccount failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteBool(subInfo->isWakeRemote)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery subInfo isWakeRemote failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(subInfo->capability)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery subInfo capability failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteUint32(subInfo->dataLen)) {
         DISC_LOGE(DISC_SDK, "StartDiscovery subInfo dataLen failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (subInfo->dataLen != 0) {
         data.WriteCString((char *)subInfo->capabilityData);
@@ -109,13 +109,13 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     int32_t err = remote->SendRequest(SERVER_START_DISCOVERY, data, reply, option);
     if (err != 0) {
         DISC_LOGE(DISC_SDK, "StartDiscovery send request failed!");
-        return SOFTBUS_ERR;
+        return err;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
         DISC_LOGE(DISC_SDK, "StartDiscovery read serverRet failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return serverRet;
 }
@@ -125,21 +125,21 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         DISC_LOGE(DISC_ABILITY, "remote is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_GET_REMOTE_FAILED;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         DISC_LOGE(DISC_SDK, "StopDiscovery failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(pkgName)) {
         DISC_LOGE(DISC_SDK, "StopDiscovery pkgName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(subscribeId)) {
         DISC_LOGE(DISC_SDK, "StopDiscovery subscribeId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
 
     MessageParcel reply;
@@ -148,13 +148,13 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
     DISC_LOGI(DISC_ABILITY, "StopDiscovery send request ret=%{public}d!", err);
     if (err != 0) {
         DISC_LOGE(DISC_SDK, "StopDiscovery send request failed!");
-        return SOFTBUS_ERR;
+        return err;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
         DISC_LOGE(DISC_SDK, "StopDiscovery read serverRet failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return serverRet;
 }
@@ -164,41 +164,41 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         DISC_LOGE(DISC_ABILITY, "remote is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_GET_REMOTE_FAILED;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         DISC_LOGE(DISC_SDK, "PublishService write InterfaceToken failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(pkgName)) {
         DISC_LOGE(DISC_SDK, "PublishService write pkgName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(pubInfo->publishId)) {
         DISC_LOGE(DISC_SDK, "PublishService write publishId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(pubInfo->mode)) {
         DISC_LOGE(DISC_SDK, "PublishService write mode failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(pubInfo->medium)) {
         DISC_LOGE(DISC_SDK, "PublishService write medium failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(pubInfo->freq)) {
         DISC_LOGE(DISC_SDK, "PublishService write freq failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(pubInfo->capability)) {
         DISC_LOGE(DISC_SDK, "PublishService write capability failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteUint32(pubInfo->dataLen)) {
         DISC_LOGE(DISC_SDK, "PublishService write dataLen failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (pubInfo->dataLen != 0) {
         data.WriteCString((char *)pubInfo->capabilityData);
@@ -209,13 +209,13 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     DISC_LOGI(DISC_ABILITY, "PublishService send request ret=%{public}d!", err);
     if (err != 0) {
         DISC_LOGE(DISC_SDK, "PublishService send request failed!");
-        return SOFTBUS_ERR;
+        return err;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
         DISC_LOGE(DISC_SDK, "PublishService read serverRet failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return serverRet;
 }
@@ -225,21 +225,21 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         DISC_LOGE(DISC_ABILITY, "remote is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_GET_REMOTE_FAILED;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         DISC_LOGE(DISC_SDK, "UnPublishService failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(pkgName)) {
         DISC_LOGE(DISC_SDK, "UnPublishService pkgName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(publishId)) {
         DISC_LOGE(DISC_SDK, "UnPublishService publishId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
 
     MessageParcel reply;
@@ -248,13 +248,13 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
     DISC_LOGI(DISC_SDK, "UnPublishService send request ret=%{public}d!", err);
     if (err != 0) {
         DISC_LOGE(DISC_SDK, "UnPublishService send request failed!");
-        return SOFTBUS_ERR;
+        return err;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
         DISC_LOGE(DISC_SDK, "UnPublishService read serverRet failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return serverRet;
 }
@@ -307,8 +307,9 @@ int32_t DiscServerProxy::ReleaseResources(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t DiscServerProxy::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
+    (void)sessionName;
     (void)channelId;
     (void)channelType;
     return SOFTBUS_OK;
@@ -373,6 +374,24 @@ int32_t DiscServerProxy::SetNodeDataChangeFlag(const char *pkgName, const char *
     (void)pkgName;
     (void)networkId;
     (void)dataChangeFlag;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::RegDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::UnregDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::SetDataLevel(const DataLevel *dataLevel)
+{
+    (void)dataLevel;
     return SOFTBUS_OK;
 }
 

@@ -41,6 +41,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/network/lnn_lwip_monitor.c",
         "$adapter_bus_center_path/network/lnn_netlink_monitor_virtual.c",
         "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
+        "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
@@ -54,6 +55,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/network/lnn_lwip_monitor_virtual.c",
         "$adapter_bus_center_path/network/lnn_netlink_monitor.c",
         "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
+        "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
@@ -73,6 +75,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/network/lnn_lwip_monitor_virtual.c",
         "$adapter_bus_center_path/network/lnn_netlink_monitor_virtual.c",
         "$adapter_bus_center_path/platform/lnn_product_monitor.c",
+        "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
@@ -90,14 +93,20 @@ if (defined(ohos_lite)) {
 } else {
   bus_center_adapter_external_deps = []
   if (has_ces_part) {
-    bus_center_adapter_src +=
-        [ "$adapter_bus_center_path/common_event/lnn_common_event_monitor.cpp" ]
+    bus_center_adapter_src += [
+      "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor.cpp",
+      "$adapter_bus_center_path/common_event/lnn_common_event_monitor.cpp",
+    ]
     bus_center_adapter_external_deps += [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
+      "init:libbeget_proxy",
     ]
   } else {
-    bus_center_adapter_src += [ "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp" ]
+    bus_center_adapter_src += [
+      "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
+      "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
+    ]
   }
   if (dsoftbus_feature_lnn_net) {
     bus_center_adapter_src += [
@@ -131,8 +140,8 @@ if (dsoftbus_feature_lnn_net) {
     bus_center_adapter_inc += [
       "$softbus_adapter_common/net/bluetooth/include",
       "$dsoftbus_root_path/core/common/dfx/interface/include",
-      "//foundation/communication/wifi/wifi/frameworks/native/interfaces",
     ]
+    bus_center_adapter_external_deps += [ "wifi:wifi_sdk" ]
     bus_center_adapter_deps +=
         [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
   } else {

@@ -26,7 +26,9 @@ group("fuzztest") {
     "leavelnninner_fuzzer:LeaveLNNInnerFuzzTest",
     "publishlnn_fuzzer:PublishLNNFuzzTest",
     "refreshlnn_fuzzer:RefreshLNNFuzzTest",
+    "regdatalevelchangecb_fuzzer:RegDataLevelChangeCbFuzzTest",
     "regnodedevicestatecb_fuzzer:RegNodeDeviceStateCbFuzzTest",
+    "setdatalevel_fuzzer:SetDataLevelFuzzTest",
     "setnodedatachangeflag_fuzzer:SetNodeDataChangeFlagFuzzTest",
     "shiftlnngear_fuzzer:ShiftLnnGearFuzzTest",
     "softbusclientmanager_fuzzer:SoftBusClientManagerFuzzTest",
@@ -35,5 +37,6 @@ group("fuzztest") {
     "stoprefreshlnn_fuzzer:StopRefreshLNNFuzzTest",
     "stoptimesync_fuzzer:StopTimeSyncFuzzTest",
     "stoptimesyncinner_fuzzer:StopTimeSyncInnerFuzzTest",
+    "unregdatalevelchangecb_fuzzer:UnregDataLevelChangeCbFuzzTest",
   ]
 }

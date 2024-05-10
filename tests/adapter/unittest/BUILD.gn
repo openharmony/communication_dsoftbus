@@ -328,6 +328,7 @@ if (defined(ohos_lite)) {
       external_deps = [
         "c_utils:utils",
         "hilog:libhilog",
+        "wifi:wifi_sdk",
       ]
     } else {
       external_deps = [

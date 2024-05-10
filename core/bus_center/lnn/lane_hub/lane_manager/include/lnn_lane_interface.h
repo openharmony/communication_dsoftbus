@@ -93,7 +93,7 @@ typedef struct {
 } P2pConnInfo;
 
 typedef struct {
-    uint16_t protocol;
+    ProtocolType protocol;
     char addr[MAX_SOCKET_ADDR_LEN];
     uint16_t port;
 } WlanConnInfo;
@@ -111,13 +111,13 @@ typedef struct {
 } LaneConnInfo;
 
 typedef struct {
-    void (*OnLaneAllocSuccess)(uint32_t laneHandle, const LaneConnInfo *info);
-    void (*OnLaneAllocFail)(uint32_t laneHandle, int32_t errCode);
+    void (*onLaneAllocSuccess)(uint32_t laneHandle, const LaneConnInfo *info);
+    void (*onLaneAllocFail)(uint32_t laneHandle, int32_t errCode);
 } LaneAllocListener;
 
 typedef struct {
-    void (*OnLaneRequestSuccess)(uint32_t laneReqId, const LaneConnInfo *info);
-    void (*OnLaneRequestFail)(uint32_t laneReqId, int32_t errCode);
+    void (*onLaneRequestSuccess)(uint32_t laneReqId, const LaneConnInfo *info);
+    void (*onLaneRequestFail)(uint32_t laneReqId, int32_t errCode);
 } ILaneListener;
 
 typedef enum {
@@ -220,4 +220,4 @@ int32_t LnnFreeLane(uint32_t laneReqId);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_INTERFACE_H

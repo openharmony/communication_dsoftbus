@@ -80,8 +80,12 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .peerNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerUdid = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerDevVer = "NOH-AN00 peer_device_version",
+        .localUdid = "localpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
+        .firstTokenName = "testfirstToken",
+        .firstTokenId = 0,
+        .firstTokenType = 0,
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
@@ -123,8 +127,12 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .peerNetworkId = "",
         .peerUdid = "",
         .peerDevVer = "",
+        .localUdid = "",
         .callerPkg = "\0",
         .calleePkg = nullptr,
+        .firstTokenName = "",
+        .firstTokenId = 0,
+        .firstTokenType = 0,
     };
     constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
 

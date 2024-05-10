@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,8 @@
 
 import("../../../dsoftbus.gni")
 import("../../common/dfx/dsoftbus_dfx.gni")
+
+disc_coap_external_deps = []
 
 if (dsoftbus_feature_disc_coap == true) {
   disc_coap_src = [
@@ -29,13 +31,14 @@ disc_coap_inc = [
   "$dsoftbus_root_path/core/discovery/coap/interface",
   "$dsoftbus_root_path/core/discovery/coap/common/include",
   "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/include",
+  "$dsoftbus_root_path/interfaces/inner_kits/lnn",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/discovery",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-  "//third_party/cJSON",
 ]
+disc_coap_external_deps += [ "cJSON:cjson" ]
 if (dsoftbus_feature_ex_kits) {
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/coap/coap_enhance.gni")

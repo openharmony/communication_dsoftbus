@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "data_level.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -32,6 +33,9 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
 int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
 int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len);
 int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
+int32_t LnnIpcRegDataLevelChangeCb(const char *pkgName, int32_t callingPid);
+int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid);
+int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel);
 int32_t LnnIpcGetNodeKeyInfoLen(int32_t key);
 int32_t LnnIpcStartTimeSync(
     const char *pkgName, int32_t callingPid, const char *targetNetworkId, int32_t accuracy, int32_t period);

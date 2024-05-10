@@ -790,6 +790,23 @@ void OnP2pVerifyChannelClosed(int32_t channelId)
     TRANS_LOGW(TRANS_CTRL, "receive p2p verify close. channelId=%{public}d", channelId);
 }
 
+static int32_t TransProxyGetAuthId(SessionConn *conn)
+{
+    AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &conn->authHandle);
+    if (conn->authHandle.authId == AUTH_INVALID_ID) {
+        //get WIFI authManager failed,retry BLE
+        AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BLE, false, &conn->authHandle);
+    }
+    if (conn->authHandle.authId == AUTH_INVALID_ID) {
+        //get WIFI and BLE authManager failed,retry BR
+        AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &conn->authHandle);
+    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(conn->authHandle.authId != AUTH_INVALID_ID, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED,
+            TRANS_CTRL, "get authManager failed");
+    return SOFTBUS_OK;
+}
+
+
 static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
 {
     int32_t ret = SOFTBUS_ERR;
@@ -808,12 +825,8 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
             return SOFTBUS_ERR;
         }
         TransProxyPipelineCloseChannelDelay(pipeLineChannelId);
-        AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &conn->authHandle);
-        if (conn->authHandle.authId == AUTH_INVALID_ID) {
-            AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &conn->authHandle);
-        }
-        TRANS_CHECK_AND_RETURN_RET_LOGW(conn->authHandle.authId != AUTH_INVALID_ID, SOFTBUS_ERR,
-            TRANS_CTRL, "get auth id failed");
+        ret = TransProxyGetAuthId(conn);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get auth id failed");
         conn->requestId = REQUEST_INVALID;
         char *msg = VerifyP2pPack(conn->appInfo.myData.addr, conn->appInfo.myData.port, NULL);
         if (msg == NULL) {

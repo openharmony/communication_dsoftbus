@@ -63,7 +63,7 @@ typedef enum {
 #define JSON_KEY_ROUTE_TYPE "ROUTE_TYPE"
 #define JSON_KEY_FIRST_DATA "FIRST_DATA"
 #define JSON_KEY_FIRST_DATA_SIZE "FIRST_DATA_SIZE"
-#define JSON_KEY_FIRST_TOKEN_ID "FIRST_TOKEN_ID"
+#define JSON_KEY_CALLING_TOKEN_ID "CALLING_TOKEN_ID"
 
 typedef struct {
     uint8_t type; // MsgType

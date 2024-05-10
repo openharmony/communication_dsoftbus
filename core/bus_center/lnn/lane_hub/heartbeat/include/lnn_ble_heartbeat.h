@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,10 @@ extern "C" {
 int32_t LnnRegistBleHeartbeatMediumMgr(void);
 int32_t HbUpdateBleScanFilter(int32_t listenerId, LnnHeartbeatType type);
 int32_t HbGenerateBitPosition(int32_t min, int32_t max, int64_t seed, int32_t *randPos, int32_t num);
+
+void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
+void LnnBleHbUnregDataLevelChangeCb();
+
 #ifdef __cplusplus
 }
 #endif

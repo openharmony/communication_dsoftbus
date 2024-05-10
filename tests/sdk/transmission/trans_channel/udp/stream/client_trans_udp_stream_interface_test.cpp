@@ -165,7 +165,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest001, TestSize.Level
     const StreamData extData = {0};
     const StreamFrameInfo frameInfo = {0};
     int ret = SendVtpStream(channelId, nullptr, &extData, &frameInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = SendVtpStream(channelId, &streamData, &extData, &frameInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);

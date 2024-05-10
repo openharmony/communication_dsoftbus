@@ -19,12 +19,13 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
+#include "softbus_qos.h"
+#include "trans_channel_common.h"
 #include "trans_client_proxy.h"
+#include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
-#include "softbus_qos.h"
-#include "trans_event.h"
 
 static IServerChannelCallBack g_channelCallBack;
 
@@ -33,12 +34,6 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
 {
     if (pkgName == NULL || sessionName == NULL || channel == NULL) {
         return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (!channel->isServer && channel->channelType == CHANNEL_TYPE_UDP &&
-        NotifyQosChannelOpened(channel) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_QOS, "NotifyQosChannelOpened failed.");
-        return SOFTBUS_ERR;
     }
     int64_t timeStart = channel->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
@@ -52,6 +47,23 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         .callerPkg = pkgName,
         .socketName = sessionName
     };
+    CoreSessionState state = CORE_SESSION_STATE_INIT;
+    TransGetSocketChannelStateByChannel(channel->channelId, channel->channelType, &state);
+    if (state == CORE_SESSION_STATE_CANCELLING) {
+        char *tmpSessionName = NULL;
+        Anonymize(sessionName, &tmpSessionName);
+        TRANS_LOGW(TRANS_CTRL,
+            "Cancel bind process, sesssionName=%{public}s, channelId=%{public}d", tmpSessionName, channel->channelId);
+        AnonymizeFree(tmpSessionName);
+        extra.result = EVENT_STAGE_RESULT_CANCELED;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+        return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
+    }
+    if (!channel->isServer && channel->channelType == CHANNEL_TYPE_UDP &&
+        NotifyQosChannelOpened(channel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_QOS, "NotifyQosChannelOpened failed.");
+        return SOFTBUS_ERR;
+    }
     if (channel->isServer) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     } else {
@@ -59,10 +71,12 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     }
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
+    TransSetSocketChannelStateByChannel(channel->channelId, channel->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
 }
 
-static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+static int32_t TransServerOnChannelClosed(
+    const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t messageType)
 {
     if (pkgName == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -76,10 +90,12 @@ static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int3
         .msgChannelId = channelId,
         .msgChannelType = channelType,
         .msgPid = pid,
+        .msgMessageType = messageType,
         .msgPkgName = pkgName,
         .msgUuid = NULL,
         .msgUdid = NULL
     };
+    TransDeleteSocketChannelInfoByChannel(channelId, channelType);
     if (ClientIpcOnChannelClosed(&data) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel close fail");
         return SOFTBUS_ERR;
@@ -105,6 +121,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
         .msgUuid = NULL,
         .msgUdid = NULL
     };
+    TransDeleteSocketChannelInfoByChannel(channelId, channelType);
     if (ClientIpcOnChannelOpenFailed(&data, errCode) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel open fail");
         return SOFTBUS_ERR;
@@ -169,7 +186,7 @@ int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const cha
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransServerOnChannelLinkDown: pkgName=%{public}s", pkgName);
+    TRANS_LOGD(TRANS_CTRL, "pkgName=%{public}s", pkgName);
 
     ChannelMsg data = {
         .msgPid = pid,

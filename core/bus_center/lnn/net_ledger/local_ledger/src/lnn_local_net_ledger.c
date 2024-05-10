@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
+#include "lnn_data_cloud_sync.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_parameter_utils.h"
 #include "lnn_log.h"
@@ -32,6 +33,7 @@
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -49,6 +51,8 @@
 #define SUPPORT_EXCHANGE_NETWORKID 1
 #define SUPPORT_NORMALIZED_LINK 2
 #define DEFAULT_CONN_SUB_FEATURE 1
+#define CACHE_KEY_LENGTH 32
+#define STATE_VERSION_VALUE_LENGTH 8
 
 typedef struct {
     NodeInfo localInfo;
@@ -69,6 +73,16 @@ static void UpdateStateVersionAndStore(void)
         g_localNetLedger.localInfo.stateVersion);
     if ((ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update local store fail");
+    }
+
+    if (g_localNetLedger.localInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        return;
+    }
+    char value[STATE_VERSION_VALUE_LENGTH] = {0};
+    (void)sprintf_s(value, STATE_VERSION_VALUE_LENGTH, "%d", g_localNetLedger.localInfo.stateVersion);
+    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_STATE_VERSION, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger state version change sync to cloud failed");
     }
 }
 
@@ -310,6 +324,47 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+
+    int64_t accountId = 0;
+    if (LnnGetAccountIdFromLocalCache(&accountId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get accountid info from cache fail");
+    }
+    if (accountId == *((int64_t *)buf) && *((int64_t *)buf) != 0) {
+        LNN_LOGI(LNN_LEDGER, "no new accountid login");
+        info->accountId = *((int64_t *)buf);
+        return SOFTBUS_OK;
+    }
+
+    if (info->accountId ==  0) {
+        if (*((int64_t *)buf) == 0) {
+            LNN_LOGI(LNN_LEDGER, "no accountid login, default is 0");
+            return SOFTBUS_OK;
+        }
+        LNN_LOGI(LNN_LEDGER, "accountid login");
+        info->accountId = *((int64_t *)buf);
+        info->stateVersion++;
+        if (LnnSaveLocalDeviceInfo(info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "accountid login, update all info to local store fail");
+        }
+        if (LnnLedgerAllDataSyncToDB(info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "accountid login, lnn ledger all data sync to cloud fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+
+    if (*((int64_t *)buf) ==  0) {
+        LNN_LOGI(LNN_LEDGER, "accountid logout");
+        if (LnnDeleteSyncToDB() != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "lnn clear local cache fail");
+            info->accountId = *((int64_t *)buf);
+            LnnSaveLocalDeviceInfo(info);
+            return SOFTBUS_MEM_ERR;
+        }
+        info->accountId = *((int64_t *)buf);
+        LnnSaveLocalDeviceInfo(info);
+        return SOFTBUS_OK;
+    }
     info->accountId = *((int64_t *)buf);
     return SOFTBUS_OK;
 }
@@ -383,6 +438,26 @@ static int32_t LlGetNickName(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static void UpdateBrMac(void)
+{
+    char brMac[BT_MAC_LEN] = {0};
+    SoftBusBtAddr mac = {0};
+    int32_t ret = 0;
+    ret = SoftBusGetBtMacAddr(&mac);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get bt mac addr fail");
+        return;
+    }
+    ret = ConvertBtMacToStr(brMac, BT_MAC_LEN, mac.addr, sizeof(mac.addr));
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert bt mac to str fail");
+        return;
+    }
+    if (strcpy_s(g_localNetLedger.localInfo.connectInfo.macAddr, MAC_LEN, brMac) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "str copy error!");
+    }
+}
+
 static int32_t LlGetBtMac(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -395,7 +470,11 @@ static int32_t LlGetBtMac(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "get bt mac fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s((char *)buf, len, mac, strlen(mac)) != EOK) {
+    if (SoftBusGetBtState() == BLE_ENABLE && mac[0] == '\0') {
+        LNN_LOGE(LNN_LEDGER, "bt status is on update brmac");
+        UpdateBrMac();
+    }
+    if (strcpy_s((char *)buf, len, mac) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -527,6 +606,15 @@ static int32_t UpdateStateVersion(const void *buf)
         *(int32_t *)buf = 1;
     }
     info->stateVersion = *(int32_t *)buf;
+    if (g_localNetLedger.localInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        return SOFTBUS_OK;
+    }
+    char value[STATE_VERSION_VALUE_LENGTH] = {0};
+    (void)sprintf_s(value, STATE_VERSION_VALUE_LENGTH, "%d", g_localNetLedger.localInfo.stateVersion);
+    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_STATE_VERSION, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger state version change sync to cloud failed");
+    }
     return SOFTBUS_OK;
 }
 
@@ -545,7 +633,7 @@ static int32_t LlGetNetCap(void *buf, uint32_t len)
     if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = (int32_t)info->netCapacity;
+    *((uint32_t *)buf) = info->netCapacity;
     return SOFTBUS_OK;
 }
 
@@ -718,6 +806,78 @@ static int32_t L1GetNodeDataChangeFlag(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t L1GetDataDynamicLevel(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_DYNAMIC_LEVEL_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint16_t *)buf) = (uint16_t)LnnGetDataDynamicLevel(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDataDynamicLevel(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetDataDynamicLevel(info, *(uint16_t *)buf);
+}
+
+static int32_t L1GetDataStaticLevel(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_STATIC_LEVEL_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint16_t *)buf) = (uint16_t)LnnGetDataStaticLevel(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDataStaticLevel(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetDataStaticLevel(info, *(uint16_t *)buf);
+}
+
+static int32_t L1GetDataSwitchLevel(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_SWITCH_LEVEL_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint32_t *)buf) = (uint32_t)LnnGetDataSwitchLevel(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDataSwitchLevel(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetDataSwitchLevel(info, *(uint32_t *)buf);
+}
+
+static int32_t L1GetDataSwitchLength(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_SWITCH_LENGTH_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint16_t *)buf) = (uint16_t)LnnGetDataSwitchLength(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDataSwitchLength(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetDataSwitchLength(info, *(uint16_t *)buf);
+}
+
 static int32_t LocalGetNodeAccountId(void *buf, uint32_t len)
 {
     if (buf == NULL || len != sizeof(int64_t)) {
@@ -861,6 +1021,14 @@ static int32_t UpdateLocalDeviceName(const void *name)
             return SOFTBUS_ERR;
         }
         UpdateStateVersionAndStore();
+        if (g_localNetLedger.localInfo.accountId == 0) {
+            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+            return SOFTBUS_OK;
+        }
+        char *value = g_localNetLedger.localInfo.deviceInfo.deviceName;
+        if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_DEVICE_NAME, value, strlen(value)) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "ledger device name change sync to cloud failed");
+        }
     }
     return SOFTBUS_OK;
 }
@@ -877,6 +1045,14 @@ static int32_t UpdateUnifiedName(const void *name)
             return SOFTBUS_ERR;
         }
         UpdateStateVersionAndStore();
+        if (g_localNetLedger.localInfo.accountId == 0) {
+            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+            return SOFTBUS_OK;
+        }
+        char *value = g_localNetLedger.localInfo.deviceInfo.unifiedName;
+        if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_UNIFIED_DEVICE_NAME, value, strlen(value)) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "ledger unified device name change sync to cloud failed");
+        }
     }
     return SOFTBUS_OK;
 }
@@ -891,6 +1067,15 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
         if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName,
             DEVICE_NAME_BUF_LEN, (char *)name) != EOK) {
             return SOFTBUS_ERR;
+        }
+        UpdateStateVersionAndStore();
+        if (g_localNetLedger.localInfo.accountId == 0) {
+            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+            return SOFTBUS_OK;
+        }
+        char *value = g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName;
+        if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_UNIFIED_DEFAULT_DEVICE_NAME, value, strlen(value)) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "ledger unified default device name change sync to cloud failed");
         }
     }
     return SOFTBUS_OK;
@@ -908,6 +1093,14 @@ static int32_t UpdateNickName(const void *name)
             return SOFTBUS_ERR;
         }
         UpdateStateVersionAndStore();
+        if (g_localNetLedger.localInfo.accountId == 0) {
+            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+            return SOFTBUS_OK;
+        }
+        char *value = g_localNetLedger.localInfo.deviceInfo.nickName;
+        if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_SETTINGS_NICK_NAME, value, strlen(value)) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "ledger nick name change sync to cloud failed");
+        }
     }
     return SOFTBUS_OK;
 }
@@ -918,6 +1111,14 @@ static int32_t UpdateLocalNetworkId(const void *id)
         return SOFTBUS_ERR;
     }
     UpdateStateVersionAndStore();
+    if (g_localNetLedger.localInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        return SOFTBUS_ERR;
+    }
+    char *value = g_localNetLedger.localInfo.networkId;
+    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_NETWORK_ID, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger networkId change sync to cloud failed");
+    }
     return SOFTBUS_OK;
 }
 
@@ -1022,6 +1223,17 @@ static int32_t UpdateLocalBtMac(const void *mac)
         return SOFTBUS_INVALID_PARAM;
     }
     LnnSetBtMac(&g_localNetLedger.localInfo, (char *)mac);
+    if (LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update Bt mac to localdevinfo store fail");
+    }
+    if (g_localNetLedger.localInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        return SOFTBUS_OK;
+    }
+    char *value = g_localNetLedger.localInfo.connectInfo.macAddr;
+    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BT_MAC, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger btMac change sync to cloud failed");
+    }
     return SOFTBUS_OK;
 }
 
@@ -1289,6 +1501,7 @@ static int32_t LlGetCipherInfoIv(void *buf, uint32_t len)
 static int32_t UpdateLocalIrk(const void *id)
 {
     if (id == NULL) {
+        LNN_LOGE(LNN_LEDGER, "id is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s((char *)g_localNetLedger.localInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, id, LFINDER_IRK_LEN) != EOK) {
@@ -1301,6 +1514,7 @@ static int32_t UpdateLocalIrk(const void *id)
 static int32_t UpdateLocalPubMac(const void *id)
 {
     if (id == NULL) {
+        LNN_LOGE(LNN_LEDGER, "id is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s((char *)g_localNetLedger.localInfo.rpaInfo.publicAddress,
@@ -1314,6 +1528,7 @@ static int32_t UpdateLocalPubMac(const void *id)
 static int32_t UpdateLocalCipherInfoKey(const void *id)
 {
     if (id == NULL) {
+        LNN_LOGE(LNN_LEDGER, "id is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s((char *)g_localNetLedger.localInfo.cipherInfo.key,
@@ -1321,17 +1536,36 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
         LNN_LOGE(LNN_LEDGER, "memcpy cipherInfo.key fail");
         return SOFTBUS_MEM_ERR;
     }
+    UpdateStateVersionAndStore();
+    if (g_localNetLedger.localInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        return SOFTBUS_OK;
+    }
+    char *value = (char *)g_localNetLedger.localInfo.cipherInfo.key;
+    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_KEY, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger cipher key change sync to cloud failed");
+    }
     return SOFTBUS_OK;
 }
 
 static int32_t UpdateLocalCipherInfoIv(const void *id)
 {
     if (id == NULL) {
+        LNN_LOGE(LNN_LEDGER, "id is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s((char *)g_localNetLedger.localInfo.cipherInfo.iv, BROADCAST_IV_LEN, id, BROADCAST_IV_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy cipherInfo.iv fail");
         return SOFTBUS_MEM_ERR;
+    }
+    UpdateStateVersionAndStore();
+    if (g_localNetLedger.localInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        return SOFTBUS_OK;
+    }
+    char *value = (char *)g_localNetLedger.localInfo.cipherInfo.iv;
+    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_IV, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger cipher iv change sync to cloud failed");
     }
     return SOFTBUS_OK;
 }
@@ -1404,6 +1638,10 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_STA_FREQUENCY, -1, L1GetStaFrequency, UpdateStaFrequency},
     {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols},
     {NUM_KEY_DATA_CHANGE_FLAG, sizeof(int16_t), L1GetNodeDataChangeFlag, UpdateNodeDataChangeFlag},
+    {NUM_KEY_DATA_DYNAMIC_LEVEL, sizeof(uint16_t), L1GetDataDynamicLevel, UpdateDataDynamicLevel},
+    {NUM_KEY_DATA_STATIC_LEVEL, sizeof(uint16_t), L1GetDataStaticLevel, UpdateDataStaticLevel},
+    {NUM_KEY_DATA_SWITCH_LEVEL, sizeof(uint32_t), L1GetDataSwitchLevel, UpdateDataSwitchLevel},
+    {NUM_KEY_DATA_SWITCH_LENGTH, sizeof(uint16_t), L1GetDataSwitchLength, UpdateDataSwitchLength},
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
     {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
@@ -1574,63 +1812,77 @@ static int32_t LnnFirstGetUdid(void)
     return SOFTBUS_OK;
 }
 
-static int32_t LnnGenBroadcastCipherInfo(void)
+static int32_t LnnLoadBroadcastCipherInfo(BroadcastCipherKey *broadcastKey)
 {
-    if (LnnLoadLocalBroadcastCipherKey() == SOFTBUS_OK) {
-        BroadcastCipherKey broadcastKey;
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "get local info failed.");
-            return SOFTBUS_ERR;
-        }
-        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
-            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-            (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-            LNN_LOGE(LNN_LEDGER, "set key error.");
-            return SOFTBUS_ERR;
-        }
-        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
-            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-            (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-            LNN_LOGE(LNN_LEDGER, "set iv error.");
-            return SOFTBUS_ERR;
-        }
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
-        return SOFTBUS_OK;
-    }
-
-    BroadcastCipherKey broadcastKey;
-    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "generate broadcast key error.");
+    if (broadcastKey == NULL) {
+        LNN_LOGE(LNN_LEDGER, "broadcastKey is null.");
         return SOFTBUS_ERR;
     }
-    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "generate broadcast iv error.");
+    if (LnnGetLocalBroadcastCipherKey(broadcastKey) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local info failed.");
         return SOFTBUS_ERR;
     }
     if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
-        broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        broadcastKey->cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set key error.");
         return SOFTBUS_ERR;
     }
     if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
-        broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        broadcastKey->cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set iv error.");
         return SOFTBUS_ERR;
     }
-    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update local broadcast key failed");
-        return SOFTBUS_ERR;
-    }
-    LNN_LOGI(LNN_LEDGER, "generate BroadcastCipherInfo success!");
+    LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
     return SOFTBUS_OK;
+}
+
+static int32_t LnnGenBroadcastCipherInfo(void)
+{
+    BroadcastCipherKey broadcastKey;
+    int32_t ret = SOFTBUS_ERR;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    do {
+        if (LnnLoadLocalBroadcastCipherKey() == SOFTBUS_OK) {
+            ret = LnnLoadBroadcastCipherInfo(&broadcastKey);
+            break;
+        }
+        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "generate broadcast key error.");
+            break;
+        }
+        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "generate broadcast iv error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
+            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set key error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
+            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set iv error.");
+            break;
+        }
+        if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "update local broadcast key failed");
+            break;
+        }
+        LNN_LOGI(LNN_LEDGER, "generate BroadcastCipherInfo success!");
+        ret = SOFTBUS_OK;
+    } while (0);
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    return ret;
 }
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
+}
+
+int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+{
+    return LnnSetLocalInfo(key, (void*)&info);
 }
 
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
@@ -1658,7 +1910,22 @@ int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
     return LnnSetLocalInfo(key, (void*)&info);
 }
 
-int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+int32_t LnnGetLocalNumU16Info(InfoKey key, uint16_t *info)
+{
+    return LnnGetLocalInfo(key, (void*)info, sizeof(uint16_t));
+}
+
+int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info)
+{
+    return LnnSetLocalInfo(key, (void*)&info);
+}
+
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return LnnGetLocalInfo(key, (void*)info, sizeof(uint32_t));
+}
+
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }

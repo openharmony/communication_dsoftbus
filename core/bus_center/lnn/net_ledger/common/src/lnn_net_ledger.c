@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
+#include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_huks_utils.h"
@@ -74,14 +75,15 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     char softBusVersion[VERSION_MAX_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
         if (strcmp(softBusVersion, info->softBusVersion) != 0) {
-            LNN_LOGW(LNN_LEDGER, "softbus version change, version:%s", softBusVersion);
+            LNN_LOGW(LNN_LEDGER, "softbus version change, version:%{public}s", softBusVersion);
             return true;
         }
     }
     uint64_t softbusFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
         if (softbusFeature != info->feature) {
-            LNN_LOGW(LNN_LEDGER, "feature change, old:%" PRIu64 ", new:%" PRIu64, info->feature, softbusFeature);
+            LNN_LOGW(LNN_LEDGER, "feature change, old:%{public}" PRIu64 ", new:%{public}" PRIu64,
+                info->feature, softbusFeature);
             return true;
         }
     }
@@ -95,14 +97,15 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     int32_t osType = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
         if (osType != info->deviceInfo.osType) {
-            LNN_LOGW(LNN_LEDGER, "osType change, old:%d, new:%d", info->deviceInfo.osType, osType);
+            LNN_LOGW(LNN_LEDGER, "osType change, old:%{public}d, new:%{public}d", info->deviceInfo.osType, osType);
             return true;
         }
     }
     uint32_t authCapacity = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_AUTH_CAP, (int32_t *)&authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
-            LNN_LOGW(LNN_LEDGER, "authCapacity change, old:%d, new:%d", info->authCapacity, authCapacity);
+            LNN_LOGW(LNN_LEDGER, "authCapacity change, old:%{public}d, new:%{public}d",
+                info->authCapacity, authCapacity);
             return true;
         }
     }
@@ -160,6 +163,8 @@ static void LnnRestoreLocalDeviceInfo()
 
 int32_t LnnInitNetLedgerDelay(void)
 {
+    LnnLoadLocalDeviceAccountIdInfo();
+    LnnInitCloudSyncModule();
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
         return SOFTBUS_ERR;
@@ -179,6 +184,7 @@ void LnnDeinitNetLedger(void)
     LnnDeinitLocalLedger();
     LnnDeinitHuksInterface();
     LnnDeinitMetaNodeExtLedger();
+    LnnDeInitCloudSyncModule();    
 }
 
 static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
@@ -203,7 +209,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
         case NODE_KEY_BLE_OFFLINE_CODE:
             return LnnGetLocalStrInfo(STRING_KEY_OFFLINE_CODE, (char *)info, infoLen);
         case NODE_KEY_NETWORK_CAPABILITY:
-            return LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)info);
+            return LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, (uint32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
             return LnnGetLocalNumInfo(NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
         case NODE_KEY_DATA_CHANGE_FLAG:
@@ -240,7 +246,7 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
         case NODE_KEY_BLE_OFFLINE_CODE:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_OFFLINE_CODE, (char *)info, infoLen);
         case NODE_KEY_NETWORK_CAPABILITY:
-            return LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, (int32_t *)info);
+            return LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, (uint32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
         case NODE_KEY_DATA_CHANGE_FLAG:
@@ -299,6 +305,42 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     }
     LNN_LOGE(LNN_LEDGER, "remote networkId");
     return SOFTBUS_ERR;
+}
+
+int32_t LnnSetDataLevel(const DataLevel *dataLevel)
+{
+    if (dataLevel == NULL) {
+        LNN_LOGE(LNN_LEDGER, "LnnSetDataLevel data level is null");
+        return SOFTBUS_ERR;
+    }
+    LNN_LOGI(LNN_LEDGER, "LnnSetDataLevel, dynamic: %{public}hu, static: %{public}hu, "
+        "switch: %{public}u, switchLen: %{public}hu", dataLevel->dynamicLevel, dataLevel->staticLevel,
+        dataLevel->switchLevel, dataLevel->switchLength);
+    uint16_t dynamicLevel = dataLevel->dynamicLevel;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_DYNAMIC_LEVEL, dynamicLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data dynamic level failed");
+        return SOFTBUS_ERR;
+    }
+
+    uint16_t staticLevel = dataLevel->staticLevel;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_STATIC_LEVEL, staticLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data static level failed");
+        return SOFTBUS_ERR;
+    }
+
+    uint32_t switchLevel = dataLevel->switchLevel;
+    if (LnnSetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, switchLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data switch level faield");
+        return SOFTBUS_ERR;
+    }
+
+    uint16_t switchLength = dataLevel->switchLength;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, switchLength) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data switch length failed");
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
 }
 
 int32_t LnnGetNodeKeyInfoLen(int32_t key)

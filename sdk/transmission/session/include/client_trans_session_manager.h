@@ -44,6 +44,23 @@ typedef enum {
     SESSION_ROLE_BUTT,
 } SessionRole;
 
+typedef enum {
+    SESSION_STATE_INIT,
+    SESSION_STATE_OPENING,
+    SESSION_STATE_OPENED,
+    SESSION_STATE_CALLBACK_FINISHED,
+    SESSION_STATE_CANCELLING,
+    SESSION_STATE_BUTT,
+} SessionState;
+
+typedef struct {
+    SessionState sessionState;
+    SoftBusCond callbackCond;
+    int32_t bindErrCode;
+    uint32_t maxWaitTime; // 0 means no check time out, for Bind end
+    uint32_t waitTime;
+} SocketLifecycleData;
+
 typedef struct {
     ListNode node;
     int32_t sessionId;
@@ -67,6 +84,7 @@ typedef struct {
     uint32_t dataConfig;
     bool isEncyptedRawStream;
     bool isAsync;
+    SocketLifecycleData lifecycle;
 } SessionInfo;
 
 typedef struct {
@@ -97,7 +115,19 @@ typedef enum {
     KEY_PKG_NAME,
 } SessionKey;
 
-int32_t ClientAddNewSession(const char* sessionName, SessionInfo* session);
+typedef enum {
+    TIMER_ACTION_START,
+    TIMER_ACTION_STOP,
+    TIMER_ACTION_BUTT
+} TimerAction;
+
+typedef struct {
+    ListNode node;
+    char pkgName[PKG_NAME_SIZE_MAX];
+    char sessionName[SESSION_NAME_SIZE_MAX];
+} SessionServerInfo;
+
+int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
 
 /**
  * @brief Add session.
@@ -151,12 +181,12 @@ int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int
 int TransClientInit(void);
 void TransClientDeinit(void);
 
-int32_t ReCreateSessionServerToServer(void);
+int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList);
 void ClientTransRegLnnOffline(void);
 
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
 
-void ClientCleanAllSessionWhenServerDeath(void);
+void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList);
 
 int32_t CheckPermissionState(int32_t sessionId);
 
@@ -182,7 +212,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
 
 int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocketInfo);
 
-bool IsSessionExceedLimit();
+bool IsSessionExceedLimit(void);
 
 int32_t ClientResetIdleTimeoutById(int32_t sessionId);
 
@@ -196,6 +226,22 @@ int32_t SetSessionIsAsyncById(int32_t sessionId, bool isAsync);
 
 int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType);
 
+int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo);
+
+void DelSessionStateClosing(void);
+int32_t GetSocketLifecycleAndSessionNameBySessionId(
+    int32_t sessionId, char *sessionName, SocketLifecycleData *lifecycle);
+int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState, int32_t optional);
+int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAction action);
+int32_t GetQosValue(const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal);
+inline bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
+{
+    return (qos == NULL) ? (qosCount == 0) : (qosCount <= QOS_TYPE_BUTT);
+}
+int32_t ClientWaitSyncBind(int32_t socket);
+int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode);
+void AddSessionStateClosing(void);
+int32_t SetSessionInitInfoById(int32_t sessionId);
 #ifdef __cplusplus
 }
 #endif
