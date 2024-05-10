@@ -193,7 +193,7 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     session->channelId = TRANS_TEST_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
-    session->isEnable = false;
+    session->enableStatus = ENABLE_STATUS_INIT;
     session->routeType = ROUTE_TYPE_ALL;
     session->info.flag = TYPE_BYTES;
     session->isEncrypt = true;
@@ -399,7 +399,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest05, TestS
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest06, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     int32_t ret = ProcessReceivedFileData(TRANS_TEST_SESSION_ID, TRANS_TEST_CHANNEL_ID, TRANS_TEST_AUTH_DATA,
                                           strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_FIRST_FRAME);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
