@@ -38,7 +38,7 @@ extern "C" {
 /**
  * @brief Defines a callback that is invoked when receive the data level from remote device.
  * For details, see {@link RegDataLevelChangeCb}.
- * 
+ *
  * @since 1.0
  * @version 1.0
  */
@@ -52,10 +52,10 @@ typedef struct {
 typedef struct {
     /**
      * @brief Called when the Data level of a device received.
-     * 
+     *
      * @param networkId Indicates the network id of the device.
      * @param dataLevel Indicates the received data level.
-     * 
+     *
      * @since 1.0
      * @version 1.0
      */
@@ -64,11 +64,11 @@ typedef struct {
 
 /**
  * @brief Registers a callback for data level received.
- * 
+ *
  * @param pkgName Indicates the package name of the caller.
  * @param callback Indicates the function callback to be registered. For details, see {@link IDataLevelCb}.
- * @return Returns <b>0</b> if the registeration is successful; returns any other value otherwise. 
- * 
+ * @return Returns <b>0</b> if the registeration is successful; returns any other value otherwise.
+ *
  * @since 1.0
  * @version 1.0
  */
@@ -76,10 +76,10 @@ int32_t RegDataLevelChangeCb(const char *pkgName, IDataLevelCb *callback);
 
 /**
  * @brief Unregisters a callback for data level received.
- * 
+ *
  * @param pkgName Indicates the package name of the caller.
- * @return Returns <b>0</b> if the registeration is successful; returns any other value otherwise.  
- * 
+ * @return Returns <b>0</b> if the registeration is successful; returns any other value otherwise.
+ *
  * @since 1.0
  * @version 1.0
  */
@@ -87,10 +87,10 @@ int32_t UnregDataLevelChangeCb(const char *pkgName);
 
 /**
  * @brief Set the DistributedDataBase Data Level. This interface CAN ONLY invoked by DistributedDataBase.
- * 
+ *
  * @param dataLevel Indicates the data level.
- * @return Returns <b>0</b> if the registeration is successful; returns any other value otherwise.  
- * 
+ * @return Returns <b>0</b> if the registeration is successful; returns any other value otherwise.
+ *
  * @since 1.0
  * @version 1.0
  */
