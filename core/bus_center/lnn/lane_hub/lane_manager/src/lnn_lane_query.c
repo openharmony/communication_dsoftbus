@@ -117,12 +117,12 @@ static int32_t GetLaneResource(LaneTransType transType, LaneLinkType *optLink, u
 static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 {
     int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
-    if (ret != SOFTBUS_OK || *local < 0) {
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
-    if (ret != SOFTBUS_OK || *remote < 0) {
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
         return false;
     }
