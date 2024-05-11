@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@
 static int32_t GetUuidFromFile(char *id, uint32_t len)
 {
     int32_t rc;
-    char uuidFilePath[SOFTBUS_MAX_PATH_LEN];
+    char uuidFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
 
     rc = LnnGetFullStoragePath(LNN_FILE_ID_UUID, uuidFilePath, SOFTBUS_MAX_PATH_LEN);
     if (rc != SOFTBUS_OK) {
