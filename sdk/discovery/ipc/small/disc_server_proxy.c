@@ -175,7 +175,7 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
     if (!ret) {
         DISC_LOGE(DISC_SDK, "Write pkgName failed");
         return SOFTBUS_IPC_ERR;
-    }   
+    }
     DiscSerializer serializer = {
         .dataLen = info->dataLen,
         .freq = info->freq,
@@ -197,13 +197,13 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
     if (!ret) {
         DISC_LOGE(DISC_SDK, "Write capability failed");
         return SOFTBUS_IPC_ERR;
-    }   
+    }
     if (info->dataLen != 0) {
         ret = WriteString(&request, (const char *)(info->capabilityData));
         if (!ret) {
             DISC_LOGE(DISC_SDK, "Write capabilityData failed");
             return SOFTBUS_IPC_ERR;
-        } 
+        }
     }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_DISCOVERY, &request, NULL, NULL);
@@ -232,7 +232,7 @@ int ServerIpcStopDiscovery(const char *pkgName, int subscribeId)
     if (!ret) {
         DISC_LOGE(DISC_SDK, "Write pkgName failed");
         return SOFTBUS_IPC_ERR;
-    }  
+    }
     ret = WriteInt32(&request, subscribeId);
     if (!ret) {
         DISC_LOGE(DISC_SDK, "Write subscribeId failed");
