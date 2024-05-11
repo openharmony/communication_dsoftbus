@@ -692,7 +692,7 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 
 int32_t TcpStartListening(const LocalListenerInfo *info)
 {
-    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P)) {
+    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P && info->type != CONNECT_HML)) {
         return SOFTBUS_INVALID_PARAM;
     }
     static SoftbusBaseListener listener = {
