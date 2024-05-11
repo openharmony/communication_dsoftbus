@@ -46,7 +46,7 @@ void SoftbusBleConflictNotifyDisconnect(const char *addr, const char *udid);
 int32_t LegacyConflictReuseConnection(const char *address, const char *udid, uint32_t requestId,
     uint32_t *connectionId);
 bool LegacyConflictPostBytes(uint32_t connectionId, uint8_t *data, uint32_t dataLen);
-void LegacyConflictDisconnect(uint32_t connectionId, bool isForce);
+void LegacyConflictDisconnect(uint32_t underlayerHandle, bool isForce);
 void LegacyConflictCancelOccupy(const char *udid);
 void LegacyConflictOccupy(const char *udid, int32_t timeout);
 int32_t LegacyConflictGetConnection(const char *udid);
