@@ -1700,7 +1700,7 @@ static void OnBrStateChanged(SoftBusMessage *msg)
     if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
         int32_t ret = SoftBusMutexLock(&g_recvMessageInfo.lock);
         DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "lock failed");
-        int32_t numNeedBrMac = g_recvMessageInfo.numNeedBrMac;
+        uint32_t numNeedBrMac = g_recvMessageInfo.numNeedBrMac;
         SoftBusMutexUnlock(&g_recvMessageInfo.lock);
 
         if (numNeedBrMac > 0) {
