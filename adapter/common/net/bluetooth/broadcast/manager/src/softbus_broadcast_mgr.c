@@ -642,7 +642,7 @@ static void BcScanStateChanged(int32_t resultCode, bool isStartScan)
 static int32_t ConvertBroadcastUuid(const SoftbusBroadcastUuid *uuid, BroadcastUuid *bcUuid)
 {
     bcUuid->uuidLen = uuid->uuidLen;
-    bcUuid->uuid = (int8_t *)SoftBusCalloc(uuid->uuidLen);
+    bcUuid->uuid = (int8_t *)SoftBusCalloc(bcUuid->uuidLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(bcUuid->uuid != NULL, SOFTBUS_MALLOC_ERR, DISC_BLE, "malloc failed!");
     if (memcpy_s(bcUuid->uuid, bcUuid->uuidLen, uuid->uuid, uuid->uuidLen) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy_s err!");
@@ -1187,7 +1187,7 @@ static void ConvertBcParams(const BroadcastParam *srcParam, SoftbusBroadcastPara
     dstParam->advFilterPolicy = srcParam->advFilterPolicy;
     dstParam->ownAddrType = srcParam->ownAddrType;
     dstParam->peerAddrType = srcParam->peerAddrType;
-    if (memcpy_s(dstParam->peerAddr.addr, BC_ADDR_MAC_LEN, srcParam->peerAddr.addr, BC_ADDR_MAC_LEN) != EOK) {
+    if (memcpy_s(dstParam->peerAddr.addr, SOFTBUS_ADDR_MAC_LEN, srcParam->peerAddr.addr, BC_ADDR_MAC_LEN) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy peerAddr fail");
         return;
     }
