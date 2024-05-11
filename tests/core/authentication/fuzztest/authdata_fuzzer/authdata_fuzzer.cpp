@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,12 @@
  */
 
 #include "auth_interface.h"
+#include "comm_log.h"
 #include "softbus_adapter_mem.h"
 #include "lnn_net_builder.h"
 #include <cstddef>
 #include <cstring>
 #include "securec.h"
-
 
 namespace OHOS {
     const uint8_t *g_baseFuzzData = nullptr;
@@ -43,7 +43,8 @@ template <class T> T GetData()
 
 bool AuthDataFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size < sizeof(uint64_t) || size < sizeof(AuthTransData)) {
+        COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
     }
     g_baseFuzzData = data;
@@ -53,16 +54,28 @@ bool AuthDataFuzzTest(const uint8_t* data, size_t size)
     AuthLinkType authLinkType = static_cast<AuthLinkType>
     (GetData<int>() % (AUTH_LINK_TYPE_MAX - AUTH_LINK_TYPE_WIFI + 1));
     uint64_t authId = *(reinterpret_cast<const uint64_t*>(data));
-
     AuthHandle authHandle = { .authId = authId, .type = authLinkType};
-    const AuthTransData dataInfo = *const_cast<AuthTransData *>(reinterpret_cast<const AuthTransData *>(data));
-    AuthPostTransData(authHandle, &dataInfo);
+
+    const AuthTransData *outData = reinterpret_cast<const AuthTransData*>(data);
+    AuthTransData *dataInfo = (AuthTransData *)SoftBusMalloc(sizeof(AuthTransData));
+    if (dataInfo == nullptr) {
+        COMM_LOGE(COMM_TEST, "dataInfo is NULL");
+        return false;
+    }
+    if (memcpy_s(dataInfo, sizeof(AuthTransData), outData, sizeof(AuthTransData)) != EOK) {
+        COMM_LOGE(COMM_TEST, "memcpy_s AuthTransData failed!");
+        SoftBusFree(dataInfo);
+        return false;
+    }
+    AuthPostTransData(authHandle, dataInfo);
+    SoftBusFree(dataInfo);
     return true;
 }
 
 bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size < sizeof(uint64_t)) {
+        COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
     }
     g_baseFuzzData = data;
@@ -72,12 +85,12 @@ bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
     AuthLinkType authLinkType = static_cast<AuthLinkType>
     (GetData<int>() % (AUTH_LINK_TYPE_MAX - AUTH_LINK_TYPE_WIFI + 1));
     uint64_t authId = *(reinterpret_cast<const uint64_t*>(data));
-
     AuthHandle authHandle = { .authId = authId, .type = authLinkType};
    
     uint8_t *outData = nullptr;
-    outData =  (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
-    if (outData == NULL) {
+    outData =  (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    if (outData == nullptr) {
+        COMM_LOGE(COMM_TEST, "outData is NULL, SoftBusMalloc failed!");
         return false;
     }
     uint32_t outLen = 0;
@@ -89,39 +102,43 @@ bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
 
 bool AuthFlushDeviceFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size > UDID_BUF_LEN) {
+        COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
     }
     const char *outData = reinterpret_cast<const char*>(data);
     char *uuid = NULL;
     uuid = (char *)SoftBusMalloc(UDID_BUF_LEN);
-    if (uuid == NULL) {
+    if (uuid == nullptr) {
+        COMM_LOGE(COMM_TEST, "uuid is NULL, SoftBusMalloc failed!");
         return false;
     }
-    if (strcpy_s(uuid, UDID_BUF_LEN, outData) != EOK) {
+    if (memcpy_s(uuid, UDID_BUF_LEN, outData, size) != EOK) {
         SoftBusFree(uuid);
         return false;
     }
     AuthFlushDevice(uuid);
-    SoftBusFree(&uuid);
+    SoftBusFree(uuid);
     return true;
 }
 
 bool AuthStartVerifyFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size < sizeof(AuthConnInfo)) {
+        COMM_LOGE(COMM_TEST, "data is NULL or size less than authConnInfo");
         return false;
     }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
-
     AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
     const AuthConnInfo connInfo = *const_cast<AuthConnInfo *>(reinterpret_cast<const AuthConnInfo *>(data));
     uint32_t requestId = GetData<uint32_t>();
     bool isFastAuth = GetData<bool>();
+    AuthVerifyModule authVeriFyModule = static_cast<AuthVerifyModule>
+    (GetData<int>() % (AUTH_MODULE_BUTT - AUTH_MODULE_LNN + 1));
 
-    AuthStartVerify(&connInfo, requestId, authVerifyCallback, isFastAuth);
+    AuthStartVerify(&connInfo, requestId, authVerifyCallback, authVeriFyModule, isFastAuth);
     return true;
 }
 
@@ -134,11 +151,9 @@ void AuthMetaStartVerifyFuzzTest(const uint8_t* data, size_t size)
     int32_t callingPid = GetData<int32_t>();
     uint32_t keyLen = GetData<uint32_t>();
     uint32_t requestId = GetData<uint32_t>();
-
     AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
     AuthMetaStartVerify(connectionId, data, keyLen, requestId, callingPid, authVerifyCallback);
 }
-
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

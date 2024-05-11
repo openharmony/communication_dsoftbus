@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "bus_center_event.h"
 #include "softbus_adapter_mem.h"
 #include <cstddef>
 #include <cstring>
 #include "securec.h"
-
 
 namespace OHOS {
     const uint8_t *g_baseFuzzData = nullptr;
@@ -43,7 +43,8 @@ template <class T> T GetData()
 
 bool LnnNotifyOnlineStateFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
+        COMM_LOGE(COMM_TEST, "data or size is valid");
         return false;
     }
     g_baseFuzzData = data;
@@ -51,7 +52,8 @@ bool LnnNotifyOnlineStateFuzzTest(const uint8_t* data, size_t size)
     g_baseFuzzPos = 0;
     bool isOnline = GetData<bool>();
     NodeBasicInfo info;
-    strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, reinterpret_cast<const char*>(data));
+    const char *outData = reinterpret_cast<const char*>(data);
+    memcpy_s(info.networkId, NETWORK_ID_BUF_LEN, outData, NETWORK_ID_BUF_LEN);
     LnnNotifyOnlineState(isOnline, &info);
     LnnNotifyMigrate(isOnline, &info);
     return true;
@@ -60,6 +62,7 @@ bool LnnNotifyOnlineStateFuzzTest(const uint8_t* data, size_t size)
 bool LnnNotifyLnnRelationChangedFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr) {
+        COMM_LOGE(COMM_TEST, "data is nullptr");
         return false;
     }
     const char *outData = reinterpret_cast<const char*>(data);
@@ -73,11 +76,12 @@ bool LnnNotifyLnnRelationChangedFuzzTest(const uint8_t* data, size_t size)
     bool isJoin = GetData<bool>();
     bool isMaster = GetData<bool>();
     char *udid = NULL;
-    udid = (char *)SoftBusMalloc(UDID_BUF_LEN);
-    if (udid == NULL) {
+    udid = (char *)SoftBusCalloc(size);
+    if (udid == nullptr) {
         return false;
     }
-    if (strcpy_s(udid, UDID_BUF_LEN, outData) != EOK) {
+    if (memcpy_s(udid, size, outData, size) != EOK) {
+        COMM_LOGE(COMM_TEST, "memcpy_s is failed!");
         SoftBusFree(udid);
         return false;
     }
@@ -89,53 +93,59 @@ bool LnnNotifyLnnRelationChangedFuzzTest(const uint8_t* data, size_t size)
 
 void LnnNotifyStateChangeEventFuzzTest(const uint8_t* data, size_t size)
 {
-    const char *outData = reinterpret_cast<const char*>(data);
-    char *state = (char *)SoftBusMalloc(sizeof(SoftBusDifferentAccountState));
-    if (state == NULL) {
+    if (data == nullptr || size > sizeof(SoftBusDifferentAccountState)) {
+        COMM_LOGE(COMM_TEST, "data is nullptr");
         return;
     }
-    if (strcpy_s(state, sizeof(SoftBusDifferentAccountState), outData) != EOK) {
+    const char *outData = reinterpret_cast<const char*>(data);
+    char *state = (char *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
+    if (state == nullptr) {
+        COMM_LOGE(COMM_TEST, "state is null, softBusCalloc is failed!");
+        return;
+    }
+    if (memcpy_s(state, sizeof(SoftBusDifferentAccountState), outData, size) != EOK) {
+        COMM_LOGE(COMM_TEST, "state memcpy_s is failed");
         SoftBusFree(state);
         return;
     }
-    char *btState = (char *)SoftBusMalloc(sizeof(SoftBusBtState));
-    if (btState == NULL) {
+    LnnNotifyDifferentAccountChangeEvent(state);
+
+    if (size > sizeof(SoftBusBtState)) {
+        COMM_LOGE(COMM_TEST, "size less than softBusBtState");
         return;
     }
-    if (strcpy_s(btState, sizeof(SoftBusBtState), outData) != EOK) {
+    char *btState = (char *)SoftBusCalloc(sizeof(SoftBusBtState));
+    if (btState == nullptr) {
+        COMM_LOGE(COMM_TEST, "btState is null, softBusCalloc is failed!");
+        return;
+    }
+    if (memcpy_s(btState, sizeof(SoftBusBtState), outData, size) != EOK) {
         SoftBusFree(btState);
+        COMM_LOGE(COMM_TEST, "btState memcpy_s is failed");
         return;
     }
     LnnNotifyBtStateChangeEvent(btState);
-    LnnNotifyDifferentAccountChangeEvent(state);
-    SoftBusFree(state);
-    SoftBusFree(btState);
 }
 
 bool LnnNotifyBtAclStateChangeEventFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size < NETWORK_ID_BUF_LEN || size < BT_MAC_LEN) {
+        COMM_LOGE(COMM_TEST, "data or size is valid");
         return false;
     }
     const char *outData = reinterpret_cast<const char*>(data);
-    char *btMac = NULL;
-    btMac = (char *)SoftBusMalloc(BT_MAC_LEN);
-    if (btMac == NULL) {
+    char btMac[BT_MAC_LEN] = { 0 };
+    if (memcpy_s(btMac, BT_MAC_LEN, outData, BT_MAC_LEN) != EOK) {
+        COMM_LOGE(COMM_TEST, "memcpy_s btMac is failed!");
         return false;
     }
-    if (strcpy_s(btMac, BT_MAC_LEN, outData) != EOK) {
-        SoftBusFree(btMac);
+    btMac[BT_MAC_LEN - 1] = '\0';
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (memcpy_s(networkId, NETWORK_ID_BUF_LEN, outData, NETWORK_ID_BUF_LEN) != EOK) {
+        COMM_LOGE(COMM_TEST, "memcpy_s networkId is failed!");
         return false;
     }
-    char *networkId = NULL;
-    networkId = (char *)SoftBusMalloc(NETWORK_ID_BUF_LEN);
-    if (networkId == NULL) {
-        return false;
-    }
-    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN, outData) != EOK) {
-        SoftBusFree(networkId);
-        return false;
-    }
+    networkId[NETWORK_ID_BUF_LEN - 1] = '\0';
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
@@ -147,29 +157,22 @@ bool LnnNotifyBtAclStateChangeEventFuzzTest(const uint8_t* data, size_t size)
     LnnNotifyNodeAddressChanged(btMac, networkId, isLocal);
     LnnNotifyBtAclStateChangeEvent(btMac, state);
     LnnNotifyAddressChangedEvent(btMac);
-    SoftBusFree(networkId);
-    SoftBusFree(btMac);
     return true;
 }
 
 bool LnnNotifySingleOffLineEventFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
+        COMM_LOGE(COMM_TEST, "data or size is valid");
         return false;
     }
     NodeBasicInfo basicInfo;
-    (void)memset_s(&basicInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-
-    ConnectionAddr *addr = (ConnectionAddr *)SoftBusMalloc(sizeof(ConnectionAddr));
-    if (addr == NULL) {
-        return false;
-    }
-    if (memset_s(addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr)) != EOK) {
-        SoftBusFree(addr);
-        return false;
-    }
-    LnnNotifySingleOffLineEvent(addr, &basicInfo);
-    SoftBusFree(addr);
+    const char *outData = reinterpret_cast<const char*>(data);
+    memcpy_s(basicInfo.networkId, NETWORK_ID_BUF_LEN, outData, NETWORK_ID_BUF_LEN);
+    ConnectionAddrType type = static_cast<ConnectionAddrType>
+    (GetData<int>() % (CONNECTION_ADDR_MAX - CONNECTION_ADDR_WLAN + 1));
+    ConnectionAddr addr = {.type = type};
+    LnnNotifySingleOffLineEvent(&addr, &basicInfo);
     return true;
 }
 

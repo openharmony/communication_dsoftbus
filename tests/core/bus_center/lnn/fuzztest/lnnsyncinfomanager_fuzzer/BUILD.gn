@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,17 +18,16 @@ import("../../../../../../dsoftbus.gni")
 ##############################fuzztest##########################################
 dsoftbus_root_path = "../../../../../.."
 
-ohos_fuzztest("LnnFastOffLineFuzzTest") {
+ohos_fuzztest("LnnSyncInfoManagerFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
-  fuzz_config_file =
-      "$dsoftbus_root_path/tests/core/bus_center/lnn/fuzztest/lnnfastoffline_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/bus_center/lnn/fuzztest/lnnsyncinfomanager_fuzzer"
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/sdk/common/include",
   ]
@@ -40,7 +39,7 @@ ohos_fuzztest("LnnFastOffLineFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "lnnfastoffline_fuzzer.cpp" ]
+  sources = [ "lnnsyncinfomanager_fuzzer.cpp" ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",

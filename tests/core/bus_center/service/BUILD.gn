@@ -69,10 +69,3 @@ group("unittest") {
   testonly = true
   deps = [ ":BusCenterDecisionTest" ]
 }
-
-group("fuzztest") {
-  testonly = true
-  deps = [
-    "fuzztest:fuzztest",
-  ]
-}
