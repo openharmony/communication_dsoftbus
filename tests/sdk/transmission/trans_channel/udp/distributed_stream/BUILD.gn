@@ -31,6 +31,7 @@ ohos_distributedtest("DistriStreamTest") {
     "//third_party/googletest:gtest",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
@@ -50,6 +51,7 @@ ohos_distributedtest("DistriStreamTestAgent") {
     "//third_party/googletest:gtest",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
