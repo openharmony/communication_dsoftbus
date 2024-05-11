@@ -342,8 +342,7 @@ int32_t KVAdapter::DeleteKvStorePtr()
 int32_t KVAdapter::CloudSync()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
-    std::function<void(DistributedKv::ProgressDetail &&)> callback;
-    callback = CloudSyncCallback;
+    std::function<void(DistributedKv::ProgressDetail &&)> callback = CloudSyncCallback;
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
@@ -373,7 +372,7 @@ void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
         LNN_LOGI(LNN_LEDGER, "cloud sync succeed");
     }
     if (progress == DistributedKv::Progress::SYNC_FINISH && code != DistributedKv::Status::SUCCESS) {
-        LNN_LOGI(LNN_LEDGER, "cloud sync failed, code: %{public}d", code);
+        LNN_LOGE(LNN_LEDGER, "cloud sync failed, code: %{public}d", code);
     }
 }
 
