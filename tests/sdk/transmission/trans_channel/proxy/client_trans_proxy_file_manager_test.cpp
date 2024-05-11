@@ -435,7 +435,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
     ASSERT_EQ(SOFTBUS_OK, ret);
 
     int32_t sessionId = 1;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
 
     ret = ClientAddSession(&g_param, &sessionId, &isEnabled);
     ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);

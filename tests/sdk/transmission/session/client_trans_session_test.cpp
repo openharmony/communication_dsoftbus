@@ -223,7 +223,7 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     session->channelId = TRANS_TEST_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
-    session->isEnable = false;
+    session->enableStatus = ENABLE_STATUS_INIT;
     session->routeType = ROUTE_TYPE_ALL;
     session->info.flag = TYPE_BYTES;
     session->isEncrypt = true;
@@ -388,7 +388,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest04, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
@@ -524,7 +524,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest09, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
@@ -568,7 +568,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
     TestGenerateCommParam(sessionParam);
     SessionInfo *session = TestGenerateSession(sessionParam);
     ASSERT_TRUE(session != NULL);
-    session->isEnable = true;
+    session->enableStatus = ENABLE_STATUS_SUCCESS;
     ret = CheckSessionIsOpened(TRANS_TEST_CHANNEL_ID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED);
     ret = ClientAddNewSession(g_sessionName, session);

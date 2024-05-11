@@ -147,7 +147,7 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     session->channelId = TRANS_TEST_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
-    session->isEnable = false;
+    session->enableStatus = ENABLE_STATUS_INIT;
     session->routeType = ROUTE_TYPE_ALL;
     session->info.flag = TYPE_BYTES;
     session->isEncrypt = true;
@@ -219,7 +219,7 @@ static SessionInfo *GenerateSession(const SessionParam *param)
     session->channelId = INVALID_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
-    session->isEnable = false;
+    session->enableStatus = ENABLE_STATUS_INIT;
     session->routeType = ROUTE_TYPE_ALL;
     session->info.flag = TYPE_BYTES;
     session->isEncrypt = true;
@@ -316,7 +316,7 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest02, TestSiz
 HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest03, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));

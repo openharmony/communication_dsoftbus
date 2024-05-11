@@ -462,7 +462,7 @@ static SessionInfo *CreateNewSession(const SessionParam *param)
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
     session->role = SESSION_ROLE_INIT;
-    session->isEnable = false;
+    session->enableStatus = ENABLE_STATUS_INIT;
     session->info.flag = param->attr->dataType;
     session->isEncrypt = true;
     session->isAsync = false;
@@ -561,7 +561,7 @@ int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session)
     return SOFTBUS_OK;
 }
 
-int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled)
+int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, SessionEnableStatus *isEnabled)
 {
     if (!IsValidSessionParam(param) || (sessionId == NULL) || (isEnabled == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
@@ -581,7 +581,7 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
     SessionInfo *session = GetExistSession(param);
     if (session != NULL) {
         *sessionId = session->sessionId;
-        *isEnabled = session->isEnable;
+        *isEnabled = session->enableStatus;
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SESSION_REPEATED;
     }
@@ -822,7 +822,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, bool *isEnable)
+int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, SessionEnableStatus *enableStatus)
 {
     if (sessionId < 0) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
@@ -850,9 +850,38 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32
     if (type != NULL) {
         *type = sessionNode->channelType;
     }
-    if (isEnable != NULL) {
-        *isEnable = sessionNode->isEnable;
+    if (enableStatus != NULL) {
+        *enableStatus = sessionNode->enableStatus;
     }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return SOFTBUS_OK;
+}
+
+int32_t ClientSetEnableStatusBySocket(int32_t socket, SessionEnableStatus enableStatus)
+{
+    if (socket < 0) {
+        TRANS_LOGE(TRANS_INIT, "invalid socket=%{public}d", socket);
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "entry list  not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "socket not found. socket=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    sessionNode->enableStatus = enableStatus;
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
@@ -1139,7 +1168,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->peerPid = channel->peerPid;
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;
-                sessionNode->isEnable = true;
+                sessionNode->enableStatus = ENABLE_STATUS_SUCCESS;
                 sessionNode->routeType = channel->routeType;
                 sessionNode->businessType = channel->businessType;
                 sessionNode->fileEncrypt = channel->fileEncrypt;
@@ -1806,7 +1835,7 @@ static void ClientInitSession(SessionInfo *session, const SessionParam *param)
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
     session->role = SESSION_ROLE_INIT;
-    session->isEnable = false;
+    session->enableStatus = ENABLE_STATUS_INIT;
     session->info.flag = param->attr->dataType;
     session->info.streamType = param->attr->attr.streamAttr.streamType;
     session->isEncrypt = true;
@@ -1862,7 +1891,8 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
     return session;
 }
 
-int32_t ClientAddSocketSession(const SessionParam *param, bool isEncyptedRawStream, int32_t *sessionId, bool *isEnabled)
+int32_t ClientAddSocketSession(
+    const SessionParam *param, bool isEncyptedRawStream, int32_t *sessionId, SessionEnableStatus *isEnabled)
 {
     if (param == NULL || param->sessionName == NULL || param->groupId == NULL || param->attr == NULL ||
         sessionId == NULL) {
@@ -1883,7 +1913,7 @@ int32_t ClientAddSocketSession(const SessionParam *param, bool isEncyptedRawStre
     SessionInfo *session = GetSocketExistSession(param, isEncyptedRawStream);
     if (session != NULL) {
         *sessionId = session->sessionId;
-        *isEnabled = session->isEnable;
+        *isEnabled = session->enableStatus;
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SESSION_REPEATED;
     }
@@ -2103,10 +2133,16 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
     }
     if (action == TIMER_ACTION_START) {
         bool binding = (sessionNode->lifecycle.maxWaitTime != 0);
-        bool bindSuccess = (sessionNode->lifecycle.maxWaitTime == 0 && sessionNode->isEnable);
-        if (binding || bindSuccess) {
-            TRANS_LOGE(TRANS_SDK, "socket=%{public}d The current state should not start the timer", socket);
+        bool bindSuccess = (sessionNode->lifecycle.maxWaitTime == 0 && sessionNode->enableStatus == ENABLE_STATUS_SUCCESS);
+        if (binding) {
+            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+            TRANS_LOGE(TRANS_SDK, "socket=%{public}d The socket is binding", socket);
             return SOFTBUS_TRANS_SOCKET_IN_USE;
+        }
+        if (bindSuccess) {
+            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+            TRANS_LOGW(TRANS_SDK, "socket=%{public}d The socket was bound successfully", socket);
+            return SOFTBUS_OK;
         }
     }
 
@@ -2302,7 +2338,7 @@ static void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
 
 static void ClientCheckWaitTimeOut(SessionInfo *sessionNode, int32_t waitOutSocket[], uint32_t capacity, uint32_t *num)
 {
-    if (sessionNode->isEnable) {
+    if (sessionNode->enableStatus == ENABLE_STATUS_SUCCESS) {
         return;
     }
 
@@ -2343,7 +2379,7 @@ static void ClientCleanUpWaitTimeoutSocket(int32_t waitOutSocket[], uint32_t wai
 static void ClientUpdateIdleTimeout(
     const ClientSessionServer *serverNode, SessionInfo *sessionNode, ListNode *destroyList)
 {
-    if (sessionNode->role != SESSION_ROLE_CLIENT || !sessionNode->isEnable) {
+    if (sessionNode->role != SESSION_ROLE_CLIENT || sessionNode->enableStatus != ENABLE_STATUS_SUCCESS) {
         return;
     }
 
@@ -2603,9 +2639,10 @@ int32_t SetSessionInitInfoById(int32_t sessionId)
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
             if (sessionNode->sessionId == sessionId) {
-                sessionNode->isEnable = false;
+                sessionNode->enableStatus = ENABLE_STATUS_INIT;
                 sessionNode->channelId = INVALID_CHANNEL_ID;
                 sessionNode->channelType = CHANNEL_TYPE_BUTT;
+                sessionNode->lifecycle.sessionState = SESSION_STATE_INIT;
                 (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
                 return SOFTBUS_OK;
             }
@@ -2803,10 +2840,10 @@ int32_t ClientWaitSyncBind(int32_t socket)
         return ret;
     }
 
-    if (!(sessionNode->isEnable)) {
+    if (sessionNode->enableStatus != ENABLE_STATUS_SUCCESS) {
         ret = sessionNode->lifecycle.bindErrCode;
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        // isEnable=false and ret=SOFTBUS_OK, is an unexpected state
+        // enableStatus=false and ret=SOFTBUS_OK, is an unexpected state
         if (ret == SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "invalid bindErrCode, socket=%{public}d", socket);
             return SOFTBUS_TRANS_SESSION_NO_ENABLE;
