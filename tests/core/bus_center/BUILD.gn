@@ -28,6 +28,6 @@ group("fuzztest") {
   testonly = true
   deps = [
     "lnn:fuzztest",
-    "service:fuzztest",
+    "service/fuzztest:fuzztest",
   ]
 }

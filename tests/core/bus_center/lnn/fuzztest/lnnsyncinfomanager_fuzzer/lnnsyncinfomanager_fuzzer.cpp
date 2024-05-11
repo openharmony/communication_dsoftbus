@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
+#include "softbus_common.h"
 #include "lnn_sync_info_manager.h"
 #include <cstddef>
 #include <cstring>
 #include "securec.h"
-
 
 namespace OHOS {
     const uint8_t *g_baseFuzzData = nullptr;
@@ -39,33 +40,44 @@ template <class T> T GetData()
     return objetct;
 }
 
-
 void LnnSendSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
+        COMM_LOGE(COMM_TEST, "data or size is vaild!");
         return;
     }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
-
     LnnSyncInfoType type = static_cast<LnnSyncInfoType>
     (GetData<int>() % (LNN_INFO_TYPE_COUNT - LNN_INFO_TYPE_CAPABILITY + 1));
-    const char *networkId = reinterpret_cast<const char*>(data);
-    uint32_t len = GetData<uint32_t>();
-
-    LnnSendSyncInfoMsg(type, networkId, data, len, NULL);
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    const char *outData = reinterpret_cast<const char*>(data);
+    if (memcpy_s(&networkId, NETWORK_ID_BUF_LEN, outData, NETWORK_ID_BUF_LEN) != EOK) {
+        COMM_LOGE(COMM_TEST, "memcpy_s networkId is failed!");
+        return;
+    }
+    networkId[NETWORK_ID_BUF_LEN - 1] = '\0';
+    LnnSyncInfoMsgComplete complete;
+    (void)memset_s(&complete, sizeof(LnnSyncInfoMsgComplete), 0, sizeof(LnnSyncInfoMsgComplete));
+    LnnSendSyncInfoMsg(type, networkId, data, (uint32_t)size, complete);
 }
 
 void LnnSendP2pSyncInfoMsgFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
+        COMM_LOGE(COMM_TEST, "data or size is vaild!");
         return;
     }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
-    const char *networkId = reinterpret_cast<const char*>(data);
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    const char *outData = reinterpret_cast<const char*>(data);
+    if (memcpy_s(&networkId, NETWORK_ID_BUF_LEN, outData, NETWORK_ID_BUF_LEN) != EOK) {
+        return;
+    }
+    networkId[NETWORK_ID_BUF_LEN - 1] = '\0';
     uint32_t netCapability = GetData<uint32_t>();
     LnnSendP2pSyncInfoMsg(networkId, netCapability);
 }

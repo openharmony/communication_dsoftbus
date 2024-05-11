@@ -25,7 +25,6 @@ ohos_fuzztest("UnpackAuthDataFuzzTest") {
     "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",

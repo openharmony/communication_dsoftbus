@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "lnn_net_builder.h"
 #include <cstddef>
 #include <cstring>
 #include "securec.h"
-
 
 namespace OHOS {
     const uint8_t *g_baseFuzzData = nullptr;
@@ -39,17 +39,25 @@ template <class T> T GetData()
     return objetct;
 }
 
-
 void LnnNotifyDiscoveryDeviceFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr) {
+        COMM_LOGE(COMM_TEST, "data is nullptr");
         return;
     }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
     bool isNeedConnect = GetData<bool>();
-    const ConnectionAddr addr = *const_cast<ConnectionAddr *>(reinterpret_cast<const ConnectionAddr *>(data));
+    if (size < sizeof(ConnectionAddr)) {
+        COMM_LOGE(COMM_TEST, "size  less than ConnectionAddr");
+        return;
+    }
+    ConnectionAddr addr;
+    if (memcpy_s(&addr, sizeof(ConnectionAddr), data, size) != EOK) {
+        COMM_LOGE(COMM_TEST, "memcpy_s ConnectionAddr is failed!");
+        return;
+    }
     LnnNotifyDiscoveryDevice(&addr, isNeedConnect);
 }
 
