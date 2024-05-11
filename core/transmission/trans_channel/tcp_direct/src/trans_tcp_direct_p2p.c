@@ -77,7 +77,7 @@ static int32_t StartNewHmlListener(const char *ip, int32_t *port, ListenerModule
 {
     int32_t listenerPort = 0;
     LocalListenerInfo info;
-    info.type = CONNECT_P2P;
+    info.type = CONNECT_HML;
     (void)memset_s(info.socketOption.addr, sizeof(info.socketOption.addr), 0, sizeof(info.socketOption.addr));
     info.socketOption.port = *port;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
@@ -267,9 +267,6 @@ static int32_t StartP2pListener(const char *ip, int32_t *port)
     if (ip == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ip is null");
         return SOFTBUS_ERR;
-    }
-    if (strncmp(ip, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
-        return StartHmlListener(ip, port);
     }
     TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
     if (SoftBusMutexLock(&g_p2pLock) != SOFTBUS_OK) {
@@ -565,7 +562,11 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
 static int32_t ConnectTcpDirectPeer(const char *addr, int port)
 {
     ConnectOption options;
-    options.type = CONNECT_P2P;
+    if (strncmp(addr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+        options.type = CONNECT_HML;
+    } else {
+        options.type = CONNECT_P2P;
+    }
     (void)memset_s(options.socketOption.addr, sizeof(options.socketOption.addr), 0, sizeof(options.socketOption.addr));
     options.socketOption.port = port;
     options.socketOption.protocol = LNN_PROTOCOL_IP;
@@ -876,7 +877,11 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(conn->channelId + ID_OFFSET));
     (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
-    ret = StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+    if (connInfo->type == CONNECT_P2P) {
+        ret = StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+    } else {
+        ret = StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+    }
     if (ret != SOFTBUS_OK) {
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "start listener fail");

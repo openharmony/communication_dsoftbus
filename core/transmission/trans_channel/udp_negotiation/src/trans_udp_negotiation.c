@@ -909,6 +909,7 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
             break;
         case CONNECT_P2P:
         case CONNECT_P2P_REUSE:
+        case CONNECT_HML:
             appInfo->udpConnType = UDP_CONN_TYPE_P2P;
             appInfo->routeType = WIFI_P2P;
             appInfo->protocol = connOpt->socketOption.protocol;
