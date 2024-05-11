@@ -130,7 +130,7 @@ static SessionInfo *GenerateSession(const SessionParam *param)
     session->channelId = INVALID_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
-    session->isEnable = false;
+    session->enableStatus = ENABLE_STATUS_INIT;
     session->routeType = ROUTE_TYPE_ALL;
     session->info.flag = TYPE_BYTES;
     session->isEncrypt = true;
@@ -168,7 +168,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest01, TestSiz
     int32_t ret = TransClientInit();
     EXPECT_EQ(ret,  SOFTBUS_OK);
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     ret = ClientAddSession(NULL, &sessionId, &isEnabled);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
@@ -260,7 +260,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest04, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest05, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -316,7 +316,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest06, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientAddSessionOutOfMaxTest01, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != NULL);
     GenerateCommParam(sessionParam);
@@ -348,7 +348,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientAddSessionOutOfMaxTest01, Tes
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest07, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -378,7 +378,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest07, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest08, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -399,7 +399,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest08, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest09, TestSize.Level1)
 {
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -454,7 +454,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest10, TestSiz
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     memset_s(data, sizeof(data), 0, sizeof(data));
@@ -504,7 +504,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest12, TestSiz
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientGetSessionIntegerDataById(sessionId, &data, KEY_PEER_PID);
@@ -532,8 +532,8 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest13, TestSiz
 {
     int32_t channelId = 0;
     int32_t type = 0;
-    bool isEnable = false;
-    int32_t ret = ClientGetChannelBySessionId(TRANS_TEST_INVALID_SESSION_ID, &channelId, &type, &isEnable);
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+    int32_t ret = ClientGetChannelBySessionId(TRANS_TEST_INVALID_SESSION_ID, &channelId, &type, &enableStatus);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_INVALID_SESSION_ID);
 }
 
@@ -579,7 +579,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest15, TestSiz
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientSetChannelBySessionId(sessionId, transInfo);
@@ -730,7 +730,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest20, TestSiz
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientGetSessionCallbackById(sessionId, &sessionlistener);
@@ -788,7 +788,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest22, TestSiz
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     int32_t sessionId = 0;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));

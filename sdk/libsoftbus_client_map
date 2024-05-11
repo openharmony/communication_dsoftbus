@@ -399,6 +399,7 @@
         "TransSetChannelInfo";
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
+        "ClientSetEnableStatusBySocket";
         "GetSocketLifecycleAndSessionNameBySessionId";
         "ClientHandleBindWaitTimer";
         "ClientSignalSyncBind";

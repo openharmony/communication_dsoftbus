@@ -71,8 +71,8 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t channelType = CHANNEL_TYPE_BUTT;
-    bool isEnable = false;
-    if (ClientGetChannelBySessionId(sessionId, &channelId, &channelType, &isEnable) != SOFTBUS_OK) {
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &channelType, &enableStatus) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
 
@@ -91,7 +91,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         return checkRet;
     }
 
-    if (!isEnable) {
+    if (enableStatus != ENABLE_STATUS_SUCCESS) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     (void)ClientResetIdleTimeoutById(sessionId);
@@ -113,8 +113,8 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t channelType = CHANNEL_TYPE_BUTT;
-    bool isEnable = false;
-    if (ClientGetChannelBySessionId(sessionId, &channelId, &channelType, &isEnable) != SOFTBUS_OK) {
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &channelType, &enableStatus) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
 
@@ -133,7 +133,7 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         return checkRet;
     }
 
-    if (!isEnable) {
+    if (enableStatus != ENABLE_STATUS_SUCCESS) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     (void)ClientResetIdleTimeoutById(sessionId);
@@ -154,8 +154,8 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
-    bool isEnable = false;
-    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &enableStatus) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if (type != CHANNEL_TYPE_UDP) {
@@ -171,7 +171,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
-    if (!isEnable) {
+    if (enableStatus != ENABLE_STATUS_SUCCESS) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     (void)ClientResetIdleTimeoutById(sessionId);
@@ -205,8 +205,8 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
-    bool isEnable = false;
-    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &enableStatus) != SOFTBUS_OK) {
         SoftBusFree(fileSchemaListener);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
@@ -222,7 +222,7 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
-    if (!isEnable) {
+    if (enableStatus !=  ENABLE_STATUS_SUCCESS) {
         SoftBusFree(fileSchemaListener);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }

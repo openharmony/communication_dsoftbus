@@ -42,7 +42,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->peerPid = channel->peerPid;
     session->peerUid = channel->peerUid;
     session->isServer = channel->isServer;
-    session->isEnable = true;
+    session->enableStatus = ENABLE_STATUS_SUCCESS;
     session->info.flag = (int32_t)flag;
     session->isEncrypt = channel->isEncrypt;
     session->businessType = channel->businessType;
@@ -299,6 +299,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     if (channelType == CHANNEL_TYPE_UNDEFINED) {
+        (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
         // only client async bind failed call
         sessionId = channelId;
         bool tmpIsServer = false;
@@ -311,6 +312,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
     bool isServer = false;
     (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     if (sessionCallback.isSocketListener) {
+        (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
         bool isAsync = true;
         int ret = ClientGetSessionIsAsyncBySessionId(sessionId, &isAsync);
         if (ret != SOFTBUS_OK) {
