@@ -35,6 +35,7 @@
 - [ ] 【内存管理】json使用需释放内存，cJSON_Parse与cJSON_Delete，JSON_PrintUnformatted与JSON_Free成对使用；
 - [ ] 【内存管理】匿名化打印接口Anonymize与AnonymizeFree必须成对使用；
 - [ ] 【内存管理】strdup使用需要注意内存释放；
+- [ ] 【内存管理】realpath使用时如果resolved_path为NULL需要注意内存释放；
 - [ ] 【敏感信息】禁止打印密钥、文件路径、内存地址、udidhash、设备名称、账号id等敏感信息；
 - [ ] 【敏感信息】堆、栈密钥使用后必须清零；
 - [ ] 【敏感信息】禁止不作匿名化直接打印udid/networkid/uuid/ip/mac等敏感信息；
