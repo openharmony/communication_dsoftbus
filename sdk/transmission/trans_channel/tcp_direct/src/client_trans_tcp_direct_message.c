@@ -481,11 +481,11 @@ static int32_t TransResizeDataBuffer(ClientDataBuf *oldBuf, uint32_t pkgLen)
 
 static int32_t TransTdcProcAllData(int32_t channelId)
 {
-    if (g_tcpDataList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is NULL");
-        return SOFTBUS_NO_INIT;
-    }
     while (1) {
+        if (g_tcpDataList == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is NULL");
+            return SOFTBUS_NO_INIT;
+        }
         SoftBusMutexLock(&g_tcpDataList->lock);
         ClientDataBuf *node = TransGetDataBufNodeById(channelId);
         if (node == NULL) {

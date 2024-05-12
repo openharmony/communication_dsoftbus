@@ -1813,13 +1813,17 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
     uint32_t bit = seq % FILE_SEND_ACK_INTERVAL;
     bit = ((bit == 0) ? (FILE_SEND_ACK_INTERVAL - 1) : (bit - 1));
     if (seq >= fileInfo->startSeq) {
-        int32_t seqDiff = (int32_t)(seq - fileInfo->seq - 1);
+        int64_t seqDiff = (int32_t)(seq - fileInfo->seq - 1);
+        if (seqDiff > INT32_MAX) {
+            TRANS_LOGE(TRANS_FILE, "seqDiff overflow");
+            return SOFTBUS_INVALID_NUM; 
+        }
 
-        if (fileInfo->oneFrameLen > INT64_MAX || seqDiff * fileInfo->oneFrameLen > INT64_MAX) {
+        if (fileInfo->oneFrameLen > INT64_MAX || seqDiff * (int64_t)fileInfo->oneFrameLen > INT64_MAX) {
             TRANS_LOGE(TRANS_FILE, "Data overflow");
             return SOFTBUS_INVALID_NUM;
         }
-        int64_t bytesToWrite = (int64_t)seqDiff * (int64_t)fileInfo->oneFrameLen;
+        int64_t bytesToWrite = seqDiff * (int64_t)fileInfo->oneFrameLen;
         if (MAX_FILE_SIZE < bytesToWrite) {
             TRANS_LOGE(
                 TRANS_FILE, "WriteEmptyFrame bytesToWrite is too large, bytesToWrite=%{public}" PRIu64, bytesToWrite);
@@ -1830,7 +1834,7 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
             return SOFTBUS_ERR;
         }
 
-        if (WriteEmptyFrame(fileInfo, seqDiff) != SOFTBUS_OK) {
+        if (WriteEmptyFrame(fileInfo, (int32_t)seqDiff) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
         if ((seq >= fileInfo->preStartSeq + FILE_SEND_ACK_INTERVAL + WAIT_FRAME_ACK_TIMEOUT_COUNT - 1) ||
