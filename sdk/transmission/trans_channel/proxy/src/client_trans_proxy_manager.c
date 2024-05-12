@@ -916,7 +916,7 @@ int32_t TransProxyPackAndSendData(
             return SOFTBUS_INVALID_NUM;
         }
         slicehead->sliceNum = (int32_t)sliceNum;
-        slicehead->sliceSeq = i;
+        slicehead->sliceSeq = (int32_t)i;
         ClientPackSliceHead(slicehead);
         if (memcpy_s(sliceData + sizeof(SliceHead), dataLen, dataInfo.outData + offset, dataLen) != EOK) {
             TRANS_LOGE(TRANS_SDK, "memcpy_s error, channelId=%{public}d", channelId);
