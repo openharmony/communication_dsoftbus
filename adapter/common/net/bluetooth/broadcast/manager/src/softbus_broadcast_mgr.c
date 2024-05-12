@@ -60,6 +60,7 @@ typedef struct {
 typedef enum {
     SCAN_FREQ_LOW_POWER,
     SCAN_FREQ_P2_60_3000,
+    SCAN_FREQ_P2_30_1500,
     SCAN_FREQ_P10_30_300,
     SCAN_FREQ_P25_60_240,
     SCAN_FREQ_P100_1000_1000,
@@ -1038,6 +1039,10 @@ static void GetScanIntervalAndWindow(int32_t freq, SoftBusBcScanParams *adapterP
         adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
         adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
     }
+    if (freq == SCAN_FREQ_P2_30_1500) {
+        adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2_FAST;
+        adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2_FAST;
+    }
     if (freq == SCAN_FREQ_P10_30_300) {
         adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
         adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
@@ -1114,6 +1119,8 @@ static int32_t CheckAndStopScan(int32_t listenerId)
             SoftBusFree(adapterFilter);
             return ret;
         }
+        DISC_LOGI(DISC_BLE, "start scan adapterId=%{public}d, interval=%{public}hu, window=%{public}hu",
+            g_scanManager[listenerId].adapterScanId, adapterParam.scanInterval, adapterParam.scanWindow);
         ret = g_interface[g_interfaceId]->StartScan(g_scanManager[listenerId].adapterScanId, &adapterParam,
                                                     adapterFilter, filterSize);
         SoftBusFree(adapterFilter);
@@ -1450,6 +1457,9 @@ static int32_t GetScanFreq(uint16_t scanInterval, uint16_t scanWindow)
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P2 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P2) {
         return SCAN_FREQ_P2_60_3000;
     }
+    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P2_FAST && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P2_FAST) {
+        return SCAN_FREQ_P2_30_1500;
+    }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P10 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P10) {
         return SCAN_FREQ_P10_30_300;
     }
@@ -1519,8 +1529,9 @@ static int32_t StartScanSub(int32_t listenerId)
     DumpBcScanFilter(adapterFilter, filterSize);
 
     DISC_LOGI(DISC_BLE, "start service srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d,"
-        "callCount=%{public}u", GetSrvType(g_scanManager[listenerId].srvType), listenerId,
-        g_scanManager[listenerId].adapterScanId, callCount++);
+        "interval=%{public}hu, window=%{public}hu, callCount=%{public}u",
+        GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId,
+        adapterParam.scanInterval, adapterParam.scanWindow, callCount++);
     int32_t ret = g_interface[g_interfaceId]->StartScan(g_scanManager[listenerId].adapterScanId, &adapterParam,
         adapterFilter, filterSize);
     SoftBusFree(adapterFilter);
@@ -1587,6 +1598,8 @@ int32_t StopScan(int32_t listenerId)
         SoftBusMutexUnlock(&g_scanLock);
         return SOFTBUS_BC_MGR_INVALID_LISN_ID;
     }
+    DISC_LOGI(DISC_BLE, "srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d, callCount=%{public}u",
+        GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId, callCount);
     if (!g_scanManager[listenerId].isScanning) {
         DISC_LOGI(DISC_BLE, "listenerId is not scanning. listenerId=%{public}d", listenerId);
         SoftBusMutexUnlock(&g_scanLock);
