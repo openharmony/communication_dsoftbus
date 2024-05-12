@@ -345,7 +345,7 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
     ret = AuthGetUidAndPidBySessionName(appInfo.myData.sessionName, &appInfo.myData.uid, &appInfo.myData.pid);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed and send msg to peer");
-        TransPostAuthChannelErrMsg(authId, ret, "session not created")
+        TransPostAuthChannelErrMsg(authId, ret, "session not created");
         goto EXIT_ERR;
     }
     ret = TransAuthFillDataConfig(&appInfo);
