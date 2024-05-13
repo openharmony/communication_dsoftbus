@@ -117,7 +117,6 @@ private:
     int ProcessConnectResponseWithGcInfoAsNone(std::shared_ptr<NegotiateCommand> &command);
     int ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<NegotiateCommand> &command);
 
-    void SyncLnnInfoForP2p(const std::string &localMac, const std::string &remoteMac);
     int CreateGroup(const NegotiateMessage &msg);
     int ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel);
     static bool IsNeedDhcp(const std::string &gcIp, const std::string &groupConfig);
