@@ -57,6 +57,20 @@ typedef struct {
     int32_t status[BLE_PROTOCOL_MAX];
 } BleServerCoordination;
 
+typedef struct {
+    int32_t delta;
+    int32_t peerRc;
+    uint16_t challengeCode;
+} BleReferenceCount;
+
+typedef struct {
+    int32_t delta;
+    int32_t localRc;
+    int32_t challengeCode;
+    uint32_t connId;
+    int32_t underlayerHandle;
+} RcPackCtlMsgPara;
+
 static void BleConnectionMsgHandler(SoftBusMessage *msg);
 static int BleCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *args);
 
@@ -260,6 +274,43 @@ static void OnDisconnectedDataFinished(uint32_t connectionId, int32_t error)
     }
 }
 
+static int32_t ConnPackCtlMsgRcSendDeltaData(RcPackCtlMsgPara *rcMsgPara)
+{
+    int32_t flag = CONN_HIGH;
+    if (rcMsgPara->delta >= 0) {
+        flag = CONN_HIGH;
+    } else {
+        flag = CONN_LOW;
+        rcMsgPara->delta = 0;
+    }
+    BleCtlMessageSerializationContext ctx = {
+        .connectionId = rcMsgPara->connId,
+        .flag = flag,
+        .method = CTRL_MSG_METHOD_NOTIFY_REQUEST,
+        .referenceRequest = {
+            .referenceNumber = rcMsgPara->localRc,
+            .delta = rcMsgPara->delta,
+        },
+        .challengeCode = rcMsgPara->challengeCode,
+    };
+    uint8_t *data = NULL;
+    uint32_t dataLen = 0;
+    int64_t seq = ConnBlePackCtlMessage(ctx, &data, &dataLen);
+    if (seq < 0) {
+        CONN_LOGE(CONN_BLE, "ble pack notify request message failed, "
+            "connId=%{public}u, underlayerHandle=%{public}d, error=%{public}d",
+            rcMsgPara->connId, rcMsgPara->underlayerHandle, (int32_t)seq);
+        return (int32_t)seq;
+    }
+    int32_t status = SOFTBUS_OK;
+    if (rcMsgPara->localRc <= 0) {
+        status = ConnBlePostBytesInner(rcMsgPara->connId, data, dataLen, 0, flag, MODULE_CONNECTION, seq,
+            OnDisconnectedDataFinished);
+    } else {
+        status = ConnBlePostBytesInner(rcMsgPara->connId, data, dataLen, 0, flag, MODULE_CONNECTION, seq, NULL);
+    }
+    return status;
+}
 
 int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challengeCode, int32_t delta)
 {
@@ -285,16 +336,14 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
         .result = EVENT_STAGE_RESULT_OK
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
-    CONN_LOGI(CONN_BLE,
-        "ble notify refrence, connId=%{public}u, handle=%{public}d, side=%{public}d, delta=%{public}d, "
-        "challenge=%{public}u, localRc=%{public}d",
+    CONN_LOGI(CONN_BLE, "ble notify refrence, connId=%{public}u, handle=%{public}d, side=%{public}d, "
+        "delta=%{public}d, challenge=%{public}u, localRc=%{public}d",
         connection->connectionId, underlayerHandle, connection->side, delta, challengeCode, localRc);
 
     if (localRc <= 0) {
         if ((featureBitSet & (1 << BLE_FEATURE_SUPPORT_REMOTE_DISCONNECT)) == 0) {
-            CONN_LOGW(CONN_BLE,
-                "reference count <= 0 and peer not support negotiation disconnect by notify msg, disconnect directly "
-                "after 200 ms, connId=%{public}u, handle=%{public}d, featureBitSet=%{public}u",
+            CONN_LOGW(CONN_BLE, "reference count <= 0 and peer not support negotiation disconnect by notify msg, "
+                "disconnect directly after 200 ms, connId=%{public}u, handle=%{public}d, featureBitSet=%{public}u",
                 connection->connectionId, underlayerHandle, featureBitSet);
             ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
                 connection->connectionId, 0, NULL, CLOSING_TIMEOUT_MILLIS);
@@ -302,34 +351,64 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
         }
     }
 
-    int32_t flag = delta >= 0 ? CONN_HIGH : CONN_LOW;
-    BleCtlMessageSerializationContext ctx = {
-        .connectionId = connection->connectionId,
-        .flag = flag,
-        .method = CTRL_MSG_METHOD_NOTIFY_REQUEST,
-        .referenceRequest = {
-            .delta = delta,
-            .referenceNumber = localRc,
-        },
+    RcPackCtlMsgPara rcMsgPara = {
+        .delta = delta,
+        .localRc = localRc,
         .challengeCode = challengeCode,
+        .connId = connection->connectionId,
+        .underlayerHandle = underlayerHandle,
     };
-    uint8_t *data = NULL;
-    uint32_t dataLen = 0;
-    int64_t seq = ConnBlePackCtlMessage(ctx, &data, &dataLen);
-    if (seq < 0) {
-        CONN_LOGE(CONN_BLE,
-            "ble pack notify request message failed, "
-            "connectionId=%{public}u, underlayerHandle=%{public}d, error=%{public}d",
-            connection->connectionId, underlayerHandle, (int32_t)seq);
-        return (int32_t)seq;
+    return ConnPackCtlMsgRcSendDeltaData(&rcMsgPara);
+}
+
+static int32_t BleOnReferenceRequest(uint32_t connId, BleReferenceCount *referenceCount)
+{
+    int32_t delta = referenceCount->delta;
+    int32_t peerRc = referenceCount->peerRc;
+    uint16_t challengeCode = referenceCount->challengeCode;
+    ConnBleConnection *connection = ConnBleGetConnectionById(connId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL,
+        SOFTBUS_INVALID_PARAM, CONN_BLE, "connection not exist, id=%{public}d", connId);
+    int32_t status = SoftBusMutexLock(&connection->lock);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "try to lock failed, connId=%{public}u, err=%{public}d", connId, status);
+        ConnBleReturnConnection(&connection);
+        return SOFTBUS_LOCK_ERR;
+    }
+    connection->connectionRc += delta;
+    int32_t localRc = connection->connectionRc;
+    CONN_LOGI(CONN_BLE, "ble received reference request, connId=%{public}u, delta=%{public}d, peerRef=%{public}d, "
+        "localRc=%{public}d, challenge=%{public}u", connId, delta, peerRc, localRc, challengeCode);
+    if (peerRc > 0) {
+        if (connection->state == BLE_CONNECTION_STATE_NEGOTIATION_CLOSING) {
+            ConnRemoveMsgFromLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
+                connection->connectionId, 0, NULL);
+            connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
+            g_connectionListener.onConnectionResume(connection->connectionId);
+        }
+        (void)SoftBusMutexUnlock(&connection->lock);
+        NotifyReusedConnected(connection->connectionId, challengeCode);
+        ConnBleReturnConnection(&connection);
+        return SOFTBUS_OK;
     }
     if (localRc <= 0) {
-        status = ConnBlePostBytesInner(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq,
-            OnDisconnectedDataFinished);
-    } else {
-        status = ConnBlePostBytesInner(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq, NULL);
+        connection->state = BLE_CONNECTION_STATE_CLOSING;
+        (void)SoftBusMutexUnlock(&connection->lock);
+        ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_NEGOTIATION_NO_REFERENCE);
+        ConnBleReturnConnection(&connection);
+        return SOFTBUS_OK;
     }
-    return status;
+    (void)SoftBusMutexUnlock(&connection->lock);
+    ConnBleReturnConnection(&connection);
+
+    RcPackCtlMsgPara rcMsgPara = {
+        .delta = delta,
+        .localRc = localRc,
+        .challengeCode = challengeCode,
+        .connId = connection->connectionId,
+        .underlayerHandle = connection->underlayerHandle,
+    };
+    return ConnPackCtlMsgRcSendDeltaData(&rcMsgPara);
 }
 
 int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *json)
@@ -349,58 +428,12 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
         CONN_LOGW(CONN_BLE, "old version NOT have KEY_CHALLENGE field. connId=%{public}u", connection->connectionId);
     }
 
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "try to lock failed, connId=%{public}u, err=%{public}d", connection->connectionId, status);
-        return SOFTBUS_LOCK_ERR;
-    }
-    connection->connectionRc += delta;
-    int32_t localRc = connection->connectionRc;
-
-    CONN_LOGI(CONN_BLE, "ble received reference request, "
-                        "connId=%{public}u, delta=%{public}d, peerRef=%{public}d, "
-                        "localRc=%{public}d, challenge=%{public}u",
-        connection->connectionId, delta, peerRc, localRc, challengeCode);
-    if (peerRc > 0) {
-        if (connection->state == BLE_CONNECTION_STATE_NEGOTIATION_CLOSING) {
-            ConnRemoveMsgFromLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
-                connection->connectionId, 0, NULL);
-            connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
-            g_connectionListener.onConnectionResume(connection->connectionId);
-        }
-        (void)SoftBusMutexUnlock(&connection->lock);
-        NotifyReusedConnected(connection->connectionId, challengeCode);
-        return SOFTBUS_OK;
-    }
-    if (localRc <= 0) {
-        connection->state = BLE_CONNECTION_STATE_CLOSING;
-        (void)SoftBusMutexUnlock(&connection->lock);
-        ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_NEGOTIATION_NO_REFERENCE);
-        return SOFTBUS_OK;
-    }
-    (void)SoftBusMutexUnlock(&connection->lock);
-
-    int32_t flag = CONN_HIGH;
-    BleCtlMessageSerializationContext ctx = {
-        .connectionId = connection->connectionId,
-        .flag = flag,
-        .method = CTRL_MSG_METHOD_NOTIFY_REQUEST,
-        .referenceRequest = {
-            .referenceNumber = localRc,
-            .delta = 0,
-        },
+    BleReferenceCount referenceCount = {
+        .delta = delta,
+        .peerRc = peerRc,
         .challengeCode = challengeCode,
     };
-    uint8_t *data = NULL;
-    uint32_t dataLen = 0;
-    int64_t seq = ConnBlePackCtlMessage(ctx, &data, &dataLen);
-    if (seq < 0) {
-        CONN_LOGE(CONN_BLE,
-            "pack reply message faild, connId=%{public}u, err=%{public}d", connection->connectionId, (int32_t)seq);
-        return (int32_t)seq;
-    }
-    status = ConnBlePostBytesInner(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq, NULL);
-    return status;
+    return BleOnReferenceRequest(connection->connectionId, &referenceCount);
 }
 
 int32_t ConnBleUpdateConnectionPriority(ConnBleConnection *connection, ConnectBlePriority priority)
@@ -1020,7 +1053,7 @@ static int BleCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *
     return COMPARE_SUCCESS;
 }
 
-int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEventListener *listener)
+static int32_t CheckBleInitConnectionPara(SoftBusLooper *looper, ConnBleConnectionEventListener *listener)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(looper != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init ble connection failed: invalid param, looper is null");
@@ -1038,6 +1071,13 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         "init ble connection failed: invalid param, listener onConnectionClosed is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onConnectionResume != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init ble connection failed: invalid param, listener onConnectionResume is null");
+    return SOFTBUS_OK;
+}
+
+int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEventListener *listener)
+{
+    int32_t status = CheckBleInitConnectionPara(looper, listener);
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, CONN_INIT, "ConnServerPartInit init failed.");
     ConnBleClientEventListener clientEventListener = {
         .onClientConnected = BleOnClientConnected,
         .onClientFailed = BleOnClientFailed,
@@ -1051,7 +1091,7 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         .onServerDataReceived = BleOnDataReceived,
         .onServerConnectionClosed = BleOnConnectionClosed,
     };
-    int32_t status = SOFTBUS_ERR;
+    status = SOFTBUS_ERR;
     const BleUnifyInterface *interface;
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         interface = ConnBleGetUnifyInterface(i);
