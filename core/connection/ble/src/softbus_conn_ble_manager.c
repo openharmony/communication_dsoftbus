@@ -1955,13 +1955,13 @@ static void OnBtStateChanged(int listenerId, int state)
 {
     (void)listenerId;
     int32_t status = SOFTBUS_OK;
-    if (state == SOFTBUS_BT_STATE_TURN_ON) {
+    if (state == SOFTBUS_BLE_STATE_TURN_ON) {
         status = ConnBleStartServer();
         CONN_LOGI(CONN_BLE, "ble manager receive bt on event, start server, status=%{public}d", status);
         return;
     }
 
-    if (state == SOFTBUS_BT_STATE_TURN_OFF) {
+    if (state == SOFTBUS_BLE_STATE_TURN_OFF) {
         status = ConnBleStopServer();
         CONN_LOGI(CONN_BLE, "ble manager receive bt off event, stop server, status=%{public}d", status);
         BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));

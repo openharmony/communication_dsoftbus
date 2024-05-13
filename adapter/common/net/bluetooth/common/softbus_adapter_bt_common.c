@@ -36,13 +36,13 @@ static int ConvertBtState(int transport, int state)
 {
     switch (state) {
         case OHOS_GAP_STATE_TURNING_ON:
-            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURNING_ON : SOFTBUS_BT_STATE_TURNING_ON;
+            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURNING_ON : SOFTBUS_BLE_STATE_TURNING_ON;
         case OHOS_GAP_STATE_TURN_ON:
-            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURN_ON : SOFTBUS_BT_STATE_TURN_ON;
+            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURN_ON : SOFTBUS_BLE_STATE_TURN_ON;
         case OHOS_GAP_STATE_TURNING_OFF:
-            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURNING_OFF : SOFTBUS_BT_STATE_TURNING_OFF;
+            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURNING_OFF : SOFTBUS_BLE_STATE_TURNING_OFF;
         case OHOS_GAP_STATE_TURN_OFF:
-            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURN_OFF : SOFTBUS_BT_STATE_TURN_OFF;
+            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURN_OFF : SOFTBUS_BLE_STATE_TURN_OFF;
         default:
             return SOFTBUS_ERR;
     }
@@ -265,7 +265,7 @@ int SoftBusSetBtName(const char *name)
 void SoftBusBtInit(void)
 {
     if (SoftBusGetBtState() == BLE_ENABLE) {
-        SoftBusOnBtSateChanged(SOFTBUS_BT_STATE_TURN_ON);
+        SoftBusOnBtSateChanged(SOFTBUS_BLE_STATE_TURN_ON);
     }
     if (SoftBusGetBrState() == BR_ENABLE) {
         SoftBusOnBtSateChanged(SOFTBUS_BR_STATE_TURN_ON);
