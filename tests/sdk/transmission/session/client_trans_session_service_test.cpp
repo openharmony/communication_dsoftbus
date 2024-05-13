@@ -425,8 +425,8 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest06, TestSiz
  */
 HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest07, TestSize.Level1)
 {
+    SessionEnableStatus isSessionEnabled = ENABLE_STATUS_INIT;
     int32_t sessionId = 1;
-    bool isEnabled = false;
     auto *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_NE(sessionParam, nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -437,7 +437,7 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest07, TestSiz
 
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    ret = ClientAddSession(sessionParam, &sessionId, &isSessionEnabled);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ClientSetActionIdBySessionId(sessionId, 0);
