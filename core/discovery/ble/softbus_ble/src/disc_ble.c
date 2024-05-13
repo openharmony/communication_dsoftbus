@@ -327,8 +327,9 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
     DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.bcData.type == BC_DATA_TYPE_SERVICE,
         SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
         "type is invalid. type=%{public}u", reportInfo->packet.bcData.type);
-    DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.bcData.id == SERVICE_UUID, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL,
-        DISC_BLE, "uuid is invalid. id=%{public}u", reportInfo->packet.bcData.id);
+    DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.bcData.id == SERVICE_UUID,
+        SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
+        "uuid is invalid. id=%{public}u", reportInfo->packet.bcData.id);
     DISC_CHECK_AND_RETURN_RET_LOGE(advData[POS_VERSION] == BLE_VERSION, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL,
         DISC_BLE, "adv version is invalid. advVersion=%{public}hhu", advData[POS_VERSION]);
     if (reportInfo->packet.rspData.payload != NULL && reportInfo->packet.rspData.payloadLen != 0) {
