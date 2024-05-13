@@ -14,6 +14,7 @@
  */
 
 #include "lnn_trans_lane_deps_mock.h"
+#include "softbus_error_code.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -33,6 +34,23 @@ TransLaneDepsInterfaceMock::~TransLaneDepsInterfaceMock()
 static TransLaneDepsInterface *GetTransLaneIf()
 {
     return reinterpret_cast<TransLaneDepsInterface *>(g_transLaneIf);
+}
+
+int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkSuccess(const LinkRequest *reqInfo,
+    uint32_t reqId, const LaneLinkCb *cb)
+{
+    LaneLinkInfo linkInfo = {
+        .type = reqInfo->linkType,
+    };
+    cb->OnLaneLinkSuccess(reqId, reqInfo->linkType, &linkInfo);
+    return SOFTBUS_OK;
+}
+
+int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkFail(const LinkRequest *reqInfo,
+    uint32_t reqId, const LaneLinkCb *cb)
+{
+    cb->OnLaneLinkFail(reqId, SOFTBUS_LANE_ID_GENERATE_FAIL, reqInfo->linkType);
+    return SOFTBUS_OK;
 }
 
 extern "C" {
