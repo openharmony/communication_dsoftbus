@@ -309,7 +309,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .baseDir = DATABASE_DIR,
         .isPublic = true,
         .cloudConfig = {
-            .enableCloud = true,
+            .enableCloud = true
         }
     };
     DistributedKv::Status status;
