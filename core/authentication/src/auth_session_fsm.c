@@ -1144,7 +1144,7 @@ static int32_t PostMessageToAuthFsmByConnId(int32_t msgType, uint64_t connId, bo
 
 static void SetAuthStartTime(AuthFsm *authFsm)
 {
-    authFsm->statisticData.startAuthTime = LnnUpTimeMs();
+    authFsm->statisticData.startAuthTime = (uint64_t)LnnUpTimeMs();
 }
 
 int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo)

@@ -226,7 +226,7 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest004, TestSi
         .attr = &attr,
     };
     int32_t sessionId = 0;
-    bool isEnabled = 0;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

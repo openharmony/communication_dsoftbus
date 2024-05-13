@@ -142,5 +142,15 @@ int32_t GetDeviceSecurityLevel(int32_t *level)
 {
     return GetLocalLedgerDepsInterface()->GetDeviceSecurityLevel(level);
 }
+
+int SoftBusGetBtState(void)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusGetBtState();
+}
+
+int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusGetBtMacAddr(mac);
+}
 } // extern "C"
 } // namespace OHOS

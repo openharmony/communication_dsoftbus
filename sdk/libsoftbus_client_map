@@ -401,6 +401,7 @@
         "TransSetChannelInfo";
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
+        "ClientSetEnableStatusBySocket";
         "GetSocketLifecycleAndSessionNameBySessionId";
         "ClientHandleBindWaitTimer";
         "ClientSignalSyncBind";
@@ -477,6 +478,7 @@
         "GetSocketOpt";
         "SetExtSocketOpt";
         "GetExtSocketOpt";
+        "SetSoftbusConfig";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
