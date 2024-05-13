@@ -654,7 +654,11 @@ int32_t TransProxyPipelineInit(void)
     if (ret != SOFTBUS_OK) {
         goto exit;
     }
-    g_manager.looper = CreateNewLooper("Trans_Proxy_lp");
+    g_manager.looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (g_manager.looper == NULL) {
+        TRANS_LOGE(TRANS_INIT, "fail to get looper.");
+        return SOFTBUS_LOOPER_ERR;
+    }
     g_manager.handler.looper = g_manager.looper;
     strcpy_s(g_manager.handler.name, strlen(PIPELINEHANDLER_NAME) + 1, PIPELINEHANDLER_NAME);
     g_manager.handler.HandleMessage = TransProxyPipelineHandleMessage;
