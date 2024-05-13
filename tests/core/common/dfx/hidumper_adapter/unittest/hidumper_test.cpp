@@ -132,9 +132,9 @@ static int32_t BroadcastVarTest3Dumper(int fd)
 HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump001, TestSize.Level1)
 {
     HiDumperVarNode testBroadcastVarArray[HIDUMPER_VAR_CASE_NUM] = {
-    {"broadcast_var_test_1", &BroadcastVarTest1Dumper},
-    {"broadcast_var_test_2", &BroadcastVarTest2Dumper},
-    {"broadcast_var_test_3", &BroadcastVarTest3Dumper},
+        {"broadcast_var_test_1", &BroadcastVarTest1Dumper},
+        {"broadcast_var_test_2", &BroadcastVarTest2Dumper},
+        {"broadcast_var_test_3", &BroadcastVarTest3Dumper},
 };
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump001, Start");
     int32_t ret;
@@ -147,43 +147,43 @@ HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump001, TestSize.Level1)
 
 /**
  * @tc.name: SoftBusRegBroadcastVarDump002
- * @tc.desc: Verify SoftBusRegBroadcastVarDump function, first param dumpVar is NULL, return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: Verify SoftBusRegBroadcastVarDump function, first param dumpVar is nullptr, return SOFTBUS_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump002, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump002, Start");
-    int32_t ret = SoftBusRegBroadcastVarDump(NULL, &BroadcastVarTest1Dumper);
+    int32_t ret = SoftBusRegBroadcastVarDump(nullptr, &BroadcastVarTest1Dumper);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump002, end");
 }
 
 /**
  * @tc.name: SoftBusRegBroadcastVarDump003
- * @tc.desc: Verify SoftBusRegBroadcastVarDump function, second param cb is NULL, return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: Verify SoftBusRegBroadcastVarDump function, second param cb is nullptr, return SOFTBUS_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump003, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump003, Start");
-    int32_t ret = SoftBusRegBroadcastVarDump(const_cast<char *>(g_testDumpVar), NULL);
+    int32_t ret = SoftBusRegBroadcastVarDump(const_cast<char *>(g_testDumpVar), nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump003, end");
 }
 
 /**
  * @tc.name: SoftBusRegBroadcastVarDump004
- * @tc.desc: Verify SoftBusRegBroadcastVarDump function, first param dumpVar is NULL,
- * second cb is null return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: Verify SoftBusRegBroadcastVarDump function, first param dumpVar is nullptr,
+ * second cb is nullptr return SOFTBUS_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegBroadcastVarDump004, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump004, Start");
-    int32_t ret = SoftBusRegBroadcastVarDump(NULL, NULL);
+    int32_t ret = SoftBusRegBroadcastVarDump(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBroadcastVarDump004, end");
 }
@@ -216,9 +216,9 @@ static int32_t DiscVarTest3Dumper(int fd)
 HWTEST_F(HidumperTest, SoftBusRegDiscVarDump001, TestSize.Level1)
 {
     HiDumperVarNode testDiscVarArray[HIDUMPER_VAR_CASE_NUM] = {
-    {"disc_var_test_1", &DiscVarTest1Dumper},
-    {"disc_var_test_2", &DiscVarTest2Dumper},
-    {"disc_var_test_3", &DiscVarTest3Dumper},
+        {"disc_var_test_1", &DiscVarTest1Dumper},
+        {"disc_var_test_2", &DiscVarTest2Dumper},
+        {"disc_var_test_3", &DiscVarTest3Dumper},
 };
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump001, Start");
     int32_t ret;
@@ -231,42 +231,43 @@ HWTEST_F(HidumperTest, SoftBusRegDiscVarDump001, TestSize.Level1)
 
 /**
  * @tc.name: SoftBusRegDiscVarDump002
- * @tc.desc: Verify SoftBusRegDiscVarDump function, first param dumpVar is NULL, return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegDiscVarDump function, first param dumpVar is nullptr, return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegDiscVarDump002, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump002, Start");
-    int32_t ret = SoftBusRegDiscVarDump(NULL, &DiscVarTest1Dumper);
+    int32_t ret = SoftBusRegDiscVarDump(nullptr, &DiscVarTest1Dumper);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump002, end");
 }
 
 /**
  * @tc.name: SoftBusRegDiscVarDump003
- * @tc.desc: Verify SoftBusRegDiscVarDump function, second param cb is NULL, return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegDiscVarDump function, second param cb is nullptr, return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegDiscVarDump003, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump003, Start");
-    int32_t ret = SoftBusRegDiscVarDump(const_cast<char *>(g_testDumpVar), NULL);
+    int32_t ret = SoftBusRegDiscVarDump(const_cast<char *>(g_testDumpVar), nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump003, end");
 }
 
 /**
  * @tc.name: SoftBusRegDiscVarDump004
- * @tc.desc: Verify SoftBusRegDiscVarDump function, first param dumpVar is NULL, second cb is null return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegDiscVarDump function, first param dumpVar is nullptr,
+ * second cb is nullptr return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegDiscVarDump004, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump004, Start");
-    int32_t ret = SoftBusRegDiscVarDump(NULL, NULL);
+    int32_t ret = SoftBusRegDiscVarDump(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump004, end");
 }
@@ -314,43 +315,43 @@ HWTEST_F(HidumperTest, SoftBusRegConnVarDump001, TestSize.Level1)
 
 /**
  * @tc.name: SoftBusRegConnVarDump002
- * @tc.desc: Verify SoftBusRegConnVarDump function, first param dumpVar is NULL, return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegConnVarDump function, first param dumpVar is nullptr, return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegConnVarDump002, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump002, Start");
-    int32_t ret = SoftBusRegConnVarDump(NULL, &ConnVarTest1Dumper);
+    int32_t ret = SoftBusRegConnVarDump(nullptr, &ConnVarTest1Dumper);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump002, end");
 }
 
 /**
  * @tc.name: SoftBusRegConnVarDump003
- * @tc.desc: Verify SoftBusRegConnVarDump function, second param cb is NULL, return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegConnVarDump function, second param cb is nullptr, return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegConnVarDump003, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump003, Start");
-    int32_t ret = SoftBusRegConnVarDump(const_cast<char *>(g_testDumpVar), NULL);
+    int32_t ret = SoftBusRegConnVarDump(const_cast<char *>(g_testDumpVar), nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump003, end");
 }
 
 /**
  * @tc.name: SoftBusRegConnVarDump004
- * @tc.desc: Verify SoftBusRegConnVarDump004 function, first param dumpVar is NULL,
- *     second cb is null return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegConnVarDump004 function, first param dumpVar is nullptr,
+ *     second cb is nullptr return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegConnVarDump004, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump004, Start");
-    int32_t ret = SoftBusRegConnVarDump(NULL, NULL);
+    int32_t ret = SoftBusRegConnVarDump(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump004, end");
 }
@@ -398,43 +399,43 @@ HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump001, TestSize.Level1)
 
 /**
  * @tc.name: SoftBusRegBusCenterVarDump002
- * @tc.desc: Verify SoftBusRegBusCenterVarDump function, first param dumpVar is NULL, return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegBusCenterVarDump function, first param dumpVar is nullptr, return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump002, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump002, Start");
-    int32_t ret = SoftBusRegBusCenterVarDump(NULL, &DiscVarTest1Dumper);
+    int32_t ret = SoftBusRegBusCenterVarDump(nullptr, &DiscVarTest1Dumper);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump002, end");
 }
 
 /**
  * @tc.name: SoftBusRegBusCenterVarDump003
- * @tc.desc: Verify SoftBusRegBusCenterVarDump function, second param cb is NULL, return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegBusCenterVarDump function, second param cb is nullptr, return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump003, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump003, Start");
-    int32_t ret = SoftBusRegBusCenterVarDump(const_cast<char *>(g_testDumpVar), NULL);
+    int32_t ret = SoftBusRegBusCenterVarDump(const_cast<char *>(g_testDumpVar), nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump003, end");
 }
 
 /**
  * @tc.name: SoftBusRegBusCenterVarDump004
- * @tc.desc: Verify SoftBusRegBusCenterVarDump function, first param dumpVar is NULL,
- *     second cb is null return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegBusCenterVarDump function, first param dumpVar is nullptr,
+ *     second cb is nullptr return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump004, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump004, Start");
-    int32_t ret = SoftBusRegBusCenterVarDump(NULL, NULL);
+    int32_t ret = SoftBusRegBusCenterVarDump(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump004, end");
 }
@@ -498,7 +499,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess002, TestSize.Level1)
             testInvalidDiscCmdArray[i].argv);
         EXPECT_EQ(SOFTBUS_ERR, ret);
     }
-    ret = SoftBusDumpProcess(0, 1, NULL);
+    ret = SoftBusDumpProcess(0, 1, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess002, end");
 }
@@ -551,7 +552,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess004, TestSize.Level1)
             testInValidConnCmdArray[i].argv);
         EXPECT_EQ(SOFTBUS_ERR, ret);
     }
-    ret = SoftBusDumpProcess(0, 1, NULL);
+    ret = SoftBusDumpProcess(0, 1, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess004, end");
 }
@@ -604,7 +605,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess006, TestSize.Level1)
             testInValidBusCenterCmdArray[i].argv);
         EXPECT_EQ(SOFTBUS_ERR, ret);
     }
-    ret = SoftBusDumpProcess(0, 1, NULL);
+    ret = SoftBusDumpProcess(0, 1, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess006, end");
 }
@@ -676,7 +677,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess009, TestSize.Level1)
             testInValidStatsCmdArray[i].argv);
         EXPECT_EQ(SOFTBUS_ERR, ret);
     }
-    ret = SoftBusDumpProcess(0, 1, NULL);
+    ret = SoftBusDumpProcess(0, 1, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess009, end");
 }
@@ -724,7 +725,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess011, TestSize.Level1)
             testInValidAlarmCmdArray[i].argv);
         EXPECT_EQ(SOFTBUS_ERR, ret);
     }
-    ret = SoftBusDumpProcess(0, 1, NULL);
+    ret = SoftBusDumpProcess(0, 1, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess011, end");
 }

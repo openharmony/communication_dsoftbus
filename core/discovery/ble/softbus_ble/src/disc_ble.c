@@ -63,7 +63,6 @@
 // Defination of boardcast
 #define BLE_VERSION 4
 #define DISTRIBUTE_BUSINESS 0x5
-#define BYTE_MASK 0xFF
 #define DEVICE_NAME_MAX_LEN 15
 
 #define BIT_WAKE_UP 0x01
@@ -328,7 +327,7 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
     DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.bcData.type == BC_DATA_TYPE_SERVICE,
         SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
         "type is invalid. type=%{public}u", reportInfo->packet.bcData.type);
-    DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.bcData.id == BLE_UUID, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL,
+    DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.bcData.id == SERVICE_UUID, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL,
         DISC_BLE, "uuid is invalid. id=%{public}u", reportInfo->packet.bcData.id);
     DISC_CHECK_AND_RETURN_RET_LOGE(advData[POS_VERSION] == BLE_VERSION, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL,
         DISC_BLE, "adv version is invalid. advVersion=%{public}hhu", advData[POS_VERSION]);
@@ -336,7 +335,7 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
         DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.rspData.type == BC_DATA_TYPE_MANUFACTURER,
             SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
             "type is invalid. type=%{public}u", reportInfo->packet.rspData.type);
-        DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.rspData.id == COMPANY_ID,
+        DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.rspData.id == MANU_COMPANY_ID,
             SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
             "companyId is invalid. companyId=%{public}u", reportInfo->packet.rspData.id);
     }
@@ -549,7 +548,7 @@ static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *rep
     DISC_CHECK_AND_RETURN_LOGD(ScanFilter(reportInfo) == SOFTBUS_OK, DISC_BLE, "scan filter failed");
 
     uint8_t *advData = reportInfo->packet.bcData.payload;
-    if ((reportInfo->packet.bcData.id == BLE_UUID) && (advData[POS_BUSINESS] == DISTRIBUTE_BUSINESS)) {
+    if ((reportInfo->packet.bcData.id == SERVICE_UUID) && (advData[POS_BUSINESS] == DISTRIBUTE_BUSINESS)) {
         SignalingMsgPrint("ble adv rcv", advData, reportInfo->packet.bcData.payloadLen, DISC_BLE);
         ProcessDistributePacket(reportInfo);
     } else {
@@ -734,7 +733,7 @@ static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastDat
     packet->isSupportFlag = true;
     packet->flag = FLAG_AD_DATA;
     packet->bcData.type = BC_DATA_TYPE_SERVICE;
-    packet->bcData.id = BLE_UUID;
+    packet->bcData.id = SERVICE_UUID;
     packet->bcData.payloadLen = (broadcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN :
         broadcastData->dataLen;
     if (memcpy_s(&packet->bcData.payload[0], ADV_DATA_MAX_LEN, broadcastData->data.advData,
@@ -759,7 +758,7 @@ static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastDat
         return SOFTBUS_MALLOC_ERR;
     }
     packet->rspData.type = BC_DATA_TYPE_MANUFACTURER;
-    packet->rspData.id = COMPANY_ID;
+    packet->rspData.id = MANU_COMPANY_ID;
     if (memcpy_s(&packet->rspData.payload[0], RESP_DATA_MAX_LEN, broadcastData->data.rspData,
         packet->rspData.payloadLen) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy err");
@@ -1794,7 +1793,7 @@ static void DiscBleSetScanFilter(int32_t listenerId)
         return;
     }
 
-    filter->serviceUuid = BLE_UUID;
+    filter->serviceUuid = SERVICE_UUID;
     filter->serviceDataLength = BLE_SCAN_FILTER_LEN;
     filter->serviceData[POS_VERSION] = BLE_VERSION;
     filter->serviceData[POS_BUSINESS] = DISTRIBUTE_BUSINESS;
