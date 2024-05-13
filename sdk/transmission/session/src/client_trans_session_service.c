@@ -266,7 +266,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     (void)memset_s(param.qos, sizeof(param.qos), 0, sizeof(param.qos));
 
     int32_t sessionId = INVALID_SESSION_ID;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
 
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
@@ -465,14 +465,19 @@ static int32_t CheckSessionIsOpened(int32_t sessionId)
 #define SESSION_STATUS_CHECK_MAX_NUM 100
 #define SESSION_CHECK_PERIOD 200000
     int32_t i = 0;
-    bool isEnable = false;
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
     while (i < SESSION_STATUS_CHECK_MAX_NUM) {
-        if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &isEnable) != SOFTBUS_OK) {
+        if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &enableStatus) != SOFTBUS_OK) {
             return SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED;
         }
-        if (isEnable == true) {
+        if (enableStatus == ENABLE_STATUS_SUCCESS) {
             TRANS_LOGD(TRANS_SDK, "session is enable");
             return SOFTBUS_OK;
+        }
+
+        if (enableStatus == ENABLE_STATUS_FAILED) {
+            TRANS_LOGE(TRANS_SDK, "socket is failed");
+            return SOFTBUS_TRANS_SESSION_NO_ENABLE;
         }
         usleep(SESSION_CHECK_PERIOD);
         i++;
@@ -503,7 +508,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     (void)memset_s(param.qos, sizeof(param.qos), 0, sizeof(param.qos));
 
     int32_t sessionId = INVALID_SESSION_ID;
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
 
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
@@ -971,7 +976,7 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
         .attr = tmpAttr,
     };
 
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     int32_t ret = ClientAddSocketSession(&param, isEncyptedRawStream, sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(tmpAttr);
@@ -1159,9 +1164,10 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         ret = ClientGetChannelBySessionId(socket, &channelId, &type, NULL);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "get channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
-            return;
+        } else {
+            AddSessionStateClosing();
         }
-        AddSessionStateClosing();
+        
         ret = ClientTransCloseChannel(channelId, type);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,
@@ -1170,9 +1176,9 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         if (lifecycle.sessionState == SESSION_STATE_OPENED) {
             (void)ClientSignalSyncBind(socket, cancelReason);
         }
-        SetSessionInitInfoById(socket);
     }
     if (cancelReason == SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT) {
+        SetSessionInitInfoById(socket);
         TRANS_LOGI(TRANS_SDK, "Bind timeout Shutdown ok, no delete socket: socket=%{public}d", socket);
         return;
     }
@@ -1192,14 +1198,14 @@ int32_t GetSocketMtuSize(int32_t socket, uint32_t *mtuSize)
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
-    bool isEnable = false;
-    int32_t ret = ClientGetChannelBySessionId(socket, &channelId, &type, &isEnable);
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+    int32_t ret = ClientGetChannelBySessionId(socket, &channelId, &type, &enableStatus);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get channel by socket=%{public}d failed, ret=%{public}d.", socket, ret);
         return ret;
     }
 
-    if (!isEnable) {
+    if (enableStatus != ENABLE_STATUS_SUCCESS) {
         TRANS_LOGI(TRANS_SDK, "socket not enable");
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }

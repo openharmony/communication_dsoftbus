@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_distributed_net_ledger.h"
+#include "permission_entry.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -46,6 +47,7 @@
 
 #define SESSION_NAME_DBD "distributeddata-default"
 #define SESSION_NAME_DSL "device.security.level"
+#define SESSION_NAME_DSL2_RE "com.*security.devicesec"
 #define MESH_MAGIC_NUMBER 0x5A5A5A5A
 
 typedef struct {
@@ -632,6 +634,10 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
 static void TransOnLaneRequestFail(uint32_t laneHandle, int32_t reason)
 {
     TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    if (reason == SOFTBUS_TIMOUT) {
+        TRANS_LOGW(TRANS_SVC, "request laneHandle=%{public}u timeout, convert to trans error code", laneHandle);
+        reason = SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT;
+    }
     int32_t ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, false, NULL, false, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
@@ -689,6 +695,23 @@ static bool IsShareSession(const char *sessionName)
     return true;
 }
 
+static bool IsDslSession(const char *sessionName)
+{
+    if (sessionName == NULL) {
+        return false;
+    }
+
+    if (strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0) {
+        return true;
+    }
+
+    if (CompareString(SESSION_NAME_DSL2_RE, sessionName, true) == SOFTBUS_OK) {
+        return true;
+    }
+
+    return false;
+}
+
 static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionName)
 {
     uint32_t authCapacity;
@@ -698,8 +721,7 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
     }
     TRANS_LOGD(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
     if (authCapacity == 0 &&
-        (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 ||
-        strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0)) {
+        (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 || IsDslSession(sessionName))) {
         return true;
     }
     return false;
@@ -707,13 +729,10 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
 
 static bool IsMeshSync(const char *sessionName)
 {
-    uint32_t dslSessionLen = strlen(SESSION_NAME_DSL);
-    if (strlen(sessionName) < dslSessionLen ||
-        strncmp(sessionName, SESSION_NAME_DSL, dslSessionLen) != 0) {
-        return false;
+    if (IsDslSession(sessionName)) {
+        return true;
     }
-    TRANS_LOGI(TRANS_SVC, "dsl module");
-    return true;
+    return false;
 }
 
 static void ModuleLaneAdapter(LanePreferredLinkList *preferred)
@@ -1041,9 +1060,10 @@ int32_t TransGetLaneInfoByQos(const LaneAllocInfo *allocInfo, LaneConnInfo *conn
         TRANS_LOGE(TRANS_SVC, "get lane info param error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (TransAddLaneAllocToPendingAndWaiting(*laneHandle, allocInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
-        return SOFTBUS_ERR;
+    int32_t ret = TransAddLaneAllocToPendingAndWaiting(*laneHandle, allocInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed. ret=%{public}d", ret);
+        return ret;
     }
     bool bSuccess = false;
     int32_t errCode = SOFTBUS_ERR;

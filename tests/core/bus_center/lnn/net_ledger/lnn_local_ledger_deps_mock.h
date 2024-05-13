@@ -25,6 +25,7 @@
 #include "softbus_adapter_crypto.h"
 #include "bus_center_adapter.h"
 #include "lnn_p2p_info.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_hidumper_buscenter.h"
 #include "lnn_ohos_account.h"
@@ -47,6 +48,8 @@ public:
     virtual int32_t GetCommonOsVersion(char *value, uint32_t len);
     virtual int32_t GetCommonDeviceVersion(char *value, uint32_t len);
     virtual int32_t GetDeviceSecurityLevel(int32_t *level);
+    virtual int SoftBusGetBtState(void) = 0;
+    virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
 };
 class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
@@ -64,6 +67,8 @@ public:
     MOCK_METHOD2(GetCommonOsVersion, int32_t (char *, uint32_t));
     MOCK_METHOD2(GetCommonDeviceVersion, int32_t (char *, uint32_t));
     MOCK_METHOD1(GetDeviceSecurityLevel, int32_t (int32_t *));
+    MOCK_METHOD0(SoftBusGetBtState, int (void));
+    MOCK_METHOD1(SoftBusGetBtMacAddr, int (SoftBusBtAddr *));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);

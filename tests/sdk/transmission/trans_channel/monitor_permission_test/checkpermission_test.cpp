@@ -72,7 +72,7 @@ void CheckPermissionTest::SetUpTestCase()
         .groupId = g_groupid,
         .attr = &g_sessionAttr,
     };
-    bool isEnabled = false;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     ret = ClientAddSession(&param, &g_sessionId, &isEnabled);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
