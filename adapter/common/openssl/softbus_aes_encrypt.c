@@ -120,6 +120,7 @@ static int32_t OpensslAesCfbEncrypt(
         AES_cfb128_encrypt(inData->data, outData->data, inData->len, &aes, cipherKey->iv, &num, DECRYPT_MODE);
     }
     outData->len = inData->len;
+    OPENSSL_cleanse(&aes, sizeof(aes));
     return SOFTBUS_OK;
 }
 
