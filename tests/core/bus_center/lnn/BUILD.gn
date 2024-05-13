@@ -1308,7 +1308,6 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_trans_lane.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_utils_virtual.c",
     "lane/src/lnn_lane_deps_mock.cpp",
     "lane/src/lnn_lane_test.cpp",
     "lane/src/lnn_link_enabled_mock.cpp",
