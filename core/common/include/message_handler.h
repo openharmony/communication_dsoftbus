@@ -64,7 +64,7 @@ enum LooperType {
     LOOP_TYPE_BR_SEND,
     LOOP_TYPE_BR_RECV,
     LOOP_TYPE_P2P,
-    LOOP_TYPE_LANE,
+    LOOP_TYPE_LNN,
     LOOP_TYPE_HANDLE_FILE
 };
 

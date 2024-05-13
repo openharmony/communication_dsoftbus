@@ -476,7 +476,7 @@ static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_BR_SEND, NULL},
     {LOOP_TYPE_BR_RECV, NULL},
     {LOOP_TYPE_P2P, NULL},
-    {LOOP_TYPE_LANE, NULL},
+    {LOOP_TYPE_LNN, NULL},
     {LOOP_TYPE_HANDLE_FILE, NULL}
 };
 

@@ -1509,7 +1509,7 @@ static int32_t InitP2pLooper(void)
 {
     g_p2pLoopHandler.name = "p2pLooper";
     g_p2pLoopHandler.HandleMessage = P2pMsgHandler;
-    g_p2pLoopHandler.looper = GetLooper(LOOP_TYPE_LANE);
+    g_p2pLoopHandler.looper = GetLooper(LOOP_TYPE_LNN);
     if (g_p2pLoopHandler.looper == NULL) {
         LNN_LOGE(LNN_LANE, "init p2pLooper fail");
         return SOFTBUS_ERR;
