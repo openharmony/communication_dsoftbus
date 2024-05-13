@@ -50,12 +50,12 @@ public:
 void LNNLaneLinkTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "LNNLaneLinkTest start";
-    LnnInitLaneLooper();
+    LnnInitLnnLooper();
 }
 
 void LNNLaneLinkTest::TearDownTestCase()
 {
-    LnnDeinitLaneLooper();
+    LnnDeinitLnnLooper();
     GTEST_LOG_(INFO) << "LNNLaneLinkTest end";
 }
 

@@ -224,24 +224,3 @@ uint64_t LnnGetSysTimeMs(void)
 {
     return SoftBusGetSysTimeMs();
 }
-
-int32_t LnnInitLaneLooper(void)
-{
-    SoftBusLooper *looper = CreateNewLooper("Lane_lp");
-    if (!looper) {
-        LNN_LOGE(LNN_LANE, "init laneLooper fail");
-        return SOFTBUS_ERR;
-    }
-    SetLooper(LOOP_TYPE_LANE, looper);
-    LNN_LOGI(LNN_LANE, "init laneLooper success");
-    return SOFTBUS_OK;
-}
-
-void LnnDeinitLaneLooper(void)
-{
-    SoftBusLooper *looper = GetLooper(LOOP_TYPE_LANE);
-    if (looper != NULL) {
-        DestroyLooper(looper);
-        SetLooper(LOOP_TYPE_LANE, NULL);
-    }
-}
