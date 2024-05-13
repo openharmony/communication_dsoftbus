@@ -581,11 +581,11 @@ static void BtOnStateChanged(int32_t listenerId, int32_t state)
     (void)listenerId;
     SoftBusMessage *msg = NULL;
     switch (state) {
-        case SOFTBUS_BT_STATE_TURN_ON:
+        case SOFTBUS_BLE_STATE_TURN_ON:
             DISC_LOGI(DISC_CONTROL, "bt turn on");
             msg = CreateBleHandlerMsg(RECOVERY, 0, 0, NULL);
             break;
-        case SOFTBUS_BT_STATE_TURN_OFF:
+        case SOFTBUS_BLE_STATE_TURN_OFF:
             DISC_LOGI(DISC_CONTROL, "bt turn off");
             msg = CreateBleHandlerMsg(TURN_OFF, 0, 0, NULL);
             break;

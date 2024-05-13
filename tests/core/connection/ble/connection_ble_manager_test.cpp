@@ -180,10 +180,10 @@ HWTEST_F(ConnectionBleManagerTest, TestTransListener001, TestSize.Level1)
 {
     NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, ConnGattClientDisconnect).WillRepeatedly(Return(SOFTBUS_OK));
-    g_btListener.OnBtStateChanged(g_listenerId, SOFTBUS_BT_STATE_TURN_OFF);
+    g_btListener.OnBtStateChanged(g_listenerId, SOFTBUS_BLE_STATE_TURN_OFF);
 
     EXPECT_CALL(bleMock, ConnGattServerStartService).WillOnce(Return(SOFTBUS_OK));
-    g_btListener.OnBtStateChanged(g_listenerId, SOFTBUS_BT_STATE_TURN_ON);
+    g_btListener.OnBtStateChanged(g_listenerId, SOFTBUS_BLE_STATE_TURN_ON);
 
     uint32_t connectionId = 13000;
     uint32_t len = 100;
@@ -622,7 +622,7 @@ HWTEST_F(ConnectionBleManagerTest, OnBtStateChanged001, TestSize.Level1)
     EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_OK));
     ret = g_bleInterface->ConnectDevice(&option, requestId, &result);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    g_btListener.OnBtStateChanged(g_listenerId, SOFTBUS_BT_STATE_TURN_OFF);
+    g_btListener.OnBtStateChanged(g_listenerId, SOFTBUS_BLE_STATE_TURN_OFF);
     SoftBusSleepMs(SLEEP_TIME_MS);
 }
 
