@@ -310,7 +310,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .isPublic = true,
         .cloudConfig = {
             .enableCloud = true,
-            .autoSync = true
+            .autoSync = false
         }
     };
     DistributedKv::Status status;
