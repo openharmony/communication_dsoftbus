@@ -511,13 +511,13 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
         return false;
     }
     if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
-        AUTH_LOGD(AUTH_HICHAIN, "account is same, continue verify progress. account=%{public}02X%{public}02X",
+        AUTH_LOGI(AUTH_HICHAIN, "account is same, continue verify progress. account=%{public}02X%{public}02X",
             device->accountHash[0], device->accountHash[1]);
         return true;
     }
     if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, false) ||
         IsPotentialTrustedDeviceDp(device->devId)) {
-        AUTH_LOGD(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
+        AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }
     return false;
