@@ -94,6 +94,7 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     if (ret >= SYSTEM_APP) {
         return SOFTBUS_OK;
     }
+    COMM_LOGE(COMM_PERM, "permission denied, permType:{public}d, ret:{public}d", permType, ret);
     return SOFTBUS_PERMISSION_DENIED;
 }
 
