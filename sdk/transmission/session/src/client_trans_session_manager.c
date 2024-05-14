@@ -810,7 +810,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
             *data = sessionNode->peerUid;
             break;
         case KEY_ACTION_ID:
-            *data = (int) sessionNode->actionId;
+            *data = (int)sessionNode->actionId;
             break;
         default:
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
