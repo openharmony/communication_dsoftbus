@@ -586,6 +586,7 @@ int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, Me
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnNodeOnlineStateChanged(pkgName, isOnline, info, infoTypeLen);
+    COMM_LOGI(COMM_SDK, "notify complete, pkgName=%{public}s, isOnline=%{public}d", pkgName, isOnline);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SDK, "OnNodeOnlineStateChangedInner write reply failed!");
         return SOFTBUS_ERR;
