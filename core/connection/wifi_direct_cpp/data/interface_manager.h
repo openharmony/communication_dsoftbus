@@ -36,7 +36,7 @@ public:
     int UpdateInterface(InterfaceInfo::InterfaceType type, const Updater &updater);
     int ReadInterface(InterfaceInfo::InterfaceType type, const Reader &reader);
 
-    bool IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare) const;
+    bool IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare);
 
     void LockInterface(InterfaceInfo::InterfaceType type, const std::string &owner);
     void UnlockInterface(InterfaceInfo::InterfaceType type);
