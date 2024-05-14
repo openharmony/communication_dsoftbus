@@ -512,15 +512,15 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     callingUid = OHOS::IPCSkeleton::GetCallingUid();
     callingPid = OHOS::IPCSkeleton::GetCallingPid();
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "permission denied, callingUid:{public}d, callingPid:{public}d, pkgName:{public}s,
-            sessionName:{public}s", callingUid, callingPid, pkgName, sessionName);
+        COMM_LOGE(COMM_SVC, "permission denied, callingUid:%{public}d, callingPid:%{public}d, pkgName:%{public}s, \
+            sessionName:%{public}s", callingUid, callingPid, pkgName, sessionName);
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
 
 #ifdef SUPPORT_BUNDLENAME
     if (CheckSessionName(sessionName, callingUid) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "permission denied, callingUid:{public}d, sessionName:{public}s",
+        COMM_LOGE(COMM_SVC, "permission denied, callingUid:%{public}d, sessionName:%{public}s",
             callingUid, sessionName);
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
