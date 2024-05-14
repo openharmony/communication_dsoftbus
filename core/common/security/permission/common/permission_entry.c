@@ -348,9 +348,11 @@ static int32_t CheckPermissionAppInfo(const SoftBusPermissionEntry *pe,
     const SoftBusPermissionItem *pItem)
 {
     if (pe == NULL || pItem == NULL) {
+        COMM_LOGE(COMM_PERM, "valid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pItem->actions == 0) {
+        COMM_LOGE(COMM_PERM, "permission denied");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t permType;
@@ -380,6 +382,7 @@ static int32_t CheckPermissionAppInfo(const SoftBusPermissionEntry *pe,
         }
         return permType;
     }
+    COMM_LOGE(COMM_PERM, "appinfo not find");
     return SOFTBUS_PERMISSION_DENIED;
 }
 
@@ -530,6 +533,7 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
             }
             permType = CheckPermissionAppInfo(pe, pItem);
             if (permType < 0) {
+                COMM_LOGE(COMM_PERM, "permType is valid, permType:{public}d", permType);
                 (void)SoftBusMutexUnlock(&permissionList->lock);
                 return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
             }
@@ -539,14 +543,17 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     }
     if (pItem->permType != NORMAL_APP) {
         (void)SoftBusMutexUnlock(&permissionList->lock);
+        COMM_LOGI(COMM_PERM, "permType is not normal, permType:{public}d", pItem->permType);
         return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
     }
     if (pItem->actions == ACTION_CREATE) {
         if (IsValidPkgName(pItem->uid, pItem->pkgName) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_PERM, "valid param, pkgName:{public}s", pItem->pkgName);
             (void)SoftBusMutexUnlock(&permissionList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
         if (!StrStartWith(sessionName, pItem->pkgName)) {
+            COMM_LOGE(COMM_PERM, "valid param, pkgName:{public}s", pItem->pkgName);
             (void)SoftBusMutexUnlock(&permissionList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
