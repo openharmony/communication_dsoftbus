@@ -1,0 +1,38 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../dsoftbus.gni")
+
+broadcast_inc = [ "$dsoftbus_root_path/core/broadcast/scheduler/include" ]
+broadcast_src = []
+broadcast_deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+
+if (dsoftbus_feature_ex_kits) {
+  import(
+      "$dsoftbus_root_path/dsoftbus_enhance/core/broadcast/broadcast_enhance.gni")
+
+  broadcast_inc += broadcast_enhance_inc
+  broadcast_src += broadcast_enhance_src
+} else {
+  broadcast_inc += [
+    "$dsoftbus_root_path/adapter/common/bet/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/core/broadcast/common/include",
+  ]
+  if (support_bluetooth && dsoftbus_feature_disc_ble) {
+    broadcast_src += [
+      "$dsoftbus_root_path/core/broadcast/scheduler/src/broadcast_scheduler.c",
+    ]
+  } else {
+    broadcast_src += [ "$dsoftbus_root_path/core/broadcast/scheduler/src/broadcast_scheduler_virtual.c" ]
+  }
+}
