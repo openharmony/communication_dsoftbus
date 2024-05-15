@@ -676,7 +676,7 @@ static int32_t PackFileTransStartInfo(
             TRANS_LOGE(TRANS_FILE, "frameLength overSize");
             return SOFTBUS_ERR;
         }
-        // magic(4 byte) + dataLen(8 byte) + oneFrameLen(4 byte) + fileSize + fileName
+        // frameLength = magic(4 bytes) + dataLen(8 bytes) + oneFrameLen(4 bytes) + fileSize(8 bytes) + fileName
         (*(uint32_t *)(fileFrame->data)) = fileFrame->magic;
         (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET)) = dataLen;
         (*(uint32_t *)(fileFrame->fileData)) =
@@ -686,7 +686,7 @@ static int32_t PackFileTransStartInfo(
             return SOFTBUS_MEM_ERR;
         }
     } else {
-        // seq(4byte) + fileName
+        // frameLength = seq(4 bytes) + fileName
         fileFrame->frameLength = FRAME_DATA_SEQ_OFFSET + len;
         if (fileFrame->frameLength > info->packetSize) {
             return SOFTBUS_ERR;
@@ -708,11 +708,11 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
     uint8_t *fileNameData = NULL;
     uint64_t fileNameLen = 0;
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
-        if (fileFrame->frameLength < FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET) {
+        if (fileFrame->frameLength < FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t)) {
             TRANS_LOGE(TRANS_FILE, "frameLength invalid");
             return SOFTBUS_INVALID_PARAM;
         }
-        // magic(4 byte) + dataLen(8 byte) + oneFrameLen(4 byte) + fileSize(8 byte) + fileName
+        // frameLength = magic(4 bytes) + dataLen(8 bytes) + oneFrameLen(4 bytes) + fileSize(8 bytes) + fileName
         fileFrame->magic = (*(uint32_t *)(fileFrame->data));
         uint64_t dataLen = (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET));
         if (FRAME_HEAD_LEN + dataLen > fileFrame->frameLength) {
@@ -733,7 +733,7 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         file->startSeq = file->preStartSeq = 1;
         file->seqResult = file->preSeqResult = 0;
     } else {
-        // seq(4byte) + fileName
+        // frameLength = seq(4byte) + fileName
         if (fileFrame->frameLength < FRAME_DATA_SEQ_OFFSET) {
             return SOFTBUS_ERR;
         }
