@@ -64,9 +64,9 @@ static uint32_t g_channelIdCount = 0;
 static int32_t GenerateTdcChannelId()
 {
     int32_t channelId;
-    if (SoftBusMutexLock(&g_myIdLock) != 0) {
+    if (SoftBusMutexLock(&g_myIdLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     channelId = g_allocTdcChannelId++;
     if (g_allocTdcChannelId >= MAX_TDC_CHANNEL_ID) {
@@ -78,9 +78,9 @@ static int32_t GenerateTdcChannelId()
 
 static int32_t GenerateProxyChannelId()
 {
-    if (SoftBusMutexLock(&g_myIdLock) != 0) {
+    if (SoftBusMutexLock(&g_myIdLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (g_channelIdCount >= MAX_PROXY_CHANNEL_ID_COUNT) {
@@ -110,7 +110,7 @@ void ReleaseProxyChannelId(int32_t channelId)
     if (channelId < MIN_FD_ID || channelId > MAX_FD_ID) {
         return;
     }
-    if (SoftBusMutexLock(&g_myIdLock) != 0) {
+    if (SoftBusMutexLock(&g_myIdLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail");
         return;
     }
@@ -136,54 +136,54 @@ int32_t TransChannelInit(void)
     IServerChannelCallBack *cb = TransServerGetChannelCb();
     if (cb == NULL) {
         TRANS_LOGE(TRANS_INIT, "cd is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
-
-    if (TransLaneMgrInit() != SOFTBUS_OK) {
+    int32_t ret = TransLaneMgrInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans lane manager init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (TransSocketLaneMgrInit() != SOFTBUS_OK) {
+    ret = TransSocketLaneMgrInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans socket lane manager init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (TransAuthInit(cb) != SOFTBUS_OK) {
+    ret = TransAuthInit(cb);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans auth init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (TransProxyManagerInit(cb) != SOFTBUS_OK) {
+    ret = TransProxyManagerInit(cb);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans proxy manager init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (TransTcpDirectInit(cb) != SOFTBUS_OK) {
+    ret = TransTcpDirectInit(cb);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans tcp direct init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (TransUdpChannelInit(cb) != SOFTBUS_OK) {
+    ret = TransUdpChannelInit(cb);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans udp channel init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (TransReqLanePendingInit() != SOFTBUS_OK) {
+    ret = TransReqLanePendingInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans req lane pending init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (TransAsyncReqLanePendingInit() != SOFTBUS_OK) {
+    ret = TransAsyncReqLanePendingInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans async req lane pending init failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     ReqLinkListener();
 
     if (SoftBusMutexInit(&g_myIdLock, NULL) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init lock failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     return SOFTBUS_OK;
@@ -463,7 +463,7 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
     int32_t ret = TransGetLaneHandleByChannelId(channelId, &laneHandle);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "get laneHandle fail, streamStatsInfo cannot be processed");
-        return SOFTBUS_ERR;
+        return ret;
     }
     TRANS_LOGI(TRANS_STREAM, "transStreamStats channelId=%{public}d, laneHandle=0x%{public}x", channelId, laneHandle);
     // modify with laneId
@@ -696,7 +696,7 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* co
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d error", channelType);
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get connId failed, channelId=%{public}d, channelType=%{public}d",

@@ -180,13 +180,13 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
             TRANS_LOGE(TRANS_INIT, "init p2p direct channel failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NO_INIT;
         }
         TRANS_LOGW(TRANS_INIT, "p2p direct channel not support.");
     }
     if (TransSrvDataListInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init srv trans tcp direct databuf list failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (TransTdcSetCallBack(cb) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "set srv trans tcp dierct call failed");

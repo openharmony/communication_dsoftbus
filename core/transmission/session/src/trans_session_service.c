@@ -36,25 +36,30 @@ int32_t TransServerInit(void)
     if (g_transSessionInitFlag) {
         return SOFTBUS_OK;
     }
-    if (TransPermissionInit() != SOFTBUS_OK) {
+    int32_t ret = TransPermissionInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "Init trans permission failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (TransSessionMgrInit() != SOFTBUS_OK) {
+    ret = TransSessionMgrInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "TransSessionMgrInit failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (TransChannelInit() != SOFTBUS_OK) {
+    ret = TransChannelInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "TransChannelInit failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (InitQos() != SOFTBUS_OK) {
+    ret = InitQos();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (ScenarioManagerGetInstance() != SOFTBUS_OK) {
+    ret = ScenarioManagerGetInstance();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
     g_transSessionInitFlag = true;
     TRANS_LOGI(TRANS_INIT, "trans session server list init succ");
