@@ -22,13 +22,11 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_qos.h"
-#include "lnn_network_manager.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
@@ -48,8 +46,6 @@
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 
-#define MIGRATE_ENABLE 2
-#define MIGRATE_SUPPORTED 1
 #define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
 #define MIN_FD_ID 1025
