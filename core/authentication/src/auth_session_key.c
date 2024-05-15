@@ -336,7 +336,7 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, AuthLink
         AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, time=%{public}" PRIu64, index, item->lastUseTime);
         return SOFTBUS_OK;
     }
-    AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d, type=%{public}u", index, item->type);
+    AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d", index);
     return SOFTBUS_ERR;
 }
 
