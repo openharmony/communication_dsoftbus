@@ -83,7 +83,7 @@ static int32_t PackFirstData(const AppInfo *appInfo, cJSON *json)
         TRANS_LOGE(TRANS_CTRL, "base64 encode failed.");
         SoftBusFree(encodeFastData);
         SoftBusFree(buf);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     if (!AddStringToJsonObject(json, FIRST_DATA, (char *)encodeFastData)) {
         TRANS_LOGE(TRANS_CTRL, "add first data failed.");
@@ -202,7 +202,7 @@ static int32_t UnpackFirstData(AppInfo *appInfo, const cJSON *json)
             SoftBusFree((void *)appInfo->fastTransData);
             appInfo->fastTransData = NULL;
             SoftBusFree(encodeFastData);
-            return SOFTBUS_ERR;
+            return SOFTBUS_DECRYPT_ERR;
         }
         SoftBusFree(encodeFastData);
     }
@@ -250,9 +250,10 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (UnpackFirstData(appInfo, msg) != SOFTBUS_OK) {
+    int32_t ret = UnpackFirstData(appInfo, msg);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack first data failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     int32_t apiVersion = API_V1;
@@ -359,7 +360,7 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
     }
     if (strcmp(uuid, appInfo->peerData.deviceId) != 0) {
         TRANS_LOGE(TRANS_CTRL, "Invalid uuid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_INVALID_UUID;
     }
     if (!GetJsonObjectNumber16Item(msg, FIRST_DATA_SIZE, fastDataSize)) {
         TRANS_LOGW(TRANS_CTRL, "Failed to get fast data size");

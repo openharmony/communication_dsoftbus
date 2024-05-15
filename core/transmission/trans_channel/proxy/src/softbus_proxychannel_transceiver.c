@@ -57,12 +57,12 @@ int32_t TransDelConnByReqId(uint32_t reqId)
 
     if (g_proxyConnectionList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_proxyConnectionList is null!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
-    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, tmpNode, &g_proxyConnectionList->list, ProxyConnInfo, node) {
@@ -88,7 +88,7 @@ void TransDelConnByConnId(uint32_t connId)
         return;
     }
 
-    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
@@ -111,12 +111,12 @@ int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer)
     ProxyConnInfo *tmpNode = NULL;
     if ((g_proxyConnectionList == NULL) || (connId == 0)) {
         TRANS_LOGE(TRANS_MSG, "g_proxyConnectionList or connId is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
-    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, tmpNode, &g_proxyConnectionList->list, ProxyConnInfo, node) {
@@ -148,12 +148,12 @@ int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer)
 
     if (g_proxyConnectionList == NULL) {
         TRANS_LOGE(TRANS_MSG, "g_proxyConnectionList is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
-    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyConnectionList->list, ProxyConnInfo, node) {
@@ -421,12 +421,12 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
 
     if (g_proxyConnectionList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_proxyConnectionList is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
-    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(item, tmpItem, &g_proxyConnectionList->list, ProxyConnInfo, node) {
@@ -481,7 +481,7 @@ void TransCreateConnByConnId(uint32_t connId, bool isServer)
         return;
     }
 
-    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
@@ -519,7 +519,7 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
 
     if (g_proxyConnectionList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "proxy connection list not inited!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     if (connInfo == NULL || proxyConn == NULL) {
@@ -527,9 +527,9 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyConnectionList->list, ProxyConnInfo, node) {
@@ -555,7 +555,7 @@ void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId, uint32_t state)
         return;
     }
 
-    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
@@ -881,15 +881,15 @@ int32_t TransProxyTransInit(void)
     g_proxyConnectionList = CreateSoftBusList();
     if (g_proxyConnectionList == NULL) {
         TRANS_LOGE(TRANS_INIT, "create observer list failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (TransProxyLoopInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "create loopInit fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (TransProxyPipelineInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init proxy pipeline failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }
@@ -903,7 +903,7 @@ int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
 
     if (g_proxyConnectionList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "proxy connect list empty.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {

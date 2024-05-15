@@ -105,7 +105,7 @@ static void DelHmlListenerByMoudle(ListenerModule type)
 {
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
-    if (SoftBusMutexLock(&g_hmlListenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock fail");
         return;
     }
@@ -198,7 +198,7 @@ ListenerModule GetMoudleByHmlIp(const char *ip)
 {
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
-    if (SoftBusMutexLock(&g_hmlListenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock fail");
         return UNUSE_BUTT;
     }
@@ -217,11 +217,11 @@ static int32_t StartHmlListener(const char *ip, int32_t *port)
     TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
     if (g_hmlListenerList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "hmlListenerList not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
-    if (SoftBusMutexLock(&g_hmlListenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -266,12 +266,12 @@ static int32_t StartP2pListener(const char *ip, int32_t *port)
 {
     if (ip == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ip is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
     if (SoftBusMutexLock(&g_p2pLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     if (g_p2pSessionPort > 0 && strcmp(ip, g_p2pSessionIp) != 0) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
@@ -541,7 +541,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     if (ret != SOFTBUS_OK) {
         OutputAnonymizeIpAddress(myIp, peerIp);
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "invalid p2p port", isAuthLink);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     char *reply = VerifyP2pPack(myIp, myPort, NULL);
@@ -585,7 +585,7 @@ static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq)
 {
     ListenerModule moudleType;
     SessionConn *conn = NULL;
-    if (SoftBusMutexLock(&g_hmlListenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "StartHmlListener lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -917,7 +917,7 @@ int32_t P2pDirectChannelInit(void)
     TRANS_LOGI(TRANS_INIT, "enter.");
     if (SoftBusMutexInit(&g_p2pLock, NULL) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init lock failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (CreatHmlListenerList() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "CreatHmlListenerList failed");
