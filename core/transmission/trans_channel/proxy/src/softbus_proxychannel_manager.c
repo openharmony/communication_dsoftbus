@@ -1487,9 +1487,11 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
         } else if (status == PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT) {
             (void)TransDelConnByReqId(removeNode->reqId);
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
-        } else if (status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
+        } else if (status == PROXY_CHANNEL_STATUS_TIMEOUT) {
             TRANS_LOGI(TRANS_CTRL, "send keepalive channelId=%{public}d", removeNode->myId);
             TransProxyPostKeepAliveMsgToLoop(removeNode);
+        } else {
+            SoftBusFree(removeNode);
         }
     }
 }

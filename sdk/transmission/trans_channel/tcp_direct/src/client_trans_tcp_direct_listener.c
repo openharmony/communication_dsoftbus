@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <securec.h>
+#include <stdatomic.h>
 
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_manager.h"
@@ -30,7 +31,7 @@
 
 typedef struct {
     SoftBusMutex lock;
-    bool lockInit;
+    _Atomic bool lockInit;
 } SoftBusTcpListenerLock;
 
 static SoftBusTcpListenerLock g_lock = {
@@ -40,12 +41,12 @@ static SoftBusTcpListenerLock g_lock = {
 
 static void TdcLockInit(void)
 {
-    if (g_lock.lockInit == false) {
+    if (!atomic_load_explicit(&(g_lock.lockInit), memory_order_acquire)) {
         if (SoftBusMutexInit(&g_lock.lock, NULL) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_INIT, "TDC lock init failed");
             return;
         }
-        g_lock.lockInit = true;
+        atomic_store_explicit(&(g_lock.lockInit), true, memory_order_release);
     }
 }
 static int32_t ClientTdcOnConnectEvent(ListenerModule module, int cfd,

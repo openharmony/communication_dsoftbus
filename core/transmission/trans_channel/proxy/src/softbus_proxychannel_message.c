@@ -16,6 +16,7 @@
 #include "softbus_proxychannel_message.h"
 
 #include <securec.h>
+#include <stdatomic.h>
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
@@ -31,7 +32,7 @@
 #include "softbus_utils.h"
 #include "trans_log.h"
 
-static int g_proxyPktHeadSeq = 2048;
+static _Atomic int32_t g_proxyPktHeadSeq = 2048;
 
 static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage *msg)
 {
@@ -944,7 +945,7 @@ static int32_t TransProxyPackFastDataHead(ProxyDataInfo *dataInfo, const AppInfo
         return SOFTBUS_MALLOC_ERR;
     }
 
-    int32_t seq = g_proxyPktHeadSeq++;
+    int32_t seq = atomic_fetch_add_explicit(&g_proxyPktHeadSeq, 1, memory_order_relaxed);
     if (TransProxyEncryptFastData(appInfo->sessionKey, seq, (const char*)dataInfo->inData,
         dataInfo->inLen, (char*)dataInfo->outData + sizeof(PacketFastHead), &cipherLength) != SOFTBUS_OK) {
         SoftBusFree(dataInfo->outData);
@@ -995,7 +996,7 @@ static int32_t TransProxyByteData(const AppInfo *appInfo, ProxyDataInfo *dataInf
     }
     uint16_t fastDataSize = appInfo->fastTransDataSize;
     SessionHead *sessionHead = (SessionHead*)dataInfo->inData;
-    sessionHead->seq = g_proxyPktHeadSeq++;
+    sessionHead->seq = atomic_fetch_add_explicit(&g_proxyPktHeadSeq, 1, memory_order_relaxed);
     sessionHead->packetFlag = (appInfo->businessType == BUSINESS_TYPE_BYTE) ? FLAG_BYTES : FLAG_MESSAGE;
     sessionHead->shouldAck = 0;
     if (memcpy_s(dataInfo->inData + sizeof(SessionHead), fastDataSize, appInfo->fastTransData, fastDataSize) != EOK) {

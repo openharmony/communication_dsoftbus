@@ -113,7 +113,7 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
     return SOFTBUS_OK;
 }
 
-static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
+NO_SANITIZE("cfi") static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
 {
     if (socketCallback == NULL || socketCallback->OnBind == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid OnBind callback function");
@@ -132,6 +132,7 @@ static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *sock
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi")
 static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socketCallback, int32_t errCode)
 {
     (void)ClientHandleBindWaitTimer(sessionId, 0, TIMER_ACTION_STOP);
