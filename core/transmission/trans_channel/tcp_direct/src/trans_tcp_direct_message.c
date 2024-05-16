@@ -842,6 +842,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         TRANS_LOGI(TRANS_CTRL,
             "Request denied: session is not a meta session. sessionName=%{public}s", tmpName);
         AnonymizeFree(tmpName);
+        SoftBusFree(conn);
         return SOFTBUS_TRANS_NOT_META_SESSION;
     }
     char *errDesc = NULL;
