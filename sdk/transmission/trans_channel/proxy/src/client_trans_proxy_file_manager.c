@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdatomic.h>
 
 #include "client_trans_pending.h"
 #include "client_trans_proxy_manager.h"
@@ -174,19 +175,20 @@ static void ProxyFileTransTimerProc(void)
 
 int32_t ClinetTransProxyFileManagerInit(void)
 {
-    if (g_sendFileInfoLock.lockInitFlag == false) {
+    if (!atomic_load_explicit(&(g_sendFileInfoLock.lockInitFlag), memory_order_acquire)) {
         if (SoftBusMutexInit(&g_sendFileInfoLock.lock, NULL) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "sendfile mutex init fail!");
             return SOFTBUS_ERR;
         }
-        g_sendFileInfoLock.lockInitFlag = true;
+        atomic_store_explicit(&(g_sendFileInfoLock.lockInitFlag), true, memory_order_release);
     }
-    if (g_recvFileInfoLock.lockInitFlag == false) {
+
+    if (!atomic_load_explicit(&(g_recvFileInfoLock.lockInitFlag), memory_order_acquire)) {
         if (SoftBusMutexInit(&g_recvFileInfoLock.lock, NULL) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "recvfile mutex init fail!");
             return SOFTBUS_ERR;
         }
-        g_recvFileInfoLock.lockInitFlag = true;
+        atomic_store_explicit(&(g_recvFileInfoLock.lockInitFlag), true, memory_order_release);
     }
     if (InitPendingPacket() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "InitPendingPacket fail!");
@@ -204,11 +206,11 @@ void ClinetTransProxyFileManagerDeinit(void)
     if (SoftBusMutexDestroy(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "destroy send file lock fail");
     }
-    g_sendFileInfoLock.lockInitFlag = false;
+    atomic_store_explicit(&(g_sendFileInfoLock.lockInitFlag), false, memory_order_release);
     if (SoftBusMutexDestroy(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "destroy recv file lock fail");
     }
-    g_recvFileInfoLock.lockInitFlag = false;
+    atomic_store_explicit(&(g_recvFileInfoLock.lockInitFlag), false, memory_order_release);
 }
 
 static int32_t SendFileAckReqAndResData(int32_t channelId, uint32_t startSeq, uint32_t value, int32_t type)
@@ -657,6 +659,7 @@ static void DelSendListenerInfo(SendListenerInfo *info)
         return;
     }
     ListDelete(&info->node);
+    SoftBusFree(info);
     TRANS_LOGI(TRANS_FILE, "delete sessionId = %{public}d", info->sessionId);
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
 }
@@ -1333,7 +1336,6 @@ static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
         return;
     }
     DelSendListenerInfo(sendInfo);
-    SoftBusFree(sendInfo);
 }
 
 int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)

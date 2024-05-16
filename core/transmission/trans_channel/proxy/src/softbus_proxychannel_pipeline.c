@@ -16,6 +16,7 @@
 #include "softbus_proxychannel_pipeline.h"
 
 #include <securec.h>
+#include <stdatomic.h>
 
 #include "bus_center_manager.h"
 #include "common_list.h"
@@ -60,7 +61,7 @@ struct PipelineChannelItem {
 };
 
 struct PipelineManager {
-    bool inited;
+    _Atomic bool inited;
     SoftBusMutex lock;
     struct ListenerItem listeners[MSG_TYPE_CNT];
     SoftBusList *channels;
@@ -638,7 +639,8 @@ int32_t TransProxyPipelineInit(void)
         .onChannelClosed = TransProxyPipelineOnChannelClosed,
         .onMessageReceived = TransProxyPipelineOnMessageReceived,
     };
-    if (g_manager.inited) {
+
+    if (atomic_load_explicit(&(g_manager.inited), memory_order_acquire)) {
         return SOFTBUS_OK;
     };
     channels = CreateSoftBusList();
@@ -658,7 +660,7 @@ int32_t TransProxyPipelineInit(void)
     g_manager.handler.looper = g_manager.looper;
     strcpy_s(g_manager.handler.name, strlen(PIPELINEHANDLER_NAME) + 1, PIPELINEHANDLER_NAME);
     g_manager.handler.HandleMessage = TransProxyPipelineHandleMessage;
-    g_manager.inited = true;
+    atomic_store_explicit(&(g_manager.inited), true, memory_order_release);
     return SOFTBUS_OK;
 exit:
     if (channels != NULL) {
@@ -667,7 +669,7 @@ exit:
     }
     g_manager.channels = NULL;
     SoftBusMutexDestroy(&g_manager.lock);
-    g_manager.inited = false;
+    atomic_store_explicit(&(g_manager.inited), false, memory_order_release);
 
     return SOFTBUS_ERR;
 }
