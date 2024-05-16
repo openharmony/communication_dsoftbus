@@ -294,6 +294,10 @@ void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return;
     }
+    if (socketFd >= SOFTBUS_FD_SETSIZE) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "socketFd is too big. socketFd=%{public}d", socketFd);
+        return;
+    }
 
     FD_SET(socketFd, (fd_set *)set->fdsBits);
 }
@@ -312,6 +316,10 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
 {
     if (set == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
+        return 0;
+    }
+    if (socketFd >= SOFTBUS_FD_SETSIZE) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "socketFd is too big. socketFd=%{public}d", socketFd);
         return 0;
     }
 
