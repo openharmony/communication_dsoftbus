@@ -511,7 +511,7 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
         return false;
     }
     if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
-        AUTH_LOGI(AUTH_HICHAIN, "account is same, continue verify progress. account=%{public}02X%{public}02X",
+        AUTH_LOGD(AUTH_HICHAIN, "account is same, continue verify progress. account=%{public}02X%{public}02X",
             device->accountHash[0], device->accountHash[1]);
         return true;
     }
