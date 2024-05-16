@@ -491,9 +491,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     const char *groupId, const SessionAttribute *attr)
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "invalid session name.");
     PrintSessionName(mySessionName, peerSessionName);
 
     SessionParam param = {

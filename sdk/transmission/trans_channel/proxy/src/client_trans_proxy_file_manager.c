@@ -701,10 +701,8 @@ static int32_t PackFileTransStartInfo(
 
 static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipientInfo *info, SingleFileInfo *file)
 {
-    if ((info == NULL) || (fileFrame == NULL) || (file == NULL)) {
-        TRANS_LOGW(TRANS_FILE, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        (info != NULL && fileFrame != NULL && file != NULL), SOFTBUS_INVALID_PARAM, TRANS_FILE, "invalid param");
     uint8_t *fileNameData = NULL;
     uint64_t fileNameLen = 0;
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
@@ -987,13 +985,30 @@ static int32_t UnpackFileCrcCheckSum(const FileRecipientInfo *info, FileFrame *f
     return SOFTBUS_OK;
 }
 
+static void HandleSendProgress(SendListenerInfo *sendInfo, uint64_t fileOffset, uint64_t fileSize)
+{
+    TRANS_CHECK_AND_RETURN_LOGE(sendInfo != NULL, TRANS_FILE, "sendInfo is empty.");
+
+    if (sendInfo->fileListener.socketSendCallback != NULL) {
+        FileEvent event = {
+            .type = FILE_EVENT_SEND_PROCESS,
+            .files = sendInfo->totalInfo.files,
+            .fileCnt = sendInfo->totalInfo.fileCnt,
+            .bytesProcessed = sendInfo->totalInfo.bytesProcessed,
+            .bytesTotal = sendInfo->totalInfo.bytesTotal,
+            .UpdateRecvPath = NULL,
+        };
+        sendInfo->fileListener.socketSendCallback(sendInfo->sessionId, &event);
+    } else if (sendInfo->fileListener.sendListener.OnSendFileProcess != NULL) {
+        sendInfo->fileListener.sendListener.OnSendFileProcess(sendInfo->channelId, fileOffset, fileSize);
+    }
+}
+
 static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum, const char *destFile, uint64_t fileSize)
 {
     FileFrame fileFrame = { 0 };
     fileFrame.data = (uint8_t *)SoftBusCalloc(sendInfo->packetSize);
-    if (fileFrame.data == NULL) {
-        return SOFTBUS_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(fileFrame.data != NULL, SOFTBUS_MALLOC_ERR, TRANS_FILE, "data calloc failed");
     fileFrame.magic = FILE_MAGIC_NUMBER;
     fileFrame.fileData = fileFrame.data;
     uint64_t fileOffset = 0;
@@ -1024,19 +1039,7 @@ static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum, const 
             TRANS_LOGE(TRANS_FILE, "send one frame failed");
             goto EXIT_ERR;
         }
-        if (sendInfo->fileListener.socketSendCallback != NULL) {
-            FileEvent event = {
-                .type = FILE_EVENT_SEND_PROCESS,
-                .files = sendInfo->totalInfo.files,
-                .fileCnt = sendInfo->totalInfo.fileCnt,
-                .bytesProcessed = sendInfo->totalInfo.bytesProcessed,
-                .bytesTotal = sendInfo->totalInfo.bytesTotal,
-                .UpdateRecvPath = NULL,
-            };
-            sendInfo->fileListener.socketSendCallback(sendInfo->sessionId, &event);
-        } else if (sendInfo->fileListener.sendListener.OnSendFileProcess != NULL) {
-            sendInfo->fileListener.sendListener.OnSendFileProcess(sendInfo->channelId, fileOffset, fileSize);
-        }
+        HandleSendProgress(sendInfo, fileOffset, fileSize);
         (void)memset_s(fileFrame.data, sendInfo->packetSize, 0, sendInfo->packetSize);
     }
     TRANS_LOGI(TRANS_FILE, "send crc check sum");
@@ -1986,13 +1989,32 @@ EXIT_ERR:
     return SOFTBUS_ERR;
 }
 
+static void NotifyRecipientReceiveStateAndCallback(
+    FileRecipientInfo *recipient, int32_t sessionId, char *absRecvPath, int32_t fileCount)
+{
+    TRANS_CHECK_AND_RETURN_LOGE(recipient != NULL, TRANS_FILE, "recipient is empty.");
+
+    SetRecipientRecvState(recipient, TRANS_FILE_RECV_IDLE_STATE);
+    if (recipient->fileListener.socketRecvCallback != NULL) {
+        const char *fileList[] = { absRecvPath };
+        FileEvent event = {
+            .type = FILE_EVENT_RECV_FINISH,
+            .files = fileList,
+            .fileCnt = 1,
+            .bytesProcessed = 0,
+            .bytesTotal = 0,
+        };
+        recipient->fileListener.socketRecvCallback(sessionId, &event);
+    } else if (recipient->fileListener.recvListener.OnReceiveFileFinished != NULL) {
+        recipient->fileListener.recvListener.OnReceiveFileFinished(sessionId, absRecvPath, fileCount);
+    }
+}
+
 static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
 {
     FileRecipientInfo *recipient = GetRecipientInfo(sessionId);
-    if (recipient == NULL) {
-        TRANS_LOGE(TRANS_FILE, "get recipient info fail");
-        return SOFTBUS_NOT_FIND;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(recipient != NULL, SOFTBUS_NOT_FIND, TRANS_FILE, "get recipient info failed");
+
     int32_t ret = SOFTBUS_ERR;
     int32_t fileCount;
     char *fullRecvPath = NULL;
@@ -2004,7 +2026,7 @@ static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
     }
     fullRecvPath = GetFullRecvPath(firstFilePath, recipient->fileListener.rootDir);
     SoftBusFree(firstFilePath);
-    if (IsPathValid(fullRecvPath) == false) {
+    if (!IsPathValid(fullRecvPath)) {
         TRANS_LOGE(TRANS_FILE, "file list path is invalid");
         SoftBusFree(fullRecvPath);
         goto EXIT_ERR;
@@ -2021,20 +2043,7 @@ static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
         SoftBusFree(absRecvPath);
         goto EXIT_ERR;
     }
-    SetRecipientRecvState(recipient, TRANS_FILE_RECV_IDLE_STATE);
-    if (recipient->fileListener.socketRecvCallback != NULL) {
-        const char *fileList[] = { absRecvPath };
-        FileEvent event = {
-            .type = FILE_EVENT_RECV_FINISH,
-            .files = fileList,
-            .fileCnt = 1,
-            .bytesProcessed = 0,
-            .bytesTotal = 0,
-        };
-        recipient->fileListener.socketRecvCallback(sessionId, &event);
-    } else if (recipient->fileListener.recvListener.OnReceiveFileFinished != NULL) {
-        recipient->fileListener.recvListener.OnReceiveFileFinished(sessionId, absRecvPath, fileCount);
-    }
+    NotifyRecipientReceiveStateAndCallback(recipient, sessionId, absRecvPath, fileCount);
     SoftBusFree(fullRecvPath);
     SoftBusFree(absRecvPath);
     ret = SOFTBUS_OK;
