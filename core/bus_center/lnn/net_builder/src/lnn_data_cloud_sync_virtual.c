@@ -61,9 +61,3 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
     (void)keySize;
     return SOFTBUS_NOT_IMPLEMENT;
 }
-
-int32_t LnnGetAccountIdFromLocalCache(int64_t *buf)
-{
-    (void)buf;
-    return SOFTBUS_NOT_IMPLEMENT;
-}

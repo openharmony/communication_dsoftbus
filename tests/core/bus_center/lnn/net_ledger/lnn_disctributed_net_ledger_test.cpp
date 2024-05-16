@@ -957,12 +957,12 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLUnifiedDeviceName_Test_001, TestSi
 {
     char *udid = nullptr;
     char *name = nullptr;
-    bool ret = LnnSetDLUnifiedDeviceName(udid, name);
-    EXPECT_TRUE(ret == false);
+    int32_t ret = LnnSetDLUnifiedDeviceName(udid, name);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *devUdid = "123456789";
     const char *devName = "devicename";
     ret = LnnSetDLUnifiedDeviceName(devUdid, devName);
-    EXPECT_TRUE(ret == false);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -975,12 +975,12 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLUnifiedDefaultDeviceName_Test_001,
 {
     char *udid = nullptr;
     char *name = nullptr;
-    bool ret = LnnSetDLUnifiedDefaultDeviceName(udid, name);
-    EXPECT_TRUE(ret == false);
+    int32_t ret = LnnSetDLUnifiedDefaultDeviceName(udid, name);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *devUdid = "111111111";
     const char *devName = "devdefaultdevicename";
     ret = LnnSetDLUnifiedDefaultDeviceName(devUdid, devName);
-    EXPECT_TRUE(ret == false);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -993,12 +993,12 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLDeviceNickNameByUdid_Test_001, Tes
 {
     char *udid = nullptr;
     char *name = nullptr;
-    bool ret = LnnSetDLDeviceNickNameByUdid(udid, name);
-    EXPECT_TRUE(ret == false);
+    int32_t ret = LnnSetDLDeviceNickNameByUdid(udid, name);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *devUdid = "2222222222";
     const char *devName = "deviceNickname";
     ret = LnnSetDLDeviceNickNameByUdid(devUdid, devName);
-    EXPECT_TRUE(ret == false);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1011,11 +1011,11 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLDeviceStateVersion_Test_001, TestS
 {
     char *udid = nullptr;
     int32_t stateVersion = 0;
-    bool ret = LnnSetDLDeviceStateVersion(udid, stateVersion);
-    EXPECT_TRUE(ret == false);
+    int32_t ret = LnnSetDLDeviceStateVersion(udid, stateVersion);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *devUdid = "3333333333";
     ret = LnnSetDLDeviceStateVersion(devUdid, stateVersion);
-    EXPECT_TRUE(ret == false);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1028,11 +1028,11 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLDeviceBroadcastCipherKey_Test_001,
 {
     char *udid = nullptr;
     const char *cipherKey = "qqqqqqqqqqqq";
-    bool ret = LnnSetDLDeviceBroadcastCipherKey(udid, cipherKey);
-    EXPECT_TRUE(ret == false);
+    int32_t ret = LnnSetDLDeviceBroadcastCipherKey(udid, cipherKey);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *devUdid = "123456789";
     ret = LnnSetDLDeviceBroadcastCipherKey(devUdid, cipherKey);
-    EXPECT_TRUE(ret == false);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1045,11 +1045,11 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_Set_DLDeviceBroadcastCipherIv_Test_001, 
 {
     char *udid = nullptr;
     const char *cipherIv = "qqqqqqqqqqqq";
-    bool ret = LnnSetDLDeviceBroadcastCipherIv(udid, cipherIv);
-    EXPECT_TRUE(ret == false);
+    int32_t ret = LnnSetDLDeviceBroadcastCipherIv(udid, cipherIv);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *devUdid = "123456789";
     ret = LnnSetDLDeviceBroadcastCipherIv(devUdid, cipherIv);
-    EXPECT_TRUE(ret == false);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
