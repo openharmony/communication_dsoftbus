@@ -128,6 +128,7 @@ typedef struct {
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
     AuthHandle authHandle; /* for cipher */
+    bool deviceTypeIsWinpc;
 } ProxyChannelInfo;
 
 typedef struct {

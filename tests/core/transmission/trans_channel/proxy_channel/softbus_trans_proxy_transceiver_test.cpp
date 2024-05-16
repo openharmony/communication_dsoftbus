@@ -168,11 +168,11 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelResetTest001, Te
     bool isServer = false;
     TransCreateConnByConnId(2, isServer);
 
-    int32_t ret = TransProxyCloseConnChannelReset(2, false, isServer);
+    int32_t ret = TransProxyCloseConnChannelReset(2, false, isServer, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannelReset(2, false, isServer);
+    ret = TransProxyCloseConnChannelReset(2, false, isServer, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannelReset(2, true, isServer);
+    ret = TransProxyCloseConnChannelReset(2, true, isServer, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
