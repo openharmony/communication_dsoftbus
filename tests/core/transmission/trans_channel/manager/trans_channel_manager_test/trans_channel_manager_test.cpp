@@ -426,14 +426,14 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
 
     channelId = -1;
     ret = TransStreamStats(channelId, channelType, data);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransStreamStats(channelId, channelType, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     TransLaneMgrDeinit();
     ret = TransStreamStats(channelId, channelType, data);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     if (data != NULL) {
         SoftBusFree(data);
@@ -456,7 +456,7 @@ HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
 
     channelType = CHANNEL_TYPE_AUTH;
     ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -566,11 +566,11 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
 
     info->channelType = CHANNEL_TYPE_UDP;
     ret = TransGetNameByChanId(info, pkgName, sessionName, pkgLen, sessionNameLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     info->channelType = CHANNEL_TYPE_AUTH;
     ret = TransGetNameByChanId(info, pkgName, sessionName, pkgLen, sessionNameLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     if (info != NULL) {
         SoftBusFree(info);
@@ -630,7 +630,7 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
 
     channelType = CHANNEL_TYPE_PROXY + 1;
     int32_t ret = TransGetConnByChanId(channelId, channelType, &connId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
 
 /**
