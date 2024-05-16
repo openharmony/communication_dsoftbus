@@ -170,55 +170,40 @@ int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer)
 
 static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
 {
-    int32_t chanId;
-    uint32_t connectionId;
-    bool isServer;
-    ProxyChannelInfo *chan = NULL;
-
-    if (msg == NULL) {
-        TRANS_LOGE(TRANS_MSG, "param invalid");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param invalid");
     TRANS_LOGI(TRANS_CTRL, "trans loop process msgType=%{public}d", msg->what);
+
+    ProxyChannelInfo *chan = NULL;
     switch (msg->what) {
-        case LOOP_HANDSHAKE_MSG:
-            chanId = *((int32_t *)msg->obj);
+        case LOOP_HANDSHAKE_MSG: {
+            int32_t chanId = *((int32_t *)msg->obj);
             TransProxyOpenProxyChannelSuccess(chanId);
             break;
-        case LOOP_DISCONNECT_MSG:
-            isServer = (bool)msg->arg1;
-            connectionId = (uint32_t)msg->arg2;
+        }
+        case LOOP_DISCONNECT_MSG: {
+            bool isServer = (bool)msg->arg1;
+            uint32_t connectionId = (uint32_t)msg->arg2;
             TransProxyCloseConnChannel(connectionId, isServer);
             break;
+        }
         case LOOP_OPENFAIL_MSG:
             chan = (ProxyChannelInfo *)msg->obj;
-            if (chan == NULL) {
-                TRANS_LOGE(TRANS_MSG, "LOOP_OPENFAIL_MSG, chan is null");
-                return;
-            }
+            TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_OPENFAIL_MSG, chan is null");
             TransProxyOpenProxyChannelFail(chan->channelId, &(chan->appInfo), (int32_t)msg->arg1);
             break;
         case LOOP_OPENCLOSE_MSG:
             chan = (ProxyChannelInfo *)msg->obj;
-            if (chan == NULL) {
-                return;
-            }
+            TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_OPENCLOSE_MSG, chan is null");
             OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
             break;
         case LOOP_KEEPALIVE_MSG:
             chan = (ProxyChannelInfo *)msg->obj;
-            if (chan == NULL) {
-                TRANS_LOGE(TRANS_MSG, "LOOP_KEEPALIVE_MSG; chan is null");
-                return;
-            }
+            TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_KEEPALIVE_MSG, chan is null");
             TransProxyKeepalive(chan->connId, chan);
             break;
         case LOOP_RESETPEER_MSG:
             chan = (ProxyChannelInfo *)msg->obj;
-            if (chan == NULL) {
-                TRANS_LOGE(TRANS_MSG, "LOOP_RESETPEER_MSG; chan is null");
-                return;
-            }
+            TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_RESETPEER_MSG, chan is null");
             TransProxyResetPeer(chan);
             break;
         default:
@@ -835,13 +820,9 @@ static void TransProxyOnDataReceived(
     uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     ProxyMessage msg;
-    TRANS_LOGI(TRANS_CTRL,
-        "recv data connId=%{public}u, moduleId=%{public}d, seq=%{public}" PRId64 ", len=%{public}d", connectionId,
-        moduleId, seq, len);
-    if (data == NULL || moduleId != MODULE_PROXY_CHANNEL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param");
-        return;
-    }
+    TRANS_LOGI(TRANS_CTRL,"recv data connId=%{public}u, moduleId=%{public}d, seq=%{public}" PRId64 ", len=%{public}d",
+        connectionId, moduleId, seq, len);
+    TRANS_CHECK_AND_RETURN_LOGE(data != NULL && moduleId == MODULE_PROXY_CHANNEL, TRANS_CTRL, "invalid param");
     (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     msg.connId = connectionId;
 

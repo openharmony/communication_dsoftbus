@@ -1142,20 +1142,16 @@ int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, u
 
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId)
 {
-    if ((channel == NULL) || (sessionId == NULL)) {
-        TRANS_LOGW(TRANS_SDK, "Invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        (channel != NULL && sessionId != NULL), SOFTBUS_INVALID_PARAM, TRANS_SDK, "Invalid param");
 
-    if (g_clientSessionServerList == NULL) {
-        TRANS_LOGE(TRANS_INIT, "entry list  not init");
-        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_clientSessionServerList != NULL, SOFTBUS_TRANS_SESSION_SERVER_NOINIT, TRANS_INIT, "entry list not init");
 
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
 
-    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
