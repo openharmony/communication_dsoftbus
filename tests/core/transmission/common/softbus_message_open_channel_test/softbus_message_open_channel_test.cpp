@@ -346,7 +346,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackFirstData001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = UnpackFirstData(appInfo, json);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 
     char *mag = TestGetMsgPack();
     cJSON *json1 = cJSON_Parse(mag);
