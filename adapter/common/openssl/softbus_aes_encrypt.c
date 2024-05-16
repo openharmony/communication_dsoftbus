@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,48 +42,47 @@ int32_t SoftBusGenerateHmacHash(
     uint32_t outBufLen;
     uint8_t tempOutputData[EVP_MAX_MD_SIZE];
 
-    if (randomKey == NULL || rootKey == NULL || rootKeyLen == 0 || hash == NULL || hashLen == 0) {
+    if (randomKey == NULL || rootKey == NULL || rootKeyLen == 0 || hash == NULL || hashLen < SHA256_MAC_LEN) {
         COMM_LOGE(COMM_ADAPTER, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     HMAC_CTX *ctx = HMAC_CTX_new();
     if (ctx == NULL) {
         COMM_LOGE(COMM_ADAPTER, "HMAC_CTX_new failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_HMAC_ERR;
     }
     if (HMAC_CTX_reset(ctx) != 1) {
         COMM_LOGE(COMM_ADAPTER, "HMAC_CTX_reset failed.");
         HMAC_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        return SOFTBUS_HMAC_ERR;
     }
     if (HMAC_Init_ex(ctx, rootKey, rootKeyLen, EVP_sha256(), NULL) != 1) {
         COMM_LOGE(COMM_ADAPTER, "HMAC_Init_ex failed.");
         HMAC_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        return SOFTBUS_HMAC_ERR;
     }
     if (HMAC_Update(ctx, randomKey->key, (size_t)randomKey->len) != 1) {
         COMM_LOGE(COMM_ADAPTER, "HMAC_Update failed.");
         HMAC_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        return SOFTBUS_HMAC_ERR;
     }
     if (HMAC_Final(ctx, tempOutputData, &outBufLen) != 1) {
         COMM_LOGE(COMM_ADAPTER, "HMAC_Final failed.");
         HMAC_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        return SOFTBUS_HMAC_ERR;
     }
     HMAC_CTX_free(ctx);
-    if (hashLen < outBufLen) {
-        COMM_LOGE(COMM_ADAPTER, "hash is invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (outBufLen != SHA256_MAC_LEN) {
         COMM_LOGE(COMM_ADAPTER, "outBufLen is invalid length for hash.");
+        (void)memset_s(tempOutputData, sizeof(tempOutputData), 0, sizeof(tempOutputData));
         return SOFTBUS_ERR;
     }
     if (memcpy_s(hash, hashLen, tempOutputData, outBufLen) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "hash result memcpy_s failed.");
+        (void)memset_s(tempOutputData, sizeof(tempOutputData), 0, sizeof(tempOutputData));
         return SOFTBUS_MEM_ERR;
     }
+    (void)memset_s(tempOutputData, sizeof(tempOutputData), 0, sizeof(tempOutputData));
     return SOFTBUS_OK;
 }
 
@@ -112,7 +111,7 @@ static int32_t OpensslAesCfbEncrypt(
     }
     if (AES_set_encrypt_key(cipherKey->key, bits, &aes) < 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftbusAesCfbEncrypt unable to set encryption key in AES.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     if (encMode == ENCRYPT_MODE) {
         AES_cfb128_encrypt(inData->data, outData->data, inData->len, &aes, cipherKey->iv, &num, ENCRYPT_MODE);
@@ -129,17 +128,20 @@ static int32_t RootKeyGenerateIvAndSessionKey(const EncryptKey *randomKey, Encry
     uint8_t result[SHA256_MAC_LEN] = { 0 };
     if (SoftBusGenerateHmacHash(randomKey, rootKey->key, rootKey->len, result, sizeof(result)) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "SslHmacSha256 failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_HMAC_ERR;
     }
     if (memcpy_s(cipherKey->key, cipherKey->keyLen, result, AES_SESSION_KEY_LENGTH) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "RootKeyGenerateIvAndSessionKey fill sessionKey failed!");
+        (void)memset_s(result, sizeof(result), 0, sizeof(result));
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(cipherKey->iv, cipherKey->ivLen, result + AES_SESSION_KEY_LENGTH,
             SHA256_MAC_LEN - AES_SESSION_KEY_LENGTH) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "RootKeyGenerateIvAndSessionKey fill iv failed!");
+        (void)memset_s(result, sizeof(result), 0, sizeof(result));
         return SOFTBUS_MEM_ERR;
     }
+    (void)memset_s(result, sizeof(result), 0, sizeof(result));
     return SOFTBUS_OK;
 }
 
@@ -153,15 +155,17 @@ static int32_t GenerateIvAndSessionKey(const EncryptKey *randomKey, EncryptKey *
     cipherKey->ivLen = AES_IV_LENGTH;
     cipherKey->key = (uint8_t *)SoftBusCalloc(cipherKey->keyLen);
     if (cipherKey->key == NULL) {
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     cipherKey->iv = (uint8_t *)SoftBusCalloc(cipherKey->ivLen);
     if (cipherKey->iv == NULL) {
         SoftBusFree(cipherKey->key);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (RootKeyGenerateIvAndSessionKey(randomKey, rootKey, cipherKey) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "RootKeyGenerateIvAndSessionKey failed!");
+        (void)memset_s(cipherKey->key, cipherKey->keyLen, 0, cipherKey->keyLen);
+        (void)memset_s(cipherKey->iv, cipherKey->ivLen, 0, cipherKey->ivLen);
         SoftBusFree(cipherKey->key);
         SoftBusFree(cipherKey->iv);
         return SOFTBUS_ERR;
@@ -190,6 +194,8 @@ int32_t SoftBusAesCfbRootEncrypt(const AesInputData *inData, const EncryptKey *r
     }
     if (OpensslAesCfbEncrypt(&cipherKey, inData, encMode, &encryptData) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "OpensslAesCfb encrypt or decrypt by root key failed.");
+        (void)memset_s(cipherKey.key, cipherKey.keyLen, 0, cipherKey.keyLen);
+        (void)memset_s(cipherKey.iv, cipherKey.ivLen, 0, cipherKey.ivLen);
         SoftBusFree(cipherKey.key);
         SoftBusFree(cipherKey.iv);
         SoftBusFree(encryptData.data);
@@ -223,20 +229,27 @@ int32_t SoftBusAesCfbEncrypt(
     EncryptKey key = { cipherKey->key, cipherKey->keyLen };
     if (SoftBusGenerateHmacHash(&key, random, sizeof(random), result, SHA256_MAC_LEN) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "SslHmacSha256 failed.");
-        return SOFTBUS_ERR;
+        (void)memset_s(random, sizeof(random), 0, sizeof(random));
+        return SOFTBUS_HMAC_ERR;
     }
     (void)memset_s(cipherKey->key, cipherKey->keyLen, 0, cipherKey->keyLen);
     if (memcpy_s(cipherKey->key, cipherKey->keyLen, result, SHA256_MAC_LEN) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "fill cipherKey->key failed!");
+        (void)memset_s(random, sizeof(random), 0, sizeof(random));
+        (void)memset_s(result, sizeof(result), 0, sizeof(result));
         return SOFTBUS_MEM_ERR;
     }
     AesOutputData encryptData = { .data = (uint8_t *)SoftBusCalloc(inData->len), .len = inData->len };
     if (encryptData.data == NULL) {
         COMM_LOGE(COMM_ADAPTER, "encryptData calloc failed.");
-        return SOFTBUS_MEM_ERR;
+        (void)memset_s(random, sizeof(random), 0, sizeof(random));
+        (void)memset_s(result, sizeof(result), 0, sizeof(result));
+        return SOFTBUS_MALLOC_ERR;
     }
     if (OpensslAesCfbEncrypt(cipherKey, inData, encMode, &encryptData) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "OpensslAesCfbEncrypt failed.");
+        (void)memset_s(random, sizeof(random), 0, sizeof(random));
+        (void)memset_s(result, sizeof(result), 0, sizeof(result));
         SoftBusFree(encryptData.data);
         encryptData.data = NULL;
         return SOFTBUS_ENCRYPT_ERR;
@@ -282,18 +295,21 @@ static int32_t GcmOpensslEvpInit(EVP_CIPHER_CTX **ctx, uint32_t keyLen, int32_t 
         if (EVP_EncryptInit_ex(*ctx, cipher, NULL, NULL, NULL) != 1) {
             COMM_LOGE(COMM_ADAPTER, "EVP_EncryptInit_ex failed.");
             EVP_CIPHER_CTX_free(*ctx);
-            return SOFTBUS_ERR;
+            *ctx = NULL;
+            return SOFTBUS_ENCRYPT_ERR;
         }
     } else {
         if (EVP_DecryptInit_ex(*ctx, cipher, NULL, NULL, NULL) != 1) {
             COMM_LOGE(COMM_ADAPTER, "EVP_DecryptInit_ex failed.");
             EVP_CIPHER_CTX_free(*ctx);
-            return SOFTBUS_ERR;
+            *ctx = NULL;
+            return SOFTBUS_DECRYPT_ERR;
         }
     }
     if (EVP_CIPHER_CTX_ctrl(*ctx, EVP_CTRL_GCM_SET_IVLEN, AES_IV_LENGTH, NULL) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_CIPHER_CTX_ctrl failed.");
         EVP_CIPHER_CTX_free(*ctx);
+        *ctx = NULL;
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -314,43 +330,44 @@ static int32_t OpensslAesGcmEncrypt(
     }
     if (EVP_EncryptInit_ex(ctx, NULL, NULL, cipherKey->key, cipherKey->iv) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptInit_ex failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        goto EXIT;
     }
     int32_t outLen = 0;
     int32_t outBufLen = 0;
     if (EVP_EncryptUpdate(ctx, outData, &outBufLen, srcData, srcDataLen) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptUpdate failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        goto EXIT;
     }
     outLen += outBufLen;
     if (EVP_EncryptFinal_ex(ctx, outData + outBufLen, &outBufLen) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptFinal_ex failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        goto EXIT;
+    }
+    if (outBufLen > INT32_MAX - outLen) {
+        COMM_LOGE(COMM_ADAPTER, "outLen convert overflow.");
+        goto EXIT;
     }
     outLen += outBufLen;
     if (*outDataLen < ((uint32_t)outLen + AES_GCM_TAG_LEN)) {
         COMM_LOGE(COMM_ADAPTER, "invalid param. *outDataLen=%{public}u, outLen=%{public}u", *outDataLen,
             (uint32_t)outLen);
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
     uint8_t tagbuf[AES_GCM_TAG_LEN]; // outData has two part: EncryptedData & AES-GCM-TAG
     if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, AES_GCM_TAG_LEN, (void *)tagbuf) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_CTRL_GCM_GET_TAG failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        goto EXIT;
     }
     if (memcpy_s(outData + outLen, *outDataLen - outLen, tagbuf, AES_GCM_TAG_LEN) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "tag memcpy_s failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_MEM_ERR;
+        goto EXIT;
     }
     *outDataLen = outLen + AES_GCM_TAG_LEN;
     EVP_CIPHER_CTX_free(ctx);
     return SOFTBUS_OK;
+EXIT:
+    EVP_CIPHER_CTX_free(ctx);
+    return SOFTBUS_ENCRYPT_ERR;
 }
 
 static int32_t OpensslAesGcmDecrypt(
@@ -369,37 +386,40 @@ static int32_t OpensslAesGcmDecrypt(
     if (EVP_DecryptInit_ex(ctx, NULL, NULL, cipherKey->key, cipherKey->iv) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptInit_ex failed.");
         EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     int32_t outLen = 0;
     int32_t outBufLen = 0;
     uint8_t trueEncryptedData[srcDataLen - AES_GCM_TAG_LEN];
     if (memcpy_s(trueEncryptedData, srcDataLen - AES_GCM_TAG_LEN, srcData, srcDataLen - AES_GCM_TAG_LEN) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "trueEncryptedData memcpy_s failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_MEM_ERR;
+        goto EXIT;
     }
     if (EVP_CIPHER_CTX_ctrl(
         ctx, EVP_CTRL_GCM_SET_TAG, AES_GCM_TAG_LEN, (void *)(srcData + (srcDataLen - AES_GCM_TAG_LEN))) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_CTRL_GCM_SET_TAG failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        goto EXIT;
     }
     if (EVP_DecryptUpdate(ctx, outData, &outBufLen, trueEncryptedData, srcDataLen - AES_GCM_TAG_LEN) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptUpdate failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        goto EXIT;
     }
     outLen += outBufLen;
     if (EVP_DecryptFinal_ex(ctx, outData + outBufLen, &outBufLen) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptFinal_ex failed.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_ERR;
+        goto EXIT;
+    }
+    if (outBufLen > INT32_MAX - outLen) {
+        COMM_LOGE(COMM_ADAPTER, "outLen convert overflow.");
+        goto EXIT;
     }
     outLen += outBufLen;
     *outDataLen = outLen;
     EVP_CIPHER_CTX_free(ctx);
     return SOFTBUS_OK;
+EXIT:
+    EVP_CIPHER_CTX_free(ctx);
+    return SOFTBUS_DECRYPT_ERR;
 }
 
 int32_t SoftBusAesGcmEncrypt(
@@ -414,7 +434,7 @@ int32_t SoftBusAesGcmEncrypt(
     uint8_t *encryptData = (uint8_t *)SoftBusCalloc(encryptDataLen);
     if (encryptData == NULL) {
         COMM_LOGE(COMM_ADAPTER, "encrypt data calloc fail.");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (encMode == ENCRYPT_MODE) {
         if (OpensslAesGcmEncrypt(inData->data, inData->len, cipherKey, encryptData, &encryptDataLen) != SOFTBUS_OK) {
