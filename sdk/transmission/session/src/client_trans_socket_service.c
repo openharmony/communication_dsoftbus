@@ -232,7 +232,7 @@ int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
         TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (level) {
+    switch (optType) {
         case OPT_TYPE_MAX_BUFFER:
         case OPT_TYPE_FIRST_PACKAGE:
         case OPT_TYPE_MAX_IDLE_TIMEOUT:
@@ -255,7 +255,7 @@ int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
         TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (level) {
+    switch (optType) {
         case OPT_TYPE_MAX_BUFFER:
         case OPT_TYPE_FIRST_PACKAGE:
         case OPT_TYPE_MAX_IDLE_TIMEOUT:

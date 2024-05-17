@@ -428,4 +428,17 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level
     ret = ClientTransUdpMgrInit(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: ClientEmitFileEventTest
+ * @tc.desc: client emit file event test, use the invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest, TestSize.Level0)
+{
+    int32_t channelId = -1;
+    int32_t ret = ClientEmitFileEvent(channelId);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
 } // namespace OHOS

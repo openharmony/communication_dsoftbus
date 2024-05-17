@@ -477,6 +477,7 @@
         "SetExtSocketOpt";
         "GetExtSocketOpt";
         "SetSoftbusConfig";
+        "ClientEmitFileEvent";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

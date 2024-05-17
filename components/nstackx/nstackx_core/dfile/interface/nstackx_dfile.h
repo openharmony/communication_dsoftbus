@@ -75,6 +75,7 @@ typedef enum {
     DFILE_ON_TRANS_IN_PROGRESS,
     DFILE_ON_SESSION_TRANSFER_RATE,
     DFILE_ON_BIND,
+    DFILE_ON_CLEAR_POLICY_FILE_LIST,
 } DFileMsgType;
 
 enum {
@@ -127,6 +128,18 @@ enum {
  *
  * It's invalid when for other message types.
  */
+typedef enum {
+    FILE_STAT_COMPLETE,     /* whole file transfered*/
+    FILE_STAT_NOT_COMPLETE, /*file start transfered but not whole*/
+    FILE_STAT_NOT_START,    /*file not start transfered*/
+    FILE_STAT_BUTT,
+} DFileFileStat;
+
+typedef struct {
+    char *file;
+    DFileFileStat stat;
+} DFileFileInfo;
+
 typedef struct {
     struct {
         const char **files;
@@ -134,6 +147,10 @@ typedef struct {
         uint16_t transId;
         char *userData;
     } fileList;
+    struct {
+        uint32_t fileNum;
+        const DFileFileInfo *fileInfo;
+    } clearPolicyFileList;
     int32_t errorCode;
     struct {
         uint16_t transId;
@@ -389,6 +406,15 @@ typedef void (*DFileLogCallback)(const char *moduleName, uint32_t logLevel, cons
  */
 NSTACKX_EXPORT int32_t NSTACKX_DFileRegisterLogCallback(DFileLogCallback userLogCallback);
 NSTACKX_EXPORT void NSTACKX_DFileRegisterDefaultLog(void);
+
+/**
+ * get DFILE_ON_CLEAR_POLICY_FILE_LIST event callback.
+ * @brief Gets file list with file state
+ * 
+ * @param[in] sessionId the session id of the session
+ * @return 0 on success, negative value on failure
+ */
+NSTACKX_EXPORT int32_t NSTACKX_DFileSessionGetFileList(int32_t sessionId);
 
 #ifdef __cplusplus
 }
