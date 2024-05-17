@@ -345,7 +345,7 @@ int32_t InnerSaveChannel(int32_t channelId, const char *uuid)
 {
     if (uuid == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid uuid");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_INVALID_UUID;
     }
     TRANS_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_manager.channels->lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
@@ -373,7 +373,7 @@ static int TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid
     TRANS_LOGD(TRANS_CTRL, "enter.");
     if (uuid == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid uuid");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_INVALID_UUID;
     }
     char *clone = (char *)SoftBusCalloc(UUID_BUF_LEN);
     if (clone == NULL || strcpy_s(clone, UUID_BUF_LEN, uuid) != EOK) {

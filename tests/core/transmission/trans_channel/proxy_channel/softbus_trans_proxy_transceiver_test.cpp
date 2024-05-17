@@ -380,7 +380,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByReqId001, TestSize.Level1)
 {
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
     int32_t ret = TransDelConnByReqId(reqId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     g_proxyConnectionList = CreateSoftBusList();
     ret = TransDelConnByReqId(reqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -416,7 +416,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransGetConn001, TestSize.Level1)
     memset_s(&proxyConn, sizeof(ProxyConnInfo), 0, sizeof(ProxyConnInfo));
     bool isServer = false;
     int32_t ret = TransGetConn(&connInfo, &proxyConn, isServer);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     g_proxyConnectionList = CreateSoftBusList();
     EXPECT_NE(g_proxyConnectionList, nullptr);

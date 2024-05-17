@@ -230,7 +230,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyGetSessionKeyByChanIdTest001
     int32_t ret = InnerSaveChannel(channelId, uuid);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = InnerSaveChannel(channelId, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_UUID, ret);
 }
 
 /**
@@ -251,7 +251,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelOpenedTest0
     int ret = TransProxyPipelineOnChannelOpened(channelId, uuid, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyPipelineOnChannelOpened(channelId, nullptr, isServer);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_UUID, ret);
     TransProxyPipelineOnChannelOpenFailed(TEST_NUMBER_TWENTY, uuid);
 }
 

@@ -78,12 +78,12 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
     channel->isServer = false;
     channel->channelType = CHANNEL_TYPE_UDP;
     ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, sessionName, channel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
 
     channel->isServer = true;
     channel->channelType = (CHANNEL_TYPE_UDP - 1);
     ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, sessionName, channel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
 
     SoftBusFree(channel);
 }
