@@ -20,6 +20,7 @@
 
 #include "channel/auth_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
+#include "channel/null_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "processor_selector_factory.h"
 #include "utils/duration_statistic.h"
@@ -75,12 +76,14 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
         "linkType=%{public}d",
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
         WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType);
+    DfxRecord(true, OK);
     callback_.onConnectSuccess(info_.info_.requestId, &link);
 }
 
 void ConnectCommand::OnFailure(WifiDirectErrorCode reason) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
+    DfxRecord(false, reason);
     callback_.onConnectFailure(info_.info_.requestId, reason);
 }
 
@@ -91,10 +94,12 @@ void ConnectCommand::PreferNegotiateChannel()
         if (info_.info_.negoChannel.type == NEGO_CHANNEL_AUTH) {
             CONN_LOGI(CONN_WIFI_DIRECT, "prefer input auth channel");
             info_.channel_ = std::make_shared<AuthNegotiateChannel>(info_.info_.negoChannel.handle.authHandle);
-        }
-        if (info_.info_.negoChannel.type == NEGO_CHANNEL_COC) {
+        } else if (info_.info_.negoChannel.type == NEGO_CHANNEL_COC) {
             CONN_LOGI(CONN_WIFI_DIRECT, "prefer input proxy channel");
             info_.channel_ = std::make_shared<CoCProxyNegotiateChannel>(info_.info_.negoChannel.handle.channelId);
+        } else {
+            CONN_LOGI(CONN_WIFI_DIRECT, "prefer input null channel");
+            info_.channel_ = std::make_shared<NullNeotiateChannel>();
         }
         return;
     }
@@ -120,7 +125,7 @@ void ConnectCommand::DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const
         DurationStatistic::GetInstance().Clear(info_.info_.requestId);
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_FAILED,
-            .errcode = reason,
+            .errcode = static_cast<int32_t>(reason),
             .requestId = static_cast<int32_t>(info_.info_.requestId),
         };
         FillConnEventExtra(extra);

@@ -138,14 +138,14 @@ HWTEST_F(DiscBleTest, DiscBleInit002, TestSize.Level1)
     {
         BleMock bleMock;
         bleMock.SetupSuccessStub();
-        EXPECT_CALL(bleMock, InitBroadcastMgr).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(bleMock, InitBroadcastMgr).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         EXPECT_EQ(DiscSoftBusBleInit(&g_discInnerCallback), nullptr);
     }
     {
         BleMock bleMock;
         bleMock.SetupSuccessStub();
         EXPECT_CALL(bleMock, InitBroadcastMgr).WillRepeatedly(Return(SOFTBUS_OK));
-        EXPECT_CALL(bleMock, RegisterScanListener).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(bleMock, RegisterScanListener).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         EXPECT_EQ(DiscSoftBusBleInit(&g_discInnerCallback), nullptr);
     }
     {
@@ -153,7 +153,7 @@ HWTEST_F(DiscBleTest, DiscBleInit002, TestSize.Level1)
         bleMock.SetupSuccessStub();
         EXPECT_CALL(bleMock, InitBroadcastMgr).WillRepeatedly(Return(SOFTBUS_OK));
         EXPECT_CALL(bleMock, RegisterScanListener).WillRepeatedly(Return(SOFTBUS_OK));
-        EXPECT_CALL(bleMock, SoftBusAddBtStateListener).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(bleMock, SoftBusAddBtStateListener).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         EXPECT_EQ(DiscSoftBusBleInit(&g_discInnerCallback), nullptr);
     }
     {
@@ -162,7 +162,7 @@ HWTEST_F(DiscBleTest, DiscBleInit002, TestSize.Level1)
         EXPECT_CALL(bleMock, InitBroadcastMgr).WillRepeatedly(Return(SOFTBUS_OK));
         EXPECT_CALL(bleMock, RegisterScanListener).WillRepeatedly(Return(SOFTBUS_OK));
         EXPECT_CALL(bleMock, SoftBusAddBtStateListener).WillRepeatedly(Return(SOFTBUS_OK));
-        EXPECT_CALL(bleMock, SetScanFilter).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(bleMock, SetScanFilter).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         EXPECT_EQ(DiscSoftBusBleInit(&g_discInnerCallback), nullptr);
     }
     {
@@ -172,7 +172,7 @@ HWTEST_F(DiscBleTest, DiscBleInit002, TestSize.Level1)
         EXPECT_CALL(bleMock, RegisterScanListener).WillRepeatedly(Return(SOFTBUS_OK));
         EXPECT_CALL(bleMock, SoftBusAddBtStateListener).WillRepeatedly(Return(SOFTBUS_OK));
         EXPECT_CALL(bleMock, SetScanFilter).WillRepeatedly(Return(SOFTBUS_OK));
-        EXPECT_CALL(bleMock, RegisterBroadcaster).WillRepeatedly(Return(SOFTBUS_ERR));
+        EXPECT_CALL(bleMock, RegisterBroadcaster).WillRepeatedly(Return(SOFTBUS_DISCOVER_TEST_CASE_ERRCODE));
         EXPECT_EQ(DiscSoftBusBleInit(&g_discInnerCallback), nullptr);
     }
     DISC_LOGI(DISC_TEST, "DiscBleInit002 end ----");

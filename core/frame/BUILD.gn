@@ -14,6 +14,7 @@
 import("../../dsoftbus.gni")
 import("../adapter/core_adapter.gni")
 import("../authentication/authentication.gni")
+import("../broadcast/broadcast.gni")
 import("../bus_center/bus_center_server.gni")
 import("../common/dfx/dsoftbus_dfx.gni")
 import("../common/security/permission/permission.gni")
@@ -29,13 +30,14 @@ dsoftbus_core_path = "${dsoftbus_root_path}/core"
 
 dsoftbus_server_common_src =
     auth_server_src + bus_center_server_src + conn_manager_src +
-    disc_server_src + trans_session_src + softbus_permission_src
+    disc_server_src + trans_session_src + softbus_permission_src + broadcast_src
 dsoftbus_server_common_inc =
     auth_server_inc + bus_center_server_inc + conn_manager_inc +
-    disc_server_inc + trans_session_inc + softbus_permission_inc
+    disc_server_inc + trans_session_inc + softbus_permission_inc + broadcast_inc
 dsoftbus_server_common_deps =
     auth_server_deps + bus_center_server_deps + disc_server_deps +
-    conn_manager_common_deps + trans_session_deps + softbus_permission_deps
+    conn_manager_common_deps + trans_session_deps + softbus_permission_deps +
+    broadcast_deps
 
 if (defined(ohos_lite)) {
   copy("permission_json") {
@@ -267,7 +269,10 @@ if (defined(ohos_lite)) {
         external_deps += [ "bundle_framework:appexecfwk_core" ]
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
       }
-
+      if (!defined(global_parts_info) ||
+          defined(global_parts_info.ability_ability_runtime)) {
+        cflags += [ "-DSUPPORT_ABILITY_RUNTIME" ]
+      }
       if (enhanced) {
         cflags += [ "-DENHANCED_FLAG" ]
         external_deps += [ "device_certificate_manager:device_cert_mgr_sdk" ]

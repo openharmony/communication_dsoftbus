@@ -91,7 +91,7 @@ int32_t DiscClientInit(void)
     if (DiscServerProxyInit() != SOFTBUS_OK) {
         DISC_LOGE(DISC_INIT, "disc server proxy init failed.");
         SoftBusFree(g_discInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISC_SERVER_INIT_FAILED;
     }
     DISC_LOGI(DISC_INIT, "Init success as client side");
     return SOFTBUS_OK;

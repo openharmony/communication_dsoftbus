@@ -164,7 +164,7 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     session->channelId = TRANS_TEST_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
-    session->isEnable = false;
+    session->enableStatus = ENABLE_STATUS_INIT;
     session->routeType = ROUTE_TYPE_ALL;
     session->info.flag = TYPE_BYTES;
     session->isEncrypt = true;
@@ -175,8 +175,8 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     return session;
 }
 
-static int32_t AddSessionServerAndSession(const char *sessionName, int32_t channelType, int32_t businessType,
-                                          bool isServer, bool isEnable)
+static int32_t AddSessionServerAndSession(
+    const char *sessionName, int32_t channelType, int32_t businessType, bool isServer, SessionEnableStatus enableStatus)
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
     if (sessionParam == NULL) {
@@ -198,7 +198,7 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
     session->channelType = (ChannelType)channelType;
     session->businessType = (BusinessType)businessType;
     session->isServer = isServer;
-    session->isEnable = isEnable;
+    session->enableStatus = enableStatus;
     ret = ClientAddNewSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -245,31 +245,36 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest01, TestSize.Level1
  */
 HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest02, TestSize.Level1)
 {
-    int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, BUSINESS_TYPE_BUTT, false, true);
+    int32_t sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     int ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, BUSINESS_TYPE_BUTT, false, true);
+    sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
     EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, true);
+    sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, TRANS_TEST_BEYOND_MAX_BYTES_LEN);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, false);
+    sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_INIT);
     ASSERT_GT(sessionId, 0);
     ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NO_ENABLE);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
     EXPECT_EQ(ret, SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND);
@@ -284,31 +289,36 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest02, TestSize.Level1
  */
 HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest03, TestSize.Level1)
 {
-    int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, true);
+    int32_t sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     int ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, true);
+    sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
     EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, false, true);
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, TRANS_TEST_BEYOND_MAX_MSG_LEN);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, false, false);
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_INIT);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NO_ENABLE);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
     EXPECT_EQ(ret, SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND);
@@ -334,25 +344,29 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest04, TestSize.Level1
         .bufLen = TRANS_TEST_MAX_MSG_LEN
     };
     StreamFrameInfo streamFrameInfo = {0};
-    int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, BUSINESS_TYPE_BUTT, false, true);
+    int32_t sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     int ret = SendStream(sessionId, &data, &ext, &streamFrameInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_STREAM_ONLY_UDP_CHANNEL);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, true);
+    sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendStream(sessionId, &data, &ext, &streamFrameInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_STREAM, false, false);
+    sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_STREAM, false, ENABLE_STATUS_INIT);
     ASSERT_GT(sessionId, 0);
     ret = SendStream(sessionId, &data, &ext, &streamFrameInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NO_ENABLE);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_STREAM, false, true);
+    sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_STREAM, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendStream(sessionId, &data, &ext, &streamFrameInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -375,17 +389,20 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest05, TestSize.Level1
         "/DATA/LOCAL/X",
         "/DATA/LOCAL/Y"
     };
-    int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, true);
+    int32_t sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     int ret = SendFile(sessionId, sFileList, dFileList, TRANS_TEST_FILE_COUNT);
     EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, false);
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, ENABLE_STATUS_INIT);
     ASSERT_GT(sessionId, 0);
     ret = SendFile(sessionId, sFileList, dFileList, TRANS_TEST_FILE_COUNT);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NO_ENABLE);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
-    sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendFile(sessionId, sFileList, dFileList, TRANS_TEST_FILE_COUNT);
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHANNEL_TYPE_INVALID);

@@ -184,7 +184,7 @@ static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *lan
         SoftBusFree(infoItem);
         return fd;
     }
-    infoItem->connId.wlanFd = fd;
+    infoItem->connId.wlanFd = (uint32_t)fd;
     if (SoftBusMutexLock(&g_laneDetectList.lock) != SOFTBUS_OK) {
         ConnShutdownSocket(fd);
         SoftBusFree(infoItem);
@@ -264,7 +264,7 @@ static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSu
             }
             LNN_LOGI(LNN_LANE, "Detect success, wlan=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
                 item->link.type, item->laneReqId, requestItem->laneDetectId);
-            item->cb.OnLaneLinkSuccess(item->laneReqId, &laneInfo);
+            item->cb.OnLaneLinkSuccess(item->laneReqId, laneInfo.type, &laneInfo);
         }
         ListDelete(&item->node);
         SoftBusFree(item);

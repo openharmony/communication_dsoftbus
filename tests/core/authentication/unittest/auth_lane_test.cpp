@@ -26,7 +26,6 @@
 #include "auth_lane_mock.h"
 #include "lnn_lane_common.h"
 #include "lnn_trans_lane.h"
-#include "lnn_trans_lane.c"
 
 using namespace testing::ext;
 using namespace testing;

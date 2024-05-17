@@ -186,7 +186,7 @@ int32_t BleMock::ActionOfUnRegisterBroadcaster(int32_t bcId)
 int32_t BleMock::ActionOfStartScan(int32_t listenerId, const BcScanParams *param)
 {
     if (listenerId != SCAN_LISTENER_ID) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     isScanning = true;
@@ -200,7 +200,7 @@ int32_t BleMock::ActionOfStartScan(int32_t listenerId, const BcScanParams *param
 int32_t BleMock::ActionOfStopScan(int32_t listenerId)
 {
     if (listenerId != SCAN_LISTENER_ID) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     isScanning = false;
@@ -217,7 +217,7 @@ int32_t BleMock::ActionOfStartBroadcasting(int32_t bcId, const BroadcastParam *p
     if (isAdvertising) {
         DISC_LOGE(DISC_TEST, "already in advertising");
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     isAdvertising = !isAdvertising;
     if (advCallback) {
@@ -233,7 +233,7 @@ int32_t BleMock::ActionOfStopBroadcasting(int32_t bcId)
     if (!isAdvertising) {
         DISC_LOGE(DISC_TEST, "already has stopped");
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     if (advCallback) {
         advCallback->OnStopBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
@@ -274,7 +274,7 @@ int32_t BleMock::ActionOfSetAdvDataForActiveDiscovery(int32_t bcId, const Broadc
         memcmp(packet->rspData.payload, activeDiscoveryRspData, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     if (advCallback) {
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
@@ -295,7 +295,7 @@ int32_t BleMock::ActionOfSetAdvDataForActivePublish(int32_t bcId, const Broadcas
         memcmp(packet->rspData.payload, activePublishRspData, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     if (advCallback) {
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
@@ -316,7 +316,7 @@ int32_t BleMock::ActionOfSetAdvDataForPassivePublish(int32_t bcId, const Broadca
         memcmp(packet->rspData.payload, passivePublishRspData, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     if (advCallback) {
@@ -339,7 +339,7 @@ int32_t BleMock::ActionOfUpdateAdvForPassivePublish(
         memcmp(packet->rspData.payload, passivePublishRspData, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     if (advCallback) {
@@ -354,7 +354,7 @@ int32_t BleMock::ActionOfUpdateAdvForPassivePublish(
 int32_t BleMock::ActionOfGetBtMacAddr(SoftBusBtAddr *mac)
 {
     if (memcpy_s(mac->addr, sizeof(mac->addr), btMacAddr, sizeof(btMacAddr)) != EOK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     return SOFTBUS_OK;
 }
@@ -375,9 +375,9 @@ void BleMock::InjectPassiveNonPacket()
         constexpr uint32_t advLen = sizeof(passivePublishAdvData);
         constexpr uint32_t rspLen = sizeof(passivePublishRspData);
         BroadcastReportInfo reportInfo = {};
-        reportInfo.packet.bcData.id = BLE_UUID;
+        reportInfo.packet.bcData.id = SERVICE_UUID;
         reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
-        reportInfo.packet.rspData.id = COMPANY_ID;
+        reportInfo.packet.rspData.id = MANU_COMPANY_ID;
         reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
         reportInfo.packet.bcData.payload = &passivePublishAdvData[0];
         reportInfo.packet.bcData.payloadLen = advLen;
@@ -393,9 +393,9 @@ void BleMock::InjectActiveNonPacket()
         constexpr uint32_t advLen = sizeof(activePublishAdvData);
         constexpr uint32_t rspLen = sizeof(activePublishRspData);
         BroadcastReportInfo reportInfo = {};
-        reportInfo.packet.bcData.id = BLE_UUID;
+        reportInfo.packet.bcData.id = SERVICE_UUID;
         reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
-        reportInfo.packet.rspData.id = COMPANY_ID;
+        reportInfo.packet.rspData.id = MANU_COMPANY_ID;
         reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
         reportInfo.packet.bcData.payload = &activePublishAdvData[0];
         reportInfo.packet.bcData.payloadLen = advLen;
@@ -411,9 +411,9 @@ void BleMock::InjectActiveConPacket()
         constexpr uint32_t advLen = sizeof(activeDiscoveryAdvData);
         constexpr uint32_t rspLen = sizeof(activeDiscoveryRspData);
         BroadcastReportInfo reportInfo = {};
-        reportInfo.packet.bcData.id = BLE_UUID;
+        reportInfo.packet.bcData.id = SERVICE_UUID;
         reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
-        reportInfo.packet.rspData.id = COMPANY_ID;
+        reportInfo.packet.rspData.id = MANU_COMPANY_ID;
         reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
         reportInfo.packet.bcData.payload = &activeDiscoveryAdvData[0];
         reportInfo.packet.bcData.payloadLen = advLen;
@@ -427,7 +427,7 @@ void BleMock::TurnOnBt()
 {
     btState = true;
     if (btStateListener) {
-        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_ON);
+        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BLE_STATE_TURN_ON);
     }
 }
 
@@ -435,7 +435,7 @@ void BleMock::TurnOffBt()
 {
     btState = false;
     if (btStateListener) {
-        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_OFF);
+        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BLE_STATE_TURN_OFF);
     }
 }
 

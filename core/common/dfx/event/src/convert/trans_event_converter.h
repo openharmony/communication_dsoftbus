@@ -55,13 +55,14 @@ TRANS_ASSIGNER(Int32, BtFlow, btFlow)
 TRANS_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 TRANS_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
 TRANS_ASSIGNER(String, PeerDevVer, peerDevVer)
+TRANS_ASSIGNER(AnonymizeString, LocalUdid, localUdid)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 TRANS_ASSIGNER(String, FirstTokenName, firstTokenName)
 TRANS_ASSIGNER(Uint32, FirstTokenId, firstTokenId)
 TRANS_ASSIGNER(Int32,  FirstTokenType, firstTokenType)
 
-#define TRANS_ASSIGNER_SIZE 26 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 27 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
@@ -84,6 +85,7 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "PEER_NET_ID",      HISYSEVENT_STRING, TransAssignerPeerNetworkId },
     { "PEER_UDID",        HISYSEVENT_STRING, TransAssignerPeerUdid      },
     { "PEER_DEV_VER",     HISYSEVENT_STRING, TransAssignerPeerDevVer    },
+    { "LOCAL_UDID",       HISYSEVENT_STRING, TransAssignerLocalUdid     },
     { "HOST_PKG",         HISYSEVENT_STRING, TransAssignerCallerPkg     },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAssignerCalleePkg     },
     { "FIRST_TOKEN_NAME", HISYSEVENT_STRING, TransAssignerFirstTokenName},

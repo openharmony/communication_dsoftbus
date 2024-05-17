@@ -420,9 +420,35 @@ void TransBuildTransOpenChannelStartEvent(TransEventExtra *extra, AppInfo *appIn
     extra->callerPkg = appInfo->myData.pkgName;
     extra->socketName = appInfo->myData.sessionName;
     extra->dataType = appInfo->businessType;
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra->localUdid = nodeInfo->masterUdid;
+    }
     extra->peerNetworkId = appInfo->peerNetWorkId;
     extra->peerUdid = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceUdid : NULL,
     extra->peerDevVer = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceVersion : NULL,
+    extra->result = EVENT_STAGE_RESULT_OK;
+}
+
+void TransBuildOpenAuthChannelStartEvent(TransEventExtra *extra, const char *sessionName, const ConnectOption *connOpt,
+    char *localUdid, char *callerPkg)
+{
+    if (extra == NULL || connOpt == NULL || localUdid == NULL || callerPkg == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    if (TransGetPkgNameBySessionName(sessionName, callerPkg, PKG_NAME_SIZE_MAX) == SOFTBUS_OK) {
+        extra->callerPkg = callerPkg;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra->localUdid = localUdid;
+    }
+    extra->socketName = sessionName;
+    extra->channelType = CHANNEL_TYPE_AUTH;
+    extra->linkType = connOpt->type;
     extra->result = EVENT_STAGE_RESULT_OK;
 }
 

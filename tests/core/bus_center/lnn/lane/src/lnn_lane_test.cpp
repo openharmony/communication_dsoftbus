@@ -39,6 +39,7 @@
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_reliability.c"
 #include "utils/wifi_direct_utils.h"
+#include "wifi_direct_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -68,6 +69,7 @@ static SoftBusMutex g_lock = {0};
 static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info);
 static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode);
 
+static int32_t g_errCode = 0;
 static LaneAllocListener g_listener = {
     .onLaneAllocSuccess = OnLaneAllocSuccess,
     .onLaneAllocFail = OnLaneAllocFail,
@@ -154,8 +156,9 @@ static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info)
 
 static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode)
 {
-    GTEST_LOG_(INFO) << "alloc lane failed, laneReqId=" << laneHandle;
-    (void)errCode;
+    GTEST_LOG_(INFO) << "alloc lane failed, laneReqId=" << laneHandle << ", errCode=" << errCode;
+    EXPECT_NE(errCode, SOFTBUS_OK);
+    g_errCode = errCode;
     const LnnLaneManager *laneManager = GetLaneManager();
     int32_t ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -170,9 +173,10 @@ static void OnLaneLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType
     return;
 }
 
-static void OnLaneLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
+static void OnLaneLinkSuccess(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo)
 {
     (void)reqId;
+    (void)linkType;
     (void)linkInfo;
     return;
 }
@@ -764,6 +768,46 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = laneManager->lnnFreeLane(laneReqId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LANE_ALLOC_ErrTest_001
+* @tc.desc: lane errcode test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_ERRTEST_001, TestSize.Level1)
+{
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+
+    LaneAllocListener listenerCb = {
+        .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
+        .onLaneAllocFail = OnLaneAllocFail,
+    };
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    wifiMock.SetDefaultResult();
+    EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
+        .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfOnConnectP2pFail);
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
+    NiceMock<LaneDepsInterfaceMock> mock;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    mock.SetDefaultResultForAlloc(63, 63, 0, 0);
+    EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_CONN_FAIL));
+
+    LaneAllocInfo allocInfo;
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
+    CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
+    int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
+    EXPECT_EQ(g_errCode, ERROR_WIFI_OFF);
+    
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }

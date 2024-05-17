@@ -75,6 +75,8 @@ public:
     MOCK_METHOD2(LaneLinkupNotify, int32_t (const char *peerUdid, const LaneLinkInfo *laneLinkInfo));
     MOCK_METHOD2(LaneLinkdownNotify, int32_t (const char *peerUdid, const LaneLinkInfo *laneLinkInfo));
     MOCK_METHOD3(ApplyLaneId, uint64_t (const char *localUdid, const char *remoteUdid, LaneLinkType linkType));
+    static int32_t ActionOfLaneLinkSuccess(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
+    static int32_t ActionOfLaneLinkFail(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
 };
 } // namespace OHOS
 #endif // LNN_TRANS_LANE_DEPS_MOCK_H

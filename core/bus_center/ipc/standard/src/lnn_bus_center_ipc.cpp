@@ -72,7 +72,7 @@ static IServerDiscInnerCallback g_discInnerCb = {
 static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
 
 static IDataLevelChangeCallback g_dataLevelChangeCb = {
-    .OnDataLevelChanged = OnDataLevelChanged,
+    .onDataLevelChanged = OnDataLevelChanged,
 };
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)

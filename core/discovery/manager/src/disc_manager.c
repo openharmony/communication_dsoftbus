@@ -759,9 +759,8 @@ static int32_t InnerUnPublishService(const char *packageName, int32_t publishId,
         ret = CallInterfaceByMedium(infoNode, packageName, UNPUBLISH_FUNC);
         if (ret != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
-        } else {
-            FreeDiscInfo(infoNode, type);
         }
+        FreeDiscInfo(infoNode, type);
     } while (false);
 
     SoftBusMutexUnlock(&g_publishInfoList->lock);
@@ -822,8 +821,8 @@ static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, 
             DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
         } else {
             DfxRecordStopDiscoveryDevice(packageName, infoNode);
-            FreeDiscInfo(infoNode, type);
         }
+        FreeDiscInfo(infoNode, type);
     } while (false);
 
     SoftBusMutexUnlock(&g_discoveryInfoList->lock);

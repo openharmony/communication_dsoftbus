@@ -621,19 +621,21 @@ static void CloseP2pNegotiateChannel(struct InnerLink *innerLink)
 {
     struct DefaultNegotiateChannel *channel = innerLink->getPointer(innerLink, IL_KEY_NEGO_CHANNEL, NULL);
     if (channel != NULL) {
-        CONN_LOGD(CONN_WIFI_DIRECT, "enter");
+        CONN_LOGI(CONN_WIFI_DIRECT, "enter");
         CloseDefaultNegotiateChannel(channel);
-        enum WifiDirectLinkType type = innerLink->getInt(innerLink, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
-        ListenerModule module = innerLink->getInt(innerLink, IL_KEY_LISTENER_MODULE_ID, -1);
-        if (module > 0) {
-            if (type == WIFI_DIRECT_LINK_TYPE_P2P) {
-                StopListeningForDefaultChannel(AUTH_LINK_TYPE_P2P, module);
-            } else if (type == WIFI_DIRECT_LINK_TYPE_HML) {
-                StopListeningForDefaultChannel(AUTH_LINK_TYPE_ENHANCED_P2P, module);
-            }
-        }
         DefaultNegotiateChannelDelete(channel);
         innerLink->remove(innerLink, IL_KEY_NEGO_CHANNEL);
+    }
+
+    enum WifiDirectLinkType type = innerLink->getInt(innerLink, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
+    ListenerModule module = innerLink->getInt(innerLink, IL_KEY_LISTENER_MODULE_ID, -1);
+    CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d module=%{public}d", type, module);
+    if (module > 0) {
+        if (type == WIFI_DIRECT_LINK_TYPE_P2P) {
+            StopListeningForDefaultChannel(AUTH_LINK_TYPE_P2P, module);
+        } else if (type == WIFI_DIRECT_LINK_TYPE_HML) {
+            StopListeningForDefaultChannel(AUTH_LINK_TYPE_ENHANCED_P2P, module);
+        }
     }
 }
 

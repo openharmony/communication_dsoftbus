@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -517,7 +517,7 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
     }
     if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, false) ||
         IsPotentialTrustedDeviceDp(device->devId)) {
-        AUTH_LOGD(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
+        AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }
     return false;

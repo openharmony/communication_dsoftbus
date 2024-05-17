@@ -141,7 +141,7 @@ static int32_t TestRegisterDeviceInfo(const char *ip)
     NSTACKX_LocalDeviceInfo *localDevInfo = (NSTACKX_LocalDeviceInfo *)malloc(sizeof(NSTACKX_LocalDeviceInfo));
     if (localDevInfo == NULL) {
         printf("nstackx local device info malloc failed.\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     (void)memset_s(localDevInfo, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
@@ -149,14 +149,14 @@ static int32_t TestRegisterDeviceInfo(const char *ip)
     if (udidStr == NULL) {
         printf("get device id string failed.\n");
         free(localDevInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     if (strcpy_s(localDevInfo->deviceId, sizeof(localDevInfo->deviceId), udidStr) != EOK) {
         cJSON_free(udidStr);
         printf("strcpy_s device id failed.\n");
         free(localDevInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     cJSON_free(udidStr);
     if (strcpy_s(localDevInfo->name, sizeof(localDevInfo->name), DEVICE_NAME) != EOK ||
@@ -165,14 +165,14 @@ static int32_t TestRegisterDeviceInfo(const char *ip)
         strcpy_s(localDevInfo->version, sizeof(localDevInfo->version), VERSION) != EOK) {
         printf("strcpy_s failed.\n");
         free(localDevInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     localDevInfo->deviceType = DEVICE_TYPE;
 
     if (NSTACKX_RegisterDevice(localDevInfo) != 0) {
         printf("nstackx register device failed.\n");
         NSTACKX_Deinit();
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     free(localDevInfo);
     return SOFTBUS_OK;
@@ -214,10 +214,10 @@ static int32_t TestRegisterServiceData(const unsigned char *serviceData, uint32_
     (void)memset_s(g_capData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
     int32_t ret = sprintf_s(g_capData, NSTACKX_MAX_SERVICE_DATA_LEN, "port:%d,", authPort);
     if (ret == -1) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     if (NSTACKX_RegisterServiceData(g_capData) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     return SOFTBUS_OK;
 }
@@ -226,13 +226,13 @@ static int32_t TestInit(void)
 {
     g_capData = (char *)malloc(NSTACKX_MAX_SERVICE_DATA_LEN);
     if (g_capData == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
     (void)memset_s(g_capData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
     if (NSTACKX_Init(&g_nstackxParam) != 0) {
         printf("nstackx init failed\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
     return SOFTBUS_OK;
 }

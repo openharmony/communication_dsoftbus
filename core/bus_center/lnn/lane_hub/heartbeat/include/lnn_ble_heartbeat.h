@@ -28,7 +28,7 @@ int32_t HbUpdateBleScanFilter(int32_t listenerId, LnnHeartbeatType type);
 int32_t HbGenerateBitPosition(int32_t min, int32_t max, int64_t seed, int32_t *randPos, int32_t num);
 
 void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
-void LnnBleHbUnregDataLevelChangeCb();
+void LnnBleHbUnregDataLevelChangeCb(void);
 
 #ifdef __cplusplus
 }

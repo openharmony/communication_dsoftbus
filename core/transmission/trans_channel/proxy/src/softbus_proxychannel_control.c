@@ -76,20 +76,20 @@ static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)
     }
 
     int32_t ret = TransProxySetAuthHandleByChanId((int32_t)info->channelId, info->authHandle);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set authHandle fail, ret=%{public}d", ret);
         return ret;
     }
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     ret = AuthGetConnInfo(info->authHandle, &connInfo);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth connInfo fail");
         return ret;
     }
     bool isAuthServer = false;
     ret = AuthGetServerSide(info->authHandle.authId, &isAuthServer);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth server side fail");
         return ret;
     }

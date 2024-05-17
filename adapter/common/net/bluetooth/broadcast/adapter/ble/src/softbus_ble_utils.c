@@ -345,6 +345,9 @@ int GetBtScanMode(uint16_t scanInterval, uint16_t scanWindow)
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P2 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P2) {
         return OHOS_BLE_SCAN_MODE_OP_P2_60_3000;
     }
+    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P2_FAST && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P2_FAST) {
+        return OHOS_BLE_SCAN_MODE_OP_P2_30_1500;
+    }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P10 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P10) {
         return OHOS_BLE_SCAN_MODE_OP_P10_30_300;
     }
@@ -416,7 +419,7 @@ static int32_t ParseFlag(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRe
 {
     if (index + 1 >= advLen) {
         DISC_LOGE(DISC_BLE_ADAPTER, "parse flag failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_BC_ADAPTER_PARSE_FAIL;
     }
     dst->data.flag = advData[index + 1];
     dst->data.isSupportFlag = true;
@@ -428,11 +431,11 @@ static int32_t ParseLocalName(const uint8_t *advData, uint8_t advLen, SoftBusBcS
 {
     if (index + 1 >= advLen) {
         DISC_LOGE(DISC_BLE_ADAPTER, "parse local name failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_BC_ADAPTER_PARSE_FAIL;
     }
     if (memcpy_s(dst->localName, sizeof(dst->localName), &advData[index + 1], len - 1) != EOK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "copy local name failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -452,11 +455,11 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
         }
         uint8_t type = advData[++index];
         if (type == BC_FLAG_AD_TYPE) {
-            DISC_CHECK_AND_RETURN_RET_LOGE(ParseFlag(advData, advLen, dst, index) == SOFTBUS_OK, SOFTBUS_ERR,
-                DISC_BLE_ADAPTER, "parse flag failed");
+            DISC_CHECK_AND_RETURN_RET_LOGE(ParseFlag(advData, advLen, dst, index) == SOFTBUS_OK,
+                SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "parse flag failed");
         } else if (type == SHORTENED_LOCAL_NAME_BC_TYPE || type == LOCAL_NAME_BC_TYPE) {
-            DISC_CHECK_AND_RETURN_RET_LOGE(ParseLocalName(advData, advLen, dst, index, len) == SOFTBUS_OK, SOFTBUS_ERR,
-                DISC_BLE_ADAPTER, "parse local name failed");
+            DISC_CHECK_AND_RETURN_RET_LOGE(ParseLocalName(advData, advLen, dst, index, len) == SOFTBUS_OK,
+                SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "parse local name failed");
         } else {
             if (type != SERVICE_BC_TYPE && type != MANUFACTURE_BC_TYPE) {
                 index += len;
@@ -467,7 +470,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
             data->payloadLen = len - ID_LEN - 1;
             if (data->payloadLen < 0 || index + ID_LEN >= advLen) {
                 DISC_LOGE(DISC_BLE_ADAPTER, "parse payload failed");
-                return SOFTBUS_ERR;
+                return SOFTBUS_BC_ADAPTER_PARSE_FAIL;
             }
             isRsp = !isRsp;
             data->type = BtAdvTypeToSoftbus(type);
@@ -478,7 +481,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
                 continue;
             }
             data->payload = (uint8_t *)SoftBusCalloc(data->payloadLen);
-            DISC_CHECK_AND_RETURN_RET_LOGE(data->payload != NULL, SOFTBUS_ERR, DISC_BLE_ADAPTER,
+            DISC_CHECK_AND_RETURN_RET_LOGE(data->payload != NULL, SOFTBUS_MALLOC_ERR, DISC_BLE_ADAPTER,
                 "malloc payload failed");
             (void)memcpy_s(data->payload, data->payloadLen, &advData[index + ID_LEN + 1], data->payloadLen);
         }
