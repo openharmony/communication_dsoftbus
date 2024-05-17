@@ -230,7 +230,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeErrMsgTest001, TestS
 
     int32_t errCode = SOFTBUS_OK;
     ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     cJSON_free(msg);
 }
 
@@ -457,7 +457,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
     ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
 /**
@@ -815,7 +815,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataHeadTest001, Test
     ProxyDataInfo *dataInfo = (ProxyDataInfo *)SoftBusCalloc(sizeof(ProxyDataInfo));
 
     int32_t ret = TransProxyPackFastDataHead(dataInfo, appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     dataInfo->inLen = FAST_TRANS_DATASIZE;
@@ -1125,10 +1125,10 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, Tes
     memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo.fastTransDataSize = 1;
     int32_t ret = PackHandshakeMsgForFastData(&appInfo, root);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     appInfo.fastTransDataSize = 0;
     ret = PackHandshakeMsgForFastData(&appInfo, root);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
 /**

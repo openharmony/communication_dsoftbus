@@ -72,7 +72,7 @@ int32_t TransReqLanePendingInit(void)
     g_reqLanePendingList = CreateSoftBusList();
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "g_reqLanePendingList is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -82,7 +82,7 @@ int32_t TransAsyncReqLanePendingInit(void)
     g_asyncReqLanePendingList = CreateSoftBusList();
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "g_asyncReqLanePendingList is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -168,7 +168,7 @@ static int32_t TransDelLaneReqFromPendingList(uint32_t laneHandle, bool isAsync)
     SoftBusList *pendingList = isAsync ? g_asyncReqLanePendingList : g_reqLanePendingList;
     if (pendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (SoftBusMutexLock(&(pendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
@@ -202,7 +202,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneHandle)
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     TransReqLaneItem *item = (TransReqLaneItem *)SoftBusCalloc(sizeof(TransReqLaneItem));
@@ -210,7 +210,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneHandle)
         TRANS_LOGE(TRANS_SVC, "malloc lane request item err.");
         return SOFTBUS_MALLOC_ERR;
     }
-    item->errCode = SOFTBUS_ERR;
+    item->errCode = SOFTBUS_MALLOC_ERR;
     item->laneHandle = laneHandle;
     item->bSucc = false;
     item->isFinished = false;
@@ -220,11 +220,11 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneHandle)
         TRANS_LOGE(TRANS_SVC, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    if (SoftBusCondInit(&item->cond) != 0) {
+    if (SoftBusCondInit(&item->cond) != SOFTBUS_OK) {
         SoftBusFree(item);
         (void)SoftBusMutexUnlock(&g_reqLanePendingList->lock);
         TRANS_LOGE(TRANS_SVC, "cond init failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     ListInit(&(item->node));
     ListAdd(&(g_reqLanePendingList->list), &(item->node));
@@ -331,7 +331,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
 {
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     TransReqLaneItem *item = (TransReqLaneItem *)SoftBusCalloc(sizeof(TransReqLaneItem));
@@ -339,7 +339,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
         TRANS_LOGE(TRANS_SVC, "malloc lane request item err.");
         return SOFTBUS_MALLOC_ERR;
     }
-    item->errCode = SOFTBUS_ERR;
+    item->errCode = SOFTBUS_MALLOC_ERR;
     item->laneHandle = laneHandle;
     item->bSucc = false;
     item->isFinished = false;
@@ -373,7 +373,7 @@ static int32_t TransGetLaneReqItemByLaneHandle(uint32_t laneHandle, bool *bSucc,
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_reqLanePendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed.");
@@ -407,7 +407,7 @@ static int32_t TransGetLaneReqItemParamByLaneHandle(
     }
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_asyncReqLanePendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed.");
@@ -456,7 +456,7 @@ static int32_t TransUpdateLaneConnInfoByLaneHandle(uint32_t laneHandle, bool bSu
             if ((connInfo != NULL) &&
                 (memcpy_s(&(item->connInfo), sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK)) {
                 (void)SoftBusMutexUnlock(&(pendingList->lock));
-                return SOFTBUS_ERR;
+                return SOFTBUS_MEM_ERR;
             }
             item->isFinished = true;
             if (!isAsync) {
@@ -907,9 +907,10 @@ static int32_t TransSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint
     }
 
     SoftBusSysTime now;
-    if (SoftBusGetTime(&now) != SOFTBUS_OK) {
+    int32_t ret = SoftBusGetTime(&now);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans softbus get time failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     int64_t usTime = now.sec * CONVERSION_BASE * CONVERSION_BASE + now.usec + (int32_t)timeMillis * CONVERSION_BASE;
     SoftBusSysTime tv;
@@ -923,7 +924,7 @@ static int32_t TransWaitingRequestCallback(uint32_t laneHandle)
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_reqLanePendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed.");
@@ -973,9 +974,10 @@ static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneHandle, const Lan
         return ret;
     }
     TRANS_LOGI(TRANS_SVC, "add laneHandle to pending and start waiting. laneHandle=%{public}u", laneHandle);
-    if (TransWaitingRequestCallback(laneHandle) != SOFTBUS_OK) {
+    ret = TransWaitingRequestCallback(laneHandle);
+    if (ret != SOFTBUS_OK) {
         (void)TransDelLaneReqFromPendingList(laneHandle, false);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -1003,9 +1005,10 @@ static int32_t TransAddLaneAllocToPendingAndWaiting(uint32_t laneHandle, const L
         return ret;
     }
     TRANS_LOGI(TRANS_SVC, "add laneHandle to pending and start waiting. laneHandle=%{public}u", laneHandle);
-    if (TransWaitingRequestCallback(laneHandle) != SOFTBUS_OK) {
+    ret = TransWaitingRequestCallback(laneHandle);
+    if (ret != SOFTBUS_OK) {
         (void)TransDelLaneReqFromPendingList(laneHandle, false);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -1348,7 +1351,7 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
 {
     if (info == NULL || connOpt == NULL) {
         TRANS_LOGW(TRANS_SVC, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (info->type == LANE_P2P) {
         return SetP2pConnInfo(&(info->connInfo.p2p), connOpt);

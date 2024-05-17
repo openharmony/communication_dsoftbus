@@ -55,11 +55,11 @@ HWTEST_F(TransPendingPktTest, PendingInit001, TestSize.Level1)
 {
     int type = -88;
     int32_t ret = PendingInit(type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     type = 999;
     ret = PendingInit(type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     type = PENDING_TYPE_DIRECT;
     ret = PendingInit(type);
@@ -117,10 +117,10 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket001, TestSize.Level1)
     int32_t channelId = 222;
     int type = PENDING_TYPE_BUTT + 1;
     int32_t ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     type = PENDING_TYPE_PROXY - 1;
     ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     type = PENDING_TYPE_PROXY + 1;
     ret = ProcPendingPacket(channelId, seqNum, type);
@@ -139,15 +139,15 @@ HWTEST_F(TransPendingPktTest, SetPendingPacket001, TestSize.Level1)
     int32_t seqNum = 222;
     int type = PENDING_TYPE_BUTT + 1;
     int32_t ret = SetPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     type = PENDING_TYPE_PROXY - 1;
     ret = SetPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     type = PENDING_TYPE_DIRECT;
     channelId = -1;
     ret = SetPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
 }
 
 /**
@@ -161,15 +161,15 @@ HWTEST_F(TransPendingPktTest, DelPendingPacket001, TestSize.Level1)
     int32_t channelId = 1111;
     int type = PENDING_TYPE_BUTT + 1;
     int32_t ret = DelPendingPacket(channelId, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     type = PENDING_TYPE_PROXY - 1;
     ret = DelPendingPacket(channelId, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     type = PENDING_TYPE_PROXY + 1;
     PendingDeinit(type);
     ret = DelPendingPacket(channelId, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
 }
 
 /**
@@ -189,7 +189,7 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket002, TestSize.Level1)
 
     type = -1;
     ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     type = 1;
     ret = PendingInit(type);

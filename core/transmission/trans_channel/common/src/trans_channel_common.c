@@ -191,7 +191,7 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
         param->attr->fastTransDataSize <= MAX_FAST_DATA_LEN) {
         if (appInfo->businessType == BUSINESS_TYPE_FILE || appInfo->businessType == BUSINESS_TYPE_STREAM) {
             TRANS_LOGE(TRANS_CTRL, "not support send fast data");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
         }
         appInfo->fastTransData = (uint8_t*)SoftBusCalloc(param->attr->fastTransDataSize);
         if (appInfo->fastTransData == NULL) {
