@@ -89,11 +89,13 @@ ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":AdapterDsoftbusRsaCryptoTest",
-    ":LnnKVAdapterTest",
-    ":LnnKVAdapterWrapperTest",
-  ]
+  deps = [ ":AdapterDsoftbusRsaCryptoTest" ]
+  if (dsoftbus_feature_lnn_cloud_sync) {
+    deps += [
+      ":LnnKVAdapterTest",
+      ":LnnKVAdapterWrapperTest",
+    ]
+  }
 }
 
 group("fuzztest") {

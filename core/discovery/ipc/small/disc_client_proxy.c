@@ -26,9 +26,10 @@
 static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
 {
     struct CommonScvId svcId = {0};
-    if (SERVER_GetIdentityByPkgName(pkgName, &svcId) != SOFTBUS_OK) {
+    int ret = SERVER_GetIdentityByPkgName(pkgName, &svcId);
+    if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "ondevice found callback failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     svc->handle = svcId.handle;
     svc->token = svcId.token;
@@ -46,12 +47,13 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, co
     bool ret = WriteRawData(&io, (const void*)device, sizeof(DeviceInfo));
     if (!ret) {
         DISC_LOGE(DISC_CONTROL, "Write DeviceInfo failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "ondevice found callback get svc failed.");
-        return SOFTBUS_ERR;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -59,7 +61,7 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, co
     int32_t ans = SendRequest(svc, CLIENT_DISCOVERY_DEVICE_FOUND, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "ondevice found callback SendRequest failed.");
-        return SOFTBUS_ERR;
+        return ans;
     }
     return SOFTBUS_OK;
 }
@@ -73,17 +75,18 @@ int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int fail
     bool ret = WriteInt32(&io, subscribeId);
     if (!ret) {
         DISC_LOGE(DISC_CONTROL, "Write subscribeId failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     ret = WriteInt32(&io, failReason);
     if (!ret) {
         DISC_LOGE(DISC_CONTROL, "Write failReason failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on discovery failed callback get svc failed.");
-        return SOFTBUS_ERR;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -91,7 +94,7 @@ int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int fail
     int32_t ans = SendRequest(svc, CLIENT_DISCOVERY_FAIL, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on discovery failed callback SendRequest failed.");
-        return SOFTBUS_ERR;
+        return ans;
     }
     return SOFTBUS_OK;
 }
@@ -105,12 +108,13 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
     bool ret = WriteInt32(&io, subscribeId);
     if (!ret) {
         DISC_LOGE(DISC_CONTROL, "Write subscribeId failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on discovery success callback get svc failed.");
-        return SOFTBUS_ERR;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -118,7 +122,7 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
     int32_t ans = SendRequest(svc, CLIENT_DISCOVERY_SUCC, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on discovery success callback SendRequest failed.");
-        return SOFTBUS_ERR;
+        return ans;
     }
     return SOFTBUS_OK;
 }
@@ -132,12 +136,13 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
     bool ret = WriteInt32(&io, publishId);
     if (!ret) {
         DISC_LOGE(DISC_CONTROL, "Write publishId failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on publish success callback get svc failed.");
-        return SOFTBUS_ERR;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -145,7 +150,7 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
     int32_t ans = SendRequest(svc, CLIENT_PUBLISH_SUCC, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on publish success callback SendRequest failed.");
-        return SOFTBUS_ERR;
+        return ans;
     }
     return SOFTBUS_OK;
 }
@@ -159,17 +164,18 @@ int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
     bool ret = WriteInt32(&io, publishId);
     if (!ret) {
         DISC_LOGE(DISC_CONTROL, "Write publishId failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     ret = WriteInt32(&io, reason);
     if (!ret) {
         DISC_LOGE(DISC_CONTROL, "Write reason failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on publish failed callback get svc failed.");
-        return SOFTBUS_ERR;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -177,7 +183,7 @@ int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
     int32_t ans = SendRequest(svc, CLIENT_PUBLISH_FAIL, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on publish failed callback SendRequest failed.");
-        return SOFTBUS_ERR;
+        return ans;
     }
     return SOFTBUS_OK;
 }

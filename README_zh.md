@@ -54,7 +54,7 @@
 ## 约束<a name="section119744591305"></a>
 
 -   组网设备需在同一局域网中 或者 距离相近的近场设备间。
--   组网之前，需先完成设备绑定，绑定流程参见安全子系统中说明。
+-   组网之前，需先完成设备绑定，绑定流程参见[安全基础能力子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80%E8%83%BD%E5%8A%9B%E5%AD%90%E7%B3%BB%E7%BB%9F.md)中说明。
 -   传输完成数据收发之后，业务要主动关闭会话，释放资源。
 
 ## 说明<a name="section1312121216216"></a>
@@ -63,8 +63,6 @@
 
 >**须知：** 
 >使用跨设备通信时，必须添加权限`ohos.permission.DISTRIBUTED_DATASYNC`和`ohos.permission.DISTRIBUTED_SOFTBUS_CENTER`，该权限类型为 _**dangerous**_ 。
-
->设备主动发现手机时，手机需打开超级终端的允许被“附近设备”发现开关（设置-超级终端-我的设备-允许被发现-附近设备），才能被设备发现。
 
 **1、发现**
 
@@ -81,10 +79,10 @@
 
     // 发布信息
     typedef struct {
-        int publishId;                  // 发现消息Id
-        DiscoverMode mode;              // 发现模式
-        ExchangeMedium medium;          // 发现媒介
-        ExchangeFreq freq;              // 发现频率
+        int publishId;                  // 发布消息Id
+        DiscoverMode mode;              // 发布模式
+        ExchangeMedium medium;          // 发布媒介
+        ExchangeFreq freq;              // 发布频率
         const char *capability;         // 被发现设备需要具备的能力
         unsigned char *capabilityData;  // 业务发布的自定义数据
         unsigned int dataLen;           // 数据长度

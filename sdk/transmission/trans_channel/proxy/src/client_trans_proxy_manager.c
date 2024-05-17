@@ -907,25 +907,32 @@ int32_t TransProxyPackAndSendData(
         uint8_t *sliceData = (uint8_t *)SoftBusCalloc(dataLen + sizeof(SliceHead));
         if (sliceData == NULL) {
             TRANS_LOGE(TRANS_SDK, "malloc slice data error, channelId=%{public}d", channelId);
+            SoftBusFree(dataInfo.outData);
             return SOFTBUS_MALLOC_ERR;
         }
         SliceHead *slicehead = (SliceHead *)sliceData;
         slicehead->priority = SessionPktTypeToProxyIndex(pktType);
         if (sliceNum > INT32_MAX) {
             TRANS_LOGE(TRANS_FILE, "Data overflow");
+            SoftBusFree(sliceData);
+            SoftBusFree(dataInfo.outData);
             return SOFTBUS_INVALID_NUM;
         }
         slicehead->sliceNum = (int32_t)sliceNum;
-        slicehead->sliceSeq = i;
+        slicehead->sliceSeq = (int32_t)i;
         ClientPackSliceHead(slicehead);
         if (memcpy_s(sliceData + sizeof(SliceHead), dataLen, dataInfo.outData + offset, dataLen) != EOK) {
             TRANS_LOGE(TRANS_SDK, "memcpy_s error, channelId=%{public}d", channelId);
+            SoftBusFree(sliceData);
+            SoftBusFree(dataInfo.outData);
             return SOFTBUS_MEM_ERR;
         }
 
         int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData, dataLen + sizeof(SliceHead), pktType);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "ServerIpcSendMessage error, channelId=%{public}d, ret=%{public}d", channelId, ret);
+            SoftBusFree(sliceData);
+            SoftBusFree(dataInfo.outData);
             return ret;
         }
 

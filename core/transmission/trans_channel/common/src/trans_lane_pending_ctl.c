@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_distributed_net_ledger.h"
+#include "permission_entry.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -46,6 +47,7 @@
 
 #define SESSION_NAME_DBD "distributeddata-default"
 #define SESSION_NAME_DSL "device.security.level"
+#define SESSION_NAME_DSL2_RE "com.*security.devicesec"
 #define MESH_MAGIC_NUMBER 0x5A5A5A5A
 
 typedef struct {
@@ -492,7 +494,6 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
     TransInfo transInfo = { .channelId = INVALID_CHANNEL_ID, .channelType = CHANNEL_TYPE_BUTT};
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    CoreSessionState state = CORE_SESSION_STATE_INIT;
     int32_t ret = TransGetConnectOptByConnInfo(connInnerInfo, &connOpt);
     if (ret != SOFTBUS_OK) {
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, timeStart);
@@ -518,12 +519,6 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
         goto EXIT_ERR;
     }
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
-    if (state == CORE_SESSION_STATE_CANCELLING) {
-        TRANS_LOGI(TRANS_SVC, "Cancel state laneHandle=%{public}u, close channel.", laneHandle);
-        TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
-        goto EXIT_CANCEL;
-    }
     TransSetSocketChannelStateByChannel(transInfo.channelId, transInfo.channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     if (((ChannelType)transInfo.channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
         TransFreeLane(laneHandle, param->isQosLane);
@@ -544,13 +539,6 @@ EXIT_ERR:
     TransFreeLane(laneHandle, param->isQosLane);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
-    return;
-EXIT_CANCEL:
-    TransBuildTransOpenChannelCancelEvent(extra, &transInfo, timeStart, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, *extra);
-    TransFreeLane(laneHandle, param->isQosLane);
-    (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
-    TRANS_LOGE(TRANS_SVC, "server open channel cancel");
     return;
 }
 
@@ -646,6 +634,10 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
 static void TransOnLaneRequestFail(uint32_t laneHandle, int32_t reason)
 {
     TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    if (reason == SOFTBUS_TIMOUT) {
+        TRANS_LOGW(TRANS_SVC, "request laneHandle=%{public}u timeout, convert to trans error code", laneHandle);
+        reason = SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT;
+    }
     int32_t ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, false, NULL, false, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
@@ -703,6 +695,23 @@ static bool IsShareSession(const char *sessionName)
     return true;
 }
 
+static bool IsDslSession(const char *sessionName)
+{
+    if (sessionName == NULL) {
+        return false;
+    }
+
+    if (strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0) {
+        return true;
+    }
+
+    if (CompareString(SESSION_NAME_DSL2_RE, sessionName, true) == SOFTBUS_OK) {
+        return true;
+    }
+
+    return false;
+}
+
 static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionName)
 {
     uint32_t authCapacity;
@@ -712,8 +721,7 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
     }
     TRANS_LOGD(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
     if (authCapacity == 0 &&
-        (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 ||
-        strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0)) {
+        (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 || IsDslSession(sessionName))) {
         return true;
     }
     return false;
@@ -721,13 +729,10 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
 
 static bool IsMeshSync(const char *sessionName)
 {
-    uint32_t dslSessionLen = strlen(SESSION_NAME_DSL);
-    if (strlen(sessionName) < dslSessionLen ||
-        strncmp(sessionName, SESSION_NAME_DSL, dslSessionLen) != 0) {
-        return false;
+    if (IsDslSession(sessionName)) {
+        return true;
     }
-    TRANS_LOGI(TRANS_SVC, "dsl module");
-    return true;
+    return false;
 }
 
 static void ModuleLaneAdapter(LanePreferredLinkList *preferred)
@@ -1055,9 +1060,10 @@ int32_t TransGetLaneInfoByQos(const LaneAllocInfo *allocInfo, LaneConnInfo *conn
         TRANS_LOGE(TRANS_SVC, "get lane info param error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (TransAddLaneAllocToPendingAndWaiting(*laneHandle, allocInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
-        return SOFTBUS_ERR;
+    int32_t ret = TransAddLaneAllocToPendingAndWaiting(*laneHandle, allocInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed. ret=%{public}d", ret);
+        return ret;
     }
     bool bSuccess = false;
     int32_t errCode = SOFTBUS_ERR;
@@ -1216,7 +1222,7 @@ int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, u
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_OK;
-    if (!(param->isAsync)) {
+    if (!(param->isQosLane)) {
         LaneRequestOption requestOption;
         (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
         ret = GetRequestOptionBySessionParam(param, &requestOption);

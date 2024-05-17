@@ -94,6 +94,8 @@ static SoftBusHandlerWrapper g_brManagerAsyncHandler = {
     .eventCompareFunc = BrCompareManagerLooperEventFunc,
 };
 
+static bool g_brStateTurnOn;
+
 void __attribute__((weak)) NipRecvDataFromBr(uint32_t connId, const char *buf, int32_t len)
 {
     (void)connId;
@@ -517,6 +519,13 @@ static void AttempReuseConnect(ConnBrDevice *device, DeviceAction actionIfAbsent
 
 static void ConnectRequestOnAvailableState(const ConnBrConnectRequestContext *ctx)
 {
+    if (!g_brStateTurnOn) {
+        CONN_LOGE(CONN_BR, "br state is turn off, requestId=%{public}u, error=%{public}d", ctx->requestId,
+            SOFTBUS_CONN_BR_STATE_TURN_OFF);
+        DfxRecordBrConnectFail(ctx->requestId, DEFAULT_PID, NULL, &ctx->statistics, SOFTBUS_CONN_BR_STATE_TURN_OFF);
+        ctx->result.OnConnectFailed(ctx->requestId, SOFTBUS_CONN_BR_STATE_TURN_OFF);
+        return;
+    }
     ConnBrDevice *device = NULL;
     int32_t status = ConvertCtxToDevice(&device, ctx);
     if (status != SOFTBUS_OK) {
@@ -645,7 +654,7 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
         }
     }
     if (result != 0) {
-        error = SOFTBUS_ERRNO(CONN_UNDERLAY_BLUETOOTH_MODULE_CODE) + result;
+        error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
     }
     NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
 }
@@ -1609,6 +1618,7 @@ static void OnBtStateChanged(int listenerId, int state)
     (void)listenerId;
     int32_t status = SOFTBUS_OK;
     if (state == SOFTBUS_BR_STATE_TURN_ON) {
+        g_brStateTurnOn = true;
         DumpLocalBtMac();
         status = ConnBrStartServer();
         CONN_LOGI(CONN_BR, "recv bt on, start server, status=%{public}d", status);
@@ -1616,6 +1626,7 @@ static void OnBtStateChanged(int listenerId, int state)
     }
 
     if (state == SOFTBUS_BR_STATE_TURN_OFF) {
+        g_brStateTurnOn = false;
         status = ConnBrStopServer();
         CONN_LOGI(CONN_BR, "recv bt off, stop server, status=%{public}d", status);
 

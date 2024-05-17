@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include "lnn_file_utils.h"
 
 #include <securec.h>
-
+#include "anonymizer.h"
 #include "lnn_log.h"
 #include "softbus_adapter_file.h"
 #include "softbus_def.h"
@@ -76,6 +76,9 @@ int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
         LNN_LOGE(LNN_STATE, "splice full path fail. id=%{public}d", id);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "full path id=%{public}d, path=%{public}s", id, path);
+    char *anonyPath = NULL;
+    Anonymize(path, &anonyPath);
+    LNN_LOGI(LNN_STATE, "full path id=%{public}d, path=%{public}s", id, anonyPath);
+    AnonymizeFree(anonyPath);
     return SOFTBUS_OK;
 }

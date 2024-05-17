@@ -46,7 +46,7 @@ typedef struct {
     uint32_t certCount;
 } SoftbusCertChain;
 
-bool IsSupportUDIDAbatement();
+bool IsSupportUDIDAbatement(void);
 bool IsNeedUDIDAbatement(const AuthSessionInfo *info);
 bool CalcHKDF(const uint8_t *ikm, uint32_t ikmLen, uint8_t *out, uint32_t outLen);
 int32_t GenerateCertificate(SoftbusCertChain *softbusCertChain, const AuthSessionInfo *info);

@@ -2155,7 +2155,7 @@ int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num)
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t count = GetAllHmlOrP2pAuthHandleNum();
-    if (count <= 0) {
+    if (count == 0) {
         AUTH_LOGE(AUTH_CONN, "not found hml or p2p authHandle");
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;

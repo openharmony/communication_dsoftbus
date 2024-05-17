@@ -20,6 +20,7 @@
 
 #include "lnn_lane_link.h"
 #include "softbus_error_code.h"
+#include "wifi_direct_error_code.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -74,7 +75,15 @@ int32_t LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p(const LinkRequest *req
         GTEST_LOG_(INFO) << "delay notify laneLinkSuccess after 50ms";
         std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     }
-    callback->OnLaneLinkSuccess(laneLinkReqId, &linkInfo);
+    callback->OnLaneLinkSuccess(laneLinkReqId, request->linkType, &linkInfo);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnWifiAdpterInterfaceMock::ActionOfOnConnectP2pFail(const LinkRequest *request, uint32_t laneLinkReqId,
+    const LaneLinkCb *callback)
+{
+    GTEST_LOG_(INFO) << "ActionOfOnConnectP2pFail enter";
+    callback->OnLaneLinkFail(laneLinkReqId, ERROR_WIFI_OFF, request->linkType);
     return SOFTBUS_OK;
 }
 

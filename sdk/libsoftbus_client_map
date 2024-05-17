@@ -374,6 +374,7 @@
         "CloseAuthMetaSocket";
         "SendMetaData";
         "Socket";
+        "SetActionAddr";
         "Bind";
         "BindAsync";
         "Listen";
@@ -388,6 +389,7 @@
         "ClientAddSocketSession";
         "ClientSetListenerBySessionId";
         "ClientIpcOpenSession";
+        "ClientSetActionIdBySessionId";
         "ClientSetSocketState";
         "ClientGetSessionCallbackAdapterByName";
         "ClientGetSessionCallbackAdapterById";
@@ -395,9 +397,11 @@
         "ClientGetSessionNameByChannelId";
         "TransSetSocketFileListener";
         "SetSessionIsAsyncById";
+        "SetSessionInitInfoById";
         "TransSetChannelInfo";
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
+        "ClientSetEnableStatusBySocket";
         "GetSocketLifecycleAndSessionNameBySessionId";
         "ClientHandleBindWaitTimer";
         "ClientSignalSyncBind";
@@ -474,6 +478,7 @@
         "GetSocketOpt";
         "SetExtSocketOpt";
         "GetExtSocketOpt";
+        "SetSoftbusConfig";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

@@ -327,6 +327,10 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         .channelType = CHANNEL_TYPE_AUTH,
         .authId = authId
     };
+    char localUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra.localUdid = localUdid;
+    }
     AppInfo appInfo;
     int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo, len);
     if (ret != SOFTBUS_OK) {
@@ -344,7 +348,8 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
     }
     ret = AuthGetUidAndPidBySessionName(appInfo.myData.sessionName, &appInfo.myData.uid, &appInfo.myData.pid);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed");
+        TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed and send msg to peer");
+        TransPostAuthChannelErrMsg(authId, ret, "session not created");
         goto EXIT_ERR;
     }
     ret = TransAuthFillDataConfig(&appInfo);
