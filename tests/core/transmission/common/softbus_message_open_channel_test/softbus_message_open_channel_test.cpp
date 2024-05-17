@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_message_open_channel.c"
+
 #include "softbus_message_open_channel.h"
+#include <gtest/gtest.h>
 #include <securec.h>
 
 #include "session.h"
@@ -23,7 +24,9 @@
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
 #include "trans_auth_message.h"
-#include "gtest/gtest.h"
+
+// This file needs to be placed after gtest.h (atomic), otherwise will compile error (stdatomic.h)
+#include "softbus_message_open_channel.c"
 
 using namespace testing::ext;
 namespace OHOS {

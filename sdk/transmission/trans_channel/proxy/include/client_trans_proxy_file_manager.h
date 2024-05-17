@@ -83,7 +83,7 @@ typedef struct {
 
 typedef struct {
     SoftBusMutex lock;
-    uint32_t lockInitFlag;
+    _Atomic uint32_t lockInitFlag;
 } TransFileInfoLock;
 
 typedef struct {

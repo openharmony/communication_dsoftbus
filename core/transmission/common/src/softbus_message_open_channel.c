@@ -16,6 +16,7 @@
 #include "softbus_message_open_channel.h"
 
 #include <securec.h>
+#include <stdatomic.h>
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -25,8 +26,6 @@
 #include "trans_log.h"
 
 #define BASE64KEY 45 // Base64 encrypt SessionKey length
-
-static int32_t g_tdcPktHeadSeq = 1024;
 
 char *PackError(int errCode, const char *errDesc)
 {
@@ -434,6 +433,7 @@ static void PackTcpFastDataPacketHead(TcpFastDataPacketHead *data)
 char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
 {
 #define MAGIC_NUMBER 0xBABEFACE
+#define TDC_PKT_HEAD_SEQ_START 1024
     if ((appInfo == NULL) || (outLen == NULL)) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return NULL;
@@ -444,9 +444,10 @@ char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
         TRANS_LOGE(TRANS_CTRL, "malloc failed.");
         return NULL;
     }
+    static _Atomic int32_t tdcPktHeadSeq = TDC_PKT_HEAD_SEQ_START;
     TcpFastDataPacketHead pktHead = {
         .magicNumber = MAGIC_NUMBER,
-        .seq = g_tdcPktHeadSeq++,
+        .seq = atomic_fetch_add_explicit(&tdcPktHeadSeq, 1, memory_order_relaxed),
         .flags = (appInfo->businessType == BUSINESS_TYPE_BYTE) ? FLAG_BYTES : FLAG_MESSAGE,
         .dataLen = dataLen,
     };
