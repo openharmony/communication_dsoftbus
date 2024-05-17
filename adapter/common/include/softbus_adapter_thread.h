@@ -21,6 +21,7 @@
 
 #include "comm_log.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_error_code.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -110,6 +111,16 @@ static inline bool CheckMutexIsNull(const SoftBusMutex *mutex)
     }                                                                                  \
     ret;                                                                               \
 })
+
+static inline void SoftBusMutexUnlockAuto(SoftBusMutex **mutex)
+{
+    if (mutex) {
+        SoftBusMutexUnlock(*mutex);
+    }
+}
+
+#define SOFTBUS_LOCK_GUARD(mutex) \
+    __attribute__((cleanup(SoftBusMutexUnlockAuto), unused)) SoftBusMutex *lockGuard##mutex = &mutex
 
 // pthread
 int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr);
