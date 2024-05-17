@@ -70,15 +70,7 @@ void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
         } catch (const ProcessorTerminate &) {
             LinkManager::GetInstance().Dump();
             CONN_LOGI(CONN_WIFI_DIRECT, "processor terminate");
-            WifiDirectSchedulerFactory::GetInstance().GetScheduler().RejectNegotiateData(*processor_);
-            GetSender().ProcessUnHandle([this](std::shared_ptr<WifiDirectEventBase> &content) {
-                auto ncw =
-                    std::dynamic_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<NegotiateCommand>>>(content);
-                if (ncw != nullptr) {
-                    processor_->HandleCommandAfterTerminate(*ncw->content_);
-                    return;
-                }
-            });
+            ProcessUnHandleCommand();
         }
 
         trace_->StopTrace();
@@ -123,4 +115,19 @@ WifiDirectEventDispatcher WifiDirectExecutor::WaitEvent()
 {
     return receiver_.Wait();
 }
+
+void WifiDirectExecutor::ProcessUnHandleCommand()
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    WifiDirectSchedulerFactory::GetInstance().GetScheduler().RejectNegotiateData(*processor_);
+    GetSender().ProcessUnHandle([this](std::shared_ptr<WifiDirectEventBase> &content) {
+        auto ncw =
+            std::dynamic_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<NegotiateCommand>>>(content);
+        if (ncw != nullptr) {
+            processor_->HandleCommandAfterTerminate(*ncw->content_);
+            return;
+        }
+    });
+}
+
 }

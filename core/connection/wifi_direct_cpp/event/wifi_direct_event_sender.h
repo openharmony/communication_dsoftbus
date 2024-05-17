@@ -30,7 +30,8 @@ public:
         }
     }
 
-    void ProcessUnHandle(const WifiDirectEventQueue::Handler &handler) {
+    void ProcessUnHandle(const WifiDirectEventQueue::Handler &handler)
+    {
         if (queue_ != nullptr) {
             queue_->Process(handler);
         }
@@ -39,5 +40,5 @@ public:
 private:
     WifiDirectEventQueue *queue_;
 };
-}
+} // namespace OHOS::SoftBus
 #endif

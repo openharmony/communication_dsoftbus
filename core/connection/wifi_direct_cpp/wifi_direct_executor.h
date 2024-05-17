@@ -34,7 +34,7 @@ public:
     virtual ~WifiDirectExecutor();
 
     void Start();
-    virtual void Run(std::shared_ptr<WifiDirectProcessor> processor);
+    void Run(std::shared_ptr<WifiDirectProcessor> processor);
     std::string GetRemoteDeviceId();
     void SetRemoteDeviceId(const std::string &remoteDeviceId);
     bool IsActive() const;
@@ -51,6 +51,8 @@ public:
 
 protected:
     WifiDirectEventSender GetSender() { return receiver_; }
+
+    virtual void ProcessUnHandleCommand();
 
     std::string remoteDeviceId_;
     WifiDirectEventReceiver receiver_;
