@@ -22,22 +22,34 @@
 #include "conn_log.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
+#include "wifi_direct_scheduler_factory.h"
+#include "command/negotiate_command.h"
 
 namespace OHOS::SoftBus {
 WifiDirectExecutor::WifiDirectExecutor(const std::string &remoteDeviceId, WifiDirectScheduler &scheduler,
                                        std::shared_ptr<WifiDirectProcessor> &processor, bool active)
-    : remoteDeviceId_(remoteDeviceId), scheduler_(scheduler), processor_(processor), active_(active)
+    : remoteDeviceId_(remoteDeviceId), scheduler_(scheduler), processor_(processor), active_(active), started_(false)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s, active=%{public}d",
               WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str(), active_);
-    std::thread thread(&WifiDirectExecutor::Run, this, processor_);
-    thread_.swap(thread);
-    thread_.detach();
 }
 
 WifiDirectExecutor::~WifiDirectExecutor()
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+}
+
+void WifiDirectExecutor::Start()
+{
+    if (started_) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s repeat start, ignore",
+            WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+        return;
+    }
+    started_ = true;
+    std::thread thread(&WifiDirectExecutor::Run, this, processor_);
+    thread_.swap(thread);
+    thread_.detach();
 }
 
 void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
@@ -58,6 +70,15 @@ void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
         } catch (const ProcessorTerminate &) {
             LinkManager::GetInstance().Dump();
             CONN_LOGI(CONN_WIFI_DIRECT, "processor terminate");
+            WifiDirectSchedulerFactory::GetInstance().GetScheduler().RejectNegotiateData(*processor_);
+            GetSender().ProcessUnHandle([this](std::shared_ptr<WifiDirectEventBase> &content) {
+                auto ncw =
+                    std::dynamic_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<NegotiateCommand>>>(content);
+                if (ncw != nullptr) {
+                    processor_->HandleCommandAfterTerminate(*ncw->content_);
+                    return;
+                }
+            });
         }
 
         trace_->StopTrace();
@@ -89,13 +110,13 @@ void WifiDirectExecutor::SetActive(bool active)
     active_ = active;
 }
 
-bool WifiDirectExecutor::CanAcceptNegotiateData()
+bool WifiDirectExecutor::CanAcceptNegotiateData(WifiDirectCommand &command)
 {
     std::lock_guard lock(processorLock_);
     if (processor_ == nullptr) {
         return false;
     }
-    return processor_->CanAcceptNegotiateData();
+    return processor_->CanAcceptNegotiateData(command);
 }
 
 WifiDirectEventDispatcher WifiDirectExecutor::WaitEvent()

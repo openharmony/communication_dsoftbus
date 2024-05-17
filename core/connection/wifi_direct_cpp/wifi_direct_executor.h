@@ -31,14 +31,15 @@ class WifiDirectExecutor {
 public:
     explicit WifiDirectExecutor(const std::string &remoteDeviceId, WifiDirectScheduler &scheduler,
                                 std::shared_ptr<WifiDirectProcessor> &processor, bool active);
-    ~WifiDirectExecutor();
+    virtual ~WifiDirectExecutor();
 
-    void Run(std::shared_ptr<WifiDirectProcessor> processor);
+    void Start();
+    virtual void Run(std::shared_ptr<WifiDirectProcessor> processor);
     std::string GetRemoteDeviceId();
     void SetRemoteDeviceId(const std::string &remoteDeviceId);
     bool IsActive() const;
     void SetActive(bool active);
-    bool CanAcceptNegotiateData();
+    bool CanAcceptNegotiateData(WifiDirectCommand &command);
 
     template<typename Content>
     void SendEvent(const Content &content)
@@ -48,7 +49,7 @@ public:
 
     WifiDirectEventDispatcher WaitEvent();
 
-private:
+protected:
     WifiDirectEventSender GetSender() { return receiver_; }
 
     std::string remoteDeviceId_;
@@ -60,6 +61,8 @@ private:
 
     bool active_;
     std::shared_ptr<WifiDirectTrace> trace_;
+
+    bool started_;
 };
 }
 #endif
