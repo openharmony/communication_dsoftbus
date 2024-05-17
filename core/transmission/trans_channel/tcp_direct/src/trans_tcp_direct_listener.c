@@ -361,7 +361,8 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
 
 int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info)
 {
-    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P) || info->socketOption.port < 0) {
+    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P && info->type != CONNECT_HML) ||
+        info->socketOption.port < 0) {
         TRANS_LOGE(TRANS_CTRL, "Invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }

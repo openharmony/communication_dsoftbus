@@ -682,6 +682,10 @@ HWTEST_F(TransLaneTest, TransLaneTest019, TestSize.Level1)
     ret = TransGetConnectOptByConnInfo(&info, &connOpt);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
+    info.type = LANE_HML;
+    ret = TransGetConnectOptByConnInfo(&info, &connOpt);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     info.type = LANE_LINK_TYPE_BUTT;
     ret = TransGetConnectOptByConnInfo(&info, &connOpt);
     EXPECT_EQ(SOFTBUS_ERR, ret);

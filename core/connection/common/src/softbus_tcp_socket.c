@@ -194,7 +194,7 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
         CONN_LOGE(CONN_COMMON, "null ptr!");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (option->type != CONNECT_TCP && option->type != CONNECT_P2P) {
+    if (option->type != CONNECT_TCP && option->type != CONNECT_P2P && option->type != CONNECT_HML) {
         CONN_LOGE(CONN_COMMON, "bad type! type=%{public}d", option->type);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -275,7 +275,7 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid param, option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_TCP || option->type == CONNECT_P2P ||
-        option->type == CONNECT_P2P_REUSE, SOFTBUS_INVALID_PARAM, CONN_COMMON,
+        option->type == CONNECT_P2P_REUSE || option->type == CONNECT_HML, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid param, unsupport type=%{public}d", option->type);
     CONN_CHECK_AND_RETURN_RET_LOGW(option->socketOption.port > 0, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid param, invalid port=%{public}d", option->socketOption.port);
