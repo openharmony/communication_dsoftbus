@@ -479,6 +479,27 @@
         "SetExtSocketOpt";
         "GetExtSocketOpt";
         "SetSoftbusConfig";
+        "SoftBusDFileServer";
+        "SoftBusDFileClient";
+        "SoftBusDFileClientWithTargetDev";
+        "SoftBusDFileClose";
+        "SoftBusDFileSendFiles";
+        "SoftBusDFileSendFilesWithRemotePath";
+        "SoftBusDFileSendFilesWithRemotePathAndType";
+        "SoftBusDFileSetStoragePath";
+        "SoftBusDFileSetRenameHook";
+        "SoftBusDFileSetStoragePathList";
+        "SoftBusDFileRegisterLog";
+        "SoftBusDFileGetCapabilities";
+        "SoftBusDFileSetCapabilities";
+        "SoftBusDFileDump";
+        "SoftBusDFileSetEventFunc";
+        "SoftBusDFileRegisterLogCallback";
+        "SoftBusDFileRegisterDefaultLog";
+        "SoftBusDFileSetOpenFdCallback";
+        "SoftBusDFileSetCloseFdCallback";
+        "SoftBusDFileClearOpenFdCallback";
+        "SoftBusDFileClearCloseFdCallback";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
