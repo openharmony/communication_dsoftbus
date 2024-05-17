@@ -141,6 +141,8 @@ enum SoftBusErrNo {
     SOFTBUS_HMAC_ERR,  // generate hmac hash fail for aes encrypt
     SOFTBUS_HUKS_ERR,  // huks fail for rsa encrypt
     SOFTBUS_BIO_ERR,  // BIO fail for rsa encrypt
+    SOFTBUS_NOT_NEED_UPDATE, // not need update
+    SOFTBUS_NO_RESOURCE_ERR, // no available resource
 
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),
