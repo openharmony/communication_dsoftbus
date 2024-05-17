@@ -37,6 +37,7 @@ typedef enum {
     EVENT_SCENE_TRANS_CREATE_SESS_SERVER = 10,
     EVENT_SCENE_TRANS_REMOVE_SESS_SERVER = 11,
     EVENT_SCENE_TRANS_PROXY_RESET_PEER = 12,
+    EVENT_SCENE_TRANS_CHANNEL_STATISTICS = 13,
 } TransEventScene;
 
 typedef enum {
@@ -83,7 +84,8 @@ typedef struct {
     const char *calleePkg;     // TO_CALL_PKG
     const char *firstTokenName; // FIRST_TOKEN_NAME
     uint32_t firstTokenId;     // FIRST_TOKEN_ID
-    int32_t  firstTokenType;    // FIRST_TOKEN_TYPE
+    int32_t  firstTokenType;   // FIRST_TOKEN_TYPE
+    const char *trafficStats;  // TRAFFIC_STATS
 } TransEventExtra;
 
 typedef enum {

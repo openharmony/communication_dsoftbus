@@ -155,6 +155,16 @@ int32_t SoftBusServerProxyFrame::CloseChannel(const char *sessionName, int32_t c
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerProxyFrame::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
+    uint32_t len)
+{
+    (void)channelId;
+    (void)laneId;
+    (void)dataInfo;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerProxyFrame::SendMessage(int32_t channelId, int32_t channelType, const void *data,
     uint32_t len, int32_t msgType)
 {

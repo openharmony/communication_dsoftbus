@@ -18,6 +18,7 @@
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_callback.h"
+#include "client_trans_statistics.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "client_trans_udp_manager.h"
@@ -39,6 +40,10 @@ int32_t ClientTransChannelInit(void)
         TRANS_LOGE(TRANS_SDK, "client trans auth init failed.");
         return SOFTBUS_ERR;
     }
+    if (ClientTransStatisticsInit() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "client trans statistics init failed.");
+        return SOFTBUS_ERR;
+    }
     if (ClientTransProxyInit(cb) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "client trans proxy init failed.");
         return SOFTBUS_ERR;
@@ -55,6 +60,7 @@ void ClientTransChannelDeinit(void)
     TransTdcManagerDeinit();
     ClientTransUdpMgrDeinit();
     ClientTransProxyDeinit();
+    ClientTransStatisticsDeinit();
 }
 
 int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
@@ -63,6 +69,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
         TRANS_LOGW(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    DeleteSocketResourceByChannelId(channelId, type);
     int32_t ret = SOFTBUS_OK;
     switch (type) {
         case CHANNEL_TYPE_PROXY:

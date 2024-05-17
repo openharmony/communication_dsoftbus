@@ -31,6 +31,7 @@
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_scenario_manager.h"
+#include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_udp_channel_manager.h"
@@ -140,6 +141,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.timeStart = appInfo->timeStart;
     info.linkType = appInfo->linkType;
     info.connectType = appInfo->connectType;
+    TransGetLaneIdByChannelId(appInfo->myData.channelId, &info.laneId);
     int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
         (char*)appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
