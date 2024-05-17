@@ -104,6 +104,7 @@ static void OnDisconnected(int32_t channelId)
 
 void SoftbusProxyChannelPipelineTest::SetUpTestCase(void)
 {
+    LooperInit();
     TransProxyPipelineInit();
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnDataReceived,
