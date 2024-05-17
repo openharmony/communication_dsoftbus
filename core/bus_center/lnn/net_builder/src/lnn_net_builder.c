@@ -596,7 +596,6 @@ static void DfxRecordLnnServerjoinStart(const ConnectionAddr *addr, const char *
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
-    extra.lnnType = needReportFailure ? LNN_TYPE_MANUAL : LNN_TYPE_AUTOMATIC;
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
