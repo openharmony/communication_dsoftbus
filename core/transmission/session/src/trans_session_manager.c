@@ -198,6 +198,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     }
     if (isFind) {
         ListDelete(&pos->node);
+        SoftBusFree(pos);
         g_sessionServerList->cnt--;
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
