@@ -17,6 +17,7 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
@@ -131,6 +132,8 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
         .errcode = ret,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
+    extra.osType = appInfo->osType;
+    extra.peerUdid = appInfo->peerUdid;
     if (!isServer) {
         extra.peerUdid = appInfo->appType == APP_TYPE_AUTH ? appInfo->peerData.deviceId : NULL;
         if (extra.result == EVENT_STAGE_RESULT_FAILED) {
@@ -164,6 +167,21 @@ static int32_t TransProxyGetChannelIsServer(int32_t channelId, int8_t *isServer)
     return SOFTBUS_OK;
 }
 
+static int32_t SelectAppType(const AppInfo *appInfo, AppType appType, int32_t channelId, int32_t errCode)
+{
+    switch (appType) {
+        case APP_TYPE_NORMAL:
+        case APP_TYPE_AUTH:
+            return NotifyNormalChannelOpenFailed(appInfo->myData.pkgName, appInfo->myData.pid, channelId, errCode);
+        case APP_TYPE_INNER:
+            NotifyNetworkingChannelOpenFailed(appInfo->myData.sessionName, channelId, appInfo->peerData.deviceId);
+            return SOFTBUS_TRANS_NOTIFY_NETWORK_OPEN_ERR;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "SOFTBUS_INVALID_APPTYPE appType=%{public}d", appType);
+            return SOFTBUS_INVALID_APPTYPE;
+    }
+}
+
 int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     if (appInfo == NULL) {
@@ -183,6 +201,8 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
             .errcode = errCode,
             .callerPkg = appInfo->myData.pkgName,
             .socketName = appInfo->myData.sessionName,
+            .peerUdid = appInfo->peerUdid,
+            .osType = appInfo->osType,
             .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
@@ -200,20 +220,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     TRANS_LOGI(TRANS_CTRL,
         "proxy channel openfailed: channelId=%{public}d, appType=%{public}d", channelId, appInfo->appType);
-    int32_t ret = SOFTBUS_ERR;
-    switch (appInfo->appType) {
-        case APP_TYPE_NORMAL:
-        case APP_TYPE_AUTH:
-            ret = NotifyNormalChannelOpenFailed(appInfo->myData.pkgName, appInfo->myData.pid, channelId, errCode);
-            break;
-        case APP_TYPE_INNER:
-            NotifyNetworkingChannelOpenFailed(appInfo->myData.sessionName, channelId, appInfo->peerData.deviceId);
-            break;
-        default:
-            ret = SOFTBUS_ERR;
-            break;
-    }
-    return ret;
+    return SelectAppType(appInfo, appInfo->appType, channelId, errCode);
 }
 
 int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)

@@ -131,6 +131,10 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
     EXPECT_STREQ(params[index].v.s, extra.calleePkg);
+    ++index;
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_EQ(params[index].v.i32, extra.osType);
 
     EXPECT_EQ(++index, validSize);
     return true;

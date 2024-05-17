@@ -40,7 +40,7 @@ HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
         .socketName = "testSocket",
         .dataType = 0, // invalid
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 3;
+    constexpr int32_t VALID_EXTRA_SIZE = 4;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -86,6 +86,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .firstTokenName = "testfirstToken",
         .firstTokenId = 0,
         .firstTokenType = 0,
+        .osType = 10,
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
