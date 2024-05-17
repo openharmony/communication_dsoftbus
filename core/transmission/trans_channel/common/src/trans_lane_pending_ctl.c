@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -520,7 +520,8 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         goto EXIT_ERR;
     }
     TransSetSocketChannelStateByChannel(transInfo.channelId, transInfo.channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
-    if (((ChannelType)transInfo.channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
+    if (((ChannelType)transInfo.channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P) &&
+        (connOpt.type != CONNECT_HML)) {
         TransFreeLane(laneHandle, param->isQosLane);
     } else if (TransLaneMgrAddLane(transInfo.channelId, transInfo.channelType, connInnerInfo,
         laneHandle, param->isQosLane, &(appInfo->myData)) != SOFTBUS_OK) {
@@ -1265,6 +1266,7 @@ static int32_t SetP2pConnInfo(const P2pConnInfo *p2pInfo, ConnectOption *connOpt
     connOpt->socketOption.port = -1;
     return SOFTBUS_OK;
 }
+
 static int32_t SetP2pReusesConnInfo(const WlanConnInfo *connInfo, ConnectOption *connOpt)
 {
     connOpt->type = CONNECT_P2P_REUSE;
@@ -1348,7 +1350,7 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
         TRANS_LOGW(TRANS_SVC, "invalid param.");
         return SOFTBUS_ERR;
     }
-    if (info->type == LANE_P2P || info->type == LANE_HML) {
+    if (info->type == LANE_P2P) {
         return SetP2pConnInfo(&(info->connInfo.p2p), connOpt);
     } else if (info->type == LANE_WLAN_2P4G || info->type == LANE_WLAN_5G || info->type == LANE_ETH) {
         return SetWlanConnInfo(&(info->connInfo.wlan), connOpt);
