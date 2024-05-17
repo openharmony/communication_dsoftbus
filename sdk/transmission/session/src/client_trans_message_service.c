@@ -20,6 +20,7 @@
 #include "client_trans_file_listener.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_session_service.h"
+#include "client_trans_statistics.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -95,6 +96,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     (void)ClientResetIdleTimeoutById(sessionId);
+    UpdateChannelStatistics(sessionId, len);
     return ClientTransChannelSendBytes(channelId, channelType, data, len);
 }
 
@@ -137,6 +139,7 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     (void)ClientResetIdleTimeoutById(sessionId);
+    UpdateChannelStatistics(sessionId, len);
     return ClientTransChannelSendMessage(channelId, channelType, data, len);
 }
 
@@ -175,6 +178,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     (void)ClientResetIdleTimeoutById(sessionId);
+    UpdateChannelStatistics(sessionId, data->bufLen);
     return ClientTransChannelSendStream(channelId, type, data, ext, param);
 }
 

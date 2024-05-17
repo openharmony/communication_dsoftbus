@@ -166,6 +166,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_OPEN_AUTH_SESSION] = &SoftBusServerStub::OpenAuthSessionInner;
     memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] = &SoftBusServerStub::NotifyAuthSuccessInner;
     memberFuncMap_[SERVER_CLOSE_CHANNEL] = &SoftBusServerStub::CloseChannelInner;
+    memberFuncMap_[SERVER_CLOSE_CHANNEL_STATISTICS] = &SoftBusServerStub::CloseChannelWithStatisticsInner;
     memberFuncMap_[SERVER_SESSION_SENDMSG] = &SoftBusServerStub::SendMessageInner;
     memberFuncMap_[SERVER_EVALUATE_QOS] = &SoftBusServerStub::EvaluateQosInner;
     memberFuncMap_[SERVER_JOIN_LNN] = &SoftBusServerStub::JoinLNNInner;
@@ -210,6 +211,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_OPEN_AUTH_SESSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_NOTIFY_AUTH_SUCCESS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_CLOSE_CHANNEL_STATISTICS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_SESSION_SENDMSG] = nullptr;
     memberPermissionMap_[SERVER_JOIN_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_JOIN_METANODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
@@ -812,6 +814,38 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
     }
 
     int32_t retReply = CloseChannel(sessionName, channelId, channelType);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::CloseChannelWithStatisticsInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read channel Id failed!");
+        return SOFTBUS_ERR;
+    }
+    uint64_t laneId;
+    if (!data.ReadUint64(laneId)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read lane Id failed!");
+        return SOFTBUS_ERR;
+    }
+    uint32_t len;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner dataInfo len failed!");
+        return SOFTBUS_ERR;
+    }
+    void *dataInfo = const_cast<void *>(reinterpret_cast<const void *>(data.ReadRawData(len)));
+    if (dataInfo == nullptr) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read dataInfo failed!");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t retReply = CloseChannelWithStatistics(channelId, laneId, dataInfo, len);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "CloseChannelInner write reply failed!");
         return SOFTBUS_ERR;

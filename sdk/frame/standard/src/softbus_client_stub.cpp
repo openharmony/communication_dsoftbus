@@ -238,6 +238,14 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
+    if (!data.ReadUint64(channel.laneId)) {
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read lane Id failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.ReadInt32(channel.connectType)) {
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read connect type failed!");
+        return SOFTBUS_ERR;
+    }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.fd = data.ReadFileDescriptor();
         channel.myIp = (char *)data.ReadCString();

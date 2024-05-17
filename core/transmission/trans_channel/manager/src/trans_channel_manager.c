@@ -40,6 +40,7 @@
 #include "trans_lane_pending_ctl.h"
 #include "trans_link_listener.h"
 #include "trans_log.h"
+#include "trans_network_statistics.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
@@ -179,6 +180,12 @@ int32_t TransChannelInit(void)
         return SOFTBUS_ERR;
     }
 
+    ret = TransNetworkStatisticsInit();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans network statistics init failed.");
+        return ret;
+    }
+
     ReqLinkListener();
 
     if (SoftBusMutexInit(&g_myIdLock, NULL) != SOFTBUS_OK) {
@@ -199,6 +206,7 @@ void TransChannelDeinit(void)
     TransUdpChannelDeinit();
     TransReqLanePendingDeinit();
     TransAsyncReqLanePendingDeinit();
+    TransNetworkStatisticsDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
@@ -571,6 +579,12 @@ int32_t TransReleaseUdpResources(int32_t channelId)
 int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
     return TransCommonCloseChannel(sessionName, channelId, channelType);
+}
+
+int32_t TransCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+{
+    (void)UpdateNetworkResourceByLaneId(channelId, laneId, dataInfo, len);
+    return SOFTBUS_OK;
 }
 
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,

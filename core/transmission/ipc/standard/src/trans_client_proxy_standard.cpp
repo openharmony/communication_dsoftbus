@@ -70,6 +70,8 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     WRITE_PARCEL_WITH_RET(data, CString, sessionName, SOFTBUS_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->connectType, SOFTBUS_ERR);
     
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
         WRITE_PARCEL_WITH_RET(data, FileDescriptor, channel->fd, SOFTBUS_ERR);

@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include "client_trans_file_listener.h"
+#include "client_trans_statistics.h"
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
 #include "softbus_adapter_mem.h"
@@ -83,6 +84,7 @@ static void NotifySocketSendResult(int32_t socket, DFileMsgType msgType, const D
     event.bytesTotal = msgData->transferUpdate.totalBytes;
     event.UpdateRecvPath = NULL;
     listener->socketSendCallback(socket, &event);
+    UpdateChannelStatistics(socket, (int64_t)msgData->transferUpdate.totalBytes);
 }
 
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)

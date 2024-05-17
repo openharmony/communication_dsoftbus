@@ -15,15 +15,19 @@ import("../../../dsoftbus.gni")
 import("../../../sdk/transmission/trans_channel/auth/trans_auth_sdk.gni")
 import("../../../sdk/transmission/trans_channel/proxy/trans_proxy_sdk.gni")
 import("../../../sdk/transmission/trans_channel/qos/trans_qos_sdk.gni")
+import(
+    "../../../sdk/transmission/trans_channel/statistics/trans_statistics_sdk.gni")
 import("../../../sdk/transmission/trans_channel/tcp_direct/trans_tcp_sdk.gni")
 import("../../../sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
 
 trans_channel_sdk_inc =
-    trans_auth_channel_sdk_inc + trans_proxy_channel_sdk_inc +
-    trans_direct_channel_sdk_inc + trans_udp_channel_sdk_inc + trans_qos_sdk_inc
+    trans_auth_channel_sdk_inc + trans_statistics_sdk_inc +
+    trans_proxy_channel_sdk_inc + trans_direct_channel_sdk_inc +
+    trans_udp_channel_sdk_inc + trans_qos_sdk_inc
 trans_channel_sdk_src =
-    trans_auth_channel_sdk_src + trans_proxy_channel_sdk_src +
-    trans_direct_channel_sdk_src + trans_udp_channel_sdk_src + trans_qos_sdk_src
+    trans_auth_channel_sdk_src + trans_statistics_sdk_src +
+    trans_proxy_channel_sdk_src + trans_direct_channel_sdk_src +
+    trans_udp_channel_sdk_src + trans_qos_sdk_src
 trans_channel_sdk_deps = trans_udp_channel_sdk_deps
 
 trans_channel_sdk_src += [
