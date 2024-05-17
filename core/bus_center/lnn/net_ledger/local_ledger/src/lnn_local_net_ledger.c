@@ -1151,7 +1151,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
     AnonymizeFree(anonyNetworkId);
     if (g_localNetLedger.localInfo.accountId == 0) {
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
-        return SOFTBUS_ERR;
+        return SOFTBUS_OK;
     }
     char *value = g_localNetLedger.localInfo.networkId;
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_NETWORK_ID, value, strlen(value)) != SOFTBUS_OK) {
@@ -1579,7 +1579,10 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    char *value = (char *)g_localNetLedger.localInfo.cipherInfo.key;
+    char value[SESSION_KEY_LENGTH + 1] = {0};
+    for (int32_t i = 0; i < SESSION_KEY_LENGTH; i++) {
+        value[i] = (char)(g_localNetLedger.localInfo.cipherInfo.key[i]);
+    }
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_KEY, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger cipher key change sync to cloud failed");
     }
@@ -1601,7 +1604,10 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    char *value = (char *)g_localNetLedger.localInfo.cipherInfo.iv;
+    char value[BROADCAST_IV_LEN + 1] = {0};
+    for (int32_t i = 0; i < BROADCAST_IV_LEN; i++) {
+        value[i] = (char)(g_localNetLedger.localInfo.cipherInfo.iv[i]);
+    }
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_IV, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger cipher iv change sync to cloud failed");
     }
