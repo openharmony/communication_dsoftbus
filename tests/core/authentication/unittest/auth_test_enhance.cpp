@@ -209,7 +209,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket).WillRepeatedly(Return(2));
-    EXPECT_CALL(socketMock, ConnSetTcpKeepAlive).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(socketMock, ConnSetTcpKeepalive).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnShutdownSocket);
     ret = AuthStartVerify(&g_connInfo2, g_requestId, &g_callback, true);
     SoftBusSleepMs(MILLIS);
