@@ -83,6 +83,8 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
         COMM_LOGI(COMM_PERM, "invalid param");
         return SOFTBUS_PERMISSION_DENIED;
     }
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
     int32_t permType = CalcPermType(callingUid, callingPid);
     SoftBusPermissionItem *pItem = CreatePermissionItem(permType, callingUid, callingPid, pkgName, actions);
     if (pItem == nullptr) {
@@ -94,7 +96,8 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     if (ret >= SYSTEM_APP) {
         return SOFTBUS_OK;
     }
-    COMM_LOGE(COMM_PERM, "permission denied, permType=%{public}d, ret=%{public}d", permType, ret);
+    COMM_LOGE(COMM_PERM, "permission denied, permType=%{public}d, ret=%{public}d, sessionName=%{public}s",
+        permType, ret, tmpName);
     return SOFTBUS_PERMISSION_DENIED;
 }
 
