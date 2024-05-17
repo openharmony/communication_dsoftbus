@@ -1819,7 +1819,7 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
         int64_t seqDiff = (int32_t)(seq - fileInfo->seq - 1);
         if (seqDiff > INT32_MAX) {
             TRANS_LOGE(TRANS_FILE, "seqDiff overflow");
-            return SOFTBUS_INVALID_NUM; 
+            return SOFTBUS_INVALID_NUM;
         }
 
         if (fileInfo->oneFrameLen > INT64_MAX || seqDiff * (int64_t)fileInfo->oneFrameLen > INT64_MAX) {
