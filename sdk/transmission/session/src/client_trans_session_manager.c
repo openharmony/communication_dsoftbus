@@ -1411,6 +1411,9 @@ static void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
         if (destroyNode == NULL) {
             continue;
         }
+        if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
+            ClientEmitFileEvent(sessionNode->channelId);
+        }
         DestroySessionId();
         ListDelete(&sessionNode->node);
         ListAdd(destroyList, &(destroyNode->node));
