@@ -141,6 +141,7 @@ enum SoftBusErrNo {
     SOFTBUS_HMAC_ERR,  // generate hmac hash fail for aes encrypt
     SOFTBUS_HUKS_ERR,  // huks fail for rsa encrypt
     SOFTBUS_BIO_ERR,  // BIO fail for rsa encrypt
+    SOFTBUS_INVALID_APPTYPE,
 
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),
@@ -282,6 +283,7 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_MSG_EMPTY_LIST, // list is empty
     SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT, // stop bind by timeout
     SOFTBUS_TRANS_MSG_NOT_SET_SCREEN_OFF, // send broadcast failed when screen flag is false
+    SOFTBUS_TRANS_NOTIFY_NETWORK_OPEN_ERR,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),

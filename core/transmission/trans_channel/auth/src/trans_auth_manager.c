@@ -434,7 +434,8 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         .channelId = info.appInfo.myData.channelId,
         .channelType = CHANNEL_TYPE_AUTH,
         .authId = authId,
-        .linkType = info.connOpt.type
+        .linkType = info.connOpt.type,
+        .osType = info.appInfo.osType
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo, len);
@@ -442,7 +443,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         TRANS_LOGE(TRANS_SVC, "unpackReply failed");
         goto EXIT_ERR;
     }
-    extra.peerUdid = info.appInfo.peerData.deviceId;
+    extra.peerUdid = info.appInfo.peerUdid;
     ret = TransAuthProcessDataConfig(&info.appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "ProcessDataConfig failed");

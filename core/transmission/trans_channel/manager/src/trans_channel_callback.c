@@ -14,8 +14,11 @@
  */
 
 #include "trans_channel_callback.h"
-
+#include "bus_center_info_key.h"
+#include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_hitrace.h"
+#include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
@@ -35,6 +38,10 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     if (pkgName == NULL || sessionName == NULL || channel == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+    char peerUdid[DEVICE_ID_SIZE_MAX] = { 0 };
+    GetRemoteUdidWithNetworkId(channel->peerDeviceId, peerUdid, sizeof(peerUdid));
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(channel->peerDeviceId, &osType);
     int64_t timeStart = channel->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     TransEventExtra extra = {
@@ -45,7 +52,9 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         .costTime = (int32_t)timediff,
         .result = EVENT_STAGE_RESULT_OK,
         .callerPkg = pkgName,
-        .socketName = sessionName
+        .socketName = sessionName,
+        .osType = osType,
+        .peerUdid = peerUdid
     };
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     TransGetSocketChannelStateByChannel(channel->channelId, channel->channelType, &state);
