@@ -184,9 +184,7 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
             bool isServer = (bool)msg->arg1;
             uint32_t connectionId = (uint32_t)msg->arg2;
             chan = (ProxyChannelInfo *)msg->obj;
-            if (chan == NULL) {
-                return;
-            }
+            TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_DISCONNECT_MSG, chan is null");
             TransProxyCloseConnChannelReset(connectionId, (isServer == 0), isServer, chan->deviceTypeIsWinpc);
             break;
         }
