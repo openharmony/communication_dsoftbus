@@ -433,7 +433,7 @@ HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
     AuthConnInfo connInfo;
     AuthDataHead head;
     uint8_t data[] = "testdata";
-    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFT_FREQ_CYCLE };
+    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFAULT_FREQ_CYCLE };
     HandleAuthData(&connInfo, &head, data);
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -627,6 +627,26 @@ HWTEST_F(AuthManagerTest, AUTH_VERIFY_AFTER_NOTIFY_NORMALIZE_TEST_001, TestSize.
     EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(&request) == SOFTBUS_OK);
     LooperDeinit();
 }
+
+/*
+ * @tc.name: AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001
+ * @tc.desc: AuthSetTcpKeepaliveByConnInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001, TestSize.Level1)
+{
+    int32_t ret;
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+
+    ret = AuthSetTcpKeepaliveByConnInfo(nullptr, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    ret = AuthSetTcpKeepaliveByConnInfo(&connInfo, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
 /*
  * @tc.name: AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001
  * @tc.desc: AuthGetLatestAuthSeqListByType test

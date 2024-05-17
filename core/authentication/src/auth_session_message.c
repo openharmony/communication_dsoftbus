@@ -183,9 +183,6 @@
 #define FAST_AUTH "fastauth"
 #define SOFTBUS_FAST_AUTH "support_fast_auth"
 
-/* VerifyDevice */
-#define CODE_VERIFY_DEVICE 2
-#define DEVICE_ID "DEVICE_ID"
 #define ENCRYPTED_FAST_AUTH_MAX_LEN 512
 #define ENCRYPTED_NORMALIZED_KEY_MAX_LEN 512
 #define UDID_SHORT_HASH_HEX_STR 17
@@ -203,10 +200,6 @@
 #define BLE_MAC_REFRESH_SWITCH "BLE_MAC_REFRESH_SWITCH"
 #define BLE_CONNECTION_CLOSE_DELAY (10 * 1000L)
 #define BLE_MAC_AUTO_REFRESH_SWITCH 1
-
-/* Tcp KeepALive */
-#define TIME "TIME"
-#define CODE_KEEP_ALIVE 3
 
 static void OptString(const JsonObj *json, const char * const key,
     char *target, uint32_t targetLen, const char *defaultValue)
@@ -2250,14 +2243,14 @@ static char *PackVerifyDeviceMessage(const char *uuid)
     return msg;
 }
 
-static char *PackKeepAliveMessage(const char *uuid, ModeCycle cycle)
+static char *PackKeepaliveMessage(const char *uuid, ModeCycle cycle)
 {
     JsonObj *obj = JSON_CreateObject();
     if (obj == NULL) {
         AUTH_LOGE(AUTH_FSM, "create json fail");
         return NULL;
     }
-    if (!JSON_AddInt32ToObject(obj, CODE, CODE_KEEP_ALIVE) || !JSON_AddStringToObject(obj, DEVICE_ID, uuid) ||
+    if (!JSON_AddInt32ToObject(obj, CODE, CODE_TCP_KEEPALIVE) || !JSON_AddStringToObject(obj, DEVICE_ID, uuid) ||
         !JSON_AddInt32ToObject(obj, TIME, cycle)) {
         AUTH_LOGE(AUTH_FSM, "add uuid or cycle fail");
         JSON_Delete(obj);
@@ -2303,15 +2296,12 @@ bool IsDeviceMessagePacket(const AuthConnInfo *connInfo, const AuthDataHead *hea
     AUTH_LOGI(AUTH_FSM, "messageType=%{public}d", messageParse->messageType);
     if (messageParse->messageType == CODE_VERIFY_DEVICE) {
         result = true;
-    } else if (messageParse->messageType == CODE_KEEP_ALIVE) {
-        if (!JSON_GetInt32FromOject(json, TIME, (int32_t *)&messageParse->cycle)) {
-            AUTH_LOGE(AUTH_FSM, "parse keepAlive cycle fail");
-            JSON_Delete(json);
-            SoftBusFree(decData);
-            return result;
+    }
+    if (messageParse->messageType == CODE_TCP_KEEPALIVE) {
+        if (JSON_GetInt32FromOject(json, TIME, (int32_t *)&messageParse->cycle)) {
+            AUTH_LOGI(AUTH_FSM, "parse keepalive cycle success, cycle=%{public}d", messageParse->cycle);
+            result = true;
         }
-        AUTH_LOGE(AUTH_FSM, "cycle=%{public}d", messageParse->cycle);
-        result = true;
     }
     JSON_Delete(json);
     SoftBusFree(decData);
@@ -2322,6 +2312,10 @@ int32_t PostDeviceMessage(
     const AuthManager *auth, int32_t flagRelay, AuthLinkType type, const DeviceMessageParse *messageParse)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(auth != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "auth is NULL");
+    if (messageParse == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
         AUTH_LOGE(AUTH_FSM, "type error, type=%{public}d", type);
         return SOFTBUS_ERR;
@@ -2329,8 +2323,8 @@ int32_t PostDeviceMessage(
     char *msg = NULL;
     if (messageParse->messageType == CODE_VERIFY_DEVICE) {
         msg = PackVerifyDeviceMessage(auth->uuid);
-    } else if (messageParse->messageType == CODE_KEEP_ALIVE) {
-        msg = PackKeepAliveMessage(auth->uuid, messageParse->cycle);
+    } else if (messageParse->messageType == CODE_TCP_KEEPALIVE) {
+        msg = PackKeepaliveMessage(auth->uuid, messageParse->cycle);
     }
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack verify device msg fail");

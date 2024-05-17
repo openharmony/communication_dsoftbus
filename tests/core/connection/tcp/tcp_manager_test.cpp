@@ -41,6 +41,11 @@
 
 #define CLIENTPORT 6666
 #define SERVERPORT 6667
+#define INVALID_FD (-100)
+#define KEEPALIVE_IDLE 100
+#define KEEPALIVE_IDLE_MAX 65535
+#define KEEPALIVE_INTERVAL 2
+#define KEEPALIVE_COUNT 5
 
 static const int MAXLNE = 50;
 
@@ -1552,11 +1557,11 @@ HWTEST_F(TcpManagerTest, testTcpManager045, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager046
-* @tc.desc: Test ConnSetTcpKeepAlive fd param invalid.
+* @tc.desc: Test ConnSetTcpKeepalive fd param invalid.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Nonzero
 * @tc.type: FUNC
-* @tc.require: The ConnSetTcpKeepAlive operates normally.
+* @tc.require: The ConnSetTcpKeepalive operates normally.
 */
 HWTEST_F(TcpManagerTest, testTcpManager046, TestSize.Level1)
 {
@@ -1567,16 +1572,17 @@ HWTEST_F(TcpManagerTest, testTcpManager046, TestSize.Level1)
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
-    EXPECT_EQ(ConnSetTcpKeepAlive(-100, 65535), -1);
+    EXPECT_EQ(ConnSetTcpKeepalive(INVALID_FD, KEEPALIVE_IDLE_MAX, KEEPALIVE_INTERVAL, KEEPALIVE_COUNT),
+        SOFTBUS_INVALID_PARAM);
 };
 
 /*
 * @tc.name: testTcpManager047
-* @tc.desc: Test ConnSetTcpKeepAlive second param invalid.
+* @tc.desc: Test ConnSetTcpKeepalive second param invalid.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
-* @tc.require: The ConnSetTcpKeepAlive operates normally.
+* @tc.require: The ConnSetTcpKeepalive operates normally.
 */
 HWTEST_F(TcpManagerTest, testTcpManager047, TestSize.Level1)
 {
@@ -1591,7 +1597,7 @@ HWTEST_F(TcpManagerTest, testTcpManager047, TestSize.Level1)
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = tcp->OpenServerSocket(&info);
-    EXPECT_EQ(ConnSetTcpKeepAlive(fd, 100), SOFTBUS_OK);
+    EXPECT_EQ(ConnSetTcpKeepalive(fd, KEEPALIVE_IDLE, KEEPALIVE_INTERVAL, KEEPALIVE_COUNT), SOFTBUS_OK);
 };
 
 /*
