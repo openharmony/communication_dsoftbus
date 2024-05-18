@@ -258,7 +258,7 @@ int32_t LnnSetProxyPort(NodeInfo *info, int32_t port)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "para error");
-        return SOFTBUS_OK;
+        return SOFTBUS_INVALID_PARAM;
     }
     info->connectInfo.proxyPort = port;
     return SOFTBUS_OK;
@@ -300,7 +300,7 @@ const char *LnnGetWifiCfg(const NodeInfo *info)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
-        return 0;
+        return NULL;
     }
     return info->p2pInfo.wifiCfg;
 }
@@ -322,7 +322,7 @@ const char *LnnGetChanList5g(const NodeInfo *info)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
-        return 0;
+        return NULL;
     }
     return info->p2pInfo.chanList5g;
 }
@@ -508,7 +508,7 @@ int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "para error");
-        return SOFTBUS_OK;
+        return SOFTBUS_INVALID_PARAM;
     }
     info->supportedProtocols = protocols;
     return SOFTBUS_OK;

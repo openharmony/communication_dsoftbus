@@ -1777,11 +1777,12 @@ static void TryUpdateDeviceSecurityLevel(NodeInfo *info)
 
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
-    // judge map
-    info->onlinetTimestamp = (uint64_t)LnnUpTimeMs();
     if (info == NULL) {
         return REPORT_NONE;
     }
+    // judge map
+    info->onlinetTimestamp = (uint64_t)LnnUpTimeMs();
+
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
         AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR, info->authSeqNum);
