@@ -129,7 +129,7 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_003, TestSize.Level1)
     AuthInterfaceMock authMock;
     BusCenterEventMock busCenterMock;
     ON_CALL(authMock, AuthGenRequestId()).WillByDefault(Return(1));
-    EXPECT_CALL(authMock, AuthStartVerify(_, _, _, _))
+    EXPECT_CALL(authMock, AuthStartVerify(_, _, _, _, _))
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_ERR));
     ON_CALL(busCenterMock, LnnNotifyJoinResult(_, _, _)).WillByDefault(Return());

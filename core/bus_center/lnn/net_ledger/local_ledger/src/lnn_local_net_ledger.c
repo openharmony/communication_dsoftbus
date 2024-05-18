@@ -351,6 +351,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         return SOFTBUS_OK;
     }
     info->accountId = *((int64_t *)buf);
+    UpdateStateVersionAndStore();
     return SOFTBUS_OK;
 }
 
@@ -1480,6 +1481,26 @@ int32_t LlGetStaticCapability(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+int32_t LlGetUdidHash(void *buf, uint32_t len)
+{
+    if (buf == NULL || len < UDID_HASH_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    uint8_t hash[UDID_HASH_LEN] = {0};
+    if (SoftBusGenerateStrHash((unsigned char *)info->deviceInfo.deviceUdid,
+        strlen(info->deviceInfo.deviceUdid), (unsigned char *)hash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "restore manager fail because generate strhash");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(buf, len, hash, UDID_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy cipher iv fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetIrk(void *buf, uint32_t len)
 {
     if (buf == NULL || len == 0) {
@@ -1697,6 +1718,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_NETWORK_ID_TIMESTAMP, sizeof(int64_t), LocalGetNetworkIdTimeStamp, LocalUpdateNetworkIdTimeStamp},
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
     {BYTE_KEY_STATIC_CAPABILITY, STATIC_CAP_LEN, LlGetStaticCapability, LlUpdateStaticCapability},
+    {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
