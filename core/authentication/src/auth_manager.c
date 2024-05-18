@@ -665,13 +665,17 @@ static AuthManager *AuthManagerIsExist(int64_t authSeq, const AuthSessionInfo *i
     return auth;
 }
 
-int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
-    bool isConnect)
+int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey, bool isConnect)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "sessionKey is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(&info->connInfo), SOFTBUS_INVALID_PARAM,
         AUTH_FSM, "connInfo type error");
+    int32_t sessionKeyIndex = TO_INT32(authSeq);
+    if ((info->isSupportFastAuth) && (info->version <= SOFTBUS_OLD_V2)) {
+        sessionKeyIndex = TO_INT32(info->oldIndex);
+    }
+    authSeq = isConnect ? authSeq : GenSeq(info->isServer);
     AUTH_LOGI(AUTH_FSM, "SetSessionKey: authSeq=%{public}" PRId64 ", side=%{public}s, requestId=%{public}u", authSeq,
         GetAuthSideStr(info->isServer), info->requestId);
     if (!RequireAuthLock()) {
@@ -682,17 +686,12 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         ReleaseAuthLock();
         return SOFTBUS_OK;
     }
-
     bool isNewCreated = false;
     AuthManager *auth = AuthManagerIsExist(authSeq, info, &isNewCreated);
     if (auth == NULL) {
         AUTH_LOGE(AUTH_FSM, "auth manager does not exist.");
         ReleaseAuthLock();
         return SOFTBUS_ERR;
-    }
-    int32_t sessionKeyIndex = TO_INT32(authSeq);
-    if ((info->isSupportFastAuth) && (info->version <= SOFTBUS_OLD_V2)) {
-        sessionKeyIndex = TO_INT32(info->oldIndex);
     }
     if (ProcessSessionKey(&auth->sessionKeyList, &sessionKeyIndex, authSeq, sessionKey, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "failed to add a sessionkey");
@@ -712,9 +711,8 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         auth->hasAuthPassed = true;
     }
     AUTH_LOGI(AUTH_FSM,
-        "auth manager. authId=%{public}" PRId64 ", authSeq=%{public}" PRId64
-        ", index=%{public}d, lastVerifyTime=%{public}" PRId64 ", ret=%{public}d",
-        auth->authId, authSeq, sessionKeyIndex, auth->lastVerifyTime, ret);
+        "authId=%{public}" PRId64 ", authSeq=%{public}" PRId64 ", index=%{public}d, lastVerifyTime=%{public}" PRId64,
+        auth->authId, authSeq, sessionKeyIndex, auth->lastVerifyTime);
     ReleaseAuthLock();
     return ret;
 }
