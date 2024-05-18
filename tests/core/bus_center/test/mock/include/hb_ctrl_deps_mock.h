@@ -35,7 +35,7 @@ public:
     virtual void RestartCoapDiscovery(void) = 0;
     virtual ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type) = 0;
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
-    virtual void LnnUpdateOhosAccount(void) = 0;
+    virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
     virtual int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param) = 0;
     virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
 };
@@ -50,7 +50,7 @@ public:
     MOCK_METHOD0(RestartCoapDiscovery, void (void));
     MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType (LnnHeartbeatType));
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool (void));
-    MOCK_METHOD0(LnnUpdateOhosAccount, void (void));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void (bool));
     MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(const LnnHeartbeatMediumParam *));
     MOCK_METHOD2(AuthSendKeepaliveOption, int32_t(const char *, ModeCycle));
 };

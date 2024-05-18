@@ -407,14 +407,20 @@ static void HbDelayConditionChanged(void *para)
     (void)para;
 
     LNN_LOGI(LNN_HEART_BEAT, "HB delay handle condition changed");
+    LnnUpdateSendInfoStrategy(UPDATE_HB_ACCOUNT_INFO);
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
     HbConditionChanged(false);
 }
 
 static int32_t HbTryCloudSync(void)
 {
-    NodeInfo info = { 0 };
+    NodeInfo info;
 
+    if (LnnIsDefaultOhosAccount()) {
+        LNN_LOGW(LNN_HEART_BEAT, "HB accountId is null, no need sync");
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK || LnnSaveLocalDeviceInfo(&info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB save local device info fail");
         return SOFTBUS_ERR;
@@ -446,7 +452,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     switch (lockState) {
         case SOFTBUS_SCREEN_UNLOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
-            LnnUpdateOhosAccount();
+            LnnUpdateOhosAccount(false);
             LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
                 HbTryCloudSync() == SOFTBUS_OK ? HB_START_DELAY_LEN : 0);
             break;
@@ -470,7 +476,7 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (accountState) {
         case SOFTBUS_ACCOUNT_LOG_IN:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
-            LnnUpdateOhosAccount();
+            LnnUpdateOhosAccount(false);
             LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
                 HbTryCloudSync() == SOFTBUS_OK ? HB_START_DELAY_LEN : 0);
             break;
