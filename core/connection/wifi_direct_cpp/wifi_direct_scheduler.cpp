@@ -137,7 +137,7 @@ int WifiDirectScheduler::ScheduleActiveCommand(const std::shared_ptr<WifiDirectC
         return SOFTBUS_ERR;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "create executor=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
-    executor = std::make_shared<WifiDirectExecutor>(remoteDeviceId, *this, processor, true);
+    executor = WifiDirectExecutorFactory::GetInstance().NewExecutor(remoteDeviceId, *this, processor, true);
     if (executor == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }

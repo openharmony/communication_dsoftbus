@@ -69,8 +69,11 @@ typedef enum {
 } LnnDiscServerType;
 
 typedef enum {
-    LNN_TYPE_AUTOMATIC = 1,
-    LNN_TYPE_MANUAL = 2,
+    LNN_TYPE_BLE_BROADCAST_ONLINE = 1,   // ble online by broadcast
+    LNN_TYPE_BLE_CONNECT_ONLINE = 2,   // ble online by connection
+    LNN_TYPE_WIFI_CONNECT_ONLINE = 101,  // wifi online by connection
+    LNN_TYPE_BR_CONNECT_ONLINE = 201,    // br online by connection
+    LNN_TYPE_OTHER_CONNECT_ONLINE = 301, // device online by other type connection
 } LnnType;
 
 typedef struct {

@@ -38,12 +38,11 @@ static int32_t TransSessionForEachShowInfo(int32_t fd)
 {
     if (g_sessionServerList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "session server list is empty");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
-
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     SessionServer *pos = NULL;
@@ -62,7 +61,8 @@ int32_t TransSessionMgrInit(void)
     }
     g_sessionServerList = CreateSoftBusList();
     if (g_sessionServerList == NULL) {
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_CTRL, "session manager init fail");
+        return SOFTBUS_MALLOC_ERR;
     }
 
     return SoftBusRegTransVarDump(CMD_REGISTED_SESSION_LIST, TransSessionForEachShowInfo);
@@ -132,10 +132,9 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         TRANS_LOGE(TRANS_CTRL, "not init");
         return SOFTBUS_NO_INIT;
     }
-
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     if (g_sessionServerList->cnt >= MAX_SESSION_SERVER_NUM) {
         (void)ShowSessionServer();
@@ -181,14 +180,15 @@ int32_t TransSessionServerDelItem(const char *sessionName)
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_sessionServerList == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     bool isFind = false;
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
@@ -198,6 +198,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     }
     if (isFind) {
         ListDelete(&pos->node);
+        SoftBusFree(pos);
         g_sessionServerList->cnt--;
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
@@ -264,18 +265,18 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
 {
     if (sessionName == NULL || pkgName == NULL || len == 0) {
         TRANS_LOGE(TRANS_CTRL, "param error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_sessionServerList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "session server list not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
@@ -294,7 +295,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
     Anonymize(sessionName, &tmpName);
     TRANS_LOGE(TRANS_CTRL, "not found sessionName=%{public}s.", tmpName);
     AnonymizeFree(tmpName);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
 }
 
 int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
@@ -349,14 +350,14 @@ static int32_t TransListCopy(ListNode *sessionServerList)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
     if (sessionServerList == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         SessionServer *newPos = (SessionServer *)SoftBusMalloc(sizeof(SessionServer));

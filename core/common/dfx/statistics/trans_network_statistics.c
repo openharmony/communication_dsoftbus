@@ -41,11 +41,13 @@ void AddNetworkResource(NetworkResource *networkResource)
     }
     if (SoftBusMutexLock(&g_networkResourceList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "lock failed");
+        SoftBusFree(networkResource);
         return;
     }
     if ((int32_t)g_networkResourceList->cnt >= MAX_NETWORK_RESOURCE_NUM) {
         COMM_LOGE(COMM_DFX, "network Resource out of max num");
         (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
+        SoftBusFree(networkResource);
         return;
     }
 
@@ -54,6 +56,7 @@ void AddNetworkResource(NetworkResource *networkResource)
         if (temp->laneId == networkResource->laneId) {
             COMM_LOGE(COMM_DFX, "laneId already in g_networkResourceList");
             (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
+            SoftBusFree(networkResource);
             return;
         }
     }

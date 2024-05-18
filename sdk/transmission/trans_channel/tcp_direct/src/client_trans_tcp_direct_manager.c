@@ -29,6 +29,8 @@
 #include "trans_server_proxy.h"
 
 #define HEART_TIME 300
+#define TCP_KEEPALIVE_INTERVAL 2
+#define TCP_KEEPALIVE_COUNT 5
 #define USER_TIME_OUT (305 * 1000)
 
 static SoftBusList *g_tcpDirectChannelInfoList = NULL;
@@ -233,8 +235,8 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         TRANS_LOGE(TRANS_SDK, "trans tdc create listener failed. fd=%{public}d", channel->fd);
         goto EXIT_ERR;
     }
-    if (ConnSetTcpKeepAlive(channel->fd, HEART_TIME) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepAlive failed, fd=%{public}d.", channel->fd);
+    if (ConnSetTcpKeepalive(channel->fd, HEART_TIME, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_COUNT) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepalive failed, fd=%{public}d.", channel->fd);
         goto EXIT_ERR;
     }
     if (ConnSetTcpUserTimeOut(channel->fd, USER_TIME_OUT) != SOFTBUS_OK) {

@@ -1189,7 +1189,7 @@ static int32_t CreateAndQueryMsgDelay(SoftBusLooper* looper, HandleMessageFunc c
 static void QueryStatisticInfoPeriod(SoftBusMessage* msg)
 {
     QueryStatisticInfo(msg);
-    CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_HANDLE_FILE), QueryStatisticInfoPeriod, DAY_TIME);
+    CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME);
 }
 
 int32_t SoftBusHidumperUtilInit(void)
@@ -1209,7 +1209,7 @@ int32_t SoftBusHidumperUtilInit(void)
     }
     InitSoftBusQueryEventParam();
     g_isDumperInit = true;
-    if (CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_HANDLE_FILE), QueryStatisticInfoPeriod, DAY_TIME) != SOFTBUS_OK) {
+    if (CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "CreateAndQueryMsgDelay fail");
     }
     return SOFTBUS_OK;

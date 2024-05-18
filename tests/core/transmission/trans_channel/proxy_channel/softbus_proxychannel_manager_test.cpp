@@ -1232,7 +1232,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessDataConfigTest001, Tes
     AppInfo appInfo;
     memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int32_t ret = TransProxyProcessDataConfig(nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     appInfo.businessType = BUSINESS_TYPE_MESSAGE;
     appInfo.peerData.dataConfig = 2;
     appInfo.myData.dataConfig = 1;
