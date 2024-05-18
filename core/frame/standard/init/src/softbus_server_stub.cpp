@@ -1007,7 +1007,11 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
         return SOFTBUS_IPC_ERR;
     }
 
-    infoTypeLen = sizeof(NodeBasicInfo);
+    infoTypeLen = data.ReadUint32();
+    if (infoTypeLen != sizeof(NodeBasicInfo)) {
+        COMM_LOGE(COMM_SVC, "read infoTypeLen failed!");
+        return SOFTBUS_IPC_ERR;
+    }
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == nullptr) {
         COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner malloc info type length failed");
@@ -1052,10 +1056,10 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "get info len failed!");
         return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
     }
-    int32_t len;
-    READ_PARCEL_WITH_RET(data, Int32, len, SOFTBUS_IPC_ERR);
-    if (len < infoLen) {
-        COMM_LOGE(COMM_SVC, "read len is invalid param, len=%{public}d, infoLen=%{public}d", len, infoLen);
+    uint32_t len;
+    READ_PARCEL_WITH_RET(data, Uint32, len, SOFTBUS_IPC_ERR);
+    if (len < (uint32_t)infoLen) {
+        COMM_LOGE(COMM_SVC, "invalid param, len=%{public}u, infoLen=%{public}d", len, infoLen);
         return SOFTBUS_INVALID_PARAM;
     }
     void *buf = SoftBusCalloc(infoLen);
@@ -1094,8 +1098,8 @@ int32_t SoftBusServerStub::SetNodeDataChangeFlagInner(MessageParcel &data, Messa
         COMM_LOGE(COMM_SVC, "SetNodeDataChangeFlag read networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
-    int16_t changeFlag;
-    if (!data.ReadInt16(changeFlag)) {
+    uint16_t changeFlag;
+    if (!data.ReadUint16(changeFlag)) {
         COMM_LOGE(COMM_SVC, "SetNodeDataChangeFlag read key failed!");
         return SOFTBUS_IPC_ERR;
     }
@@ -1518,6 +1522,10 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
 
     if (!data.ReadInt32(infoNum)) {
         COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo read infoNum failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if ((uint32_t)infoNum > MAX_META_NODE_NUM) {
+        COMM_LOGE(COMM_SVC, "invalid param, infoNum=%{pubilc}d, maxNum=%{pubilc}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_IPC_ERR;
     }
     if (GetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {
