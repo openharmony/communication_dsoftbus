@@ -21,9 +21,10 @@
 #include "client_trans_file_listener.c"
 #include "client_trans_session_callback.h"
 #include "client_trans_stream.h"
-#include "client_trans_udp_manager.h"
 #include "client_trans_udp_manager.c"
+#include "client_trans_udp_manager.h"
 #include "file_adapter.c"
+#include "nstackx_dfile.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 
@@ -780,5 +781,249 @@ HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level0)
     ret = TransAddNewSocketFileListener(g_mySessionName, SocketFileCallbackFuncTest, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
     TransFileDeinit();
+}
+
+/**
+ * @tc.name: FreeFileStatusListTest001
+ * @tc.desc: test free file status list
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FreeFileStatusListTest001, TestSize.Level0)
+{
+    FileEvent event;
+    event.statusList.completedList.fileCnt = 1;
+    event.statusList.notCompletedList.fileCnt = 1;
+    event.statusList.notStartedList.fileCnt = 1;
+    event.statusList.completedList.files =
+        (char **)SoftBusCalloc(event.statusList.completedList.fileCnt * sizeof(char *));
+    event.statusList.notCompletedList.files =
+        (char **)SoftBusCalloc(event.statusList.notCompletedList.fileCnt * sizeof(char *));
+    event.statusList.notStartedList.files =
+        (char **)SoftBusCalloc(event.statusList.notStartedList.fileCnt * sizeof(char *));
+
+    FreeFileStatusList(&event);
+
+    ASSERT_EQ(event.statusList.completedList.files, nullptr);
+    ASSERT_EQ(event.statusList.notCompletedList.files, nullptr);
+    ASSERT_EQ(event.statusList.notStartedList.files, nullptr);
+    SoftBusFree(event.statusList.completedList.files);
+    SoftBusFree(event.statusList.notCompletedList.files);
+    SoftBusFree(event.statusList.notStartedList.files);
+
+    FileEvent *event2 = nullptr;
+    FreeFileStatusList(event2);
+}
+
+/**
+ * @tc.name: FreeFileStatusListTest002
+ * @tc.desc: test free file status list with null files
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FreeFileStatusListTest002, TestSize.Level0)
+{
+    FileEvent event;
+    event.statusList.completedList.files = nullptr;
+    event.statusList.notCompletedList.files = nullptr;
+    event.statusList.notStartedList.files = nullptr;
+
+    FreeFileStatusList(&event);
+    ASSERT_EQ(event.statusList.completedList.files, nullptr);
+    ASSERT_EQ(event.statusList.notCompletedList.files, nullptr);
+    ASSERT_EQ(event.statusList.notStartedList.files, nullptr);
+}
+
+/**
+ * @tc.name: FillFileStatusListTest001
+ * @tc.desc: test fill file status list
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest001, TestSize.Level0)
+{
+    DFileMsg msgData;
+    FileEvent event;
+    msgData.clearPolicyFileList.fileNum = 3;
+    DFileFileInfo *fileInfo =
+        (DFileFileInfo *)SoftBusCalloc(msgData.clearPolicyFileList.fileNum * sizeof(DFileFileInfo));
+    fileInfo[0].stat = FILE_STAT_COMPLETE;
+    fileInfo[0].file = (char *)"file1";
+    fileInfo[1].stat = FILE_STAT_NOT_COMPLETE;
+    fileInfo[1].file = (char *)"file2";
+    fileInfo[2].stat = FILE_STAT_NOT_START;
+    fileInfo[2].file = (char *)"file3";
+    msgData.clearPolicyFileList.fileInfo = fileInfo;
+
+    FillFileStatusList(&msgData, &event);
+
+    // Check status list content
+    ASSERT_EQ(1, event.statusList.completedList.fileCnt);
+    ASSERT_STREQ("file1", event.statusList.completedList.files[0]);
+    ASSERT_EQ(1, event.statusList.notCompletedList.fileCnt);
+    ASSERT_STREQ("file2", event.statusList.notCompletedList.files[0]);
+    ASSERT_EQ(1, event.statusList.notStartedList.fileCnt);
+    ASSERT_STREQ("file3", event.statusList.notStartedList.files[0]);
+    SoftBusFree(fileInfo);
+}
+
+/**
+ * @tc.name: FillFileStatusListTest002
+ * @tc.desc: test fill file status list
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest002, TestSize.Level0)
+{
+    DFileMsg msgData;
+    FileEvent event;
+    msgData.clearPolicyFileList.fileNum = 0;
+
+    FillFileStatusList(&msgData, &event);
+
+    // Check status list content
+    ASSERT_EQ(nullptr, event.statusList.completedList.files);
+    ASSERT_EQ(0, event.statusList.completedList.fileCnt);
+    ASSERT_EQ(nullptr, event.statusList.notCompletedList.files);
+    ASSERT_EQ(0, event.statusList.notCompletedList.fileCnt);
+    ASSERT_EQ(nullptr, event.statusList.notStartedList.files);
+    ASSERT_EQ(0, event.statusList.notStartedList.fileCnt);
+
+    msgData.clearPolicyFileList.fileNum = MAX_FILE_NUM + 1;
+    FillFileStatusList(&msgData, &event);
+    // Check status list content
+    ASSERT_EQ(nullptr, event.statusList.completedList.files);
+    ASSERT_EQ(0, event.statusList.completedList.fileCnt);
+    ASSERT_EQ(nullptr, event.statusList.notCompletedList.files);
+    ASSERT_EQ(0, event.statusList.notCompletedList.fileCnt);
+    ASSERT_EQ(nullptr, event.statusList.notStartedList.files);
+    ASSERT_EQ(0, event.statusList.notStartedList.fileCnt);
+}
+
+/**
+ * @tc.name: FillFileStatusListTest003
+ * @tc.desc: test fill file status list
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FillFileStatusListTest003, TestSize.Level0)
+{
+    DFileMsg msgData;
+    FileEvent event;
+    msgData.clearPolicyFileList.fileNum = 3;
+    DFileFileInfo *fileInfo =
+        (DFileFileInfo *)SoftBusCalloc(msgData.clearPolicyFileList.fileNum * sizeof(DFileFileInfo));
+    fileInfo[0].stat = FILE_STAT_COMPLETE;
+    fileInfo[0].file = (char *)"file1";
+    fileInfo[1].stat = FILE_STAT_COMPLETE;
+    fileInfo[1].file = (char *)"file2";
+    fileInfo[2].stat = FILE_STAT_COMPLETE;
+    fileInfo[2].file = (char *)"file3";
+    msgData.clearPolicyFileList.fileInfo = fileInfo;
+
+    FillFileStatusList(&msgData, &event);
+
+    // Check status list content
+    ASSERT_EQ(3, event.statusList.completedList.fileCnt);
+    ASSERT_STREQ("file1", event.statusList.completedList.files[0]);
+    ASSERT_STREQ("file2", event.statusList.completedList.files[1]);
+    ASSERT_STREQ("file3", event.statusList.completedList.files[2]);
+    ASSERT_EQ(0, event.statusList.notCompletedList.fileCnt);
+    ASSERT_EQ(0, event.statusList.notStartedList.fileCnt);
+    SoftBusFree(fileInfo);
+}
+
+void MockSocketSendCallback(int32_t socket, FileEvent *event)
+{
+    (void)socket;
+    (void)event;
+}
+
+void MockSocketRecvCallback(int32_t socket, FileEvent *event)
+{
+    (void)socket;
+    (void)event;
+}
+
+void InitDFileMsg(DFileMsg *msgData)
+{
+    msgData->fileList.files = nullptr;
+    msgData->fileList.fileNum = 0;
+    msgData->clearPolicyFileList.fileNum = 0;
+    msgData->clearPolicyFileList.fileInfo = nullptr;
+    msgData->errorCode = 0;
+    msgData->transferUpdate.bytesTransferred = 0;
+    msgData->transferUpdate.totalBytes = 0;
+    msgData->transferUpdate.transId = 0;
+    msgData->rate = 0;
+}
+
+/**
+ * @tc.name: NotifySocketSendResultTest001
+ * @tc.desc: test notify socket send result
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, NotifySocketSendResultTest001, TestSize.Level0)
+{
+    int32_t socket = 1;
+    DFileMsg msgData;
+    InitDFileMsg(&msgData);
+    FileListener listener;
+    listener.socketSendCallback = MockSocketSendCallback;
+    listener.socketRecvCallback = MockSocketRecvCallback;
+
+    NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, &listener);
+    NotifySocketSendResult(socket, DFILE_ON_FILE_SEND_SUCCESS, &msgData, &listener);
+    NotifySocketSendResult(socket, DFILE_ON_FILE_SEND_FAIL, &msgData, &listener);
+    NotifySocketSendResult(socket, DFILE_ON_CLEAR_POLICY_FILE_LIST, &msgData, &listener);
+    NotifySocketSendResult(socket, DFILE_ON_CONNECT_FAIL, &msgData, &listener);
+
+    NotifySocketRecvResult(socket, DFILE_ON_FILE_LIST_RECEIVED, &msgData, &listener);
+    NotifySocketRecvResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, &listener);
+    NotifySocketRecvResult(socket, DFILE_ON_FILE_RECEIVE_SUCCESS, &msgData, &listener);
+    NotifySocketRecvResult(socket, DFILE_ON_FILE_RECEIVE_FAIL, &msgData, &listener);
+    NotifySocketRecvResult(socket, DFILE_ON_CLEAR_POLICY_FILE_LIST, &msgData, &listener);
+    NotifySocketRecvResult(socket, DFILE_ON_CONNECT_FAIL, &msgData, &listener);
+}
+
+/**
+ * @tc.name: FillFileEventErrorCodeTest
+ * @tc.desc: test fill file event error code
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest, TestSize.Level0)
+{
+    DFileMsg msgData;
+    FileEvent event;
+
+    msgData.errorCode = NSTACKX_EOK;
+    FillFileEventErrorCode(&msgData, &event);
+    ASSERT_EQ(SOFTBUS_OK, event.errorCode);
+
+    msgData.errorCode = NSTACKX_EPERM;
+    FillFileEventErrorCode(&msgData, &event);
+    ASSERT_EQ(SOFTBUS_TRANS_FILE_PERMISSION_DENIED, event.errorCode);
+
+    msgData.errorCode = NSTACKX_EDQUOT;
+    FillFileEventErrorCode(&msgData, &event);
+    ASSERT_EQ(SOFTBUS_TRANS_FILE_DISK_QUOTA_EXCEEDED, event.errorCode);
+
+    msgData.errorCode = NSTACKX_ENOMEM;
+    FillFileEventErrorCode(&msgData, &event);
+    ASSERT_EQ(SOFTBUS_TRANS_FILE_NO_MEMORY, event.errorCode);
+
+    msgData.errorCode = NSTACKX_ENETDOWN;
+    FillFileEventErrorCode(&msgData, &event);
+    ASSERT_EQ(SOFTBUS_TRANS_FILE_NETWORK_ERROR, event.errorCode);
+
+    msgData.errorCode = NSTACKX_EEXIST;
+    FillFileEventErrorCode(&msgData, &event);
+    ASSERT_EQ(SOFTBUS_TRANS_FILE_EXISTED, event.errorCode);
+
+    msgData.errorCode = NSTACKX_NOTSUPPORT;
+    FillFileEventErrorCode(&msgData, &event);
+    ASSERT_EQ(NSTACKX_NOTSUPPORT, event.errorCode);
 }
 }

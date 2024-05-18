@@ -284,6 +284,12 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_MSG_EMPTY_LIST, // list is empty
     SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT, // stop bind by timeout
     SOFTBUS_TRANS_MSG_NOT_SET_SCREEN_OFF, // send broadcast failed when screen flag is false
+    SOFTBUS_TRANS_FILE_PERMISSION_DENIED, // file permission denied
+    SOFTBUS_TRANS_FILE_DISK_QUOTA_EXCEEDED, // disk quota exceeded
+    SOFTBUS_TRANS_FILE_NO_MEMORY, // no memory
+    SOFTBUS_TRANS_FILE_NETWORK_ERROR, // network error
+    SOFTBUS_TRANS_FILE_NOT_FOUND, // file not found
+    SOFTBUS_TRANS_FILE_EXISTED, // file existed
     SOFTBUS_TRANS_INVALID_UUID,
     SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL,
     SOFTBUS_TRANS_PROXY_READINT_FAILED,
