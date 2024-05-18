@@ -44,7 +44,7 @@ static SoftBusList *g_pendingList[PENDING_TYPE_BUTT] = {NULL, NULL};
 static int32_t IsPendingListTypeLegal(int type)
 {
     if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -54,12 +54,13 @@ int32_t PendingInit(int type)
     int32_t ret = IsPendingListTypeLegal(type);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "type illegal. type=%{public}d ", type);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     g_pendingList[type] = CreateSoftBusList();
     if (g_pendingList[type] == NULL) {
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SVC, "pending init fail");
+        return SOFTBUS_MALLOC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -113,10 +114,10 @@ static void ReleasePendingItem(PendingPktInfo *item)
 
 int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 {
-    int32_t result = IsPendingListTypeLegal(type);
-    if (result != SOFTBUS_OK) {
+    int32_t ret = IsPendingListTypeLegal(type);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "type illegal. type=%{public}d", type);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     PendingPktInfo *item = NULL;
@@ -161,7 +162,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
         SoftBusCondWait(&item->cond, &item->lock, &outtime);
     }
 
-    int32_t ret = SOFTBUS_OK;
+    ret = SOFTBUS_OK;
     if (item->status != PACKAGE_STATUS_FINISHED) {
         ret = SOFTBUS_TIMOUT;
     }
@@ -181,17 +182,17 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
     int32_t ret = IsPendingListTypeLegal(type);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "type illegal. type=%{public}d", type);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "pending type list not inited. type=%{public}d", type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND;
     }
     if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "set pendind lock failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     PendingPktInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
@@ -211,17 +212,17 @@ int32_t DelPendingPacket(int32_t channelId, int type)
     int32_t ret = IsPendingListTypeLegal(type);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "type illegal. type=%{public}d", type);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "pending type list not inited. type=%{public}d", type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND;
     }
     if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "del pendind lock failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     PendingPktInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {

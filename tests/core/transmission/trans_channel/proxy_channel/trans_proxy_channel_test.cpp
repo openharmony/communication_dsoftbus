@@ -377,7 +377,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest001, TestSize.Level1)
 
     TestAddTestProxyChannel();
     int ret = TransProxyResetPeer(&info);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
     TestDelTestProxyChannel();
 }
 
@@ -399,7 +399,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest002, TestSize.Level1)
 
     TestAddTestProxyChannel(1);
     int ret = TransProxyResetPeer(&info);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
     TestDelTestProxyChannel();
 }
 

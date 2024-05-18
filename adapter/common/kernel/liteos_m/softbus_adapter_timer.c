@@ -110,3 +110,8 @@ uint64_t SoftBusGetSysTimeMs(void)
     uint64_t ms = (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
     return ms;
 }
+
+const char *SoftBusFormatTimestamp(uint64_t timestamp)
+{
+    return "0000-00-00 00:00:00.000";
+}

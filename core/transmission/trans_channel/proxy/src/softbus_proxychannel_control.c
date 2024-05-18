@@ -313,7 +313,7 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
         TRANS_LOGE(TRANS_CTRL, "send reset buf fail");
         extra.result = EVENT_STAGE_RESULT_FAILED;
         TRANS_EVENT(EVENT_SCENE_TRANS_PROXY_RESET_PEER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
-        return SOFTBUS_ERR;
+        return ret;
     }
     TRANS_EVENT(EVENT_SCENE_TRANS_PROXY_RESET_PEER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
     return SOFTBUS_OK;

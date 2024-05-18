@@ -596,7 +596,6 @@ static void DfxRecordLnnServerjoinStart(const ConnectionAddr *addr, const char *
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
-    extra.lnnType = needReportFailure ? LNN_TYPE_MANUAL : LNN_TYPE_AUTOMATIC;
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
@@ -659,16 +658,17 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
     }
     LNN_LOGI(LNN_BUILDER, "addr same to before, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
     ConnectionAddr addr = para->addr;
-    SoftBusFree((void *)para);
     if (addr.type != CONNECTION_ADDR_WLAN ||
         !IsNeedWifiReauth(connFsm->connInfo.peerNetworkId, addr.peerUid, MAX_ACCOUNT_HASH_LEN)) {
         LNN_LOGI(LNN_BUILDER, "account not change no need reauth");
+        SoftBusFree((void *)para);
         return SOFTBUS_OK;
     }
     AuthConnInfo authConn;
     uint32_t requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&addr, &authConn);
     DfxRecordLnnAuthStart(&authConn, para, requestId);
+    SoftBusFree((void *)para);
     if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
         return SOFTBUS_ERR;

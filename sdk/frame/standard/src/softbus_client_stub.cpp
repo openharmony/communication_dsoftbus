@@ -436,14 +436,7 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    char *infoData = (char *)SoftBusMalloc(len);
-    if (infoData == NULL) {
-        COMM_LOGE(COMM_SDK, "malloc infoData failed!");
-        return SOFTBUS_ERR;
-    }
-    memcpy_s(infoData, len, dataInfo, len);
-    int ret = OnChannelMsgReceived(channelId, channelType, infoData, len, type);
-    SoftBusFree(infoData);
+    int ret = OnChannelMsgReceived(channelId, channelType, dataInfo, len, type);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner write reply failed!");
@@ -594,6 +587,7 @@ int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, Me
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnNodeOnlineStateChanged(pkgName, isOnline, info, infoTypeLen);
+    COMM_LOGI(COMM_SDK, "notify complete, pkgName=%{public}s, isOnline=%{public}d", pkgName, isOnline);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SDK, "OnNodeOnlineStateChangedInner write reply failed!");
         return SOFTBUS_ERR;

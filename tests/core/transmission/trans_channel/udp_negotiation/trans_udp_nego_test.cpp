@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,11 +184,11 @@ HWTEST_F(TransUdpNegoTest, TransUnpackReplyErrInfo001, TestSize.Level1)
     int32_t errCode = 0;
     string msgStr = "ProcessMessage";
     int32_t ret = TransUnpackReplyErrInfo(NULL, NULL);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     cJSON *msg = cJSON_Parse((char *)msgStr.c_str());
     ret = TransUnpackReplyErrInfo(msg, &errCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_Delete(msg);
 }
 
@@ -206,10 +206,10 @@ HWTEST_F(TransUdpNegoTest, TransPackReplyErrInfo001, TestSize.Level1)
     const char* errDesc = "errDesc";
 
     int32_t ret = TransPackReplyErrInfo(NULL, errCode, NULL);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransPackReplyErrInfo(msg, errCode, errDesc);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(msg);
 }
 
@@ -226,10 +226,10 @@ HWTEST_F(TransUdpNegoTest, sendUdpInfo001, TestSize.Level1)
     string msg = "ProcessMessage";
     cJSON *replyMsg = cJSON_Parse((char *)msg.c_str());
     int32_t ret = sendUdpInfo(NULL, authHandle, seq);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     authHandle.authId = 0;
     ret = sendUdpInfo(replyMsg, authHandle, 0);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_Delete(replyMsg);
 }
 
@@ -602,6 +602,10 @@ HWTEST_F(TransUdpNegoTest, PrepareAppInfoForUdpOpen001, TestSize.Level1)
 
     int32_t ret = PrepareAppInfoForUdpOpen(&connOpt, &invalidInfo, &channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    connOpt.type = CONNECT_HML;
+    ret = PrepareAppInfoForUdpOpen(&connOpt, &invalidInfo, &channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -648,24 +652,24 @@ HWTEST_F(TransUdpNegoTest, NotifyUdpChannelOpened001, TestSize.Level1)
     ASSERT_TRUE(appInfo != nullptr);
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
     ret = NotifyUdpChannelOpened(appInfo, isServerSide);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     isServerSide = false;
     (void)memcpy_s(&appInfo->myData.pkgName, PKG_NAME_SIZE_MAX,
         "com.invalid pkgName", sizeof("com.invalid pkgName"));
     appInfo->myData.pid = 0;
     ret = NotifyUdpChannelOpened(appInfo, isServerSide);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     (void)memcpy_s(&appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX,
         "com.session sessionName", sizeof("com.invalid sessionName"));
     ret = NotifyUdpChannelOpened(appInfo, isServerSide);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     (void)memcpy_s(&appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX,
         "com.invalid.deviceid", sizeof("com.invalid.deviceid"));
     ret = NotifyUdpChannelOpened(appInfo, isServerSide);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     SoftBusFree(appInfo);
 }
@@ -750,7 +754,7 @@ HWTEST_F(TransUdpNegoTest, AcceptUdpChannelAsClient001, TestSize.Level1)
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
 
     int32_t ret = AcceptUdpChannelAsClient(appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     SoftBusFree(appInfo);
     SoftBusFree(channel);
 }
@@ -775,11 +779,11 @@ HWTEST_F(TransUdpNegoTest, ProcessUdpChannelState001, TestSize.Level1)
 
     isServerSide = false;
     ret = ProcessUdpChannelState(appInfo, isServerSide);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     appInfo->udpChannelOptType = TYPE_INVALID_CHANNEL;
     ret = ProcessUdpChannelState(appInfo, isServerSide);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
 
     SoftBusFree(appInfo);
     SoftBusFree(channel);
