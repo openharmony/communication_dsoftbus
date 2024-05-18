@@ -60,7 +60,7 @@ typedef struct {
 } DeviceMessageParse;
 
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
-    bool isConnect);
+    bool isConnect, bool isOldKey);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);
 
 void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info);
@@ -101,6 +101,7 @@ int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_
     uint32_t *outLen);
 int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac);
 
+int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo *info);
 int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request);
 int32_t AuthDeviceGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);

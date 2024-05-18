@@ -386,8 +386,9 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         return true;
     }
     AuthDeviceKeyInfo keyInfo = { 0 };
-    if (AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
-        AuthFindLatestNormalizeKey(device->devId, &keyInfo) != SOFTBUS_OK) {
+    if (!IsFeatureSupport(deviceInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO) &&
+        AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
+        AuthFindLatestNormalizeKey(device->devId, &keyInfo, true) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
         return true;
     }
@@ -470,7 +471,7 @@ static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *stored
     uint32_t requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
     DfxRecordHeartBeatAuthStart(&authConn, LNN_DEFAULT_PKG_NAME, requestId);
-    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "AuthStartVerify error");
         return SOFTBUS_ERR;
     }
