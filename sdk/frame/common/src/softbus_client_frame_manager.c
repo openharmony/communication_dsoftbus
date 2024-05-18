@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -214,22 +214,18 @@ ERR_EXIT:
 
 int32_t InitSoftBus(const char *pkgName)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
-        COMM_LOGE(COMM_SDK, "init softbus sdk fail. Package name is empty or length exceeds");
-        return SOFTBUS_INVALID_PKGNAME;
-    }
-    if (SoftBusMutexInit(&g_pkgNameLock, NULL) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "lock init pkgName failed");
-        return SOFTBUS_LOCK_ERR;
-    }
-    if ((!g_isInited) && (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK)) {
-        COMM_LOGE(COMM_SDK, "lock init failed");
-        return SOFTBUS_LOCK_ERR;
-    }
-    if (SoftBusMutexLock(&g_isInitedLock) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "lock failed");
-        return SOFTBUS_LOCK_ERR;
-    }
+    CHECK_AND_RETURN_RET_LOG_INNER(IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1),
+        SOFTBUS_INVALID_PKGNAME, COMM_LOGE, COMM_SDK, "init softbus sdk fail.Package name is empty or length exceeds");
+
+    CHECK_AND_RETURN_RET_LOG_INNER(SoftBusMutexInit(
+        &g_pkgNameLock, NULL) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_LOGE, COMM_SDK, "lock init pkgName failed");
+
+    CHECK_AND_RETURN_RET_LOG_INNER((g_isInited || SoftBusMutexInit(
+        &g_isInitedLock, NULL) == SOFTBUS_OK), SOFTBUS_LOCK_ERR, COMM_LOGE, COMM_SDK, "lock init failed");
+
+    CHECK_AND_RETURN_RET_LOG_INNER(
+        SoftBusMutexLock(&g_isInitedLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_LOGE, COMM_SDK, "lock failed");
+
     if (g_isInited) {
         (void)ClientRegisterPkgName(pkgName);
         SoftBusMutexUnlock(&g_isInitedLock);

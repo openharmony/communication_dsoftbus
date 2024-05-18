@@ -425,10 +425,10 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
     };
     CONN_EVENT(EVENT_SCENE_START_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
     CONN_CHECK_AND_RETURN_RET_LOGW(info != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "info is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(info->type == CONNECT_TCP || info->type == CONNECT_P2P, SOFTBUS_INVALID_PARAM,
-        CONN_COMMON, "only CONNECT_TCP and CONNECT_P2P is permitted, "
-                     "CONNECT_TCP=%{public}d, CONNECT_P2P=%{public}d, type=%{public}d",
-        CONNECT_TCP, CONNECT_P2P, info->type);
+    CONN_CHECK_AND_RETURN_RET_LOGW(info->type == CONNECT_TCP || info->type == CONNECT_P2P || info->type == CONNECT_HML,
+        SOFTBUS_INVALID_PARAM, CONN_COMMON, "only CONNECT_TCP, CONNECT_P2P and CONNECT_HML is permitted, "
+        "CONNECT_TCP=%{public}d, CONNECT_P2P=%{public}d, CONNECT_HML=%{public}d, type=%{public}d",
+        CONNECT_TCP, CONNECT_P2P, CONNECT_HML, info->type);
     CONN_CHECK_AND_RETURN_RET_LOGW(info->socketOption.port >= 0, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "port is invalid, port=%{public}d", info->socketOption.port);
     CONN_CHECK_AND_RETURN_RET_LOGW(info->socketOption.moduleId >= 0 && info->socketOption.moduleId < UNUSE_BUTT,

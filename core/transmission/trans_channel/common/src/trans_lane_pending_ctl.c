@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_distributed_net_ledger.h"
+#include "permission_entry.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -46,6 +47,7 @@
 
 #define SESSION_NAME_DBD "distributeddata-default"
 #define SESSION_NAME_DSL "device.security.level"
+#define SESSION_NAME_DSL2_RE "com.*security.devicesec"
 #define MESH_MAGIC_NUMBER 0x5A5A5A5A
 
 typedef struct {
@@ -70,7 +72,7 @@ int32_t TransReqLanePendingInit(void)
     g_reqLanePendingList = CreateSoftBusList();
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "g_reqLanePendingList is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -80,7 +82,7 @@ int32_t TransAsyncReqLanePendingInit(void)
     g_asyncReqLanePendingList = CreateSoftBusList();
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "g_asyncReqLanePendingList is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -166,7 +168,7 @@ static int32_t TransDelLaneReqFromPendingList(uint32_t laneHandle, bool isAsync)
     SoftBusList *pendingList = isAsync ? g_asyncReqLanePendingList : g_reqLanePendingList;
     if (pendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (SoftBusMutexLock(&(pendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
@@ -200,7 +202,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneHandle)
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     TransReqLaneItem *item = (TransReqLaneItem *)SoftBusCalloc(sizeof(TransReqLaneItem));
@@ -208,7 +210,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneHandle)
         TRANS_LOGE(TRANS_SVC, "malloc lane request item err.");
         return SOFTBUS_MALLOC_ERR;
     }
-    item->errCode = SOFTBUS_ERR;
+    item->errCode = SOFTBUS_MALLOC_ERR;
     item->laneHandle = laneHandle;
     item->bSucc = false;
     item->isFinished = false;
@@ -218,11 +220,11 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneHandle)
         TRANS_LOGE(TRANS_SVC, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    if (SoftBusCondInit(&item->cond) != 0) {
+    if (SoftBusCondInit(&item->cond) != SOFTBUS_OK) {
         SoftBusFree(item);
         (void)SoftBusMutexUnlock(&g_reqLanePendingList->lock);
         TRANS_LOGE(TRANS_SVC, "cond init failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     ListInit(&(item->node));
     ListAdd(&(g_reqLanePendingList->list), &(item->node));
@@ -329,7 +331,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
 {
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     TransReqLaneItem *item = (TransReqLaneItem *)SoftBusCalloc(sizeof(TransReqLaneItem));
@@ -337,7 +339,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
         TRANS_LOGE(TRANS_SVC, "malloc lane request item err.");
         return SOFTBUS_MALLOC_ERR;
     }
-    item->errCode = SOFTBUS_ERR;
+    item->errCode = SOFTBUS_MALLOC_ERR;
     item->laneHandle = laneHandle;
     item->bSucc = false;
     item->isFinished = false;
@@ -371,7 +373,7 @@ static int32_t TransGetLaneReqItemByLaneHandle(uint32_t laneHandle, bool *bSucc,
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_reqLanePendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed.");
@@ -405,7 +407,7 @@ static int32_t TransGetLaneReqItemParamByLaneHandle(
     }
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_asyncReqLanePendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed.");
@@ -454,7 +456,7 @@ static int32_t TransUpdateLaneConnInfoByLaneHandle(uint32_t laneHandle, bool bSu
             if ((connInfo != NULL) &&
                 (memcpy_s(&(item->connInfo), sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK)) {
                 (void)SoftBusMutexUnlock(&(pendingList->lock));
-                return SOFTBUS_ERR;
+                return SOFTBUS_MEM_ERR;
             }
             item->isFinished = true;
             if (!isAsync) {
@@ -518,7 +520,8 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         goto EXIT_ERR;
     }
     TransSetSocketChannelStateByChannel(transInfo.channelId, transInfo.channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
-    if (((ChannelType)transInfo.channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
+    if (((ChannelType)transInfo.channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P) &&
+        (connOpt.type != CONNECT_HML)) {
         TransFreeLane(laneHandle, param->isQosLane);
     } else if (TransLaneMgrAddLane(transInfo.channelId, transInfo.channelType, connInnerInfo,
         laneHandle, param->isQosLane, &(appInfo->myData)) != SOFTBUS_OK) {
@@ -693,6 +696,23 @@ static bool IsShareSession(const char *sessionName)
     return true;
 }
 
+static bool IsDslSession(const char *sessionName)
+{
+    if (sessionName == NULL) {
+        return false;
+    }
+
+    if (strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0) {
+        return true;
+    }
+
+    if (CompareString(SESSION_NAME_DSL2_RE, sessionName, true) == SOFTBUS_OK) {
+        return true;
+    }
+
+    return false;
+}
+
 static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionName)
 {
     uint32_t authCapacity;
@@ -702,8 +722,7 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
     }
     TRANS_LOGD(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
     if (authCapacity == 0 &&
-        (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 ||
-        strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0)) {
+        (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 || IsDslSession(sessionName))) {
         return true;
     }
     return false;
@@ -711,13 +730,10 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
 
 static bool IsMeshSync(const char *sessionName)
 {
-    uint32_t dslSessionLen = strlen(SESSION_NAME_DSL);
-    if (strlen(sessionName) < dslSessionLen ||
-        strncmp(sessionName, SESSION_NAME_DSL, dslSessionLen) != 0) {
-        return false;
+    if (IsDslSession(sessionName)) {
+        return true;
     }
-    TRANS_LOGI(TRANS_SVC, "dsl module");
-    return true;
+    return false;
 }
 
 static void ModuleLaneAdapter(LanePreferredLinkList *preferred)
@@ -891,9 +907,10 @@ static int32_t TransSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint
     }
 
     SoftBusSysTime now;
-    if (SoftBusGetTime(&now) != SOFTBUS_OK) {
+    int32_t ret = SoftBusGetTime(&now);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans softbus get time failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     int64_t usTime = now.sec * CONVERSION_BASE * CONVERSION_BASE + now.usec + (int32_t)timeMillis * CONVERSION_BASE;
     SoftBusSysTime tv;
@@ -907,7 +924,7 @@ static int32_t TransWaitingRequestCallback(uint32_t laneHandle)
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_reqLanePendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed.");
@@ -957,9 +974,10 @@ static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneHandle, const Lan
         return ret;
     }
     TRANS_LOGI(TRANS_SVC, "add laneHandle to pending and start waiting. laneHandle=%{public}u", laneHandle);
-    if (TransWaitingRequestCallback(laneHandle) != SOFTBUS_OK) {
+    ret = TransWaitingRequestCallback(laneHandle);
+    if (ret != SOFTBUS_OK) {
         (void)TransDelLaneReqFromPendingList(laneHandle, false);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -987,9 +1005,10 @@ static int32_t TransAddLaneAllocToPendingAndWaiting(uint32_t laneHandle, const L
         return ret;
     }
     TRANS_LOGI(TRANS_SVC, "add laneHandle to pending and start waiting. laneHandle=%{public}u", laneHandle);
-    if (TransWaitingRequestCallback(laneHandle) != SOFTBUS_OK) {
+    ret = TransWaitingRequestCallback(laneHandle);
+    if (ret != SOFTBUS_OK) {
         (void)TransDelLaneReqFromPendingList(laneHandle, false);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -1250,6 +1269,7 @@ static int32_t SetP2pConnInfo(const P2pConnInfo *p2pInfo, ConnectOption *connOpt
     connOpt->socketOption.port = -1;
     return SOFTBUS_OK;
 }
+
 static int32_t SetP2pReusesConnInfo(const WlanConnInfo *connInfo, ConnectOption *connOpt)
 {
     connOpt->type = CONNECT_P2P_REUSE;
@@ -1331,9 +1351,9 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
 {
     if (info == NULL || connOpt == NULL) {
         TRANS_LOGW(TRANS_SVC, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (info->type == LANE_P2P || info->type == LANE_HML) {
+    if (info->type == LANE_P2P) {
         return SetP2pConnInfo(&(info->connInfo.p2p), connOpt);
     } else if (info->type == LANE_WLAN_2P4G || info->type == LANE_WLAN_5G || info->type == LANE_ETH) {
         return SetWlanConnInfo(&(info->connInfo.wlan), connOpt);

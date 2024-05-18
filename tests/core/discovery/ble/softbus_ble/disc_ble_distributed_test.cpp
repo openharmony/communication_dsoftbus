@@ -201,14 +201,14 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter002, TestSize.Level1)
     int32_t ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    // when not reportInfo->packet.bcData.id == BLE_UUID
+    // when not reportInfo->packet.bcData.id == SERVICE_UUID
     reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
-    reportInfo.packet.bcData.id = BLE_UUID + 1;
+    reportInfo.packet.bcData.id = SERVICE_UUID + 1;
     ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     // when not advData[POS_VERSION] == BLE_VERSION
-    reportInfo.packet.bcData.id = BLE_UUID;
+    reportInfo.packet.bcData.id = SERVICE_UUID;
     reportInfo.packet.bcData.payload[POS_VERSION] = BLE_VERSION + 1;
     ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -219,9 +219,9 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter002, TestSize.Level1)
     ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    // when not reportInfo->packet.rspData.id == COMPANY_ID
+    // when not reportInfo->packet.rspData.id == MANU_COMPANY_ID
     reportInfo.packet.rspData.type = BC_DATA_TYPE_SERVICE;
-    reportInfo.packet.rspData.id = COMPANY_ID + 1;
+    reportInfo.packet.rspData.id = MANU_COMPANY_ID + 1;
     ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
@@ -249,13 +249,13 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter003, TestSize.Level1)
                 .payload = &payload[0],
                 .payloadLen = POS_TLV,
                 .type = BC_DATA_TYPE_SERVICE,
-                .id = BLE_UUID,
+                .id = SERVICE_UUID,
             },
             .rspData = {
                 .payload = &payload[0],
                 .payloadLen = POS_TLV,
                 .type = BC_DATA_TYPE_MANUFACTURER,
-                .id = COMPANY_ID,
+                .id = MANU_COMPANY_ID,
             },
         },
     };
@@ -400,7 +400,7 @@ HWTEST_F(DiscDistributedBleTest, TestBuildBleConfigAdvData001, TestSize.Level1)
     broadcastData.dataLen = ADV_DATA_MAX_LEN + 1;
     ret = BuildBleConfigAdvData(&broadcastPacket, &broadcastData);
     EXPECT_EQ(broadcastPacket.rspData.type, BC_DATA_TYPE_MANUFACTURER);
-    EXPECT_EQ(broadcastPacket.rspData.id, COMPANY_ID);
+    EXPECT_EQ(broadcastPacket.rspData.id, MANU_COMPANY_ID);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();

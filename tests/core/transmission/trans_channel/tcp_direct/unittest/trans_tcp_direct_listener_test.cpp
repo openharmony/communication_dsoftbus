@@ -138,7 +138,7 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnConnectEventTest001, TestSize.Level1)
     int cfd = NORMAL_FD;
 
     int32_t ret = TdcOnConnectEvent(module, cfd, clientAddr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 }
 
 /**

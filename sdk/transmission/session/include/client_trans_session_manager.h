@@ -92,6 +92,7 @@ typedef struct {
     bool isEncyptedRawStream;
     bool isAsync;
     SocketLifecycleData lifecycle;
+    uint32_t actionId;
 } SessionInfo;
 
 typedef struct {
@@ -120,6 +121,7 @@ typedef enum {
     KEY_PEER_PID,
     KEY_PEER_UID,
     KEY_PKG_NAME,
+    KEY_ACTION_ID,
 } SessionKey;
 
 typedef enum {
@@ -211,6 +213,8 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
 
 int32_t ClientIpcOpenSession(
     int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo, bool isAsync);
+
+int32_t ClientSetActionIdBySessionId(int32_t sessionId, uint32_t actionId);
 
 int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRole role);
 

@@ -33,6 +33,8 @@
 #include "wifi_direct_manager.h"
 
 #define HANDSHAKE_TIMEOUT 19
+#define NETWORK_ID_LEN 7
+#define HML_IP_PREFIX "172.30."
 
 static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
 {
@@ -178,13 +180,13 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
             TRANS_LOGE(TRANS_INIT, "init p2p direct channel failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NO_INIT;
         }
         TRANS_LOGW(TRANS_INIT, "p2p direct channel not support.");
     }
     if (TransSrvDataListInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init srv trans tcp direct databuf list failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (TransTdcSetCallBack(cb) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "set srv trans tcp dierct call failed");
@@ -290,11 +292,16 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         TRANS_LOGI(TRANS_CTRL, "goto WIFI_STA");
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
+
+    ConnectType connType = connInfo->type;
+    if (connType == CONNECT_P2P_REUSE) {
+        connType = (strncmp(appInfo->myData.addr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) ? CONNECT_HML : CONNECT_P2P;
+    }
     TransEventExtra extra = {
         .peerNetworkId = NULL,
         .calleePkg = NULL,
         .callerPkg = NULL,
-        .linkType = connInfo->type,
+        .linkType = connType,
         .channelType = CHANNEL_TYPE_TCP_DIRECT,
         .channelId = *channelId,
         .errcode = ret,

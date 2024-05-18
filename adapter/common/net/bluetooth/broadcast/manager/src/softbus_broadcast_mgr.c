@@ -1742,6 +1742,7 @@ int32_t BroadcastGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->GetBroadcastHandle != NULL,
                                    SOFTBUS_BC_MGR_FUNC_NULL, DISC_BLE, "function is null!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckBcIdIsValid(bcId), SOFTBUS_INVALID_PARAM, DISC_BLE, "bcId is invalid!");
 
     int32_t ret = g_interface[g_interfaceId]->GetBroadcastHandle(g_bcManager[bcId].adapterBcId, bcHandle);
     if (ret != SOFTBUS_OK) {

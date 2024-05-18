@@ -34,9 +34,6 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
-#define DATA_TYPE_MASK 0xF0
-#define DATA_LENGTH_MASK 0x0F
-#define BYTE_SHIFT 4
 #define CUST_CAPABILITY_LEN 2
 #define WIDE_CHAR_MAX_LEN 8
 #define WIDE_STR_MAX_LEN 128
@@ -255,9 +252,9 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
         DISC_LOGE(DISC_BLE, "tlv remainLen is 0.");
         return SOFTBUS_DISCOVER_BLE_ASSEMBLE_DATA_FAIL;
     }
-    broadcastData->data.data[broadcastData->dataLen] = (dataType << BYTE_SHIFT) & DATA_TYPE_MASK;
+    broadcastData->data.data[broadcastData->dataLen] = (dataType << BYTE_SHIFT_4BIT) & MOST_SIGNIFICANT_4BIT_MASK;
     if (dataLen <= TLV_MAX_DATA_LEN) {
-        broadcastData->data.data[broadcastData->dataLen] |= dataLen & DATA_LENGTH_MASK;
+        broadcastData->data.data[broadcastData->dataLen] |= dataLen & LEAST_SIGNIFICANT_4BIT_MASK;
     }
     broadcastData->dataLen += 1;
     remainLen -= 1;
@@ -399,8 +396,8 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
     uint32_t curLen = 0;
     int32_t ret = SOFTBUS_OK;
     while (curLen < dataLen) {
-        uint8_t type = (data[curLen] & DATA_TYPE_MASK) >> BYTE_SHIFT;
-        uint32_t len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
+        uint8_t type = (data[curLen] & MOST_SIGNIFICANT_4BIT_MASK) >> BYTE_SHIFT_4BIT;
+        uint32_t len = (uint32_t)(data[curLen] & LEAST_SIGNIFICANT_4BIT_MASK);
         if (curLen + TL_LEN + len > dataLen || (len == TLV_VARIABLE_DATA_LEN && curLen + TL_LEN  >= dataLen)) {
             DISC_LOGE(DISC_BLE,
                 "unexperted advData: out of range, "

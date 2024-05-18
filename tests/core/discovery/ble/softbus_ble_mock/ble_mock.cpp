@@ -375,9 +375,9 @@ void BleMock::InjectPassiveNonPacket()
         constexpr uint32_t advLen = sizeof(passivePublishAdvData);
         constexpr uint32_t rspLen = sizeof(passivePublishRspData);
         BroadcastReportInfo reportInfo = {};
-        reportInfo.packet.bcData.id = BLE_UUID;
+        reportInfo.packet.bcData.id = SERVICE_UUID;
         reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
-        reportInfo.packet.rspData.id = COMPANY_ID;
+        reportInfo.packet.rspData.id = MANU_COMPANY_ID;
         reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
         reportInfo.packet.bcData.payload = &passivePublishAdvData[0];
         reportInfo.packet.bcData.payloadLen = advLen;
@@ -393,9 +393,9 @@ void BleMock::InjectActiveNonPacket()
         constexpr uint32_t advLen = sizeof(activePublishAdvData);
         constexpr uint32_t rspLen = sizeof(activePublishRspData);
         BroadcastReportInfo reportInfo = {};
-        reportInfo.packet.bcData.id = BLE_UUID;
+        reportInfo.packet.bcData.id = SERVICE_UUID;
         reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
-        reportInfo.packet.rspData.id = COMPANY_ID;
+        reportInfo.packet.rspData.id = MANU_COMPANY_ID;
         reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
         reportInfo.packet.bcData.payload = &activePublishAdvData[0];
         reportInfo.packet.bcData.payloadLen = advLen;
@@ -411,9 +411,9 @@ void BleMock::InjectActiveConPacket()
         constexpr uint32_t advLen = sizeof(activeDiscoveryAdvData);
         constexpr uint32_t rspLen = sizeof(activeDiscoveryRspData);
         BroadcastReportInfo reportInfo = {};
-        reportInfo.packet.bcData.id = BLE_UUID;
+        reportInfo.packet.bcData.id = SERVICE_UUID;
         reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
-        reportInfo.packet.rspData.id = COMPANY_ID;
+        reportInfo.packet.rspData.id = MANU_COMPANY_ID;
         reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
         reportInfo.packet.bcData.payload = &activeDiscoveryAdvData[0];
         reportInfo.packet.bcData.payloadLen = advLen;
@@ -427,7 +427,7 @@ void BleMock::TurnOnBt()
 {
     btState = true;
     if (btStateListener) {
-        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_ON);
+        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BLE_STATE_TURN_ON);
     }
 }
 
@@ -435,7 +435,7 @@ void BleMock::TurnOffBt()
 {
     btState = false;
     if (btStateListener) {
-        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_OFF);
+        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BLE_STATE_TURN_OFF);
     }
 }
 
