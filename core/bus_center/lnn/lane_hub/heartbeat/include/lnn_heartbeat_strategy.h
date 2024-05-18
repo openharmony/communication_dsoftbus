@@ -35,8 +35,8 @@ int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param);
 int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeartbeatType type);
 
 int32_t LnnSetHbAsMasterNodeState(bool isMasterNode);
-int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
-    LnnHeartbeatStrategyType strategyType);
+int32_t LnnGetHbStrategyManager(
+    LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType);
 
 int32_t LnnStartNewHbStrategyFsm(void);
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay);
