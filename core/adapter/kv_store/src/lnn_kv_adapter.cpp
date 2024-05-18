@@ -373,10 +373,20 @@ void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
     auto code = detail.code;
     auto progress = detail.progress;
     if (progress == DistributedKv::Progress::SYNC_FINISH && code == DistributedKv::Status::SUCCESS) {
-        LNN_LOGI(LNN_LEDGER, "cloud sync succeed");
+        LNN_LOGI(LNN_LEDGER, "cloud sync succeed, upload.total=%{public}u, upload.success=%{public}u, "
+            "upload.failed=%{public}u, upload.untreated=%{public}u, download.total=%{public}u, "
+            "download.success=%{public}u, download.failed=%{public}u, download.untreated=%{public}u",
+            detail.details.upload.total, detail.details.upload.success, detail.details.upload.failed,
+            detail.details.upload.untreated, detail.details.download.total, detail.details.download.success,
+            detail.details.download.failed, detail.details.download.untreated);
     }
     if (progress == DistributedKv::Progress::SYNC_FINISH && code != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "cloud sync failed, code: %{public}d", code);
+        LNN_LOGI(LNN_LEDGER, "cloud sync failed, code: %{public}d, upload.total=%{public}u, upload.success=%{public}u, "
+            "upload.failed=%{public}u, upload.untreated=%{public}u, download.total=%{public}u, "
+            "download.success=%{public}u, download.failed=%{public}u, download.untreated=%{public}u", code,
+            detail.details.upload.total, detail.details.upload.success, detail.details.upload.failed,
+            detail.details.upload.untreated, detail.details.download.total, detail.details.download.success,
+            detail.details.download.failed, detail.details.download.untreated);
     }
 }
 

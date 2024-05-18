@@ -815,7 +815,7 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
 
     FreeKeyAndValue(key, value, keySize);
     (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
-    LNN_LOGI(LNN_BUILDER, "LnnDBDataAddChangeSyncToCache success.");
+    LNN_LOGI(LNN_BUILDER, "LnnDBDataAddChangeSyncToCache success. stateVersion=%{public}d", cacheInfo.stateVersion);
     if (LnnUpdateDistributedNodeInfo(&cacheInfo, cacheInfo.deviceInfo.deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:Cache info add sync to Ledger fail");
         return SOFTBUS_ERR;
@@ -886,7 +886,8 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGE(LNN_BUILDER, "fail:data sync to DB fail, errorcode: %{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success.", key);
+    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success. stateVersion=%{public}d", key,
+        localCaheInfo.stateVersion);
 
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
@@ -923,7 +924,7 @@ int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
         LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode:%{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "LnnLedgerAllDataSyncToDB success.");
+    LNN_LOGI(LNN_BUILDER, "LnnLedgerAllDataSyncToDB success. stateVersion=%{public}d", syncInfo.stateVersion);
 
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
