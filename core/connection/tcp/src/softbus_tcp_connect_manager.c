@@ -510,7 +510,7 @@ static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requ
     };
     CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
     CONN_LOGE(CONN_COMMON, "OpenTcpClient failed.");
-    result->OnConnectFailed(requestId, SOFTBUS_ERR);
+    result->OnConnectFailed(requestId, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
     statistics->reqId = requestId;
     DfxRecordTcpConnectFail(
         DEFAULT_PID, (ConnectOption *)option, NULL, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);

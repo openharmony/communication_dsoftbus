@@ -16,6 +16,7 @@
 #ifndef HEARTBEAT_STRATEGY_H
 #define HEARTBEAT_STRATEGY_H
 
+#include "auth_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_net_builder.h"
@@ -53,6 +54,7 @@ public:
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis) = 0;
     virtual int32_t LnnStartHeartbeat(uint64_t delayMillis) = 0;
+    virtual bool IsNeedAuthLimit(const char *udidHash) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
 public:
@@ -80,6 +82,7 @@ public:
     MOCK_METHOD1(LnnStopHeartBeatAdvByTypeNow, int32_t (LnnHeartbeatType));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD1(LnnStartHeartbeat, int32_t(uint64_t));
+    MOCK_METHOD1(IsNeedAuthLimit, bool(const char *));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_STRATEGY_H

@@ -23,6 +23,7 @@
 #include "auth_request.h"
 #include "lnn_connection_mock.h"
 #include "lnn_hichain_mock.h"
+#include "lnn_map.h"
 #include "lnn_socket_mock.h"
 #include "message_handler.h"
 #include "softbus_access_token_test.h"

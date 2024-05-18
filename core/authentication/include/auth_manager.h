@@ -66,6 +66,8 @@ int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, S
 void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info);
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason);
 void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info);
+bool IsNeedAuthLimit(const char *udidHash);
+void ClearAuthLimitMap(void);
 
 int32_t DelAuthReqInfoByAuthHandle(const AuthHandle *authHandle);
 void AuthFreeLane(const AuthHandle *authHandle);
