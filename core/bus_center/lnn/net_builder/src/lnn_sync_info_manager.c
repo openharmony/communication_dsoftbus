@@ -276,7 +276,6 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     SyncChannelInfo *info = NULL;
 
-    LNN_LOGI(LNN_BUILDER, "channelId=%{public}d, server=%{public}u", channelId, isServer);
     if (LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "peer device not online");
         return SOFTBUS_ERR;
@@ -285,6 +284,12 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
         LNN_LOGE(LNN_BUILDER, "sync channel opened lock fail");
         return SOFTBUS_LOCK_ERR;
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER,
+        "channelId=%{public}d, networkId=%{public}s, server=%{public}u",
+        channelId, anonyNetworkId, isServer);
+    AnonymizeFree(anonyNetworkId);
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL) {
         if (!isServer) {
@@ -331,7 +336,6 @@ static void OnChannelOpenFailed(int32_t channelId, const char *peerUuid)
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     SyncChannelInfo *info = NULL;
 
-    LNN_LOGI(LNN_BUILDER, "open channel fail. channelId=%{public}d", channelId);
     if (LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "peer device not online");
         return;
@@ -340,6 +344,12 @@ static void OnChannelOpenFailed(int32_t channelId, const char *peerUuid)
         LNN_LOGE(LNN_BUILDER, "sync channel opened failed lock fail");
         return;
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER,
+        "open channel fail. channelId=%{public}d, networkId=%{public}s",
+        channelId, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL || (info->clientChannelId != channelId && info->serverChannelId != channelId)) {
         LNN_LOGE(LNN_BUILDER, "unexpected channel open fail event");
@@ -788,7 +798,12 @@ static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
         SoftBusFree(info);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "open sync info. channelId=%{public}d", info->clientChannelId);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER,
+        "open sync info. channelId=%{public}d, networkId=%{public}s",
+        info->clientChannelId, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     SoftBusGetTime(&info->accessTime);
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
         LNN_LOGE(LNN_BUILDER, "send sync info lock fail");
@@ -828,6 +843,12 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return SendSyncInfoByNewChannel(networkId, msg);
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER,
+        "send sync info by alread exists channel. channelId=%{public}d, networkId=%{public}s",
+        info->clientChannelId, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     ListTailInsert(&info->syncMsgList, &msg->node);
     if (info->isClientOpened) {
         SoftBusGetTime(&info->accessTime);
