@@ -2071,11 +2071,11 @@ static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq, const AuthSessionIn
 }
 
 static void SetCompressFlagByAuthInfo(const AuthSessionInfo *info, char *msg, int32_t *compressFlag,
-                                        uint8_t *compressData, uint32_t *compressLen)
+    uint8_t **compressData, uint32_t *compressLen)
 {
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
         AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
-        if (DataCompress((uint8_t *)msg, strlen(msg) + 1, &compressData, compressLen) != SOFTBUS_OK) {
+        if (DataCompress((uint8_t *)msg, strlen(msg) + 1, compressData, compressLen) != SOFTBUS_OK) {
             *compressFlag = FLAG_UNCOMPRESS_DEVICE_INFO;
         } else {
             *compressFlag = FLAG_COMPRESS_DEVICE_INFO;
@@ -2108,7 +2108,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     int32_t compressFlag = FLAG_UNCOMPRESS_DEVICE_INFO;
     uint8_t *compressData = NULL;
     uint32_t compressLen = 0;
-    SetCompressFlagByAuthInfo(info, msg, &compressFlag, compressData, &compressLen);
+    SetCompressFlagByAuthInfo(info, msg, &compressFlag, &compressData, &compressLen);
     InDataInfo inDataInfo = { 0 };
     uint8_t *data = NULL;
     uint32_t dataLen = 0;
