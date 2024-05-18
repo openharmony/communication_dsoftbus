@@ -35,6 +35,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "//third_party/cJSON",
+    "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interfaces",
   ]
 } else {
   trans_session_sdk_inc = [
