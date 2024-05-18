@@ -438,7 +438,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
 
     strcpy_s(recvBuf, recvLen, recvStr.c_str());
     ret = TransTdcUpdateDataBufWInfo(channelId, recvBuf, recvLen);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
     SoftBusFree(tmp);
     tmp = nullptr;
@@ -506,7 +506,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelClosedTest001, TestSize.L
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = NotifyChannelClosed(appInfo, 1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
     SoftBusFree(appInfo);
 }
 
@@ -701,7 +701,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyFastDataRecvTest001, TestSize.Le
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSize.Level1)
 {
     int32_t ret = TransTdcFillDataConfig(NULL);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     AppInfo *appInfo = TestSetAppInfo();
     EXPECT_NE(appInfo, nullptr);
@@ -759,15 +759,15 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcGetDataBufInfoByChannelIdTest0
     int32_t fd = 1;
     size_t len = 1;
     int32_t ret = TransTdcGetDataBufInfoByChannelId(channelId, nullptr, &len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransTdcGetDataBufInfoByChannelId(channelId, &fd, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransTdcGetDataBufInfoByChannelId(channelId, &fd, &len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     DestroySoftBusList(g_tcpSrvDataList);
     g_tcpSrvDataList = nullptr;
     ret = TransTdcGetDataBufInfoByChannelId(channelId, &fd, &len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**
@@ -792,7 +792,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0014, TestSi
     DestroySoftBusList(g_tcpSrvDataList);
     g_tcpSrvDataList = nullptr;
     ret = TransTdcUpdateDataBufWInfo(channelId, recvBuf, recvLen);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
     SoftBusFree(tmp);
     tmp = nullptr;

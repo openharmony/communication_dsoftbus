@@ -28,6 +28,7 @@ enum class CommandType {
     BLE_TRIGGER_COMMAND,
 };
 
+class WifiDirectProcessor;
 class WifiDirectCommand {
 public:
     virtual std::string GetRemoteDeviceId() const = 0;

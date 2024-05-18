@@ -26,16 +26,16 @@ extern "C" {
 #endif
 #endif
 
-#define AUTH_INVALID_FD              (-1)
-#define KEEP_ALIVE_INTERVAL          2
-#define KEEP_ALIVE_HIGH_COUNT        3
-#define KEEP_ALIVE_MID_COUNT         3
-#define KEEP_ALIVE_LOW_COUNT         5
-#define KEEP_ALIVE_DEFT_COUNT        5
-#define KEEP_ALIVE_HIGH_USER_TIMEOUT (10 * 1000)
-#define KEEP_ALIVE_MID_USER_TIMEOUT  (10 * 1000)
-#define KEEP_ALIVE_LOW_USER_TIMEOUT  (15 * 1000)
-#define KEEP_ALIVE_DEFT_USER_TIMEOUT (15 * 1000)
+#define AUTH_INVALID_FD                    (-1)
+#define TCP_KEEPALIVE_INTERVAL             2
+#define TCP_KEEPALIVE_HIGH_COUNT           3
+#define TCP_KEEPALIVE_MID_COUNT            3
+#define TCP_KEEPALIVE_LOW_COUNT            5
+#define TCP_KEEPALIVE_DEFAULT_COUNT        5
+#define TCP_KEEPALIVE_HIGH_USER_TIMEOUT    (10 * 1000)
+#define TCP_KEEPALIVE_MID_USER_TIMEOUT     (10 * 1000)
+#define TCP_KEEPALIVE_LOW_USER_TIMEOUT     (15 * 1000)
+#define TCP_KEEPALIVE_DEFAULT_USER_TIMEOUT (15 * 1000)
 
 typedef struct {
     void (*onConnected)(ListenerModule module, int32_t fd, bool isClient);
@@ -57,7 +57,7 @@ int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer);
 int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info);
 void StopSocketListening(void);
 
-int32_t AuthSetTcpKeepAliveOption(int32_t fd, ModeCycle cycle);
+int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle);
 
 #ifdef __cplusplus
 #if __cplusplus

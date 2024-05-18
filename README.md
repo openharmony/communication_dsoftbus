@@ -47,7 +47,7 @@ The DSoftBus directory structure is as follows:
 ## Constraints
 
 -   Connections can be set up only between the devices in the same LAN or between near-field devices.
--   Before setting up a connection between two devices, you must bind the devices. For details about the binding process, see the Security subsystem readme file.
+-   Before setting up a connection between two devices, you must bind the devices. For details about the binding process, see [the Security subsystem](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80%E8%83%BD%E5%8A%9B%E5%AD%90%E7%B3%BB%E7%BB%9F.md) readme file.
 -   After data transmission is complete, the service needs to close the session to release resources.
 
 ## Usage

@@ -33,10 +33,9 @@ public:
     ~P2pV1Processor() override;
 
     [[noreturn]] void Run() override;
-    bool CanAcceptNegotiateData() override
-    {
-        return canAcceptNegotiateData_;
-    }
+
+    bool CanAcceptNegotiateDataAtState(WifiDirectCommand &command) override;
+    void HandleCommandAfterTerminate(WifiDirectCommand &command) override;
 
 private:
     static constexpr int P2P_VERSION = 2;

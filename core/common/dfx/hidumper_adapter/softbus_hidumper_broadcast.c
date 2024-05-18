@@ -154,7 +154,7 @@ static int32_t SoftbusBroadcastDumpLooperInit(void)
         COMM_LOGI(COMM_DFX, "looper already inited");
         return SOFTBUS_OK;
     }
-    g_bcDumphandler.looper = GetLooper(LOOP_TYPE_HANDLE_FILE);
+    g_bcDumphandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_bcDumphandler.looper == NULL) {
         COMM_LOGE(COMM_DFX, "get looper fail!");
         return SOFTBUS_LOOPER_ERR;

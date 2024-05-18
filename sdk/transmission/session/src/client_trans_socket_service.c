@@ -133,7 +133,10 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
     int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
-    if (ret != SOFTBUS_OK) {
+    if (ret == SOFTBUS_ALREADY_TRIGGERED) {
+        TRANS_LOGW(TRANS_SDK, "already success, socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Start timer failed, ret=%{public}d", ret);
         return ret;
     }
@@ -153,7 +156,10 @@ int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const IS
     }
 
     int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
-    if (ret != SOFTBUS_OK) {
+    if (ret == SOFTBUS_ALREADY_TRIGGERED) {
+        TRANS_LOGW(TRANS_SDK, "already success, socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Start timer failed, ret=%{public}d, socket=%{public}d", ret, socket);
         return ret;
     }

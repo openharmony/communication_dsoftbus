@@ -392,6 +392,31 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest005, TestSize.Level0)
 }
 
 /*
+ * @tc.name: SoftBusMutexLockGuardTest001
+ * @tc.desc: should call SoftBusMutexUnlock automatically when leave bracket scope
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockGuardTest001, TestSize.Level0)
+{
+    SoftBusMutex mutex = 0;
+    int32_t ret = SoftBusMutexInit(&mutex, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    {
+        ret = SoftBusMutexLock(&mutex);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        SOFTBUS_LOCK_GUARD(mutex);
+    }
+    {
+        ret = SoftBusMutexLock(&mutex);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        SOFTBUS_LOCK_GUARD(mutex);
+    }
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
 * @tc.name: SoftBusThreadAttrInitTest001
 * @tc.desc: threadAttr is nullptr
 * @tc.type: FUNC

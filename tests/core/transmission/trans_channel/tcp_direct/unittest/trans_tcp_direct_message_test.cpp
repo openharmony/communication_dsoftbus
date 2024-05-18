@@ -184,7 +184,7 @@ HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1
 
     connInfo->type = CONNECT_P2P;
     ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     connInfo->type = CONNECT_BR;
     ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
