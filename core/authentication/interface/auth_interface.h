@@ -61,6 +61,12 @@ typedef struct {
     AuthLinkType linkType[AUTH_LINK_TYPE_MAX];
 } AuthLinkTypeList;
 
+typedef enum {
+    AUTH_MODULE_LNN,
+    AUTH_MODULE_TRANS,
+    AUTH_MODULE_BUTT,
+} AuthVerifyModule;
+
 typedef struct {
     AuthLinkType type;
     union {
@@ -106,9 +112,16 @@ typedef struct {
     void (*onVerifyFailed)(uint32_t requestId, int32_t reason);
 } AuthVerifyCallback;
 
+typedef struct {
+    void (*onConnOpened)(uint32_t requestId, AuthHandle authHandle);
+    void (*onConnOpenFailed)(uint32_t requestId, int32_t reason);
+} AuthConnCallback;
+
 uint32_t AuthGenRequestId(void);
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-    const AuthVerifyCallback *callback, bool isFastAuth);
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *verifyCallback,
+    AuthVerifyModule module, bool isFastAuth);
+int32_t AuthStartConnVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthConnCallback *connCallback,
+    AuthVerifyModule module, bool isFastAuth);
 void AuthHandleLeaveLNN(AuthHandle authHandle);
 int32_t AuthFlushDevice(const char *uuid);
 int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle);
@@ -158,10 +171,6 @@ typedef struct {
 int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener);
 void UnregAuthTransListener(int32_t module);
 
-typedef struct {
-    void (*onConnOpened)(uint32_t requestId, AuthHandle authHandle);
-    void (*onConnOpenFailed)(uint32_t requestId, int32_t reason);
-} AuthConnCallback;
 int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta);
 int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo);
 void AuthCloseConn(AuthHandle authHandle);
@@ -194,6 +203,8 @@ bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit);
 int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback);
 void AuthFreeConn(const AuthHandle *authHandle);
 
+int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConnInfo *connInfo);
+int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle);
 int32_t AuthInit(void);
 void AuthDeinit(void);
 int32_t AuthRestoreAuthManager(const char *udidHash,

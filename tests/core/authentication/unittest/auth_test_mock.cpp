@@ -172,7 +172,7 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ON_CALL(*mockInterface->authMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
     const unsigned char val = 0x01;
     SoftbusSetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, &val, sizeof(val));
-    ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack, true);
+    ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack, AUTH_MODULE_LNN, true);
 
     EXPECT_TRUE(ret == SOFTBUS_OK);
     AuthParam authInfo = {
