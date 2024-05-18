@@ -1113,7 +1113,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
     UpdateStateVersionAndStore();
     if (g_localNetLedger.localInfo.accountId == 0) {
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
-        return SOFTBUS_ERR;
+        return SOFTBUS_OK;
     }
     char *value = g_localNetLedger.localInfo.networkId;
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_NETWORK_ID, value, strlen(value)) != SOFTBUS_OK) {
