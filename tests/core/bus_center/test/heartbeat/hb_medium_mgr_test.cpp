@@ -26,6 +26,7 @@
 #include "lnn_heartbeat_medium_mgr.c"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_ledger_mock.h"
+#include "lnn_parameter_utils_virtual.c"
 #include "softbus_common.h"
 
 namespace OHOS {

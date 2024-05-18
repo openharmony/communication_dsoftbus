@@ -428,7 +428,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     (void)groupId;
     LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupCreated");
-    LnnUpdateOhosAccount();
+    LnnUpdateOhosAccount(true);
     LnnHbOnTrustedRelationIncreased(groupType);
     RestartCoapDiscovery();
     EhLoginEventHandler();

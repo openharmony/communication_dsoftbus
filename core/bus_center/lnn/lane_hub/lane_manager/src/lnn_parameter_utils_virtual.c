@@ -19,3 +19,8 @@ bool IsLinkEnabled(LaneLinkType parameter)
 {
     return false;
 }
+
+bool IsCloudSyncEnabled(void)
+{
+    return false;
+}
