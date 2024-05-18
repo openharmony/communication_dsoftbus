@@ -733,7 +733,7 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
     char *anonyTrueValue = NULL;
     Anonymize(trueValue, &anonyTrueValue);
     LNN_LOGI(LNN_BUILDER,
-        "deviceUdid:%{public}s, fieldName:%{public}s update to %{public}s success, stateVersion is %{public}d",
+        "deviceUdid=%{public}s, fieldName=%{public}s update to %{public}s success, stateVersion=%{public}d",
         anonyDeviceUdid, fieldName, anonyTrueValue, stateVersion);
     AnonymizeFree(anonyDeviceUdid);
     AnonymizeFree(anonyTrueValue);
