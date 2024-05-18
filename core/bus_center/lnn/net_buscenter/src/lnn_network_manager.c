@@ -571,13 +571,10 @@ static void NetAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (accountState) {
         case SOFTBUS_ACCOUNT_LOG_IN:
             LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_ACCOUNT_LOG_IN");
-            LnnUpdateOhosAccount();
-            LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
             RestartCoapDiscovery();
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_ACCOUNT_LOG_OUT");
-            LnnOnOhosAccountLogout();
             LnnHbOnTrustedRelationReduced();
             break;
         default:
