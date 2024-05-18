@@ -1738,6 +1738,7 @@ if (!defined(ohos_lite) && enhanced_test) {
       "$dsoftbus_root_path/core/connection/p2p/interface",
       "$dsoftbus_root_path/core/connection/p2p/common/include",
       "$dsoftbus_root_path/core/authentication/interface",
+      "$dsoftbus_root_path/core/authentication/include",
       "$dsoftbus_root_path/core/bus_center/interface",
       "$dsoftbus_root_path/core/bus_center/utils/include",
       "$dsoftbus_root_path/interfaces/kits/bus_center",

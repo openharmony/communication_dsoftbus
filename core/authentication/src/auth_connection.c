@@ -501,7 +501,7 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason)
 {
     AUTH_LOGI(AUTH_CONN, "requestId=%{public}u, reason=%{public}d", requestId, reason);
     RemoveConnConnectTimeout(requestId);
-    NotifyClientConnected(requestId, 0, SOFTBUS_CONN_FAIL, NULL);
+    NotifyClientConnected(requestId, 0, reason, NULL);
 }
 
 static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, ConnSideType sideType)

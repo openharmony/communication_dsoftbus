@@ -143,5 +143,10 @@ int32_t LnnStartHeartbeat(uint64_t delayMillis)
 {
     return HeartBeatStrategyInterface()->LnnStartHeartbeat(delayMillis);
 }
+
+bool IsNeedAuthLimit(const char *udidHash)
+{
+    return HeartBeatStrategyInterface()->IsNeedAuthLimit(udidHash);
+}
 }
 } // namespace OHOS

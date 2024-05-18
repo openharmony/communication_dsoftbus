@@ -41,6 +41,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_map.h"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -52,10 +53,19 @@
 #define FLAG_REPLY                         1
 #define FLAG_ACTIVE                        0
 #define UDID_SHORT_HASH_LEN_TEMP           8
+#define SHORT_UDID_HASH_HEX_LEN            16
 #define AUTH_COUNT                         2
 #define RETRY_REGDATA_TIMES                3
 #define RETRY_REGDATA_MILLSECONDS          300
 #define DELAY_REG_DP_TIME                  10000
+#define DELAY_AUTH_TIME                    (20 * 1000L)
+
+#define SOFTBUS_AUTH_HICHAIN_LOCAL_IDENTITY_NOT_EXIST \
+    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x040C)))
+#define SOFTBUS_AUTH_HICHAIN_GROUP_NOT_EXIST \
+    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0607)))
+#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
+    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
@@ -65,6 +75,10 @@ static GroupChangeListener g_groupChangeListener = { 0 };
 static AuthTransCallback g_transCallback = { 0 };
 static bool g_regDataChangeListener = false;
 static SoftBusList *g_authReqList;
+
+static Map g_authLimitMap;
+static SoftBusMutex g_authLimitMutex;
+static bool g_isInit = false;
 
 typedef struct {
     ListNode node;
@@ -1022,6 +1036,145 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     }
 }
 
+static bool AuthMapInit(void)
+{
+    if (SoftBusMutexInit(&g_authLimitMutex, NULL) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "g_authLimit mutex init fail");
+        return false;
+    }
+    LnnMapInit(&g_authLimitMap);
+    g_isInit = true;
+    AUTH_LOGI(AUTH_FSM, "authLimit map init success");
+    return true;
+}
+
+static void InsertToAuthLimitMap(const char *udidHash, uint64_t currentTime)
+{
+    if (SoftBusMutexLock(&g_authLimitMutex) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "SoftBusMutexLock fail");
+        return;
+    }
+    if (LnnMapSet(&g_authLimitMap, udidHash, (const void *)&currentTime, sizeof(uint64_t)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "LnnMapSet fail");
+        (void)SoftBusMutexUnlock(&g_authLimitMutex);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_authLimitMutex);
+}
+
+static int32_t GetNodeFromAuthLimitMap(const char *udidHash, uint64_t *time)
+{
+    if (!g_isInit) {
+        return SOFTBUS_OK;
+    }
+    if (SoftBusMutexLock(&g_authLimitMutex) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "SoftBusMutexLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint64_t *ptr = (uint64_t *)LnnMapGet(&g_authLimitMap, udidHash);
+    if (ptr == NULL) {
+        AUTH_LOGE(AUTH_FSM, "LnnMapGet fail");
+        (void)SoftBusMutexUnlock(&g_authLimitMutex);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *time = *ptr;
+    (void)SoftBusMutexUnlock(&g_authLimitMutex);
+    return SOFTBUS_OK;
+}
+
+bool IsNeedAuthLimit(const char *udidHash)
+{
+    if (udidHash == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param");
+        return false;
+    }
+    uint64_t time = 0;
+    uint64_t currentTime = 0;
+    if (GetNodeFromAuthLimitMap(udidHash, &time) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "GetNodeFromAuthLimitMap fail");
+        return false;
+    }
+    if (time == 0) {
+        AUTH_LOGI(AUTH_FSM, "no need delay authentication");
+        return false;
+    }
+    currentTime = GetCurrentTimeMs();
+    AUTH_LOGI(AUTH_FSM, "currentTime=%{public}" PRIu64 ", time=%{public}" PRIu64 "", currentTime, time);
+    if (currentTime - time < DELAY_AUTH_TIME) {
+        AUTH_LOGE(AUTH_FSM, "lastest retcode authentication time less than 20s");
+        return true;
+    }
+    return false;
+}
+
+static void DeleteAuthLimitMap(const char *udidHash)
+{
+    if (!g_isInit || udidHash == NULL) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_authLimitMutex) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "SoftBusMutexLock fail");
+        return;
+    }
+    int32_t ret = LnnMapErase(&g_authLimitMap, udidHash);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "delete item fail, ret=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_authLimitMutex);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_authLimitMutex);
+}
+
+void ClearAuthLimitMap(void)
+{
+    if (!g_isInit) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_authLimitMutex) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "SoftBusMutexLock fail");
+        return;
+    }
+    LnnMapDelete(&g_authLimitMap);
+    AUTH_LOGI(AUTH_FSM, "ClearAuthLimitMap success");
+    (void)SoftBusMutexUnlock(&g_authLimitMutex);
+}
+
+static int32_t GenerateUdidHash(const char *udid, uint8_t *hash)
+{
+    if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void AddNodeToAuthLimitMap(const char *udid, int32_t reason)
+{
+    AUTH_CHECK_AND_RETURN_LOGE(udid != NULL, AUTH_FSM, "udid is null");
+
+    if (reason == SOFTBUS_AUTH_HICHAIN_LOCAL_IDENTITY_NOT_EXIST || reason == SOFTBUS_AUTH_HICHAIN_GROUP_NOT_EXIST ||
+        reason == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP) {
+        uint64_t currentTime = GetCurrentTimeMs();
+        AUTH_LOGI(AUTH_FSM, "reason=%{public}d, currentTime=%{public}" PRIu64 "", reason, currentTime);
+
+        uint8_t hash[SHA_256_HASH_LEN] = { 0 };
+        char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+        if (GenerateUdidHash(udid, hash) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "GenerateUdidShortHash fail.");
+            return;
+        }
+        if (ConvertBytesToUpperCaseHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1, hash, UDID_SHORT_HASH_LEN_TEMP) !=
+            SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+            return;
+        }
+        if (!g_isInit && !AuthMapInit()) {
+            return;
+        }
+        InsertToAuthLimitMap(udidHash, currentTime);
+    }
+}
+
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "auth session info is null");
@@ -1054,6 +1207,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
         UpdateAuthDevicePriority(info->connId);
         DisconnectAuthDevice((uint64_t *)&info->connId);
     }
+    AddNodeToAuthLimitMap(info->udid, reason);
 }
 
 static void HandleBleDisconnectDelay(const void *para)
@@ -1094,6 +1248,19 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info)
             AUTH_LOGI(AUTH_FSM, "ble disconn now");
             DisconnectAuthDevice((uint64_t *)&info->connId);
         }
+        AUTH_CHECK_AND_RETURN_LOGE(info->udid != NULL, AUTH_FSM, "udid is null");
+        uint8_t hash[SHA_256_HASH_LEN] = { 0 };
+        char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+        if (GenerateUdidHash(info->udid, hash) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "GenerateUdidShortHash fail.");
+            return;
+        }
+        if (ConvertBytesToUpperCaseHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1, hash, UDID_SHORT_HASH_LEN_TEMP) !=
+            SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+            return;
+        }
+        DeleteAuthLimitMap(udidHash);
     }
     if (info->connInfo.type == AUTH_LINK_TYPE_BR) {
         AUTH_LOGI(AUTH_FSM, "br disconn now");
@@ -1141,15 +1308,6 @@ static void HandleBleConnectResult(uint32_t requestId, int64_t authId, uint64_t 
         }
         DelAuthRequest(request.requestId);
     } while (FindAuthRequestByConnInfo(&request.connInfo, &request) == SOFTBUS_OK);
-}
-
-static int32_t GenerateUdidHash(const char *udid, uint8_t *hash)
-{
-    if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
 }
 
 static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uint32_t bufLen)
