@@ -308,7 +308,11 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
-        .isPublic = true
+        .isPublic = true,
+        .cloudConfig = {
+            .enableCloud = true,
+            .autoSync = false
+        }
     };
     DistributedKv::Status status;
     {

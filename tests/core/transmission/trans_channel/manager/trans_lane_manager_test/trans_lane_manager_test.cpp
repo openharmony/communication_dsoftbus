@@ -185,7 +185,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
     TRANS_LOGI(TRANS_TEST, "TransLaneMgrDelLane001 start");
     TransLaneMgrDeinit();
     int32_t ret = TransLaneMgrDelLane(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -193,7 +193,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
     channelId = -1;
     channelType = 9999999;
     ret = TransLaneMgrDelLane(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     TRANS_LOGI(TRANS_TEST, "TransLaneMgrDelLane001 end");
 }
 
