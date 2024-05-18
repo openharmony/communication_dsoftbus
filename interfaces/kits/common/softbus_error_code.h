@@ -138,6 +138,11 @@ enum SoftBusErrNo {
     SOFTBUS_NOT_SAME_ACCOUNT, // check whether the accounts are the same
     SOFTBUS_NO_ONLINE_DEVICE, // there is no network online device
     SOFTBUS_LOOPER_ERR,  // get looper fail
+    SOFTBUS_HMAC_ERR,  // generate hmac hash fail for aes encrypt
+    SOFTBUS_HUKS_ERR,  // huks fail for rsa encrypt
+    SOFTBUS_BIO_ERR,  // BIO fail for rsa encrypt
+    SOFTBUS_NOT_NEED_UPDATE, // not need update
+    SOFTBUS_NO_RESOURCE_ERR, // no available resource
 
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),
@@ -279,6 +284,10 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_MSG_EMPTY_LIST, // list is empty
     SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT, // stop bind by timeout
     SOFTBUS_TRANS_MSG_NOT_SET_SCREEN_OFF, // send broadcast failed when screen flag is false
+    SOFTBUS_TRANS_INVALID_UUID,
+    SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL,
+    SOFTBUS_TRANS_PROXY_READINT_FAILED,
+    SOFTBUS_TRANS_PROXY_WRITEINT_FAILED,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),
@@ -351,6 +360,7 @@ enum SoftBusErrNo {
     SOFTBUS_KV_GET_DB_FAIL,
     SOFTBUS_KV_CLOUD_DISABLED,
     SOFTBUS_KV_CLOUD_SYNC_FAIL,
+    SOFTBUS_KV_CLOUD_SYNC_ASYNC_FAILED,
     SOFTBUS_KV_REGISTER_SYNC_LISTENER_FAILED,
     SOFTBUS_KV_UNREGISTER_SYNC_LISTENER_FAILED,
     SOFTBUS_KV_REGISTER_DATA_LISTENER_FAILED,
@@ -384,6 +394,7 @@ enum SoftBusErrNo {
     /* common error for bluetooth medium */
     SOFTBUS_CONN_BLUETOOTH_OFF,
 
+    SOFTBUS_CONN_BR_STATE_TURN_OFF,
     SOFTBUS_CONN_BR_INTERNAL_ERR,
     SOFTBUS_CONN_BR_INVALID_ADDRESS_ERR,
     SOFTBUS_CONN_BR_CONNECT_TIMEOUT_ERR,

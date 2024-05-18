@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,6 @@
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
-#include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "customized_security_protocol.h"
 #include "lnn_decision_db.h"
@@ -35,7 +34,6 @@
 #include "softbus_def.h"
 
 #define SHORT_ACCOUNT_HASH_LEN 2
-#define AUTH_COUNT             2
 
 typedef struct {
     int32_t module;
@@ -307,32 +305,6 @@ static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeIn
     return SOFTBUS_OK;
 }
 
-int32_t AuthSetTcpKeepAlive(const AuthConnInfo *connInfo, ModeCycle cycle)
-{
-    if (connInfo == NULL) {
-        AUTH_LOGE(AUTH_CONN, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    int32_t ret = SOFTBUS_ERR;
-    AuthManager *auth[AUTH_COUNT] = { NULL, NULL }; /* 2: WiFi * (Client + Server) */
-    auth[0] = GetAuthManagerByConnInfo(connInfo, false);
-    auth[1] = GetAuthManagerByConnInfo(connInfo, true);
-    for (uint32_t i = 0; i < AUTH_COUNT; i++) {
-        if (auth[i] == NULL) {
-            continue;
-        }
-        ret = AuthSetTcpKeepAliveOption(GetFd(auth[i]->connId[AUTH_LINK_TYPE_WIFI]), cycle);
-        if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "auth set tcp keepalive option fail");
-            break;
-        }
-    }
-    DelDupAuthManager(auth[1]);
-    DelDupAuthManager(auth[0]);
-    return ret;
-}
-
 int32_t AuthRestoreAuthManager(const char *udidHash,
     const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
@@ -517,7 +489,7 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
     }
     if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, false) ||
         IsPotentialTrustedDeviceDp(device->devId)) {
-        AUTH_LOGD(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
+        AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }
     return false;

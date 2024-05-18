@@ -269,6 +269,7 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
     switch (wifiState) {
         case SOFTBUS_WIFI_OBTAINING_IPADDR:
             (void)LnnSetNetCapability(capability, BIT_WIFI);
+            LnnSetNetBandCapability(capability);
             break;
         case SOFTBUS_WIFI_ENABLED:
             g_isWifiEnable = true;

@@ -129,6 +129,20 @@ if (agcr_enhanced) {
   bus_center_server_inc += agcr_inc
 }
 
+lnn_lp_dir = "dsoftbus_enhance/adapter/common/mlps/src"
+lnn_lp_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                              [
+                                "$native_source_path",
+                                "$lnn_lp_dir",
+                              ],
+                              "value")
+
+if (lnn_lp_enhanced) {
+  import("../../dsoftbus_enhance/adapter/common/adapter_mlps.gni")
+  bus_center_server_inc += adapter_mlps_inc
+  bus_center_server_src += adapter_mlps_src
+}
+
 route_dir = "dsoftbus_enhance/components/newip/route"
 route_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                              [

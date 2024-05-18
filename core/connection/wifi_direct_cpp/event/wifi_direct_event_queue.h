@@ -29,7 +29,7 @@ public:
     void Push(const Content &content)
     {
         std::lock_guard<std::mutex> lk(m_);
-        queue_.push(std::make_shared<WifiDirectEventWrapper<Content>>(content));
+        queue_.push_back(std::make_shared<WifiDirectEventWrapper<Content>>(content));
         c_.notify_all();
     }
 
@@ -38,14 +38,23 @@ public:
         std::unique_lock<std::mutex> lk(m_);
         c_.wait(lk, [&] { return !queue_.empty(); });
         auto res = queue_.front();
-        queue_.pop();
+        queue_.pop_front();
         return res;
+    }
+
+    using Handler = std::function<void(std::shared_ptr<WifiDirectEventBase> &)>;
+    void Process(const Handler &handler)
+    {
+        std::lock_guard<std::mutex> lk(m_);
+        for (auto it = queue_.rbegin(); it != queue_.rend(); it++) {
+            handler(*it);
+        }
     }
 
 private:
     std::mutex m_;
     std::condition_variable c_;
-    std::queue<std::shared_ptr<WifiDirectEventBase>> queue_;
+    std::deque<std::shared_ptr<WifiDirectEventBase>> queue_;
 };
 }
 #endif

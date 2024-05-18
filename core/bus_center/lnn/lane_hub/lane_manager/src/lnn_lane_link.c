@@ -635,7 +635,7 @@ static int32_t LaneLinkOfBleReuseCommon(uint32_t reqId, const LinkRequest *reqIn
     linkInfo.linkInfo.ble.protoType = type;
     if (type == BLE_COC) {
         linkInfo.type = LANE_COC;
-        linkInfo.linkInfo.ble.psm = connection->psm;
+        linkInfo.linkInfo.ble.psm = (int32_t)connection->psm;
     } else if (type == BLE_GATT) {
         linkInfo.type = LANE_BLE;
     }

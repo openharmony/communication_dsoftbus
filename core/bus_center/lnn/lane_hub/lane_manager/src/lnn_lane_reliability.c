@@ -184,7 +184,7 @@ static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *lan
         SoftBusFree(infoItem);
         return fd;
     }
-    infoItem->connId.wlanFd = fd;
+    infoItem->connId.wlanFd = (uint32_t)fd;
     if (SoftBusMutexLock(&g_laneDetectList.lock) != SOFTBUS_OK) {
         ConnShutdownSocket(fd);
         SoftBusFree(infoItem);

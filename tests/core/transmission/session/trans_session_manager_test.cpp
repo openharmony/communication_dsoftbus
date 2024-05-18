@@ -129,7 +129,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest04, TestSize.Level1)
     int32_t ret = TransSessionServerDelItem(NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransSessionServerDelItem(g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**
@@ -158,11 +158,11 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest06, TestSize.Level1)
     EXPECT_EQ(ret,  SOFTBUS_OK);
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
     ret = TransGetPkgNameBySessionName(NULL, pkgName, PKG_NAME_SIZE_MAX);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransGetPkgNameBySessionName(g_sessionName, NULL, PKG_NAME_SIZE_MAX);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransGetPkgNameBySessionName(g_sessionName, pkgName, 0);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     TransSessionMgrDeinit();
 }
 

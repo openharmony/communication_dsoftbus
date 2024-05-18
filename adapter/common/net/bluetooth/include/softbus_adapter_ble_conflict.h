@@ -33,13 +33,13 @@ typedef struct {
 } SoftBusBleConflictListener;
 
 typedef struct {
-    void (*conflictNotifyConnectResult)(int32_t requestId, int32_t underlayerHandle, bool result);
+    void (*conflictNotifyConnectResult)(uint32_t requestId, int32_t underlayerHandle, bool result);
     void (*conflictNotifyDataReceive)(int32_t underlayerHandle, const uint8_t *data, uint32_t dataLen);
     void (*conflictNotifyDisconnect)(int32_t underlayerHandle, int32_t status);
 } LegacyConflictEventListener;
 
 void SoftbusBleConflictRegisterListener(SoftBusBleConflictListener *listener);
-void SoftbusBleConflictNotifyConnectResult(int32_t requestId, int32_t underlayerHandle, bool status);
+void SoftbusBleConflictNotifyConnectResult(uint32_t requestId, int32_t underlayerHandle, bool status);
 void SoftbusBleConflictNotifyDateReceive(int32_t underlayerHandle, const uint8_t *data, uint32_t dataLen);
 void SoftbusBleConflictNotifyDisconnect(const char *addr, const char *udid);
 

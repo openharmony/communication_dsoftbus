@@ -32,24 +32,29 @@ protected:
     void SetUp();
     void TearDown();
 };
+
 void SoftbusTimeTest::SetUpTestCase(void)
 {
 }
+
 void SoftbusTimeTest::TearDownTestCase(void)
 {
 }
+
 void SoftbusTimeTest::SetUp()
 {
 }
+
 void SoftbusTimeTest::TearDown()
 {
 }
+
 /*
-* @tc.name: SoftBusTimerTest001
-* @tc.desc: soft bus timer test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SoftBusTimerTest001
+ * @tc.desc: soft bus timer test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusTimeTest, SoftBusTimerTest001, TestSize.Level1)
 {
     void *timerId = NULL;
@@ -71,4 +76,21 @@ HWTEST_F(SoftbusTimeTest, SoftBusTimerTest001, TestSize.Level1)
     ret = SoftBusGetTime(&times);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/*
+ * @tc.name: SoftBusTimerTest002
+ * @tc.desc: test SoftBusFormatTimestamp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTimeTest, SoftBusTimerTest002, TestSize.Level1)
+{
+    uint64_t timestamp1 = 946656000000;
+    const char *formated1 = SoftBusFormatTimestamp(timestamp1);
+    EXPECT_STREQ(formated1, "2000-01-01 00:00:00.000");
+
+    uint64_t timestamp2 = 1705984496789;
+    const char *formated2 = SoftBusFormatTimestamp(timestamp2);
+    EXPECT_STREQ(formated2, "2024-01-23 12:34:56.789");
 }
+} // namespace OHOS
