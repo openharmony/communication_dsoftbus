@@ -65,6 +65,7 @@
 #define NORMALIZED_DATA "normalizedData"
 #define EXCHANGE_ID_TYPE "exchangeIdType"
 #define DEV_IP_HASH_TAG "DevIpHash"
+#define AUTH_MODULE "AuthModule"
 #define CMD_TAG_LEN 30
 #define PACKET_SIZE (64 * 1024)
 
@@ -341,7 +342,7 @@ static bool GetUdidOrShortHashForNormalized(const AuthSessionInfo *info, char *u
 static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info, AuthDeviceKeyInfo *deviceKey)
 {
     /* first, reuse ble authKey */
-    if (AuthFindLatestNormalizeKey(udidHash, deviceKey) == SOFTBUS_OK ||
+    if (AuthFindLatestNormalizeKey(udidHash, deviceKey, true) == SOFTBUS_OK ||
         AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_BLE, deviceKey) == SOFTBUS_OK) {
         AUTH_LOGD(AUTH_FSM, "get authKey succ");
         return SOFTBUS_OK;
@@ -491,7 +492,7 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info)
     }
     AuthDeviceKeyInfo deviceKey;
     (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-    if (AuthFindLatestNormalizeKey((char *)udidHashHexStr, &deviceKey) != SOFTBUS_OK) {
+    if (AuthFindLatestNormalizeKey((char *)udidHashHexStr, &deviceKey, true) != SOFTBUS_OK) {
         AUTH_LOGW(AUTH_FSM, "can't find device key");
         return;
     }
@@ -598,7 +599,7 @@ static int32_t ParseNormalizeData(AuthSessionInfo *info, char *encNormalizedKey,
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     // First: use latest normalizedKey
-    if (AuthFindLatestNormalizeKey(hashHexStr, deviceKey) != SOFTBUS_OK) {
+    if (AuthFindLatestNormalizeKey(hashHexStr, deviceKey, true) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "can't find common key, parse normalize data fail");
         return SOFTBUS_ERR;
     }
@@ -846,7 +847,8 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
     }
     if (!JSON_AddStringToObject(obj, DATA_TAG, uuid) || !JSON_AddInt32ToObject(obj, DATA_BUF_SIZE_TAG, PACKET_SIZE) ||
         !JSON_AddInt32ToObject(obj, SOFTBUS_VERSION_TAG, info->version) ||
-        !JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, info->idType)) {
+        !JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, info->idType) ||
+        !JSON_AddInt32ToObject(obj, AUTH_MODULE, info->module)) {
         AUTH_LOGE(AUTH_FSM, "add msg body fail");
         JSON_Delete(obj);
         return NULL;
@@ -1076,6 +1078,7 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
         OptString(obj, SUPPORT_INFO_COMPRESS, compressParse, PARSE_UNCOMPRESS_STRING_BUFF_LEN, FALSE_STRING_TAG);
         SetCompressFlag(compressParse, &info->isSupportCompress);
     }
+    OptInt(obj, AUTH_MODULE, (int32_t *)&info->module, AUTH_MODULE_LNN);
     bool isSupportNormalizedKey = false;
     OptBool(obj, IS_NORMALIZED, &isSupportNormalizedKey, false);
     UnpackFastAuth(obj, info);
@@ -2048,7 +2051,7 @@ static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, 
         AUTH_LOGE(AUTH_FSM, "get session key fail");
         return;
     }
-    if (AddSessionKey(list, TO_INT32(index), &sessionKey, info->connInfo.type) != SOFTBUS_OK) {
+    if (AddSessionKey(list, TO_INT32(index), &sessionKey, info->connInfo.type, false) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "add session key fail");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return;

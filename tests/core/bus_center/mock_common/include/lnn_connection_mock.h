@@ -87,6 +87,18 @@ public:
         (void)reason;
         return;
     }
+    static void onConnOpened(uint32_t requestId, AuthHandle authHandle)
+    {
+        (void)requestId;
+        (void)authHandle;
+        return;
+    }
+    static void onConnOpenFailed(uint32_t requestId, int32_t reason)
+    {
+        (void)requestId;
+        (void)reason;
+        return;
+    }
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H
