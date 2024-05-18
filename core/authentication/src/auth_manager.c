@@ -1944,16 +1944,16 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             /* fall-through */
         case AUTH_LINK_TYPE_BLE:
             judgeTimeOut = true;
-        case AUTH_LINK_TYPE_P2P:
             authHandle.authId = GetActiveAuthIdByConnInfo(info, judgeTimeOut);
             if (authHandle.authId != AUTH_INVALID_ID) {
                 return StartReconnectDevice(authHandle, info, requestId, callback);
             }
             return StartVerifyDevice(requestId, info, NULL, callback, true);
+        case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             authHandle.authId = GetActiveAuthIdByConnInfo(info, judgeTimeOut);
             if (authHandle.authId != AUTH_INVALID_ID) {
-                AUTH_LOGI(AUTH_CONN, "reuse enhanced p2p authId=%{public}" PRId64, authHandle.authId);
+                AUTH_LOGI(AUTH_CONN, "reuse type=%{public}d, authId=%{public}" PRId64, info->type, authHandle.authId);
                 callback->onConnOpened(requestId, authHandle);
                 break;
             }
