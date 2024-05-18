@@ -251,7 +251,7 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
+int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth)
 {
     if (len <= PROXY_CHANNEL_HEAD_LEN) {
         TRANS_LOGE(TRANS_CTRL, "parseMessage: invalid message len=%{public}d", len);
@@ -262,28 +262,27 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
     }
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
         int32_t ret;
-        AuthHandle auth = { .authId = AUTH_INVALID_ID };
         if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
             TRANS_LOGD(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
-            ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, &auth,
+            ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, auth,
                 (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data));
         } else {
-            ret = TransProxyGetAuthId(msg->msgHead.myId, &auth);
+            ret = TransProxyGetAuthId(msg->msgHead.myId, auth);
         }
-        if (ret != SOFTBUS_OK || auth.authId == AUTH_INVALID_ID) {
+        if (ret != SOFTBUS_OK || auth->authId == AUTH_INVALID_ID) {
             TRANS_LOGE(TRANS_CTRL, "get authId fail, connId=%{public}d, myChannelId=%{public}d, type=%{public}d",
                 msg->connId, msg->msgHead.myId, msg->msgHead.type);
             return SOFTBUS_AUTH_NOT_FOUND;
         }
-        msg->authHandle = auth;
+        msg->authHandle = (*auth);
         uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dateLen);
         uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
         if (decData == NULL) {
             return SOFTBUS_MALLOC_ERR;
         }
         msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
-        if (AuthDecrypt(&auth, (uint8_t *)msg->data, (uint32_t)msg->dateLen, decData, &decDataLen) != SOFTBUS_OK &&
-            GetAuthIdReDecrypt(&auth, msg, decData, &decDataLen) != SOFTBUS_OK) {
+        if (AuthDecrypt(auth, (uint8_t *)msg->data, (uint32_t)msg->dateLen, decData, &decDataLen) != SOFTBUS_OK &&
+            GetAuthIdReDecrypt(auth, msg, decData, &decDataLen) != SOFTBUS_OK) {
             SoftBusFree(decData);
             TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
             return SOFTBUS_DECRYPT_ERR;
