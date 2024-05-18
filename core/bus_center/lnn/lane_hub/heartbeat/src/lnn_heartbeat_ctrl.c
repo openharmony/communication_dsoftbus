@@ -16,6 +16,7 @@
 #include "lnn_heartbeat_ctrl.h"
 
 #include <securec.h>
+#include <stdatomic.h>
 #include <string.h>
 
 #include "anonymizer.h"
@@ -64,7 +65,7 @@ typedef struct {
 static HbConditionState g_hbConditionState;
 static int64_t g_lastScreenOnTime = 0;
 static int64_t g_lastScreenOffTime = 0;
-static bool g_enableState = false;
+static atomic_bool g_enableState = false;
 static DcTask g_dcTask;
 
 static void InitHbConditionState(void)
@@ -401,6 +402,32 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbDelayConditionChanged(void *para)
+{
+    (void)para;
+
+    LNN_LOGI(LNN_HEART_BEAT, "HB delay handle condition changed");
+    LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
+    HbConditionChanged(false);
+}
+
+static int32_t HbTryCloudSync(void)
+{
+    NodeInfo info = { 0 };
+
+    if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK || LnnSaveLocalDeviceInfo(&info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB save local device info fail");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = LnnLedgerAllDataSyncToDB(&info);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB sync to cloud fail");
+    } else {
+        LNN_LOGI(LNN_HEART_BEAT, "HB sync to cloud end");
+    }
+    return ret;
+}
+
 static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_SCREEN_LOCK_CHANGED) {
@@ -420,14 +447,8 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_SCREEN_UNLOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
             LnnUpdateOhosAccount();
-            const NodeInfo *info = LnnGetLocalNodeInfo();
-            if ((LnnSaveLocalDeviceInfo(info)) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_LEDGER, "screen unlocked event, update all ledgerinfo to local store fail");
-            }
-            if (LnnLedgerAllDataSyncToDB(info) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_LEDGER, "screen unlocked event, ledgerinf sync to cloud fail");
-            }
-            HbConditionChanged(false);
+            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
+                HbTryCloudSync() == SOFTBUS_OK ? HB_START_DELAY_LEN : 0);
             break;
         case SOFTBUS_SCREEN_LOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_LOCK");
@@ -449,10 +470,16 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (accountState) {
         case SOFTBUS_ACCOUNT_LOG_IN:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
-            HbConditionChanged(true);
+            LnnUpdateOhosAccount();
+            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
+                HbTryCloudSync() == SOFTBUS_OK ? HB_START_DELAY_LEN : 0);
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
+            if (LnnDeleteSyncToDB() != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LEDGER, "HB clear local cache fail");
+            }
+            LnnOnOhosAccountLogout();
             HbConditionChanged(false);
             break;
         default:

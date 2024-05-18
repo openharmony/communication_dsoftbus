@@ -334,8 +334,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         info->accountId = *((int64_t *)buf);
         return SOFTBUS_OK;
     }
-
-    if (info->accountId ==  0) {
+    if (info->accountId == 0) {
         if (*((int64_t *)buf) == 0) {
             LNN_LOGI(LNN_LEDGER, "no accountid login, default is 0");
             return SOFTBUS_OK;
@@ -343,24 +342,10 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         LNN_LOGI(LNN_LEDGER, "accountid login");
         info->accountId = *((int64_t *)buf);
         info->stateVersion++;
-        if (LnnSaveLocalDeviceInfo(info) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "accountid login, update all info to local store fail");
-        }
-        if (LnnLedgerAllDataSyncToDB(info) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "accountid login, lnn ledger all data sync to cloud fail");
-            return SOFTBUS_MEM_ERR;
-        }
         return SOFTBUS_OK;
     }
-
-    if (*((int64_t *)buf) ==  0) {
+    if (*((int64_t *)buf) == 0) {
         LNN_LOGI(LNN_LEDGER, "accountid logout");
-        if (LnnDeleteSyncToDB() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "lnn clear local cache fail");
-            info->accountId = *((int64_t *)buf);
-            LnnSaveLocalDeviceInfo(info);
-            return SOFTBUS_MEM_ERR;
-        }
         info->accountId = *((int64_t *)buf);
         LnnSaveLocalDeviceInfo(info);
         return SOFTBUS_OK;
@@ -1027,6 +1012,21 @@ static int32_t ModifyId(char *dstId, uint32_t dstLen, const char *sourceId)
 const NodeInfo *LnnGetLocalNodeInfo(void)
 {
     return &g_localNetLedger.localInfo;
+}
+
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (memcpy_s(info, sizeof(NodeInfo), LnnGetLocalNodeInfo(), sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy node info fail");
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
 }
 
 static int32_t UpdateLocalDeviceName(const void *name)
