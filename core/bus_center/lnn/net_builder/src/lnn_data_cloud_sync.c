@@ -47,8 +47,6 @@
 #define UDID_HASH_HEX_LEN 16
 static int32_t g_dbId = 0;
 
-static SoftBusMutex g_cloudSyncMutex;
-
 static int32_t ConvertNameInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
 {
     cloudSyncInfo->accountId = nodeInfo->accountId;
@@ -319,12 +317,12 @@ static int32_t DBConnectMacInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
         }
     } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_IRK) == 0 && valueLength < LFINDER_IRK_LEN + 1) {
         if (memcpy_s((char *)cacheInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, value, valueLength) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s peerIrk fail");
+            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s peerIrk fail");
             return SOFTBUS_MEM_ERR;
         }
     } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_PUB_MAC) == 0 && valueLength < LFINDER_MAC_ADDR_LEN + 1) {
         if (memcpy_s((char *)cacheInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, value, valueLength) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s publicAddress fail");
+            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s publicAddress fail");
             return SOFTBUS_MEM_ERR;
         }
     } else {
@@ -668,36 +666,27 @@ static int32_t HandleDBUpdateInternal(char *deviceUdid, char *fieldName, char *t
         LNN_LOGE(LNN_BUILDER, "Generate UDID HexStringHash fail");
         return SOFTBUS_ERR;
     }
-    if (SoftBusMutexLock(&g_cloudSyncMutex) != 0) {
-        LNN_LOGE(LNN_BUILDER, "lock mutex fail");
-        return SOFTBUS_LOCK_ERR;
-    }
     NodeInfo cacheInfo = {0};
     if (LnnRetrieveDeviceInfo(udidHash, &cacheInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "no this device info in deviceCacheInfoMap, need to insert");
         NodeInfo newInfo = { 0 };
         if (strcpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, deviceUdid) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceudid fail");
-            (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
             return SOFTBUS_STRCPY_ERR;
         }
         UpdateInfoToLedger(&newInfo, deviceUdid, fieldName, trueValue);
         if (LnnSaveRemoteDeviceInfo(&newInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "fail:Lnn save remote device info fail");
-            (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
             return SOFTBUS_ERR;
         }
-        (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
         return SOFTBUS_OK;
     }
     if (cacheInfo.stateVersion > stateVersion && stateVersion != 1) {
-        (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
         return SOFTBUS_OK;
     }
     cacheInfo.stateVersion = stateVersion;
     UpdateInfoToLedger(&cacheInfo, deviceUdid, fieldName, trueValue);
     (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
-    (void)SoftBusMutexUnlock(&g_cloudSyncMutex);
     return SOFTBUS_OK;
 }
 
@@ -739,6 +728,15 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
         LNN_LOGE(LNN_BUILDER, "handle DB update change internal fail");
         return SOFTBUS_ERR;
     }
+    char *anonyDeviceUdid = NULL;
+    Anonymize(deviceUdid, &anonyDeviceUdid);
+    char *anonyTrueValue = NULL;
+    Anonymize(trueValue, &anonyTrueValue);
+    LNN_LOGI(LNN_BUILDER,
+        "deviceUdid:%{public}s, fieldName:%{public}s update to %{public}s success, stateVersion is %{public}d",
+        anonyDeviceUdid, fieldName, anonyTrueValue, stateVersion);
+    AnonymizeFree(anonyDeviceUdid);
+    AnonymizeFree(anonyTrueValue);
     return SOFTBUS_OK;
 }
 
@@ -787,10 +785,23 @@ static void FreeKeyAndValue(const char **key, const char **value, int32_t keySiz
     SoftBusFree(value);
 }
 
+static void FreeKeyOrValue(const char **object, int32_t size)
+{
+    for (int32_t i = 0; i < size; i++) {
+        SoftBusFree((void *)object[i]);
+    }
+    SoftBusFree(object);
+}
+
 int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize)
 {
     if (key == NULL || value == NULL || keySize == 0) {
         LNN_LOGE(LNN_BUILDER, "invalid param or keySize is none");
+        if (key == NULL && value != NULL && keySize != 0) {
+            FreeKeyOrValue(value, keySize);
+        } else if (key != NULL && value == NULL && keySize != 0) {
+            FreeKeyOrValue(key, keySize);
+        }
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo cacheInfo = { 0 };
@@ -804,7 +815,10 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
 
     FreeKeyAndValue(key, value, keySize);
     (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
-    LNN_LOGI(LNN_BUILDER, "LnnDBDataAddChangeSyncToCache success.");
+    char *anonyDeviceUdid = NULL;
+    Anonymize(cacheInfo.deviceInfo.deviceUdid, &anonyDeviceUdid);
+    LNN_LOGI(LNN_BUILDER, "LnnDBDataAddChangeSyncToCache success, deviceUdid:%{public}s", anonyDeviceUdid);
+    AnonymizeFree(anonyDeviceUdid);
     if (LnnUpdateDistributedNodeInfo(&cacheInfo, cacheInfo.deviceInfo.deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:Cache info add sync to Ledger fail");
         return SOFTBUS_ERR;
@@ -853,6 +867,10 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
         return SOFTBUS_ERR;
     }
+    if (localCaheInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need sync to DB");
+        return SOFTBUS_OK;
+    }
     char putKey[KEY_MAX_LEN] = {0};
     if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%s", localCaheInfo.accountId, localCaheInfo.deviceInfo.deviceUdid,
         key) < 0) {
@@ -871,7 +889,8 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGE(LNN_BUILDER, "fail:data sync to DB fail, errorcode: %{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success.", key);
+    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success, stateVersion:%{public}d", key,
+        localCaheInfo.stateVersion);
 
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
@@ -955,9 +974,6 @@ void LnnInitCloudSyncModule(void)
         return;
     }
     g_dbId = dbId;
-    if (SoftBusMutexInit(&g_cloudSyncMutex, NULL) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Lnn Init cloud Sync mutex fail");
-    }
 }
 
 void LnnDeInitCloudSyncModule(void)
@@ -968,5 +984,4 @@ void LnnDeInitCloudSyncModule(void)
         LNN_LOGE(LNN_BUILDER, "DeInit Cloud Sync module fail");
     }
     g_dbId = 0;
-    SoftBusMutexDestroy(&g_cloudSyncMutex);
 }
