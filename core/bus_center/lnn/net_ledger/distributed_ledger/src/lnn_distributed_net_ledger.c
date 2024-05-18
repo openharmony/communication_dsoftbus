@@ -2416,11 +2416,11 @@ int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
         return SOFTBUS_INVALID_PARAM;
     }
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
-    NodeInfo *oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
+    NodeInfo *oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo == NULL) {
         LNN_LOGI(LNN_LEDGER, "no this device info in ledger, need to insert");
         int32_t ret = LnnMapSet(&map->udidMap, udid, newInfo, sizeof(NodeInfo));
