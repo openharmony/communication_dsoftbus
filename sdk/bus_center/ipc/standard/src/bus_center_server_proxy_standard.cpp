@@ -89,7 +89,7 @@ int32_t BusCenterServerProxy::StartDiscovery(const char *pkgName, const Subscrib
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
+int32_t BusCenterServerProxy::StopDiscovery(const char *pkgName, int32_t subscribeId)
 {
     (void)pkgName;
     (void)subscribeId;
@@ -103,7 +103,7 @@ int32_t BusCenterServerProxy::PublishService(const char *pkgName, const PublishI
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::UnPublishService(const char *pkgName, int publishId)
+int32_t BusCenterServerProxy::UnPublishService(const char *pkgName, int32_t publishId)
 {
     (void)pkgName;
     (void)publishId;
@@ -187,7 +187,7 @@ int32_t BusCenterServerProxy::SendMessage(int32_t channelId, int32_t channelType
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int quality)
+int32_t BusCenterServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
     (void)channelId;
     (void)chanType;
@@ -297,7 +297,7 @@ int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkI
     return serverRet;
 }
 
-static bool WriteSendRequestMessage(const char *pkgName, MessageParcel *data, const uint32_t infoTypeLen)
+static bool WriteSendRequestMessage(const char *pkgName, MessageParcel *data, uint32_t infoTypeLen)
 {
     if (!data->WriteInterfaceToken(BusCenterServerProxy::GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
@@ -315,28 +315,9 @@ static bool WriteSendRequestMessage(const char *pkgName, MessageParcel *data, co
     return true;
 }
 
-int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)
+static int32_t ReadIPCReceiveOnlineNodeInfo(void **info, uint32_t infoTypeLen, int32_t *infoNum, MessageParcel* reply)
 {
-    if (pkgName == nullptr || info == nullptr || infoNum == nullptr) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    sptr<IRemoteObject> remote = GetSystemAbility();
-    if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
-        return SOFTBUS_IPC_ERR;
-    }
-
-    MessageParcel data;
-    if (!WriteSendRequestMessage(pkgName, &data, infoTypeLen)) {
-        return SOFTBUS_IPC_ERR;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    if (remote->SendRequest(SERVER_GET_ALL_ONLINE_NODE_INFO, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!reply.ReadInt32(*infoNum)) {
+    if (!reply->ReadInt32(*infoNum)) {
         LNN_LOGE(LNN_EVENT, "read infoNum failed");
         return SOFTBUS_IPC_ERR;
     }
@@ -346,10 +327,15 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
         LNN_LOGE(LNN_EVENT, "softbus get config failed");
         return SOFTBUS_IPC_ERR;
     }
+
+    if ((*infoNum) < 0 || (uint32_t)(*infoNum) > maxConnCount) {
+        LNN_LOGE(LNN_EVENT, "invalid param, infoNum=%{public}d, maxConnCount=%{public}u", *infoNum, maxConnCount);
+        return SOFTBUS_IPC_ERR;
+    }
     *info = nullptr;
     if ((*infoNum) > 0 && static_cast<uint32_t>(*infoNum) <= maxConnCount) {
         uint32_t infoSize = static_cast<uint32_t>(*infoNum) * infoTypeLen;
-        void *nodeInfo = const_cast<void *>(reply.ReadRawData(infoSize));
+        void *nodeInfo = const_cast<void *>(reply->ReadRawData(infoSize));
         if (nodeInfo == nullptr) {
             LNN_LOGE(LNN_EVENT, "read node info failed");
             return SOFTBUS_IPC_ERR;
@@ -367,6 +353,30 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
         }
     }
     return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen,
+    int32_t *infoNum)
+{
+    if (pkgName == nullptr || info == nullptr || infoNum == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel data;
+    if (!WriteSendRequestMessage(pkgName, &data, infoTypeLen)) {
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_GET_ALL_ONLINE_NODE_INFO, data, reply, option) != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return ReadIPCReceiveOnlineNodeInfo(info, infoTypeLen, infoNum, &reply);
 }
 
 int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
@@ -409,8 +419,8 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
-    uint32_t len)
+int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key,
+    unsigned char *buf, uint32_t len)
 {
     if (pkgName == nullptr || networkId == nullptr || buf == nullptr) {
         LNN_LOGE(LNN_EVENT, "params are nullptr");
@@ -431,7 +441,7 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
         LNN_LOGE(LNN_EVENT, "write client name or networkId failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteInt32(key) || !data.WriteInt32(len)) {
+    if (!data.WriteInt32(key) || !data.WriteUint32(len)) {
         LNN_LOGE(LNN_EVENT, "write key or buf len failed");
         return SOFTBUS_IPC_ERR;
     }
@@ -444,7 +454,7 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
     int32_t infoLen;
     if (!reply.ReadInt32(infoLen) || infoLen <= 0 || static_cast<uint32_t>(infoLen) > len) {
         LNN_LOGE(LNN_EVENT,
-            "read infoLen failed, len=%{public}d, infoLen=%{public}d", len, infoLen);
+            "read infoLen failed, len=%{public}u, infoLen=%{public}d", len, infoLen);
         return SOFTBUS_IPC_ERR;
     }
     void *retBuf = const_cast<void *>(reply.ReadRawData(infoLen));
@@ -484,7 +494,7 @@ int32_t BusCenterServerProxy::SetNodeDataChangeFlag(const char *pkgName, const c
         LNN_LOGE(LNN_EVENT, "write networkId failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteInt16(dataChangeFlag)) {
+    if (!data.WriteUint16(dataChangeFlag)) {
         LNN_LOGE(LNN_EVENT, "write key failed");
         return SOFTBUS_IPC_ERR;
     }

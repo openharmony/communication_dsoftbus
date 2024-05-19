@@ -603,16 +603,17 @@ HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest001, TestSize.Level1)
     ProxyDataInfo dataInfo;
     char *data = (char *)dataInfo.outData;
     int32_t len = dataInfo.outLen;
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     
     ProxyMessage msg;
-    int32_t ret = TransProxyParseMessage(data, len, &msg);
+    int32_t ret = TransProxyParseMessage(data, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK;
-    ret = TransProxyParseMessage(data, len, &msg);
+    ret = TransProxyParseMessage(data, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyParseMessage(data, PROXY_CHANNEL_HEAD_LEN - 1, &msg);
+    ret = TransProxyParseMessage(data, PROXY_CHANNEL_HEAD_LEN - 1, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

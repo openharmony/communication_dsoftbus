@@ -82,6 +82,8 @@ int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *udpChannel);
 void TransUdpDeleteFileListener(const char *sessionName);
 
 int32_t TransUdpOnCloseAckReceived(int32_t channelId);
+
+int32_t ClientEmitFileEvent(int32_t channelId);
 #ifdef __cplusplus
 }
 #endif

@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-int BusCenterClientInit(void);
+int32_t BusCenterClientInit(void);
 void BusCenterClientDeinit(void);
 
 int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
@@ -57,7 +57,7 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info);
 int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type);
-int32_t LnnOnTimeSyncResult(const void *info, int retCode);
+int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode);
 void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
 void LnnOnRefreshDeviceFound(const void *device);

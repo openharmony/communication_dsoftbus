@@ -1643,3 +1643,8 @@ void NSTACKX_DFileRegisterDefaultLog(void)
     SetDefaultLogCallback();
     return;
 }
+
+int32_t NSTACKX_DFileSessionGetFileList(int32_t sessionId)
+{
+    return NSTACKX_EOK;
+}
