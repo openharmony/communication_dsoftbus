@@ -202,7 +202,7 @@ int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
     if (memcpy_s(&stats, sizeof(StreamSendStats), &info->info.frameSendStats,
         sizeof(info->info.frameSendStats)) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "streamStats info memcpy fail");
-        return -1;
+        return SOFTBUS_MEM_ERR;
     }
 
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
@@ -231,7 +231,7 @@ int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
     if (memcpy_s(&stats.stats, sizeof(stats.stats), info->info.trafficData.stats,
         sizeof(info->info.trafficData.stats)) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "RipplePolicy info memcpy fail");
-        return -1;
+        return SOFTBUS_MEM_ERR;
     }
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     auto itListener = g_streamSocketMap.find(fd);
@@ -1502,13 +1502,13 @@ ssize_t VtpStreamSocket::Encrypt(const void *in, ssize_t inLen, void *out, ssize
 
     if (inLen - OVERHEAD_LEN > outLen) {
         TRANS_LOGE(TRANS_STREAM, "Encrypt invalid para.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.first, sessionKey_.second) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     int ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
@@ -1530,13 +1530,13 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
 
     if (inLen - OVERHEAD_LEN > outLen) {
         TRANS_LOGE(TRANS_STREAM, "Decrypt invalid para.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.first, sessionKey_.second) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     int ret = SoftBusDecryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
