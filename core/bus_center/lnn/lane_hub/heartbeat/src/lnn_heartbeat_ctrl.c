@@ -21,6 +21,7 @@
 
 #include "anonymizer.h"
 #include "auth_interface.h"
+#include "auth_manager.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_ble_heartbeat.h"
@@ -270,6 +271,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_BLE_TURN_ON:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_ON");
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_OPEN_INFO);
+            ClearAuthLimitMap();
             HbConditionChanged(false);
             if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) !=
                 SOFTBUS_OK) {
@@ -280,6 +282,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_OFF");
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_CLOSE_INFO);
             HbConditionChanged(false);
+            ClearAuthLimitMap();
             break;
         default:
             return;

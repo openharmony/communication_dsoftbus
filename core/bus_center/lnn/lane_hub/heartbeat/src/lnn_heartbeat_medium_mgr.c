@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "anonymizer.h"
+#include "auth_manager.h"
 #include "auth_device_common_key.h"
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
@@ -480,18 +481,50 @@ static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *stored
     return SOFTBUS_OK;
 }
 
+static int32_t HbSuspendReAuth(DeviceInfo *device)
+{
+    if (device->addr[0].type == CONNECTION_ADDR_BLE) {
+        char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+        if (ConvertBytesToUpperCaseHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1, device->addr[0].info.ble.udidHash,
+                SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "convert bytes to string fail");
+            return SOFTBUS_ERR;
+        }
+        if (IsNeedAuthLimit(udidHash)) {
+            char *anonyUdidHash = NULL;
+            Anonymize(udidHash, &anonyUdidHash);
+            LNN_LOGI(LNN_HEART_BEAT, "current device need delay authentication, type=%{public}d, udidHash=%{public}s",
+                device->addr[0].type, anonyUdidHash);
+            AnonymizeFree(anonyUdidHash);
+            return SOFTBUS_NETWORK_BLE_CONNECT_SUSPEND;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static void ProcessUdidAnonymize(char *devId)
+{
+    char *anonyUdid = NULL;
+    Anonymize(devId, &anonyUdid);
+    LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s", anonyUdid);
+    AnonymizeFree(anonyUdid);
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
     uint64_t nowTime = GetNowTime();
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "mgr lock recv info list fail");
         return SOFTBUS_LOCK_ERR;
     }
     LnnHeartbeatRecvInfo *storedInfo = HbGetStoredRecvInfo(device->devId, device->addr[0].type, nowTime);
     if (HbIsRepeatedRecvInfo(hbType, storedInfo, nowTime)) {
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
+    }
+    if (HbSuspendReAuth(device) == SOFTBUS_NETWORK_BLE_CONNECT_SUSPEND) {
+        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+        return SOFTBUS_NETWORK_BLE_CONNECT_SUSPEND;
     }
     if (HbSaveRecvTimeToRemoveRepeat(
         storedInfo, device, mediumWeight->weight, mediumWeight->localMasterWeight, nowTime) != SOFTBUS_OK) {
@@ -516,10 +549,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         return ret;
     }
     if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
-        char *anonyUdid = NULL;
-        Anonymize(device->devId, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s", anonyUdid);
-        AnonymizeFree(anonyUdid);
+        ProcessUdidAnonymize(device->devId);
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }

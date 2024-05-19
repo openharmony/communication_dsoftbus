@@ -16,6 +16,7 @@
 
 #include <securec.h>
 
+#include "auth_manager.h"
 #include "bus_center_manager.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
@@ -104,6 +105,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
             accountHash[0], accountHash[1]);
         return;
     }
+    ClearAuthLimitMap();
     LNN_LOGI(LNN_STATE,
         "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);

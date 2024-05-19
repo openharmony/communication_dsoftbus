@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "auth_manager.h"
 #include "bus_center_adapter.h"
 #include "distribute_net_ledger_mock.h"
 #include "hb_strategy_mock.h"
@@ -284,10 +285,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
         .discoveryType = TEST_DISC_TYPE,
         .deviceInfo.deviceUdid = TEST_UDID_HASH,
     };
-    HbRespData hbResp = {
-        .capabiltiy = TEST_CAPABILTIY,
-        .stateVersion = TEST_STATEVERSION,
-    };
+    HbRespData hbResp = { .capabiltiy = TEST_CAPABILTIY, .stateVersion = TEST_STATEVERSION };
     ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     ON_CALL(ledgerMock, LnnGetNodeInfoById).WillByDefault(Return(&nodeInfo));
     ON_CALL(ledgerMock, LnnHasDiscoveryType).WillByDefault(Return(true));
@@ -308,6 +306,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     ON_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStopOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStrateMock, IsNeedAuthLimit).WillRepeatedly(Return(false));
     int ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_CONNECTABLE);
     HbFirstSaveRecvTime(&storedInfo, &device,
