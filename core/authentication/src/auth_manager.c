@@ -793,6 +793,29 @@ static void OnDeviceNotTrusted(const char *peerUdid)
     AuthRemoveDeviceKeyByUdid(peerUdid);
 }
 
+void AuthDeviceNotTrust(const char *peerUdid)
+{
+    if (peerUdid == NULL || strlen(peerUdid) == 0) {
+        AUTH_LOGE(AUTH_HICHAIN, "invalid param");
+        return;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get networkId by udid fail");
+        return;
+    }
+    RemoveNotPassedAuthManagerByUdid(peerUdid);
+    AuthSessionHandleDeviceNotTrusted(peerUdid);
+    LnnDeleteSpecificTrustedDevInfo(peerUdid);
+    LnnHbOnTrustedRelationReduced();
+    AuthRemoveDeviceKeyByUdid(peerUdid);
+    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "request leave specific fail");
+    } else {
+        AUTH_LOGI(AUTH_HICHAIN, "request leave specific successful");
+    }
+}
+
 static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     if (g_groupChangeListener.onGroupCreated != NULL) {

@@ -110,6 +110,7 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback);
 int32_t RegTrustListenerOnHichainSaStart(void);
 int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num);
 void AuthDeviceDeinit(void);
+void AuthDeviceNotTrust(const char *udid);
 
 #ifdef __cplusplus
 #if __cplusplus
