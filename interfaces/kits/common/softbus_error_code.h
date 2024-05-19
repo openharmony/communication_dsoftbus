@@ -143,6 +143,7 @@ enum SoftBusErrNo {
     SOFTBUS_BIO_ERR,  // BIO fail for rsa encrypt
     SOFTBUS_NOT_NEED_UPDATE, // not need update
     SOFTBUS_NO_RESOURCE_ERR, // no available resource
+    SOFTBUS_INVALID_APPTYPE,
 
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),
@@ -298,6 +299,7 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_AUTH_ALREADY_INIT,
     SOFTBUS_TRANS_AUTH_REQUEST_NOT_FOUND,
     SOFTBUS_TRANS_AUTH_NEGOTIATE_SK_TIMEOUT,
+    SOFTBUS_TRANS_NOTIFY_NETWORK_OPEN_ERR,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),
