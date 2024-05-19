@@ -62,8 +62,9 @@ TRANS_ASSIGNER(String, FirstTokenName, firstTokenName)
 TRANS_ASSIGNER(Uint32, FirstTokenId, firstTokenId)
 TRANS_ASSIGNER(Int32,  FirstTokenType, firstTokenType)
 TRANS_ASSIGNER(LongString,  TrafficStats, trafficStats)
+TRANS_ASSIGNER(Int32,  OsType, osType)
 
-#define TRANS_ASSIGNER_SIZE 28 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 29 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
@@ -93,6 +94,7 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "FIRST_TOKEN_ID",   HISYSEVENT_UINT32, TransAssignerFirstTokenId  },
     { "FIRST_TOKEN_TYPE", HISYSEVENT_INT32,  TransAssignerFirstTokenType},
     { "TRAFFIC_STATS",    HISYSEVENT_STRING, TransAssignerTrafficStats  },
+    { "OS_TYPE",          HISYSEVENT_INT32, TransAssignerOsType         },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 

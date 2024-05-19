@@ -190,6 +190,8 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .linkType = info->connectType,
         .costTime = timediff,
         .errcode = errCode,
+        .osType = info->osType,
+        .peerUdid = info->peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
     if (info->isClient) {
