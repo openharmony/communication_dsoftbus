@@ -230,7 +230,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeErrMsgTest001, TestS
 
     int32_t errCode = SOFTBUS_OK;
     ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     cJSON_free(msg);
 }
 
@@ -457,7 +457,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
     ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
 /**
@@ -471,37 +471,38 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
     ProxyMessage msg;
     int32_t ret = SOFTBUS_ERR;
     int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
     ASSERT_TRUE(NULL != buf);
 
     /* test invalid len */
-    ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg);
+    ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     /* test invalid head version */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (TEST_INVALID_HEAD_VERSION << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg);
+    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     /* test invalid head type */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg);
+    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     /* test message no encrypte */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     msg.msgHead.cipher = 0;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg);
+    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     /* test normal message encrypte, and channel not exist */
     msg.msgHead.cipher = 1;
     msg.msgHead.peerId = -1;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg);
+    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -518,6 +519,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
     ProxyMessage msg, outMsg;
     int32_t ret = SOFTBUS_ERR;
     int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
     ASSERT_TRUE(NULL != buf);
     msg.msgHead.cipher = 1;
@@ -527,10 +529,10 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
     /* test normal message encrypte */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -547,6 +549,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize
     ProxyMessage msg, outMsg;
     int32_t ret = SOFTBUS_ERR;
     int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
     ASSERT_TRUE(NULL != buf);
 
@@ -563,28 +566,28 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize
     brInfo.type = CONNECT_BR;
 
     /* test get auth connection info or type err */
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test auth connection type is invalid */
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test auth connection type is tcp, and isBr is false */
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test auth connection type is tcp, and isBr is true */
     msg.msgHead.cipher |= USE_BLE_CIPHER;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     /* test connection type is br */
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyParseMessage(buf, len, &outMsg);
+    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -815,7 +818,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataHeadTest001, Test
     ProxyDataInfo *dataInfo = (ProxyDataInfo *)SoftBusCalloc(sizeof(ProxyDataInfo));
 
     int32_t ret = TransProxyPackFastDataHead(dataInfo, appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     dataInfo->inLen = FAST_TRANS_DATASIZE;
@@ -1125,10 +1128,10 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, Tes
     memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo.fastTransDataSize = 1;
     int32_t ret = PackHandshakeMsgForFastData(&appInfo, root);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     appInfo.fastTransDataSize = 0;
     ret = PackHandshakeMsgForFastData(&appInfo, root);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
 /**

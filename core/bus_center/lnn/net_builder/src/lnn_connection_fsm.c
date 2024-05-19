@@ -410,7 +410,22 @@ static void SetLnnConnNodeInfo(
         connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, relation[connInfo->addr.type], true);
 }
 
-static void DfxRecordLnnAddOnlineNodeEnd(NodeInfo *info, int32_t onlineNum, int32_t reason)
+static void GetLnnOnlineType(bool isNeedConnect, ConnectionAddrType type, int32_t *lnnType)
+{
+    if (!isNeedConnect && type == CONNECTION_ADDR_BLE) {
+        *lnnType = LNN_TYPE_BLE_BROADCAST_ONLINE;
+    } else if (isNeedConnect && type == CONNECTION_ADDR_BLE) {
+        *lnnType = LNN_TYPE_BLE_CONNECT_ONLINE;
+    } else if (type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_ETH) {
+        *lnnType = LNN_TYPE_WIFI_CONNECT_ONLINE;
+    } else if (type == CONNECTION_ADDR_BR) {
+        *lnnType = LNN_TYPE_BR_CONNECT_ONLINE;
+    } else {
+        *lnnType = LNN_TYPE_OTHER_CONNECT_ONLINE;
+    }
+}
+
+static void DfxRecordLnnAddOnlineNodeEnd(NodeInfo *info, int32_t onlineNum, int32_t lnnType, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
@@ -447,6 +462,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(NodeInfo *info, int32_t onlineNum, int3
     extra.peerUdid = udidData;
     extra.peerBleMac = bleMacAddr;
     extra.peerDeviceType = deviceType;
+    extra.lnnType = lnnType;
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
 }
 
@@ -471,18 +487,18 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         AuthHandleLeaveLNN(connInfo->authHandle);
     }
     
-    if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_PASSIVE) == 0) {
-        int32_t infoNum = 0;
-        NodeBasicInfo *info = NULL;
-        bool isSuccessFlag = true;
-        if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "Lnn get online node fail");
-            isSuccessFlag = false;
-        }
-        if (isSuccessFlag) {
-            DfxRecordLnnAddOnlineNodeEnd(connInfo->nodeInfo, infoNum, retCode);
-            SoftBusFree(info);
-        }
+    int32_t infoNum = 0;
+    int32_t lnnType = 0;
+    NodeBasicInfo *info = NULL;
+    bool isSuccessFlag = true;
+    GetLnnOnlineType(connFsm->isNeedConnect, connInfo->addr.type, &lnnType);
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Lnn get online node fail");
+        isSuccessFlag = false;
+    }
+    if (isSuccessFlag) {
+        DfxRecordLnnAddOnlineNodeEnd(connInfo->nodeInfo, infoNum, lnnType, retCode);
+        SoftBusFree(info);
     }
 
     if (connInfo->nodeInfo != NULL) {
@@ -718,7 +734,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         }
     }
     DfxRecordConnAuthStart(&authConn, connFsm, connInfo->requestId);
-    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), true) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), AUTH_MODULE_LNN, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth verify device failed. [id=%{public}u]", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
         rc = SOFTBUS_ERR;

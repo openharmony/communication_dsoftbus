@@ -61,10 +61,11 @@ int32_t AuthFindNormalizeKeyByServerSide(const char *udidHash, bool isServer, Au
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey)
+int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey, bool clearOldKey)
 {
     (void)udidHash;
     (void)deviceKey;
+    (void)clearOldKey;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

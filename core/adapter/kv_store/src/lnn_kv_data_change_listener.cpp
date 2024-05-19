@@ -103,16 +103,16 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
 
 void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entry>& insertRecords)
 {
-    LNN_LOGI(LNN_LEDGER, "Handle kv data add change!");
     int32_t insertSize = insertRecords.size();
+    LNN_LOGI(LNN_LEDGER, "Handle kv data add change! insertSize=%{public}d", insertSize);
     char **keys = (char **)SoftBusCalloc(insertSize * sizeof(char *));
     if (keys == nullptr) {
-        LNN_LOGE(LNN_LEDGER, "malloc failed");
+        LNN_LOGE(LNN_LEDGER, "keys malloc failed");
         return;
     }
     char **values = (char **)SoftBusCalloc(insertSize * sizeof(char *));
     if (values == nullptr) {
-        LNN_LOGE(LNN_LEDGER, "malloc failed");
+        LNN_LOGE(LNN_LEDGER, "values malloc failed");
         SoftBusFree(keys);
         return;
     }
@@ -128,7 +128,7 @@ void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entr
 
 void KvDataChangeListener::HandleUpdateChange(const std::vector<DistributedKv::Entry>& updateRecords)
 {
-    LNN_LOGI(LNN_LEDGER, "Handle kv data update change!");
+    LNN_LOGI(LNN_LEDGER, "Handle kv data update change! updateSize=%{public}u", updateRecords.size());
     for (const auto& item : updateRecords) {
         std::string dbKey = item.key.ToString();
         std::string dbValue = item.value.ToString();
@@ -138,7 +138,7 @@ void KvDataChangeListener::HandleUpdateChange(const std::vector<DistributedKv::E
 
 void KvDataChangeListener::HandleDeleteChange(const std::vector<DistributedKv::Entry>& deleteRecords)
 {
-    LNN_LOGI(LNN_LEDGER, "Handle kv data delete change!");
+    LNN_LOGI(LNN_LEDGER, "Handle kv data delete change! deleteSize=%{public}u", deleteRecords.size());
     for (const auto& item : deleteRecords) {
         std::string dbKey = item.key.ToString();
         char *dbValue = nullptr;

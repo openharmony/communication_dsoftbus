@@ -88,7 +88,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
             Anonymize(appInfo->peerData.deviceId, &anonyUuid);
             TRANS_LOGE(TRANS_CTRL, "get info networkId fail, uuid=%{public}s", anonyUuid);
             AnonymizeFree(anonyUuid);
-            return SOFTBUS_ERR;
+            return ret;
         }
         info.peerDeviceId = buf;
     } else {
@@ -160,7 +160,7 @@ static int32_t TransProxyGetChannelIsServer(int32_t channelId, int8_t *isServer)
     }
     if (TransProxyGetChanByChanId(channelId, chan) != SOFTBUS_OK) {
         SoftBusFree(chan);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
     }
     *isServer = chan->isServer;
     SoftBusFree(chan);
@@ -279,7 +279,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get local uuid fail. ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "strcpy_s my sessionName failed");
