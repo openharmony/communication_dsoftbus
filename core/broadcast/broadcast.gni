@@ -13,7 +13,7 @@
 
 import("../../dsoftbus.gni")
 
-broadcast_inc = [ "$dsoftbus_root_path/core/broadcast/scheduler/include" ]
+broadcast_inc = [ "$dsoftbus_root_path/core/broadcast/scheduler/interface" ]
 broadcast_src = []
 broadcast_deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
 
@@ -25,8 +25,8 @@ if (dsoftbus_feature_ex_kits) {
   broadcast_src += broadcast_enhance_src
 } else {
   broadcast_inc += [
-    "$dsoftbus_root_path/adapter/common/bet/bluetooth/broadcast/interface",
-    "$dsoftbus_root_path/core/broadcast/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/core/broadcast/scheduler/include",
   ]
   if (support_bluetooth && dsoftbus_feature_disc_ble) {
     broadcast_src += [
