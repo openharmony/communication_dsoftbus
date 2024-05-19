@@ -20,6 +20,7 @@
 
 #include "hilog_mock.h"
 #include "trans_log.h"
+#include "softbus_log_test_utils.h"
 
 using namespace std;
 using namespace testing;
@@ -39,67 +40,16 @@ HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
     int32_t index = 0;
     int32_t transDomainBase = 0xd005740;
 
-    EXPECT_EQ(index, TRANS_SDK);
-    auto label = TRANS_LABELS[TRANS_SDK];
-    EXPECT_EQ(index, TRANS_SDK);
-    label = TRANS_LABELS[TRANS_SDK];
-    EXPECT_EQ(TRANS_SDK, label.label);
-    EXPECT_EQ(transDomainBase, label.domain);
-    EXPECT_STREQ("TransSdk", label.tag);
-
-    EXPECT_EQ(++index, TRANS_SVC);
-    label = TRANS_LABELS[TRANS_SVC];
-    EXPECT_EQ(TRANS_SVC, label.label);
-    EXPECT_EQ(++transDomainBase, label.domain);
-    EXPECT_STREQ("TransSvc", label.tag);
-
-    EXPECT_EQ(++index, TRANS_INIT);
-    label = TRANS_LABELS[TRANS_INIT];
-    EXPECT_EQ(TRANS_INIT, label.label);
-    EXPECT_EQ(++transDomainBase, label.domain);
-    EXPECT_STREQ("TransInit", label.tag);
-
-    EXPECT_EQ(++index, TRANS_CTRL);
-    label = TRANS_LABELS[TRANS_CTRL];
-    EXPECT_EQ(TRANS_CTRL, label.label);
-    EXPECT_EQ(++transDomainBase, label.domain);
-    EXPECT_STREQ("TransCtrl", label.tag);
-
-    EXPECT_EQ(++index, TRANS_BYTES);
-    label = TRANS_LABELS[TRANS_BYTES];
-    EXPECT_EQ(TRANS_BYTES, label.label);
-    EXPECT_EQ(++transDomainBase, label.domain);
-    EXPECT_STREQ("TransBytes", label.tag);
-
-    EXPECT_EQ(++index, TRANS_FILE);
-    label = TRANS_LABELS[TRANS_FILE];
-    EXPECT_EQ(TRANS_FILE, label.label);
-    EXPECT_EQ(++transDomainBase, label.domain);
-    EXPECT_STREQ("TransFile", label.tag);
-
-    EXPECT_EQ(++index, TRANS_MSG);
-    label = TRANS_LABELS[TRANS_MSG];
-    EXPECT_EQ(TRANS_MSG, label.label);
-    EXPECT_EQ(++transDomainBase, label.domain);
-    EXPECT_STREQ("TransMsg", label.tag);
-
-    EXPECT_EQ(++index, TRANS_STREAM);
-    label = TRANS_LABELS[TRANS_STREAM];
-    EXPECT_EQ(TRANS_STREAM, label.label);
-    EXPECT_EQ(++transDomainBase, label.domain);
-    EXPECT_STREQ("TransStream", label.tag);
-
-    EXPECT_EQ(++index, TRANS_QOS);
-    label = TRANS_LABELS[TRANS_QOS];
-    EXPECT_EQ(TRANS_QOS, label.label);
-    EXPECT_EQ(++transDomainBase, label.domain);
-    EXPECT_STREQ("TransQos", label.tag);
-
-    EXPECT_EQ(++index, TRANS_TEST);
-    label = TRANS_LABELS[TRANS_TEST];
-    EXPECT_EQ(TRANS_TEST, label.label);
-    EXPECT_EQ(DOMAIN_ID_TEST, label.domain);
-    EXPECT_STREQ("TransTest", label.tag);
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[index], TRANS_SDK, transDomainBase, "TransSdk");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_SVC, ++transDomainBase, "TransSvc");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_INIT, ++transDomainBase, "TransInit");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_CTRL, ++transDomainBase, "TransCtrl");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_BYTES, ++transDomainBase, "TransBytes");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_FILE, ++transDomainBase, "TransFile");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_MSG, ++transDomainBase, "TransMsg");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_STREAM, ++transDomainBase, "TransStream");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_QOS, ++transDomainBase, "TransQos");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_TEST, DOMAIN_ID_TEST, "TransTest");
 }
 
 /**
