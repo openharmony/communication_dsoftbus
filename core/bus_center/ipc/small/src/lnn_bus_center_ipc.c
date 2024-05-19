@@ -268,7 +268,7 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
 }
 
 int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen,
-    int *infoNum)
+    int32_t *infoNum)
 {
     (void)pkgName;
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
@@ -285,9 +285,13 @@ int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoT
     return LnnGetLocalDeviceInfo((NodeBasicInfo *)info);
 }
 
-int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
+int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
     uint32_t len)
 {
+    if (key == NODE_KEY_BLE_OFFLINE_CODE) {
+        LNN_LOGE(LNN_EVENT, "the process has been abandoned");
+        return SOFTBUS_INVALID_PARAM;
+    }
     (void)pkgName;
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }

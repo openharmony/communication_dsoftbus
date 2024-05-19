@@ -395,7 +395,7 @@ HWTEST_F(AuthTest, ENCRYPT_INNER_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
     ListInit(&list);
-    ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey, AUTH_LINK_TYPE_WIFI);
+    ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey, AUTH_LINK_TYPE_WIFI, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     inDataInfo.inLen = CRYPT_DATA_LEN;
     ret = EncryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
@@ -437,7 +437,7 @@ HWTEST_F(AuthTest, DENCRYPT_INNER_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
     ListInit(&list);
-    ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey, AUTH_LINK_TYPE_WIFI);
+    ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey, AUTH_LINK_TYPE_WIFI, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     inDataInfo.inLen = CRYPT_DATA_LEN;
     ret = DecryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
@@ -732,7 +732,7 @@ HWTEST_F(AuthTest, AUTH_MANAGER_SET_SESSION_KEY_Test_001, TestSize.Level1)
     const SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
 
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    int32_t ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey, false);
+    int32_t ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey, false, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -780,10 +780,30 @@ HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    ret = AuthStartVerify(nullptr, requestId, &callback, true);
+    ret = AuthStartVerify(nullptr, requestId, &callback, AUTH_MODULE_LNN, true);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthStartVerify(&connInfo, requestId, nullptr, true);
+    ret = AuthStartVerify(&connInfo, requestId, nullptr, AUTH_MODULE_LNN, true);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: AUTH_START_CONN_VERIFY_Test_001
+ * @tc.desc: auth start conn verify test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_START_CONN_VERIFY_Test_001, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    uint32_t requestId = 0;
+    const AuthConnCallback callback = { 0 };
+    int32_t ret;
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    ret = AuthStartConnVerify(nullptr, requestId, &callback, AUTH_MODULE_LNN, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AuthStartConnVerify(&connInfo, requestId, &callback, AUTH_MODULE_LNN, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1752,12 +1772,12 @@ HWTEST_F(AuthTest, ADD_SESSION_KEY_Test_001, TestSize.Level1)
     SessionKey *key = nullptr;
     SessionKey keyValue;
     SessionKeyList listValue;
-    int32_t ret = AddSessionKey(list, index, key, AUTH_LINK_TYPE_WIFI);
+    int32_t ret = AddSessionKey(list, index, key, AUTH_LINK_TYPE_WIFI, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     (void)memset_s(&keyValue, sizeof(SessionKey), 0, sizeof(SessionKey));
     (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
     ListInit(&listValue);
-    ret = AddSessionKey(&listValue, index, &keyValue, AUTH_LINK_TYPE_WIFI);
+    ret = AddSessionKey(&listValue, index, &keyValue, AUTH_LINK_TYPE_WIFI, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -2010,7 +2030,7 @@ HWTEST_F(AuthTest, AUTH_SET_AND_SET_SESSIONKEY_AVAILABLE_Test_001, TestSize.Leve
     SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
     int32_t index = 0;
     ListInit(&list);
-    int32_t ret = AddSessionKey(&list, index, &sessionKey, AUTH_LINK_TYPE_WIFI);
+    int32_t ret = AddSessionKey(&list, index, &sessionKey, AUTH_LINK_TYPE_WIFI, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     uint64_t time = GetLatestAvailableSessionKeyTime(&list, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(time == 0);

@@ -82,7 +82,7 @@ int32_t LnnInitOhosAccount(void)
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
-void LnnUpdateOhosAccount(void)
+void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
@@ -111,7 +111,9 @@ void LnnUpdateOhosAccount(void)
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
-    LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
+    if (isNeedUpdateHeartbeat) {
+        LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
+    }
 }
 
 void LnnOnOhosAccountLogout(void)

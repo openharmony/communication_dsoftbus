@@ -39,6 +39,7 @@
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
 #include "trans_event.h"
+#include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
@@ -433,6 +434,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     if (conn.appInfo.fastTransDataSize > 0) {
         info.isFastData = true;
     }
+    TransGetLaneIdByChannelId(channelId, &info.laneId);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
     SetSessionConnStatusById(channelId, conn.status);
@@ -465,6 +467,8 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .linkType = conn.appInfo.connectType,
         .costTime = timediff,
         .errcode = errCode,
+        .osType = conn.appInfo.osType,
+        .peerUdid = conn.appInfo.peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
     if (!conn.serverSide) {

@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include "client_trans_file_listener.h"
+#include "client_trans_statistics.h"
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
 #include "softbus_adapter_mem.h"
@@ -26,6 +27,7 @@
 #include "trans_log.h"
 
 #define DEFAULT_KEY_LENGTH 32
+#define MAX_FILE_NUM       500
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
@@ -59,10 +61,111 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
     }
 }
 
-static void NotifySocketSendResult(int32_t socket, DFileMsgType msgType, const DFileMsg *msgData,
-    const FileListener *listener)
+static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
+{
+    int32_t fileNum = msgData->clearPolicyFileList.fileNum;
+    if (fileNum <= 0) {
+        return;
+    }
+    if (fileNum > MAX_FILE_NUM) {
+        TRANS_LOGE(TRANS_SDK, "invalid fileNum.");
+        return;
+    }
+
+    event->statusList.completedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
+    if (event->statusList.completedList.files == NULL) {
+        TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        return;
+    }
+    event->statusList.notCompletedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
+    if (event->statusList.notCompletedList.files == NULL) {
+        TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        return;
+    }
+    event->statusList.notStartedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
+    if (event->statusList.notStartedList.files == NULL) {
+        TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        return;
+    }
+    int32_t completedIndex = 0;
+    int32_t notCompletedIndex = 0;
+    int32_t notStartedIndex = 0;
+    for (int32_t i = 0; i < fileNum; i++) {
+        if (msgData->clearPolicyFileList.fileInfo[i].stat == FILE_STAT_COMPLETE) {
+            event->statusList.completedList.files[completedIndex] = msgData->clearPolicyFileList.fileInfo[i].file;
+            completedIndex++;
+        } else if (msgData->clearPolicyFileList.fileInfo[i].stat == FILE_STAT_NOT_COMPLETE) {
+            event->statusList.notCompletedList.files[notCompletedIndex] = msgData->clearPolicyFileList.fileInfo[i].file;
+            notCompletedIndex++;
+        } else if (msgData->clearPolicyFileList.fileInfo[i].stat == FILE_STAT_NOT_START) {
+            event->statusList.notStartedList.files[notStartedIndex] = msgData->clearPolicyFileList.fileInfo[i].file;
+            notStartedIndex++;
+        }
+    }
+    event->statusList.completedList.fileCnt = completedIndex;
+    event->statusList.notCompletedList.fileCnt = notCompletedIndex;
+    event->statusList.notStartedList.fileCnt = notStartedIndex;
+    TRANS_LOGI(TRANS_SDK,
+        "status list totalFileNum=%{public}d, completedNum=%{public}d, notCompletedNum=%{public}d, "
+        "notStartedNum=%{public}d",
+        fileNum, event->statusList.completedList.fileCnt, event->statusList.notCompletedList.fileCnt,
+        event->statusList.notStartedList.fileCnt);
+}
+
+static void FreeFileStatusList(FileEvent *event)
+{
+    if (event == NULL) {
+        return;
+    }
+    if (event->statusList.completedList.files != NULL) {
+        SoftBusFree(event->statusList.completedList.files);
+        event->statusList.completedList.files = NULL;
+    }
+    if (event->statusList.notCompletedList.files != NULL) {
+        SoftBusFree(event->statusList.notCompletedList.files);
+        event->statusList.notCompletedList.files = NULL;
+    }
+    if (event->statusList.notStartedList.files != NULL) {
+        SoftBusFree(event->statusList.notStartedList.files);
+        event->statusList.notStartedList.files = NULL;
+    }
+}
+
+static void FillFileEventErrorCode(const DFileMsg *msgData, FileEvent *event)
+{
+    switch (msgData->errorCode) {
+        case NSTACKX_EOK:
+            event->errorCode = SOFTBUS_OK;
+            break;
+        case NSTACKX_EPERM:
+            event->errorCode = SOFTBUS_TRANS_FILE_PERMISSION_DENIED;
+            break;
+        case NSTACKX_EDQUOT:
+            event->errorCode = SOFTBUS_TRANS_FILE_DISK_QUOTA_EXCEEDED;
+            break;
+        case NSTACKX_ENOMEM:
+            event->errorCode = SOFTBUS_TRANS_FILE_NO_MEMORY;
+            break;
+        case NSTACKX_ENETDOWN:
+            event->errorCode = SOFTBUS_TRANS_FILE_NETWORK_ERROR;
+            break;
+        case NSTACKX_ENOENT:
+            event->errorCode = SOFTBUS_TRANS_FILE_NOT_FOUND;
+            break;
+        case NSTACKX_EEXIST:
+            event->errorCode = SOFTBUS_TRANS_FILE_EXISTED;
+            break;
+        default:
+            event->errorCode = msgData->errorCode;
+            break;
+    }
+}
+
+static void NotifySocketSendResult(
+    int32_t socket, DFileMsgType msgType, const DFileMsg *msgData, const FileListener *listener)
 {
     FileEvent event;
+    (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
     switch (msgType) {
         case DFILE_ON_TRANS_IN_PROGRESS:
             event.type = FILE_EVENT_SEND_PROCESS;
@@ -73,16 +176,27 @@ static void NotifySocketSendResult(int32_t socket, DFileMsgType msgType, const D
         case DFILE_ON_FILE_SEND_FAIL:
             event.type = FILE_EVENT_SEND_ERROR;
             break;
+        case DFILE_ON_CLEAR_POLICY_FILE_LIST:
+            event.type = FILE_EVENT_TRANS_STATUS;
+            break;
         default:
             return;
     }
-
+    TRANS_LOGD(TRANS_SDK, "sendNotify socket=%{public}d type=%{public}d", socket, event.type);
     event.files = msgData->fileList.files;
     event.fileCnt = msgData->fileList.fileNum;
     event.bytesProcessed = msgData->transferUpdate.bytesTransferred;
     event.bytesTotal = msgData->transferUpdate.totalBytes;
     event.UpdateRecvPath = NULL;
+    if (event.type == FILE_EVENT_TRANS_STATUS || event.type == FILE_EVENT_SEND_ERROR) {
+        FillFileStatusList(msgData, &event);
+    } else if (event.type == FILE_EVENT_SEND_PROCESS) {
+        event.rate = msgData->rate;
+    }
+    FillFileEventErrorCode(msgData, &event);
     listener->socketSendCallback(socket, &event);
+    UpdateChannelStatistics(socket, (int64_t)msgData->transferUpdate.totalBytes);
+    FreeFileStatusList(&event);
 }
 
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
@@ -122,7 +236,10 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
             FileEvent event;
             (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
             event.type = FILE_EVENT_SEND_ERROR;
+            FillFileStatusList(msgData, &event);
+            FillFileEventErrorCode(msgData, &event);
             fileListener.socketSendCallback(sessionId, &event);
+            FreeFileStatusList(&event);
         } else if (fileListener.sendListener.OnFileTransError != NULL) {
             fileListener.sendListener.OnFileTransError(sessionId);
         }
@@ -176,10 +293,11 @@ static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFil
     }
 }
 
-static void NotifySocketRecvResult(int32_t socket, DFileMsgType msgType, const DFileMsg *msgData,
-    const FileListener *listener)
+static void NotifySocketRecvResult(
+    int32_t socket, DFileMsgType msgType, const DFileMsg *msgData, const FileListener *listener)
 {
     FileEvent event;
+    (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
     switch (msgType) {
         case DFILE_ON_FILE_LIST_RECEIVED:
             event.type = FILE_EVENT_RECV_START;
@@ -193,16 +311,26 @@ static void NotifySocketRecvResult(int32_t socket, DFileMsgType msgType, const D
         case DFILE_ON_FILE_RECEIVE_FAIL:
             event.type = FILE_EVENT_RECV_ERROR;
             break;
+        case DFILE_ON_CLEAR_POLICY_FILE_LIST:
+            event.type = FILE_EVENT_TRANS_STATUS;
+            break;
         default:
             return;
     }
-
+    TRANS_LOGD(TRANS_SDK, "recvNotify socket=%{public}d type=%{public}d", socket, event.type);
     event.files = msgData->fileList.files;
     event.fileCnt = msgData->fileList.fileNum;
     event.bytesProcessed = msgData->transferUpdate.bytesTransferred;
     event.bytesTotal = msgData->transferUpdate.totalBytes;
     event.UpdateRecvPath = NULL;
+    if (event.type == FILE_EVENT_TRANS_STATUS || event.type == FILE_EVENT_RECV_ERROR) {
+        FillFileStatusList(msgData, &event);
+    } else if (event.type == FILE_EVENT_RECV_PROCESS) {
+        event.rate = msgData->rate;
+    }
+    FillFileEventErrorCode(msgData, &event);
     listener->socketRecvCallback(socket, &event);
+    FreeFileStatusList(&event);
 }
 
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
@@ -236,7 +364,10 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
             FileEvent event;
             (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
             event.type = FILE_EVENT_RECV_ERROR;
+            FillFileStatusList(msgData, &event);
+            FillFileEventErrorCode(msgData, &event);
             fileListener.socketRecvCallback(sessionId, &event);
+            FreeFileStatusList(&event);
         } else if (fileListener.recvListener.OnFileTransError != NULL) {
             fileListener.recvListener.OnFileTransError(sessionId);
         }

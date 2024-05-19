@@ -256,7 +256,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest06, TestSize.Level1)
     appInfo->myData.pid = INVALID_PID;
     appInfo->myData.channelId = TEST_CHANNEL_ID;
     int32_t ret = NotifyUdpChannelClosed(appInfo, MESSAGE_TYPE_NOMAL);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_IPC_ERR);
     SoftBusFree(appInfo);
 }
 

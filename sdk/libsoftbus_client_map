@@ -479,6 +479,7 @@
         "SetExtSocketOpt";
         "GetExtSocketOpt";
         "SetSoftbusConfig";
+        "ClientEmitFileEvent";
         "SoftBusDFileServer";
         "SoftBusDFileClient";
         "SoftBusDFileClientWithTargetDev";
@@ -500,6 +501,7 @@
         "SoftBusDFileSetCloseFdCallback";
         "SoftBusDFileClearOpenFdCallback";
         "SoftBusDFileClearCloseFdCallback";
+        "UpdateChannelStatistics";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

@@ -72,10 +72,10 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     return HeartBeatStrategyInterface()->LnnRequestLeaveSpecific(networkId, addrType);
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-    const AuthVerifyCallback *callback, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
+    AuthVerifyModule module, bool isFastAuth)
 {
-    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
+    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, callback, module, isFastAuth);
 }
 
 AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
