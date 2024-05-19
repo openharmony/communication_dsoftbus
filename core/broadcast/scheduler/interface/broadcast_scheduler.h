@@ -16,7 +16,7 @@
 #ifndef BROADCAST_SHCEDULER_H
 #define BROADCAST_SHCEDULER_H
 
-#include "broadcast_utils.h"
+#include "broadcast_scheduler_type.h"
 #include "softbus_broadcast_manager.h"
 
 #ifdef __cplusplus
