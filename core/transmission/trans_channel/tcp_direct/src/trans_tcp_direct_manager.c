@@ -52,6 +52,8 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
         .linkType = node->appInfo.connectType,
         .costTime = (int32_t)timeDiff,
         .errcode = errCode,
+        .osType = node->appInfo.osType,
+        .peerUdid = node->appInfo.peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
     if (!node->serverSide) {
