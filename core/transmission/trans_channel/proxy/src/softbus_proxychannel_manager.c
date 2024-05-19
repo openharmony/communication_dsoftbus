@@ -437,6 +437,9 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
                 (void)memcpy_s(channelInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo));
             }
             ReleaseProxyChannelId(removeNode->channelId);
+            if (removeNode->appInfo.fastTransData != NULL) {
+                SoftBusFree((void *)removeNode->appInfo.fastTransData);
+            }
             ListDelete(&(removeNode->node));
             SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
@@ -467,6 +470,9 @@ static int32_t TransProxyResetChan(ProxyChannelInfo *chanInfo)
         if (ResetChanIsEqual(removeNode->status, removeNode, chanInfo) == SOFTBUS_OK) {
             (void)memcpy_s(chanInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo));
             ReleaseProxyChannelId(removeNode->channelId);
+            if (removeNode->appInfo.fastTransData != NULL) {
+                SoftBusFree((void *)removeNode->appInfo.fastTransData);
+            }
             ListDelete(&(removeNode->node));
             SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
@@ -1115,6 +1121,17 @@ static void TransProxyFastDataRecv(ProxyChannelInfo *chan)
     return;
 }
 
+static void ReleaseChannelInfo(ProxyChannelInfo *chan)
+{
+    if (chan == NULL) {
+        return;
+    }
+    if (chan->appInfo.fastTransData != NULL) {
+        SoftBusFree((void*)chan->appInfo.fastTransData);
+    }
+    SoftBusFree(chan);
+}
+
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
     if (msg == NULL) {
@@ -1135,7 +1152,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     if (memcpy_s(tmpSocketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName,
         strlen(chan->appInfo.myData.sessionName)) != EOK) {
         ReleaseProxyChannelId(chan->channelId);
-        SoftBusFree(chan);
+        ReleaseChannelInfo(chan);
         TRANS_LOGE(TRANS_CTRL, "memcpy socketName failed");
         return;
     }
@@ -1157,7 +1174,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(chan->channelId);
-        SoftBusFree(chan);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
 
@@ -1174,7 +1191,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
         ReleaseProxyChannelId(chan->channelId);
-        SoftBusFree(chan);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
 
