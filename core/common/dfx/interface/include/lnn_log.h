@@ -37,7 +37,7 @@ typedef enum {
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel LNN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {LNN_INIT,        0xd005780,      "LnnInit"     },
+    { LNN_INIT,       0xd005780,      "LnnInit"     },
     { LNN_HEART_BEAT, 0xd005781,      "LnnHeartBeat"},
     { LNN_LEDGER,     0xd005782,      "LnnLedger"   },
     { LNN_BUILDER,    0xd005783,      "LnnBuilder"  },

@@ -20,6 +20,7 @@
 
 #include "disc_log.h"
 #include "hilog_mock.h"
+#include "softbus_log_test_utils.h"
 
 using namespace std;
 using namespace testing;
@@ -39,83 +40,19 @@ HWTEST_F(DiscLogTest, DiscLogTest001, TestSize.Level0)
     int32_t index = 0;
     int32_t discDomainBase = 0xd0057a0;
 
-    EXPECT_EQ(index, DISC_INIT);
-    auto label = DISC_LABELS[DISC_INIT];
-    EXPECT_EQ(DISC_INIT, label.label);
-    EXPECT_EQ(discDomainBase, label.domain);
-    EXPECT_STREQ("DiscInit", label.tag);
-
-    EXPECT_EQ(++index, DISC_CONTROL);
-    label = DISC_LABELS[DISC_CONTROL];
-    EXPECT_EQ(DISC_CONTROL, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscControl", label.tag);
-
-    EXPECT_EQ(++index, DISC_LNN);
-    label = DISC_LABELS[DISC_LNN];
-    EXPECT_EQ(DISC_LNN, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscLnn", label.tag);
-
-    EXPECT_EQ(++index, DISC_BLE);
-    label = DISC_LABELS[DISC_BLE];
-    EXPECT_EQ(DISC_BLE, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscBle", label.tag);
-
-    EXPECT_EQ(++index, DISC_BLE_ADAPTER);
-    label = DISC_LABELS[DISC_BLE_ADAPTER];
-    EXPECT_EQ(DISC_BLE_ADAPTER, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscBleAdapter", label.tag);
-
-    EXPECT_EQ(++index, DISC_COAP);
-    label = DISC_LABELS[DISC_COAP];
-    EXPECT_EQ(DISC_COAP, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscCoap", label.tag);
-
-    EXPECT_EQ(++index, DISC_DFINDER);
-    label = DISC_LABELS[DISC_DFINDER];
-    EXPECT_EQ(DISC_DFINDER, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscDfinder", label.tag);
-
-    EXPECT_EQ(++index, DISC_ABILITY);
-    label = DISC_LABELS[DISC_ABILITY];
-    EXPECT_EQ(DISC_ABILITY, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscAbility", label.tag);
-
-    EXPECT_EQ(++index, DISC_USB);
-    label = DISC_LABELS[DISC_USB];
-    EXPECT_EQ(DISC_USB, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscUsb", label.tag);
-
-    EXPECT_EQ(++index, DISC_USB_ADAPTER);
-    label = DISC_LABELS[DISC_USB_ADAPTER];
-    EXPECT_EQ(DISC_USB_ADAPTER, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscUsbAdapter", label.tag);
-
-    EXPECT_EQ(++index, DISC_SDK);
-    label = DISC_LABELS[DISC_SDK];
-    EXPECT_EQ(DISC_SDK, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscSdk", label.tag);
-
-    EXPECT_EQ(++index, DISC_BROADCAST);
-    label = DISC_LABELS[DISC_BROADCAST];
-    EXPECT_EQ(DISC_BROADCAST, label.label);
-    EXPECT_EQ(++discDomainBase, label.domain);
-    EXPECT_STREQ("DiscBroadcast", label.tag);
-
-    EXPECT_EQ(++index, DISC_TEST);
-    label = DISC_LABELS[DISC_TEST];
-    EXPECT_EQ(DISC_TEST, label.label);
-    EXPECT_EQ(DOMAIN_ID_TEST, label.domain);
-    EXPECT_STREQ("DiscTest", label.tag);
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[index], DISC_INIT, discDomainBase, "DiscInit");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_CONTROL, ++discDomainBase, "DiscControl");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_LNN, ++discDomainBase, "DiscLnn");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_BLE, ++discDomainBase, "DiscBle");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_BLE_ADAPTER, ++discDomainBase, "DiscBleAdapter");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_COAP, ++discDomainBase, "DiscCoap");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_DFINDER, ++discDomainBase, "DiscDfinder");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_ABILITY, ++discDomainBase, "DiscAbility");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_USB, ++discDomainBase, "DiscUsb");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_USB_ADAPTER, ++discDomainBase, "DiscUsbAdapter");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_SDK, ++discDomainBase, "DiscSdk");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_BROADCAST, ++discDomainBase, "DiscBroadcast");
+    ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_TEST, DOMAIN_ID_TEST, "DiscTest");
 }
 
 /**
