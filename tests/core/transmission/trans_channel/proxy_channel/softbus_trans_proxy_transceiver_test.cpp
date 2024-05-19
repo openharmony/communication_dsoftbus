@@ -444,7 +444,8 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessage001, TestSize.L
     const char *identity = TEST_STRING_IDENTITY;
     msg.data = TransProxyPackIdentity(identity);
     msg.dateLen = 9;
-    int32_t ret = TransProxySendBadKeyMessage(&msg);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    int32_t ret = TransProxySendBadKeyMessage(&msg, &authHandle);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 } // namespace OHOS

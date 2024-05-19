@@ -515,3 +515,25 @@ void TransFreeLane(uint32_t laneHandle, bool isQosLane)
         LnnFreeLane(laneHandle);
     }
 }
+
+void TransReportBadKeyEvent(int32_t errCode, uint32_t connectionId, int64_t seq, int32_t len)
+{
+    TransAuditExtra extra = {
+        .hostPkg = NULL,
+        .localIp = NULL,
+        .localPort = NULL,
+        .localDevId = NULL,
+        .localSessName = NULL,
+        .peerIp = NULL,
+        .peerPort = NULL,
+        .peerDevId = NULL,
+        .peerSessName = NULL,
+        .result = TRANS_AUDIT_DISCONTINUE,
+        .errcode = errCode,
+        .auditType = AUDIT_EVENT_PACKETS_ERROR,
+        .connId = connectionId,
+        .dataSeq = seq,
+        .dataLen = len,
+    };
+    TRANS_AUDIT(AUDIT_SCENE_SEND_MSG, extra);
+}

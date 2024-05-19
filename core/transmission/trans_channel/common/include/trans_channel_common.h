@@ -51,6 +51,8 @@ void TransBuildTransOpenChannelCancelEvent(
 
 void TransBuildTransAlarmEvent(TransAlarmExtra *extraAlarm, AppInfo *appInfo, int32_t ret);
 
+void TransReportBadKeyEvent(int32_t errCode, uint32_t connectionId, int64_t seq, int32_t len);
+
 LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param);
 
 int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt,
