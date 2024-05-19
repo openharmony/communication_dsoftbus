@@ -183,7 +183,7 @@ public:
     virtual int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what);
     virtual void LnnDeinitBusCenterEvent(void);
     virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-        const AuthVerifyCallback *callback, bool isFastAuth);
+        const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -306,7 +306,8 @@ public:
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool (const ConnectionAddr *, AuthConnInfo *));
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t (FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void ());
-    MOCK_METHOD4(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, bool));
+    MOCK_METHOD5(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *,
+        AuthVerifyModule, bool));
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool (const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t (const char *uuid));
 

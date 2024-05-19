@@ -175,7 +175,13 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
 {
     return GetNetLedgerInterface()->GetJsonObjectStringItem(json, string, target, targetLen);
 }
+
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetNetLedgerInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
+}
+
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)
 {

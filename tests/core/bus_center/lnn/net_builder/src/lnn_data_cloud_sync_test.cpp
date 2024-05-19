@@ -63,7 +63,6 @@ void LNNDataCloudSyncTest::TearDown() {}
  */
 HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level1)
 {
-    LnnInitCloudSyncModule();
     NodeInfo *info = nullptr;
     int32_t ret = LnnLedgerAllDataSyncToDB(info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -76,7 +75,6 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level
     ret = LnnLedgerAllDataSyncToDB(info);
     EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(info);
-    LnnDeInitCloudSyncModule();
 }
 
 /*
@@ -87,12 +85,10 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level
  */
 HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Level1)
 {
-    LnnInitCloudSyncModule();
     char *key = nullptr;
     int32_t ret = LnnLedgerDataChangeSyncToDB(key, VALUE, strlen(VALUE));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     LnnDeleteSyncToDB();
-    LnnDeInitCloudSyncModule();
 }
 
 /*
@@ -103,7 +99,6 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Le
  */
 HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Level1)
 {
-    LnnInitCloudSyncModule();
     char *key = nullptr;
     char *value = nullptr;
     ChangeType type = DB_UPDATE;
@@ -119,7 +114,6 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Lev
     type = DB_CHANGE_TYPE_MAX;
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    LnnDeInitCloudSyncModule();
 }
 
 /*
@@ -130,12 +124,10 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Lev
  */
 HWTEST_F(LNNDataCloudSyncTest, LnnDBDataAddChangeSyncToCache_Test_004, TestSize.Level1)
 {
-    LnnInitCloudSyncModule();
     const char **key = nullptr;
     const char **value = nullptr;
     int32_t keySize = 0;
     int32_t ret = LnnDBDataAddChangeSyncToCache(key, value, keySize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    LnnDeInitCloudSyncModule();
 }
 } // namespace OHOS

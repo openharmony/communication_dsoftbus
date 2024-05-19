@@ -734,7 +734,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         }
     }
     DfxRecordConnAuthStart(&authConn, connFsm, connInfo->requestId);
-    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), true) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), AUTH_MODULE_LNN, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth verify device failed. [id=%{public}u]", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
         rc = SOFTBUS_ERR;

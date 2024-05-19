@@ -91,6 +91,7 @@ typedef struct {
 #define USE_BLE_CIPHER 0x4
 #define BAD_CIPHER 0x8
 #define CS_MODE 0x10
+#define AUTH_SINGLE_CIPHER 0x28 // To be compatible with LegacyOs, use 0x28 which & BAD_CIPHER also BAD_CIPHER
 #define PROXY_BYTES_LENGTH_MAX (4 * 1024 * 1024)
 #define PROXY_MESSAGE_LENGTH_MAX 1024
 
@@ -163,7 +164,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     int32_t len, uint16_t *fastDataSize);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 char* TransProxyPackHandshakeErrMsg(int32_t errCode);
-int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
+int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth);
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);

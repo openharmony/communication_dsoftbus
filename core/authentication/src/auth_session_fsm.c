@@ -28,8 +28,8 @@
 #include "auth_request.h"
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
-#include "lnn_event.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -202,6 +202,21 @@ static int32_t ProcAuthFsm(uint32_t requestId, bool isServer, AuthFsm *authFsm)
     return SOFTBUS_OK;
 }
 
+static int32_t FillSessionInfoModule(uint32_t requestId, AuthSessionInfo *info)
+{
+    if (!info->isServer) {
+        AuthRequest request;
+        (void)memset_s(&request, sizeof(request), 0, sizeof(request));
+        int32_t ret = GetAuthRequestNoLock(requestId, &request);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "get auth request fail");
+            return ret;
+        }
+        info->module = request.module;
+    }
+    return SOFTBUS_OK;
+}
+
 static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t connId,
     const AuthConnInfo *connInfo, bool isServer)
 {
@@ -218,6 +233,10 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V2;
     authFsm->info.idType = EXCHANHE_UDID;
+    if (FillSessionInfoModule(requestId, &authFsm->info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "fill module fail");
+        return NULL;
+    }
     if (!isServer) {
         if (ProcAuthFsm(requestId, isServer, authFsm) != SOFTBUS_OK) {
             SoftBusFree(authFsm);
@@ -760,7 +779,7 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
         (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
         return;
     }
-    if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey, true) != SOFTBUS_OK) {
+    if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey, true, false) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "auth fsm save session key fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
     }
 
