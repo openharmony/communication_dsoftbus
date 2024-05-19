@@ -805,6 +805,17 @@ static bool IsMetaSession(const char *sessionName)
     return true;
 }
 
+static void ReleaseSessionConn(SessionConn *chan)
+{
+    if (chan == NULL) {
+        return;
+    }
+    if (chan->appInfo.fastTransData != NULL) {
+        SoftBusFree((void*)chan->appInfo.fastTransData);
+    }
+    SoftBusFree(chan);
+}
+
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, seq=%{public}" PRIu64, channelId, seq);
@@ -842,7 +853,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         TRANS_LOGI(TRANS_CTRL,
             "Request denied: session is not a meta session. sessionName=%{public}s", tmpName);
         AnonymizeFree(tmpName);
-        SoftBusFree(conn);
+        ReleaseSessionConn(conn);
         return SOFTBUS_TRANS_NOT_META_SESSION;
     }
     char *errDesc = NULL;
@@ -902,7 +913,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, flags) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequest reply err");
         (void)NotifyChannelClosed(&conn->appInfo, channelId);
-        SoftBusFree(conn);
+        ReleaseSessionConn(conn);
         return SOFTBUS_ERR;
     } else {
         extra.result = EVENT_STAGE_RESULT_OK;
@@ -917,7 +928,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         }
     }
 
-    SoftBusFree(conn);
+    ReleaseSessionConn(conn);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
 
@@ -925,7 +936,7 @@ ERR_EXIT:
     if (OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
     }
-    SoftBusFree(conn);
+    ReleaseSessionConn(conn);
     return errCode;
 }
 
