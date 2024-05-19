@@ -46,16 +46,11 @@ int HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *ta
 }
 
 #ifdef HILOG_RAWFORMAT
-int HilogMock::HiLogPrintDict(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
-    const FmtId *fmtid, const char *fmt, ...)
+int HiLogPrintDictNew(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+    const unsigned int uuid, const unsigned int fmtOffset, const char *fmt, ...)
 {
-    return 0;
-}
-
-int HiLogPrintDict(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
-    const FmtId *fmtid, const char *fmt, ...)
-{
-    (void)fmtid;
+    (void)uuid;
+    (void)fmtOffset;
     char *args;
     va_list va_args;
     va_start(va_args, fmt);

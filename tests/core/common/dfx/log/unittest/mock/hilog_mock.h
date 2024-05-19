@@ -26,11 +26,6 @@ class HilogInterface {
 public:
     virtual int HiLogPrint(
         LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...) = 0;
-
-#ifdef HILOG_RAWFORMAT
-    virtual int HiLogPrintDict(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
-        const FmtId *fmtid, const char *fmt, ...) = 0;
-#endif // HILOG_RAWFORMAT
 };
 
 class HilogMock : public HilogInterface {
@@ -47,15 +42,6 @@ public:
 
     MOCK_METHOD6(
         HiLogPrint, int(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, char *));
-
-#ifdef HILOG_RAWFORMAT
-    int HiLogPrintDict(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
-        const FmtId *fmtid, const char *fmt, ...) override;
-
-    MOCK_METHOD7(HiLogPrintDict,
-        int(const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const FmtId *fmtid,
-            const char *fmt, char *));
-#endif // HILOG_RAWFORMAT
 
 private:
     static inline std::atomic<HilogMock *> mock = nullptr;
