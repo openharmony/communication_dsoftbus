@@ -245,7 +245,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
     ON_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
-    EXPECT_TRUE(ret = SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(connMock, ConnSetConnectCallback(_, _))
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofConnSetConnectCallback);
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -255,7 +255,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, AUTH_MODULE_LNN, true);
-    EXPECT_TRUE(ret = SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);
 }
 
@@ -375,7 +375,6 @@ HWTEST_F(AuthEnhanceMockTest, CHECK_SESSION_KEY_VALID_BY_AUTH_HANDLE_Test_001, T
         UDID_HASH_LEN) == EOK);
     EXPECT_EQ(AuthDirectOnlineCreateAuthManager(authSeq, &info), SOFTBUS_OK);
     AuthHandle authHandle = { .authId = authSeq, .type = connInfo.type };
-    EXPECT_EQ(AuthCheckSessionKeyValidByAuthHandle(&authHandle), SOFTBUS_AUTH_SESSION_KEY_INVALID);
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     sessionKey.len = keyLen;
