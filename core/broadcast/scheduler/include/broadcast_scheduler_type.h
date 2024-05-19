@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef BROADCAST_UTILS_H
-#define BROADCAST_UTILS_H
+#ifndef BROADCAST_SCHEDULER_TYPE_H
+#define BROADCAST_SCHEDULER_TYPE_H
 
 typedef enum {
     BC_TYPE_DISTRIB_CON,
     BC_TYPE_DISTRIB_NON,
-    BC_TYPE_SCHDULER_BUTT,
+    BC_TYPE_SCHEDULER_BUTT,
 } BroadcastContentType;
 
-#endif // BROADCAST_UTILS_H
+#endif // BROADCAST_SCHEDULER_TYPE_H
