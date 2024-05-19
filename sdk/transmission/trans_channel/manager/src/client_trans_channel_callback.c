@@ -18,6 +18,7 @@
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_statistics.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_udp_manager.h"
@@ -52,6 +53,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
 
+    AddSocketResource(sessionName, channel);
     if (channel->channelType == CHANNEL_TYPE_UDP && channel->isServer) {
         return udpPort;
     }
@@ -94,6 +96,7 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
 
 static int32_t NofifyChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
+    DeleteSocketResourceByChannelId(channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             return ClientTransAuthOnChannelClosed(channelId, reason);

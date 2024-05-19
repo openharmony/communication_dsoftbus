@@ -18,6 +18,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    "trans_auth_negotiation_test:unittest",
     "trans_channel_callback_test:unittest",
     "trans_channel_manager_test:unittest",
     "trans_lane_manager_test:unittest",

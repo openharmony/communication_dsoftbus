@@ -51,6 +51,7 @@ if (dsoftbus_feature_lnn_net) {
     "$core_lane_hub_path/lane_manager/src/lnn_trans_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_reliability.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_listener.c",
+    "$dsoftbus_root_path/core/common/dfx/statistics/trans_network_statistics.c",
   ]
 
   if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {

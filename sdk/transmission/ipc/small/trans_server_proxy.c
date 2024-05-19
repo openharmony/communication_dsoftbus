@@ -329,6 +329,15 @@ int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_
     return ret;
 }
 
+int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+{
+    (void)channelId;
+    (void)laneId;
+    (void)dataInfo;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
     TRANS_LOGD(TRANS_SDK, "enter.");

@@ -67,9 +67,9 @@ bool IsEnableSoftBusHeartbeat(void)
     return HeartBeatCtrlDepsInterface()->IsEnableSoftBusHeartbeat();
 }
 
-void LnnUpdateOhosAccount(void)
+void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
 {
-    return HeartBeatCtrlDepsInterface()->LnnUpdateOhosAccount();
+    return HeartBeatCtrlDepsInterface()->LnnUpdateOhosAccount(isNeedUpdateHeartbeat);
 }
 
 int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)

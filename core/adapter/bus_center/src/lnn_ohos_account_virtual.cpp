@@ -28,8 +28,9 @@ int32_t LnnInitOhosAccount(void)
     return SOFTBUS_OK;
 }
 
-void LnnUpdateOhosAccount(void)
+void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
 {
+    (void)isNeedUpdateHeartbeat;
 }
 
 void LnnOnOhosAccountLogout(void)

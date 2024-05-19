@@ -12,14 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef CLIENT_TRANS_STATISTICS_H
+#define CLIENT_TRANS_STATISTICS_H
 
-#ifndef BROADCAST_UTILS_H
-#define BROADCAST_UTILS_H
+#include "softbus_def.h"
+#include "trans_network_statistics.h"
 
-typedef enum {
-    BC_TYPE_DISTRIB_CON,
-    BC_TYPE_DISTRIB_NON,
-    BC_TYPE_SCHDULER_BUTT,
-} BroadcastContentType;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // BROADCAST_UTILS_H
+void AddSocketResource(const char *sessionName, const ChannelInfo *channel);
+
+void UpdateChannelStatistics(int32_t socketId, int64_t len);
+
+void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType);
+
+int32_t ClientTransStatisticsInit(void);
+
+void ClientTransStatisticsDeinit(void);
+
+#ifdef __cplusplus
+}
+#endif
+#endif // CLIENT_TRANS_STATISTICS_H

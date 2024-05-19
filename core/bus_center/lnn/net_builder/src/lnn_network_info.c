@@ -436,7 +436,7 @@ static void InitWifiDirectCapability(void)
 {
     g_isWifiDirectSupported = SoftBusHasWifiDirectCapability();
     char *coexistCap = SoftBusGetWifiInterfaceCoexistCap();
-    LNN_CHECK_AND_RETURN_LOGE(coexistCap, LNN_INIT, "coexistCap is null");
+    LNN_CHECK_AND_RETURN_LOGE(coexistCap != NULL, LNN_INIT, "coexistCap is null");
     LNN_LOGI(LNN_BUILDER, "coexistCap=%{public}s", coexistCap);
     g_isApCoexistSupported = IsSupportApCoexist(coexistCap);
     SoftBusFree(coexistCap);

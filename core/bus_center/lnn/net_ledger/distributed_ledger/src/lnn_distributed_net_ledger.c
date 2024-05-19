@@ -1777,11 +1777,12 @@ static void TryUpdateDeviceSecurityLevel(NodeInfo *info)
 
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
-    // judge map
-    info->onlinetTimestamp = (uint64_t)LnnUpTimeMs();
     if (info == NULL) {
         return REPORT_NONE;
     }
+    // judge map
+    info->onlinetTimestamp = (uint64_t)LnnUpTimeMs();
+
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
         AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR, info->authSeqNum);
@@ -2415,11 +2416,11 @@ int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
         return SOFTBUS_INVALID_PARAM;
     }
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
-    NodeInfo *oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
+    NodeInfo *oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo == NULL) {
         LNN_LOGI(LNN_LEDGER, "no this device info in ledger, need to insert");
         int32_t ret = LnnMapSet(&map->udidMap, udid, newInfo, sizeof(NodeInfo));

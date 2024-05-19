@@ -499,6 +499,14 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, timeStart);
         goto EXIT_ERR;
     }
+    ret = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_MASTER_NODE_UDID,
+                              appInfo->peerUdid, sizeof(appInfo->peerUdid));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get remote uuid err, ret=%{public}d", ret);
+        goto EXIT_ERR;
+    }
+    extra->peerUdid = appInfo->peerUdid;
+    extra->osType = appInfo->osType;
     appInfo->connectType = connOpt.type;
     extra->linkType = connOpt.type;
     FillAppInfo(appInfo, param, &transInfo, connInnerInfo);

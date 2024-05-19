@@ -80,6 +80,14 @@ extern "C" {
 #define NSTACKX_NOTSUPPORT (-12)
 
 #define NSTACKX_PEER_CLOSE (-13)
+
+#define NSTACKX_EPERM (-14)
+
+#define NSTACKX_EDQUOT (-15)
+
+#define NSTACKX_ENETDOWN (-16)
+
+#define NSTACKX_ENOENT (-17)
 #ifdef __cplusplus
 }
 #endif

@@ -36,10 +36,10 @@ static LnnAuthInterface *GetAuthInterface()
 }
 
 extern "C" {
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-    const AuthVerifyCallback *callback, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
+    AuthVerifyModule module, bool isFastAuth)
 {
-    return GetAuthInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
+    return GetAuthInterface()->AuthStartVerify(connInfo, requestId, callback, module, isFastAuth);
 }
 
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)

@@ -188,7 +188,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
     }
     sessionKey->len = strlen(sessionKeyStr);
 
-    int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false);
+    int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false, false);
     SoftBusFree(info);
     return ret;
 }
@@ -279,7 +279,7 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
 
     SessionKey sessionKey;
     info->connInfo.type = AUTH_LINK_TYPE_WIFI;
-    int32_t ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey, false);
+    int32_t ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey, false, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(info);

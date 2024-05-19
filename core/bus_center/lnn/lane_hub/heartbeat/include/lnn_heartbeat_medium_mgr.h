@@ -18,8 +18,8 @@
 
 #include <stdint.h>
 
-#include "softbus_common.h"
 #include "lnn_heartbeat_utils.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,8 +50,8 @@ typedef struct {
 
 typedef struct {
     void (*onRelay)(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType);
-    int32_t (*onReceive)(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
-        LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
+    int32_t (*onReceive)(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight, LnnHeartbeatType hbType,
+        bool isOnlineDirectly, HbRespData *hbResp);
     int32_t (*onRecvHigherWeight)(const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect);
     void (*onRecvSensorHubInfo)(const char *networkId, uint64_t nowTime);
 } LnnHeartbeatMediumMgrCb;

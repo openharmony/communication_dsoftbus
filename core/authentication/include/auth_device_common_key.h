@@ -36,6 +36,7 @@ typedef struct {
     int64_t keyIndex;
     uint8_t deviceKey[SESSION_KEY_LENGTH];
     uint32_t keyLen;
+    bool isOldKey;
 } AuthDeviceKeyInfo;
 
 void AuthLoadDeviceKey(void);
@@ -47,7 +48,7 @@ void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bo
 void AuthUpdateNormalizeKeyIndex(const char *udidHash, int64_t index, AuthLinkType type, SessionKey *normalizedKey,
     bool isServer);
 int32_t AuthFindNormalizeKeyByServerSide(const char *udidHash, bool isServer, AuthDeviceKeyInfo *deviceKey);
-int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey);
+int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey, bool clearOldKey);
 void AuthClearDeviceKey(void);
 
 #ifdef __cplusplus

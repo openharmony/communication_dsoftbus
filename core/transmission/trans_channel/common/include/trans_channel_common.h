@@ -51,6 +51,8 @@ void TransBuildTransOpenChannelCancelEvent(
 
 void TransBuildTransAlarmEvent(TransAlarmExtra *extraAlarm, AppInfo *appInfo, int32_t ret);
 
+void TransReportBadKeyEvent(int32_t errCode, uint32_t connectionId, int64_t seq, int32_t len);
+
 LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param);
 
 int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt,
@@ -63,6 +65,12 @@ int32_t TransCommonGetLocalConfig(int32_t channelType, int32_t businessType, uin
 void TransFreeAppInfo(AppInfo *appInfo);
 
 void TransFreeLane(uint32_t laneHandle, bool isQosLane);
+
+bool IsPeerDeviceLegacyOs(int32_t osType);
+
+void GetOsTypeByNetworkId(const char *networkId, int32_t *osType);
+
+void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len);
 
 #ifdef __cplusplus
 }
