@@ -1434,15 +1434,6 @@ static void HandleReconnectResult(const AuthRequest *request, uint64_t connId, i
     DelAuthRequest(request->requestId);
 }
 
-static int32_t GenerateUdidHash(const char *udid, uint8_t *hash)
-{
-    if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uint32_t bufLen)
 {
     char udid[UDID_BUF_LEN] = {0};
