@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include "client_trans_file_listener.h"
+#include "client_trans_statistics.h"
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
 #include "softbus_adapter_mem.h"
@@ -194,6 +195,7 @@ static void NotifySocketSendResult(
     }
     FillFileEventErrorCode(msgData, &event);
     listener->socketSendCallback(socket, &event);
+    UpdateChannelStatistics(socket, (int64_t)msgData->transferUpdate.totalBytes);
     FreeFileStatusList(&event);
 }
 

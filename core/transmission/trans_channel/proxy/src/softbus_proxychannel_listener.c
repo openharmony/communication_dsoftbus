@@ -30,6 +30,7 @@
 #include "softbus_proxychannel_control.h"
 #include "softbus_utils.h"
 #include "softbus_adapter_mem.h"
+#include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_event.h"
@@ -79,6 +80,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.timeStart = appInfo->timeStart;
     info.linkType = appInfo->linkType;
     info.connectType = appInfo->connectType;
+    TransGetLaneIdByChannelId(channelId, &info.laneId);
 
     int32_t ret = SOFTBUS_ERR;
     if (appInfo->appType != APP_TYPE_AUTH) {

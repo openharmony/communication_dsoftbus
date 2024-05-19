@@ -33,6 +33,7 @@ if (defined(ohos_lite)) {
   trans_session_sdk_inc = [
     "$dsoftbus_sdk_path/transmission/session/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "//third_party/cJSON",
     "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interfaces",
@@ -43,6 +44,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_sdk_path/transmission/session/cpp/include",
     "$dsoftbus_sdk_path/transmission/session/cpp/src",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
   ]
 
