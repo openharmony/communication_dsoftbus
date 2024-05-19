@@ -70,6 +70,15 @@ int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_
     return TransCloseChannel(sessionName, channelId, channelType);
 }
 
+int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+{
+    (void)channelId;
+    (void)laneId;
+    (void)dataInfo;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t ServerIpcReleaseResources(int32_t channelId)
 {
     return TransReleaseUdpResources(channelId);

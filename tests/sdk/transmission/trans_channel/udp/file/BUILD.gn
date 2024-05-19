@@ -80,6 +80,7 @@ if (defined(ohos_lite)) {
       "dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
       "dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/src",
       "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/src",
       "$dsoftbus_root_path/sdk/transmission/session/include",

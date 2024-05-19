@@ -168,6 +168,23 @@ int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_
     return g_serverProxy->CloseChannel(sessionName, channelId, channelType);
 }
 
+int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+{
+    if (g_serverProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
+        return SOFTBUS_NO_INIT;
+    }
+    if (channelId < 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid channel Id!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (laneId < 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid lane Id!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return g_serverProxy->CloseChannelWithStatistics(channelId, laneId, dataInfo, len);
+}
+
 int32_t ServerIpcReleaseResources(int32_t channelId)
 {
     if (g_serverProxy == nullptr) {

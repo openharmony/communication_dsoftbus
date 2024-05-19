@@ -501,6 +501,7 @@
         "SoftBusDFileSetCloseFdCallback";
         "SoftBusDFileClearOpenFdCallback";
         "SoftBusDFileClearCloseFdCallback";
+        "UpdateChannelStatistics";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
