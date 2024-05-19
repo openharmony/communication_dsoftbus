@@ -84,6 +84,7 @@ typedef struct {
     const char *firstTokenName; // FIRST_TOKEN_NAME
     uint32_t firstTokenId;     // FIRST_TOKEN_ID
     int32_t  firstTokenType;    // FIRST_TOKEN_TYPE
+    int32_t  osType;            // OS_TYPE
 } TransEventExtra;
 
 typedef enum {

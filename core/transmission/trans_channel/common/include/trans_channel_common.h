@@ -66,6 +66,12 @@ void TransFreeAppInfo(AppInfo *appInfo);
 
 void TransFreeLane(uint32_t laneHandle, bool isQosLane);
 
+bool IsPeerDeviceLegacyOs(int32_t osType);
+
+void GetOsTypeByNetworkId(const char *networkId, int32_t *osType);
+
+void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
