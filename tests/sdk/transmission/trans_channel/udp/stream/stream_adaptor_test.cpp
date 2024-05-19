@@ -125,7 +125,7 @@ HWTEST_F(StreamAdaptorTest, EncryptTest002, TestSize.Level0)
     int32_t ret = adaptor->Encrypt(streamData.buf, streamData.bufLen, data.get(), dataLen, adaptor->GetSessionKey());
     EXPECT_EQ(dataLen, ret);
     ret = adaptor->Decrypt(data.get(), dataLen + 1, streamData.buf, streamData.bufLen, adaptor->GetSessionKey());
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     adaptor->ReleaseAdaptor();
 }
 }
