@@ -22,6 +22,7 @@
 #include "anonymizer.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_log.h"
+#include "lnn_parameter_utils.h"
 #include "softbus_errcode.h"
 
 #include "datetime_ex.h"
@@ -86,6 +87,10 @@ int32_t KVAdapter::DeInit()
 int32_t KVAdapter::RegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
@@ -105,6 +110,10 @@ int32_t KVAdapter::RegisterDataChangeListener()
 int32_t KVAdapter::UnRegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "UnRegister db data change listener");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
@@ -346,6 +355,10 @@ int32_t KVAdapter::DeleteKvStorePtr()
 int32_t KVAdapter::CloudSync()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     std::function<void(DistributedKv::ProgressDetail &&)> callback = CloudSyncCallback;
     DistributedKv::Status status;
     {

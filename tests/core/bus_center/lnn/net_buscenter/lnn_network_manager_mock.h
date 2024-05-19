@@ -43,7 +43,7 @@ public:
     virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium) = 0;
     virtual void LnnStopPublish(void) = 0;
     virtual int32_t LnnStartPublish(void) = 0;
-    virtual void LnnUpdateOhosAccount(void) = 0;
+    virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
     virtual void LnnOnOhosAccountLogout(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect) = 0;
@@ -67,7 +67,7 @@ public:
     MOCK_METHOD2(DiscLinkStatusChanged, void (LinkStatus, ExchangeMedium));
     MOCK_METHOD0(LnnStopPublish, void (void));
     MOCK_METHOD0(LnnStartPublish, int32_t (void));
-    MOCK_METHOD0(LnnUpdateOhosAccount, void (void));
+    MOCK_METHOD1(LnnUpdateOhosAccount, void (bool));
     MOCK_METHOD0(LnnOnOhosAccountLogout, void (void));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD2(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, bool));
