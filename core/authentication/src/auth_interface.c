@@ -18,8 +18,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "auth_deviceprofile.h"
 #include "auth_device_common_key.h"
+#include "auth_deviceprofile.h"
 #include "auth_hichain.h"
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
@@ -31,6 +31,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_ohos_account.h"
+#include "lnn_parameter_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
@@ -452,7 +453,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     // get device key
     bool hasDeviceKey = false;
     AuthDeviceKeyInfo keyInfo = {0};
-    bool isSupportCloud = IsFeatureSupport(nodeInfo->feature, BIT_CLOUD_SYNC_DEVICE_INFO);
+    bool isSupportCloud = IsCloudSyncEnabled() && IsFeatureSupport(nodeInfo->feature, BIT_CLOUD_SYNC_DEVICE_INFO);
     if (AuthFindLatestNormalizeKey(udidHash, &keyInfo, !isSupportCloud) == SOFTBUS_OK ||
         AuthFindDeviceKey(udidHash, connInfo->type, &keyInfo) == SOFTBUS_OK) {
         hasDeviceKey = true;

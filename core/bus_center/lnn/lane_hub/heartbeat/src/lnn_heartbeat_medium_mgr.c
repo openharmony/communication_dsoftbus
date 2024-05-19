@@ -38,6 +38,8 @@
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
+#include "lnn_parameter_utils.h"
+
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
@@ -386,7 +388,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         return true;
     }
     AuthDeviceKeyInfo keyInfo = { 0 };
-    if (!IsFeatureSupport(deviceInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO) &&
+    if ((!IsCloudSyncEnabled() || !IsFeatureSupport(deviceInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) &&
         AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
         AuthFindLatestNormalizeKey(device->devId, &keyInfo, true) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
