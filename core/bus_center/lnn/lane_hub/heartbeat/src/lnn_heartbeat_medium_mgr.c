@@ -19,7 +19,6 @@
 #include <string.h>
 
 #include "anonymizer.h"
-#include "auth_interface.h"
 #include "auth_manager.h"
 #include "auth_device_common_key.h"
 #include "auth_interface.h"
