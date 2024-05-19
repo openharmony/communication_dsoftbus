@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,6 +31,7 @@ trans_channel_deps =
 trans_channel_src += [
   "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
   "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_message.c",
+  "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_auth_negotiation.c",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_callback.c",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@ void TransProxyPostDisConnectMsgToLoop(uint32_t connId, bool isServer);
 void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan, int32_t errCode);
 void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan);
+void TransProxyPostAuthNegoMsgToLooperDelay(uint32_t authRequestId, int32_t channelId, uint32_t delayTime);
 int32_t TransProxyTransInit(void);
 int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer);
 int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect, bool isServer);
