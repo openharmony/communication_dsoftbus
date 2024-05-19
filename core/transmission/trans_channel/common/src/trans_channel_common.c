@@ -210,7 +210,7 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
         param->attr->fastTransDataSize <= MAX_FAST_DATA_LEN) {
         if (appInfo->businessType == BUSINESS_TYPE_FILE || appInfo->businessType == BUSINESS_TYPE_STREAM) {
             TRANS_LOGE(TRANS_CTRL, "not support send fast data");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
         }
         appInfo->fastTransData = (uint8_t*)SoftBusCalloc(param->attr->fastTransDataSize);
         if (appInfo->fastTransData == NULL) {
@@ -536,6 +536,28 @@ void TransFreeLane(uint32_t laneHandle, bool isQosLane)
         }
         LnnFreeLane(laneHandle);
     }
+}
+
+void TransReportBadKeyEvent(int32_t errCode, uint32_t connectionId, int64_t seq, int32_t len)
+{
+    TransAuditExtra extra = {
+        .hostPkg = NULL,
+        .localIp = NULL,
+        .localPort = NULL,
+        .localDevId = NULL,
+        .localSessName = NULL,
+        .peerIp = NULL,
+        .peerPort = NULL,
+        .peerDevId = NULL,
+        .peerSessName = NULL,
+        .result = TRANS_AUDIT_DISCONTINUE,
+        .errcode = errCode,
+        .auditType = AUDIT_EVENT_PACKETS_ERROR,
+        .connId = connectionId,
+        .dataSeq = seq,
+        .dataLen = len,
+    };
+    TRANS_AUDIT(AUDIT_SCENE_SEND_MSG, extra);
 }
 
 bool IsPeerDeviceLegacyOs(int32_t osType)

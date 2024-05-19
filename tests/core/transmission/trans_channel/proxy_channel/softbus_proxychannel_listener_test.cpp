@@ -334,7 +334,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransProxyGetAppInfoTest001, TestSize.
 
     int32_t ret = TransProxyGetAppInfo(sessionName, peerNetworkId, appInfo);
     SoftBusFree(appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 }
 
 /**

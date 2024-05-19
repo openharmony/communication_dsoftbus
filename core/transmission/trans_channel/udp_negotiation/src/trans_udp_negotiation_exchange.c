@@ -54,10 +54,10 @@ int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
 {
     if ((msg == NULL) && (errCode == NULL)) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (!GetJsonObjectInt32Item(msg, ERR_CODE, errCode)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -67,7 +67,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     TRANS_LOGI(TRANS_CTRL, "unpack reply udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
@@ -91,7 +91,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     return SOFTBUS_OK;
 }
@@ -101,7 +101,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
     size_t len = 0;
@@ -110,7 +110,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
         (unsigned char*)encodeSessionKey, strlen((char*)encodeSessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
         TRANS_LOGE(TRANS_CTRL, "mbedtls decode failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
 
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
@@ -145,7 +145,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     return SOFTBUS_OK;
 }
@@ -155,7 +155,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     TRANS_LOGI(TRANS_CTRL, "pack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     switch (appInfo->udpChannelOptType) {
@@ -177,7 +177,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
         (unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != 0) {
         TRANS_LOGE(TRANS_CTRL, "mbedtls base64 encode failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     (void)AddStringToJsonObject(msg, "SESSION_KEY", encodeSessionKey);
 
@@ -203,7 +203,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     TRANS_LOGI(TRANS_CTRL, "pack reply udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     switch (appInfo->udpChannelOptType) {
@@ -216,7 +216,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
 
     (void)AddNumberToJsonObject(msg, "CODE", getCodeType(appInfo));
@@ -234,7 +234,7 @@ int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc)
     TRANS_LOGI(TRANS_CTRL, "pack reply error info in negotiation.");
     if (msg == NULL || errDesc == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     (void)AddNumberToJsonObject(msg, CODE, CODE_EXCHANGE_UDP_INFO);

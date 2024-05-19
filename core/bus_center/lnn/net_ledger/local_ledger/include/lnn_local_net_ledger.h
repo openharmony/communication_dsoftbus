@@ -45,6 +45,7 @@ int32_t LnnInitLocalLedgerDelay(void);
 void LnnDeinitLocalLedger(void);
 
 const NodeInfo *LnnGetLocalNodeInfo(void);
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info);
 int32_t LnnUpdateLocalNetworkId(const void *id);
 int32_t LnnUpdateLocalNetworkIdTime(int64_t time);
 void LnnUpdateStateVersion();

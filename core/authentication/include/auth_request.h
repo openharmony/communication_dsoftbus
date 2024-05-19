@@ -36,6 +36,7 @@ typedef struct {
     uint32_t requestId;
     AuthConnInfo connInfo;
     AuthVerifyCallback verifyCb;
+    AuthVerifyModule module;
     int64_t authId;
     int64_t traceId;
     AuthConnCallback connCb;

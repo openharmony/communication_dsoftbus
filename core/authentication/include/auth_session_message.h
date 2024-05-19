@@ -36,6 +36,14 @@ typedef struct {
     SoftBusVersion version;
 } DevInfoData;
 
+/* VerifyDevice */
+#define CODE_VERIFY_DEVICE 2
+#define DEVICE_ID "DEVICE_ID"
+
+/* TcpKeepalive */
+#define TIME "TIME"
+#define CODE_TCP_KEEPALIVE 3
+
 char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid,
     const AuthSessionInfo *info);
 int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth,

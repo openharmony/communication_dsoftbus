@@ -15,6 +15,8 @@
 
 #include "trans_session_service.h"
 
+#include <stdatomic.h>
+
 #include "anonymizer.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -29,41 +31,46 @@
 #include "trans_log.h"
 #include "trans_session_manager.h"
 
-static bool g_transSessionInitFlag = false;
+static _Atomic bool g_transSessionInitFlag = false;
 
 int32_t TransServerInit(void)
 {
-    if (g_transSessionInitFlag) {
+    if (atomic_load_explicit(&g_transSessionInitFlag, memory_order_acquire)) {
         return SOFTBUS_OK;
     }
-    if (TransPermissionInit() != SOFTBUS_OK) {
+    int32_t ret = TransPermissionInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "Init trans permission failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (TransSessionMgrInit() != SOFTBUS_OK) {
+    ret = TransSessionMgrInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "TransSessionMgrInit failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (TransChannelInit() != SOFTBUS_OK) {
+    ret = TransChannelInit();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "TransChannelInit failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (InitQos() != SOFTBUS_OK) {
+    ret = InitQos();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (ScenarioManagerGetInstance() != SOFTBUS_OK) {
+    ret = ScenarioManagerGetInstance();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    g_transSessionInitFlag = true;
+    atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
     TRANS_LOGI(TRANS_INIT, "trans session server list init succ");
     return SOFTBUS_OK;
 }
 
 void TransServerDeinit(void)
 {
-    if (!g_transSessionInitFlag) {
+    if (!atomic_load_explicit(&g_transSessionInitFlag, memory_order_acquire)) {
         return;
     }
 
@@ -71,7 +78,7 @@ void TransServerDeinit(void)
     TransChannelDeinit();
     TransPermissionDeinit();
     ScenarioManagerdestroyInstance();
-    g_transSessionInitFlag = false;
+    atomic_store_explicit(&g_transSessionInitFlag, false, memory_order_release);
 }
 
 void TransServerDeathCallback(const char *pkgName, int32_t pid)
