@@ -81,7 +81,7 @@ typedef struct {
         int32_t filterSize);
     int32_t (*StopScan)(int32_t scannerId);
     bool (*IsLpDeviceAvailable)(void);
-    bool (*SetAdvFilterParam)(SensorHubServerType type, const SoftBusLpBroadcastParam *bcParam,
+    bool (*SetAdvFilterParam)(LpServerType type, const SoftBusLpBroadcastParam *bcParam,
         const SoftBusLpScanParam *scanParam);
     int32_t (*GetBroadcastHandle)(int32_t advId, int32_t *bcHandle);
     int32_t (*EnableSyncDataToLpDevice)(void);

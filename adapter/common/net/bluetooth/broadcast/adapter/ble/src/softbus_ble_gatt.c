@@ -710,7 +710,7 @@ static bool IsLpAvailable(void)
     return ret;
 }
 
-static int32_t SetBtUuidByBroadCastType(SensorHubServerType type, BtUuid *btUuid)
+static int32_t SetBtUuidByBroadCastType(LpServerType type, BtUuid *btUuid)
 {
     switch (type) {
         case SOFTBUS_HEARTBEAT_TYPE:
@@ -735,7 +735,7 @@ static void FreeManufactureData(BleScanNativeFilter *nativeFilter, int32_t filte
     }
 }
 
-static bool SetLpParam(SensorHubServerType type,
+static bool SetLpParam(LpServerType type,
     const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
     BleScanConfigs scanConfig = {};
