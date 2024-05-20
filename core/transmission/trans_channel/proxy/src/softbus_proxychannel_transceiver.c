@@ -185,7 +185,9 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
         case LOOP_DISCONNECT_MSG: {
             bool isServer = (bool)msg->arg1;
             uint32_t connectionId = (uint32_t)msg->arg2;
-            TransProxyCloseConnChannel(connectionId, isServer);
+            chan = (ProxyChannelInfo *)msg->obj;
+            TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_DISCONNECT_MSG, chan is null");
+            TransProxyCloseConnChannelReset(connectionId, (isServer == 0), isServer, chan->deviceTypeIsWinpc);
             break;
         }
         case LOOP_OPENFAIL_MSG:
@@ -282,9 +284,9 @@ void TransProxyPostHandshakeMsgToLoop(int32_t chanId)
     g_transLoophandler.looper->PostMessage(g_transLoophandler.looper, msg);
 }
 
-void TransProxyPostDisConnectMsgToLoop(uint32_t connId, bool isServer)
+void TransProxyPostDisConnectMsgToLoop(uint32_t connId, bool isServer, const ProxyChannelInfo *chan)
 {
-    SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_DISCONNECT_MSG, isServer, connId, NULL);
+    SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_DISCONNECT_MSG, isServer, connId, (char *)chan);
     if (msg == NULL) {
         TRANS_LOGE(TRANS_MSG, "msg create failed");
         return;
@@ -639,13 +641,13 @@ int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect, bool isServer)
+int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect, bool isServer, bool deviceType)
 {
     if (TransDecConnRefByConnId(connectionId, isServer) == SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_CTRL, "reset disconnect device. isDisconnect=%{public}d, connId=%{public}d",
-            isDisconnect, connectionId);
+        TRANS_LOGI(TRANS_CTRL, "reset dis device. isDisconnect=%{public}d, connId=%{public}d, deviceType=%{public}d",
+            isDisconnect, connectionId, deviceType);
         // only client side can disconnect connection
-        if (isDisconnect) {
+        if (isDisconnect && deviceType != true) {
             (void)ConnDisconnectDevice(connectionId);
         }
     }
