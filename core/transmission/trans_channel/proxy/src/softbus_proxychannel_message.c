@@ -711,6 +711,7 @@ static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
         if (ret != 0) {
             TRANS_LOGE(TRANS_CTRL, "mbedtls decode failed.");
             SoftBusFree((void *)appInfo->fastTransData);
+            appInfo->fastTransData = NULL;
             SoftBusFree(encodeFastData);
             return SOFTBUS_DECRYPT_ERR;
         }
