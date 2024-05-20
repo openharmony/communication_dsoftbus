@@ -16,6 +16,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "cJSON.h"
 #include "comm_log.h"
 #include "common_list.h"
