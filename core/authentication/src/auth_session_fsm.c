@@ -37,6 +37,7 @@
 #define AUTH_TIMEOUT_MS (10 * 1000)
 #define TO_AUTH_FSM(ptr) CONTAINER_OF(ptr, AuthFsm, fsm)
 #define SHORT_UDID_HASH_LEN 8
+#define HICHAIN_RETURN_NOT_TRUSTED (-425919748)
 
 typedef enum {
     STATE_SYNC_DEVICE_ID = 0,
@@ -809,6 +810,10 @@ static void HandleMsgAuthError(AuthFsm *authFsm, const MessagePara *para)
     int32_t result = *((int32_t *)(para->data));
     AUTH_LOGE(AUTH_FSM,
         "auth fsm handle hichain error, authSeq=%{public}" PRId64", reason=%{public}d", authFsm->authSeq, result);
+    if (result == HICHAIN_RETURN_NOT_TRUSTED) {
+        AUTH_LOGE(AUTH_FSM, "device not has trust relation, begin to offline");
+        AuthDeviceNotTrust(authFsm->info.udid);
+    }
     CompleteAuthSession(authFsm, result);
 }
 
