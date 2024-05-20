@@ -69,6 +69,10 @@ int32_t KVAdapter::Init()
         if (status == DistributedKv::Status::SECURITY_LEVEL_ERROR) {
             DeleteKvStore();
         }
+        if (status == DistributedKv::Status::STORE_META_CHANGED) {
+            LNN_LOGE(LNN_LEDGER, "This db meta changed, remove and rebuild it");
+            DeleteKvStore();
+        }
         usleep(INIT_RETRY_SLEEP_INTERVAL);
         tryTimes--;
     }
