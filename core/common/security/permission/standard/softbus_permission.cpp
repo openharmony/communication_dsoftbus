@@ -98,6 +98,7 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     }
     COMM_LOGE(COMM_PERM, "permission denied, permType=%{public}d, ret=%{public}d, sessionName=%{public}s, \
         callingUid={piblic}d, callingPid={public}d", permType, ret, tmpName, callingUid, callingPid);
+    AnonymizeFree(tmpName);
     return SOFTBUS_PERMISSION_DENIED;
 }
 
