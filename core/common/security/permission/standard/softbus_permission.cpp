@@ -85,7 +85,6 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
         return SOFTBUS_PERMISSION_DENIED;
     }
     char *tmpName = nullptr;
-    Anonymize(sessionName, &tmpName);
     int32_t permType = CalcPermType(callingUid, callingPid);
     SoftBusPermissionItem *pItem = CreatePermissionItem(permType, callingUid, callingPid, pkgName, actions);
     if (pItem == nullptr) {
@@ -97,6 +96,7 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     if (ret >= SYSTEM_APP) {
         return SOFTBUS_OK;
     }
+    Anonymize(sessionName, &tmpName);
     COMM_LOGE(COMM_PERM, "permission denied, permType=%{public}d, ret=%{public}d, sessionName=%{public}s, \
         callingUid=%{piblic}d, callingPid=%{public}d", permType, ret, tmpName, callingUid, callingPid);
     AnonymizeFree(tmpName);
