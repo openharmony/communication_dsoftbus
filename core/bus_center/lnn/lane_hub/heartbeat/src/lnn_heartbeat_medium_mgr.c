@@ -63,7 +63,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeig
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
 static int32_t HbMediumMgrRecvHigherWeight(
     const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect);
-static void HbMediumMgrRecvSensorHubInfo(const char *networkId, uint64_t nowTime);
+static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime);
 
 static LnnHeartbeatMediumMgr *g_hbMeidumMgr[HB_MAX_TYPE_COUNT] = { 0 };
 
@@ -71,7 +71,7 @@ static LnnHeartbeatMediumMgrCb g_hbMediumMgrCb = {
     .onRelay = HbMediumMgrRelayProcess,
     .onReceive = HbMediumMgrRecvProcess,
     .onRecvHigherWeight = HbMediumMgrRecvHigherWeight,
-    .onRecvSensorHubInfo = HbMediumMgrRecvSensorHubInfo,
+    .onRecvLpInfo = HbMediumMgrRecvLpInfo,
 };
 
 static SoftBusList *g_hbRecvList = NULL;
@@ -624,7 +624,7 @@ static int32_t HbMediumMgrRecvHigherWeight(
     return SOFTBUS_OK;
 }
 
-static void HbMediumMgrRecvSensorHubInfo(const char *networkId, uint64_t nowTime)
+static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime)
 {
     if (HbUpdateOfflineTimingByRecvInfo(networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V0, nowTime) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB medium mgr update time stamp fail");
@@ -793,7 +793,7 @@ int32_t LnnHbMediumMgrInit(void)
         return SOFTBUS_ERR;
     }
     if (LnnRegisterBleLpDeviceMediumMgr() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "SH regist LpDevice manager fail");
+        LNN_LOGE(LNN_HEART_BEAT, "LP regist LpDevice manager fail");
         return SOFTBUS_ERR;
     }
     return HbInitRecvList();
