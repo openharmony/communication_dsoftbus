@@ -410,7 +410,6 @@ NSTACKX_EXPORT void NSTACKX_DFileRegisterDefaultLog(void);
 /**
  * get DFILE_ON_CLEAR_POLICY_FILE_LIST event callback.
  * @brief Gets file list with file state
- * 
  * @param[in] sessionId the session id of the session
  * @return 0 on success, negative value on failure
  */
