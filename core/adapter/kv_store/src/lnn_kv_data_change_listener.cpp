@@ -128,7 +128,7 @@ void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entr
 
 void KvDataChangeListener::HandleUpdateChange(const std::vector<DistributedKv::Entry>& updateRecords)
 {
-    LNN_LOGI(LNN_LEDGER, "Handle kv data update change! updateSize=%{public}u", updateRecords.size());
+    LNN_LOGI(LNN_LEDGER, "Handle kv data update change! updateSize=%{public}zu", updateRecords.size());
     for (const auto& item : updateRecords) {
         std::string dbKey = item.key.ToString();
         std::string dbValue = item.value.ToString();
@@ -138,7 +138,7 @@ void KvDataChangeListener::HandleUpdateChange(const std::vector<DistributedKv::E
 
 void KvDataChangeListener::HandleDeleteChange(const std::vector<DistributedKv::Entry>& deleteRecords)
 {
-    LNN_LOGI(LNN_LEDGER, "Handle kv data delete change! deleteSize=%{public}u", deleteRecords.size());
+    LNN_LOGI(LNN_LEDGER, "Handle kv data delete change! deleteSize=%{public}zu", deleteRecords.size());
     for (const auto& item : deleteRecords) {
         std::string dbKey = item.key.ToString();
         char *dbValue = nullptr;
