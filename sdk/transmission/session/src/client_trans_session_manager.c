@@ -1381,6 +1381,9 @@ static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType,
         if (ClientTransGetUdpIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
             return false;
         }
+        if (sessionNode->businessType == BUSINESS_TYPE_FILE) {
+            return false;
+        }
     } else if (sessionNode->channelType == CHANNEL_TYPE_TCP_DIRECT) {
         if (ClientTransGetTdcIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
             return false;
@@ -1423,9 +1426,6 @@ static void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
         if (destroyNode == NULL) {
             continue;
-        }
-        if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
-            ClientEmitFileEvent(sessionNode->channelId);
         }
         DestroySessionId();
         ListDelete(&sessionNode->node);
