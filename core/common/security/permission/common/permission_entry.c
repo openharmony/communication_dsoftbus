@@ -523,8 +523,7 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     bool isDynamicPermission = CheckDBinder(sessionName);
-    SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
-    
+    SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;    
 
     if (permissionList == NULL) {
         COMM_LOGE(COMM_PERM, "permissionList is NULL");
