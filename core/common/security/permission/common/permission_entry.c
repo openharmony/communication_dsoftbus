@@ -16,6 +16,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "cJSON.h"
 #include "comm_log.h"
 #include "common_list.h"
@@ -348,9 +349,11 @@ static int32_t CheckPermissionAppInfo(const SoftBusPermissionEntry *pe,
     const SoftBusPermissionItem *pItem)
 {
     if (pe == NULL || pItem == NULL) {
+        COMM_LOGE(COMM_PERM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pItem->actions == 0) {
+        COMM_LOGE(COMM_PERM, "permission denied");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t permType;
@@ -380,6 +383,10 @@ static int32_t CheckPermissionAppInfo(const SoftBusPermissionEntry *pe,
         }
         return permType;
     }
+    char *tmpName = NULL;
+    Anonymize(pe->sessionName, &tmpName);
+    COMM_LOGE(COMM_PERM, "appinfo not find, sessionName=%{public}s", tmpName);
+    AnonymizeFree(tmpName);
     return SOFTBUS_PERMISSION_DENIED;
 }
 
@@ -514,9 +521,9 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     }
     int permType;
     SoftBusPermissionEntry *pe = NULL;
+    char *tmpName = NULL;
     bool isDynamicPermission = CheckDBinder(sessionName);
     SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
-
     if (permissionList == NULL) {
         COMM_LOGE(COMM_PERM, "permissionList is NULL");
         return SOFTBUS_INVALID_PARAM;
@@ -530,6 +537,10 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
             }
             permType = CheckPermissionAppInfo(pe, pItem);
             if (permType < 0) {
+                Anonymize(sessionName, &tmpName);
+                COMM_LOGE(COMM_PERM, "permType is invalid, permType=%{public}d, sessionName=%{public}s",
+                    permType, tmpName);
+                AnonymizeFree(tmpName);
                 (void)SoftBusMutexUnlock(&permissionList->lock);
                 return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
             }
@@ -538,15 +549,25 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
         }
     }
     if (pItem->permType != NORMAL_APP) {
+        Anonymize(sessionName, &tmpName);
+        COMM_LOGI(COMM_PERM, "permType is not normal, permType=%{public}d, sessionName=%{public}s",
+            pItem->permType, tmpName);
+        AnonymizeFree(tmpName);
         (void)SoftBusMutexUnlock(&permissionList->lock);
         return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
     }
     if (pItem->actions == ACTION_CREATE) {
         if (IsValidPkgName(pItem->uid, pItem->pkgName) != SOFTBUS_OK) {
+            Anonymize(sessionName, &tmpName);
+            COMM_LOGE(COMM_PERM, "invalid param, sessionName=%{public}s", tmpName);
+            AnonymizeFree(tmpName);
             (void)SoftBusMutexUnlock(&permissionList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
         if (!StrStartWith(sessionName, pItem->pkgName)) {
+            Anonymize(sessionName, &tmpName);
+            COMM_LOGE(COMM_PERM, "invalid param, sessionName=%{public}s", tmpName);
+            AnonymizeFree(tmpName);
             (void)SoftBusMutexUnlock(&permissionList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
