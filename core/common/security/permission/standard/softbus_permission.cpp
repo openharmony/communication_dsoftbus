@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
+#include "anonymizer.h"
 #include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
