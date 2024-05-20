@@ -522,7 +522,6 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     int permType;
     SoftBusPermissionEntry *pe = NULL;
     char *tmpName = NULL;
-    Anonymize(sessionName, &tmpName);
     bool isDynamicPermission = CheckDBinder(sessionName);
     SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
     if (permissionList == NULL) {
@@ -538,6 +537,7 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
             }
             permType = CheckPermissionAppInfo(pe, pItem);
             if (permType < 0) {
+                Anonymize(sessionName, &tmpName);
                 COMM_LOGE(COMM_PERM, "permType is invalid, permType=%{public}d, sessionName=%{public}s",
                     permType, tmpName);
                 AnonymizeFree(tmpName);
@@ -549,6 +549,7 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
         }
     }
     if (pItem->permType != NORMAL_APP) {
+        Anonymize(sessionName, &tmpName);
         COMM_LOGI(COMM_PERM, "permType is not normal, permType=%{public}d, sessionName=%{public}s",
             pItem->permType, tmpName);
         AnonymizeFree(tmpName);
@@ -557,12 +558,14 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     }
     if (pItem->actions == ACTION_CREATE) {
         if (IsValidPkgName(pItem->uid, pItem->pkgName) != SOFTBUS_OK) {
+            Anonymize(sessionName, &tmpName);
             COMM_LOGE(COMM_PERM, "invalid param, sessionName=%{public}s", tmpName);
             AnonymizeFree(tmpName);
             (void)SoftBusMutexUnlock(&permissionList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
         if (!StrStartWith(sessionName, pItem->pkgName)) {
+            Anonymize(sessionName, &tmpName);
             COMM_LOGE(COMM_PERM, "invalid param, sessionName=%{public}s", tmpName);
             AnonymizeFree(tmpName);
             (void)SoftBusMutexUnlock(&permissionList->lock);
