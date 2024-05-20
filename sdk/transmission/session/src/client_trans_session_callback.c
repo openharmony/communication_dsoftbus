@@ -20,10 +20,13 @@
 #include "anonymizer.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
+#include "session_set_timer.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "trans_log.h"
+
+#define DFX_TIMERS_S 15
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -280,6 +283,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         return ret;
     }
 
+    int id = SetTimer("OnSessionOpened", DFX_TIMERS_S);
     if (sessionCallback.isSocketListener) {
         return HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
     }
@@ -290,6 +294,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_ERR;
     }
+    CancelTimer(id);
     TRANS_LOGI(TRANS_SDK, "ok, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
