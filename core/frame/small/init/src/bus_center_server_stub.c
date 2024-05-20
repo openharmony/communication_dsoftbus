@@ -428,6 +428,7 @@ int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply)
         info.capabilityData = NULL;
         info.dataLen = 0;
     }
+    ReadBool(req, &info.ranging);
     return ServerRecoverPublishLNN(pkgName, &info, reply);
 }
 
