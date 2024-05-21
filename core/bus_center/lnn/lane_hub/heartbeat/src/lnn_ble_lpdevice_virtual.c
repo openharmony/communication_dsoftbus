@@ -38,13 +38,13 @@ int32_t GetBurstAdvId(void)
     return SOFTBUS_ERR;
 }
 
-int32_t SendDeviceInfoToSHByType(SensorHubFeatureType type)
+int32_t SendDeviceInfoToSHByType(LpFeatureType type)
 {
     (void)type;
     return SOFTBUS_OK;
 }
 
-int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, SensorHubServerType type)
+int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type)
 {
     (void)lpAdvParam;
     (void)type;

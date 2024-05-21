@@ -252,7 +252,7 @@ bool SchedulerIsLpDeviceAvailable(void);
  * @since 5.0
  * @version 1.0
  */
-bool SchedulerSetAdvDeviceParam(SensorHubServerType type, const LpBroadcastParam *bcParam,
+bool SchedulerSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
     const LpScanParam *scanParam);
 
 /**
