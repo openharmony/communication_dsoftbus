@@ -67,6 +67,7 @@ int32_t KVAdapter::Init()
         }
         LNN_LOGI(LNN_LEDGER, "CheckKvStore, left times: %{public}d, status: %{public}d", tryTimes, status);
         if (status == DistributedKv::Status::SECURITY_LEVEL_ERROR) {
+            LNN_LOGE(LNN_LEDGER, "This db security level error, remove and rebuild it");
             DeleteKvStore();
         }
         if (status == DistributedKv::Status::STORE_META_CHANGED) {
