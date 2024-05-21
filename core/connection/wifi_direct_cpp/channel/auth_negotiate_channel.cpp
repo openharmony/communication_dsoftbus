@@ -242,11 +242,17 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
     };
 
     auto requestId = AuthGenRequestId();
-    ret = AuthOpenConn(&authConnInfo, requestId, &authConnCallback, isMeta);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "auth open connect failed");
+    {
+        std::lock_guard lock(lock_);
+        requestIdToDeviceIdMap_[requestId] = param.remoteUuid;
+    }
 
-    std::lock_guard lock(lock_);
-    requestIdToDeviceIdMap_[requestId] = param.remoteUuid;
-    return SOFTBUS_OK;
+    ret = AuthOpenConn(&authConnInfo, requestId, &authConnCallback, isMeta);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "auth open connect failed, error=%{public}d", ret);
+        std::lock_guard lock(lock_);
+        requestIdToDeviceIdMap_.erase(requestId);
+    }
+    return ret;
 }
 } // namespace OHOS::SoftBus
