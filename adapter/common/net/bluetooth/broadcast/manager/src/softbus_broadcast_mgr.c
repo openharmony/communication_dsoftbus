@@ -902,6 +902,9 @@ static void ReleaseBcScanFilter(int listenerId)
 {
     DISC_LOGD(DISC_BLE, "enter.");
     BcScanFilter *filter = g_scanManager[listenerId].filter;
+    if (filter == NULL) {
+        return;
+    }
     uint8_t filterSize = g_scanManager[listenerId].filterSize;
     while (filterSize-- > 0) {
         SoftBusFree((filter + filterSize)->address);
