@@ -47,6 +47,8 @@ ohos_unittest("P2pEntityTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "//third_party/googletest/googletest/include",
+    "//third_party/googletest/googletest/src",
     "$wifi_direct_cpp_path",
     "$wifi_direct_cpp_unit_path",
   ]
@@ -69,6 +71,7 @@ ohos_unittest("P2pEntityTest") {
     "//third_party/googletest:gmock_rtti",
     "//third_party/googletest:gtest_main",
     "//third_party/googletest:gtest_rtti",
+    "//third_party/googletest:gmock_main",
   ]
 
   sources = [
