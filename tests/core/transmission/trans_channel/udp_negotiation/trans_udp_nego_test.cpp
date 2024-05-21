@@ -285,6 +285,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     cJSON *msg = cJSON_Parse(data);
     UdpChannelInfo *newChannel = CreateUdpChannelPackTest();
     ASSERT_TRUE(newChannel != nullptr);
+    std::cout << "Create newChannel ok" << std::endl;
     int64_t authId = AUTH_INVALID_ID;
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
