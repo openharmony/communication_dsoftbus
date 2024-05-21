@@ -25,10 +25,8 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_transceiver.h"
 
-#define AUTH_NEGOTIATION_TIMEOUT_MS 2000 // Generate auth key timeout period, unit ms
+#define AUTH_NEGOTIATION_TIMEOUT_MS 10000 // Generate auth key timeout period, unit ms
 #define AUTH_NEGOTIATION_CHECK_INTERVAL 100 // Auth status check interval, unit ms
-#define P2P_DEFAULT_PORT (-1)
-#define HML_DEFAULT_PORT (-1)
 
 static SoftBusList *g_reqAuthPendingList = NULL;
 
@@ -209,8 +207,15 @@ int32_t TransNegotiateSessionKey(const AuthConnInfo *authConnInfo, int32_t chann
     TRANS_CHECK_AND_RETURN_RET_LOGE((authConnInfo != NULL && peerNetworkId != NULL),
         SOFTBUS_INVALID_PARAM, TRANS_SVC, "invalid param");
 
+    // Meta's peerNetworkId is empty in dSoftBus, and meta no need to negotiate, just skip
+    if (strlen(peerNetworkId) == 0) {
+        TRANS_LOGI(TRANS_SVC, "channelId=%{public}d peerNetworkId is empty, skip negotiate", channelId);
+        TransProxyNegoSessionKeySucc(channelId);
+        return SOFTBUS_OK;
+    }
+
     int32_t ret = AuthCheckSessionKeyValidByConnInfo(peerNetworkId, authConnInfo);
-    if (ret != SOFTBUS_OK) {
+    if (ret == SOFTBUS_AUTH_SESSION_KEY_INVALID || ret == SOFTBUS_AUTH_SESSION_KEY_TOO_OLD) {
         uint32_t authRequestId = AuthGenRequestId();
         bool isFastAuth = true;
         if (ret == SOFTBUS_AUTH_SESSION_KEY_TOO_OLD) {
