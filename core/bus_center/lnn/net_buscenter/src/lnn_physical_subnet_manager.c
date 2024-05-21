@@ -50,7 +50,10 @@ static LnnPhysicalSubnet *g_physicalSubnets[MAX_SUPPORTED_PHYSICAL_SUBNET];
 
 int32_t LnnInitPhysicalSubnetManager(void)
 {
-    return SoftBusMutexInit(&g_physicalSubnetsLock, NULL);
+    LNN_LOGI(LNN_BUILDER, "g_physicalSubnetsLock init");
+    int32_t ret = SoftBusMutexInit(&g_physicalSubnetsLock, NULL);
+    LNN_LOGI(LNN_BUILDER, "g_physicalSubnetsLock init succ");
+    return ret;
 }
 
 static void ClearSubnetManager(void)
@@ -67,7 +70,9 @@ static void ClearSubnetManager(void)
 
 void LnnDeinitPhysicalSubnetManager(void)
 {
+    LNN_LOGI(LNN_BUILDER, "g_physicalSubnetsLock deinit");
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, ClearSubnetManager());
+    LNN_LOGI(LNN_BUILDER, "g_physicalSubnetsLock deinit succ");
     if (SoftBusMutexDestroy(&g_physicalSubnetsLock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "destroy mutex failed");
     }
@@ -96,7 +101,9 @@ int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;
+    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock start");
     CALL_WITH_LOCK(ret, &g_physicalSubnetsLock, DoRegistSubnet(subnet));
+    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock end");
     return ret;
 }
 
@@ -116,7 +123,9 @@ static int32_t DoUnregistSubnetByType(ProtocolType type)
 int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
 {
     int32_t ret = SOFTBUS_OK;
+    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock start");
     CALL_WITH_LOCK(ret, &g_physicalSubnetsLock, DoUnregistSubnetByType(type));
+    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock end");
     return ret;
 }
 
@@ -140,7 +149,9 @@ void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *s
 
 void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status)
 {
+    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock start");
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, DoNotifyStatusChange(ifName, protocolType, status));
+    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock end");
 }
 
 static void EnableResetingSubnetByType(ProtocolType protocolType)
@@ -158,7 +169,9 @@ static void EnableResetingSubnetByType(ProtocolType protocolType)
 void LnnNotifyAllTypeOffline(ConnectionAddrType type)
 {
     if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_MAX) {
+        LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock start");
         CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, EnableResetingSubnetByType(LNN_PROTOCOL_IP));
+        LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock end");
     }
 }
 
@@ -180,6 +193,8 @@ static bool DoVisitSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
 bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
 {
     bool ret = false;
+    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock start");
     CALL_WITH_LOCK(ret, &g_physicalSubnetsLock, DoVisitSubnet(callback, data));
+    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock end");
     return ret;
 }
