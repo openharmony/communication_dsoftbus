@@ -30,6 +30,7 @@ declare_args() {
   softbus_communication_wifi_feature = true
   softbus_os_account = true
   dsoftbus_feature_lnn_cloud_sync = true
+  softbus_lnn_lp_feature = true
 }
 
 if (defined(global_parts_info) &&
@@ -52,6 +53,11 @@ if (defined(global_parts_info) &&
   support_bluetooth = false
 } else {
   support_bluetooth = true
+}
+
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.resourceschedule_device_standby_ext)) {
+  softbus_lnn_lp_feature = false
 }
 
 if (defined(ohos_lite)) {

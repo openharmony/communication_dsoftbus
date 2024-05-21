@@ -35,8 +35,9 @@ int InterfaceManager::ReadInterface(InterfaceInfo::InterfaceType type, const Rea
     return reader(interfaces_[static_cast<int>(type)]);
 }
 
-bool InterfaceManager::IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare) const
+bool InterfaceManager::IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare)
 {
+    std::shared_lock lock(lock_);
     auto info = interfaces_[static_cast<int>(type)];
     if (!info.IsEnable()) {
         CONN_LOGW(CONN_WIFI_DIRECT, "isEnable=0, interface type=%{public}d", static_cast<int>(type));

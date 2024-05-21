@@ -509,7 +509,7 @@ static int32_t StartAdv(int32_t advId, const SoftbusBroadcastParam *param, const
         DISC_LOGE(DISC_BLE_ADAPTER, "lock failed, advId=%{public}d, btAdvId=%{public}d", advId, btAdvId);
         return SOFTBUS_LOCK_ERR;
     }
-    g_advChannel[advId].advId = btAdvId;
+    g_advChannel[advId].advId = (ret == SOFTBUS_OK) ? btAdvId : -1;
     g_advChannel[advId].isAdvertising = (ret == SOFTBUS_OK);
     SoftBusMutexUnlock(&g_advLock);
     if (ret != SOFTBUS_OK) {
@@ -710,7 +710,7 @@ static bool IsLpAvailable(void)
     return ret;
 }
 
-static int32_t SetBtUuidByBroadCastType(SensorHubServerType type, BtUuid *btUuid)
+static int32_t SetBtUuidByBroadCastType(LpServerType type, BtUuid *btUuid)
 {
     switch (type) {
         case SOFTBUS_HEARTBEAT_TYPE:
@@ -735,7 +735,7 @@ static void FreeManufactureData(BleScanNativeFilter *nativeFilter, int32_t filte
     }
 }
 
-static bool SetLpParam(SensorHubServerType type,
+static bool SetLpParam(LpServerType type,
     const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
     BleScanConfigs scanConfig = {};

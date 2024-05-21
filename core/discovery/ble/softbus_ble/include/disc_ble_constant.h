@@ -16,6 +16,8 @@
 #ifndef DISC_BLE_CONSTANT_H
 #define DISC_BLE_CONSTANT_H
 
+#include "broadcast_protocol_constant.h"
+
 #define INT32_MAX_BIT_NUM 32
 #define MAX_CAP_NUM (CAPABILITY_NUM * INT32_MAX_BIT_NUM)
 
@@ -23,33 +25,8 @@
 #define SOFTBUS_BLE_CLIENT_ID 0x1
 
 #define SHA_HASH_LEN 32
-#define BLE_UUID 0xFDEE
-#define COMPANY_ID 0x027D
-#define BYTE_SHIFT_BIT 8
 
 #define BT_ADDR_LEN 6
-
-/* ADV Boardcast head */
-#define POS_FLAG_BYTE_LEN 0
-#define POS_FLAG_AD_TYPE 1
-#define POS_FLAG_AD_DATA 2
-#define POS_PACKET_LENGTH 3
-#define POS_AD_TYPE 4
-#define POS_UUID 5
-#define UUID_LEN 2
-#define ADV_HEAD_LEN 7
-#define RSP_HEAD_LEN 4
-
-#define FLAG_BYTE_LEN 0x2
-#define FLAG_AD_TYPE 0x1
-#define FLAG_AD_DATA 0x2
-#define AD_TYPE 0x16
-
-/* SCAN Rsp head */
-#define POS_RSP_LENGTH 0
-#define POS_RSP_TYPE 1
-#define POS_COMPANY_ID 2
-#define RSP_TYPE 0xFF
 
 /* TLV constant defination */
 #define TLV_TYPE_END 0x00
@@ -76,9 +53,5 @@
 #define DEVICE_TYPE_MASK 0xFF
 #define ONE_BYTE_LENGTH 8
 #define RANGE_POWER_TYPE_LEN 1
-#define TL_LEN 1
-
-#define MAX_BROADCAST_DATA_LEN 31
-#define SCAN_RSP_HEADER_LEN 4
 
 #endif

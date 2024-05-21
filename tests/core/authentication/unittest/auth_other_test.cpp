@@ -869,7 +869,7 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
         return;
     }
     sessionKey->len = 0;
-    int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false);
+    int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = AuthManagerGetSessionKey(authSeq, info, sessionKey);
     EXPECT_TRUE(ret != SOFTBUS_OK);

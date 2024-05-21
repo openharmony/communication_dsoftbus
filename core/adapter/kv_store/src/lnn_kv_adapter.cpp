@@ -14,13 +14,15 @@
 */
 
 #include <cinttypes>
+#include <functional>
 #include <mutex>
 #include <unistd.h>
 #include <vector>
 
-#include "lnn_kv_adapter.h"
 #include "anonymizer.h"
+#include "lnn_kv_adapter.h"
 #include "lnn_log.h"
+#include "lnn_parameter_utils.h"
 #include "softbus_errcode.h"
 
 #include "datetime_ex.h"
@@ -67,6 +69,10 @@ int32_t KVAdapter::Init()
         if (status == DistributedKv::Status::SECURITY_LEVEL_ERROR) {
             DeleteKvStore();
         }
+        if (status == DistributedKv::Status::STORE_META_CHANGED) {
+            LNN_LOGE(LNN_LEDGER, "This db meta changed, remove and rebuild it");
+            DeleteKvStore();
+        }
         usleep(INIT_RETRY_SLEEP_INTERVAL);
         tryTimes--;
     }
@@ -85,6 +91,10 @@ int32_t KVAdapter::DeInit()
 int32_t KVAdapter::RegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
@@ -104,6 +114,10 @@ int32_t KVAdapter::RegisterDataChangeListener()
 int32_t KVAdapter::UnRegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "UnRegister db data change listener");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
@@ -307,7 +321,11 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
-        .isPublic = true
+        .isPublic = true,
+        .cloudConfig = {
+            .enableCloud = true,
+            .autoSync = false
+        }
     };
     DistributedKv::Status status;
     {
@@ -341,6 +359,11 @@ int32_t KVAdapter::DeleteKvStorePtr()
 int32_t KVAdapter::CloudSync()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
+    std::function<void(DistributedKv::ProgressDetail &&)> callback = CloudSyncCallback;
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
@@ -348,7 +371,11 @@ int32_t KVAdapter::CloudSync()
             LNN_LOGE(LNN_LEDGER, "kvDBPtr is null!");
             return SOFTBUS_KV_DB_PTR_NULL;
         }
-        status = kvStorePtr_->CloudSync(nullptr);
+        status = kvStorePtr_->CloudSync(callback);
+    }
+    if (status == DistributedKv::Status::CLOUD_DISABLED) {
+        LNN_LOGE(LNN_LEDGER, "cloud sync disabled, ret: %{public}d", status);
+        return SOFTBUS_KV_CLOUD_DISABLED;
     }
     if (status != DistributedKv::Status::SUCCESS) {
         LNN_LOGE(LNN_LEDGER, "cloud sync failed, ret: %{public}d", status);
@@ -356,6 +383,28 @@ int32_t KVAdapter::CloudSync()
     }
     LNN_LOGI(LNN_LEDGER, "cloud sync ok, ret: %{public}d", status);
     return SOFTBUS_OK;
+}
+
+void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
+{
+    auto code = detail.code;
+    auto progress = detail.progress;
+    if (progress == DistributedKv::Progress::SYNC_FINISH && code == DistributedKv::Status::SUCCESS) {
+        LNN_LOGI(LNN_LEDGER, "cloud sync succeed, upload.total=%{public}u, upload.success=%{public}u, "
+            "upload.failed=%{public}u, upload.untreated=%{public}u, download.total=%{public}u, "
+            "download.success=%{public}u, download.failed=%{public}u, download.untreated=%{public}u",
+            detail.details.upload.total, detail.details.upload.success, detail.details.upload.failed,
+            detail.details.upload.untreated, detail.details.download.total, detail.details.download.success,
+            detail.details.download.failed, detail.details.download.untreated);
+    }
+    if (progress == DistributedKv::Progress::SYNC_FINISH && code != DistributedKv::Status::SUCCESS) {
+        LNN_LOGI(LNN_LEDGER, "cloud sync failed, code: %{public}d, upload.total=%{public}u, upload.success=%{public}u, "
+            "upload.failed=%{public}u, upload.untreated=%{public}u, download.total=%{public}u, "
+            "download.success=%{public}u, download.failed=%{public}u, download.untreated=%{public}u", code,
+            detail.details.upload.total, detail.details.upload.success, detail.details.upload.failed,
+            detail.details.upload.untreated, detail.details.download.total, detail.details.download.success,
+            detail.details.download.failed, detail.details.download.untreated);
+    }
 }
 
 } // namespace OHOS

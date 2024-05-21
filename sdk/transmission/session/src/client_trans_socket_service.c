@@ -59,15 +59,19 @@ static void PrintSocketInfo(const SocketInfo *info)
 {
     char *tmpMyName = NULL;
     char *tmpPeerName = NULL;
+    char *tmpPeerNetworkId = NULL;
     char *tmpPkgName = NULL;
     Anonymize(info->name, &tmpMyName);
     Anonymize(info->peerName, &tmpPeerName);
+    Anonymize(info->peerNetworkId, &tmpPeerNetworkId);
     Anonymize(info->pkgName, &tmpPkgName);
     TRANS_LOGI(TRANS_SDK,
-        "Socket: mySessionName=%{public}s, peerSessionName=%{public}s, pkgName=%{public}s, dataType=%{public}d",
-        tmpMyName, tmpPeerName, tmpPkgName, info->dataType);
+        "Socket: mySessionName=%{public}s, peerSessionName=%{public}s, peerNetworkId=%{public}s, "
+        "pkgName=%{public}s, dataType=%{public}d",
+        tmpMyName, tmpPeerName, tmpPeerNetworkId, tmpPkgName, info->dataType);
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
+    AnonymizeFree(tmpPeerNetworkId);
     AnonymizeFree(tmpPkgName);
 }
 
@@ -129,7 +133,10 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
     int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
-    if (ret != SOFTBUS_OK) {
+    if (ret == SOFTBUS_ALREADY_TRIGGERED) {
+        TRANS_LOGW(TRANS_SDK, "already success, socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Start timer failed, ret=%{public}d", ret);
         return ret;
     }
@@ -149,7 +156,10 @@ int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const IS
     }
 
     int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
-    if (ret != SOFTBUS_OK) {
+    if (ret == SOFTBUS_ALREADY_TRIGGERED) {
+        TRANS_LOGW(TRANS_SDK, "already success, socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Start timer failed, ret=%{public}d, socket=%{public}d", ret, socket);
         return ret;
     }
@@ -228,7 +238,7 @@ int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
         TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (level) {
+    switch (optType) {
         case OPT_TYPE_MAX_BUFFER:
         case OPT_TYPE_FIRST_PACKAGE:
         case OPT_TYPE_MAX_IDLE_TIMEOUT:
@@ -251,7 +261,7 @@ int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
         TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (level) {
+    switch (optType) {
         case OPT_TYPE_MAX_BUFFER:
         case OPT_TYPE_FIRST_PACKAGE:
         case OPT_TYPE_MAX_IDLE_TIMEOUT:

@@ -269,6 +269,7 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
     switch (wifiState) {
         case SOFTBUS_WIFI_OBTAINING_IPADDR:
             (void)LnnSetNetCapability(capability, BIT_WIFI);
+            LnnSetNetBandCapability(capability);
             break;
         case SOFTBUS_WIFI_ENABLED:
             g_isWifiEnable = true;
@@ -435,7 +436,7 @@ static void InitWifiDirectCapability(void)
 {
     g_isWifiDirectSupported = SoftBusHasWifiDirectCapability();
     char *coexistCap = SoftBusGetWifiInterfaceCoexistCap();
-    LNN_CHECK_AND_RETURN_LOGE(coexistCap, LNN_INIT, "coexistCap is null");
+    LNN_CHECK_AND_RETURN_LOGE(coexistCap != NULL, LNN_INIT, "coexistCap is null");
     LNN_LOGI(LNN_BUILDER, "coexistCap=%{public}s", coexistCap);
     g_isApCoexistSupported = IsSupportApCoexist(coexistCap);
     SoftBusFree(coexistCap);

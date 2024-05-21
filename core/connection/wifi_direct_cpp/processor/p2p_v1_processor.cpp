@@ -28,7 +28,6 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_scheduler_factory.h"
-#include "bus_center_manager.h"
 
 namespace OHOS::SoftBus {
 std::map<std::string, P2pV1Processor::ProcessorState> P2pV1Processor::stateNameMapping = {
@@ -62,6 +61,32 @@ P2pV1Processor::~P2pV1Processor()
     for (;;) {
         (this->*state_)();
     }
+}
+
+bool P2pV1Processor::CanAcceptNegotiateDataAtState(WifiDirectCommand &command)
+{
+    if (!canAcceptNegotiateData_) {
+        return false;
+    }
+
+    auto nc = dynamic_cast<NegotiateCommand *>(&command);
+    if (nc == nullptr) {
+        return false;
+    }
+    return nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_INVALID;
+}
+
+void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    auto nc = dynamic_cast<NegotiateCommand *>(&command);
+    if (nc == nullptr) {
+        return;
+    }
+    if (nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_CONN_V1_REQ) {
+        return;
+    }
+    WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommand(*nc);
 }
 
 void P2pV1Processor::SwitchState(ProcessorState state, int timeoutInMillis)
@@ -183,18 +208,10 @@ void P2pV1Processor::ProcessConnectCommand(std::shared_ptr<ConnectCommand> &comm
     }
 }
 
-void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand> &command)
+static void RemoveLinkFromManager(const std::string &remoteDeviceId, int linkId, size_t &refCnt, std::string &remoteMac)
 {
-    Exclusive(command->GetRemoteDeviceId());
-    canAcceptNegotiateData_ = false;
-
-    auto linkId = command->GetDisconnectInfo().info_.linkId;
-    auto requestId = command->GetDisconnectInfo().info_.requestId;
-    CONN_LOGI(CONN_WIFI_DIRECT, "disconnect device, linkId=%{public}d", linkId);
-    std::string remoteMac;
-    size_t refCnt = 0;
     LinkManager::GetInstance().ProcessIfPresent(
-        InnerLink::LinkType::P2P, command->GetRemoteDeviceId(), [linkId, &refCnt, &remoteMac](InnerLink &link) {
+        InnerLink::LinkType::P2P, remoteDeviceId, [linkId, &refCnt, &remoteMac](InnerLink &link) {
             if (!link.IsContainId(linkId)) {
                 return;
             }
@@ -205,6 +222,19 @@ void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand>
             link.RemoveId(linkId);
             remoteMac = link.GetRemoteBaseMac();
         });
+}
+
+void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand> &command)
+{
+    Exclusive(command->GetRemoteDeviceId());
+    canAcceptNegotiateData_ = false;
+
+    auto linkId = command->GetDisconnectInfo().info_.linkId;
+    auto requestId = command->GetDisconnectInfo().info_.requestId;
+    CONN_LOGI(CONN_WIFI_DIRECT, "disconnect device, linkId=%{public}d", linkId);
+    std::string remoteMac;
+    size_t refCnt = 0;
+    RemoveLinkFromManager(command->GetRemoteDeviceId(), linkId, refCnt, remoteMac);
     if (refCnt == 0 || refCnt > 1) {
         CONN_LOGI(CONN_WIFI_DIRECT, "link is not exist or ref by others, refCnt=%{public}zu", refCnt);
         command->OnSuccess();
@@ -1349,8 +1379,7 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
     auto isRemoteWideBandSupported = msg.GetLegacyP2pWideBandSupported();
     auto stationFrequency = msg.GetLegacyP2pStationFrequency();
     auto channelListString = msg.GetLegacyP2pGcChannelList();
-    auto channels = WifiDirectUtils::StringToChannelList(channelListString);
-    auto finalFrequency = ChooseFrequency(stationFrequency, channels);
+    auto finalFrequency = ChooseFrequency(stationFrequency, WifiDirectUtils::StringToChannelList(channelListString));
     CONN_CHECK_AND_RETURN_RET_LOGW(finalFrequency > 0, finalFrequency, CONN_WIFI_DIRECT,
         "choose frequency failed, frequency=%{public}d", finalFrequency);
 
@@ -1379,8 +1408,7 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
         InterfaceInfo::P2P, [&localMac, &localIp](InterfaceInfo &interface) {
             localMac = interface.GetBaseMac();
             localIp = interface.GetIpString().ToIpString();
-            auto reuseCount = interface.GetReuseCount();
-            interface.SetReuseCount(reuseCount + 1);
+            interface.SetReuseCount(interface.GetReuseCount() + 1);
             CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%{public}d", interface.GetReuseCount());
             return SOFTBUS_OK;
         });
@@ -1398,10 +1426,7 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
     CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
 
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
-    ret = StartAuthListening(localIp);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "start auth listen failed, error=%{public}d", ret);
-    return SOFTBUS_OK;
+    return StartAuthListening(localIp);
 }
 
 int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel)

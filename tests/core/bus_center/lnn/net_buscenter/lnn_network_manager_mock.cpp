@@ -93,9 +93,9 @@ int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc 
 {
     return GetNetworkManagerInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
-void LnnUpdateOhosAccount(void)
+void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
 {
-    return GetNetworkManagerInterface()->LnnUpdateOhosAccount();
+    return GetNetworkManagerInterface()->LnnUpdateOhosAccount(isNeedUpdateHeartbeat);
 }
 void LnnOnOhosAccountLogout(void)
 {

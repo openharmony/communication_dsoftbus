@@ -15,8 +15,8 @@
 
 #include "lnn_ble_heartbeat.h"
 
-#include "lnn_log.h"
 #include "lnn_heartbeat_medium_mgr.h"
+#include "lnn_log.h"
 #include "softbus_errcode.h"
 
 static int32_t InitBleHeartbeat(const LnnHeartbeatMediumMgrCb *callback)
@@ -99,6 +99,4 @@ void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
     (void)callback;
 }
 
-void LnnBleHbUnregDataLevelChangeCb(void)
-{
-}
+void LnnBleHbUnregDataLevelChangeCb(void) { }

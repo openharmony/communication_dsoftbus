@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ void TransProxyDelChanByChanId(int32_t chanlId);
 int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan);
 int32_t TransProxyGetChanByReqId(int32_t reqId, ProxyChannelInfo *chan);
 
-void TransProxyOpenProxyChannelSuccess(int32_t chanId);
+void TransProxyOpenProxyChannelSuccess(int32_t channelId);
 void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode);
 void TransProxyonMessageReceived(const ProxyMessage *msg);
 
@@ -69,6 +69,9 @@ int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOp
 int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity);
 int32_t TransProxySpecialUpdateChanInfo(ProxyChannelInfo *channelInfo);
 int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle);
+
+void TransProxyNegoSessionKeySucc(int32_t channelId);
+void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode);
 
 #ifdef __cplusplus
 }

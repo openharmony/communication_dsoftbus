@@ -24,7 +24,7 @@ extern "C" {
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len);
 int32_t LnnInitOhosAccount(void);
-void LnnUpdateOhosAccount(void);
+void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat);
 void LnnOnOhosAccountLogout(void);
 bool LnnIsDefaultOhosAccount(void);
 

@@ -39,6 +39,7 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
+#include "trans_network_statistics.h"
 
 #define IF_NAME_BR  "br0"
 #define IF_NAME_BLE "ble0"
@@ -195,6 +196,40 @@ static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t lane
     return SOFTBUS_OK;
 }
 
+static void AddNetworkResourceInner(const LaneLinkInfo *linkInfo, uint64_t laneId)
+{
+    if (linkInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    if (linkInfo->type != LANE_BR && linkInfo->type != LANE_BLE && linkInfo->type != LANE_P2P &&
+        linkInfo->type != LANE_HML) {
+        return;
+    }
+
+    NetworkResource *networkResource = (NetworkResource *)SoftBusCalloc(sizeof(NetworkResource));
+    if (networkResource == NULL) {
+        LNN_LOGE(LNN_LANE, "malloc network resource fail");
+        return;
+    }
+    LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkResource->localUdid, NETWORK_ID_BUF_LEN);
+    networkResource->laneId = laneId;
+    networkResource->laneLinkType = linkInfo->type;
+    char *anonyLocalUdid = NULL;
+    char *anonyRemoteUdid = NULL;
+    Anonymize(networkResource->localUdid, &anonyLocalUdid);
+    Anonymize(linkInfo->peerUdid, &anonyRemoteUdid);
+    if (anonyLocalUdid == NULL || strcpy_s(networkResource->localUdid, NETWORK_ID_BUF_LEN, anonyLocalUdid) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy localUdid fail");
+    }
+    if (anonyRemoteUdid == NULL || strcpy_s(networkResource->peerUdid, NETWORK_ID_BUF_LEN, anonyRemoteUdid) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy peerUdid fail");
+    }
+    AddNetworkResource(networkResource);
+    AnonymizeFree(anonyLocalUdid);
+    AnonymizeFree(anonyRemoteUdid);
+}
+
 int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide)
 {
     if (linkInfo == NULL || laneId == INVALID_LANE_ID) {
@@ -228,6 +263,9 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
         }
     }
     LaneUnlock();
+    if (!isServerSide) {
+        AddNetworkResourceInner(linkInfo, laneId);
+    }
     return CreateNewLaneResource(linkInfo, laneId, isServerSide);
 }
 
@@ -251,6 +289,7 @@ static bool IsNeedDelResource(uint64_t laneId, bool isServerSide, LaneResource *
         isServer = item->isServerSide;
         ref = --item->clientRef;
         if (!isServer && ref == 0) {
+            DeleteNetworkResourceByLaneId(laneId);
             ListDelete(&item->node);
             SoftBusFree(item);
             g_laneResource.cnt--;
@@ -635,7 +674,7 @@ static int32_t LaneLinkOfBleReuseCommon(uint32_t reqId, const LinkRequest *reqIn
     linkInfo.linkInfo.ble.protoType = type;
     if (type == BLE_COC) {
         linkInfo.type = LANE_COC;
-        linkInfo.linkInfo.ble.psm = connection->psm;
+        linkInfo.linkInfo.ble.psm = (int32_t)connection->psm;
     } else if (type == BLE_GATT) {
         linkInfo.type = LANE_BLE;
     }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_CUSTOMIZED_SECURITY_PROTOCAL_H
-#define SOFTBUS_CUSTOMIZED_SECURITY_PROTOCAL_H
+#ifndef SOFTBUS_CUSTOMIZED_SECURITY_PROTOCOL_H
+#define SOFTBUS_CUSTOMIZED_SECURITY_PROTOCOL_H
 
 #include <stdint.h>
 
@@ -32,4 +32,4 @@ void CustomizedSecurityProtocolDeinit(void);
 }
 #endif
 #endif
-#endif /* SOFTBUS_CUSTOMIZED_SECURITY_PROTOCAL_H */
+#endif /* SOFTBUS_CUSTOMIZED_SECURITY_PROTOCOL_H */

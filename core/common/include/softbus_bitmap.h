@@ -35,10 +35,6 @@ extern "C" {
 
 void SoftbusBitmapSet(uint32_t *bitmap, const uint8_t pos);
 void SoftbusBitmapClr(uint32_t *bitmap, const uint8_t pos);
-void SoftbusBitmapSetBits(uint32_t *bitmap, const uint8_t start, const uint8_t nums);
-void SoftbusBitmapClrBits(uint32_t *bitmap, const uint8_t start, const uint8_t nums);
-uint8_t SoftbusLowBitGet(uint32_t bitmap);
-uint8_t SoftbusHighBitGet(uint32_t bitmap);
 bool SoftbusIsBitmapSet(const uint32_t *bitMap, const uint8_t pos);
 
 #ifdef __cplusplus

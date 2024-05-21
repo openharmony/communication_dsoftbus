@@ -50,6 +50,8 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid);
 
 int32_t TransGetLaneHandleByChannelId(int32_t channelId, uint32_t *laneHandle);
 
+int32_t TransGetLaneIdByChannelId(int32_t channelId, uint64_t *laneId);
+
 int32_t TransGetChannelInfoByLaneHandle(uint32_t laneHandle, int32_t *channelId, int32_t *channelType);
 
 int32_t TransAddSocketChannelInfo(

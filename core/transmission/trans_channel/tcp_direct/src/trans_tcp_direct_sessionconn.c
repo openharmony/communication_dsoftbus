@@ -72,7 +72,7 @@ int32_t GetSessionConnLock(void)
     if (g_sessionConnList == NULL) {
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_sessionConnList->lock) != 0) {
+    if (SoftBusMutexLock(&g_sessionConnList->lock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
