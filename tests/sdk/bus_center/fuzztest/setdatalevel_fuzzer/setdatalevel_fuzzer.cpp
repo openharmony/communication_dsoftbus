@@ -27,7 +27,7 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size == 0 || size > MAX_MACLLOC_SIZE) {
+        if (data == nullptr || size == 0 || size > MAX_MACLLOC_SIZE || size < sizeof(DataLevel)) {
             return true;
         }
 
@@ -39,7 +39,7 @@ namespace OHOS {
             free(tmp);
             return false;
         }
-        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+        if (memcpy_s(tmp, size, data, size) != EOK) {
             free(tmp);
             return false;
         }
