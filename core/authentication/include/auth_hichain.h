@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len);
 uint32_t HichainGetJoinedGroups(int32_t groupType);
 int32_t RegHichainSaStatusListener(void);
 int32_t UnRegHichainSaStatusListener(void);
+void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusErrCode);
 
 void HichainCancelRequest(int64_t authReqId);
 void HichainDestroy(void);
