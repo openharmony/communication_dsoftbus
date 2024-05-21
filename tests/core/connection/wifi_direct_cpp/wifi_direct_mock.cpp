@@ -16,7 +16,6 @@
 #include "wifi_direct_mock.h"
 #include <thread>
 #include "conn_log.h"
-extern "C" {
 // implement dependencies and redirect request to mock object here
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
@@ -381,5 +380,4 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupTimeOutAction()
     return WIFI_SUCCESS;
 }
 }
-} 
 // namespace OHOS::SoftBus
