@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef BROADCAST_SHCEDULER_H
-#define BROADCAST_SHCEDULER_H
+#ifndef BROADCAST_SCHEDULER_H
+#define BROADCAST_SCHEDULER_H
 
 #include "broadcast_scheduler_type.h"
 #include "softbus_broadcast_manager.h"
@@ -323,4 +323,5 @@ int32_t SchedulerSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_
 #ifdef __cplusplus
 }
 #endif // __cplusplus
-#endif // BROADCAST_SHCEDULER_H
+#endif // BROADCAST_SCHEDULER_H
+
