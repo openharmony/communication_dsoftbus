@@ -153,8 +153,8 @@ uint64_t SoftBusGetSysTimeMs(void)
 
 const char *SoftBusFormatTimestamp(uint64_t timestamp)
 {
-    int32_t milliseconds = timestamp % MS_PER_SECOND;
-    time_t seconds = timestamp / MS_PER_SECOND;
+    uint32_t milliseconds = timestamp % MS_PER_SECOND;
+    time_t seconds = (time_t)(timestamp / MS_PER_SECOND);
     struct tm formatedDateTime;
 
 #if (defined( __WINDOWS__ ))
@@ -168,7 +168,7 @@ const char *SoftBusFormatTimestamp(uint64_t timestamp)
 
     const int32_t BASE_YEAR = 1900;
     const int32_t BASE_MONTH = 1;
-    int32_t ret = sprintf_s(g_dateTimeBuff, DATE_TIME_BUFF_LEN, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+    int32_t ret = sprintf_s(g_dateTimeBuff, DATE_TIME_BUFF_LEN, "%04d-%02d-%02d %02d:%02d:%02d.%03u",
         formatedDateTime.tm_year + BASE_YEAR, formatedDateTime.tm_mon + BASE_MONTH, formatedDateTime.tm_mday,
         formatedDateTime.tm_hour, formatedDateTime.tm_min, formatedDateTime.tm_sec, milliseconds);
     if (ret < 0) {
