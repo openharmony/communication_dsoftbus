@@ -84,17 +84,14 @@ int32_t LnnInitHeartbeat(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitHeartbeat(void)
-{
-}
+void LnnDeinitHeartbeat(void) { }
 
 SoftBusScreenState GetScreenState(void)
 {
     return SOFTBUS_SCREEN_UNKNOWN;
 }
 
-int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode,
-    LnnHeartbeatStrategyType strategyType)
+int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType)
 {
     (void)callerId;
     (void)mode;
@@ -112,6 +109,4 @@ void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
     (void)callback;
 }
 
-void LnnUnregDataLevelChangeCb(void)
-{
-}
+void LnnUnregDataLevelChangeCb(void) { }

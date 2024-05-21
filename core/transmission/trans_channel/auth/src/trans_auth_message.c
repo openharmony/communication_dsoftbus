@@ -29,8 +29,10 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     if (appInfo->reqId[0] == '\0') {
-        if (GenerateRandomStr((char *)(appInfo->reqId), REQ_ID_SIZE_MAX) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
+        int32_t ret = GenerateRandomStr((char *)(appInfo->reqId), REQ_ID_SIZE_MAX);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "GenerateRandomStr fail");
+            return ret;
         }
     }
     if (!AddNumberToJsonObject(msg, "CODE", CODE_OPEN_AUTH_MSG_CHANNEL) ||
@@ -60,7 +62,7 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
     if (GetJsonObjectNumberItem(obj, "ERR_CODE", &errcode)) {
         TRANS_LOGE(TRANS_SVC, "unpack errcode=%{public}d", errcode);
         cJSON_Delete(obj);
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectStringItem(obj, "DEVICE_ID", appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX) ||
         !GetJsonObjectStringItem(obj, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX) ||

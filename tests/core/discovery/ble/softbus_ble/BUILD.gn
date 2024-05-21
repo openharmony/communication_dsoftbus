@@ -24,6 +24,8 @@ ohos_unittest("DiscDistributedBleTest") {
   sources = [ "disc_ble_distributed_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_root_path/core/broadcast/scheduler/include",
+    "$dsoftbus_root_path/core/broadcast/scheduler/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
@@ -36,6 +38,7 @@ ohos_unittest("DiscDistributedBleTest") {
     "$softbus_adapter_common/include",
     "$softbus_adapter_common/net/bluetooth/include",
     "$softbus_adapter_common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/manager",

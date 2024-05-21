@@ -72,7 +72,7 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
     return LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
 }

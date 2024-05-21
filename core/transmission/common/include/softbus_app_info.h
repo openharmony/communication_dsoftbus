@@ -97,6 +97,7 @@ typedef struct {
     char sessionKey[SESSION_KEY_LENGTH];
     char reqId[REQ_ID_SIZE_MAX];
     char peerNetWorkId[DEVICE_ID_SIZE_MAX];
+    char peerUdid[DEVICE_ID_SIZE_MAX];
     RouteType routeType;
     BusinessType businessType;
     StreamType streamType;
@@ -127,6 +128,7 @@ typedef struct {
     uint32_t callingTokenId; // for transmission access control
     bool isClient;
     char tokenName[PKG_NAME_SIZE_MAX];
+    int32_t osType;
 } AppInfo;
 
 #ifdef __cplusplus

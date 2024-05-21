@@ -541,9 +541,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener003, TestS
     EXPECT_EQ(SOFTBUS_BC_MGR_REG_DUP, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_SH_BURST, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_LP_BURST, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
-    EXPECT_EQ(SOFTBUS_BC_MGR_REG_DUP, RegisterScanListener(SRV_TYPE_SH_BURST, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_REG_DUP, RegisterScanListener(SRV_TYPE_LP_BURST, &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());

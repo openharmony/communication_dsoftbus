@@ -337,6 +337,14 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason 
         TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed.", channelId);
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
+    if (channel.businessType == BUSINESS_TYPE_FILE) {
+        TRANS_LOGD(TRANS_SDK, "close udp channel get file list start");
+        int32_t ret = NSTACKX_DFileSessionGetFileList(channel.dfileId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "close udp channel to get file list failed. channelId=%{public}d, ret=%{public}d",
+                channelId, ret);
+        }
+    }
 
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "trans del udp channel failed. channelId=%{public}d", channelId);
@@ -607,4 +615,25 @@ void TransUdpDeleteFileListener(const char *sessionName)
 int32_t TransUdpOnCloseAckReceived(int32_t channelId)
 {
     return SetPendingPacket(channelId, 0, PENDING_TYPE_UDP);
+}
+
+// trigger file event FILE_EVENT_TRANS_STATUS when link down
+int32_t ClientEmitFileEvent(int32_t channelId)
+{
+    UdpChannel channel;
+    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    int32_t ret = TransGetUdpChannel(channelId, &channel);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed.", channelId);
+        return ret;
+    }
+    if (channel.businessType == BUSINESS_TYPE_FILE) {
+        TRANS_LOGD(TRANS_SDK, "linkdown trigger file event, channelId=%{public}d", channelId);
+        ret = NSTACKX_DFileSessionGetFileList(channel.dfileId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(
+                TRANS_SDK, "linkdown get file list failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
+        }
+    }
+    return ret;
 }

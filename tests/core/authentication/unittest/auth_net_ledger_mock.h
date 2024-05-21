@@ -62,6 +62,7 @@ public:
     virtual void RouteClearAuthChannelId(int32_t cfd) = 0;
     virtual bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target,
                                          uint32_t targetLen) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
@@ -93,6 +94,7 @@ public:
     MOCK_METHOD1(RouteClearAuthChannelId, void (int32_t));
     MOCK_METHOD(bool, GetJsonObjectStringItem, (const cJSON *json, const char * const string, char *target,
                 uint32_t targetLen), (override));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;

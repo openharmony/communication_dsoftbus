@@ -59,9 +59,8 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         screenState = SOFTBUS_SCREEN_OFF;
     } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         screenState = SOFTBUS_SCREEN_ON;
-    } else if (action == CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
-        LnnNotifyScreenLockStateChangeEvent(SOFTBUS_SCREEN_UNLOCK);
-    } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
+    } else if (action == CommonEventSupport::COMMON_EVENT_USER_UNLOCKED ||
+        action == CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
         LnnNotifyScreenLockStateChangeEvent(SOFTBUS_SCREEN_UNLOCK);
     }
     if (screenState != SOFTBUS_SCREEN_UNKNOWN) {

@@ -44,6 +44,7 @@ private:
     int32_t NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply);
     int32_t ReleaseResourcesInner(MessageParcel &data, MessageParcel &reply);
     int32_t CloseChannelInner(MessageParcel &data, MessageParcel &reply);
+    int32_t CloseChannelWithStatisticsInner(MessageParcel &data, MessageParcel &reply);
     int32_t SendMessageInner(MessageParcel &data, MessageParcel &reply);
     int32_t CheckOpenSessionPermission(const SessionParam *param);
     int32_t CheckChannelPermission(int32_t channelId, int32_t channelType);

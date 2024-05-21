@@ -39,7 +39,7 @@ typedef enum {
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {DISC_INIT,         0xd0057a0,      "DiscInit"      },
+    { DISC_INIT,        0xd0057a0,      "DiscInit"      },
     { DISC_CONTROL,     0xd0057a1,      "DiscControl"   },
     { DISC_LNN,         0xd0057a2,      "DiscLnn"       },
     { DISC_BLE,         0xd0057a3,      "DiscBle"       },

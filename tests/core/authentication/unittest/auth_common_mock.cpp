@@ -111,5 +111,10 @@ int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle)
 {
     return GetCommonInterface()->LnnNotifyLeaveLnnByAuthHandle(authHandle);
 }
+
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+{
+    return GetCommonInterface()->LnnRequestLeaveSpecific(networkId, addrType);
+}
 }
 } // namespace OHOS

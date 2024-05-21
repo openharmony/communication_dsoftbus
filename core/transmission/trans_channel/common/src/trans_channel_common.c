@@ -17,6 +17,7 @@
 
 #include "access_control.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "lnn_network_manager.h"
 #include "softbus_adapter_mem.h"
@@ -181,6 +182,24 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
     }
 }
 
+void GetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    int32_t errCode = LnnGetOsTypeByNetworkId(networkId, osType);
+    if (errCode != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get remote osType err, errCode=%{public}d", errCode);
+        return;
+    }
+}
+
+void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len)
+{
+    int32_t errCode = LnnGetRemoteStrInfo(networkId, STRING_KEY_MASTER_NODE_UDID, info, len);
+    if (errCode != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get remote node udid err, errCode=%{public}d", errCode);
+        return;
+    }
+}
+
 static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam *param)
 {
     if (param == NULL || param->attr == NULL) {
@@ -191,7 +210,7 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
         param->attr->fastTransDataSize <= MAX_FAST_DATA_LEN) {
         if (appInfo->businessType == BUSINESS_TYPE_FILE || appInfo->businessType == BUSINESS_TYPE_STREAM) {
             TRANS_LOGE(TRANS_CTRL, "not support send fast data");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
         }
         appInfo->fastTransData = (uint8_t*)SoftBusCalloc(param->attr->fastTransDataSize);
         if (appInfo->fastTransData == NULL) {
@@ -228,6 +247,8 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
         TRANS_LOGE(TRANS_CTRL, "get remote node uuid err");
         return errCode;
     }
+    GetRemoteUdidWithNetworkId(appInfo->peerNetWorkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
+    GetOsTypeByNetworkId(appInfo->peerNetWorkId, &appInfo->osType);
     return SOFTBUS_OK;
 }
 
@@ -423,6 +444,7 @@ void TransBuildTransOpenChannelStartEvent(TransEventExtra *extra, AppInfo *appIn
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
         extra->localUdid = nodeInfo->masterUdid;
     }
+    extra->osType = appInfo->osType;
     extra->peerNetworkId = appInfo->peerNetWorkId;
     extra->peerUdid = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceUdid : NULL,
     extra->peerDevVer = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceVersion : NULL,
@@ -514,4 +536,32 @@ void TransFreeLane(uint32_t laneHandle, bool isQosLane)
         }
         LnnFreeLane(laneHandle);
     }
+}
+
+void TransReportBadKeyEvent(int32_t errCode, uint32_t connectionId, int64_t seq, int32_t len)
+{
+    TransAuditExtra extra = {
+        .hostPkg = NULL,
+        .localIp = NULL,
+        .localPort = NULL,
+        .localDevId = NULL,
+        .localSessName = NULL,
+        .peerIp = NULL,
+        .peerPort = NULL,
+        .peerDevId = NULL,
+        .peerSessName = NULL,
+        .result = TRANS_AUDIT_DISCONTINUE,
+        .errcode = errCode,
+        .auditType = AUDIT_EVENT_PACKETS_ERROR,
+        .connId = connectionId,
+        .dataSeq = seq,
+        .dataLen = len,
+    };
+    TRANS_AUDIT(AUDIT_SCENE_SEND_MSG, extra);
+}
+
+bool IsPeerDeviceLegacyOs(int32_t osType)
+{
+    // peer device legacyOs when osType is not OH_OS_TYPE
+    return (osType == OH_OS_TYPE) ? false : true;
 }

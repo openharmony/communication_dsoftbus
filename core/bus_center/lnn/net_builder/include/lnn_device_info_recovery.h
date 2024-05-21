@@ -98,8 +98,8 @@ void LnnDeleteDeviceInfo(const char *udid);
 void ClearDeviceInfo(void);
 int32_t LnnGetUdidByBrMac(const char *brMac, char *udid, uint32_t udidLen);
 int32_t LnnGetLocalCacheNodeInfo(NodeInfo *info);
-int32_t LnnGetRemoteCacheNodeInfo(Map *devMap);
 int32_t LnnLoadLocalDeviceAccountIdInfo(void);
+int32_t LnnGetAccountIdFromLocalCache(int64_t *buf);
 #ifdef __cplusplus
 }
 #endif

@@ -27,14 +27,14 @@ typedef enum {
     SOFTBUS_SUPPORT_HEARTBEAT_TYPE = 0,
     SOFTBUS_SUPPORT_BURST_TYPE,
     SOFTBUS_SUPPORT_ALL_TYPE,
-} SensorHubFeatureType;
+} LpFeatureType;
 
 int32_t LnnRegisterBleLpDeviceMediumMgr(void);
 void SendInfoToMlpsBleOnlineProcess(void *para);
 void SendInfoToMlpsBleOfflineProcess(void *para);
 int32_t GetBurstAdvId(void);
-int32_t SendDeviceInfoToSHByType(SensorHubFeatureType type);
-int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, SensorHubServerType type);
+int32_t SendDeviceInfoToSHByType(LpFeatureType type);
+int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type);
 int32_t SwtichHeartbeatReportChannel(bool isToAP);
 
 #ifdef __cplusplus

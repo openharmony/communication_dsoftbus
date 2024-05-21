@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,10 +42,14 @@ bool IsScreenUnlock(void)
 
 int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen)
 {
-    if (in == NULL || out == NULL) {
-        return SOFTBUS_ERR;
+    if (in == NULL || out == NULL || outLen == NULL) {
+        return SOFTBUS_INVALID_PARAM;
     }
     (void)keyIndex;
+    if (in->dataLen >= UINT32_MAX - OVERHEAD_LEN) {
+        LNN_LOGE(LNN_STATE, "dataLen is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t encDataLen = in->dataLen + OVERHEAD_LEN;
     uint8_t *encData = (uint8_t *)SoftBusCalloc(encDataLen);
     if (encData == NULL) {
@@ -72,8 +76,12 @@ int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, 
 
 int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen)
 {
-    if (in == NULL || out == NULL) {
-        return SOFTBUS_ERR;
+    if (in == NULL || out == NULL || outLen == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (in->dataLen <= OVERHEAD_LEN) {
+        LNN_LOGE(LNN_STATE, "dataLen is invalid");
+        return SOFTBUS_INVALID_PARAM;
     }
     uint32_t decDataLen = in->dataLen - OVERHEAD_LEN;
     uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);

@@ -16,6 +16,7 @@
 #include "softbus_message_open_channel.h"
 
 #include <securec.h>
+#include <stdatomic.h>
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -25,8 +26,6 @@
 #include "trans_log.h"
 
 #define BASE64KEY 45 // Base64 encrypt SessionKey length
-
-static int32_t g_tdcPktHeadSeq = 1024;
 
 char *PackError(int errCode, const char *errDesc)
 {
@@ -83,7 +82,7 @@ static int32_t PackFirstData(const AppInfo *appInfo, cJSON *json)
         TRANS_LOGE(TRANS_CTRL, "base64 encode failed.");
         SoftBusFree(encodeFastData);
         SoftBusFree(buf);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     if (!AddStringToJsonObject(json, FIRST_DATA, (char *)encodeFastData)) {
         TRANS_LOGE(TRANS_CTRL, "add first data failed.");
@@ -202,7 +201,7 @@ static int32_t UnpackFirstData(AppInfo *appInfo, const cJSON *json)
             SoftBusFree((void *)appInfo->fastTransData);
             appInfo->fastTransData = NULL;
             SoftBusFree(encodeFastData);
-            return SOFTBUS_ERR;
+            return SOFTBUS_DECRYPT_ERR;
         }
         SoftBusFree(encodeFastData);
     }
@@ -250,9 +249,10 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (UnpackFirstData(appInfo, msg) != SOFTBUS_OK) {
+    int32_t ret = UnpackFirstData(appInfo, msg);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack first data failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     int32_t apiVersion = API_V1;
@@ -359,7 +359,7 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
     }
     if (strcmp(uuid, appInfo->peerData.deviceId) != 0) {
         TRANS_LOGE(TRANS_CTRL, "Invalid uuid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_INVALID_UUID;
     }
     if (!GetJsonObjectNumber16Item(msg, FIRST_DATA_SIZE, fastDataSize)) {
         TRANS_LOGW(TRANS_CTRL, "Failed to get fast data size");
@@ -433,6 +433,7 @@ static void PackTcpFastDataPacketHead(TcpFastDataPacketHead *data)
 char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
 {
 #define MAGIC_NUMBER 0xBABEFACE
+#define TDC_PKT_HEAD_SEQ_START 1024
     if ((appInfo == NULL) || (outLen == NULL)) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return NULL;
@@ -443,9 +444,10 @@ char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
         TRANS_LOGE(TRANS_CTRL, "malloc failed.");
         return NULL;
     }
+    static _Atomic int32_t tdcPktHeadSeq = TDC_PKT_HEAD_SEQ_START;
     TcpFastDataPacketHead pktHead = {
         .magicNumber = MAGIC_NUMBER,
-        .seq = g_tdcPktHeadSeq++,
+        .seq = atomic_fetch_add_explicit(&tdcPktHeadSeq, 1, memory_order_relaxed),
         .flags = (appInfo->businessType == BUSINESS_TYPE_BYTE) ? FLAG_BYTES : FLAG_MESSAGE,
         .dataLen = dataLen,
     };

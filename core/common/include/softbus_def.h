@@ -175,6 +175,7 @@ typedef struct {
     int32_t connectType;
     bool isFastData;
     uint32_t dataConfig;
+    uint64_t laneId;
 } ChannelInfo;
 
 #ifdef __cplusplus

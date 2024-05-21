@@ -20,6 +20,7 @@
 
 #include "comm_log.h"
 #include "hilog_mock.h"
+#include "softbus_log_test_utils.h"
 
 using namespace std;
 using namespace testing;
@@ -37,67 +38,18 @@ class CommLogTest : public testing::Test { };
 HWTEST_F(CommLogTest, CommLogTest001, TestSize.Level0)
 {
     int32_t index = 0;
-    int32_t authDomainBase = 0xd005700;
+    int32_t commDomainBase = 0xd005700;
 
-    EXPECT_EQ(index, COMM_SDK);
-    auto label = COMM_LABELS[COMM_SDK];
-    EXPECT_EQ(COMM_SDK, label.label);
-    EXPECT_EQ(authDomainBase, label.domain);
-    EXPECT_STREQ("CommSdk", label.tag);
-
-    EXPECT_EQ(++index, COMM_SVC);
-    label = COMM_LABELS[COMM_SVC];
-    EXPECT_EQ(COMM_SVC, label.label);
-    EXPECT_EQ(++authDomainBase, label.domain);
-    EXPECT_STREQ("CommSvc", label.tag);
-
-    EXPECT_EQ(++index, COMM_INIT);
-    label = COMM_LABELS[COMM_INIT];
-    EXPECT_EQ(COMM_INIT, label.label);
-    EXPECT_EQ(++authDomainBase, label.domain);
-    EXPECT_STREQ("CommInit", label.tag);
-
-    EXPECT_EQ(++index, COMM_DFX);
-    label = COMM_LABELS[COMM_DFX];
-    EXPECT_EQ(COMM_DFX, label.label);
-    EXPECT_EQ(++authDomainBase, label.domain);
-    EXPECT_STREQ("CommDfx", label.tag);
-
-    EXPECT_EQ(++index, COMM_EVENT);
-    label = COMM_LABELS[COMM_EVENT];
-    EXPECT_EQ(COMM_EVENT, label.label);
-    EXPECT_EQ(++authDomainBase, label.domain);
-    EXPECT_STREQ("CommEvent", label.tag);
-
-    EXPECT_EQ(++index, COMM_VERIFY);
-    label = COMM_LABELS[COMM_VERIFY];
-    EXPECT_EQ(COMM_VERIFY, label.label);
-    EXPECT_EQ(++authDomainBase, label.domain);
-    EXPECT_STREQ("CommVerify", label.tag);
-
-    EXPECT_EQ(++index, COMM_PERM);
-    label = COMM_LABELS[COMM_PERM];
-    EXPECT_EQ(COMM_PERM, label.label);
-    EXPECT_EQ(++authDomainBase, label.domain);
-    EXPECT_STREQ("CommPerm", label.tag);
-
-    EXPECT_EQ(++index, COMM_UTILS);
-    label = COMM_LABELS[COMM_UTILS];
-    EXPECT_EQ(COMM_UTILS, label.label);
-    EXPECT_EQ(++authDomainBase, label.domain);
-    EXPECT_STREQ("CommUtils", label.tag);
-
-    EXPECT_EQ(++index, COMM_ADAPTER);
-    label = COMM_LABELS[COMM_ADAPTER];
-    EXPECT_EQ(COMM_ADAPTER, label.label);
-    EXPECT_EQ(++authDomainBase, label.domain);
-    EXPECT_STREQ("CommAdapter", label.tag);
-
-    EXPECT_EQ(++index, COMM_TEST);
-    label = COMM_LABELS[COMM_TEST];
-    EXPECT_EQ(COMM_TEST, label.label);
-    EXPECT_EQ(DOMAIN_ID_TEST, label.domain);
-    EXPECT_STREQ("CommTest", label.tag);
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[index], COMM_SDK, commDomainBase, "CommSdk");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_SVC, ++commDomainBase, "CommSvc");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_INIT, ++commDomainBase, "CommInit");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_DFX, ++commDomainBase, "CommDfx");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_EVENT, ++commDomainBase, "CommEvent");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_VERIFY, ++commDomainBase, "CommVerify");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_PERM, ++commDomainBase, "CommPerm");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_UTILS, ++commDomainBase, "CommUtils");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_ADAPTER, ++commDomainBase, "CommAdapter");
+    ExpectMatchSoftBusLogAttrs(COMM_LABELS[++index], COMM_TEST, DOMAIN_ID_TEST, "CommTest");
 }
 
 /**

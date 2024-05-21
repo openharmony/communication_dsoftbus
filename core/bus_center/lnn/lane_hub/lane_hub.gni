@@ -51,6 +51,7 @@ if (dsoftbus_feature_lnn_net) {
     "$core_lane_hub_path/lane_manager/src/lnn_trans_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_reliability.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_listener.c",
+    "$dsoftbus_root_path/core/common/dfx/statistics/trans_network_statistics.c",
   ]
 
   if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
@@ -148,7 +149,7 @@ if (enhanced) {
   lane_channel_rating_src_path = "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating"
   bus_center_hub_inc += [
     "$lane_channel_rating_src_path/include",
-    "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
+    "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/interface",
   ]
   bus_center_hub_src += [
     "$lane_channel_rating_src_path/src/channel_rating_v2.c",
