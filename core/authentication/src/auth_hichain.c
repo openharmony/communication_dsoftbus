@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -142,7 +142,7 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
     (void)AuthSessionHandleAuthFinish(authSeq);
 }
 
-static void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusErrCode)
+void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusErrCode)
 {
     if (hichainErrCode >= HICHAIN_DAS_ERRCODE_MIN && hichainErrCode <= HICHAIN_DAS_ERRCODE_MAX) {
         *softbusErrCode = hichainErrCode & MASK_LOW_16BIT;
@@ -339,16 +339,17 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
     char *authParams = GenDeviceLevelParam(udid, uid, true);
     if (authParams == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
-    if (AuthDevice(authSeq, authParams, &g_hichainCallback) == SOFTBUS_OK) {
+    int32_t ret = AuthDevice(authSeq, authParams, &g_hichainCallback);
+    if (ret == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");
         cJSON_free(authParams);
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed");
     cJSON_free(authParams);
-    return SOFTBUS_AUTH_START_ERR;
+    return ret;
 }
 
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
