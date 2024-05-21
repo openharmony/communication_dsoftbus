@@ -35,8 +35,13 @@ static SoftBusList *g_networkResourceList = NULL;
 
 void AddNetworkResource(NetworkResource *networkResource)
 {
-    if (networkResource == NULL || g_networkResourceList == NULL) {
-        COMM_LOGE(COMM_DFX, "invalid param or g_networkResourceList init fail");
+    if (networkResource == NULL) {
+        COMM_LOGE(COMM_DFX, "invalid param");
+        return;
+    }
+    if (g_networkResourceList == NULL) {
+        COMM_LOGE(COMM_DFX, "g_networkResourceList init fail");
+        SoftBusFree(networkResource);
         return;
     }
     if (SoftBusMutexLock(&g_networkResourceList->lock) != SOFTBUS_OK) {
@@ -103,7 +108,7 @@ void UpdateNetworkResourceByLaneId(int32_t channelId, uint64_t laneId, const voi
         info->len = len;
         info->channelInfo = (char *)SoftBusMalloc(len);
         if (info->channelInfo == NULL || memcpy_s(info->channelInfo, len, (char *)dataInfo, len) != EOK) {
-            COMM_LOGE(COMM_DFX, "channel info memcpy fail");
+            COMM_LOGE(COMM_DFX, "channel info is null or channel info memcpy fail");
         }
         ListAdd(&temp->channels, &info->node);
         (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
@@ -172,6 +177,7 @@ static void DfxRecordTransChannelStatistics(NetworkResource *networkResource)
         .trafficStats = trafficStats
     };
     TRANS_EVENT(EVENT_SCENE_TRANS_CHANNEL_STATISTICS, EVENT_STAGE_TRANS_COMMON_ONE, extra);
+    cJSON_free(trafficStats);
 }
 
 void DeleteNetworkResourceByLaneId(uint64_t laneId)
