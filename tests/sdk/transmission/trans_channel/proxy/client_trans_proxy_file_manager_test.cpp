@@ -918,6 +918,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAbsFullPathTest001,
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest001, TestSize.Level0)
 {
     SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
+    EXPECT_TRUE(info != nullptr);
     info->sessionId = 1;
     info->crc = 1;
     info->channelId = 1;
