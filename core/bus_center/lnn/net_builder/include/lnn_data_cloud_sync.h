@@ -17,6 +17,7 @@
 #define LNN_DATA_CLOUD_SYNC_H
 
 #include <stdint.h>
+
 #include "lnn_node_info.h"
 #include "softbus_adapter_crypto.h"
 
