@@ -366,13 +366,13 @@ static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool i
     }
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (isOnline) {
-        LNN_LOGI(LNN_BUILDER, "SH ap online");
+        LNN_LOGI(LNN_BUILDER, "LP ap online");
         if (LnnAsyncCallbackDelayHelper(looper, SendInfoToMlpsBleOnlineProcess, (void *)outUdid, 0) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "async call online process fail");
             SoftBusFree(outUdid);
         }
     } else {
-        LNN_LOGI(LNN_BUILDER, "SH ap offline");
+        LNN_LOGI(LNN_BUILDER, "LP ap offline");
         if (LnnAsyncCallbackDelayHelper(looper, SendInfoToMlpsBleOfflineProcess, (void *)outUdid, 0) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "async call online process fail");
             SoftBusFree(outUdid);
@@ -396,8 +396,8 @@ static void SetLnnConnNodeInfo(
     }
     LNN_LOGI(LNN_BUILDER, "peer feature=%{public}" PRIu64 ", local=%{public}" PRIu64 "",
         connInfo->nodeInfo->feature, localFeature);
-    if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
-        IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
+    if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_LP_HEARTBEAT) &&
+        IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT)) {
         DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
     }
     NotifyJoinResult(connFsm, networkId, retCode);
