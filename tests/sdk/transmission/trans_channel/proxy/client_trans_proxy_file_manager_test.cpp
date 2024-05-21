@@ -917,11 +917,11 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAbsFullPathTest001,
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest001, TestSize.Level0)
 {
-    SendListenerInfo info;
-    info.sessionId = 1;
-    info.crc = 1;
-    info.channelId = 1;
-    int ret = AddSendListenerInfo(&info);
+    SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
+    info->sessionId = 1;
+    info->crc = 1;
+    info->channelId = 1;
+    int ret = AddSendListenerInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     int32_t sessionId = 1;
@@ -932,7 +932,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest00
 
     DelSendListenerInfo(nullptr);
 
-    DelSendListenerInfo(&info);
+    DelSendListenerInfo(info);
 }
 
 /**
