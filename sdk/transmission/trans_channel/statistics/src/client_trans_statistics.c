@@ -139,6 +139,7 @@ static void CloseChannelAndSendStatistics(SocketResource *resource)
     cJSON_Delete(json);
     TRANS_CHECK_AND_RETURN_LOGE(str != NULL, TRANS_SDK, "cJSON_PrintUnformatted failed");
     ServerIpcCloseChannelWithStatistics(resource->channelId, resource->laneId, str, strlen(str));
+    cJSON_free(str);
 }
 
 void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
