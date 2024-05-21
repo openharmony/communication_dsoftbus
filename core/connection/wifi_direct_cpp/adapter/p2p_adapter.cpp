@@ -380,6 +380,10 @@ int32_t P2pAdapter::GetDynamicMacAddress(std::string &macString)
 
 int32_t P2pAdapter::RequestGcIp(const std::string &macString, std::string &ipString)
 {
+    if (macString.size() == 0) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "mac is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
     std::vector<uint8_t> macArray = WifiDirectUtils::MacStringToArray(macString);
 
     uint32_t ipArray[IPV4_ADDR_ARRAY_LEN];
