@@ -166,6 +166,10 @@ static int32_t StartDelayInit(void)
 
 static int32_t BusCenterServerInitFirstStep(void)
 {
+    if (LnnInitLnnLooper() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init lnn looper fail");
+        return SOFTBUS_ERR;
+    }
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -230,6 +234,26 @@ static int32_t BusCenterServerInitSecondStep(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnInitLnnLooper(void)
+{
+    SoftBusLooper *looper = CreateNewLooper("Lnn_Lp");
+    if (!looper) {
+        LNN_LOGE(LNN_LANE, "init laneLooper fail");
+        return SOFTBUS_ERR;
+    }
+    SetLooper(LOOP_TYPE_LNN, looper);
+    LNN_LOGI(LNN_LANE, "init laneLooper success");
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitLnnLooper(void)
+{
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_LNN);
+    if (looper != NULL) {
+        DestroyLooper(looper);
+        SetLooper(LOOP_TYPE_LNN, NULL);
+    }
+}
 
 int32_t BusCenterServerInit(void)
 {
@@ -257,5 +281,6 @@ void BusCenterServerDeinit(void)
     DeinitDecisionCenter();
     LnnDeinitMetaNode();
     LnnCoapConnectDeinit();
+    LnnDeinitLnnLooper();
     LNN_LOGI(LNN_INIT, "bus center server deinit");
 }

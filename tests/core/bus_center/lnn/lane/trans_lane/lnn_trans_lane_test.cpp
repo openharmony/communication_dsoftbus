@@ -47,12 +47,12 @@ public:
 void LNNTransLaneMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "LNNTransLaneMockTest start";
-    LnnInitLaneLooper();
+    LnnInitLnnLooper();
 }
 
 void LNNTransLaneMockTest::TearDownTestCase()
 {
-    LnnDeinitLaneLooper();
+    LnnDeinitLnnLooper();
     GTEST_LOG_(INFO) << "LNNTransLaneMockTest end";
 }
 
@@ -77,8 +77,8 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode)
     GTEST_LOG_(INFO) << "alloc lane failed, laneReqId=" << laneHandle << ", errCode=" << errCode;
     EXPECT_NE(errCode, SOFTBUS_OK);
     g_errCode = errCode;
-    const LnnLaneManager *laneManager = GetLaneManager();
-    (void)laneManager->lnnFreeLane(laneHandle);
+    LaneInterface *transObj = TransLaneGetInstance();
+    (void)transObj->freeLane(laneHandle);
 }
 
 /*
