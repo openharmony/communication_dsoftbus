@@ -156,7 +156,7 @@ int InterfaceInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector
                 break;
             }
             case Serializable::ValueType::BYTE_ARRAY: {
-                Set(InterfaceInfoKey(key), std::vector<unit8_t>(data, data + size));
+                Set(InterfaceInfoKey(key), std::vector<uint8_t>(data, data + size));
                 break;
             }
             case Serializable::ValueType::IPV4_INFO: {
