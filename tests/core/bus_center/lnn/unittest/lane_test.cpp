@@ -66,7 +66,9 @@ public:
 
 void LaneTest::SetUpTestCase()
 {
-    int32_t ret = LooperInit();
+    int32_t ret = LnnInitLnnLooper();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LooperInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitDistributedLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -85,6 +87,7 @@ void LaneTest::TearDownTestCase()
     LnnDeinitLocalLedger();
     LnnDeinitDistributedLedger();
     LooperDeinit();
+    LnnDeinitLnnLooper();
     (void)memset_s(&g_nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     GTEST_LOG_(INFO) << "LaneTest end";
 }
