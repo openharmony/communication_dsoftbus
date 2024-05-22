@@ -18,21 +18,21 @@
 #include <cinttypes>
 #include <cstring>
 
-#include "softbus_errcode.h"
 #include "anonymizer.h"
-#include "lnn_log.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_kv_adapter_wrapper.h"
+#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_errcode.h"
 
 namespace OHOS {
 namespace {
-    const std::string APP_ID = "dsoftbus";
-    const std::string STORE_ID = "dsoftbus_kv_db";
-    constexpr int32_t APP_ID_LEN = 8;
-    constexpr int32_t STORE_ID_LEN = 14;
-    constexpr int32_t MAX_DB_RECORD_SIZE = 10000;
-}
+const std::string APP_ID = "dsoftbus";
+const std::string STORE_ID = "dsoftbus_kv_db";
+constexpr int32_t APP_ID_LEN = 8;
+constexpr int32_t STORE_ID_LEN = 14;
+constexpr int32_t MAX_DB_RECORD_SIZE = 10000;
+} // namespace
 
 KvDataChangeListener::KvDataChangeListener()
 {
@@ -101,7 +101,7 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
     return entries;
 }
 
-void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entry>& insertRecords)
+void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entry> &insertRecords)
 {
     int32_t insertSize = insertRecords.size();
     LNN_LOGI(LNN_LEDGER, "Handle kv data add change! insertSize=%{public}d", insertSize);
@@ -116,30 +116,30 @@ void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entr
         SoftBusFree(keys);
         return;
     }
-    
+
     for (int32_t i = 0; i < insertSize; ++i) {
         std::string dbKey = insertRecords[i].key.ToString();
         std::string dbValue = insertRecords[i].value.ToString();
         keys[i] = strdup(dbKey.c_str());
         values[i] = strdup(dbValue.c_str());
     }
-    LnnDBDataAddChangeSyncToCache(const_cast<const char**>(keys), const_cast<const char**>(values), insertSize);
+    LnnDBDataAddChangeSyncToCache(const_cast<const char **>(keys), const_cast<const char **>(values), insertSize);
 }
 
-void KvDataChangeListener::HandleUpdateChange(const std::vector<DistributedKv::Entry>& updateRecords)
+void KvDataChangeListener::HandleUpdateChange(const std::vector<DistributedKv::Entry> &updateRecords)
 {
     LNN_LOGI(LNN_LEDGER, "Handle kv data update change! updateSize=%{public}zu", updateRecords.size());
-    for (const auto& item : updateRecords) {
+    for (const auto &item : updateRecords) {
         std::string dbKey = item.key.ToString();
         std::string dbValue = item.value.ToString();
         LnnDBDataChangeSyncToCache(dbKey.c_str(), dbValue.c_str(), ChangeType::DB_UPDATE);
     }
 }
 
-void KvDataChangeListener::HandleDeleteChange(const std::vector<DistributedKv::Entry>& deleteRecords)
+void KvDataChangeListener::HandleDeleteChange(const std::vector<DistributedKv::Entry> &deleteRecords)
 {
     LNN_LOGI(LNN_LEDGER, "Handle kv data delete change! deleteSize=%{public}zu", deleteRecords.size());
-    for (const auto& item : deleteRecords) {
+    for (const auto &item : deleteRecords) {
         std::string dbKey = item.key.ToString();
         char *dbValue = nullptr;
         LnnDBDataChangeSyncToCache(dbKey.c_str(), dbValue, ChangeType::DB_DELETE);
