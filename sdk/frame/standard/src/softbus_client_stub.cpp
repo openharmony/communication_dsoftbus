@@ -428,7 +428,7 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    int ret = OnChannelMsgReceived(channelId, channelType, infoData, len, type);
+    int ret = OnChannelMsgReceived(channelId, channelType, dataInfo, len, type);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner write reply failed!");
