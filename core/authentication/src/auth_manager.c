@@ -1807,6 +1807,7 @@ static void HandleConnectionData(
         ReleaseAuthLock();
         return;
     }
+    auth->hasAuthPassed = true;
     auth->lastActiveTime = GetCurrentTimeMs();
     auth->connId[type] = connId;
     AuthHandle authHandle = { .authId = authId, .type = GetConnType(connId) };
