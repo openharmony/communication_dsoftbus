@@ -67,7 +67,7 @@ void InterfaceInfo::MarshallingString(
             protocol.Write(static_cast<int>(key), type, macArray.data(), macArray.size());
         }
     } else {
-        protocol.Write(static_cast<int>(key), type, (uint8_t *)value.c_str(), value.length() + 1);
+        protocol.Write(static_cast<int>(key), type, (uint8_t *)value.c_str(), value.length());
     }
 }
 
@@ -99,8 +99,8 @@ int InterfaceInfo::Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_t
                 break;
             }
             case Serializable::ValueType::BYTE_ARRAY: {
-                auto data = std::any_cast<uint8_t *>(value);
-                protocol.Write(static_cast<int>(key), type, data, sizeof(data));
+                const auto &data = std::any_cast<const std::vector<uint8_t> &>(value);
+                protocol.Write(static_cast<int>(key), type, data.data(), data.size());
                 break;
             }
             case Serializable::ValueType::STRING: {
@@ -152,12 +152,11 @@ int InterfaceInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector
                 break;
             }
             case Serializable::ValueType::STRING: {
-                std::string str(std::string(reinterpret_cast<const char *>(data)), 0, size);
-                Set(InterfaceInfoKey(key), str);
+                Set(InterfaceInfoKey(key), std::string(reinterpret_cast<const char *>(data), size));
                 break;
             }
             case Serializable::ValueType::BYTE_ARRAY: {
-                Set(InterfaceInfoKey(key), *data);
+                Set(InterfaceInfoKey(key), std::vector<unit8_t>(data, data + size));
                 break;
             }
             case Serializable::ValueType::IPV4_INFO: {
