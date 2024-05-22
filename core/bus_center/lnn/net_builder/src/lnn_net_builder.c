@@ -2260,7 +2260,7 @@ static void UpdateLocalNetCapability(void)
     }
 }
 
-static int32_t InitGNetBuilder(void)
+static int32_t InitNetBuilderLooper(void)
 {
     ListInit(&g_netBuilder.fsmList);
     ListInit(&g_netBuilder.pendingList);
@@ -2268,13 +2268,13 @@ static int32_t InitGNetBuilder(void)
     g_netBuilder.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_netBuilder.looper == NULL) {
         LNN_LOGE(LNN_INIT, "get default looper fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     g_netBuilder.handler.name = (char *)"NetBuilderHandler";
     g_netBuilder.handler.looper = g_netBuilder.looper;
     g_netBuilder.handler.HandleMessage = NetBuilderMessageHandler;
     g_netBuilder.isInit = true;
-    LNN_LOGI(LNN_INIT, "init net builder success");
+    LNN_LOGI(LNN_INIT, "init net builder looper success");
     return SOFTBUS_OK;
 }
 
@@ -2316,7 +2316,7 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGE(LNN_INIT, "regist account change evt handler fail!");
         return SOFTBUS_ERR;
     }
-    return InitGNetBuilder();
+    return InitNetBuilderLooper();
 }
 
 int32_t LnnInitNetBuilderDelay(void)
