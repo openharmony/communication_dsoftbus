@@ -899,7 +899,6 @@ HWTEST_F(ConnectionBrTest, testBrBrans005, TestSize.Level1)
 
     len = MAX_DATA_LEN;
     data = (uint8_t *)SoftBusCalloc(len);
-    connectionId = 0x20001;
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
 }

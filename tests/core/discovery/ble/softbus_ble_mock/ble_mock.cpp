@@ -427,7 +427,7 @@ void BleMock::TurnOnBt()
 {
     btState = true;
     if (btStateListener) {
-        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_ON);
+        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BLE_STATE_TURN_ON);
     }
 }
 
@@ -435,7 +435,7 @@ void BleMock::TurnOffBt()
 {
     btState = false;
     if (btStateListener) {
-        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_OFF);
+        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BLE_STATE_TURN_OFF);
     }
 }
 

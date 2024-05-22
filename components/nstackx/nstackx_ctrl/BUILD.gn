@@ -152,6 +152,9 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
   ohos_shared_library("nstackx_ctrl") {
     sanitize = {
+      ubsan = true
+      integer_overflow = true
+      boundary_sanitize = true
       cfi = true
       cfi_cross_dso = true
       debug = false

@@ -374,6 +374,7 @@
         "CloseAuthMetaSocket";
         "SendMetaData";
         "Socket";
+        "SetActionAddr";
         "Bind";
         "BindAsync";
         "Listen";
@@ -388,6 +389,7 @@
         "ClientAddSocketSession";
         "ClientSetListenerBySessionId";
         "ClientIpcOpenSession";
+        "ClientSetActionIdBySessionId";
         "ClientSetSocketState";
         "ClientGetSessionCallbackAdapterByName";
         "ClientGetSessionCallbackAdapterById";
@@ -477,6 +479,31 @@
         "SetExtSocketOpt";
         "GetExtSocketOpt";
         "SetSoftbusConfig";
+        "ClientEmitFileEvent";
+        "SoftBusDFileServer";
+        "SoftBusDFileClient";
+        "SoftBusDFileClientWithTargetDev";
+        "SoftBusDFileClose";
+        "SoftBusDFileSendFiles";
+        "SoftBusDFileSendFilesWithRemotePath";
+        "SoftBusDFileSendFilesWithRemotePathAndType";
+        "SoftBusDFileSetStoragePath";
+        "SoftBusDFileSetRenameHook";
+        "SoftBusDFileSetStoragePathList";
+        "SoftBusDFileRegisterLog";
+        "SoftBusDFileGetCapabilities";
+        "SoftBusDFileSetCapabilities";
+        "SoftBusDFileDump";
+        "SoftBusDFileSetEventFunc";
+        "SoftBusDFileRegisterLogCallback";
+        "SoftBusDFileRegisterDefaultLog";
+        "SoftBusDFileSetOpenFdCallback";
+        "SoftBusDFileSetCloseFdCallback";
+        "SoftBusDFileClearOpenFdCallback";
+        "SoftBusDFileClearCloseFdCallback";
+        "UpdateChannelStatistics";
+        "SetTimer";
+        "CancelTimer";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

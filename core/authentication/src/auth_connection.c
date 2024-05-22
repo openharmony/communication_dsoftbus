@@ -30,7 +30,7 @@
 #include "wifi_direct_manager.h"
 
 #define AUTH_CONN_DATA_HEAD_SIZE           24
-#define AUTH_CONN_CONNECT_TIMEOUT_MS       10000
+#define AUTH_CONN_CONNECT_TIMEOUT_MS       11000
 #define AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY 1000
 #define AUTH_CONN_MAX_RETRY_TIMES          1
 #define AUTH_CONN_RETRY_DELAY_MILLIS       3000
@@ -501,7 +501,7 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason)
 {
     AUTH_LOGI(AUTH_CONN, "requestId=%{public}u, reason=%{public}d", requestId, reason);
     RemoveConnConnectTimeout(requestId);
-    NotifyClientConnected(requestId, 0, SOFTBUS_CONN_FAIL, NULL);
+    NotifyClientConnected(requestId, 0, reason, NULL);
 }
 
 static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, ConnSideType sideType)

@@ -28,6 +28,7 @@
 #include "event/wifi_direct_event_wrapper.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
+#include "wifi_direct_executor_factory.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectSchedulerFactory;
@@ -48,7 +49,7 @@ public:
         std::lock_guard executorLock(executorLock_);
         auto it = executors_.find(remoteDeviceId);
         if (it != executors_.end()) {
-            if (it->second->CanAcceptNegotiateData()) {
+            if (it->second->CanAcceptNegotiateData(command)) {
                 CONN_LOGI(CONN_WIFI_DIRECT, "send data to executor=%{public}s",
                           WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
                 it->second->SendEvent(std::make_shared<Command>(command));
@@ -74,7 +75,7 @@ public:
         }
         CONN_LOGI(CONN_WIFI_DIRECT, "create executor=%{public}s",
                   WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
-        auto executor = std::make_shared<WifiDirectExecutor>(remoteDeviceId, *this, processor, false);
+        auto executor =  WifiDirectExecutorFactory::GetInstance().NewExecutor(remoteDeviceId, *this, processor, false);
         if (executor == nullptr) {
             return;
         }
@@ -88,6 +89,7 @@ public:
         std::lock_guard lock(executorLock_);
         auto it = executors_.find(remoteDeviceId);
         if (it == executors_.end()) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "executor not exist");
             return;
         }
 
@@ -102,7 +104,7 @@ public:
     {
         std::lock_guard commandLock(commandLock_);
         CONN_LOGI(CONN_WIFI_DIRECT, "push data to list");
-        commandList_.push_back(std::make_shared<Command>(command));
+        commandList_.push_front(std::make_shared<Command>(command));
     }
 
     template<typename Command>
@@ -128,6 +130,12 @@ public:
                 return;
             }
         }
+    }
+
+    void RejectNegotiateData(WifiDirectProcessor &processor)
+    {
+        std::lock_guard executorLock(executorLock_);
+        processor.SetRejectNegotiateData();
     }
 
     virtual bool ProcessNextCommand(WifiDirectExecutor *executor, std::shared_ptr<WifiDirectProcessor> &processor);

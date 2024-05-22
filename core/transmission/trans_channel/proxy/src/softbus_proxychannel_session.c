@@ -222,7 +222,7 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t chann
 {
     if (data == NULL || pkgName == NULL) {
         TRANS_LOGE(TRANS_MSG, "data or pkgname is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_MSG, 
         "channelId=%{public}d recv normal msg input len=%{public}d, pid=%{public}d", channelId, len, pid);

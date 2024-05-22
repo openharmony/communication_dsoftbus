@@ -456,6 +456,50 @@ int32_t TransServerProxy::CloseChannel(const char *sessionName, int32_t channelI
     return serverRet;
 }
 
+int32_t TransServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
+    uint32_t len)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelId)) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write channel id failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteUint64(laneId)) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write lane id failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteUint32(len)) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write dataInfo len failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData(dataInfo, len)) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write dataInfo failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_CLOSE_CHANNEL_STATISTICS, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics send request failed! ret=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
 int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, const void *dataInfo,
     uint32_t len, int32_t msgType)
 {

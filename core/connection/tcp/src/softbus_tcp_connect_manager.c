@@ -38,6 +38,8 @@
 
 #define INVALID_DATA (-1)
 #define AUTH_P2P_KEEP_ALIVE_TIME 10
+#define AUTH_P2P_KEEP_ALIVE_INTERVAL 2
+#define AUTH_P2P_KEEP_ALIVE_COUNT 5
 
 #define TCP_CONNECT_INFO "tcpConnectInfo"
 
@@ -234,7 +236,8 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const Conne
 
     if (module == AUTH_P2P || IsEnhanceP2pModuleId(module)) {
         CONN_LOGI(CONN_COMMON, "recv p2p conned. cfd=%{public}d", cfd);
-        if (ConnSetTcpKeepAlive(cfd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
+        if (ConnSetTcpKeepalive(
+                cfd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "set keepalive fail");
             ConnShutdownSocket(cfd);
             return SOFTBUS_ERR;
@@ -507,7 +510,7 @@ static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requ
     };
     CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
     CONN_LOGE(CONN_COMMON, "OpenTcpClient failed.");
-    result->OnConnectFailed(requestId, SOFTBUS_ERR);
+    result->OnConnectFailed(requestId, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
     statistics->reqId = requestId;
     DfxRecordTcpConnectFail(
         DEFAULT_PID, (ConnectOption *)option, NULL, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
@@ -541,7 +544,8 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
 
     int32_t error = SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR;
     if (option->socketOption.keepAlive == 1) {
-        if (ConnSetTcpKeepAlive(fd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
+        if (ConnSetTcpKeepalive(
+                fd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "set keepalive fail, fd=%{public}d", fd);
             ConnShutdownSocket(fd);
             result->OnConnectFailed(requestId, SOFTBUS_ERR);
@@ -692,7 +696,7 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 
 int32_t TcpStartListening(const LocalListenerInfo *info)
 {
-    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P)) {
+    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P && info->type != CONNECT_HML)) {
         return SOFTBUS_INVALID_PARAM;
     }
     static SoftbusBaseListener listener = {

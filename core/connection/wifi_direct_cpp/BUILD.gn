@@ -55,6 +55,9 @@ ohos_static_library("wifi_direct") {
   if (dsoftbus_feature_conn_p2p == true &&
       softbus_communication_wifi_feature == true) {
     sanitize = {
+      ubsan = true
+      integer_overflow = true
+      boundary_sanitize = true
       cfi = true
       cfi_cross_dso = true
       debug = false

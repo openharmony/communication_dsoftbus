@@ -82,11 +82,13 @@ std::shared_ptr<NegotiateChannel> DisconnectCommand::GetNegotiateChannel() const
 
 void DisconnectCommand::OnSuccess() const
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u", info_.info_.requestId);
     callback_.onDisconnectSuccess(info_.info_.requestId);
 }
 
 void DisconnectCommand::OnFailure(WifiDirectErrorCode reason) const
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
     callback_.onDisconnectFailure(info_.info_.requestId, reason);
 }
 } // namespace OHOS::SoftBus

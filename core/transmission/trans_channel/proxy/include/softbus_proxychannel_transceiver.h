@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,14 @@ typedef struct {
 
 void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostHandshakeMsgToLoop(int32_t chanId);
-void TransProxyPostDisConnectMsgToLoop(uint32_t connId, bool isServer);
+void TransProxyPostDisConnectMsgToLoop(uint32_t connId, bool isServer, const ProxyChannelInfo *chan);
 void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan, int32_t errCode);
 void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan);
+void TransProxyPostAuthNegoMsgToLooperDelay(uint32_t authRequestId, int32_t channelId, uint32_t delayTime);
 int32_t TransProxyTransInit(void);
 int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer);
-int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect, bool isServer);
+int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect, bool isServer, bool deviceType);
 int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid);
 void TransCreateConnByConnId(uint32_t connId, bool isServer);
