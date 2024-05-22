@@ -50,10 +50,10 @@ static void LnnOnBtStateChanged(int32_t listenerId, int32_t state)
     }
     *notifyState = SOFTBUS_BT_UNKNOWN;
     switch (btState) {
-        case SOFTBUS_BT_STATE_TURN_ON:
+        case SOFTBUS_BLE_STATE_TURN_ON:
             *notifyState = SOFTBUS_BLE_TURN_ON;
             break;
-        case SOFTBUS_BT_STATE_TURN_OFF:
+        case SOFTBUS_BLE_STATE_TURN_OFF:
             *notifyState = SOFTBUS_BLE_TURN_OFF;
             break;
         case SOFTBUS_BR_STATE_TURN_ON:

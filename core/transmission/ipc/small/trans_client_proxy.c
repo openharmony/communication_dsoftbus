@@ -29,9 +29,10 @@
 static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
 {
     struct CommonScvId svcId = {0};
-    if (SERVER_GetIdentityByPkgName(pkgName, &svcId) != SOFTBUS_OK) {
+    int32_t ret = SERVER_GetIdentityByPkgName(pkgName, &svcId);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "ger identity failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
     svc->handle = (int32_t)svcId.handle;
     svc->token = (uintptr_t)svcId.token;
@@ -50,7 +51,7 @@ static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
     if (ans != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelOpened SendRequest failed");
         FreeBuffer((void *)ptr);
-        return SOFTBUS_ERR;
+        return ans;
     }
     int32_t udpPort;
     ReadInt32(&reply, &udpPort);
@@ -82,13 +83,15 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     WriteBuffer(&io, channel->sessionKey, channel->keyLen);
     WriteString(&io, channel->peerSessionName);
     WriteString(&io, channel->peerDeviceId);
-    if ((channel->channelType == CHANNEL_TYPE_TCP_DIRECT) && (!WriteFileDescriptor(&io, channel->fd))) {
-            return SOFTBUS_ERR;
+    if ((channel->channelType == CHANNEL_TYPE_TCP_DIRECT) && (!WriteString(&io, channel->myIp) ||
+        !WriteFileDescriptor(&io, channel->fd))) {
+        return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+    int32_t ret = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelOpened get svc failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     WriteInt32(&io, channel->businessType);
     if (channel->channelType == CHANNEL_TYPE_UDP) {
@@ -126,9 +129,10 @@ int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
     WriteInt32(&io, data->msgChannelType);
     WriteInt32(&io, errCode);
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(data->msgPkgName, &svc) != SOFTBUS_OK) {
+    int32_t ret = GetSvcIdentityByPkgName(data->msgPkgName, &svc);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelOpenFailed get svc failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -155,9 +159,10 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
     WriteString(&io, networkId);
     WriteInt32(&io, routeType);
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(data->msgPkgName, &svc) != SOFTBUS_OK) {
+    int32_t ret = GetSvcIdentityByPkgName(data->msgPkgName, &svc);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnLeaveLNNResult callback get svc failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -165,7 +170,7 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
     int32_t ans = SendRequest(svc, CLIENT_ON_CHANNEL_LINKDOWN, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "callback SendRequest failed.");
-        return SOFTBUS_ERR;
+        return ans;
     }
     return SOFTBUS_OK;
 }
@@ -184,9 +189,10 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
     WriteInt32(&io, data->msgChannelType);
     WriteInt32(&io, data->msgMessageType);
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(data->msgPkgName, &svc) != SOFTBUS_OK) {
+    int32_t ret = GetSvcIdentityByPkgName(data->msgPkgName, &svc);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelOpenClosed get svc failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -209,7 +215,7 @@ int32_t ClientIpcOnChannelMsgReceived(ChannelMsg *data, TransReceiveData *receiv
     uint8_t *tmpData = (uint8_t *)SoftBusCalloc(receiveData->dataLen + MAX_SOFT_BUS_IPC_LEN);
     if (tmpData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "tmpData is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     IpcIoInit(&io, tmpData, receiveData->dataLen + MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&io, data->msgChannelId);
@@ -218,10 +224,11 @@ int32_t ClientIpcOnChannelMsgReceived(ChannelMsg *data, TransReceiveData *receiv
     WriteUint32(&io, receiveData->dataLen);
     WriteBuffer(&io, receiveData->data, receiveData->dataLen);
     SvcIdentity svc = {0};
-    if (GetSvcIdentityByPkgName(data->msgPkgName, &svc) != SOFTBUS_OK) {
+    int32_t ret = GetSvcIdentityByPkgName(data->msgPkgName, &svc);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelMsgReceived get svc failed");
         SoftBusFree(tmpData);
-        return SOFTBUS_ERR;
+        return ret;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -261,7 +268,7 @@ int32_t ClientIpcSetChannelInfo(
     int32_t ret = GetSvcIdentityByPkgName(pkgName, &svc);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get svc failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
     MessageOption option;
     MessageOptionInit(&option);

@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
+#include "anonymizer.h"
 #include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
@@ -83,6 +84,7 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
         COMM_LOGI(COMM_PERM, "invalid param");
         return SOFTBUS_PERMISSION_DENIED;
     }
+    char *tmpName = nullptr;
     int32_t permType = CalcPermType(callingUid, callingPid);
     SoftBusPermissionItem *pItem = CreatePermissionItem(permType, callingUid, callingPid, pkgName, actions);
     if (pItem == nullptr) {
@@ -94,6 +96,10 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     if (ret >= SYSTEM_APP) {
         return SOFTBUS_OK;
     }
+    Anonymize(sessionName, &tmpName);
+    COMM_LOGE(COMM_PERM, "permission denied, permType=%{public}d, ret=%{public}d, sessionName=%{public}s, \
+        callingUid=%{piblic}d, callingPid=%{public}d", permType, ret, tmpName, callingUid, callingPid);
+    AnonymizeFree(tmpName);
     return SOFTBUS_PERMISSION_DENIED;
 }
 

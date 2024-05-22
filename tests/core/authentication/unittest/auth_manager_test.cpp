@@ -32,7 +32,6 @@ constexpr int64_t AUTH_SEQ_3 = 4;
 constexpr uint64_t CONN_ID_1 = 11;
 constexpr int32_t PORT = 1;
 constexpr int32_t PORT_1 = 2;
-constexpr int32_t KEY_INDEX = 1;
 constexpr int32_t GROUP_TYPE = 100;
 constexpr int32_t DEVICE_ID_HASH_LEN = 9;
 constexpr int32_t KEY_VALUE_LEN = 13;
@@ -145,12 +144,14 @@ HWTEST_F(AuthManagerTest, NEW_AND_FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     connInfo.type = AUTH_LINK_TYPE_P2P;
     PrintAuthConnInfo(&connInfo);
     PrintAuthConnInfo(nullptr);
-    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
-    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI);
-    SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
-    AuthManagerSetAuthPassed(AUTH_SEQ, &info);
     EXPECT_EQ(FindAuthManagerByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
     EXPECT_EQ(FindAuthManagerByUdid(UDID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    EXPECT_EQ(AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI, false), SOFTBUS_OK);
+    EXPECT_EQ(SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ), SOFTBUS_OK);
+    AuthManagerSetAuthPassed(AUTH_SEQ, &info);
+    EXPECT_NE(FindAuthManagerByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
+    EXPECT_NE(FindAuthManagerByUdid(UDID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
 }
 
 static int32_t MyUpdateFuncReturnError(AuthManager *auth1, const AuthManager *auth2, AuthLinkType type)
@@ -184,7 +185,7 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
         AUTH_LINK_TYPE_WIFI) == SOFTBUS_ERR);
     EXPECT_TRUE(UpdateAuthManagerByAuthId(AUTH_SEQ, MyUpdateFuncReturnOk, auth, AUTH_LINK_TYPE_WIFI) == SOFTBUS_OK);
     AuthConnInfo connInfo;
-    EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo), SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo), SOFTBUS_OK);
 }
 
 /*
@@ -233,21 +234,21 @@ HWTEST_F(AuthManagerTest, GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001, TestSize.Lev
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_WIFI);
     bool isNewCreated;
-    EXPECT_TRUE(AuthManagerIsExist(AUTH_SEQ_1, &info, &isNewCreated) != nullptr);
+    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated) != nullptr);
     info.isSupportFastAuth = true;
     info.version = SOFTBUS_OLD_V2;
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     ASSERT_TRUE(memcpy_s(sessionKey.value, SESSION_KEY_LENGTH, KEY_VALUE, KEY_VALUE_LEN) == EOK);
     sessionKey.len = KEY_VALUE_LEN;
-    EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, false) == SOFTBUS_OK);
+    EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, false, false) == SOFTBUS_OK);
     SetAuthSessionInfo(&info, CONN_ID_1, true, AUTH_LINK_TYPE_WIFI);
-    EXPECT_TRUE(AuthManagerIsExist(AUTH_SEQ_1, &info, &isNewCreated) != nullptr);
-    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_SEQ_1);
+    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated) != nullptr);
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) != AUTH_SEQ_1);
     SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_WIFI);
     info.isSupportFastAuth = false;
     info.version = SOFTBUS_OLD_V2;
-    EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, true) == SOFTBUS_OK);
+    EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, true, false) == SOFTBUS_OK);
 }
 
 /*
@@ -266,16 +267,14 @@ HWTEST_F(AuthManagerTest, AUTH_MANAGER_GET_SESSION_KEY_TEST_001, TestSize.Level1
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     ASSERT_TRUE(memcpy_s(sessionKey.value, SESSION_KEY_LENGTH, KEY_VALUE, KEY_VALUE_LEN) == EOK);
     sessionKey.len = KEY_VALUE_LEN;
-    EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, false) == SOFTBUS_OK);
+    EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, false, false) == SOFTBUS_OK);
     SessionKey tmpKey;
     EXPECT_TRUE(AuthManagerGetSessionKey(AUTH_SEQ_1, &info, &tmpKey) == SOFTBUS_AUTH_GET_SESSION_KEY_FAIL);
     SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_WIFI);
     info.isSupportFastAuth = false;
     info.version = SOFTBUS_OLD_V2;
-    EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, true) == SOFTBUS_OK);
+    EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, true, false) == SOFTBUS_OK);
     EXPECT_TRUE(AuthManagerGetSessionKey(AUTH_SEQ_1, &info, &tmpKey) == SOFTBUS_OK);
-    RemoveAuthSessionKeyByIndex(AUTH_SEQ_3, KEY_INDEX, AUTH_LINK_TYPE_BLE);
-    RemoveAuthSessionKeyByIndex(AUTH_SEQ_1, KEY_INDEX, AUTH_LINK_TYPE_BLE);
     AuthHandle authHandle1 = {.authId = AUTH_SEQ_3, .type = AUTH_LINK_TYPE_BLE};
     AuthHandle authHandle2 = {.authId = AUTH_SEQ_1, .type = AUTH_LINK_TYPE_WIFI};
     RemoveAuthManagerByAuthId(authHandle1);
@@ -339,10 +338,10 @@ HWTEST_F(AuthManagerTest, START_VERIFY_DEVICE_TEST_001, TestSize.Level1)
     connCb.onConnOpened = MyConnOpenedFunc;
     connCb.onConnOpenFailed = MyConnOpenFailed;
     g_regDataChangeListener = false;
-    EXPECT_TRUE(StartVerifyDevice(REQUEST_ID, &connInfo, &verifyCb, &connCb, true) == SOFTBUS_AUTH_INIT_FAIL);
+    EXPECT_TRUE(StartVerifyDevice(REQUEST_ID, &connInfo, &verifyCb, AUTH_MODULE_LNN, true) == SOFTBUS_AUTH_INIT_FAIL);
     g_regDataChangeListener = true;
-    EXPECT_TRUE(StartVerifyDevice(REQUEST_ID, &connInfo, &verifyCb, &connCb, true) == SOFTBUS_AUTH_CONN_FAIL);
-    EXPECT_TRUE(StartVerifyDevice(REQUEST_ID, &connInfo, nullptr, nullptr, true) == SOFTBUS_AUTH_CONN_FAIL);
+    EXPECT_TRUE(StartVerifyDevice(REQUEST_ID, &connInfo, &verifyCb, AUTH_MODULE_LNN, true) == SOFTBUS_AUTH_CONN_FAIL);
+    EXPECT_TRUE(StartVerifyDevice(REQUEST_ID, &connInfo, nullptr, AUTH_MODULE_LNN, true) == SOFTBUS_INVALID_PARAM);
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(NewAuthManager(AUTH_SEQ, &info) != nullptr);
@@ -402,8 +401,6 @@ HWTEST_F(AuthManagerTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
     request.type = REQUEST_TYPE_RECONNECT;
     HandleReconnectResult(&request, CONN_ID_1, SOFTBUS_OK, 0);
     EXPECT_TRUE(AddAuthRequest(&request) == SOFTBUS_OK);
-    HandleBleConnectResult(REQUEST_ID_1, AUTH_SEQ, CONN_ID, SOFTBUS_OK, 0);
-    HandleBleConnectResult(REQUEST_ID, AUTH_SEQ, CONN_ID, SOFTBUS_OK, 0);
     DfxRecordLnnConnectEnd(REQUEST_ID_1, CONN_ID_1, nullptr, SOFTBUS_OK);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -431,7 +428,7 @@ HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
     AuthConnInfo connInfo;
     AuthDataHead head;
     uint8_t data[] = "testdata";
-    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFT_FREQ_CYCLE };
+    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFAULT_FREQ_CYCLE };
     HandleAuthData(&connInfo, &head, data);
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -496,13 +493,15 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
     AuthManager *auth = NewAuthManager(authHandle.authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
-    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI);
-    SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
-    AuthManagerSetAuthPassed(authHandle.authId, &info);
     EXPECT_EQ(AuthDeviceGetPreferConnInfo(UUID_TEST, &connInfo), SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL);
     EXPECT_EQ(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), false);
     EXPECT_EQ(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_P2P, false), false);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    EXPECT_EQ(AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI, false), SOFTBUS_OK);
+    EXPECT_EQ(SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ), SOFTBUS_OK);
+    AuthManagerSetAuthPassed(authHandle.authId, &info);
+    EXPECT_EQ(AuthDeviceGetPreferConnInfo(UUID_TEST, &connInfo), SOFTBUS_OK);
+    EXPECT_EQ(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), true);
 }
 
 /*
@@ -546,7 +545,7 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level
     EXPECT_TRUE(AuthGetLatestAuthSeqList(nullptr, authSeq,
         DISCOVERY_TYPE_COUNT) == SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(AuthGetLatestAuthSeqList("", authSeq, DISCOVERY_TYPE_COUNT), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(AuthGetLatestAuthSeqList(UDID_TEST, authSeq, DISCOVERY_TYPE_COUNT), SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_EQ(AuthGetLatestAuthSeqList(UDID_TEST, authSeq, DISCOVERY_TYPE_COUNT), SOFTBUS_OK);
     EXPECT_EQ(AuthGetLatestAuthSeqList(INVALID_UDID_TEST, authSeq,
         DISCOVERY_TYPE_COUNT), SOFTBUS_AUTH_NOT_FOUND);
 }
@@ -617,12 +616,36 @@ HWTEST_F(AuthManagerTest, AUTH_VERIFY_AFTER_NOTIFY_NORMALIZE_TEST_001, TestSize.
     NormalizeRequest request;
 
     (void)memset_s(&request, sizeof(NormalizeRequest), 0, sizeof(NormalizeRequest));
-    EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(&request) != SOFTBUS_OK);
-    EXPECT_TRUE(LooperInit() == SOFTBUS_OK);
-    EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(&request) == SOFTBUS_OK);
+    EXPECT_EQ(AuthVerifyAfterNotifyNormalize(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_NE(AuthVerifyAfterNotifyNormalize(&request), SOFTBUS_OK);
+    EXPECT_EQ(LooperInit(), SOFTBUS_OK);
+    EXPECT_EQ(AuthVerifyAfterNotifyNormalize(&request), SOFTBUS_MEM_ERR);
+    AuthRequest authRequest;
+    (void)memset_s(&authRequest, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    EXPECT_EQ(AddAuthRequest(&authRequest), SOFTBUS_OK);
+    EXPECT_EQ(AuthVerifyAfterNotifyNormalize(&request), SOFTBUS_OK);
     LooperDeinit();
 }
+
+/*
+ * @tc.name: AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001
+ * @tc.desc: AuthSetTcpKeepaliveByConnInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001, TestSize.Level1)
+{
+    int32_t ret;
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+
+    ret = AuthSetTcpKeepaliveByConnInfo(nullptr, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    ret = AuthSetTcpKeepaliveByConnInfo(&connInfo, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
 /*
  * @tc.name: AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001
  * @tc.desc: AuthGetLatestAuthSeqListByType test
@@ -636,7 +659,7 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSi
     AuthManager *auth = NewAuthManager(AUTH_SEQ, &info);
     EXPECT_TRUE(auth != nullptr);
     SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
-    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_BLE);
+    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_BLE, false);
     SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
     AuthManagerSetAuthPassed(AUTH_SEQ, &info);
     auth->lastAuthSeq[AUTH_LINK_TYPE_BLE] = AUTH_SEQ;
@@ -648,5 +671,34 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSi
     EXPECT_TRUE(ret1 == SOFTBUS_INVALID_PARAM);
     int32_t ret2 = AuthGetLatestAuthSeqListByType(UDID_TEST, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
     EXPECT_TRUE(ret2 == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001
+ * @tc.desc: AuthDirectOnlineCreateAuthManager test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
+    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, DEVICE_ID_HASH,
+        DEVICE_ID_HASH_LEN) == EOK);
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_INVALID_ID);
+
+    AuthSessionInfo info;
+    SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_WIFI);
+    info.isSupportFastAuth = true;
+    info.version = SOFTBUS_OLD_V2;
+
+    EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, nullptr) != SOFTBUS_OK);
+    EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, &info) != SOFTBUS_OK);
+    SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_BLE);
+    bool isNewCreated;
+    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated) != nullptr);
+    EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, &info) == SOFTBUS_OK);
 }
 } // namespace OHOS

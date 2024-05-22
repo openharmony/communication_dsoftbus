@@ -19,22 +19,22 @@
 
 #include "anonymizer.h"
 #include "common_list.h"
-#include "lnn_heartbeat_medium_mgr.h"
-#include "lnn_heartbeat_utils.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_fsm.h"
+#include "lnn_heartbeat_medium_mgr.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
 
+#include "bus_center_manager.h"
+#include "lnn_feature_capability.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
-#include "lnn_feature_capability.h"
-#include "bus_center_manager.h"
 
-#define HB_GEARMODE_MAX_SET_CNT 100
+#define HB_GEARMODE_MAX_SET_CNT        100
 #define HB_GEARMODE_LIFETIME_PERMANENT (-1)
-#define HB_DEFAULT_CALLER_ID "HEARTBEAT_DEFAULT_CALLER_ID"
+#define HB_DEFAULT_CALLER_ID           "HEARTBEAT_DEFAULT_CALLER_ID"
 
 typedef struct {
     const char *callerId;
@@ -53,7 +53,7 @@ typedef struct {
 
 static SoftBusMutex g_hbStrategyMutex;
 static LnnHeartbeatFsm *g_hbFsm = NULL;
-static LnnHeartbeatParamManager *g_hbParamMgr[HB_MAX_TYPE_COUNT] = {0};
+static LnnHeartbeatParamManager *g_hbParamMgr[HB_MAX_TYPE_COUNT] = { 0 };
 
 static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
 static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
@@ -94,7 +94,8 @@ static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeLis
         if (dumpCount > HB_DUMP_GEAR_MODE_LIST_MAX_NUM) {
             break;
         }
-        LNN_LOGD(LNN_HEART_BEAT, "DumpGearModeSettingList count=%{public}d, callerId=%{public}s, cycle=%{public}d, "
+        LNN_LOGD(LNN_HEART_BEAT,
+            "DumpGearModeSettingList count=%{public}d, callerId=%{public}s, cycle=%{public}d, "
             "duration=%{public}d, wakeupFlag=%{public}d, lifeTimestamp=%{public}" PRId64 ", needClean=%{public}s",
             dumpCount, info->callerId, info->mode.cycle, info->mode.duration, info->mode.wakeupFlag,
             info->lifeTimestamp,
@@ -139,8 +140,9 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
         callerId = info->callerId;
     }
     if (callerId != NULL) {
-        LNN_LOGD(LNN_HEART_BEAT, "HB get Gearmode from list, id=%{public}s, cycle=%{public}d, duration=%{public}d, "
-        "wakeupFlag=%{public}d", callerId, mode->cycle, mode->duration, mode->wakeupFlag);
+        LNN_LOGD(LNN_HEART_BEAT,
+            "HB get Gearmode from list, id=%{public}s, cycle=%{public}d, duration=%{public}d, wakeupFlag=%{public}d",
+            callerId, mode->cycle, mode->duration, mode->wakeupFlag);
     }
     return SOFTBUS_OK;
 }
@@ -228,8 +230,7 @@ static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime,
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
-    LnnHeartbeatType type)
+int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type)
 {
     int64_t nowTime;
     SoftBusSysTime times;
@@ -295,11 +296,11 @@ static bool VisitClearNoneSplitHbType(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
     return true;
 }
 
-static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara,
-    const GearMode *mode, LnnHeartbeatType registedHbType, bool isRelayV0)
+static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara, const GearMode *mode,
+    LnnHeartbeatType registedHbType, bool isRelayV0)
 {
-    LNN_LOGD(LNN_HEART_BEAT, "SendEachSeparately enter, hbType=%{public}d, isRelayV0=%{public}d", registedHbType,
-        isRelayV0);
+    LNN_LOGD(
+        LNN_HEART_BEAT, "SendEachSeparately enter, hbType=%{public}d, isRelayV0=%{public}d", registedHbType, isRelayV0);
     bool wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
     msgPara->isNeedUpdataData = false;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, 0) != SOFTBUS_OK) {
@@ -327,8 +328,8 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
             }
             msgPara->isSyncData = true;
             msgPara->isNeedUpdataData = true;
-            if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara,
-                i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
+            if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara, i * HB_SEND_EACH_SEPARATELY_LEN) !=
+                SOFTBUS_OK) {
                 msgPara->isSyncData = false;
                 LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%{public}d", splitHbType);
                 return SOFTBUS_ERR;
@@ -359,8 +360,7 @@ static bool VisitClearUnRegistedHbType(LnnHeartbeatType *typeSet, LnnHeartbeatTy
     return true;
 }
 
-static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara,
-    const GearMode *mode)
+static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara, const GearMode *mode)
 {
     bool isRemoved = true;
     LnnHeartbeatType registedHbType = msgPara->hbType;
@@ -373,8 +373,8 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
     LnnRemoveSendEndMsg(hbFsm, registedHbType, wakeupFlag, msgPara->isRelay, &isRemoved);
     if (!isRemoved) {
         LNN_LOGW(LNN_HEART_BEAT,
-            "HB send once is beginning, hbType=%{public}d, wakeupFlag=%{public}d, isRelay=%{public}d",
-            msgPara->hbType, wakeupFlag, msgPara->isRelay);
+            "HB send once is beginning, hbType=%{public}d, wakeupFlag=%{public}d, isRelay=%{public}d", msgPara->hbType,
+            wakeupFlag, msgPara->isRelay);
         return SOFTBUS_OK;
     }
     LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
@@ -387,7 +387,7 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
         LNN_LOGD(LNN_HEART_BEAT, "HB send once but dont check status, hbType=%{public}d", registedHbType);
         return SOFTBUS_OK;
     }
-    LnnCheckDevStatusMsgPara checkMsg = {.hbType = registedHbType, .hasNetworkId = false, .isWakeUp = wakeupFlag};
+    LnnCheckDevStatusMsgPara checkMsg = { .hbType = registedHbType, .hasNetworkId = false, .isWakeUp = wakeupFlag };
     LnnRemoveCheckDevStatusMsg(hbFsm, &checkMsg);
     if (LnnPostCheckDevStatusMsgToHbFsm(hbFsm, &checkMsg, HB_CHECK_DELAY_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once post check msg fail, hbType=%{public}d", registedHbType);
@@ -641,16 +641,16 @@ int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeart
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
-    LnnHeartbeatStrategyType strategyType)
+int32_t LnnGetHbStrategyManager(
+    LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType)
 {
     if (mgr == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get strategy mgr invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnCheckSupportedHbType(&hbType, &g_hbStrategyMgr[strategyType].supportType)) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB get strategy mgr not support, type=%{public}d, hbType=%{public}d",
-            strategyType, hbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB get strategy mgr not support, type=%{public}d, hbType=%{public}d", strategyType,
+            hbType);
         return SOFTBUS_ERR;
     }
     mgr->supportType = g_hbStrategyMgr[strategyType].supportType;
@@ -683,7 +683,7 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
 {
     GearMode mode;
     (void)memset_s(&mode, sizeof(GearMode), 0, sizeof(GearMode));
-    LnnCheckDevStatusMsgPara msgPara = {0};
+    LnnCheckDevStatusMsgPara msgPara = { 0 };
 
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -734,7 +734,7 @@ int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrT
         LNN_LOGE(LNN_HEART_BEAT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    LnnCheckDevStatusMsgPara msgPara = {0};
+    LnnCheckDevStatusMsgPara msgPara = { 0 };
     if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB start offline timing strcpy_s networkId fail");
         return SOFTBUS_ERR;
@@ -767,8 +767,7 @@ int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrTy
     return SOFTBUS_OK;
 }
 
-int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType,
-    bool isRelay)
+int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
 {
     LnnProcessSendOnceMsgPara msgPara = {
         .hbType = hbType,
@@ -805,8 +804,9 @@ int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
         return SOFTBUS_ERR;
     }
     LnnHbClearRecvList();
-    if (type == (HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3 |
-        HEARTBEAT_TYPE_TCP_FLUSH)) {
+    if (type ==
+        (HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3 |
+            HEARTBEAT_TYPE_TCP_FLUSH)) {
         return LnnPostTransStateMsgToHbFsm(g_hbFsm, EVENT_HB_IN_NONE_STATE);
     }
     return SOFTBUS_OK;

@@ -170,7 +170,7 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return ret;
 }
 
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");

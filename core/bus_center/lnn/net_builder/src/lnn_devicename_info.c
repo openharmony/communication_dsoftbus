@@ -182,7 +182,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         LNN_LOGE(LNN_BUILDER, "set remote device nick name fail");
         return;
     }
-    int32_t ret = SOFTBUS_OK;
+    int32_t ret = EOK;
     LNN_LOGE(LNN_BUILDER, "peer unifiedDefaultName=%{public}s", peerNodeInfo.deviceInfo.unifiedDefaultName);
     if (strlen(peerNodeInfo.deviceInfo.unifiedName) != 0 &&
         strcmp(peerNodeInfo.deviceInfo.unifiedName, peerNodeInfo.deviceInfo.unifiedDefaultName) != 0) {
@@ -193,7 +193,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         LnnGetDeviceDisplayName(nickName, peerNodeInfo.deviceInfo.unifiedDefaultName,
             displayName, DEVICE_NAME_BUF_LEN);
     }
-    if (ret != SOFTBUS_OK) {
+    if (ret != EOK) {
         LNN_LOGW(LNN_BUILDER, "strcpy_s fail, use default name");
     }
     LNN_LOGE(LNN_BUILDER, "peer deviceName=%{public}s", displayName);

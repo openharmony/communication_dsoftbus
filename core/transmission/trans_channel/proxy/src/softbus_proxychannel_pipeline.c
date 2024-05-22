@@ -16,6 +16,7 @@
 #include "softbus_proxychannel_pipeline.h"
 
 #include <securec.h>
+#include <stdatomic.h>
 
 #include "bus_center_manager.h"
 #include "common_list.h"
@@ -60,7 +61,7 @@ struct PipelineChannelItem {
 };
 
 struct PipelineManager {
-    bool inited;
+    _Atomic bool inited;
     SoftBusMutex lock;
     struct ListenerItem listeners[MSG_TYPE_CNT];
     SoftBusList *channels;
@@ -345,7 +346,7 @@ int32_t InnerSaveChannel(int32_t channelId, const char *uuid)
 {
     if (uuid == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid uuid");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_INVALID_UUID;
     }
     TRANS_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_manager.channels->lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
@@ -373,7 +374,7 @@ static int TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid
     TRANS_LOGD(TRANS_CTRL, "enter.");
     if (uuid == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid uuid");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_INVALID_UUID;
     }
     char *clone = (char *)SoftBusCalloc(UUID_BUF_LEN);
     if (clone == NULL || strcpy_s(clone, UUID_BUF_LEN, uuid) != EOK) {
@@ -638,7 +639,8 @@ int32_t TransProxyPipelineInit(void)
         .onChannelClosed = TransProxyPipelineOnChannelClosed,
         .onMessageReceived = TransProxyPipelineOnMessageReceived,
     };
-    if (g_manager.inited) {
+
+    if (atomic_load_explicit(&(g_manager.inited), memory_order_acquire)) {
         return SOFTBUS_OK;
     };
     channels = CreateSoftBusList();
@@ -654,11 +656,15 @@ int32_t TransProxyPipelineInit(void)
     if (ret != SOFTBUS_OK) {
         goto exit;
     }
-    g_manager.looper = CreateNewLooper("Trans_Proxy_lp");
+    g_manager.looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (g_manager.looper == NULL) {
+        TRANS_LOGE(TRANS_INIT, "fail to get looper.");
+        return SOFTBUS_LOOPER_ERR;
+    }
     g_manager.handler.looper = g_manager.looper;
     strcpy_s(g_manager.handler.name, strlen(PIPELINEHANDLER_NAME) + 1, PIPELINEHANDLER_NAME);
     g_manager.handler.HandleMessage = TransProxyPipelineHandleMessage;
-    g_manager.inited = true;
+    atomic_store_explicit(&(g_manager.inited), true, memory_order_release);
     return SOFTBUS_OK;
 exit:
     if (channels != NULL) {
@@ -667,7 +673,7 @@ exit:
     }
     g_manager.channels = NULL;
     SoftBusMutexDestroy(&g_manager.lock);
-    g_manager.inited = false;
+    atomic_store_explicit(&(g_manager.inited), false, memory_order_release);
 
     return SOFTBUS_ERR;
 }

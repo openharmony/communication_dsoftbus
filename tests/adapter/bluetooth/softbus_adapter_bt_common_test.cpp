@@ -142,28 +142,28 @@ HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
     auto btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURNING_ON);
     EXPECT_TRUE(btStateResult);
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURNING_ON);
-    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURNING_ON);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BLE_STATE_TURNING_ON);
     EXPECT_TRUE(btStateResult);
 
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_ON);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURN_ON);
     EXPECT_TRUE(btStateResult);
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURN_ON);
-    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURN_ON);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BLE_STATE_TURN_ON);
     EXPECT_TRUE(btStateResult);
 
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_OFF);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURNING_OFF);
     EXPECT_TRUE(btStateResult);
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURNING_OFF);
-    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURNING_OFF);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BLE_STATE_TURNING_OFF);
     EXPECT_TRUE(btStateResult);
 
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_OFF);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURN_OFF);
     EXPECT_TRUE(btStateResult);
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURN_OFF);
-    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURN_OFF);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BLE_STATE_TURN_OFF);
     EXPECT_TRUE(btStateResult);
 
     // invalid status

@@ -71,9 +71,11 @@ typedef struct {
     int32_t idType;
     bool isNeedPackCert;
     uint64_t sessionKeyRandomNum;
+    AuthVerifyModule module;
     NormalizedType normalizedType;
     SessionKey *normalizedKey;
     int64_t normalizedIndex;
+    bool isOldKey;
 } AuthSessionInfo;
 
 typedef struct {

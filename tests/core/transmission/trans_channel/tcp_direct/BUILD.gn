@@ -619,6 +619,7 @@ ohos_unittest("TransTcpDirectListenerTest") {
     "$dsoftbus_root_path/core/discovery/interface",
 
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "//commonlibrary/c_utils/base/include",

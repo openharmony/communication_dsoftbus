@@ -89,13 +89,13 @@ int32_t LnnGetLocalCacheNodeInfo(NodeInfo *info)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnGetRemoteCacheNodeInfo(Map *devMap)
+int32_t LnnLoadLocalDeviceAccountIdInfo(void)
 {
-    (void)devMap;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnLoadLocalDeviceAccountIdInfo(void)
+int32_t LnnGetAccountIdFromLocalCache(int64_t *buf)
 {
+    (void)buf;
     return SOFTBUS_NOT_IMPLEMENT;
 }

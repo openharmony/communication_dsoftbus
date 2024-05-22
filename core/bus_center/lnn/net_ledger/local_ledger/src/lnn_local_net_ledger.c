@@ -334,8 +334,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         info->accountId = *((int64_t *)buf);
         return SOFTBUS_OK;
     }
-
-    if (info->accountId ==  0) {
+    if (info->accountId == 0) {
         if (*((int64_t *)buf) == 0) {
             LNN_LOGI(LNN_LEDGER, "no accountid login, default is 0");
             return SOFTBUS_OK;
@@ -343,29 +342,16 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         LNN_LOGI(LNN_LEDGER, "accountid login");
         info->accountId = *((int64_t *)buf);
         info->stateVersion++;
-        if (LnnSaveLocalDeviceInfo(info) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "accountid login, update all info to local store fail");
-        }
-        if (LnnLedgerAllDataSyncToDB(info) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "accountid login, lnn ledger all data sync to cloud fail");
-            return SOFTBUS_MEM_ERR;
-        }
         return SOFTBUS_OK;
     }
-
-    if (*((int64_t *)buf) ==  0) {
+    if (*((int64_t *)buf) == 0) {
         LNN_LOGI(LNN_LEDGER, "accountid logout");
-        if (LnnDeleteSyncToDB() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "lnn clear local cache fail");
-            info->accountId = *((int64_t *)buf);
-            LnnSaveLocalDeviceInfo(info);
-            return SOFTBUS_MEM_ERR;
-        }
         info->accountId = *((int64_t *)buf);
         LnnSaveLocalDeviceInfo(info);
         return SOFTBUS_OK;
     }
     info->accountId = *((int64_t *)buf);
+    UpdateStateVersionAndStore();
     return SOFTBUS_OK;
 }
 
@@ -376,6 +362,17 @@ static int32_t LocalUpdateBleStartTime(const void *buf)
         return SOFTBUS_INVALID_PARAM;
     }
     info->bleStartTimestamp = *((int64_t *)buf);
+    return SOFTBUS_OK;
+}
+
+static int32_t LocalUpdateNetworkIdTimeStamp(const void *buf)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->networkIdTimestamp = *((int64_t *)buf);
+    LNN_LOGD(LNN_LEDGER, "local networkId timeStamp=%{public}" PRId64, info->networkIdTimestamp);
     return SOFTBUS_OK;
 }
 
@@ -896,6 +893,15 @@ static int32_t LocalGetNodeBleStartTime(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LocalGetNetworkIdTimeStamp(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(int64_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int64_t *)buf) = g_localNetLedger.localInfo.networkIdTimestamp;
+    return SOFTBUS_OK;
+}
+
 static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
 {
     char devType[DEVICE_TYPE_BUF_LEN] = TYPE_UNKNOWN;
@@ -1009,6 +1015,21 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return &g_localNetLedger.localInfo;
 }
 
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (memcpy_s(info, sizeof(NodeInfo), LnnGetLocalNodeInfo(), sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy node info fail");
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalDeviceName(const void *name)
 {
     if (name == NULL) {
@@ -1105,15 +1126,33 @@ static int32_t UpdateNickName(const void *name)
     return SOFTBUS_OK;
 }
 
+int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_localNetLedger.localInfo.networkIdTimestamp = time;
+    LNN_LOGE(LNN_LEDGER, "update local networkId timeStamp=%{public}" PRId64, time);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalNetworkId(const void *id)
 {
     if (ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(g_localNetLedger.localInfo.networkId, &anonyNetworkId);
+    g_localNetLedger.localInfo.networkIdTimestamp = SoftBusGetSysTimeMs();
+    LNN_LOGI(LNN_LEDGER, "networkId change, reset networkId=%{public}s, networkIdTimestamp=%{public}" PRId64,
+        anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore();
+    AnonymizeFree(anonyNetworkId);
     if (g_localNetLedger.localInfo.accountId == 0) {
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
-        return SOFTBUS_ERR;
+        return SOFTBUS_OK;
     }
     char *value = g_localNetLedger.localInfo.networkId;
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_NETWORK_ID, value, strlen(value)) != SOFTBUS_OK) {
@@ -1442,6 +1481,26 @@ int32_t LlGetStaticCapability(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+int32_t LlGetUdidHash(void *buf, uint32_t len)
+{
+    if (buf == NULL || len < UDID_HASH_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    uint8_t hash[UDID_HASH_LEN] = {0};
+    if (SoftBusGenerateStrHash((unsigned char *)info->deviceInfo.deviceUdid,
+        strlen(info->deviceInfo.deviceUdid), (unsigned char *)hash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "restore manager fail because generate strhash");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(buf, len, hash, UDID_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy cipher iv fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetIrk(void *buf, uint32_t len)
 {
     if (buf == NULL || len == 0) {
@@ -1541,7 +1600,10 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    char *value = (char *)g_localNetLedger.localInfo.cipherInfo.key;
+    char value[SESSION_KEY_LENGTH + 1] = {0};
+    for (int32_t i = 0; i < SESSION_KEY_LENGTH; i++) {
+        value[i] = (char)(g_localNetLedger.localInfo.cipherInfo.key[i]);
+    }
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_KEY, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger cipher key change sync to cloud failed");
     }
@@ -1563,7 +1625,10 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    char *value = (char *)g_localNetLedger.localInfo.cipherInfo.iv;
+    char value[BROADCAST_IV_LEN + 1] = {0};
+    for (int32_t i = 0; i < BROADCAST_IV_LEN; i++) {
+        value[i] = (char)(g_localNetLedger.localInfo.cipherInfo.iv[i]);
+    }
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_IV, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger cipher iv change sync to cloud failed");
     }
@@ -1650,8 +1715,10 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
     {BYTE_KEY_BROADCAST_CIPHER_IV, BROADCAST_IV_LEN, LlGetCipherInfoIv, UpdateLocalCipherInfoIv},
+    {NUM_KEY_NETWORK_ID_TIMESTAMP, sizeof(int64_t), LocalGetNetworkIdTimeStamp, LocalUpdateNetworkIdTimeStamp},
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
     {BYTE_KEY_STATIC_CAPABILITY, STATIC_CAP_LEN, LlGetStaticCapability, LlUpdateStaticCapability},
+    {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)

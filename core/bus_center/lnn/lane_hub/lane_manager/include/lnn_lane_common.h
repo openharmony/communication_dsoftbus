@@ -30,8 +30,6 @@ int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueS
 void *LnnReadData(const Map *map, uint32_t key);
 void LnnDeleteData(Map *map, uint32_t key);
 uint64_t LnnGetSysTimeMs(void);
-int32_t LnnInitLaneLooper(void);
-void LnnDeinitLaneLooper(void);
 
 #ifdef __cplusplus
 }

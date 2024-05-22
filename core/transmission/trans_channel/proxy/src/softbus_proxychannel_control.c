@@ -76,20 +76,20 @@ static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)
     }
 
     int32_t ret = TransProxySetAuthHandleByChanId((int32_t)info->channelId, info->authHandle);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set authHandle fail, ret=%{public}d", ret);
         return ret;
     }
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     ret = AuthGetConnInfo(info->authHandle, &connInfo);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth connInfo fail");
         return ret;
     }
     bool isAuthServer = false;
     ret = AuthGetServerSide(info->authHandle.authId, &isAuthServer);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth server side fail");
         return ret;
     }
@@ -313,7 +313,7 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
         TRANS_LOGE(TRANS_CTRL, "send reset buf fail");
         extra.result = EVENT_STAGE_RESULT_FAILED;
         TRANS_EVENT(EVENT_SCENE_TRANS_PROXY_RESET_PEER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
-        return SOFTBUS_ERR;
+        return ret;
     }
     TRANS_EVENT(EVENT_SCENE_TRANS_PROXY_RESET_PEER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
     return SOFTBUS_OK;

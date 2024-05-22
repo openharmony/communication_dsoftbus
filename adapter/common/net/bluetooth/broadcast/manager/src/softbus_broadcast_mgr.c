@@ -796,7 +796,7 @@ static int32_t RegisterScanListenerSub(BaseServiceType srvType, int32_t *adapter
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     int32_t ret;
 
-    if (srvType == SRV_TYPE_SH_BURST || srvType == SRV_TYPE_SH_HB) {
+    if (srvType == SRV_TYPE_LP_BURST || srvType == SRV_TYPE_LP_HB) {
         if (g_isLpScanCbReg) {
             *adapterScanId = g_adapterLpScannerId;
             DISC_LOGE(DISC_BLE, "service is already registered. srvType=%{public}s", GetSrvType(srvType));
@@ -902,6 +902,9 @@ static void ReleaseBcScanFilter(int listenerId)
 {
     DISC_LOGD(DISC_BLE, "enter.");
     BcScanFilter *filter = g_scanManager[listenerId].filter;
+    if (filter == NULL) {
+        return;
+    }
     uint8_t filterSize = g_scanManager[listenerId].filterSize;
     while (filterSize-- > 0) {
         SoftBusFree((filter + filterSize)->address);
@@ -1683,7 +1686,7 @@ bool BroadcastIsLpDeviceAvailable(void)
     return g_interface[g_interfaceId]->IsLpDeviceAvailable();
 }
 
-bool BroadcastSetAdvDeviceParam(SensorHubServerType type, const LpBroadcastParam *bcParam,
+bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
     const LpScanParam *scanParam)
 {
     DISC_LOGI(DISC_BLE, "enter.");
@@ -1742,6 +1745,7 @@ int32_t BroadcastGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->GetBroadcastHandle != NULL,
                                    SOFTBUS_BC_MGR_FUNC_NULL, DISC_BLE, "function is null!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckBcIdIsValid(bcId), SOFTBUS_INVALID_PARAM, DISC_BLE, "bcId is invalid!");
 
     int32_t ret = g_interface[g_interfaceId]->GetBroadcastHandle(g_bcManager[bcId].adapterBcId, bcHandle);
     if (ret != SOFTBUS_OK) {
