@@ -572,13 +572,6 @@ int LooperInit(void)
         return SOFTBUS_ERR;
     }
     SetLooper(LOOP_TYPE_DEFAULT, looper);
-    
-    SoftBusLooper *handleFileLooper = CreateNewLooper("Hidumper_Lp");
-    if (!handleFileLooper) {
-        COMM_LOGE(COMM_UTILS, "init HandleFile looper fail.");
-        return SOFTBUS_ERR;
-    }
-    SetLooper(LOOP_TYPE_HANDLE_FILE, handleFileLooper);
 
     SoftBusLooper *connLooper = CreateNewLooper("ReactorLink_Lp");
     if (!connLooper) {
