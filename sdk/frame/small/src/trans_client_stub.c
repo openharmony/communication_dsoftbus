@@ -48,6 +48,11 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
         return SOFTBUS_ERR;
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        channel.myIp = (char *)ReadString(data, &size);
+        if (channel.myIp == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "pointer null error.");
+            return SOFTBUS_IPC_ERR;
+        }
         channel.fd = ReadFileDescriptor(data);
     }
     ReadInt32(data, &(channel.businessType));
