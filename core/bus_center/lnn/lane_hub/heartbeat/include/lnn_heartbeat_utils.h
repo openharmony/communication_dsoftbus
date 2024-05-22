@@ -34,6 +34,7 @@ extern "C" {
 
 #define HB_TIME_FACTOR                  (1000LL)
 #define HB_START_DELAY_LEN              (10 * HB_TIME_FACTOR)
+#define HB_CLOUD_SYNC_DELAY_LEN         (20 * HB_TIME_FACTOR)
 #define HB_SEND_ONCE_LEN                (10 * HB_TIME_FACTOR)
 #define HB_SEND_RELAY_LEN               (2 * HB_TIME_FACTOR)
 #define HB_CHECK_DELAY_LEN              HB_SEND_ONCE_LEN
