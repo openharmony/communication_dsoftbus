@@ -822,7 +822,8 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, SessionEnableStatus *enableStatus)
+int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId,
+                                    int32_t *type, SessionEnableStatus *enableStatus)
 {
     if (sessionId < 0) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
@@ -2133,7 +2134,8 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
     }
     if (action == TIMER_ACTION_START) {
         bool binding = (sessionNode->lifecycle.maxWaitTime != 0);
-        bool bindSuccess = (sessionNode->lifecycle.maxWaitTime == 0 && sessionNode->enableStatus == ENABLE_STATUS_SUCCESS);
+        bool bindSuccess = (sessionNode->lifecycle.maxWaitTime == 0 &&
+                            sessionNode->enableStatus == ENABLE_STATUS_SUCCESS);
         if (binding) {
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             TRANS_LOGE(TRANS_SDK, "socket=%{public}d The socket is binding", socket);

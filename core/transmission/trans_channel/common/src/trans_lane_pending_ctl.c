@@ -1130,7 +1130,7 @@ int32_t TransAsyncGetLaneInfoByOption(const SessionParam *param, const LaneReque
         TRANS_SVC, "lnnGetLaneHandle is null");
     *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
     TransUpdateSocketChannelLaneInfoBySession(
-            param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
+        param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
     int32_t ret = TransAddAsyncLaneReqFromPendingList(*laneHandle, param, callingTokenId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(
