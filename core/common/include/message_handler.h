@@ -65,7 +65,8 @@ enum LooperType {
     LOOP_TYPE_BR_RECV,
     LOOP_TYPE_P2P,
     LOOP_TYPE_LANE,
-    LOOP_TYPE_CONN
+    LOOP_TYPE_CONN,
+    LOOP_TYPE_LNN
 };
 
 SoftBusLooper *GetLooper(int looper);

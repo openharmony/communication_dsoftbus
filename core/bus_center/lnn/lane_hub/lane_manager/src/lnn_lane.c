@@ -485,10 +485,6 @@ static int32_t LaneDelayInit(void)
 
 int32_t InitLane(void)
 {
-    if (LnnInitLaneLooper() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "[InitLane]init laneLooper fail");
-        return SOFTBUS_ERR;
-    }
     if (InitLaneModel() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "[InitLane]init laneModel fail");
         return SOFTBUS_ERR;
@@ -529,7 +525,6 @@ void DeinitLane(void)
     DeinitLaneModel();
     DeinitLaneLink();
     LnnDeinitScore();
-    LnnDeinitLaneLooper();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->deinit();
     }

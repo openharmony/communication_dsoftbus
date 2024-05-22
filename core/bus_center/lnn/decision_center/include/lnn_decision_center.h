@@ -19,6 +19,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     STATE_TYPE_BLE_SWITCH_ON = 0,
     STATE_TYPE_BLE_SWITCH_OFF,
@@ -128,4 +132,7 @@ int32_t LnnDcSubscribe(DcTask *task);
 int32_t LnnDcUnsubscribe(DcTask *task);
 void LnnDcDispatchEvent(DcEvent *dcEvnet);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
