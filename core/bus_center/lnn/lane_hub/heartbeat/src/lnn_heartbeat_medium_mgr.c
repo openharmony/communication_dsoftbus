@@ -62,7 +62,7 @@ static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType typ
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
 static int32_t HbMediumMgrRecvHigherWeight(
-    const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect);
+    const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect, bool isPeerScreenOn);
 static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime);
 
 static LnnHeartbeatMediumMgr *g_hbMeidumMgr[HB_MAX_TYPE_COUNT] = { 0 };
@@ -582,7 +582,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeig
 }
 
 static int32_t HbMediumMgrRecvHigherWeight(
-    const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect)
+    const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect, bool isPeerScreenOn)
 {
     NodeInfo nodeInfo;
     char masterUdid[UDID_BUF_LEN] = { 0 };
@@ -610,7 +610,7 @@ static int32_t HbMediumMgrRecvHigherWeight(
         LNN_LOGE(LNN_HEART_BEAT, "notify master elect fail");
         return SOFTBUS_ERR;
     }
-    if (isFromMaster) {
+    if (isFromMaster && isPeerScreenOn) {
         LnnSetHbAsMasterNodeState(false);
     }
     char *anonyUdid = NULL;
