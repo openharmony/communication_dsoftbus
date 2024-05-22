@@ -104,7 +104,7 @@ int32_t KVAdapter::RegisterDataChangeListener()
         DistributedKv::Status status =
             kvStorePtr_->SubscribeKvStore(DistributedKv::SubscribeType::SUBSCRIBE_TYPE_CLOUD, dataChangeListener_);
         if (status != DistributedKv::Status::SUCCESS) {
-            LNN_LOGE(LNN_LEDGER, "Register db data change listener failed, ret: %{public}d", status);
+            LNN_LOGE(LNN_LEDGER, "Register db data change listener failed, ret=%{public}d", status);
             return SOFTBUS_KV_REGISTER_DATA_LISTENER_FAILED;
         }
     }
@@ -127,7 +127,7 @@ int32_t KVAdapter::UnRegisterDataChangeListener()
         DistributedKv::Status status =
             kvStorePtr_->UnSubscribeKvStore(DistributedKv::SubscribeType::SUBSCRIBE_TYPE_CLOUD, dataChangeListener_);
         if (status != DistributedKv::Status::SUCCESS) {
-            LNN_LOGE(LNN_LEDGER, "UnRegister db data change listener failed, ret: %{public}d", status);
+            LNN_LOGE(LNN_LEDGER, "UnRegister db data change listener failed, ret=%{public}d", status);
             return SOFTBUS_KV_UNREGISTER_DATA_LISTENER_FAILED;
         }
     }
@@ -174,7 +174,7 @@ int32_t KVAdapter::Put(const std::string &key, const std::string &value)
         status = kvStorePtr_->Put(kvKey, kvValue);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "Put kv to db failed, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "Put kv to db failed, ret=%{public}d", status);
         return SOFTBUS_KV_PUT_DB_FAIL;
     }
     LNN_LOGI(LNN_LEDGER, "KVAdapter Put succeed");
@@ -222,7 +222,7 @@ int32_t KVAdapter::PutBatch(const std::map<std::string, std::string> &values)
         status = kvStorePtr_->PutBatch(entries);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "PutBatch kv to db failed, ret: %d", status);
+        LNN_LOGE(LNN_LEDGER, "PutBatch kv to db failed, ret=%d", status);
         return SOFTBUS_KV_PUT_DB_FAIL;
     }
     LNN_LOGI(LNN_LEDGER, "KVAdapter PutBatch succeed");
@@ -266,7 +266,7 @@ int32_t KVAdapter::DeleteByPrefix(const std::string &keyPrefix)
     std::vector<DistributedKv::Entry> allEntries;
     DistributedKv::Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "GetEntries failed, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "GetEntries failed, ret=%{public}d", status);
         return SOFTBUS_KV_DEL_DB_FAIL;
     }
     std::vector<DistributedKv::Key> keys;
@@ -275,7 +275,7 @@ int32_t KVAdapter::DeleteByPrefix(const std::string &keyPrefix)
     }
     status = kvStorePtr_->DeleteBatch(keys);
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "DeleteBatch failed, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "DeleteBatch failed, ret=%{public}d", status);
         return SOFTBUS_KV_DEL_DB_FAIL;
     }
     LNN_LOGI(LNN_LEDGER, "DeleteByPrefix succeed");
@@ -307,7 +307,7 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
         return SOFTBUS_KV_GET_DB_FAIL;
     }
     value = kvValue.ToString();
-    LNN_LOGI(LNN_LEDGER, "Get succeed");
+    LNN_LOGD(LNN_LEDGER, "Get succeed");
     return SOFTBUS_OK;
 }
 
@@ -371,14 +371,14 @@ int32_t KVAdapter::CloudSync()
         status = kvStorePtr_->CloudSync(callback);
     }
     if (status == DistributedKv::Status::CLOUD_DISABLED) {
-        LNN_LOGE(LNN_LEDGER, "cloud sync disabled, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "cloud sync disabled, ret=%{public}d", status);
         return SOFTBUS_KV_CLOUD_DISABLED;
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "cloud sync failed, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "cloud sync failed, ret=%{public}d", status);
         return SOFTBUS_KV_CLOUD_SYNC_FAIL;
     }
-    LNN_LOGI(LNN_LEDGER, "cloud sync ok, ret: %{public}d", status);
+    LNN_LOGI(LNN_LEDGER, "cloud sync ok, ret=%{public}d", status);
     return SOFTBUS_OK;
 }
 
