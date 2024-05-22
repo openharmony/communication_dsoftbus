@@ -476,7 +476,8 @@ static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_BR_SEND, NULL},
     {LOOP_TYPE_BR_RECV, NULL},
     {LOOP_TYPE_P2P, NULL},
-    {LOOP_TYPE_LANE, NULL}
+    {LOOP_TYPE_LANE, NULL},
+    {LOOP_TYPE_CONN, NULL}
 };
 
 SoftBusLooper *GetLooper(int type)
@@ -570,6 +571,21 @@ int LooperInit(void)
         return SOFTBUS_ERR;
     }
     SetLooper(LOOP_TYPE_DEFAULT, looper);
+    
+    SoftBusLooper *handleFileLooper = CreateNewLooper("Hidumper_Lp");
+    if (!handleFileLooper) {
+        COMM_LOGE(COMM_UTILS, "init HandleFile looper fail.");
+        return SOFTBUS_ERR;
+    }
+    SetLooper(LOOP_TYPE_HANDLE_FILE, handleFileLooper);
+
+    SoftBusLooper *connLooper = CreateNewLooper("ReactorLink_Lp");
+    if (!connLooper) {
+        COMM_LOGE(COMM_UTILS, "init connection looper fail.");
+        return SOFTBUS_ERR;
+    }
+    SetLooper(LOOP_TYPE_CONN, connLooper);
+
     COMM_LOGD(COMM_UTILS, "init looper success.");
     return SOFTBUS_OK;
 }
