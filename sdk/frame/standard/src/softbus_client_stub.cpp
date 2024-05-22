@@ -428,11 +428,6 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    char *infoData = (char *)SoftBusMalloc(len);
-    if (infoData == NULL) {
-        COMM_LOGE(COMM_SDK, "malloc infoData failed!");
-        return SOFTBUS_ERR;
-    }
     int ret = OnChannelMsgReceived(channelId, channelType, infoData, len, type);
     bool res = reply.WriteInt32(ret);
     if (!res) {
