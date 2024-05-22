@@ -194,13 +194,13 @@ static int32_t ConvertNodeInfoToCloudSyncInfo(CloudSyncInfo *cloudSyncInfo, cons
 
 static int32_t DBCipherInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const char *value, size_t valueLength)
 {
-    if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_KEY) == 0 && valueLength < SESSION_KEY_LENGTH + 1) {
-        if (memcpy_s((char *)cacheInfo->cipherInfo.key, SESSION_KEY_LENGTH, value, valueLength) != EOK) {
+    if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_KEY) == 0) {
+        if (memcpy_s((char *)cacheInfo->cipherInfo.key, SESSION_KEY_LENGTH, value, SESSION_KEY_LENGTH) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:memcpy_s cipherkey fail");
             return SOFTBUS_MEM_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_IV) == 0 && valueLength < BROADCAST_IV_LEN + 1) {
-        if (memcpy_s((char *)cacheInfo->cipherInfo.iv, BROADCAST_IV_LEN, value, valueLength) != EOK) {
+    } else if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_IV) == 0) {
+        if (memcpy_s((char *)cacheInfo->cipherInfo.iv, BROADCAST_IV_LEN, value, BROADCAST_IV_LEN) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:memcpy_s cipheriv fail");
             return SOFTBUS_MEM_ERR;
         }
@@ -315,13 +315,14 @@ static int32_t DBConnectMacInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s p2pMac fail");
             return SOFTBUS_STRCPY_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_IRK) == 0 && valueLength < LFINDER_IRK_LEN + 1) {
-        if (memcpy_s((char *)cacheInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, value, valueLength) != EOK) {
+    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_IRK) == 0) {
+        if (memcpy_s((char *)cacheInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, value, LFINDER_IRK_LEN) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:memcpy_s peerIrk fail");
             return SOFTBUS_MEM_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_PUB_MAC) == 0 && valueLength < LFINDER_MAC_ADDR_LEN + 1) {
-        if (memcpy_s((char *)cacheInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, value, valueLength) != EOK) {
+    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_PUB_MAC) == 0) {
+        if (memcpy_s((char *)cacheInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, value, LFINDER_MAC_ADDR_LEN) !=
+            EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:memcpy_s publicAddress fail");
             return SOFTBUS_MEM_ERR;
         }
@@ -344,9 +345,9 @@ static int32_t DBConnectInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, co
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s pkgVersion fail");
             return SOFTBUS_STRCPY_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_PTK) == 0 && valueLength < PTK_DEFAULT_LEN + 1) {
-        if (memcpy_s(cacheInfo->remotePtk, PTK_DEFAULT_LEN, value, valueLength) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:strcpy_s remotePtk fail");
+    } else if (strcmp(fieldName, DEVICE_INFO_PTK) == 0) {
+        if (memcpy_s(cacheInfo->remotePtk, PTK_DEFAULT_LEN, value, PTK_DEFAULT_LEN) != EOK) {
+            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s remotePtk fail");
             return SOFTBUS_MEM_ERR;
         }
     } else if (strcmp(fieldName, DEVICE_INFO_SW_VERSION) == 0 && valueLength < VERSION_MAX_LEN) {
@@ -579,7 +580,7 @@ static int32_t HandleDBAddChangeInternal(const char *key, const char *value, Nod
 static int32_t SetDBNameDataToDLedger(NodeInfo *cacheInfo, char *deviceUdid, char *fieldName)
 {
     if (strcmp(fieldName, DEVICE_INFO_DEVICE_NAME) == 0) {
-        if (LnnSetDLDeviceInfoName(deviceUdid, cacheInfo->deviceInfo.deviceName) != SOFTBUS_OK) {
+        if (!LnnSetDLDeviceInfoName(deviceUdid, cacheInfo->deviceInfo.deviceName)) {
             LNN_LOGE(LNN_BUILDER, "set device name to distributedLedger fail");
             return SOFTBUS_ERR;
         }
