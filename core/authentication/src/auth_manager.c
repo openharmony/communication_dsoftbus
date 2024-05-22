@@ -1505,7 +1505,6 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
     return SOFTBUS_OK;
 }
 
-
 static void DfxRecordLnnConnectEnd(uint32_t requestId, uint64_t connId, const AuthConnInfo *connInfo, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
@@ -1994,8 +1993,8 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
     if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_WIFI) {
         DisconnectAuthDevice(&auth->connId[authHandle.type]);
     }
-    DelAuthManager(auth, authHandle.type);
     AuthFreeConn(&authHandle);
+    DelAuthManager(auth, authHandle.type);
     ReleaseAuthLock();
 }
 
@@ -2166,11 +2165,6 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
         AUTH_LOGE(AUTH_CONN, "get peer uuid fail");
         return SOFTBUS_ERR;
     }
-    char udid[UDID_BUF_LEN] = {0};
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get peer udid fail");
-        return SOFTBUS_ERR;
-    }
     AuthLinkType linkList[] = {AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_LINK_TYPE_WIFI,
         AUTH_LINK_TYPE_P2P, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE};
     AuthConnInfo connInfo;
@@ -2183,12 +2177,8 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
         if (GetAuthConnInfoByUuid(uuid, linkList[i], &connInfo) != SOFTBUS_OK) {
             continue;
         }
-        if (linkList[i] == AUTH_LINK_TYPE_ENHANCED_P2P || linkList[i] == AUTH_LINK_TYPE_P2P) {
-            if (!IsAuthReuseP2p(networkId, udid, linkList[i])) {
-                continue;
-            }
-        }
-        if (linkList[i] == AUTH_LINK_TYPE_BLE && !CheckActiveAuthConnection(&connInfo)) {
+        if ((linkList[i] == AUTH_LINK_TYPE_BLE || linkList[i] == AUTH_LINK_TYPE_BR) &&
+            !CheckActiveAuthConnection(&connInfo)) {
             AUTH_LOGI(AUTH_CONN, "auth ble connection not active");
             continue;
         }
@@ -2197,6 +2187,11 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
         linkTypeList->linkTypeNum++;
     }
     if (linkTypeList->linkTypeNum == 0) {
+        if (TryGetBrConnInfo(uuid, &connInfo) == SOFTBUS_OK) {
+            linkTypeList->linkType[linkTypeList->linkTypeNum] = AUTH_LINK_TYPE_BR;
+            linkTypeList->linkTypeNum++;
+            return SOFTBUS_OK;
+        }
         AUTH_LOGE(AUTH_CONN, "no available auth link");
         return SOFTBUS_ERR;
     }
@@ -3054,7 +3049,8 @@ static void AuthOnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *lane
         AUTH_LOGE(AUTH_CONN, "memset_s authConnInfo fail");
         return;
     }
-    if (GetAuthConn(uuid, laneConnInfo->type, &authConnInfo) != SOFTBUS_OK) {
+    if (GetAuthConn(uuid, laneConnInfo->type, &authConnInfo) != SOFTBUS_OK &&
+        laneConnInfo->type == LANE_BR && TryGetBrConnInfo(uuid, &authConnInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "GetAuthConn fail");
         return;
     }
@@ -3097,7 +3093,7 @@ static void AuthOnLaneAllocFail(uint32_t laneHandle, int32_t reason)
     }
 }
 
-static int32_t AuthGetRequestOption(const char *networkId, LaneAllocInfo *allocInfo)
+static int32_t AuthGetLaneAllocInfo(const char *networkId, LaneAllocInfo *allocInfo)
 {
     if (networkId == NULL || allocInfo == NULL) {
         AUTH_LOGE(AUTH_CONN, "param invalid");
@@ -3157,7 +3153,7 @@ int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCal
         return SOFTBUS_MEM_ERR;
     }
 
-    if (AuthGetRequestOption(networkId, &allocInfo) != SOFTBUS_OK) {
+    if (AuthGetLaneAllocInfo(networkId, &allocInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "auth get requestOption fail");
         GetLaneManager()->lnnFreeLane(laneHandle);
         return SOFTBUS_ERR;

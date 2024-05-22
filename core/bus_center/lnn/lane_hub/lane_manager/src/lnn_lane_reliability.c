@@ -243,7 +243,7 @@ static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSu
     ListInit(&detectInfoList);
     int32_t ret = GetAllDetectInfoWithDetectId(requestItem->laneDetectId, &detectInfoList);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get all detect info fail, laneDetectId=%{public}u", requestItem->laneDetectId);
+        LNN_LOGE(LNN_LANE, "get all detect info fail, detectId=%{public}u", requestItem->laneDetectId);
         return ret;
     }
     LaneDetectInfo *item = NULL;
@@ -284,7 +284,7 @@ static int32_t LaneDetectOnDataEvent(ListenerModule module, int32_t events, int3
             LNN_LOGE(LNN_LANE, "wlan detect info not found by fd=%{public}d", fd);
             (void)DelTrigger(LANE, fd, WRITE_TRIGGER);
             ConnShutdownSocket(fd);
-            return SOFTBUS_NOT_FIND;
+            return SOFTBUS_LANE_NOT_FIND;
         }
         LNN_LOGI(LNN_LANE, "wlan connect success, detectId=%{public}u, fd=%{public}d", requestItem.laneDetectId, fd);
         (void)DelTrigger(LANE, fd, WRITE_TRIGGER);

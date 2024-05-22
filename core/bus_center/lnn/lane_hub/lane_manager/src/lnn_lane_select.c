@@ -18,8 +18,11 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "bus_center_manager.h"
 #include "common_list.h"
+#include "lnn_common_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_parameter_utils.h"
 #include "lnn_select_rule.h"
@@ -27,8 +30,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
-#include "lnn_select_rule.h"
-#include "lnn_common_utils.h"
+#include "wifi_direct_manager.h"
 
 #define INVALID_LINK (-1)
 #define MESH_MAGIC_NUMBER 0x5A5A5A5A
@@ -215,7 +217,7 @@ static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *r
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LANE, "device not online, cancel selectLane, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     return SOFTBUS_OK;
 }
@@ -318,7 +320,7 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList, uint32_t *listNum)
 {
     if (PreProcLaneSelect(networkId, request, recommendList, listNum) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
@@ -336,15 +338,15 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     if (resNum == 0) {
         LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         *listNum = 0;
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
     if (!HmlIsExist(resList, resNum) && LaneAddHml(networkId, resList, &resNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "LaneAddHml fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
     if (AdjustLanePriority(networkId, request, resList, resNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
 
     recommendList->linkTypeNum = resNum;
@@ -482,6 +484,31 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     return SOFTBUS_OK;
 }
 
+static bool IsAuthReuseWifiDirect(const char *networkId, LaneLinkType linkType)
+{
+    char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get peer udid fail");
+        return false;
+    }
+    LaneResource resoureItem;
+    if (memset_s(&resoureItem, sizeof(LaneResource), 0, sizeof(LaneResource)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memset_s LaneResource fail");
+        return false;
+    }
+    if (linkType == LANE_HML && FindLaneResourceByLinkType(udid, LANE_HML, &resoureItem) == SOFTBUS_OK &&
+        !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_HML)) {
+        LNN_LOGI(LNN_LANE, "can use HML");
+        return true;
+    } else if (linkType == LANE_P2P && FindLaneResourceByLinkType(udid, LANE_P2P, &resoureItem) == SOFTBUS_OK &&
+        !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_P2P)) {
+        LNN_LOGI(LNN_LANE, "can use P2P");
+        return true;
+    } else {
+        return false;
+    }
+}
+
 int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
     LanePreferredLinkList *recommendList)
 {
@@ -490,6 +517,10 @@ int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
     }
     recommendList->linkTypeNum = 0;
     for (uint32_t i = 0; i < request->linkTypeNum; ++i) {
+        if ((request->linkType[i] == LANE_HML || request->linkType[i] == LANE_P2P) &&
+            !IsAuthReuseWifiDirect(networkId, request->linkType[i])) {
+            continue;
+        }
         if (IsValidLane(networkId, request->linkType[i])) {
             recommendList->linkType[recommendList->linkTypeNum] = request->linkType[i];
             recommendList->linkTypeNum++;
