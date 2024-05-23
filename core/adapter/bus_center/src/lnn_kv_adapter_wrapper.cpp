@@ -229,6 +229,7 @@ int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
             return SOFTBUS_NOT_FIND;
         }
         putBatchRet = kvAdapter->PutBatch(values);
+        values.clear();
     }
     if (putBatchRet != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "kvAdapter putBatch failed, ret=%{public}d", putBatchRet);
