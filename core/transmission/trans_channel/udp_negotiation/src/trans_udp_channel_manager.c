@@ -510,3 +510,33 @@ int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
     TRANS_LOGE(TRANS_CTRL, "udp channel not found. channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
 }
+
+int32_t TransUdpGetChannelIdByAddr(AppInfo *appInfo)
+{
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_INIT, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->info.peerData.channelId == appInfo->peerData.channelId) {
+            if (strcmp(udpChannelNode->info.peerData.addr, appInfo->peerData.addr) == EOK) {
+                appInfo->myData.channelId = udpChannelNode->info.myData.channelId;
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "not found peerChannelId and addr");
+    return SOFTBUS_NOT_FIND;
+}

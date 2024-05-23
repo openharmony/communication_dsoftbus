@@ -22,6 +22,7 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "trans_log.h"
+#include "trans_udp_channel_manager.h"
 
 #define BASE64_SESSION_KEY_LEN 45
 typedef enum {
@@ -142,6 +143,11 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
+            (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
+            (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
+            if (appInfo->myData.channelId == 0) {
+                (void)TransUdpGetChannelIdByAddr(appInfo);
+            }
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
@@ -166,6 +172,8 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)AddNumber64ToJsonObject(msg, "PEER_CHANNEL_ID", appInfo->peerData.channelId);
+            (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
+            (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
