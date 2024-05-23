@@ -73,10 +73,10 @@ void KvDataChangeListener::OnChange(const DistributedKv::DataOrigin &origin, Key
 std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataToEntries(
     const std::vector<std::string> &keys)
 {
-    LNN_LOGI(LNN_LEDGER, "call!");
     int32_t dbId = 0;
     char *anonyKey = nullptr;
     LnnCreateKvAdapter(&dbId, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
+    LNN_LOGI(LNN_LEDGER, "call! dbId=%{public}d", dbId);
     std::vector<DistributedKv::Entry> entries;
     if (keys.empty()) {
         LNN_LOGE(LNN_LEDGER, "keys empty");
