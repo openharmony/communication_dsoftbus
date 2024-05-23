@@ -26,13 +26,15 @@ public:
     KvDataChangeListener();
     ~KvDataChangeListener();
 
-    void OnChange(const DistributedKv::DataOrigin& origin, Keys &&keys) override;
+    void OnChange(const DistributedKv::DataOrigin &origin, Keys &&keys) override;
 
 private:
     std::vector<DistributedKv::Entry> ConvertCloudChangeDataToEntries(const std::vector<std::string> &keys);
+    void SelectChangeType(const std::vector<DistributedKv::Entry> &records);
     void HandleAddChange(const std::vector<DistributedKv::Entry> &insertRecords);
     void HandleUpdateChange(const std::vector<DistributedKv::Entry> &updateRecords);
     void HandleDeleteChange(const std::vector<DistributedKv::Entry> &deleteRecords);
+    std::string GetKeyPrefix(const std::string &key);
 };
 } // namespace OHOS
 #endif // LNN_KV_DATA_CHANGE_LISTENER_H
