@@ -100,19 +100,16 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
 int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
-    if (msg == NULL || appInfo == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGW(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
     unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
     size_t len = 0;
     (void)GetJsonObjectStringItem(msg, "SESSION_KEY", (char*)encodeSessionKey, BASE64_SESSION_KEY_LEN);
     int32_t ret = SoftBusBase64Decode((unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
         (unsigned char*)encodeSessionKey, strlen((char*)encodeSessionKey));
-    if (len != sizeof(appInfo->sessionKey) || ret != 0) {
-        TRANS_LOGE(TRANS_CTRL, "mbedtls decode failed.");
-        return SOFTBUS_DECRYPT_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(len == sizeof(appInfo->sessionKey),
+        SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
 
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
     (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
