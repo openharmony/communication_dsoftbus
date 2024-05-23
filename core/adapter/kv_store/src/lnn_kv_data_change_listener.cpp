@@ -54,7 +54,7 @@ void KvDataChangeListener::OnChange(const DistributedKv::DataOrigin &origin, Key
 
     std::vector<DistributedKv::Entry> updateRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_UPDATE]);
     if (!updateRecords.empty() && updateRecords.size() <= MAX_DB_RECORD_SIZE) {
-        HandleUpdateChange(updateRecords);
+        SelectChangeType(updateRecords);
     }
 
     std::vector<std::string> delKeys = keys[ChangeOp::OP_DELETE];
@@ -144,5 +144,42 @@ void KvDataChangeListener::HandleDeleteChange(const std::vector<DistributedKv::E
         char *dbValue = nullptr;
         LnnDBDataChangeSyncToCache(dbKey.c_str(), dbValue, ChangeType::DB_DELETE);
     }
+}
+
+void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Entry>& records) {
+    LNN_LOGI(LNN_LEDGER, "call! recordsSize=%{public}zu", records.size());
+    auto innerRecords(records);
+    while (!innerRecords.empty()) {
+        std::vector<DistributedKv::Entry> entries;
+        entries.emplace_back(innerRecords.front());
+        std::string keyPrefix = GetKeyPrefix(innerRecords.front().key.ToString());
+        innerRecords.erase(innerRecords.begin());
+        for (auto iter = innerRecords.begin(); iter != innerRecords.end(); ++iter) {
+            if (keyPrefix == GetKeyPrefix(iter->key.ToString())) {
+                entries.emplace_back(*iter);
+                innerRecords.erase(iter);
+                --iter;
+            }
+        }
+        if (entries.size() == CLOUD_SYNC_INFO_SIZE) {
+            LNN_LOGI(LNN_LEDGER, "add! entriesSize=%{public}zu", entries.size());
+            HandleAddChange(entries);
+        } else {
+            LNN_LOGI(LNN_LEDGER, "update! entriesSize=%{public}zu", entries.size());
+            HandleUpdateChange(entries);
+        }
+    }
+}
+
+std::string KvDataChangeListener::GetKeyPrefix(const std::string& key) {
+    std::size_t pos1 = key.find('#');
+    if (pos1 == std::string::npos) {
+        return "";
+    }
+    std::size_t pos2 = key.find('#', pos1 + 1);
+    if (pos2 == std::string::npos) {
+        return "";
+    }
+    return key.substr(0, pos2);
 }
 } // namespace OHOS
