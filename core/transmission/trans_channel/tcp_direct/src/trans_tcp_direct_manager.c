@@ -236,6 +236,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
             TRANS_LOGI(TRANS_CTRL, "delete pkgName = %{public}s, pid = %{public}d", pkgName, pid);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
+            ConnShutdownSocket(item->appInfo.fd);
             SoftBusFree(item);
             continue;
         }
