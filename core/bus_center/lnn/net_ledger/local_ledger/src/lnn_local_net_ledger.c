@@ -1609,6 +1609,7 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_KEY, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger cipher key change sync to cloud failed");
     }
+    (void)memset_s(value, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
     return SOFTBUS_OK;
 }
 
@@ -1636,6 +1637,7 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_IV, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger cipher iv change sync to cloud failed");
     }
+    (void)memset_s(value, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
     return SOFTBUS_OK;
 }
 
