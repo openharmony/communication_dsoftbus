@@ -62,8 +62,8 @@ static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType typ
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
 static int32_t HbMediumMgrRecvHigherWeight(
-    const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect);
-static void HbMediumMgrRecvSensorHubInfo(const char *networkId, uint64_t nowTime);
+    const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect, bool isPeerScreenOn);
+static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime);
 
 static LnnHeartbeatMediumMgr *g_hbMeidumMgr[HB_MAX_TYPE_COUNT] = { 0 };
 
@@ -71,7 +71,7 @@ static LnnHeartbeatMediumMgrCb g_hbMediumMgrCb = {
     .onRelay = HbMediumMgrRelayProcess,
     .onReceive = HbMediumMgrRecvProcess,
     .onRecvHigherWeight = HbMediumMgrRecvHigherWeight,
-    .onRecvSensorHubInfo = HbMediumMgrRecvSensorHubInfo,
+    .onRecvLpInfo = HbMediumMgrRecvLpInfo,
 };
 
 static SoftBusList *g_hbRecvList = NULL;
@@ -373,19 +373,19 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK ||
         strlen(deviceInfo.connectInfo.macAddr) == 0) {
         LNN_LOGI(LNN_HEART_BEAT,
-            "don't support ble direct online because peer state version change, ver:%{public}d->%{public}d",
+            "don't support ble direct online because retrieve fail, stateVersion=%{public}d->%{public}d",
             deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
         return true;
     }
     if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK &&
         stateVersion != deviceInfo.localStateVersion) {
-        LNN_LOGI(LNN_HEART_BEAT,
-            "don't support ble direct online because local state version change, ver:%{public}d->%{public}d",
+        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because local stateVersion=%{public}d->%{public}d",
             deviceInfo.localStateVersion, stateVersion);
         return true;
     }
     if ((int32_t)hbResp->stateVersion != deviceInfo.stateVersion) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because state version change");
+        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because peer stateVersion=%{public}d->%{public}d",
+            deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
         return true;
     }
     AuthDeviceKeyInfo keyInfo = { 0 };
@@ -395,7 +395,6 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
         return true;
     }
-    // update capability
     SetDeviceNetCapability(&deviceInfo.netCapacity, hbResp);
     if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret=%{public}d", ret);
@@ -582,7 +581,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeig
 }
 
 static int32_t HbMediumMgrRecvHigherWeight(
-    const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect)
+    const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect, bool isPeerScreenOn)
 {
     NodeInfo nodeInfo;
     char masterUdid[UDID_BUF_LEN] = { 0 };
@@ -610,7 +609,7 @@ static int32_t HbMediumMgrRecvHigherWeight(
         LNN_LOGE(LNN_HEART_BEAT, "notify master elect fail");
         return SOFTBUS_ERR;
     }
-    if (isFromMaster) {
+    if (isFromMaster && isPeerScreenOn) {
         LnnSetHbAsMasterNodeState(false);
     }
     char *anonyUdid = NULL;
@@ -624,7 +623,7 @@ static int32_t HbMediumMgrRecvHigherWeight(
     return SOFTBUS_OK;
 }
 
-static void HbMediumMgrRecvSensorHubInfo(const char *networkId, uint64_t nowTime)
+static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime)
 {
     if (HbUpdateOfflineTimingByRecvInfo(networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V0, nowTime) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB medium mgr update time stamp fail");
@@ -793,7 +792,7 @@ int32_t LnnHbMediumMgrInit(void)
         return SOFTBUS_ERR;
     }
     if (LnnRegisterBleLpDeviceMediumMgr() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "SH regist LpDevice manager fail");
+        LNN_LOGE(LNN_HEART_BEAT, "LP regist LpDevice manager fail");
         return SOFTBUS_ERR;
     }
     return HbInitRecvList();

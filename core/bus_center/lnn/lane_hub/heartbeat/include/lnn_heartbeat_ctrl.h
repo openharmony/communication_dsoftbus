@@ -42,7 +42,8 @@ void LnnHbOnTrustedRelationReduced(void);
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);
 
-int32_t LnnTriggerDataLevelHeartBeat(void);
+int32_t LnnTriggerDataLevelHeartbeat(void);
+int32_t LnnTriggerCloudSyncHeartbeat(void);
 void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnUnregDataLevelChangeCb(void);
 

@@ -181,7 +181,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest003, TestSize.Level1)
     TransUdpChannelMgrDeinit();
     ret = TransAddUdpChannel(Channel);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
-    ret = TransDelUdpChannel(Channel->info.myData.channelId);
+    ret = TransDelUdpChannel(invalidId);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
@@ -392,7 +392,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest011, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransUdpChannelMgrDeinit();
-    ret = TransSetUdpChannelStatus(Channel->seq, (UdpChannelStatus)UDP_CHANNEL_STATUS_INIT);
+    ret = TransSetUdpChannelStatus(seq, (UdpChannelStatus)UDP_CHANNEL_STATUS_INIT);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
@@ -530,8 +530,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest016, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransUdpChannelMgrDeinit();
-    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName, sessionName,
-        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+    ret = TransUdpGetNameByChanId(channelId, pkgName, sessionName, PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 

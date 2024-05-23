@@ -365,8 +365,12 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 {
     uint32_t connId = info->connId;
     bool isServer = (bool)info->isServer;
+    ProxyChannelInfo *disChanInfo = (ProxyChannelInfo *)SoftBusMalloc(sizeof(ProxyChannelInfo));
+    if (disChanInfo != NULL) {
+        (void)memcpy_s(disChanInfo, sizeof(ProxyChannelInfo), info, sizeof(ProxyChannelInfo));
+    }
     TransProxyPostResetPeerMsgToLoop(info);
-    TransProxyPostDisConnectMsgToLoop(connId, isServer);
+    TransProxyPostDisConnectMsgToLoop(connId, isServer, disChanInfo);
 }
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
@@ -437,6 +441,9 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
                 (void)memcpy_s(channelInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo));
             }
             ReleaseProxyChannelId(removeNode->channelId);
+            if (removeNode->appInfo.fastTransData != NULL) {
+                SoftBusFree((void *)removeNode->appInfo.fastTransData);
+            }
             ListDelete(&(removeNode->node));
             SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
@@ -467,6 +474,9 @@ static int32_t TransProxyResetChan(ProxyChannelInfo *chanInfo)
         if (ResetChanIsEqual(removeNode->status, removeNode, chanInfo) == SOFTBUS_OK) {
             (void)memcpy_s(chanInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo));
             ReleaseProxyChannelId(removeNode->channelId);
+            if (removeNode->appInfo.fastTransData != NULL) {
+                SoftBusFree((void *)removeNode->appInfo.fastTransData);
+            }
             ListDelete(&(removeNode->node));
             SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
@@ -936,6 +946,9 @@ static void ConstructProxyChannelInfo(
 {
     // always be client when communicating with WinPC
     chan->isServer = (msg->msgHead.cipher & CS_MODE) == 0 ? 0 : 1;
+    if (chan->isServer == 0) {
+        chan->deviceTypeIsWinpc = true;
+    }
     chan->status = PROXY_CHANNEL_STATUS_COMPLETED;
     chan->connId = msg->connId;
     chan->myId = newChanId;
@@ -1115,6 +1128,17 @@ static void TransProxyFastDataRecv(ProxyChannelInfo *chan)
     return;
 }
 
+static void ReleaseChannelInfo(ProxyChannelInfo *chan)
+{
+    if (chan == NULL) {
+        return;
+    }
+    if (chan->appInfo.fastTransData != NULL) {
+        SoftBusFree((void*)chan->appInfo.fastTransData);
+    }
+    SoftBusFree(chan);
+}
+
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
     if (msg == NULL) {
@@ -1135,7 +1159,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     if (memcpy_s(tmpSocketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName,
         strlen(chan->appInfo.myData.sessionName)) != EOK) {
         ReleaseProxyChannelId(chan->channelId);
-        SoftBusFree(chan);
+        ReleaseChannelInfo(chan);
         TRANS_LOGE(TRANS_CTRL, "memcpy socketName failed");
         return;
     }
@@ -1157,7 +1181,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(chan->channelId);
-        SoftBusFree(chan);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
 
@@ -1174,7 +1198,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
         ReleaseProxyChannelId(chan->channelId);
-        SoftBusFree(chan);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
 
@@ -1182,7 +1206,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if ((ret = OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened fail");
-        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer);
+        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
         TransProxyDelChanByChanId(chan->channelId);
         goto EXIT_ERR;
     }
@@ -1320,7 +1344,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
     }
-    (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0), info->isServer);
+    (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0), info->isServer, info->deviceTypeIsWinpc);
     if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
         TRANS_LOGE(TRANS_CTRL, "clear bad key cipher=%{public}d, authId=%{public}" PRId64 ", keyIndex=%{public}d",
             msg->msgHead.cipher, msg->authHandle.authId, msg->keyIndex);
@@ -1601,6 +1625,7 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
     TRANS_LOGI(TRANS_CTRL, "enter.");
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
+    ProxyChannelInfo *disChanInfo = NULL;
     uint32_t connId;
     int8_t status;
     bool isServer;
@@ -1611,8 +1636,12 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
         if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             isServer = removeNode->isServer;
+            disChanInfo = (ProxyChannelInfo *)SoftBusMalloc(sizeof(ProxyChannelInfo));
+            if (disChanInfo != NULL) {
+                (void)memcpy_s(disChanInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo));
+            }
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
-            TransProxyPostDisConnectMsgToLoop(connId, isServer);
+            TransProxyPostDisConnectMsgToLoop(connId, isServer, disChanInfo);
         } else if (status == PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT) {
             (void)TransDelConnByReqId(removeNode->reqId);
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);

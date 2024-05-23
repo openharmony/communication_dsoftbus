@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,23 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef WIFI_DIRECT_ENTITY_FACTORY_H
-#define WIFI_DIRECT_ENTITY_FACTORY_H
 
-#include "wifi_direct_types.h"
-#include "entity/wifi_direct_entity.h"
+#include "session_set_timer.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct WifiDirectEntityFactory {
-    struct WifiDirectEntity* (*createEntity)(enum WifiDirectEntityType type);
-};
-
-struct WifiDirectEntityFactory* GetWifiDirectEntityFactory(void);
-
-#ifdef __cplusplus
+int SetTimer(const char *name, unsigned int timeout)
+{
+    (void)name;
+    (void)timeout;
+    return -1;
 }
-#endif
-#endif
+
+void CancelTimer(int id)
+{
+    (void)id;
+    return;
+}

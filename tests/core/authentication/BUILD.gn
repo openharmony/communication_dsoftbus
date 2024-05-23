@@ -843,8 +843,8 @@ ohos_unittest("AuthLaneTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct/utils",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
   ]
 

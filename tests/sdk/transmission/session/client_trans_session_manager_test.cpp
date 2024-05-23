@@ -467,7 +467,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest10, TestSiz
     ret = ClientGetSessionDataById(sessionId, data, PKG_NAME_SIZE_MAX, KEY_PKG_NAME);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientGetSessionDataById(sessionId, data, PKG_NAME_SIZE_MAX, KEY_PEER_PID);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_MEM_ERR);
     ret = ClientDeleteSession(sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
@@ -514,7 +514,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest12, TestSiz
     ret = ClientGetSessionIntegerDataById(sessionId, &data, KEY_PEER_UID);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientGetSessionIntegerDataById(sessionId, &data, KEY_PKG_NAME);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_NOT_FIND);
     ret = ClientDeleteSession(sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);

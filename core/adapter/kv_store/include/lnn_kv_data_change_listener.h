@@ -26,7 +26,7 @@ public:
     KvDataChangeListener();
     ~KvDataChangeListener();
 
-    void OnChange(const DistributedKv::DataOrigin& origin, Keys &&keys) override;
+    void OnChange(const DistributedKv::DataOrigin &origin, Keys &&keys) override;
 
 private:
     std::vector<DistributedKv::Entry> ConvertCloudChangeDataToEntries(const std::vector<std::string> &keys);
