@@ -198,7 +198,6 @@ if (defined(ohos_lite)) {
       cfi = true
       cfi_cross_dso = true
       debug = false
-      blocklist = "../cfi_blocklist.txt"
     }
     branch_protector_ret = "pac_ret"
 
