@@ -219,7 +219,7 @@ static int32_t DBCipherInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, con
         LNN_LOGE(LNN_BUILDER, "fail:cipher info %{public}s valuelength over range", fieldName);
         return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGI(LNN_BUILDER, "DBCipherInfoSyncToCache success.");
+    LNN_LOGI(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
 }
 
@@ -277,7 +277,7 @@ static int32_t DBDeviceBasicInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName
         LNN_LOGE(LNN_BUILDER, "fail:DB device name info sync to cache fail");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "DBDeviceBasicInfoSyncToCache success.");
+    LNN_LOGI(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
 }
 
@@ -285,6 +285,7 @@ static int32_t DBNumInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const 
 {
     if (strcmp(fieldName, DEVICE_INFO_STATE_VERSION) == 0) {
         cacheInfo->stateVersion = atoi(value);
+        LNN_LOGI(LNN_BUILDER, "success. stateVersion=%{public}d", cacheInfo->stateVersion);
     } else if (strcmp(fieldName, DEVICE_INFO_TRANSPORT_PROTOCOL) == 0) {
         cacheInfo->supportedProtocols = atoll(value);
     } else if (strcmp(fieldName, DEVICE_INFO_WIFI_VERSION) == 0) {
@@ -295,12 +296,15 @@ static int32_t DBNumInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const 
         cacheInfo->accountId = atoll(value);
     } else if (strcmp(fieldName, DEVICE_INFO_FEATURE) == 0) {
         cacheInfo->feature = atoll(value);
+        LNN_LOGI(LNN_BUILDER, "success. feature=%{public}" PRIu64 "", cacheInfo->feature);
     } else if (strcmp(fieldName, DEVICE_INFO_CONN_SUB_FEATURE) == 0) {
         cacheInfo->connSubFeature = atoll(value);
+        LNN_LOGI(LNN_BUILDER, "success. connSubFeature=%{public}" PRIu64 "", cacheInfo->connSubFeature);
     } else if (strcmp(fieldName, DEVICE_INFO_AUTH_CAP) == 0) {
         cacheInfo->authCapacity = atoi(value);
+        LNN_LOGI(LNN_BUILDER, "success. authCapacity=%{public}u", cacheInfo->authCapacity);
     }
-    LNN_LOGI(LNN_BUILDER, "DBNumInfoSyncToCache success.");
+    LNN_LOGD(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
 }
 
@@ -342,6 +346,10 @@ static int32_t DBConnectInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, co
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s networkid fail");
             return SOFTBUS_STRCPY_ERR;
         }
+        char *anonyNetworkId = NULL;
+        Anonymize(cacheInfo->networkId, &anonyNetworkId);
+        LNN_LOGI(LNN_BUILDER, "success. networkId=%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
     } else if (strcmp(fieldName, DEVICE_INFO_PKG_VERSION) == 0 && valueLength < VERSION_MAX_LEN) {
         if (strcpy_s(cacheInfo->pkgVersion, VERSION_MAX_LEN, value) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s pkgVersion fail");
@@ -361,7 +369,7 @@ static int32_t DBConnectInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, co
         LNN_LOGE(LNN_BUILDER, "fail:DB ConnectMacInfo Sync To Cache fail");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "DBConnectInfoSyncToCache success.");
+    LNN_LOGD(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
 }
 
@@ -538,7 +546,7 @@ static int32_t SplitString(char splitKey[SPLIT_KEY_NUM][SPLIT_MAX_LEN], char spl
 
 static int32_t HandleDBAddChangeInternal(const char *key, const char *value, NodeInfo *cacheInfo)
 {
-    LNN_LOGI(LNN_BUILDER, "HandleDBAddChangeInternal enter.");
+    LNN_LOGI(LNN_BUILDER, "enter.");
     if (key == NULL || value == NULL) {
         LNN_LOGE(LNN_BUILDER, "fail:invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -643,7 +651,7 @@ static int32_t SetDBDataToDistributedLedger(NodeInfo *cacheInfo, char *deviceUdi
 
 static void UpdateInfoToLedger(NodeInfo *cacheInfo, char *deviceUdid, char *fieldName, char *value)
 {
-    LNN_LOGI(LNN_BUILDER, "UpdateInfoToLedger enter");
+    LNN_LOGI(LNN_BUILDER, "enter");
     if (cacheInfo == NULL || deviceUdid == NULL || strlen(deviceUdid) > UDID_BUF_LEN - 1 || fieldName == NULL ||
         value == NULL) {
         LNN_LOGE(LNN_BUILDER, "fail:invalid param");
@@ -691,8 +699,8 @@ static int32_t HandleDBUpdateInternal(
     if (cacheInfo.stateVersion > stateVersion && stateVersion != 1) {
         return SOFTBUS_OK;
     }
-    LNN_LOGI(
-        LNN_BUILDER, "update peer localStateVersion=%{public}d->%{public}d", cacheInfo.stateVersion, localStateVersion);
+    LNN_LOGI(LNN_BUILDER, "update peer stateVersion=%{public}d->%{public}d, localStateVersion=%{public}d->%{public}d",
+        cacheInfo.stateVersion, stateVersion, cacheInfo.localStateVersion, localStateVersion);
     cacheInfo.stateVersion = stateVersion;
     UpdateInfoToLedger(&cacheInfo, deviceUdid, fieldName, trueValue);
     cacheInfo.localStateVersion = localStateVersion;
@@ -782,7 +790,7 @@ static int32_t HandleDBDeleteChangeInternal(const char *key, const char *value)
 
     LnnDeleteDeviceInfo(deviceUdid);
     LnnRemoveNode(deviceUdid);
-    LNN_LOGI(LNN_BUILDER, "HandleDBDeleteChangeInternal success");
+    LNN_LOGI(LNN_BUILDER, "success");
     return SOFTBUS_OK;
 }
 
@@ -826,7 +834,7 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
 
     FreeKeyAndValue(key, value, keySize);
     (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
-    LNN_LOGI(LNN_BUILDER, "LnnDBDataAddChangeSyncToCache success. stateVersion=%{public}d", cacheInfo.stateVersion);
+    LNN_LOGI(LNN_BUILDER, "success. stateVersion=%{public}d", cacheInfo.stateVersion);
     if (LnnUpdateDistributedNodeInfo(&cacheInfo, cacheInfo.deviceInfo.deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:Cache info add sync to Ledger fail");
         return SOFTBUS_ERR;
@@ -860,7 +868,7 @@ int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeTyp
             LNN_LOGE(LNN_BUILDER, "changeType is invalid");
             return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGI(LNN_BUILDER, "LnnDBDataChangeSyncToCache success.");
+    LNN_LOGI(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
 }
 
@@ -894,7 +902,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
     int32_t dbId = g_dbId;
     int32_t ret = LnnPutDBData(dbId, putKey, strlen(putKey), putValue, strlen(putValue));
     if (ret != 0) {
-        LNN_LOGE(LNN_BUILDER, "fail:data sync to DB fail, errorcode: %{public}d", ret);
+        LNN_LOGE(LNN_BUILDER, "fail:data sync to DB fail, errorcode=%{public}d", ret);
         return ret;
     }
     LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success. stateVersion=%{public}d", key,
@@ -902,7 +910,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
 
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:data change cloud sync fail, errorcode:%{public}d", ret);
+        LNN_LOGE(LNN_BUILDER, "fail:data change cloud sync fail, errorcode=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -928,18 +936,16 @@ int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
         LNN_LOGE(LNN_BUILDER, "get broadcastcipherinfo fail");
         return SOFTBUS_ERR;
     }
-
     int32_t dbId = g_dbId;
     int32_t ret = LnnPutDBDataBatch(dbId, &syncInfo);
     if (ret != 0) {
-        LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode:%{public}d", ret);
+        LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode=%{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "LnnLedgerAllDataSyncToDB success. stateVersion=%{public}d", syncInfo.stateVersion);
-
+    LNN_LOGI(LNN_BUILDER, "success. stateVersion=%{public}d", syncInfo.stateVersion);
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:data batch cloud sync fail, errorcode:%{public}d", ret);
+        LNN_LOGE(LNN_BUILDER, "fail:data batch cloud sync fail, errorcode=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -964,10 +970,10 @@ int32_t LnnDeleteSyncToDB(void)
         LNN_LOGE(LNN_BUILDER, "fail:data delete sync to DB fail");
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "LnnDeleteSyncToDB success.");
+    LNN_LOGI(LNN_BUILDER, "success.");
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:data delete cloud sync fail, errorcode:%{public}d", ret);
+        LNN_LOGE(LNN_BUILDER, "fail:data delete cloud sync fail, errorcode=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -975,7 +981,7 @@ int32_t LnnDeleteSyncToDB(void)
 
 void LnnInitCloudSyncModule(void)
 {
-    LNN_LOGI(LNN_BUILDER, "LnnInitCloudSyncModule enter.");
+    LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = 0;
     if (LnnCreateKvAdapter(&dbId, APPID, strlen(APPID), STOREID, strlen(STOREID)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Lnn Init Cloud Sync Module fail");
@@ -986,7 +992,7 @@ void LnnInitCloudSyncModule(void)
 
 void LnnDeInitCloudSyncModule(void)
 {
-    LNN_LOGI(LNN_BUILDER, "LnnDeInitCloudSyncModule enter.");
+    LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = g_dbId;
     if (LnnDestroyKvAdapter(dbId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "DeInit Cloud Sync module fail");

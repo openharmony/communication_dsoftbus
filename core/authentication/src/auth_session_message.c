@@ -1031,36 +1031,43 @@ static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
     }
 }
 
+
+static int32_t UnpackWifiInfoFromJsonObj(JsonObj *obj, AuthSessionInfo *info)
+{
+    char cmd[CMD_TAG_LEN] = {0};
+    if (!JSON_GetStringFromOject(obj, CMD_TAG, cmd, CMD_TAG_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "CMD_TAG not found");
+        return SOFTBUS_NOT_FIND;
+    }
+    if (!UnpackWifiSinglePassInfo(obj, info)) {
+        AUTH_LOGE(AUTH_FSM, "check ip fail, can't support auth");
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isServer) {
+        if (strncmp(cmd, CMD_GET_AUTH_INFO, strlen(CMD_GET_AUTH_INFO)) != 0) {
+            AUTH_LOGE(AUTH_FSM, "CMD_GET not match");
+            return SOFTBUS_INVALID_PARAM;
+        }
+    } else {
+        if (strncmp(cmd, CMD_RET_AUTH_INFO, strlen(CMD_RET_AUTH_INFO)) != 0) {
+            AUTH_LOGE(AUTH_FSM, "CMD_RET not match");
+            return SOFTBUS_INVALID_PARAM;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
 {
     JsonObj *obj = JSON_Parse(msg, len);
     if (obj == NULL) {
         AUTH_LOGE(AUTH_FSM, "json parse fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    char cmd[CMD_TAG_LEN] = {0};
-    if (!JSON_GetStringFromOject(obj, CMD_TAG, cmd, CMD_TAG_LEN)) {
-        AUTH_LOGE(AUTH_FSM, "CMD_TAG not found");
+    int32_t ret = UnpackWifiInfoFromJsonObj(obj, info);
+    if (ret != SOFTBUS_OK) {
         JSON_Delete(obj);
-        return SOFTBUS_ERR;
-    }
-    if (!UnpackWifiSinglePassInfo(obj, info)) {
-        AUTH_LOGE(AUTH_FSM, "check ip fail, can't support auth");
-        JSON_Delete(obj);
-        return SOFTBUS_ERR;
-    }
-    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isServer) {
-        if (strncmp(cmd, CMD_GET_AUTH_INFO, strlen(CMD_GET_AUTH_INFO)) != 0) {
-            AUTH_LOGE(AUTH_FSM, "CMD_GET not match");
-            JSON_Delete(obj);
-            return SOFTBUS_ERR;
-        }
-    } else {
-        if (strncmp(cmd, CMD_RET_AUTH_INFO, strlen(CMD_RET_AUTH_INFO)) != 0) {
-            AUTH_LOGE(AUTH_FSM, "CMD_RET not match");
-            JSON_Delete(obj);
-            return SOFTBUS_ERR;
-        }
+        return ret;
     }
     if (!JSON_GetStringFromOject(obj, DATA_TAG, info->uuid, UUID_BUF_LEN)) {
         AUTH_LOGE(AUTH_FSM, "uuid not found");
