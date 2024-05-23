@@ -107,6 +107,24 @@ static int32_t UpdateBleConnectionStateInOrder(
     return SOFTBUS_OK;
 }
 
+static int32_t SetConnectionHandle(ConnBleConnection *connection, int32_t underlayerHandle)
+{
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "client connection lock failed, connectionId=%{public}u, err=%{public}d",
+            connection->connectionId, ret);
+        (void)SoftbusGattcUnRegister(underlayerHandle);
+        return SOFTBUS_LOCK_ERR;
+    }
+    connection->underlayerHandle = underlayerHandle;
+    connection->state = BLE_CONNECTION_STATE_CONNECTING;
+    (void)SoftBusMutexUnlock(&connection->lock);
+    CONN_LOGI(CONN_BLE,
+        "ble client connect. connectionId=%{public}u, handle=%{public}d, fastestConnectEnable=%{public}d",
+        connection->connectionId, underlayerHandle, connection->fastestConnectEnable);
+    return SOFTBUS_OK;
+}
+
 int32_t ConnGattClientConnect(ConnBleConnection *connection)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
@@ -121,8 +139,8 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
         CONN_BLE, "ble client connect failed: underlayer register failed, underlayerHandle=%{public}d",
         underlayerHandle);
     status = SoftbusGattcRegisterCallback(&g_gattcCallback, underlayerHandle);
-    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_BLE, "client connect %{public}u failed: convert "
-        "string mac to binary fail, err=%{public}d", connection->connectionId, status);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_BLE, "client connect %{public}u failed:register "
+        "callback fail, err=%{public}d", connection->connectionId, status);
     bool setFastestConn = true;
     if (connection->fastestConnectEnable && SoftbusGattcSetFastestConn(underlayerHandle) != SOFTBUS_OK) {
         setFastestConn = false;
@@ -144,7 +162,6 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
                 connection->connectionId, underlayerHandle, status);
         }
     }
-
     status = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "client connect failed: underlayer connect failed, connectionId=%{public}u, err=%{public}d",
@@ -153,21 +170,7 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
         return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR;
     }
 
-    status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(
-            CONN_BLE, "client connection lock failed, connectionId=%{public}u, err=%{public}d",
-            connection->connectionId, status);
-        (void)SoftbusGattcUnRegister(underlayerHandle);
-        return SOFTBUS_LOCK_ERR;
-    }
-    connection->underlayerHandle = underlayerHandle;
-    connection->state = BLE_CONNECTION_STATE_CONNECTING;
-    (void)SoftBusMutexUnlock(&connection->lock);
-    CONN_LOGI(CONN_BLE,
-        "ble client connect. connectionId=%{public}u, handle=%{public}d, fastestConnectEnable=%{public}d",
-        connection->connectionId, underlayerHandle, connection->fastestConnectEnable);
-    return SOFTBUS_OK;
+    return SetConnectionHandle(connection, underlayerHandle);
 }
 
 static void BleGattcConnStateCallback(int32_t underlayerHandle, int32_t state, int32_t status)
@@ -302,8 +305,7 @@ static int32_t RetrySearchService(ConnBleConnection *connection, enum RetrySearc
 
     if (state >= BLE_CONNECTION_STATE_NET_NOTIFICATED ||
         retrySearchServiceCnt > BLE_CLIENT_MAX_RETRY_SEARCH_SERVICE_TIMES) {
-        CONN_LOGW(CONN_BLE,
-            "retry search service just ignore. "
+        CONN_LOGW(CONN_BLE, "retry search service just ignore. "
             "state=%{public}d, count=%{public}d, connId=%{public}u, handle=%{public}d, reason=%{public}d",
             state, retrySearchServiceCnt, connection->connectionId, underlayerHandle, reason);
         return SOFTBUS_ERR;
@@ -311,28 +313,24 @@ static int32_t RetrySearchService(ConnBleConnection *connection, enum RetrySearc
 
     status = SoftbusGattcRefreshServices(underlayerHandle);
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BLE,
-            "fresh service failed, connId=%{public}u, handle=%{public}d, reason=%{public}d, err=%{public}d",
-            connection->connectionId, underlayerHandle, reason, status);
+        CONN_LOGW(CONN_BLE, "fresh service failed, connId=%{public}u, handle=%{public}d, reason=%{public}d, "
+            "err=%{public}d", connection->connectionId, underlayerHandle, reason, status);
         return status;
     }
     status = SoftbusGattcSearchServices(underlayerHandle);
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BLE,
-            "search service failed, connId=%{public}u, handle=%{public}d, reason=%{public}d, err=%{public}d",
-            connection->connectionId, underlayerHandle, reason, status);
+        CONN_LOGW(CONN_BLE, "search service failed, connId=%{public}u, handle=%{public}d, reason=%{public}d, "
+            "err=%{public}d", connection->connectionId, underlayerHandle, reason, status);
         return status;
     }
     status = UpdateBleConnectionStateInOrder(
         connection, BLE_CONNECTION_STATE_CONNECTED, BLE_CONNECTION_STATE_SERVICE_SEARCHING);
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BLE,
-            "retry search service failed: update connection state failed, connId=%{public}u, "
-            "underlayerHandle=%{public}d, reason=%{public}d, error=%{public}d",
-            connection->connectionId, underlayerHandle, reason, status);
+        CONN_LOGW(CONN_BLE, " update connection state failed, connId=%{public}u, underlayerHandle=%{public}d, "
+            "reason=%{public}d, error=%{public}d", connection->connectionId, underlayerHandle, reason, status);
         return status;
     }
-    CONN_LOGW(CONN_BLE, "retry search service, connId=%{public}u, handle=%{public}d, reason=%{public}d",
+    CONN_LOGW(CONN_BLE, "connId=%{public}u, handle=%{public}d, reason=%{public}d",
         connection->connectionId, underlayerHandle, reason);
     return SOFTBUS_OK;
 }
@@ -358,6 +356,53 @@ static void BleGattcSearchServiceCallback(int32_t underlayerHandle, int32_t stat
     }
 }
 
+static int32_t GattcGetServiceAndRegisterNotification(ConnBleConnection *connection, const CommonStatusContext *ctx)
+{
+    SoftBusBtUuid serviceUuid = {
+        .uuid = (char *)SOFTBUS_SERVICE_UUID,
+        .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
+    };
+    int32_t rc = SoftbusGattcGetService(ctx->underlayerHandle, &serviceUuid);
+    if (rc != SOFTBUS_OK) {
+        CONN_LOGW(CONN_BLE, "underlay get service failed, connId=%{public}u, handle=%{public}d, error=%{public}d",
+            connection->connectionId, ctx->underlayerHandle, rc);
+        if (RetrySearchService(connection, BLE_CLIENT_GET_SERVICE_ERR) == SOFTBUS_OK) {
+            rc = SOFTBUS_OK;
+        } else {
+            rc = SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_GET_SERVICE_ERR;
+        }
+        return rc;
+    }
+    SoftBusBtUuid connCharacteristicUuid = {
+        .uuid = (char *)SOFTBUS_CHARA_BLECONN_UUID,
+        .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
+    };
+    SoftBusBtUuid descriptorUuid = {
+        .uuid = (char *)SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
+        .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
+    };
+    rc = SoftbusGattcRegisterNotification(
+        ctx->underlayerHandle, &serviceUuid, &connCharacteristicUuid, &descriptorUuid);
+    if (rc != SOFTBUS_OK) {
+        CONN_LOGW(CONN_BLE, "underlay register conn characteristic notification failed, connId=%{public}u, "
+            "handle=%{public}d, err=%{public}d", connection->connectionId, ctx->underlayerHandle, rc);
+        if (RetrySearchService(connection, BLE_CLIENT_REGISTER_NOTIFICATION_ERR) == SOFTBUS_OK) {
+            rc = SOFTBUS_OK;
+        } else {
+            rc = SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_REGISTER_NOTIFICATION_ERR;
+        }
+        return rc;
+    }
+    rc = UpdateBleConnectionStateInOrder(
+        connection, BLE_CONNECTION_STATE_SERVICE_SEARCHED, BLE_CONNECTION_STATE_CONN_NOTIFICATING);
+    if (rc != SOFTBUS_OK) {
+        CONN_LOGW(CONN_BLE, "update connection state failed, connId=%{public}u, handle=%{public}d, err=%{public}d",
+            connection->connectionId, ctx->underlayerHandle, rc);
+        return rc;
+    }
+    return SOFTBUS_OK;
+}
+
 static void SearchedMsgHandler(const CommonStatusContext *ctx)
 {
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(ctx->underlayerHandle, CONN_SIDE_CLIENT, BLE_GATT);
@@ -381,50 +426,7 @@ static void SearchedMsgHandler(const CommonStatusContext *ctx)
                 connection->connectionId, ctx->underlayerHandle, rc);
             break;
         }
-        SoftBusBtUuid serviceUuid = {
-            .uuid = (char *)SOFTBUS_SERVICE_UUID,
-            .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
-        };
-        rc = SoftbusGattcGetService(ctx->underlayerHandle, &serviceUuid);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGW(CONN_BLE, "underlay get service failed, connId=%{public}u, handle=%{public}d, error=%{public}d",
-                connection->connectionId, ctx->underlayerHandle, rc);
-            if (RetrySearchService(connection, BLE_CLIENT_GET_SERVICE_ERR) == SOFTBUS_OK) {
-                rc = SOFTBUS_OK;
-            } else {
-                rc = SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_GET_SERVICE_ERR;
-            }
-            break;
-        }
-        SoftBusBtUuid connCharacteristicUuid = {
-            .uuid = (char *)SOFTBUS_CHARA_BLECONN_UUID,
-            .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
-        };
-        SoftBusBtUuid descriptorUuid = {
-            .uuid = (char *)SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
-            .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
-        };
-        rc = SoftbusGattcRegisterNotification(
-            ctx->underlayerHandle, &serviceUuid, &connCharacteristicUuid, &descriptorUuid);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGW(CONN_BLE,
-                "underlay register conn characteristic notification failed, connId=%{public}u, handle=%{public}d, "
-                "err=%{public}d",
-                connection->connectionId, ctx->underlayerHandle, rc);
-            if (RetrySearchService(connection, BLE_CLIENT_REGISTER_NOTIFICATION_ERR) == SOFTBUS_OK) {
-                rc = SOFTBUS_OK;
-            } else {
-                rc = SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_REGISTER_NOTIFICATION_ERR;
-            }
-            break;
-        }
-        rc = UpdateBleConnectionStateInOrder(
-            connection, BLE_CONNECTION_STATE_SERVICE_SEARCHED, BLE_CONNECTION_STATE_CONN_NOTIFICATING);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGW(CONN_BLE, "update connection state failed, connId=%{public}u, handle=%{public}d, err=%{public}d",
-                connection->connectionId, ctx->underlayerHandle, rc);
-            break;
-        }
+        rc = GattcGetServiceAndRegisterNotification(connection, ctx);
     } while (false);
 
     if (rc != SOFTBUS_OK) {
