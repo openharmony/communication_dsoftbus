@@ -17,7 +17,10 @@
 #include <cstring>
 #include "lnn_kv_adapter_wrapper.h"
 #include "lnn_log.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_utils.h"
+#include "lnn_node_info.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_kv_data_change_listener.h"
 #include "lnn_device_info_recovery.h"
@@ -295,32 +298,50 @@ void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::str
     std::string keyPrefix = std::to_string(localInfo->accountId) + SEPARATOR + localInfo->deviceUdid + SEPARATOR;
     std::string stateVersionStr = SEPARATOR + std::to_string(localInfo->stateVersion);
 
-    char peerIrkStr[LFINDER_IRK_LEN];
-    for (int32_t i = 0; i < LFINDER_IRK_LEN; i++) {
-        peerIrkStr[i] = static_cast<char>(localInfo->peerIrk[i]);
+    char remotePtkStr[PTK_DEFAULT_LEN + 1] = {0};
+    for (int32_t i = 0; i < PTK_DEFAULT_LEN; i++) {
+        remotePtkStr[i] = static_cast<char>(localInfo->remotePtk[i]);
     }
-    values[keyPrefix + DEVICE_INFO_DEVICE_IRK] = peerIrkStr + stateVersionStr;
-    char publicAddressStr[LFINDER_MAC_ADDR_LEN];
-    for (int32_t i = 0; i < LFINDER_MAC_ADDR_LEN; i++) {
-        publicAddressStr[i] = static_cast<char>(localInfo->publicAddress[i]);
-    }
-    values[keyPrefix + DEVICE_INFO_DEVICE_PUB_MAC] = publicAddressStr + stateVersionStr;
-    values[keyPrefix + DEVICE_INFO_PTK] = localInfo->remotePtk + stateVersionStr;
+    values[keyPrefix + DEVICE_INFO_PTK] = remotePtkStr + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_TABLE_MIAN] = localInfo->tableMain + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_TOTAL_LIFE] = std::to_string(localInfo->lifeTotal) + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_TIMESTAMP_BEGIN] = std::to_string(localInfo->curBeginTime) +
         stateVersionStr;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_CURRENT_INDEX] = std::to_string(localInfo->currentIndex) + stateVersionStr;
-    char cipherKeyStr[SESSION_KEY_LENGTH];
-    for (int32_t i = 0; i < SESSION_KEY_LENGTH; i++) {
-        cipherKeyStr[i] = static_cast<char>(localInfo->cipherKey[i]);
-    }
-    values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_KEY] = cipherKeyStr + stateVersionStr;
-    char cipherIvStr[BROADCAST_IV_LEN];
-    for (int32_t i = 0; i < BROADCAST_IV_LEN; i++) {
-        cipherIvStr[i] = static_cast<char>(localInfo->cipherIv[i]);
-    }
-    values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_IV] = cipherIvStr + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_DISTRIBUTED_SWITCH] = (localInfo->distributedSwitch ? "true" : "false") +
         stateVersionStr;
+
+    char cipherKey[SESSION_KEY_STR_LEN] = {0};
+    char cipherIv[BROADCAST_IV_STR_LEN] = {0};
+    char peerIrk[LFINDER_IRK_STR_LEN] = {0};
+    char pubMac[LFINDER_MAC_ADDR_STR_LEN] = {0};
+
+    if (ConvertBytesToHexString(cipherKey, SESSION_KEY_STR_LEN,
+        localInfo->cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert cipherkey to string fail.");
+        return;
+    }
+
+    if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN,
+        localInfo->cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert cipheriv to string fail.");
+        return;
+    }
+
+    if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN,
+        localInfo->peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert peerIrk to string fail.");
+        return;
+    }
+
+    if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN,
+        localInfo->publicAddress, LFINDER_MAC_ADDR_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert publicAddress to string fail.");
+        return;
+    }
+
+    values[keyPrefix + DEVICE_INFO_DEVICE_IRK] = peerIrk + stateVersionStr;
+    values[keyPrefix + DEVICE_INFO_DEVICE_PUB_MAC] = pubMac + stateVersionStr;
+    values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_KEY] = cipherKey + stateVersionStr;
+    values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_IV] = cipherIv + stateVersionStr;
 }
