@@ -404,10 +404,7 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
     bool isServer = false;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get session callback failed");
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get session callback failed");
     (void)ClientResetIdleTimeoutById(sessionId);
     ISocketListener *listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
     switch (type) {

@@ -202,9 +202,7 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
         return SOFTBUS_INVALID_PARAM;
     }
     TransLaneInfo *newLane = (TransLaneInfo *)SoftBusCalloc(sizeof(TransLaneInfo));
-    if (newLane == NULL) {
-        return SOFTBUS_MALLOC_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(newLane != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "calloc laneInfo failed.");
     newLane->channelId = channelId;
     newLane->channelType = channelType;
     newLane->laneHandle = laneHandle;
