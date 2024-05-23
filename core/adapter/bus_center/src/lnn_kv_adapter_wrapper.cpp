@@ -311,35 +311,29 @@ void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::str
     values[keyPrefix + DEVICE_INFO_DISTRIBUTED_SWITCH] = (localInfo->distributedSwitch ? "true" : "false") +
         stateVersionStr;
 
-    char cipherKey[SESSION_KEY_STR_LEN] = {0};
-    char cipherIv[BROADCAST_IV_STR_LEN] = {0};
-    char peerIrk[LFINDER_IRK_STR_LEN] = {0};
-    char pubMac[LFINDER_MAC_ADDR_STR_LEN] = {0};
+    char cipherKey[SESSION_KEY_STR_LEN] = { 0 };
+    char cipherIv[BROADCAST_IV_STR_LEN] = { 0 };
+    char peerIrk[LFINDER_IRK_STR_LEN] = { 0 };
+    char pubMac[LFINDER_MAC_ADDR_STR_LEN] = { 0 };
 
-    if (ConvertBytesToHexString(cipherKey, SESSION_KEY_STR_LEN,
-        localInfo->cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+    if (ConvertBytesToHexString(cipherKey, SESSION_KEY_STR_LEN, localInfo->cipherKey, SESSION_KEY_LENGTH) !=
+        SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipherkey to string fail.");
         return;
     }
-
-    if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN,
-        localInfo->cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+    if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN, localInfo->cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipheriv to string fail.");
         return;
     }
-
-    if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN,
-        localInfo->peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+    if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN, localInfo->peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert peerIrk to string fail.");
         return;
     }
-
-    if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN,
-        localInfo->publicAddress, LFINDER_MAC_ADDR_LEN) != SOFTBUS_OK) {
+    if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN, localInfo->publicAddress, LFINDER_MAC_ADDR_LEN) !=
+        SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert publicAddress to string fail.");
         return;
     }
-
     values[keyPrefix + DEVICE_INFO_DEVICE_IRK] = peerIrk + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_DEVICE_PUB_MAC] = pubMac + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_KEY] = cipherKey + stateVersionStr;
