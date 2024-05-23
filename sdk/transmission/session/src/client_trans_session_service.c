@@ -351,7 +351,7 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
     }
     cJSON_Delete(obj);
     TRANS_LOGE(TRANS_SDK, "addr convert fail");
-    return SOFTBUS_ERR;
+    return SOFTBUS_PARSE_JSON_ERR;
 }
 
 static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)

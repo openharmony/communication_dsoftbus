@@ -481,7 +481,7 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
             LnnUpdateOhosAccount(false);
             LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
-                HbTryCloudSync() == SOFTBUS_OK ? HB_START_DELAY_LEN : 0);
+                HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
@@ -1011,10 +1011,20 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler);
 }
 
-int32_t LnnTriggerDataLevelHeartBeat()
+int32_t LnnTriggerDataLevelHeartbeat(void)
 {
-    LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDataLevelHeartBeat");
+    LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDataLevelHeartbeat");
     if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V1, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnTriggerCloudSyncHeartbeat(void)
+{
+    LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerCloudSyncHeartbeat");
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
         return SOFTBUS_ERR;
     }
@@ -1026,7 +1036,7 @@ void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
     LnnBleHbRegDataLevelChangeCb(callback);
 }
 
-void LnnUnregDataLevelChangeCb()
+void LnnUnregDataLevelChangeCb(void)
 {
     LnnBleHbUnregDataLevelChangeCb();
 }

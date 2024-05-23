@@ -923,7 +923,7 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
     }
     AnonymizeFree(anonyNetworkId);
     if (LnnIsLocalSupportBurstFeature()) {
-        LNN_LOGI(LNN_HEART_BEAT, "local device support sh, no need offline");
+        LNN_LOGI(LNN_HEART_BEAT, "local device support lp, no need offline");
         return;
     }
     if (LnnRequestLeaveSpecific(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {

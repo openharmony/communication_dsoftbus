@@ -887,10 +887,7 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     Anonymize(authFsm->info.udid, &anonyUdid);
     AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s", anonyUdid);
     AnonymizeFree(anonyUdid);
-    if (HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid) != SOFTBUS_OK) {
-        return SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
-    }
-    return SOFTBUS_OK;
+    return HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid);
 }
 
 static void DeviceAuthStateEnter(FsmStateMachine *fsm)

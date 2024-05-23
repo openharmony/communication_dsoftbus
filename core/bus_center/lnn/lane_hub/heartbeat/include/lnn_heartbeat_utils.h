@@ -34,6 +34,7 @@ extern "C" {
 
 #define HB_TIME_FACTOR                  (1000LL)
 #define HB_START_DELAY_LEN              (10 * HB_TIME_FACTOR)
+#define HB_CLOUD_SYNC_DELAY_LEN         (20 * HB_TIME_FACTOR)
 #define HB_SEND_ONCE_LEN                (10 * HB_TIME_FACTOR)
 #define HB_SEND_RELAY_LEN               (2 * HB_TIME_FACTOR)
 #define HB_CHECK_DELAY_LEN              HB_SEND_ONCE_LEN
@@ -60,7 +61,7 @@ extern "C" {
 #define HEARTBEAT_TYPE_BLE_V1    (0x1L << 2)
 #define HEARTBEAT_TYPE_TCP_FLUSH (0x1L << 3)
 #define HEARTBEAT_TYPE_BLE_V3    (0x1L << 4)
-#define HEARTBEAT_TYPE_BLE_V4    (0x1L << 5) // for heartbeat to sh
+#define HEARTBEAT_TYPE_BLE_V4    (0x1L << 5) // for heartbeat to lowpower
 #define HEARTBEAT_TYPE_MAX       (0x1L << 6)
 
 #define NORMAL_STRATEGY               1

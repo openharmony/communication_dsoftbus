@@ -90,13 +90,13 @@ static ScenarioManager *g_manager = NULL;
 
 
 static void NotifyWifi(const char *ifName, const char *localMac,
-    const char *peerMac, int finalType, int businessType)
+    const char *peerMac, uint32_t finalType, int32_t businessType)
 {
     (void)peerMac;
     TRANS_LOGI(TRANS_CTRL,
-        "ifName=%{public}s, finalType=%{public}d, businessType=%{public}d",
+        "ifName=%{public}s, finalType=%{public}u, businessType=%{public}d",
         ifName, finalType, businessType);
-    Hid2dUpperScene *scene =  NULL;
+    Hid2dUpperScene *scene = NULL;
     scene = (Hid2dUpperScene *)SoftBusCalloc(sizeof(Hid2dUpperScene));
     if (scene == NULL) {
         TRANS_LOGE(TRANS_CTRL, "error, out of memory");
@@ -107,7 +107,7 @@ static void NotifyWifi(const char *ifName, const char *localMac,
         SoftBusFree(scene);
         return;
     }
-    scene->scene = (int32_t)finalType;
+    scene->scene = finalType;
     if (businessType != SM_VIDEO_TYPE) {
         scene->fps = -1;
     }

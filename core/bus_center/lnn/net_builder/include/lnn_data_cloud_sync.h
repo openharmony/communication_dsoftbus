@@ -17,12 +17,15 @@
 #define LNN_DATA_CLOUD_SYNC_H
 
 #include <stdint.h>
+
 #include "lnn_node_info.h"
 #include "softbus_adapter_crypto.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define CLOUD_SYNC_INFO_SIZE 33
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];

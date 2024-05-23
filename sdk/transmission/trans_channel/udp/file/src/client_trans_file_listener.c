@@ -46,7 +46,7 @@ void TransFileDeinit(void)
     if (g_fileListener == NULL) {
         return;
     }
-    if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_fileListener->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "file listener deinit lock failed");
         return;
     }
@@ -68,7 +68,7 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
         TRANS_LOGE(TRANS_INIT, "file listener hasn't init.");
         return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
     }
-    if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_fileListener->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "file receive listener lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -119,7 +119,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
         TRANS_LOGE(TRANS_FILE, "file listener hasn't init.");
         return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
     }
-    if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_fileListener->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "file send listener lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -198,7 +198,7 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
         TRANS_LOGE(TRANS_FILE, "file listener hasn't init.");
         return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
     }
-    if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_fileListener->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "file delete lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -243,7 +243,7 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
         TRANS_LOGE(TRANS_FILE, "file listener hasn't init.");
         return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
     }
-    if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_fileListener->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "file get listener lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -274,7 +274,7 @@ void TransDeleteFileListener(const char *sessionName)
         TRANS_LOGE(TRANS_FILE, "file listener hasn't init.");
         return;
     }
-    if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_fileListener->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "file delete lock failed");
         return;
     }

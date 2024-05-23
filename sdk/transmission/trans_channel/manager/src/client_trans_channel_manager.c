@@ -28,30 +28,22 @@
 int32_t ClientTransChannelInit(void)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
-    if (cb == NULL) {
-        TRANS_LOGE(TRANS_SDK, "get client session Cb failed.");
-        return SOFTBUS_ERR;
-    }
-    if (TransTdcManagerInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "trans tcp manager init failed.");
-        return SOFTBUS_ERR;
-    }
-    if (ClientTransAuthInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client trans auth init failed.");
-        return SOFTBUS_ERR;
-    }
-    if (ClientTransStatisticsInit() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client trans statistics init failed.");
-        return SOFTBUS_ERR;
-    }
-    if (ClientTransProxyInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client trans proxy init failed.");
-        return SOFTBUS_ERR;
-    }
-    if (ClientTransUdpMgrInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client trans udp mgr init failed.");
-        return SOFTBUS_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_NO_INIT, TRANS_SDK, "get client session Cb failed.");
+
+    int32_t ret = TransTdcManagerInit(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "trans tcp manager init failed.");
+
+    ret = ClientTransAuthInit(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "client trans auth init failed.");
+
+    ret = ClientTransStatisticsInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "client trans statistics init failed.");
+
+    ret = ClientTransProxyInit(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "client trans proxy init failed.");
+
+    ret = ClientTransUdpMgrInit(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "client trans udp mgr init failed.");
     return SOFTBUS_OK;
 }
 

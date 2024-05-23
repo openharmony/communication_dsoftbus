@@ -97,7 +97,7 @@ bool SchedulerIsLpDeviceAvailable(void)
     return BroadcastIsLpDeviceAvailable();
 }
 
-bool SchedulerSetAdvDeviceParam(SensorHubServerType type, const LpBroadcastParam *bcParam,
+bool SchedulerSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
     const LpScanParam *scanParam)
 {
     return BroadcastSetAdvDeviceParam(type, bcParam, scanParam);
