@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#define CLOUD_SYNC_INFO_SIZE 33
+
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     char deviceName[DEVICE_NAME_BUF_LEN];
