@@ -1604,7 +1604,6 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
     if (ConvertBytesToHexString(value, SESSION_KEY_STR_LEN,
         g_localNetLedger.localInfo.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipher key to string fail.");
-        (void)memset_s(value, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_KEY, value, strlen(value)) != SOFTBUS_OK) {
@@ -1633,7 +1632,6 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     if (ConvertBytesToHexString(value, BROADCAST_IV_STR_LEN,
         g_localNetLedger.localInfo.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipher iv to string fail.");
-        (void)memset_s(value, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_IV, value, strlen(value)) != SOFTBUS_OK) {
