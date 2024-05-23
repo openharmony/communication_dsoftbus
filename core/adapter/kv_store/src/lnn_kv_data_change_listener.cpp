@@ -146,7 +146,8 @@ void KvDataChangeListener::HandleDeleteChange(const std::vector<DistributedKv::E
     }
 }
 
-void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Entry>& records) {
+void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Entry>& records)
+{
     LNN_LOGI(LNN_LEDGER, "call! recordsSize=%{public}zu", records.size());
     auto innerRecords(records);
     while (!innerRecords.empty()) {
@@ -171,7 +172,8 @@ void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Ent
     }
 }
 
-std::string KvDataChangeListener::GetKeyPrefix(const std::string& key) {
+std::string KvDataChangeListener::GetKeyPrefix(const std::string& key)
+{
     std::size_t pos1 = key.find('#');
     if (pos1 == std::string::npos) {
         return "";
