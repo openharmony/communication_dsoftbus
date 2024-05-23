@@ -437,10 +437,7 @@ static void SendVerifyP2pFailRsp(AuthHandle authHandle, int64_t seq,
     int32_t code, int32_t errCode, const char *errDesc, bool isAuthLink)
 {
     char *reply = VerifyP2pPackError(code, errCode, errDesc);
-    if (reply == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "verify p2ppack error");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(reply != NULL, TRANS_CTRL, "verifyP2p pack error");
     if (isAuthLink) {
         if (SendAuthData(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, reply) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "send auth data fail");
@@ -478,13 +475,10 @@ static int32_t SendVerifyP2pRsp(AuthHandle authHandle, int32_t module, int32_t f
         }
     } else {
         uint32_t strLen = strlen(reply) + 1;
-        char *sendMsg = (char*)SoftBusCalloc(strLen + sizeof(int64_t) + sizeof(int64_t));
-        if (sendMsg == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "softbuscalloc fail");
-            return SOFTBUS_MALLOC_ERR;
-        }
-        *(int64_t*)sendMsg = P2P_VERIFY_REPLY;
-        *(int64_t*)(sendMsg + sizeof(int64_t)) = seq;
+        char *sendMsg = (char *)SoftBusCalloc(strLen + sizeof(int64_t) + sizeof(int64_t));
+        TRANS_CHECK_AND_RETURN_RET_LOGE(sendMsg != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc sendMsg failed");
+        *(int64_t *)sendMsg = P2P_VERIFY_REPLY;
+        *(int64_t *)(sendMsg + sizeof(int64_t)) = seq;
         if (strcpy_s(sendMsg  + sizeof(int64_t) + sizeof(int64_t), strLen, reply) != EOK) {
             SoftBusFree(sendMsg);
             return SOFTBUS_STRCPY_ERR;
