@@ -65,7 +65,7 @@ static int32_t GenerateUdpChannelId(void)
         TRANS_LOGE(TRANS_CTRL, "generate udp channel id lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-    for (uint32_t id = g_idMark + 1; id != g_idMark; id++) {
+    for (uint32_t id = g_idMark + 1, cnt = 0; id != g_idMark, cnt < MAX_UDP_CHANNEL_ID_COUNT; id++, cnt++) {
         id = id % MAX_UDP_CHANNEL_ID_COUNT;
         if (((g_channelIdFlagBitsMap >> id) & ID_USED) == ID_NOT_USED) {
             g_channelIdFlagBitsMap |= (ID_USED << id);
