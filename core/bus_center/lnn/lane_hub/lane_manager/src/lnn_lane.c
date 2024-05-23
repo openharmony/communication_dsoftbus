@@ -324,11 +324,11 @@ static int32_t LnnReAllocLane(uint32_t laneReqId, uint64_t laneId, const LaneAll
 {
     if (!AllocInfoCheck(allocInfo, listener)) {
         LNN_LOGE(LNN_LANE, "lane realloc info invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_laneObject[allocInfo->type] == NULL) {
         LNN_LOGE(LNN_LANE, "laneType is not supported. laneType=%{public}d", allocInfo->type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NOT_INIT;
     }
     LNN_LOGI(LNN_LANE, "realloc lane enter, laneReqId=%{public}u, laneId=%{public}" PRIu64 ", laneType=%{public}d, "
         "transType=%{public}d, minBW=%{public}u, maxLaneLatency=%{public}u, minLaneLatency=%{public}u",
@@ -339,7 +339,29 @@ static int32_t LnnReAllocLane(uint32_t laneReqId, uint64_t laneId, const LaneAll
     int32_t result = g_laneObject[allocInfo->type]->reallocLaneByQos(laneReqId, laneId, allocInfo, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "realloc lane fail, laneReqId=%{public}u, result=%{public}d", laneReqId, result);
-        return SOFTBUS_ERR;
+        return result;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnAllocTargetLane(uint32_t laneHandle, const LaneAllocInfoExt *allocInfo,
+    const LaneAllocListener *listener)
+{
+    if (allocInfo == NULL || listener == NULL || laneHandle == INVALID_LANE_REQ_ID) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (allocInfo->type != LANE_TYPE_TRANS) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LNN_LOGI(LNN_LANE, "targetLinkNum=%{public}u and first targetLinkType=%{public}d",
+        allocInfo->linkList.linkTypeNum, allocInfo->linkList.linkType[0]);
+    if (allocInfo->linkList.linkTypeNum >= LANE_LINK_TYPE_BUTT) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t result = g_laneObject[allocInfo->type]->allocTargetLane(laneHandle, allocInfo, listener);
+    if (result != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "alloc target lane fail, handle=%{public}u, result=%{public}d", laneHandle, result);
+        return result;
     }
     return SOFTBUS_OK;
 }
@@ -387,6 +409,7 @@ static LnnLaneManager g_LaneManager = {
     .lnnGetLaneHandle = ApplyLaneReqId,
     .lnnAllocLane = LnnAllocLane,
     .lnnReAllocLane = LnnReAllocLane,
+    .lnnAllocTargetLane = LnnAllocTargetLane,
     .lnnCancelLane = LnnCancelLane,
     .lnnFreeLane = LnnFreeLink,
     .registerLaneListener = RegisterLaneListener,
