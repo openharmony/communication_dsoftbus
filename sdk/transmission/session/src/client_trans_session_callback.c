@@ -285,11 +285,14 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
 
     int id = SetTimer("OnSessionOpened", DFX_TIMERS_S);
     if (sessionCallback.isSocketListener) {
-        return HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
+        ret = HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
+        CancelTimer(id);
+        return ret;
     }
     TRANS_LOGD(TRANS_SDK, "trigger session open callback");
     if ((sessionCallback.session.OnSessionOpened == NULL) ||
         (sessionCallback.session.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK)) {
+        CancelTimer(id);
         TRANS_LOGE(TRANS_SDK, "OnSessionOpened failed");
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_ERR;
