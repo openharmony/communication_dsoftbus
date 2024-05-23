@@ -193,15 +193,17 @@ static int32_t ConvertNodeInfoToCloudSyncInfo(CloudSyncInfo *cloudSyncInfo, cons
 
 static int32_t DBCipherInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const char *value, size_t valueLength)
 {
-    if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_KEY) == 0) {
-        if (memcpy_s((char *)cacheInfo->cipherInfo.key, SESSION_KEY_LENGTH, value, SESSION_KEY_LENGTH) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s cipherkey fail");
-            return SOFTBUS_MEM_ERR;
+    if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_KEY) == 0 && valueLength < SESSION_KEY_STR_LEN) {
+        if (ConvertHexStringToBytes((unsigned char *)cacheInfo->cipherInfo.key, SESSION_KEY_LENGTH, value,
+            valueLength) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "convert cipherkey to bytes fail. cipher info sync to cache fail");
+            return SOFTBUS_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_IV) == 0) {
-        if (memcpy_s((char *)cacheInfo->cipherInfo.iv, BROADCAST_IV_LEN, value, BROADCAST_IV_LEN) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s cipheriv fail");
-            return SOFTBUS_MEM_ERR;
+    } else if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_IV) == 0 && valueLength < BROADCAST_IV_STR_LEN) {
+        if (ConvertHexStringToBytes((unsigned char *)cacheInfo->cipherInfo.iv, SESSION_KEY_LENGTH, value,
+            valueLength) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "convert cipheriv to bytes fail. cipher info sync to cache fail");
+            return SOFTBUS_ERR;
         }
     } else if (strcmp(fieldName, DEVICE_INFO_JSON_KEY_TABLE_MIAN) == 0 && valueLength < BLE_BROADCAST_IV_LEN + 1) {
         LNN_LOGI(LNN_BUILDER, "cipher table mian info no need update into nodeinfo");
@@ -314,16 +316,17 @@ static int32_t DBConnectMacInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s p2pMac fail");
             return SOFTBUS_STRCPY_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_IRK) == 0) {
-        if (memcpy_s((char *)cacheInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, value, LFINDER_IRK_LEN) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s peerIrk fail");
-            return SOFTBUS_MEM_ERR;
+    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_IRK) == 0 && valueLength < LFINDER_IRK_STR_LEN) {
+        if (ConvertHexStringToBytes((unsigned char *)cacheInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, value,
+            valueLength) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "convert peerIrk to bytes fail. rpa info sync to cache fail");
+            return SOFTBUS_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_PUB_MAC) == 0) {
-        if (memcpy_s((char *)cacheInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, value, LFINDER_MAC_ADDR_LEN) !=
-            EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s publicAddress fail");
-            return SOFTBUS_MEM_ERR;
+    } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_PUB_MAC) == 0 && valueLength < LFINDER_MAC_ADDR_STR_LEN) {
+        if (ConvertHexStringToBytes((unsigned char *)cacheInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, value,
+            valueLength) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "convert publicAddress to bytes fail. rpa info sync to cache fail");
+            return SOFTBUS_ERR;
         }
     } else {
         LNN_LOGE(LNN_BUILDER, "fail:connect info %{public}s valuelength over range", fieldName);
