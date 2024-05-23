@@ -36,7 +36,7 @@
 #define TEST_FD 10
 #define COUNT 11
 #define PKG_LEN 32
-#define RECV_BUF "testrecvBuf"
+#define RECV_BUF "testABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
 #define BUF_LEN 10
 #define COUNT 11
 #define SESSIONKEY_LEN 32
@@ -507,7 +507,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest001, TestSize.Level0)
     uint32_t len = BUF_LEN;
     int flags = FLAG_ACK;
     int32_t ret = TransTdcProcessPostData(channel, data, len, flags);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
     SoftBusFree(channel);
 }
 
@@ -563,7 +563,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetPendingPacketTest001, TestSize.Level0)
     int32_t seqNum = 1;
     int type = 1;
     int32_t ret = TransTdcSetPendingPacket(channelId, data, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = PendingInit(type);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -600,7 +600,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendAckTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransTdcSendAck(channel, seq);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
     SoftBusFree(channel);
 }
 
@@ -704,13 +704,13 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
     info->fd = g_fd;
 
     int32_t ret = TransTdcProcessData(channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, ret);
     IClientSessionCallBack *cb = GetClientSessionCb();
     ret = TransTdcManagerInit(cb);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcProcessData(channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, ret);
 
     ret = TransDataListInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -876,7 +876,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataByFlagTest002, TestSize.Level0)
     EXPECT_NE(ret, SOFTBUS_OK);
 
     ret = TransTdcProcessDataByFlag(FILE_FIRST_FRAME, seqNum, channel, plain, (uint32_t)strlen(plain));
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     SoftBusFree(channel);
 }

@@ -920,6 +920,29 @@ static void OnDeviceNotTrusted(const char *peerUdid)
     AuthRemoveDeviceKeyByUdid(peerUdid);
 }
 
+void AuthDeviceNotTrust(const char *peerUdid)
+{
+    if (peerUdid == NULL || strlen(peerUdid) == 0) {
+        AUTH_LOGE(AUTH_HICHAIN, "invalid param");
+        return;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get networkId by udid fail");
+        return;
+    }
+    RemoveNotPassedAuthManagerByUdid(peerUdid);
+    AuthSessionHandleDeviceNotTrusted(peerUdid);
+    LnnDeleteSpecificTrustedDevInfo(peerUdid);
+    LnnHbOnTrustedRelationReduced();
+    AuthRemoveDeviceKeyByUdid(peerUdid);
+    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "request leave specific fail");
+    } else {
+        AUTH_LOGI(AUTH_HICHAIN, "request leave specific successful");
+    }
+}
+
 static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     if (g_groupChangeListener.onGroupCreated != NULL) {
@@ -1238,7 +1261,6 @@ bool IsNeedAuthLimit(const char *udidHash)
     uint64_t time = 0;
     uint64_t currentTime = 0;
     if (GetNodeFromAuthLimitMap(udidHash, &time) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "GetNodeFromAuthLimitMap fail");
         return false;
     }
     if (time == 0) {
@@ -1248,7 +1270,7 @@ bool IsNeedAuthLimit(const char *udidHash)
     currentTime = GetCurrentTimeMs();
     AUTH_LOGI(AUTH_FSM, "currentTime=%{public}" PRIu64 ", time=%{public}" PRIu64 "", currentTime, time);
     if (currentTime - time < DELAY_AUTH_TIME) {
-        AUTH_LOGE(AUTH_FSM, "lastest retcode authentication time less than 20s");
+        AUTH_LOGI(AUTH_FSM, "lastest retcode authentication time less than 20s");
         return true;
     }
     return false;
@@ -1785,6 +1807,7 @@ static void HandleConnectionData(
         ReleaseAuthLock();
         return;
     }
+    auth->hasAuthPassed = true;
     auth->lastActiveTime = GetCurrentTimeMs();
     auth->connId[type] = connId;
     AuthHandle authHandle = { .authId = authId, .type = GetConnType(connId) };

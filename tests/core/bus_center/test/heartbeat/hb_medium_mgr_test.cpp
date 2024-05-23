@@ -351,20 +351,20 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level
     EXPECT_CALL(ledgerMock, LnnConvertIdToDeviceType).WillRepeatedly(Return(const_cast<char *>(TYPE_PAD)));
     LnnGenerateHexStringHash(
         reinterpret_cast<const unsigned char *>(TEST_UDID_HASH), udidHash, HB_SHORT_UDID_HASH_HEX_LEN);
-    int32_t ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true);
+    int32_t ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
-    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true);
+    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     HbGetOnlineNodeByRecvInfo(udidHash, CONNECTION_ADDR_BR, &nodeInfo, &hbResp);
-    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true);
+    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = HbMediumMgrRecvHigherWeight(nullptr, TEST_WEIGHT, CONNECTION_ADDR_BR, true);
+    ret = HbMediumMgrRecvHigherWeight(nullptr, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     EXPECT_CALL(hbStrategyMock, LnnNotifyMasterElect).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, false);
+    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, false, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(50);
 }

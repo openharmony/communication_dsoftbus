@@ -134,6 +134,22 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     ++index;
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_STREQ(params[index].v.s, extra.firstTokenName);
+    ++index;
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_EQ(params[index].v.i32, extra.firstTokenId);
+    ++index;
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_EQ(params[index].v.i32, extra.firstTokenType);
+    ++index;
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_STREQ(params[index].v.s, extra.trafficStats);
+    ++index;
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
     EXPECT_EQ(params[index].v.i32, extra.osType);
 
     EXPECT_EQ(++index, validSize);
@@ -153,6 +169,11 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
     EXPECT_EQ(params[index].v.i32, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
+    ++index;
+    int32_t num = 25;
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i32, extra.firstTokenId);
     EXPECT_EQ(++index, validSize);
     return true;
 }

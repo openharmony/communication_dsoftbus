@@ -502,6 +502,8 @@
         "SoftBusDFileClearOpenFdCallback";
         "SoftBusDFileClearCloseFdCallback";
         "UpdateChannelStatistics";
+        "SetTimer";
+        "CancelTimer";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

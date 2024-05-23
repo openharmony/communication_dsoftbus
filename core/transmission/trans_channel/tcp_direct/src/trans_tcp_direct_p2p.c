@@ -508,6 +508,23 @@ static void OutputAnonymizeIpAddress(const char *myIp, const char *peerIp)
     TRANS_LOGE(TRANS_CTRL, "StartListener failed, myIp=%{public}s peerIp=%{public}s", anonymizedMyIp, anonymizedPeerIp);
 }
 
+static int32_t PackAndSendVerifyP2pRsp(const char *myIp, int32_t myPort, int64_t seq, bool isAuthLink,
+    AuthHandle authHandle)
+{
+    int32_t ret = SOFTBUS_OK;
+    char *reply = VerifyP2pPack(myIp, myPort, NULL);
+    if (reply == NULL) {
+        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "pack reply failed", isAuthLink);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, reply, isAuthLink);
+    cJSON_free(reply);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSON *json, bool isAuthLink)
 {
     TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", seq=%{public}" PRId64, authHandle.authId, seq);
@@ -536,26 +553,19 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
             "get wifidirectmanager or localip fail", isAuthLink);
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
-
-    ret = StartP2pListener(myIp, &myPort);
+    if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+        ret = StartHmlListener(myIp, &myPort);
+    } else {
+        ret = StartP2pListener(myIp, &myPort);
+    }
     if (ret != SOFTBUS_OK) {
         OutputAnonymizeIpAddress(myIp, peerIp);
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "invalid p2p port", isAuthLink);
         return ret;
     }
-
-    char *reply = VerifyP2pPack(myIp, myPort, NULL);
-    if (reply == NULL) {
-        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "pack reply failed", isAuthLink);
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, reply, isAuthLink);
-    cJSON_free(reply);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+    ret = PackAndSendVerifyP2pRsp(myIp, myPort, seq, isAuthLink, authHandle);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "fail to send VerifyP2pRsp.");
     LaneAddP2pAddressByIp(peerIp, peerPort);
-    TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
 }
 

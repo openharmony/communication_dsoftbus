@@ -295,7 +295,7 @@ int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel)
         LNN_LOGE(LNN_EVENT, "Set Data Level failed, ret=%{public}d", ret);
         return ret;
     }
-    ret = LnnTriggerDataLevelHeartBeat();
+    ret = LnnTriggerDataLevelHeartbeat();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "Set Data Level but trigger heartbeat failed, ret=%{public}d", ret);
         return ret;
