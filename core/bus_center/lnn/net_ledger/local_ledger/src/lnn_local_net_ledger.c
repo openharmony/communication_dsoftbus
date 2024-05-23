@@ -1600,7 +1600,7 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    char value[SESSION_KEY_STR_LEN] = {0};
+    char value[SESSION_KEY_STR_LEN] = { 0 };
     if (ConvertBytesToHexString(value, SESSION_KEY_STR_LEN,
         g_localNetLedger.localInfo.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipher key to string fail.");
@@ -1627,7 +1627,7 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    char value[BROADCAST_IV_STR_LEN] = {0};
+    char value[BROADCAST_IV_STR_LEN] = { 0 };
     if (ConvertBytesToHexString(value, BROADCAST_IV_STR_LEN,
         g_localNetLedger.localInfo.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipher iv to string fail.");
