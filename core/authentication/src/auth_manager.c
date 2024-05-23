@@ -1807,6 +1807,8 @@ static void HandleConnectionData(
         ReleaseAuthLock();
         return;
     }
+    int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)data);
+    (void)SetSessionKeyAvailable(&auth->sessionKeyList, index);
     auth->hasAuthPassed = true;
     auth->lastActiveTime = GetCurrentTimeMs();
     auth->connId[type] = connId;
