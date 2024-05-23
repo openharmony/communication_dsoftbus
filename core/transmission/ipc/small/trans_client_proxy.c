@@ -82,8 +82,9 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     WriteBuffer(&io, channel->sessionKey, channel->keyLen);
     WriteString(&io, channel->peerSessionName);
     WriteString(&io, channel->peerDeviceId);
-    if ((channel->channelType == CHANNEL_TYPE_TCP_DIRECT) && (!WriteFileDescriptor(&io, channel->fd))) {
-            return SOFTBUS_ERR;
+    if ((channel->channelType == CHANNEL_TYPE_TCP_DIRECT) && (!WriteString(&io, channel->myIp) ||
+        !WriteFileDescriptor(&io, channel->fd))) {
+        return SOFTBUS_ERR;
     }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
