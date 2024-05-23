@@ -279,7 +279,7 @@ static void NotifyDeviceConnectResult(
                 it->requestId, anomizeAddress, reason);
             DfxRecordBrConnectFail(it->requestId, DEFAULT_PID, (ConnBrDevice *)device, &it->statistics, reason);
             it->result.OnConnectFailed(it->requestId, reason);
-            CONN_LOGD(CONN_BR,
+            CONN_LOGE(CONN_BR,
                 "br notify connect request failed done, requestId=%{public}u, addr=%{public}s, reason=%{public}d",
                 it->requestId, anomizeAddress, reason);
         }
