@@ -298,23 +298,25 @@ static int32_t CipherAndRpaInfoToMap(const CloudSyncInfo *localInfo, std::map<st
     if (ConvertBytesToHexString(cipherKey, SESSION_KEY_STR_LEN, localInfo->cipherKey, SESSION_KEY_LENGTH) !=
         SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipherkey to string fail.");
-        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN, localInfo->cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipheriv to string fail.");
-        (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN, localInfo->peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert peerIrk to string fail.");
-        (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN, localInfo->publicAddress, LFINDER_MAC_ADDR_LEN) !=
         SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert publicAddress to string fail.");
-        (void)memset_s(pubMac, LFINDER_MAC_ADDR_STR_LEN, 0, LFINDER_MAC_ADDR_STR_LEN);
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
+        (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
         return SOFTBUS_ERR;
     }
     values[keyPrefix + DEVICE_INFO_DEVICE_IRK] = peerIrk + stateVersionStr;
