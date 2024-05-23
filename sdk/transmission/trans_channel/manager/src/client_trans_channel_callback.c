@@ -33,7 +33,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     int32_t udpPort = 0;
     switch (channel->channelType) {
         case CHANNEL_TYPE_AUTH:

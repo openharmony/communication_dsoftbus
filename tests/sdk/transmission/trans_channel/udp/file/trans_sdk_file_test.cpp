@@ -383,17 +383,17 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     (void)strcpy_s(channelInfo->myIp, strlen("127.0.0.5") + 1, "127.0.0.5");
     (void)strcpy_s(channelInfo->sessionKey, strlen("session key") + 1, "session key");
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     channelInfo->isServer = false;
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
     ClientTransUdpMgrDeinit();
 }
 
@@ -425,7 +425,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     TransDeleteFileListener(g_mySessionName);
     TransFileDeinit();
@@ -571,17 +571,17 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     (void)strcpy_s(channelInfo->myIp, strlen("127.0.0.5") + 1, "127.0.0.5");
     (void)strcpy_s(channelInfo->sessionKey, strlen("session key") + 1, "session key");
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     channelInfo->isServer = false;
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
     ClientTransUdpMgrDeinit();
 }
 
@@ -614,7 +614,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
     
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
     
     TransCloseFileChannel(channel->dfileId);
     
@@ -657,7 +657,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
     
     ret = SetReuseAddr(0, on);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
 }
 
 /**
@@ -674,7 +674,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
     
     ret = SetReusePort(0, on);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
 }
 
 /**
@@ -690,7 +690,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
     EXPECT_TRUE(ret);
 
     ret = OpenTcpServer("280567565", port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     ret = OpenTcpServer("127.0.0.1", 0);
     EXPECT_TRUE(ret);

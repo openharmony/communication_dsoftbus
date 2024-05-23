@@ -804,21 +804,21 @@ HWTEST_F(VtpStreamSocketTest, Decrypt001, TestSize.Level1)
     ret = vtpStreamSocket->Encrypt(in, inLen, nullptr, outLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = vtpStreamSocket->Encrypt(in, inLen, data.get() + FRAME_HEADER_LEN, outLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ssize_t res = vtpStreamSocket->Decrypt(nullptr, inLen, data.get(), outLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
     res = vtpStreamSocket->Decrypt(in, inLen, nullptr, outLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
     res = vtpStreamSocket->Decrypt(in, inLen, data.get(), outLen);
-    EXPECT_EQ(SOFTBUS_ERR, res);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
 
     outLen = 23;
     ret = vtpStreamSocket->Encrypt(in, inLen, data.get() + FRAME_HEADER_LEN, outLen);
-    EXPECT_EQ(SOFTBUS_ERR, res);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
 
     res = vtpStreamSocket->Decrypt(in, inLen, data.get(), outLen);
-    EXPECT_EQ(SOFTBUS_ERR, res);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, res);
 }
 
 /**

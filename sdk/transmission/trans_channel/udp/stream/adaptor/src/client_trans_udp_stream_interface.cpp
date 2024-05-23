@@ -108,7 +108,7 @@ static int32_t ProcessAdaptorAndEncrypt(const StreamFrameInfo *param, const Stre
         stream = IStream::MakeCommonStream(data, outFrameInfo);
     } else {
         TRANS_LOGE(TRANS_STREAM, "Do not support");
-        return SOFTBUS_ERR;
+        return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     return SOFTBUS_OK;
 }
@@ -147,7 +147,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
 {
     if (channelId < 0 || param == nullptr || param->pkgName == nullptr || callback == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "invalid channelId or pkgName");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_STREAM, "Start Channel Server. channelId=%{public}d ", channelId);
     auto it = g_adaptorMap.find(channelId);
@@ -192,7 +192,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
 {
     if (channelId < 0 || param == nullptr || param->pkgName == nullptr || callback == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "invalid channelId or pkgName");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     TRANS_LOGI(TRANS_STREAM, "StartChannelClient channelId=%{public}d.", channelId);
@@ -245,7 +245,7 @@ int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 
     if (channelId < 0 || pkgName == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "invalid channelId or pkgName");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     {
