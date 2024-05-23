@@ -14,6 +14,7 @@
  */
 
 #include <cstring>
+#include <securec.h>
 #include <string>
 
 #include "lnn_kv_adapter_wrapper.h"
