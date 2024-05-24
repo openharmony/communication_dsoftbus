@@ -74,12 +74,16 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordFirstDiscTime_001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, 3000);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, UINT64_MAX - 1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, 1000);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, 2000);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, 3000);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, UINT64_MAX - 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     StatisticEvtReportFunc reportFunc = GetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_FIRST_DISC_DURATION);
