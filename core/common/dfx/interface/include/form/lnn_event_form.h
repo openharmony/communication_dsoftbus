@@ -99,6 +99,8 @@ typedef struct {
     const char *peerUdid;       // PEER_UDID
     const char *peerNetworkId;  // PEER_NET_ID
     const char *peerDeviceType; // PEER_DEV_TYPE
+    const char *localUdidHash;  // LOCAL_UDID_HASH
+    const char *peerUdidHash;   // PEER_UDID_HASH
     const char *callerPkg;      // HOST_PKG
     const char *calleePkg;      // TO_CALL_PKG
 } LnnEventExtra;
