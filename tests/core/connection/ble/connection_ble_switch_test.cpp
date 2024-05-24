@@ -88,12 +88,15 @@ public:
 
 void ConnectionBleSwitchTest::SetUpTestCase(void)
 {
+    LooperInit();
     SoftbusConfigInit();
     ConnServerInit();
 }
 
 void ConnectionBleSwitchTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+}
 
 void ConnectionBleSwitchTest::SetUp(void)
 {}
