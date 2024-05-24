@@ -1054,6 +1054,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::PublishServiceFuzzTest(data, size);
     OHOS::UnPublishServiceFuzzTest(data, size);
     OHOS::SoftbusRegisterServiceFuzzTest(data, size);
+    OHOS::CheckOpenSessionPermissionFuzzTest(data, size);
     return 0;
 }
 

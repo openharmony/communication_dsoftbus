@@ -40,21 +40,60 @@ int32_t FreeLaneResource(const LaneResource *resourceItem)
 {
     return GetLaneListenerDepsInterface()->FreeLaneResource(resourceItem);
 }
+
 int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     return GetLaneListenerDepsInterface()->LaneInfoProcess(linkInfo, connInfo, profile);
 }
+
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
 {
     return GetLaneListenerDepsInterface()->PostLaneStateChangeMessage(state, peerUdid, laneLinkInfo);
 }
+
 int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *infoItem, LaneResource *resourceItem)
 {
     return GetLaneListenerDepsInterface()->FindLaneResourceByLinkAddr(infoItem, resourceItem);
 }
-uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType)
+
+uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType)
 {
-    return GetLaneListenerDepsInterface()->ApplyLaneId(localUdid, remoteUdid, linkType);
+    return GetLaneListenerDepsInterface()->GenerateLaneId(localUdid, remoteUdid, linkType);
+}
+
+int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource)
+{
+    return GetLaneListenerDepsInterface()->FindLaneResourceByLinkType(peerUdid, type, resource);
+}
+
+void DelLogicAndLaneRelationship(uint64_t laneId)
+{
+    GetLaneListenerDepsInterface()->DelLogicAndLaneRelationship(laneId);
+}
+
+int32_t ClearLaneResourceByLaneId(uint64_t laneId)
+{
+    return GetLaneListenerDepsInterface()->ClearLaneResourceByLaneId(laneId);
+}
+
+void RemoveDelayDestroyMessage(uint64_t laneId)
+{
+    GetLaneListenerDepsInterface()->RemoveDelayDestroyMessage(laneId);
+}
+
+LnnLaneManager* GetLaneManager(void)
+{
+    return GetLaneListenerDepsInterface()->GetLaneManager();
+}
+
+int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide)
+{
+    return GetLaneListenerDepsInterface()->AddLaneResourceToPool(linkInfo, laneId, isServerSide);
+}
+
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
+{
+    return GetLaneListenerDepsInterface()->DelLaneResourceByLaneId(laneId, isServerSide);
 }
 }
 } // namespace OHOS

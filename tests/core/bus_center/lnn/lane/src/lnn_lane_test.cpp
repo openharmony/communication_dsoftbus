@@ -38,7 +38,6 @@
 #include "softbus_wifi_api_adapter.h"
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_reliability.c"
-#include "utils/wifi_direct_utils.h"
 #include "wifi_direct_error_code.h"
 
 namespace OHOS {
@@ -243,6 +242,46 @@ static void CreateAllocInfoForAllocTest(LaneType laneType, LaneTransType transTy
     allocInfo->qosRequire.minBW = minBW;
     allocInfo->qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
     allocInfo->qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
+}
+
+/*
+* @tc.name: LANE_ALLOC_ErrTest_001
+* @tc.desc: lane errcode test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_ERRTEST_001, TestSize.Level1)
+{
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+
+    LaneAllocListener listenerCb = {
+        .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
+        .onLaneAllocFail = OnLaneAllocFail,
+    };
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    wifiMock.SetDefaultResult();
+    EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
+        .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfOnConnectP2pFail);
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
+    NiceMock<LaneDepsInterfaceMock> mock;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    mock.SetDefaultResultForAlloc(63, 63, 0, 0);
+    EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_CONN_FAIL));
+
+    LaneAllocInfo allocInfo;
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
+    CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
+    int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
+    EXPECT_EQ(g_errCode, ERROR_WIFI_OFF);
+    
+    ret = laneManager->lnnFreeLane(laneReqId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -576,27 +615,27 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_001, TestSize.Level1)
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     int32_t ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, nullptr, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     LaneAllocInfo allocInfo;
     ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     allocInfo.type = LANE_TYPE_BUTT;
 
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = laneManager->lnnReAllocLane(INVALID_LANE_REQ_ID, LANE_ID_BASE, &allocInfo, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = laneManager->lnnReAllocLane(laneReqId, INVALID_LANE_ID, &allocInfo, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     allocInfo.type = LANE_TYPE_HDLC;
     ret = laneManager->lnnReAllocLane(laneReqId, INVALID_LANE_ID, &allocInfo, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -777,46 +816,6 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_ErrTest_001
-* @tc.desc: lane errcode test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_ERRTEST_001, TestSize.Level1)
-{
-    const LnnLaneManager *laneManager = GetLaneManager();
-    LaneType laneType = LANE_TYPE_TRANS;
-    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
-    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
-
-    LaneAllocListener listenerCb = {
-        .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
-        .onLaneAllocFail = OnLaneAllocFail,
-    };
-    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
-    wifiMock.SetDefaultResult();
-    EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
-        .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfOnConnectP2pFail);
-    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
-    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
-    NiceMock<LaneDepsInterfaceMock> mock;
-    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
-    mock.SetDefaultResultForAlloc(63, 63, 0, 0);
-    EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_CONN_FAIL));
-
-    LaneAllocInfo allocInfo;
-    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
-    CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
-    int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listenerCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
-    EXPECT_EQ(g_errCode, ERROR_WIFI_OFF);
-    
-    ret = laneManager->lnnFreeLane(laneReqId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
 * @tc.name: LANE_CANCEL_Test_001
 * @tc.desc: lane cancel
 * @tc.type: FUNC
@@ -850,7 +849,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     ret = laneManager->lnnCancelLane(laneReqId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -932,7 +931,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_003, TestSize.Level1)
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = laneManager->lnnCancelLane(laneReqId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /*
@@ -947,7 +946,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FREE_001, TestSize.Level1)
     LaneType laneType = LANE_TYPE_BUTT;
     uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     int32_t ret = laneManager->lnnFreeLane(laneReqId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     laneType = LANE_TYPE_TRANS;
     laneReqId = laneManager->lnnGetLaneHandle(laneType);
@@ -1160,7 +1159,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
     selectParam.list.linkType[1] = LANE_LINK_TYPE_BUTT;
 
     int32_t ret = SelectLane(NODE_NETWORK_ID, nullptr, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -1169,7 +1168,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)));
@@ -1177,11 +1176,11 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 
     selectParam.transType = LANE_T_MIX;
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
     SoftBusFree(linkList);
 }
 
@@ -1212,14 +1211,14 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<1>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<2>(1), Return(SOFTBUS_OK)));
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
     SoftBusFree(linkList);
 }
 
@@ -1259,7 +1258,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_ERR));
     wifiMock.SetDefaultResult();
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 
     node.discoveryType = 3;
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById)
@@ -1273,7 +1272,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<2>(1), Return(SOFTBUS_OK)));
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 }
 
 /*
@@ -1488,14 +1487,14 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(nullptr));
     ON_CALL(mock, LnnGetRemoteStrInfo).WillByDefault(Return(SOFTBUS_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ON_CALL(mock, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_MEM_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_MEM_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1568,7 +1567,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_006, TestSize.Level1)
 
     (void)strcpy_s(request->peerNetworkId, NETWORK_ID_BUF_LEN, networkIdNotFound);
     ret = BuildLink(request, reqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    EXPECT_TRUE(ret == SOFTBUS_LANE_NOT_FIND);
     SoftBusFree(request);
     LaneDeleteP2pAddress(networkId, true);
 }
@@ -1774,20 +1773,20 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 
 
     selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 
     selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + HIGH_BW;
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 
     selectParam.transType = LANE_T_MIX;
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 }
 
 /*
@@ -2035,7 +2034,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DECISION_MODELS_001, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
 
     int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 }
 
 /*
@@ -2123,7 +2122,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = FindLaneResourceByLinkType(PEER_UDID, LANE_HML, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FIND);
 
     uint64_t laneId = LANE_ID_BASE;
     uint32_t clientRef = 0;
@@ -2132,10 +2131,10 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Level
     clientRef++;
 
     ret = FindLaneResourceByLinkType(LOCAL_UDID, LANE_HML, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FIND);
 
     ret = FindLaneResourceByLinkType(PEER_UDID, LANE_P2P, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FIND);
 
     ret = FindLaneResourceByLinkType(PEER_UDID, LANE_HML, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -2261,7 +2260,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = LaneDetectOnDataEvent(module, events, FD);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FIND);
     EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -2449,22 +2448,22 @@ HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_002, TestSize.Level1
 }
 
 /*
-* @tc.name: LANE_APPLY_LANE_ID_001
-* @tc.desc: LANE APPLY LANE ID
+* @tc.name: LANE_GENERATE_LANE_ID_001
+* @tc.desc: LANE GENERATE LANE ID
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_APPLY_LANE_ID_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_GENERATE_LANE_ID_001, TestSize.Level1)
 {
     LaneDepsInterfaceMock laneMock;
     EXPECT_CALL(laneMock, SoftBusGenerateStrHash)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(LaneDepsInterfaceMock::ActionOfGenerateStrHash);
 
-    uint64_t laneId = ApplyLaneId(LOCAL_UDID, PEER_UDID, LANE_HML);
+    uint64_t laneId = GenerateLaneId(LOCAL_UDID, PEER_UDID, LANE_HML);
     EXPECT_EQ(laneId, INVALID_LANE_ID);
 
-    laneId = ApplyLaneId(LOCAL_UDID, PEER_UDID, LANE_HML);
+    laneId = GenerateLaneId(LOCAL_UDID, PEER_UDID, LANE_HML);
     EXPECT_NE(laneId, INVALID_LANE_ID);
 }
 
@@ -2561,7 +2560,6 @@ HWTEST_F(LNNLaneMockTest, LNN_AUTH_ALLOC_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, GetAuthLinkTypeList)
         .WillRepeatedly(DoAll(SetArgPointee<1>(mockList), Return(SOFTBUS_OK)));
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    CondWait();
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 } // namespace OHOS

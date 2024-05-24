@@ -24,7 +24,6 @@
 extern "C" {
 #endif
 
-int32_t ConvertAuthLinkToLaneLink(AuthLinkTypeList *authLinkType, LanePreferredLinkList *laneLinkType);
 LaneInterface *CtrlLaneGetInstance(void);
 bool IsAuthReuseP2p(const char *networkId, const char *udid, AuthLinkType authType);
 

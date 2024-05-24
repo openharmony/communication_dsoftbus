@@ -36,6 +36,7 @@ typedef struct {
     int32_t (*cancelLane)(uint32_t laneHandle);
     int32_t (*freeLane)(uint32_t laneHandle);
 } LaneInterface;
+
 #ifdef __cplusplus
 }
 #endif

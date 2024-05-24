@@ -120,7 +120,7 @@ ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t
 
     if (inLen - OVERHEAD_LEN > outLen) {
         TRANS_LOGE(TRANS_STREAM, "Encrypt invalid para.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
@@ -147,7 +147,7 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
 
     if (inLen - OVERHEAD_LEN > outLen) {
         TRANS_LOGE(TRANS_STREAM, "Decrypt invalid para.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption

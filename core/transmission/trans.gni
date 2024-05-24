@@ -24,6 +24,14 @@ enhanced_broadcast = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                  ],
                                  "value")
 
+qos_info_dep_dir = "dsoftbus_enhance/core/transmission/trans_channel/common"
+enhanced_qos_info = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                [
+                                  "$native_source_path",
+                                  "$qos_info_dep_dir",
+                                ],
+                                "value")
+
 trans_session_src = trans_channel_src
 trans_session_inc = trans_channel_inc
 trans_session_deps = trans_channel_deps
@@ -39,6 +47,14 @@ trans_session_inc += [
   "$dsoftbus_root_path/core/transmission/session/include",
   "$dsoftbus_root_path/core/transmission/interface",
 ]
+
+if (enhanced_qos_info) {
+  trans_session_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/transmission/trans_channel/common/src/trans_qos_info.c" ]
+  trans_session_inc +=
+      [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport" ]
+} else {
+  trans_session_src += [ "$dsoftbus_root_path/core/transmission/trans_channel/common/src/trans_qos_info.c" ]
+}
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
