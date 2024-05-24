@@ -760,7 +760,7 @@ static void ModuleLaneAdapter(LanePreferredLinkList *preferred)
     }
 }
 
-static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
+static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, AllocExtendInfo *extendInfo)
 {
     if (!(param->isQosLane)) {
         TRANS_LOGD(TRANS_SVC, "not support qos lane");
@@ -782,7 +782,7 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
                 qosInfo->rttLevel = (LaneRttLevel)((param->qos[i].value > 0) ? param->qos[i].value : 0);
                 break;
             default:
-                GetExtQosInfo(param, qosInfo, i);
+                GetExtQosInfo(param, qosInfo, i, extendInfo);
                 break;
         }
     }
@@ -832,7 +832,7 @@ static int32_t GetAllocInfoBySessionParam(const SessionParam *param, LaneAllocIn
     }
     allocInfo->transType = transType;
     allocInfo->acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
-    TransGetQosInfo(param, &allocInfo->qosRequire);
+    TransGetQosInfo(param, &allocInfo->qosRequire, &(allocInfo->extendInfo));
 
     if (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName)) {
         allocInfo->qosRequire.minBW = MESH_MAGIC_NUMBER;
