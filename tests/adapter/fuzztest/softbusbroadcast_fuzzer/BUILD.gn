@@ -26,18 +26,7 @@ ohos_fuzztest("SoftBusBroadcastFuzzTest") {
   fuzz_config_file =
       "$dsoftbus_root_path/tests/adapter/fuzztest/softbusbroadcast_fuzzer"
 
-  sources = [
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_gatt.c",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_utils.c",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/manager/src/softbus_broadcast_mgr.c",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c",
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_data_cloud_sync.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/src/lnn_local_net_ledger.c",
-    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
-    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
-    "softbusbroadcast_fuzzer.cpp",
-  ]
+  sources = [ "softbusbroadcast_fuzzer.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
