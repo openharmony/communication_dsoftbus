@@ -37,7 +37,6 @@ int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, c
 int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler);
 int32_t LnnInitDeviceNameMonitorImpl(void);
 void RegisterNameMonitor(void);
-void LnnReleaseDatashareHelper(void);
 
 #ifdef __cplusplus
 }
