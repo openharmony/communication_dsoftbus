@@ -29,9 +29,9 @@ namespace {
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MIN_STRING_LEN = 1;
 constexpr int32_t APP_ID_LEN = 8;
-constexpr int32_t STORE_ID_LEN = 14;
+constexpr int32_t STORE_ID_LEN = 19;
 const std::string APP_ID = "dsoftbus";
-const std::string STORE_ID = "dsoftbus_kv_db";
+const std::string STORE_ID = "dsoftbus_kv_db_test";
 }
 static int32_t g_dbId = 1;
 class KVAdapterWrapperTest : public testing::Test {

@@ -26,7 +26,7 @@ namespace OHOS {
 
 namespace {
 const std::string APP_ID = "dsoftbus";
-const std::string STORE_ID = "dsoftbus_kv_db";
+const std::string STORE_ID = "dsoftbus_kv_db_test";
 shared_ptr<KVAdapter> kvStore = nullptr;
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MAX_MAP_SIZE = 10000;
