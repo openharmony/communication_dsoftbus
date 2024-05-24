@@ -1604,7 +1604,7 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
     if (ConvertBytesToHexString(value, SESSION_KEY_STR_LEN,
         g_localNetLedger.localInfo.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipher key to string fail.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CONVERT_STRING_FAILED;
     }
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_KEY, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger cipher key change sync to cloud failed");
@@ -1632,7 +1632,7 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     if (ConvertBytesToHexString(value, BROADCAST_IV_STR_LEN,
         g_localNetLedger.localInfo.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipher iv to string fail.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CONVERT_STRING_FAILED;
     }
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_IV, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger cipher iv change sync to cloud failed");
