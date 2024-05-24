@@ -623,6 +623,12 @@ static void DfxRecordLnnAuthStart(const AuthConnInfo *connInfo, const JoinLnnMsg
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
 
+static bool IsConnFsmFlagOnline(LnnConnectionFsm *connFsm, bool needReportFailure)
+{
+    connFsm->connInfo.flag |= (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
+    return (connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0;
+}
+
 static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure, bool isShort)
 {
     int32_t ret = SOFTBUS_OK;
@@ -643,8 +649,7 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
         SoftBusFree((void *)para);
         return ret;
     }
-    connFsm->connInfo.flag |= (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
-    if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
+    if (IsConnFsmFlagOnline(connFsm, needReportFailure)) {
         if (connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN || connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH) {
             char uuid[UUID_BUF_LEN] = {0};
             (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID,
