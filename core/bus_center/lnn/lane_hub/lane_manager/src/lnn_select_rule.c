@@ -495,7 +495,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
     LNN_LOGI(LNN_LANE, "decide optimal links num=%{public}d", *linksNum);
 }
 
-static bool isLaneExist(LaneLinkType *linkList, LaneLinkType linkType)
+static bool IsLaneExist(LaneLinkType *linkList, LaneLinkType linkType)
 {
     for (int i = 0; i < LANE_LINK_TYPE_BUTT; i++) {
         if (linkList[i] == linkType) {
@@ -515,7 +515,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
             break;
         }
         if (IsValidLane(networkId, g_retryLaneList[bandWidthType][i], request->transType) &&
-            !isLaneExist(linkList, g_retryLaneList[bandWidthType][i])) {
+            !IsLaneExist(linkList, g_retryLaneList[bandWidthType][i])) {
             linkList[(*linksNum)++] = g_retryLaneList[bandWidthType][i];
             LNN_LOGI(LNN_LANE, "decide retry linkType=%{public}d", g_retryLaneList[bandWidthType][i]);
         }

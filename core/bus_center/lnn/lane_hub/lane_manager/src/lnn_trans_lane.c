@@ -480,12 +480,140 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
     return SOFTBUS_OK;
 }
 
+static void DumpInputLinkList(const LanePreferredLinkList *linkInfo)
+{
+    for (uint32_t i = 0; i < linkInfo->linkTypeNum; i++) {
+        LNN_LOGD(LNN_LANE, "priority=%{public}u, linkType=%{public}d", i, linkInfo->linkType[i]);
+    }
+}
+
+static int32_t LaneAllocInfoConvert(const LaneAllocInfoExt *allocInfoExt, LaneAllocInfo *allocInfo)
+{
+    allocInfo->type = allocInfoExt->type;
+    allocInfo->transType = allocInfoExt->commInfo.transType;
+    if (strcpy_s(allocInfo->networkId, NETWORK_ID_BUF_LEN, allocInfoExt->commInfo.networkId) != EOK) {
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t BuildTargetLink(uint32_t laneHandle, const LaneAllocInfoExt *allocInfoExt,
+    const LaneAllocListener *listener)
+{
+    LanePreferredLinkList *linkList = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
+    if (linkList == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(linkList, sizeof(LanePreferredLinkList), &allocInfoExt->linkList,
+        sizeof(LanePreferredLinkList)) != EOK) {
+        SoftBusFree(linkList);
+        return SOFTBUS_MEM_ERR;
+    }
+    LaneAllocInfo allocInfo;
+    (void)memset_s(&allocInfo, sizeof(allocInfo), 0, sizeof(allocInfo));
+    int32_t ret = LaneAllocInfoConvert(allocInfoExt, &allocInfo);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(linkList);
+        return ret;
+    }
+    TransReqInfo *newItem = CreateReqNodeWithQos(laneHandle, &allocInfo, listener);
+    if (newItem == NULL) {
+        SoftBusFree(linkList);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        SoftBusFree(newItem);
+        SoftBusFree(linkList);
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListTailInsert(&g_requestList->list, &newItem->node);
+    g_requestList->cnt++;
+    Unlock();
+    ret = TriggerLinkWithQos(laneHandle, &allocInfo, linkList);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(linkList);
+        DeleteRequestNode(laneHandle);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t AllocTargetLane(uint32_t laneHandle, const LaneAllocInfoExt *allocInfo,
+    const LaneAllocListener *listener)
+{
+    if (laneHandle == INVALID_LANE_REQ_ID || allocInfo == NULL ||
+        allocInfo->type != LANE_TYPE_TRANS || listener == NULL) {
+        LNN_LOGE(LNN_LANE, "alloc targetLane param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (allocInfo->linkList.linkTypeNum >= LANE_LINK_TYPE_BUTT) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    DumpInputLinkList((const LanePreferredLinkList *)&allocInfo->linkList);
+    return BuildTargetLink(laneHandle, allocInfo, listener);
+}
+
+static bool SpecifiedLinkConvert(LaneSpecifiedLink link, LanePreferredLinkList *preferLink)
+{
+    uint32_t linkNum = 0;
+    switch (link) {
+        case LANE_LINK_TYPE_WIFI_WLAN:
+            preferLink->linkType[linkNum++] = LANE_WLAN_5G;
+            preferLink->linkType[linkNum++] = LANE_WLAN_2P4G;
+            break;
+        case LANE_LINK_TYPE_WIFI_P2P:
+            preferLink->linkType[linkNum++] = LANE_P2P;
+            break;
+        case LANE_LINK_TYPE_BR:
+            preferLink->linkType[linkNum++] = LANE_BR;
+            break;
+        case LANE_LINK_TYPE_COC_DIRECT:
+            preferLink->linkType[linkNum++] = LANE_COC_DIRECT;
+            break;
+        case LANE_LINK_TYPE_BLE_DIRECT:
+            preferLink->linkType[linkNum++] = LANE_BLE_DIRECT;
+            break;
+        case LANE_LINK_TYPE_HML:
+            preferLink->linkType[linkNum++] = LANE_HML;
+            break;
+        default:
+            LNN_LOGE(LNN_LANE, "unexpected link=%{public}d", link);
+            break;
+    }
+    if (linkNum == 0) {
+        return false;
+    }
+    preferLink->linkTypeNum = linkNum;
+    return true;
+}
+
+static int32_t ProcessSpecifiedLink(uint32_t laneHandle, const LaneAllocInfo *allocInfo,
+    const LaneAllocListener *listener)
+{
+    LaneAllocInfoExt info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+    if (!SpecifiedLinkConvert(allocInfo->extendInfo.linkType, &info.linkList)) {
+        return SOFTBUS_LANE_SELECT_FAIL;
+    }
+    info.type = allocInfo->type;
+    info.commInfo.transType = allocInfo->transType;
+    if (strcpy_s(info.commInfo.networkId, NETWORK_ID_BUF_LEN, allocInfo->networkId) != EOK) {
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return BuildTargetLink(laneHandle, &info, listener);
+}
+
 static int32_t AllocLaneByQos(uint32_t laneReqId, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)
 {
     if (laneReqId == INVALID_LANE_REQ_ID || allocInfo == NULL ||
         allocInfo->type != LANE_TYPE_TRANS || listener == NULL) {
         LNN_LOGE(LNN_LANE, "allocLane param invalid");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (allocInfo->extendInfo.isSpecifiedLink) {
+        LNN_LOGW(LNN_LANE, "process specifiedLink, linkType=%{public}d", allocInfo->extendInfo.linkType);
+        return ProcessSpecifiedLink(laneReqId, allocInfo, listener);
     }
     int32_t ret = AllocValidLane(laneReqId, INVALID_LANE_ID, allocInfo, listener);
     if (ret != SOFTBUS_OK) {
@@ -1345,6 +1473,7 @@ static LaneInterface g_transLaneObject = {
     .allocLane = Alloc,
     .allocLaneByQos = AllocLaneByQos,
     .reallocLaneByQos = ReallocLaneByQos,
+    .allocTargetLane = AllocTargetLane,
     .cancelLane = CancelLane,
     .freeLane = Free,
 };

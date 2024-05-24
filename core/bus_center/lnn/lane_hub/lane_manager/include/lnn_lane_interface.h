@@ -69,6 +69,16 @@ typedef enum {
     LANE_LINK_FAILED,
 } LaneRequestFailReason;
 
+typedef enum {
+    LANE_LINK_TYPE_WIFI_WLAN = 1,
+    LANE_LINK_TYPE_WIFI_P2P = 2,
+    LANE_LINK_TYPE_BR = 3,
+    LANE_LINK_TYPE_COC_DIRECT = 4,
+    LANE_LINK_TYPE_BLE_DIRECT = 5,
+    LANE_LINK_TYPE_HML = 6,
+    LANE_LINK_TYPE_MAX,
+} LaneSpecifiedLink;
+
 typedef struct {
     char brMac[BT_MAC_LEN];
 } BrConnInfo;
@@ -186,6 +196,8 @@ typedef struct {
 typedef struct {
     char peerBleMac[MAX_MAC_LEN];
     bool networkDelegate;
+    bool isSpecifiedLink;
+    LaneSpecifiedLink linkType;
 } AllocExtendInfo;
 
 typedef struct {
@@ -199,10 +211,23 @@ typedef struct {
 } LaneAllocInfo;
 
 typedef struct {
+    char networkId[NETWORK_ID_BUF_LEN];
+    LaneTransType transType;
+} LaneAllocCommInfo;
+
+typedef struct {
+    LaneType type;
+    LaneAllocCommInfo commInfo;
+    LanePreferredLinkList linkList;
+} LaneAllocInfoExt;
+
+typedef struct {
     int32_t (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
     uint32_t (*lnnGetLaneHandle)(LaneType type);
     int32_t (*lnnAllocLane)(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
     int32_t (*lnnReAllocLane)(uint32_t laneHandle, uint64_t laneId, const LaneAllocInfo *allocInfo,
+        const LaneAllocListener *listener);
+    int32_t (*lnnAllocTargetLane)(uint32_t laneHandle, const LaneAllocInfoExt *allocInfo,
         const LaneAllocListener *listener);
     int32_t (*lnnCancelLane)(uint32_t laneHandle);
     int32_t (*lnnFreeLane)(uint32_t laneHandle);
