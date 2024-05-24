@@ -188,7 +188,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSi
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 
 /**
@@ -243,7 +243,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyChannelSendFile(channelId, g_testProxyFileName, nullptr, TEST_FILE_CNT);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     ret = TransProxyChannelSendFile(channelId, g_testProxyFileName, g_proxyFileSet, TEST_FILE_CNT);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -289,7 +289,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyPackAndSendData(channelId,
         static_cast<const void *>(data), len, &info, pktType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
 /**

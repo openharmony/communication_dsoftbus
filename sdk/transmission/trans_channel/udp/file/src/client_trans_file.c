@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include "client_trans_file_listener.h"
+#include "client_trans_statistics.h"
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
 #include "softbus_adapter_mem.h"
@@ -26,6 +27,7 @@
 #include "trans_log.h"
 
 #define DEFAULT_KEY_LENGTH 32
+#define MAX_FILE_NUM       500
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
@@ -59,10 +61,111 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
     }
 }
 
-static void NotifySocketSendResult(int32_t socket, DFileMsgType msgType, const DFileMsg *msgData,
-    const FileListener *listener)
+static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
+{
+    int32_t fileNum = msgData->clearPolicyFileList.fileNum;
+    if (fileNum <= 0) {
+        return;
+    }
+    if (fileNum > MAX_FILE_NUM) {
+        TRANS_LOGE(TRANS_SDK, "invalid fileNum.");
+        return;
+    }
+
+    event->statusList.completedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
+    if (event->statusList.completedList.files == NULL) {
+        TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        return;
+    }
+    event->statusList.notCompletedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
+    if (event->statusList.notCompletedList.files == NULL) {
+        TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        return;
+    }
+    event->statusList.notStartedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
+    if (event->statusList.notStartedList.files == NULL) {
+        TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        return;
+    }
+    int32_t completedIndex = 0;
+    int32_t notCompletedIndex = 0;
+    int32_t notStartedIndex = 0;
+    for (int32_t i = 0; i < fileNum; i++) {
+        if (msgData->clearPolicyFileList.fileInfo[i].stat == FILE_STAT_COMPLETE) {
+            event->statusList.completedList.files[completedIndex] = msgData->clearPolicyFileList.fileInfo[i].file;
+            completedIndex++;
+        } else if (msgData->clearPolicyFileList.fileInfo[i].stat == FILE_STAT_NOT_COMPLETE) {
+            event->statusList.notCompletedList.files[notCompletedIndex] = msgData->clearPolicyFileList.fileInfo[i].file;
+            notCompletedIndex++;
+        } else if (msgData->clearPolicyFileList.fileInfo[i].stat == FILE_STAT_NOT_START) {
+            event->statusList.notStartedList.files[notStartedIndex] = msgData->clearPolicyFileList.fileInfo[i].file;
+            notStartedIndex++;
+        }
+    }
+    event->statusList.completedList.fileCnt = (uint32_t)completedIndex;
+    event->statusList.notCompletedList.fileCnt = (uint32_t)notCompletedIndex;
+    event->statusList.notStartedList.fileCnt = (uint32_t)notStartedIndex;
+    TRANS_LOGI(TRANS_SDK,
+        "status list totalFileNum=%{public}d, completedNum=%{public}d, notCompletedNum=%{public}d, "
+        "notStartedNum=%{public}d",
+        fileNum, event->statusList.completedList.fileCnt, event->statusList.notCompletedList.fileCnt,
+        event->statusList.notStartedList.fileCnt);
+}
+
+static void FreeFileStatusList(FileEvent *event)
+{
+    if (event == NULL) {
+        return;
+    }
+    if (event->statusList.completedList.files != NULL) {
+        SoftBusFree(event->statusList.completedList.files);
+        event->statusList.completedList.files = NULL;
+    }
+    if (event->statusList.notCompletedList.files != NULL) {
+        SoftBusFree(event->statusList.notCompletedList.files);
+        event->statusList.notCompletedList.files = NULL;
+    }
+    if (event->statusList.notStartedList.files != NULL) {
+        SoftBusFree(event->statusList.notStartedList.files);
+        event->statusList.notStartedList.files = NULL;
+    }
+}
+
+static void FillFileEventErrorCode(const DFileMsg *msgData, FileEvent *event)
+{
+    switch (msgData->errorCode) {
+        case NSTACKX_EOK:
+            event->errorCode = SOFTBUS_OK;
+            break;
+        case NSTACKX_EPERM:
+            event->errorCode = SOFTBUS_TRANS_FILE_PERMISSION_DENIED;
+            break;
+        case NSTACKX_EDQUOT:
+            event->errorCode = SOFTBUS_TRANS_FILE_DISK_QUOTA_EXCEEDED;
+            break;
+        case NSTACKX_ENOMEM:
+            event->errorCode = SOFTBUS_TRANS_FILE_NO_MEMORY;
+            break;
+        case NSTACKX_ENETDOWN:
+            event->errorCode = SOFTBUS_TRANS_FILE_NETWORK_ERROR;
+            break;
+        case NSTACKX_ENOENT:
+            event->errorCode = SOFTBUS_TRANS_FILE_NOT_FOUND;
+            break;
+        case NSTACKX_EEXIST:
+            event->errorCode = SOFTBUS_TRANS_FILE_EXISTED;
+            break;
+        default:
+            event->errorCode = msgData->errorCode;
+            break;
+    }
+}
+
+static void NotifySocketSendResult(
+    int32_t socket, DFileMsgType msgType, const DFileMsg *msgData, const FileListener *listener)
 {
     FileEvent event;
+    (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
     switch (msgType) {
         case DFILE_ON_TRANS_IN_PROGRESS:
             event.type = FILE_EVENT_SEND_PROCESS;
@@ -73,16 +176,27 @@ static void NotifySocketSendResult(int32_t socket, DFileMsgType msgType, const D
         case DFILE_ON_FILE_SEND_FAIL:
             event.type = FILE_EVENT_SEND_ERROR;
             break;
+        case DFILE_ON_CLEAR_POLICY_FILE_LIST:
+            event.type = FILE_EVENT_TRANS_STATUS;
+            break;
         default:
             return;
     }
-
+    TRANS_LOGD(TRANS_SDK, "sendNotify socket=%{public}d type=%{public}d", socket, event.type);
     event.files = msgData->fileList.files;
     event.fileCnt = msgData->fileList.fileNum;
     event.bytesProcessed = msgData->transferUpdate.bytesTransferred;
     event.bytesTotal = msgData->transferUpdate.totalBytes;
     event.UpdateRecvPath = NULL;
+    if (event.type == FILE_EVENT_TRANS_STATUS || event.type == FILE_EVENT_SEND_ERROR) {
+        FillFileStatusList(msgData, &event);
+    } else if (event.type == FILE_EVENT_SEND_PROCESS) {
+        event.rate = msgData->rate;
+    }
+    FillFileEventErrorCode(msgData, &event);
     listener->socketSendCallback(socket, &event);
+    UpdateChannelStatistics(socket, (int64_t)msgData->transferUpdate.totalBytes);
+    FreeFileStatusList(&event);
 }
 
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
@@ -122,7 +236,10 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
             FileEvent event;
             (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
             event.type = FILE_EVENT_SEND_ERROR;
+            FillFileStatusList(msgData, &event);
+            FillFileEventErrorCode(msgData, &event);
             fileListener.socketSendCallback(sessionId, &event);
+            FreeFileStatusList(&event);
         } else if (fileListener.sendListener.OnFileTransError != NULL) {
             fileListener.sendListener.OnFileTransError(sessionId);
         }
@@ -176,10 +293,11 @@ static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFil
     }
 }
 
-static void NotifySocketRecvResult(int32_t socket, DFileMsgType msgType, const DFileMsg *msgData,
-    const FileListener *listener)
+static void NotifySocketRecvResult(
+    int32_t socket, DFileMsgType msgType, const DFileMsg *msgData, const FileListener *listener)
 {
     FileEvent event;
+    (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
     switch (msgType) {
         case DFILE_ON_FILE_LIST_RECEIVED:
             event.type = FILE_EVENT_RECV_START;
@@ -193,16 +311,26 @@ static void NotifySocketRecvResult(int32_t socket, DFileMsgType msgType, const D
         case DFILE_ON_FILE_RECEIVE_FAIL:
             event.type = FILE_EVENT_RECV_ERROR;
             break;
+        case DFILE_ON_CLEAR_POLICY_FILE_LIST:
+            event.type = FILE_EVENT_TRANS_STATUS;
+            break;
         default:
             return;
     }
-
+    TRANS_LOGD(TRANS_SDK, "recvNotify socket=%{public}d type=%{public}d", socket, event.type);
     event.files = msgData->fileList.files;
     event.fileCnt = msgData->fileList.fileNum;
     event.bytesProcessed = msgData->transferUpdate.bytesTransferred;
     event.bytesTotal = msgData->transferUpdate.totalBytes;
     event.UpdateRecvPath = NULL;
+    if (event.type == FILE_EVENT_TRANS_STATUS || event.type == FILE_EVENT_RECV_ERROR) {
+        FillFileStatusList(msgData, &event);
+    } else if (event.type == FILE_EVENT_RECV_PROCESS) {
+        event.rate = msgData->rate;
+    }
+    FillFileEventErrorCode(msgData, &event);
     listener->socketRecvCallback(socket, &event);
+    FreeFileStatusList(&event);
 }
 
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
@@ -236,7 +364,10 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
             FileEvent event;
             (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
             event.type = FILE_EVENT_RECV_ERROR;
+            FillFileStatusList(msgData, &event);
+            FillFileEventErrorCode(msgData, &event);
             fileListener.socketRecvCallback(sessionId, &event);
+            FreeFileStatusList(&event);
         } else if (fileListener.recvListener.OnFileTransError != NULL) {
             fileListener.recvListener.OnFileTransError(sessionId);
         }
@@ -254,10 +385,8 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
 static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener, int32_t fileSession)
 {
     int32_t sessionId = -1;
-    if (g_udpChannelMgrCb->OnFileGetSessionId(channelId, &sessionId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get sessionId by channelId failed");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = g_udpChannelMgrCb->OnFileGetSessionId(channelId, &sessionId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get sessionId by channelId failed");
 
     if (fileListener->socketRecvCallback != NULL) {
         FileEvent event;
@@ -266,7 +395,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
         fileListener->socketRecvCallback(sessionId, &event);
         if (event.UpdateRecvPath == NULL) {
             TRANS_LOGE(TRANS_SDK, "UpdateRecvPath is null");
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
 
         const char *rootDir = event.UpdateRecvPath();
@@ -275,7 +404,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
             TRANS_LOGE(TRANS_SDK,
                 "rootDir not exist, rootDir=%{public}s, errno=%{public}d.",
                 (rootDir == NULL ? "null" : rootDir), errno);
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
 
         if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, absPath) != EOK) {
@@ -289,7 +418,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
     if (NSTACKX_DFileSetStoragePath(fileSession, fileListener->rootDir) != SOFTBUS_OK) {
         NSTACKX_DFileClose(fileSession);
         TRANS_LOGE(TRANS_SDK, "set storage path failed. rootDir=%{public}s", fileListener->rootDir);
-        return SOFTBUS_ERR;
+        return SOFTBUS_FILE_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -307,34 +436,34 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
     if (channel->isServer) {
         FileListener fileListener;
         (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
-        if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_FILE, "get file listener failed");
-            return SOFTBUS_ERR;
-        }
+        int32_t ret = TransGetFileListener(sessionName, &fileListener);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "get file listener failed");
+
         fileSession = StartNStackXDFileServer(channel->myIp, (uint8_t *)channel->sessionKey,
             DEFAULT_KEY_LENGTH, FileReceiveListener, filePort);
         if (fileSession < 0) {
             TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
-        if (g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId) != SOFTBUS_OK) {
+        ret = g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "udp channel open failed.");
             NSTACKX_DFileClose(fileSession);
             *filePort = 0;
-            return SOFTBUS_ERR;
+            return ret;
         }
         if (UpdateFileRecvPath(channel->channelId, &fileListener, fileSession)) {
             TRANS_LOGE(TRANS_FILE, "update receive file path failed");
             NSTACKX_DFileClose(fileSession);
             *filePort = 0;
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
     } else {
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
             (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, FileSendListener);
         if (fileSession < 0) {
             TRANS_LOGE(TRANS_FILE, "start file channel as client failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
     }
     return fileSession;

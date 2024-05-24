@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 bool IsLinkEnabled(LaneLinkType parameter);
+bool IsCloudSyncEnabled(void);
 
 #ifdef __cplusplus
 }

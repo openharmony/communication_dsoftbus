@@ -17,12 +17,15 @@
 #define LNN_DATA_CLOUD_SYNC_H
 
 #include <stdint.h>
+
 #include "lnn_node_info.h"
 #include "softbus_adapter_crypto.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define CLOUD_SYNC_INFO_SIZE 33
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
@@ -74,7 +77,6 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
 int32_t LnnDeleteSyncToDB(void);
 int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeType changeType);
 int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize);
-int32_t LnnGetAccountIdFromLocalCache(int64_t *buf);
 #ifdef __cplusplus
 }
 #endif

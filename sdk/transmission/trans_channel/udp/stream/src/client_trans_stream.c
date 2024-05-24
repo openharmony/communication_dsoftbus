@@ -129,7 +129,7 @@ static int32_t GetRawStreamEncryptOptByChannelId(int32_t channelId, bool *isEncr
 {
     if (g_udpChannelMgrCb == NULL) {
         TRANS_LOGE(TRANS_STREAM, "udp channel callback is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (g_udpChannelMgrCb->OnRawStreamEncryptOptGet == NULL) {
         TRANS_LOGE(TRANS_STREAM, "OnRawStreamEncryptOptGet of udp channel callback is null.");
@@ -151,9 +151,10 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         return SOFTBUS_INVALID_PARAM;
     }
     bool isEncryptedRawStream = false;
-    if (GetRawStreamEncryptOptByChannelId(channel->channelId, &isEncryptedRawStream) != SOFTBUS_OK) {
+    int32_t ret = GetRawStreamEncryptOptByChannelId(channel->channelId, &isEncryptedRawStream);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "failed to get encryption option by channelId=%{public}d", channel->channelId);
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (channel->isServer) {
         if (IsSessionExceedLimit()) {
@@ -182,7 +183,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         TRANS_LOGI(TRANS_STREAM, "stream start client success.");
         if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnUdpChannelOpened == NULL)) {
             TRANS_LOGE(TRANS_STREAM, "udp channel callback on udp channel opened is null.");
-            return SOFTBUS_ERR;
+            return SOFTBUS_NO_INIT;
         }
         g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
     }
@@ -201,9 +202,7 @@ int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamD
 int32_t TransCloseStreamChannel(int32_t channelId)
 {
     TRANS_LOGI(TRANS_STREAM, "close stream channel. channelId=%{public}d", channelId);
-    if (CloseVtpStreamChannel(channelId, "DSOFTBUS_STREAM") != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_STREAM, "close stream channel failed.");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = CloseVtpStreamChannel(channelId, "DSOFTBUS_STREAM");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_STREAM, "close stream channel failed.");
     return SOFTBUS_OK;
 }

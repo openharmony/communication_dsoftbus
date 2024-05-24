@@ -151,6 +151,7 @@ ohos_unittest("TransClientMsgServiceTest") {
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/sdk/transmission/session/src",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/sdk/frame/common/include",

@@ -37,7 +37,7 @@ typedef enum {
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {TRANS_SDK,     0xd005740,      "TransSdk"   },
+    { TRANS_SDK,    0xd005740,      "TransSdk"   },
     { TRANS_SVC,    0xd005741,      "TransSvc"   },
     { TRANS_INIT,   0xd005742,      "TransInit"  },
     { TRANS_CTRL,   0xd005743,      "TransCtrl"  },

@@ -29,6 +29,8 @@
 #include "trans_server_proxy.h"
 
 #define HEART_TIME 300
+#define TCP_KEEPALIVE_INTERVAL 2
+#define TCP_KEEPALIVE_COUNT 5
 #define USER_TIME_OUT (305 * 1000)
 
 static SoftBusList *g_tcpDirectChannelInfoList = NULL;
@@ -211,30 +213,30 @@ static void TransTdcDelChannelInfo(int32_t channelId)
 
 int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
-    if (sessionName == NULL || channel == NULL) {
-        TRANS_LOGE(TRANS_SDK, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (ClientTransCheckTdcChannelExist(channel->channelId) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(sessionName != NULL && channel != NULL,
+        SOFTBUS_INVALID_PARAM, TRANS_SDK, "param invalid");
+
+    int32_t ret = ClientTransCheckTdcChannelExist(channel->channelId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "check tdc channel fail!");
+
     TcpDirectChannelInfo *item = TransGetNewTcpChannel(channel);
     if (item == NULL) {
         TRANS_LOGE(TRANS_SDK, "get new tcp channel err. channelId=%{public}d", channel->channelId);
         return SOFTBUS_MEM_ERR;
     }
-    if (TransAddDataBufNode(channel->channelId, channel->fd) != SOFTBUS_OK) {
+    ret = TransAddDataBufNode(channel->channelId, channel->fd);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK,
             "add data buf node fail. channelId=%{public}d, fd=%{public}d", channel->channelId, channel->fd);
         SoftBusFree(item);
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (TransTdcCreateListener(channel->fd) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "trans tdc create listener failed. fd=%{public}d", channel->fd);
         goto EXIT_ERR;
     }
-    if (ConnSetTcpKeepAlive(channel->fd, HEART_TIME) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepAlive failed, fd=%{public}d.", channel->fd);
+    if (ConnSetTcpKeepalive(channel->fd, HEART_TIME, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_COUNT) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepalive failed, fd=%{public}d.", channel->fd);
         goto EXIT_ERR;
     }
     if (ConnSetTcpUserTimeOut(channel->fd, USER_TIME_OUT) != SOFTBUS_OK) {
@@ -249,11 +251,12 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     TRANS_LOGI(TRANS_SDK, "add channelId=%{public}d", item->channelId);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
-    if (ClientTransTdcOnSessionOpened(sessionName, channel) != SOFTBUS_OK) {
+    ret = ClientTransTdcOnSessionOpened(sessionName, channel);
+    if (ret != SOFTBUS_OK) {
         TransDelDataBufNode(channel->channelId);
         TransTdcDelChannelInfo(channel->channelId);
         TRANS_LOGE(TRANS_SDK, "notify on session opened err.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 EXIT_ERR:
@@ -275,7 +278,7 @@ int32_t TransTdcManagerInit(const IClientSessionCallBack *callback)
         return ret;
     }
     ret = PendingInit(PENDING_TYPE_DIRECT);
-    if (ret == SOFTBUS_ERR) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans direct pending init failed, ret=%{public}d", ret);
         return SOFTBUS_NO_INIT;
     }
@@ -342,7 +345,7 @@ int32_t TransDisableSessionListener(int32_t channelId)
     }
     if (channel.detail.fd < 0) {
         TRANS_LOGE(TRANS_SDK, "invalid handle.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_FD;
     }
     return TransTdcStopRead(channel.detail.fd);
 }

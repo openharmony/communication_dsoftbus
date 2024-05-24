@@ -151,7 +151,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
     channel.routeType = TEST_DATA_TYPE;
 
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransOnUdpChannelClosed(channel.channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
@@ -205,7 +205,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Lev
     channel.routeType = TEST_DATA_TYPE;
 
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransOnUdpChannelQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
@@ -320,7 +320,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUdpChannelSendStream(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
@@ -427,5 +427,18 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level
     IClientSessionCallBack *cb = GetClientSessionCb();
     ret = ClientTransUdpMgrInit(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ClientEmitFileEventTest
+ * @tc.desc: client emit file event test, use the invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest, TestSize.Level0)
+{
+    int32_t channelId = -1;
+    int32_t ret = ClientEmitFileEvent(channelId);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

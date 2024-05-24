@@ -18,6 +18,7 @@
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_callback.h"
+#include "client_trans_statistics.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "client_trans_udp_manager.h"
@@ -27,26 +28,22 @@
 int32_t ClientTransChannelInit(void)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
-    if (cb == NULL) {
-        TRANS_LOGE(TRANS_SDK, "get client session Cb failed.");
-        return SOFTBUS_ERR;
-    }
-    if (TransTdcManagerInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "trans tcp manager init failed.");
-        return SOFTBUS_ERR;
-    }
-    if (ClientTransAuthInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client trans auth init failed.");
-        return SOFTBUS_ERR;
-    }
-    if (ClientTransProxyInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client trans proxy init failed.");
-        return SOFTBUS_ERR;
-    }
-    if (ClientTransUdpMgrInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client trans udp mgr init failed.");
-        return SOFTBUS_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_NO_INIT, TRANS_SDK, "get client session Cb failed.");
+
+    int32_t ret = TransTdcManagerInit(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "trans tcp manager init failed.");
+
+    ret = ClientTransAuthInit(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "client trans auth init failed.");
+
+    ret = ClientTransStatisticsInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "client trans statistics init failed.");
+
+    ret = ClientTransProxyInit(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "client trans proxy init failed.");
+
+    ret = ClientTransUdpMgrInit(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "client trans udp mgr init failed.");
     return SOFTBUS_OK;
 }
 
@@ -55,6 +52,7 @@ void ClientTransChannelDeinit(void)
     TransTdcManagerDeinit();
     ClientTransUdpMgrDeinit();
     ClientTransProxyDeinit();
+    ClientTransStatisticsDeinit();
 }
 
 int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
@@ -63,6 +61,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
         TRANS_LOGW(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    DeleteSocketResourceByChannelId(channelId, type);
     int32_t ret = SOFTBUS_OK;
     switch (type) {
         case CHANNEL_TYPE_PROXY:

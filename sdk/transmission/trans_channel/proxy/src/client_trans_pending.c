@@ -108,7 +108,7 @@ int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
 EXIT:
     SoftBusMutexDestroy(&pending->lock);
     SoftBusFree(pending);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NO_INIT;
 }
 
 void DeletePendingPacket(uint32_t id, uint64_t seq)

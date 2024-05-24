@@ -145,7 +145,6 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
 
 static void *NetlinkMonitorThread(void *para)
 {
-    struct nlmsghdr *nlh = NULL;
     (void)para;
     LNN_LOGI(LNN_BUILDER, "netlink monitor thread start");
     int32_t sockFd = CreateNetlinkSocket();
@@ -172,7 +171,7 @@ static void *NetlinkMonitorThread(void *para)
             LNN_LOGE(LNN_BUILDER, "recv buffer not enough");
             continue;
         }
-        nlh = (struct nlmsghdr *)buffer;
+        struct nlmsghdr *nlh = (struct nlmsghdr *)buffer;
         while (NLMSG_OK(nlh, len) && nlh->nlmsg_type != NLMSG_DONE) {
             LNN_LOGD(LNN_BUILDER, "nlmsg_type=%{public}d", nlh->nlmsg_type);
             switch (nlh->nlmsg_type) {

@@ -311,7 +311,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest03, TestS
     ret = TransOnSessionOpened(g_sessionName, NULL, TYPE_BUTT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BUTT);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
@@ -382,7 +382,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest05, TestS
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionClosed(INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = TransOnSessionClosed(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);

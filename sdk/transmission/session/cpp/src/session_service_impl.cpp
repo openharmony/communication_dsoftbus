@@ -75,7 +75,7 @@ int32_t SessionServiceImpl::RemoveSessionServer(const std::string &pkgName, cons
         return RemoveSessionServerInner(pkgName.c_str(), sessionName.c_str());
     }
     TRANS_LOGE(TRANS_SDK, "not find session server");
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
 }
 
 std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySessionName,
@@ -145,29 +145,29 @@ int32_t SessionServiceImpl::CreateSession(int32_t sessionId, const std::shared_p
 {
     TRANS_LOGD(TRANS_SDK, "enter.");
     int32_t isServer;
-    if (IsServerSideInner(sessionId, &isServer) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = IsServerSideInner(sessionId, &isServer);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "server side failed!");
 
     session->SetSessionId(sessionId);
 
     char str[SESSION_NAME_SIZE_MAX];
-    if (GetMySessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+
+    ret = GetMySessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get session name failed!");
+
     std::string mySessionName(str);
     session->SetMySessionName(mySessionName);
 
-    if (GetPeerSessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    ret = GetPeerSessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get peer session name failed!");
+
     std::string peerSessionName(str);
     session->SetPeerSessionName(peerSessionName);
 
     char networkId[DEVICE_ID_SIZE_MAX];
-    if (GetPeerDeviceIdInner(sessionId, networkId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    ret = GetPeerDeviceIdInner(sessionId, networkId, DEVICE_ID_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get peer device id failed!");
+
     std::string peerNetworkId(networkId);
     session->SetPeerDeviceId(peerNetworkId);
     session->SetIsServer(isServer);
@@ -181,33 +181,31 @@ int32_t SessionServiceImpl::CreateSession(int32_t sessionId, const std::shared_p
 int32_t SessionServiceImpl::OpenSessionCallback(int32_t sessionId)
 {
     std::shared_ptr<Session> session = std::make_shared<SessionImpl>();
-    if (CreateSession(sessionId, session) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+
+    int32_t ret = CreateSession(sessionId, session);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "create session failed!");
 
     std::shared_ptr<ISessionListener> listener;
-    if (GetSessionListenerOnSessionOpened(sessionId, listener, session) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get session listener failed");
-        return SOFTBUS_ERR;
-    }
+    ret = GetSessionListenerOnSessionOpened(sessionId, listener, session);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get session listener failed!");
 
     NodeBasicInfo info;
     char pkgName[PKG_NAME_SIZE_MAX];
-    if (GetPkgNameInner(sessionId, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK ||
-        GetLocalNodeDeviceInfo(pkgName, &info) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get pkgName or deviceInfo failed");
-        return SOFTBUS_ERR;
-    }
+    ret = GetPkgNameInner(sessionId, pkgName, PKG_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get pkgName failed!");
+
+    ret = GetLocalNodeDeviceInfo(pkgName, &info);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get deviceInfo failed!");
+
     session->SetDeviceId(info.networkId);
 
     int32_t tmp;
-    if (GetPeerUidInner(sessionId, &tmp) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    ret = GetPeerUidInner(sessionId, &tmp);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get peer uid failed!");
+
     session->SetPeerUid(static_cast<uid_t>(tmp));
-    if (GetPeerPidInner(sessionId, &tmp) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    ret = GetPeerPidInner(sessionId, &tmp);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get peer pid failed!");
     session->SetPeerPid(static_cast<pid_t>(tmp));
 
     TRANS_LOGD(TRANS_SDK, "Ok");
@@ -262,7 +260,7 @@ int32_t SessionServiceImpl::GetSessionListener(
             return SOFTBUS_OK;
         }
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t SessionServiceImpl::GetSessionListenerOnSessionOpened(
@@ -270,9 +268,9 @@ int32_t SessionServiceImpl::GetSessionListenerOnSessionOpened(
 {
     (void)session;
     char str[SESSION_NAME_SIZE_MAX];
-    if (GetMySessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = GetMySessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get my session name failed!");
+
     std::string mySessionName(str);
 
     std::lock_guard<std::mutex> autoLock(listenerMutex_);
@@ -281,7 +279,7 @@ int32_t SessionServiceImpl::GetSessionListenerOnSessionOpened(
         listener = iterListener->second;
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 } // namespace SoftBus
 } // namespace Communication

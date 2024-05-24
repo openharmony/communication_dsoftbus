@@ -55,6 +55,7 @@ typedef struct {
     void (*OnSessionClosed)(int sessionId);
     void (*OnShutdown)(int32_t socket, ShutdownReason reason);
     char sessionName[SESSION_NAME_SIZE_MAX];
+    char pkgName[PKG_NAME_SIZE_MAX];
 } DestroySessionInfo;
 
 int32_t CheckPermissionState(int32_t sessionId)
@@ -204,13 +205,18 @@ NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionIn
         SoftBusFree(destroyNode);
         return NULL;
     }
+    if (memcpy_s(destroyNode->pkgName, PKG_NAME_SIZE_MAX, server->pkgName, PKG_NAME_SIZE_MAX) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy_s pkgName fail.");
+        SoftBusFree(destroyNode);
+        return NULL;
+    }
     destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
     destroyNode->OnShutdown = sessionNode->isServer ? server->listener.socketServer.OnShutdown :
         server->listener.socketClient.OnShutdown;
     return destroyNode;
 }
 
-static int32_t TryDeleteEmptySessionServer(const char *sessionName)
+static int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName)
 {
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
@@ -230,6 +236,12 @@ static int32_t TryDeleteEmptySessionServer(const char *sessionName)
             SoftBusFree(serverNode);
             g_clientSessionServerList->cnt--;
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+            // calling the ipc interface by locking here may block other threads for a long time
+            int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
+                return ret;
+            }
             TRANS_LOGI(TRANS_SDK, "delete empty session server, sessionName=%{public}s", tmpName);
             AnonymizeFree(tmpName);
             return SOFTBUS_OK;
@@ -258,7 +270,7 @@ NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList,
             destroyNode->OnSessionClosed(id);
         } else if (destroyNode->OnShutdown != NULL) {
             destroyNode->OnShutdown(id, reason);
-            (void)TryDeleteEmptySessionServer(destroyNode->sessionName);
+            (void)TryDeleteEmptySessionServer(destroyNode->pkgName, destroyNode->sessionName);
         }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
@@ -764,7 +776,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
             break;
         default:
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-            return SOFTBUS_ERR;
+            return SOFTBUS_MEM_ERR;
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
@@ -815,18 +827,15 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
             break;
         default:
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-            return SOFTBUS_ERR;
+            return SOFTBUS_NOT_FIND;
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    if (ret != EOK) {
-        TRANS_LOGE(TRANS_SDK, "copy data failed");
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, SessionEnableStatus *enableStatus)
+int32_t ClientGetChannelBySessionId(
+    int32_t sessionId, int32_t *channelId, int32_t *type, SessionEnableStatus *enableStatus)
 {
     if (sessionId < 0) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
@@ -1060,7 +1069,7 @@ int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync)
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     TRANS_LOGE(TRANS_SDK, "not found session with sessionId=%{public}d", sessionId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, int32_t *routeType)
@@ -1349,6 +1358,13 @@ static bool ClientTransCheckHmlIp(const char *ip)
 // determine connection type based on IP, delete session when connection type and parameter connType are consistent
 static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType, int32_t connType)
 {
+    /*
+     * When the channel type is UDP and the business type is file, the SessionNode is not cleared to ensure that the
+     * FileEvent can be reported when the link is disconnected abnormally.
+     */
+    if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
+        return false;
+    }
     if (connType == TRANS_CONN_ALL) {
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
             return false;
@@ -1766,19 +1782,11 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
         return ret;
     }
 
-    ret = TryDeleteEmptySessionServer(sessionName);
+    ret = TryDeleteEmptySessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "delete empty session server failed, ret=%{public}d", ret);
         return ret;
     }
-
-    // calling the ipc interface by locking here may block other threads for a long time
-    ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
-        return ret;
-    }
-
     return SOFTBUS_OK;
 }
 
@@ -2169,7 +2177,8 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
     }
     if (action == TIMER_ACTION_START) {
         bool binding = (sessionNode->lifecycle.maxWaitTime != 0);
-        bool bindSuccess = (sessionNode->lifecycle.maxWaitTime == 0 && sessionNode->enableStatus == ENABLE_STATUS_SUCCESS);
+        bool bindSuccess =
+            (sessionNode->lifecycle.maxWaitTime == 0 && sessionNode->enableStatus == ENABLE_STATUS_SUCCESS);
         if (binding) {
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             TRANS_LOGE(TRANS_SDK, "socket=%{public}d The socket is binding", socket);
@@ -2178,7 +2187,7 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
         if (bindSuccess) {
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             TRANS_LOGW(TRANS_SDK, "socket=%{public}d The socket was bound successfully", socket);
-            return SOFTBUS_OK;
+            return SOFTBUS_ALREADY_TRIGGERED;
         }
     }
 
@@ -2261,7 +2270,7 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%{public}s", sessionName);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)
@@ -2364,7 +2373,7 @@ static void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
         TRANS_LOGI(TRANS_SDK, "session is idle, sessionId=%{public}d", id);
         if (destroyNode->OnShutdown != NULL) {
             destroyNode->OnShutdown(id, SHUTDOWN_REASON_TIMEOUT);
-            (void)TryDeleteEmptySessionServer(destroyNode->sessionName);
+            (void)TryDeleteEmptySessionServer(destroyNode->pkgName, destroyNode->sessionName);
         }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);

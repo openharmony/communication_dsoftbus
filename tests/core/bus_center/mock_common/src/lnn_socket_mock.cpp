@@ -60,9 +60,9 @@ void ConnShutdownSocket(int32_t fd)
     return GetSocketMockInterface()->ConnShutdownSocket(fd);
 }
 
-int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
+int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount)
 {
-    return GetSocketMockInterface()->ConnSetTcpKeepAlive(fd, seconds);
+    return GetSocketMockInterface()->ConnSetTcpKeepalive(fd, seconds, keepAliveIntvl, keepAliveCount);
 }
 
 int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)

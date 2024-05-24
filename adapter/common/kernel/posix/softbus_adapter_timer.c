@@ -30,10 +30,11 @@
 #define MS_PER_SECOND 1000
 #define US_PER_MSECOND 1000
 #define NS_PER_USECOND 1000
+#define DATE_TIME_BUFF_LEN 24 // yyyy-MM-dd HH:mm:ss.SSS
 
 static unsigned int g_timerType;
-
 static TimerFunc g_timerFunc = NULL;
+static _Thread_local char g_dateTimeBuff[DATE_TIME_BUFF_LEN] = {0};
 
 static void HandleTimeoutAdapterFun(union sigval para)
 {
@@ -148,4 +149,33 @@ uint64_t SoftBusGetSysTimeMs(void)
         return 0;
     }
     return (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
+}
+
+const char *SoftBusFormatTimestamp(uint64_t timestamp)
+{
+    uint32_t milliseconds = timestamp % MS_PER_SECOND;
+    time_t seconds = (time_t)(timestamp / MS_PER_SECOND);
+    struct tm formatedDateTime;
+
+#if (defined( __WINDOWS__ ))
+    if (localtime_s(&formatedDateTime, &seconds) != 0) {
+#else
+    if (localtime_r(&seconds, &formatedDateTime) == NULL) {
+#endif // __WINDOWS__
+        COMM_LOGE(COMM_ADAPTER, "get localtime failed");
+        return NULL;
+    }
+
+    const int32_t BASE_YEAR = 1900;
+    const int32_t BASE_MONTH = 1;
+    int32_t ret = sprintf_s(g_dateTimeBuff, DATE_TIME_BUFF_LEN, "%04d-%02d-%02d %02d:%02d:%02d.%03u",
+        formatedDateTime.tm_year + BASE_YEAR, formatedDateTime.tm_mon + BASE_MONTH, formatedDateTime.tm_mday,
+        formatedDateTime.tm_hour, formatedDateTime.tm_min, formatedDateTime.tm_sec, milliseconds);
+    if (ret < 0) {
+        COMM_LOGE(COMM_ADAPTER, "sprintf failed");
+        return NULL;
+    }
+
+    g_dateTimeBuff[DATE_TIME_BUFF_LEN - 1] = '\0';
+    return g_dateTimeBuff;
 }

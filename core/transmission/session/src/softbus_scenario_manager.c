@@ -90,13 +90,13 @@ static ScenarioManager *g_manager = NULL;
 
 
 static void NotifyWifi(const char *ifName, const char *localMac,
-    const char *peerMac, int finalType, int businessType)
+    const char *peerMac, uint32_t finalType, int32_t businessType)
 {
     (void)peerMac;
     TRANS_LOGI(TRANS_CTRL,
-        "ifName=%{public}s, finalType=%{public}d, businessType=%{public}d",
+        "ifName=%{public}s, finalType=%{public}u, businessType=%{public}d",
         ifName, finalType, businessType);
-    Hid2dUpperScene *scene =  NULL;
+    Hid2dUpperScene *scene = NULL;
     scene = (Hid2dUpperScene *)SoftBusCalloc(sizeof(Hid2dUpperScene));
     if (scene == NULL) {
         TRANS_LOGE(TRANS_CTRL, "error, out of memory");
@@ -107,7 +107,7 @@ static void NotifyWifi(const char *ifName, const char *localMac,
         SoftBusFree(scene);
         return;
     }
-    scene->scene = (int32_t)finalType;
+    scene->scene = finalType;
     if (businessType != SM_VIDEO_TYPE) {
         scene->fps = -1;
     }
@@ -255,7 +255,7 @@ static bool ScenarioManagerCheckAndUpdateIfaceName(ScenarioManager *manager, con
         TRANS_LOGE(TRANS_CTRL, "scenarioItemList hasn't initialized");
         return false;
     }
-    if (SoftBusMutexLock(&(manager->macIfacePairList->lock)) != 0) {
+    if (SoftBusMutexLock(&(manager->macIfacePairList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
         return false;
     }
@@ -458,21 +458,21 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
 {
     if (manager == NULL || manager->scenarioItemList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "scenarioItemList hasn't initialized");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (info == NULL) {
         TRANS_LOGE(TRANS_CTRL, "OriginalScenario is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != 0) {
+    if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     ScenarioItem *scenarioItem = ScenarioManagerGetOrAddScenarioItem(manager, info, true);
     if (scenarioItem == NULL) {
         TRANS_LOGE(TRANS_CTRL, "error, get scenario item failed");
         (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
-        return SOFTBUS_ERR;
+        return SOFTBUS_NOT_FIND;
     }
     BusinessCounter *counter = NULL;
     BusinessCounter *tmp = NULL;
@@ -517,15 +517,15 @@ static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *i
 {
     if (manager == NULL || manager->scenarioItemList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "scenarioItemList hasn't initialized");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (info == NULL) {
         TRANS_LOGE(TRANS_CTRL, "OriginalScenario is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != 0) {
+    if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     ScenarioItem *scenarioItem = ScenarioManagerGetOrAddScenarioItem(manager, info, false);
     if (scenarioItem == NULL) {
@@ -603,7 +603,7 @@ static void ScenarioManagerClearMacIfacePairList(ScenarioManager *manager)
     TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList numer=%{public}d", manager->macIfacePairList->cnt);
     MacIfacePair *pair = NULL;
     MacIfacePair *nextPair = NULL;
-    if (SoftBusMutexLock(&(manager->macIfacePairList->lock)) != 0) {
+    if (SoftBusMutexLock(&(manager->macIfacePairList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
         return;
     }
@@ -631,7 +631,7 @@ static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
     TRANS_LOGI(TRANS_CTRL, "before clean:scenarioItemList numer=%{public}d", manager->scenarioItemList->cnt);
     ScenarioItem *item = NULL;
     ScenarioItem *tmp = NULL;
-    if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != 0) {
+    if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
         return;
     }

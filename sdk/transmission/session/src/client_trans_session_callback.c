@@ -20,10 +20,13 @@
 #include "anonymizer.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
+#include "session_set_timer.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "trans_log.h"
+
+#define DFX_TIMERS_S 15
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -113,7 +116,7 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
     return SOFTBUS_OK;
 }
 
-static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
+NO_SANITIZE("cfi") static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
 {
     if (socketCallback == NULL || socketCallback->OnBind == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid OnBind callback function");
@@ -132,6 +135,7 @@ static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *sock
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi")
 static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socketCallback, int32_t errCode)
 {
     (void)ClientHandleBindWaitTimer(sessionId, 0, TIMER_ACTION_STOP);
@@ -279,16 +283,21 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         return ret;
     }
 
+    int id = SetTimer("OnSessionOpened", DFX_TIMERS_S);
     if (sessionCallback.isSocketListener) {
-        return HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
+        ret = HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
+        CancelTimer(id);
+        return ret;
     }
     TRANS_LOGD(TRANS_SDK, "trigger session open callback");
     if ((sessionCallback.session.OnSessionOpened == NULL) ||
         (sessionCallback.session.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK)) {
+        CancelTimer(id);
         TRANS_LOGE(TRANS_SDK, "OnSessionOpened failed");
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_ERR;
     }
+    CancelTimer(id);
     TRANS_LOGI(TRANS_SDK, "ok, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
@@ -343,7 +352,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
 {
     TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     SessionListenerAdapter sessionCallback;
     bool isServer = false;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));

@@ -1283,7 +1283,7 @@ static int32_t InitLooper(void)
 {
     g_laneLoopHandler.name = "transLaneLooper";
     g_laneLoopHandler.HandleMessage = MsgHandler;
-    g_laneLoopHandler.looper = GetLooper(LOOP_TYPE_LANE);
+    g_laneLoopHandler.looper = GetLooper(LOOP_TYPE_LNN);
     if (g_laneLoopHandler.looper == NULL) {
         LNN_LOGE(LNN_LANE, "transLane init looper fail");
         return SOFTBUS_ERR;

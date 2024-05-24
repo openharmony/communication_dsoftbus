@@ -48,6 +48,8 @@ int32_t TransReleaseUdpResources(int32_t channelId);
 
 int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType);
 
+int32_t TransCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len);
+
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);
 
 void TransChannelDeathCallback(const char *pkgName, int32_t pid);

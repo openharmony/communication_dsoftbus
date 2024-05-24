@@ -1478,7 +1478,7 @@ static int32_t InitGuideChannelLooper(void)
 {
     g_guideChannelHandler.name = "GuideChannelHandler";
     g_guideChannelHandler.HandleMessage = GuideChannelMsgHandler;
-    g_guideChannelHandler.looper = GetLooper(LOOP_TYPE_LANE);
+    g_guideChannelHandler.looper = GetLooper(LOOP_TYPE_LNN);
     if (g_guideChannelHandler.looper == NULL) {
         LNN_LOGE(LNN_LANE, "init p2pLooper fail");
         return SOFTBUS_ERR;

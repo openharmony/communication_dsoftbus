@@ -19,6 +19,7 @@
 #include "disc_ble.c"
 #include "disc_log.h"
 #include "message_handler.h"
+#include "softbus_broadcast_utils.h"
 #include "softbus_errcode.h"
 
 using namespace testing::ext;

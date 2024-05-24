@@ -15,11 +15,11 @@
 
 #ifndef SOFTBUS_ADAPTER_TIMER_H
 #define SOFTBUS_ADAPTER_TIMER_H
+
 #include <stdint.h>
+
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 typedef struct {
@@ -40,11 +40,10 @@ int SoftBusSleepMs(unsigned int ms);
 
 int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
 uint64_t SoftBusGetSysTimeMs(void);
+const char *SoftBusFormatTimestamp(uint64_t timestamp);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif /* __cplusplus */
 #endif /* __cplusplus */
 
 #endif // SOFTBUS_ADAPTER_TIMER_H

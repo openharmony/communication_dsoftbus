@@ -60,12 +60,14 @@ typedef struct {
 } DeviceMessageParse;
 
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
-    bool isConnect);
+    bool isConnect, bool isOldKey);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);
 
 void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info);
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason);
 void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info);
+bool IsNeedAuthLimit(const char *udidHash);
+void ClearAuthLimitMap(void);
 
 int32_t DelAuthReqInfoByAuthHandle(const AuthHandle *authHandle);
 void AuthFreeLane(const AuthHandle *authHandle);
@@ -101,6 +103,7 @@ int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_
     uint32_t *outLen);
 int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac);
 
+int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo *info);
 int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request);
 int32_t AuthDeviceGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
@@ -110,6 +113,7 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback);
 int32_t RegTrustListenerOnHichainSaStart(void);
 int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num);
 void AuthDeviceDeinit(void);
+void AuthDeviceNotTrust(const char *udid);
 
 #ifdef __cplusplus
 #if __cplusplus

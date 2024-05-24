@@ -28,8 +28,8 @@ public:
 
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo,
-        uint32_t requestId, const AuthVerifyCallback *callback, bool isFastAuth) = 0;
+    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+        const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth) = 0;
     virtual int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener) = 0;
@@ -37,7 +37,7 @@ public:
     virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
-    virtual int32_t AuthSendKeepAlive(const char *uuid, ModeCycle cycle) = 0;
+    virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
 };
 class AuthInterfaceMock : public AuthInterface {
 public:
@@ -45,8 +45,8 @@ public:
     ~AuthInterfaceMock() override;
     MOCK_METHOD(void, AuthHandleLeaveLNN, (AuthHandle), (override));
     MOCK_METHOD(uint32_t, AuthGenRequestId, (), (override));
-    MOCK_METHOD(int32_t, AuthStartVerify, (const AuthConnInfo *,
-        uint32_t, const AuthVerifyCallback *, bool), (override));
+    MOCK_METHOD(int32_t, AuthStartVerify, (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *,
+        AuthVerifyModule, bool), (override));
     MOCK_METHOD(int32_t, AuthGetVersion, (int64_t, SoftBusVersion *), (override));
     MOCK_METHOD(int32_t, AuthGetDeviceUuid, (int64_t, char *, uint16_t), (override));
 
@@ -55,7 +55,7 @@ public:
     MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
-    MOCK_METHOD2(AuthSendKeepAlive, int32_t(const char *, ModeCycle));
+    MOCK_METHOD2(AuthSendKeepaliveOption, int32_t(const char *, ModeCycle));
 };
 } // namespace OHOS
 #endif // AUTH_MOCK_H

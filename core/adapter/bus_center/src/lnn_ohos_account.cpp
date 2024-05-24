@@ -16,6 +16,7 @@
 
 #include <securec.h>
 
+#include "auth_manager.h"
 #include "bus_center_manager.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
@@ -81,7 +82,7 @@ int32_t LnnInitOhosAccount(void)
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
-void LnnUpdateOhosAccount(void)
+void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
@@ -104,12 +105,15 @@ void LnnUpdateOhosAccount(void)
             accountHash[0], accountHash[1]);
         return;
     }
+    ClearAuthLimitMap();
     LNN_LOGI(LNN_STATE,
         "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
-    LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
+    if (isNeedUpdateHeartbeat) {
+        LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
+    }
 }
 
 void LnnOnOhosAccountLogout(void)

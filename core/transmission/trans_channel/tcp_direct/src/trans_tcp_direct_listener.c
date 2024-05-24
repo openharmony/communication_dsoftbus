@@ -19,6 +19,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -27,12 +28,12 @@
 #include "softbus_errcode.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
+#include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
-#include "lnn_distributed_net_ledger.h"
 
 #define ID_OFFSET (1)
 #define OHOS_TYPE_UNKNOWN (-1)
@@ -82,24 +83,6 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
     return SOFTBUS_OK;
 }
 
-static bool IsPeerDeviceLegacyOs(const char *networkId)
-{
-    int32_t osType = OH_OS_TYPE;
-    char *anonyNetworkId = NULL;
-    Anonymize(networkId, &anonyNetworkId);
-    int32_t ret = LnnGetOsTypeByNetworkId(networkId, &osType);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get osType by networkId=%{public}s failed, ret=%{public}d", anonyNetworkId, ret);
-        AnonymizeFree(anonyNetworkId);
-        return false;
-    }
-    TRANS_LOGI(TRANS_CTRL, "peer device osType=%{public}d networkId=%{public}s", osType, anonyNetworkId);
-    AnonymizeFree(anonyNetworkId);
-
-    // peer device legacyOs when osType is not OH_OS_TYPE
-    return (osType == OH_OS_TYPE) ? false : true;
-}
-
 static int32_t StartVerifySession(SessionConn *conn)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
@@ -110,7 +93,7 @@ static int32_t StartVerifySession(SessionConn *conn)
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
     bool isAuthServer = false;
     uint32_t cipherFlag = FLAG_WIFI;
-    bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.peerNetWorkId);
+    bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.osType);
     if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer, isLegacyOs)) {
         TRANS_LOGE(TRANS_CTRL, "get cipher flag failed");
         return SOFTBUS_TRANS_GET_CIPHER_FAILED;
@@ -361,7 +344,8 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
 
 int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info)
 {
-    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P) || info->socketOption.port < 0) {
+    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P && info->type != CONNECT_HML) ||
+        info->socketOption.port < 0) {
         TRANS_LOGE(TRANS_CTRL, "Invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
