@@ -34,7 +34,7 @@ static int ProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
     if (code != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "publish service callback errCode=%{public}d.", code);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     ReadInt32(reply, (int *)owner);
@@ -46,14 +46,14 @@ static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
     if (code != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "publish service callback errCode=%{public}d.", code);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     uint32_t size;
     ReadUint32(reply, &size);
     void *data = (void *)ReadBuffer(reply, size);
     if (data == NULL) {
         TRANS_LOGE(TRANS_SDK, "pop data is null.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     *(TransSerializer *)owner = *(TransSerializer *)data;
     return SOFTBUS_OK;
@@ -63,7 +63,7 @@ int32_t TransServerProxyInit(void)
 {
     if (g_serverProxy != NULL) {
         TRANS_LOGE(TRANS_INIT, "server proxy has init.");
-        return SOFTBUS_OK;
+        return SOFTBUS_NO_INIT;
     }
 
     TRANS_LOGI(TRANS_INIT, "get trans server proxy");
@@ -109,16 +109,16 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
     WriteString(&request, pkgName);
     WriteString(&request, sessionName);
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
-        return SOFTBUS_NO_INIT;
+        return ret;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_CREATE_SESSION_SERVER, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
         TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
     }
     return ret;
 }
@@ -137,11 +137,11 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     WriteString(&request, pkgName);
     WriteString(&request, sessionName);
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
-        return SOFTBUS_NO_INIT;
+        return ret;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REMOVE_SESSION_SERVER, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
@@ -217,11 +217,11 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     }
 
     TransSerializer transSerializer;
-    transSerializer.ret = SOFTBUS_ERR;
+    transSerializer.ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
-        return SOFTBUS_NO_INIT;
+        return transSerializer.ret;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_SESSION, &request,
         &transSerializer, OpenSessionProxyCallback);
@@ -246,18 +246,18 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     WriteString(&request, sessionName);
     bool value = WriteRawData(&request, (void*)addrInfo, sizeof(ConnectionAddr));
     if (!value) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
-        return SOFTBUS_NO_INIT;
+        return ret;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_AUTH_SESSION, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
         TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
     }
     return ret;
 }
@@ -270,15 +270,15 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&request, channelId);
     WriteInt32(&request, channelType);
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
-        return SOFTBUS_NO_INIT;
+        return ret;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_NOTIFY_AUTH_SUCCESS, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
         TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
     }
     return ret;
 }
@@ -290,11 +290,11 @@ int32_t ServerIpcReleaseResources(int32_t channelId)
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&request, channelId);
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
-        return SOFTBUS_NO_INIT;
+        return ret;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_RELEASE_RESOURCES, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
@@ -315,18 +315,27 @@ int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_
     if (channelType == CHANNEL_TYPE_UNDEFINED) {
         WriteString(&request, sessionName);
     }
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
-        return SOFTBUS_NO_INIT;
+        return ret;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_CLOSE_CHANNEL, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
         TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return ans;
     }
     return ret;
+}
+
+int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+{
+    (void)channelId;
+    (void)laneId;
+    (void)dataInfo;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
@@ -347,18 +356,18 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
     WriteUint32(&request, len);
     WriteBuffer(&request, data, len);
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
         SoftBusFree(ipcData);
-        return SOFTBUS_NO_INIT;
+        return ret;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SESSION_SENDMSG, &request, &ret, ProxyCallback);
     SoftBusFree(ipcData);
     if (ans != EC_SUCCESS) {
         TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
     }
     TRANS_LOGD(TRANS_SDK, "ok");
     return ret;

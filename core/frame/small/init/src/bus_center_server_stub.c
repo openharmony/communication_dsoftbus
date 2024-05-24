@@ -42,32 +42,36 @@ static int32_t CheckPermission(const char *pkgName, int32_t uid)
 
 int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGD(LNN_STATE, "ServerJoinLNN ipc server pop");
+    LNN_LOGD(LNN_STATE, "ipc server pop");
     if (req == NULL || reply == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
     const char *pkgName = (const char *)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t addrTypeLen;
     ReadUint32(req, &addrTypeLen);
     if (addrTypeLen != sizeof(ConnectionAddr)) {
-        LNN_LOGE(LNN_STATE, "ServerJoinLNN read addrTypeLen=%{public}d failed", addrTypeLen);
+        LNN_LOGE(LNN_STATE, "read addrTypeLen=%{public}d failed", addrTypeLen);
         return SOFTBUS_ERR;
     }
     void *addr = (void *)ReadBuffer(req, addrTypeLen);
     if (addr == NULL) {
-        LNN_LOGE(LNN_STATE, "ServerJoinLNN read addr is null");
+        LNN_LOGE(LNN_STATE, "read addr is null");
         return SOFTBUS_IPC_ERR;
     }
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerJoinLNN no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerJoinLNN failed");
+        LNN_LOGE(LNN_STATE, "LnnIpcServerJoin failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -82,22 +86,26 @@ int32_t ServerJoinMetaNode(IpcIo *req, IpcIo *reply)
 
 int32_t ServerLeaveLNN(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGI(LNN_STATE, "ServerLeaveLNN ipc server pop");
+    LNN_LOGI(LNN_STATE, "ipc server pop");
     size_t len;
     const char *pkgName = (const char *)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     const char *networkId = (const char *)ReadString(req, &len);
-    if (networkId == NULL) {
-        LNN_LOGE(LNN_STATE, "ServerLeaveLNN read networkId failed");
+    if (networkId == NULL || len >= NETWORK_ID_BUF_LEN) {
+        LNN_LOGE(LNN_STATE, "read networkId failed");
         return SOFTBUS_ERR;
     }
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerLeaveLNN no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcServerLeave(pkgName, 0, networkId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerLeaveLNN failed");
+        LNN_LOGE(LNN_STATE, "LnnIpcServerLeave failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -112,35 +120,39 @@ int32_t ServerLeaveMetaNode(IpcIo *req, IpcIo *reply)
 
 int32_t ServerGetAllOnlineNodeInfo(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGI(LNN_STATE, "ServerGetAllOnlineNodeInfo ipc server pop");
+    LNN_LOGI(LNN_STATE, "ipc server pop");
     void *nodeInfo = NULL;
     int32_t infoNum = 0;
     size_t len;
     const char *pkgName = (const char *)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t infoTypeLen;
     ReadUint32(req, &infoTypeLen);
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerGetAllOnlineNodeInfo no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcGetAllOnlineNodeInfo(pkgName, &nodeInfo, infoTypeLen, &infoNum);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerGetAllOnlineNodeInfo get info failed");
+        LNN_LOGE(LNN_STATE, "get info failed");
         WriteInt32(reply, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
     if (infoNum < 0 || (infoNum > 0 && nodeInfo == NULL)) {
-        LNN_LOGE(LNN_STATE, "ServerGetAllOnlineNodeInfo node info is invalid");
+        LNN_LOGE(LNN_STATE, "node info is invalid");
         if (!(WriteInt32(reply, SOFTBUS_ERR))) {
-            LNN_LOGE(LNN_STATE, "ServerGetAllOnlineNodeInfo write reply failed!");
+            LNN_LOGE(LNN_STATE, "write reply failed!");
             SoftBusFree(nodeInfo);
             return SOFTBUS_ERR;
         }
     }
     if (!(WriteInt32(reply, infoNum))) {
-        LNN_LOGE(LNN_STATE, "ServerGetAllOnlineNodeInfo write infoNum failed!");
+        LNN_LOGE(LNN_STATE, "write infoNum failed!");
         SoftBusFree(nodeInfo);
         return SOFTBUS_ERR;
     }
@@ -154,29 +166,38 @@ int32_t ServerGetAllOnlineNodeInfo(IpcIo *req, IpcIo *reply)
 
 int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGD(LNN_STATE, "ServerGetLocalDeviceInfo ipc server pop");
+    LNN_LOGD(LNN_STATE, "ipc server pop");
     void *nodeInfo = NULL;
     size_t len;
     const char *pkgName = (const char *)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerGetLocalDeviceInfo no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    uint32_t infoTypeLen = sizeof(NodeBasicInfo);
+    uint32_t infoTypeLen;
+    ReadUint32(req, &infoTypeLen);
+    if (infoTypeLen != sizeof(NodeBasicInfo)) {
+        LNN_LOGE(LNN_STATE, "read infoTypeLen failed, infoTypeLen=%{pubilc}u", infoTypeLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == NULL) {
-        LNN_LOGE(LNN_STATE, "ServerGetLocalDeviceInfo malloc info type length failed");
+        LNN_LOGE(LNN_STATE, "malloc info type length failed");
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = LnnIpcGetLocalDeviceInfo(pkgName, nodeInfo, infoTypeLen);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerGetLocalDeviceInfo get local info failed");
+        LNN_LOGE(LNN_STATE, "get local info failed");
         SoftBusFree(nodeInfo);
         return SOFTBUS_ERR;
     }
     if (!(WriteUint32(reply, infoTypeLen))) {
-        LNN_LOGE(LNN_STATE, "ServerGetLocalDeviceInfo write reply failed!");
+        LNN_LOGE(LNN_STATE, "write reply failed!");
         SoftBusFree(nodeInfo);
         return SOFTBUS_ERR;
     }
@@ -185,76 +206,89 @@ int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
+static int32_t ServerRecoverGetNodeKeyInfo(void *buf, IpcIo *reply, int32_t infoLen)
+{
+    if (!(WriteInt32(reply, infoLen))) {
+        LNN_LOGE(LNN_STATE, "write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    WriteBuffer(reply, buf, infoLen);
+    return SOFTBUS_OK;
+}
+
 int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGD(LNN_STATE, "ServerGetNodeKeyInfo ipc server pop");
+    LNN_LOGD(LNN_STATE, "ipc server pop");
     size_t length;
     const char *pkgName = (const char *)ReadString(req, &length);
+    if (pkgName == NULL || length >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerGetNodeKeyInfo no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
     const char *networkId = (const char *)ReadString(req, &length);
-    if (networkId == NULL) {
-        LNN_LOGE(LNN_STATE, "GetNodeKeyInfoInner read networkId failed");
+    if (networkId == NULL || length >= NETWORK_ID_BUF_LEN) {
+        LNN_LOGE(LNN_STATE, "read networkId failed");
         return SOFTBUS_ERR;
     }
     int32_t key;
     ReadInt32(req, &key);
     int32_t infoLen  = LnnIpcGetNodeKeyInfoLen(key);
     if (infoLen == SOFTBUS_ERR) {
-        LNN_LOGE(LNN_STATE, "GetNodeKeyInfoInner get infoLen failed");
+        LNN_LOGE(LNN_STATE, "get infoLen failed");
         return SOFTBUS_ERR;
     }
-    int32_t len;
-    ReadInt32(req, &len);
-    if (len < infoLen) {
-        LNN_LOGE(LNN_STATE, "GetNodeKeyInfoInner read len is invalid param, len=%{public}d, infoLen=%{public}d", len,
+    uint32_t len;
+    ReadUint32(req, &len);
+    if (len < (uint32_t)infoLen) {
+        LNN_LOGE(LNN_STATE, "read len is invalid param, len=%{public}u, infoLen=%{public}d", len,
             infoLen);
         return SOFTBUS_ERR;
     }
     void *buf = SoftBusCalloc(infoLen);
     if (buf == NULL) {
-        LNN_LOGE(LNN_STATE, "ServerGetNodeKeyInfo malloc buffer failed");
+        LNN_LOGE(LNN_STATE, "malloc buffer failed");
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = LnnIpcGetNodeKeyInfo(pkgName, networkId, key, (unsigned char *)buf, infoLen);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerGetNodeKeyInfo get local info failed");
+        LNN_LOGE(LNN_STATE, "get local info failed");
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
-    if (!(WriteInt32(reply, infoLen))) {
-        LNN_LOGE(LNN_STATE, "GetNodeKeyInfoInner write reply failed!");
-        SoftBusFree(buf);
-        return SOFTBUS_ERR;
-    }
-    WriteBuffer(reply, buf, infoLen);
+    ret = ServerRecoverGetNodeKeyInfo(buf, reply, infoLen);
     SoftBusFree(buf);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerSetNodeDataChangeFlag(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGD(LNN_STATE, "ServerSetNodeDataChangeFlag ipc server pop");
+    LNN_LOGD(LNN_STATE, "ipc server pop");
     size_t length;
     const char *pkgName = (const char *)ReadString(req, &length);
+    if (pkgName == NULL || length >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     const char *networkId = (const char *)ReadString(req, &length);
-    if (networkId == NULL) {
-        LNN_LOGE(LNN_STATE, "SetNodeDataChangeFlag read networkId failed");
+    if (networkId == NULL || length >= NETWORK_ID_BUF_LEN) {
+        LNN_LOGE(LNN_STATE, "read networkId failed");
         return SOFTBUS_ERR;
     }
     int16_t dataChangeFlag;
     ReadInt16(req, &dataChangeFlag);
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerSetNodeDataChangeFlag no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerSetNodeDataChangeFlag get local info failed");
+        LNN_LOGE(LNN_STATE, "get local info failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -283,12 +317,16 @@ int32_t ServerSetDataLevel(IpcIo *req, IpcIo *reply)
 
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGD(LNN_STATE, "ServerStartTimeSync ipc server pop");
+    LNN_LOGD(LNN_STATE, "ipc server pop");
     size_t length;
     const char *pkgName = (const char *)ReadString(req, &length);
+    if (pkgName == NULL || length >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     const char *targetNetworkId = (const char *)ReadString(req, &length);
-    if (targetNetworkId == NULL) {
-        LNN_LOGE(LNN_STATE, "ServerStartTimeSync read targetNetworkId failed");
+    if (targetNetworkId == NULL || length >= NETWORK_ID_BUF_LEN) {
+        LNN_LOGE(LNN_STATE, "read targetNetworkId failed");
         return SOFTBUS_ERR;
     }
     int32_t accuracy;
@@ -297,12 +335,12 @@ int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply)
     ReadInt32(req, &period);
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerStartTimeSync no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcStartTimeSync(pkgName, 0, targetNetworkId, accuracy, period);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerStartTimeSync start time sync failed");
+        LNN_LOGE(LNN_STATE, "start time sync failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -310,22 +348,37 @@ int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply)
 
 int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGI(LNN_STATE, "ServerStopTimeSync ipc server pop");
+    LNN_LOGI(LNN_STATE, "ipc server pop");
     size_t length;
     const char *pkgName = (const char *)ReadString(req, &length);
+    if (pkgName == NULL || length >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     const char *targetNetworkId = (const char *)ReadString(req, &length);
-    if (targetNetworkId == NULL) {
-        LNN_LOGE(LNN_STATE, "ServerStopTimeSync read targetNetworkId failed");
+    if (targetNetworkId == NULL || length >= NETWORK_ID_BUF_LEN) {
+        LNN_LOGE(LNN_STATE, "read targetNetworkId failed");
         return SOFTBUS_ERR;
     }
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerStopTimeSync no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcStopTimeSync(pkgName, targetNetworkId, 0);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerStopTimeSync start time sync failed");
+        LNN_LOGE(LNN_STATE, "start time sync failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t ServerRecoverPublishLNN(const char *pkgName, PublishInfo* info, IpcIo *reply)
+{
+    int32_t ret = LnnIpcPublishLNN(pkgName, &info);
+    WriteInt32(reply, ret);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "LnnIpcPublishLNN failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -333,19 +386,22 @@ int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply)
 
 int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGD(LNN_STATE, "ServerPublishLNN ipc server pop");
+    LNN_LOGD(LNN_STATE, "ipc server pop");
     if (req == NULL || reply == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
     const char *pkgName = (const char *)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerPublishLNN no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
-
     PublishInfo info;
     (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     ReadInt32(req, &info.publishId);
@@ -358,14 +414,14 @@ int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply)
     info.freq = (ExchangeFreq)freq;
     info.capability = (const char *)ReadString(req, &len);
     if (info.capability == NULL) {
-        LNN_LOGE(LNN_STATE, "ServerPublishLNN read capability is null");
+        LNN_LOGE(LNN_STATE, "read capability is null");
         return SOFTBUS_IPC_ERR;
     }
     ReadUint32(req, &info.dataLen);
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
         info.capabilityData = (unsigned char *)ReadString(req, &len);
         if (info.capabilityData == NULL) {
-            LNN_LOGE(LNN_STATE, "ServerPublishLNN read capabilityData is null");
+            LNN_LOGE(LNN_STATE, "read capabilityData is null");
             return SOFTBUS_IPC_ERR;
         }
     } else {
@@ -373,34 +429,32 @@ int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply)
         info.dataLen = 0;
     }
     ReadBool(req, &info.ranging);
-    int32_t ret = LnnIpcPublishLNN(pkgName, &info);
-    WriteInt32(reply, ret);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerPublishLNN failed");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
+    return ServerRecoverPublishLNN(pkgName, &info, reply);
 }
 
 int32_t ServerStopPublishLNN(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGD(LNN_STATE, "ServerStopPublishLNN ipc server pop");
+    LNN_LOGD(LNN_STATE, "ipc server pop");
     if (req == NULL || reply == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
     const char *pkgName = (const char *)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t publishId;
     ReadInt32(req, &publishId);
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerStopPublishLNN no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcStopPublishLNN(pkgName, publishId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerStopPublishLNN failed");
+        LNN_LOGE(LNN_STATE, "LnnIpcStopPublishLNN failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -413,6 +467,10 @@ int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply)
 
     size_t len;
     const char *pkgName = (const char *)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t callingUid = GetCallingUid();
     LNN_CHECK_AND_RETURN_RET_LOGE((
         CheckPermission(pkgName, callingUid) == SOFTBUS_OK), SOFTBUS_PERMISSION_DENIED, LNN_STATE, "no permission");
@@ -456,23 +514,27 @@ int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply)
 
 int32_t ServerStopRefreshLNN(IpcIo *req, IpcIo *reply)
 {
-    LNN_LOGD(LNN_STATE, "ServerStopRefreshLNN ipc server pop");
+    LNN_LOGD(LNN_STATE, "ipc server pop");
     if (req == NULL || reply == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
     const char *pkgName = (const char *)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t refreshId;
     ReadInt32(req, &refreshId);
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerStopRefreshLNN no permission");
+        LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcStopRefreshLNN(pkgName, 0, refreshId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerStopRefreshLNN failed");
+        LNN_LOGE(LNN_STATE, "LnnIpcStopRefreshLNN failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -482,9 +544,13 @@ int32_t ServerActiveMetaNode(IpcIo *req, IpcIo *reply)
 {
     uint32_t size;
     const char *pkgName = (const char *)ReadString(req, &size);
+    if (pkgName == NULL || size >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     MetaNodeConfigInfo *info = (MetaNodeConfigInfo *)ReadRawData(req, sizeof(MetaNodeConfigInfo));
-    if (info == NULL || size != sizeof(MetaNodeConfigInfo)) {
-        LNN_LOGE(LNN_STATE, "ServerActiveMetaNode read meta node config info failed");
+    if (info == NULL) {
+        LNN_LOGE(LNN_STATE, "read meta node config info failed");
         WriteInt32(reply, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_ERR;
     }
@@ -496,16 +562,16 @@ int32_t ServerActiveMetaNode(IpcIo *req, IpcIo *reply)
     char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
     ret = LnnIpcActiveMetaNode(info, metaNodeId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerActiveMetaNode failed");
+        LNN_LOGE(LNN_STATE, "LnnIpcActiveMetaNode failed");
         WriteInt32(reply, ret);
         return SOFTBUS_ERR;
     }
     if (!(WriteInt32(reply, SOFTBUS_OK))) {
-        LNN_LOGE(LNN_STATE, "ServerActiveMetaNode write SOFTBUS_OK to reply failed!");
+        LNN_LOGE(LNN_STATE, "write SOFTBUS_OK to reply failed!");
         return SOFTBUS_ERR;
     }
     if (!(WriteString(reply, metaNodeId))) {
-        LNN_LOGE(LNN_STATE, "ServerActiveMetaNode write metaNodeId to reply failed!");
+        LNN_LOGE(LNN_STATE, "write metaNodeId to reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -515,9 +581,13 @@ int32_t ServerDeactiveMetaNode(IpcIo *req, IpcIo *reply)
 {
     uint32_t size;
     const char *pkgName = (const char *)ReadString(req, &size);
+    if (pkgName == NULL || size >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     const char *metaNodeId = (const char *)ReadString(req, &size);
     if (metaNodeId == NULL || size != (NETWORK_ID_BUF_LEN - 1)) {
-        LNN_LOGE(LNN_STATE, "ServerDeactiveMetaNode read meta node id failed, size=%{public}d", size);
+        LNN_LOGE(LNN_STATE, "read meta node id failed, size=%{public}d", size);
         WriteInt32(reply, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_ERR;
     }
@@ -528,7 +598,7 @@ int32_t ServerDeactiveMetaNode(IpcIo *req, IpcIo *reply)
     }
     ret = LnnIpcDeactiveMetaNode(metaNodeId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerDeactiveMetaNode failed");
+        LNN_LOGE(LNN_STATE, "LnnIpcDeactiveMetaNode failed");
         WriteInt32(reply, ret);
         return SOFTBUS_ERR;
     }
@@ -540,9 +610,17 @@ int32_t ServerGetAllMetaNodeInfo(IpcIo *req, IpcIo *reply)
 {
     uint32_t size;
     const char *pkgName = (const char *)ReadString(req, &size);
+    if (pkgName == NULL || size >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t infoNum;
     if (!(ReadInt32(req, &infoNum))) {
-        LNN_LOGE(LNN_STATE, "ServerGetAllMetaNodeInfo read infoNum failed!");
+        LNN_LOGE(LNN_STATE, "read infoNum failed!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if ((uint32_t)infoNum > MAX_META_NODE_NUM) {
+        LNN_LOGE(LNN_STATE, "inivalid param, infoNum=%{pubilc}d, maxNum=%{pubilc}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_ERR;
     }
     MetaNodeInfo infos[MAX_META_NODE_NUM];
@@ -553,16 +631,16 @@ int32_t ServerGetAllMetaNodeInfo(IpcIo *req, IpcIo *reply)
     }
     ret = LnnIpcGetAllMetaNodeInfo(infos, &infoNum);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerGetAllMetaNodeInfo failed");
+        LNN_LOGE(LNN_STATE, "LnnIpcGetAllMetaNodeInfo failed");
         WriteInt32(reply, ret);
         return SOFTBUS_ERR;
     }
     if (!(WriteInt32(reply, SOFTBUS_OK))) {
-        LNN_LOGE(LNN_STATE, "ServerGetAllMetaNodeInfo write SOFTBUS_OK to reply failed!");
+        LNN_LOGE(LNN_STATE, "write SOFTBUS_OK to reply failed!");
         return SOFTBUS_ERR;
     }
     if (!(WriteInt32(reply, infoNum))) {
-        LNN_LOGE(LNN_STATE, "ServerGetAllMetaNodeInfo write infoNum to reply failed!");
+        LNN_LOGE(LNN_STATE, "write infoNum to reply failed!");
         return SOFTBUS_ERR;
     }
     if (infoNum > 0) {
@@ -580,28 +658,28 @@ int32_t ServerShiftLnnGear(IpcIo *req, IpcIo *reply)
 
     const char *pkgName = (const char *)ReadString(req, &len);
     if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
-        LNN_LOGE(LNN_STATE, "ServerShiftLnnGear read pkgName failed");
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
         goto ERR_RETURN;
     }
     const char *callerId = (const char *)ReadString(req, &len);
     if (callerId == NULL || len == 0 || len >= CALLER_ID_MAX_LEN) {
-        LNN_LOGE(LNN_STATE, "ServerShiftLnnGear read callerId failed");
+        LNN_LOGE(LNN_STATE, "read callerId failed");
         goto ERR_RETURN;
     }
     if (!ReadBool(req, &targetNetworkIdIsNULL)) {
-        LNN_LOGE(LNN_STATE, "ServerShiftLnnGear read targetNetworkIdIsNULL failed");
+        LNN_LOGE(LNN_STATE, "read targetNetworkIdIsNULL failed");
         goto ERR_RETURN;
     }
     if (!targetNetworkIdIsNULL) {
         targetNetworkId = (const char *)ReadString(req, &len);
         if (targetNetworkId == NULL || len != NETWORK_ID_BUF_LEN - 1) {
-            LNN_LOGE(LNN_STATE, "ServerShiftLnnGear read targetNetworkId failed");
+            LNN_LOGE(LNN_STATE, "read targetNetworkId failed");
             goto ERR_RETURN;
         }
     }
     const GearMode *mode = (GearMode *)ReadRawData(req, sizeof(GearMode));
     if (mode == NULL) {
-        LNN_LOGE(LNN_STATE, "ServerShiftLnnGear read gear mode info failed");
+        LNN_LOGE(LNN_STATE, "read gear mode info failed");
         goto ERR_RETURN;
     }
     int32_t ret = CheckPermission(pkgName, GetCallingUid());
@@ -611,12 +689,12 @@ int32_t ServerShiftLnnGear(IpcIo *req, IpcIo *reply)
     }
     ret = LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "ServerShiftLnnGear failed");
+        LNN_LOGE(LNN_STATE, "LnnIpcShiftLNNGear failed");
         WriteInt32(reply, ret);
         return SOFTBUS_ERR;
     }
     if (!(WriteInt32(reply, SOFTBUS_OK))) {
-        LNN_LOGE(LNN_STATE, "ServerShiftLnnGear write reply failed!");
+        LNN_LOGE(LNN_STATE, "write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

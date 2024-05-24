@@ -158,8 +158,20 @@ typedef enum {
     FILE_EVENT_RECV_PROCESS,     /**< Receiving file */
     FILE_EVENT_RECV_FINISH,      /**< Receive file end */
     FILE_EVENT_RECV_ERROR,       /**< Receive file failed */
+    FILE_EVENT_TRANS_STATUS,     /**< Transmission status of the files */
     FILE_EVENT_BUTT,
 } FileEventType;
+
+typedef struct {
+    char **files;     /**< File path */
+    uint32_t fileCnt; /**< Count of the files */
+} FileList;
+
+typedef struct {
+    FileList completedList;    /**< Completed file list */
+    FileList notCompletedList; /**< Not completed file list */
+    FileList notStartedList;   /**< Not started file list */
+} FileStatusList;
 
 typedef struct {
     FileEventType type;                  /**< Event data type of the files*/
@@ -168,6 +180,9 @@ typedef struct {
     uint64_t bytesProcessed;             /**< Send or receive bytes of the files*/
     uint64_t bytesTotal;                 /**< Total bytes of the files*/
     const char *(*UpdateRecvPath)(void); /**< Update file receiving directory*/
+    FileStatusList statusList;           /**< File status list */
+    int32_t errorCode;                   /**< Error code */
+    uint32_t rate;                       /**< Rate of the file transmission */
 } FileEvent;
 
 /**

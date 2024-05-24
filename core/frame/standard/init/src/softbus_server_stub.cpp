@@ -166,6 +166,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_OPEN_AUTH_SESSION] = &SoftBusServerStub::OpenAuthSessionInner;
     memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] = &SoftBusServerStub::NotifyAuthSuccessInner;
     memberFuncMap_[SERVER_CLOSE_CHANNEL] = &SoftBusServerStub::CloseChannelInner;
+    memberFuncMap_[SERVER_CLOSE_CHANNEL_STATISTICS] = &SoftBusServerStub::CloseChannelWithStatisticsInner;
     memberFuncMap_[SERVER_SESSION_SENDMSG] = &SoftBusServerStub::SendMessageInner;
     memberFuncMap_[SERVER_EVALUATE_QOS] = &SoftBusServerStub::EvaluateQosInner;
     memberFuncMap_[SERVER_JOIN_LNN] = &SoftBusServerStub::JoinLNNInner;
@@ -210,6 +211,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_OPEN_AUTH_SESSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_NOTIFY_AUTH_SUCCESS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_CLOSE_CHANNEL_STATISTICS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_SESSION_SENDMSG] = nullptr;
     memberPermissionMap_[SERVER_JOIN_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_JOIN_METANODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
@@ -819,6 +821,38 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerStub::CloseChannelWithStatisticsInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read channel Id failed!");
+        return SOFTBUS_ERR;
+    }
+    uint64_t laneId;
+    if (!data.ReadUint64(laneId)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read lane Id failed!");
+        return SOFTBUS_ERR;
+    }
+    uint32_t len;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner dataInfo len failed!");
+        return SOFTBUS_ERR;
+    }
+    void *dataInfo = const_cast<void *>(reinterpret_cast<const void *>(data.ReadRawData(len)));
+    if (dataInfo == nullptr) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read dataInfo failed!");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t retReply = CloseChannelWithStatistics(channelId, laneId, dataInfo, len);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t channelId;
@@ -1007,7 +1041,11 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
         return SOFTBUS_IPC_ERR;
     }
 
-    infoTypeLen = sizeof(NodeBasicInfo);
+    infoTypeLen = data.ReadUint32();
+    if (infoTypeLen != sizeof(NodeBasicInfo)) {
+        COMM_LOGE(COMM_SVC, "read infoTypeLen failed!");
+        return SOFTBUS_IPC_ERR;
+    }
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == nullptr) {
         COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner malloc info type length failed");
@@ -1052,10 +1090,10 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "get info len failed!");
         return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
     }
-    int32_t len;
-    READ_PARCEL_WITH_RET(data, Int32, len, SOFTBUS_IPC_ERR);
-    if (len < infoLen) {
-        COMM_LOGE(COMM_SVC, "read len is invalid param, len=%{public}d, infoLen=%{public}d", len, infoLen);
+    uint32_t len;
+    READ_PARCEL_WITH_RET(data, Uint32, len, SOFTBUS_IPC_ERR);
+    if (len < (uint32_t)infoLen) {
+        COMM_LOGE(COMM_SVC, "invalid param, len=%{public}u, infoLen=%{public}d", len, infoLen);
         return SOFTBUS_INVALID_PARAM;
     }
     void *buf = SoftBusCalloc(infoLen);
@@ -1094,8 +1132,8 @@ int32_t SoftBusServerStub::SetNodeDataChangeFlagInner(MessageParcel &data, Messa
         COMM_LOGE(COMM_SVC, "SetNodeDataChangeFlag read networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
-    int16_t changeFlag;
-    if (!data.ReadInt16(changeFlag)) {
+    uint16_t changeFlag;
+    if (!data.ReadUint16(changeFlag)) {
         COMM_LOGE(COMM_SVC, "SetNodeDataChangeFlag read key failed!");
         return SOFTBUS_IPC_ERR;
     }
@@ -1518,6 +1556,10 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
 
     if (!data.ReadInt32(infoNum)) {
         COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo read infoNum failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if ((uint32_t)infoNum > MAX_META_NODE_NUM) {
+        COMM_LOGE(COMM_SVC, "invalid param, infoNum=%{pubilc}d, maxNum=%{pubilc}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_IPC_ERR;
     }
     if (GetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {

@@ -1,17 +1,17 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <cinttypes>
 #include <functional>
@@ -20,8 +20,10 @@
 #include <vector>
 
 #include "anonymizer.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_log.h"
+#include "lnn_parameter_utils.h"
 #include "softbus_errcode.h"
 
 #include "datetime_ex.h"
@@ -33,23 +35,22 @@ constexpr int32_t MAX_INIT_RETRY_TIMES = 30;
 constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 500 * 1000; // 500ms
 constexpr int32_t MAX_MAP_SIZE = 10000;
 const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
-}
+} // namespace
 
 KVAdapter::KVAdapter(const std::string &appId, const std::string &storeId,
-                     const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener)
+    const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener)
 {
     this->appId_.appId = appId;
     this->storeId_.storeId = storeId;
     this->dataChangeListener_ = dataChangeListener;
-    LNN_LOGI(LNN_LEDGER, "KVAdapter Constructor Success, appId: %{public}s, storeId: %{public}s",
-        appId.c_str(), storeId.c_str());
+    LNN_LOGI(LNN_LEDGER, "KVAdapter Constructor Success, appId: %{public}s, storeId: %{public}s", appId.c_str(),
+        storeId.c_str());
 }
 
 KVAdapter::~KVAdapter()
 {
     LNN_LOGI(LNN_LEDGER, "KVAdapter Destruction!");
 }
-
 
 int32_t KVAdapter::Init()
 {
@@ -66,6 +67,10 @@ int32_t KVAdapter::Init()
         }
         LNN_LOGI(LNN_LEDGER, "CheckKvStore, left times: %{public}d, status: %{public}d", tryTimes, status);
         if (status == DistributedKv::Status::SECURITY_LEVEL_ERROR) {
+            DeleteKvStore();
+        }
+        if (status == DistributedKv::Status::STORE_META_CHANGED) {
+            LNN_LOGE(LNN_LEDGER, "This db meta changed, remove and rebuild it");
             DeleteKvStore();
         }
         usleep(INIT_RETRY_SLEEP_INTERVAL);
@@ -86,6 +91,10 @@ int32_t KVAdapter::DeInit()
 int32_t KVAdapter::RegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
@@ -93,9 +102,9 @@ int32_t KVAdapter::RegisterDataChangeListener()
             return SOFTBUS_KV_DB_PTR_NULL;
         }
         DistributedKv::Status status =
-                kvStorePtr_->SubscribeKvStore(DistributedKv::SubscribeType::SUBSCRIBE_TYPE_CLOUD, dataChangeListener_);
+            kvStorePtr_->SubscribeKvStore(DistributedKv::SubscribeType::SUBSCRIBE_TYPE_CLOUD, dataChangeListener_);
         if (status != DistributedKv::Status::SUCCESS) {
-            LNN_LOGE(LNN_LEDGER, "Register db data change listener failed, ret: %{public}d", status);
+            LNN_LOGE(LNN_LEDGER, "Register db data change listener failed, ret=%{public}d", status);
             return SOFTBUS_KV_REGISTER_DATA_LISTENER_FAILED;
         }
     }
@@ -105,6 +114,10 @@ int32_t KVAdapter::RegisterDataChangeListener()
 int32_t KVAdapter::UnRegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "UnRegister db data change listener");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
@@ -114,7 +127,7 @@ int32_t KVAdapter::UnRegisterDataChangeListener()
         DistributedKv::Status status =
             kvStorePtr_->UnSubscribeKvStore(DistributedKv::SubscribeType::SUBSCRIBE_TYPE_CLOUD, dataChangeListener_);
         if (status != DistributedKv::Status::SUCCESS) {
-            LNN_LOGE(LNN_LEDGER, "UnRegister db data change listener failed, ret: %{public}d", status);
+            LNN_LOGE(LNN_LEDGER, "UnRegister db data change listener failed, ret=%{public}d", status);
             return SOFTBUS_KV_UNREGISTER_DATA_LISTENER_FAILED;
         }
     }
@@ -131,7 +144,7 @@ int32_t KVAdapter::DeleteDataChangeListener()
     return SOFTBUS_OK;
 }
 
-int32_t KVAdapter::Put(const std::string& key, const std::string& value)
+int32_t KVAdapter::Put(const std::string &key, const std::string &value)
 {
     if (key.empty() || key.size() > MAX_STRING_LEN || value.empty() || value.size() > MAX_STRING_LEN) {
         LNN_LOGE(LNN_LEDGER, "Param is invalid!");
@@ -151,8 +164,8 @@ int32_t KVAdapter::Put(const std::string& key, const std::string& value)
             char *anonyValue = nullptr;
             Anonymize(key.c_str(), &anonyKey);
             Anonymize(value.c_str(), &anonyValue);
-            LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s, value=%{public}s",
-                anonyKey, anonyValue);
+            LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s, value=%{public}s", anonyKey,
+                anonyValue);
             AnonymizeFree(anonyKey);
             AnonymizeFree(anonyValue);
             return SOFTBUS_OK;
@@ -161,14 +174,14 @@ int32_t KVAdapter::Put(const std::string& key, const std::string& value)
         status = kvStorePtr_->Put(kvKey, kvValue);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "Put kv to db failed, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "Put kv to db failed, ret=%{public}d", status);
         return SOFTBUS_KV_PUT_DB_FAIL;
     }
     LNN_LOGI(LNN_LEDGER, "KVAdapter Put succeed");
     return SOFTBUS_OK;
 }
 
-int32_t KVAdapter::PutBatch(const std::map<std::string, std::string>& values)
+int32_t KVAdapter::PutBatch(const std::map<std::string, std::string> &values)
 {
     if (values.empty() || values.size() > MAX_MAP_SIZE) {
         LNN_LOGE(LNN_LEDGER, "Param is invalid!");
@@ -209,14 +222,14 @@ int32_t KVAdapter::PutBatch(const std::map<std::string, std::string>& values)
         status = kvStorePtr_->PutBatch(entries);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "PutBatch kv to db failed, ret: %d", status);
+        LNN_LOGE(LNN_LEDGER, "PutBatch kv to db failed, ret=%d", status);
         return SOFTBUS_KV_PUT_DB_FAIL;
     }
     LNN_LOGI(LNN_LEDGER, "KVAdapter PutBatch succeed");
     return SOFTBUS_OK;
 }
 
-int32_t KVAdapter::Delete(const std::string& key)
+int32_t KVAdapter::Delete(const std::string &key)
 {
     DistributedKv::Status status;
     {
@@ -236,7 +249,7 @@ int32_t KVAdapter::Delete(const std::string& key)
     return SOFTBUS_OK;
 }
 
-int32_t KVAdapter::DeleteByPrefix(const std::string& keyPrefix)
+int32_t KVAdapter::DeleteByPrefix(const std::string &keyPrefix)
 {
     LNN_LOGI(LNN_LEDGER, "call");
     if (keyPrefix.empty() || keyPrefix.size() > MAX_STRING_LEN) {
@@ -253,7 +266,7 @@ int32_t KVAdapter::DeleteByPrefix(const std::string& keyPrefix)
     std::vector<DistributedKv::Entry> allEntries;
     DistributedKv::Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "GetEntries failed, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "GetEntries failed, ret=%{public}d", status);
         return SOFTBUS_KV_DEL_DB_FAIL;
     }
     std::vector<DistributedKv::Key> keys;
@@ -262,14 +275,14 @@ int32_t KVAdapter::DeleteByPrefix(const std::string& keyPrefix)
     }
     status = kvStorePtr_->DeleteBatch(keys);
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "DeleteBatch failed, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "DeleteBatch failed, ret=%{public}d", status);
         return SOFTBUS_KV_DEL_DB_FAIL;
     }
     LNN_LOGI(LNN_LEDGER, "DeleteByPrefix succeed");
     return SOFTBUS_OK;
 }
 
-int32_t KVAdapter::Get(const std::string& key, std::string& value)
+int32_t KVAdapter::Get(const std::string &key, std::string &value)
 {
     char *anonyKey = nullptr;
     Anonymize(key.c_str(), &anonyKey);
@@ -294,7 +307,7 @@ int32_t KVAdapter::Get(const std::string& key, std::string& value)
         return SOFTBUS_KV_GET_DB_FAIL;
     }
     value = kvValue.ToString();
-    LNN_LOGI(LNN_LEDGER, "Get succeed");
+    LNN_LOGD(LNN_LEDGER, "Get succeed");
     return SOFTBUS_OK;
 }
 
@@ -309,10 +322,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
         .isPublic = true,
-        .cloudConfig = {
-            .enableCloud = true,
-            .autoSync = false
-        }
+        .cloudConfig = { .enableCloud = true, .autoSync = false }
     };
     DistributedKv::Status status;
     {
@@ -346,6 +356,10 @@ int32_t KVAdapter::DeleteKvStorePtr()
 int32_t KVAdapter::CloudSync()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     std::function<void(DistributedKv::ProgressDetail &&)> callback = CloudSyncCallback;
     DistributedKv::Status status;
     {
@@ -357,14 +371,14 @@ int32_t KVAdapter::CloudSync()
         status = kvStorePtr_->CloudSync(callback);
     }
     if (status == DistributedKv::Status::CLOUD_DISABLED) {
-        LNN_LOGE(LNN_LEDGER, "cloud sync disabled, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "cloud sync disabled, ret=%{public}d", status);
         return SOFTBUS_KV_CLOUD_DISABLED;
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "cloud sync failed, ret: %{public}d", status);
+        LNN_LOGE(LNN_LEDGER, "cloud sync failed, ret=%{public}d", status);
         return SOFTBUS_KV_CLOUD_SYNC_FAIL;
     }
-    LNN_LOGI(LNN_LEDGER, "cloud sync ok, ret: %{public}d", status);
+    LNN_LOGI(LNN_LEDGER, "cloud sync ok, ret=%{public}d", status);
     return SOFTBUS_OK;
 }
 
@@ -373,10 +387,22 @@ void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
     auto code = detail.code;
     auto progress = detail.progress;
     if (progress == DistributedKv::Progress::SYNC_FINISH && code == DistributedKv::Status::SUCCESS) {
-        LNN_LOGI(LNN_LEDGER, "cloud sync succeed");
+        LNN_LOGI(LNN_LEDGER,
+            "cloud sync succeed, upload.total=%{public}u, upload.success=%{public}u, "
+            "upload.failed=%{public}u, upload.untreated=%{public}u, download.total=%{public}u, "
+            "download.success=%{public}u, download.failed=%{public}u, download.untreated=%{public}u",
+            detail.details.upload.total, detail.details.upload.success, detail.details.upload.failed,
+            detail.details.upload.untreated, detail.details.download.total, detail.details.download.success,
+            detail.details.download.failed, detail.details.download.untreated);
     }
     if (progress == DistributedKv::Progress::SYNC_FINISH && code != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "cloud sync failed, code: %{public}d", code);
+        LNN_LOGI(LNN_LEDGER,
+            "cloud sync failed, code: %{public}d, upload.total=%{public}u, upload.success=%{public}u, "
+            "upload.failed=%{public}u, upload.untreated=%{public}u, download.total=%{public}u, "
+            "download.success=%{public}u, download.failed=%{public}u, download.untreated=%{public}u",
+            code, detail.details.upload.total, detail.details.upload.success, detail.details.upload.failed,
+            detail.details.upload.untreated, detail.details.download.total, detail.details.download.success,
+            detail.details.download.failed, detail.details.download.untreated);
     }
 }
 

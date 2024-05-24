@@ -428,7 +428,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     (void)groupId;
     LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupCreated");
-    LnnUpdateOhosAccount();
+    LnnUpdateOhosAccount(true);
     LnnHbOnTrustedRelationIncreased(groupType);
     RestartCoapDiscovery();
     EhLoginEventHandler();
@@ -571,13 +571,10 @@ static void NetAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (accountState) {
         case SOFTBUS_ACCOUNT_LOG_IN:
             LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_ACCOUNT_LOG_IN");
-            LnnUpdateOhosAccount();
-            LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
             RestartCoapDiscovery();
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_ACCOUNT_LOG_OUT");
-            LnnOnOhosAccountLogout();
             LnnHbOnTrustedRelationReduced();
             break;
         default:
@@ -607,6 +604,31 @@ static int32_t RegistProtocolManager(void)
     return SOFTBUS_OK;
 }
 
+
+static int32_t LnnRegisterEvent(void)
+{
+    if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, NightModeChangeEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "register night mode change event handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, NetUserStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist user background evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, NetLockStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist user unlock evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist OOBE state evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist account change evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    return SOFTBUS_OK;
+}
 
 int32_t LnnInitNetworkManager(void)
 {
@@ -647,27 +669,7 @@ int32_t LnnInitNetworkManager(void)
         LNN_LOGE(LNN_BUILDER, "set supported protocol failed, ret=%{public}d", ret);
         return ret;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, NightModeChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "register night mode change event handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, NetUserStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Net regist user background evt handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, NetLockStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Net regist user unlock evt handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Net regist OOBE state evt handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Net regist account change evt handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    return SOFTBUS_OK;
+    return LnnRegisterEvent();
 }
 
 static void RetryCheckOOBEState(void *para)

@@ -596,7 +596,6 @@ static void DfxRecordLnnServerjoinStart(const ConnectionAddr *addr, const char *
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
-    extra.lnnType = needReportFailure ? LNN_TYPE_MANUAL : LNN_TYPE_AUTOMATIC;
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
@@ -670,7 +669,7 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
     (void)LnnConvertAddrToAuthConnInfo(&addr, &authConn);
     DfxRecordLnnAuthStart(&authConn, para, requestId);
     SoftBusFree((void *)para);
-    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
         return SOFTBUS_ERR;
     }
@@ -2261,6 +2260,24 @@ static void UpdateLocalNetCapability(void)
     }
 }
 
+static int32_t InitNetBuilderLooper(void)
+{
+    ListInit(&g_netBuilder.fsmList);
+    ListInit(&g_netBuilder.pendingList);
+    g_netBuilder.nodeType = NODE_TYPE_L;
+    g_netBuilder.looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (g_netBuilder.looper == NULL) {
+        LNN_LOGE(LNN_INIT, "get default looper fail");
+        return SOFTBUS_LOOPER_ERR;
+    }
+    g_netBuilder.handler.name = (char *)"NetBuilderHandler";
+    g_netBuilder.handler.looper = g_netBuilder.looper;
+    g_netBuilder.handler.HandleMessage = NetBuilderMessageHandler;
+    g_netBuilder.isInit = true;
+    LNN_LOGI(LNN_INIT, "init net builder looper success");
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitNetBuilder(void)
 {
     if (g_netBuilder.isInit == true) {
@@ -2299,20 +2316,7 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGE(LNN_INIT, "regist account change evt handler fail!");
         return SOFTBUS_ERR;
     }
-    ListInit(&g_netBuilder.fsmList);
-    ListInit(&g_netBuilder.pendingList);
-    g_netBuilder.nodeType = NODE_TYPE_L;
-    g_netBuilder.looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (g_netBuilder.looper == NULL) {
-        LNN_LOGE(LNN_INIT, "get default looper fail");
-        return SOFTBUS_ERR;
-    }
-    g_netBuilder.handler.name = (char *)"NetBuilderHandler";
-    g_netBuilder.handler.looper = g_netBuilder.looper;
-    g_netBuilder.handler.HandleMessage = NetBuilderMessageHandler;
-    g_netBuilder.isInit = true;
-    LNN_LOGI(LNN_INIT, "init net builder success");
-    return SOFTBUS_OK;
+    return InitNetBuilderLooper();
 }
 
 int32_t LnnInitNetBuilderDelay(void)

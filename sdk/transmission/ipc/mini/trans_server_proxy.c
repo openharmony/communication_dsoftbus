@@ -55,7 +55,7 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
 
     ConnectOption connOpt;
     if (!LnnConvertAddrToOption(addrInfo, &connOpt)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return TransOpenAuthChannel(sessionName, &connOpt, "");
 }
@@ -68,6 +68,15 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
     return TransCloseChannel(sessionName, channelId, channelType);
+}
+
+int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+{
+    (void)channelId;
+    (void)laneId;
+    (void)dataInfo;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t ServerIpcReleaseResources(int32_t channelId)

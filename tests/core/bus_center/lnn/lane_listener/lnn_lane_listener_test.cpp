@@ -64,14 +64,14 @@ void LNNLaneListenerTest::SetUpTestCase()
     GTEST_LOG_(INFO) << "LNNLaneListenerTest start";
     LaneDepsInterfaceMock laneMock;
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    LnnInitLaneLooper();
+    LnnInitLnnLooper();
     InitLaneListener();
     GTEST_LOG_(INFO) << "LNNLaneListenerTest init end";
 }
 
 void LNNLaneListenerTest::TearDownTestCase()
 {
-    LnnDeinitLaneLooper();
+    LnnDeinitLnnLooper();
     GTEST_LOG_(INFO) << "LNNLaneListenerTest end";
 }
 

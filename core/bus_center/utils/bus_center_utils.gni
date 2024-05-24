@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("../../../dsoftbus.gni")
+import("../../authentication/authentication.gni")
 import("../../common/dfx/dsoftbus_dfx.gni")
 
 core_bus_center_utils_path = "$dsoftbus_root_path/core/bus_center/utils"
@@ -19,7 +20,6 @@ core_bus_center_utils_path = "$dsoftbus_root_path/core/bus_center/utils"
 bus_center_utils_src = [
   "$core_bus_center_utils_path/src/lnn_async_callback_utils.c",
   "$core_bus_center_utils_path/src/lnn_common_utils.c",
-  "$core_bus_center_utils_path/src/lnn_compress.c",
   "$core_bus_center_utils_path/src/lnn_connection_addr_utils.c",
   "$core_bus_center_utils_path/src/lnn_map.c",
 ]
@@ -39,3 +39,9 @@ bus_center_utils_inc = [
 ]
 bus_center_utils_deps =
     [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
+if (enhanced) {
+  bus_center_utils_src += [ "$core_bus_center_utils_path/src/lnn_compress.c" ]
+} else {
+  bus_center_utils_src +=
+      [ "$core_bus_center_utils_path/src/lnn_compress_virtual.c" ]
+}

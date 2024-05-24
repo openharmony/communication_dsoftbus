@@ -84,6 +84,7 @@ void P2pConnectState::OnP2pStateChangeEvent(P2pState state)
     if (state == P2P_STATE_STARTED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "state is P2P_STATE_STARTED");
     } else {
+        timer_.Unregister(operation_->timerId_);
         if (operation_ != nullptr) {
             result.errorCode_ = SOFTBUS_ERR;
             operation_->promise_.set_value(result);

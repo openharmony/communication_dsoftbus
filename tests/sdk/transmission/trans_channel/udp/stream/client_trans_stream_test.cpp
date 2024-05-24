@@ -246,11 +246,11 @@ HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
     channel->isServer = false;
     channel->channelId = -1;
     ret = TransOnstreamChannelOpened(channel, &streamPort);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     channel->isServer = true;
     ret = TransOnstreamChannelOpened(channel, &streamPort);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     if (channel != nullptr) {
         SoftBusFree(channel);
@@ -269,7 +269,7 @@ HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level0)
 {
     int32_t channelId = -1;
     int ret = TransCloseStreamChannel(channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = 1;
     ret = TransCloseStreamChannel(channelId);

@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "broadcast_scheduler.h"
 #include "common_list.h"
 #include "disc_ble_constant.h"
 #include "disc_ble_utils.h"
@@ -34,9 +35,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_range.h"
 #include "softbus_bitmap.h"
-#include "softbus_broadcast_manager.h"
-#include "softbus_broadcast_utils.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"
@@ -916,7 +914,8 @@ static int32_t StartAdvertiser(int32_t adv)
 
     SignalingMsgPrint("ble adv send", (uint8_t *)packet.bcData.payload, (uint8_t)packet.bcData.payloadLen,
         DISC_BLE);
-    ret = StartBroadcasting(advertiser->channel, &advParam, &packet);
+    BroadcastContentType contentType = (adv == CON_ADV_ID) ? BC_TYPE_DISTRIB_CON : BC_TYPE_DISTRIB_NON;
+    ret = SchedulerStartBroadcast(advertiser->channel, contentType, &advParam, &packet);
     if (ret != SOFTBUS_OK) {
         DfxRecordAdevertiserEnd(adv, ret);
         DestroyBleConfigAdvData(&packet);
@@ -936,7 +935,7 @@ static int32_t StopAdvertiser(int32_t adv)
         DISC_LOGI(DISC_BLE, "advertiser adv is already stopped. adv=%{public}d", adv);
         return SOFTBUS_OK;
     }
-    int32_t ret = StopBroadcasting(advertiser->channel);
+    int32_t ret = SchedulerStopBroadcast(advertiser->channel);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "stop advertiser failed. advId=%{public}d, ret=%{public}d", adv, ret);
     }
@@ -970,7 +969,7 @@ static int32_t UpdateAdvertiser(int32_t adv)
         DISC_LOGE(DISC_BLE, "BuildBleConfigAdvData failed, ret=%{public}d", ret);
         return SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL;
     }
-    ret = SetBroadcastingData(advertiser->channel, &packet);
+    ret = SchedulerSetBroadcastData(advertiser->channel, &packet);
     if (ret != SOFTBUS_OK) {
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "UpdateAdv failed, ret=%{public}d", ret);
@@ -1023,7 +1022,7 @@ static void StartScaner(void)
         DISC_LOGE(DISC_BLE, "GetScannerParam failed");
         return;
     }
-    int32_t ret = StartScan(g_bleListener.scanListenerId, &scanParam);
+    int32_t ret = SchedulerStartScan(g_bleListener.scanListenerId, &scanParam);
     if (ret != SOFTBUS_OK) {
         DfxRecordScanEnd(ret);
         DISC_LOGE(DISC_BLE, "start scan failed");
@@ -1039,7 +1038,7 @@ static int32_t StopScaner(void)
         DISC_LOGI(DISC_BLE, "already stop scanning");
         return SOFTBUS_OK;
     }
-    int32_t ret = StopScan(g_bleListener.scanListenerId);
+    int32_t ret = SchedulerStopScan(g_bleListener.scanListenerId);
     if (ret != SOFTBUS_OK) {
         DISC_LOGI(DISC_BLE, "StopScaner failed, ret=%{public}d", ret);
         return SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL;
@@ -1373,20 +1372,20 @@ static int32_t InitAdvertiser(void)
 {
     int32_t conChannel = -1;
     int32_t nonChannel = -1;
-    int32_t ret = RegisterBroadcaster(SRV_TYPE_DIS, &conChannel, &g_advCallback);
+    int32_t ret = SchedulerRegisterBroadcaster(SRV_TYPE_DIS, &conChannel, &g_advCallback);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register broadcaster con fail");
 
-    ret = RegisterBroadcaster(SRV_TYPE_DIS, &nonChannel, &g_advCallback);
+    ret = SchedulerRegisterBroadcaster(SRV_TYPE_DIS, &nonChannel, &g_advCallback);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_INIT, "register broadcaster non fail");
-        (void)UnRegisterBroadcaster(conChannel);
+        (void)SchedulerUnregisterBroadcaster(conChannel);
         return ret;
     }
     if (conChannel < 0 || nonChannel < 0) {
         DISC_LOGE(DISC_INIT, "register broadcaster fail. conChannel=%{public}d, nonChannel=%{public}d",
             conChannel, nonChannel);
-        (void)UnRegisterBroadcaster(conChannel);
-        (void)UnRegisterBroadcaster(nonChannel);
+        (void)SchedulerUnregisterBroadcaster(conChannel);
+        (void)SchedulerUnregisterBroadcaster(nonChannel);
         return SOFTBUS_DISCOVER_BLE_ADV_INIT_FAIL;
     }
     DISC_LOGI(DISC_INIT, "conChannel=%{public}d, nonChannel=%{public}d", conChannel, nonChannel);
@@ -1801,7 +1800,7 @@ static void DiscBleSetScanFilter(int32_t listenerId)
     filter->serviceDataMask[POS_VERSION] = BYTE_MASK;
     filter->serviceDataMask[POS_BUSINESS] = BYTE_MASK;
 
-    if (SetScanFilter(listenerId, filter, 1) != SOFTBUS_OK) {
+    if (SchedulerSetScanFilter(listenerId, filter, 1) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "set scan filter failed");
         DiscFreeBleScanFilter(filter);
     }
@@ -1809,7 +1808,7 @@ static void DiscBleSetScanFilter(int32_t listenerId)
 
 static int32_t InitBleListener(void)
 {
-    int32_t ret = RegisterScanListener(SRV_TYPE_DIS, &g_bleListener.scanListenerId, &g_scanListener);
+    int32_t ret = SchedulerRegisterScanListener(SRV_TYPE_DIS, &g_bleListener.scanListenerId, &g_scanListener);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register scanner listener fail");
     g_bleListener.stateListenerId = SoftBusAddBtStateListener(&g_stateChangedListener);
     if (g_bleListener.stateListenerId < 0 || g_bleListener.scanListenerId < 0) {
@@ -1839,8 +1838,8 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
     DiscBleInitPublish();
     DiscBleInitSubscribe();
     InitScanner();
-    if (InitBroadcastMgr() != SOFTBUS_OK) {
-        DISC_LOGE(DISC_INIT, "init broadcast mgr failed");
+    if (SchedulerInitBroadcast() != SOFTBUS_OK) {
+        DISC_LOGE(DISC_INIT, "init broadcast scheduler failed");
         return NULL;
     }
 
@@ -1878,8 +1877,8 @@ static void RecvMessageDeinit(void)
 
 static void AdvertiserDeinit(void)
 {
-    (void)UnRegisterBroadcaster(g_bleAdvertiser[CON_ADV_ID].channel);
-    (void)UnRegisterBroadcaster(g_bleAdvertiser[NON_ADV_ID].channel);
+    (void)SchedulerUnregisterBroadcaster(g_bleAdvertiser[CON_ADV_ID].channel);
+    (void)SchedulerUnregisterBroadcaster(g_bleAdvertiser[NON_ADV_ID].channel);
     for (uint32_t index = 0; index < NUM_ADVERTISER; index++) {
         (void)memset_s(&g_bleAdvertiser[index], sizeof(DiscBleAdvertiser), 0x0, sizeof(DiscBleAdvertiser));
     }
@@ -1888,7 +1887,7 @@ static void AdvertiserDeinit(void)
 static void BleListenerDeinit(void)
 {
     (void)SoftBusRemoveBtStateListener(g_bleListener.stateListenerId);
-    (void)UnRegisterScanListener(g_bleListener.scanListenerId);
+    (void)SchedulerUnregisterListener(g_bleListener.scanListenerId);
 }
 
 static void DiscBleInfoDeinit(void)
@@ -1908,7 +1907,7 @@ void DiscSoftBusBleDeinit(void)
     RecvMessageDeinit();
     DiscBleInfoDeinit();
     AdvertiserDeinit();
-    DeInitBroadcastMgr();
+    SchedulerDeinitBroadcast();
 }
 
 static int32_t BleInfoDump(int fd)

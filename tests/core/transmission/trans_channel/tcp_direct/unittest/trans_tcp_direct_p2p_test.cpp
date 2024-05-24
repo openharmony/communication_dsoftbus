@@ -178,13 +178,13 @@ HWTEST_F(TransTcpDirectP2pTest, StartP2pListenerTest001, TestSize.Level1)
 {
     StopP2pSessionListener();
     int32_t ret = StartP2pListener(nullptr, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = StartP2pListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     ret = StartP2pListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     StopP2pSessionListener();
 }
@@ -279,10 +279,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
 {
-    int32_t ret = ConnectTcpDirectPeer(nullptr, g_port);
-    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
-
-    ret = ConnectTcpDirectPeer(g_addr, g_port);
+    int32_t ret = ConnectTcpDirectPeer(g_addr, g_port);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
@@ -457,7 +454,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest001, TestSize.Level1)
 {
     int32_t ret = StartHmlListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**

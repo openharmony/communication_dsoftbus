@@ -23,6 +23,7 @@ module_output_path = "dsoftbus/discovery"
 ohos_unittest("DiscBleTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/broadcast/scheduler/src/broadcast_scheduler.c",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
     "ble_mock.cpp",
@@ -34,6 +35,8 @@ ohos_unittest("DiscBleTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/broadcast/common/include",
+    "$dsoftbus_root_path/core/broadcast/scheduler/include",
+    "$dsoftbus_root_path/core/broadcast/scheduler/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",

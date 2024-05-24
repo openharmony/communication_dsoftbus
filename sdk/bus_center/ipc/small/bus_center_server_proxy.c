@@ -114,7 +114,7 @@ static int32_t OnActiveMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize)
     if (info->retCode == SOFTBUS_OK) {
         info->data = (void *)ReadString(reply, &infoSize);
         if (infoSize != (NETWORK_ID_BUF_LEN - 1)) {
-            LNN_LOGE(LNN_EVENT, "invalid meta node id length=%{public}d", infoSize);
+            LNN_LOGE(LNN_EVENT, "invalid meta node id length=%{public}u", infoSize);
             return SOFTBUS_ERR;
         }
     }
@@ -158,7 +158,7 @@ static int32_t OnStartPublishLnn(Reply *info, IpcIo *reply, uint32_t infoSize)
     return SOFTBUS_OK;
 }
 
-static int32_t ClientBusCenterResultCb(Reply *info, int ret, IpcIo *reply)
+static int32_t ClientBusCenterResultCb(Reply *info, int32_t ret, IpcIo *reply)
 {
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "ClientBusCenterResultCb failed. ret=%{public}d", ret);
@@ -301,7 +301,8 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
+int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+    uint32_t len)
 {
     if (networkId == NULL || buf == NULL) {
         LNN_LOGW(LNN_EVENT, "params are nullptr");
@@ -318,7 +319,7 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
     WriteString(&request, pkgName);
     WriteString(&request, networkId);
     WriteInt32(&request, key);
-    WriteInt32(&request, len);
+    WriteUint32(&request, len);
     Reply reply = {0};
     reply.id = GET_NODE_KEY_INFO;
     /* asynchronous invocation */
@@ -328,9 +329,9 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
         LNN_LOGE(LNN_EVENT, "GetNodeKeyInfo invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
-    if (reply.data == NULL || reply.dataLen > len) {
+    if (reply.data == NULL || reply.dataLen <= 0 || (uint32_t)reply.dataLen > len) {
         LNN_LOGE(LNN_EVENT,
-            "GetNodeKeyInfo read retBuf failed, inlen=%{public}d, reply.dataLen=%{public}d", len, reply.dataLen);
+            "GetNodeKeyInfo read retBuf failed, inlen=%{public}u, reply.dataLen=%{public}d", len, reply.dataLen);
         return SOFTBUS_ERR;
     }
     if (memcpy_s(buf, len, reply.data, reply.dataLen) != EOK) {
@@ -407,7 +408,7 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return g_serverProxy->Invoke(g_serverProxy, SERVER_SET_DATA_LEVEL, &request, NULL, NULL);
 }
 
-int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
     LNN_LOGD(LNN_EVENT, "join Lnn ipc client push");
     if (addr == NULL || pkgName == NULL) {
@@ -433,7 +434,7 @@ int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
     return SOFTBUS_OK;
 }
 
-int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
+int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     LNN_LOGD(LNN_EVENT, "leave Lnn ipc client push");
     if (pkgName == NULL || networkId == NULL) {

@@ -39,6 +39,7 @@
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
 #include "trans_event.h"
+#include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
@@ -97,7 +98,7 @@ int32_t TransSrvDataListInit(void)
     g_tcpSrvDataList = CreateSoftBusList();
     if (g_tcpSrvDataList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "creat list failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -156,7 +157,7 @@ int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
     if (SoftBusMutexLock(&(g_tcpSrvDataList->lock)) != SOFTBUS_OK) {
         SoftBusFree(node->data);
         SoftBusFree(node);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     ListInit(&node->node);
     ListTailInsert(&g_tcpSrvDataList->list, &node->node);
@@ -287,7 +288,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SendFailToFlushDevice(conn);
         SoftBusFree(buffer);
         SoftBusFree(conn);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCP_SOCKET_ERR;
     }
     SoftBusFree(conn);
     SoftBusFree(buffer);
@@ -412,7 +413,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get info networkId fail.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     info.peerDeviceId = buf;
     info.timeStart = conn.appInfo.timeStart;
@@ -433,6 +434,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     if (conn.appInfo.fastTransDataSize > 0) {
         info.isFastData = true;
     }
+    TransGetLaneIdByChannelId(channelId, &info.laneId);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
     SetSessionConnStatusById(channelId, conn.status);
@@ -465,6 +467,8 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .linkType = conn.appInfo.connectType,
         .costTime = timediff,
         .errcode = errCode,
+        .osType = conn.appInfo.osType,
+        .peerUdid = conn.appInfo.peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
     if (!conn.serverSide) {
@@ -643,7 +647,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
         ret = NotifyChannelOpened(channelId);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "notify channel open failed");
-            return SOFTBUS_ERR;
+            return ret;
         }
     } else {
         ret = TransTdcPostFisrtData(&conn);
@@ -771,7 +775,7 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
 {
     if (appInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "appInfo is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (appInfo->businessType != BUSINESS_TYPE_BYTE && appInfo->businessType != BUSINESS_TYPE_MESSAGE) {
         TRANS_LOGI(TRANS_CTRL, "invalid businessType=%{public}d", appInfo->businessType);
@@ -803,6 +807,17 @@ static bool IsMetaSession(const char *sessionName)
         return false;
     }
     return true;
+}
+
+static void ReleaseSessionConn(SessionConn *chan)
+{
+    if (chan == NULL) {
+        return;
+    }
+    if (chan->appInfo.fastTransData != NULL) {
+        SoftBusFree((void*)chan->appInfo.fastTransData);
+    }
+    SoftBusFree(chan);
 }
 
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
@@ -842,7 +857,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         TRANS_LOGI(TRANS_CTRL,
             "Request denied: session is not a meta session. sessionName=%{public}s", tmpName);
         AnonymizeFree(tmpName);
-        SoftBusFree(conn);
+        ReleaseSessionConn(conn);
         return SOFTBUS_TRANS_NOT_META_SESSION;
     }
     char *errDesc = NULL;
@@ -902,7 +917,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, flags) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequest reply err");
         (void)NotifyChannelClosed(&conn->appInfo, channelId);
-        SoftBusFree(conn);
+        ReleaseSessionConn(conn);
         return SOFTBUS_ERR;
     } else {
         extra.result = EVENT_STAGE_RESULT_OK;
@@ -917,7 +932,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         }
     }
 
-    SoftBusFree(conn);
+    ReleaseSessionConn(conn);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
 
@@ -925,7 +940,7 @@ ERR_EXIT:
     if (OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
     }
-    SoftBusFree(conn);
+    ReleaseSessionConn(conn);
     return errCode;
 }
 
@@ -1145,15 +1160,15 @@ static int32_t TransTdcGetDataBufInfoByChannelId(int32_t channelId, int32_t *fd,
 {
     if (fd == NULL || len == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_tcpSrvDataList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "tcp srv data list empty.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     ServerDataBuf *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_tcpSrvDataList->list), ServerDataBuf, node) {
@@ -1177,7 +1192,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
     }
     if (g_tcpSrvDataList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "srv data list empty.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");

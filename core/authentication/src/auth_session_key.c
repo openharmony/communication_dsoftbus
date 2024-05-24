@@ -37,6 +37,7 @@ typedef struct {
     ListNode node;
     uint32_t type;
     uint64_t useTime[AUTH_LINK_TYPE_MAX];
+    bool isOldKey;
 } SessionKeyItem;
 
 static void RemoveOldKey(SessionKeyList *list)
@@ -115,6 +116,30 @@ bool CheckSessionKeyListExistType(const SessionKeyList *list, AuthLinkType type)
         }
     }
     return false;
+}
+
+bool CheckSessionKeyListHasOldKey(const SessionKeyList *list, AuthLinkType type)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(list, false);
+    SessionKeyItem *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, list, SessionKeyItem, node) {
+        if (SessionKeyHasAuthLinkType(item->type, type) && item->isOldKey) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int32_t ClearOldKey(const SessionKeyList *list, AuthLinkType type)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
+    SessionKeyItem *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, list, SessionKeyItem, node) {
+        if (SessionKeyHasAuthLinkType(item->type, type) && item->isOldKey) {
+            item->isOldKey = false;
+        }
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList)
@@ -212,15 +237,17 @@ int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index)
         if (item->index != index) {
             continue;
         }
-        item->isAvailable = true;
-        AUTH_LOGI(AUTH_FSM, "index=%{public}d, set available", index);
+        if (!item->isAvailable) {
+            item->isAvailable = true;
+            AUTH_LOGI(AUTH_FSM, "index=%{public}d, set available", index);
+        }
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_FSM, "can't find sessionKey, index=%{public}d", index);
     return SOFTBUS_ERR;
 }
 
-int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key, AuthLinkType type)
+int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key, AuthLinkType type, bool isOldKey)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
@@ -238,6 +265,7 @@ int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key
     item->index = index;
     item->lastUseTime = GetCurrentTimeMs();
     item->useTime[type] = item->lastUseTime;
+    item->isOldKey = isOldKey;
     SetAuthLinkType(&item->type, type);
     if (memcpy_s(&item->key, sizeof(item->key), key, sizeof(SessionKey)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "add session key fail");

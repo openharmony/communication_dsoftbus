@@ -203,59 +203,47 @@ void ConnectionBrConnectionTest::TearDown(void) { }
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection001, TestSize.Level1)
 {
     int ret;
-    ConnBrConnection connection;
+    char mac[BT_MAC_LEN] = { 0 };
+    int32_t socketHandle = 111;
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_SERVER, socketHandle);
+    ConnBrSaveConnection(connection);
     const cJSON *json = nullptr;
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
     EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(false));
-    ret = ConnBrOnReferenceRequest(&connection, json);
+    ret = ConnBrOnReferenceRequest(connection, json);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(true));
-    connection.connectionRc = 0;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = ConnBrOnReferenceRequest(&connection, json);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(true));
     EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
-    connection.connectionRc = 1;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = ConnBrOnReferenceRequest(&connection, json);
+    ret = ConnBrOnReferenceRequest(connection, json);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
 
-    EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(true));
     EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(brMock, AddNumber64ToJsonObject).WillRepeatedly(Return(true));
-    connection.connectionRc = 1;
-    connection.connectionId = 1;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = ConnBrOnReferenceRequest(&connection, json);
-    EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
+    ret = ConnBrOnReferenceRequest(connection, json);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection002, TestSize.Level1)
 {
     int ret;
-    ConnBrConnection connection;
+    char mac[BT_MAC_LEN] = { 0 };
+    int32_t socketHandle = 222;
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_SERVER, socketHandle);
+    ConnBrSaveConnection(connection);
     int32_t delta;
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
     EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
-    connection.connectionId = 1;
-    connection.connectionRc = 0;
     delta = 0;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = ConnBrUpdateConnectionRc(&connection, delta);
+    ret = ConnBrUpdateConnectionRc(connection, delta);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
 
     EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    connection.connectionId = 1;
-    connection.connectionRc = 0;
     delta = 0;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = ConnBrUpdateConnectionRc(&connection, delta);
-    EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
+    ret = ConnBrUpdateConnectionRc(connection, delta);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection003, TestSize.Level1)
@@ -1092,11 +1080,14 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager030, TestSize.Level1)
 HWTEST_F(ConnectionBrConnectionTest, testBrManager031, TestSize.Level1)
 {
     int ret;
-    ConnBrConnection it;
-
+    char mac[BT_MAC_LEN] = { 0 };
+    int32_t socketHandle = 333;
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_SERVER, socketHandle);
+    ConnBrSaveConnection(connection);
+    connection->connectionId = (CONNECT_BR << CONNECT_TYPE_SHIFT) + 6;
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     ListInit(&g_brManager.connections->list);
-    it.connectionId = (CONNECT_BR << CONNECT_TYPE_SHIFT) + 3;
-    ListTailInsert(&g_brManager.connections->list, &it.node);
+    ListTailInsert(&g_brManager.connections->list, &connection->node);
     ret = AllocateConnectionIdUnsafe();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

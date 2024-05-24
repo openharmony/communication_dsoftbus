@@ -20,7 +20,7 @@ void SoftbusBleConflictRegisterListener(SoftBusBleConflictListener *listener)
     (void)listener;
 }
 
-void SoftbusBleConflictNotifyConnectResult(int32_t requestId, int32_t underlayerHandle, bool status)
+void SoftbusBleConflictNotifyConnectResult(uint32_t requestId, int32_t underlayerHandle, bool status)
 {
     (void)requestId;
     (void)underlayerHandle;

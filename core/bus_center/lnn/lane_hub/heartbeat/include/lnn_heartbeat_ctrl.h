@@ -16,9 +16,9 @@
 #ifndef LNN_HEARTBEAT_CTRL_H
 #define LNN_HEARTBEAT_CTRL_H
 
+#include "bus_center_event.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "softbus_bus_center.h"
-#include "bus_center_event.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,8 +31,8 @@ int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
 void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
-int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode,
-    LnnHeartbeatStrategyType strategyType);
+int32_t LnnShiftLNNGearWithoutPkgName(
+    const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType);
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout);
 
@@ -42,7 +42,8 @@ void LnnHbOnTrustedRelationReduced(void);
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);
 
-int32_t LnnTriggerDataLevelHeartBeat(void);
+int32_t LnnTriggerDataLevelHeartbeat(void);
+int32_t LnnTriggerCloudSyncHeartbeat(void);
 void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnUnregDataLevelChangeCb(void);
 

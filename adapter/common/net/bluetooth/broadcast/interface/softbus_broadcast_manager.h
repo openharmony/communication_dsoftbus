@@ -285,7 +285,7 @@ bool BroadcastIsLpDeviceAvailable(void);
  * @since 4.1
  * @version 1.0
  */
-bool BroadcastSetAdvDeviceParam(SensorHubServerType type, const LpBroadcastParam *bcParam,
+bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
     const LpScanParam *scanParam);
 
 /**
