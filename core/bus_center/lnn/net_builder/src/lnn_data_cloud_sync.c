@@ -200,7 +200,7 @@ static int32_t DBCipherInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, con
             return SOFTBUS_KV_CONVERT_BYTES_FAILED;
         }
     } else if (strcmp(fieldName, DEVICE_INFO_BROADCAST_CIPHER_IV) == 0 && valueLength < BROADCAST_IV_STR_LEN) {
-        if (ConvertHexStringToBytes((unsigned char *)cacheInfo->cipherInfo.iv, SESSION_KEY_LENGTH, value,
+        if (ConvertHexStringToBytes((unsigned char *)cacheInfo->cipherInfo.iv, BROADCAST_IV_LEN, value,
             valueLength) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "convert cipheriv to bytes fail. cipher info sync to cache fail");
             return SOFTBUS_KV_CONVERT_BYTES_FAILED;
