@@ -55,6 +55,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     }
     char *anonyDeviceIdHash = nullptr;
     Anonymize(deviceIdHash, &anonyDeviceIdHash);
+    static uint32_t callCount = 0;
     for (const auto &trustDevice : trustDevices) {
         if (trustDevice.GetDeviceIdType() != (int32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             trustDevice.GetDeviceId().empty()) {
@@ -62,7 +63,8 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         }
         char *anonyUdid = nullptr;
         Anonymize(trustDevice.GetDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", anonyUdid, anonyDeviceIdHash);
+        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s, callCount=%{public}u",
+            anonyUdid, anonyDeviceIdHash, callCount++);
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};
@@ -82,7 +84,8 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
             return true;
         }
     }
-    LNN_LOGI(LNN_STATE, "device is not trusted in dp, deviceIdHash=%{public}s", anonyDeviceIdHash);
+    LNN_LOGI(LNN_STATE, "device is not trusted in dp, deviceIdHash=%{public}s, callCount=%{public}u",
+        anonyDeviceIdHash, callCount++);
     AnonymizeFree(anonyDeviceIdHash);
     return false;
 }
