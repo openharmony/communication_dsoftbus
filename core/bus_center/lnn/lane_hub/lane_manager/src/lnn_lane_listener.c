@@ -147,7 +147,10 @@ int32_t DelLaneBusinessInfoItem(LaneType laneType, uint64_t laneId)
     }
     LaneBusinessInfo *item = GetLaneBusinessInfoWithoutLock(&laneBusinessInfo);
     if (item != NULL) {
-        uint32_t ref = --item->ref;
+        uint32_t ref = item->ref;
+        if (item->ref != 0) {
+            ref = --item->ref;
+        }
         if (ref == 0) {
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -171,7 +174,7 @@ static int32_t FindLaneBusinessInfoByLinkInfo(const LaneLinkInfo *laneLinkInfo,
         LNN_LOGE(LNN_LANE, "get udid fail");
         return SOFTBUS_ERR;
     }
-    uint64_t laneId = ApplyLaneId(localUdid, laneLinkInfo->peerUdid, laneLinkInfo->type);
+    uint64_t laneId = GenerateLaneId(localUdid, laneLinkInfo->peerUdid, laneLinkInfo->type);
     if (LaneListenerLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane listener lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -262,7 +265,7 @@ int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
         LNN_LOGE(LNN_LANE, "get udid fail");
         return SOFTBUS_ERR;
     }
-    uint64_t laneId = ApplyLaneId(localUdid, peerUdid, laneLinkInfo->type);
+    uint64_t laneId = GenerateLaneId(localUdid, peerUdid, laneLinkInfo->type);
     for (uint32_t i = 0; i < LANE_TYPE_BUTT; i++) {
         if (listenerList[i].listener.onLaneLinkup != NULL) {
             LNN_LOGI(LNN_LANE, "notify lane linkup, laneType=%{public}u", i);
@@ -384,7 +387,7 @@ static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp
 
 static void LnnOnWifiDirectRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
-    LNN_LOGD(LNN_LANE, "lnn wifidirect roleChange");
+    LNN_LOGD(LNN_LANE, "lnn wifiDirect roleChange");
     (void)oldRole;
     (void)newRole;
 }
@@ -462,9 +465,9 @@ static void LnnOnWifiDirectConnectedForSink(const char *remoteMac, const char *r
         return;
     }
     laneLinkInfo.type = LANE_HML;
-    uint64_t laneId = ApplyLaneId(localUdid, laneLinkInfo.peerUdid, laneLinkInfo.type);
+    uint64_t laneId = GenerateLaneId(localUdid, laneLinkInfo.peerUdid, laneLinkInfo.type);
     if (laneId == INVALID_LANE_ID) {
-        LNN_LOGE(LNN_LANE, "apply laneid fail");
+        LNN_LOGE(LNN_LANE, "generate laneid fail");
         return;
     }
     if (AddLaneResourceToPool(&laneLinkInfo, laneId, true) != SOFTBUS_OK) {

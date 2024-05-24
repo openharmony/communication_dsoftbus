@@ -86,9 +86,9 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelServerTest001, 
 {
     int32_t channelId = -1;
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = CloseVtpStreamChannel(channelId, g_pkgName);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -117,7 +117,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest001, 
 {
     int32_t channelId = -1;
     int32_t ret = StartVtpStreamChannelClient(channelId, &g_clientParam1, &g_callback);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 }
 
@@ -195,7 +195,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_ERR, ret);
     ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     g_serverParam1.type = COMMON_VIDEO_STREAM;

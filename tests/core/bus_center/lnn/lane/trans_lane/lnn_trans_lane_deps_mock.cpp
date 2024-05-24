@@ -49,7 +49,7 @@ int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkSuccess(const LinkRequest *r
 int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkFail(const LinkRequest *reqInfo,
     uint32_t reqId, const LaneLinkCb *cb)
 {
-    cb->OnLaneLinkFail(reqId, SOFTBUS_LANE_ID_GENERATE_FAIL, reqInfo->linkType);
+    cb->OnLaneLinkFail(reqId, SOFTBUS_LANE_TRIGGER_LINK_FAIL, reqInfo->linkType);
     return SOFTBUS_OK;
 }
 
@@ -101,6 +101,7 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
 {
     return GetTransLaneIf()->AddLaneResourceToPool(linkInfo, laneId, isServerSide);
 }
+
 int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
 {
     return GetTransLaneIf()->DelLaneResourceByLaneId(laneId, isServerSide);
@@ -141,9 +142,9 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
     return GetTransLaneIf()->LaneLinkdownNotify(peerUdid, laneLinkInfo);
 }
 
-uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType)
+uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType)
 {
-    return GetTransLaneIf()->ApplyLaneId(localUdid, remoteUdid, linkType);
+    return GetTransLaneIf()->GenerateLaneId(localUdid, remoteUdid, linkType);
 }
 }
 } // namespace OHOS
