@@ -444,7 +444,13 @@ int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
         return SOFTBUS_LOCK_ERR;
     }
     FirstDiscTime *record = &g_firstDiscTime[medium];
-    record->mDiscTotalTime += costTime;
+    uint64_t diffTime = UINT64_MAX - record->mDiscTotalTime;
+    if (diffTime > costTime) {
+        record->mDiscTotalTime += costTime;
+    } else {
+        COMM_LOGE(COMM_EVENT, "time is too long");
+        record->mDiscTotalTime = costTime - diffTime;
+    }
     record->mDiscTotalCount++;
     if (costTime > STANDARD_S) {
         record->mDiscCount1++;

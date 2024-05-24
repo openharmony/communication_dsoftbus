@@ -71,7 +71,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     OnStreamReceived(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);
 
     int32_t ret = OnFileGetSessionId(TEST_CHANNELID, &sessionId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     OnUdpChannelOpened(TEST_CHANNELID);
     OnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
@@ -85,7 +85,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = ClosePeerUdpChannel(TEST_CHANNELID);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
 /**

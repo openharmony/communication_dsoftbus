@@ -113,7 +113,7 @@ int SessionImpl::SendBytes(const void *buf, ssize_t len) const
 {
     if (buf == nullptr || len <= 0 || len > MAX_BYTES_LENGTH) {
         TRANS_LOGW(TRANS_BYTES, "Invalid params");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SendBytesInner(sessionId_, buf, len);
 }

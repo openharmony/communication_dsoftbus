@@ -279,7 +279,7 @@ static void NotifyDeviceConnectResult(
                 it->requestId, anomizeAddress, reason);
             DfxRecordBrConnectFail(it->requestId, DEFAULT_PID, (ConnBrDevice *)device, &it->statistics, reason);
             it->result.OnConnectFailed(it->requestId, reason);
-            CONN_LOGD(CONN_BR,
+            CONN_LOGE(CONN_BR,
                 "br notify connect request failed done, requestId=%{public}u, addr=%{public}s, reason=%{public}d",
                 it->requestId, anomizeAddress, reason);
         }
@@ -1587,7 +1587,7 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
 
 static int32_t BrInitLooper(void)
 {
-    g_brManagerAsyncHandler.handler.looper = CreateNewLooper("Conn_Br_lp");
+    g_brManagerAsyncHandler.handler.looper = GetLooper(LOOP_TYPE_CONN);
     if (g_brManagerAsyncHandler.handler.looper == NULL) {
         return SOFTBUS_ERR;
     }
