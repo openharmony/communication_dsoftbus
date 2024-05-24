@@ -659,13 +659,11 @@ static void UpdateInfoToLedger(NodeInfo *cacheInfo, char *deviceUdid, char *fiel
     }
     if (DBDataChangeBatchSyncToCacheInternal(cacheInfo, fieldName, value, strlen(value), deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:DB data change sync to cache fail");
-        (void)memset_s(value, strlen(value), 0, strlen(value));
         return;
     }
     if (SetDBDataToDistributedLedger(cacheInfo, deviceUdid, strlen(deviceUdid), fieldName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set DB data to distributedLedger fail");
     }
-    (void)memset_s(value, strlen(value), 0, strlen(value));
 }
 
 static int32_t HandleDBUpdateInternal(
@@ -701,6 +699,7 @@ static int32_t HandleDBUpdateInternal(
         return SOFTBUS_OK;
     }
     if (cacheInfo.stateVersion > stateVersion && stateVersion != 1) {
+        (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_BUILDER, "update peer stateVersion=%{public}d->%{public}d, localStateVersion=%{public}d->%{public}d",
@@ -733,12 +732,6 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
         LNN_LOGE(LNN_BUILDER, "get info from splitkey error");
         return SOFTBUS_ERR;
     }
-    char trueValue[SPLIT_MAX_LEN] = { 0 };
-    if (strcpy_s(trueValue, SPLIT_MAX_LEN, splitValue[0]) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s true value fail.");
-        return SOFTBUS_STRCPY_ERR;
-    }
-
     NodeInfo localCaheInfo = { 0 };
     if (LnnGetLocalCacheNodeInfo(&localCaheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
@@ -747,9 +740,15 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
     if (strcmp(deviceUdid, localCaheInfo.deviceInfo.deviceUdid) == 0) {
         return SOFTBUS_OK;
     }
+    char trueValue[SPLIT_MAX_LEN] = { 0 };
+    if (strcpy_s(trueValue, SPLIT_MAX_LEN, splitValue[0]) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s true value fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
     if (HandleDBUpdateInternal(deviceUdid, fieldName, trueValue, stateVersion, localCaheInfo.stateVersion) !=
         SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "handle DB update change internal fail");
+        (void)memset_s(trueValue, strlen(trueValue), 0, strlen(trueValue));
         return SOFTBUS_ERR;
     }
     char *anonyDeviceUdid = NULL;
@@ -761,6 +760,7 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
         anonyDeviceUdid, fieldName, anonyTrueValue, stateVersion);
     AnonymizeFree(anonyDeviceUdid);
     AnonymizeFree(anonyTrueValue);
+    (void)memset_s(trueValue, strlen(trueValue), 0, strlen(trueValue));
     return SOFTBUS_OK;
 }
 
