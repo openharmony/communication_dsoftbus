@@ -151,7 +151,7 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
         LNN_LOGE(LNN_LANE, "get peer uuid fail");
         return SOFTBUS_ERR;
     }
-    int32_t ret = AuthGetP2pConnInfo(uuid, connInfo, isMetaAuth);
+    int32_t ret = AuthGetHmlConnInfo(uuid, connInfo, isMetaAuth);
     if (ret != SOFTBUS_OK) {
         ret = AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
     }
