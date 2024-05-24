@@ -260,6 +260,7 @@ void AuthCloseConn(AuthHandle authHandle)
     }
     AuthMetaCloseConn(authHandle.authId);
 }
+
 int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
 {
     if (networkId == NULL || callback == NULL) {

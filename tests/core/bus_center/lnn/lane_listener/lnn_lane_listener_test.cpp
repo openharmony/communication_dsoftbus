@@ -297,7 +297,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_FIND_BUSINESS_INFO_BY_LANE_INFO_001, Test
     LaneListenerDepsInterfaceMock listenerMock;
     EXPECT_CALL(listenerMock, FindLaneResourceByLinkAddr)
         .WillRepeatedly(DoAll(SetArgPointee<1>(laneResource), Return(SOFTBUS_OK)));
-    EXPECT_CALL(listenerMock, ApplyLaneId).WillRepeatedly(Return(LANE_ID_P2P));
+    EXPECT_CALL(listenerMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_P2P));
     LaneDepsInterfaceMock laneMock;
     EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -454,7 +454,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKUP_NOTIFY_001, TestSize.Level1)
     EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     LaneListenerDepsInterfaceMock listenerMock;
     EXPECT_CALL(listenerMock, LaneInfoProcess).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(listenerMock, ApplyLaneId).WillRepeatedly(Return(LANE_ID_HML));
+    EXPECT_CALL(listenerMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_HML));
     ret = LaneLinkupNotify(PEER_UDID, &linkInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
@@ -497,7 +497,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKDOWN_NOTIFY_001, TestSize.Level1)
     LaneListenerDepsInterfaceMock listenerMock;
     EXPECT_CALL(listenerMock, FindLaneResourceByLinkAddr)
         .WillRepeatedly(DoAll(SetArgPointee<1>(laneResource), Return(SOFTBUS_OK)));
-    EXPECT_CALL(listenerMock, ApplyLaneId).WillRepeatedly(Return(LANE_ID_HML));
+    EXPECT_CALL(listenerMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_HML));
     LaneDepsInterfaceMock laneMock;
     EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -563,7 +563,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKDOWN_NOTIFY_002, TestSize.Level1)
     EXPECT_CALL(listenerMock, LaneInfoProcess)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(listenerMock, ApplyLaneId).WillRepeatedly(Return(LANE_ID_HML));
+    EXPECT_CALL(listenerMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_HML));
     LaneDepsInterfaceMock laneMock;
     EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     LaneLinkInfo linkInfo;

@@ -34,6 +34,7 @@
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
+#include "trans_qos_info.h"
 #include "trans_session_manager.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -788,6 +789,7 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
                 qosInfo->rttLevel = (LaneRttLevel)((param->qos[i].value > 0) ? param->qos[i].value : 0);
                 break;
             default:
+                GetExtQosInfo(param, qosInfo, i);
                 break;
         }
     }

@@ -47,4 +47,9 @@ group("unittest") {
 group("fuzztest") {
   testonly = true
   deps = [ "fuzztest:fuzztest" ]
+  if (has_enhance_test) {
+    deps += [
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission:fuzztest",
+    ]
+  }
 }
