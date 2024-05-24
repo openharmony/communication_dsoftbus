@@ -38,10 +38,6 @@ void RegisterNameMonitor(void)
 {
 }
 
-void LnnReleaseDatashareHelper(void)
-{
-}
-
 int32_t LnnGetUnifiedDisplayDeviceName(char *unifiedDisplayName, uint32_t len)
 {
     (void)unifiedDisplayName;
