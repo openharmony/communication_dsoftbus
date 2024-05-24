@@ -73,9 +73,15 @@ public:
 
 void ConnectionBleTransTest::SetUpTestCase()
 {
+    LooperInit();
     g_transEventListener.onPostBytesFinished = OnPostBytesFinished;
     int32_t ret = ConnBleInitTransModule(&g_transEventListener);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+void ConnectionBleTransTest::TearDownTestCase()
+{
+    LooperDeinit();
 }
 
 /*

@@ -153,6 +153,7 @@ public:
         connectCb.OnDisconnected = OnDisconnected;
         connectCb.OnDataReceived = OnDataReceived;
 
+        LooperInit();
         SoftbusConfigInit();
 
         NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
@@ -161,7 +162,10 @@ public:
         g_bleInterface = ConnInitBle(&connectCb);
         ASSERT_NE(g_bleInterface, NULL);
     }
-    void TearDown() override {};
+    void TearDown() override 
+    {
+        LooperDeinit();
+    }
 };
 
 void ConnectionBleManagerTest::TearDownTestCase()

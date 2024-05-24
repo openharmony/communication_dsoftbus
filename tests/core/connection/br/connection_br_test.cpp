@@ -101,12 +101,15 @@ public:
 
 void ConnectionBrTest::SetUpTestCase(void)
 {
+    LooperInit();
     SoftbusConfigInit();
     ConnServerInit();
 }
 
 void ConnectionBrTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+}
 
 void ConnectionBrTest::SetUp(void)
 {}
