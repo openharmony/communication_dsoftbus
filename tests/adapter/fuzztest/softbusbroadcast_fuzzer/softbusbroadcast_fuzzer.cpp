@@ -31,42 +31,57 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_broadcast_adapter_type.h"
 #include "softbus_broadcast_adapter_interface.h"
+#include "softbus_broadcast_type.h"
 #include "softbus_ble_gatt.h"
 #include "softbus_errcode.h"
 
-#define MIN_DATA_LEN 30
+#define MIN_DATA_LEN 50
 
-#define BC_NUM_MAX 16
 #define BC_INTERNAL 48
 #define BC_ADV_TX_POWER_DEFAULT (-6)
-#define BC_CHANNLE_MAP 0x0
 #define SERVICE_UUID 0xFDEE
 #define BC_ADV_FLAG 0x2
 #define MANUFACTURE_COMPANY_ID 0x027D
 
 namespace OHOS {
 
-size_t size;
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos;
 
-static int32_t BuildBroadcastParam(MessageParcel &parcel, BroadcastParam *param)
+template <class T> T GetData()
 {
-    param->minInterval = BC_INTERNAL;
-    param->maxInterval = BC_INTERNAL;
-    param->advType = SOFTBUS_BC_ADV_IND;
-    param->ownAddrType = SOFTBUS_BC_PUBLIC_DEVICE_ADDRESS;
-    param->peerAddrType = SOFTBUS_BC_PUBLIC_DEVICE_ADDRESS;
-    param->channelMap = BC_CHANNLE_MAP;
-    param->txPower = BC_ADV_TX_POWER_DEFAULT;
-
-    if (!parcel.ReadUint8(param->advFilterPolicy) || !parcel.ReadBool(param->isSupportRpa) ||
-        !parcel.ReadInt32(param->duration)) {
-        return SOFTBUS_INVALID_PARAM;
+    T object{};
+    size_t objetctSize = sizeof(object);
+    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
+        return object;
     }
-    if (memcpy_s(param->ownIrk, BC_IRK_LEN, parcel.ReadBuffer(BC_IRK_LEN), BC_IRK_LEN) != EOK) {
+    errno_t ret = memcpy_s(&object, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_baseFuzzPos += objetctSize;
+    return object;
+}
+
+static int32_t BuildBroadcastParam(const uint8_t* data, size_t size, BroadcastParam *param)
+{
+    g_baseFuzzPos = 0;
+    param->minInterval = GetData<int32_t>() % BC_INTERNAL;
+    param->maxInterval = GetData<int32_t>() % BC_INTERNAL;
+    param->advType = GetData<uint8_t>() % SOFTBUS_BC_ADV_DIRECT_IND_LOW;
+    param->ownAddrType = GetData<uint8_t>() % SOFTBUS_BC_RANDOM_STATIC_IDENTITY_ADDRESS;
+    param->peerAddrType = GetData<uint8_t>() % SOFTBUS_BC_RANDOM_STATIC_IDENTITY_ADDRESS;
+    param->channelMap = GetData<int32_t>();
+    param->txPower = BC_ADV_TX_POWER_DEFAULT;
+    param->advFilterPolicy = GetData<uint8_t>();
+    param->isSupportRpa = GetData<bool>();
+    param->duration = GetData<int32_t>();
+
+    if (memcpy_s(param->ownIrk, BC_IRK_LEN, data, BC_IRK_LEN) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(param->ownUdidHash, BC_UDID_HASH_LEN, parcel.ReadBuffer(BC_UDID_HASH_LEN),
-        BC_UDID_HASH_LEN) != EOK) {
+    if (memcpy_s(param->ownUdidHash, BC_UDID_HASH_LEN, data, BC_UDID_HASH_LEN) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -80,7 +95,7 @@ static void DestroyBleConfigAdvData(BroadcastPacket *packet)
     packet->rspData.payload = nullptr;
 }
 
-static int32_t BuildBroadcastPacket(MessageParcel &parcel, BroadcastPacket *packet)
+static int32_t BuildBroadcastPacket(const uint8_t* data, size_t size, BroadcastPacket *packet)
 {
     packet->isSupportFlag = true;
     packet->flag = BC_ADV_FLAG;
@@ -94,8 +109,7 @@ static int32_t BuildBroadcastPacket(MessageParcel &parcel, BroadcastPacket *pack
         return SOFTBUS_MALLOC_ERR;
     }
     packet->bcData.payloadLen = (size > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN : size;
-    if (memcpy_s(packet->bcData.payload, ADV_DATA_MAX_LEN, parcel.ReadBuffer(packet->bcData.payloadLen),
-        packet->bcData.payloadLen) != EOK) {
+    if (memcpy_s(packet->bcData.payload, ADV_DATA_MAX_LEN, data, packet->bcData.payloadLen) != EOK) {
         SoftBusFree(packet->bcData.payload);
         packet->rspData.payload = nullptr;
         return SOFTBUS_MEM_ERR;
@@ -113,32 +127,34 @@ static int32_t BuildBroadcastPacket(MessageParcel &parcel, BroadcastPacket *pack
         packet->bcData.payload = nullptr;
         return SOFTBUS_MALLOC_ERR;
     }
-    if (memcpy_s(&packet->rspData.payload[0], RESP_DATA_MAX_LEN, parcel.ReadBuffer(packet->rspData.payloadLen),
-        packet->rspData.payloadLen) != EOK) {
+    if (memcpy_s(&packet->rspData.payload[0], RESP_DATA_MAX_LEN, data, packet->rspData.payloadLen) != EOK) {
         DestroyBleConfigAdvData(packet);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static BcScanParams BuildScanParam()
+static BcScanParams BuildScanParam(const uint8_t* data, size_t size)
 {
+    g_baseFuzzPos = 0;
     BcScanParams scanParam;
     scanParam.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
     scanParam.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
-    scanParam.scanType = SOFTBUS_BC_SCAN_TYPE_ACTIVE;
-    scanParam.scanPhy = SOFTBUS_BC_SCAN_PHY_1M;
-    scanParam.scanFilterPolicy = SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL;
+    scanParam.scanType = GetData<bool>();
+    scanParam.scanPhy = GetData<uint8_t>() % SOFTBUS_BC_SCAN_PHY_CODED;
+    scanParam.scanFilterPolicy = GetData<uint8_t>() % SOFTBUS_BC_SCAN_FILTER_POLICY_ONLY_WHITE_LIST_AND_RPA;
     return scanParam;
 }
 
-static int32_t BuildLpBroadcastParam(MessageParcel &parcel, LpBroadcastParam *lpBcParam)
+static int32_t BuildLpBroadcastParam(const uint8_t* data, size_t size, LpBroadcastParam *lpBcParam)
 {
-    int32_t ret = BuildBroadcastParam(parcel, &lpBcParam->bcParam);
+    g_baseFuzzPos = 0;
+    lpBcParam->bcHandle = GetData<int32_t>();
+    int32_t ret = BuildBroadcastParam(data, size, &lpBcParam->bcParam);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    ret = BuildBroadcastPacket(parcel, &lpBcParam->packet);
+    ret = BuildBroadcastPacket(data, size, &lpBcParam->packet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -146,10 +162,10 @@ static int32_t BuildLpBroadcastParam(MessageParcel &parcel, LpBroadcastParam *lp
     return SOFTBUS_OK;
 }
 
-static LpScanParam BuildLpScanParam()
+static LpScanParam BuildLpScanParam(const uint8_t* data, size_t size)
 {
     LpScanParam lpScanParam;
-    lpScanParam.scanParam = BuildScanParam();
+    lpScanParam.scanParam = BuildScanParam(data, size);
 
     return lpScanParam;
 }
@@ -209,150 +225,91 @@ static ScanCallback g_scanListener = {
     .OnReportScanDataCallback = BleScanResultCallback,
 };
 
-void StartBroadcastingFuzzTest(MessageParcel &parcel)
+void StartBroadcastingFuzzTest(int32_t bcId, const uint8_t* data, size_t size)
 {
-    parcel.RewindRead(0);
-    int32_t bcId;
-    if (!parcel.ReadInt32(bcId)) {
-        return;
-    }
     BroadcastParam param;
-    if (BuildBroadcastParam(parcel, &param) != SOFTBUS_OK) {
-        return;
-    }
+    BuildBroadcastParam(data, size, &param);
     BroadcastPacket packet;
-    if (BuildBroadcastPacket(parcel, &packet) != SOFTBUS_OK) {
-        return;
-    }
+    BuildBroadcastPacket(data, size, &packet);
 
     StartBroadcasting(bcId, &param, &packet);
     DestroyBleConfigAdvData(&packet);
 }
 
-void UpdateBroadcastingFuzzTest(MessageParcel &parcel)
+void UpdateBroadcastingFuzzTest(int32_t bcId, const uint8_t* data, size_t size)
 {
-    parcel.RewindRead(0);
-    int32_t bcId;
-    if (!parcel.ReadInt32(bcId)) {
-        return;
-    }
     BroadcastParam param;
-    if (BuildBroadcastParam(parcel, &param) != SOFTBUS_OK) {
-        return;
-    }
+    BuildBroadcastParam(data, size, &param);
     BroadcastPacket packet;
-    if (BuildBroadcastPacket(parcel, &packet) != SOFTBUS_OK) {
-        return;
-    }
+    BuildBroadcastPacket(data, size, &packet);
 
     UpdateBroadcasting(bcId, &param, &packet);
     DestroyBleConfigAdvData(&packet);
 }
 
-void SetBroadcastingDataFuzzTest(MessageParcel &parcel)
+void SetBroadcastingDataFuzzTest(int32_t bcId, const uint8_t* data, size_t size)
 {
-    parcel.RewindRead(0);
-    int32_t bcId;
-    if (!parcel.ReadInt32(bcId)) {
-        return;
-    }
     BroadcastPacket packet;
-    if (BuildBroadcastPacket(parcel, &packet) != SOFTBUS_OK) {
-        return;
-    }
+    BuildBroadcastPacket(data, size, &packet);
 
     SetBroadcastingData(bcId, &packet);
     DestroyBleConfigAdvData(&packet);
 }
 
-void StopBroadcastingFuzzTest(MessageParcel &parcel)
+void StopBroadcastingFuzzTest(int32_t bcId)
 {
-    parcel.RewindRead(0);
-    int32_t bcId;
-    if (!parcel.ReadInt32(bcId)) {
-        return;
-    }
     StopBroadcasting(bcId);
 }
 
-void StartScanFuzzTest(MessageParcel &parcel)
+void StartScanFuzzTest(int32_t listenerId, const uint8_t* data, size_t size)
 {
-    parcel.RewindRead(0);
-    int32_t listenerId;
-    if (!parcel.ReadInt32(listenerId)) {
-        return;
-    }
-    BcScanParams scanParam = BuildScanParam();
+    BcScanParams scanParam = BuildScanParam(data, size);
 
     StartScan(listenerId, &scanParam);
 }
 
-void StopScanFuzzTest(MessageParcel &parcel)
+void StopScanFuzzTest(int32_t listenerId)
 {
-    parcel.RewindRead(0);
-    int32_t listenerId;
-    if (!parcel.ReadInt32(listenerId)) {
-        return;
-    }
     StopScan(listenerId);
 }
 
-void BroadcastSetAdvDeviceParamFuzzTest(MessageParcel &parcel)
+void BroadcastSetAdvDeviceParamFuzzTest(int32_t listenerId, const uint8_t* data, size_t size)
 {
-    parcel.RewindRead(0);
-    uint8_t type;
-    if (!parcel.ReadUint8(type)) {
-        return;
-    }
-    LpScanParam lpScanParam = BuildLpScanParam();
+    g_baseFuzzPos = 0;
+    uint8_t type = GetData<uint8_t>();
+    LpScanParam lpScanParam = BuildLpScanParam(data, size);
+    lpScanParam.listenerId = listenerId;
     LpBroadcastParam lpBcParam;
-    if (!parcel.ReadInt32(lpScanParam.listenerId) || !parcel.ReadInt32(lpBcParam.bcHandle)) {
-        return;
-    }
-    if (BuildLpBroadcastParam(parcel, &lpBcParam) != SOFTBUS_OK) {
-        return;
-    }
+    BuildLpBroadcastParam(data, size, &lpBcParam);
 
-    BroadcastSetAdvDeviceParam(static_cast<SensorHubServerType>(type), &lpBcParam, &lpScanParam);
+    BroadcastSetAdvDeviceParam(static_cast<LpServerType>(type), &lpBcParam, &lpScanParam);
     DestroyBleConfigAdvData(&lpBcParam.packet);
 }
 
-void BroadcastGetBroadcastHandleFuzzTest(MessageParcel &parcel)
+void BroadcastGetBroadcastHandleFuzzTest(int32_t bcId)
 {
-    parcel.RewindRead(0);
-    int32_t bcHandle;
-    int32_t bcId;
-    if (!parcel.ReadInt32(bcHandle) || !parcel.ReadInt32(bcId)) {
-        return;
-    }
+    g_baseFuzzPos = 0;
+    int32_t bcHandle = GetData<int32_t>();
 
     BroadcastGetBroadcastHandle(bcId, &bcHandle);
 }
 
-void BroadcastSetScanReportChannelToLpDeviceFuzzTest(MessageParcel &parcel)
+void BroadcastSetScanReportChannelToLpDeviceFuzzTest(int32_t listenerId)
 {
-    parcel.RewindRead(0);
-    bool enable;
-    int32_t listenerId;
-    if (!parcel.ReadBool(enable) || !parcel.ReadInt32(listenerId)) {
-        return;
-    }
+    g_baseFuzzPos = 0;
+    bool enable = GetData<bool>();
 
     BroadcastSetScanReportChannelToLpDevice(listenerId, enable);
 }
 
-void BroadcastSetLpAdvParamFuzzTest(MessageParcel &parcel)
+void BroadcastSetLpAdvParamFuzzTest()
 {
-    parcel.RewindRead(0);
-    int32_t duration;
-    int32_t maxExtAdvEvents;
-    int32_t window;
-    int32_t interval;
-    int32_t lpAdvBCHandle;
-    if (!parcel.ReadInt32(duration) || !parcel.ReadInt32(maxExtAdvEvents) || !parcel.ReadInt32(window) ||
-        !parcel.ReadInt32(interval) || !parcel.ReadInt32(lpAdvBCHandle)) {
-        return;
-    }
+    g_baseFuzzPos = 0;
+    int32_t duration = GetData<int32_t>();
+    int32_t maxExtAdvEvents = GetData<int32_t>();
+    int32_t window = GetData<int32_t>();
+    int32_t interval = GetData<int32_t>();
+    int32_t lpAdvBCHandle = GetData<int32_t>();
 
     BroadcastSetLpAdvParam(duration, maxExtAdvEvents, window, interval, lpAdvBCHandle);
 }
@@ -364,9 +321,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (size < MIN_DATA_LEN) {
         return 0;
     }
-    OHOS::size = size;
-    OHOS::MessageParcel parcel;
-    parcel.WriteBuffer(data, size);
+    OHOS::g_baseFuzzData = data;
+    OHOS::g_baseFuzzSize = size;
 
     int32_t listenerId = -1;
     int32_t bcId = -1;
@@ -375,16 +331,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     RegisterBroadcaster(SRV_TYPE_DIS, &bcId, &OHOS::g_advCallback);
     RegisterScanListener(SRV_TYPE_DIS, &listenerId, &OHOS::g_scanListener);
 
-    OHOS::StartBroadcastingFuzzTest(parcel);
-    OHOS::UpdateBroadcastingFuzzTest(parcel);
-    OHOS::SetBroadcastingDataFuzzTest(parcel);
-    OHOS::StopBroadcastingFuzzTest(parcel);
-    OHOS::StartScanFuzzTest(parcel);
-    OHOS::StopScanFuzzTest(parcel);
-    OHOS::BroadcastSetAdvDeviceParamFuzzTest(parcel);
-    OHOS::BroadcastGetBroadcastHandleFuzzTest(parcel);
-    OHOS::BroadcastSetScanReportChannelToLpDeviceFuzzTest(parcel);
-    OHOS::BroadcastSetLpAdvParamFuzzTest(parcel);
+    OHOS::StartBroadcastingFuzzTest(bcId, data, size);
+    OHOS::UpdateBroadcastingFuzzTest(bcId, data, size);
+    OHOS::SetBroadcastingDataFuzzTest(bcId, data, size);
+    OHOS::StopBroadcastingFuzzTest(bcId);
+    OHOS::StartScanFuzzTest(listenerId, data, size);
+    OHOS::StopScanFuzzTest(listenerId);
+    OHOS::BroadcastSetAdvDeviceParamFuzzTest(listenerId, data, size);
+    OHOS::BroadcastGetBroadcastHandleFuzzTest(bcId);
+    OHOS::BroadcastSetScanReportChannelToLpDeviceFuzzTest(listenerId);
+    OHOS::BroadcastSetLpAdvParamFuzzTest();
 
     UnRegisterScanListener(listenerId);
     UnRegisterBroadcaster(bcId);
