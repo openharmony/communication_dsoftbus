@@ -605,6 +605,31 @@ static int32_t RegistProtocolManager(void)
 }
 
 
+static int32_t LnnRegisterEvent(void)
+{
+    if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, NightModeChangeEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "register night mode change event handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, NetUserStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist user background evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, NetLockStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist user unlock evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist OOBE state evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist account change evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitNetworkManager(void)
 {
     RegistNetIfMgr(LNN_ETH_TYPE, CreateNetifMgr);
@@ -644,27 +669,7 @@ int32_t LnnInitNetworkManager(void)
         LNN_LOGE(LNN_BUILDER, "set supported protocol failed, ret=%{public}d", ret);
         return ret;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, NightModeChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "register night mode change event handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, NetUserStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Net regist user background evt handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, NetLockStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Net regist user unlock evt handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Net regist OOBE state evt handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Net regist account change evt handler fail");
-        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
-    }
-    return SOFTBUS_OK;
+    return LnnRegisterEvent();
 }
 
 static void RetryCheckOOBEState(void *para)
