@@ -192,13 +192,13 @@ HWTEST_F(AuthLaneTest, AUTH_GET_REQUEST_OPTION_TEST_001, TestSize.Level1)
     LaneAllocInfo allocInfo;
     (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
 
-    int32_t ret = AuthGetRequestOption(nullptr, &allocInfo);
+    int32_t ret = AuthGetLaneAllocInfo(nullptr, &allocInfo);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    ret = AuthGetRequestOption(NETWORK_ID, nullptr);
+    ret = AuthGetLaneAllocInfo(NETWORK_ID, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    ret = AuthGetRequestOption(NETWORK_ID, &allocInfo);
+    ret = AuthGetLaneAllocInfo(NETWORK_ID, &allocInfo);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

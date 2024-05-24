@@ -299,7 +299,6 @@ static int32_t ConnPackCtlMsgRcSendDeltaData(RcPackCtlMsgPara *rcMsgPara)
             rcMsgPara->connId, rcMsgPara->underlayerHandle, (int32_t)seq);
         return (int32_t)seq;
     }
-    int32_t status = SOFTBUS_OK;
     return rcMsgPara->localRc <= 0 ?
         ConnBlePostBytesInner(rcMsgPara->connId, data, dataLen, 0, flag, MODULE_CONNECTION, seq,
             OnDisconnectedDataFinished) :

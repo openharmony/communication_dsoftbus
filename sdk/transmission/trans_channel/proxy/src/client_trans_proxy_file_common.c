@@ -228,7 +228,7 @@ int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer
         // note: no \0 here
         if (memcpy_s(fileItem->fileName, bufferSize - offset, destFile[index], fileNameSize) != EOK) {
             TRANS_LOGE(TRANS_FILE, "copy file name failed!");
-            errCode = SOFTBUS_ERR;
+            errCode = SOFTBUS_MEM_ERR;
             break;
         }
 

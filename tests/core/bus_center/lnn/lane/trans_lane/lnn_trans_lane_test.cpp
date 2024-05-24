@@ -19,10 +19,10 @@
 #include <securec.h>
 
 #include "lnn_trans_lane.h"
-
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_score_virtual.c"
 #include "lnn_trans_lane_deps_mock.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -148,9 +148,12 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
     uint32_t laneReqId = 1;
     LaneAllocInfo allocInfo;
     allocInfo.type = LANE_TYPE_TRANS;
-    EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_CALL(laneMock, SelectExpectLanesByQos).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, nullptr);
+    LaneAllocListener listenerCb = {
+        .onLaneAllocSuccess = OnLaneAllocSuccess,
+        .onLaneAllocFail = OnLaneAllocFail,
+    };
+    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->deinit();
@@ -189,7 +192,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_004, TestSize.Level1)
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
-    EXPECT_EQ(g_errCode, SOFTBUS_LANE_TRIGGER_LINK_FAIL);
+    EXPECT_EQ(g_errCode, SOFTBUS_LANE_ID_GENERATE_FAIL);
     transObj->deinit();
 }
 
@@ -226,7 +229,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_005, TestSize.Level1)
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
-    EXPECT_EQ(g_errCode, SOFTBUS_LANE_ID_GENERATE_FAIL);
+    EXPECT_EQ(g_errCode, SOFTBUS_LANE_TRIGGER_LINK_FAIL);
     transObj->deinit();
 }
 

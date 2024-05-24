@@ -237,8 +237,10 @@ int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index)
         if (item->index != index) {
             continue;
         }
-        item->isAvailable = true;
-        AUTH_LOGI(AUTH_FSM, "index=%{public}d, set available", index);
+        if (!item->isAvailable) {
+            item->isAvailable = true;
+            AUTH_LOGI(AUTH_FSM, "index=%{public}d, set available", index);
+        }
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_FSM, "can't find sessionKey, index=%{public}d", index);

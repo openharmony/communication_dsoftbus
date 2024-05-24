@@ -155,7 +155,7 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSi
 
     int sessionId = 1;
     ret = testSessionServiceImpl.OpenSessionCallback(sessionId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     testSessionServiceImpl.CloseSessionCallback(sessionId);
     const char data[TEST_DATA_LENGTH] = "test";
