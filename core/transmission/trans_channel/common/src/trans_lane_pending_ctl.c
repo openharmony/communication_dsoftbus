@@ -602,7 +602,7 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
     }
     TransSetSocketChannelStateBySession(param.sessionName, param.sessionId, CORE_SESSION_STATE_LAN_COMPLETE);
     AppInfo *appInfo = TransCommonGetAppInfo(&param);
-    TRANS_CHECK_AND_RETURN_LOGW(!(appInfo == NULL), TRANS_SVC, "GetAppInfo is null.");
+    TRANS_CHECK_AND_RETURN_LOGW(appInfo != NULL, TRANS_SVC, "GetAppInfo is null.");
     appInfo->callingTokenId = callingTokenId;
     appInfo->timeStart = timeStart;
     NodeInfo nodeInfo;
@@ -634,7 +634,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     extra.linkType = LANE_LINK_TYPE_BUTT;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_SELECT_LANE, extra);
     AppInfo *appInfo = TransCommonGetAppInfo(&param);
-    TRANS_CHECK_AND_RETURN_LOGW(!(appInfo == NULL), TRANS_SVC, "GetAppInfo is null.");
+    TRANS_CHECK_AND_RETURN_LOGW(appInfo != NULL, TRANS_SVC, "GetAppInfo is null.");
     appInfo->callingTokenId = callingTokenId;
     appInfo->timeStart = timeStart;
     CallBackOpenChannelFailed(&param, appInfo, reason);

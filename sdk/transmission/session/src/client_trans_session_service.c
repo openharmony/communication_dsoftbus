@@ -460,13 +460,15 @@ void NotifyAuthSuccess(int sessionId)
     }
 }
 
-static int32_t CheckSessionIsOpened(int32_t sessionId)
+static int32_t CheckSessionIsOpened(int32_t sessionId, bool isCancelCheck)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
+#define SESSION_STATUS_CANCEL_CHECK_MAX_NUM 25
 #define SESSION_CHECK_PERIOD 200000
+    int32_t checkMaxNum = isCancelCheck ? SESSION_STATUS_CANCEL_CHECK_MAX_NUM : SESSION_STATUS_CHECK_MAX_NUM;
     int32_t i = 0;
     SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
-    while (i < SESSION_STATUS_CHECK_MAX_NUM) {
+    while (i < checkMaxNum) {
         if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &enableStatus) != SOFTBUS_OK) {
             return SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED;
         }
@@ -512,7 +514,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     if (ret != SOFTBUS_OK) {
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
             TRANS_LOGI(TRANS_SDK, "session already opened");
-            CheckSessionIsOpened(sessionId);
+            CheckSessionIsOpened(sessionId, false);
             return OpenSessionWithExistSession(sessionId, isEnabled);
         }
         TRANS_LOGE(TRANS_SDK, "add session err: ret=%{public}d", ret);
@@ -534,7 +536,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         return SOFTBUS_TRANS_SESSION_SET_CHANNEL_FAILED;
     }
 
-    ret = CheckSessionIsOpened(sessionId);
+    ret = CheckSessionIsOpened(sessionId, false);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "CheckSessionIsOpened err: ret=%{public}d", ret);
         (void)ClientDeleteSession(sessionId);
@@ -1154,7 +1156,7 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         lifecycle.sessionState == SESSION_STATE_CALLBACK_FINISHED) {
         if (lifecycle.sessionState == SESSION_STATE_OPENED) {
             TRANS_LOGI(TRANS_SDK, "This socket state is opened, socket=%{public}d", socket);
-            CheckSessionIsOpened(socket);
+            CheckSessionIsOpened(socket, true);
         }
         TRANS_LOGI(TRANS_SDK, "This socket state is callback finish, socket=%{public}d", socket);
         int32_t channelId = INVALID_CHANNEL_ID;
