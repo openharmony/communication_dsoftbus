@@ -192,7 +192,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnGetSessionPort(nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetSessionPort(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetProxyPort(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetProxyPort(nullptr, PORT) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnSetProxyPort(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetP2pRole(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetP2pRole(nullptr) == 0);
     EXPECT_TRUE(LnnSetP2pMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
@@ -202,7 +202,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnSetWifiDirectAddr(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetP2pGoMac(nullptr) == nullptr);
     EXPECT_TRUE(LnnGetSupportedProtocols(nullptr) == 0);
-    EXPECT_TRUE(LnnSetSupportedProtocols(nullptr, PROTOCOLS) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnSetSupportedProtocols(nullptr, PROTOCOLS) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetPtk(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
