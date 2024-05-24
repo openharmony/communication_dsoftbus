@@ -234,7 +234,7 @@ HWTEST_F(AuthManagerTest, GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001, TestSize.Lev
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_WIFI);
     bool isNewCreated;
-    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated) != nullptr);
+    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated, AUTH_SEQ_1) != nullptr);
     info.isSupportFastAuth = true;
     info.version = SOFTBUS_OLD_V2;
     SessionKey sessionKey;
@@ -243,7 +243,7 @@ HWTEST_F(AuthManagerTest, GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001, TestSize.Lev
     sessionKey.len = KEY_VALUE_LEN;
     EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, false, false) == SOFTBUS_OK);
     SetAuthSessionInfo(&info, CONN_ID_1, true, AUTH_LINK_TYPE_WIFI);
-    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated) != nullptr);
+    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated, AUTH_SEQ_1) != nullptr);
     EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) != AUTH_SEQ_1);
     SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_WIFI);
     info.isSupportFastAuth = false;
@@ -698,7 +698,7 @@ HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001, TestSi
     EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, &info) != SOFTBUS_OK);
     SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_BLE);
     bool isNewCreated;
-    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated) != nullptr);
+    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated, AUTH_SEQ_1) != nullptr);
     EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, &info) == SOFTBUS_OK);
 }
 } // namespace OHOS
