@@ -348,6 +348,28 @@ static int32_t LnnReAllocLane(uint32_t laneReqId, uint64_t laneId, const LaneAll
     return SOFTBUS_OK;
 }
 
+static int32_t LnnAllocTargetLane(uint32_t laneHandle, const LaneAllocInfoExt *allocInfo,
+    const LaneAllocListener *listener)
+{
+    if (allocInfo == NULL || listener == NULL || laneHandle == INVALID_LANE_REQ_ID) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (allocInfo->type != LANE_TYPE_TRANS) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LNN_LOGI(LNN_LANE, "targetLinkNum=%{public}u and first targetLinkType=%{public}d",
+        allocInfo->linkList.linkTypeNum, allocInfo->linkList.linkType[0]);
+    if (allocInfo->linkList.linkTypeNum >= LANE_LINK_TYPE_BUTT) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t result = g_laneObject[allocInfo->type]->allocTargetLane(laneHandle, allocInfo, listener);
+    if (result != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "alloc target lane fail, handle=%{public}u, result=%{public}d", laneHandle, result);
+        return result;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t CheckLaneObject(uint32_t laneReqId, LaneType *type)
 {
     *type = laneReqId >> LANE_REQ_ID_TYPE_SHIFT;
@@ -398,6 +420,7 @@ static LnnLaneManager g_LaneManager = {
     .lnnGetLaneHandle = ApplyLaneReqId,
     .lnnAllocLane = LnnAllocLane,
     .lnnReAllocLane = LnnReAllocLane,
+    .lnnAllocTargetLane = LnnAllocTargetLane,
     .lnnCancelLane = LnnCancelLane,
     .lnnFreeLane = LnnFreeLink,
     .registerLaneListener = RegisterLaneListener,
