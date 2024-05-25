@@ -1661,7 +1661,7 @@ void TransProxyTimerProc(void)
     ListNode proxyProcList;
 
     if (g_proxyChannelList == NULL) {
-        TRANS_LOGE(TRANS_INIT, "g_proxyChannelList is null or empty");
+        TRANS_LOGD(TRANS_INIT, "g_proxyChannelList is null or empty");
         return;
     }
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
