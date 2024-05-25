@@ -154,7 +154,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
     };
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->deinit();
 }
@@ -283,9 +283,9 @@ HWTEST_F(LNNTransLaneMockTest, LNN_LANE_SCORE_VIRTUAL_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDeinitScore();
     ret = LnnGetWlanLinkedInfo(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
     ret = LnnGetCurrChannelScore(CHANNEL_ID);
-    EXPECT_TRUE(ret == VIRTUAL_DEFAULT_SCORE);
+    EXPECT_EQ(ret, VIRTUAL_DEFAULT_SCORE);
     ret = LnnStartScoring(INTERVAL);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnStopScoring();

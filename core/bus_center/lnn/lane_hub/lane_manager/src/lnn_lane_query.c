@@ -103,7 +103,7 @@ static int32_t GetLaneResource(LaneTransType transType, LaneLinkType *optLink, u
             break;
         default:
             LNN_LOGE(LNN_LANE, "lane type is not supported, transType=%{public}d", transType);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
     }
     *linkNum = 0;
     if (memcpy_s(optLink, optLinkMaxNum * sizeof(LaneLinkType), defaultLink, sizeof(defaultLink)) != EOK) {
@@ -134,7 +134,7 @@ static int32_t BrLinkState(const char *networkId)
     uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (!(local & (1 << BIT_BR))) {
         LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}u", local);
@@ -153,7 +153,7 @@ static int32_t BleLinkState(const char *networkId)
     uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (!(local & (1 << BIT_BLE))) {
         LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}u", local);
@@ -176,16 +176,16 @@ static int32_t WlanLinkState(const char *networkId)
     (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote node info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         LNN_LOGE(LNN_LANE, "peer node not wifi online");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (!(local & (1 << BIT_WIFI))) {
         LNN_LOGE(LNN_LANE, "local wifi close, local=%{public}u", local);
@@ -212,7 +212,7 @@ static int32_t P2pLinkState(const char *networkId)
     uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
         LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
@@ -246,7 +246,7 @@ static int32_t HmlLinkState(const char *networkId)
     bool result = false;
     if (LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, &result) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote feature failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
 
     if (!result) {
@@ -278,11 +278,11 @@ static int32_t IsValidLaneLink(const char *networkId, LaneLinkType linkType)
     }
     if (!g_linkState[linkType].available) {
         LNN_LOGE(LNN_LANE, "invalid QueryLink, linkType=%{public}d", linkType);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_linkState[linkType].QueryLink == NULL) {
         LNN_LOGE(LNN_LANE, "invalid QueryLink, linkType=%{public}d", linkType);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return g_linkState[linkType].QueryLink(networkId);
 }
@@ -307,13 +307,13 @@ static int32_t QueryByRequireLink(const LaneQueryInfo *queryInfo, const QosInfo 
     bool isHighBand = false;
     if (!isHighRequire(qosInfo, &isHighBand)) {
         LNN_LOGE(LNN_LANE, "set param failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LaneLinkType optLink[LANE_LINK_TYPE_BUTT];
     (void)memset_s(optLink, sizeof(optLink), 0, sizeof(optLink));
     uint32_t linkNum = LANE_LINK_TYPE_BUTT;
-    int32_t ret = SOFTBUS_ERR;
-    if (GetLaneResource(queryInfo->transType, optLink, &linkNum, isHighBand) != SOFTBUS_OK) {
+    int32_t ret = GetLaneResource(queryInfo->transType, optLink, &linkNum, isHighBand);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get defaultLinkList fail");
         return ret;
     }
@@ -332,11 +332,11 @@ static int32_t QueryByDefaultLink(const LaneQueryInfo *queryInfo)
     LaneLinkType optLink[LANE_LINK_TYPE_BUTT];
     (void)memset_s(optLink, sizeof(optLink), 0, sizeof(optLink));
     uint32_t linkNum = LANE_LINK_TYPE_BUTT;
-    if (GetLaneResource(queryInfo->transType, optLink, &linkNum, false) != SOFTBUS_OK) {
+    int32_t ret = GetLaneResource(queryInfo->transType, optLink, &linkNum, false);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get defaultLinkList fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    int32_t ret = SOFTBUS_ERR;
     for (uint32_t i = 0; i < linkNum; i++) {
         ret = IsValidLaneLink(queryInfo->networkId, optLink[i]);
         if (ret == SOFTBUS_OK) {
@@ -353,14 +353,12 @@ int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SOFTBUS_ERR;
     if (qosInfo->minBW > 0) {
         LNN_LOGI(LNN_LANE, "Query lane by prefer linklist, transType=%{public}d, minBW=%{public}d",
             queryInfo->transType, qosInfo->minBW);
-        ret = QueryByRequireLink(queryInfo, qosInfo);
+        return QueryByRequireLink(queryInfo, qosInfo);
     } else {
         LNN_LOGI(LNN_LANE, "Query lane by default linklist, transType=%{public}d", queryInfo->transType);
-        ret = QueryByDefaultLink(queryInfo);
+        return QueryByDefaultLink(queryInfo);
     }
-    return ret;
 }
