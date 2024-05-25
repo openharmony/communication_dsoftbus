@@ -35,12 +35,12 @@
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_event.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
+#include "lnn_map.h"
 #include "lnn_network_id.h"
 #include "lnn_network_info.h"
 #include "lnn_network_manager.h"
@@ -158,6 +158,10 @@ typedef struct {
 
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
+
+static Map g_lnnDfxReportMap;
+static SoftBusMutex g_lnnDfxReportMutex;
+static bool g_lnnDfxReportIsInit = false;
 
 void __attribute__((weak)) SfcSyncNodeAddrHandle(const char *networkId, int32_t code)
 {
@@ -2702,4 +2706,112 @@ void LnnRequestLeaveAllOnlineNodes(void)
         }
     }
     SoftBusFree(info);
+}
+
+static bool LnnBleReportExtraMapInit(void)
+{
+    if (SoftBusMutexInit(&g_lnnDfxReportMutex, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "lnnDfxReport mutex init fail");
+        return false;
+    }
+    LnnMapInit(&g_lnnDfxReportMap);
+    g_lnnDfxReportIsInit = true;
+    LNN_LOGI(LNN_BUILDER, "lnnDfxReport map init success");
+    return true;
+}
+
+void AddNodeToLnnBleReportExtraMap(const char *udidHash, const LnnBleReportExtra *bleExtra)
+{
+    if (!g_lnnDfxReportIsInit || udidHash == NULL || bleExtra == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxReportMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    if (LnnMapSet(&g_lnnDfxReportMap, udidHash, bleExtra, sizeof(LnnBleReportExtra)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "LnnMapSet fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+}
+
+int32_t GetNodeFromLnnBleReportExtraMap(const char *udidHash, LnnBleReportExtra *bleExtra)
+{
+    if (!g_lnnDfxReportIsInit || udidHash == NULL || bleExtra == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxReportMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LnnBleReportExtra *extra = NULL;
+    extra = (LnnBleReportExtra *)LnnMapGet(&g_lnnDfxReportMap, udidHash);
+    if (extra == NULL) {
+        LNN_LOGE(LNN_BUILDER, "LnnMapGet fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+        return SOFTBUS_NOT_FIND;
+    }
+    if (memcpy_s(bleExtra, sizeof(LnnBleReportExtra), extra, sizeof(LnnBleReportExtra)) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "memcpy_s extra fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+    return SOFTBUS_OK;
+}
+
+bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExtra)
+{
+    if (udidHash == NULL || bleExtra == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return false;
+    }
+    if (!g_lnnDfxReportIsInit && !LnnBleReportExtraMapInit()) {
+        LNN_LOGE(LNN_BUILDER, "LnnBleReportExtraMap is not init");
+        return false;
+    }
+    if (GetNodeFromLnnBleReportExtraMap(udidHash, bleExtra) != SOFTBUS_OK) {
+        return false;
+    }
+    char *anonyUdidHash = NULL;
+    Anonymize(udidHash, &anonyUdidHash);
+    LNN_LOGI(LNN_BUILDER, "device report node is exist, udidHash=%{public}s", anonyUdidHash);
+    AnonymizeFree(anonyUdidHash);
+    return true;
+}
+
+void DeleteNodeFromLnnBleReportExtraMap(const char *udidHash)
+{
+    if (!g_lnnDfxReportIsInit || udidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxReportMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    int32_t ret = LnnMapErase(&g_lnnDfxReportMap, udidHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "delete item fail, ret=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+}
+
+void ClearLnnBleReportExtraMap(void)
+{
+    if (!g_lnnDfxReportIsInit) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxReportMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    LnnMapDelete(&g_lnnDfxReportMap);
+    LNN_LOGI(LNN_BUILDER, "ClearLnnBleReportExtraMap success");
+    (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
 }

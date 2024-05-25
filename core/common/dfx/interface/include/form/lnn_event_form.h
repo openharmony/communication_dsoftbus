@@ -27,6 +27,8 @@ extern "C" {
 #endif
 
 #define LNN_DEFAULT_PKG_NAME "MODULE_LNN"
+#define DEVICE_TYPE_SIZE_LEN 3
+#define HB_SHORT_UDID_HASH_HEX_LEN 16
 
 typedef enum {
     EVENT_SCENE_LNN = 1,
@@ -104,6 +106,30 @@ typedef struct {
     const char *callerPkg;      // HOST_PKG
     const char *calleePkg;      // TO_CALL_PKG
 } LnnEventExtra;
+
+typedef struct {
+    int32_t result;                                           // STAGE_RES
+    int32_t errcode;                                          // ERROR_CODE
+    int32_t lnnType;                                          // LNN_TYPE
+    int32_t onlineNum;                                        // ONLINE_NUM
+    char peerBleMac[BT_MAC_LEN];                              // PEER_BLE_MAC
+    char peerUdid[UDID_BUF_LEN];                              // PEER_UDID
+    char peerNetworkId[NETWORK_ID_BUF_LEN];                   // PEER_NET_ID
+    char peerDeviceType[DEVICE_TYPE_SIZE_LEN + 1];            // PEER_DEV_TYPE
+    char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1];       // LOCAL_UDID_HASH
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1];        // PEER_UDID_HASH
+} LnnReportEventExtra;
+
+typedef enum {
+    BLE_REPORT_EVENT_INIT = 1,
+    BLE_REPORT_EVENT_FAIL = 2,
+    BLE_REPORT_EVENT_SUCCESS = 3,
+} ReportStatus;
+
+typedef struct {
+    LnnReportEventExtra extra;
+    ReportStatus status;
+} LnnBleReportExtra;
 
 typedef enum {
     ALARM_SCENE_LNN_RESERVED = 1,
