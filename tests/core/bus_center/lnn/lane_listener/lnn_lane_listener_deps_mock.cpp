@@ -81,11 +81,6 @@ void RemoveDelayDestroyMessage(uint64_t laneId)
     GetLaneListenerDepsInterface()->RemoveDelayDestroyMessage(laneId);
 }
 
-LnnLaneManager* GetLaneManager(void)
-{
-    return GetLaneListenerDepsInterface()->GetLaneManager();
-}
-
 int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide)
 {
     return GetLaneListenerDepsInterface()->AddLaneResourceToPool(linkInfo, laneId, isServerSide);
