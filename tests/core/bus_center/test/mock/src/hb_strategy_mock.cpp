@@ -148,5 +148,10 @@ bool IsNeedAuthLimit(const char *udidHash)
 {
     return HeartBeatStrategyInterface()->IsNeedAuthLimit(udidHash);
 }
+
+bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExtra)
+{
+    return HeartBeatStrategyInterface()->IsExistLnnDfxNodeByUdidHash(udidHash, bleExtra);
+}
 }
 } // namespace OHOS
