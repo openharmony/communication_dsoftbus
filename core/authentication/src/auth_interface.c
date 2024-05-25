@@ -296,6 +296,14 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
     return AuthDeviceGetP2pConnInfo(uuid, connInfo);
 }
 
+int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    if (isMeta) {
+        return AUTH_INVALID_ID;
+    }
+    return AuthDeviceGetHmlConnInfo(uuid, connInfo);
+}
+
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {
