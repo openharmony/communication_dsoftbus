@@ -635,6 +635,7 @@ ERR_EXIT:
         TRANS_LOGE(TRANS_CTRL, "send reply error info failed.");
     }
 }
+
 static void TransOnExchangeUdpInfo(AuthHandle authHandle, int32_t isReply, int64_t seq, const cJSON *msg)
 {
     if (isReply) {
