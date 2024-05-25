@@ -75,6 +75,8 @@ void LnnEventExtraInit(LnnEventExtra *extra)
     extra->peerUdid = NULL;
     extra->peerNetworkId = NULL;
     extra->peerDeviceType = NULL;
+    extra->localUdidHash = NULL;
+    extra->peerUdidHash = NULL;
     extra->callerPkg = NULL;
     extra->calleePkg = NULL;
 }
