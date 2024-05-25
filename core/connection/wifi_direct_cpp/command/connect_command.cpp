@@ -108,6 +108,11 @@ void ConnectCommand::PreferNegotiateChannel()
     info_.channel_ = innerLink->GetNegotiateChannel();
 }
 
+bool ConnectCommand::IsSameCommand(const WifiDirectConnectInfo &info)
+{
+    return (info.requestId == info_.info_.requestId) && (info.pid == info_.info_.pid);
+}
+
 void ConnectCommand::DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const
 {
     if (isSuccess) {
