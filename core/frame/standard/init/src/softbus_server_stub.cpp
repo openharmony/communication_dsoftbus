@@ -870,11 +870,11 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "SendMessage dataInfo len failed!");
         return SOFTBUS_ERR;
     }
-    void *dataInfo = const_cast<void *>(reinterpret_cast<const void *>(data.ReadRawData(len)));
-    if (dataInfo == nullptr) {
-        COMM_LOGE(COMM_SVC, "SendMessage read dataInfo failed!");
-        return SOFTBUS_ERR;
-    }
+
+    auto rawData = data.ReadRawData(len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read rawData failed!");
+    void *dataInfo = const_cast<void *>(rawData);
+
     int32_t msgType;
     if (!data.ReadInt32(msgType)) {
         COMM_LOGE(COMM_SVC, "SendMessage message type failed!");

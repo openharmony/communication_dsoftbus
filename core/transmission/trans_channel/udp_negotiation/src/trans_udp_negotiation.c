@@ -239,6 +239,24 @@ int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount,
     return g_channelCb->OnQosEvent(pkgName, &param);
 }
 
+static int32_t CopyAppInfoFastTransData(UdpChannelInfo *newChannel, const AppInfo *appInfo)
+{
+    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
+        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+        if (fastTransData == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
+            appInfo->fastTransDataSize) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
+            SoftBusFree(fastTransData);
+            return SOFTBUS_MEM_ERR;
+        }
+        newChannel->info.fastTransData = fastTransData;
+    }
+    return SOFTBUS_OK;
+}
+
 static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
 {
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
@@ -252,6 +270,11 @@ static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
         SoftBusFree(newChannel);
         return NULL;
     }
+    if (CopyAppInfoFastTransData(newChannel, info) != SOFTBUS_OK) {
+        SoftBusFree(newChannel);
+        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
+        return NULL;
+    }
     return newChannel;
 }
 
@@ -261,7 +284,7 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo)
     int32_t udpChannelId = GenerateUdpChannelId();
     if (udpChannelId == INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "generate udp channel id failed.");
-        return SOFTBUS_TRANS_UDP_INVALID_ID;
+        return SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID;
     }
     appInfo->myData.channelId = udpChannelId;
     int32_t udpPort = NotifyUdpChannelOpened(appInfo, true);
@@ -635,6 +658,7 @@ ERR_EXIT:
         TRANS_LOGE(TRANS_CTRL, "send reply error info failed.");
     }
 }
+
 static void TransOnExchangeUdpInfo(AuthHandle authHandle, int32_t isReply, int64_t seq, const cJSON *msg)
 {
     if (isReply) {
@@ -814,6 +838,9 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     int32_t ret = SOFTBUS_ERR;
     if (linkType == LANE_HML || linkType == LANE_P2P_REUSE) {
         TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", linkType);
+        ret = AuthGetHmlConnInfo(peerUdid, &auth, isMeta);
+    }
+    if (ret != SOFTBUS_OK && (linkType == LANE_P2P || linkType == LANE_P2P_REUSE)) {
         ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK) {
@@ -925,7 +952,7 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
     int32_t id = GenerateUdpChannelId();
     if (id == INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "generate udp channel id failed.");
-        return SOFTBUS_TRANS_UDP_INVALID_ID;
+        return SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID;
     }
     *channelId = id;
     appInfo->myData.channelId = id;

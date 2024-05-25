@@ -50,9 +50,6 @@ int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const 
 void RemoveDelayDestroyMessage(uint64_t laneId);
 void DelLogicAndLaneRelationship(uint64_t laneId);
 
-int32_t CtrlFree(uint32_t laneHandle);
-int32_t CtrlAlloc(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
-
 #ifdef __cplusplus
 }
 #endif

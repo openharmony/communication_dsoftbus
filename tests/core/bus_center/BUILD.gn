@@ -23,3 +23,11 @@ group("unittest") {
     "utils:unittest",
   ]
 }
+
+group("fuzztest") {
+  testonly = true
+  deps = [
+    "lnn:fuzztest",
+    "service/fuzztest:fuzztest",
+  ]
+}

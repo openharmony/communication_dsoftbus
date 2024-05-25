@@ -495,7 +495,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
     LNN_LOGI(LNN_LANE, "decide optimal links num=%{public}d", *linksNum);
 }
 
-static bool isLaneExist(LaneLinkType *linkList, LaneLinkType linkType)
+static bool IsLaneExist(LaneLinkType *linkList, LaneLinkType linkType)
 {
     for (int i = 0; i < LANE_LINK_TYPE_BUTT; i++) {
         if (linkList[i] == linkType) {
@@ -515,14 +515,14 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
             break;
         }
         if (IsValidLane(networkId, g_retryLaneList[bandWidthType][i], request->transType) &&
-            !isLaneExist(linkList, g_retryLaneList[bandWidthType][i])) {
+            !IsLaneExist(linkList, g_retryLaneList[bandWidthType][i])) {
             linkList[(*linksNum)++] = g_retryLaneList[bandWidthType][i];
             LNN_LOGI(LNN_LANE, "decide retry linkType=%{public}d", g_retryLaneList[bandWidthType][i]);
         }
     }
 }
 
-static void UpdataHmlPriority(const char *peerNetWorkId, const LaneSelectParam *request,
+static void UpdateHmlPriority(const char *peerNetWorkId, const LaneSelectParam *request,
     LaneLinkType *linkList, uint32_t *linksNum)
 {
     char peerUdid[UDID_BUF_LEN] = {0};
@@ -539,6 +539,10 @@ static void UpdataHmlPriority(const char *peerNetWorkId, const LaneSelectParam *
     }
     LNN_LOGI(LNN_LANE, "hml exist reuse laneId=%{public}" PRIu64 ", update priority", resourceItem.laneId);
     LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
+    if (*linksNum > LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "link num exceed lisk list");
+        return;
+    }
     uint32_t num = 0;
     tmpList[num++] = LANE_HML;
     for (uint32_t i = 0; i < *linksNum; i++) {
@@ -564,6 +568,10 @@ static void DelHasAllocedLink(uint64_t allocedLaneId, LaneLinkType *linkList, ui
     }
     uint32_t num = 0;
     LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
+    if (*linksNum > LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "link num exceed lisk list");
+        return;
+    }
     for (uint32_t i = 0; i < *linksNum; i++) {
         if (linkList[i] != resourceItem.link.type) {
             tmpList[num++] = linkList[i];
@@ -628,7 +636,7 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     uint32_t linksNum = 0;
     DecideOptimalLinks(networkId, request, linkList, &linksNum);
     DecideRetryLinks(networkId, request, linkList, &linksNum);
-    UpdataHmlPriority(networkId, request, linkList, &linksNum);
+    UpdateHmlPriority(networkId, request, linkList, &linksNum);
     if (request->allocedLaneId != INVALID_LANE_ID) {
         DelHasAllocedLink(request->allocedLaneId, linkList, &linksNum);
     }
