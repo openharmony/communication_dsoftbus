@@ -293,7 +293,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
         return SOFTBUS_STRCPY_ERR;
     }
     if (strcpy_s(appInfo->peerNetWorkId, sizeof(appInfo->peerNetWorkId), peerNetworkId) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s peer peerNetworkId failed");
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s peerNetworkId failed");
         return SOFTBUS_STRCPY_ERR;
     }
 
