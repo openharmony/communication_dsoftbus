@@ -512,13 +512,13 @@ HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
 
     (void)memcpy_s(&requestOption.requestInfo, sizeof(TransOption), &trans, sizeof(TransOption));
     ret = TransAddLaneReqToPendingAndWaiting(laneHandle, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransAddLaneReqToPendingAndWaiting(laneHandle, &requestOption);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransAddLaneReqToPendingAndWaiting(laneHandle, &requestOption);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     (void)TransDelLaneReqFromPendingList(laneHandle, false);
     LnnDeinitDistributedLedger();

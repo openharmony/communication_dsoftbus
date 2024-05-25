@@ -197,6 +197,9 @@ int32_t TransDelUdpChannel(int32_t channelId)
             ReleaseUdpChannelId((int32_t)(udpChannelNode->info.myData.channelId));
             ListDelete(&(udpChannelNode->node));
             TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d", channelId);
+            if (udpChannelNode->info.fastTransData != NULL) {
+                SoftBusFree((void *)(udpChannelNode->info.fastTransData));
+            }
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -217,6 +220,9 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
 
         ListDelete(&(udpChannel->node));
         TRANS_LOGI(TRANS_CTRL, "channelId=%{public}" PRId64, udpChannel->info.myData.channelId);
+        if (udpChannel->info.fastTransData != NULL) {
+            SoftBusFree((void *)(udpChannel->info.fastTransData));
+        }
         SoftBusFree(udpChannel);
     }
 }

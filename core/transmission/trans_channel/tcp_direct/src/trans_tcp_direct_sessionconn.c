@@ -292,6 +292,9 @@ void TransDelSessionConnById(int32_t channelId)
             }
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d", item->channelId);
+            if (item->appInfo.fastTransData != NULL) {
+                SoftBusFree((void*)item->appInfo.fastTransData);
+            }
             SoftBusFree(item);
             g_sessionConnList->cnt--;
             ReleaseSessonConnLock();
