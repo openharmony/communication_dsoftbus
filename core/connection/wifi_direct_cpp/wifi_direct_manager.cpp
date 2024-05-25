@@ -137,6 +137,12 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     return ret;
 }
 
+static int32_t CancelConnectDevice(const struct WifiDirectConnectInfo *info)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
+    return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().CancelConnectDevice(*info);
+}
+
 static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
@@ -367,6 +373,7 @@ static struct WifiDirectManager g_manager = {
     .allocateListenerModuleId = AllocateListenerModuleId,
     .freeListenerModuleId = FreeListenerModuleId,
     .connectDevice = ConnectDevice,
+    .cancelConnectDevice = CancelConnectDevice,
     .disconnectDevice = DisconnectDevice,
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
