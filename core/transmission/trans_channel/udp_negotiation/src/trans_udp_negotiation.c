@@ -261,7 +261,7 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo)
     int32_t udpChannelId = GenerateUdpChannelId();
     if (udpChannelId == INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "generate udp channel id failed.");
-        return SOFTBUS_TRANS_UDP_INVALID_ID;
+        return SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID;
     }
     appInfo->myData.channelId = udpChannelId;
     int32_t udpPort = NotifyUdpChannelOpened(appInfo, true);
@@ -926,7 +926,7 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
     int32_t id = GenerateUdpChannelId();
     if (id == INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "generate udp channel id failed.");
-        return SOFTBUS_TRANS_UDP_INVALID_ID;
+        return SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID;
     }
     *channelId = id;
     appInfo->myData.channelId = id;
