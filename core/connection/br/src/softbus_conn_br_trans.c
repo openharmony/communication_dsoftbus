@@ -49,9 +49,8 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
     }
     if (buffer->capacity - pktHeadLen < head->len) {
         buffer->length = 0;
-        CONN_LOGE(CONN_BR,
-            "recv data too big: connId=%{public}u, module=%{public}d, seq=%{public}" PRId64 ", datalen=%{public}d",
-            connectionId, head->module, head->seq, head->len);
+        CONN_LOGE(CONN_BR, "recv data too big: connId=%{public}u, module=%{public}d, seq=%{public}" PRId64 ", "
+            "datalen=%{public}d", connectionId, head->module, head->seq, head->len);
         return NULL;
     }
     uint32_t packLen = head->len + sizeof(ConnPktHead);
@@ -66,10 +65,8 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
         return NULL;
     }
     if (memcpy_s(dataCopy, packLen, buffer->buffer, packLen) != EOK) {
-        CONN_LOGE(CONN_BR,
-            "parse data failed: memcpy_s failed, retry next time, "
-            "connId=%{public}u, packLen=%{public}u, bufferLen=%{public}u",
-            connectionId, packLen, buffer->length);
+        CONN_LOGE(CONN_BR, "parse data failed: memcpy_s failed, retry next time, connId=%{public}u, "
+            "packLen=%{public}u, bufferLen=%{public}u", connectionId, packLen, buffer->length);
         SoftBusFree(dataCopy);
         return NULL;
     }
@@ -79,8 +76,7 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
         SoftBusFree(dataCopy);
         return NULL;
     }
-    CONN_LOGI(CONN_BR,
-        "br receive data, connId=%{public}u, cachedLength=%{public}u, "
+    CONN_LOGI(CONN_BR, "br receive data, connId=%{public}u, cachedLength=%{public}u, "
         "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, buffer->length, packLen, head->flag, head->module, head->seq);
     buffer->length -= packLen;
