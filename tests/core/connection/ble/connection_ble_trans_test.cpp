@@ -66,7 +66,7 @@ namespace OHOS {
 class ConnectionBleTransTest : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase() {}
+    static void TearDownTestCase();
     void SetUp() override {}
     void TearDown() override {}
 };
