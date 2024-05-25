@@ -49,7 +49,6 @@ int WifiDirectScheduler::CancelConnectDevice(const WifiDirectConnectInfo &info)
     for (auto itc = commandList_.begin(); itc != commandList_.end(); itc++) {
         auto connectCommand = std::dynamic_pointer_cast<ConnectCommand>(*itc);
         if (connectCommand != nullptr && connectCommand->IsSameCommand(info)) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "cancel command requestId=%{public}d pid=%{public}d", info.requestId, info.pid);
             commandList_.erase(itc);
             return SOFTBUS_OK;
         }
