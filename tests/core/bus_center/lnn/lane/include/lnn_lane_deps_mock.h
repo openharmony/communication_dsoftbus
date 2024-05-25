@@ -36,6 +36,15 @@
 #include "softbus_base_listener.h"
 #include "wifi_direct_manager.h"
 
+typedef enum {
+    LANE_MOCK_PARAM1 = 0,
+    LANE_MOCK_PARAM2,
+    LANE_MOCK_PARAM3,
+    LANE_MOCK_PARAM4,
+    LANE_MOCK_PARAM5,
+    LANE_MOCK_PARAM_BUTT
+} LaneMockParamIndex;
+
 namespace OHOS {
 class LaneDepsInterface {
 public:
