@@ -41,6 +41,12 @@ public:
     virtual WifiErrorCode Hid2dGetChannelListFor5G(int *chanList, int len) = 0;
     virtual WifiErrorCode GetP2pEnableStatus(P2pState* state) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info) = 0;
+    virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
+    virtual int32_t LnnSyncP2pInfo() = 0;
+    virtual uint64_t LnnGetFeatureCapabilty() = 0;
+    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
+
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info) = 0;
@@ -55,13 +61,6 @@ public:
         const AuthConnCallback *callback, bool isMeta) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
-
-    virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info) = 0;
-    virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
-    virtual int32_t LnnSyncP2pInfo() = 0;
-    virtual uint64_t LnnGetFeatureCapabilty();
-    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
-
     // Defines dependencies short-reach interface here
     virtual WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info) = 0;
     virtual WifiErrorCode Hid2dGetRecommendChannel(const RecommendChannelRequest *request,
