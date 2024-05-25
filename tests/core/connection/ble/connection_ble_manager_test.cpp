@@ -162,7 +162,7 @@ public:
         g_bleInterface = ConnInitBle(&connectCb);
         ASSERT_NE(g_bleInterface, NULL);
     }
-    void TearDown() override 
+    void TearDown() override
     {
         LooperDeinit();
     }
