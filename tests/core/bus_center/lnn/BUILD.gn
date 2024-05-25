@@ -1908,3 +1908,8 @@ group("unittest") {
     ]
   }
 }
+
+group("fuzztest") {
+  testonly = true
+  deps = [ "fuzztest:fuzztest" ]
+}
