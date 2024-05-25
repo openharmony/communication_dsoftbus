@@ -79,6 +79,11 @@ public:
 
     static WifiDirectRole ToWifiDirectRole(LinkInfo::LinkMode mode);
     static void ShowLinkInfoList(const std::string &banana, const std::vector<LinkInfo> &inkList);
+
+    static constexpr int BAND_WIDTH_80M_NUMBER = 80 << 20;
+    static constexpr int BAND_WIDTH_160M_NUMBER = 160 << 20;
+    static WifiDirectBandWidth BandWidthNumberToEnum(int bandWidth);
+    static int BandWidthEnumToNumber(WifiDirectBandWidth bandWidth);
 };
 }
 
