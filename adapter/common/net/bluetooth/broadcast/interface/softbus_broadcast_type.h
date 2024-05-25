@@ -91,6 +91,7 @@ typedef enum {
     SRV_TYPE_LP_BURST, // The service type is burst for lowpower.
     SRV_TYPE_LP_HB, // The service type is heartbeat for lowpower.
     SRV_TYPE_FAST_OFFLINE, // The service type is fast offline.
+    SRV_TYPE_VLINK, // The service type is virtual link discovery.
     SRV_TYPE_BUTT,
 } BaseServiceType;
 
@@ -125,6 +126,7 @@ static const SrvTypeMap g_srvTypeMap[] = {
     {SRV_TYPE_LP_BURST, (char *)"lp burst"},
     {SRV_TYPE_LP_HB, (char *)"lp heartbeat"},
     {SRV_TYPE_FAST_OFFLINE, (char *)"fast offline"},
+    {SRV_TYPE_VLINK, (char *)"virtual link"}
 };
 
 /**
