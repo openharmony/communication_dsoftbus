@@ -23,6 +23,8 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_deviceinfo_to_profile.h"
+#include "lnn_feature_capability.h"
+#include "lnn_heartbeat_strategy.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
@@ -167,6 +169,28 @@ static bool IsNeedToSend(NodeInfo *nodeInfo, uint32_t type)
     }
 }
 
+static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *msg, uint32_t netCapability,
+    uint32_t type)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (IsNeedToSend(&nodeInfo, type)) {
+        if (!IsFeatureSupport(nodeInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) {
+            ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+        } else {
+            if (type == ((1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR))) {
+                ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+            } else {
+                ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+            }
+        }
+        ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+        LNN_LOGE(LNN_BUILDER,
+            "sync capability info ret=%{public}d, deviceName=%{public}s.", ret, netInfo.deviceName);
+    } else if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
+        LnnSendP2pSyncInfoMsg(netInfo.networkId, netCapability);
+    }
+}
+
 static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
 {
     uint8_t *msg = ConvertCapabilityToMsg(netCapability);
@@ -194,13 +218,7 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }
-        if (IsNeedToSend(&nodeInfo, type)) {
-            int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo[i].networkId, msg, MSG_LEN, NULL);
-            LNN_LOGE(LNN_BUILDER,
-                "sync network info ret=%{public}d, deviceName=%{public}s.", ret, netInfo[i].deviceName);
-        } else if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
-            LnnSendP2pSyncInfoMsg(netInfo[i].networkId, netCapability);
-        }
+        DoSendCapability(nodeInfo, netInfo[i], msg, netCapability, type);
     }
     SoftBusFree(netInfo);
     SoftBusFree(msg);
