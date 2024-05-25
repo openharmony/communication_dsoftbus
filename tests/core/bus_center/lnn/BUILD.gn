@@ -1662,6 +1662,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
 ohos_unittest("LNNLaneListenerTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_listener/lnn_lane_listener_deps_mock.cpp",

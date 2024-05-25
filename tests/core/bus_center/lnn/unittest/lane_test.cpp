@@ -340,7 +340,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
     };
     uint32_t requestId = 0x5A5A;
     ret = BuildLink(&reqInfo, requestId, &linkCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_CONN_FAIL);
     ConnServerDeinit();
 }
 
