@@ -20,6 +20,7 @@
 #include <securec.h>
 
 #include "common_list.h"
+#include "message_handler.h"
 #include "conn_log.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
