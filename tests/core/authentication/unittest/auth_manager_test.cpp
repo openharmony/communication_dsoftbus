@@ -486,6 +486,9 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
     EXPECT_TRUE(AuthDeviceGetP2pConnInfo(nullptr, &connInfo) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthDeviceGetP2pConnInfo(UUID_TEST, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthDeviceGetP2pConnInfo(UUID_TEST, &connInfo) == SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_TRUE(AuthDeviceGetHmlConnInfo(nullptr, &connInfo) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthDeviceGetHmlConnInfo(UUID_TEST, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthDeviceGetHmlConnInfo(UUID_TEST, &connInfo) == SOFTBUS_AUTH_NOT_FOUND);
     AuthSessionInfo info;
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
