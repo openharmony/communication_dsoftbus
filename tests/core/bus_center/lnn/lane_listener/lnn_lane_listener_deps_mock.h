@@ -39,7 +39,6 @@ public:
     virtual void DelLogicAndLaneRelationship(uint64_t laneId) = 0;
     virtual int32_t ClearLaneResourceByLaneId(uint64_t laneId) = 0;
     virtual void RemoveDelayDestroyMessage(uint64_t laneId) = 0;
-    virtual LnnLaneManager* GetLaneManager(void) = 0;
     virtual int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide) = 0;
     virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
 };
