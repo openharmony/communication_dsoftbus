@@ -56,10 +56,12 @@ LNN_ASSIGNER(String, PeerPort, peerPort)
 LNN_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
 LNN_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 LNN_ASSIGNER(String, PeerDeviceType, peerDeviceType)
+LNN_ASSIGNER(AnonymizeString, LocalUdidHash, localUdidHash)
+LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 24 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 26 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -83,6 +85,8 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "PEER_UDID",        HISYSEVENT_STRING, LnnAssignerPeerUdid         },
     { "PEER_NET_ID",      HISYSEVENT_STRING, LnnAssignerPeerNetworkId    },
     { "PEER_DEV_TYPE",    HISYSEVENT_STRING, LnnAssignerPeerDeviceType   },
+    { "LOCAL_UDID_HASH",  HISYSEVENT_STRING, LnnAssignerLocalUdidHash    },
+    { "PEER_UDID_HASH",   HISYSEVENT_STRING, LnnAssignerPeerUdidHash     },
     { "HOST_PKG",         HISYSEVENT_STRING, LnnAssignerCallerPkg        },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, LnnAssignerCalleePkg        },
     // Modification Note: remember updating LNN_ASSIGNER_SIZE

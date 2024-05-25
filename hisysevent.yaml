@@ -145,6 +145,8 @@ BUSCENTER_BEHAVIOR:
   PEER_UDID: { type: STRING, desc: peer device udid }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
+  LOCAL_UDID_HASH: { type: STRING, desc: local device udid hash}
+  PEER_UDID_HASH: { type: STRING, desc: peer device udid hash}
 
 BUSCENTER_AUDIT:
   __BASE: {type: SECURITY, level: CRITICAL, desc: bus center security audit }

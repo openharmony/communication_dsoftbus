@@ -417,8 +417,9 @@ static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta)
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb;
     (void)memset_s(&cb, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
-    int32_t ret = AuthGetP2pConnInfo(uuid, &auth, isMeta);
-    if (ret != SOFTBUS_OK && AuthGetPreferConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK) {
+    if (AuthGetHmlConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK &&
+        AuthGetP2pConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK &&
+        AuthGetPreferConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth info fail");
         return SOFTBUS_ERR;
     }
@@ -437,10 +438,7 @@ static void SendVerifyP2pFailRsp(AuthHandle authHandle, int64_t seq,
     int32_t code, int32_t errCode, const char *errDesc, bool isAuthLink)
 {
     char *reply = VerifyP2pPackError(code, errCode, errDesc);
-    if (reply == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "verify p2ppack error");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(reply != NULL, TRANS_CTRL, "verifyP2p pack error");
     if (isAuthLink) {
         if (SendAuthData(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, reply) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "send auth data fail");
@@ -478,13 +476,10 @@ static int32_t SendVerifyP2pRsp(AuthHandle authHandle, int32_t module, int32_t f
         }
     } else {
         uint32_t strLen = strlen(reply) + 1;
-        char *sendMsg = (char*)SoftBusCalloc(strLen + sizeof(int64_t) + sizeof(int64_t));
-        if (sendMsg == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "softbuscalloc fail");
-            return SOFTBUS_MALLOC_ERR;
-        }
-        *(int64_t*)sendMsg = P2P_VERIFY_REPLY;
-        *(int64_t*)(sendMsg + sizeof(int64_t)) = seq;
+        char *sendMsg = (char *)SoftBusCalloc(strLen + sizeof(int64_t) + sizeof(int64_t));
+        TRANS_CHECK_AND_RETURN_RET_LOGE(sendMsg != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc sendMsg failed");
+        *(int64_t *)sendMsg = P2P_VERIFY_REPLY;
+        *(int64_t *)(sendMsg + sizeof(int64_t)) = seq;
         if (strcpy_s(sendMsg  + sizeof(int64_t) + sizeof(int64_t), strLen, reply) != EOK) {
             SoftBusFree(sendMsg);
             return SOFTBUS_STRCPY_ERR;
@@ -865,8 +860,32 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
     return ret;
 }
 
-int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
-    int32_t *channelId)
+static int32_t CopyAppInfoFastTransData(SessionConn *conn, const AppInfo *appInfo)
+{
+    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
+        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+        if (fastTransData == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
+            appInfo->fastTransDataSize) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
+            SoftBusFree(fastTransData);
+            return SOFTBUS_MEM_ERR;
+        }
+        conn->appInfo.fastTransData = fastTransData;
+    }
+    return SOFTBUS_OK;
+}
+
+static void FreeFastTransData(AppInfo *appInfo)
+{
+    if (appInfo != NULL && appInfo->fastTransData != NULL) {
+        SoftBusFree((void *)(appInfo->fastTransData));
+    }
+}
+
+int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL ||
@@ -885,14 +904,24 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
         "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(conn->channelId + ID_OFFSET));
-    (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
-
+    if (memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy appInfo fail");
+        SoftBusFree(conn);
+        return SOFTBUS_MEM_ERR;
+    }
+    ret = CopyAppInfoFastTransData(conn, appInfo);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(conn);
+        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
+        return ret;
+    }
     if (connInfo->type == CONNECT_P2P) {
         ret = StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
     } else {
         ret = StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
     }
     if (ret != SOFTBUS_OK) {
+        FreeFastTransData(&(conn->appInfo));
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "start listener fail");
         return ret;
@@ -900,6 +929,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 
     uint64_t seq = TransTdcGetNewSeqId();
     if (seq == INVALID_SEQ_ID) {
+        FreeFastTransData(&(conn->appInfo));
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
@@ -908,6 +938,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
     ret = TransTdcAddSessionConn(conn);
     if (ret != SOFTBUS_OK) {
+        FreeFastTransData(&(conn->appInfo));
         SoftBusFree(conn);
         return ret;
     }

@@ -23,7 +23,7 @@
 extern "C"{
 #endif /* __cplusplus */
 
-void GetExtQosInfo(const SessionParam *param, QosInfo *qosInfo, uint32_t index);
+void GetExtQosInfo(const SessionParam *param, QosInfo *qosInfo, uint32_t index, AllocExtendInfo *extendInfo);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

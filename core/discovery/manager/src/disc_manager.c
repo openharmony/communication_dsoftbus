@@ -167,7 +167,13 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
 {
     DISC_LOGD(DISC_CONTROL, "record device found");
     if (infoNode->statistics.repTimes == 0) {
-        uint64_t costTime = SoftBusGetSysTimeMs() - infoNode->statistics.startTime;
+        uint64_t costTime = 0;
+        uint64_t sysTime = SoftBusGetSysTimeMs();
+        if (sysTime >= infoNode->statistics.startTime) {
+            costTime = sysTime - infoNode->statistics.startTime;
+        } else {
+            DISC_LOGE(DISC_CONTROL, "CurTime < startTime");
+        }
         SoftbusRecordFirstDiscTime((SoftBusDiscMedium)addtions->medium, costTime);
         DiscEventExtra extra = { 0 };
         DiscEventExtraInit(&extra);
