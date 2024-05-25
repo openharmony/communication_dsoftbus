@@ -1653,3 +1653,42 @@ void LnnDestroyP2p(void)
     LinkUnlock();
     (void)SoftBusMutexDestroy(&g_p2pLinkMutex);
 }
+
+void LnnCancelWifiDirect(uint32_t laneReqId)
+{
+    if (LinkLock() != 0) {
+        LNN_LOGE(LNN_LANE, "link lock fail");
+        return;
+    }
+    struct WifiDirectConnectInfo wifiDirectInfo;
+    (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
+    bool isNodeExist = false;
+    P2pLinkReqList *item = NULL;
+    P2pLinkReqList *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkList, P2pLinkReqList, node) {
+        if (item->laneRequestInfo.laneReqId == laneReqId && item->p2pInfo.p2pRequestId != INVALID_P2P_REQUEST_ID) {
+            wifiDirectInfo.requestId = item->p2pInfo.p2pRequestId;
+            wifiDirectInfo.pid = item->laneRequestInfo.pid;
+            isNodeExist = true;
+            break;
+        }
+    }
+    LinkUnlock();
+    if (!isNodeExist) {
+        LNN_LOGI(LNN_LANE, "not build wifidirect, no need cancel, laneRequestId=%{public}u.", laneReqId);
+        return;
+    }
+    struct WifiDirectManager *mgr = GetWifiDirectManager();
+    if (mgr == NULL || mgr->cancelConnectDevice == NULL) {
+        LNN_LOGE(LNN_LANE, "get wifiDirect manager null");
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "cancel wifidirect request, p2pRequestId=%{public}u.", wifiDirectInfo.requestId);
+    int32_t ret = mgr->cancelConnectDevice(&wifiDirectInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "cancel wifidirect request fail, p2pRequestId=%{public}u, reason=%{public}d.",
+            wifiDirectInfo.requestId, ret);
+        return;
+    }
+    NotifyLinkFail(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, SOFTBUS_LANE_BUILD_LINK_FAIL);
+}

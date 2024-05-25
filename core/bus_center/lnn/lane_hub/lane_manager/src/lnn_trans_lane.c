@@ -736,6 +736,7 @@ static int32_t CancelLane(uint32_t laneReqId)
             }
             item->isCanceled = true;
             Unlock();
+            LnnCancelWifiDirect(laneReqId);
             LNN_LOGI(LNN_LANE, "cancel lane succ, laneReqId=%{public}u", laneReqId);
             return SOFTBUS_OK;
         }

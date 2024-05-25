@@ -117,5 +117,9 @@ int32_t UpdateP2pLinkedInfo(uint32_t laneReqId, uint64_t laneId)
 {
     return GetWifiAdpterInterface()->UpdateP2pLinkedInfo(laneReqId, laneId);
 }
+void LnnCancelWifiDirect(uint32_t laneReqId)
+{
+    return GetWifiAdpterInterface()->LnnCancelWifiDirect(laneReqId);
+}
 }
 }

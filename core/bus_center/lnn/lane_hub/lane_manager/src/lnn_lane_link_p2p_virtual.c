@@ -34,3 +34,8 @@ void LnnDestroyP2p(void)
     return;
 }
 
+void LnnCancelWifiDirect(uint32_t laneReqId)
+{
+    (void)laneReqId;
+    return;
+}
