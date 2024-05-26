@@ -176,7 +176,7 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_HEART_BEAT, "networkId=%{public}s, capability change:%{public}u->%{public}u", anonyNetworkId,
+    LNN_LOGI(LNN_HEART_BEAT, "networkId=%{public}s capability change:%{public}u->%{public}u", anonyNetworkId,
         oldNetCapa, nodeInfo.netCapacity);
     AnonymizeFree(anonyNetworkId);
 }
