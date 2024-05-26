@@ -546,9 +546,18 @@ HWTEST_F(TransServerTcpDirectTest, OpenAuthConn001, TestSize.Level1)
 {
     const char* uuid = TEST_TRANS_UDID;
     uint32_t reqId = 1;
+    ConnectType type = CONNECT_HML;
 
-    int32_t ret = OpenAuthConn(uuid, reqId, false);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int32_t ret = OpenAuthConn(uuid, reqId, false, type);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
+
+    type = CONNECT_P2P;
+    ret = OpenAuthConn(uuid, reqId, false, type);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
+
+    type = CONNECT_TCP;
+    ret = OpenAuthConn(uuid, reqId, false, type);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 }
 
 /**
