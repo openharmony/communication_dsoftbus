@@ -85,7 +85,7 @@ void ReleaseUdpChannelId(int32_t channelId)
         return;
     }
     uint32_t id = (uint32_t)channelId;
-    g_channelIdFlagBitsMap &= (~(ID_USED << id));
+    g_channelIdFlagBitsMap &= (~(ID_USED << (uint64_t)id));
     SoftBusMutexUnlock(&g_udpNegLock);
 }
 
