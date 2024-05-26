@@ -25,6 +25,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_common.h"
+#include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_proxychannel_pipeline.h"
@@ -410,18 +411,24 @@ static void OnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     TRANS_LOGW(TRANS_CTRL, "ok");
 }
 
-static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta)
+static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta, ConnectType type)
 {
     TRANS_LOGI(TRANS_CTRL, "reqId=%{public}u", reqId);
     AuthConnInfo auth;
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb;
     (void)memset_s(&cb, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
-    if (AuthGetHmlConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK &&
-        AuthGetP2pConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK &&
-        AuthGetPreferConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get auth info fail");
-        return SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
+    if (type == CONNECT_HML) {
+        TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", type);
+        ret = AuthGetHmlConnInfo(uuid, &auth, isMeta);
+    }
+    if (ret != SOFTBUS_OK && type == CONNECT_P2P) {
+        TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", type);
+        ret = AuthGetP2pConnInfo(uuid, &auth, isMeta);
+    }
+    if (ret != SOFTBUS_OK) {
+        ret = AuthGetPreferConnInfo(uuid, &auth, isMeta);
     }
     cb.onConnOpened = OnAuthConnOpened;
     cb.onConnOpenFailed = OnAuthConnOpenFailed;
@@ -761,9 +768,9 @@ static void OnAuthChannelClose(AuthHandle authHandle)
 }
 
 static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn,
-    int32_t newChannelId, uint32_t requestId)
+    int32_t newChannelId, ConnectType type)
 {
-    int32_t ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, conn->isMeta);
+    int32_t ret = OpenAuthConn(appInfo->peerData.deviceId, conn->requestId, conn->isMeta, type);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenP2pDirectChannel open auth conn fail");
         return ret;
@@ -813,7 +820,7 @@ static int32_t TransProxyGetAuthId(SessionConn *conn)
 }
 
 
-static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
+static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, ConnectType type)
 {
     int32_t ret = SOFTBUS_ERR;
     int32_t newChannelId = conn->channelId;
@@ -823,7 +830,10 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
         uint32_t requestId = AuthGenRequestId();
         conn->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
         conn->requestId = requestId;
-        ret = OpenNewAuthConn(appInfo, conn, newChannelId, conn->requestId);
+        if (type == CONNECT_P2P_REUSE) {
+            type = (strncmp(appInfo->myData.addr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) ? CONNECT_HML : CONNECT_P2P;
+        }
+        ret = OpenNewAuthConn(appInfo, conn, newChannelId, type);
     } else {
         ret = TransProxyReuseByChannelId(pipeLineChannelId);
         if (ret != SOFTBUS_OK) {
@@ -895,7 +905,6 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     SessionConn *conn = NULL;
     int32_t ret = SOFTBUS_ERR;
-
     conn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_P2P, false);
     if (conn == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create new sessin conn fail");
@@ -926,14 +935,12 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         TRANS_LOGE(TRANS_CTRL, "start listener fail");
         return ret;
     }
-
     uint64_t seq = TransTdcGetNewSeqId();
     if (seq == INVALID_SEQ_ID) {
         FreeFastTransData(&(conn->appInfo));
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-
     conn->req = (int64_t)seq;
     conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
     ret = TransTdcAddSessionConn(conn);
@@ -942,7 +949,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         SoftBusFree(conn);
         return ret;
     }
-    ret = StartVerifyP2pInfo(appInfo, conn);
+    ret = StartVerifyP2pInfo(appInfo, conn, connInfo->type);
     if (ret != SOFTBUS_OK) {
         TransDelSessionConnById(conn->channelId);
         TRANS_LOGE(TRANS_CTRL, "StartVerifyP2pInfo fail, ret=%{public}d", ret);
