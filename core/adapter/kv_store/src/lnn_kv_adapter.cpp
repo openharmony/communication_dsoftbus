@@ -403,7 +403,8 @@ void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
     }
 }
 
-int32_t KVAdapter::DeRegisterDataChangeListener() {
+int32_t KVAdapter::DeRegisterDataChangeListener()
+{
     LNN_LOGI(LNN_LEDGER, "call!");
     UnRegisterDataChangeListener();
     DeleteDataChangeListener();
