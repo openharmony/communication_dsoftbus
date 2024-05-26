@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_secure_storage.h"
@@ -163,6 +164,23 @@ static int32_t LnnParseWifiDirectAddrMsg(const char *msg, char *wifiDirectAddr, 
     return SOFTBUS_OK;
 }
 
+static bool IsNeedSyncP2pInfo(const NodeInfo *localInfo, const NodeBasicInfo *info)
+{
+    int32_t osType = 0;
+    // rk need to sync
+    if (!IsFeatureSupport(localInfo->feature, BIT_WIFI_DIRECT_TLV_NEGOTIATION)) {
+        return true;
+    }
+    if (LnnGetOsTypeByNetworkId(info->networkId, &osType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get remote osType fail");
+    }
+    if (osType != OH_OS_TYPE) {
+        LNN_LOGE(LNN_BUILDER, "remote osType is %{public}d, need sync p2pinfo", osType);
+        return true;
+    }
+    return false;
+}
+
 static void ProcessSyncP2pInfo(void *para)
 {
     (void)para;
@@ -195,7 +213,8 @@ static void ProcessSyncP2pInfo(void *para)
         if (LnnIsLSANode(&info[i])) {
             continue;
         }
-        if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
+        if (IsNeedSyncP2pInfo(localInfo, &info[i]) &&
+            LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "sync p2p info fail. deviceName=%{public}s", info[i].deviceName);
         }
     }
@@ -235,7 +254,13 @@ static void ProcessSyncWifiDirectAddr(void *para)
         if (LnnIsLSANode(&info[i])) {
             continue;
         }
-        if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_WIFI_DIRECT, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
+        int32_t osType = 0;
+        if (LnnGetOsTypeByNetworkId(info->networkId, &osType) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "get remote osType fail");
+        }
+        if (osType != OH_OS_TYPE &&
+            LnnSendSyncInfoMsg(LNN_INFO_TYPE_WIFI_DIRECT, info[i].networkId, (uint8_t *)msg, len, NULL)
+            != SOFTBUS_OK) {
             char *anonyNetworkId = NULL;
             Anonymize(info[i].networkId, &anonyNetworkId);
             LNN_LOGE(LNN_BUILDER, "sync wifidirect addr fail. anonyNetworkId=%{public}s", anonyNetworkId);

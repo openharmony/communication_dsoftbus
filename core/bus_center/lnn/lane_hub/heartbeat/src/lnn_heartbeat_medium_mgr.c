@@ -154,9 +154,15 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
     uint32_t oldNetCapa = nodeInfo.netCapacity;
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
+    } else {
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_5G);
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_24G);
     }
     if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
         (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI_P2P);
+    } else {
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_P2P);
     }
     (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BLE);
     (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BR);
@@ -168,6 +174,11 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         LNN_LOGE(LNN_HEART_BEAT, "update net capability fail");
         return;
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_HEART_BEAT, "networkId=%{public}s, capability change:%{public}u->%{public}u", anonyNetworkId,
+        oldNetCapa, nodeInfo.netCapacity);
+    AnonymizeFree(anonyNetworkId);
 }
 
 static int32_t HbGetOnlineNodeByRecvInfo(
@@ -348,9 +359,15 @@ static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *
 {
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI);
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_5G);
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_24G);
     }
     if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC)) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
     }
     (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BR);
     (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
