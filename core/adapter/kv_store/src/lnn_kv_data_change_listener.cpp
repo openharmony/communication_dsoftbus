@@ -27,16 +27,14 @@
 
 namespace OHOS {
 namespace {
-const std::string APP_ID = "dsoftbus";
-const std::string STORE_ID = "dsoftbus_kv_db";
-constexpr int32_t APP_ID_LEN = 8;
-constexpr int32_t STORE_ID_LEN = 14;
 constexpr int32_t MAX_DB_RECORD_SIZE = 10000;
 } // namespace
 
-KvDataChangeListener::KvDataChangeListener()
+KvDataChangeListener::KvDataChangeListener(const std::string &appId, const std::string &storeId)
 {
     LNN_LOGI(LNN_LEDGER, "construct!");
+    this->appId_ = appId;
+    this->storeId_ = storeId;
 }
 
 KvDataChangeListener::~KvDataChangeListener()
@@ -75,7 +73,7 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
 {
     int32_t dbId = 0;
     char *anonyKey = nullptr;
-    LnnCreateKvAdapter(&dbId, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
+    LnnCreateKvAdapter(&dbId, appId_.c_str(), appId_.length(), storeId_.c_str(), storeId_.length());
     LNN_LOGI(LNN_LEDGER, "call! dbId=%{public}d", dbId);
     std::vector<DistributedKv::Entry> entries;
     if (keys.empty()) {

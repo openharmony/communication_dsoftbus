@@ -984,6 +984,7 @@ void LnnInitCloudSyncModule(void)
         LNN_LOGE(LNN_BUILDER, "Lnn Init Cloud Sync Module fail");
         return;
     }
+    LnnRegisterDataChangeListener(dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
     g_dbId = dbId;
 }
 
@@ -991,6 +992,7 @@ void LnnDeInitCloudSyncModule(void)
 {
     LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = g_dbId;
+    LnnDeRegisterDataChangeListener(dbId);
     if (LnnDestroyKvAdapter(dbId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "DeInit Cloud Sync module fail");
     }
