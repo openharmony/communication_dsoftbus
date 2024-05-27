@@ -25,7 +25,7 @@ int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, c
 int32_t LnnDestroyKvAdapter(int32_t dbId);
 void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
     int32_t storeIdLen);
-void LnnDeRegisterDataChangeListener(int32_t dbId);
+void LnnUnRegisterDataChangeListener(int32_t dbId);
 int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *value, int32_t valueLen);
 int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo);
 int32_t LnnDeleteDBData(int32_t dbId, const char *key, int32_t keyLen);
