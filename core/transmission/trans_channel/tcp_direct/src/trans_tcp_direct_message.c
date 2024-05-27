@@ -467,7 +467,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .linkType = conn.appInfo.connectType,
         .costTime = timediff,
         .errcode = errCode,
-        .osType = conn.appInfo.osType,
+        .osType = (conn.appInfo.osType < 0) ? UNKNOW_OS_TYPE : (conn.appInfo.osType),
         .peerUdid = conn.appInfo.peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
