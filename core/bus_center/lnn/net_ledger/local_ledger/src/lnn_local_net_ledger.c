@@ -1594,19 +1594,7 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
     SESSION_KEY_LENGTH, id, SESSION_KEY_LENGTH) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy cipherInfo.key fail");
         return SOFTBUS_MEM_ERR;
-    }
-    UpdateStateVersionAndStore();
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
-        return SOFTBUS_OK;
-    }
-    char value[SESSION_KEY_LENGTH + 1] = {0};
-    for (int32_t i = 0; i < SESSION_KEY_LENGTH; i++) {
-        value[i] = (char)(g_localNetLedger.localInfo.cipherInfo.key[i]);
-    }
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_KEY, value, strlen(value)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "ledger cipher key change sync to cloud failed");
-    }
+    }    
     return SOFTBUS_OK;
 }
 
@@ -1619,19 +1607,7 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     if (memcpy_s((char *)g_localNetLedger.localInfo.cipherInfo.iv, BROADCAST_IV_LEN, id, BROADCAST_IV_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy cipherInfo.iv fail");
         return SOFTBUS_MEM_ERR;
-    }
-    UpdateStateVersionAndStore();
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
-        return SOFTBUS_OK;
-    }
-    char value[BROADCAST_IV_LEN + 1] = {0};
-    for (int32_t i = 0; i < BROADCAST_IV_LEN; i++) {
-        value[i] = (char)(g_localNetLedger.localInfo.cipherInfo.iv[i]);
-    }
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_IV, value, strlen(value)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "ledger cipher iv change sync to cloud failed");
-    }
+    }    
     return SOFTBUS_OK;
 }
 
