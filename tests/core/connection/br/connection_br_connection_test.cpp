@@ -1012,17 +1012,13 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager029, TestSize.Level1)
     ret = BrCompareManagerLooperEventFunc(&msg, &args);
     EXPECT_EQ(COMPARE_FAILED, ret);
 
-    msg.what = MSG_CONNECT_TIMEOUT;
     args.what = MSG_CONNECT_TIMEOUT;
     msg.arg1 = 1;
     args.arg1 = 1;
     ret = BrCompareManagerLooperEventFunc(&msg, &args);
     EXPECT_EQ(COMPARE_SUCCESS, ret);
 
-    msg.what = MSG_CONNECT_TIMEOUT;
-    args.what = MSG_CONNECT_TIMEOUT;
     msg.arg1 = 0;
-    args.arg1 = 1;
     ret = BrCompareManagerLooperEventFunc(&msg, &args);
     EXPECT_EQ(COMPARE_FAILED, ret);
 
@@ -1042,8 +1038,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager029, TestSize.Level1)
     ret = BrCompareManagerLooperEventFunc(&msg, &args);
     EXPECT_EQ(COMPARE_SUCCESS, ret);
 
-    msg.what = MSG_UNPEND;
-    args.what = MSG_UNPEND;
     (void)strcpy_s(msgInfo.addr, BT_MAC_LEN, "abcd");
     (void)strcpy_s(ctxInfo.addr, BT_MAC_LEN, "abc");
     msg.obj = &msgInfo;
@@ -1057,8 +1051,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager029, TestSize.Level1)
     ret = BrCompareManagerLooperEventFunc(&msg, &args);
     EXPECT_EQ(COMPARE_FAILED, ret);
 
-    msg.what = MSG_CONNECT_REQUEST;
-    args.what = MSG_CONNECT_REQUEST;
     args.arg1 = 0;
     args.arg2 = 0;
     args.obj = nullptr;

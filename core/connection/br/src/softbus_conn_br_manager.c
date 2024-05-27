@@ -1023,104 +1023,144 @@ static void TransitionToState(enum BrServerState target)
 // memory management rules in BrManagerMsgHandler
 // 1. DO NOT free memory in case of not contain nested dynamic memory;
 // 2. MUST free nested dynamic memory which layer large than 1, msg->obj self layer is 1;
+typedef struct {
+    int32_t cmd;
+    void (*func)(SoftBusMessage *msg);
+} MsgHandlerCommand;
+
+static void HandlePendingRequestFunc(SoftBusMessage *msg)
+{
+    (void)msg;
+    if (g_brManager.state->handlePendingRequest != NULL) {
+        g_brManager.state->handlePendingRequest();
+        return;
+    }
+}
+
+static void ConnectRequestFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->handlePendingRequest == NULL) {
+        return;
+    }
+    ConnBrConnectRequestContext *ctx = (ConnBrConnectRequestContext *)msg->obj;
+    g_brManager.state->connectRequest(ctx);
+}
+
+static void ClientConnectedFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->clientConnected != NULL) {
+        g_brManager.state->clientConnected((uint32_t)msg->arg1);
+        return;
+    }
+}
+
+static void ClientConnectTimeoutFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->clientConnectTimeout != NULL) {
+        g_brManager.state->clientConnectTimeout((uint32_t)msg->arg1, (char *)msg->obj);
+        return;
+    }
+}
+
+static void ClientConnectFailedFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->clientConnectFailed == NULL) {
+        return;
+    }
+    ErrorContext *ctx = (ErrorContext *)(msg->obj);
+    g_brManager.state->clientConnectFailed(ctx->connectionId, ctx->error);
+}
+
+static void ServerAcceptedFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->serverAccepted != NULL) {
+        g_brManager.state->serverAccepted((uint32_t)msg->arg1);
+        return;
+    }
+}
+
+static void DataReceivedFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->dataReceived == NULL) {
+        return;
+    }
+    ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)msg->obj;
+    g_brManager.state->dataReceived(ctx);
+}
+
+static void ConnectionExceptionFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->connectionException == NULL) {
+        return;
+    }
+    ErrorContext *ctx = (ErrorContext *)(msg->obj);
+    g_brManager.state->connectionException(ctx->connectionId, ctx->error);
+}
+
+static void ConnectionResumeFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->connectionResume != NULL) {
+        g_brManager.state->connectionResume((uint32_t)msg->arg1);
+        return;
+    }
+}
+
+static void DisconnectRequestFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->disconnectRequest != NULL) {
+        g_brManager.state->disconnectRequest((uint32_t)msg->arg1);
+        return;
+    }
+}
+
+static void UnpendFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->unpend != NULL) {
+        g_brManager.state->unpend((const char *)msg->obj);
+        return;
+    }
+}
+
+static void ResetFunc(SoftBusMessage *msg)
+{
+    if (g_brManager.state->reset == NULL) {
+        return;
+    }
+    ErrorContext *ctx = (ErrorContext *)(msg->obj);
+    g_brManager.state->reset(ctx->error);
+}
+
+static MsgHandlerCommand g_commands[] = {
+    {MSG_NEXT_CMD, HandlePendingRequestFunc},
+    {MSG_CONNECT_REQUEST, ConnectRequestFunc},
+    {MSG_CONNECT_SUCCESS, ClientConnectedFunc},
+    {MSG_CONNECT_TIMEOUT, ClientConnectTimeoutFunc},
+    {MSG_CONNECT_FAIL, ClientConnectFailedFunc},
+    {MSG_SERVER_ACCEPTED, ServerAcceptedFunc},
+    {MSG_DATA_RECEIVED, DataReceivedFunc},
+    {MSG_CONNECTION_EXECEPTION, ConnectionExceptionFunc},
+    {MSG_CONNECTION_RESUME, ConnectionResumeFunc},
+    {MGR_DISCONNECT_REQUEST, DisconnectRequestFunc},
+    {MSG_UNPEND, UnpendFunc},
+    {MSG_RESET, ResetFunc},
+};
+
 static void BrManagerMsgHandler(SoftBusMessage *msg)
 {
-    CONN_LOGI(CONN_BR, "recvMsg=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
-    switch (msg->what) {
-        case MSG_NEXT_CMD: {
-            if (g_brManager.state->handlePendingRequest != NULL) {
-                g_brManager.state->handlePendingRequest();
-                return;
-            }
-            break;
-        }
-        case MSG_CONNECT_REQUEST: {
-            ConnBrConnectRequestContext *ctx = (ConnBrConnectRequestContext *)(msg->obj);
-            if (g_brManager.state->connectRequest != NULL) {
-                g_brManager.state->connectRequest(ctx);
-                return;
-            }
-            break;
-        }
-        case MSG_CONNECT_SUCCESS: {
-            if (g_brManager.state->clientConnected != NULL) {
-                g_brManager.state->clientConnected((uint32_t)msg->arg1);
-                return;
-            }
-            break;
-        }
-        case MSG_CONNECT_TIMEOUT: {
-            if (g_brManager.state->clientConnectTimeout != NULL) {
-                g_brManager.state->clientConnectTimeout((uint32_t)msg->arg1, (char *)msg->obj);
-                return;
-            }
-            break;
-        }
-        case MSG_CONNECT_FAIL: {
-            ErrorContext *ctx = (ErrorContext *)(msg->obj);
-            if (g_brManager.state->clientConnectFailed != NULL) {
-                g_brManager.state->clientConnectFailed(ctx->connectionId, ctx->error);
-                return;
-            }
-            break;
-        }
-        case MSG_SERVER_ACCEPTED: {
-            if (g_brManager.state->serverAccepted != NULL) {
-                g_brManager.state->serverAccepted((uint32_t)msg->arg1);
-                return;
-            }
-            break;
-        }
-        case MSG_DATA_RECEIVED: {
-            ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)(msg->obj);
-            if (g_brManager.state->dataReceived != NULL) {
-                g_brManager.state->dataReceived(ctx);
-                return;
-            }
-            break;
-        }
-        case MSG_CONNECTION_EXECEPTION: {
-            ErrorContext *ctx = (ErrorContext *)(msg->obj);
-            if (g_brManager.state->connectionException != NULL) {
-                g_brManager.state->connectionException(ctx->connectionId, ctx->error);
-                return;
-            }
-            break;
-        }
-        case MSG_CONNECTION_RESUME: {
-            if (g_brManager.state->connectionResume != NULL) {
-                g_brManager.state->connectionResume((uint32_t)msg->arg1);
-                return;
-            }
-            break;
-        }
-        case MGR_DISCONNECT_REQUEST: {
-            if (g_brManager.state->disconnectRequest != NULL) {
-                g_brManager.state->disconnectRequest((uint32_t)msg->arg1);
-                return;
-            }
-            break;
-        }
-        case MSG_UNPEND: {
-            if (g_brManager.state->unpend != NULL) {
-                g_brManager.state->unpend((const char *)msg->obj);
-                return;
-            }
-            break;
-        }
-        case MSG_RESET: {
-            ErrorContext *ctx = (ErrorContext *)(msg->obj);
-            if (g_brManager.state->reset != NULL) {
-                g_brManager.state->reset(ctx->error);
-                return;
-            }
-            break;
-        }
-        default:
-            CONN_LOGW(CONN_BR, "unexpected msg, what=%{public}d", msg->what);
-            break;
+    COMM_CHECK_AND_RETURN_LOGW(msg != NULL, CONN_BR, "msg is null");
+    if (msg->what != MSG_DATA_RECEIVED) {
+        CONN_LOGI(CONN_BR, "recvMsg=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
     }
-    CONN_LOGW(CONN_BR, "ignore msg, what=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
+    bool isInvaildCmd = false;
+    size_t commandSize = sizeof(g_commands) / sizeof(g_commands[0]);
+    for (size_t i = 0; i < commandSize; i++) {
+        if (g_commands[i].cmd == msg->what) {
+            g_commands[i].func(msg);
+            isInvaildCmd = true;
+            break;
+        }
+    }
+    COMM_CHECK_AND_RETURN_LOGW(isInvaildCmd == true, CONN_BR, "unexpected msg, what=%{public}d", msg->what);
 }
 
 static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args)
