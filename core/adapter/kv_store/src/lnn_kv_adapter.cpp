@@ -91,6 +91,10 @@ int32_t KVAdapter::RegisterDataChangeListener(
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_ERR;
     }
+    if (dataChangeListener == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "dataChangeListener is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     this->dataChangeListener_ = dataChangeListener;
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
