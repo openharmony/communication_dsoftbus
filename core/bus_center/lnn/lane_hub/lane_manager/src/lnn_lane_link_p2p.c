@@ -645,7 +645,8 @@ static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLi
     } else {
         linkInfo->type = LANE_P2P;
     }
-    linkInfo->linkInfo.p2p.bw = LANE_BW_RANDOM;
+    LNN_LOGI(LNN_LANE, "bandWidth=%{public}d", link->bandWidth);
+    linkInfo->linkInfo.p2p.bw = (LaneBandwidth)link->bandWidth;
     if (strcpy_s(linkInfo->linkInfo.p2p.connInfo.localIp, IP_LEN, link->localIp) != EOK ||
         strcpy_s(linkInfo->linkInfo.p2p.connInfo.peerIp, IP_LEN, link->remoteIp) != EOK) {
         LNN_LOGE(LNN_LANE, "strcpy localIp fail");
@@ -1046,6 +1047,7 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
             LNN_LOGE(LNN_LANE, "get remote wifidirect addr fail");
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
         }
+        wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
         int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
             item->laneRequestInfo.networkId);
@@ -1164,6 +1166,17 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
     }
     struct WifiDirectConnectInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
+    TransReqInfo reqInfo;
+    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", laneReqId);
+        return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
+    }
+    if (reqInfo.isWithQos) {
+        wifiDirectInfo.bandWidth = reqInfo.allocInfo.qosRequire.minBW;
+    } else {
+        wifiDirectInfo.bandWidth = 0;
+    }
     wifiDirectInfo.requestId = GetWifiDirectManager()->getRequestId();
     int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneReqId, request, callback);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_LANE, "add new connect node failed");
