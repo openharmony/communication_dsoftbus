@@ -326,38 +326,42 @@ void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::str
 void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
     int32_t storeIdLen)
 {
-    if (dbId < MIN_DBID_COUNT || dbId >= g_dbId || appId == nullptr || appIdLen < MIN_STRING_LEN ||
-        appIdLen > MAX_STRING_LEN || storeId == nullptr || storeIdLen < MIN_STRING_LEN ||
-        storeIdLen > MAX_STRING_LEN) {
-        LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
-    }
-    std::string appIdStr(appId, appIdLen);
-    std::string storeIdStr(storeId, storeIdLen);
     int32_t status;
     {
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+        if (dbId < MIN_DBID_COUNT || dbId >= g_dbId || appId == nullptr || appIdLen < MIN_STRING_LEN ||
+            appIdLen > MAX_STRING_LEN || storeId == nullptr || storeIdLen < MIN_STRING_LEN ||
+            storeIdLen > MAX_STRING_LEN) {
+            LNN_LOGE(LNN_LEDGER, "invalid param");
+            return;
+        }
+        std::string appIdStr(appId, appIdLen);
+        std::string storeIdStr(storeId, storeIdLen);
         auto kvAdapter = FindKvStorePtr(dbId);
         if (kvAdapter == nullptr) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
+            return;
         }
         status = kvAdapter->RegisterDataChangeListener(std::make_shared<KvDataChangeListener>(appIdStr, storeIdStr));
     }
-    if (status == SOFTBUS_OK) {
-        LNN_LOGI(LNN_LEDGER, "RegisterDataChangeListener success");
-    } else {
+    if (status != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "RegisterDataChangeListener failed");
+        return;
     }
+    LNN_LOGI(LNN_LEDGER, "RegisterDataChangeListener success");
 }
 
-void LnnDeRegisterDataChangeListener(int32_t dbId)
+void LnnUnRegisterDataChangeListener(int32_t dbId)
 {
+    std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
         LNN_LOGI(LNN_LEDGER, "Invalid dbId ");
+        return;
     }
-    std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     auto kvAdapter = FindKvStorePtr(dbId);
     if (kvAdapter == nullptr) {
         LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
+        return;
     }
     kvAdapter->DeRegisterDataChangeListener();
 }

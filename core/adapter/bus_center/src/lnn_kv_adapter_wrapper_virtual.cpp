@@ -89,7 +89,7 @@ void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appI
     (void)storeId;
     (void)storeIdLen;
 }
-void LnnDeRegisterDataChangeListener(int32_t dbId)
+void LnnUnRegisterDataChangeListener(int32_t dbId)
 {
     (void)dbId;
 }

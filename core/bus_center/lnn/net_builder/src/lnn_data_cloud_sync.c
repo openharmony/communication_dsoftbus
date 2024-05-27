@@ -992,7 +992,7 @@ void LnnDeInitCloudSyncModule(void)
 {
     LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = g_dbId;
-    LnnDeRegisterDataChangeListener(dbId);
+    LnnUnRegisterDataChangeListener(dbId);
     if (LnnDestroyKvAdapter(dbId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "DeInit Cloud Sync module fail");
     }
