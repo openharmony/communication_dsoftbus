@@ -52,7 +52,6 @@ enum BleMgrLooperMsg {
     BLE_MGR_MSG_CONNECTION_CLOSED,
     BLE_MGR_MSG_CONNECTION_RESUME,
     BLE_MGR_MSG_DISCONNECT_REQUEST,
-    BLE_MGR_MSG_REUSE_CONNECTION_REQUEST,
     BLE_MGR_MSG_PREVENT_TIMEOUT,
     BLE_MGR_MSG_RESET,
     BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT,
@@ -1025,13 +1024,11 @@ static int32_t BleReuseConnectionCommon(const char *udid, const char *anomizeAdd
     return status;
 }
 
-static void BleReuseConnectionRequestOnAvailableState(const ConnBleReuseConnectionContext *ctx)
+static int32_t BleReuseConnectionRequestOnAvailableState(const ConnBleReuseConnectionContext *ctx)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, ctx->addr, BT_MAC_LEN);
-    int32_t result = BleReuseConnectionCommon(ctx->udid, anomizeAddress, ctx->protocol);
-    ctx->waitResult->result = result;
-    sem_post(&ctx->waitResult->wait);
+    return BleReuseConnectionCommon(ctx->udid, anomizeAddress, ctx->protocol);
 }
 
 static void ConflictOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *info)
@@ -1051,38 +1048,31 @@ static void ConflictOnConnectFailed(uint32_t requestId, int32_t reason)
     SoftbusBleConflictNotifyConnectResult(requestId, INVALID_UNDERLAY_HANDLE, false);
 }
 
-static void BleReuseConnectionRequestOnConnectingState(const ConnBleReuseConnectionContext *ctx)
+static int32_t BleReuseConnectionRequestOnConnectingState(const ConnBleReuseConnectionContext *ctx)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, ctx->addr, BT_MAC_LEN);
     int32_t result = BleReuseConnectionCommon(ctx->udid, anomizeAddress, ctx->protocol);
     if (result != SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR) {
-        ctx->waitResult->result = result;
-        sem_post(&ctx->waitResult->wait);
-        return;
+        return result;
     }
 
     if ((BleProtocolType)ctx->protocol != g_bleManager.connecting->protocol ||
         !IsSameDevice(ctx->udid, g_bleManager.connecting->udid)) {
-        ctx->waitResult->result = SOFTBUS_ERR;
-        sem_post(&ctx->waitResult->wait);
-        return;
+        return SOFTBUS_CONN_BLE_REUSE_FAILED;
     }
 
     // merge connect request
     ConnBleRequest *request = (ConnBleRequest *)SoftBusCalloc(sizeof(ConnBleRequest));
     if (request == NULL) {
-        ctx->waitResult->result = SOFTBUS_MALLOC_ERR;
-        sem_post(&ctx->waitResult->wait);
-        return;
+        return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&request->node);
     request->requestId = ctx->requestId;
     request->result.OnConnectSuccessed = ConflictOnConnectSuccessed;
     request->result.OnConnectFailed = ConflictOnConnectFailed;
     ListAdd(&g_bleManager.connecting->requests, &request->node);
-    ctx->waitResult->result = CONFLICT_REUSE_CONNECTING;
-    sem_post(&ctx->waitResult->wait);
+    return CONFLICT_REUSE_CONNECTING;
 }
 
 static void BlePreventTimeout(const char *udid)
@@ -1602,14 +1592,6 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             }
             break;
         }
-        case BLE_MGR_MSG_REUSE_CONNECTION_REQUEST: {
-            ConnBleReuseConnectionContext *ctx = (ConnBleReuseConnectionContext *)msg->obj;
-            if (g_bleManager.state->reuseConnectionRequest != NULL) {
-                g_bleManager.state->reuseConnectionRequest(ctx);
-                return;
-            }
-            break;
-        }
         case BLE_MGR_MSG_PREVENT_TIMEOUT: {
             char *udid = (char *)msg->obj;
             if (g_bleManager.state->preventTimeout != NULL) {
@@ -1997,57 +1979,25 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
         "conflict reuse connection, receive reuse request, reqId=%{public}u, addr=%{public}s, udid=%{public}s",
         requestId, anomizeAddress, anomizeUdid);
 
-    ConnBleReuseConnectionContext *ctx =
-        (ConnBleReuseConnectionContext *)SoftBusCalloc(sizeof(ConnBleReuseConnectionContext));
-    ConnBleReuseConnectionWaitResult *waitResult =
-        (ConnBleReuseConnectionWaitResult *)SoftBusCalloc(sizeof(ConnBleReuseConnectionWaitResult));
-    if (ctx == NULL || waitResult == NULL) {
-        CONN_LOGE(CONN_BLE, "calloc reuse connect objects failed, reqId=%{public}u, addr=%{public}s, udid=%{public}s",
-            requestId, anomizeAddress, anomizeUdid);
-        SoftBusFree(ctx);
-        SoftBusFree(waitResult);
-        return SOFTBUS_MALLOC_ERR;
-    }
-
     size_t addressLen = strlen(address);
     size_t udidLen = strlen(udid);
-    if (memcpy_s(ctx->addr, BT_MAC_LEN - 1, address, addressLen) != EOK ||
-        memcpy_s(ctx->udid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
+    ConnBleReuseConnectionContext ctx = { 0 };
+    if (memcpy_s(ctx.addr, BT_MAC_LEN - 1, address, addressLen) != EOK ||
+        memcpy_s(ctx.udid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
         CONN_LOGE(CONN_BLE,
             "memcpy_s address or udid failed, "
             "addressLen=%{public}zu, udidLen=%{public}zu, reqId=%{public}u, addr=%{public}s, udid=%{public}s",
             addressLen, udidLen, requestId, anomizeAddress, anomizeUdid);
-        SoftBusFree(ctx);
-        SoftBusFree(waitResult);
         return SOFTBUS_MEM_ERR;
     }
-    ctx->requestId = requestId;
+    ctx.requestId = requestId;
+    ctx.protocol = BLE_GATT;
 
-    if (sem_init(&waitResult->wait, 0, 0) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "init wait semaphore failed, reqId=%{public}u, addr=%{public}s, udid=%{public}s",
-            requestId, anomizeAddress, anomizeUdid);
-        SoftBusFree(ctx);
-        SoftBusFree(waitResult);
-        return SOFTBUS_ERR;
+    if (g_bleManager.state->reuseConnectionRequest == NULL) {
+        CONN_LOGE(CONN_BLE, "reuseConnectionRequest is null");
+        return SOFTBUS_CONN_BLE_REUSE_FAILED;
     }
-    ctx->waitResult = waitResult;
-    ctx->protocol = BLE_GATT;
-    int32_t status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_REUSE_CONNECTION_REQUEST, 0, 0, ctx, 0);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE,
-            "post reuse connection msg to looper failed, reqId=%{public}u, addr=%{public}s, udid=%{public}s",
-            requestId, anomizeAddress, anomizeUdid);
-        sem_destroy(&waitResult->wait);
-        SoftBusFree(ctx);
-        SoftBusFree(waitResult);
-        return status;
-    }
-    sem_wait(&waitResult->wait);
-
-    int32_t result = waitResult->result;
-    sem_destroy(&waitResult->wait);
-    // MUST NOT free ctx here, as ctx is free-ed by message looper
-    SoftBusFree(waitResult);
+    int32_t result = g_bleManager.state->reuseConnectionRequest(&ctx);
     CONN_LOGE(CONN_BLE,
         "conflict reuse connection, reqId=%{public}u, addr=%{public}s, udid=%{public}s, result=%{public}d",
         requestId, anomizeAddress, anomizeUdid, result);

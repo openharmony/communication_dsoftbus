@@ -502,6 +502,7 @@ enum SoftBusErrNo {
     SOFTBUS_CONN_BLE_DIRECT_INIT_FAILED,
     SOFTBUS_SOCKET_ADDR_ERR,
     SOFTBUS_SOCKET_BIND_ERR,
+    SOFTBUS_CONN_BLE_REUSE_FAILED,
 
     /* soft bus connection mapping short range conflict error code */
     SOFTBUS_CONN_SHORT_RANGE_BASE = SOFTBUS_ERRNO(CONN_SUB_MODULE_CODE) + 1000,
