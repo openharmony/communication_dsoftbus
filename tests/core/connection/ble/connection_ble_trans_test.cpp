@@ -66,16 +66,22 @@ namespace OHOS {
 class ConnectionBleTransTest : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase() {}
+    static void TearDownTestCase();
     void SetUp() override {}
     void TearDown() override {}
 };
 
 void ConnectionBleTransTest::SetUpTestCase()
 {
+    LooperInit();
     g_transEventListener.onPostBytesFinished = OnPostBytesFinished;
     int32_t ret = ConnBleInitTransModule(&g_transEventListener);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+void ConnectionBleTransTest::TearDownTestCase()
+{
+    LooperDeinit();
 }
 
 /*

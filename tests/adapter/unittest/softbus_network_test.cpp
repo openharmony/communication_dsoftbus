@@ -83,7 +83,6 @@ HWTEST_F(AdapterDsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1
  */
 HWTEST_F(AdapterDsoftbusNetworkTest, ProcessAddrEventTest001, TestSize.Level1)
 {
-    void *para = nullptr;
     nlmsghdr nlh1 = {
         .nlmsg_len = TEST_LEN,
     };
@@ -99,8 +98,10 @@ HWTEST_F(AdapterDsoftbusNetworkTest, ProcessAddrEventTest001, TestSize.Level1)
         .nlmsg_len = TEST_LEN2,
     };
     ProcessAddrEvent(&nlh2);
+    EXPECT_TRUE(NetlinkOnConnectEvent(NETLINK, -1, nullptr) == SOFTBUS_OK);
+    EXPECT_TRUE(NetlinkOnDataEvent(NETLINK, SOFTBUS_SOCKET_OUT, -1) == SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(networkMock, SoftBusSocketRecv).WillOnce(Return(TEST_LEN)).WillRepeatedly(Return(TEST_LISTENER_ID2));
-    NetlinkMonitorThread(para);
+    EXPECT_TRUE(NetlinkOnDataEvent(NETLINK, SOFTBUS_SOCKET_IN, 0) == SOFTBUS_SOCKET_EXCEPTION);
 }
 
 /*

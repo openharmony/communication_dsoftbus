@@ -67,17 +67,23 @@ static struct WifiDirectManager manager = {
     .getLocalIpByUuid = GetLocalIpByUuid,
 };
 
-void HeartBeatFSMTest::SetUpTestCase()
-{
-    int32_t ret = LooperInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
+void HeartBeatFSMTest::SetUpTestCase() { }
 
 void HeartBeatFSMTest::TearDownTestCase() { }
 
-void HeartBeatFSMTest::SetUp() { }
+void HeartBeatFSMTest::SetUp()
+{
+    int32_t ret = LooperInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnInitLnnLooper();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+}
 
-void HeartBeatFSMTest::TearDown() { }
+void HeartBeatFSMTest::TearDown()
+{
+    LooperDeinit();
+    LnnDeinitLnnLooper();
+}
 
 /*
  * @tc.name: CheckHbFsmStateMsgArgs

@@ -86,67 +86,83 @@ void LnnDumpHbOnlineNodeList(void)
 {
     return HeartBeatFSMInterfaceInstance()->LnnDumpHbOnlineNodeList();
 }
+
 bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
 {
     return HeartBeatFSMInterfaceInstance()->LnnIsHeartbeatEnable(type);
 }
+
 int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
 {
     return HeartBeatFSMInterfaceInstance()->LnnGetGearModeBySpecificType(mode, type);
 }
+
 DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
 {
     return HeartBeatFSMInterfaceInstance()->LnnConvAddrTypeToDiscType(type);
 }
+
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
 {
     return HeartBeatFSMInterfaceInstance()->LnnOfflineTimingByHeartbeat(networkId, addrType);
 }
+
 int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
 {
     return HeartBeatFSMInterfaceInstance()->LnnRequestLeaveSpecific(networkId, addrType);
 }
+
 int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData)
 {
     return HeartBeatFSMInterfaceInstance()->LnnHbMediumMgrSendBegin(custData);
 }
+
 int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *type)
 {
     return HeartBeatFSMInterfaceInstance()->LnnHbMediumMgrSendEnd(type);
 }
+
 int32_t LnnGetHbStrategyManager(
     LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType)
 {
     return HeartBeatFSMInterfaceInstance()->LnnGetHbStrategyManager(mgr, hbType, strategyType);
 }
-int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
+
+int32_t LnnHbMediumMgrSetParam(void *param)
 {
     return HeartBeatFSMInterfaceInstance()->LnnHbMediumMgrSetParam(param);
 }
+
 int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type)
 {
     return HeartBeatFSMInterfaceInstance()->LnnHbMediumMgrUpdateSendInfo(type);
 }
+
 int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
 {
     return HeartBeatFSMInterfaceInstance()->LnnStartScreenChangeOfflineTiming(networkId, addrType);
 }
+
 int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
 {
     return HeartBeatFSMInterfaceInstance()->LnnStopScreenChangeOfflineTiming(networkId, addrType);
 }
+
 int32_t StopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType)
 {
     return HeartBeatFSMInterfaceInstance()->StopHeartBeatAdvByTypeNow(registedHbType);
 }
+
 SoftBusScreenState GetScreenState(void)
 {
     return HeartBeatFSMInterfaceInstance()->GetScreenState();
 }
+
 void SetScreenState(SoftBusScreenState state)
 {
     return HeartBeatFSMInterfaceInstance()->SetScreenState(state);
 }
+
 struct WifiDirectManager* GetWifiDirectManager(void)
 {
     return HeartBeatFSMInterfaceInstance()->GetWifiDirectManager();

@@ -97,10 +97,13 @@ ohos_static_library("softbus_client_static") {
     if (is_standard_system) {
       external_deps += [
         "c_utils:utils",
-        "hicollie:libhicollie",
         "hilog:libhilog",
         "ipc:ipc_single",
       ]
+    }
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.hiviewdfx_hicollie)) {
+      external_deps += [ "hicollie:libhicollie" ]
     }
     part_name = "dsoftbus"
     subsystem_name = "communication"

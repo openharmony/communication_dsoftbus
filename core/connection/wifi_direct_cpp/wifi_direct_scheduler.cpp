@@ -26,9 +26,11 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
                                        bool markRetried)
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
-              "requestId=%{public}d pid=%{public}d type=%{public}d networkId=%{public}s remoteUuid=%{public}s",
+              "requestId=%{public}d pid=%{public}d type=%{public}d networkId=%{public}s remoteUuid=%{public}s "
+              "expectRole=0x%{public}x, bw=%{public}d, ipaddrType=%{public}d",
               info.requestId, info.pid, info.connectType, WifiDirectAnonymizeDeviceId(info.remoteNetworkId).c_str(),
-              WifiDirectAnonymizeDeviceId(WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId)).c_str());
+              WifiDirectAnonymizeDeviceId(WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId)).c_str(),
+              info.expectApiRole, info.bandWidth, info.ipAddrType);
 
     auto command = CommandFactory::GetInstance().CreateConnectCommand(info, callback);
     command->SetRetried(markRetried);
@@ -39,6 +41,21 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
         executor->SendEvent(command);
     }
     return ret;
+}
+
+int WifiDirectScheduler::CancelConnectDevice(const WifiDirectConnectInfo &info)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d pid=%{public}d", info.requestId, info.pid);
+
+    std::lock_guard commandLock(commandLock_);
+    for (auto itc = commandList_.begin(); itc != commandList_.end(); itc++) {
+        auto connectCommand = std::dynamic_pointer_cast<ConnectCommand>(*itc);
+        if (connectCommand != nullptr && connectCommand->IsSameCommand(info)) {
+            commandList_.erase(itc);
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_NOT_FIND;
 }
 
 int WifiDirectScheduler::ConnectDevice(const std::shared_ptr<ConnectCommand> &command, bool markRetried)

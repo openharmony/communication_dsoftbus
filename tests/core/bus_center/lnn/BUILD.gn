@@ -414,11 +414,11 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_sync_info_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
@@ -430,6 +430,7 @@ ohos_unittest("LNNConnectionFsmTest") {
   ]
 
   include_dirs = lnn_mock_test_include_dirs
+  include_dirs += [ "$dsoftbus_root_path/core/bus_center/ipc/include" ]
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
@@ -1663,6 +1664,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
 ohos_unittest("LNNLaneListenerTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_listener/lnn_lane_listener_deps_mock.cpp",
@@ -1913,4 +1915,7 @@ group("unittest") {
 group("fuzztest") {
   testonly = true
   deps = [ "fuzztest:fuzztest" ]
+  if (enhanced_test) {
+    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/fuzztest/lnnfastoffline_fuzzer:fuzztest" ]
+  }
 }

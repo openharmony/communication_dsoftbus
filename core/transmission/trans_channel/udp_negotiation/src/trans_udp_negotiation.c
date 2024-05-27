@@ -85,7 +85,7 @@ void ReleaseUdpChannelId(int32_t channelId)
         return;
     }
     uint32_t id = (uint32_t)channelId;
-    g_channelIdFlagBitsMap &= (~(ID_USED << id));
+    g_channelIdFlagBitsMap &= (~(ID_USED << (uint64_t)id));
     SoftBusMutexUnlock(&g_udpNegLock);
 }
 
@@ -190,7 +190,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .linkType = info->connectType,
         .costTime = timediff,
         .errcode = errCode,
-        .osType = info->osType,
+        .osType = (info->osType < 0) ? UNKNOW_OS_TYPE : info->osType,
         .peerUdid = info->peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
@@ -838,6 +838,9 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     int32_t ret = SOFTBUS_ERR;
     if (linkType == LANE_HML || linkType == LANE_P2P_REUSE) {
         TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", linkType);
+        ret = AuthGetHmlConnInfo(peerUdid, &auth, isMeta);
+    }
+    if (ret != SOFTBUS_OK && (linkType == LANE_P2P || linkType == LANE_P2P_REUSE)) {
         ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK) {

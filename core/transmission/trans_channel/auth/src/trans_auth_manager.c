@@ -442,7 +442,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         .channelType = CHANNEL_TYPE_AUTH,
         .authId = authId,
         .linkType = info.connOpt.type,
-        .osType = info.appInfo.osType
+        .osType = (info.appInfo.osType < 0) ? UNKNOW_OS_TYPE : info.appInfo.osType,
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo, len);

@@ -451,14 +451,22 @@ void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncRes
     LnnIpcNotifyTimeSyncResult(pkgName, pid, info, sizeof(TimeSyncResultInfo), retCode);
 }
 
-void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
+void LnnNotifyWlanStateChangeEvent(void *state)
 {
-    if (state < SOFTBUS_WIFI_CONNECTED || state > SOFTBUS_WIFI_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad state=%{public}d", state);
+    if (state == NULL) {
+        LNN_LOGE(LNN_EVENT, "state is empty");
         return;
     }
-    LnnMonitorWlanStateChangedEvent event = {.basic.event = LNN_EVENT_WIFI_STATE_CHANGED, .status = state};
+    SoftBusWifiState *wifiState = (SoftBusWifiState *)state;
+    if (*wifiState < SOFTBUS_WIFI_CONNECTED || *wifiState > SOFTBUS_WIFI_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad wifiState=%{public}d", *wifiState);
+        SoftBusFree(wifiState);
+        return;
+    }
+    LnnMonitorWlanStateChangedEvent event = {.basic.event = LNN_EVENT_WIFI_STATE_CHANGED,
+        .status = (uint8_t)(*wifiState)};
     NotifyEvent((const LnnEventBasicInfo *)&event);
+    SoftBusFree(wifiState);
 }
 
 void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state)
@@ -693,7 +701,7 @@ void LnnNotifyNetworkIdChangeEvent(const char *networkId)
 int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;
-    SoftBusLooper *looper = CreateNewLooper("LnnNotify_Lp");
+    SoftBusLooper *looper = CreateNewLooper("Notify_Lp");
     if (looper == NULL) {
         LNN_LOGE(LNN_EVENT, "create notify looper fail");
         return SOFTBUS_ERR;

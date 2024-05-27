@@ -504,6 +504,10 @@
         "UpdateChannelStatistics";
         "SetTimer";
         "CancelTimer";
+        "RegistDirSchema";
+        "UnregistDirSchema";
+        "TransRegistDirSchema";
+        "TransUnRegistDirSchema";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
