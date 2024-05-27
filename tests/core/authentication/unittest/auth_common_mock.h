@@ -38,6 +38,7 @@ public:
         void *para, uint64_t delayMillis);
     virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
     virtual int SoftBusGetBtState(void) = 0;
+    virtual int SoftBusGetBrState(void) = 0;
     virtual void LnnHbOnTrustedRelationReduced(void) = 0;
     virtual int32_t LnnInsertSpecificTrustedDevInfo(const char *udid) = 0;
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
@@ -60,6 +61,7 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
     MOCK_METHOD0(SoftBusGetBtState, int (void));
+    MOCK_METHOD0(SoftBusGetBrState, int (void));
     MOCK_METHOD0(LnnHbOnTrustedRelationReduced, void ());
     MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t (const char *));
     MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *, char *, uint32_t));

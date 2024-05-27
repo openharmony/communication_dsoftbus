@@ -90,6 +90,7 @@ typedef struct {
     int32_t lnnType;            // LNN_TYPE
     int32_t onlineNum;          // ONLINE_NUM
     int32_t peerDeviceAbility;  // PEER_DEV_ABILITY
+    int32_t onlineType;         // ONLINE_TYPE
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC
