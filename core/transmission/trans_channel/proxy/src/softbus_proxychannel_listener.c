@@ -134,7 +134,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
         .errcode = ret,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
-    extra.osType = appInfo->osType;
+    extra.osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     extra.peerUdid = appInfo->peerUdid;
     if (!isServer) {
         extra.peerUdid = appInfo->appType == APP_TYPE_AUTH ? appInfo->peerData.deviceId : NULL;
@@ -204,7 +204,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
             .callerPkg = appInfo->myData.pkgName,
             .socketName = appInfo->myData.sessionName,
             .peerUdid = appInfo->peerUdid,
-            .osType = appInfo->osType,
+            .osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType,
             .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
