@@ -36,6 +36,7 @@ int32_t GetBurstAdvId(void);
 int32_t SendDeviceInfoToSHByType(LpFeatureType type);
 int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type);
 int32_t SwtichHeartbeatReportChannel(bool isToAP);
+bool IsSupportLpFeature(void);
 
 #ifdef __cplusplus
 }
