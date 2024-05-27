@@ -179,7 +179,7 @@ int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value
         LNN_LOGE(LNN_LEDGER, "strdup failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "kvAdapter get success, dbId=%{public}d", dbId);
+    LNN_LOGD(LNN_LEDGER, "kvAdapter get success, dbId=%{public}d", dbId);
     return SOFTBUS_OK;
 }
 
