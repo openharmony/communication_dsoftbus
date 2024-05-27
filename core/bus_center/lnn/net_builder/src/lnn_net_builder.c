@@ -2230,20 +2230,26 @@ static void UpdateLocalNetCapability(void)
     }
     int btState = SoftBusGetBtState();
     if (btState == BLE_ENABLE) {
-        LNN_LOGI(LNN_INIT, "bluetooth state is on");
-        (void)LnnSetNetCapability(&netCapability, BIT_BR);
+        LNN_LOGI(LNN_INIT, "ble state is on");
         (void)LnnSetNetCapability(&netCapability, BIT_BLE);
     } else if (btState == BLE_DISABLE) {
-        LNN_LOGI(LNN_INIT, "bluetooth state is off");
-        (void)LnnClearNetCapability(&netCapability, BIT_BR);
+        LNN_LOGI(LNN_INIT, "ble state is off");
         (void)LnnClearNetCapability(&netCapability, BIT_BLE);
+    }
+
+    int brState = SoftBusGetBrState();
+    if (brState == BR_ENABLE) {
+        LNN_LOGI(LNN_INIT, "br state is on");
+        (void)LnnSetNetCapability(&netCapability, BIT_BR);
+    } else if (brState == BR_DISABLE) {
+        LNN_LOGI(LNN_INIT, "br state is off");
+        (void)LnnClearNetCapability(&netCapability, BIT_BR);
     }
 
     bool isWifiActive = SoftBusIsWifiActive();
     LNN_LOGI(LNN_INIT, "wifi state: %s", isWifiActive ? "true" : "false");
     if (!isWifiActive) {
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
-        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_P2P);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
     } else {
@@ -2258,6 +2264,11 @@ static void UpdateLocalNetCapability(void)
             (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
             (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
         }
+    }
+
+    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
+        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_P2P);
     }
 
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {

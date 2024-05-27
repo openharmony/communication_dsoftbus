@@ -62,25 +62,6 @@ static void LeaveSpecificBrNetwork(const char *addr)
     }
     LNN_LOGI(LNN_STATE, "leave br network finished");
 }
-static void LeaveSpecificBrBleNetwork(const char *addr)
-{
-    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (LnnGetNetworkIdByBtMac(addr, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "networkId not found by addr");
-        return;
-    }
-
-    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGW(LNN_STATE, "leave br network failed, ret=%{public}d", ret);
-    }
-
-    ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGW(LNN_STATE, "leave ble nework failed, ret=%{public}d", ret);
-    }
-    LNN_LOGI(LNN_STATE, "leave br and ble network finished");
-}
 
 static void HandleBrConnectException(const ConnectOption *option, int32_t errorCode)
 {
@@ -110,7 +91,7 @@ static void HandleBrConnectException(const ConnectOption *option, int32_t errorC
         if ((target->errorCode == HCI_ERR_BR_CONN_PAGE_TIMEOUT && target->count >= BR_PAGETIMEOUT_OFFLINE_COUNT) ||
             (target->errorCode == HCI_ERR_BR_CONN_PEER_NOT_SUPORT_SDP_RECODE &&
             target->count >= BR_SDP_NOT_SUPORT_OFFLINE_COUNT)) {
-            LeaveSpecificBrBleNetwork(option->brOption.brMac);
+            LeaveSpecificBrNetwork(option->brOption.brMac);
             ListDelete(&target->node);
             SoftBusFree(target);
             g_exceptionConnMgr.connections->cnt--;

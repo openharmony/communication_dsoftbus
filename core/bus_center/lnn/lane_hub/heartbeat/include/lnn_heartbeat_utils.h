@@ -115,6 +115,7 @@ typedef struct {
 #define P2P_GO                (1 << 1)
 #define P2P_GC                (1 << 2)
 #define ENABLE_WIFI_CAP       (1 << 3)
+#define DISABLE_BR_CAP        (1 << 4)
 
 typedef struct {
     int32_t (*onDataLevelChanged)(const char *networkId, const DataLevelInfo *dataLevelInfo);
