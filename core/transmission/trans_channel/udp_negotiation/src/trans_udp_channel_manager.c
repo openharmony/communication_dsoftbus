@@ -538,6 +538,7 @@ int32_t TransUdpGetChannelIdByAddr(AppInfo *appInfo)
         if (udpChannelNode->info.peerData.channelId == appInfo->peerData.channelId) {
             if (strcmp(udpChannelNode->info.peerData.addr, appInfo->peerData.addr) == EOK) {
                 appInfo->myData.channelId = udpChannelNode->info.myData.channelId;
+                (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
                 return SOFTBUS_OK;
             }
         }
