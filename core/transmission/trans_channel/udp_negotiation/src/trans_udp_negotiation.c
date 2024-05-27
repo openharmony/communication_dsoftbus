@@ -564,21 +564,25 @@ static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(channel.info.myData.channelId + ID_OFFSET));
     int32_t errCode = SOFTBUS_OK;
     if (TransUnpackReplyErrInfo(msg, &errCode) == SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "receive err reply info");
+        TRANS_LOGE(TRANS_CTRL, "receive err reply info, channelId=%{public}" PRId64, channel.info.myData.channelId);
         ProcessAbnormalUdpChannelState(&(channel.info), errCode, true);
         return;
     }
-    if (TransUnpackReplyUdpInfo(msg, &(channel.info)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "unpack reply udp info failed.");
-        ProcessAbnormalUdpChannelState(&(channel.info), SOFTBUS_TRANS_HANDSHAKE_ERROR, true);
-        return;
-    }
-    if (ProcessUdpChannelState(&(channel.info), false) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "process udp channel state failed.");
-        ProcessAbnormalUdpChannelState(&(channel.info), SOFTBUS_IPC_ERR, false);
+    int32_t ret = TransUnpackReplyUdpInfo(msg, &(channel.info));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "unpack reply udp info fail channelId=%{public}" PRId64, channel.info.myData.channelId);
+        ProcessAbnormalUdpChannelState(&(channel.info), ret, true);
         return;
     }
     TransUpdateUdpChannelInfo(seq, &(channel.info));
+    ret = ProcessUdpChannelState(&(channel.info), false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL,
+            "process udp channelId=%{public}" PRId64 " failed, close peer", channel.info.myData.channelId);
+        (void)TransCloseUdpChannel(channel.info.myData.channelId);
+        ProcessAbnormalUdpChannelState(&(channel.info), ret, false);
+        return;
+    }
     TransEventExtra extra = {
         .socketName = NULL,
         .peerNetworkId = NULL,
