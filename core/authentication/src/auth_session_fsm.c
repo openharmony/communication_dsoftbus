@@ -1176,7 +1176,7 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
         return SOFTBUS_LOCK_ERR;
     }
     AuthFsm *authFsm = CreateAuthFsm(authParam->authSeq, authParam->requestId, authParam->connId,
-                                    connInfo, authParam->isServer);
+        connInfo, authParam->isServer);
     if (authFsm == NULL) {
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;
