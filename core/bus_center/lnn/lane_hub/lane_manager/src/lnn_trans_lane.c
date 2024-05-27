@@ -893,7 +893,7 @@ static int32_t UpdateLinkStatus(uint32_t laneReqId, BuildLinkStatus status, Lane
         return SOFTBUS_OK;
     }
     if (memcpy_s(&(nodeInfo->statusList[linkType].linkInfo), sizeof(LaneLinkInfo), linkInfo,
-            sizeof(LaneLinkInfo)) != EOK) {
+        sizeof(LaneLinkInfo)) != EOK) {
         LNN_LOGE(LNN_LANE, "linkParam memcpy fail, laneReqId=%{public}u", laneReqId);
         Unlock();
         return SOFTBUS_ERR;
@@ -946,7 +946,7 @@ static int32_t GetLaneLinkInfo(uint32_t laneReqId, LaneLinkType *type, LaneLinkI
         LaneLinkType linkType = nodeInfo->linkList->linkType[i];
         if (nodeInfo->statusList[linkType].status == BUILD_LINK_STATUS_SUCC) {
             if (memcpy_s(info, sizeof(LaneLinkInfo), &(nodeInfo->statusList[linkType].linkInfo),
-                    sizeof(LaneLinkInfo)) != EOK) {
+                sizeof(LaneLinkInfo)) != EOK) {
                 Unlock();
                 LNN_LOGE(LNN_LANE, "info memcpy fail, laneReqId=%{public}u", laneReqId);
                 return SOFTBUS_ERR;
@@ -980,7 +980,7 @@ static void FreeLowPriorityLink(uint32_t laneReqId, LaneLinkType linkType)
         LaneLinkType type = nodeInfo->linkList->linkType[i];
         if (type != linkType && nodeInfo->statusList[type].status == BUILD_LINK_STATUS_SUCC) {
             if (memcpy_s(&statusList[listNum++], sizeof(LinkStatusInfo), &nodeInfo->statusList[type],
-                    sizeof(LinkStatusInfo)) != EOK) {
+                sizeof(LinkStatusInfo)) != EOK) {
                 continue;
             }
         }
