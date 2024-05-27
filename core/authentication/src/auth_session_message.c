@@ -2078,7 +2078,7 @@ static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq, const AuthSessionIn
 }
 
 static void SetCompressFlagByAuthInfo(const AuthSessionInfo *info, char *msg, int32_t *compressFlag,
-                                        uint8_t *compressData, uint32_t *compressLen)
+    uint8_t *compressData, uint32_t *compressLen)
 {
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
         AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
