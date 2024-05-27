@@ -82,5 +82,20 @@ WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo* groupInfo)
 {
     return GetWifiInterface()->GetCurrentGroup(groupInfo);
 }
+
+int IsWifiActive(void)
+{
+    return GetWifiInterface()->IsWifiActive();
+}
+
+WifiErrorCode GetWifiDetailState(WifiDetailState *state)
+{
+    return GetWifiInterface()->GetWifiDetailState(state);
+}
+
+WifiErrorCode GetP2pEnableStatus(P2pState *state)
+{
+    return GetWifiInterface()->GetP2pEnableStatus(state);
+}
 }
 } // namespace OHOS

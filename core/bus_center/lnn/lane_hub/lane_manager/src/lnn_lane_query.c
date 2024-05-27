@@ -206,7 +206,8 @@ static int32_t P2pLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "not support wifi direct");
         return SOFTBUS_P2P_NOT_SUPPORT;
     }
-    if (!SoftBusIsWifiActive()) {
+    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
+        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         return SOFTBUS_WIFI_OFF;
     }
     uint32_t local, remote;
@@ -233,7 +234,8 @@ static int32_t HmlLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "not support wifi direct");
         return SOFTBUS_HML_NOT_SUPPORT;
     }
-    if (!SoftBusIsWifiActive()) {
+    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
+        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         return SOFTBUS_WIFI_OFF;
     }
 

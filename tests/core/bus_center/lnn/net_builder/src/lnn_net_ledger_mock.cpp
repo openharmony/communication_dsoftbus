@@ -301,6 +301,11 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return GetNetLedgerInterface()->LnnGetLocalNumInfo(key, info);
 }
 
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return GetNetLedgerInterface()->LnnGetLocalNumU32Info(key, info);
+}
+
 int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
     char *dstIdBuf, uint32_t dstIdBufLen)
 {
@@ -477,26 +482,32 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalDeviceInfo(info);
 }
+
 int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
 {
     return GetNetLedgerInterface()->LnnGetLocalByteInfo(key, info, len);
 }
+
 bool LnnIsDefaultOhosAccount()
 {
     return GetNetLedgerInterface()->LnnIsDefaultOhosAccount();
 }
+
 bool LnnIsPotentialHomeGroup(const char *udid)
 {
     return GetNetLedgerInterface()->LnnIsPotentialHomeGroup(udid);
 }
+
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
+
 bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint)
 {
     return GetNetLedgerInterface()->IsPotentialTrustedDevice(idType, deviceId, isPrecise, isPointToPoint);
 }
+
 int32_t LnnRegisterBleLpDeviceMediumMgr(void)
 {
     return GetNetLedgerInterface()->LnnRegisterBleLpDeviceMediumMgr();
