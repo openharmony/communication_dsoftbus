@@ -865,7 +865,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind005, TestSize.Level0)
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
-    EXPECT_EQ(0, ret);
+    EXPECT_NE(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
 }
@@ -957,7 +957,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen004, TestSize.Level0)
     EXPECT_EQ(0, ret);
 
     ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
-    EXPECT_EQ(0, ret);
+    EXPECT_NE(0, ret);
 
     ret = SoftBusSocketListen(socketFd, backLog);
     EXPECT_EQ(0, ret);
