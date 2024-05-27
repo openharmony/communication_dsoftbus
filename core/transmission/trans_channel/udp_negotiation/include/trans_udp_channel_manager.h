@@ -68,6 +68,7 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo);
 UdpChannelInfo *TransGetChannelObj(int32_t channelId);
 
 int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo);
+int32_t TransUdpGetChannelIdByAddr(AppInfo *appInfo);
 
 #ifdef __cplusplus
 }

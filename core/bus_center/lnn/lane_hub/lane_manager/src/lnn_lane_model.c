@@ -107,7 +107,7 @@ static int32_t AddLaneModel(uint64_t laneId, uint32_t profileId, LaneProfile *la
 {
     if (ModelLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get lock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel != NULL) {
@@ -121,12 +121,13 @@ static int32_t AddLaneModel(uint64_t laneId, uint32_t profileId, LaneProfile *la
     if (memcpy_s(&newModel.profile, sizeof(LaneProfile), laneProfile, sizeof(LaneProfile)) != EOK) {
         LNN_LOGE(LNN_LANE, "addLaneModel memcpy fail");
         ModelUnlock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
-    if (LnnCreateData(&g_profileMap, profileId, &newModel, sizeof(LaneModel)) != SOFTBUS_OK) {
+    int32_t ret = LnnCreateData(&g_profileMap, profileId, &newModel, sizeof(LaneModel));
+    if (ret != SOFTBUS_OK) {
         ModelUnlock();
-        return SOFTBUS_ERR;
+        return ret;
     }
     laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel != NULL) {
@@ -141,7 +142,7 @@ int32_t BindLaneIdToProfile(uint64_t laneId, LaneProfile *profile)
 {
     if (profile == NULL) {
         LNN_LOGE(LNN_LANE, "profile is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LaneGenerateParam param;
     param.linkType = profile->linkType;
@@ -149,8 +150,9 @@ int32_t BindLaneIdToProfile(uint64_t laneId, LaneProfile *profile)
     param.priority = profile->priority;
     uint32_t profileId = GenerateLaneProfileId(&param);
     profile->serialNum = profileId;
-    if (AddLaneModel(laneId, profileId, profile) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    int32_t ret = AddLaneModel(laneId, profileId, profile);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -177,21 +179,21 @@ int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
 {
     if (profile == NULL) {
         LNN_LOGE(LNN_LANE, "profile is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (ModelLock() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel == NULL) {
         ModelUnlock();
         LNN_LOGE(LNN_LANE, "read laneModel fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(profile, sizeof(LaneProfile), &laneModel->profile, sizeof(LaneProfile)) != EOK) {
         LNN_LOGE(LNN_LANE, "profile memcpy fail");
         ModelUnlock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     ModelUnlock();
     return SOFTBUS_OK;
@@ -201,24 +203,24 @@ int32_t GetLaneIdList(uint32_t profileId, uint64_t **laneIdList, uint32_t *listS
 {
     if (ModelLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get lock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel == NULL) {
         ModelUnlock();
         LNN_LOGE(LNN_LANE, "read laneModel fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (laneModel->ref == 0) {
         LNN_LOGE(LNN_LANE, "ref count is zero");
         ModelUnlock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *laneIdList = (uint64_t *)SoftBusCalloc(sizeof(uint64_t) * laneModel->ref);
     if (*laneIdList == NULL) {
         LNN_LOGE(LNN_LANE, "laneIdList malloc fail");
         ModelUnlock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     uint32_t cnt = 0;
     LaneIdInfo *infoNode = NULL;
@@ -248,7 +250,7 @@ int32_t InitLaneModel(void)
     LnnMapInit(&g_profileMap);
     if (SoftBusMutexInit(&g_laneModelMutex, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "laneModel mutex init fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }

@@ -91,7 +91,7 @@ static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType *optLink
             break;
         default:
             LNN_LOGE(LNN_LANE, "lane type is not supported. type=%{public}d", transType);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
     }
     *linkNum = 0;
     if (memcpy_s(optLink, optLinkMaxNum * sizeof(LaneLinkType), defaultLink, sizeof(defaultLink)) != EOK) {
@@ -250,10 +250,9 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
 {
     int32_t resListScore[LANE_LINK_TYPE_BUTT];
     (void)memset_s(resListScore, sizeof(resListScore), INVALID_LINK, sizeof(resListScore));
-    int32_t ret = GetListScore(networkId, request->expectedBw, resList, resListScore, resNum);
-    if (ret != SOFTBUS_OK) {
+    if (GetListScore(networkId, request->expectedBw, resList, resListScore, resNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get linklist score fail");
-        return ret;
+        return SOFTBUS_LANE_GET_LINK_SCORE_ERR;
     }
     if ((resListScore[LANE_WLAN_2P4G] == INVALID_LINK && resListScore[LANE_WLAN_5G] == INVALID_LINK) ||
         (resListScore[LANE_P2P] == INVALID_LINK && resListScore[LANE_HML] == INVALID_LINK)) {
@@ -379,7 +378,7 @@ static int32_t AddRecommendLinkType(LanePreferredLinkList *setRecommendLinkList,
 {
     if ((*linkNum) < 0 || (*linkNum) >= LANE_LINK_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "enum out of bounds");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     setRecommendLinkList->linkType[(*linkNum)++] = linkType;
     setRecommendLinkList->linkTypeNum = *linkNum;
@@ -419,7 +418,7 @@ int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
         LNN_LOGI(LNN_LANE, "ble_only = on");
         return SOFTBUS_OK;
     } else {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
 }
 
@@ -509,8 +508,7 @@ static bool IsAuthReuseWifiDirect(const char *networkId, LaneLinkType linkType)
     }
 }
 
-int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
-    LanePreferredLinkList *recommendList)
+int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request, LanePreferredLinkList *recommendList)
 {
     if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
         return SOFTBUS_INVALID_PARAM;
