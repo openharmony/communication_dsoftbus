@@ -135,7 +135,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, ScanResultCbTest001, TestSize.Level1)
     int32_t ret = SoftBusRegisterWifiEvent(&cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = SoftBusRegisterWifiEvent(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -180,7 +180,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusUnRegisterWifiEventTest001, TestSize.Le
     int32_t ret = SoftBusUnRegisterWifiEvent(&cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = SoftBusUnRegisterWifiEvent(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
