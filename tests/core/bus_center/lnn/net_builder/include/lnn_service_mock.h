@@ -38,7 +38,7 @@ public:
     virtual void LnnNotifyLeaveResult(const char *networkId, int32_t retCode) = 0;
     virtual void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info) = 0;
     virtual void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type) = 0;
-    virtual void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state) = 0;
+    virtual void LnnNotifyWlanStateChangeEvent(void *state) = 0;
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
     virtual void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type,
         uint8_t relation, bool isJoin) = 0;
@@ -65,7 +65,7 @@ public:
     MOCK_METHOD2(LnnNotifyLeaveResult, void (const char *, int32_t));
     MOCK_METHOD2(LnnNotifyOnlineState, void (bool, NodeBasicInfo *));
     MOCK_METHOD2(LnnNotifyBasicInfoChanged, void (NodeBasicInfo *, NodeBasicInfoType));
-    MOCK_METHOD1(LnnNotifyWlanStateChangeEvent, void (SoftBusWifiState));
+    MOCK_METHOD1(LnnNotifyWlanStateChangeEvent, void (void *));
     MOCK_METHOD1(LnnNotifyBtStateChangeEvent, void (void *));
     MOCK_METHOD4(LnnNotifyLnnRelationChanged, void (const char *, ConnectionAddrType, uint8_t, bool));
     MOCK_METHOD3(LnnNotifyMasterNodeChanged, void (bool, const char*, int32_t));
