@@ -111,8 +111,8 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
         return;
     }
     char deviceName[DEVICE_NAME_BUF_LEN + 1] = {0};
-    if (memcpy_s(deviceName, DEVICE_NAME_BUF_LEN, msg, len) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "memcpy fail");
+    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN + 1, (char *)msg) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy fail");
         return;
     }
     char *anonyNetworkId = NULL;
