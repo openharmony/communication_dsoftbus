@@ -47,6 +47,12 @@ public:
         GetSender().Send(content);
     }
 
+    void SetProcessor(std::shared_ptr<WifiDirectProcessor> processor)
+    {
+        std::lock_guard lock(processorLock_);
+        processor_ = processor;
+    }
+
     WifiDirectEventDispatcher WaitEvent();
 
 protected:

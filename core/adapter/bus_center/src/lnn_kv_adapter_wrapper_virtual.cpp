@@ -23,13 +23,13 @@ int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, c
     (void)appIdLen;
     (void)storeId;
     (void)storeIdLen;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnDestroyKvAdapter(int32_t dbId)
 {
     (void)dbId;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *value, int32_t valueLen)
@@ -39,7 +39,7 @@ int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *
     (void)keyLen;
     (void)value;
     (void)valueLen;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnDeleteDBData(int32_t dbId, const char *key, int32_t keyLen)
@@ -47,7 +47,7 @@ int32_t LnnDeleteDBData(int32_t dbId, const char *key, int32_t keyLen)
     (void)dbId;
     (void)key;
     (void)keyLen;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value)
@@ -56,7 +56,7 @@ int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value
     (void)key;
     (void)keyLen;
     (void)value;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t keyPrefixLen)
@@ -64,18 +64,18 @@ int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t key
     (void)dbId;
     (void)keyPrefix;
     (void)keyPrefixLen;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
 {
     (void)dbId;
     (void)localInfo;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnCloudSync(int32_t dbId)
 {
     (void)dbId;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }

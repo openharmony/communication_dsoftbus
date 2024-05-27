@@ -111,7 +111,18 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
         SetSoftBusWifiHotSpotState(code, &state);
     }
     if (state != SOFTBUS_WIFI_UNKNOWN) {
-        LnnNotifyWlanStateChangeEvent(state);
+        SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
+        if (notifyState == NULL) {
+            LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
+            return;
+        }
+        *notifyState = state;
+        int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWlanStateChangeEvent,
+            (void *)notifyState);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "async notify wifi state err, ret=%{public}d", ret);
+            SoftBusFree(notifyState);
+        }
     }
 }
 

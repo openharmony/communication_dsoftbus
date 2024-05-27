@@ -126,6 +126,11 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
     return GetTransAuthInterface()->AuthGetP2pConnInfo(uuid, connInfo, isMeta);
 }
 
+int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    return GetTransAuthInterface()->AuthGetHmlConnInfo(uuid, connInfo, isMeta);
+}
+
 void AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta, AuthHandle *authHandle)
 {
     return GetTransAuthInterface()->AuthGetLatestIdByUuid(uuid, isIpConnection, isMeta, authHandle);

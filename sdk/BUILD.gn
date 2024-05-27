@@ -126,6 +126,10 @@ target(build_type, "softbus_client") {
         "ipc:ipc_single",
       ]
     }
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.hiviewdfx_hicollie)) {
+      external_deps += [ "hicollie:libhicollie" ]
+    }
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"

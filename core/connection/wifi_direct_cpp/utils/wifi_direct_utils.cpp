@@ -179,7 +179,7 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
 std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetworkId)
 {
     std::vector<uint8_t> result;
-    uint8_t ptkBytes[PTK_DEFAULT_LEN] = { 0 };
+    uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
     int32_t ret = LnnGetRemoteByteInfo(remoteNetworkId.c_str(), BYTE_KEY_REMOTE_PTK, ptkBytes, sizeof(ptkBytes));
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get remote ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
@@ -398,11 +398,26 @@ WifiDirectRole WifiDirectUtils::ToWifiDirectRole(LinkInfo::LinkMode mode)
 
 void WifiDirectUtils::ShowLinkInfoList(const std::string &banana, const std::vector<LinkInfo> &inkList)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "banana=%{public}s", banana.c_str());
+    int count = 0;
+    for (const auto &info : inkList) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s[%{public}d]: name=%{public}s, mode=%{public}d", banana.c_str(), count,
+                  info.GetLocalInterface().c_str(), info.GetLocalLinkMode());
+        count++;
+    }
+}
 
-    for (const LinkInfo &info : inkList) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s, mode=%{public}d", info.GetLocalInterface().c_str(),
-            static_cast<int>(info.GetLocalLinkMode()));
+enum WifiDirectBandWidth WifiDirectUtils::BandWidthNumberToEnum(int bandWidth)
+{
+    return bandWidth >= BAND_WIDTH_160M_NUMBER ? BAND_WIDTH_160M : BAND_WIDTH_80M;
+}
+
+int WifiDirectUtils::BandWidthEnumToNumber(WifiDirectBandWidth bandWidth)
+{
+    switch (bandWidth) {
+        case BAND_WIDTH_160M:
+            return BAND_WIDTH_160M_NUMBER;
+        default:
+            return BAND_WIDTH_80M_NUMBER;
     }
 }
 } // namespace OHOS::SoftBus

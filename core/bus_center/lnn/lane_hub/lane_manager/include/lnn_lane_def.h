@@ -30,6 +30,7 @@ typedef enum {
     LANE_BW_20M,
     LANE_BW_40M,
     LANE_BW_80M,
+    LANE_BW_80P80M,
     LANE_BW_160M,
     LANE_BW_BUTT = 0xFF,
 } LaneBandwidth;
