@@ -184,7 +184,7 @@ void LnnDeinitNetLedger(void)
     LnnDeinitLocalLedger();
     LnnDeinitHuksInterface();
     LnnDeinitMetaNodeExtLedger();
-    LnnDeInitCloudSyncModule();    
+    LnnDeInitCloudSyncModule();
 }
 
 static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *info, uint32_t infoLen)

@@ -49,7 +49,6 @@ protected:
 };
 void LnnSettingdataEventMonitorTest::SetUpTestCase(void)
 {
-
 }
 void LnnSettingdataEventMonitorTest::TearDownTestCase(void)
 {
@@ -63,7 +62,7 @@ void LnnSettingdataEventMonitorTest::TearDown(void)
 
 /*
 * @tc.name: LnnGetSettingDeviceNameTest001
-* @tc.desc: 
+* @tc.desc:
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -72,7 +71,7 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest001, TestSiz
     int ret = LnnGetSettingDeviceName(DEVICE_NAME1, DEVICE_NAME_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     char* deviceName = (char*)malloc(sizeof(DEVICE_NAME2));
-    memset_s(deviceName,sizeof(char*),0,sizeof(char*));
+    memset_s(deviceName, sizeof(char*), 0, sizeof(char*));
     ret = LnnGetSettingDeviceName(deviceName, DEVICE_NAME_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(deviceName);
