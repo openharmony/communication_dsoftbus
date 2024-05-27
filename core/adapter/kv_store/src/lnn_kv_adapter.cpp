@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "anonymizer.h"
-#include "lnn_heartbeat_ctrl.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_log.h"
 #include "lnn_parameter_utils.h"
@@ -54,7 +53,7 @@ KVAdapter::~KVAdapter()
 
 int32_t KVAdapter::Init()
 {
-    LNN_LOGI(LNN_LEDGER, "Init kvAdapter, storeId: %s", storeId_.storeId.c_str());
+    LNN_LOGI(LNN_LEDGER, "Init kvAdapter, storeId: %{public}s", storeId_.storeId.c_str());
     int32_t tryTimes = MAX_INIT_RETRY_TIMES;
     int64_t beginTime = GetTickCount();
     while (tryTimes > 0) {
@@ -222,7 +221,7 @@ int32_t KVAdapter::PutBatch(const std::map<std::string, std::string> &values)
         status = kvStorePtr_->PutBatch(entries);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "PutBatch kv to db failed, ret=%d", status);
+        LNN_LOGE(LNN_LEDGER, "PutBatch kv to db failed, ret=%{public}d", status);
         return SOFTBUS_KV_PUT_DB_FAIL;
     }
     LNN_LOGI(LNN_LEDGER, "KVAdapter PutBatch succeed");
@@ -302,7 +301,7 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
     if (status != DistributedKv::Status::SUCCESS) {
         anonyKey = nullptr;
         Anonymize(key.c_str(), &anonyKey);
-        LNN_LOGE(LNN_LEDGER, "Get data from kv failed, key: %{public}s", anonyKey);
+        LNN_LOGE(LNN_LEDGER, "Get data from kv failed, key=%{public}s", anonyKey);
         AnonymizeFree(anonyKey);
         return SOFTBUS_KV_GET_DB_FAIL;
     }
@@ -397,7 +396,7 @@ void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
     }
     if (progress == DistributedKv::Progress::SYNC_FINISH && code != DistributedKv::Status::SUCCESS) {
         LNN_LOGI(LNN_LEDGER,
-            "cloud sync failed, code: %{public}d, upload.total=%{public}u, upload.success=%{public}u, "
+            "cloud sync failed, code=%{public}d, upload.total=%{public}u, upload.success=%{public}u, "
             "upload.failed=%{public}u, upload.untreated=%{public}u, download.total=%{public}u, "
             "download.success=%{public}u, download.failed=%{public}u, download.untreated=%{public}u",
             code, detail.details.upload.total, detail.details.upload.success, detail.details.upload.failed,

@@ -237,7 +237,7 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
 void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info);
 
-void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state);
+void LnnNotifyWlanStateChangeEvent(void *state);
 void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state);
 void LnnNotifyDifferentAccountChangeEvent(void *state);
 void LnnNotifyBtStateChangeEvent(void *state);

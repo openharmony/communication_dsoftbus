@@ -51,7 +51,7 @@ void KvDataChangeListener::OnChange(const DistributedKv::DataOrigin &origin, Key
         LNN_LOGI(LNN_LEDGER, "Cloud data change.store=%{public}s", origin.store.c_str());
         std::vector<DistributedKv::Entry> insertRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_INSERT]);
         if (!insertRecords.empty() && insertRecords.size() <= MAX_DB_RECORD_SIZE) {
-            HandleAddChange(insertRecords);
+            SelectChangeType(insertRecords);
         }
 
         std::vector<DistributedKv::Entry> updateRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_UPDATE]);
