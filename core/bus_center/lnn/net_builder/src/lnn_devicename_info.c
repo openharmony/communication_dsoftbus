@@ -117,8 +117,8 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_BUILDER, "recv device name changed. msg=%{public}s, networkId=%{public}s",
-        (char *)msg, anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "recv device name changed. deviceName=%{public}s, networkId=%{public}s",
+        deviceName, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "convert networkId to udid fail");
