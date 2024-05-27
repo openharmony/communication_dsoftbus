@@ -39,6 +39,7 @@
 #include "lnn_net_builder.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
+#include "lnn_parameter_utils.h"
 
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
@@ -409,32 +410,38 @@ static void HbDelayConditionChanged(void *para)
 {
     (void)para;
 
-    LNN_LOGI(LNN_HEART_BEAT, "HB delay handle condition changed");
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle delay condition changed");
     LnnUpdateSendInfoStrategy(UPDATE_HB_ACCOUNT_INFO);
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
     HbConditionChanged(false);
 }
 
-static int32_t HbTryCloudSync(void)
+static void HbTryCloudSync(void *para)
 {
+    (void)para;
     NodeInfo info;
+    int32_t ret = SOFTBUS_ERR;
 
-    if (LnnIsDefaultOhosAccount()) {
-        LNN_LOGW(LNN_HEART_BEAT, "HB accountId is null, no need sync");
-        return SOFTBUS_ERR;
-    }
-    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK || LnnSaveLocalDeviceInfo(&info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB save local device info fail");
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = LnnLedgerAllDataSyncToDB(&info);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB sync to cloud fail");
-    } else {
-        LNN_LOGI(LNN_HEART_BEAT, "HB sync to cloud end");
-    }
-    return ret;
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle delay cloud sync");
+    do {
+        if (LnnIsDefaultOhosAccount()) {
+            LNN_LOGW(LNN_HEART_BEAT, "HB accountId is null, no need sync");
+            break;
+        }
+        (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "HB save local device info fail");
+            break;
+        }
+        ret = LnnLedgerAllDataSyncToDB(&info);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "HB sync to cloud fail");
+        } else {
+            LNN_LOGI(LNN_HEART_BEAT, "HB sync to cloud end");
+        }
+    } while (false);
+    LnnAsyncCallbackDelayHelper(
+        GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL, ret == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
 }
 
 static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
@@ -456,8 +463,8 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_SCREEN_UNLOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
             LnnUpdateOhosAccount(false);
-            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
-                HbTryCloudSync() == SOFTBUS_OK ? HB_START_DELAY_LEN : 0);
+            LnnAsyncCallbackDelayHelper(
+                GetLooper(LOOP_TYPE_DEFAULT), HbTryCloudSync, NULL, IsCloudSyncEnabled() ? HB_CLOUD_SYNC_DELAY_LEN : 0);
             break;
         case SOFTBUS_SCREEN_LOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_LOCK");
@@ -480,8 +487,8 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_ACCOUNT_LOG_IN:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
             LnnUpdateOhosAccount(false);
-            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
-                HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
+            LnnAsyncCallbackDelayHelper(
+                GetLooper(LOOP_TYPE_DEFAULT), HbTryCloudSync, NULL, IsCloudSyncEnabled() ? HB_CLOUD_SYNC_DELAY_LEN : 0);
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");

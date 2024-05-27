@@ -15,9 +15,10 @@
 
 #include "trans_qos_info.h"
 
-void GetExtQosInfo(const SessionParam *param, QosInfo *qosInfo, uint32_t index)
+void GetExtQosInfo(const SessionParam *param, QosInfo *qosInfo, uint32_t index, AllocExtendInfo *extendInfo)
 {
     (void)param;
     (void)qosInfo;
     (void)index;
+    (void)extendInfo;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -222,16 +222,10 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
     sleep(2);
     char sendStringData[STR_LEN];
     memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
-    StreamData d1 = {
-        sendStringData,
-        STR_LEN,
-    };
-    StreamData d2 = {
-        g_tmpBuf,
-        TEST_TMP_BUF_LEN,
-    };
+    StreamData d1 = { sendStringData, STR_LEN };
+    StreamData d2 = { g_tmpBuf, TEST_TMP_BUF_LEN };
     StreamFrameInfo tmpf = {};
-    std::map<int, int>::iterator iter;
+    std::map<int32_t, int32_t>::iterator iter;
     for (int32_t times = 0; times < sendTimes; times++) {
         iter = g_qosEventCount.begin();
         while (iter != g_qosEventCount.end()) {

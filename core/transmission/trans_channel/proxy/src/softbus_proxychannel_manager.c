@@ -327,6 +327,9 @@ void TransProxyDelChanByChanId(int32_t chanlId)
         if (item->channelId == chanlId) {
             ReleaseProxyChannelId(item->channelId);
             ListDelete(&(item->node));
+            if (item->appInfo.fastTransData != NULL) {
+                SoftBusFree((void *)item->appInfo.fastTransData);
+            }
             SoftBusFree(item);
             g_proxyChannelList->cnt--;
             break;
@@ -389,6 +392,10 @@ static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t err
         } else {
             OnProxyChannelClosed(removeNode->channelId, &(removeNode->appInfo));
         }
+        if (removeNode->appInfo.fastTransData != NULL) {
+            SoftBusFree((void *)removeNode->appInfo.fastTransData);
+        }
+        SoftBusFree(removeNode);
     }
 }
 
@@ -1467,6 +1474,24 @@ void TransProxyonMessageReceived(const ProxyMessage *msg)
     }
 }
 
+static int32_t CopyAppInfoFastTransData(ProxyChannelInfo *chan, const AppInfo *appInfo)
+{
+    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
+        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+        if (fastTransData == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
+            appInfo->fastTransDataSize) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
+            SoftBusFree(fastTransData);
+            return SOFTBUS_MEM_ERR;
+        }
+        chan->appInfo.fastTransData = fastTransData;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)
 {
     chan->myId = (int16_t)channelId;
@@ -1485,7 +1510,14 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
         }
     }
 
-    (void)memcpy_s(&(chan->appInfo), sizeof(chan->appInfo), appInfo, sizeof(AppInfo));
+    if (memcpy_s(&(chan->appInfo), sizeof(chan->appInfo), appInfo, sizeof(AppInfo)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "appInfo memcpy failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (CopyAppInfoFastTransData(chan, appInfo) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
+        return SOFTBUS_MEM_ERR;
+    }
     if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "trans proxy add channelId fail. channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
@@ -1661,7 +1693,7 @@ void TransProxyTimerProc(void)
     ListNode proxyProcList;
 
     if (g_proxyChannelList == NULL) {
-        TRANS_LOGE(TRANS_INIT, "g_proxyChannelList is null or empty");
+        TRANS_LOGD(TRANS_INIT, "g_proxyChannelList is null or empty");
         return;
     }
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {

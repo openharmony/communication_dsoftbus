@@ -861,13 +861,13 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
 
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->udpChannelOptType = TYPE_INVALID_CHANNEL;
+    (void)TransSessionMgrInit();
     ret = ParseRequestAppInfo(authHandle, msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
     SoftBusFree(newNode);
-    TransSessionMgrDeinit();
 }
 
 /**
@@ -885,11 +885,10 @@ HWTEST_F(TransUdpNegoTest, TransPackRequestUdpInfo001, TestSize.Level1)
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     GenerateAppInfo(appInfo);
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
-    cJSON *msg = cJSON_CreateObject();
-    ASSERT_TRUE(msg != nullptr);
-
+    string msgStr = "normal msgStr";
+    cJSON *msg = cJSON_Parse(msgStr.c_str());
     int32_t ret = TransPackRequestUdpInfo(msg, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     TransOnExchangeUdpInfoRequest(authHandle, seq, msg);
     cJSON_Delete(msg);

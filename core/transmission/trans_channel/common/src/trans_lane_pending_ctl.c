@@ -760,7 +760,7 @@ static void ModuleLaneAdapter(LanePreferredLinkList *preferred)
     }
 }
 
-static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
+static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, AllocExtendInfo *extendInfo)
 {
     if (!(param->isQosLane)) {
         TRANS_LOGD(TRANS_SVC, "not support qos lane");
@@ -782,7 +782,7 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
                 qosInfo->rttLevel = (LaneRttLevel)((param->qos[i].value > 0) ? param->qos[i].value : 0);
                 break;
             default:
-                GetExtQosInfo(param, qosInfo, i);
+                GetExtQosInfo(param, qosInfo, i, extendInfo);
                 break;
         }
     }
@@ -832,7 +832,7 @@ static int32_t GetAllocInfoBySessionParam(const SessionParam *param, LaneAllocIn
     }
     allocInfo->transType = transType;
     allocInfo->acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
-    TransGetQosInfo(param, &allocInfo->qosRequire);
+    TransGetQosInfo(param, &allocInfo->qosRequire, &(allocInfo->extendInfo));
 
     if (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName)) {
         allocInfo->qosRequire.minBW = MESH_MAGIC_NUMBER;
@@ -1049,10 +1049,9 @@ int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneCon
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnGetLaneHandle != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
         TRANS_SVC, "lnnGetLaneHandle is null");
     *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
-    if (TransAddLaneReqToPendingAndWaiting(*laneHandle, requestOption) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = TransAddLaneReqToPendingAndWaiting(*laneHandle, requestOption);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "trans add lane to pending list failed.");
+
     bool bSuccess = false;
     int32_t errCode = SOFTBUS_ERR;
     if (TransGetLaneReqItemByLaneHandle(*laneHandle, &bSuccess, connInfo, &errCode) != SOFTBUS_OK) {

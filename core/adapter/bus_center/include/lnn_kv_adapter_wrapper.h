@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DSOFTBUS_KV_STORE_LNN_KV_ADAPTER_WRAPPER_H
-#define DSOFTBUS_KV_STORE_LNN_KV_ADAPTER_WRAPPER_H
+#ifndef LNN_KV_ADAPTER_WRAPPER_H
+#define LNN_KV_ADAPTER_WRAPPER_H
 
 #include "lnn_data_cloud_sync.h"
 #ifdef __cplusplus
@@ -34,4 +34,4 @@ int32_t LnnCloudSync(int32_t dbId);
 };
 #endif
 
-#endif // DSOFTBUS_KV_STORE_LNN_KV_ADAPTER_WRAPPER_H
+#endif //LNN_KV_ADAPTER_WRAPPER_H
