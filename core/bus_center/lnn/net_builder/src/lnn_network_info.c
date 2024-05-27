@@ -183,9 +183,8 @@ static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *
                 ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
             }
         }
-        ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
         LNN_LOGE(LNN_BUILDER,
-            "sync capability info ret=%{public}d, deviceName=%{public}s.", ret, netInfo.deviceName);
+            "sync cap info ret=%{public}d, deviceName=%{public}s.", ret, netInfo.deviceName);
     } else if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
         LnnSendP2pSyncInfoMsg(netInfo.networkId, netCapability);
     }
