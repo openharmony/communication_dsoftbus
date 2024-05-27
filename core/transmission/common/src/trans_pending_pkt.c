@@ -166,7 +166,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
     while (item->status == PACKAGE_STATUS_PENDING && TimeBefore(&outTime)) {
         SoftBusCondWait(&item->cond, &item->lock, &outTime);
     }
-    ret = (item->status == PACKAGE_STATUS_FINISHED) ? SOFTBUS_OK : SOFTBUS_TIMOUT;
+    int32_t errCode = (item->status == PACKAGE_STATUS_FINISHED) ? SOFTBUS_OK : SOFTBUS_TIMOUT;
     (void)SoftBusMutexUnlock(&item->lock);
 
     ret = SoftBusMutexLock(&pendingList->lock);
@@ -176,7 +176,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
     pendingList->cnt--;
     (void)SoftBusMutexUnlock(&pendingList->lock);
     ReleasePendingItem(item);
-    return SOFTBUS_OK;
+    return errCode;
 }
 
 int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
