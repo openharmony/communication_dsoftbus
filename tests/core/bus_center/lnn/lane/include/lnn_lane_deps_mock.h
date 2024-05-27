@@ -36,6 +36,15 @@
 #include "softbus_base_listener.h"
 #include "wifi_direct_manager.h"
 
+typedef enum {
+    LANE_MOCK_PARAM1 = 0,
+    LANE_MOCK_PARAM2,
+    LANE_MOCK_PARAM3,
+    LANE_MOCK_PARAM4,
+    LANE_MOCK_PARAM5,
+    LANE_MOCK_PARAM_BUTT
+} LaneMockParamIndex;
+
 namespace OHOS {
 class LaneDepsInterface {
 public:
@@ -53,6 +62,7 @@ public:
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
         const AuthConnCallback *callback, bool isMeta) = 0;
     virtual int SoftBusFrequencyToChannel(int frequency) = 0;
@@ -103,6 +113,7 @@ public:
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char*, InfoKey, char*, uint32_t));
     MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char*, AuthConnInfo*, bool));
+    MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo*, uint32_t, const AuthConnCallback*, bool));
     MOCK_METHOD1(SoftBusFrequencyToChannel, int (int));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));

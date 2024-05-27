@@ -23,12 +23,15 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_deviceinfo_to_profile.h"
+#include "lnn_feature_capability.h"
+#include "lnn_heartbeat_strategy.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
 #include "lnn_node_info.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_info_manager.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
@@ -41,7 +44,6 @@
 #define BITLEN 4
 #define STRING_INTERFACE_BUFFER_LEN 16
 
-static SoftBusWifiState g_wifiState = SOFTBUS_WIFI_UNKNOWN;
 static bool g_isWifiDirectSupported = false;
 static bool g_isApCoexistSupported = false;
 static bool g_isWifiEnable = false;
@@ -167,6 +169,27 @@ static bool IsNeedToSend(NodeInfo *nodeInfo, uint32_t type)
     }
 }
 
+static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *msg, uint32_t netCapability,
+    uint32_t type)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (IsNeedToSend(&nodeInfo, type)) {
+        if (!IsFeatureSupport(nodeInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) {
+            ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+        } else {
+            if (type == ((1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR))) {
+                ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+            } else {
+                ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+            }
+        }
+        LNN_LOGE(LNN_BUILDER,
+            "sync cap info ret=%{public}d, deviceName=%{public}s.", ret, netInfo.deviceName);
+    } else if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
+        LnnSendP2pSyncInfoMsg(netInfo.networkId, netCapability);
+    }
+}
+
 static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
 {
     uint8_t *msg = ConvertCapabilityToMsg(netCapability);
@@ -194,13 +217,7 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }
-        if (IsNeedToSend(&nodeInfo, type)) {
-            int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo[i].networkId, msg, MSG_LEN, NULL);
-            LNN_LOGE(LNN_BUILDER,
-                "sync network info ret=%{public}d, deviceName=%{public}s.", ret, netInfo[i].deviceName);
-        } else if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
-            LnnSendP2pSyncInfoMsg(netInfo[i].networkId, netCapability);
-        }
+        DoSendCapability(nodeInfo, netInfo[i], msg, netCapability, type);
     }
     SoftBusFree(netInfo);
     SoftBusFree(msg);
@@ -264,6 +281,16 @@ static void LnnClearNetBandCapability(uint32_t *capability)
     }
 }
 
+static void LnnSetP2pNetCapability(uint32_t *capability)
+{
+    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
+        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+        (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+    } else {
+        (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+    }
+}
+
 static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
 {
     switch (wifiState) {
@@ -290,9 +317,7 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             g_isWifiEnable = false;
             if (!g_isApEnable) {
                 LnnClearNetworkCapability(capability);
-                if (!GetWifiDirectManager()->isWifiP2pEnabled()) {
-                    (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
-                }
+                LnnSetP2pNetCapability(capability);
             }
             *needSync = true;
             break;
@@ -330,10 +355,6 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
         return;
     }
     LNN_LOGI(LNN_BUILDER, "WifiStateEventHandler WifiState=%{public}d", wifiState);
-    if (g_wifiState == wifiState) {
-        return;
-    }
-    g_wifiState = wifiState;
     bool needSync = false;
     GetNetworkCapability(wifiState, &netCapability, &needSync);
     WifiStateProcess(netCapability, needSync);
@@ -357,10 +378,14 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (btState) {
         case SOFTBUS_BR_TURN_ON:
             (void)LnnSetNetCapability(&netCapability, BIT_BR);
+            break;
+        case SOFTBUS_BLE_TURN_ON:
             (void)LnnSetNetCapability(&netCapability, BIT_BLE);
             break;
         case SOFTBUS_BR_TURN_OFF:
             (void)LnnClearNetCapability(&netCapability, BIT_BR);
+            break;
+        case SOFTBUS_BLE_TURN_OFF:
             (void)LnnClearNetCapability(&netCapability, BIT_BLE);
             isSend = true;
             break;

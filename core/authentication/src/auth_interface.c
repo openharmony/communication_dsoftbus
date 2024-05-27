@@ -62,6 +62,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_P2P_NETWORKING_SYNC,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_AUTH_SYNC_INFO,
+        .listener = { NULL, NULL },
     }
 };
 
@@ -294,6 +298,14 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
         return AUTH_INVALID_ID;
     }
     return AuthDeviceGetP2pConnInfo(uuid, connInfo);
+}
+
+int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    if (isMeta) {
+        return AUTH_INVALID_ID;
+    }
+    return AuthDeviceGetHmlConnInfo(uuid, connInfo);
 }
 
 /* for ProxyChannel & P2P TcpDirectchannel */

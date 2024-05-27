@@ -617,4 +617,106 @@ HWTEST_F(AuthSessionMessageTest, IsDeviceMessagePacket_TEST_001, TestSize.Level1
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     EXPECT_TRUE(!IsDeviceMessagePacket(&connInfo, nullptr, nullptr, true, &messageParse));
 }
+
+/*
+ * @tc.name: PACK_FAST_AUTH_VALUE_TEST_001
+ * @tc.desc: Pack fast auth value test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
+{
+    AuthDeviceKeyInfo deviceCommKey = {0};
+    JsonObj *obj = JSON_CreateObject();
+    ASSERT_NE(obj, nullptr);
+    uint32_t keyLen = 0;
+    deviceCommKey.keyLen = keyLen;
+    uint64_t ret = PackFastAuthValue(obj, &deviceCommKey);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    JSON_Delete(obj);
+}
+
+/*
+ * @tc.name: CHECK_BUS_VERSION_TEST_001
+ * @tc.desc: check bus version test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
+{
+    JsonObj *obj = JSON_CreateObject();
+    if (obj == NULL) {
+        return;
+    }
+
+    NodeInfo *info = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
+    if (info == NULL) {
+        JSON_Delete(obj);
+        return;
+    }
+    (void)memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+
+    SoftBusVersion version = SOFTBUS_NEW_V1;
+    ASSERT_NE(obj, NULL);
+    if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) ||
+        !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
+        !JSON_AddInt32ToObject(obj, "BUS_MIN_VERSION", (int32_t)1) ||
+        !JSON_AddInt32ToObject(obj, "AUTH_PORT", (int32_t)8710) ||
+        !JSON_AddInt32ToObject(obj, "SESSION_PORT", (int32_t)26) ||
+        !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) ||
+        !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
+        JSON_Delete(obj);
+        return;
+    }
+    JSON_AddStringToObject(obj, BLE_OFFLINE_CODE, "10244");
+
+    info->connectInfo.authPort = 8710;
+    info->connectInfo.sessionPort = 26;
+    info->connectInfo.proxyPort = 80;
+    info->supportedProtocols = LNN_PROTOCOL_BR;
+    
+    int32_t ret = UnpackWiFi(obj, info, version, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)-1);
+    ret = UnpackWiFi(obj, info, version, false);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_KEY", "1222222222");
+    (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_IV", "1222222222");
+    (void)JSON_AddStringToObject(obj, "IRK", "1222222222");
+    (void)JSON_AddStringToObject(obj, "PUB_MAC", "1222222222");
+
+    JSON_AddStringToObject(obj, "MASTER_UDID", "1122334554444");
+    JSON_AddStringToObject(obj, "NODE_ADDR", "1122334554444");
+    UnpackCommon(obj, info, version, false);
+    version = SOFTBUS_OLD_V1;
+    JSON_AddInt32ToObject(obj, "MASTER_WEIGHT", (int32_t)10);
+    UnpackCommon(obj, info, version, true);
+    UnpackCipherRpaInfo(obj, info);
+    JSON_Delete(obj);
+    SoftBusFree(info);
+}
+
+/*
+ * @tc.name: POST_BT_V1_DEVID_TEST_001
+ * @tc.desc: post bt v1 devid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
+{
+    int64_t authSeq = 0;
+    AuthSessionInfo *info = (AuthSessionInfo*)SoftBusCalloc(sizeof(AuthSessionInfo));
+    if (info == NULL) {
+        return;
+    }
+    info->requestId = 1;
+    info->connId = 1;
+    info->isServer = false;
+    info->version = SOFTBUS_NEW_V1;
+    info->connInfo.type = AUTH_LINK_TYPE_WIFI;
+    int32_t ret = PostDeviceIdV1(authSeq, info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    SoftBusFree(info);
+}
 } // namespace OHOS

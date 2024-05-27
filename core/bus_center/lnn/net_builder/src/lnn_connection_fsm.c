@@ -60,6 +60,14 @@ typedef enum {
     STATE_NUM_MAX,
 } ConnFsmStateIndex;
 
+typedef enum {
+    ONLINE_TYPE_INVALID = 1,
+    ONLINE_TYPE_WIFI = 2,
+    ONLINE_TYPE_BLE = 3,
+    ONLINE_TYPE_BLE_THREE_STATE = 4,
+    ONLINE_TYPE_BR = 5,
+} OnlineType;
+
 #define JOIN_LNN_TIMEOUT_LEN  (15 * 1000UL)
 #define LEAVE_LNN_TIMEOUT_LEN (5 * 1000UL)
 
@@ -410,6 +418,32 @@ static void SetLnnConnNodeInfo(
         connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, relation[connInfo->addr.type], true);
 }
 
+static int32_t DfxRecordLnnOnlineType(const NodeInfo *info)
+{
+    if (info == NULL) {
+        return ONLINE_TYPE_INVALID;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
+        return ONLINE_TYPE_WIFI;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
+        return ONLINE_TYPE_BR;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
+        uint32_t local;
+        if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &local) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "get cap fail");
+            return ONLINE_TYPE_INVALID;
+        }
+        if (((local & (1 << BIT_BR)) == 0) || (info->netCapacity & (1 << BIT_BR)) == 0) {
+            return ONLINE_TYPE_BLE_THREE_STATE;
+        } else {
+            return ONLINE_TYPE_BLE;
+        }
+    }
+    return ONLINE_TYPE_INVALID;
+}
+
 static void GetLnnOnlineType(bool isNeedConnect, ConnectionAddrType type, int32_t *lnnType)
 {
     if (!isNeedConnect && type == CONNECTION_ADDR_BLE) {
@@ -586,6 +620,15 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
 }
 
+static void SetOnlineType(int32_t reason, NodeInfo *nodeInfo, LnnEventExtra extra)
+{
+    if (reason == SOFTBUS_OK) {
+        extra.onlineType = DfxRecordLnnOnlineType(nodeInfo);
+    } else {
+        extra.onlineType = ONLINE_TYPE_INVALID;
+    }
+}
+
 static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onlineNum, int32_t lnnType, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
@@ -606,6 +649,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
         DfxReportOnlineEvent(connInfo, reason, extra);
         return;
     }
+    SetOnlineType(reason, connInfo->nodeInfo, extra);
     char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (strcpy_s(netWorkId, NETWORK_ID_BUF_LEN, connInfo->nodeInfo->networkId) != EOK) {
         LNN_LOGE(LNN_BUILDER, "strcpy_s netWorkId fail");

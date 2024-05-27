@@ -39,6 +39,9 @@ public:
     virtual WifiErrorCode Hid2dGetChannelListFor5G(int *chanList, int len) = 0;
     virtual WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info) = 0;
     virtual WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo* groupInfo) = 0;
+    virtual int IsWifiActive(void) = 0;
+    virtual WifiErrorCode GetWifiDetailState(WifiDetailState *state) = 0;
+    virtual WifiErrorCode GetP2pEnableStatus(P2pState *state) = 0;
 };
 class WifiInterfaceMock : public WifiInterface {
 public:
@@ -54,6 +57,9 @@ public:
     MOCK_METHOD2(Hid2dGetChannelListFor5G, WifiErrorCode(int *, int));
     MOCK_METHOD1(GetLinkedInfo, WifiErrorCode(WifiLinkedInfo *));
     MOCK_METHOD1(GetCurrentGroup, WifiErrorCode(WifiP2pGroupInfo*));
+    MOCK_METHOD0(IsWifiActive, int(void));
+    MOCK_METHOD1(GetWifiDetailState, WifiErrorCode(WifiDetailState *));
+    MOCK_METHOD1(GetP2pEnableStatus, WifiErrorCode(P2pState *));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

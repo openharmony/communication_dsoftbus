@@ -77,7 +77,7 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
     return GetServiceInterface()->LnnNotifyBasicInfoChanged(info, type);
 }
 
-void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
+void LnnNotifyWlanStateChangeEvent(void *state)
 {
     return GetServiceInterface()->LnnNotifyWlanStateChangeEvent(state);
 }
