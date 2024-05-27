@@ -23,7 +23,7 @@
 namespace OHOS {
 class KvDataChangeListener : public DistributedKv::KvStoreObserver {
 public:
-    KvDataChangeListener();
+    KvDataChangeListener(const std::string &appId, const std::string &storeId);
     ~KvDataChangeListener();
 
     void OnChange(const DistributedKv::DataOrigin &origin, Keys &&keys) override;
@@ -35,6 +35,10 @@ private:
     void HandleUpdateChange(const std::vector<DistributedKv::Entry> &updateRecords);
     void HandleDeleteChange(const std::vector<DistributedKv::Entry> &deleteRecords);
     std::string GetKeyPrefix(const std::string &key);
+    
+private:
+    std::string appId_;
+    std::string storeId_;
 };
 } // namespace OHOS
 #endif // LNN_KV_DATA_CHANGE_LISTENER_H

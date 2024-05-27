@@ -79,3 +79,17 @@ int32_t LnnCloudSync(int32_t dbId)
     (void)dbId;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
+    int32_t storeIdLen)
+{
+    (void)dbId;
+    (void)appId;
+    (void)appIdLen;
+    (void)storeId;
+    (void)storeIdLen;
+}
+void LnnUnRegisterDataChangeListener(int32_t dbId)
+{
+    (void)dbId;
+}

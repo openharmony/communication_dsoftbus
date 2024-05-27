@@ -36,12 +36,10 @@ constexpr int32_t MAX_MAP_SIZE = 10000;
 const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
 } // namespace
 
-KVAdapter::KVAdapter(const std::string &appId, const std::string &storeId,
-    const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener)
+KVAdapter::KVAdapter(const std::string &appId, const std::string &storeId)
 {
     this->appId_.appId = appId;
     this->storeId_.storeId = storeId;
-    this->dataChangeListener_ = dataChangeListener;
     LNN_LOGI(LNN_LEDGER, "KVAdapter Constructor Success, appId: %{public}s, storeId: %{public}s", appId.c_str(),
         storeId.c_str());
 }
@@ -61,7 +59,6 @@ int32_t KVAdapter::Init()
         if (kvStorePtr_ && status == DistributedKv::Status::SUCCESS) {
             int64_t endTime = GetTickCount();
             LNN_LOGI(LNN_LEDGER, "Init KvStorePtr Success, spend %{public}" PRId64 " ms", endTime - beginTime);
-            RegisterDataChangeListener();
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "CheckKvStore, left times: %{public}d, status: %{public}d", tryTimes, status);
@@ -82,19 +79,23 @@ int32_t KVAdapter::Init()
 int32_t KVAdapter::DeInit()
 {
     LNN_LOGI(LNN_LEDGER, "DBAdapter DeInit");
-    UnRegisterDataChangeListener();
-    DeleteDataChangeListener();
     DeleteKvStorePtr();
     return SOFTBUS_OK;
 }
 
-int32_t KVAdapter::RegisterDataChangeListener()
+int32_t KVAdapter::RegisterDataChangeListener(
+    const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener)
 {
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
     if (!IsCloudSyncEnabled()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_ERR;
     }
+    if (dataChangeListener == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "dataChangeListener is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    this->dataChangeListener_ = dataChangeListener;
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
@@ -389,6 +390,13 @@ void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
             detail.details.upload.untreated, detail.details.download.total, detail.details.download.success,
             detail.details.download.failed, detail.details.download.untreated);
     }
+}
+
+void KVAdapter::DeRegisterDataChangeListener()
+{
+    LNN_LOGI(LNN_LEDGER, "call!");
+    UnRegisterDataChangeListener();
+    DeleteDataChangeListener();
 }
 
 } // namespace OHOS
