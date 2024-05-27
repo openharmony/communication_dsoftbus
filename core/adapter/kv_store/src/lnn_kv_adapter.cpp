@@ -30,8 +30,8 @@ namespace OHOS {
 using namespace OHOS::DistributedKv;
 namespace {
 constexpr int32_t MAX_STRING_LEN = 4096;
-constexpr int32_t MAX_INIT_RETRY_TIMES = 30;
-constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 500 * 1000; // 500ms
+constexpr int32_t MAX_INIT_RETRY_TIMES = 3;
+constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 100 * 1000; // 100ms
 constexpr int32_t MAX_MAP_SIZE = 10000;
 const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
 } // namespace
@@ -66,6 +66,7 @@ int32_t KVAdapter::Init()
         }
         LNN_LOGI(LNN_LEDGER, "CheckKvStore, left times: %{public}d, status: %{public}d", tryTimes, status);
         if (status == DistributedKv::Status::SECURITY_LEVEL_ERROR) {
+            LNN_LOGE(LNN_LEDGER, "This db security level error, remove and rebuild it");
             DeleteKvStore();
         }
         if (status == DistributedKv::Status::STORE_META_CHANGED) {
@@ -159,14 +160,7 @@ int32_t KVAdapter::Put(const std::string &key, const std::string &value)
         DistributedKv::Key kvKey(key);
         DistributedKv::Value oldV;
         if (kvStorePtr_->Get(kvKey, oldV) == DistributedKv::Status::SUCCESS && oldV.ToString() == value) {
-            char *anonyKey = nullptr;
-            char *anonyValue = nullptr;
-            Anonymize(key.c_str(), &anonyKey);
-            Anonymize(value.c_str(), &anonyValue);
-            LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s, value=%{public}s", anonyKey,
-                anonyValue);
-            AnonymizeFree(anonyKey);
-            AnonymizeFree(anonyValue);
+            LNN_LOGI(LNN_LEDGER, "The key-value pair already exists.");
             return SOFTBUS_OK;
         }
         DistributedKv::Value kvValue(value);
@@ -199,14 +193,6 @@ int32_t KVAdapter::PutBatch(const std::map<std::string, std::string> &values)
         for (auto item : values) {
             kvKey = item.first;
             if (kvStorePtr_->Get(kvKey, oldV) == DistributedKv::Status::SUCCESS && oldV.ToString() == item.second) {
-                char *anonyKey = nullptr;
-                char *anonyValue = nullptr;
-                Anonymize(item.first.c_str(), &anonyKey);
-                Anonymize(item.second.c_str(), &anonyValue);
-                LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s, value=%{public}s", anonyKey,
-                    anonyValue);
-                AnonymizeFree(anonyKey);
-                AnonymizeFree(anonyValue);
                 continue;
             }
             Entry entry;
