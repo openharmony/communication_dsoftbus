@@ -509,7 +509,7 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         goto EXIT_ERR;
     }
     extra->peerUdid = appInfo->peerUdid;
-    extra->osType = appInfo->osType;
+    extra->osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     appInfo->connectType = connOpt.type;
     extra->linkType = connOpt.type;
     FillAppInfo(appInfo, param, &transInfo, connInnerInfo);
