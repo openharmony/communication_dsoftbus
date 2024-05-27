@@ -680,6 +680,7 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
     }
 
     if ((info->appInfo.appType == APP_TYPE_NORMAL) || (info->appInfo.appType == APP_TYPE_AUTH)) {
+        TransProxyDelChanByChanId(info->channelId);
         (void)TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
     }
 }
