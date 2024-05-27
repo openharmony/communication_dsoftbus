@@ -55,7 +55,7 @@ int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, c
     std::shared_ptr<KVAdapter> kvAdapter = nullptr;
     {
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
-        kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr, std::make_shared<KvDataChangeListener>());
+        kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr);
         int32_t initRet = kvAdapter->Init();
         if (initRet != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret=%{public}d", initRet);
@@ -188,7 +188,7 @@ int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value
         LNN_LOGE(LNN_LEDGER, "strdup failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "kvAdapter get success, dbId=%{public}d", dbId);
+    LNN_LOGD(LNN_LEDGER, "kvAdapter get success, dbId=%{public}d", dbId);
     return SOFTBUS_OK;
 }
 
@@ -362,4 +362,47 @@ void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::str
     if (CipherAndRpaInfoToMap(localInfo, values, keyPrefix, stateVersionStr) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipher and rpa info to map fail");
     }
+}
+
+void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
+    int32_t storeIdLen)
+{
+    int32_t status;
+    {
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+        if (dbId < MIN_DBID_COUNT || dbId >= g_dbId || appId == nullptr || appIdLen < MIN_STRING_LEN ||
+            appIdLen > MAX_STRING_LEN || storeId == nullptr || storeIdLen < MIN_STRING_LEN ||
+            storeIdLen > MAX_STRING_LEN) {
+            LNN_LOGE(LNN_LEDGER, "invalid param");
+            return;
+        }
+        std::string appIdStr(appId, appIdLen);
+        std::string storeIdStr(storeId, storeIdLen);
+        auto kvAdapter = FindKvStorePtr(dbId);
+        if (kvAdapter == nullptr) {
+            LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
+            return;
+        }
+        status = kvAdapter->RegisterDataChangeListener(std::make_shared<KvDataChangeListener>(appIdStr, storeIdStr));
+    }
+    if (status != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "RegisterDataChangeListener failed");
+        return;
+    }
+    LNN_LOGI(LNN_LEDGER, "RegisterDataChangeListener success");
+}
+
+void LnnUnRegisterDataChangeListener(int32_t dbId)
+{
+    std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+    if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+        LNN_LOGI(LNN_LEDGER, "Invalid dbId ");
+        return;
+    }
+    auto kvAdapter = FindKvStorePtr(dbId);
+    if (kvAdapter == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
+        return;
+    }
+    kvAdapter->DeRegisterDataChangeListener();
 }
