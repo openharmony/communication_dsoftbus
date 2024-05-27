@@ -81,7 +81,18 @@ static void ProcessLwipEvent(struct HdfSBuf *data)
 
 static void ProcessWlanEvent(struct HdfSBuf *data)
 {
-    LnnNotifyWlanStateChangeEvent(SOFTBUS_WIFI_UNKNOWN);
+    SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
+    if (notifyState == NULL) {
+        LNN_LOGE(LNN_EVENT, "notifyState malloc err");
+        return;
+    }
+    *notifyState = SOFTBUS_WIFI_UNKNOWN;
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWlanStateChangeEvent,
+        (void *)notifyState);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "async notify wifi state err, ret=%{public}d", ret);
+        SoftBusFree(notifyState);
+    }
 }
 
 static int32_t OnReceiveDriverEvent(
