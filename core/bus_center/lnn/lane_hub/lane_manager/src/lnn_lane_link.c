@@ -405,7 +405,7 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
     Anonymize(peerUdid, &anonyPeerUdid);
     LNN_LOGE(LNN_LANE, "no find lane resource by linktype=%{public}d, peerUdid=%{public}s", type, anonyPeerUdid);
     AnonymizeFree(anonyPeerUdid);
-    return SOFTBUS_LANE_RESOURCE_NOT_FIND;
+    return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
 int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resource)
@@ -421,7 +421,7 @@ int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resou
     if (item == NULL) {
         LNN_LOGE(LNN_LANE, "no found lane resource by link info");
         LaneUnlock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
     }
     if (memcpy_s(resource, sizeof(LaneResource), item, sizeof(LaneResource)) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy lane resource fail");
@@ -456,7 +456,7 @@ int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource)
     }
     LaneUnlock();
     LNN_LOGE(LNN_LANE, "no found lane resource by laneId=%{public}" PRIu64 "", laneId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
 static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
@@ -806,7 +806,7 @@ static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     uint16_t port;
     if (!LaneGetP2PReuseMac(reqInfo->peerNetworkId, ipAddr, MAX_SOCKET_ADDR_LEN, &port)) {
         LNN_LOGE(LNN_LANE, "p2p resue get addr failed");
-        return SOFTBUS_LANE_NOT_FIND;
+        return SOFTBUS_LANE_NOT_FOUND;
     }
     linkInfo.linkInfo.wlan.connInfo.protocol = LNN_PROTOCOL_IP;
     linkInfo.linkInfo.wlan.connInfo.port = port;
@@ -823,7 +823,7 @@ static int32_t GetWlanLinkedAttribute(int32_t *channel, bool *is5GBand, bool *is
     int32_t ret = LnnGetWlanLinkedInfo(&info);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "LnnGetWlanLinkedInfo fail, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
     *isConnected = info.isConnected;
     *is5GBand = (info.band != 1);
@@ -862,13 +862,13 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
     int ret = LnnGetRemoteNodeInfoById(netWorkId, CATEGORY_NETWORK_ID, &remoteNodeInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "no such network id");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
 
     const NodeInfo *localNode = LnnGetLocalNodeInfo();
     if (localNode == NULL) {
         LNN_LOGE(LNN_LANE, "get local node info failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
 
     struct SelectProtocolReq req = {
@@ -900,7 +900,7 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
 
 static int32_t FillWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
 {
-    int32_t ret = SOFTBUS_LANE_DETECT_FAIL;
+    int32_t ret = SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     int32_t port = 0;
     if (reqInfo->transType == LANE_T_MSG) {
         ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
@@ -983,7 +983,7 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     ret = LaneDetectReliability(reqId, &linkInfo, callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane detect reliability fail, laneReqId=%{public}u", reqId);
-        return ret;
+        return ErrCodeFilter(ret, SOFTBUS_LANE_DETECT_FAIL);
     }
     return SOFTBUS_OK;
 }
@@ -1101,7 +1101,7 @@ int32_t InitLaneLink(void)
     LaneInitP2pAddrList();
     if (SoftBusMutexInit(&g_laneResource.lock, NULL) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "lane resource mutex init fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     ListInit(&g_laneResource.list);
     g_laneResource.cnt = 0;

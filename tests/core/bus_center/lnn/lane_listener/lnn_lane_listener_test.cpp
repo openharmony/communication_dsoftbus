@@ -385,7 +385,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_FIND_LANE_LISTENER_INFO_BY_LANE_TYPE_001,
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = FindLaneListenerInfoByLaneType(LANE_TYPE_HDLC, &laneListenerInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LANE_NOT_FOUND, ret);
 
     ret = FindLaneListenerInfoByLaneType(LANE_TYPE_TRANS, &laneListenerInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -422,7 +422,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_GET_STATE_NOTIFY_INFO_001, TestSize.Level
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(nodeInfo), Return(SOFTBUS_OK)));
     ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, &laneLinkInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LANE_GET_LEDGER_INFO_ERR, ret);
 
     ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -466,7 +466,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKUP_NOTIFY_001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = LaneLinkupNotify(PEER_UDID, &linkInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LANE_GET_LEDGER_INFO_ERR, ret);
 
     ret = LaneLinkupNotify(PEER_UDID, &linkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);

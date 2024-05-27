@@ -723,7 +723,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_011, TestSize.Level1)
 
     allocInfo.type = laneType;
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
 
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1129,16 +1129,16 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_004, TestSize.Level1)
     LaneConnInfo *connInfo = nullptr;
     LaneProfile *profile = nullptr;
     int32_t ret = LaneInfoProcess(nullptr, connInfo, profile);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = LaneInfoProcess(&info, nullptr, profile);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = LaneInfoProcess(&info, connInfo, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = LaneInfoProcess(&info, connInfo, profile);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1186,7 +1186,7 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_005, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_DATA_001, TestSize.Level1)
 {
     int32_t ret = LnnCreateData(nullptr, 32, nullptr, 0);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     LnnDeleteData(nullptr, 32);
 }
@@ -1201,7 +1201,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
 {
     uint64_t laneId = 0x1000000000000001;
     int32_t ret = BindLaneIdToProfile(laneId, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     LaneProfile profile;
     (void)memset_s(&profile, sizeof(LaneProfile), 0, sizeof(LaneProfile));
@@ -1225,7 +1225,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = GetLaneProfile(profileId, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     uint64_t *laneReqIdList = nullptr;
     uint32_t listSize = 0;
@@ -1676,7 +1676,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_006, TestSize.Level1)
 
     (void)strcpy_s(request->peerNetworkId, NETWORK_ID_BUF_LEN, networkIdNotFound);
     ret = BuildLink(request, reqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_LANE_NOT_FIND);
+    EXPECT_TRUE(ret == SOFTBUS_LANE_NOT_FOUND);
     SoftBusFree(request);
     LaneDeleteP2pAddress(networkId, true);
 }
@@ -2097,7 +2097,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_008, TestSize.Leve
         WillOnce(Return(false)).WillOnce(Return(false));
 
     int32_t ret = SelectExpectLaneByParameter(&linkList);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 }
 
 /*
@@ -2171,7 +2171,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = FindLaneResourceByLinkAddr(&linkInfo, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 
     uint64_t laneId = LANE_ID_BASE;
     uint32_t clientRef = 0;
@@ -2183,11 +2183,11 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Level
     ASSERT_EQ(memset_s(&linkInfoFind, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
     linkInfoFind.type = LANE_HML;
     ret = FindLaneResourceByLinkAddr(&linkInfoFind, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 
     ASSERT_EQ(strncpy_s(linkInfoFind.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
     ret = FindLaneResourceByLinkAddr(&linkInfoFind, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 
     ASSERT_EQ(strncpy_s(linkInfoFind.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
     ret = FindLaneResourceByLinkAddr(&linkInfoFind, &laneResourse);
@@ -2231,7 +2231,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = FindLaneResourceByLinkType(PEER_UDID, LANE_HML, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 
     uint64_t laneId = LANE_ID_BASE;
     uint32_t clientRef = 0;
@@ -2240,10 +2240,10 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Level
     clientRef++;
 
     ret = FindLaneResourceByLinkType(LOCAL_UDID, LANE_HML, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 
     ret = FindLaneResourceByLinkType(PEER_UDID, LANE_P2P, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 
     ret = FindLaneResourceByLinkType(PEER_UDID, LANE_HML, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -2281,7 +2281,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 
     laneId = LANE_ID_BASE;
     uint32_t clientRef = 0;
@@ -2290,7 +2290,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Level1)
     clientRef++;
 
     ret = FindLaneResourceByLaneId(INVALID_LANE_ID, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -2369,7 +2369,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = LaneDetectOnDataEvent(module, events, FD);
-    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
     EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -2433,7 +2433,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_003, TestSize.Level1)
     EXPECT_CALL(mock, AddTrigger).WillRepeatedly(Return(SOFTBUS_ERR));
 
     ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
-    EXPECT_EQ(ret, SOFTBUS_CONN_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
     linkInfo.linkInfo.wlan.connInfo.port = PORT_B;
 
     ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
@@ -2508,7 +2508,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_001, TestSize.Level1
     ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
 }
 
 /*
@@ -2669,6 +2669,6 @@ HWTEST_F(LNNLaneMockTest, LNN_AUTH_ALLOC_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, GetAuthLinkTypeList)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(mockList), Return(SOFTBUS_OK)));
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
 }
 } // namespace OHOS

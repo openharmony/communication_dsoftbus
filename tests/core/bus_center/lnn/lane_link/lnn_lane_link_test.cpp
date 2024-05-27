@@ -141,7 +141,7 @@ static struct WifiDirectManager g_manager = {
 HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_001, TestSize.Level1)
 {
     int32_t ret = GetWlanLinkedFrequency();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 }
 
 /*
@@ -273,7 +273,7 @@ HWTEST_F(LNNLaneLinkTest, LnnConnectP2p_004, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LANE_GUIDE_NO_AVAILABLE_LINK, ret);
     LnnDestroyP2p();
 }
 
