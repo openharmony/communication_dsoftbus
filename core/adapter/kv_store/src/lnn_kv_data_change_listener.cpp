@@ -17,6 +17,7 @@
 
 #include <cinttypes>
 #include <cstring>
+#include <thread>
 
 #include "anonymizer.h"
 #include "lnn_data_cloud_sync.h"
@@ -44,28 +45,31 @@ KvDataChangeListener::~KvDataChangeListener()
 
 void KvDataChangeListener::OnChange(const DistributedKv::DataOrigin &origin, Keys &&keys)
 {
-    LNN_LOGI(LNN_LEDGER, "Cloud data change.store=%{public}s", origin.store.c_str());
-    std::vector<DistributedKv::Entry> insertRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_INSERT]);
-    if (!insertRecords.empty() && insertRecords.size() <= MAX_DB_RECORD_SIZE) {
-        SelectChangeType(insertRecords);
-    }
-
-    std::vector<DistributedKv::Entry> updateRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_UPDATE]);
-    if (!updateRecords.empty() && updateRecords.size() <= MAX_DB_RECORD_SIZE) {
-        SelectChangeType(updateRecords);
-    }
-
-    std::vector<std::string> delKeys = keys[ChangeOp::OP_DELETE];
-    if (!delKeys.empty() && delKeys.size() <= MAX_DB_RECORD_SIZE) {
-        std::vector<DistributedKv::Entry> deleteRecords;
-        for (const auto &key : delKeys) {
-            DistributedKv::Entry entry;
-            DistributedKv::Key kvKey(key);
-            entry.key = kvKey;
-            deleteRecords.emplace_back(entry);
+    auto autoSyncTask = [this, origin, keys]() {
+        LNN_LOGI(LNN_LEDGER, "Cloud data change.store=%{public}s", origin.store.c_str());
+        std::vector<DistributedKv::Entry> insertRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_INSERT]);
+        if (!insertRecords.empty() && insertRecords.size() <= MAX_DB_RECORD_SIZE) {
+            SelectChangeType(insertRecords);
         }
-        HandleDeleteChange(deleteRecords);
-    }
+
+        std::vector<DistributedKv::Entry> updateRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_UPDATE]);
+        if (!updateRecords.empty() && updateRecords.size() <= MAX_DB_RECORD_SIZE) {
+            SelectChangeType(updateRecords);
+        }
+
+        std::vector<std::string> delKeys = keys[ChangeOp::OP_DELETE];
+        if (!delKeys.empty() && delKeys.size() <= MAX_DB_RECORD_SIZE) {
+            std::vector<DistributedKv::Entry> deleteRecords;
+            for (const auto &key : delKeys) {
+                DistributedKv::Entry entry;
+                DistributedKv::Key kvKey(key);
+                entry.key = kvKey;
+                deleteRecords.emplace_back(entry);
+            }
+            HandleDeleteChange(deleteRecords);
+        }
+    };
+    std::thread(autoSyncTask).detach();
 }
 
 std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataToEntries(
