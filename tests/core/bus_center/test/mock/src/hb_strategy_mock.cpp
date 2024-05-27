@@ -72,20 +72,9 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     return HeartBeatStrategyInterface()->LnnRequestLeaveSpecific(networkId, addrType);
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
-{
-    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, callback, module, isFastAuth);
-}
-
 AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
 {
     return HeartBeatStrategyInterface()->LnnGetReAuthVerifyCallback();
-}
-
-uint32_t AuthGenRequestId(void)
-{
-    return HeartBeatStrategyInterface()->AuthGenRequestId();
 }
 
 int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type)
@@ -147,6 +136,11 @@ int32_t LnnStartHeartbeat(uint64_t delayMillis)
 bool IsNeedAuthLimit(const char *udidHash)
 {
     return HeartBeatStrategyInterface()->IsNeedAuthLimit(udidHash);
+}
+
+int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
+{
+    return HeartBeatStrategyInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
 }
 }
 } // namespace OHOS

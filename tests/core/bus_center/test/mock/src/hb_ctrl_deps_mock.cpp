@@ -47,9 +47,14 @@ int32_t AuthFlushDevice(const char *uuid)
     return HeartBeatCtrlDepsInterface()->AuthFlushDevice(uuid);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return HeartBeatCtrlDepsInterface()->SoftBusGetBtState();
+}
+
+int32_t SoftBusGetBrState(void)
+{
+    return HeartBeatCtrlDepsInterface()->SoftBusGetBrState();
 }
 
 void RestartCoapDiscovery(void)
@@ -72,7 +77,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
     return HeartBeatCtrlDepsInterface()->LnnUpdateOhosAccount(isNeedUpdateHeartbeat);
 }
 
-int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
+int32_t LnnHbMediumMgrSetParam(void *param)
 {
     return HeartBeatCtrlDepsInterface()->LnnHbMediumMgrSetParam(param);
 }
