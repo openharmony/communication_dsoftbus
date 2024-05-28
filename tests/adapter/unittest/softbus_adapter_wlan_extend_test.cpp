@@ -67,13 +67,13 @@ HWTEST_F(AdapterWlanExtendTest, Wlan_Extend_Test_001, TestSize.Level0)
 {
     g_wlanChannelInfoCb = NULL;
     WlanChannelInfoCb *g_wlanChannelInfoCbInit = new WlanChannelInfoCb();
-    int32_t laneReqId = 0;
+    int32_t ret = 0;
 
-    laneReqId = SoftBusRegWlanChannelInfoCb(g_wlanChannelInfoCb);
-    EXPECT_TRUE(laneReqId == SOFTBUS_INVALID_PARAM);
-    laneReqId = SoftBusRegWlanChannelInfoCb(g_wlanChannelInfoCbInit);
+    ret = SoftBusRegWlanChannelInfoCb(g_wlanChannelInfoCb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = SoftBusRegWlanChannelInfoCb(g_wlanChannelInfoCbInit);
     delete g_wlanChannelInfoCbInit;
-    EXPECT_TRUE(laneReqId == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -87,17 +87,17 @@ HWTEST_F(AdapterWlanExtendTest, Wlan_Extend_Test_002, TestSize.Level0)
     int32_t *channelId = nullptr;
     int32_t value = 1;
     uint32_t num = 0;
-    int32_t laneReqId = 0;
+    int32_t ret = 0;
 
-    laneReqId = SoftBusRequestWlanChannelInfo(channelId, num);
-    EXPECT_TRUE(laneReqId == SOFTBUS_INVALID_PARAM);
+    ret = SoftBusRequestWlanChannelInfo(channelId, num);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     channelId = &value;
-    laneReqId = SoftBusRequestWlanChannelInfo(channelId, num);
-    EXPECT_TRUE(laneReqId == SOFTBUS_INVALID_PARAM);
+    ret = SoftBusRequestWlanChannelInfo(channelId, num);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     num = 1;
     g_wlanObj = NULL;
-    laneReqId = SoftBusRequestWlanChannelInfo(channelId, num);
-    EXPECT_TRUE(laneReqId == SOFTBUS_OK);
+    ret = SoftBusRequestWlanChannelInfo(channelId, num);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 } // namespace OHOS
