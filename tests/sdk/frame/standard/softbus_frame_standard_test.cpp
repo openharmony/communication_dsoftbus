@@ -304,14 +304,14 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest001, TestSize.Leve
     MessageParcel data;
     MessageParcel reply;
     MessageParcel tempData;
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteCString("OnChannelOpenedInnerTest");
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);
@@ -329,7 +329,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest001, TestSize.Leve
     data.WriteInt32(0);
     data.WriteBool(false);
     data.WriteBool(true);
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);
@@ -359,7 +359,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest002, TestSize.Leve
     data.WriteBool(true);
     data.WriteBool(false);
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);
@@ -369,7 +369,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest002, TestSize.Leve
     data.WriteBool(false);
     data.WriteInt32(0);
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);
@@ -380,7 +380,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest002, TestSize.Leve
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteCString("OnChannelOpenedInnerTest");
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 }
 
 /**

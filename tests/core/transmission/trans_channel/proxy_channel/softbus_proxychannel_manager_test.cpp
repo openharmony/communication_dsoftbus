@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1172,8 +1172,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest001, TestSi
 {
     int16_t myId = 1;
     const char *identity = "test";
-    int32_t ret = TransProxyGetAppInfoType(myId, identity);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    AppType appType;
+    int32_t ret = TransProxyGetAppInfoType(myId, identity, &appType);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
 
 /**

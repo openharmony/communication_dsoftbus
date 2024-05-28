@@ -92,24 +92,23 @@ static int32_t ResetChanIsEqual(int status, ProxyChannelInfo *a, ProxyChannelInf
     return SOFTBUS_ERR;
 }
 
-int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity)
+int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *appType)
 {
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "fail to lock mutex!");
         return SOFTBUS_LOCK_ERR;
     }
 
-    AppType appType;
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if ((item->myId == myId) && (strcmp(item->identity, identity) == 0)) {
-            appType = item->appInfo.appType;
+            *appType = item->appInfo.appType;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-            return appType;
+            return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
 }
 
 static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
@@ -1012,25 +1011,43 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void TransProxyReportAuditEvent(int32_t ret)
+{
+    TransAuditExtra extra = {
+        .hostPkg = NULL,
+        .localIp = NULL,
+        .localPort = NULL,
+        .localDevId = NULL,
+        .localSessName = NULL,
+        .peerIp = NULL,
+        .peerPort = NULL,
+        .peerDevId = NULL,
+        .peerSessName = NULL,
+        .result = TRANS_AUDIT_DISCONTINUE,
+        .errcode = ret,
+        .auditType = AUDIT_EVENT_PACKETS_ERROR,
+    };
+    TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, extra);
+}
+
+static void SelectRouteType(ConnectType type, ProxyChannelInfo *chan)
+{
+    if (type == CONNECT_TCP) {
+        chan->appInfo.routeType = WIFI_STA;
+    } else if (type == CONNECT_BR) {
+        chan->appInfo.routeType = BT_BR;
+    } else if (type == CONNECT_BLE) {
+        chan->appInfo.routeType = BT_BLE;
+    } else if (type == CONNECT_BLE_DIRECT) {
+        chan->appInfo.routeType = BT_BLE;
+    }
+}
+
 static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan)
 {
     int32_t ret = TransProxyUnpackHandshakeMsg(msg->data, chan, msg->dateLen);
     if (ret != SOFTBUS_OK) {
-        TransAuditExtra extra = {
-            .hostPkg = NULL,
-            .localIp = NULL,
-            .localPort = NULL,
-            .localDevId = NULL,
-            .localSessName = NULL,
-            .peerIp = NULL,
-            .peerPort = NULL,
-            .peerDevId = NULL,
-            .peerSessName = NULL,
-            .result = TRANS_AUDIT_DISCONTINUE,
-            .errcode = ret,
-            .auditType = AUDIT_EVENT_PACKETS_ERROR,
-        };
-        TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, extra);
+        TransProxyReportAuditEvent(ret);
         TRANS_LOGE(TRANS_CTRL, "UnpackHandshakeMsg fail.");
         return ret;
     }
@@ -1056,15 +1073,7 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     if (ConnGetTypeByConnectionId(msg->connId, &type) != SOFTBUS_OK) {
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
-    if (type == CONNECT_TCP) {
-        chan->appInfo.routeType = WIFI_STA;
-    } else if (type == CONNECT_BR) {
-        chan->appInfo.routeType = BT_BR;
-    } else if (type == CONNECT_BLE) {
-        chan->appInfo.routeType = BT_BLE;
-    } else if (type == CONNECT_BLE_DIRECT) {
-        chan->appInfo.routeType = BT_BLE;
-    }
+    SelectRouteType(type, chan);
 
     int16_t newChanId = (int16_t)(GenerateChannelId(false));
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
@@ -1282,6 +1291,35 @@ static int32_t TransProxyProcessReNegotiateMsg(const ProxyMessage *msg, const Pr
     return SOFTBUS_OK;
 }
 
+static void TransProxyProcessResetMsgHelper(const ProxyChannelInfo *info, const ProxyMessage *msg)
+{
+    if (info->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
+        int32_t errCode = ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) ?
+            SOFTBUS_TRANS_BAD_KEY : SOFTBUS_TRANS_HANDSHAKE_ERROR;
+        TransProxyUnPackRestErrMsg(msg->data, &errCode, msg->dateLen);
+        TRANS_LOGE(TRANS_CTRL, "TransProxyProcessResetMsg errCode=%{public}d", errCode);
+        TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
+    } else if (info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
+        TransEventExtra extra = {
+            .socketName = NULL,
+            .peerNetworkId = NULL,
+            .calleePkg = NULL,
+            .callerPkg = NULL,
+            .channelId = msg->msgHead.myId,
+            .peerChannelId = msg->msgHead.peerId,
+            .result = EVENT_STAGE_RESULT_OK
+        };
+        TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
+        OnProxyChannelClosed(info->channelId, &(info->appInfo));
+    }
+    (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0), info->isServer, info->deviceTypeIsWinpc);
+    if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
+        TRANS_LOGE(TRANS_CTRL, "clear bad key cipher=%{public}d, authId=%{public}" PRId64 ", keyIndex=%{public}d",
+            msg->msgHead.cipher, msg->authHandle.authId, msg->keyIndex);
+        RemoveAuthSessionKeyByIndex(msg->authHandle.authId, msg->keyIndex, (AuthLinkType)msg->authHandle.type);
+    }
+}
+
 void TransProxyProcessResetMsg(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -1332,31 +1370,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         SoftBusFree(info);
         return;
     }
-    if (info->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
-        int32_t errCode = ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) ?
-            SOFTBUS_TRANS_BAD_KEY : SOFTBUS_TRANS_HANDSHAKE_ERROR;
-        TransProxyUnPackRestErrMsg(msg->data, &errCode, msg->dateLen);
-        TRANS_LOGE(TRANS_CTRL, "TransProxyProcessResetMsg errCode=%{public}d", errCode);
-        TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
-    } else if (info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
-        TransEventExtra extra = {
-            .socketName = NULL,
-            .peerNetworkId = NULL,
-            .calleePkg = NULL,
-            .callerPkg = NULL,
-            .channelId = msg->msgHead.myId,
-            .peerChannelId = msg->msgHead.peerId,
-            .result = EVENT_STAGE_RESULT_OK
-        };
-        TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
-        OnProxyChannelClosed(info->channelId, &(info->appInfo));
-    }
-    (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0), info->isServer, info->deviceTypeIsWinpc);
-    if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
-        TRANS_LOGE(TRANS_CTRL, "clear bad key cipher=%{public}d, authId=%{public}" PRId64 ", keyIndex=%{public}d",
-            msg->msgHead.cipher, msg->authHandle.authId, msg->keyIndex);
-        RemoveAuthSessionKeyByIndex(msg->authHandle.authId, msg->keyIndex, (AuthLinkType)msg->authHandle.type);
-    }
+
+    TransProxyProcessResetMsgHelper(info, msg);
     SoftBusFree(info);
 }
 
