@@ -99,8 +99,8 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_HANDLE_LEAVE_LNN_TEST_001, TestSize.Level1)
 HWTEST_F(HeartBeatCtrlStaticTest, HB_HANDLE_LEAVE_LNN_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
