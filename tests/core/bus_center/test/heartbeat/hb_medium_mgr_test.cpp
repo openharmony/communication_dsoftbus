@@ -17,8 +17,8 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "ble_mock.h"
 #include "auth_manager.h"
+#include "ble_mock.h"
 #include "bus_center_adapter.h"
 #include "distribute_net_ledger_mock.h"
 #include "hb_strategy_mock.h"
