@@ -33,6 +33,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/interfaces/kits/common",
     "//base/startup/init/interfaces/innerkits/include/syspara",
     "//third_party/bounds_checking_function/include",
+    "//third_party/json/include",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -114,6 +115,7 @@ if (defined(ohos_lite)) {
       sources = [
         "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
         "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
+        "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
         "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
@@ -121,6 +123,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/perf/softbus_adapter_perf.c",
         "$softbus_adapter_common/range/softbus_adapter_range.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]

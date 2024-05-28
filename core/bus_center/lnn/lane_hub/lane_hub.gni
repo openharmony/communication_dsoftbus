@@ -88,8 +88,11 @@ if (dsoftbus_feature_lnn_net) {
       ]
     }
   } else {
-    bus_center_hub_src +=
-        [ "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_ctrl_virtual.c" ]
+    bus_center_hub_src += [
+      "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",
+      "$core_lane_hub_path/heartbeat/src/lnn_ble_lpdevice_virtual.c",
+      "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_utils_virtual.c",
+    ]
   }
   bus_center_hub_inc += [
     "$dsoftbus_core_path/connection/wifi_direct",
