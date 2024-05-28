@@ -246,6 +246,10 @@ ohos_unittest("LedgerLaneHubTest") {
   include_dirs = bus_center_unittest_dirs
   deps = bus_center_unittest_deps
 
+  include_dirs += [
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
@@ -298,6 +302,8 @@ ohos_unittest("LNNNetBuilderTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
   ]
 
   deps = [
@@ -382,6 +388,8 @@ ohos_unittest("LNNNetBuilderMockTest") {
     "$dsoftbus_root_path/core/connection/p2p/common/include",
     "$dsoftbus_root_path/core/connection/p2p/manager/include",
     "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
   ]
 
   deps = [
@@ -1065,6 +1073,8 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "lane/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
   ]
 
   deps = [
