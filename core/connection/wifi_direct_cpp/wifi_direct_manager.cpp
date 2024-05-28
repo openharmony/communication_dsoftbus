@@ -175,7 +175,8 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
 {
     bool found = false;
     OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
-        if (innerLink.GetRemoteDeviceId() == uuid)  {
+        if (innerLink.GetRemoteDeviceId() == uuid &&
+            innerLink.GetStatus() == OHOS::SoftBus::InnerLink::LinkState::CONNECTED) {
             found = true;
             if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv4().c_str()) != EOK) {
                 found = false;
