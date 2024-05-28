@@ -53,6 +53,7 @@ public:
         void *para, uint64_t delayMillis) = 0;
     virtual int32_t LnnStartHeartbeat(uint64_t delayMillis) = 0;
     virtual bool IsNeedAuthLimit(const char *udidHash) = 0;
+    virtual bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExtra) = 0;
     virtual int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
@@ -80,6 +81,7 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD1(LnnStartHeartbeat, int32_t(uint64_t));
     MOCK_METHOD1(IsNeedAuthLimit, bool(const char *));
+    MOCK_METHOD2(IsExistLnnDfxNodeByUdidHash, bool(const char *, LnnBleReportExtra *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *, NodeInfo *));
 };
 } // namespace OHOS
