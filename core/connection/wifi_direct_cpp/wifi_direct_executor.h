@@ -68,7 +68,6 @@ protected:
     std::thread thread_;
 
     bool active_;
-    std::shared_ptr<WifiDirectTrace> trace_;
 
     bool started_;
 };
