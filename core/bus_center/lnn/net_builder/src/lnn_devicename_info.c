@@ -240,7 +240,6 @@ static void HandlerGetDeviceName(const char *deviceName)
         LNN_LOGE(LNN_BUILDER, "set device name fail");
         return;
     }
-    LnnReleaseDatashareHelper();
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set device name fail");
     }
@@ -413,7 +412,6 @@ void UpdateDeviceName(void *p)
 {
     UpdateDeviceNameFromSetting();
     UpdataLocalFromSetting(p);
-    LnnReleaseDatashareHelper();
 }
 
 static void LnnAccountStateChangeHandler(const LnnEventBasicInfo *info)

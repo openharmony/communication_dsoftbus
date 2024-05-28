@@ -42,7 +42,6 @@ static constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.sett
 static constexpr const char *SETTINGS_DATA_FIELD_KEYWORD = "KEYWORD";
 static constexpr const char *SETTINGS_DATA_FIELD_VALUE = "VALUE";
 static constexpr const char *PREDICATES_STRING = "settings.general.device_name";
-std::shared_ptr<DataShare::DataShareHelper> g_dataShareHelper;
 static const uint32_t SOFTBUS_SA_ID = 4700;
 
 class LnnSettingDataEventMonitor : public AAFwk::DataAbilityObserverStub {
@@ -58,94 +57,86 @@ void LnnSettingDataEventMonitor::OnChange()
     }
 }
 
-static void CreateDataShareHelperInstance(void)
+std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelperInstance(void)
 {
-    if (g_dataShareHelper != nullptr) {
-        LNN_LOGE(LNN_STATE, "already inited");
-        return;
-    }
-
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         LNN_LOGE(LNN_STATE, "saManager NULL");
-        return;
+        return nullptr;
     }
 
     sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
     if (remoteObject == nullptr) {
         LNN_LOGE(LNN_STATE, "remoteObject NULL");
-        return;
+        return nullptr;
     }
-    g_dataShareHelper =  DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI,
-        SETTINGS_DATA_EXT_URI);
-    if (g_dataShareHelper == nullptr) {
-        LNN_LOGE(LNN_STATE, "create fail.");
-        return;
-    }
-    LNN_LOGI(LNN_STATE, "exit success.");
-}
-
-static void ReleaseDataShareHelperInstance(void)
-{
-    if (g_dataShareHelper != nullptr) {
-        g_dataShareHelper.reset();
-        LNN_LOGI(LNN_STATE, "release instance success.");
-    }
+    return DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI, SETTINGS_DATA_EXT_URI);
 }
 
 static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
 {
-    if (g_dataShareHelper == nullptr) {
-        LNN_LOGI(LNN_STATE, "retry to create datashare intance.");
-        OHOS::BusCenter::CreateDataShareHelperInstance();
-        if (g_dataShareHelper == nullptr) {
-            LNN_LOGE(LNN_STATE, "GetDeviceNameFromDataShareHelper NULL.");
-            return SOFTBUS_ERR;
-        }
+    auto dataShareHelper = OHOS::BusCenter::CreateDataShareHelperInstance();
+    if (dataShareHelper == nullptr) {
+        LNN_LOGE(LNN_STATE, "CreateDataShareHelperInstance fail.");
+        return SOFTBUS_ERR;
     }
 
     LNN_LOGI(LNN_STATE, "GetDeviceNameFromDataShareHelper enter.");
     int32_t numRows = 0;
     std::string val;
 
-    std::shared_ptr<Uri> uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI);
+    std::shared_ptr<Uri> uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI + "&key=" + PREDICATES_STRING);
     std::vector<std::string> columns;
     columns.emplace_back(SETTINGS_DATA_FIELD_VALUE);
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTINGS_DATA_FIELD_KEYWORD, PREDICATES_STRING);
 
-    auto resultSet = g_dataShareHelper->Query(*uri, predicates, columns);
+    auto resultSet = dataShareHelper->Query(*uri, predicates, columns);
     if (resultSet == nullptr) {
         LNN_LOGE(LNN_STATE, "GetDeviceNameFromDataShareHelper query fail.");
+        dataShareHelper->Release();
         return SOFTBUS_ERR;
     }
     resultSet->GetRowCount(numRows);
     if (numRows <= 0) {
         LNN_LOGE(LNN_STATE, "GetDeviceNameFromDataShareHelper row zero.");
+        resultSet->Close();
+        dataShareHelper->Release();
         return SOFTBUS_ERR;
     }
 
     int columnIndex;
     resultSet->GoToFirstRow();
     resultSet->GetColumnIndex(SETTINGS_DATA_FIELD_VALUE, columnIndex);
-    resultSet->GetString(columnIndex, val);
+    if (resultSet->GetString(columnIndex, val) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "GetString val fail");
+        resultSet->Close();
+        dataShareHelper->Release();
+        return SOFTBUS_ERR;
+    }
     if (strncpy_s(deviceName, len, val.c_str(), strlen(val.c_str())) != EOK) {
         LNN_LOGE(LNN_STATE, "strncpy_s fail.");
+        resultSet->Close();
+        dataShareHelper->Release();
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_STATE, "GetDeviceNameFromDataShareHelper, deviceName=%{public}s.", deviceName);
+    resultSet->Close();
+    dataShareHelper->Release();
     return SOFTBUS_OK;
 }
 
 static void RegisterNameMonitorHelper(void)
 {
-    if (g_dataShareHelper == nullptr) {
-        LNN_LOGE(LNN_STATE, "g_dataShareHelper == NULL");
+    auto dataShareHelper = OHOS::BusCenter::CreateDataShareHelperInstance();
+    if (dataShareHelper == nullptr) {
+        LNN_LOGE(LNN_STATE, "CreateDataShareHelperInstance fail.");
         return;
     }
     auto uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI + "&key=" + PREDICATES_STRING);
     sptr<LnnSettingDataEventMonitor> settingDataObserver = std::make_unique<LnnSettingDataEventMonitor>().release();
-    g_dataShareHelper->RegisterObserver(*uri, settingDataObserver);
+    dataShareHelper->RegisterObserver(*uri, settingDataObserver);
+    dataShareHelper->Release();
     LNN_LOGI(LNN_STATE, "success");
 }
 }
@@ -164,11 +155,6 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
     return SOFTBUS_OK;
 }
 
-void LnnReleaseDatashareHelper(void)
-{
-    OHOS::BusCenter::ReleaseDataShareHelperInstance();
-}
-
 int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
 {
     if (handler == NULL) {
@@ -176,7 +162,6 @@ int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
         return SOFTBUS_ERR;
     }
     g_eventHandler = handler;
-    OHOS::BusCenter::CreateDataShareHelperInstance();
     return SOFTBUS_OK;
 }
 
