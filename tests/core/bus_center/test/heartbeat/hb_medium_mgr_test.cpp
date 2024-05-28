@@ -27,6 +27,7 @@
 #include "lnn_heartbeat_ctrl_virtual.c"
 #include "lnn_heartbeat_medium_mgr.c"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_parameter_utils_virtual.c"
 #include "softbus_common.h"
@@ -308,6 +309,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     ON_CALL(hbStrateMock, LnnStopOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStrateMock, IsNeedAuthLimit).WillRepeatedly(Return(false));
+    EXPECT_CALL(hbStrateMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     int ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_CONNECTABLE);
     HbFirstSaveRecvTime(&storedInfo, &device,
@@ -824,6 +826,7 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
     EXPECT_CALL(heartBeatMock, LnnNotifyDiscoveryDevice)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(heartBeatMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     int32_t ret = SoftBusNetNodeResult(&device, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = SoftBusNetNodeResult(&device, false);

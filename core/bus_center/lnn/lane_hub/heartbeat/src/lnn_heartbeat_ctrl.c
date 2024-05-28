@@ -307,6 +307,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_ON, state=%{public}d", btState);
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_OPEN_INFO);
             ClearAuthLimitMap();
+            ClearLnnBleReportExtraMap();
             HbConditionChanged(false);
             if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) !=
                 SOFTBUS_OK) {
@@ -332,6 +333,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_CLOSE_INFO);
             HbConditionChanged(false);
             ClearAuthLimitMap();
+            ClearLnnBleReportExtraMap();
             break;
         default:
             return;

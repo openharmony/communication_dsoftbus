@@ -416,6 +416,7 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_sync_info_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
