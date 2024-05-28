@@ -224,7 +224,7 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t chann
         TRANS_LOGE(TRANS_MSG, "data or pkgname is null.");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_MSG, 
+    TRANS_LOGI(TRANS_MSG,
         "channelId=%{public}d recv normal msg input len=%{public}d, pid=%{public}d", channelId, len, pid);
     TransReceiveData receiveData;
     receiveData.data = (void*)data;
