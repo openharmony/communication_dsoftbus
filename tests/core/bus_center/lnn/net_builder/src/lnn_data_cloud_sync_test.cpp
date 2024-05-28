@@ -153,7 +153,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnGetAccountIdFromLocalCache_Test_005, TestSize.
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     int64_t buffer = 0;
     ret = LnnGetAccountIdFromLocalCache(&buffer);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     LnnDeInitCloudSyncModule();
 }
 } // namespace OHOS
