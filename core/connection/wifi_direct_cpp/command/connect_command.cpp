@@ -19,8 +19,8 @@
 #include "conn_log.h"
 
 #include "channel/auth_negotiate_channel.h"
+#include "channel/dummy_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
-#include "channel/null_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "processor_selector_factory.h"
 #include "utils/duration_statistic.h"
@@ -99,7 +99,7 @@ void ConnectCommand::PreferNegotiateChannel()
             info_.channel_ = std::make_shared<CoCProxyNegotiateChannel>(info_.info_.negoChannel.handle.channelId);
         } else {
             CONN_LOGI(CONN_WIFI_DIRECT, "prefer input null channel");
-            info_.channel_ = std::make_shared<NullNeotiateChannel>();
+            info_.channel_ = std::make_shared<DummyNegotiateChannel>();
         }
         return;
     }
