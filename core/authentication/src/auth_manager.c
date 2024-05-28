@@ -1794,6 +1794,9 @@ static void HandleConnectionData(
         PrintAuthConnInfo(connInfo);
         AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
         ReleaseAuthLock();
+        if (connInfo->type == AUTH_LINK_TYPE_P2P) {
+            return;
+        }
         (void)PostDecryptFailAuthData(connId, fromServer, head, data);
         return;
     }
