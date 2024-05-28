@@ -2189,7 +2189,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusInetAddrTest005, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusIfNameToIndexTest001, TestSize.Level0)
 {
-    const char *cp = "chba0";
+    const char *cp = "wlan0";
     int32_t ret = SoftBusIfNameToIndex(cp);
     EXPECT_TRUE(ret > 0);
 }
