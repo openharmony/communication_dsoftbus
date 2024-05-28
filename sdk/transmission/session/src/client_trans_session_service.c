@@ -244,16 +244,12 @@ static SessionAttribute *BuildParamSessionAttribute(const SessionAttribute *attr
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
-    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+    int32_t ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "invalid session name.");
+
     PrintSessionName(mySessionName, peerSessionName);
     SessionAttribute *tmpAttr = BuildParamSessionAttribute(attr);
-    if (tmpAttr == NULL) {
-        TRANS_LOGE(TRANS_SDK, "Build SessionAttribute failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(tmpAttr != NULL, SOFTBUS_MEM_ERR, TRANS_SDK, "Build SessionAttribute failed.");
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
@@ -280,8 +276,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     }
     param.isAsync = false;
     param.sessionId = sessionId;
-    TransInfo transInfo;
-    (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
+    TransInfo transInfo = { 0 };
     ret = ServerIpcOpenSession(&param, &transInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);

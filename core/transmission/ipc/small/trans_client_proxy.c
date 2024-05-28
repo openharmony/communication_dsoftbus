@@ -65,11 +65,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     (void)pid;
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
-    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, 1);
-    } else {
-        IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, 0);
-    }
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) ? 1 : 0);
     WriteString(&io, sessionName);
     WriteInt32(&io, channel->channelId);
     WriteInt32(&io, channel->channelType);
