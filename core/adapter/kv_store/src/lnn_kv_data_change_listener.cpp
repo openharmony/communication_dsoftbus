@@ -149,8 +149,7 @@ void KvDataChangeListener::HandleDeleteChange(const std::vector<DistributedKv::E
     }
 }
 
-void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Entry>& records,
-    const bool &isInsert = false)
+void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Entry>& records, const bool &isInsert)
 {
     LNN_LOGI(LNN_LEDGER, "call! recordsSize=%{public}zu", records.size());
     auto innerRecords(records);
