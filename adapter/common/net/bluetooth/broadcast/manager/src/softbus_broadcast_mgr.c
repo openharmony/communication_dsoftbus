@@ -1831,32 +1831,34 @@ static int32_t RegisterInfoDump(int fd)
 {
     SOFTBUS_DPRINTF(fd, "\n---------------------------Register Broadcaster Info-------------------------\n");
     SOFTBUS_DPRINTF(fd, "max broadcaster num                   : %d\n", BC_NUM_MAX);
+    SOFTBUS_DPRINTF(fd, "isAdvertising : 0 - false, 1 - true\n\n");
     int32_t managerId;
     for (managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         if (!g_bcManager[managerId].isUsed) {
             continue;
         }
         BroadcastManager *bcManager = &g_bcManager[managerId];
-        SOFTBUS_DPRINTF(fd, "managerId                             : %d\n", managerId);
-        SOFTBUS_DPRINTF(fd, "serviceType                           : %s\n", GetSrvType(bcManager->srvType));
-        SOFTBUS_DPRINTF(fd, "adapterBcId                           : %d\n", bcManager->adapterBcId);
-        SOFTBUS_DPRINTF(fd, "isAdvertising(0 - false, 1 - true)    : %d\n\n", bcManager->isAdvertising);
+        SOFTBUS_DPRINTF(fd, "managerId : %d, ", managerId);
+        SOFTBUS_DPRINTF(fd, "adapterBcId : %d, ", bcManager->adapterBcId);
+        SOFTBUS_DPRINTF(fd, "isAdvertising : %d, ", bcManager->isAdvertising);
+        SOFTBUS_DPRINTF(fd, "serviceType : %s\n", GetSrvType(bcManager->srvType));
     }
 
     SOFTBUS_DPRINTF(fd, "\n---------------------------Register Listener Info----------------------------\n");
     SOFTBUS_DPRINTF(fd, "max listener num                      : %d\n", SCAN_NUM_MAX);
+    SOFTBUS_DPRINTF(fd, "freq : 0 - low power, 1 - 60/3000, 2 - 30/1500, 3 - 30/300, 4 - 60/240, 5 - 1000/1000\n");
+    SOFTBUS_DPRINTF(fd, "isNeedReset/isScanning : 0 - false, 1 - true\n\n");
     for (managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         if (!g_scanManager[managerId].isUsed) {
             continue;
         }
         ScanManager *scanManager = &g_scanManager[managerId];
-        SOFTBUS_DPRINTF(fd, "managerId                             : %d\n", managerId);
-        SOFTBUS_DPRINTF(fd, "serviceType                           : %s\n", GetSrvType(scanManager->srvType));
-        SOFTBUS_DPRINTF(fd, "adapterScanId                         : %d\n", scanManager->adapterScanId);
-        SOFTBUS_DPRINTF(fd, "isNeedReset(0 - false, 1 - true)      : %d\n", scanManager->isNeedReset);
-        SOFTBUS_DPRINTF(fd, "isScanning(0 - false, 1 - true)       : %d\n", scanManager->isScanning);
-        SOFTBUS_DPRINTF(fd, "scan freq(0 - low power, 1 - 60/3000, 2 - 30/300, 3 - 60/240, 4 - 1000/1000,\n");
-        SOFTBUS_DPRINTF(fd, "                                      : %d\n\n", scanManager->freq);
+        SOFTBUS_DPRINTF(fd, "managerId : %d, ", managerId);
+        SOFTBUS_DPRINTF(fd, "adapterScanId : %d, ", scanManager->adapterScanId);
+        SOFTBUS_DPRINTF(fd, "isNeedReset : %d, ", scanManager->isNeedReset);
+        SOFTBUS_DPRINTF(fd, "isScanning : %d, ", scanManager->isScanning);
+        SOFTBUS_DPRINTF(fd, "scan freq: %d, ", scanManager->freq);
+        SOFTBUS_DPRINTF(fd, "serviceType : %s\n", GetSrvType(scanManager->srvType));
     }
     return SOFTBUS_OK;
 }
