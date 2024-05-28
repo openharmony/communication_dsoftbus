@@ -12,17 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NULL_NEGOTIATE_CHANNEL_H
-#define NULL_NEGOTIATE_CHANNEL_H
-
-#include "channel/negotiate_channel.h"
+#include "dummy_negotiate_channel.h"
+#include "conn_log.h"
+#include "softbus_errcode.h"
 
 namespace OHOS::SoftBus {
-class NullNeotiateChannel : public NegotiateChannel {
-public:
-    ~NullNeotiateChannel() override;
-    int SendMessage(const NegotiateMessage &msg) const override;
-    std::string GetRemoteDeviceId() const override;
-};
+DummyNegotiateChannel::~DummyNegotiateChannel() { }
+
+int DummyNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "Empty implementation");
+    return SOFTBUS_OK;
+}
+
+std::string DummyNegotiateChannel::GetRemoteDeviceId() const
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "Empty implementation");
+    return "";
+}
 } // namespace OHOS::SoftBus
-#endif
