@@ -41,7 +41,7 @@ static int32_t g_dbId = 1;
 static std::map<int32_t, std::shared_ptr<OHOS::KVAdapter>> g_dbID2KvAdapter;
 void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
 void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
-std::shared_ptr<OHOS::KVAdapter> FindKvStorePtr(int32_t &dbId);
+static std::shared_ptr<OHOS::KVAdapter> FindKvStorePtr(int32_t &dbId);
 
 int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen)
 {
@@ -97,7 +97,7 @@ int32_t LnnDestroyKvAdapter(int32_t dbId)
     return SOFTBUS_OK;
 }
 
-std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &dbId)
+static std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &dbId)
 {
     auto iter = g_dbID2KvAdapter.find(dbId);
     if (iter == g_dbID2KvAdapter.end()) {

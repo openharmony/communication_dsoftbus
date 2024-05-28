@@ -304,13 +304,13 @@ static int32_t DBNumInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const 
     } else if (strcmp(fieldName, DEVICE_INFO_ACCOUNT_ID) == 0) {
         cacheInfo->accountId = atoll(value);
     } else if (strcmp(fieldName, DEVICE_INFO_FEATURE) == 0) {
-        cacheInfo->feature = atoll(value);
+        cacheInfo->feature = (uint64_t)atoll(value);
         LNN_LOGI(LNN_BUILDER, "success. feature=%{public}" PRIu64 "", cacheInfo->feature);
     } else if (strcmp(fieldName, DEVICE_INFO_CONN_SUB_FEATURE) == 0) {
         cacheInfo->connSubFeature = atoll(value);
         LNN_LOGI(LNN_BUILDER, "success. connSubFeature=%{public}" PRIu64 "", cacheInfo->connSubFeature);
     } else if (strcmp(fieldName, DEVICE_INFO_AUTH_CAP) == 0) {
-        cacheInfo->authCapacity = atoi(value);
+        cacheInfo->authCapacity = (uint32_t)atoi(value);
         LNN_LOGI(LNN_BUILDER, "success. authCapacity=%{public}u", cacheInfo->authCapacity);
     }
     LNN_LOGD(LNN_BUILDER, "success.");
