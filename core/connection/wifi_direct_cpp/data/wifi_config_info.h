@@ -48,7 +48,7 @@ class WifiConfigInfo : public Serializable, public InfoContainer<WifiConfigInfoK
 public:
     WifiConfigInfo();
     explicit WifiConfigInfo(std::vector<uint8_t> &config);
-    ~WifiConfigInfo();
+    ~WifiConfigInfo() override;
     int Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_t> &output) const override;
     int Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint8_t> &input) override;
 

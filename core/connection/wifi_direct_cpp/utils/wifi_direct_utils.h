@@ -70,7 +70,7 @@ public:
 
     static bool SupportHml();
     static bool SupportHmlTwo();
-    static int32_t GetInterfaceIpString(const std::string &interface, std::string &ipString);
+    static int32_t GetInterfaceIpString(const std::string &interface, std::string &ip);
     static bool IsInChannelList(int32_t channel, const std::vector<int> &channelArray);
     static int32_t IpStringToIntArray(const char *addrString, uint32_t *addrArray, size_t addrArraySize);
 
