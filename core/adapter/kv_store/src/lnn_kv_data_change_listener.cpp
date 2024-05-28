@@ -49,7 +49,7 @@ void KvDataChangeListener::OnChange(const DistributedKv::DataOrigin &origin, Key
         LNN_LOGI(LNN_LEDGER, "Cloud data change.store=%{public}s", origin.store.c_str());
         std::vector<DistributedKv::Entry> insertRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_INSERT]);
         if (!insertRecords.empty() && insertRecords.size() <= MAX_DB_RECORD_SIZE) {
-            SelectChangeType(insertRecords);
+            SelectChangeType(insertRecords, true);
         }
 
         std::vector<DistributedKv::Entry> updateRecords = ConvertCloudChangeDataToEntries(keys[ChangeOp::OP_UPDATE]);
@@ -149,7 +149,8 @@ void KvDataChangeListener::HandleDeleteChange(const std::vector<DistributedKv::E
     }
 }
 
-void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Entry>& records)
+void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Entry>& records,
+    const bool &isInsert = false)
 {
     LNN_LOGI(LNN_LEDGER, "call! recordsSize=%{public}zu", records.size());
     auto innerRecords(records);
@@ -165,7 +166,7 @@ void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Ent
                 --iter;
             }
         }
-        if (entries.size() == CLOUD_SYNC_INFO_SIZE) {
+        if (entries.size() == CLOUD_SYNC_INFO_SIZE || isInsert) {
             LNN_LOGI(LNN_LEDGER, "add! entriesSize=%{public}zu", entries.size());
             HandleAddChange(entries);
         } else {
