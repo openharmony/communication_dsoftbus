@@ -321,7 +321,7 @@ static void NotifyDisconnectedForSink(
     }
 }
 
-bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
+static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, true, CONN_WIFI_DIRECT, "remote networkid is null");
     auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
