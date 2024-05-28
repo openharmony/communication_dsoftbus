@@ -131,7 +131,7 @@ static int32_t GetCtrlReqInfo(uint32_t laneHandle, CtrlReqInfo *reqInfo)
         }
     }
     Unlock();
-    return SOFTBUS_ERR;
+    return SOFTBUS_LANE_NOT_FOUND;
 }
 
 static void DeleteCtrlRequestNode(uint32_t laneHandle)
@@ -220,13 +220,13 @@ static void CtrlLinkSuccess(uint32_t laneHandle, LaneLinkType linkType, const La
     char localUdid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get udid fail, laneHandle=%{public}u", laneHandle);
-        CtrlLinkFail(laneHandle, SOFTBUS_ERR, linkType);
+        CtrlLinkFail(laneHandle, SOFTBUS_LANE_GET_LEDGER_INFO_ERR, linkType);
         return;
     }
     uint64_t laneId = GenerateLaneId(localUdid, linkInfo->peerUdid, linkInfo->type);
     if (laneId == INVALID_LANE_ID) {
         LNN_LOGE(LNN_LANE, "generate laneId fail, laneHandle=%{public}u", laneHandle);
-        CtrlLinkFail(laneHandle, SOFTBUS_ERR, linkType);
+        CtrlLinkFail(laneHandle, SOFTBUS_LANE_ID_GENERATE_FAIL, linkType);
         return;
     }
     int32_t ret = AddLaneResourceToPool(linkInfo, laneId, false);
@@ -307,27 +307,30 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
     if (reqInfo == NULL) {
         LNN_LOGE(LNN_LANE, "get lane reqInfo fail");
         Unlock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_NOT_FOUND;
     }
     LaneLinkCb linkCb = {
         .OnLaneLinkSuccess = CtrlLinkSuccess,
         .OnLaneLinkFail = CtrlLinkFail,
     };
     LinkRequest requestInfo = {0};
+    int32_t ret = SOFTBUS_LANE_TRIGGER_LINK_FAIL;
     do {
-        if (CreateLinkRequestNode(&reqInfo->allocInfo, &requestInfo) != SOFTBUS_OK) {
+        ret = CreateLinkRequestNode(&reqInfo->allocInfo, &requestInfo);
+        if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "Create LinkRequestNode fail.");
             break;
         }
         requestInfo.linkType = reqInfo->linkList.linkType[reqInfo->linkListIdx];
         reqInfo->linkListIdx++;
         Unlock();
-        if (BuildLink(&requestInfo, laneHandle, &linkCb) == SOFTBUS_OK) {
+        ret = BuildLink(&requestInfo, laneHandle, &linkCb);
+        if (ret == SOFTBUS_OK) {
             return SOFTBUS_OK;
         }
     } while (false);
-    linkCb.OnLaneLinkFail(laneHandle, SOFTBUS_ERR, requestInfo.linkType);
-    return SOFTBUS_ERR;
+    linkCb.OnLaneLinkFail(laneHandle, ret, requestInfo.linkType);
+    return ret;
 }
 
 static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)
@@ -335,21 +338,23 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
     AuthLinkTypeList authList;
     if (memset_s(&authList, sizeof(AuthLinkTypeList), 0, sizeof(AuthLinkTypeList)) != EOK) {
         LNN_LOGE(LNN_LANE, "memset_s authList fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
-    if (GetAuthLinkTypeList(allocInfo->networkId, &authList) != SOFTBUS_OK) {
+    int32_t ret = GetAuthLinkTypeList(allocInfo->networkId, &authList);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get authList fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     LanePreferredLinkList request;
     if (memset_s(&request, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList)) != EOK) {
         LNN_LOGE(LNN_LANE, "memset_s request fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
-    if (ConvertAuthLinkToLaneLink(&authList, &request) != SOFTBUS_OK) {
+    ret = ConvertAuthLinkToLaneLink(&authList, &request);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "convert authLink to laneLink fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     if (recommendLinkList == NULL) {
@@ -357,11 +362,11 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
         return SOFTBUS_MALLOC_ERR;
     }
     recommendLinkList->linkTypeNum = 0;
-    if (SelectAuthLane(allocInfo->networkId, &request, recommendLinkList) != SOFTBUS_OK ||
-        recommendLinkList->linkTypeNum == 0) {
+    ret = SelectAuthLane(allocInfo->networkId, &request, recommendLinkList);
+    if (ret != SOFTBUS_OK || recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "no abailable link resources, laneHandle=%{public}u", laneHandle);
-        return SOFTBUS_ERR;
+        return ret;
     }
     for (uint32_t i = 0; i < recommendLinkList->linkTypeNum; ++i) {
         LNN_LOGI(LNN_LANE, "auth expect recommendLinkList nums=%{public}u, priority=%{public}u, link=%{public}u",
@@ -370,12 +375,13 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
     if (CreateCtrlReqNode(laneHandle, allocInfo, listener, recommendLinkList) != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "create ctrlReqInfo node fail.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_LIST_ERR;
     }
-    if (CtrlTriggerLink(laneHandle) != SOFTBUS_OK) {
+    ret = CtrlTriggerLink(laneHandle);
+    if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "trigger link fail, laneHandle=%{public}u", laneHandle);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -386,10 +392,11 @@ static int32_t CtrlAlloc(uint32_t laneHandle, const LaneAllocInfo *allocInfo, co
         LNN_LOGE(LNN_LANE, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (AllocCtrlLane(laneHandle, allocInfo, listener) != SOFTBUS_OK) {
+    int32_t ret = AllocCtrlLane(laneHandle, allocInfo, listener);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc valid lane fail, laneHandle=%{public}u", laneHandle);
         FreeLaneReqId(laneHandle);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -440,11 +447,11 @@ static int32_t FreeLaneLink(uint32_t laneHandle, uint64_t laneId)
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (FindLaneResourceByLaneId(laneId, &resourceItem) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
     }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(resourceItem.link.peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     DestroyLink(networkId, laneHandle, resourceItem.link.type);
     DelLaneResourceByLaneId(laneId, false);

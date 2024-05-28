@@ -544,17 +544,17 @@ HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     (void)InitLane();
     ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, &connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     (void)LnnFreeLane(laneHandle);
     DeinitLane();

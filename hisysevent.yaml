@@ -136,6 +136,7 @@ BUSCENTER_BEHAVIOR:
   LNN_TYPE: { type: INT32, desc: lnn type }
   ONLINE_NUM: { type: INT32, desc: current online device num }
   PEER_DEV_ABILITY: { type: INT32, desc: peer device ability }
+  ONLINE_TYPE: { type: INT32, desc: online type }
   PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }

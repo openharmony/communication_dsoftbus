@@ -75,9 +75,9 @@ bool LnnNotifyLnnRelationChangedFuzzTest(const uint8_t* data, size_t size)
     int32_t weight = GetData<int32_t>();
     bool isJoin = GetData<bool>();
     bool isMaster = GetData<bool>();
-    char *udid = NULL;
-    udid = (char *)SoftBusCalloc(size);
+    char *udid = reinterpret_cast<char *>(SoftBusCalloc(size));
     if (udid == nullptr) {
+        COMM_LOGE(COMM_TEST, "udid is nullptr");
         return false;
     }
     if (memcpy_s(udid, size, outData, size) != EOK) {

@@ -52,7 +52,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
         .linkType = node->appInfo.connectType,
         .costTime = (int32_t)timeDiff,
         .errcode = errCode,
-        .osType = node->appInfo.osType,
+        .osType = (node->appInfo.osType < 0) ? UNKNOW_OS_TYPE : node->appInfo.osType,
         .peerUdid = node->appInfo.peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
@@ -236,6 +236,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
             TRANS_LOGI(TRANS_CTRL, "delete pkgName = %{public}s, pid = %{public}d", pkgName, pid);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
+            ConnShutdownSocket(item->appInfo.fd);
             SoftBusFree(item);
             continue;
         }

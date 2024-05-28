@@ -62,27 +62,17 @@ typedef struct {
 
 static LocalNetLedger g_localNetLedger;
 
-static void UpdateStateVersionAndStore(void)
+static void UpdateStateVersionAndStore(InfoKey key)
 {
     int32_t ret;
     g_localNetLedger.localInfo.stateVersion++;
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
         g_localNetLedger.localInfo.stateVersion = 1;
     }
-    LNN_LOGI(LNN_LEDGER, "local stateVersion=%{public}d",
+    LNN_LOGI(LNN_LEDGER, "key=%{public}d changed, update local stateVersion=%{public}d", key,
         g_localNetLedger.localInfo.stateVersion);
     if ((ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update local store fail");
-    }
-
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
-        return;
-    }
-    char value[STATE_VERSION_VALUE_LENGTH] = {0};
-    (void)sprintf_s(value, STATE_VERSION_VALUE_LENGTH, "%d", g_localNetLedger.localInfo.stateVersion);
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_STATE_VERSION, value, strlen(value)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "ledger state version change sync to cloud failed");
     }
 }
 
@@ -327,31 +317,33 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
 
     int64_t accountId = 0;
     if (LnnGetAccountIdFromLocalCache(&accountId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get accountid info from cache fail");
+        LNN_LOGE(LNN_LEDGER, "get accountId info from cache fail");
     }
     if (accountId == *((int64_t *)buf) && *((int64_t *)buf) != 0) {
-        LNN_LOGI(LNN_LEDGER, "no new accountid login");
+        LNN_LOGI(LNN_LEDGER, "no new accountId login");
         info->accountId = *((int64_t *)buf);
         return SOFTBUS_OK;
     }
     if (info->accountId == 0) {
         if (*((int64_t *)buf) == 0) {
-            LNN_LOGI(LNN_LEDGER, "no accountid login, default is 0");
+            LNN_LOGI(LNN_LEDGER, "no accountId login, default is 0");
             return SOFTBUS_OK;
         }
-        LNN_LOGI(LNN_LEDGER, "accountid login");
+        LNN_LOGI(LNN_LEDGER, "accountId login");
         info->accountId = *((int64_t *)buf);
-        info->stateVersion++;
+        UpdateStateVersionAndStore(NUM_KEY_ACCOUNT_LONG);
         return SOFTBUS_OK;
     }
     if (*((int64_t *)buf) == 0) {
-        LNN_LOGI(LNN_LEDGER, "accountid logout");
+        LNN_LOGI(LNN_LEDGER, "accountId logout");
         info->accountId = *((int64_t *)buf);
         LnnSaveLocalDeviceInfo(info);
         return SOFTBUS_OK;
     }
+    LNN_LOGI(LNN_LEDGER, "accountId changed, accountId=%{public}" PRId64 "->%{public}" PRId64, info->accountId,
+        *((int64_t *)buf));
     info->accountId = *((int64_t *)buf);
-    UpdateStateVersionAndStore();
+    UpdateStateVersionAndStore(NUM_KEY_ACCOUNT_LONG);
     return SOFTBUS_OK;
 }
 
@@ -1041,7 +1033,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
             LNN_LOGE(LNN_LEDGER, "set device name fail");
             return SOFTBUS_ERR;
         }
-        UpdateStateVersionAndStore();
+        UpdateStateVersionAndStore(STRING_KEY_DEV_NAME);
         if (g_localNetLedger.localInfo.accountId == 0) {
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
@@ -1065,7 +1057,7 @@ static int32_t UpdateUnifiedName(const void *name)
             DEVICE_NAME_BUF_LEN, (char *)name) != EOK) {
             return SOFTBUS_ERR;
         }
-        UpdateStateVersionAndStore();
+        UpdateStateVersionAndStore(STRING_KEY_DEV_UNIFIED_NAME);
         if (g_localNetLedger.localInfo.accountId == 0) {
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
@@ -1089,7 +1081,7 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
             DEVICE_NAME_BUF_LEN, (char *)name) != EOK) {
             return SOFTBUS_ERR;
         }
-        UpdateStateVersionAndStore();
+        UpdateStateVersionAndStore(STRING_KEY_DEV_UNIFIED_DEFAULT_NAME);
         if (g_localNetLedger.localInfo.accountId == 0) {
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
@@ -1113,7 +1105,7 @@ static int32_t UpdateNickName(const void *name)
             DEVICE_NAME_BUF_LEN, (char *)name) != EOK) {
             return SOFTBUS_ERR;
         }
-        UpdateStateVersionAndStore();
+        UpdateStateVersionAndStore(STRING_KEY_DEV_NICK_NAME);
         if (g_localNetLedger.localInfo.accountId == 0) {
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
@@ -1133,7 +1125,7 @@ int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
         return SOFTBUS_LOCK_ERR;
     }
     g_localNetLedger.localInfo.networkIdTimestamp = time;
-    LNN_LOGE(LNN_LEDGER, "update local networkId timeStamp=%{public}" PRId64, time);
+    LNN_LOGI(LNN_LEDGER, "update local networkId timeStamp=%{public}" PRId64, time);
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -1148,7 +1140,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
     g_localNetLedger.localInfo.networkIdTimestamp = SoftBusGetSysTimeMs();
     LNN_LOGI(LNN_LEDGER, "networkId change, reset networkId=%{public}s, networkIdTimestamp=%{public}" PRId64,
         anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
-    UpdateStateVersionAndStore();
+    UpdateStateVersionAndStore(STRING_KEY_NETWORKID);
     AnonymizeFree(anonyNetworkId);
     if (g_localNetLedger.localInfo.accountId == 0) {
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
@@ -1405,15 +1397,30 @@ int32_t LlUpdateNodeAddr(const void *addr)
 
 int32_t LnnUpdateLocalNetworkId(const void *id)
 {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     if (ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id) != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
         return SOFTBUS_ERR;
     }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
     return SOFTBUS_OK;
 }
 
-void LnnUpdateStateVersion()
+void LnnUpdateStateVersion(void)
 {
-    return UpdateStateVersionAndStore();
+    UpdateStateVersionAndStore(INFO_KEY_MAX);
+    if (g_localNetLedger.localInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        return;
+    }
+    char value[STATE_VERSION_VALUE_LENGTH] = { 0 };
+    (void)sprintf_s(value, STATE_VERSION_VALUE_LENGTH, "%d", g_localNetLedger.localInfo.stateVersion);
+    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_STATE_VERSION, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger state version change sync to cloud failed");
+    }
 }
 
 static int32_t LlGetStaticCapLen(void *buf, uint32_t len)
@@ -1457,7 +1464,7 @@ static int32_t LlUpdateDeviceSecurityLevel(const void *buf)
     return SOFTBUS_OK;
 }
 
-int32_t LlUpdateStaticCapability(const void *staticCap)
+static int32_t LlUpdateStaticCapability(const void *staticCap)
 {
     if (staticCap == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -1467,7 +1474,7 @@ int32_t LlUpdateStaticCapability(const void *staticCap)
     return LnnSetStaticCapability(info, (uint8_t *)staticCap, info->staticCapLen);
 }
 
-int32_t LlGetStaticCapability(void *buf, uint32_t len)
+static int32_t LlGetStaticCapability(void *buf, uint32_t len)
 {
     if (buf == NULL || len > STATIC_CAP_LEN) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -1481,7 +1488,7 @@ int32_t LlGetStaticCapability(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t LlGetUdidHash(void *buf, uint32_t len)
+static int32_t LlGetUdidHash(void *buf, uint32_t len)
 {
     if (buf == NULL || len < UDID_HASH_LEN) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -1595,18 +1602,6 @@ static int32_t UpdateLocalCipherInfoKey(const void *id)
         LNN_LOGE(LNN_LEDGER, "memcpy cipherInfo.key fail");
         return SOFTBUS_MEM_ERR;
     }
-    UpdateStateVersionAndStore();
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
-        return SOFTBUS_OK;
-    }
-    char value[SESSION_KEY_LENGTH + 1] = {0};
-    for (int32_t i = 0; i < SESSION_KEY_LENGTH; i++) {
-        value[i] = (char)(g_localNetLedger.localInfo.cipherInfo.key[i]);
-    }
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_KEY, value, strlen(value)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "ledger cipher key change sync to cloud failed");
-    }
     return SOFTBUS_OK;
 }
 
@@ -1619,18 +1614,6 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     if (memcpy_s((char *)g_localNetLedger.localInfo.cipherInfo.iv, BROADCAST_IV_LEN, id, BROADCAST_IV_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy cipherInfo.iv fail");
         return SOFTBUS_MEM_ERR;
-    }
-    UpdateStateVersionAndStore();
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
-        return SOFTBUS_OK;
-    }
-    char value[BROADCAST_IV_LEN + 1] = {0};
-    for (int32_t i = 0; i < BROADCAST_IV_LEN; i++) {
-        value[i] = (char)(g_localNetLedger.localInfo.cipherInfo.iv[i]);
-    }
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BROADCAST_CIPHER_IV, value, strlen(value)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "ledger cipher iv change sync to cloud failed");
     }
     return SOFTBUS_OK;
 }

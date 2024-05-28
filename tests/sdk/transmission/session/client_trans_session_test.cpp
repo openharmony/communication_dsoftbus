@@ -569,13 +569,13 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
     SessionInfo *session = TestGenerateSession(sessionParam);
     ASSERT_TRUE(session != NULL);
     session->enableStatus = ENABLE_STATUS_SUCCESS;
-    ret = CheckSessionIsOpened(TRANS_TEST_CHANNEL_ID);
+    ret = CheckSessionIsOpened(TRANS_TEST_CHANNEL_ID, false);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = CheckSessionIsOpened(sessionId);
+    ret = CheckSessionIsOpened(sessionId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSession(sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
