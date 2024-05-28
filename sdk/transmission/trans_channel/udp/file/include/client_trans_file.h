@@ -30,6 +30,7 @@ typedef struct {
     const char name[SCHEMA_MAX_LENGTH];
     int (*OpenFd)(const char *filename, int32_t flag, int32_t mode);
     int (*CloseFd)(int32_t fd);
+    int (*RemoveFd)(const char *pathName);
 } FileSchema;
 
 typedef struct {

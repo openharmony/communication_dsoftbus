@@ -106,6 +106,11 @@ typedef struct {
     void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
 } LaneLinkCb;
 
+inline int32_t ErrCodeFilter(const int32_t errCode, const int32_t exceptErrCode)
+{
+    return ((errCode > SOFTBUS_PUBLIC_ERR_BASE) && (errCode < SOFTBUS_TRANS_ERR_BASE)) ? exceptErrCode : errCode;
+}
+
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);

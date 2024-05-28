@@ -271,4 +271,82 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetCurrentGroupTest001, TestSize.Level1
     int32_t ret = SoftBusGetCurrentGroup(&groupInfo);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: SoftBusIsWifiActive
+ * @tc.desc: softbus wifi test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusIsWifiActiveTest001, TestSize.Level1)
+{
+    NiceMock<WifiInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, IsWifiActive)
+        .WillOnce(Return(WIFI_STA_ACTIVE))
+        .WillRepeatedly(Return(WIFI_STA_NOT_ACTIVE));
+    bool ret = SoftBusIsWifiActive();
+    EXPECT_TRUE(ret == true);
+    ret = SoftBusIsWifiActive();
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: SoftBusGetWifiState
+ * @tc.desc: softbus wifi test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiStateTest001, TestSize.Level1)
+{
+    WifiDetailState wifiState = STATE_INACTIVE;
+    NiceMock<WifiInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, GetWifiDetailState)
+        .WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(ERROR_WIFI_INVALID_ARGS)));
+    SoftBusWifiDetailState ret = SoftBusGetWifiState();
+    EXPECT_TRUE(ret == SOFTBUS_WIFI_STATE_UNKNOWN);
+
+    EXPECT_CALL(wifiMock, GetWifiDetailState)
+        .WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
+    ret = SoftBusGetWifiState();
+    EXPECT_TRUE(ret == SOFTBUS_WIFI_STATE_INACTIVE);
+
+    wifiState = STATE_ACTIVATED;
+    EXPECT_CALL(wifiMock, GetWifiDetailState)
+        .WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
+    ret = SoftBusGetWifiState();
+    EXPECT_TRUE(ret == SOFTBUS_WIFI_STATE_ACTIVED);
+
+    wifiState = STATE_SEMI_ACTIVE;
+    EXPECT_CALL(wifiMock, GetWifiDetailState)
+        .WillOnce(DoAll(SetArgPointee<0>(wifiState), Return(WIFI_SUCCESS)));
+    ret = SoftBusGetWifiState();
+    EXPECT_TRUE(ret == SOFTBUS_WIFI_STATE_SEMIACTIVE);
+}
+
+/*
+ * @tc.name: SoftBusIsWifiP2pEnabled
+ * @tc.desc: softbus wifi test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusIsWifiP2pEnabledTest001, TestSize.Level1)
+{
+    P2pState stateEnable = P2P_STATE_STARTED;
+    P2pState stateDisable = P2P_STATE_CLOSING;
+    NiceMock<WifiInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, GetP2pEnableStatus)
+        .WillRepeatedly(DoAll(SetArgPointee<0>(stateEnable), Return(ERROR_WIFI_INVALID_ARGS)));
+    bool ret = SoftBusIsWifiP2pEnabled();
+    EXPECT_TRUE(ret == false);
+
+    EXPECT_CALL(wifiMock, GetP2pEnableStatus)
+        .WillRepeatedly(DoAll(SetArgPointee<0>(stateDisable), Return(WIFI_SUCCESS)));
+    ret = SoftBusIsWifiP2pEnabled();
+    EXPECT_TRUE(ret == false);
+
+    EXPECT_CALL(wifiMock, GetP2pEnableStatus)
+        .WillRepeatedly(DoAll(SetArgPointee<0>(stateEnable), Return(WIFI_SUCCESS)));
+    ret = SoftBusIsWifiP2pEnabled();
+    EXPECT_TRUE(ret == true);
+}
 } // namespace OHOS

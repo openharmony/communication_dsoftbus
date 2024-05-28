@@ -25,6 +25,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_ble_lpdevice.h"
 #include "lnn_cipherkey_manager.h"
@@ -42,6 +43,7 @@
 #include "lnn_parameter_utils.h"
 
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -49,6 +51,7 @@
 
 #define HB_RECV_INFO_SAVE_LEN (60 * 60 * HB_TIME_FACTOR)
 #define HB_REAUTH_TIME        (10 * HB_TIME_FACTOR)
+#define HB_DFX_DELAY_TIME     (7 * HB_TIME_FACTOR)
 typedef struct {
     ListNode node;
     DeviceInfo *device;
@@ -154,12 +157,22 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
     uint32_t oldNetCapa = nodeInfo.netCapacity;
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
+    } else {
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_5G);
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_24G);
     }
     if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
         (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI_P2P);
+    } else {
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_P2P);
+    }
+    if ((hbResp->capabiltiy & DISABLE_BR_CAP) != 0) {
+        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_BR);
+    } else {
+        (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BR);
     }
     (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BLE);
-    (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BR);
     if (oldNetCapa == nodeInfo.netCapacity) {
         LNN_LOGD(LNN_HEART_BEAT, "capa not change, don't update devInfo");
         return;
@@ -168,6 +181,11 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         LNN_LOGE(LNN_HEART_BEAT, "update net capability fail");
         return;
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_HEART_BEAT, "networkId=%{public}s capability change:%{public}u->%{public}u", anonyNetworkId,
+        oldNetCapa, nodeInfo.netCapacity);
+    AnonymizeFree(anonyNetworkId);
 }
 
 static int32_t HbGetOnlineNodeByRecvInfo(
@@ -344,15 +362,38 @@ static bool IsLocalSupportBleDirectOnline()
     return true;
 }
 
+static bool IsLocalSupportThreeState()
+{
+    uint64_t localFeatureCap = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeatureCap) != SOFTBUS_OK) {
+        LNN_LOGW(LNN_HEART_BEAT, "build ble broadcast, get local feature cap failed");
+        return false;
+    }
+    if ((localFeatureCap & (1 << BIT_SUPPORT_THREE_STATE)) == 0) {
+        return false;
+    }
+    return true;
+}
+
 static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *hbResp)
 {
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI);
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_5G);
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_24G);
+    }
+    if ((hbResp->capabiltiy & DISABLE_BR_CAP) != 0) {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_BR);
+    } else {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BR);
     }
     if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC)) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
     }
-    (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BR);
     (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
 }
 
@@ -420,11 +461,119 @@ static bool HbIsRepeatedReAuthRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_t
     return false;
 }
 
+static bool HbIsValidJoinLnnRequest(DeviceInfo *device, HbRespData *hbResp)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (!IsLocalSupportThreeState()) {
+        LNN_LOGI(LNN_HEART_BEAT, "local don't support three state");
+        return true;
+    }
+    if (LnnRetrieveDeviceInfo(device->devId, &nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_HEART_BEAT, "retrieve device info failed");
+        return true;
+    }
+    if ((nodeInfo.feature & (1 << BIT_SUPPORT_THREE_STATE)) == 0 && SoftBusGetBrState() == BR_DISABLE) {
+        char *anonyUdid = NULL;
+        Anonymize(device->devId, &anonyUdid);
+        LNN_LOGI(LNN_HEART_BEAT, "peer udidHash=%{public}s don't support three state and local br off", anonyUdid);
+        AnonymizeFree(anonyUdid);
+        return false;
+    }
+    return true;
+}
+
 static uint64_t GetNowTime()
 {
     SoftBusSysTime times = { 0 };
     SoftBusGetTime(&times);
     return (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
+}
+
+static void CopyBleReportExtra(const LnnBleReportExtra *bleExtra, LnnEventExtra *extra)
+{
+    if (bleExtra == NULL || extra == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return;
+    }
+
+    extra->onlineNum = bleExtra->extra.onlineNum;
+    extra->errcode = bleExtra->extra.errcode;
+    extra->lnnType = bleExtra->extra.lnnType;
+    extra->result = bleExtra->extra.result;
+    extra->localUdidHash = bleExtra->extra.localUdidHash;
+    extra->peerUdidHash = bleExtra->extra.peerUdidHash;
+    if (bleExtra->extra.peerNetworkId[0] != '\0') {
+        extra->peerNetworkId = bleExtra->extra.peerNetworkId;
+        extra->peerUdid = bleExtra->extra.peerUdid;
+        extra->peerBleMac = bleExtra->extra.peerBleMac;
+        extra->peerDeviceType = bleExtra->extra.peerDeviceType;
+    }
+}
+
+static void HbProcessDfxMessage(void *para)
+{
+    if (para == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid para");
+        return;
+    }
+    LnnBleReportExtra bleExtra;
+    (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
+    if (GetNodeFromLnnBleReportExtraMap((char *)para, &bleExtra) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get ble report node from lnnBleReportExtraMap fail");
+        SoftBusFree(para);
+        return;
+    }
+    if (bleExtra.status == BLE_REPORT_EVENT_SUCCESS || bleExtra.status == BLE_REPORT_EVENT_INIT) {
+        DeleteNodeFromLnnBleReportExtraMap((char *)para);
+        SoftBusFree(para);
+        return;
+    }
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    CopyBleReportExtra(&bleExtra, &extra);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+    LNN_LOGI(LNN_HEART_BEAT, "the device online failed within 7 seconds.");
+    DeleteNodeFromLnnBleReportExtraMap((char *)para);
+    SoftBusFree(para);
+}
+
+static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
+{
+    if (device == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SOFTBUS_OK;
+    LnnBleReportExtra bleExtra;
+    (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
+    if (device->addr[0].type == CONNECTION_ADDR_BLE) {
+        char *udidHash = (char *)SoftBusCalloc(SHORT_UDID_HASH_HEX_LEN + 1);
+        if (udidHash == NULL) {
+            LNN_LOGE(LNN_HEART_BEAT, "udidHash calloc fail");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        ret = ConvertBytesToHexString(
+            udidHash, SHORT_UDID_HASH_HEX_LEN + 1, device->addr[0].info.ble.udidHash, SHORT_UDID_HASH_LEN);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "convert bytes to string fail");
+            SoftBusFree(udidHash);
+            return ret;
+        }
+        if (!IsExistLnnDfxNodeByUdidHash(udidHash, &bleExtra)) {
+            ret = LnnAsyncCallbackDelayHelper(
+                GetLooper(LOOP_TYPE_DEFAULT), HbProcessDfxMessage, (void *)udidHash, HB_DFX_DELAY_TIME);
+            if (ret != SOFTBUS_OK) {
+                LNN_LOGE(LNN_HEART_BEAT, "HbProcessDfxMessage failed, due to set async callback fail");
+                SoftBusFree(udidHash);
+                return ret;
+            }
+            bleExtra.status = BLE_REPORT_EVENT_INIT;
+            AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
+        }
+        SoftBusFree(udidHash);
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
@@ -435,6 +584,10 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
         "heartbeat(HB) find device, udidHash=%{public}s, ConnectionAddrType=%{public}02X, isConnect=%{public}d",
         anonyUdid, device->addr[0].type, isConnect);
     AnonymizeFree(anonyUdid);
+
+    if (HbAddAsyncProcessCallbackDelay(device) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HbAddAsyncProcessCallbackDelay fail");
+    }
     if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
         return SOFTBUS_ERR;
@@ -551,6 +704,10 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         ProcessUdidAnonymize(device->devId);
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
+    }
+    if (!HbIsValidJoinLnnRequest(device, hbResp)) {
+        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+        return SOFTBUS_ERR;
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     bool isConnect = IsNeedConnectOnLine(device, hbResp);
@@ -944,7 +1101,7 @@ void LnnHbMediumMgrDeinit(void)
     HbDeinitRecvList();
 }
 
-int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
+int32_t LnnHbMediumMgrSetParam(void *param)
 {
     int32_t id, ret;
 
@@ -952,18 +1109,19 @@ int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
         LNN_LOGE(LNN_HEART_BEAT, "set medium param get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    id = LnnConvertHbTypeToId(param->type);
+    LnnHeartbeatMediumParam *mediumParam = (LnnHeartbeatMediumParam *)param;
+    id = LnnConvertHbTypeToId(mediumParam->type);
     if (id == HB_INVALID_TYPE_ID) {
         LNN_LOGE(LNN_HEART_BEAT, "set medium param convert type fail");
         return SOFTBUS_ERR;
     }
     if (g_hbMeidumMgr[id] == NULL || g_hbMeidumMgr[id]->onSetMediumParam == NULL) {
-        LNN_LOGW(LNN_HEART_BEAT, "not support heartbeat type=%{public}d", param->type);
+        LNN_LOGW(LNN_HEART_BEAT, "not support heartbeat type=%{public}d", mediumParam->type);
         return SOFTBUS_NOT_IMPLEMENT;
     }
-    ret = g_hbMeidumMgr[id]->onSetMediumParam(param);
+    ret = g_hbMeidumMgr[id]->onSetMediumParam((const LnnHeartbeatMediumParam *)mediumParam);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "set medium param fail, type=%{public}d, ret=%{public}d", param->type, ret);
+        LNN_LOGE(LNN_HEART_BEAT, "set medium param fail, type=%{public}d, ret=%{public}d", mediumParam->type, ret);
         return ret;
     }
     return SOFTBUS_OK;

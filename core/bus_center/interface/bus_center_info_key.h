@@ -95,6 +95,7 @@ typedef enum {
     BYTE_KEY_BROADCAST_CIPHER_IV,
     BYTE_KEY_UDID_HASH,
     BYTE_KEY_END,
+    INFO_KEY_MAX,
 } InfoKey;
 
 #ifdef __cplusplus

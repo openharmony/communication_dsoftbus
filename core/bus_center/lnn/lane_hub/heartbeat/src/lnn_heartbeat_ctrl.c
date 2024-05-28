@@ -31,6 +31,7 @@
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_local_net_ledger.h"
@@ -39,6 +40,7 @@
 #include "lnn_net_builder.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
+#include "lnn_parameter_utils.h"
 
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
@@ -102,7 +104,8 @@ static bool IsHeartbeatEnable(void)
     if ((g_hbConditionState.lockState == SOFTBUS_SCREEN_LOCK_UNKNOWN) && IsActiveOsAccountUnlocked()) {
         g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
     }
-    bool isBtOn = g_hbConditionState.btState == SOFTBUS_BLE_TURN_ON || g_hbConditionState.btState == SOFTBUS_BR_TURN_ON;
+    bool isBtOn = ((g_hbConditionState.btState != SOFTBUS_BLE_TURN_OFF) &&
+        (g_hbConditionState.btState != SOFTBUS_BT_UNKNOWN));
     bool isScreenUnlock = g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK;
     bool isLogIn = g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN;
     bool isBackground = g_hbConditionState.backgroundState == SOFTBUS_USER_BACKGROUND;
@@ -258,6 +261,36 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
     }
 }
 
+static int32_t HbHandleLeaveLnn(void)
+{
+    int32_t i;
+    int32_t infoNum;
+    NodeBasicInfo *info = NULL;
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
+        return SOFTBUS_ERR;
+    }
+    if (info == NULL || infoNum == 0) {
+        LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret;
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    for (i = 0; i < infoNum; ++i) {
+        ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
+        if (ret != SOFTBUS_OK) {
+            continue;
+        }
+        if ((nodeInfo.feature & (1 << BIT_SUPPORT_THREE_STATE)) == 0 && SoftBusGetBrState() == BR_DISABLE) {
+            LNN_LOGI(LNN_HEART_BEAT, "peer don't support three state and local br off");
+            LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_BLE);
+        }
+    }
+    SoftBusFree(info);
+    return SOFTBUS_OK;
+}
+
 static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_BT_STATE_CHANGED) {
@@ -269,9 +302,26 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     g_hbConditionState.btState = btState;
     switch (btState) {
         case SOFTBUS_BLE_TURN_ON:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_ON");
+        case SOFTBUS_BR_TURN_ON:
+            g_enableState = false;
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_ON, state=%{public}d", btState);
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_OPEN_INFO);
             ClearAuthLimitMap();
+            ClearLnnBleReportExtraMap();
+            HbConditionChanged(false);
+            if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) !=
+                SOFTBUS_OK) {
+                LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
+            }
+            break;
+        case SOFTBUS_BR_TURN_OFF:
+            if (SoftBusGetBtState() == BLE_DISABLE) {
+                LNN_LOGE(LNN_HEART_BEAT, "ble is off");
+                return;
+            }
+            g_enableState = false;
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BR_TURN_OFF, state=%{public}d", btState);
+            (void)HbHandleLeaveLnn();
             HbConditionChanged(false);
             if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) !=
                 SOFTBUS_OK) {
@@ -283,6 +333,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_CLOSE_INFO);
             HbConditionChanged(false);
             ClearAuthLimitMap();
+            ClearLnnBleReportExtraMap();
             break;
         default:
             return;
@@ -409,32 +460,38 @@ static void HbDelayConditionChanged(void *para)
 {
     (void)para;
 
-    LNN_LOGI(LNN_HEART_BEAT, "HB delay handle condition changed");
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle delay condition changed");
     LnnUpdateSendInfoStrategy(UPDATE_HB_ACCOUNT_INFO);
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
     HbConditionChanged(false);
 }
 
-static int32_t HbTryCloudSync(void)
+static void HbTryCloudSync(void *para)
 {
+    (void)para;
     NodeInfo info;
+    int32_t ret = SOFTBUS_ERR;
 
-    if (LnnIsDefaultOhosAccount()) {
-        LNN_LOGW(LNN_HEART_BEAT, "HB accountId is null, no need sync");
-        return SOFTBUS_ERR;
-    }
-    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK || LnnSaveLocalDeviceInfo(&info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB save local device info fail");
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = LnnLedgerAllDataSyncToDB(&info);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB sync to cloud fail");
-    } else {
-        LNN_LOGI(LNN_HEART_BEAT, "HB sync to cloud end");
-    }
-    return ret;
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle delay cloud sync");
+    do {
+        if (LnnIsDefaultOhosAccount()) {
+            LNN_LOGW(LNN_HEART_BEAT, "HB accountId is null, no need sync");
+            break;
+        }
+        (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "HB save local device info fail");
+            break;
+        }
+        ret = LnnLedgerAllDataSyncToDB(&info);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "HB sync to cloud fail");
+        } else {
+            LNN_LOGI(LNN_HEART_BEAT, "HB sync to cloud end");
+        }
+    } while (false);
+    LnnAsyncCallbackDelayHelper(
+        GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL, ret == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
 }
 
 static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
@@ -456,8 +513,8 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_SCREEN_UNLOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
             LnnUpdateOhosAccount(false);
-            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
-                HbTryCloudSync() == SOFTBUS_OK ? HB_START_DELAY_LEN : 0);
+            LnnAsyncCallbackDelayHelper(
+                GetLooper(LOOP_TYPE_DEFAULT), HbTryCloudSync, NULL, IsCloudSyncEnabled() ? HB_CLOUD_SYNC_DELAY_LEN : 0);
             break;
         case SOFTBUS_SCREEN_LOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_LOCK");
@@ -480,8 +537,8 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_ACCOUNT_LOG_IN:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
             LnnUpdateOhosAccount(false);
-            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
-                HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
+            LnnAsyncCallbackDelayHelper(
+                GetLooper(LOOP_TYPE_DEFAULT), HbTryCloudSync, NULL, IsCloudSyncEnabled() ? HB_CLOUD_SYNC_DELAY_LEN : 0);
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
@@ -522,7 +579,7 @@ static void HbDifferentAccountEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusDifferentAccountState difAccountState = (SoftBusDifferentAccountState)event->status;
-    if (difAccountState == LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED) {
+    if ((LnnEventType)difAccountState == LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED) {
         HbConditionChanged(false);
     }
 }
@@ -604,26 +661,28 @@ static void HbLpEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_HEART_BEAT, "lp report evt handler get invalid param");
         return;
     }
+    int32_t ret;
     const LnnLpReportEvent *event = (const LnnLpReportEvent *)info;
     SoftBusLpEventType type = (SoftBusLpEventType)event->type;
     switch (type) {
         case SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY");
-            int32_t ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+            ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed, ret=%{public}d", ret);
                 return;
             }
             break;
         default:
-            LNN_LOGE(LNN_HEART_BEAT, "lp evt handler get invalid type = %{public}d", type);
+            LNN_LOGE(LNN_HEART_BEAT, "lp evt handler get invalid type=%{public}d", type);
+            return;
     }
 }
 
 static void HbTryRecoveryNetwork(void)
 {
     if (SoftBusGetBtState() == BLE_ENABLE) {
-        g_hbConditionState.btState = SOFTBUS_BR_TURN_ON;
+        g_hbConditionState.btState = SOFTBUS_BLE_TURN_ON;
     }
     if (!LnnIsDefaultOhosAccount()) {
         g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
@@ -703,7 +762,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
         anonyNetworkId, timeStamp);
     AnonymizeFree(anonyNetworkId);
     if (SoftBusGetBtState() == BLE_ENABLE) {
-        g_hbConditionState.btState = SOFTBUS_BR_TURN_ON;
+        g_hbConditionState.btState = SOFTBUS_BLE_TURN_ON;
     }
     return SOFTBUS_OK;
 }
@@ -817,7 +876,8 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
         return SOFTBUS_ERR;
     }
     int32_t ret;
-    NodeInfo nodeInfo = { 0 };
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     for (i = 0; i < infoNum; ++i) {
         ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
         if (ret != SOFTBUS_OK || !LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI)) {
@@ -892,7 +952,7 @@ static int32_t LnnHbSubscribeTask(void)
 {
     (void)memset_s(&g_dcTask, sizeof(DcTask), 0, sizeof(DcTask));
     g_dcTask.preferredSystem = TASK_RULE_SYSTEM;
-    g_dcTask.optimizeStrategy = (void *)LnnHbMediumMgrSetParam;
+    g_dcTask.optimizeStrategy = LnnHbMediumMgrSetParam;
     return LnnDcSubscribe(&g_dcTask);
 }
 

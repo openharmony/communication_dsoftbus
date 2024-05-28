@@ -24,6 +24,7 @@
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_hid2d.h"
 #include "kits/c/wifi_p2p.h"
+#include "kits/c/wifi_state.h"
 
 static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceWifiConf, SoftBusWifiDevConf *wifiConf)
 {
@@ -416,4 +417,43 @@ bool SoftBusIsWifiActive(void)
         return true;
     }
     return false;
+}
+
+SoftBusWifiDetailState SoftBusGetWifiState(void)
+{
+    WifiDetailState wifiState;
+    if (GetWifiDetailState(&wifiState) != WIFI_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetWifiDetailState failed");
+        return SOFTBUS_WIFI_STATE_UNKNOWN;
+    }
+    LNN_LOGI(LNN_STATE, "wifiState=%{public}d", wifiState);
+    switch (wifiState) {
+        case STATE_INACTIVE:
+            return SOFTBUS_WIFI_STATE_INACTIVE;
+        case STATE_ACTIVATED:
+            return SOFTBUS_WIFI_STATE_ACTIVED;
+        case STATE_ACTIVATING:
+            return SOFTBUS_WIFI_STATE_ACTIVATING;
+        case STATE_DEACTIVATING:
+            return SOFTBUS_WIFI_STATE_DEACTIVATING;
+        case STATE_SEMI_ACTIVATING:
+            return SOFTBUS_WIFI_STATE_SEMIACTIVATING;
+        case STATE_SEMI_ACTIVE:
+            return SOFTBUS_WIFI_STATE_SEMIACTIVE;
+        default:
+            break;
+    }
+    return SOFTBUS_WIFI_STATE_UNKNOWN;
+}
+
+bool SoftBusIsWifiP2pEnabled(void)
+{
+    enum P2pState state;
+    if (GetP2pEnableStatus(&state) != WIFI_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetP2pEnableStatus failed");
+        return false;
+    }
+    LNN_LOGI(LNN_STATE, "P2pState=%{public}d", state);
+
+    return state == P2P_STATE_STARTED;
 }

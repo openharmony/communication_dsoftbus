@@ -669,7 +669,7 @@ static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *par
         LNN_LOGE(LNN_HEART_BEAT, "set medium param get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    ret = LnnHbMediumMgrSetParam((const LnnHeartbeatMediumParam *)para);
+    ret = LnnHbMediumMgrSetParam(para);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "set medium param process fail, ret=%{public}d", ret);
     }
@@ -1065,7 +1065,7 @@ static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         LNN_LOGE(LNN_HEART_BEAT, "format fsm name fail");
         return SOFTBUS_ERR;
     }
-    SoftBusLooper *looper = CreateNewLooper("Heartbeat_Lp");
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_LNN);
     if (looper == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "create looper fail");
         return SOFTBUS_ERR;

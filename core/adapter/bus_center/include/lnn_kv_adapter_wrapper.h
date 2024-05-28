@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DSOFTBUS_KV_STORE_LNN_KV_ADAPTER_WRAPPER_H
-#define DSOFTBUS_KV_STORE_LNN_KV_ADAPTER_WRAPPER_H
+#ifndef LNN_KV_ADAPTER_WRAPPER_H
+#define LNN_KV_ADAPTER_WRAPPER_H
 
 #include "lnn_data_cloud_sync.h"
 #ifdef __cplusplus
@@ -23,6 +23,9 @@ extern "C" {
 #endif
 int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen);
 int32_t LnnDestroyKvAdapter(int32_t dbId);
+void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
+    int32_t storeIdLen);
+void LnnUnRegisterDataChangeListener(int32_t dbId);
 int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *value, int32_t valueLen);
 int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo);
 int32_t LnnDeleteDBData(int32_t dbId, const char *key, int32_t keyLen);
@@ -34,4 +37,4 @@ int32_t LnnCloudSync(int32_t dbId);
 };
 #endif
 
-#endif // DSOFTBUS_KV_STORE_LNN_KV_ADAPTER_WRAPPER_H
+#endif //LNN_KV_ADAPTER_WRAPPER_H

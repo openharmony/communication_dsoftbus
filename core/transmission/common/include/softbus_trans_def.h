@@ -28,6 +28,7 @@ extern "C" {
 #define MSG_FLAG_REQUEST 0
 #define MES_FLAG_REPLY 1
 #define TRAFFIC_LEN 32
+#define UNKNOW_OS_TYPE 1 /* peer osType unknow */
 
 typedef struct {
     const char *sessionName;
