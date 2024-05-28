@@ -534,6 +534,15 @@ static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdi
     }
     return SOFTBUS_OK;
 }
+
+static void SetOnlineType(int32_t reason, NodeInfo *nodeInfo, LnnEventExtra extra)
+{
+    if (reason == SOFTBUS_OK) {
+        extra.onlineType = DfxRecordLnnOnlineType(nodeInfo);
+    } else {
+        extra.onlineType = ONLINE_TYPE_INVALID;
+    }
+}
   
 static int32_t FillDeviceBleReportExtra(const LnnEventExtra *extra, LnnBleReportExtra *bleExtra)
 {
@@ -541,6 +550,7 @@ static int32_t FillDeviceBleReportExtra(const LnnEventExtra *extra, LnnBleReport
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    bleExtra->extra.onlineType = extra->onlineType;
     if (strcpy_s(bleExtra->extra.peerNetworkId, NETWORK_ID_BUF_LEN, extra->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_BUILDER, "strcpy_s peerNetworkId fail");
         return SOFTBUS_STRCPY_ERR;
@@ -618,15 +628,6 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
         }
     }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
-}
-
-static void SetOnlineType(int32_t reason, NodeInfo *nodeInfo, LnnEventExtra extra)
-{
-    if (reason == SOFTBUS_OK) {
-        extra.onlineType = DfxRecordLnnOnlineType(nodeInfo);
-    } else {
-        extra.onlineType = ONLINE_TYPE_INVALID;
-    }
 }
 
 static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onlineNum, int32_t lnnType, int32_t reason)
