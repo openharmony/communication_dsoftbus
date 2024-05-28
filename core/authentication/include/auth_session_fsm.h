@@ -38,6 +38,14 @@ extern "C" {
 #define AUTH_FSM_NAME_LEN 32
 
 typedef enum {
+    STATE_SYNC_NEGOTIATION,
+    STATE_SYNC_DEVICE_ID,
+    STATE_DEVICE_AUTH,
+    STATE_SYNC_DEVICE_INFO,
+    STATE_NUM_MAX
+} AuthFsmStateIndex;
+
+typedef enum {
     EXCHANHE_UDID = 0,
     EXCHANGE_NETWORKID,
     EXCHANGE_FAIL,
@@ -50,9 +58,18 @@ typedef enum {
     NORMALIZED_SUPPORT,
 } NormalizedType;
 
+typedef enum {
+    AUTH_STATE_WAIT = 1,
+    AUTH_STATE_START,
+    AUTH_STATE_UNKNOW,
+    AUTH_STATE_ACK,
+    AUTH_STATE_COMPATIBLE,
+} AuthStartState;
+
 typedef struct {
     uint32_t requestId;
     bool isServer;
+    bool isConnectServer;
     uint64_t connId;
     AuthConnInfo connInfo;
     uint8_t *deviceInfoData;
@@ -63,6 +80,7 @@ typedef struct {
     bool isAuthFinished;
     char udid[UDID_BUF_LEN];
     char uuid[UUID_BUF_LEN];
+    char udidHash[SHA_256_HEX_HASH_LEN];
     SoftBusVersion version;
     bool isSupportCompress;
     bool isSupportFastAuth;
@@ -76,6 +94,8 @@ typedef struct {
     SessionKey *normalizedKey;
     int64_t normalizedIndex;
     bool isOldKey;
+    AuthStartState localState;
+    AuthStartState peerState;
 } AuthSessionInfo;
 
 typedef struct {
@@ -85,6 +105,7 @@ typedef struct {
     char fsmName[AUTH_FSM_NAME_LEN];
     FsmStateMachine fsm;
     AuthSessionInfo info;
+    AuthFsmStateIndex curState;
     AuthStatisticData statisticData;
     bool isDead;
 } AuthFsm;
@@ -111,7 +132,8 @@ int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, co
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
 int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
-AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer);
+int32_t AuthNotifyRequestVerify(int64_t authSeq);
+AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer, bool isConnectSide);
 void AuthSessionFsmExit(void);
 
 #ifdef __cplusplus

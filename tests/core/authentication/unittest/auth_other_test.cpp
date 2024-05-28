@@ -918,7 +918,7 @@ HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
 {
     uint64_t connId = 111;
     bool isServer = true;
-    AuthFsm* ret = GetAuthFsmByConnId(connId, isServer);
+    AuthFsm* ret = GetAuthFsmByConnId(connId, isServer, false);
     EXPECT_TRUE(ret == NULL);
     int32_t ret1 = AuthSessionHandleDeviceDisconnected(connId);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
