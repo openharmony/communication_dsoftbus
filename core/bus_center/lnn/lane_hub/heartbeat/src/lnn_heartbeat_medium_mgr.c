@@ -504,6 +504,7 @@ static void CopyBleReportExtra(const LnnBleReportExtra *bleExtra, LnnEventExtra 
     extra->localUdidHash = bleExtra->extra.localUdidHash;
     extra->peerUdidHash = bleExtra->extra.peerUdidHash;
     if (bleExtra->extra.peerNetworkId[0] != '\0') {
+        extra->onlineType = bleExtra->extra.onlineType;
         extra->peerNetworkId = bleExtra->extra.peerNetworkId;
         extra->peerUdid = bleExtra->extra.peerUdid;
         extra->peerBleMac = bleExtra->extra.peerBleMac;
@@ -570,6 +571,7 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
             }
             bleExtra.status = BLE_REPORT_EVENT_INIT;
             AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
+            return SOFTBUS_OK;
         }
         SoftBusFree(udidHash);
     }
