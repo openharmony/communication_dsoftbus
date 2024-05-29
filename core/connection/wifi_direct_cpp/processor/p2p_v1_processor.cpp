@@ -470,8 +470,8 @@ void P2pV1Processor::OnWaitReqResponseTimeoutEvent()
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "wait connect response timeout");
     if (connectCommand_ != nullptr) {
-        CleanupIfNeed(ERROR_WIFI_DIRECT_WAIT_CONNECT_RESPONSE_TIMEOUT, connectCommand_->GetRemoteDeviceId());
-        connectCommand_->OnFailure(ERROR_WIFI_DIRECT_WAIT_CONNECT_RESPONSE_TIMEOUT);
+        CleanupIfNeed(SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT, connectCommand_->GetRemoteDeviceId());
+        connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT));
         connectCommand_ = nullptr;
     }
     Terminate();
