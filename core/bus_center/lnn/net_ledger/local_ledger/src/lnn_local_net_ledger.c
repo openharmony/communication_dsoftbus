@@ -1253,6 +1253,11 @@ static int32_t UpdateLocalBtMac(const void *mac)
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
+    const char *beforeMac = LnnGetBtMac(&g_localNetLedger.localInfo);
+    if (strcmp(beforeMac, (char *)mac) == 0) {
+        LNN_LOGI(LNN_LEDGER, "unchanged. no need update");
+        return SOFTBUS_OK;
+    }
     LnnSetBtMac(&g_localNetLedger.localInfo, (char *)mac);
     if (LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update Bt mac to localdevinfo store fail");
