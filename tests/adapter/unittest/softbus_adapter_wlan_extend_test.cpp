@@ -67,6 +67,7 @@ HWTEST_F(AdapterWlanExtendTest, Wlan_Extend_Test_001, TestSize.Level0)
 {
     g_wlanChannelInfoCb = NULL;
     WlanChannelInfoCb *g_wlanChannelInfoCbInit = new WlanChannelInfoCb();
+    EXPECT_TRUE(ret != nullptr);
     int32_t ret = 0;
 
     ret = SoftBusRegWlanChannelInfoCb(g_wlanChannelInfoCb);
