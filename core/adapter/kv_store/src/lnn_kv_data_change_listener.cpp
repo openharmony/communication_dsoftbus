@@ -106,7 +106,7 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
 
 void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entry> &insertRecords)
 {
-    int32_t insertSize = insertRecords.size();
+    int32_t insertSize = static_cast<int32_t>(insertRecords.size());
     LNN_LOGI(LNN_LEDGER, "Handle kv data add change! insertSize=%{public}d", insertSize);
     char **keys = (char **)SoftBusCalloc(insertSize * sizeof(char *));
     if (keys == nullptr) {
