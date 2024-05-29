@@ -51,7 +51,6 @@
 
 #define DATA_SIZE 32
 #define DISCOVERY_TYPE_MASK 0x7FFF
-#define DEVICE_TYPE_SIZE_LEN 3
 
 typedef enum {
     STATE_AUTH_INDEX = 0,
@@ -535,6 +534,91 @@ static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdi
     }
     return SOFTBUS_OK;
 }
+  
+static int32_t FillDeviceBleReportExtra(const LnnEventExtra *extra, LnnBleReportExtra *bleExtra)
+{
+    if (extra == NULL || bleExtra == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(bleExtra->extra.peerNetworkId, NETWORK_ID_BUF_LEN, extra->peerNetworkId) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s peerNetworkId fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(bleExtra->extra.peerUdid, UDID_BUF_LEN, extra->peerUdid) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s peerUdid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(bleExtra->extra.peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, extra->peerUdidHash) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s peerUdidHash fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(bleExtra->extra.peerBleMac, BT_MAC_LEN, extra->peerBleMac) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s peerBleMac fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(bleExtra->extra.peerDeviceType, DEVICE_TYPE_SIZE_LEN + 1, extra->peerDeviceType) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s peerDeviceType fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void DfxAddBleReportExtra(
+    const LnnConntionInfo *connInfo, const LnnEventExtra *extra, LnnBleReportExtra *bleExtra)
+{
+    if (connInfo == NULL || extra == NULL || bleExtra == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    bleExtra->extra.onlineNum = extra->onlineNum;
+    bleExtra->extra.errcode = extra->errcode;
+    bleExtra->extra.lnnType = extra->lnnType;
+    bleExtra->extra.result = extra->result;
+    if (strcpy_s(bleExtra->extra.localUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, extra->localUdidHash) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s localUdidHash fail");
+        return;
+    }
+    if (strcpy_s(bleExtra->extra.peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, extra->peerUdidHash) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s peerUdidHash fail");
+        return;
+    }
+    if (connInfo->nodeInfo == NULL) {
+        bleExtra->status = BLE_REPORT_EVENT_FAIL;
+        AddNodeToLnnBleReportExtraMap(bleExtra->extra.peerUdidHash, bleExtra);
+        return;
+    }
+    if (FillDeviceBleReportExtra(extra, bleExtra) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "FillDeviceBleReportExtra fail");
+        return;
+    }
+    bleExtra->status = BLE_REPORT_EVENT_FAIL;
+    AddNodeToLnnBleReportExtraMap(bleExtra->extra.peerUdidHash, bleExtra);
+}
+
+static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnEventExtra extra)
+{
+    if (connInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "connInfo is NULL");
+        return;
+    }
+    if (connInfo->addr.type == CONNECTION_ADDR_BLE) {
+        LnnBleReportExtra bleExtra;
+        (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
+        if (IsExistLnnDfxNodeByUdidHash(extra.peerUdidHash, &bleExtra)) {
+            if (reason == SOFTBUS_OK) {
+                LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+                bleExtra.status = BLE_REPORT_EVENT_SUCCESS;
+                AddNodeToLnnBleReportExtraMap(extra.peerUdidHash, &bleExtra);
+                return;
+            } else {
+                DfxAddBleReportExtra(connInfo, &extra, &bleExtra);
+                return;
+            }
+        }
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+}
 
 static void SetOnlineType(int32_t reason, NodeInfo *nodeInfo, LnnEventExtra extra)
 {
@@ -562,7 +646,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     extra.localUdidHash = localUdidHash;
     extra.peerUdidHash = peerUdidHash;
     if (connInfo->nodeInfo == NULL) {
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+        DfxReportOnlineEvent(connInfo, reason, extra);
         return;
     }
     SetOnlineType(reason, connInfo->nodeInfo, extra);
@@ -592,7 +676,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     extra.peerUdidHash = peerUdidHash;
     extra.peerBleMac = bleMacAddr;
     extra.peerDeviceType = deviceType;
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+    DfxReportOnlineEvent(connInfo, reason, extra);
 }
 
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
@@ -624,6 +708,10 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Lnn get online node fail");
         isSuccessFlag = false;
+    }
+    if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_REQUEST) == 0 && lnnType == LNN_TYPE_BR_CONNECT_ONLINE) {
+        isSuccessFlag = false;
+        SoftBusFree(info);
     }
     if (isSuccessFlag) {
         DfxRecordLnnAddOnlineNodeEnd(connInfo, infoNum, lnnType, retCode);

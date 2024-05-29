@@ -70,6 +70,7 @@ InfoContainer<NegotiateMessageKey>::KeyTypeTable InfoContainer<NegotiateMessageK
     { NegotiateMessageKey::IS_PROXY_ENABLE,       Serializable::ValueType::BOOL                 },
     { NegotiateMessageKey::CHANNEL_5G_LIST,       Serializable::ValueType::STRING               },
     { NegotiateMessageKey::CHANNEL_5G_SCORE,      Serializable::ValueType::STRING               },
+    { NegotiateMessageKey::CHALLENGE_CODE,        Serializable::ValueType::UINT                 },
 
     /* old p2p */
     { NegotiateMessageKey::GC_CHANNEL_LIST,       Serializable::ValueType::STRING               },
@@ -510,6 +511,16 @@ void NegotiateMessage::Set5GChannelScore(const std::string &value)
 std::string NegotiateMessage::Get5GChannelScore() const
 {
     return Get(NegotiateMessageKey::CHANNEL_5G_SCORE, std::string());
+}
+
+void NegotiateMessage::SetChallengeCode(uint32_t value)
+{
+    Set(NegotiateMessageKey::CHALLENGE_CODE, value);
+}
+
+uint32_t NegotiateMessage::GetChallengeCode() const
+{
+    return Get(NegotiateMessageKey::CHALLENGE_CODE, static_cast<uint32_t>(0));
 }
 
 void NegotiateMessage::SetLegacyP2pGcChannelList(const std::string &value)

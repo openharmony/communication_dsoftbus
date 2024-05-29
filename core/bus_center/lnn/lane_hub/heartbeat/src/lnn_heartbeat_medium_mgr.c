@@ -25,6 +25,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_ble_lpdevice.h"
 #include "lnn_cipherkey_manager.h"
@@ -50,6 +51,7 @@
 
 #define HB_RECV_INFO_SAVE_LEN (60 * 60 * HB_TIME_FACTOR)
 #define HB_REAUTH_TIME        (10 * HB_TIME_FACTOR)
+#define HB_DFX_DELAY_TIME     (7 * HB_TIME_FACTOR)
 typedef struct {
     ListNode node;
     DeviceInfo *device;
@@ -488,6 +490,92 @@ static uint64_t GetNowTime()
     return (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
 }
 
+static void CopyBleReportExtra(const LnnBleReportExtra *bleExtra, LnnEventExtra *extra)
+{
+    if (bleExtra == NULL || extra == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return;
+    }
+
+    extra->onlineNum = bleExtra->extra.onlineNum;
+    extra->errcode = bleExtra->extra.errcode;
+    extra->lnnType = bleExtra->extra.lnnType;
+    extra->result = bleExtra->extra.result;
+    extra->localUdidHash = bleExtra->extra.localUdidHash;
+    extra->peerUdidHash = bleExtra->extra.peerUdidHash;
+    if (bleExtra->extra.peerNetworkId[0] != '\0') {
+        extra->peerNetworkId = bleExtra->extra.peerNetworkId;
+        extra->peerUdid = bleExtra->extra.peerUdid;
+        extra->peerBleMac = bleExtra->extra.peerBleMac;
+        extra->peerDeviceType = bleExtra->extra.peerDeviceType;
+    }
+}
+
+static void HbProcessDfxMessage(void *para)
+{
+    if (para == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid para");
+        return;
+    }
+    LnnBleReportExtra bleExtra;
+    (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
+    if (GetNodeFromLnnBleReportExtraMap((char *)para, &bleExtra) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get ble report node from lnnBleReportExtraMap fail");
+        SoftBusFree(para);
+        return;
+    }
+    if (bleExtra.status == BLE_REPORT_EVENT_SUCCESS || bleExtra.status == BLE_REPORT_EVENT_INIT) {
+        DeleteNodeFromLnnBleReportExtraMap((char *)para);
+        SoftBusFree(para);
+        return;
+    }
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    CopyBleReportExtra(&bleExtra, &extra);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+    LNN_LOGI(LNN_HEART_BEAT, "the device online failed within 7 seconds.");
+    DeleteNodeFromLnnBleReportExtraMap((char *)para);
+    SoftBusFree(para);
+}
+
+static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
+{
+    if (device == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SOFTBUS_OK;
+    LnnBleReportExtra bleExtra;
+    (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
+    if (device->addr[0].type == CONNECTION_ADDR_BLE) {
+        char *udidHash = (char *)SoftBusCalloc(SHORT_UDID_HASH_HEX_LEN + 1);
+        if (udidHash == NULL) {
+            LNN_LOGE(LNN_HEART_BEAT, "udidHash calloc fail");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        ret = ConvertBytesToHexString(
+            udidHash, SHORT_UDID_HASH_HEX_LEN + 1, device->addr[0].info.ble.udidHash, SHORT_UDID_HASH_LEN);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "convert bytes to string fail");
+            SoftBusFree(udidHash);
+            return ret;
+        }
+        if (!IsExistLnnDfxNodeByUdidHash(udidHash, &bleExtra)) {
+            ret = LnnAsyncCallbackDelayHelper(
+                GetLooper(LOOP_TYPE_DEFAULT), HbProcessDfxMessage, (void *)udidHash, HB_DFX_DELAY_TIME);
+            if (ret != SOFTBUS_OK) {
+                LNN_LOGE(LNN_HEART_BEAT, "HbProcessDfxMessage failed, due to set async callback fail");
+                SoftBusFree(udidHash);
+                return ret;
+            }
+            bleExtra.status = BLE_REPORT_EVENT_INIT;
+            AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
+        }
+        SoftBusFree(udidHash);
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
 {
     char *anonyUdid = NULL;
@@ -496,6 +584,10 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
         "heartbeat(HB) find device, udidHash=%{public}s, ConnectionAddrType=%{public}02X, isConnect=%{public}d",
         anonyUdid, device->addr[0].type, isConnect);
     AnonymizeFree(anonyUdid);
+
+    if (HbAddAsyncProcessCallbackDelay(device) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HbAddAsyncProcessCallbackDelay fail");
+    }
     if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
         return SOFTBUS_ERR;
