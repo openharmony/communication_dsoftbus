@@ -37,4 +37,4 @@ int32_t LnnCloudSync(int32_t dbId);
 };
 #endif
 
-#endif //LNN_KV_ADAPTER_WRAPPER_H
+#endif // LNN_KV_ADAPTER_WRAPPER_H
