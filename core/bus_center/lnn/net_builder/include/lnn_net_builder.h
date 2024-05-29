@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "auth_interface.h"
+#include "lnn_event.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_bus_center.h"
 
@@ -79,6 +80,11 @@ AuthVerifyCallback *LnnGetVerifyCallback(void);
 AuthVerifyCallback *LnnGetReAuthVerifyCallback(void);
 void SetWatchdogFlag(bool flag);
 bool GetWatchdogFlag(void);
+void AddNodeToLnnBleReportExtraMap(const char *udidHash, const LnnBleReportExtra *bleExtra);
+int32_t GetNodeFromLnnBleReportExtraMap(const char *udidHash, LnnBleReportExtra *bleExtra);
+bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExtra);
+void DeleteNodeFromLnnBleReportExtraMap(const char *udidHash);
+void ClearLnnBleReportExtraMap(void);
 
 #ifdef __cplusplus
 }

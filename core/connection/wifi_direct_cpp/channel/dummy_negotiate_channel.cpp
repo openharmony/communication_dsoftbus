@@ -12,19 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef WIFI_DIRECT_TRACE_H
-#define WIFI_DIRECT_TRACE_H
-
-#include <string>
+#include "dummy_negotiate_channel.h"
+#include "conn_log.h"
+#include "softbus_errcode.h"
 
 namespace OHOS::SoftBus {
-class WifiDirectTrace {
-public:
-    static void StartTrace(const std::string &requestDeviceId, const std::string &receiveDeviceId);
-    static void StopTrace();
-    static void SetRequestId(uint64_t requestId);
-};
+DummyNegotiateChannel::~DummyNegotiateChannel() { }
 
+int DummyNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "Empty implementation");
+    return SOFTBUS_OK;
+}
+
+std::string DummyNegotiateChannel::GetRemoteDeviceId() const
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "Empty implementation");
+    return "";
+}
 } // namespace OHOS::SoftBus
-#endif // WIFI_DIRECT_TRACE_H

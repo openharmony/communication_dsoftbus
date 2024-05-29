@@ -651,5 +651,10 @@ int32_t AuthFlushDevice(const char *uuid)
 {
     return GetNetBuilderDepsInterface()->AuthFlushDevice(uuid);
 }
+
+bool IsSupportLpFeature(void)
+{
+    return GetNetBuilderDepsInterface()->IsSupportLpFeature();
+}
 } // extern "C"
 } // namespace OHOS
