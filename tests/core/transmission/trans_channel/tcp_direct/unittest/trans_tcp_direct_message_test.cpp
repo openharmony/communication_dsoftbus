@@ -392,7 +392,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetAppInfoByIdTest0010, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     channelId = 0;
     ret = GetAppInfoById(channelId, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_APP_INFO_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -412,7 +412,7 @@ HWTEST_F(TransTcpDirectMessageTest, SetAuthHandleByChanIdTest0011, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
     channelId = 0;
     ret = SetAuthHandleByChanId(channelId, &authHandle);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SET_AUTH_HANDLE_FAILED);
 }
 
 /**

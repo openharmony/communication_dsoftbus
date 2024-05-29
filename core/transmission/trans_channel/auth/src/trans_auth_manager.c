@@ -89,7 +89,7 @@ static int32_t GetAuthChannelInfoByChanId(int32_t channelId, AuthChannelInfo *ds
         }
     }
     SoftBusMutexUnlock(&g_authChannelList->lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
 static int32_t GetAuthIdByChannelId(int32_t channelId)
@@ -137,7 +137,7 @@ static int32_t GetChannelInfoByAuthId(int32_t authId, AuthChannelInfo *dstInfo)
         }
     }
     SoftBusMutexUnlock(&g_authChannelList->lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
 static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServer)
@@ -669,7 +669,7 @@ int32_t TransAuthInit(IServerChannelCallBack *cb)
         RegAuthChannelListener(MODULE_AUTH_MSG, &msgListener) != SOFTBUS_OK) {
         UnregAuthChannelListener(MODULE_AUTH_CHANNEL);
         UnregAuthChannelListener(MODULE_AUTH_MSG);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_REG_AUTH_CHANNEL_LISTERNER_FAILED;
     }
     if (g_authChannelList == NULL) {
         g_authChannelList = CreateSoftBusList();
@@ -875,7 +875,7 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         return SOFTBUS_OK;
     }
     SoftBusMutexUnlock(&g_authChannelList->lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
 int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len)
@@ -936,7 +936,7 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connO
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     if (!LnnConvertOptionToAddr(&addr, connOpt, CONNECTION_ADDR_WLAN)) {
         TRANS_LOGE(TRANS_SVC, "channelId convert addr fail. channelId=%{public}d", channelId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_CHANNELID_CONVERT_ADDR_FAILED;
     }
     return LnnNotifyDiscoveryDevice(&addr, true);
 }
@@ -990,5 +990,5 @@ int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
     }
     SoftBusMutexUnlock(&g_authChannelList->lock);
     TRANS_LOGE(TRANS_SVC, "get connid failed");
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }

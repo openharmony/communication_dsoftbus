@@ -194,7 +194,7 @@ static int32_t OnUdpChannelOpened(int32_t channelId)
     if ((g_sessionCb != NULL) && (g_sessionCb->OnSessionOpened != NULL)) {
         return g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NO_INIT;
 }
 
 static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const ChannelInfo *channel)
@@ -279,7 +279,7 @@ static int32_t TransDeleteBusinnessChannel(UdpChannel *channel)
         case BUSINESS_TYPE_STREAM:
             if (TransCloseStreamChannel(channel->channelId) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_SDK, "trans close udp channel failed.");
-                return SOFTBUS_ERR;
+                return SOFTBUS_TRANS_CLOSE_UDP_CHANNEL_FAILED;
             }
             break;
         case BUSINESS_TYPE_FILE:
