@@ -1465,7 +1465,8 @@ static int32_t SelectGuideChannel(const LinkRequest *request, uint32_t laneReqId
         return SOFTBUS_MEM_ERR;
     }
     guideInfo.callback = *callback;
-    if (memcpy_s(guideInfo.guideList, sizeof(guideChannelList), guideChannelList, sizeof(guideChannelList)) != EOK) {
+    if (memcpy_s(guideInfo.guideList, sizeof(guideInfo.guideList),
+        guideChannelList, sizeof(guideChannelList)) != EOK) {
         LNN_LOGE(LNN_LANE, "guideList memcpy fail.");
         return SOFTBUS_MEM_ERR;
     }
