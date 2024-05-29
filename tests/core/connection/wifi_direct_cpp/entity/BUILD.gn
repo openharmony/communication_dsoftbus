@@ -75,7 +75,7 @@ ohos_unittest("P2pEntityTest") {
   sources = [
     "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
     "$wifi_direct_cpp_path/channel/auth_negotiate_channel.cpp",
-    "$wifi_direct_cpp_path/channel/null_negotiate_channel.cpp",
+    "$wifi_direct_cpp_path/channel/dummy_negotiate_channel.cpp",
     "$wifi_direct_cpp_path/channel/proxy_negotiate_channel.cpp",
     "$wifi_direct_cpp_path/command/command_factory.cpp",
     "$wifi_direct_cpp_path/command/connect_command.cpp",
