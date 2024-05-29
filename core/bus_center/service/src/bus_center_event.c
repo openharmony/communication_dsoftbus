@@ -281,7 +281,7 @@ static uint64_t GetNetworkIdUpdateTime()
     int64_t networkIdTimestamp = 0;
     int64_t nowTime = 0;
     uint64_t delayTime = 0;
-    nowTime = SoftBusGetSysTimeMs();
+    nowTime = (int64_t)SoftBusGetSysTimeMs();
     if (LnnGetLocalNum64Info(NUM_KEY_NETWORK_ID_TIMESTAMP, &networkIdTimestamp) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get local networkIdTimestamp fail");
         return NETWORK_ID_UPDATE_DELAY_TIME;
@@ -290,7 +290,7 @@ static uint64_t GetNetworkIdUpdateTime()
     if (diff <= NETWORK_ID_MIN_UPDATE_DELAY_TIME) {
         delayTime = NETWORK_ID_MIN_UPDATE_DELAY_TIME;
     } else if (diff <= NETWORK_ID_UPDATE_DELAY_TIME) {
-        delayTime = diff;
+        delayTime = (uint64_t)diff;
     } else {
         delayTime = NETWORK_ID_UPDATE_DELAY_TIME;
     }
