@@ -68,6 +68,7 @@ typedef enum {
 typedef struct {
     BuildLinkStatus status;
     LaneLinkInfo linkInfo;
+    int32_t result;
 } LinkStatusInfo;
 
 typedef struct {
@@ -79,7 +80,6 @@ typedef struct {
     uint32_t listNum;
     uint32_t linkRetryIdx;
     bool networkDelegate;
-    int32_t p2pErrCode;
     uint64_t startTime;
     uint64_t restTime;
     char peerBleMac[MAX_MAC_LEN];
@@ -248,6 +248,7 @@ static void InitStatusList(LaneLinkNodeInfo *linkNode)
 {
     for (uint32_t i = 0; i < LANE_LINK_TYPE_BUTT; i++) {
         linkNode->statusList[i].status = BUILD_LINK_STATUS_BUTT;
+        linkNode->statusList[i].result = SOFTBUS_LANE_BUILD_LINK_FAIL;
         (void)memset_s(&linkNode->statusList[i].linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     }
 }
@@ -279,7 +280,6 @@ static int32_t TriggerLink(uint32_t laneReqId, TransOption *request,
     linkNode->pid = request->pid;
     linkNode->networkDelegate = request->networkDelegate;
     linkNode->p2pOnly = request->p2pOnly;
-    linkNode->p2pErrCode = SOFTBUS_OK;
     linkNode->acceptableProtocols = request->acceptableProtocols;
     linkNode->startTime = SoftBusGetSysTimeMs();
     linkNode->restTime = DEFAULT_LINK_LATENCY;
@@ -394,7 +394,6 @@ static int32_t TriggerLinkWithQos(uint32_t laneReqId, const LaneAllocInfo *alloc
     linkNode->linkList = recommendLinkList;
     linkNode->pid = allocInfo->pid;
     linkNode->networkDelegate = allocInfo->extendInfo.networkDelegate;
-    linkNode->p2pErrCode = SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
     linkNode->acceptableProtocols = allocInfo->acceptableProtocols;
     linkNode->startTime = SoftBusGetSysTimeMs();
     linkNode->restTime = allocInfo->qosRequire.maxLaneLatency != 0 ?
@@ -893,6 +892,34 @@ static LaneLinkNodeInfo *GetLaneLinkNodeWithoutLock(uint32_t laneReqId)
     return NULL;
 }
 
+static int32_t GetErrCodeWithLock(uint32_t laneReqId)
+{
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneLinkNodeInfo *nodeInfo = GetLaneLinkNodeWithoutLock(laneReqId);
+    if (nodeInfo == NULL || nodeInfo->linkList == NULL) {
+        LNN_LOGE(LNN_LANE, "get lane link node info fail, laneReqId=%{public}u", laneReqId);
+        Unlock();
+        return SOFTBUS_LANE_NOT_FOUND;
+    }
+    LaneLinkType linkType;
+    int32_t result = SOFTBUS_LANE_BUILD_LINK_FAIL;
+    for (int32_t i = 0; i < nodeInfo->linkList->linkTypeNum; i++) {
+        linkType = nodeInfo->linkList->linkType[i];
+        if (linkType == LANE_HML || linkType == LANE_P2P) {
+            result = nodeInfo->statusList[linkType].result;
+            Unlock();
+            return result;
+        }
+    }
+    linkType = nodeInfo->linkList->linkType[0];
+    result = nodeInfo->statusList[linkType].result;
+    Unlock();
+    return result;
+}
+
 static int32_t CreateLinkRequestNode(const LaneLinkNodeInfo *nodeInfo, LinkRequest *requestInfo)
 {
     requestInfo->networkDelegate = nodeInfo->networkDelegate;
@@ -983,7 +1010,7 @@ static void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo)
 }
 
 static int32_t UpdateLinkStatus(uint32_t laneReqId, BuildLinkStatus status, LaneLinkType linkType,
-    const LaneLinkInfo *linkInfo)
+    const LaneLinkInfo *linkInfo, int32_t result)
 {
     if (Lock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get lock fail");
@@ -1010,6 +1037,7 @@ static int32_t UpdateLinkStatus(uint32_t laneReqId, BuildLinkStatus status, Lane
     LNN_LOGI(LNN_LANE, "update link status, laneReqId=%{public}u, status=%{public}d, linkType=%{public}d",
         laneReqId, status, linkType);
     nodeInfo->statusList[linkType].status = status;
+    nodeInfo->statusList[linkType].result = result;
     if (status != BUILD_LINK_STATUS_SUCC) {
         Unlock();
         return SOFTBUS_OK;
@@ -1165,7 +1193,7 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
     LaneLinkInfo *info = (LaneLinkInfo *)msg->obj;
     uint32_t laneReqId = (uint32_t)msg->arg1;
     LaneLinkType linkType = (LaneLinkType)msg->arg2;
-    if (UpdateLinkStatus(laneReqId, BUILD_LINK_STATUS_SUCC, linkType, info) != SOFTBUS_OK) {
+    if (UpdateLinkStatus(laneReqId, BUILD_LINK_STATUS_SUCC, linkType, info, SOFTBUS_OK) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "update link status fail, laneReqId=%{public}u", laneReqId);
         SoftBusFree(info);
         return;
@@ -1178,13 +1206,7 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
     }
 }
 
-static bool IsWifiDirectErrCode(const int32_t errCode)
-{
-    return ((errCode >= ERROR_WIFI_DIRECT_END && errCode <= ERROR_BASE) ||
-        (errCode >= V1_ERROR_END && errCode <= V1_ERROR_START)) ? true : false;
-}
-
-static bool IsNeedNotifyFail(uint32_t laneReqId, int32_t reason, LaneLinkType failLinkType, int32_t *failReason)
+static bool IsNeedNotifyFail(uint32_t laneReqId)
 {
     bool notifyFail = false;
     if (Lock() != SOFTBUS_OK) {
@@ -1197,10 +1219,6 @@ static bool IsNeedNotifyFail(uint32_t laneReqId, int32_t reason, LaneLinkType fa
         LNN_LOGE(LNN_LANE, "get lane link node info fail, laneReqId=%{public}u", laneReqId);
         return true;
     }
-    if (IsWifiDirectErrCode(reason) || failLinkType == nodeInfo->linkList->linkType[0]) {
-        nodeInfo->p2pErrCode = IsWifiDirectErrCode(nodeInfo->p2pErrCode) ? nodeInfo->p2pErrCode : reason;
-    }
-    *failReason = nodeInfo->p2pErrCode;
     uint64_t costTime = SoftBusGetSysTimeMs() - nodeInfo->startTime;
     if (costTime >= nodeInfo->restTime || nodeInfo->linkRetryIdx >= nodeInfo->listNum) {
         LNN_LOGE(LNN_LANE, "link retry exceed limit, laneReqId=%{public}u", laneReqId);
@@ -1277,16 +1295,16 @@ static void LaneLinkFail(SoftBusMessage *msg)
     LaneLinkType linkType = failInfo->linkType;
     SoftBusFree(failInfo);
     LNN_LOGI(LNN_LANE, "lane link fail, laneReqId=%{public}u, reason=%{public}d", laneReqId, reason);
-    if (UpdateLinkStatus(laneReqId, BUILD_LINK_STATUS_FAIL, linkType, NULL) != SOFTBUS_OK) {
+    if (UpdateLinkStatus(laneReqId, BUILD_LINK_STATUS_FAIL, linkType, NULL, failReason) != SOFTBUS_OK) {
         return;
     }
     if (IsNeedNotifySucc(laneReqId)) {
         RemoveLinkTimeoutMessage(laneReqId, LANE_LINK_TYPE_BUTT);
         NotifyLinkSucc(laneReqId);
         DeleteLaneLinkNode(laneReqId);
-    } else if (IsNeedNotifyFail(laneReqId, reason, linkType, &failReason)) {
+    } else if (IsNeedNotifyFail(laneReqId)) {
         RemoveLinkTimeoutMessage(laneReqId, LANE_LINK_TYPE_BUTT);
-        NotifyLaneAllocFail(laneReqId, failReason);
+        NotifyLaneAllocFail(laneReqId, GetErrCodeWithLock(laneReqId));
         DeleteLaneLinkNode(laneReqId);
     } else {
         BuildLinkRetry(laneReqId);
