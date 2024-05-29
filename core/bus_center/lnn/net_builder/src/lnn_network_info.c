@@ -306,6 +306,7 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             break;
         case SOFTBUS_WIFI_CONNECTED:
             (void)LnnSetNetCapability(capability, BIT_WIFI);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
             LnnSetNetBandCapability(capability);
             *needSync = true;
             break;
