@@ -98,10 +98,10 @@ if (defined(ohos_lite)) {
     ]
 
     deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
-    external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "c_utils:utilsbase",
-    ]
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
+    if (is_standard_system) {
+      external_deps += [ "c_utils:utils" ]
+    }
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
