@@ -1137,7 +1137,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
     }
     char *anonyNetworkId = NULL;
     Anonymize(g_localNetLedger.localInfo.networkId, &anonyNetworkId);
-    g_localNetLedger.localInfo.networkIdTimestamp = SoftBusGetSysTimeMs();
+    g_localNetLedger.localInfo.networkIdTimestamp = (int64_t)SoftBusGetSysTimeMs();
     LNN_LOGI(LNN_LEDGER, "networkId change, reset networkId=%{public}s, networkIdTimestamp=%{public}" PRId64,
         anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore(STRING_KEY_NETWORKID);
