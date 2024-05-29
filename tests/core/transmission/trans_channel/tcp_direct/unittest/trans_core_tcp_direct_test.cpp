@@ -268,7 +268,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
 
     connOpt.type = CONNECT_P2P;
     ret = TransOpenDirectChannel(appInfo, &connOpt, &channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
     ret = TransOpenDirectChannel(NULL, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -421,11 +421,11 @@ HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
     uint32_t flag = 0;
 
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 
     authHandle.authId = INVALID_VALUE;
     ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 
 /**
@@ -553,7 +553,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId, 0);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
 
     TransSrvDataListDeinit();
 }
@@ -569,7 +569,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     int errCode = SOFTBUS_OK;
     int32_t channelId = 1;
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
     SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
@@ -589,7 +589,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
     conn->serverSide = false;
     ret = TransSessionMgrInit();
@@ -600,7 +600,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
     TransSessionMgrDeinit();
     SoftBusFree(conn);
 }

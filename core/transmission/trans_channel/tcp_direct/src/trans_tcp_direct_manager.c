@@ -174,34 +174,30 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
 
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 {
-    if (cb == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param invalid");
+
     int32_t ret = P2pDirectChannelInit();
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
             TRANS_LOGE(TRANS_INIT, "init p2p direct channel failed");
-            return SOFTBUS_NO_INIT;
+            return ret;
         }
         TRANS_LOGW(TRANS_INIT, "p2p direct channel not support.");
     }
-    if (TransSrvDataListInit() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "init srv trans tcp direct databuf list failed");
-        return SOFTBUS_NO_INIT;
-    }
-    if (TransTdcSetCallBack(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "set srv trans tcp dierct call failed");
-        return SOFTBUS_ERR;
-    }
-    if (RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, TransTdcTimerProc) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "RegisterTimeoutCallback failed");
-        return SOFTBUS_ERR;
-    }
-    if (CreatSessionConnList() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "CreatSessionConnList failed");
-        return SOFTBUS_ERR;
-    }
+
+    ret = TransSrvDataListInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_INIT, "init srv trans tcp direct databuf list failed");
+
+    ret = TransTdcSetCallBack(cb);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set srv trans tcp dierct call failed");
+
+    ret = RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, TransTdcTimerProc);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "RegisterTimeoutCallback failed");
+
+    ret = CreatSessionConnList();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "CreatSessionConnList failed");
+
     return SOFTBUS_OK;
 }
 
@@ -277,8 +273,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SOFTBUS_ERR;
-    ret = TransUpdAppInfo((AppInfo *)appInfo, connInfo);
+    int32_t ret = TransUpdAppInfo((AppInfo *)appInfo, connInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "udp app fail");
         return ret;

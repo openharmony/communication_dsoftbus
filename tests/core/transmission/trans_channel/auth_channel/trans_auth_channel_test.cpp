@@ -139,7 +139,7 @@ static int32_t TestGenerateAppInfo(AppInfo *appInfo)
 HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest001, TestSize.Level1)
 {
     int32_t ret = GetAuthChannelInfoByChanId(TRANS_TEST_CHANNEL_ID, NULL);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
     ret = GetAuthIdByChannelId(TRANS_TEST_CHANNEL_ID);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret =  GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID, NULL);

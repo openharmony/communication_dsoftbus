@@ -298,7 +298,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyKeepAlvieChanTest001, TestSiz
 
     chanInfo->peerId = TEST_MESSAGE_CHANNEL_VALID_ID;
     ret = TransProxyKeepAlvieChan(chanInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     TransProxyDelByConnId(connId);
     SoftBusFree(chanInfo);
 }
@@ -314,11 +314,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAuthIdTest001, TestSize.Le
     AuthHandle authHandle = { 0 };
     int32_t channelId = TEST_NUMBER_VALID;
     int32_t ret = TransProxyGetAuthId(channelId, &authHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channelId = m_testProxyAuthChannelId;
     ret = TransProxyGetAuthId(channelId, &authHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -507,15 +507,15 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest002,
     ConnectOption* connOpt = NULL;
 
     ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     connOpt = (ConnectOption *)SoftBusMalloc(sizeof(ConnectOption));
     ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channelId = TEST_MESSAGE_CHANNEL_ID;
     ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -831,7 +831,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest002, TestSize.
 
     chanInfo->peerId = TEST_MESSAGE_CHANNEL_VALID_ID;
     ret = TransProxyKeepAlvieChan(chanInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     SoftBusFree(chanInfo);
 }
 
@@ -932,8 +932,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransChanIsEqualTest001, TestSize.Level
     info2.peerId = TEST_NUMBER_ZERO;
     (void)strcpy_s(info2.identity, sizeof(info2.identity), TEST_CHANNEL_INDENTITY);
 
-    int ret = ChanIsEqual(&info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool ret = ChanIsEqual(&info1, &info2);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -956,14 +956,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransResetChanIsEqualTest001, TestSize.
     info2.peerId = TEST_NUMBER_ZERO;
     (void)strcpy_s(info2.identity, sizeof(info2.identity), TEST_CHANNEL_INDENTITY);
 
-    int32_t ret = ResetChanIsEqual(PROXY_CHANNEL_STATUS_HANDSHAKEING, &info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool ret = ResetChanIsEqual(PROXY_CHANNEL_STATUS_HANDSHAKEING, &info1, &info2);
+    EXPECT_EQ(ret, true);
     ret = ResetChanIsEqual(status, &info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, true);
 
     info1.myId = TEST_NUMBER_TWO;
     ret = ResetChanIsEqual(status, &info1, &info2);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(true, ret);
 }
 
 /**
@@ -1048,8 +1048,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransChanIsEqualTest002, TestSize.Level
     info2.peerId = 0;
     (void)strcpy_s(info2.identity, sizeof(info2.identity), TEST_CHANNEL_INDENTITY);
 
-    int ret = ChanIsEqual(&info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool ret = ChanIsEqual(&info1, &info2);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -1072,14 +1072,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransResetChanIsEqualTest002, TestSize.
     info2.peerId = 0;
     (void)strcpy_s(info2.identity, sizeof(info2.identity), TEST_CHANNEL_INDENTITY);
 
-    int ret = ResetChanIsEqual(PROXY_CHANNEL_STATUS_HANDSHAKEING, &info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool ret = ResetChanIsEqual(PROXY_CHANNEL_STATUS_HANDSHAKEING, &info1, &info2);
+    EXPECT_EQ(ret, true);
     ret = ResetChanIsEqual(status, &info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, true);
 
     info1.myId = 2;
     ret = ResetChanIsEqual(status, &info1, &info2);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(true, ret);
 }
 
 /**
@@ -1197,10 +1197,10 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest001,
     channelInfo.status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
     channelInfo.connId = 1;
     ret = TransProxySpecialUpdateChanInfo(&channelInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     channelInfo.type = CONNECT_TYPE_MAX;
     ret = TransProxySpecialUpdateChanInfo(&channelInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -1218,7 +1218,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByChanIdTest001, TestS
     int32_t ret = TransProxyGetChanByChanId(chanId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyGetChanByChanId(chanId, &chan);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**

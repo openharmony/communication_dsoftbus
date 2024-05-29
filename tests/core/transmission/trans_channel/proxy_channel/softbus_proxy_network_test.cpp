@@ -254,7 +254,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Lev
     /* test app type is inner */
     appInfo.appType = APP_TYPE_INNER;
     ret = OnProxyChannelClosed(channelId, &appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
 
 /**

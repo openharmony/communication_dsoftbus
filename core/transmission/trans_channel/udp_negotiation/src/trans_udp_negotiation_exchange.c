@@ -174,7 +174,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
     size_t len = 0;

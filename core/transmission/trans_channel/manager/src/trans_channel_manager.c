@@ -410,7 +410,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
     return channelId;
 EXIT_ERR:
     extra.result = EVENT_STAGE_RESULT_FAILED;
-    extra.errcode = SOFTBUS_ERR;
+    extra.errcode = SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     return INVALID_CHANNEL_ID;
 }
@@ -487,12 +487,12 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
         ret = SOFTBUS_OK;
     } else {
         TRANS_LOGE(TRANS_QOS, "requestQos invalid. quality=%{public}d", quality);
-        ret = SOFTBUS_ERR;
+        ret = SOFTBUS_TRANS_REQUEST_QOS_INVALID;
     }
 
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_QOS, "request Qos fail, quality=%{public}d, ret=%{public}d", quality, ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_REQUEST_QOS_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -525,7 +525,7 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
 
 int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     ConnectOption connOpt;
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
@@ -535,7 +535,7 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
             ret = TransProxyGetConnOptionByChanId(channelId, &connOpt);
             break;
         default:
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
             TRANS_LOGE(TRANS_CTRL, "invalid. channelId=%{public}d, channelType=%{public}d.", channelId, channelType);
     }
     if (ret != SOFTBUS_OK) {

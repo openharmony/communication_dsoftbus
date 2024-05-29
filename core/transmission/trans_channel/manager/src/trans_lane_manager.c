@@ -231,7 +231,7 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             TRANS_LOGI(TRANS_SVC,
                 "trans lane info has existed. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
-            return SOFTBUS_ERR;
+            return SOFTBUS_ALREADY_EXISTED;
         }
     }
     ListInit(&(newLane->node));
@@ -279,7 +279,7 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     TRANS_LOGE(TRANS_SVC, "trans lane not found. channelId=%{public}d, channelType=%{public}d",
         channelId, channelType);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
 void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
@@ -335,7 +335,7 @@ int32_t TransGetLaneHandleByChannelId(int32_t channelId, uint32_t *laneHandle)
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
 int32_t TransGetLaneIdByChannelId(int32_t channelId, uint64_t *laneId)
@@ -376,7 +376,7 @@ int32_t TransGetChannelInfoByLaneHandle(uint32_t laneHandle, int32_t *channelId,
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
 static SocketWithChannelInfo *GetSocketWithChannelInfoBySession(const char *sessionName, int32_t sessionId)
