@@ -30,7 +30,7 @@ public:
 
 private:
     std::vector<DistributedKv::Entry> ConvertCloudChangeDataToEntries(const std::vector<std::string> &keys);
-    void SelectChangeType(const std::vector<DistributedKv::Entry> &records);
+    void SelectChangeType(const std::vector<DistributedKv::Entry> &records, const bool &isInsert = false);
     void HandleAddChange(const std::vector<DistributedKv::Entry> &insertRecords);
     void HandleUpdateChange(const std::vector<DistributedKv::Entry> &updateRecords);
     void HandleDeleteChange(const std::vector<DistributedKv::Entry> &deleteRecords);
