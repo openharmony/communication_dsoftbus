@@ -463,6 +463,7 @@ static void HbDelayConditionChanged(void *para)
     LNN_LOGI(LNN_HEART_BEAT, "HB handle delay condition changed");
     LnnUpdateSendInfoStrategy(UPDATE_HB_ACCOUNT_INFO);
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
+    g_hbConditionState.heartbeatEnable = true;
     HbConditionChanged(false);
 }
 
@@ -480,10 +481,11 @@ static int32_t HbTryCloudSync(void)
         return SOFTBUS_ERR;
     }
     int32_t ret = LnnLedgerAllDataSyncToDB(&info);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB sync to cloud fail");
-    } else {
+    if (ret == SOFTBUS_OK) {
+        g_hbConditionState.heartbeatEnable = false;
         LNN_LOGI(LNN_HEART_BEAT, "HB sync to cloud end");
+    } else {
+        LNN_LOGE(LNN_HEART_BEAT, "HB sync to cloud fail");
     }
     return ret;
 }
