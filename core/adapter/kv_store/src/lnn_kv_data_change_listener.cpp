@@ -165,10 +165,10 @@ void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Ent
                 --iter;
             }
         }
-        if (entries.size() == CLOUD_SYNC_INFO_SIZE || isInsert) {
+        if (entries.size() == CLOUD_SYNC_INFO_SIZE) {
             LNN_LOGI(LNN_LEDGER, "add! entriesSize=%{public}zu", entries.size());
             HandleAddChange(entries);
-        } else {
+        } else if (!isInsert) {
             LNN_LOGI(LNN_LEDGER, "update! entriesSize=%{public}zu", entries.size());
             HandleUpdateChange(entries);
         }
