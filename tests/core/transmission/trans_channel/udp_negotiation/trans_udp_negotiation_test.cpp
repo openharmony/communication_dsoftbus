@@ -181,7 +181,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest03, TestSize.Level1)
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = TEST_CHANNEL_ID;
     appInfo->linkType = LANE_BLE;
-    strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_sessionName);
+    (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_sessionName);
     ConnectOption *connOpt = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
     EXPECT_TRUE(connOpt != NULL);
     memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
