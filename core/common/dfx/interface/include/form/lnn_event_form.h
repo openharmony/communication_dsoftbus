@@ -113,6 +113,7 @@ typedef struct {
     int32_t errcode;                                          // ERROR_CODE
     int32_t lnnType;                                          // LNN_TYPE
     int32_t onlineNum;                                        // ONLINE_NUM
+    int32_t onlineType;                                       // ONLINE_TYPE
     char peerBleMac[BT_MAC_LEN];                              // PEER_BLE_MAC
     char peerUdid[UDID_BUF_LEN];                              // PEER_UDID
     char peerNetworkId[NETWORK_ID_BUF_LEN];                   // PEER_NET_ID
