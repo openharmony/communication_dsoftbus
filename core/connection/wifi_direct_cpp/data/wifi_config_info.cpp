@@ -18,7 +18,6 @@
 #include "softbus_error_code.h"
 
 namespace OHOS::SoftBus {
-static constexpr int LENGTH_HEADER = 2;
 template <>
 InfoContainer<WifiConfigInfoKey>::KeyTypeTable InfoContainer<WifiConfigInfoKey>::keyTypeTable_ = {
     {WifiConfigInfoKey::INTERFACE_INFO_ARRAY, Serializable::ValueType::INTERFACE_INFO_ARRAY},
@@ -27,21 +26,14 @@ InfoContainer<WifiConfigInfoKey>::KeyTypeTable InfoContainer<WifiConfigInfoKey>:
 
 WifiConfigInfo::WifiConfigInfo(std::vector<uint8_t> &config)
 {
-    std::vector<uint8_t> configInfo = config;
-    configInfo.erase(configInfo.begin(), configInfo.begin() + LENGTH_HEADER);
-    WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
+    auto pro = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
     if (pro == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "create tlv protocol failed");
         return;
     }
     pro->SetFormat(ProtocolFormat { TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE1 });
-    Unmarshalling(*pro, configInfo);
-    delete pro;
+    Unmarshalling(*pro, std::vector<uint8_t>(config.begin() + HEADER_LEN, config.end()));
 }
-
-WifiConfigInfo::~WifiConfigInfo() { }
-
-WifiConfigInfo::WifiConfigInfo() { }
 
 int WifiConfigInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint8_t> &input)
 {
@@ -67,14 +59,13 @@ void WifiConfigInfo::MarshallingInterfaceArray(WifiDirectProtocol &protocol) con
 {
     auto interfaceArray = GetInterfaceInfoArray();
     for (const auto &interface : interfaceArray) {
-        WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
+        auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
         if (pro != nullptr) {
-            std::vector<uint8_t> interfaceOutput;
+            std::vector<uint8_t> output;
             pro->SetFormat(protocol.GetFormat());
-            interface.Marshalling(*pro, interfaceOutput);
+            interface.Marshalling(*pro, output);
             protocol.Write(static_cast<int>(WifiConfigInfoKey::INTERFACE_INFO_ARRAY),
-                Serializable::ValueType::INTERFACE_INFO_ARRAY, interfaceOutput.data(), interfaceOutput.size());
-            delete pro;
+                           Serializable::ValueType::INTERFACE_INFO_ARRAY, output.data(), output.size());
         }
     }
 }
@@ -97,21 +88,14 @@ int WifiConfigInfo::Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_
 
 void WifiConfigInfo::UnmarshallingInterfaceArray(WifiDirectProtocol &protocol, uint8_t *data, size_t size)
 {
-    if (data == nullptr) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "invalil para data");
-        return;
-    }
-    WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
-    if (pro == nullptr) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "create protocol failed");
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGW(data != nullptr, CONN_WIFI_DIRECT, "data is nullptr");
+    auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
+    CONN_CHECK_AND_RETURN_LOGE(pro != nullptr, CONN_WIFI_DIRECT, "create protocol failed");
     pro->SetFormat(ProtocolFormat { TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE1 });
 
     InterfaceInfo info;
     std::vector<uint8_t> input(data, data + size);
     info.Unmarshalling(*pro, input);
-    delete pro;
     auto interfaceArray = GetInterfaceInfoArray();
     interfaceArray.push_back(info);
     SetInterfaceInfoArray(interfaceArray);
@@ -147,5 +131,4 @@ std::string WifiConfigInfo::GetDeviceId() const
 {
     return Get(WifiConfigInfoKey::DEVICE_ID, std::string(""));
 }
-
 } // namespace OHOS::SoftBus

@@ -32,8 +32,7 @@ int WifiDirectRoleOption::GetExpectedRole(
             expectedRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO;
         }
         isStrict = false;
-    } else if (type == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML || type == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
-               type == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
+    } else if (type == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
         enum WifiDirectRole role = GetExpectedP2pRole(networkId);
         if (role == WIFI_DIRECT_ROLE_GC) {
             expectedRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_HML;
@@ -43,6 +42,10 @@ int WifiDirectRoleOption::GetExpectedRole(
             expectedRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
         }
         isStrict = false;
+    } else if (type == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
+        type == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML || type == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML) {
+        expectedRole = WIFI_DIRECT_API_ROLE_HML;
+        isStrict = true;
     } else {
         CONN_LOGW(CONN_WIFI_DIRECT, "type invalid. type=%{public}d", type);
         return SOFTBUS_INVALID_PARAM;

@@ -92,6 +92,8 @@ struct WifiDirectLink {
     int32_t remotePort;
     enum WifiDirectLinkType linkType;
     enum WifiDirectBandWidth bandWidth;
+    bool isReuse;
+    int channelId;
 };
 
 enum WifiDirectNegoChannelType {
