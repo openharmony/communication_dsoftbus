@@ -152,8 +152,19 @@ static bool CheckInterfaceCommonArgs(const LnnConnectionFsm *connFsm, bool needC
 static void NotifyJoinResult(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
-
     if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_REQUEST) != 0) {
+        LnnNotifyJoinResult(&connInfo->addr, networkId, retCode);
+        connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_ACTIVE;
+        return;
+    }
+    NodeInfo *nodeInfo = connInfo->nodeInfo;
+    if (retCode == SOFTBUS_OK && nodeInfo != NULL) {
+        if (connInfo->addr.type == CONNECTION_ADDR_WLAN &&
+            connInfo->addr.info.ip.port != nodeInfo->connectInfo.authPort) {
+            LNN_LOGI(LNN_BUILDER, "before port =%{public}d, after port=%{public}d",
+                connInfo->addr.info.ip.port, nodeInfo->connectInfo.authPort);
+            connInfo->addr.info.ip.port = nodeInfo->connectInfo.authPort;
+        }
         LnnNotifyJoinResult(&connInfo->addr, networkId, retCode);
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_ACTIVE;
@@ -698,7 +709,8 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         SetLnnConnNodeInfo(connInfo, networkId, connFsm, retCode);
     } else if (retCode != SOFTBUS_OK) {
         NotifyJoinResult(connFsm, networkId, retCode);
-        AuthHandleLeaveLNN(connInfo->authHandle);
+        connFsm->isDead = true;
+        LnnNotifyAuthHandleLeaveLNN(connInfo->authHandle);
     }
     
     int32_t infoNum = 0;
@@ -726,7 +738,6 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     if (retCode != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "join failed, ready clean, [id=%{public}u], retCode=%{public}d", connFsm->id, retCode);
-        connFsm->isDead = true;
         LnnRequestCleanConnFsm(connFsm->id);
         return;
     }
