@@ -450,6 +450,10 @@ static int32_t GetUdidHashForDfx(char *localUdidHash, char *peerUdidHash, LnnCon
 {
     int32_t rc = SOFTBUS_OK;
     const NodeInfo *localInfo = LnnGetLocalNodeInfo();
+    if (localInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "localInfo is NULL");
+        return SOFTBUS_ERR;
+    }
     uint8_t hash[UDID_HASH_LEN] = { 0 };
     rc = SoftBusGenerateStrHash((uint8_t *)localInfo->deviceInfo.deviceUdid, strlen(localInfo->deviceInfo.deviceUdid),
         hash);
@@ -463,7 +467,8 @@ static int32_t GetUdidHashForDfx(char *localUdidHash, char *peerUdidHash, LnnCon
         return rc;
     }
     if (connInfo->addr.type == CONNECTION_ADDR_WLAN) {
-        if (strcpy_s(peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN, (char *)connInfo->addr.info.ip.udidHash) != EOK) {
+        if (strncpy_s(peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, (char *)connInfo->addr.info.ip.udidHash,
+            HB_SHORT_UDID_HASH_HEX_LEN) != EOK) {
             LNN_LOGE(LNN_BUILDER, "strcpy_s wifi udidhash fail");
             return SOFTBUS_STRCPY_ERR;
         }
