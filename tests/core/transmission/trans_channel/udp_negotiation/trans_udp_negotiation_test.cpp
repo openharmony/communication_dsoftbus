@@ -34,6 +34,7 @@
 #include "disc_event_manager.h"
 #include "softbus_conn_ble_direct.h"
 #include "message_handler.h"
+#include "lnn_lane_interface.h"
 
 using namespace testing::ext;
 
@@ -179,10 +180,12 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest03, TestSize.Level1)
     EXPECT_TRUE(appInfo != NULL);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = TEST_CHANNEL_ID;
+    appInfo->linkType = LANE_BLE;
+    (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_sessionName);
     ConnectOption *connOpt = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
     EXPECT_TRUE(connOpt != NULL);
     memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    connOpt->type = CONNECT_TCP;
+    connOpt->type = CONNECT_TYPE_MAX;
     connOpt->socketOption.port = TEST_SOCKET_PORT;
     int32_t channelId = 0;
     ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
