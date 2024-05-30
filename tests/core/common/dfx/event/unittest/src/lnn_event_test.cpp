@@ -73,7 +73,7 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
         .lnnType = 11,
         .onlineNum = 12,
         .peerDeviceAbility = 13,
-        .onlineType = 0,
+        .onlineType = 14,
         .peerDeviceInfo = "testPeerDeviceInfo",
         .peerIp = "10.11.12.1",
         .peerBrMac = "dd:15:bc:b9:f2:04",

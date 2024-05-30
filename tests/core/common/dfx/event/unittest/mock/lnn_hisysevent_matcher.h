@@ -136,6 +136,18 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     ++index;
     EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
     EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    Anonymize(extra.localUdidHash, &anonyStr);
+    EXPECT_STREQ(params[index].v.s, anonyStr);
+    AnonymizeFree(anonyStr);
+    ++index;
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    Anonymize(extra.peerUdidHash, &anonyStr);
+    EXPECT_STREQ(params[index].v.s, anonyStr);
+    AnonymizeFree(anonyStr);
+    ++index;
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
     EXPECT_STREQ(params[index].v.s, extra.callerPkg);
     ++index;
     EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
