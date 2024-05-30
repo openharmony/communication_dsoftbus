@@ -2713,29 +2713,23 @@ int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, in
         TRANS_LOGE(TRANS_MSG, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
-
-    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if ((strcmp(serverNode->sessionName, sessionName) != 0) || IsListEmpty(&serverNode->sessionList)) {
-            continue;
-        }
-
-        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->sessionId == sessionId) {
-                sessionNode->channelId = channelId;
-                sessionNode->channelType = (ChannelType)channelType;
-                sessionNode->lifecycle.sessionState = SESSION_STATE_OPENED;
-                (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-                return SOFTBUS_OK;
-            }
-        }
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", sessionId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
-
+    if (sessionNode->lifecycle.sessionState == SESSION_STATE_CANCELLING) {
+        TRANS_LOGW(TRANS_SDK, "this socket already in cancelling state. socketFd=%{public}d", sessionId);
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        return sessionNode->lifecycle.bindErrCode;
+    }
+    sessionNode->channelId = channelId;
+    sessionNode->channelType = (ChannelType)channelType;
+    sessionNode->lifecycle.sessionState = SESSION_STATE_OPENED;
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_MSG, "not found session info with sessionId=%{public}d", sessionId);
-    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    return SOFTBUS_OK;
 }
 
 int32_t GetSocketLifecycleAndSessionNameBySessionId(
