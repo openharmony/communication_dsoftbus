@@ -97,6 +97,22 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void TransGetUdpInfo(const cJSON *msg, AppInfo *appInfo) 
+{
+    (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
+    (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
+    (void)GetJsonObjectStringItem(msg, "CLIENT_BUS_NAME", appInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX);
+    (void)GetJsonObjectStringItem(msg, "GROUP_ID", appInfo->groupId, GROUP_ID_SIZE_MAX);
+
+    (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int *)&(appInfo->peerData.apiVersion));
+    (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
+    (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
+    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int *)&(appInfo->businessType));
+    (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int *)&(appInfo->streamType));
+    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int *)&(appInfo->udpChannelOptType));
+    (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int *)&(appInfo->udpConnType));
+}
+
 int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
@@ -111,18 +127,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
         SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
 
-    (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
-    (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
-    (void)GetJsonObjectStringItem(msg, "CLIENT_BUS_NAME", appInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX);
-    (void)GetJsonObjectStringItem(msg, "GROUP_ID", appInfo->groupId, GROUP_ID_SIZE_MAX);
-
-    (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int*)&(appInfo->peerData.apiVersion));
-    (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
-    (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
-    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int*)&(appInfo->businessType));
-    (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int*)&(appInfo->streamType));
-    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int *)&(appInfo->udpChannelOptType));
-    (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int *)&(appInfo->udpConnType));
+    TransGetUdpInfo(msg, appInfo);
 
     int code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
