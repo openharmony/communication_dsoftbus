@@ -102,7 +102,7 @@ private:
         { PKT_STATISTICS, FT_CONF_APP_FC_STATISTICS },
         { PKT_LOSS, FT_CONF_APP_FC_RECV_PKT_LOSS },
     };
-
+    bool EncryptStreamPacket(std::unique_ptr<IStream> stream, std::unique_ptr<char[]> &data, ssize_t &len);
     bool ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer, int32_t &dataLength,
         std::unique_ptr<char[]> &extBuffer, int32_t &extLen, StreamFrameInfo &info);
     void InsertElementToFuncMap(int type, ValueType valueType, MySetFunc set, MyGetFunc get);

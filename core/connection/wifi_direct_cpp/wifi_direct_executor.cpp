@@ -57,11 +57,10 @@ void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
     processor_ = std::move(processor);
     do {
         if (IsActive()) {
-            trace_ = std::make_shared<WifiDirectTrace>(WifiDirectUtils::GetLocalUuid(), remoteDeviceId_);
+            WifiDirectTrace::StartTrace(WifiDirectUtils::GetLocalUuid(), remoteDeviceId_);
         } else {
-            trace_ = std::make_shared<WifiDirectTrace>(remoteDeviceId_, WifiDirectUtils::GetLocalUuid());
+            WifiDirectTrace::StartTrace(remoteDeviceId_, WifiDirectUtils::GetLocalUuid());
         }
-        trace_->StartTrace();
 
         processor_->BindExecutor(this);
         try {
@@ -73,10 +72,9 @@ void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
             ProcessUnHandleCommand();
         }
 
-        trace_->StopTrace();
-        trace_ = nullptr;
         std::lock_guard lock(processorLock_);
         processor_ = nullptr;
+        WifiDirectTrace::StopTrace();
     } while (scheduler_.ProcessNextCommand(this, processor_));
 
     CONN_LOGI(CONN_WIFI_DIRECT, "executor terminate");

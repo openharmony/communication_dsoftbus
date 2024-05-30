@@ -101,6 +101,16 @@ typedef enum SoftBusP2pDeviceStatus {
     SOFTBUS_API_WIFI_PDS_UNAVAILABLE
 } SoftBusP2pDeviceStatus;
 
+typedef enum SoftBusWifiDetailState {
+    SOFTBUS_WIFI_STATE_UNKNOWN = -1,
+    SOFTBUS_WIFI_STATE_INACTIVE,
+    SOFTBUS_WIFI_STATE_ACTIVED,
+    SOFTBUS_WIFI_STATE_ACTIVATING,
+    SOFTBUS_WIFI_STATE_DEACTIVATING,
+    SOFTBUS_WIFI_STATE_SEMIACTIVATING,
+    SOFTBUS_WIFI_STATE_SEMIACTIVE,
+} SoftBusWifiDetailState;
+
 typedef struct SoftBusWifiP2pWfdInfo {
     int32_t wfdEnabled; /* 0: false, 1: true */
     int32_t deviceInfo;
@@ -151,6 +161,8 @@ bool SoftBusHasWifiDirectCapability(void);
 bool SoftBusIsWifiTripleMode(void);
 char* SoftBusGetWifiInterfaceCoexistCap(void);
 bool SoftBusIsWifiActive(void);
+SoftBusWifiDetailState SoftBusGetWifiState(void);
+bool SoftBusIsWifiP2pEnabled(void);
 
 #ifdef __cplusplus
 }

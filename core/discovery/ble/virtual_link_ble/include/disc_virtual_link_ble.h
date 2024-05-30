@@ -12,17 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NULL_NEGOTIATE_CHANNEL_H
-#define NULL_NEGOTIATE_CHANNEL_H
 
-#include "channel/negotiate_channel.h"
+#ifndef DISC_VIRTUAL_LINK_BLE_H
+#define DISC_VIRTUAL_LINK_BLE_H
 
-namespace OHOS::SoftBus {
-class NullNeotiateChannel : public NegotiateChannel {
-public:
-    ~NullNeotiateChannel() override;
-    int SendMessage(const NegotiateMessage &msg) const override;
-    std::string GetRemoteDeviceId() const override;
-};
-} // namespace OHOS::SoftBus
-#endif
+#include "disc_ble_dispatcher.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+DiscoveryBleDispatcherInterface *DiscVLinkBleInit(DiscInnerCallback *discInnerCb);
+void DiscVLinkBleDeinit(void);
+int32_t DiscVLinkBleEventInit(void);
+void DiscVLinkBleEventDeinit(void);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DISC_VIRTUAL_LINK_BLE_H */

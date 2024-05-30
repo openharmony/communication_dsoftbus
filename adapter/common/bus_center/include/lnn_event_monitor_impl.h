@@ -48,6 +48,8 @@ void LnnDeinitProductMonitorImpl(void);
 
 void LnnDeinitDriverMonitorImpl(void);
 
+void LnnDeInitNetlinkMonitorImpl(void);
+
 #ifdef __cplusplus
 }
 #endif

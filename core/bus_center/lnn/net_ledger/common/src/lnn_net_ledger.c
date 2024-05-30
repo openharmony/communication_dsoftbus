@@ -34,6 +34,8 @@
 #include "lnn_meta_node_interface.h"
 #include "lnn_p2p_info.h"
 #include "lnn_device_info_recovery.h"
+#include "lnn_feature_capability.h"
+#include "lnn_ble_lpdevice.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
@@ -119,7 +121,7 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     return false;
 }
 
-static void LnnRestoreLocalDeviceInfo()
+static void RestoreLocalDeviceInfo(void)
 {
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
     if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
@@ -127,8 +129,9 @@ static void LnnRestoreLocalDeviceInfo()
         const NodeInfo *temp = LnnGetLocalNodeInfo();
         if (LnnSaveLocalDeviceInfo(temp) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save local device info fail");
+        } else {
+            LNN_LOGI(LNN_LEDGER, "save local device info success");
         }
-        LNN_LOGI(LNN_LEDGER, "save local device info success");
     } else {
         NodeInfo info;
         (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -165,8 +168,19 @@ static void LnnRestoreLocalDeviceInfo()
     LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
 }
 
+static void LnnSetLocalFeature(void)
+{
+    if (IsSupportLpFeature()) {
+        uint64_t feature = 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
+        if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set feature fail");
+        }
+    }
+}
+
 int32_t LnnInitNetLedgerDelay(void)
 {
+    LnnSetLocalFeature();
     LnnLoadLocalDeviceAccountIdInfo();
     LnnInitCloudSyncModule();
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
@@ -177,7 +191,7 @@ int32_t LnnInitNetLedgerDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
         return SOFTBUS_ERR;
     }
-    LnnRestoreLocalDeviceInfo();
+    RestoreLocalDeviceInfo();
     return SOFTBUS_OK;
 }
 
@@ -188,7 +202,7 @@ void LnnDeinitNetLedger(void)
     LnnDeinitLocalLedger();
     LnnDeinitHuksInterface();
     LnnDeinitMetaNodeExtLedger();
-    LnnDeInitCloudSyncModule();    
+    LnnDeInitCloudSyncModule();
 }
 
 static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
@@ -325,25 +339,21 @@ int32_t LnnSetDataLevel(const DataLevel *dataLevel)
         LNN_LOGE(LNN_LEDGER, "Set data dynamic level failed");
         return SOFTBUS_ERR;
     }
-
     uint16_t staticLevel = dataLevel->staticLevel;
     if (LnnSetLocalNumU16Info(NUM_KEY_DATA_STATIC_LEVEL, staticLevel) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Set data static level failed");
         return SOFTBUS_ERR;
     }
-
     uint32_t switchLevel = dataLevel->switchLevel;
     if (LnnSetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, switchLevel) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Set data switch level faield");
         return SOFTBUS_ERR;
     }
-
     uint16_t switchLength = dataLevel->switchLength;
     if (LnnSetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, switchLength) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Set data switch length failed");
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 

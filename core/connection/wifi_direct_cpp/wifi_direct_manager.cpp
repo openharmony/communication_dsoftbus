@@ -124,12 +124,6 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     int32_t ret = OHOS::SoftBus::WifiDirectRoleOption::GetInstance().GetExpectedRole(
         info->remoteNetworkId, info->connectType, info->expectApiRole, info->isStrict);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
-    CONN_LOGI(CONN_WIFI_DIRECT,
-        "requestId=%{public}d, pid=%{public}d, type=%{public}d, expectRole=0x%{public}x",
-        info->requestId,
-        info->pid,
-        info->connectType,
-        info->expectApiRole);
     ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
     extra.errcode = ret;
     extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
@@ -329,7 +323,7 @@ static void NotifyDisconnectedForSink(
 
 bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != NULL, true, CONN_WIFI_DIRECT, "remote networkid is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, true, CONN_WIFI_DIRECT, "remote networkid is null");
     auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
     CONN_CHECK_AND_RETURN_RET_LOGE(!remoteUuid.empty(), true, CONN_WIFI_DIRECT, "get remote uuid failed");
 

@@ -206,20 +206,20 @@ static int32_t DBCipherInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, con
             return SOFTBUS_KV_CONVERT_BYTES_FAILED;
         }
     } else if (strcmp(fieldName, DEVICE_INFO_JSON_KEY_TABLE_MIAN) == 0 && valueLength < BLE_BROADCAST_IV_LEN + 1) {
-        LNN_LOGI(LNN_BUILDER, "cipher table mian info no need update into nodeinfo");
+        LNN_LOGD(LNN_BUILDER, "cipher table mian info no need update into nodeinfo");
     } else if (strcmp(fieldName, DEVICE_INFO_JSON_KEY_TOTAL_LIFE) == 0) {
-        LNN_LOGI(LNN_BUILDER, "cipher total life info no need update into nodeinfo");
+        LNN_LOGD(LNN_BUILDER, "cipher total life info no need update into nodeinfo");
     } else if (strcmp(fieldName, DEVICE_INFO_JSON_KEY_TIMESTAMP_BEGIN) == 0) {
-        LNN_LOGI(LNN_BUILDER, "cipher timestamp begin info no need update into nodeinfo");
+        LNN_LOGD(LNN_BUILDER, "cipher timestamp begin info no need update into nodeinfo");
     } else if (strcmp(fieldName, DEVICE_INFO_JSON_KEY_CURRENT_INDEX) == 0) {
-        LNN_LOGI(LNN_BUILDER, "cipher current index info no need update into nodeinfo");
+        LNN_LOGD(LNN_BUILDER, "cipher current index info no need update into nodeinfo");
     } else if (strcmp(fieldName, DEVICE_INFO_DISTRIBUTED_SWITCH) == 0) {
-        LNN_LOGI(LNN_BUILDER, "distributed switch info no need update into nodeinfo");
+        LNN_LOGD(LNN_BUILDER, "distributed switch info no need update into nodeinfo");
     } else {
         LNN_LOGE(LNN_BUILDER, "fail:cipher info %{public}s valuelength over range", fieldName);
         return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGI(LNN_BUILDER, "success.");
+    LNN_LOGD(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
 }
 
@@ -230,6 +230,7 @@ static int32_t DBDeviceNameInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s devicename fail");
             return SOFTBUS_STRCPY_ERR;
         }
+        LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", cacheInfo->deviceInfo.deviceName);
     } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
         if (strcpy_s(cacheInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, value) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s unifiedname fail");
@@ -259,6 +260,10 @@ static int32_t DBDeviceBasicInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceUdid fail");
             return SOFTBUS_STRCPY_ERR;
         }
+        char *anonyUdid = NULL;
+        Anonymize(cacheInfo->deviceInfo.deviceUdid, &anonyUdid);
+        LNN_LOGI(LNN_BUILDER, "success, udid=%{public}s", anonyUdid);
+        AnonymizeFree(anonyUdid);
     } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_TYPE) == 0) {
         cacheInfo->deviceInfo.deviceTypeId = atoi(value);
     } else if (strcmp(fieldName, DEVICE_INFO_OS_TYPE) == 0) {
@@ -273,11 +278,15 @@ static int32_t DBDeviceBasicInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s uuid fail");
             return SOFTBUS_STRCPY_ERR;
         }
+        char *anoyUuid = NULL;
+        Anonymize(cacheInfo->uuid, &anoyUuid);
+        LNN_LOGI(LNN_BUILDER, "success, uuid=%{public}s", anoyUuid);
+        AnonymizeFree(anoyUuid);
     } else if (DBDeviceNameInfoSyncToCache(cacheInfo, fieldName, value, valueLength) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:DB device name info sync to cache fail");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "success.");
+    LNN_LOGD(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
 }
 
@@ -295,13 +304,13 @@ static int32_t DBNumInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const 
     } else if (strcmp(fieldName, DEVICE_INFO_ACCOUNT_ID) == 0) {
         cacheInfo->accountId = atoll(value);
     } else if (strcmp(fieldName, DEVICE_INFO_FEATURE) == 0) {
-        cacheInfo->feature = atoll(value);
+        cacheInfo->feature = (uint64_t)atoll(value);
         LNN_LOGI(LNN_BUILDER, "success. feature=%{public}" PRIu64 "", cacheInfo->feature);
     } else if (strcmp(fieldName, DEVICE_INFO_CONN_SUB_FEATURE) == 0) {
         cacheInfo->connSubFeature = atoll(value);
         LNN_LOGI(LNN_BUILDER, "success. connSubFeature=%{public}" PRIu64 "", cacheInfo->connSubFeature);
     } else if (strcmp(fieldName, DEVICE_INFO_AUTH_CAP) == 0) {
-        cacheInfo->authCapacity = atoi(value);
+        cacheInfo->authCapacity = (uint32_t)atoi(value);
         LNN_LOGI(LNN_BUILDER, "success. authCapacity=%{public}u", cacheInfo->authCapacity);
     }
     LNN_LOGD(LNN_BUILDER, "success.");
@@ -546,7 +555,7 @@ static int32_t SplitString(char splitKey[SPLIT_KEY_NUM][SPLIT_MAX_LEN], char spl
 
 static int32_t HandleDBAddChangeInternal(const char *key, const char *value, NodeInfo *cacheInfo)
 {
-    LNN_LOGI(LNN_BUILDER, "enter.");
+    LNN_LOGD(LNN_BUILDER, "enter.");
     if (key == NULL || value == NULL) {
         LNN_LOGE(LNN_BUILDER, "fail:invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -584,6 +593,7 @@ static int32_t HandleDBAddChangeInternal(const char *key, const char *value, Nod
         LNN_LOGE(LNN_BUILDER, "fail:DB data change batch sync to cache fail");
         return SOFTBUS_ERR;
     }
+    cacheInfo->localStateVersion = localCaheInfo.stateVersion;
     return SOFTBUS_OK;
 }
 
@@ -766,6 +776,7 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
 
 static int32_t HandleDBDeleteChangeInternal(const char *key, const char *value)
 {
+    (void)value;
     if (key == NULL) {
         LNN_LOGE(LNN_BUILDER, "fail:invalid param key");
         return SOFTBUS_INVALID_PARAM;
@@ -837,10 +848,27 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
             return SOFTBUS_ERR;
         }
     }
-
     FreeKeyAndValue(key, value, keySize);
+    char udidHash[UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (LnnGenerateHexStringHash((const unsigned char *)cacheInfo.deviceInfo.deviceUdid, udidHash, UDID_HASH_HEX_LEN) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Generate UDID HexStringHash fail");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo oldCacheInfo = { 0 };
+    if (LnnRetrieveDeviceInfo(udidHash, &oldCacheInfo) == SOFTBUS_OK &&
+        oldCacheInfo.stateVersion > cacheInfo.stateVersion) {
+        LNN_LOGE(LNN_BUILDER,
+            "fail: sync info is older, oldCacheInfo.stateVersion=%{public}d, cacheInfo.stateVersion=%{public}d",
+            oldCacheInfo.stateVersion, cacheInfo.stateVersion);
+        return SOFTBUS_ERR;
+    }
     (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
-    LNN_LOGI(LNN_BUILDER, "success. stateVersion=%{public}d", cacheInfo.stateVersion);
+    char *anonyUdid = NULL;
+    Anonymize(cacheInfo.deviceInfo.deviceUdid, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "success. udid=%{public}s, stateVersion=%{public}d, localStateVersion=%{public}d,", anonyUdid,
+        cacheInfo.stateVersion, cacheInfo.localStateVersion);
+    AnonymizeFree(anonyUdid);
     if (LnnUpdateDistributedNodeInfo(&cacheInfo, cacheInfo.deviceInfo.deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:Cache info add sync to Ledger fail");
         (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -876,7 +904,7 @@ int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeTyp
             LNN_LOGE(LNN_BUILDER, "changeType is invalid");
             return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGI(LNN_BUILDER, "success.");
+    LNN_LOGD(LNN_BUILDER, "success.");
     return SOFTBUS_OK;
 }
 
@@ -950,7 +978,7 @@ int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
         LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode=%{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "success. stateVersion=%{public}d", syncInfo.stateVersion);
+    LNN_LOGI(LNN_BUILDER, "sync all data to db success. stateVersion=%{public}d", syncInfo.stateVersion);
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch cloud sync fail, errorcode=%{public}d", ret);
@@ -995,6 +1023,7 @@ void LnnInitCloudSyncModule(void)
         LNN_LOGE(LNN_BUILDER, "Lnn Init Cloud Sync Module fail");
         return;
     }
+    LnnRegisterDataChangeListener(dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
     g_dbId = dbId;
 }
 
@@ -1002,6 +1031,7 @@ void LnnDeInitCloudSyncModule(void)
 {
     LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = g_dbId;
+    LnnUnRegisterDataChangeListener(dbId);
     if (LnnDestroyKvAdapter(dbId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "DeInit Cloud Sync module fail");
     }

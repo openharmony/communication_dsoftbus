@@ -952,7 +952,7 @@ static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType
 
     if (idType == EXCHANGE_NETWORKID) {
         if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%s", anonyUdid);
+            AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", anonyUdid);
             info->idType = EXCHANGE_FAIL;
             (void)memset_s(info->udid, sizeof(info->udid), 0, sizeof(info->udid));
         } else {
@@ -961,7 +961,7 @@ static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType
                 info->idType = EXCHANGE_FAIL;
                 return SOFTBUS_MEM_ERR;
             }
-            AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%s", anonyUdid);
+            AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%{public}s", anonyUdid);
             info->idType = EXCHANGE_NETWORKID;
         }
     }
