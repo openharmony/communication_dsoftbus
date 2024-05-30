@@ -19,6 +19,8 @@
 #include "lnn_log.h"
 #include "lnn_net_builder_deps_mock.h"
 #include "lnn_net_builder.c"
+#include "lnn_net_builder_init.c"
+#include "lnn_net_builder_process.c"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"

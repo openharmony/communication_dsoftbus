@@ -27,6 +27,8 @@ if (dsoftbus_feature_lnn_net) {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_battery_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
