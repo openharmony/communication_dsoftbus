@@ -859,7 +859,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
 
     ret = TransProxyGetSendMsgChanInfo(chan->channelId, chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
 }
 
 /**
