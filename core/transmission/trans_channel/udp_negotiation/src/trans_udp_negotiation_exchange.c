@@ -137,7 +137,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             if (!GetJsonObjectNumberItem(msg, "CALLING_TOKEN_ID", (int32_t *)&appInfo->callingTokenId)) {
                 appInfo->callingTokenId = TOKENID_NOT_SET;
             }
-            (void)GetJsonObjectNumberItem(msg, "LINK_TYPE", appInfo->linkType);
+            (void)GetJsonObjectNumberItem(msg, "LINK_TYPE", &appInfo->linkType);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
