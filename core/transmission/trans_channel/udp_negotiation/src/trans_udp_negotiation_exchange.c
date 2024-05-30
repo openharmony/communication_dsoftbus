@@ -97,7 +97,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo) 
+static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo)
 {
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
     (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
