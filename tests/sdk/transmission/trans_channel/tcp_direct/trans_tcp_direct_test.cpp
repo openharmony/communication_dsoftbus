@@ -68,19 +68,15 @@ static SessionAttribute g_sessionAttr = {
 class TransTcpDirectTest : public testing::Test {
 public:
     TransTcpDirectTest()
-    {
-    }
+    {}
     ~TransTcpDirectTest()
-    {
-    }
+    {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override
-    {
-    }
+    {}
     void TearDown() override
-    {
-    }
+    {}
 };
 
 void TransTcpDirectTest::SetUpTestCase(void)
