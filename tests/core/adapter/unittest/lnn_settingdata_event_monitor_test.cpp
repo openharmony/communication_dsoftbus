@@ -71,7 +71,9 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest001, TestSiz
     int ret = LnnGetSettingDeviceName(DEVICE_NAME1, DEVICE_NAME_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     char* deviceName = (char*)malloc(sizeof(DEVICE_NAME2));
-    memset_s(deviceName, sizeof(DEVICE_NAME2), 0, sizeof(DEVICE_NAME2));
+    if (memset_s(deviceName, sizeof(DEVICE_NAME2), 0, sizeof(DEVICE_NAME2)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memset_s deviceName fail!");
+    }
     ret = LnnGetSettingDeviceName(deviceName, DEVICE_NAME_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(deviceName);
