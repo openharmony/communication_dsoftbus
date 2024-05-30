@@ -49,19 +49,15 @@ static int32_t g_fd = socket(AF_INET, SOCK_STREAM, 0);
 class TransSdkTcpDirectTest : public testing::Test {
 public:
     TransSdkTcpDirectTest()
-    {
-    }
+    {}
     ~TransSdkTcpDirectTest()
-    {
-    }
+    {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override
-    {
-    }
+    {}
     void TearDown() override
-    {
-    }
+    {}
 };
 
 static int OnServerSessionOpened(int sessionId, int result)
