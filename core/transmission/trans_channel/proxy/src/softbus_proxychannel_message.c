@@ -619,58 +619,54 @@ int32_t TransProxyUnPackRestErrMsg(const char *msg, int *errCode, int32_t len)
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
     int32_t len, uint16_t *fastDataSize)
 {
-    cJSON *root = 0;
-    AppInfo *appInfo = &(chanInfo->appInfo);
-    if (appInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "appInfo is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    root = cJSON_ParseWithLength(msg, len);
-    if (root == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(msg != NULL && chanInfo != NULL && fastDataSize != NULL,
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "msg or chanInfo or fastDataSize is empty.");
+
+    TRANS_CHECK_AND_RETURN_RET_LOGE(&chanInfo->appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null");
+
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
 
     if (!GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chanInfo->identity, sizeof(chanInfo->identity)) ||
-        !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, appInfo->peerData.deviceId,
-                                 sizeof(appInfo->peerData.deviceId))) {
+        !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, chanInfo->appInfo.peerData.deviceId,
+                                 sizeof(chanInfo->appInfo.peerData.deviceId))) {
         TRANS_LOGE(TRANS_CTRL, "fail to get json item");
         cJSON_Delete(root);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(chanInfo->appInfo.peerData.dataConfig))) {
         TRANS_LOGD(TRANS_CTRL, "peer dataconfig is null.");
     }
-    appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
-    appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
-    appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
-    int32_t appType = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity);
-    if (appType == SOFTBUS_ERR || appType == SOFTBUS_LOCK_ERR) {
-        TRANS_LOGE(TRANS_CTRL, "fail to get app type");
+    chanInfo->appInfo.encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
+    chanInfo->appInfo.algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+    chanInfo->appInfo.crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+
+    int32_t ret = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity, &chanInfo->appInfo.appType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "failed to get app type");
         cJSON_Delete(root);
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
-    appInfo->appType = (AppType)appType;
-    if (appInfo->appType == APP_TYPE_NORMAL) {
-        if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &appInfo->peerData.uid) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_PID, &appInfo->peerData.pid) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &appInfo->encrypt) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc) ||
+    if (chanInfo->appInfo.appType == APP_TYPE_NORMAL) {
+        if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &chanInfo->appInfo.peerData.uid) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_PID, &chanInfo->appInfo.peerData.pid) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &chanInfo->appInfo.encrypt) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &chanInfo->appInfo.algorithm) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &chanInfo->appInfo.crc) ||
             !GetJsonObjectNumber16Item(root, JSON_KEY_FIRST_DATA_SIZE, fastDataSize) ||
-            !GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, appInfo->peerData.sessionName,
-                                     sizeof(appInfo->peerData.sessionName)) ||
-            !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, appInfo->myData.sessionName,
-                                     sizeof(appInfo->myData.sessionName))) {
+            !GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, chanInfo->appInfo.peerData.sessionName,
+                                     sizeof(chanInfo->appInfo.peerData.sessionName)) ||
+            !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, chanInfo->appInfo.myData.sessionName,
+                                     sizeof(chanInfo->appInfo.myData.sessionName))) {
             TRANS_LOGW(TRANS_CTRL, "unpack handshake ack old version");
         }
-        if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &(appInfo->peerHandleId))) {
-            appInfo->peerHandleId = -1;
+        if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &chanInfo->appInfo.peerHandleId)) {
+            chanInfo->appInfo.peerHandleId = -1;
         }
     }
 
-    if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
-                                 sizeof(appInfo->peerData.pkgName))) {
+    if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, chanInfo->appInfo.peerData.pkgName,
+                                 sizeof(chanInfo->appInfo.peerData.pkgName))) {
         TRANS_LOGW(TRANS_CTRL, "no item to get pkg name");
     }
     cJSON_Delete(root);
@@ -797,15 +793,14 @@ static int32_t TransProxyUnpackInnerHandshakeMsg(cJSON *root, AppInfo *appInfo, 
 
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(msg != NULL && chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param invalid.");
     cJSON *root = cJSON_ParseWithLength(msg, len);
-    if (root == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    char sessionKey[BASE64KEY] = {0};
+    TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
+
+    char sessionKey[BASE64KEY] = { 0 };
     AppInfo *appInfo = &(chan->appInfo);
 
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_TYPE, (int32_t*)&(appInfo->appType)) ||
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_TYPE, (int32_t *)&(appInfo->appType)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chan->identity, sizeof(chan->identity)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, appInfo->peerData.deviceId,
                                  sizeof(appInfo->peerData.deviceId)) ||
@@ -819,7 +814,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
     
     if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        TRANS_LOGE(TRANS_CTRL, "peer dataconfig is null.");
+        TRANS_LOGW(TRANS_CTRL, "peer dataconfig is null.");
     }
 
     int32_t ret = SOFTBUS_ERR;
