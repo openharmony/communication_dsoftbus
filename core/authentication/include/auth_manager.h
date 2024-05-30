@@ -69,6 +69,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info);
 bool IsNeedAuthLimit(const char *udidHash);
 void ClearAuthLimitMap(void);
 
+void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info);
 int32_t DelAuthReqInfoByAuthHandle(const AuthHandle *authHandle);
 void AuthFreeLane(const AuthHandle *authHandle);
 int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList);
@@ -105,7 +106,6 @@ int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_
 int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac);
 
 int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo *info);
-int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request);
 int32_t AuthDeviceGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
 int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version);

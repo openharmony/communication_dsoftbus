@@ -216,9 +216,9 @@ HWTEST_F(AuthSessionFsmTest, GET_AUTH_FSM_TEST_001, TestSize.Level1)
     authFsm->isDead = true;
     ListNodeInsert(&g_authFsmList, &authFsm->node);
     EXPECT_TRUE(GetAuthFsmByAuthSeq(AUTH_SEQ) == nullptr);
-    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID_1, false) == nullptr);
-    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID, false) == nullptr);
-    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID, true) == nullptr);
+    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID_1, false, false) == nullptr);
+    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID, false, false) == nullptr);
+    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID, true, false) == nullptr);
 }
 
 /*

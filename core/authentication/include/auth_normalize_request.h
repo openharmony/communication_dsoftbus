@@ -30,15 +30,14 @@ extern "C" {
 typedef struct {
     char udidHash[SHA_256_HEX_HASH_LEN];
     int64_t authSeq;
-    uint32_t requestId;
-    uint64_t connId;
-    bool isFastAuth;
     AuthConnInfo connInfo;
+    bool isConnectServer;
     ListNode node;
 } NormalizeRequest;
 
+bool AuthIsRepeatedAuthRequest(int64_t authSeq);
 uint32_t AddNormalizeRequest(const NormalizeRequest *request);
-void NotifyNormalizeRequestSuccess(int64_t authSeq);
+void NotifyNormalizeRequestSuccess(int64_t authSeq, bool isSupportNego);
 void NotifyNormalizeRequestFail(int64_t authSeq, int32_t ret);
 
 #ifdef __cplusplus
