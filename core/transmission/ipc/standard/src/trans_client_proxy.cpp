@@ -122,7 +122,11 @@ int32_t ClientIpcSetChannelInfo(
         TRANS_LOGE(TRANS_SDK, "Softbus client proxy is nullptr!, pkgName=%{public}s pid=%{public}d", pkgName, pid);
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
-    clientProxy->SetChannelInfo(sessionName, sessionId, transInfo->channelId, transInfo->channelType);
+    int32_t ret = clientProxy->SetChannelInfo(sessionName, sessionId, transInfo->channelId, transInfo->channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "SetChannelInfo failed, ret=%{public}d", ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 
