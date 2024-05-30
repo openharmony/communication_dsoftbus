@@ -21,6 +21,7 @@
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm_mock.h"
 #include "lnn_devicename_info.h"
+#include "lnn_map.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_service_mock.h"

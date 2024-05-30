@@ -26,9 +26,11 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
                                        bool markRetried)
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
-              "requestId=%{public}d pid=%{public}d type=%{public}d networkId=%{public}s remoteUuid=%{public}s",
+              "requestId=%{public}d pid=%{public}d type=%{public}d networkId=%{public}s remoteUuid=%{public}s "
+              "expectRole=0x%{public}x, bw=%{public}d, ipaddrType=%{public}d",
               info.requestId, info.pid, info.connectType, WifiDirectAnonymizeDeviceId(info.remoteNetworkId).c_str(),
-              WifiDirectAnonymizeDeviceId(WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId)).c_str());
+              WifiDirectAnonymizeDeviceId(WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId)).c_str(),
+              info.expectApiRole, info.bandWidth, info.ipAddrType);
 
     auto command = CommandFactory::GetInstance().CreateConnectCommand(info, callback);
     command->SetRetried(markRetried);

@@ -43,8 +43,7 @@ protected:
 
 void KVAdapterTest::SetUpTestCase(void)
 {
-    kvStore = make_shared<KVAdapter>(APP_ID, STORE_ID,
-        make_shared<KvDataChangeListener>());
+    kvStore = make_shared<KVAdapter>(APP_ID, STORE_ID);
 }
 
 void KVAdapterTest::TearDownTestCase(void)

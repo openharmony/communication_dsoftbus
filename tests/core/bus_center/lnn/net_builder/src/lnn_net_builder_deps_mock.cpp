@@ -526,9 +526,14 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
     return GetNetBuilderDepsInterface()->GetAuthRequest(requestId, request);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetNetBuilderDepsInterface()->SoftBusGetBtState();
+}
+
+int32_t SoftBusGetBrState(void)
+{
+    return GetNetBuilderDepsInterface()->SoftBusGetBrState();
 }
 
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
@@ -645,6 +650,11 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
 int32_t AuthFlushDevice(const char *uuid)
 {
     return GetNetBuilderDepsInterface()->AuthFlushDevice(uuid);
+}
+
+bool IsSupportLpFeature(void)
+{
+    return GetNetBuilderDepsInterface()->IsSupportLpFeature();
 }
 } // extern "C"
 } // namespace OHOS

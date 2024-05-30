@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "anonymizer.h"
-#include "lnn_heartbeat_ctrl.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_log.h"
 #include "lnn_parameter_utils.h"
@@ -31,18 +30,16 @@ namespace OHOS {
 using namespace OHOS::DistributedKv;
 namespace {
 constexpr int32_t MAX_STRING_LEN = 4096;
-constexpr int32_t MAX_INIT_RETRY_TIMES = 30;
-constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 500 * 1000; // 500ms
+constexpr int32_t MAX_INIT_RETRY_TIMES = 3;
+constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 100 * 1000; // 100ms
 constexpr int32_t MAX_MAP_SIZE = 10000;
 const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
 } // namespace
 
-KVAdapter::KVAdapter(const std::string &appId, const std::string &storeId,
-    const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener)
+KVAdapter::KVAdapter(const std::string &appId, const std::string &storeId)
 {
     this->appId_.appId = appId;
     this->storeId_.storeId = storeId;
-    this->dataChangeListener_ = dataChangeListener;
     LNN_LOGI(LNN_LEDGER, "KVAdapter Constructor Success, appId: %{public}s, storeId: %{public}s", appId.c_str(),
         storeId.c_str());
 }
@@ -54,7 +51,7 @@ KVAdapter::~KVAdapter()
 
 int32_t KVAdapter::Init()
 {
-    LNN_LOGI(LNN_LEDGER, "Init kvAdapter, storeId: %s", storeId_.storeId.c_str());
+    LNN_LOGI(LNN_LEDGER, "Init kvAdapter, storeId: %{public}s", storeId_.storeId.c_str());
     int32_t tryTimes = MAX_INIT_RETRY_TIMES;
     int64_t beginTime = GetTickCount();
     while (tryTimes > 0) {
@@ -62,11 +59,11 @@ int32_t KVAdapter::Init()
         if (kvStorePtr_ && status == DistributedKv::Status::SUCCESS) {
             int64_t endTime = GetTickCount();
             LNN_LOGI(LNN_LEDGER, "Init KvStorePtr Success, spend %{public}" PRId64 " ms", endTime - beginTime);
-            RegisterDataChangeListener();
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "CheckKvStore, left times: %{public}d, status: %{public}d", tryTimes, status);
         if (status == DistributedKv::Status::SECURITY_LEVEL_ERROR) {
+            LNN_LOGE(LNN_LEDGER, "This db security level error, remove and rebuild it");
             DeleteKvStore();
         }
         if (status == DistributedKv::Status::STORE_META_CHANGED) {
@@ -82,19 +79,23 @@ int32_t KVAdapter::Init()
 int32_t KVAdapter::DeInit()
 {
     LNN_LOGI(LNN_LEDGER, "DBAdapter DeInit");
-    UnRegisterDataChangeListener();
-    DeleteDataChangeListener();
     DeleteKvStorePtr();
     return SOFTBUS_OK;
 }
 
-int32_t KVAdapter::RegisterDataChangeListener()
+int32_t KVAdapter::RegisterDataChangeListener(
+    const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener)
 {
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
     if (!IsCloudSyncEnabled()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_ERR;
     }
+    if (dataChangeListener == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "dataChangeListener is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    this->dataChangeListener_ = dataChangeListener;
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
@@ -160,14 +161,7 @@ int32_t KVAdapter::Put(const std::string &key, const std::string &value)
         DistributedKv::Key kvKey(key);
         DistributedKv::Value oldV;
         if (kvStorePtr_->Get(kvKey, oldV) == DistributedKv::Status::SUCCESS && oldV.ToString() == value) {
-            char *anonyKey = nullptr;
-            char *anonyValue = nullptr;
-            Anonymize(key.c_str(), &anonyKey);
-            Anonymize(value.c_str(), &anonyValue);
-            LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s, value=%{public}s", anonyKey,
-                anonyValue);
-            AnonymizeFree(anonyKey);
-            AnonymizeFree(anonyValue);
+            LNN_LOGI(LNN_LEDGER, "The key-value pair already exists.");
             return SOFTBUS_OK;
         }
         DistributedKv::Value kvValue(value);
@@ -200,14 +194,6 @@ int32_t KVAdapter::PutBatch(const std::map<std::string, std::string> &values)
         for (auto item : values) {
             kvKey = item.first;
             if (kvStorePtr_->Get(kvKey, oldV) == DistributedKv::Status::SUCCESS && oldV.ToString() == item.second) {
-                char *anonyKey = nullptr;
-                char *anonyValue = nullptr;
-                Anonymize(item.first.c_str(), &anonyKey);
-                Anonymize(item.second.c_str(), &anonyValue);
-                LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s, value=%{public}s", anonyKey,
-                    anonyValue);
-                AnonymizeFree(anonyKey);
-                AnonymizeFree(anonyValue);
                 continue;
             }
             Entry entry;
@@ -222,7 +208,7 @@ int32_t KVAdapter::PutBatch(const std::map<std::string, std::string> &values)
         status = kvStorePtr_->PutBatch(entries);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "PutBatch kv to db failed, ret=%d", status);
+        LNN_LOGE(LNN_LEDGER, "PutBatch kv to db failed, ret=%{public}d", status);
         return SOFTBUS_KV_PUT_DB_FAIL;
     }
     LNN_LOGI(LNN_LEDGER, "KVAdapter PutBatch succeed");
@@ -302,7 +288,7 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
     if (status != DistributedKv::Status::SUCCESS) {
         anonyKey = nullptr;
         Anonymize(key.c_str(), &anonyKey);
-        LNN_LOGE(LNN_LEDGER, "Get data from kv failed, key: %{public}s", anonyKey);
+        LNN_LOGE(LNN_LEDGER, "Get data from kv failed, key=%{public}s", anonyKey);
         AnonymizeFree(anonyKey);
         return SOFTBUS_KV_GET_DB_FAIL;
     }
@@ -322,7 +308,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
         .isPublic = true,
-        .cloudConfig = { .enableCloud = true, .autoSync = false }
+        .cloudConfig = { .enableCloud = true, .autoSync = true }
     };
     DistributedKv::Status status;
     {
@@ -397,13 +383,20 @@ void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
     }
     if (progress == DistributedKv::Progress::SYNC_FINISH && code != DistributedKv::Status::SUCCESS) {
         LNN_LOGI(LNN_LEDGER,
-            "cloud sync failed, code: %{public}d, upload.total=%{public}u, upload.success=%{public}u, "
+            "cloud sync failed, code=%{public}d, upload.total=%{public}u, upload.success=%{public}u, "
             "upload.failed=%{public}u, upload.untreated=%{public}u, download.total=%{public}u, "
             "download.success=%{public}u, download.failed=%{public}u, download.untreated=%{public}u",
             code, detail.details.upload.total, detail.details.upload.success, detail.details.upload.failed,
             detail.details.upload.untreated, detail.details.download.total, detail.details.download.success,
             detail.details.download.failed, detail.details.download.untreated);
     }
+}
+
+void KVAdapter::DeRegisterDataChangeListener()
+{
+    LNN_LOGI(LNN_LEDGER, "call!");
+    UnRegisterDataChangeListener();
+    DeleteDataChangeListener();
 }
 
 } // namespace OHOS

@@ -30,6 +30,8 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
+#include "lnn_feature_capability.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -368,7 +370,8 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
         }
         return;
     } else if (result == SOFTBUS_AUTH_SYNC_DEVID_FAIL || result == SOFTBUS_AUTH_SYNC_DEVINFO_FAIL ||
-        result == SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL || result == SOFTBUS_AUTH_SEND_FAIL) {
+        result == SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL || result == SOFTBUS_AUTH_SEND_FAIL ||
+        result == SOFTBUS_AUTH_NOT_SUPPORT_THREE_STATE) {
         stage = AUTH_EXCHANGE_STAGE;
     } else if (result == SOFTBUS_AUTH_DEVICE_DISCONNECTED) {
         stage = AUTH_CONNECT_STAGE;
@@ -961,6 +964,21 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
     return true;
 }
 
+static int32_t HandleCloseAckMessage(AuthFsm *authFsm, const AuthSessionInfo *info)
+{
+    if ((SoftBusGetBrState() == BR_DISABLE) && (info->nodeInfo.feature & 1 << BIT_SUPPORT_THREE_STATE) == 0) {
+        AUTH_LOGE(AUTH_FSM, "peer not support three state");
+        CompleteAuthSession(authFsm, SOFTBUS_AUTH_NOT_SUPPORT_THREE_STATE);
+        return SOFTBUS_ERR;
+    }
+    if (PostCloseAckMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "post close ack fail");
+        CompleteAuthSession(authFsm, SOFTBUS_AUTH_SEND_FAIL);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
 {
     AuthSessionInfo *info = &authFsm->info;
@@ -997,9 +1015,8 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
         TryFinishAuthSession(authFsm);
         return;
     }
-    if (PostCloseAckMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "post close ack fail");
-        CompleteAuthSession(authFsm, SOFTBUS_AUTH_SEND_FAIL);
+    if (HandleCloseAckMessage(authFsm, info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "handle close ack fail");
         return;
     }
     if (info->isCloseAckReceived) {
@@ -1176,7 +1193,7 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
         return SOFTBUS_LOCK_ERR;
     }
     AuthFsm *authFsm = CreateAuthFsm(authParam->authSeq, authParam->requestId, authParam->connId,
-                                    connInfo, authParam->isServer);
+        connInfo, authParam->isServer);
     if (authFsm == NULL) {
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;

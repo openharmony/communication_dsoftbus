@@ -62,6 +62,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_P2P_NETWORKING_SYNC,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_AUTH_SYNC_INFO,
+        .listener = { NULL, NULL },
     }
 };
 

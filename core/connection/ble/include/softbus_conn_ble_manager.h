@@ -83,16 +83,9 @@ typedef struct {
 } ConnBleDataReceivedContext;
 
 typedef struct {
-    sem_t wait;
-    int32_t result;
-} ConnBleReuseConnectionWaitResult;
-
-typedef struct {
     char addr[BT_MAC_LEN];
     char udid[UDID_BUF_LEN];
     uint32_t requestId;
-    // define as pointer type on purpose, it can skip looper free
-    ConnBleReuseConnectionWaitResult *waitResult;
     ProtocolType protocol;
 } ConnBleReuseConnectionContext;
 
@@ -110,7 +103,7 @@ typedef struct {
     void (*connectionClosed)(uint32_t connectionId, int32_t error);
     void (*connectionResume)(uint32_t connectionId);
     void (*disconnectRequest)(uint32_t connectionId);
-    void (*reuseConnectionRequest)(const ConnBleReuseConnectionContext *ctx);
+    int32_t (*reuseConnectionRequest)(const ConnBleReuseConnectionContext *ctx);
     void (*preventTimeout)(const char *udid);
     void (*reset)(int32_t reason);
     void (*keepAliveTimeout)(uint32_t connectionId, uint32_t requestId);

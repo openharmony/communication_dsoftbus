@@ -27,6 +27,7 @@
 #include "trans_log.h"
 
 #define DFX_TIMERS_S 15
+#define RETRY_GET_INFO_TIMES_MS 300
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -128,6 +129,11 @@ NO_SANITIZE("cfi") static int32_t TransOnBindSuccess(int32_t sessionId, const IS
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Get peer socket info failed, ret=%{public}d", ret);
         return ret;
+    }
+
+    if ((socketCallback->OnNegotiate != NULL) && (!socketCallback->OnNegotiate(sessionId, info))) {
+        TRANS_LOGW(TRANS_SDK, "The negotiate rejected the socket=%{public}d", sessionId);
+        return SOFTBUS_TRANS_NEGOTIATE_REJECTED;
     }
 
     (void)socketCallback->OnBind(sessionId, info);
@@ -273,7 +279,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     } else {
         ret = ClientEnableSessionByChannelId(channel, &sessionId);
         if (ret == SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND) {
-            SoftBusSleepMs(300); // avoid set channel info later than sesssion opened callback
+            SoftBusSleepMs(RETRY_GET_INFO_TIMES_MS); // avoid set channel info later than sesssion opened callback
             ret = ClientEnableSessionByChannelId(channel, &sessionId);
         }
     }

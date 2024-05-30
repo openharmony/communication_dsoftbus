@@ -680,6 +680,7 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
     }
 
     if ((info->appInfo.appType == APP_TYPE_NORMAL) || (info->appInfo.appType == APP_TYPE_AUTH)) {
+        TransProxyDelChanByChanId(info->channelId);
         (void)TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
     }
 }
@@ -708,7 +709,7 @@ static int32_t TransProxyGetAppInfo(int16_t myId, AppInfo *appInfo)
     return SOFTBUS_ERR;
 }
 
-static int32_t TransProxyGetReqId(int32_t myId, int32_t *reqId)
+static int32_t TransProxyGetReqIdAndStatus(int32_t myId, int32_t *reqId, int8_t *status)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "proxy channel list not init");
@@ -719,6 +720,7 @@ static int32_t TransProxyGetReqId(int32_t myId, int32_t *reqId)
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->myId == myId) {
             *reqId = item->reqId;
+            *status = item->status;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
@@ -1307,7 +1309,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         return;
     }
 
-    if (TransProxyGetReqId(info->myId, &info->reqId) != SOFTBUS_OK) {
+    if (TransProxyGetReqIdAndStatus(info->myId, &info->reqId, &info->status) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fail to get conn reqId");
         SoftBusFree(info);
         return;

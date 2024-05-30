@@ -17,22 +17,9 @@
 #include "softbus_broadcast_manager.h"
 
 #include <cstddef>
-#include <cstdio>
 #include <securec.h>
-#include <sstream>
-#include <string>
 
-#include "disc_ble.h"
-#include "disc_ble_utils.h"
-#include "lnn_local_net_ledger.h"
-#include "message_handler.h"
-#include "message_parcel.h"
-#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_broadcast_adapter_type.h"
-#include "softbus_broadcast_adapter_interface.h"
-#include "softbus_broadcast_type.h"
-#include "softbus_ble_gatt.h"
 #include "softbus_errcode.h"
 
 #define MIN_DATA_LEN 50
@@ -42,25 +29,28 @@
 #define SERVICE_UUID 0xFDEE
 #define BC_ADV_FLAG 0x2
 #define MANUFACTURE_COMPANY_ID 0x027D
+#define ADV_DATA_MAX_LEN 24
+#define RESP_DATA_MAX_LEN 26
+#define BROADCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
 
 namespace OHOS {
 
-const uint8_t *g_baseFuzzData = nullptr;
+const uint8_t *BASE_FUZZ_DATA = nullptr;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 
 template <class T> T GetData()
 {
     T object{};
-    size_t objetctSize = sizeof(object);
-    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
+    size_t objectSize = sizeof(object);
+    if (BASE_FUZZ_DATA == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
+    errno_t ret = memcpy_s(&object, objectSize, BASE_FUZZ_DATA + g_baseFuzzPos, objectSize);
     if (ret != EOK) {
         return {};
     }
-    g_baseFuzzPos += objetctSize;
+    g_baseFuzzPos += objectSize;
     return object;
 }
 
@@ -321,7 +311,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (size < MIN_DATA_LEN) {
         return 0;
     }
-    OHOS::g_baseFuzzData = data;
+    OHOS::BASE_FUZZ_DATA = data;
     OHOS::g_baseFuzzSize = size;
 
     int32_t listenerId = -1;
