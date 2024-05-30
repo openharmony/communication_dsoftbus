@@ -97,7 +97,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static void TransGetUdpInfo(const cJSON *msg, AppInfo *appInfo) 
+static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo) 
 {
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
     (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
@@ -127,7 +127,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
         SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
 
-    TransGetUdpInfo(msg, appInfo);
+    TransGetCommonUdpInfoFromJson(msg, appInfo);
 
     int code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
