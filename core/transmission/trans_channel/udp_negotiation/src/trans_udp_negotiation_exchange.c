@@ -104,13 +104,13 @@ static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectStringItem(msg, "CLIENT_BUS_NAME", appInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX);
     (void)GetJsonObjectStringItem(msg, "GROUP_ID", appInfo->groupId, GROUP_ID_SIZE_MAX);
 
-    (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int *)&(appInfo->peerData.apiVersion));
+    (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
     (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
     (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
-    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int *)&(appInfo->businessType));
-    (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int *)&(appInfo->streamType));
-    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int *)&(appInfo->udpChannelOptType));
-    (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int *)&(appInfo->udpConnType));
+    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int32_t *)&(appInfo->businessType));
+    (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int32_t *)&(appInfo->streamType));
+    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int32_t *)&(appInfo->udpChannelOptType));
+    (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int32_t *)&(appInfo->udpConnType));
 }
 
 int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
