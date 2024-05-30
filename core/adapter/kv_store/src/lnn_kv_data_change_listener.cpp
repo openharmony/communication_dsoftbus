@@ -106,7 +106,7 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
 
 void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entry> &insertRecords)
 {
-    int32_t insertSize = insertRecords.size();
+    int32_t insertSize = static_cast<int32_t>(insertRecords.size());
     LNN_LOGI(LNN_LEDGER, "Handle kv data add change! insertSize=%{public}d", insertSize);
     char **keys = (char **)SoftBusCalloc(insertSize * sizeof(char *));
     if (keys == nullptr) {
@@ -120,11 +120,13 @@ void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entr
         return;
     }
 
-    for (int32_t i = 0; i < insertSize; ++i) {
-        std::string dbKey = insertRecords[i].key.ToString();
-        std::string dbValue = insertRecords[i].value.ToString();
+    int32_t i = 0;
+    for (const auto &item : insertRecords) {
+        std::string dbKey = item.key.ToString();
+        std::string dbValue = item.value.ToString();
         keys[i] = strdup(dbKey.c_str());
         values[i] = strdup(dbValue.c_str());
+        ++i;
     }
     LnnDBDataAddChangeSyncToCache(const_cast<const char **>(keys), const_cast<const char **>(values), insertSize);
 }
