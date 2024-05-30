@@ -20,7 +20,10 @@ softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 ohos_unittest("TransAuthChannelTest") {
   module_out_path = module_output_path
-  sources = [ "trans_auth_channel_test.cpp" ]
+  sources = [ 
+    "auth_channel_mock.cpp",
+    "trans_auth_channel_test.cpp",
+  ]
 
   include_dirs = [
     "$softbus_adapter_common/include",
@@ -69,12 +72,14 @@ ohos_unittest("TransAuthChannelTest") {
     "$dsoftbus_root_path/core/discovery/event_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/auth_channel",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gtest_main",
+    "//third_party/googletest:gmock",
   ]
 
   if (is_standard_system) {

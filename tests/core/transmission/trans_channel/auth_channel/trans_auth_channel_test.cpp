@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <securec.h>
 
+#include "auth_channel_mock.h"
 #include "auth_interface.h"
 #include "gtest/gtest.h"
 #include "session.h"
@@ -36,6 +37,7 @@
 #include "softbus_conn_ble_direct.h"
 #include "message_handler.h"
 
+using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
@@ -323,6 +325,10 @@ HWTEST_F(TransAuthChannelTest, OnAuthChannelDataRecvTest001, TestSize.Level1)
     data->data = (uint8_t *)TEST_AUTH_DATA;
     data->len = strlen(TEST_AUTH_DATA) + 1;
     data->flag = AUTH_CHANNEL_REQ;
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnInitGetDeviceName).WillRepeatedly(
+        AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName);
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     OnAuthChannelDataRecv(authId, data);
 
     data->flag = AUTH_CHANNEL_REPLY;
@@ -712,6 +718,10 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest001, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnInitGetDeviceName).WillRepeatedly(
+        AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName);
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     cJSON *msg = cJSON_CreateObject();
     AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != NULL);
@@ -752,6 +762,10 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest003, TestSize.Level1)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnInitGetDeviceName).WillRepeatedly(
+        AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName);
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = TransSessionMgrInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthInit(callback);
