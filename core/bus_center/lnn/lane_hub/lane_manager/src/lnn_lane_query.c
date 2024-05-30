@@ -131,7 +131,8 @@ static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 
 static int32_t BrLinkState(const char *networkId)
 {
-    uint32_t local, remote;
+    uint32_t local;
+    uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
@@ -150,7 +151,8 @@ static int32_t BrLinkState(const char *networkId)
 
 static int32_t BleLinkState(const char *networkId)
 {
-    uint32_t local, remote;
+    uint32_t local;
+    uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
@@ -182,7 +184,8 @@ static int32_t WlanLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "peer node not wifi online");
         return SOFTBUS_ERR;
     }
-    uint32_t local, remote;
+    uint32_t local;
+    uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
@@ -209,7 +212,8 @@ static int32_t P2pLinkState(const char *networkId)
     if (!SoftBusIsWifiActive()) {
         return SOFTBUS_WIFI_OFF;
     }
-    uint32_t local, remote;
+    uint32_t local;
+    uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;

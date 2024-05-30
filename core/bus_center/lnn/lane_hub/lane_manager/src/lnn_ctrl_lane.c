@@ -74,11 +74,13 @@ bool IsAuthReuseP2p(const char *networkId, const char *udid, AuthLinkType authTy
         LNN_LOGE(LNN_LANE, "memset_s LaneResource fail");
         return false;
     }
-    if (authType == AUTH_LINK_TYPE_ENHANCED_P2P && FindLaneResourceByLinkType(udid, LANE_HML, &resoureItem) == SOFTBUS_OK &&
+    if (authType == AUTH_LINK_TYPE_ENHANCED_P2P &&
+        FindLaneResourceByLinkType(udid, LANE_HML, &resoureItem) == SOFTBUS_OK &&
         !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_HML)) {
         LNN_LOGI(LNN_LANE, "can use HML");
         return true;
-    } else if (authType == AUTH_LINK_TYPE_P2P && FindLaneResourceByLinkType(udid, LANE_P2P, &resoureItem) == SOFTBUS_OK &&
+    } else if (authType == AUTH_LINK_TYPE_P2P &&
+        FindLaneResourceByLinkType(udid, LANE_P2P, &resoureItem) == SOFTBUS_OK &&
         !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_P2P)) {
         LNN_LOGI(LNN_LANE, "can use P2P");
         return true;
