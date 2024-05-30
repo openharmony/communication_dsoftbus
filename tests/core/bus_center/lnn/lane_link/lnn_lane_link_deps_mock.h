@@ -34,6 +34,8 @@ public:
     virtual int32_t TransProxyPipelineCloseChannel(int32_t channelId) = 0;
     virtual int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId) = 0;
     virtual int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource) = 0;
+    virtual int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo,
+        const LaneLinkCb *callback) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -48,6 +50,8 @@ public:
     MOCK_METHOD1(TransProxyPipelineCloseChannel, int32_t (int32_t channelId));
     MOCK_METHOD1(TransProxyPipelineCloseChannelDelay, int32_t (int32_t channelId));
     MOCK_METHOD3(FindLaneResourceByLinkType, int32_t (const char *peerUdid, LaneLinkType type, LaneResource *resource));
+    MOCK_METHOD3(LaneDetectReliability, int32_t (uint32_t laneReqId, const LaneLinkInfo *linkInfo,
+        const LaneLinkCb *callback));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);
