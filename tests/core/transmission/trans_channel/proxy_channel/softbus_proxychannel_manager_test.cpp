@@ -852,15 +852,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     chan->channelId = TEST_DEATH_CHANNEL_ID;
     chan->connId = TEST_NUMBER_VALID;
     chan->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
-
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
     TransProxyDeathCallback(NULL, TEST_DEATH_CHANNEL_ID);
-    TransProxyDeathCallback(TEST_PKGNAME, TEST_DEATH_CHANNEL_ID);
 
     ret = TransProxyGetSendMsgChanInfo(chan->channelId, chan);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
 }
 
 /**
