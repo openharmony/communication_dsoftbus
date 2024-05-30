@@ -222,10 +222,12 @@ if (defined(ohos_lite)) {
 
     external_deps = [
       "bounds_checking_function:libsec_shared",
-      "c_utils:utilsbase",
       "hilog:libhilog",
       "mbedtls:mbedtls_shared",
     ]
+    if (is_standard_system) {
+      external_deps += [ "c_utils:utils" ]
+    }
     public_configs = [ ":nstackx_util_header" ]
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
