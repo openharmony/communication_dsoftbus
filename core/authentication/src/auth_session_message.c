@@ -1714,14 +1714,29 @@ static int32_t UnpackWiFi(const JsonObj *json, NodeInfo *info, SoftBusVersion ve
     return SOFTBUS_OK;
 }
 
+static int32_t PackDeviceInfoMac(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
+{
+    AUTH_LOGI(AUTH_FSM, "pack deviceInfo mac");
+    if (!JSON_AddStringToObject(json, BR_MAC_ADDR, LnnGetBtMac(info)) ||
+        !JSON_AddStringToObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info)) ||
+        !JSON_AddStringToObject(json, BT_MAC, info->connectInfo.macAddr) ||
+        !JSON_AddStringToObject(json, HML_MAC, info->wifiDirectAddr)) {
+        AUTH_LOGE(AUTH_FSM, "add mac info fail");
+        return SOFTBUS_AUTH_REG_DATA_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
 {
     AUTH_LOGI(AUTH_FSM, "pack deviceInfo bt-v1");
+    if (PackDeviceInfoMac(json, info, isMetaAuth) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "add packdevice mac info fail ");
+        return SOFTBUS_AUTH_REG_DATA_FAIL;
+    }
     if (!JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !JSON_AddStringToObject(json, DEVICE_VERSION_TYPE, info->versionType) ||
-        !JSON_AddStringToObject(json, BR_MAC_ADDR, LnnGetBtMac(info)) ||
-        !JSON_AddStringToObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info)) ||
         !JSON_AddStringToObject(json, UUID, info->uuid) ||
         !JSON_AddStringToObject(json, SW_VERSION, info->softBusVersion) ||
         !JSON_AddStringToObject(json, DEVICE_UDID, info->deviceInfo.deviceUdid) ||
@@ -1729,8 +1744,6 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
         !JSON_AddInt64ToObject(json, BLE_VERSION, info->bleVersion) ||
         !JSON_AddInt64ToObject(json, CONN_CAP, info->netCapacity) ||
         !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity) ||
-        !JSON_AddStringToObject(json, BT_MAC, info->connectInfo.macAddr) ||
-        !JSON_AddStringToObject(json, HML_MAC, info->wifiDirectAddr) ||
         !JSON_AddInt32ToObject(json, REMAIN_POWER, info->batteryInfo.batteryLevel) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
