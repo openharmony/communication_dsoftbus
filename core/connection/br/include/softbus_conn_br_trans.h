@@ -47,6 +47,12 @@ enum BrCtlMessageMethod {
 };
 
 typedef struct {
+    SoftBusMutex lock;
+    bool isStartSendLp;
+} StartBrSendLPInfo;
+
+
+typedef struct {
     uint32_t connectionId;
     int32_t flag;
     enum BrCtlMessageMethod method;

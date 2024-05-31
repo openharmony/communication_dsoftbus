@@ -32,6 +32,8 @@
 static SppSocketDriver *g_sppDriver = NULL;
 static ConnBrTransEventListener g_transEventListener = { 0 };
 static struct ConnSlideWindowController *g_flowController = NULL;
+static void *SendHandlerLoop(void *arg);
+static StartBrSendLPInfo g_startBrSendLPInfo = { 0 };
 
 static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, int32_t *outLen)
 {
@@ -324,6 +326,19 @@ int32_t ConnBrPostBytes(
         FreeSendNode(node);
         return status;
     }
+    
+    if (g_startBrSendLPInfo.isStartSendLp) {
+        status = ConnStartActionAsync(NULL, SendHandlerLoop, "BrSend_Tsk");
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "start br send task failed errno=%{public}d", status);
+            return status;
+        }
+        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBrSendLPInfo.lock) == SOFTBUS_OK,
+            SOFTBUS_LOCK_ERR, CONN_BR, "lock fail!");
+        g_startBrSendLPInfo.isStartSendLp = false;
+        SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
+        CONN_LOGI(CONN_BR, "start br send task succ");
+    }
     CONN_LOGI(CONN_BR,
         "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
         "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
@@ -417,7 +432,16 @@ void *SendHandlerLoop(void *arg)
     CONN_LOGI(CONN_BR, "br send data: send loop start");
     SendBrQueueNode *sendNode = NULL;
     while (true) {
-        int32_t status = ConnBrDequeueBlock((void **)(&sendNode));
+        int32_t status = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
+        CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_BR, "lock fail!");
+        status = ConnBrDequeueBlock((void **)(&sendNode));
+        if (status == SOFTBUS_TIMOUT && sendNode == NULL) {
+            CONN_LOGW(CONN_BR, "br dequeue time out err=%{public}d,", status);
+            g_startBrSendLPInfo.isStartSendLp = true;
+            SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
+            break;
+        }
+        SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
         if (status != SOFTBUS_OK || sendNode == NULL) {
             CONN_LOGE(CONN_BR, "br dequeue send node failed, error=%{public}d", status);
             continue;
@@ -516,14 +540,13 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
     CONN_CHECK_AND_RETURN_RET_LOGW(
         controller, SOFTBUS_ERR, CONN_INIT, "init br trans module failed: init flow controller failed");
 
-    status = ConnStartActionAsync(NULL, SendHandlerLoop, "BrSend_Tsk");
-    if (status != SOFTBUS_OK) {
-        ConnSlideWindowControllerDelete(controller);
-        return status;
-    }
-
     g_sppDriver = sppDriver;
     g_transEventListener = *listener;
     g_flowController = controller;
+    status = SoftBusMutexInit(&g_startBrSendLPInfo.lock, NULL);
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        status == SOFTBUS_OK, status, CONN_INIT,
+        "init bbr trans module failed: init send lp lock failed, err=%{public}d", status);
+    g_startBrSendLPInfo.isStartSendLp = true;
     return SOFTBUS_OK;
 }
