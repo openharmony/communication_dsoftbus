@@ -288,9 +288,39 @@ ohos_unittest("TransClientSocketTest") {
   }
 }
 
+ohos_unittest("SessionMockTest") {
+  module_out_path = module_output_path
+  sources = [ "session_mock_test.cpp" ]
+  include_dirs = [
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/src",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/sdk:softbus_client",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
+    ":SessionMockTest",
     ":TransClientMsgServiceTest",
     ":TransClientSessionCallbackTest",
     ":TransClientSessionManagerTest",
