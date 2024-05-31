@@ -76,11 +76,11 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* co
     return GetNetBuilderDepsInterface()->TransGetConnByChanId(channelId, channelType, connId);
 }
 
-int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-    uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack)
+int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
+    int32_t callingPid, const AuthVerifyCallback *callBack)
 {
-    return GetNetBuilderDepsInterface()->AuthMetaStartVerify(connectionId,
-        key, keyLen, requestId, callingPid, callBack);
+    return GetNetBuilderDepsInterface()->AuthMetaStartVerify(
+        connectionId, authKeyInfo, requestId, callingPid, callBack);
 }
 
 uint32_t AuthGenRequestId(void)

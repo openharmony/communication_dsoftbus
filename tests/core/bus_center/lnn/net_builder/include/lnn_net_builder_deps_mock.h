@@ -62,8 +62,8 @@ public:
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type) = 0;
     virtual int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId) = 0;
-    virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-        uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
+    virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
+        int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target,
@@ -195,8 +195,8 @@ public:
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char*, uint16_t));
     MOCK_METHOD2(LnnDeleteMetaInfo, int32_t (const char *, ConnectionAddrType));
     MOCK_METHOD3(TransGetConnByChanId, int32_t (int32_t, int32_t, int32_t *));
-    MOCK_METHOD6(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *,
-        uint32_t, uint32_t, int32_t, const AuthVerifyCallback *));
+    MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const AuthKeyInfo *, uint32_t, int32_t,
+        const AuthVerifyCallback *));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
