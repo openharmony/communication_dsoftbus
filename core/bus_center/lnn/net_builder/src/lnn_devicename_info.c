@@ -167,6 +167,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         LNN_LOGE(LNN_BUILDER, "local devinfo nullptr");
         return;
     }
+    LNN_LOGI(LNN_BUILDER, "nickName is=%{public}s", nickName);
     char displayName[DEVICE_NAME_BUF_LEN] = {0};
     NodeInfo peerNodeInfo;
     (void)memset_s(&peerNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -183,7 +184,10 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         return;
     }
     int32_t ret = EOK;
-    LNN_LOGE(LNN_BUILDER, "peer unifiedDefaultName=%{public}s", peerNodeInfo.deviceInfo.unifiedDefaultName);
+    LNN_LOGI(LNN_BUILDER, "peer unifiedDefaultName=%{public}s, nickName=%{public}s, "
+        "unifiedName=%{public}s, deviceName=%{public}s",
+        peerNodeInfo.deviceInfo.unifiedDefaultName, peerNodeInfo.deviceInfo.nickName,
+        peerNodeInfo.deviceInfo.unifiedName, peerNodeInfo.deviceInfo.deviceName);
     if (strlen(peerNodeInfo.deviceInfo.unifiedName) != 0 &&
         strcmp(peerNodeInfo.deviceInfo.unifiedName, peerNodeInfo.deviceInfo.unifiedDefaultName) != 0) {
         ret = strcpy_s(displayName, DEVICE_NAME_BUF_LEN, peerNodeInfo.deviceInfo.unifiedName);
@@ -196,8 +200,8 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
     if (ret != EOK) {
         LNN_LOGW(LNN_BUILDER, "strcpy_s fail, use default name");
     }
-    LNN_LOGE(LNN_BUILDER, "peer deviceName=%{public}s", displayName);
-    if (strcmp(peerNodeInfo.deviceInfo.deviceName, displayName) == 0) {
+    LNN_LOGI(LNN_BUILDER, "peer deviceName=%{public}s", displayName);
+    if (strcmp(peerNodeInfo.deviceInfo.deviceName, displayName) == 0 || strlen(displayName) == 0) {
         LNN_LOGI(LNN_BUILDER, "device name not change, ignore this msg");
         return;
     }
@@ -240,7 +244,6 @@ static void HandlerGetDeviceName(const char *deviceName)
         LNN_LOGE(LNN_BUILDER, "set device name fail");
         return;
     }
-    LnnReleaseDatashareHelper();
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set device name fail");
     }
@@ -413,7 +416,6 @@ void UpdateDeviceName(void *p)
 {
     UpdateDeviceNameFromSetting();
     UpdataLocalFromSetting(p);
-    LnnReleaseDatashareHelper();
 }
 
 static void LnnAccountStateChangeHandler(const LnnEventBasicInfo *info)

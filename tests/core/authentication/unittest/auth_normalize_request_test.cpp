@@ -69,9 +69,9 @@ HWTEST_F(AuthNormalizeRequestTest, NOTIFY_NORMALIZE_REQUEST_SUCCESS_TEST_001, Te
     request.authSeq = 3;
     ret = AddNormalizeRequest(&request);
     EXPECT_TRUE(ret != 0);
-    NotifyNormalizeRequestSuccess(authSeq);
+    NotifyNormalizeRequestSuccess(authSeq, false);
     authSeq = 1;
-    NotifyNormalizeRequestSuccess(authSeq);
+    NotifyNormalizeRequestSuccess(authSeq, false);
     AuthCommonDeinit();
 }
 

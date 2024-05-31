@@ -1323,7 +1323,7 @@ static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
     DelSendListenerInfo(sendInfo);
 }
 
-static void HandleFileSendingProcess(
+static int32_t HandleFileSendingProcess(
     int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     SendListenerInfo *sendInfo = NULL;
@@ -1364,6 +1364,8 @@ static void HandleFileSendingProcess(
         ReleaseSendListenerInfo(sendInfo);
         sendInfo = NULL;
     }
+
+    return ret;
 }
 
 int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
@@ -1389,10 +1391,14 @@ int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const c
         DelSessionFileLock(sessionLock);
         return SOFTBUS_LOCK_ERR;
     }
-    HandleFileSendingProcess(channelId, sFileList, dFileList, fileCnt);
+
+    int32_t ret = HandleFileSendingProcess(channelId, sFileList, dFileList, fileCnt);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "file senging process failed, ret=%{public}d", ret);
+    }
     (void)SoftBusMutexUnlock(&sessionLock->sendLock);
     DelSessionFileLock(sessionLock);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 static bool CheckRecvFileExist(const char *absFullPath)

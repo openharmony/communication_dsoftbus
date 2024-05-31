@@ -56,3 +56,8 @@ int32_t SwtichHeartbeatReportChannel(bool isToAP)
     (void)isToAP;
     return SOFTBUS_OK;
 }
+
+bool IsSupportLpFeature(void)
+{
+    return false;
+}

@@ -944,6 +944,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_001, TestSize.Level1)
     wifiMock.SetDefaultResult();
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
+    EXPECT_CALL(wifiMock, LnnCancelWifiDirect).WillRepeatedly(Return());
     NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
     EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -981,6 +982,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_002, TestSize.Level1)
     wifiMock.SetDefaultResult();
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
+    EXPECT_CALL(wifiMock, LnnCancelWifiDirect).WillRepeatedly(Return());
     NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
     EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1016,6 +1018,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_003, TestSize.Level1)
     wifiMock.SetDefaultResult();
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
+    EXPECT_CALL(wifiMock, LnnCancelWifiDirect).WillRepeatedly(Return());
     NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
     EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
     NiceMock<LaneDepsInterfaceMock> mock;

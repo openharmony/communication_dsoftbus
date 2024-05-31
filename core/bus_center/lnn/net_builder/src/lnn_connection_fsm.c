@@ -152,8 +152,19 @@ static bool CheckInterfaceCommonArgs(const LnnConnectionFsm *connFsm, bool needC
 static void NotifyJoinResult(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
-
     if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_REQUEST) != 0) {
+        LnnNotifyJoinResult(&connInfo->addr, networkId, retCode);
+        connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_ACTIVE;
+        return;
+    }
+    NodeInfo *nodeInfo = connInfo->nodeInfo;
+    if (retCode == SOFTBUS_OK && nodeInfo != NULL) {
+        if (connInfo->addr.type == CONNECTION_ADDR_WLAN &&
+            connInfo->addr.info.ip.port != nodeInfo->connectInfo.authPort) {
+            LNN_LOGI(LNN_BUILDER, "before port =%{public}d, after port=%{public}d",
+                connInfo->addr.info.ip.port, nodeInfo->connectInfo.authPort);
+            connInfo->addr.info.ip.port = nodeInfo->connectInfo.authPort;
+        }
         LnnNotifyJoinResult(&connInfo->addr, networkId, retCode);
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_ACTIVE;
@@ -534,6 +545,15 @@ static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdi
     }
     return SOFTBUS_OK;
 }
+
+static void SetOnlineType(int32_t reason, NodeInfo *nodeInfo, LnnEventExtra extra)
+{
+    if (reason == SOFTBUS_OK) {
+        extra.onlineType = DfxRecordLnnOnlineType(nodeInfo);
+    } else {
+        extra.onlineType = ONLINE_TYPE_INVALID;
+    }
+}
   
 static int32_t FillDeviceBleReportExtra(const LnnEventExtra *extra, LnnBleReportExtra *bleExtra)
 {
@@ -541,6 +561,7 @@ static int32_t FillDeviceBleReportExtra(const LnnEventExtra *extra, LnnBleReport
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    bleExtra->extra.onlineType = extra->onlineType;
     if (strcpy_s(bleExtra->extra.peerNetworkId, NETWORK_ID_BUF_LEN, extra->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_BUILDER, "strcpy_s peerNetworkId fail");
         return SOFTBUS_STRCPY_ERR;
@@ -620,15 +641,6 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
 }
 
-static void SetOnlineType(int32_t reason, NodeInfo *nodeInfo, LnnEventExtra extra)
-{
-    if (reason == SOFTBUS_OK) {
-        extra.onlineType = DfxRecordLnnOnlineType(nodeInfo);
-    } else {
-        extra.onlineType = ONLINE_TYPE_INVALID;
-    }
-}
-
 static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onlineNum, int32_t lnnType, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
@@ -697,7 +709,8 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         SetLnnConnNodeInfo(connInfo, networkId, connFsm, retCode);
     } else if (retCode != SOFTBUS_OK) {
         NotifyJoinResult(connFsm, networkId, retCode);
-        AuthHandleLeaveLNN(connInfo->authHandle);
+        connFsm->isDead = true;
+        LnnNotifyAuthHandleLeaveLNN(connInfo->authHandle);
     }
     
     int32_t infoNum = 0;
@@ -725,7 +738,6 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     if (retCode != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "join failed, ready clean, [id=%{public}u], retCode=%{public}d", connFsm->id, retCode);
-        connFsm->isDead = true;
         LnnRequestCleanConnFsm(connFsm->id);
         return;
     }

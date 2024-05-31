@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,25 +173,18 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     if (!IsValidString(networkId, ID_MAX_LEN)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (option == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "option invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    TRANS_CHECK_AND_RETURN_RET_LOGW(networkId, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid network id");
-    TRANS_CHECK_AND_RETURN_RET_LOGW(callback && callback->onChannelOpened && callback->onChannelOpenFailed,
+    TRANS_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "option invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(networkId, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid network id");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(callback && callback->onChannelOpened && callback->onChannelOpenFailed,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid callback");
 
     if (option->bleDirect) {
-        if (!ConnBleDirectIsEnable(BLE_COC)) {
-            TRANS_LOGE(TRANS_CTRL, "ble direct is not enable");
-            return SOFTBUS_FUNC_NOT_SUPPORT;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(
+            ConnBleDirectIsEnable(BLE_COC), SOFTBUS_FUNC_NOT_SUPPORT, TRANS_CTRL, "ble direct is not enable");
     }
     struct PipelineChannelItem *item = (struct PipelineChannelItem *)SoftBusCalloc(sizeof(struct PipelineChannelItem));
-    if (item == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc item failed, reqId=%{public}d", requestId);
-        return SOFTBUS_MALLOC_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc item failed, reqId=%{public}d", requestId);
     item->requestId = requestId;
     if (strcpy_s(item->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "strcpy_s network id failed, reqId=%{public}d", requestId);
@@ -213,9 +206,8 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     msg->handler = &g_manager.handler;
     msg->FreeMessage = TransProxyPipelineFreeMessage;
 
-    int32_t ret = SoftBusMutexLock(&g_manager.channels->lock);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock channels failed, reqId=%{public}d, ret=%{public}d", requestId, ret);
+    if (SoftBusMutexLock(&g_manager.channels->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock channels failed, reqId=%{public}d", requestId);
         SoftBusFree(item);
         SoftBusFree(msg);
         return SOFTBUS_LOCK_ERR;
@@ -223,7 +215,7 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     ListInit(&item->node);
     ListAdd(&g_manager.channels->list, &item->node);
     TRANS_LOGI(TRANS_CTRL, "add channelId=%{public}d", item->channelId);
-    g_manager.channels->cnt += 1;
+    g_manager.channels->cnt++;
     SoftBusMutexUnlock(&g_manager.channels->lock);
 
     g_manager.looper->PostMessage(g_manager.looper, msg);
@@ -538,6 +530,38 @@ static void TransProxyPipelineOnMessageReceived(int32_t channelId, const char *d
     target->listener.onDataReceived(channelId, data + sizeof(uint32_t), len - sizeof(uint32_t));
 }
 
+static void OpenNetWorkingChannel(int32_t requestId, ITransProxyPipelineCallback *callback,
+    LanePreferredLinkList *preferred, char *networkId, struct PipelineChannelItem *target)
+{
+    int32_t channelId = TransOpenNetWorkingChannel(SESSION_NAME, networkId, preferred);
+    int32_t ret = SoftBusMutexLock(&g_manager.channels->lock);
+    TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_CTRL, "fail to lock channels.");
+    target = SearchChannelItemUnsafe(&requestId, CompareByRequestId);
+    if (target == NULL) {
+        TRANS_LOGE(TRANS_CTRL,
+            "open proxy session failed, reqId=%{public}d, channelId=%{public}d", requestId, channelId);
+        (void)SoftBusMutexUnlock(&g_manager.channels->lock);
+        if (channelId != INVALID_CHANNEL_ID) {
+            TransCloseNetWorkingChannel(channelId);
+        }
+        return;
+    }
+    callback->onChannelOpenFailed = target->callback.onChannelOpenFailed;
+
+    if (channelId == INVALID_CHANNEL_ID) {
+        TRANS_LOGE(TRANS_CTRL, "open proxy channel failed, reqId=%{public}d", requestId);
+        ListDelete(&target->node);
+        g_manager.channels->cnt -= 1;
+        SoftBusFree(target);
+        (void)SoftBusMutexUnlock(&g_manager.channels->lock);
+        callback->onChannelOpenFailed(requestId, SOFTBUS_ERR);
+        return;
+    }
+    target->channelId = channelId;
+    target->ref = 1;
+    (void)SoftBusMutexUnlock(&g_manager.channels->lock);
+}
+
 static void InnerOpenProxyChannel(int32_t requestId)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
@@ -549,7 +573,7 @@ static void InnerOpenProxyChannel(int32_t requestId)
     struct PipelineChannelItem *target = SearchChannelItemUnsafe(&requestId, CompareByRequestId);
     if (target == NULL) {
         TRANS_LOGE(TRANS_CTRL, "channel not found. reqId=%{public}d", requestId);
-        SoftBusMutexUnlock(&g_manager.channels->lock);
+        (void)SoftBusMutexUnlock(&g_manager.channels->lock);
         return;
     }
     ITransProxyPipelineCallback callback = {
@@ -566,42 +590,14 @@ static void InnerOpenProxyChannel(int32_t requestId)
         ListDelete(&target->node);
         g_manager.channels->cnt -= 1;
         SoftBusFree(target);
-        SoftBusMutexUnlock(&g_manager.channels->lock);
+        (void)SoftBusMutexUnlock(&g_manager.channels->lock);
         callback.onChannelOpenFailed(requestId, SOFTBUS_STRCPY_ERR);
         return;
     }
     target = NULL;
-    SoftBusMutexUnlock(&g_manager.channels->lock);
+    (void)SoftBusMutexUnlock(&g_manager.channels->lock);
 
-    int32_t channelId = TransOpenNetWorkingChannel(SESSION_NAME, networkId, &preferred);
-    ret = SoftBusMutexLock(&g_manager.channels->lock);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-        return;
-    }
-    target = SearchChannelItemUnsafe(&requestId, CompareByRequestId);
-    if (target == NULL) {
-        TRANS_LOGE(TRANS_CTRL,
-            "open proxy session failed, reqId=%{public}d, channelId=%{public}d", requestId, channelId);
-        SoftBusMutexUnlock(&g_manager.channels->lock);
-        if (channelId != INVALID_CHANNEL_ID) {
-            TransCloseNetWorkingChannel(channelId);
-        }
-        return;
-    }
-    callback.onChannelOpenFailed = target->callback.onChannelOpenFailed;
-    if (channelId == INVALID_CHANNEL_ID) {
-        TRANS_LOGE(TRANS_CTRL, "open proxy channel failed, reqId=%{public}d", requestId);
-        ListDelete(&target->node);
-        g_manager.channels->cnt -= 1;
-        SoftBusFree(target);
-        SoftBusMutexUnlock(&g_manager.channels->lock);
-        callback.onChannelOpenFailed(requestId, SOFTBUS_ERR);
-        return;
-    }
-    target->channelId = channelId;
-    target->ref = 1;
-    SoftBusMutexUnlock(&g_manager.channels->lock);
+    OpenNetWorkingChannel(requestId, &callback, &preferred, networkId, target);
 }
 #ifdef  __cplusplus
 extern "C" {

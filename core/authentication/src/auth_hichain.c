@@ -263,10 +263,19 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
         AUTH_LOGW(AUTH_HICHAIN, "invalid udid");
         return;
     }
+    GroupInfo info;
+    (void)memset_s(&info, sizeof(GroupInfo), 0, sizeof(GroupInfo));
+    if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
+        return;
+    }
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
-    AUTH_LOGI(AUTH_HICHAIN, "hichain onDeviceBound, udid=%{public}s", anonyUdid);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain onDeviceBound, udid=%{public}s, type=%{public}d", anonyUdid, info.groupType);
     AnonymizeFree(anonyUdid);
+    if (info.groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
+        AUTH_LOGI(AUTH_HICHAIN, "ignore same account udid");
+        return;
+    }
     char localUdid[UDID_BUF_LEN] = { 0 };
     LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
     if (strcmp(localUdid, udid) == 0) {

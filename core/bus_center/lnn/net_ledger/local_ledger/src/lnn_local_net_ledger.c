@@ -1137,7 +1137,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
     }
     char *anonyNetworkId = NULL;
     Anonymize(g_localNetLedger.localInfo.networkId, &anonyNetworkId);
-    g_localNetLedger.localInfo.networkIdTimestamp = SoftBusGetSysTimeMs();
+    g_localNetLedger.localInfo.networkIdTimestamp = (int64_t)SoftBusGetSysTimeMs();
     LNN_LOGI(LNN_LEDGER, "networkId change, reset networkId=%{public}s, networkIdTimestamp=%{public}" PRId64,
         anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore(STRING_KEY_NETWORKID);
@@ -1252,6 +1252,11 @@ static int32_t UpdateLocalBtMac(const void *mac)
     if (mac == NULL) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
+    }
+    const char *beforeMac = LnnGetBtMac(&g_localNetLedger.localInfo);
+    if (strcmp(beforeMac, (char *)mac) == 0) {
+        LNN_LOGI(LNN_LEDGER, "unchanged. no need update");
+        return SOFTBUS_OK;
     }
     LnnSetBtMac(&g_localNetLedger.localInfo, (char *)mac);
     if (LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo) != SOFTBUS_OK) {

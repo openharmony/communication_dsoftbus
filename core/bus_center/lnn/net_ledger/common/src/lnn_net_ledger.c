@@ -34,6 +34,8 @@
 #include "lnn_meta_node_interface.h"
 #include "lnn_p2p_info.h"
 #include "lnn_device_info_recovery.h"
+#include "lnn_feature_capability.h"
+#include "lnn_ble_lpdevice.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
@@ -166,8 +168,19 @@ static void RestoreLocalDeviceInfo(void)
     LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
 }
 
+static void LnnSetLocalFeature(void)
+{
+    if (IsSupportLpFeature()) {
+        uint64_t feature = 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
+        if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set feature fail");
+        }
+    }
+}
+
 int32_t LnnInitNetLedgerDelay(void)
 {
+    LnnSetLocalFeature();
     LnnLoadLocalDeviceAccountIdInfo();
     LnnInitCloudSyncModule();
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {

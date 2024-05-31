@@ -474,6 +474,16 @@ int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
     return SOFTBUS_OK;
 }
 
+static inline uint32_t AddAndCheckOverflowUint32(uint32_t a, uint32_t b)
+{
+    return (a > UINT32_MAX - b) ? UINT32_MAX : (a + b);
+}
+
+static inline uint64_t AddAndCheckOverflowUint64(uint64_t a, uint64_t b)
+{
+    return (a > UINT64_MAX - b) ? UINT64_MAX : (a + b);
+}
+
 int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_t repTimes, uint32_t devNum,
                                     uint32_t discTimes)
 {
@@ -491,10 +501,11 @@ int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_
             return SOFTBUS_ERR;
         }
     }
-    discDetailNode->devNum += devNum;
-    discDetailNode->discTimes += discTimes;
-    discDetailNode->duration += duration;
-    discDetailNode->repTimes += repTimes;
+
+    discDetailNode->devNum = AddAndCheckOverflowUint32(discDetailNode->devNum, devNum);
+    discDetailNode->discTimes = AddAndCheckOverflowUint32(discDetailNode->discTimes, discTimes);
+    discDetailNode->duration = AddAndCheckOverflowUint64(discDetailNode->duration, duration);
+    discDetailNode->repTimes = AddAndCheckOverflowUint32(discDetailNode->repTimes, repTimes);
     (void)SoftBusMutexUnlock(&g_discDetailLock);
     return SOFTBUS_OK;
 }

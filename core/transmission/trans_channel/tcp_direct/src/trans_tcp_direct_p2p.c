@@ -762,7 +762,7 @@ static void OnAuthChannelClose(AuthHandle authHandle)
     TRANS_LOGW(TRANS_CTRL, "AuthId=%{public}" PRId64 ",channelIds num=%{public}d", authHandle.authId, num);
     int32_t i;
     for (i = 0; i < num; i++) {
-        (void)OnChannelOpenFail(channelIds[i], SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED);
+        (void)OnChannelOpenFail(channelIds[i], SOFTBUS_TRANS_OPEN_AUTH_CHANNEL_FAILED);
     }
     SoftBusFree(channelIds);
 }

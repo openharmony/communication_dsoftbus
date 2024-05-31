@@ -40,6 +40,9 @@ bus_center_ledger_inc = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+  "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+  "$dsoftbus_root_path/interfaces/kits/common",
 ]
 bus_center_ledger_deps = []
 bus_center_ledger_external_deps = [ "huks:libhukssdk" ]
