@@ -847,7 +847,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     (void)strcpy_s(appInfo.myData.pkgName, TEST_PKG_NAME_LEN, TEST_PKGNAME);
     appInfo.appType = APP_TYPE_AUTH;
     appInfo.myData.pid = TEST_DEATH_CHANNEL_ID;
-    //will free in TransProxyDeathCallback
+    // will free in TransProxyDeathCallback
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
     chan->channelId = TEST_DEATH_CHANNEL_ID;
