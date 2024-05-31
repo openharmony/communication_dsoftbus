@@ -969,11 +969,9 @@ static void CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilter 
         ScanManager *scanManager = &g_scanManager[managerId];
         if (!scanManager->isUsed || (!scanManager->isScanning && managerId != listenerId) ||
             scanManager->adapterScanId != g_scanManager[listenerId].adapterScanId) {
-            scanManager->isNeedReset = false;
             continue;
         }
 
-        scanManager->isNeedReset = true;
         size += scanManager->filterSize;
     }
     *adapterFilter = (SoftBusBcScanFilter *)SoftBusCalloc(sizeof(SoftBusBcScanFilter) * size);
@@ -1072,6 +1070,7 @@ static void CheckScanFreq(int32_t listenerId, SoftBusBcScanParams *adapterParam)
         if (maxFreq != scanLpFreq) {
             DISC_LOGD(DISC_BLE, "lp freq need to update.");
             scanLpFreq = maxFreq;
+            // Need to reset scanner when frequency changed.
             g_scanManager[listenerId].isNeedReset = true;
         }
         return;
@@ -1085,6 +1084,7 @@ static void CheckScanFreq(int32_t listenerId, SoftBusBcScanParams *adapterParam)
         maxFreq = (maxFreq > (int32_t)(scanManager->freq)) ? maxFreq : (int32_t)(scanManager->freq);
     }
     if (scanFreq != maxFreq) {
+        // Need to reset scanner when frequency changed.
         g_scanManager[listenerId].isNeedReset = true;
         scanFreq = maxFreq;
         DISC_LOGD(DISC_BLE, "need to update.");
@@ -1099,7 +1099,7 @@ static int32_t CheckAndStopScan(int32_t listenerId)
     int32_t ret;
     bool needUpdate = CheckNeedUpdateScan(listenerId, &liveListenerId);
     if (!needUpdate) {
-        DISC_LOGI(DISC_BLE, "call stop scan");
+        DISC_LOGI(DISC_BLE, "call stop scan, adapterId=%{public}d", g_scanManager[listenerId].adapterScanId);
         ret = g_interface[g_interfaceId]->StopScan(g_scanManager[listenerId].adapterScanId);
         if (ret != SOFTBUS_OK) {
             g_scanManager[listenerId].scanCallback->OnStopScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
@@ -1480,7 +1480,8 @@ static bool NeedUpdateScan(int32_t listenerId)
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), false, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, false, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopScan != NULL, false, DISC_BLE, "function is null!");
-    bool isNeedReset = false;
+    
+    // Check whether the scanner is scanning.
     bool isScanning = false;
     int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
 
@@ -1488,25 +1489,32 @@ static bool NeedUpdateScan(int32_t listenerId)
         if (g_scanManager[managerId].adapterScanId != adapterScanId) {
             continue;
         }
-        if (g_scanManager[managerId].isNeedReset) {
-            isNeedReset = true;
-        }
         if (g_scanManager[managerId].isScanning) {
             isScanning = true;
+            break;
         }
     }
-    if (!isScanning) {
+    
+    // Need to reset scanner when the listenerId is not added in scanner.
+    if (!g_scanManager[listenerId].isScanning) {
+        g_scanManager[listenerId].isNeedReset = true;
+    }
+
+    if (g_scanManager[listenerId].isNeedReset) {
+        goto NEED_RESET;
+    }
+    DISC_LOGD(DISC_BLE, "no need reset");
+    return false;
+
+NEED_RESET:
+    if (isScanning) {
+        int32_t ret = g_interface[g_interfaceId]->StopScan(adapterScanId);
+        if (ret != SOFTBUS_OK) {
+            DISC_LOGE(DISC_BLE, "call from adapter fail!, ret=%{public}d", ret);
+        }
         return true;
     }
-    if (!isNeedReset) {
-        DISC_LOGD(DISC_BLE, "no need reset");
-        return false;
-    }
-    int32_t ret = g_interface[g_interfaceId]->StopScan(adapterScanId);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "call from adapter fail!");
-        return false;
-    }
+    DISC_LOGI(DISC_BLE, "just start scan");
     return true;
 }
 
@@ -1523,10 +1531,11 @@ static int32_t StartScanSub(int32_t listenerId)
     SoftBusBcScanFilter *adapterFilter = NULL;
 
     if (!NeedUpdateScan(listenerId)) {
-        DISC_LOGD(DISC_BLE, "no need update scan");
+        DISC_LOGI(DISC_BLE, "no need update scan, listenerId=%{public}d, srvType=%{public}s, callCount=%{public}u",
+            listenerId, GetSrvType(g_scanManager[listenerId].srvType), callCount);
         return SOFTBUS_OK;
     }
-    DISC_LOGD(DISC_BLE, "need update scan");
+
     GetBcScanFilters(listenerId, &adapterFilter, &filterSize);
     DISC_CHECK_AND_RETURN_RET_LOGE(filterSize > 0, SOFTBUS_BC_MGR_START_SCAN_NO_FILTER, DISC_BLE, "fitersize is 0!");
     DumpBcScanFilter(adapterFilter, filterSize);
@@ -1537,6 +1546,7 @@ static int32_t StartScanSub(int32_t listenerId)
         adapterParam.scanInterval, adapterParam.scanWindow, callCount++);
     int32_t ret = g_interface[g_interfaceId]->StartScan(g_scanManager[listenerId].adapterScanId, &adapterParam,
         adapterFilter, filterSize);
+    g_scanManager[listenerId].isNeedReset = false;
     SoftBusFree(adapterFilter);
     if (ret != SOFTBUS_OK) {
         g_scanManager[listenerId].scanCallback->OnStartScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
@@ -1639,6 +1649,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
     ReleaseBcScanFilter(listenerId);
     g_scanManager[listenerId].filter = (BcScanFilter *)scanFilter;
     g_scanManager[listenerId].filterSize = filterNum;
+    // Need to reset scanner when filter changed.
     g_scanManager[listenerId].isNeedReset = true;
     DISC_LOGI(DISC_BLE, "srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d",
               GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId);
