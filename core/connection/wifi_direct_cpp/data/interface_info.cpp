@@ -67,7 +67,7 @@ void InterfaceInfo::MarshallingString(
             protocol.Write(static_cast<int>(key), type, macArray.data(), macArray.size());
         }
     } else {
-        protocol.Write(static_cast<int>(key), type, (uint8_t *)value.c_str(), value.length());
+        protocol.Write(static_cast<int>(key), type, reinterpret_cast<const uint8_t*>(value.c_str()), value.length());
     }
 }
 
