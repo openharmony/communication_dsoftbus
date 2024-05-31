@@ -276,33 +276,34 @@ static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *d
 
     while (waitSendLen > 0) {
         uint32_t sendLen = waitSendLen <= maxPayload ? waitSendLen : maxPayload;
-        uint8_t *buff = (uint8_t *)SoftBusCalloc(sendLen + BLE_TRANS_HEADER_SIZE);
+        uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)sendLen);
+        uint8_t *buff = (uint8_t *)SoftBusCalloc(amount + BLE_TRANS_HEADER_SIZE);
         if (buff == NULL) {
             return SOFTBUS_MALLOC_ERR;
         }
-        if (memcpy_s(buff + BLE_TRANS_HEADER_SIZE, sendLen, waitSendData, sendLen) != EOK) {
+        if (memcpy_s(buff + BLE_TRANS_HEADER_SIZE, amount, waitSendData, amount) != EOK) {
             SoftBusFree(buff);
             return SOFTBUS_MEM_ERR;
         }
         BleTransHeader *header = (BleTransHeader *)buff;
         header->total = htonl(dataLen);
-        header->size = htonl(sendLen);
+        header->size = htonl(amount);
         header->offset = htonl(offset);
         header->seq = htonl(sequence);
 
-        int32_t status = ConnBleSend(connection, buff, sendLen + BLE_TRANS_HEADER_SIZE, module);
+        int32_t status = ConnBleSend(connection, buff, amount + BLE_TRANS_HEADER_SIZE, module);
         CONN_LOGI(CONN_BLE,
             "ble send packet: connId=%{public}u, module=%{public}d, "
             "Seq=%{public}u, Total=%{public}d, Size=%{public}d, Offset=%{public}u, status=%{public}d",
-            connection->connectionId, module, sequence, dataLen, sendLen, offset, status);
+            connection->connectionId, module, sequence, dataLen, amount, offset, status);
         if (status != SOFTBUS_OK) {
             SoftBusFree(buff);
             return status;
         }
         SoftBusFree(buff);
-        waitSendData += sendLen;
-        waitSendLen -= sendLen;
-        offset += sendLen;
+        waitSendData += amount;
+        waitSendLen -= amount;
+        offset += amount;
         if (waitSendLen > 0) {
             // Temporarily add delay to avoid packet loss
             SoftBusSleepMs(BLE_SEND_PACKET_DELAY_MILLIS);
@@ -553,11 +554,17 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
 
 static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
-    int32_t status = ConnBleSend(connection, data, dataLen, module);
-    CONN_LOGI(CONN_BLE,
-        "coc send packet: connId=%{public}u, module=%{public}d, total=%{public}u, status=%{public}d",
-        connection->connectionId, module, dataLen, status);
-    return status;
+    #define BLE_SEND_PACKET_DELAY_MILLIS 10
+    uint32_t sentLen = 0;
+    while (dataLen > sentLen) {
+        uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)dataLen);
+        int32_t status = ConnBleSend(connection, data, amount, module);
+        CONN_LOGI(CONN_BLE,
+            "coc send packet: connId=%{public}u, module=%{public}d, total=%{public}u, status=%{public}d",
+            connection->connectionId, module, dataLen, status);
+        sentLen += amount;
+    }
+    return SOFTBUS_OK;
 }
 
 void *BleSendTask(void *arg)
@@ -582,26 +589,16 @@ void *BleSendTask(void *arg)
             continue;
         }
 
-        uint32_t sentLen = 0;
-        while (sentLen < sendNode->dataLen) {
-            int32_t amount = g_flowController->apply(g_flowController, (int32_t)(sendNode->dataLen - sentLen));
-            switch (connection->protocol) {
-                case BLE_GATT:
-                    status = ConnGattTransSend(connection, sendNode->data + sentLen, amount, sendNode->module);
-                    break;
-                case BLE_COC:
-                    status = ConnCocTransSend(connection, sendNode->data + sentLen, amount, sendNode->module);
-                    break;
-                default:
-                    CONN_LOGE(CONN_BLE, "ble connection trans send failed, connectionId=%{public}u, protocol=%{public}d",
-                        connection->connectionId, connection->protocol);
-                    status = SOFTBUS_ERR;
-                    break;
-            }
-            if (status != SOFTBUS_OK){
+        switch (connection->protocol) {
+            case BLE_GATT:
+                status = ConnGattTransSend(connection, sendNode->data, sendNode->dataLen, sendNode->module);
                 break;
-            }
-            sentLen += (uint32_t)amount;
+            case BLE_COC:
+                status = ConnCocTransSend(connection, sendNode->data, sendNode->dataLen, sendNode->module);
+                break;
+            default:
+                CONN_LOGE(CONN_BLE, "ble connecion trans send failed, connectionId=%{public}u, protocol=%{public}d",
+                    connection->connectionId, connection->protocol);
         }
         ConnBleReturnConnection(&connection);
         g_transEventListener.onPostBytesFinished(sendNode->connectionId, sendNode->dataLen, sendNode->pid,
