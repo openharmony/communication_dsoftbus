@@ -1484,14 +1484,14 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(nullptr));
     ON_CALL(mock, LnnGetRemoteStrInfo).WillByDefault(Return(SOFTBUS_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ON_CALL(mock, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
