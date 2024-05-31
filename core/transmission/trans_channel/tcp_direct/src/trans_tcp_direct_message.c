@@ -467,7 +467,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .linkType = conn.appInfo.connectType,
         .costTime = timediff,
         .errcode = errCode,
-        .osType = conn.appInfo.osType,
+        .osType = (conn.appInfo.osType < 0) ? UNKNOW_OS_TYPE : (conn.appInfo.osType),
         .peerUdid = conn.appInfo.peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
@@ -604,11 +604,9 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d", channelId);
     SessionConn conn;
     (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
-    if (GetSessionConnById(channelId, &conn) == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
-        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
-    }
-    int errCode = SOFTBUS_OK;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetSessionConnById(channelId, &conn) != NULL,
+        SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
+    int32_t errCode = SOFTBUS_OK;
     if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
         TransEventExtra extra = {
             .socketName = NULL,
@@ -617,49 +615,31 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
             .callerPkg = NULL,
             .channelId = channelId,
             .errcode = errCode,
-            .result = EVENT_STAGE_RESULT_FAILED
-        };
+            .result = EVENT_STAGE_RESULT_FAILED };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TRANS_LOGE(TRANS_CTRL, "receive err reply msg");
-        if (NotifyChannelOpenFailed(channelId, errCode) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "channel open failed");
-            return SOFTBUS_ERR;
-        }
+        int32_t status = NotifyChannelOpenFailed(channelId, errCode);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, TRANS_CTRL, "channel open failed.");
         return errCode;
     }
     uint16_t fastDataSize = 0;
-    if (UnpackReply(reply, &conn.appInfo, &fastDataSize) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "UnpackReply failed");
-        return SOFTBUS_TRANS_UNPACK_REPLY_FAILED;
-    }
-    int32_t ret = SOFTBUS_ERR;
-    ret = TransTdcProcessDataConfig(&conn.appInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Trans Tdc process data config failed.");
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(UnpackReply(reply, &conn.appInfo, &fastDataSize) == SOFTBUS_OK,
+        SOFTBUS_TRANS_UNPACK_REPLY_FAILED, TRANS_CTRL, "UnpackReply failed");
+
+    int32_t ret = TransTdcProcessDataConfig(&conn.appInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Trans Tdc process data config failed.");
+
     ret = SetAppInfoById(channelId, &conn.appInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "set app info by id failed.");
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "set app info by id failed.");
+
     if ((fastDataSize > 0 && (conn.appInfo.fastTransDataSize == fastDataSize)) || conn.appInfo.fastTransDataSize == 0) {
         ret = NotifyChannelOpened(channelId);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "notify channel open failed");
-            return ret;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");
     } else {
         ret = TransTdcPostFisrtData(&conn);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "tdc send fast data failed");
-            return ret;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "tdc send fast data failed");
         ret = NotifyChannelOpened(channelId);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "notify channel open failed");
-            return ret;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");
     }
     TransEventExtra extra = {
         .socketName = NULL,

@@ -137,9 +137,15 @@ public:
     void TearDown();
 };
 
-void ConnectionBrConnectionTest::SetUpTestCase(void){ }
+void ConnectionBrConnectionTest::SetUpTestCase(void)
+{
+    LooperInit();
+}
 
-void ConnectionBrConnectionTest::TearDownTestCase(void) { }
+void ConnectionBrConnectionTest::TearDownTestCase(void)
+{
+    LooperDeinit();
+}
 
 void ConnectionBrConnectionTest::SetUp(void) { }
 
@@ -160,6 +166,7 @@ ConnectFuncInterface *g_connectFuncInterface = NULL;
 
 ConnectFuncInterface *ConnInit(void)
 {
+    LooperInit();
     ConnectCallback callback = {
         .OnConnected = OnConnected,
         .OnDisconnected = OnDisconnected,

@@ -175,10 +175,12 @@ if (defined(ohos_lite)) {
     ]
     external_deps = [
       "bounds_checking_function:libsec_shared",
-      "c_utils:utilsbase",
       "mbedtls:mbedtls_shared",
       "openssl:libcrypto_shared",
     ]
+    if (is_standard_system) {
+      external_deps += [ "c_utils:utils" ]
+    }
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"

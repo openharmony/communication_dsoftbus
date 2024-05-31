@@ -96,7 +96,8 @@ static int32_t FindAndDelNormalizeRequest(int64_t authSeq, NormalizeRequest *req
     return SOFTBUS_ERR;
 }
 
-static int32_t GetNormalizeRequestList(int64_t authSeq, bool isNeedClear, NormalizeRequest **requests, uint32_t *num)
+static int32_t GetNormalizeRequestList(int64_t authSeq, bool isNeedClear, NormalizeRequest *request,
+    NormalizeRequest **requests, uint32_t *num)
 {
     if (num == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -105,15 +106,31 @@ static int32_t GetNormalizeRequestList(int64_t authSeq, bool isNeedClear, Normal
         AUTH_LOGE(AUTH_HICHAIN, "RequireAuthLock fail");
         return SOFTBUS_ERR;
     }
-    NormalizeRequest request = {0};
-    if (FindAndDelNormalizeRequest(authSeq, &request) != SOFTBUS_OK) {
+    if (FindAndDelNormalizeRequest(authSeq, request) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "not found normalize request");
         ReleaseAuthLock();
         return SOFTBUS_AUTH_INNER_ERR;
     }
-    int32_t ret = GetRequestListByUdidHash(request.udidHash, isNeedClear, requests, num);
+    int32_t ret = GetRequestListByUdidHash(request->udidHash, isNeedClear, requests, num);
     ReleaseAuthLock();
     return ret;
+}
+
+bool AuthIsRepeatedAuthRequest(int64_t authSeq)
+{
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_HICHAIN, "RequireAuthLock fail");
+        return SOFTBUS_ERR;
+    }
+    NormalizeRequest *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_normalizeRequestList, NormalizeRequest, node) {
+        if (item->authSeq == authSeq) {
+            ReleaseAuthLock();
+            return true;
+        }
+    }
+    ReleaseAuthLock();
+    return false;
 }
 
 uint32_t AddNormalizeRequest(const NormalizeRequest *request)
@@ -136,11 +153,12 @@ uint32_t AddNormalizeRequest(const NormalizeRequest *request)
     return waitNum;
 }
 
-void NotifyNormalizeRequestSuccess(int64_t authSeq)
+void NotifyNormalizeRequestSuccess(int64_t authSeq, bool isSupportNego)
 {
     NormalizeRequest *requests = NULL;
+    NormalizeRequest request = { 0 };
     uint32_t num = 0;
-    if (GetNormalizeRequestList(authSeq, true, &requests, &num) != SOFTBUS_OK) {
+    if (GetNormalizeRequestList(authSeq, true, &request, &requests, &num) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "get hichain request fail: authSeq=%{public}" PRId64, authSeq);
         return;
     }
@@ -150,9 +168,12 @@ void NotifyNormalizeRequestSuccess(int64_t authSeq)
     }
     AUTH_LOGI(AUTH_HICHAIN, "request num=%{public}d", num);
     for (uint32_t i = 0; i < num; i++) {
+        if (isSupportNego && requests[i].connInfo.type == request.connInfo.type) {
+            continue;
+        }
         AUTH_LOGI(AUTH_HICHAIN, "notify AuthSessionSaveSessionKey: authSeq=%{public}" PRId64,
             requests[i].authSeq);
-        (void)AuthVerifyAfterNotifyNormalize(&requests[i]);
+        (void)AuthNotifyRequestVerify(requests[i].authSeq);
     }
     SoftBusFree(requests);
 }
@@ -161,8 +182,9 @@ void NotifyNormalizeRequestFail(int64_t authSeq, int32_t ret)
 {
     (void)ret;
     NormalizeRequest *requests = NULL;
+    NormalizeRequest request = { 0 };
     uint32_t num = 0;
-    if (GetNormalizeRequestList(authSeq, false, &requests, &num) != SOFTBUS_OK) {
+    if (GetNormalizeRequestList(authSeq, false, &request, &requests, &num) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "get hichain request fail: authSeq=%{public}" PRId64, authSeq);
         return;
     }
@@ -170,7 +192,7 @@ void NotifyNormalizeRequestFail(int64_t authSeq, int32_t ret)
         return;
     }
     for (uint32_t i = 0; i < num; i++) {
-        if (AuthVerifyAfterNotifyNormalize(&requests[i]) == SOFTBUS_OK) {
+        if (AuthNotifyRequestVerify(requests[i].authSeq) == SOFTBUS_OK) {
             AUTH_LOGI(AUTH_HICHAIN, "continue auth, authSeq=%{public}" PRId64, requests[i].authSeq);
             break;
         }

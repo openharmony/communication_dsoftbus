@@ -55,9 +55,6 @@ ohos_static_library("wifi_direct") {
   if (dsoftbus_feature_conn_p2p == true &&
       softbus_communication_wifi_feature == true) {
     sanitize = {
-      ubsan = true
-      integer_overflow = true
-      boundary_sanitize = true
       cfi = true
       cfi_cross_dso = true
       debug = false
@@ -67,7 +64,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/adapter/p2p_adapter.cpp",
       "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
       "$wifi_direct_path/channel/proxy_negotiate_channel.cpp",
-      "$wifi_direct_path/channel/null_negotiate_channel.cpp",
+      "$wifi_direct_path/channel/dummy_negotiate_channel.cpp",
       "$wifi_direct_path/command/connect_command.cpp",
       "$wifi_direct_path/command/command_factory.cpp",
       "$wifi_direct_path/command/disconnect_command.cpp",

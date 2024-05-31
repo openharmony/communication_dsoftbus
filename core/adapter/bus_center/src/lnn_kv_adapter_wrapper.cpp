@@ -14,6 +14,7 @@
  */
 
 #include <cstring>
+#include <securec.h>
 #include <string>
 
 #include "lnn_kv_adapter_wrapper.h"
@@ -21,7 +22,10 @@
 #include "lnn_kv_adapter.h"
 #include "lnn_kv_data_change_listener.h"
 #include "lnn_log.h"
+#include "lnn_node_info.h"
 #include "softbus_errcode.h"
+#include "softbus_def.h"
+#include "softbus_utils.h"
 
 using namespace OHOS;
 using namespace OHOS::DistributedKv;
@@ -35,14 +39,15 @@ std::mutex g_kvAdapterWrapperMutex;
 
 static int32_t g_dbId = 1;
 static std::map<int32_t, std::shared_ptr<OHOS::KVAdapter>> g_dbID2KvAdapter;
-void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
-void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
-std::shared_ptr<OHOS::KVAdapter> FindKvStorePtr(int32_t &dbId);
+static void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
+static void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
+static std::shared_ptr<OHOS::KVAdapter> FindKvStorePtr(int32_t &dbId);
 
 int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen)
 {
     if (dbId == nullptr || appId == nullptr || appIdLen < MIN_STRING_LEN || appIdLen > MAX_STRING_LEN ||
         storeId == nullptr || storeIdLen < MIN_STRING_LEN || storeIdLen > MAX_STRING_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     std::string appIdStr(appId, appIdLen);
@@ -50,13 +55,13 @@ int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, c
     std::shared_ptr<KVAdapter> kvAdapter = nullptr;
     {
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
-        kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr, std::make_shared<KvDataChangeListener>());
+        kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr);
         int32_t initRet = kvAdapter->Init();
         if (initRet != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret=%{public}d", initRet);
             return initRet;
         }
-        *dbId=g_dbId;
+        *dbId = g_dbId;
         g_dbID2KvAdapter.insert(std::make_pair(g_dbId, kvAdapter));
         g_dbId++;
     }
@@ -70,6 +75,7 @@ int32_t LnnDestroyKvAdapter(int32_t dbId)
     {
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+            LNN_LOGE(LNN_LEDGER, "invalid param");
             return SOFTBUS_INVALID_PARAM;
         }
         auto kvAdapter = FindKvStorePtr(dbId);
@@ -91,7 +97,7 @@ int32_t LnnDestroyKvAdapter(int32_t dbId)
     return SOFTBUS_OK;
 }
 
-std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &dbId)
+static std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &dbId)
 {
     auto iter = g_dbID2KvAdapter.find(dbId);
     if (iter == g_dbID2KvAdapter.end()) {
@@ -108,6 +114,7 @@ int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (key == nullptr || keyLen < MIN_STRING_LEN || keyLen > MAX_STRING_LEN || value == nullptr ||
             valueLen < MIN_STRING_LEN || valueLen > MAX_STRING_LEN || dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+            LNN_LOGE(LNN_LEDGER, "invalid param");
             return SOFTBUS_INVALID_PARAM;
         }
         std::string keyStr(key, keyLen);
@@ -134,6 +141,7 @@ int32_t LnnDeleteDBData(int32_t dbId, const char *key, int32_t keyLen)
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (key == nullptr || keyLen < MIN_STRING_LEN || keyLen > MAX_STRING_LEN || dbId < MIN_DBID_COUNT ||
             dbId >= g_dbId) {
+            LNN_LOGE(LNN_LEDGER, "invalid param");
             return SOFTBUS_INVALID_PARAM;
         }
         std::string keyStr(key, keyLen);
@@ -160,6 +168,7 @@ int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (value == nullptr || key == nullptr || keyLen < MIN_STRING_LEN || keyLen > MAX_STRING_LEN ||
             dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+            LNN_LOGE(LNN_LEDGER, "invalid param");
             return SOFTBUS_INVALID_PARAM;
         }
         std::string keyStr(key, keyLen);
@@ -179,7 +188,7 @@ int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value
         LNN_LOGE(LNN_LEDGER, "strdup failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "kvAdapter get success, dbId=%{public}d", dbId);
+    LNN_LOGD(LNN_LEDGER, "kvAdapter get success, dbId=%{public}d", dbId);
     return SOFTBUS_OK;
 }
 
@@ -190,6 +199,7 @@ int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t key
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (keyPrefix == nullptr || keyPrefixLen < MIN_STRING_LEN || keyPrefixLen > MAX_STRING_LEN ||
             dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+            LNN_LOGE(LNN_LEDGER, "invalid param");
             return SOFTBUS_INVALID_PARAM;
         }
         std::string keyPrefixStr(keyPrefix, keyPrefixLen);
@@ -212,19 +222,22 @@ int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
 {
     int32_t putBatchRet;
     {
+        LNN_LOGI(LNN_LEDGER, "call");
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (localInfo == nullptr || dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+            LNN_LOGE(LNN_LEDGER, "invalid param, dbId=%{public}d", dbId);
             return SOFTBUS_INVALID_PARAM;
         }
         std::map<std::string, std::string> values;
-        BasicCloudSyncInfoToMap(localInfo, values);
-        ComplexCloudSyncInfoToMap(localInfo, values);
         auto kvAdapter = FindKvStorePtr(dbId);
         if (kvAdapter == nullptr) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
             return SOFTBUS_NOT_FIND;
         }
+        BasicCloudSyncInfoToMap(localInfo, values);
+        ComplexCloudSyncInfoToMap(localInfo, values);
         putBatchRet = kvAdapter->PutBatch(values);
+        values.clear();
     }
     if (putBatchRet != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "kvAdapter putBatch failed, ret=%{public}d", putBatchRet);
@@ -249,7 +262,7 @@ int32_t LnnCloudSync(int32_t dbId)
     return (kvAdapter->CloudSync());
 }
 
-void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values)
+static void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values)
 {
     if (localInfo == nullptr) {
         LNN_LOGE(LNN_LEDGER, "localInfo is null");
@@ -284,7 +297,48 @@ void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::strin
     values[keyPrefix + DEVICE_INFO_P2P_MAC_ADDR] = localInfo->p2pMac + stateVersionStr;
 }
 
-void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values)
+static int32_t CipherAndRpaInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values,
+    const std::string &keyPrefix, const std::string &stateVersionStr)
+{
+    char cipherKey[SESSION_KEY_STR_LEN] = { 0 };
+    char cipherIv[BROADCAST_IV_STR_LEN] = { 0 };
+    char peerIrk[LFINDER_IRK_STR_LEN] = { 0 };
+    char pubMac[LFINDER_MAC_ADDR_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(cipherKey, SESSION_KEY_STR_LEN, localInfo->cipherKey, SESSION_KEY_LENGTH) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert cipherkey to string fail.");
+        return SOFTBUS_KV_CONVERT_STRING_FAILED;
+    }
+    if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN, localInfo->cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert cipheriv to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        return SOFTBUS_KV_CONVERT_STRING_FAILED;
+    }
+    if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN, localInfo->peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert peerIrk to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
+        return SOFTBUS_KV_CONVERT_STRING_FAILED;
+    }
+    if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN, localInfo->publicAddress, LFINDER_MAC_ADDR_LEN) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert publicAddress to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
+        (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
+        return SOFTBUS_KV_CONVERT_STRING_FAILED;
+    }
+    values[keyPrefix + DEVICE_INFO_DEVICE_IRK] = peerIrk + stateVersionStr;
+    values[keyPrefix + DEVICE_INFO_DEVICE_PUB_MAC] = pubMac + stateVersionStr;
+    values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_KEY] = cipherKey + stateVersionStr;
+    values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_IV] = cipherIv + stateVersionStr;
+    (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+    (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
+    (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
+    return SOFTBUS_OK;
+}
+
+static void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values)
 {
     if (localInfo == nullptr) {
         LNN_LOGE(LNN_LEDGER, "localInfo is null");
@@ -293,32 +347,62 @@ void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::str
     std::string keyPrefix = std::to_string(localInfo->accountId) + SEPARATOR + localInfo->deviceUdid + SEPARATOR;
     std::string stateVersionStr = SEPARATOR + std::to_string(localInfo->stateVersion);
 
-    char peerIrkStr[LFINDER_IRK_LEN];
-    for (int32_t i = 0; i < LFINDER_IRK_LEN; i++) {
-        peerIrkStr[i] = static_cast<char>(localInfo->peerIrk[i]);
+    char remotePtkStr[PTK_DEFAULT_LEN + 1] = {0};
+    for (int32_t i = 0; i < PTK_DEFAULT_LEN; i++) {
+        remotePtkStr[i] = static_cast<char>(localInfo->remotePtk[i]);
     }
-    values[keyPrefix + DEVICE_INFO_DEVICE_IRK] = peerIrkStr + stateVersionStr;
-    char publicAddressStr[LFINDER_MAC_ADDR_LEN];
-    for (int32_t i = 0; i < LFINDER_MAC_ADDR_LEN; i++) {
-        publicAddressStr[i] = static_cast<char>(localInfo->publicAddress[i]);
-    }
-    values[keyPrefix + DEVICE_INFO_DEVICE_PUB_MAC] = publicAddressStr + stateVersionStr;
-    values[keyPrefix + DEVICE_INFO_PTK] = localInfo->remotePtk + stateVersionStr;
+    values[keyPrefix + DEVICE_INFO_PTK] = remotePtkStr + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_TABLE_MIAN] = localInfo->tableMain + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_TOTAL_LIFE] = std::to_string(localInfo->lifeTotal) + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_TIMESTAMP_BEGIN] =
         std::to_string(localInfo->curBeginTime) + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_CURRENT_INDEX] = std::to_string(localInfo->currentIndex) + stateVersionStr;
-    char cipherKeyStr[SESSION_KEY_LENGTH];
-    for (int32_t i = 0; i < SESSION_KEY_LENGTH; i++) {
-        cipherKeyStr[i] = static_cast<char>(localInfo->cipherKey[i]);
-    }
-    values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_KEY] = cipherKeyStr + stateVersionStr;
-    char cipherIvStr[BROADCAST_IV_LEN];
-    for (int32_t i = 0; i < BROADCAST_IV_LEN; i++) {
-        cipherIvStr[i] = static_cast<char>(localInfo->cipherIv[i]);
-    }
-    values[keyPrefix + DEVICE_INFO_BROADCAST_CIPHER_IV] = cipherIvStr + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_DISTRIBUTED_SWITCH] =
         (localInfo->distributedSwitch ? "true" : "false") + stateVersionStr;
+    if (CipherAndRpaInfoToMap(localInfo, values, keyPrefix, stateVersionStr) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert cipher and rpa info to map fail");
+    }
+}
+
+void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
+    int32_t storeIdLen)
+{
+    int32_t status;
+    {
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+        if (dbId < MIN_DBID_COUNT || dbId >= g_dbId || appId == nullptr || appIdLen < MIN_STRING_LEN ||
+            appIdLen > MAX_STRING_LEN || storeId == nullptr || storeIdLen < MIN_STRING_LEN ||
+            storeIdLen > MAX_STRING_LEN) {
+            LNN_LOGE(LNN_LEDGER, "invalid param");
+            return;
+        }
+        std::string appIdStr(appId, appIdLen);
+        std::string storeIdStr(storeId, storeIdLen);
+        auto kvAdapter = FindKvStorePtr(dbId);
+        if (kvAdapter == nullptr) {
+            LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
+            return;
+        }
+        status = kvAdapter->RegisterDataChangeListener(std::make_shared<KvDataChangeListener>(appIdStr, storeIdStr));
+    }
+    if (status != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "RegisterDataChangeListener failed");
+        return;
+    }
+    LNN_LOGI(LNN_LEDGER, "RegisterDataChangeListener success");
+}
+
+void LnnUnRegisterDataChangeListener(int32_t dbId)
+{
+    std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+    if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+        LNN_LOGI(LNN_LEDGER, "Invalid dbId ");
+        return;
+    }
+    auto kvAdapter = FindKvStorePtr(dbId);
+    if (kvAdapter == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
+        return;
+    }
+    kvAdapter->DeRegisterDataChangeListener();
 }

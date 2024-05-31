@@ -53,7 +53,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         .result = EVENT_STAGE_RESULT_OK,
         .callerPkg = pkgName,
         .socketName = sessionName,
-        .osType = osType,
+        .osType = (osType < 0) ? UNKNOW_OS_TYPE : osType,
         .peerUdid = peerUdid
     };
     CoreSessionState state = CORE_SESSION_STATE_INIT;

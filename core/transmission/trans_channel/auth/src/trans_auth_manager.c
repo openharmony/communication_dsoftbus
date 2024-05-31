@@ -442,7 +442,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         .channelType = CHANNEL_TYPE_AUTH,
         .authId = authId,
         .linkType = info.connOpt.type,
-        .osType = info.appInfo.osType
+        .osType = (info.appInfo.osType < 0) ? UNKNOW_OS_TYPE : info.appInfo.osType,
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo, len);
@@ -560,16 +560,19 @@ static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *a
 static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
 {
     if (g_authChannelList == NULL || info == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "lock failed");
+        TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList.");
         return SOFTBUS_LOCK_ERR;
     }
     AuthChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
         if (item->appInfo.myData.channelId == info->appInfo.myData.channelId) {
             (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            TRANS_LOGE(TRANS_SVC, "not found authChannel, channelId=%{public}" PRId64,
+                info->appInfo.myData.channelId);
             return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
         }
     }
@@ -775,6 +778,29 @@ EXIT_ERR:
     return NULL;
 }
 
+static void FillAndReportEventStart(const char *sessionName, int32_t *channelId, int32_t connType,
+    TransEventExtra *extra, AuthChannelInfo *channel)
+{
+    *channelId = (int32_t)channel->appInfo.myData.channelId;
+    channel->appInfo.timeStart = GetSoftbusRecordTimeMillis();
+    channel->appInfo.connectType = connType;
+    extra->peerNetworkId = NULL;
+    extra->calleePkg = NULL;
+    extra->callerPkg = NULL;
+    extra->socketName = sessionName;
+    extra->channelId = *channelId;
+    extra->channelType = CHANNEL_TYPE_AUTH;
+    extra->linkType = connType;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, *extra);
+}
+
+static void FillAndReportEventEnd(int32_t authId, TransEventExtra *extra)
+{
+    extra->result = EVENT_STAGE_RESULT_OK;
+    extra->authId = authId;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, *extra);
+}
+
 int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt,
     int32_t *channelId, const char *reqId)
 {
@@ -782,40 +808,22 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         return SOFTBUS_INVALID_PARAM;
     }
     AuthChannelInfo *channel = CreateAuthChannelInfo(sessionName, true);
-    if (channel == NULL) {
-        return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
-    }
-    if (strcpy_s(channel->appInfo.reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(channel != NULL, SOFTBUS_TRANS_CREATE_CHANNEL_ERR, TRANS_SVC, "fail to add pid");
+    if (strcpy_s(channel->appInfo.reqId, REQ_ID_SIZE_MAX, reqId) != EOK ||
+        memcpy_s(&channel->connOpt, sizeof(ConnectOption), connOpt, sizeof(ConnectOption)) != EOK) {
         SoftBusFree(channel);
-        TRANS_LOGE(TRANS_SVC, "TransOpenAuthMsgChannel strcpy_s reqId failed");
+        TRANS_LOGE(TRANS_SVC, "fail to copy appInfo and connOpt.");
         return SOFTBUS_STRCPY_ERR;
     }
-    if (memcpy_s(&channel->connOpt, sizeof(ConnectOption), connOpt, sizeof(ConnectOption)) != EOK) {
-        SoftBusFree(channel);
-        return SOFTBUS_MEM_ERR;
-    }
-    *channelId = (int32_t)channel->appInfo.myData.channelId;
-    channel->appInfo.timeStart = GetSoftbusRecordTimeMillis();
-    channel->appInfo.connectType = connOpt->type;
-    TransEventExtra extra = {
-        .peerNetworkId = NULL,
-        .calleePkg = NULL,
-        .callerPkg = NULL,
-        .socketName = sessionName,
-        .channelId = *channelId,
-        .channelType = CHANNEL_TYPE_AUTH,
-        .linkType = connOpt->type
-    };
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
+    TransEventExtra extra;
+    FillAndReportEventStart(sessionName, channelId, connOpt->type, &extra, channel);
     int32_t authId = AuthOpenChannel(connOpt->socketOption.addr, connOpt->socketOption.port);
     if (authId < 0) {
         TRANS_LOGE(TRANS_SVC, "AuthOpenChannel failed");
         SoftBusFree(channel);
-        return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
+        return SOFTBUS_TRANS_OPEN_AUTH_CHANNEL_FAILED;
     }
-    extra.result = EVENT_STAGE_RESULT_OK;
-    extra.authId = authId;
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
+    FillAndReportEventEnd(authId, &extra);
     channel->authId = authId;
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "SoftBusMutexLock failed");
@@ -825,7 +833,6 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
     }
     int32_t ret = AddAuthChannelInfo(channel);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "AddAuthChannelInfo failed");
         AuthCloseChannel(channel->authId);
         SoftBusFree(channel);
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
@@ -835,7 +842,6 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
     ret = TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "TransPostAuthRequest failed");
         AuthCloseChannel(channel->authId);
         DelAuthChannelInfoByChanId(*channelId);
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);

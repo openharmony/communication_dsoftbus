@@ -21,9 +21,11 @@
 #include "auth_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_fsm.c"
+#include "ble_mock.h"
 #include "softbus_adapter_mem.h"
 
 namespace OHOS {
+using namespace testing;
 using namespace testing::ext;
 constexpr int64_t AUTH_SEQ = 1;
 constexpr int64_t AUTH_SEQ_1 = 2;
@@ -214,9 +216,9 @@ HWTEST_F(AuthSessionFsmTest, GET_AUTH_FSM_TEST_001, TestSize.Level1)
     authFsm->isDead = true;
     ListNodeInsert(&g_authFsmList, &authFsm->node);
     EXPECT_TRUE(GetAuthFsmByAuthSeq(AUTH_SEQ) == nullptr);
-    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID_1, false) == nullptr);
-    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID, false) == nullptr);
-    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID, true) == nullptr);
+    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID_1, false, false) == nullptr);
+    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID, false, false) == nullptr);
+    EXPECT_TRUE(GetAuthFsmByConnId(CONN_ID, true, false) == nullptr);
 }
 
 /*
@@ -251,5 +253,37 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_HANDLE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(AuthSessionHandleDeviceDisconnected(CONN_ID_1) == SOFTBUS_OK);
     EXPECT_TRUE(AuthSessionHandleDeviceDisconnected(CONN_ID) == SOFTBUS_OK);
     AuthSessionFsmExit();
+}
+
+/*
+ * @tc.name: HANDLE_CLOSE_ACK_TEST_001
+ * @tc.desc: handle close ack base remote info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, HANDLE_CLOSE_ACK_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info = {0};
+    info.nodeInfo.feature = 0xF7CA;
+    BleMock bleMock;
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+
+    EXPECT_CALL(bleMock, SoftBusGetBrState()).WillRepeatedly(Return(BR_ENABLE));
+    int32_t ret = HandleCloseAckMessage(&authFsm, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    EXPECT_CALL(bleMock, SoftBusGetBrState()).WillRepeatedly(Return(BR_DISABLE));
+    ret = HandleCloseAckMessage(&authFsm, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    EXPECT_CALL(bleMock, SoftBusGetBrState()).WillRepeatedly(Return(BR_DISABLE));
+    ret = HandleCloseAckMessage(&authFsm, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    info.nodeInfo.feature = 0x1F7CA;
+    EXPECT_CALL(bleMock, SoftBusGetBrState()).WillRepeatedly(Return(BR_DISABLE));
+    ret = HandleCloseAckMessage(&authFsm, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS

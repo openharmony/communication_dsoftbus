@@ -39,6 +39,7 @@ public:
     int ConnectDevice(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback,
                       bool markRetried = false);
     int ConnectDevice(const std::shared_ptr<ConnectCommand> &command, bool markRetried = false);
+    int CancelConnectDevice(const WifiDirectConnectInfo &info);
     int DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback);
 
     template<typename Command>

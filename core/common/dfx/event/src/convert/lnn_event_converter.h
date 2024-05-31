@@ -47,6 +47,7 @@ LNN_ASSIGNER(Int32, AuthCostTime, authCostTime)
 LNN_ASSIGNER(Int32, LnnType, lnnType)
 LNN_ASSIGNER(Int32, OnlineNum, onlineNum)
 LNN_ASSIGNER(Int32, PeerDeviceAbility, peerDeviceAbility)
+LNN_ASSIGNER(Int32, OnlineType, onlineType)
 LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 LNN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -56,10 +57,12 @@ LNN_ASSIGNER(String, PeerPort, peerPort)
 LNN_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
 LNN_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 LNN_ASSIGNER(String, PeerDeviceType, peerDeviceType)
+LNN_ASSIGNER(AnonymizeString, LocalUdidHash, localUdidHash)
+LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 24 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 27 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -74,6 +77,7 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "LNN_TYPE",         HISYSEVENT_INT32,  LnnAssignerLnnType          },
     { "ONLINE_NUM",       HISYSEVENT_INT32,  LnnAssignerOnlineNum        },
     { "PEER_DEV_ABILITY", HISYSEVENT_INT32,  LnnAssignerPeerDeviceAbility},
+    { "ONLINE_TYPE",      HISYSEVENT_INT32,  LnnAssignerOnlineType       },
     { "PEER_DEV_INFO",    HISYSEVENT_STRING, LnnAssignerPeerDeviceInfo   },
     { "PEER_IP",          HISYSEVENT_STRING, LnnAssignerPeerIp           },
     { "PEER_BR_MAC",      HISYSEVENT_STRING, LnnAssignerPeerBrMac        },
@@ -83,6 +87,8 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "PEER_UDID",        HISYSEVENT_STRING, LnnAssignerPeerUdid         },
     { "PEER_NET_ID",      HISYSEVENT_STRING, LnnAssignerPeerNetworkId    },
     { "PEER_DEV_TYPE",    HISYSEVENT_STRING, LnnAssignerPeerDeviceType   },
+    { "LOCAL_UDID_HASH",  HISYSEVENT_STRING, LnnAssignerLocalUdidHash    },
+    { "PEER_UDID_HASH",   HISYSEVENT_STRING, LnnAssignerPeerUdidHash     },
     { "HOST_PKG",         HISYSEVENT_STRING, LnnAssignerCallerPkg        },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, LnnAssignerCalleePkg        },
     // Modification Note: remember updating LNN_ASSIGNER_SIZE

@@ -102,3 +102,13 @@ bool SoftBusIsWifiActive(void)
 {
     return true;
 }
+
+SoftBusWifiDetailState SoftBusGetWifiState(void)
+{
+    return SOFTBUS_WIFI_STATE_ACTIVED;
+}
+
+bool SoftBusIsWifiP2pEnabled(void)
+{
+    return true;
+}

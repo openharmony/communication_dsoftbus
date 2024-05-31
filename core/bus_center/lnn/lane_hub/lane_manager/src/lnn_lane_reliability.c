@@ -68,7 +68,7 @@ static int32_t GetSameLaneDetectInfo(LaneDetectInfo *infoItem)
         }
     }
     SoftBusMutexUnlock(&g_laneDetectList.lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_LANE_NOT_FOUND;
 }
 
 static int32_t ClientConnectTcp(LaneDetectInfo *infoItem)
@@ -88,7 +88,7 @@ static int32_t ClientConnectTcp(LaneDetectInfo *infoItem)
     }
     int32_t fd = ConnOpenClientSocket(&option, BIND_ADDR_ALL, true);
     if (fd < 0) {
-        return SOFTBUS_CONN_FAIL;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     return fd;
 }
@@ -128,7 +128,7 @@ static int32_t GetLaneDetectInfoByWlanFd(uint32_t fd, LaneDetectInfo *infoItem)
         }
     }
     SoftBusMutexUnlock(&g_laneDetectList.lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_LANE_NOT_FOUND;
 }
 
 static int32_t AddLaneTriggerAndTimeOut(int32_t fd, uint32_t detectId)
@@ -284,7 +284,7 @@ static int32_t LaneDetectOnDataEvent(ListenerModule module, int32_t events, int3
             LNN_LOGE(LNN_LANE, "wlan detect info not found by fd=%{public}d", fd);
             (void)DelTrigger(LANE, fd, WRITE_TRIGGER);
             ConnShutdownSocket(fd);
-            return SOFTBUS_LANE_NOT_FIND;
+            return SOFTBUS_LANE_NOT_FOUND;
         }
         LNN_LOGI(LNN_LANE, "wlan connect success, detectId=%{public}u, fd=%{public}d", requestItem.laneDetectId, fd);
         (void)DelTrigger(LANE, fd, WRITE_TRIGGER);
@@ -313,7 +313,7 @@ int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *laneInfo, 
         return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGI(LNN_LANE, "lane detect start, linktype=%{public}d, laneReqId=%{public}u", laneInfo->type, laneReqId);
-    int32_t result = SOFTBUS_ERR;
+    int32_t result = SOFTBUS_LANE_DETECT_FAIL;
     switch (laneInfo->type) {
         case LANE_WLAN_2P4G:
         case LANE_WLAN_5G:
@@ -338,7 +338,7 @@ void NotifyDetectTimeout(uint32_t detectId)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &detectInfoList, LaneDetectInfo, node) {
         LNN_LOGI(LNN_LANE, "Detect time out, link=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
             item->link.type, item->laneReqId, item->laneDetectId);
-        item->cb.OnLaneLinkFail(item->laneReqId, SOFTBUS_LANE_DETECT_FAIL, item->link.type);
+        item->cb.OnLaneLinkFail(item->laneReqId, SOFTBUS_LANE_DETECT_TIMEOUT, item->link.type);
         ListDelete(&item->node);
         SoftBusFree(item);
     }
@@ -350,12 +350,13 @@ int32_t InitLaneReliability(void)
         .onConnectEvent = LaneDetectOnConnectEvent,
         .onDataEvent = LaneDetectOnDataEvent,
     };
-    if (StartBaseClient(LANE, &listener) != SOFTBUS_OK) {
+    int32_t ret = StartBaseClient(LANE, &listener);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "listening fail, moudle=%{public}d ", LANE);
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (SoftBusMutexInit(&g_laneDetectList.lock, NULL) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     ListInit(&g_laneDetectList.list);
     g_laneDetectList.cnt = 0;
