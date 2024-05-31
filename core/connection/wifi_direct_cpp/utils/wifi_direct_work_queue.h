@@ -12,28 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef WIFI_DIRECT_COMMAND_H
-#define WIFI_DIRECT_COMMAND_H
+#ifndef WIFI_DIRECT_WORK_QUEUE_H
+#define WIFI_DIRECT_WORK_QUEUE_H
 
-#include <memory>
-#include <string>
+#include <functional>
+#include "message_handler.h"
 
 namespace OHOS::SoftBus {
-enum class CommandType {
-    NOT_COMMAND,
-    CONNECT_COMMAND,
-    DISCONNECT_COMMAND,
-    NEGOTIATE_COMMAND,
-    BLE_TRIGGER_COMMAND,
-};
-
-class WifiDirectProcessor;
-class WifiDirectCommand {
+class WifiDirectWorkQueue {
 public:
-    virtual std::string GetRemoteDeviceId() const = 0;
-    virtual std::shared_ptr<WifiDirectProcessor> GetProcessor() = 0;
-    virtual CommandType GetType() const { return CommandType::NOT_COMMAND; }
-    virtual ~WifiDirectCommand() = default;
+    using WorkFunction = std::function<void(void *data)>;
+    struct Work {
+        WorkFunction work;
+        void *data;
+    };
+
+    WifiDirectWorkQueue();
+    ~WifiDirectWorkQueue();
+
+    void ScheduleDelayWork(const Work *work, uint64_t timeMs);
+    void RemoveWork(const Work *work);
+
+private:
+    SoftBusHandler handler_ {};
 };
 }
 #endif

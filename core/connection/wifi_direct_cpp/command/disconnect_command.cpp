@@ -86,7 +86,7 @@ void DisconnectCommand::OnSuccess() const
     callback_.onDisconnectSuccess(info_.info_.requestId);
 }
 
-void DisconnectCommand::OnFailure(WifiDirectErrorCode reason) const
+void DisconnectCommand::OnFailure(int reason) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
     callback_.onDisconnectFailure(info_.info_.requestId, reason);
