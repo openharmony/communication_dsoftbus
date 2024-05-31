@@ -34,6 +34,7 @@
 namespace OHOS::SoftBus {
 static constexpr char DEFAULT_NET_MASK[] = "255.255.255.0";
 static constexpr int CHANNEL_ARRAY_NUM_MAX = 256;
+static constexpr int DECIMAL_BASE = 10;
 
 int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
 {

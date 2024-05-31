@@ -59,8 +59,6 @@ public:
     static constexpr int32_t LOCAL_NETWORK_ID = 99;
 
     static std::string ApplySubNet(const std::vector<Ipv4Info> &localArray, const std::vector<Ipv4Info> &remoteArray);
-    static std::bitset<EUI_64_IDENTIFIER_LEN> GetEUI64Identifier(const std::string &mac);
-    static std::string BitsetToIPv6(const std::bitset<EUI_64_IDENTIFIER_LEN> &eui64Bits);
 
     static int32_t GetNetworkGateWay(const std::string &ipString, std::string &gateWay);
     static int32_t GetNetworkDestination(const std::string &ipString, std::string &destination);

@@ -54,10 +54,12 @@ P2pV1Processor::~P2pV1Processor()
     StopTimer();
     timer_.Shutdown();
     RemoveExclusive();
+    WifiDirectUtils::SerialFlowExit();
 }
 
 [[noreturn]] void P2pV1Processor::Run()
 {
+    WifiDirectUtils::SerialFlowEnter();
     for (;;) {
         (this->*state_)();
     }
@@ -1051,7 +1053,8 @@ int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &comm
     auto pid = connectCommand_->GetConnectInfo().info_.pid;
     WifiDirectLink dlink {};
     auto success = LinkManager::GetInstance().ProcessIfPresent(remoteMac, [requestId, pid, &dlink](InnerLink &link) {
-        link.GenerateLink(requestId, pid, dlink);
+        link.GenerateLink(requestId, pid, dlink, true);
+        dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
     });
     CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
     connectCommand_->OnSuccess(dlink);
@@ -1104,7 +1107,8 @@ int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand
             link.SetNegotiateChannel(channel);
             if (connectCommand_ != nullptr) {
                 link.GenerateLink(connectCommand_->GetConnectInfo().info_.requestId,
-                    connectCommand_->GetConnectInfo().info_.pid, dlink);
+                    connectCommand_->GetConnectInfo().info_.pid, dlink, true);
+                dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
             }
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_NOT_FIND, CONN_WIFI_DIRECT,
@@ -1258,8 +1262,9 @@ int P2pV1Processor::ProcessConnectResponseAsGo(std::shared_ptr<NegotiateCommand>
         remoteMac, [msg, requestId, pid, &dlink, &alreadyAuthHandShake](InnerLink &link) {
             link.SetState(InnerLink::LinkState::CONNECTED);
             link.SetRemoteIpv4(msg.GetLegacyP2pIp());
-            link.GenerateLink(requestId, pid, dlink);
+            link.GenerateLink(requestId, pid, dlink, true);
             link.GetNegotiateChannel();
+            dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
             alreadyAuthHandShake = link.GetNegotiateChannel() != nullptr;
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_NOT_FIND, CONN_WIFI_DIRECT, "update inner link failed");
@@ -1314,7 +1319,8 @@ int P2pV1Processor::ProcessConnectResponseWithGoInfoAsNone(std::shared_ptr<Negot
     WifiDirectLink dlink {};
     auto success = LinkManager::GetInstance().ProcessIfPresent(
         InnerLink::LinkType::P2P, command->GetRemoteDeviceId(), [requestId, pid, &dlink](InnerLink &link) {
-            link.GenerateLink(requestId, pid, dlink);
+            link.GenerateLink(requestId, pid, dlink, true);
+            dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
     connectCommand_->OnSuccess(dlink);
@@ -1364,7 +1370,8 @@ int P2pV1Processor::ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<Ne
         auto success = LinkManager::GetInstance().ProcessIfPresent(
             remoteMac, [msg, requestId, pid, &dlink, &alreadyAuthHandShake](InnerLink &link) {
                 link.SetState(InnerLink::LinkState::CONNECTED);
-                link.GenerateLink(requestId, pid, dlink);
+                link.GenerateLink(requestId, pid, dlink, true);
+                dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
             });
         CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_NOT_FIND, CONN_WIFI_DIRECT,
             "link not found, remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
@@ -1562,7 +1569,7 @@ int P2pV1Processor::ReuseLink(const std::shared_ptr<ConnectCommand> &command, In
     if (isBeingUsedByLocal) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuse success");
         WifiDirectLink dlink {};
-        link.GenerateLink(requestId, pid, dlink);
+        link.GenerateLink(requestId, pid, dlink, true);
         command->OnSuccess(dlink);
         Terminate();
         return SOFTBUS_OK;

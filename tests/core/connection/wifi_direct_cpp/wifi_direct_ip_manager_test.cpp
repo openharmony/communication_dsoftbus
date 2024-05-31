@@ -34,20 +34,6 @@ public:
 };
 
 /*
- * @tc.name: GetEUI64Identifier
- * @tc.desc: check GetEUI64Identifier methods
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectIpManagerTest, GetEUI64Identifier, TestSize.Level1)
-{
-    std::string mac("00:00:02:0d:48:91");
-    std::bitset<WifiDirectIpManager::EUI_64_IDENTIFIER_LEN> ret =
-        WifiDirectIpManager::GetInstance().GetEUI64Identifier(mac);
-    EXPECT_EQ(ret.to_string(), "0000001000000000000000101111111111111110000011010100100010010001");
-}
-
-/*
  * @tc.name: ApplyIpv6
  * @tc.desc: check ApplyIpv6 methods,when mac is null
  * @tc.type: FUNC

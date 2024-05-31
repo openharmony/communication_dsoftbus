@@ -90,7 +90,8 @@ public:
         std::lock_guard lock(executorLock_);
         auto it = executors_.find(remoteDeviceId);
         if (it == executors_.end()) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "executor not exist");
+            CONN_LOGE(CONN_WIFI_DIRECT, "executor not exist, remoteDeviceId=%{public}s",
+                      WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
             return;
         }
 

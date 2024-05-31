@@ -43,12 +43,11 @@ static void OnDataReceived(int32_t channelId, const char *data, uint32_t len)
         type = ProtocolType::TLV;
     }
 
-    auto *protocol = WifiDirectProtocolFactory::CreateProtocol(type);
+    auto protocol = WifiDirectProtocolFactory::CreateProtocol(type);
     std::vector<uint8_t> input;
     input.insert(input.end(), data, data + len);
     NegotiateMessage msg;
     msg.Unmarshalling(*protocol, input);
-    delete protocol;
     msg.SetRemoteDeviceId(remoteDeviceId);
 
     NegotiateCommand command(msg, channel);
@@ -103,10 +102,9 @@ int CoCProxyNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
     if (WifiDirectUtils::IsLocalSupportTlv() && WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
         type = ProtocolType::TLV;
     }
-    auto *protocol = WifiDirectProtocolFactory::CreateProtocol(type);
+    auto protocol = WifiDirectProtocolFactory::CreateProtocol(type);
     std::vector<uint8_t> output;
     msg.Marshalling(*protocol, output);
-    delete protocol;
 
     auto ret = TransProxyPipelineSendMessage(
         channelId_, output.data(), static_cast<uint32_t>(output.size()), MSG_TYPE_P2P_NEGO);

@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 #include "wifi_direct_ip_manager.h"
-#include <algorithm>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-
+#include "securec.h"
 #include "conn_log.h"
 #include "net_conn_client.h"
 #include "softbus_error_code.h"
@@ -25,31 +21,32 @@
 #include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
+static constexpr int32_t U_L_BIT = 0x2;
+static constexpr uint8_t INSERT_BYTE_0 = 0xff;
+static constexpr uint8_t INSERT_BYTE_1 = 0xfe;
+static constexpr int INSERT_POS = 3;
+static constexpr int IPV6_PREFIX = 64;
+
 static constexpr int32_t HML_IP_NET_END = 256;
-static constexpr int32_t HEXADECIMAL = 16;
-static constexpr int32_t U_L_BIT = 7;
-static constexpr int32_t GROUP_LENGTH = 4;
-static constexpr int32_t EIGHT = 8;
-static constexpr int32_t TWO_DIVISION = 2;
-static constexpr int32_t IPV6_PREFIX = 64;
 static constexpr char HML_IP_PREFIX[] = "172.30.";
 static constexpr char HML_IP_SOURCE_SUFFIX[] = ".2";
 static constexpr char HML_IP_SINK_SUFFIX[] = ".1";
-static constexpr char BITS_TO_BE_INSERTED[] = ":FF:FE";
 
 std::string WifiDirectIpManager::ApplyIpv6(const std::string &mac)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(!mac.empty(), "", CONN_WIFI_DIRECT, "mac is null");
-    std::bitset<EUI_64_IDENTIFIER_LEN> eui64Bits = GetEUI64Identifier(mac);
-    std::string eui64String = BitsetToIPv6(eui64Bits);
-    std::string ipv6String = "FE80:";
-    for (int i = 0; i < GROUP_LENGTH; i++) {
-        ipv6String += ":";
-        ipv6String += eui64String.substr(i * GROUP_LENGTH, GROUP_LENGTH);
+    auto array = WifiDirectUtils::MacStringToArray(mac);
+    if ((array[0] & U_L_BIT) == 0) {
+        array[0] |= U_L_BIT;
+    } else {
+        array[0] &= ~U_L_BIT;
     }
-    // FE80:0200:02FF:FE0D:4891
-    ipv6String += "%chba0";
-    return ipv6String;
+    array.insert(array.begin() + INSERT_POS, { INSERT_BYTE_0, INSERT_BYTE_1 });
+    char result[IP_STR_MAX_LEN] {};
+    auto ret = sprintf_s(result, sizeof(result), "fe80::%x%02x:%x%02x:%x%02x:%x%02x%%chba0",
+                         array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7]);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret > 0, "", CONN_WIFI_DIRECT, "format failed");
+    return result;
 }
 
 int32_t WifiDirectIpManager::ApplyIpv4(
@@ -87,32 +84,6 @@ std::string WifiDirectIpManager::ApplySubNet(
         }
     }
     return "";
-}
-
-std::bitset<WifiDirectIpManager::EUI_64_IDENTIFIER_LEN> WifiDirectIpManager::GetEUI64Identifier(const std::string &mac)
-{
-    std::bitset<EUI_64_IDENTIFIER_LEN> eui64Bits;
-
-    std::string macTMp(mac);
-    macTMp.insert(mac.length() / TWO_DIVISION, BITS_TO_BE_INSERTED);
-    std::stringstream ss(macTMp);
-    std::string segment;
-    while (std::getline(ss, segment, ':')) {
-        eui64Bits <<= EIGHT;
-        eui64Bits |= std::bitset<EUI_64_IDENTIFIER_LEN>(std::stoi(segment, nullptr, HEXADECIMAL));
-    }
-    eui64Bits.flip(EUI_64_IDENTIFIER_LEN - U_L_BIT);
-    return eui64Bits;
-}
-
-std::string WifiDirectIpManager::BitsetToIPv6(const std::bitset<EUI_64_IDENTIFIER_LEN> &eui64Bits)
-{
-    std::string eui64String;
-    std::string binary = eui64Bits.to_string();
-    std::stringstream ss;
-    ss << std::hex << std::setfill('0') << std::setw(HEXADECIMAL) << std::uppercase << eui64Bits.to_ulong();
-    eui64String = ss.str();
-    return eui64String;
 }
 
 int32_t WifiDirectIpManager::ConfigIpv6(const std::string &interface, const std::string &ip)

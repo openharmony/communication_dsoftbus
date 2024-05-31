@@ -153,6 +153,18 @@ void LinkManager::RemoveLink(InnerLink::LinkType type, const std::string &remote
     }
 }
 
+void LinkManager::RemoveLink(const std::string &remoteMac)
+{
+    std::lock_guard lock(lock_);
+    for (const auto &[key, value] : links_) {
+        if (remoteMac == value->GetRemoteBaseMac() && value->GetState() == InnerLink::LinkState::CONNECTED) {
+            CONN_LOGD(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
+            links_.erase(key);
+            return;
+        }
+    }
+}
+
 void LinkManager::RemoveLinks(InnerLink::LinkType type)
 {
     std::lock_guard lock(lock_);
@@ -172,13 +184,26 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
     }
 }
 
+std::shared_ptr<InnerLink> LinkManager::GetReuseLink(const std::string &remoteMac)
+{
+    std::lock_guard lock(lock_);
+    for (const auto &[key, link] : links_) {
+        if (link->GetRemoteBaseMac() == remoteMac && link->GetState() == InnerLink::LinkState::CONNECTED) {
+            return link;
+        }
+    }
+    CONN_LOGE(CONN_WIFI_DIRECT, "not find remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
+    return nullptr;
+}
+
 std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
     WifiDirectConnectType connectType, const std::string &remoteDeviceId)
 {
     WifiDirectLinkType linkType = WIFI_DIRECT_LINK_TYPE_P2P;
     if (connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML ||
         connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
-        connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
+        connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML ||
+        connectType == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML) {
         linkType = WIFI_DIRECT_LINK_TYPE_HML;
     }
 
@@ -198,9 +223,26 @@ std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
     std::lock_guard lock(lock_);
     auto iterator = links_.find({linkType, remoteDeviceId});
     if (iterator == links_.end() || iterator->second->GetState() != InnerLink::LinkState::CONNECTED) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not find remoteDeviceId=%{public}s",
+                  WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
         return nullptr;
     }
     return iterator->second;
+}
+
+void LinkManager::RefreshRelationShip(const std::string &remoteDeviceId, const std::string &remoteMac)
+{
+    std::lock_guard lock(lock_);
+    auto it = links_.find({ InnerLink::LinkType::HML, remoteMac });
+    if (it == links_.end()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not find %{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
+        return;
+    }
+    auto link = it->second;
+    links_.erase(it);
+
+    link->SetRemoteDeviceId(remoteDeviceId);
+    links_.insert({{ InnerLink::LinkType::HML, remoteDeviceId }, link });
 }
 
 void LinkManager::Dump() const
