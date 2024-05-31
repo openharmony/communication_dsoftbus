@@ -47,6 +47,7 @@ enum class LinkInfoKey {
     IS_CLIENT = 20,
     LOCAL_IPV6 = 21,
     REMOTE_IPV6 = 22,
+    CUSTOM_PORT = 23,
 };
 
 class LinkInfo : public Serializable, public InfoContainer<LinkInfoKey> {
@@ -132,10 +133,13 @@ public:
     bool GetIsClient() const;
 
     void SetLocalIpv6(const std::string &value);
-    std::string GetLocalIpv6();
+    std::string GetLocalIpv6() const;
 
     void SetRemoteIpv6(const std::string &value);
-    std::string GetRemoteIpv6();
+    std::string GetRemoteIpv6() const;
+
+    void SetCustomPort(int value);
+    int GetCustomPort();
 };
 }
 #endif

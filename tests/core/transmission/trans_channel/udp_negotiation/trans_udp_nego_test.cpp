@@ -576,7 +576,7 @@ HWTEST_F(TransUdpNegoTest, OpenAuthConnForUdpNegotiation001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = OpenAuthConnForUdpNegotiation(channel);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CHANNEL_FAILED);
 
     channel->info.myData.channelId = 0;
     ret = OpenAuthConnForUdpNegotiation(channel);
@@ -847,23 +847,23 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
 
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     ret = ParseRequestAppInfo(authHandle, msg, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
 
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
     ret = ParseRequestAppInfo(authHandle, msg, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
 
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->udpConnType = UDP_CONN_TYPE_P2P;
     ret = ParseRequestAppInfo(authHandle, msg, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
 
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->udpChannelOptType = TYPE_INVALID_CHANNEL;
     (void)TransSessionMgrInit();
     ret = ParseRequestAppInfo(authHandle, msg, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
 
     cJSON_Delete(msg);
     SoftBusFree(appInfo);

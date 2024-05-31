@@ -183,6 +183,11 @@ std::string InterfaceInfo::GetName() const
     return Get(InterfaceInfoKey::INTERFACE_NAME, std::string(""));
 }
 
+std::vector<uint8_t> InterfaceInfo::GetChannelAndBandWidth() const
+{
+    return Get(InterfaceInfoKey::CHANNEL_AND_BANDWIDTH, std::vector<uint8_t>());
+}
+
 void InterfaceInfo::SetIpString(const Ipv4Info &ipv4Info)
 {
     Set(InterfaceInfoKey::IPV4, ipv4Info);
@@ -281,6 +286,16 @@ int InterfaceInfo::GetCenter20M() const
     return Get(InterfaceInfoKey::CENTER_20M, 0);
 }
 
+void InterfaceInfo::SetBandWidth(int value)
+{
+    Set(InterfaceInfoKey::BANDWIDTH, value);
+}
+
+int InterfaceInfo::GetBandWidth() const
+{
+    return Get(InterfaceInfoKey::BANDWIDTH, 0);
+}
+
 void InterfaceInfo::SetIsEnable(bool value)
 {
     Set(InterfaceInfoKey::IS_ENABLE, value);
@@ -377,5 +392,4 @@ void InterfaceInfo::DecreaseRefCount()
     Set(InterfaceInfoKey::REUSE_COUNT, count);
     CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount = %{public}d", count);
 }
-
 } // namespace OHOS::SoftBus

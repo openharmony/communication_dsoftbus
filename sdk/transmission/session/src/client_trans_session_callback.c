@@ -131,6 +131,11 @@ NO_SANITIZE("cfi") static int32_t TransOnBindSuccess(int32_t sessionId, const IS
         return ret;
     }
 
+    if ((socketCallback->OnNegotiate != NULL) && (!socketCallback->OnNegotiate(sessionId, info))) {
+        TRANS_LOGW(TRANS_SDK, "The negotiate rejected the socket=%{public}d", sessionId);
+        return SOFTBUS_TRANS_NEGOTIATE_REJECTED;
+    }
+
     (void)socketCallback->OnBind(sessionId, info);
     TRANS_LOGI(TRANS_SDK, "OnBind success, socket=%{public}d", sessionId);
     return SOFTBUS_OK;

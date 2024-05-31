@@ -850,12 +850,6 @@ static int32_t ProcessVerifyResult(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (msgPara->retCode == SOFTBUS_OK && msgPara->nodeInfo == NULL) {
-        LNN_LOGE(LNN_BUILDER, "msgPara node Info is null");
-        SoftBusFree((void *)msgPara);
-        return SOFTBUS_INVALID_PARAM;
-    }
-
     do {
         connFsm = FindConnectionFsmByRequestId(msgPara->requestId);
         if (connFsm == NULL || connFsm->isDead) {
@@ -863,15 +857,21 @@ static int32_t ProcessVerifyResult(const void *para)
             rc = SOFTBUS_NETWORK_NOT_FOUND;
             break;
         }
-        LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm auth done, type=%{public}d, authId=%{public}"
+        LNN_LOGI(LNN_BUILDER, "[id=%{public}u] connection fsm auth done, type=%{public}d, authId=%{public}"
             PRId64 ", retCode=%{public}d", connFsm->id,msgPara->authHandle.type,
             msgPara->authHandle.authId, msgPara->retCode);
         if (msgPara->retCode == SOFTBUS_OK) {
+            if (msgPara->nodeInfo == NULL) {
+                LNN_LOGE(LNN_BUILDER, "msgPara node Info is null, stop fsm [id=%{public}u]", connFsm->id);
+                StopConnectionFsm(connFsm);
+                rc = SOFTBUS_ERR;
+                break;
+            }
             connFsm->connInfo.authHandle = msgPara->authHandle;
             connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
         }
         if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "send auth result to connection failed. fsmId=%{public}u", connFsm->id);
+            LNN_LOGE(LNN_BUILDER, "send auth result to connection failed. [id=%{public}u]", connFsm->id);
             connFsm->connInfo.nodeInfo = NULL;
             rc = SOFTBUS_ERR;
             break;
@@ -1779,12 +1779,7 @@ static void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle aut
     para->requestId = requestId;
     para->retCode = retCode;
     if (retCode == SOFTBUS_OK) {
-        para->nodeInfo = DupNodeInfo(info);
-        if (para->nodeInfo == NULL) {
-            LNN_LOGE(LNN_BUILDER, "dup NodeInfo fail");
-            SoftBusFree(para);
-            return;
-        }
+        para->nodeInfo = (info == NULL) ? NULL : DupNodeInfo(info);
         para->authHandle = authHandle;
     }
     if (PostMessageToHandler(MSG_TYPE_VERIFY_RESULT, para) != SOFTBUS_OK) {
@@ -1800,10 +1795,6 @@ static void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle aut
 static void OnVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
     LNN_LOGI(LNN_BUILDER, "verify passed. requestId=%{public}u, authId=%{public}" PRId64, requestId, authHandle.authId);
-    if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "post verify result message failed");
-        return;
-    }
     if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
         LNN_LOGE(LNN_BUILDER, "authHandle type error");
         return;

@@ -31,13 +31,13 @@
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_scenario_manager.h"
+#include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 #include "wifi_direct_manager.h"
-#include "trans_event.h"
 
 #define ID_NOT_USED 0
 #define ID_USED 1
@@ -481,53 +481,37 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     appInfo->peerHandleId = -1;
     int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
         appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "GetPkgNameBySessionName Failed, ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get pkgName failed, ret=%{public}d", ret);
 
     ret = g_channelCb->GetUidAndPidBySessionName(appInfo->myData.sessionName, &appInfo->myData.uid,
         &appInfo->myData.pid);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "GetUidAndPidBySessionName Failed, ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get uid and pid failed, ret=%{public}d", ret);
 
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
         return SOFTBUS_OK;
     }
 
-    if (SetPeerDeviceIdByAuth(authHandle, appInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get network id by auth id failed.");
-        return SOFTBUS_ERR;
-    }
+    ret = SetPeerDeviceIdByAuth(authHandle, appInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_PEER_PROC_ERR, TRANS_CTRL, "set deviceId failed.");
 
-    char localIp[IP_LEN] = {0};
+    char localIp[IP_LEN] = { 0 };
     if (appInfo->udpConnType == UDP_CONN_TYPE_WIFI) {
         appInfo->routeType = WIFI_STA;
-        int32_t ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, sizeof(localIp));
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get local ip from lnn failed.");
-            return ret;
-        }
+        ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, sizeof(localIp));
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get local strInfo failed.");
     } else {
         appInfo->routeType = WIFI_P2P;
         struct WifiDirectManager *mgr = GetWifiDirectManager();
-        if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
-            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(mgr != NULL && mgr->getLocalIpByRemoteIp != NULL,
+            SOFTBUS_WIFI_DIRECT_INIT_FAILED, TRANS_CTRL, "get mgr obj failed.");
 
         ret = mgr->getLocalIpByRemoteIp(appInfo->peerData.addr, localIp, sizeof(localIp));
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get localIp failed, ret=%{public}d", ret);
     }
-    if (strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s my ip addr failed.");
-        return SOFTBUS_STRCPY_ERR;
-    }
+    ret = strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, TRANS_CTRL, "strcpy_s my ip addr failed.");
 
     return SOFTBUS_OK;
 }
@@ -907,7 +891,7 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
         extra.result = EVENT_STAGE_RESULT_FAILED;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "open auth conn fail");
-        return SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED;
+        return SOFTBUS_TRANS_OPEN_AUTH_CHANNEL_FAILED;
     }
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;

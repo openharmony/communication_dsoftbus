@@ -39,9 +39,9 @@ std::mutex g_kvAdapterWrapperMutex;
 
 static int32_t g_dbId = 1;
 static std::map<int32_t, std::shared_ptr<OHOS::KVAdapter>> g_dbID2KvAdapter;
-void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
-void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
-std::shared_ptr<OHOS::KVAdapter> FindKvStorePtr(int32_t &dbId);
+static void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
+static void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values);
+static std::shared_ptr<OHOS::KVAdapter> FindKvStorePtr(int32_t &dbId);
 
 int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen)
 {
@@ -61,7 +61,7 @@ int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, c
             LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret=%{public}d", initRet);
             return initRet;
         }
-        *dbId=g_dbId;
+        *dbId = g_dbId;
         g_dbID2KvAdapter.insert(std::make_pair(g_dbId, kvAdapter));
         g_dbId++;
     }
@@ -97,7 +97,7 @@ int32_t LnnDestroyKvAdapter(int32_t dbId)
     return SOFTBUS_OK;
 }
 
-std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &dbId)
+static std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &dbId)
 {
     auto iter = g_dbID2KvAdapter.find(dbId);
     if (iter == g_dbID2KvAdapter.end()) {
@@ -262,7 +262,7 @@ int32_t LnnCloudSync(int32_t dbId)
     return (kvAdapter->CloudSync());
 }
 
-void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values)
+static void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values)
 {
     if (localInfo == nullptr) {
         LNN_LOGE(LNN_LEDGER, "localInfo is null");
@@ -338,7 +338,7 @@ static int32_t CipherAndRpaInfoToMap(const CloudSyncInfo *localInfo, std::map<st
     return SOFTBUS_OK;
 }
 
-void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values)
+static void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values)
 {
     if (localInfo == nullptr) {
         LNN_LOGE(LNN_LEDGER, "localInfo is null");

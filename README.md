@@ -57,7 +57,6 @@ The DSoftBus directory structure is as follows:
 >**NOTE**
 >
 >- The permissions ohos.permission.DISTRIBUTED_DATASYNC and ohos.permission.DISTRIBUTED_SOFTBUS_CENTER are required for remote procedure calls (RPCs) across devices.
->- To make a mobile phone visible to other devices, choose **Settings** > **Super Device** > **This device** > **Visible to**, and select **All nearby devices**.
 
 **1. Discovery**
 
@@ -74,14 +73,14 @@ The DSoftBus directory structure is as follows:
 
     // Publish information.
     typedef struct {
-        int publishId; // Publish ID.
-        DiscoverMode mode; // Discovery mode.
-        ExchangeMedium medium; // Medium used for device discovery.
-        ExchangeFreq freq; // Device discovery frequency.
-        const char *capability; // Capability of the device that can be discovered.
+        int publishId;                 // Publish ID.
+        DiscoverMode mode;             // Publish mode.
+        ExchangeMedium medium;         // Medium used for publishing the service.
+        ExchangeFreq freq;             // Service publishing frequency.
+        const char *capability;        // Capability of the device that can be discovered.
         unsigned char *capabilityData; // Custom data for service publishing
-        unsigned int dataLen; // Length of the data.
-        bool ranging; // Whether to measure the distance.
+        unsigned int dataLen;          // Length of the data.
+        bool ranging;                  // Whether to measure the distance.
     } PublishInfo;
 
     // Publish a service.

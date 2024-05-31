@@ -46,15 +46,13 @@ enum class WifiConfigInfoKey {
 
 class WifiConfigInfo : public Serializable, public InfoContainer<WifiConfigInfoKey> {
 public:
-    WifiConfigInfo();
+    WifiConfigInfo() = default;
     explicit WifiConfigInfo(std::vector<uint8_t> &config);
-    ~WifiConfigInfo() override;
+    ~WifiConfigInfo() override = default;
+
     int Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_t> &output) const override;
     int Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint8_t> &input) override;
 
-    static void MarshallingString(
-        WifiDirectProtocol &protocol, InterfaceInfoKey key, Serializable::ValueType type, const std::string &value);
-    /* Get/Set */
     void SetInterfaceInfoArray(const std::vector<InterfaceInfo> &value);
     std::vector<InterfaceInfo> GetInterfaceInfoArray() const;
     InterfaceInfo GetInterfaceInfo(const std::string &name) const;
@@ -63,6 +61,7 @@ public:
     std::string GetDeviceId() const;
 
 private:
+    static constexpr int HEADER_LEN = 2;
     void MarshallingInterfaceArray(WifiDirectProtocol &protocol) const;
     void UnmarshallingInterfaceArray(WifiDirectProtocol &protocol, uint8_t *data, size_t size);
 };

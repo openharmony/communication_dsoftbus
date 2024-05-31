@@ -16,6 +16,7 @@
 #define WIFI_DIRECT_UTILS_H
 
 #include <cinttypes>
+#include <condition_variable>
 #include <vector>
 #include <string>
 
@@ -59,10 +60,14 @@ public:
     static std::vector<uint8_t> GetRemotePtk(const std::string &remoteNetworkId);
     static bool IsRemoteSupportTlv(const std::string &remoteDeviceId);
     static bool IsLocalSupportTlv();
+    static void SetLocalWifiDirectMac(const std::string &mac);
+    static bool IsDeviceOnline(const std::string &remoteNetworkId);
 
     static std::vector<uint8_t> MacStringToArray(const std::string &macString);
     static std::string MacArrayToString(const std::vector<uint8_t> &macArray);
+    static std::string MacArrayToString(const uint8_t *mac, int size);
     static std::vector<uint8_t> GetInterfaceMacAddr(const std::string &interface);
+    static std::string GetInterfaceIpv6Addr(const std::string &name);
 
     static std::vector<Ipv4Info> GetLocalIpv4Infos();
 
@@ -84,6 +89,17 @@ public:
     static constexpr int BAND_WIDTH_160M_NUMBER = 160 << 20;
     static WifiDirectBandWidth BandWidthNumberToEnum(int bandWidth);
     static int BandWidthEnumToNumber(WifiDirectBandWidth bandWidth);
+
+    static void SerialFlowEnter();
+    static void SerialFlowExit();
+    static void ParallelFlowEnter();
+    static void ParallelFlowExit();
+
+private:
+    static inline std::mutex serialParallelLock_;
+    static inline std::condition_variable serialParallelCv_;
+    static inline int serialCount_ = 0;
+    static inline int parallelCount_ = 0;
 };
 }
 

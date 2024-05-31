@@ -156,6 +156,15 @@ static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirect
     return SOFTBUS_OK;
 }
 
+static void RefreshRelationShip(const char *remoteUuid, const char *remoteMac)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s, remoteMac=%{public}s",
+              OHOS::SoftBus::WifiDirectAnonymizeDeviceId(remoteUuid).c_str(),
+              OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str());
+    OHOS::SoftBus::LinkManager::GetInstance().RefreshRelationShip(remoteUuid, remoteMac);
+    OHOS::SoftBus::LinkManager::GetInstance().Dump();
+}
+
 static bool IsDeviceOnline(const char *remoteMac)
 {
     bool isOnline = false;
@@ -206,6 +215,13 @@ static int32_t GetLocalIpByRemoteIpOnce(const char *remoteIp, char *localIp, int
             }
             return true;
         }
+        if (innerLink.GetRemoteIpv6() == remoteIp) {
+            found = true;
+            if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv6().c_str()) != EOK) {
+                found = false;
+            }
+            return true;
+        }
         return false;
     });
 
@@ -241,6 +257,13 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     bool found = false;
     OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
         if (innerLink.GetRemoteIpv4() == remoteIp) {
+            found = true;
+            if (strcpy_s(uuid, uuidSize, innerLink.GetRemoteDeviceId().c_str()) != EOK) {
+                found = false;
+            }
+            return true;
+        }
+        if (innerLink.GetRemoteIpv6() == remoteIp) {
             found = true;
             if (strcpy_s(uuid, uuidSize, innerLink.GetRemoteDeviceId().c_str()) != EOK) {
                 found = false;
@@ -300,12 +323,12 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
 }
 
 static void NotifyConnectedForSink(
-    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type, int channelId)
 {
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onConnectedForSink != nullptr) {
-            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type, channelId);
         }
     }
 }
@@ -373,6 +396,8 @@ static struct WifiDirectManager g_manager = {
     .prejudgeAvailability = PrejudgeAvailability,
 
     .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
+    .refreshRelationShip = RefreshRelationShip,
+
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
