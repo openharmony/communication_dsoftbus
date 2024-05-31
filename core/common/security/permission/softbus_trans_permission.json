@@ -475,7 +475,6 @@
     "SESSION_NAME": "com.huawei.systemserver_CHANNEL_DPMS",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.security.distributed_access_token",
@@ -484,4 +483,4 @@
       }
     ]
   }
-]
+] 
