@@ -518,15 +518,13 @@ static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requ
     return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
 }
 
-int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
-    const ConnectResult *result)
+int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
     if (TcpConnectDeviceCheckArg(option, requestId, result) == SOFTBUS_ERR) {
         return SOFTBUS_INVALID_PARAM;
     }
     ConnectStatistics *statistics = (ConnectStatistics *)SoftBusCalloc(sizeof(ConnectStatistics));
-    CONN_CHECK_AND_RETURN_RET_LOGE(statistics != NULL, SOFTBUS_MALLOC_ERR, CONN_COMMON,
-        "calloc ConnectStatistics fail");
+    CONN_CHECK_AND_RETURN_RET_LOGE(statistics != NULL, SOFTBUS_MALLOC_ERR, CONN_COMMON, "calloc Connstatistics fail");
     statistics->startTime = SoftBusGetSysTimeMs();
     statistics->connectTraceId = SoftbusGetConnectTraceId();
     statistics->reqId = requestId;
@@ -541,11 +539,10 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
     if (fd < 0) {
         return TcpOpenClientSocketErr(option, requestId, statistics, result);
     }
-
     int32_t error = SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR;
     if (option->socketOption.keepAlive == 1) {
-        if (ConnSetTcpKeepalive(
-                fd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
+        if (ConnSetTcpKeepalive(fd, AUTH_P2P_KEEP_ALIVE_TIME,
+                AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "set keepalive fail, fd=%{public}d", fd);
             ConnShutdownSocket(fd);
             result->OnConnectFailed(requestId, SOFTBUS_ERR);
@@ -555,26 +552,22 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
         }
         CONN_LOGI(CONN_COMMON, "set keepalive successfully, fd=%{public}d", fd);
     }
-
     uint32_t connectionId = CalTcpConnectionId(fd);
     if (WrapperAddTcpConnInfo(option, result, connectionId, requestId, fd, *statistics) != SOFTBUS_OK) {
-        ConnShutdownSocket(fd);
-        result->OnConnectFailed(requestId, SOFTBUS_ERR);
-        DfxRecordTcpConnectFail(DEFAULT_PID, (ConnectOption *)option, NULL, statistics, error);
-        SoftBusFree(statistics);
-        return SOFTBUS_ERR;
+        goto ERR_FAIL;
     }
     if (AddTrigger((ListenerModule)(option->socketOption.moduleId), fd, WRITE_TRIGGER) != SOFTBUS_OK) {
-        DelTcpConnNode(connectionId);
-        ConnShutdownSocket(fd);
-        result->OnConnectFailed(requestId, SOFTBUS_ERR);
-        DfxRecordTcpConnectFail(DEFAULT_PID, (ConnectOption *)option, NULL, statistics, error);
-        SoftBusFree(statistics);
-        return SOFTBUS_ERR;
+        goto ERR_FAIL;
     }
     SoftBusFree(statistics);
     CONN_LOGI(CONN_COMMON, "tcp connect add write trigger ok");
     return SOFTBUS_OK;
+ERR_FAIL:
+    ConnShutdownSocket(fd);
+    result->OnConnectFailed(requestId, SOFTBUS_ERR);
+    DfxRecordTcpConnectFail(DEFAULT_PID, (ConnectOption *)option, NULL, statistics, error);
+    SoftBusFree(statistics);
+    return SOFTBUS_ERR;
 }
 
 int32_t TcpDisconnectDevice(uint32_t connectionId)

@@ -34,6 +34,8 @@ static const size_t BLE_TRANS_HEADER_SIZE = sizeof(BleTransHeader);
 
 static ConnBleTransEventListener g_transEventListener = { 0 };
 static struct ConnSlideWindowController *g_flowController = NULL;
+static void *BleSendTask(void *arg);
+static StartBleSendLPInfo g_startBleSendLPInfo = { 0 };
 
 static int32_t UnpackTransHeader(uint8_t *data, uint32_t dataLen, BleTransHeader *header)
 {
@@ -394,6 +396,19 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
         "connId=%{public}u, pid=%{public}d, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, pid, dataLen, flag, module, seq);
     ConnBleReturnConnection(&connection);
+
+    if (g_startBleSendLPInfo.isStartSendLp) {
+        status = ConnStartActionAsync(NULL, BleSendTask, "BleSend_Tsk");
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "start send task failed errno=%{public}d", status);
+            return status;
+        }
+        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBleSendLPInfo.lock) == SOFTBUS_OK,
+            SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
+        g_startBleSendLPInfo.isStartSendLp = false;
+        SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
+        CONN_LOGI(CONN_BLE, "start ble send task succ");
+    }
     return SOFTBUS_OK;
 }
 
@@ -565,9 +580,18 @@ void *BleSendTask(void *arg)
 #define WAIT_TIME 10
     SendQueueNode *sendNode = NULL;
     while (true) {
-        int32_t status = ConnBleDequeueBlock((void **)(&sendNode));
+        int32_t status = SoftBusMutexLock(&g_startBleSendLPInfo.lock);
+        CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_BLE, "lock fail!");
+        status = ConnBleDequeueBlock((void **)(&sendNode));
+        if (status == SOFTBUS_TIMOUT && sendNode == NULL) {
+            CONN_LOGW(CONN_BLE, "ble dequeue time out err=%{public}d,", status);
+            g_startBleSendLPInfo.isStartSendLp = true;
+            SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
+            break;
+        }
+        SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
         if (status != SOFTBUS_OK || sendNode == NULL) {
-            CONN_LOGW(CONN_BLE, "deque err=%{public}d", status);
+            CONN_LOGW(CONN_BLE, "ble dequeue failed err=%{public}d,", status);
             SoftBusSleepMs(WAIT_TIME);
             continue;
         }
@@ -612,6 +636,7 @@ void *BleSendTask(void *arg)
         FreeSendNode(sendNode);
         sendNode = NULL;
     }
+    return NULL;
 }
 
 int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
@@ -630,10 +655,11 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
         status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: init send queue failed, err=%{public}d",
         status);
 
-    status = ConnStartActionAsync(NULL, BleSendTask, "BleSend_Tsk");
+    status = SoftBusMutexInit(&g_startBleSendLPInfo.lock, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: start send task failed, err=%{public}d",
+        status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: init send lp lock failed, err=%{public}d",
         status);
+    g_startBleSendLPInfo.isStartSendLp = true;
     g_transEventListener = *listener;
     g_flowController = controller;
     return SOFTBUS_OK;

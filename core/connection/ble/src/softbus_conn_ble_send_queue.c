@@ -24,6 +24,7 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_queue.h"
+#define BLE_WAIT_TIME_SEC (600)
 
 static LIST_HEAD(g_bleQueueList);
 static SoftBusMutex g_bleQueueLock;
@@ -135,6 +136,9 @@ int32_t ConnBleDequeueBlock(void **msg)
     int32_t status = SOFTBUS_ERR;
     ConnectionQueue *item = NULL;
     ConnectionQueue *next = NULL;
+    SoftBusSysTime waitTime = {0};
+    waitTime.sec = BLE_WAIT_TIME_SEC;
+
     if (msg == NULL) {
         CONN_LOGE(CONN_BLE, "msg is null");
         return SOFTBUS_INVALID_PARAM;
@@ -163,9 +167,15 @@ int32_t ConnBleDequeueBlock(void **msg)
             status = SOFTBUS_OK;
             break;
         }
-        if (SoftBusCondWait(&g_sendCond, &g_bleQueueLock, NULL) != SOFTBUS_OK) {
-            CONN_LOGI(CONN_BLE, "BleSendCondWait failed");
-            status = SOFTBUS_ERR;
+        int32_t ret = SoftBusCondWait(&g_sendCond, &g_bleQueueLock, &waitTime);
+        if (ret != SOFTBUS_OK) {
+            if (ret == SOFTBUS_TIMOUT) {
+                CONN_LOGW(CONN_BLE, "BleSendCondWait 600s time out");
+                status = SOFTBUS_TIMOUT;
+                break;
+            }
+            CONN_LOGE(CONN_BLE, "BleSendCondWait fail");
+            status = SOFTBUS_CONN_COND_WAIT_FAIL;
             break;
         }
         CONN_LOGI(CONN_BLE, "ble queue wakeup.");
