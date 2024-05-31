@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <sys/time.h>
 
+#include "auth_session_json.c"
 #include "auth_session_message.h"
 #include "auth_session_message.c"
 #include "softbus_adapter_json.h"

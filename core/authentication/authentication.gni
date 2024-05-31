@@ -50,6 +50,7 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/auth_request.c",
     "$authentication_path/src/auth_session_fsm.c",
     "$authentication_path/src/auth_session_key.c",
+    "$authentication_path/src/auth_session_json.c",
     "$authentication_path/src/auth_session_message.c",
     "$authentication_path/src/auth_interface.c",
   ]
