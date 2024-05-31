@@ -117,6 +117,11 @@ typedef struct {
     void (*onConnOpenFailed)(uint32_t requestId, int32_t reason);
 } AuthConnCallback;
 
+typedef struct {
+    const uint8_t *key;
+    uint32_t keyLen;
+} AuthKeyInfo;
+
 uint32_t AuthGenRequestId(void);
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *verifyCallback,
     AuthVerifyModule module, bool isFastAuth);
@@ -126,8 +131,8 @@ void AuthHandleLeaveLNN(AuthHandle authHandle);
 int32_t AuthFlushDevice(const char *uuid);
 int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle);
 
-int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-    uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack);
+int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
+    int32_t callingPid, const AuthVerifyCallback *callBack);
 void AuthMetaReleaseVerify(int64_t authId);
 void AuthServerDeathCallback(const char *pkgName, int32_t pid);
 
