@@ -422,22 +422,33 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
     int tmpId1 = GetPublishId();
     int tmpId2 = GetPublishId();
     int tmpId3 = GetPublishId();
-
-    g_pInfo.publishId = tmpId1;
-    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    g_pInfo1.publishId = tmpId2;
-    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo1, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    g_pInfo1.publishId = tmpId3;
-    ret = PublishLNN(TEST_PKG_NAME_1, &g_pInfo1, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(TEST_PKG_NAME, tmpId1);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(TEST_PKG_NAME, tmpId2);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(TEST_PKG_NAME_1, tmpId3);
-    EXPECT_TRUE(ret == 0);
+    NodeBasicInfo info;
+    char localIp[IP_LEN] = {0};
+    char loopBackIpAddr[] = "127.0.0.1";
+    char invalidIpAddr[] = "0.0.0.0";
+    (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS,
+        (uint8_t *)localIp, IP_LEN) == SOFTBUS_OK);
+    if (strcmp(localIp, loopBackIpAddr) != 0 &&
+        strcmp(localIp, invalidIpAddr) != 0 &&
+        strcmp(localIp, "") != 0) {
+        g_pInfo.publishId = tmpId1;
+        ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        g_pInfo1.publishId = tmpId2;
+        ret = PublishLNN(TEST_PKG_NAME, &g_pInfo1, &g_publishCb);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        g_pInfo1.publishId = tmpId3;
+        ret = PublishLNN(TEST_PKG_NAME_1, &g_pInfo1, &g_publishCb);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        ret = StopPublishLNN(TEST_PKG_NAME, tmpId1);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        ret = StopPublishLNN(TEST_PKG_NAME, tmpId2);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        ret = StopPublishLNN(TEST_PKG_NAME_1, tmpId3);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+    }
 }
 
 /**
@@ -497,22 +508,33 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
     int tmpId1 = GetSubscribeId();
     int tmpId2 = GetSubscribeId();
     int tmpId3 = GetSubscribeId();
-
-    g_sInfo.subscribeId = tmpId1;
-    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
-    EXPECT_TRUE(ret == 0);
-    g_sInfo1.subscribeId = tmpId2;
-    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo1, &g_refreshCb);
-    EXPECT_TRUE(ret == 0);
-    g_sInfo1.subscribeId = tmpId3;
-    ret = RefreshLNN(TEST_PKG_NAME_1, &g_sInfo1, &g_refreshCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(TEST_PKG_NAME, tmpId1);
-    EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(TEST_PKG_NAME, tmpId2);
-    EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(TEST_PKG_NAME_1, tmpId3);
-    EXPECT_TRUE(ret == 0);
+    NodeBasicInfo info;
+    char localIp[IP_LEN] = {0};
+    char loopBackIpAddr[] = "127.0.0.1";
+    char invalidIpAddr[] = "0.0.0.0";
+    (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS,
+        (uint8_t *)localIp, IP_LEN) == SOFTBUS_OK);
+    if (strcmp(localIp, loopBackIpAddr) != 0 &&
+        strcmp(localIp, invalidIpAddr) != 0 &&
+        strcmp(localIp, "") != 0) {
+        g_sInfo.subscribeId = tmpId1;
+        ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        g_sInfo1.subscribeId = tmpId2;
+        ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo1, &g_refreshCb);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        g_sInfo1.subscribeId = tmpId3;
+        ret = RefreshLNN(TEST_PKG_NAME_1, &g_sInfo1, &g_refreshCb);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        ret = StopRefreshLNN(TEST_PKG_NAME, tmpId1);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        ret = StopRefreshLNN(TEST_PKG_NAME, tmpId2);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+        ret = StopRefreshLNN(TEST_PKG_NAME_1, tmpId3);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+    }
 }
 
 /**
