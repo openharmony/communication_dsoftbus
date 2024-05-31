@@ -137,13 +137,11 @@ static int32_t MockUpdateBroadcasting(int32_t bcId, const SoftbusBroadcastParam 
 static int32_t MockStartScan(int32_t scanerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
     int32_t filterSize)
 {
-    ManagerMock::scanCallback->OnStartScanCallback(scanerId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
 static int32_t MockStopScan(int32_t scanerId)
 {
-    ManagerMock::scanCallback->OnStopScanCallback(scanerId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
