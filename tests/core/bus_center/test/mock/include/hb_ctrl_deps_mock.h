@@ -32,11 +32,12 @@ public:
     virtual void LnnNotifyNetworkStateChanged(SoftBusNetworkState state) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
     virtual int SoftBusGetBtState(void) = 0;
+    virtual int SoftBusGetBrState(void) = 0;
     virtual void RestartCoapDiscovery(void) = 0;
     virtual ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type) = 0;
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
     virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
-    virtual int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param) = 0;
+    virtual int32_t LnnHbMediumMgrSetParam(void *param) = 0;
     virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
 };
 class HeartBeatCtrlDepsInterfaceMock : public HeartBeatCtrlDepsInterface {
@@ -47,11 +48,12 @@ public:
     MOCK_METHOD1(LnnNotifyNetworkStateChanged, void (SoftBusNetworkState));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
     MOCK_METHOD0(SoftBusGetBtState, int (void));
+    MOCK_METHOD0(SoftBusGetBrState, int (void));
     MOCK_METHOD0(RestartCoapDiscovery, void (void));
     MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType (LnnHeartbeatType));
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool (void));
     MOCK_METHOD1(LnnUpdateOhosAccount, void (bool));
-    MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(const LnnHeartbeatMediumParam *));
+    MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(void *));
     MOCK_METHOD2(AuthSendKeepaliveOption, int32_t(const char *, ModeCycle));
 };
 } // namespace OHOS

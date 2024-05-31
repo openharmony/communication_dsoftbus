@@ -370,6 +370,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/dfx/interface/include",
     ]
     deps = [
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//foundation/communication/dsoftbus/core/common/dfx/log:softbus_dfx_log",
       "//third_party/googletest:gmock",
       "//third_party/googletest:gtest_main",

@@ -47,6 +47,7 @@ public:
 
     void OnSuccess(const WifiDirectLink &link) const;
     void OnFailure(WifiDirectErrorCode reason) const;
+    bool IsSameCommand(const WifiDirectConnectInfo &info);
 
 protected:
     ConnectInfo info_;

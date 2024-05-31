@@ -26,8 +26,7 @@
 namespace OHOS {
 class KVAdapter {
 public:
-    KVAdapter(const std::string &appId, const std::string &storeId,
-        const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener);
+    KVAdapter(const std::string &appId, const std::string &storeId);
     virtual ~KVAdapter();
 
     int32_t Init();
@@ -39,12 +38,13 @@ public:
     int32_t Get(const std::string &key, std::string &value);
     int32_t DeleteKvStore();
     int32_t CloudSync();
+    int32_t RegisterDataChangeListener(const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener);
+    void DeRegisterDataChangeListener();
     static void CloudSyncCallback(DistributedKv::ProgressDetail &&detail);
 
 private:
     DistributedKv::Status GetKvStorePtr();
     int32_t DeleteKvStorePtr();
-    int32_t RegisterDataChangeListener();
     int32_t UnRegisterDataChangeListener();
     int32_t DeleteDataChangeListener();
 

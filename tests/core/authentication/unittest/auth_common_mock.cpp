@@ -52,9 +52,14 @@ int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
     return GetCommonInterface()->LnnGetLocalNumU64Info(key, info);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetCommonInterface()->SoftBusGetBtState();
+}
+
+int32_t SoftBusGetBrState(void)
+{
+    return GetCommonInterface()->SoftBusGetBrState();
 }
 
 void LnnHbOnTrustedRelationReduced(void)

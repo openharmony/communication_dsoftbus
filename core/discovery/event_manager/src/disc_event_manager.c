@@ -16,12 +16,16 @@
 #include "disc_approach_ble.h"
 #include "disc_event_manager.h"
 #include "disc_log.h"
+#include "disc_virtual_link_ble.h"
 #include "softbus_error_code.h"
 
 int32_t DiscEventManagerInit(void)
 {
     int32_t ret = DiscApproachBleEventInit();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init approach ble event failed");
+
+    ret = DiscVLinkBleEventInit();
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init vlink ble event failed");
 
     DISC_LOGI(DISC_INIT, "disc event manager init succ");
     return SOFTBUS_OK;
@@ -30,5 +34,6 @@ int32_t DiscEventManagerInit(void)
 void DiscEventManagerDeinit(void)
 {
     DiscApproachBleEventDeinit();
+    DiscVLinkBleEventDeinit();
 }
 

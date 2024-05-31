@@ -75,12 +75,23 @@ enum WifiDirectLinkType {
     WIFI_DIRECT_LINK_TYPE_HML,
 };
 
+enum WifiDirectBandWidth {
+    BAND_WIDTH_RANDOM = 0x0,
+    BAND_WIDTH_20M,
+    BAND_WIDTH_40M,
+    BAND_WIDTH_80M,
+    BAND_WIDTH_80P80M,
+    BAND_WIDTH_160M,
+    BAND_WIDTH_BUTT = 0xFF,
+};
+
 struct WifiDirectLink {
     int32_t linkId;
     char localIp[IP_STR_MAX_LEN];
     char remoteIp[IP_STR_MAX_LEN];
     int32_t remotePort;
     enum WifiDirectLinkType linkType;
+    enum WifiDirectBandWidth bandWidth;
 };
 
 enum WifiDirectNegoChannelType {
@@ -127,15 +138,13 @@ struct WifiDirectConnectInfo {
     int32_t pid;
     enum WifiDirectConnectType connectType;
     struct WifiDirectNegotiateChannel negoChannel;
-    bool paralle;
     uint32_t expectApiRole;
     bool isStrict;
     char remoteNetworkId[NETWORK_ID_BUF_LEN];
     char remoteMac[MAC_ADDR_STR_LEN];
     bool isNetworkDelegate;
-    uint32_t bandWidth;
+    int32_t bandWidth;
     enum IpAddrType ipAddrType;
-    uint32_t custom;
 
     enum StatisticLinkType linkType;
     enum StatisticBootLinkType bootLinkType;

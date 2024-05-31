@@ -3366,8 +3366,11 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
     if (device->devId[0] != '\0') {
+        char *anoyUdidHash = NULL;
+        Anonymize(device->devId, &anoyUdidHash);
         LNN_LOGI(LNN_LEDGER, "device found. medium=%{public}d, udidhash=%{public}s, onlineStatus=%{public}d",
-            addtions->medium, device->devId, device->isOnline);
+            addtions->medium, anoyUdidHash, device->isOnline);
+        AnonymizeFree(anoyUdidHash);
     }
 }
 

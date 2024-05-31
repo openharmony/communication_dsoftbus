@@ -557,11 +557,33 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
     return true;
 }
 
+bool VtpStreamSocket::EncryptStreamPacket(std::unique_ptr<IStream> stream, std::unique_ptr<char[]> &data, ssize_t &len)
+{
+    StreamPacketizer packet(streamType_, std::move(stream));
+    auto plainData = packet.PacketizeStream();
+    if (plainData == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "PacketizeStream failed");
+        return false;
+    }
+    len = packet.GetPacketLen() + GetEncryptOverhead();
+    TRANS_LOGD(TRANS_STREAM, "packetLen=%{public}zd, encryptOverhead=%{public}zd",
+        packet.GetPacketLen(), GetEncryptOverhead());
+    data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
+    ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(), data.get() + FRAME_HEADER_LEN, len);
+    if (encLen != len) {
+        TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", len, encLen);
+        return false;
+    }
+    InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
+    len += FRAME_HEADER_LEN;
+
+    return true;
+}
+
 bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 {
-    TRANS_LOGD(TRANS_STREAM,
-        "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd", streamType_,
-        stream->GetBufferLen(), stream->GetExtBufferLen());
+    TRANS_LOGD(TRANS_STREAM, "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd",
+        streamType_, stream->GetBufferLen(), stream->GetExtBufferLen());
 
     if (!isBlocked_) {
         isBlocked_ = true;
@@ -586,24 +608,9 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
             TRANS_LOGE(TRANS_STREAM, "streamFrameInfo is null");
             return false;
         }
-
-        StreamPacketizer packet(streamType_, std::move(stream));
-        auto plainData = packet.PacketizeStream();
-        if (plainData == nullptr) {
-            TRANS_LOGE(TRANS_STREAM, "PacketizeStream failed");
+        if (!EncryptStreamPacket(std::move(stream), data, len)) {
             return false;
         }
-        len = packet.GetPacketLen() + GetEncryptOverhead();
-        TRANS_LOGD(TRANS_STREAM, "packetLen=%{public}zd, encryptOverhead=%{public}zd", packet.GetPacketLen(),
-            GetEncryptOverhead());
-        data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
-        ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(), data.get() + FRAME_HEADER_LEN, len);
-        if (encLen != len) {
-            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", len, encLen);
-            return false;
-        }
-        InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
-        len += FRAME_HEADER_LEN;
 
         FrameInfo frameInfo;
         ConvertStreamFrameInfo2FrameInfo(&frameInfo, streamFrameInfo);

@@ -55,7 +55,9 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_mock.cpp",
     "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_service_impl.cpp",
   ]
-  if (is_standard_system) {
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.hiviewdfx_hicollie)) {
     trans_session_sdk_src += [ "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_set_timer.cpp" ]
   } else {
     trans_session_sdk_src += [ "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_set_timer_virtual.c" ]

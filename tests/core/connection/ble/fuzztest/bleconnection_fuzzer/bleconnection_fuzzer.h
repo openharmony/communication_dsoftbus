@@ -12,17 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NULL_NEGOTIATE_CHANNEL_H
-#define NULL_NEGOTIATE_CHANNEL_H
 
-#include "channel/negotiate_channel.h"
+#ifndef CONNECTIONCOMMON_FUZZER_H
+#define CONNECTIONCOMMON_FUZZER_H
 
-namespace OHOS::SoftBus {
-class NullNeotiateChannel : public NegotiateChannel {
-public:
-    ~NullNeotiateChannel() override;
-    int SendMessage(const NegotiateMessage &msg) const override;
-    std::string GetRemoteDeviceId() const override;
-};
-} // namespace OHOS::SoftBus
-#endif
+#include <cstdint>
+#include <unistd.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <fcntl.h>
+
+#define FUZZ_PROJECT_NAME "connectioncommon_fuzzer"
+
+#endif // CONNECTIONCOMMON_FUZZER_H

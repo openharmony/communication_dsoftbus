@@ -17,15 +17,8 @@
 
 #include "hitrace/trace.h"
 
-
 namespace OHOS::SoftBus {
 static constexpr uint32_t TRACE_ID_OFFSET = 32;
-
-WifiDirectTrace::WifiDirectTrace(const std::string &requestDeviceId, const std::string &receiveDeviceId)
-{
-    this->requestDeviceId = requestDeviceId;
-    this->receiverDeviceId = receiveDeviceId;
-}
 
 static uint64_t ConvertTraceChainId(const std::string &requestDeviceId, const std::string &receiveDeviceId)
 {
@@ -44,19 +37,26 @@ static uint64_t ConvertTraceChainId(const std::string &requestDeviceId, const st
     return chainID;
 }
 
-void WifiDirectTrace::StartTrace()
+void WifiDirectTrace::StartTrace(const std::string &requestDeviceId, const std::string &receiverDeviceId)
 {
     uint64_t chainId = ConvertTraceChainId(requestDeviceId, receiverDeviceId);
-    // TODO: flags and name should specified
-    auto hiTraceId = OHOS::HiviewDFX::HiTraceChain::Begin("", 0);
-    hiTraceId.SetChainId(chainId);
-    OHOS::HiviewDFX::HiTraceChain::SetId(hiTraceId);
-    traceId = hiTraceId;
+    auto traceId = OHOS::HiviewDFX::HiTraceChain::Begin("", 0);
+    traceId.SetChainId(chainId);
+    traceId.SetSpanId(0);
+    OHOS::HiviewDFX::HiTraceChain::SetId(traceId);
 }
 
 void WifiDirectTrace::StopTrace()
 {
+    auto traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     OHOS::HiviewDFX::HiTraceChain::End(traceId);
+}
+
+void WifiDirectTrace::SetRequestId(uint64_t requestId)
+{
+    auto traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
+    traceId.SetSpanId(requestId);
+    OHOS::HiviewDFX::HiTraceChain::SetId(traceId);
 }
 
 } // namespace OHOS::SoftBus

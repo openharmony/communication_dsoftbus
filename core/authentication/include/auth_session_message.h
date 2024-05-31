@@ -61,6 +61,7 @@ int32_t PostDeviceMessage(
     const AuthManager *auth, int32_t flagRelay, AuthLinkType type, const DeviceMessageParse *messageParse);
 bool IsDeviceMessagePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer,
     DeviceMessageParse *messageParse);
+int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info);
 
 #ifdef __cplusplus
 #if __cplusplus
