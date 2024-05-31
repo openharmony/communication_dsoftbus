@@ -656,20 +656,20 @@ static int32_t Alloc(uint32_t laneReqId, const LaneRequestOption *request, const
         &transRequest->expectedLink, sizeof(transRequest->expectedLink)) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
-    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
+    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     if (recommendLinkList == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    recommendLinkList->linkTypeNum = 0;
     uint32_t listNum = 0;
-    if (SelectLane((const char *)transRequest->networkId, &selectParam, recommendLinkList, &listNum) != SOFTBUS_OK) {
+    int32_t ret = SelectLane((const char *)transRequest->networkId, &selectParam, recommendLinkList, &listNum);
+    if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
-        return SOFTBUS_LANE_SELECT_FAIL;
+        return ErrCodeFilter(ret, SOFTBUS_LANE_SELECT_FAIL);
     }
     if (recommendLinkList->linkTypeNum == 0) {
         LNN_LOGE(LNN_LANE, "no link resources available, alloc fail");
         SoftBusFree(recommendLinkList);
-        return SOFTBUS_LANE_SELECT_FAIL;
+        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
     LNN_LOGI(LNN_LANE, "select lane link success, linkNum=%{public}d, laneReqId=%{public}u", listNum, laneReqId);
     TransReqInfo *newItem = CreateRequestNode(laneReqId, transRequest, listener);
@@ -685,11 +685,11 @@ static int32_t Alloc(uint32_t laneReqId, const LaneRequestOption *request, const
     ListTailInsert(&g_requestList->list, &newItem->node);
     g_requestList->cnt++;
     Unlock();
-    int32_t ret = TriggerLink(laneReqId, transRequest, recommendLinkList);
+    ret = TriggerLink(laneReqId, transRequest, recommendLinkList);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         DeleteRequestNode(laneReqId);
-        return ret;
+        return ErrCodeFilter(ret, SOFTBUS_LANE_TRIGGER_LINK_FAIL);
     }
     return SOFTBUS_OK;
 }
