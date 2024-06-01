@@ -1328,6 +1328,7 @@ ohos_unittest("LNNLaneMockTest") {
 
   include_dirs = [
     "lane/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
