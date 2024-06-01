@@ -22,7 +22,6 @@
 
 #define MS_PER_SECOND  1000
 #define US_PER_MSECOND 1000
-#define NS_PER_USECOND 1000
 
 static TimerFunc g_timerFunc = NULL;
 
