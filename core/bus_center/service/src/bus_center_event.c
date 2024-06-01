@@ -513,6 +513,17 @@ void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state)
+{
+    if (state < SOFTBUS_USER_SWITCHED || state >= SOFTBUS_USER_SWITCH_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad userSwitchState=%{public}d", state);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_USER_SWITCHED,
+        .status = (uint8_t)state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 void LnnNotifyDifferentAccountChangeEvent(void *state)
 {
     SoftBusDifferentAccountState *difAccountState = (SoftBusDifferentAccountState *)state;
