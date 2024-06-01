@@ -571,6 +571,7 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
             }
             bleExtra.status = BLE_REPORT_EVENT_INIT;
             AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
+            // udidHash will free When the callback function HbProcessDfxMessage is started.
             return SOFTBUS_OK;
         }
         SoftBusFree(udidHash);
@@ -587,6 +588,12 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
         anonyUdid, device->addr[0].type, isConnect);
     AnonymizeFree(anonyUdid);
 
+    if (isConnect) {
+        if (!AuthHasSameAccountGroup(device)) {
+            LNN_LOGE(LNN_HEART_BEAT, "device has not same account group relation with local device");
+            return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
+        }
+    }
     if (HbAddAsyncProcessCallbackDelay(device) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HbAddAsyncProcessCallbackDelay fail");
     }
