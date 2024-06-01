@@ -923,10 +923,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGI(LNN_LEDGER, "no account info. no need sync to DB");
         return SOFTBUS_OK;
     }
-    int64_t nowTime = 0;
-    SoftBusSysTime time = { 0 };
-    SoftBusGetTime(&time);
-    nowTime = time.sec * CLOUD_SYNC_TIME_FACTOR + time.usec / CLOUD_SYNC_TIME_FACTOR;
+    uint64_t nowTime = SoftBusGetSysTimeMs();
     char putKey[KEY_MAX_LEN] = { 0 };
     if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%s", localCaheInfo.accountId, localCaheInfo.deviceInfo.deviceUdid, key) <
         0) {
@@ -934,7 +931,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         return SOFTBUS_ERR;
     }
     char putValue[PUT_VALUE_MAX_LEN] = { 0 };
-    if (sprintf_s(putValue, PUT_VALUE_MAX_LEN, "%s#%d#%ld", value, localCaheInfo.stateVersion, nowTime) < 0) {
+    if (sprintf_s(putValue, PUT_VALUE_MAX_LEN, "%s#%d#%llu", value, localCaheInfo.stateVersion, nowTime) < 0) {
         LNN_LOGE(LNN_BUILDER, "sprintf_s value fail");
         return SOFTBUS_ERR;
     }
