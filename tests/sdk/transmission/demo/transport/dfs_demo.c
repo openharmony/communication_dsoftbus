@@ -82,16 +82,16 @@ static ISessionListener g_sessionlistenerA = {
 int main(void)
 {
     /*
-     * 1. Device A calls CreateSessionServer() to create a session service based on
-     * the application bundle name and session name, and registers the callbacks
-     * for session opened, session closed, byte received, and message received.
+     * 1. Device A calls CreateSessionServer() to create a session service based on the application bundle name and
+     * session name, and registers the callbacks for session opened, session closed, byte received, and message
+     * received.
      */
     int ret = CreateSessionServer(g_pkgNameA, g_sessionNameA, &g_sessionlistenerA);
     printf("create session server result = %d\n", ret);
 
     /*
-     * 2. Device A calls OpenSession() to open a session based on the local session name, peer session name,
-     * and peer network ID, and then determines the session channel based on the session type.
+     * 2. Device A calls OpenSession() to open a session based on the local session name, peer session name, and peer
+     * network ID, and then determines the session channel based on the session type.
      * When the session is open, a callback will be invoked to notify devices A and B.
      * A session ID is returned for subsequent operations. In addition, sessionName must be DistributedFileService.
      */
