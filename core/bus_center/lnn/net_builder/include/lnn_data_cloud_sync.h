@@ -27,7 +27,6 @@ extern "C" {
 #endif
 
 #define CLOUD_SYNC_INFO_SIZE 33
-#define CLOUD_SYNC_TIME_FACTOR (1000LL)
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];

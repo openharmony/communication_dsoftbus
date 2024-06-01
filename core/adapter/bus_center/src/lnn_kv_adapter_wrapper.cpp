@@ -40,9 +40,9 @@ std::mutex g_kvAdapterWrapperMutex;
 static int32_t g_dbId = 1;
 static std::map<int32_t, std::shared_ptr<OHOS::KVAdapter>> g_dbID2KvAdapter;
 static void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values,
-    const int64_t &nowTime);
+    const uint64_t &nowTime);
 static void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values,
-    const int64_t &nowTime);
+    const uint64_t &nowTime);
 static std::shared_ptr<OHOS::KVAdapter> FindKvStorePtr(int32_t &dbId);
 
 int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen)
@@ -236,10 +236,7 @@ int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
             return SOFTBUS_NOT_FIND;
         }
-        int64_t nowTime = 0;
-        SoftBusSysTime time = { 0 };
-        SoftBusGetTime(&time);
-        nowTime = time.sec * CLOUD_SYNC_TIME_FACTOR + time.usec / CLOUD_SYNC_TIME_FACTOR;
+        uint64_t nowTime = SoftBusGetSysTimeMs();
         BasicCloudSyncInfoToMap(localInfo, values, nowTime);
         ComplexCloudSyncInfoToMap(localInfo, values, nowTime);
         putBatchRet = kvAdapter->PutBatch(values);
@@ -269,7 +266,7 @@ int32_t LnnCloudSync(int32_t dbId)
 }
 
 static void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values,
-    const int64_t &nowTime)
+    const uint64_t &nowTime)
 {
     if (localInfo == nullptr) {
         LNN_LOGE(LNN_LEDGER, "localInfo is null");
@@ -348,7 +345,7 @@ static int32_t CipherAndRpaInfoToMap(const CloudSyncInfo *localInfo, std::map<st
 }
 
 static void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values,
-    const int64_t &nowTime)
+    const uint64_t &nowTime)
 {
     if (localInfo == nullptr) {
         LNN_LOGE(LNN_LEDGER, "localInfo is null");
