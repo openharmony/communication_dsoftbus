@@ -1040,7 +1040,6 @@ static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInf
     request.connInfo = *connInfo;
     request.authId = AUTH_INVALID_ID;
     request.type = REQUEST_TYPE_VERIFY;
-    request.addTime = GetCurrentTimeMs();
     request.isFastAuth = isFastAuth;
     return VerifyDevice(&request);
 }
@@ -1060,7 +1059,6 @@ static int32_t StartConnVerifyDevice(uint32_t requestId, const AuthConnInfo *con
     request.connInfo = *connInfo;
     request.authId = AUTH_INVALID_ID;
     request.type = REQUEST_TYPE_VERIFY;
-    request.addTime = GetCurrentTimeMs();
     request.isFastAuth = isFastAuth;
     return VerifyDevice(&request);
 }
@@ -1085,7 +1083,6 @@ static int32_t StartReconnectDevice(
     request.connInfo = *connInfo;
     request.requestId = requestId;
     request.type = REQUEST_TYPE_RECONNECT;
-    request.addTime = GetCurrentTimeMs();
     request.isFastAuth = true;
     if (connInfo->type == AUTH_LINK_TYPE_BR) {
         request.connInfo.info.brInfo.connectionId = GetConnId(connId);
