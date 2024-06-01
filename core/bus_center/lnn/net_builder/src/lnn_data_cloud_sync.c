@@ -31,7 +31,6 @@
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
@@ -926,7 +925,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
     }
     int64_t nowTime = 0;
     SoftBusSysTime time = { 0 };
-    SoftBusGetRealTime(&time);
+    SoftBusGetTime(&time);
     nowTime = time.sec * CLOUD_SYNC_TIME_FACTOR + time.usec / CLOUD_SYNC_TIME_FACTOR;
     char putKey[KEY_MAX_LEN] = { 0 };
     if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%s", localCaheInfo.accountId, localCaheInfo.deviceInfo.deviceUdid, key) <
@@ -946,8 +945,8 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGE(LNN_BUILDER, "fail:data sync to DB fail, errorcode=%{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success. stateVersion=%{public}d, time=%{public}lld",
-        key, localCaheInfo.stateVersion, nowTime);
+    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success. stateVersion=%{public}d", key,
+        localCaheInfo.stateVersion);
 
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
