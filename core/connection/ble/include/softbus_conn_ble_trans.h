@@ -35,7 +35,8 @@ extern "C" {
 
 typedef struct {
     SoftBusMutex lock;
-    bool isStartSendLp;
+    bool messagePosted;
+    bool sendTaskRunning;
 } StartBleSendLPInfo;
 
 typedef struct {
