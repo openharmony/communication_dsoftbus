@@ -579,7 +579,7 @@ static int32_t HandleDBAddChangeInternal(const char *key, const char *value, Nod
         LNN_LOGE(LNN_BUILDER, "fail:strcpy_s true value fail.");
         return SOFTBUS_STRCPY_ERR;
     }
-    LNN_LOGE(LNN_BUILDER, "DB data add device sync info, time=%{public}s", splitValue[SPLIT_VALUE_NUM - 1]);
+    LNN_LOGI(LNN_BUILDER, "DB data add device sync info, time=%{public}s", splitValue[SPLIT_VALUE_NUM - 1]);
     NodeInfo localCaheInfo = { 0 };
     if (LnnGetLocalCacheNodeInfo(&localCaheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");

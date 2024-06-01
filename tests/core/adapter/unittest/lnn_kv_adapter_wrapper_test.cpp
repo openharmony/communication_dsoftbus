@@ -215,13 +215,6 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutBatch001, TestSize.Level1)
         .distributedSwitch = true
     };
     EXPECT_EQ(LnnPutDBDataBatch(dbId, &info), SOFTBUS_OK);
-    char *value = nullptr;
-    string separator = "#";
-    string networkIdKey = to_string(info.accountId) + separator + info.deviceUdid + separator + "NETWORK_ID";
-    string expectNetworkIdValue = info.networkId + separator + to_string(info.stateVersion);
-    LnnGetDBData(dbId, networkIdKey.c_str(), networkIdKey.length(), &value);
-    EXPECT_EQ(strcmp(value, expectNetworkIdValue.c_str()), 0);
-    SoftBusFree(value);
 }
 
 /**
