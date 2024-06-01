@@ -25,6 +25,7 @@
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
 #include "lnn_net_builder.h"
 #include "lnn_log.h"
 #include "message_handler.h"
@@ -33,6 +34,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_bus_center.h"
+#include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_transmission_interface.h"
@@ -104,8 +106,9 @@ static void ClearSyncChannelInfo(void)
 static SyncChannelInfo *FindSyncChannelInfoByNetworkId(const char *networkId)
 {
     SyncChannelInfo *item = NULL;
+    SyncChannelInfo *next = NULL;
 
-    LIST_FOR_EACH_ENTRY(item, &g_syncInfoManager.channelInfoList, SyncChannelInfo, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_syncInfoManager.channelInfoList, SyncChannelInfo, node) {
         if (strcmp(item->networkId, networkId) == 0) {
             return item;
         }
@@ -116,8 +119,9 @@ static SyncChannelInfo *FindSyncChannelInfoByNetworkId(const char *networkId)
 static SyncChannelInfo *FindSyncChannelInfoByChannelId(int32_t channelId)
 {
     SyncChannelInfo *item = NULL;
+    SyncChannelInfo *next = NULL;
 
-    LIST_FOR_EACH_ENTRY(item, &g_syncInfoManager.channelInfoList, SyncChannelInfo, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_syncInfoManager.channelInfoList, SyncChannelInfo, node) {
         if (item->clientChannelId == channelId || item->serverChannelId == channelId) {
             return item;
         }
@@ -681,6 +685,59 @@ static void OnLnnOnlineStateChange(const LnnEventBasicInfo *info)
     }
 }
 
+static void OnWifiDirectSyncMsgRecv(AuthHandle authHandle, const AuthTransData *data)
+{
+    LnnSyncInfoType type;
+    LnnSyncInfoMsgHandler handler;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "recv null data, authId=%{public}" PRId64, authHandle.authId);
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "recv sync info msg. type=%{public}d, authId=%{public}" PRId64 ", len=%{public}u",
+        (LnnSyncInfoType)(*(int32_t *)data->data), authHandle.authId, data->len);
+    if (data->len <= MSG_HEAD_LEN || data->len > MAX_SYNC_INFO_MSG_LEN) {
+        LNN_LOGE(LNN_BUILDER, "invalid msg. len=%{public}u", data->len);
+        return;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
+    if (auth == NULL) {
+        return;
+    }
+    char *anonyUdid = NULL;
+    Anonymize(auth->udid, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "udid=%{public}s", anonyUdid);
+    AnonymizeFree(anonyUdid);
+    if (LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "LnnGetNetworkIdByUdid fail");
+        DelAuthManager(auth, false);
+        return;
+    }
+    DelAuthManager(auth, false);
+    type = (LnnSyncInfoType)(*(int32_t *)data->data);
+    if (type < 0 || type >= LNN_INFO_TYPE_COUNT) {
+        LNN_LOGE(LNN_BUILDER, "received data is exception, type=%{public}d", type);
+        return;
+    }
+    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
+        LNN_LOGE(LNN_BUILDER, "sync info lock fail");
+        return;
+    }
+    handler = g_syncInfoManager.handlers[type];
+    if (handler == NULL) {
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+    handler(type, networkId, &data->data[MSG_HEAD_LEN], data->len - MSG_HEAD_LEN);
+}
+
+static void OnWifiDirectSyncAuthClose(AuthHandle authHandle)
+{
+    LNN_LOGW(LNN_BUILDER, "authId=%{public}" PRId64, authHandle.authId);
+}
+
 int32_t LnnInitSyncInfoManager(void)
 {
     int32_t i;
@@ -688,6 +745,15 @@ int32_t LnnInitSyncInfoManager(void)
     ListInit(&g_syncInfoManager.channelInfoList);
     for (i = 0; i < LNN_INFO_TYPE_COUNT; ++i) {
         g_syncInfoManager.handlers[i] = NULL;
+    }
+
+    AuthTransListener wifiDirectSyncCb = {
+        .onDataReceived = OnWifiDirectSyncMsgRecv,
+        .onDisconnected = OnWifiDirectSyncAuthClose,
+    };
+    if (RegAuthTransListener(MODULE_AUTH_SYNC_INFO, &wifiDirectSyncCb) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "reg auth lister fail");
+        return SOFTBUS_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "reg online lister fail");
@@ -719,7 +785,8 @@ void LnnDeinitSyncInfoManager(void)
         g_syncInfoManager.handlers[i] = NULL;
     }
     UnregAuthTransListener(MODULE_P2P_NETWORKING_SYNC);
-    LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange);
+    LnnUnregisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange);
+    UnregAuthTransListener(MODULE_AUTH_SYNC_INFO);
     ClearSyncChannelInfo();
     SoftBusMutexDestroy(&g_syncInfoManager.lock);
 }
@@ -829,6 +896,7 @@ static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
 
 static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
 {
+    LNN_LOGI(LNN_BUILDER, "begin send sync info");
     SyncChannelInfo *info = NULL;
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
         LNN_LOGE(LNN_BUILDER, "send sync info lock fail");
@@ -862,21 +930,134 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
     return SOFTBUS_OK;
 }
 
+static int32_t GetWifiDirectAuthByNetworkId(const char *networkId, AuthHandle *authHandle)
+{
+    char uuid[UUID_BUF_LEN] = {0};
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+    AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, authHandle);
+    if (authHandle->authId != AUTH_INVALID_ID) {
+        LNN_LOGI(LNN_BUILDER, "find wifidirect authHandle, networkId=%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_OK;
+    }
+    AnonymizeFree(anonyNetworkId);
+    return SOFTBUS_ERR;
+}
+
+static int32_t TrySendSyncInfoMsgByAuth(const char *networkId, SyncInfoMsg *msg)
+{
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    AuthHandle authHandle = {
+        .authId = AUTH_INVALID_ID
+    };
+    if (GetWifiDirectAuthByNetworkId(networkId, &authHandle) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get authHandle fail, networkId=%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_ERR;
+    }
+    AnonymizeFree(anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "send sync info, authId=%{public}" PRId64 ", datalen=%{public}u",
+        authHandle.authId, msg->dataLen);
+    AuthTransData dataInfo = {
+        .module = MODULE_AUTH_SYNC_INFO,
+        .flag = 0,
+        .seq = 0,
+        .len = msg->dataLen,
+        .data = msg->data,
+    };
+    if (AuthPostTransData(authHandle, &dataInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "auth post data fail");
+        return SOFTBUS_ERR;
+    }
+    if (msg->complete != NULL) {
+        msg->complete((LnnSyncInfoType)(*(uint32_t *)msg->data), networkId, &msg->data[MSG_HEAD_LEN],
+            msg->dataLen - MSG_HEAD_LEN);
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remote)
+{
+    int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
+    if (ret != SOFTBUS_OK || *local == 0) {
+        LNN_LOGE(LNN_BUILDER, "get local cap fail, ret=%{public}d, local=%{public}" PRIu64, ret, *local);
+        return SOFTBUS_ERR;
+    }
+    ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
+    if (ret != SOFTBUS_OK || *remote == 0) {
+        LNN_LOGE(LNN_BUILDER, "get remote cap fail, ret=%{public}d, remote=%{public}" PRIu64, ret, *remote);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static bool IsNeedSyncByAuth(const char *networkId)
+{
+    uint32_t localCap;
+    uint32_t remoteCap;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &localCap) != SOFTBUS_OK ||
+        LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, &remoteCap) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get cap fail");
+        return false;
+    }
+    if (((localCap & (1 << BIT_WIFI_P2P)) == 0) || ((remoteCap & (1 << BIT_WIFI_P2P)) == 0)) {
+        LNN_LOGI(LNN_BUILDER, "not support p2p");
+        return false;
+    }
+    uint64_t local = 0;
+    uint64_t remote = 0;
+    if (GetFeatureCap(networkId, &local, &remote) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get feature fail");
+        return false;
+    }
+    if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0 || (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) {
+        LNN_LOGI(LNN_BUILDER, "not support wifi direct");
+        return false;
+    }
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get remote node info fail");
+        return false;
+    }
+    if (LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+        LNN_LOGI(LNN_BUILDER, "peer node is wifi online");
+        return false;
+    }
+    if ((localCap & (1 << BIT_BR)) && (remoteCap & (1 << BIT_BR))) {
+        LNN_LOGI(LNN_BUILDER, "both support br");
+        return false;
+    }
+    LNN_LOGI(LNN_BUILDER, "need sync info by auth");
+    return true;
+}
+
 int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
 {
+    SyncInfoMsg *syncMsg = NULL;
+    int32_t rc;
+
+    LNN_LOGI(LNN_BUILDER, "send sync info msg for type=%{public}d, len=%{public}d", type, len);
     if (type >= LNN_INFO_TYPE_COUNT || networkId == NULL || msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid sync info msg param");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    SyncInfoMsg *syncMsg = NULL;
-    LNN_LOGI(LNN_BUILDER, "send sync info msg. type=%{public}d, len=%{public}d", type, len);
     syncMsg = CreateSyncInfoMsg(type, msg, len, complete);
     if (syncMsg == NULL) {
         return SOFTBUS_ERR;
     }
-    int32_t rc = TrySendSyncInfoMsg(networkId, syncMsg);
+    if (IsNeedSyncByAuth(networkId)) {
+        rc = TrySendSyncInfoMsgByAuth(networkId, syncMsg);
+        if (rc == SOFTBUS_OK) {
+            SoftBusFree(syncMsg);
+            return rc;
+        }
+    }
+    rc = TrySendSyncInfoMsg(networkId, syncMsg);
     if (rc != SOFTBUS_OK) {
         SoftBusFree(syncMsg);
     }

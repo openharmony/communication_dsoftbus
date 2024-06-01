@@ -44,15 +44,21 @@ void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq,
 class ConnectionBleTest : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase() {}
+    static void TearDownTestCase();
     void SetUp() override {}
     void TearDown() override {}
 };
 
 void ConnectionBleTest::SetUpTestCase()
 {
+    LooperInit();
     SoftbusConfigInit();
     ConnServerInit();
+}
+
+void ConnectionBleTest::TearDownTestCase()
+{
+    LooperDeinit();
 }
 
 /*

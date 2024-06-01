@@ -75,6 +75,8 @@ public:
     void SetName(const std::string &value);
     std::string GetName() const;
 
+    std::vector<uint8_t> GetChannelAndBandWidth() const;
+
     void SetIpString(const Ipv4Info &ipv4Info);
     Ipv4Info GetIpString() const;
 
@@ -103,6 +105,9 @@ public:
 
     void SetCenter20M(int value);
     int GetCenter20M() const;
+
+    void SetBandWidth(int value);
+    int GetBandWidth() const;
 
     void SetIsEnable(bool value);
     bool IsEnable() const;

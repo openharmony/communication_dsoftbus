@@ -50,7 +50,7 @@ public:
     virtual int32_t DelLaneBusinessInfoItem(LaneType laneType, uint64_t laneId) = 0;
     virtual int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo) = 0;
     virtual int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo) = 0;
-    virtual uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType) = 0;
+    virtual uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType) = 0;
 };
 
 class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
@@ -74,7 +74,8 @@ public:
     MOCK_METHOD2(DelLaneBusinessInfoItem, int32_t (LaneType laneType, uint64_t laneId));
     MOCK_METHOD2(LaneLinkupNotify, int32_t (const char *peerUdid, const LaneLinkInfo *laneLinkInfo));
     MOCK_METHOD2(LaneLinkdownNotify, int32_t (const char *peerUdid, const LaneLinkInfo *laneLinkInfo));
-    MOCK_METHOD3(ApplyLaneId, uint64_t (const char *localUdid, const char *remoteUdid, LaneLinkType linkType));
+    MOCK_METHOD3(GenerateLaneId, uint64_t (const char *localUdid, const char *remoteUdid, LaneLinkType linkType));
+
     static int32_t ActionOfLaneLinkSuccess(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
     static int32_t ActionOfLaneLinkFail(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
 };

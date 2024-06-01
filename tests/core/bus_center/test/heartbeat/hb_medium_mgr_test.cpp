@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "ble_mock.h"
 #include "auth_manager.h"
 #include "bus_center_adapter.h"
 #include "distribute_net_ledger_mock.h"
@@ -26,6 +27,7 @@
 #include "lnn_heartbeat_ctrl_virtual.c"
 #include "lnn_heartbeat_medium_mgr.c"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_parameter_utils_virtual.c"
 #include "softbus_common.h"
@@ -307,6 +309,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     ON_CALL(hbStrateMock, LnnStopOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStrateMock, IsNeedAuthLimit).WillRepeatedly(Return(false));
+    EXPECT_CALL(hbStrateMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     int ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_CONNECTABLE);
     HbFirstSaveRecvTime(&storedInfo, &device,
@@ -351,20 +354,20 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level
     EXPECT_CALL(ledgerMock, LnnConvertIdToDeviceType).WillRepeatedly(Return(const_cast<char *>(TYPE_PAD)));
     LnnGenerateHexStringHash(
         reinterpret_cast<const unsigned char *>(TEST_UDID_HASH), udidHash, HB_SHORT_UDID_HASH_HEX_LEN);
-    int32_t ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true);
+    int32_t ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
-    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true);
+    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     HbGetOnlineNodeByRecvInfo(udidHash, CONNECTION_ADDR_BR, &nodeInfo, &hbResp);
-    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true);
+    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = HbMediumMgrRecvHigherWeight(nullptr, TEST_WEIGHT, CONNECTION_ADDR_BR, true);
+    ret = HbMediumMgrRecvHigherWeight(nullptr, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     EXPECT_CALL(hbStrategyMock, LnnNotifyMasterElect).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, false);
+    ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, false, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(50);
 }
@@ -823,6 +826,7 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
     EXPECT_CALL(heartBeatMock, LnnNotifyDiscoveryDevice)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(heartBeatMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     int32_t ret = SoftBusNetNodeResult(&device, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = SoftBusNetNodeResult(&device, false);
@@ -902,5 +906,75 @@ HWTEST_F(HeartBeatMediumTest, LnnHeartbeatCtrlVirtual_TEST01, TestSize.Level1)
     LnnDeinitHeartbeat();
     ret = LnnInitHeartbeat();
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: IsLocalSupportThreeState_TEST01
+ * @tc.desc: three state test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, IsLocalSupportThreeState_TEST01, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
+    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info).WillOnce(Return(SOFTBUS_ERR));
+    bool ret = IsLocalSupportThreeState();
+    EXPECT_TRUE(ret == false);
+
+    uint64_t localFeatureCap = 0;
+    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
+    ret = IsLocalSupportThreeState();
+    EXPECT_TRUE(ret == false);
+
+    localFeatureCap = 0x1FFFF;
+    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
+    ret = IsLocalSupportThreeState();
+    EXPECT_TRUE(ret == true);
+}
+
+/*
+ * @tc.name: HbIsValidJoinLnnRequest_TEST01
+ * @tc.desc: three state test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
+    uint64_t localFeatureCap = 0x0;
+    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
+    bool ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
+    EXPECT_TRUE(ret == true);
+
+    localFeatureCap = 0x1FFFF;
+    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
+    NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
+    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo).WillOnce(Return(SOFTBUS_ERR));
+    ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
+    EXPECT_TRUE(ret == true);
+
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    nodeInfo.feature = 0x1FFFF;
+    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo).
+        WillOnce(DoAll(SetArgPointee<1>(nodeInfo), Return(SOFTBUS_OK)));
+    ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
+    EXPECT_TRUE(ret == true);
+
+    nodeInfo.feature = 0x0;
+    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(nodeInfo), Return(SOFTBUS_OK)));
+    BleMock bleMock;
+    EXPECT_CALL(bleMock, SoftBusGetBrState).WillOnce(Return(BR_ENABLE));
+    ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
+    EXPECT_TRUE(ret == true);
+
+    EXPECT_CALL(bleMock, SoftBusGetBrState).WillOnce(Return(BR_DISABLE));
+    ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
+    EXPECT_TRUE(ret == false);
 }
 } // namespace OHOS

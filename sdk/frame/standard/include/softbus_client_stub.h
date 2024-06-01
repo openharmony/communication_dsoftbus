@@ -22,6 +22,14 @@
 #include "iremote_stub.h"
 
 namespace OHOS {
+#define READ_PARCEL_WITH_RET(parcel, type, data, retVal)        \
+    do {                                                        \
+        if (!(parcel).Read##type(data)) {                       \
+            COMM_LOGE(COMM_SDK, "read data failed.");           \
+            return (retVal);                                    \
+        }                                                       \
+    } while (false)                                             \
+
 class SoftBusClientStub : public IRemoteStub<ISoftBusClient> {
 public:
     SoftBusClientStub();

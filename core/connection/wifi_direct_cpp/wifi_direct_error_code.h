@@ -353,6 +353,15 @@ enum WifiDirectErrorCode {
 
     /* Error code parallelism conflict */
     ERROR_PARALLELISM_CONFLICT = ERROR_BASE - 6623,
+    
+    /* Error code retry for avoid block */
+    ERROR_RETRY_FOR_AVOID_BLOCK = ERROR_BASE - 6624,
+	
+    /* Error code no wifi config info */
+    ERROR_NO_WIFI_CONFIG_INFO = ERROR_BASE - 6625,
+
+    /* Error code start action listen failed */
+    ERROR_START_ACTION_LISTEN_FAILED = ERROR_BASE - 6626,
 
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,

@@ -190,11 +190,15 @@ public:
 
 void ConnectionBrConnectionTest::SetUpTestCase(void)
 {
+    LooperInit();
     SoftbusConfigInit();
     ConnServerInit();
 }
 
-void ConnectionBrConnectionTest::TearDownTestCase(void) { }
+void ConnectionBrConnectionTest::TearDownTestCase(void)
+{
+    LooperDeinit();
+}
 
 void ConnectionBrConnectionTest::SetUp(void) { }
 

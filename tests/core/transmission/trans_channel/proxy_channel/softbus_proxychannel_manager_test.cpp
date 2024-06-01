@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -847,6 +847,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     (void)strcpy_s(appInfo.myData.pkgName, TEST_PKG_NAME_LEN, TEST_PKGNAME);
     appInfo.appType = APP_TYPE_AUTH;
     appInfo.myData.pid = TEST_DEATH_CHANNEL_ID;
+    // will free in TransProxyDeathCallback
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
     chan->channelId = TEST_DEATH_CHANNEL_ID;
@@ -859,8 +860,15 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     TransProxyDeathCallback(NULL, TEST_DEATH_CHANNEL_ID);
     TransProxyDeathCallback(TEST_PKGNAME, TEST_DEATH_CHANNEL_ID);
 
-    ret = TransProxyGetSendMsgChanInfo(chan->channelId, chan);
+    ProxyChannelInfo *chanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ASSERT_TRUE(NULL != chanInfo);
+    chanInfo->channelId = TEST_DEATH_CHANNEL_ID;
+    chanInfo->connId = TEST_NUMBER_VALID;
+    chanInfo->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
+
+    ret = TransProxyGetSendMsgChanInfo(chanInfo->channelId, chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
+    SoftBusFree(chanInfo);
 }
 
 /**
@@ -1172,8 +1180,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest001, TestSi
 {
     int16_t myId = 1;
     const char *identity = "test";
-    int32_t ret = TransProxyGetAppInfoType(myId, identity);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    AppType appType;
+    int32_t ret = TransProxyGetAppInfoType(myId, identity, &appType);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
 
 /**

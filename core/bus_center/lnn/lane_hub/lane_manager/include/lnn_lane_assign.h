@@ -31,9 +31,12 @@ typedef struct {
     int32_t (*allocLaneByQos)(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
     int32_t (*reallocLaneByQos)(uint32_t laneHandle, uint64_t laneId, const LaneAllocInfo *allocInfo,
         const LaneAllocListener *listener);
+    int32_t (*allocTargetLane)(uint32_t laneHandle, const LaneAllocInfoExt *allocInfo,
+        const LaneAllocListener *listener);
     int32_t (*cancelLane)(uint32_t laneHandle);
     int32_t (*freeLane)(uint32_t laneHandle);
 } LaneInterface;
+
 #ifdef __cplusplus
 }
 #endif

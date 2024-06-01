@@ -74,6 +74,7 @@ enum class NegotiateMessageType {
     CMD_RENEGOTIATE_REQ = 53,
     CMD_RENEGOTIATE_RESP = 54,
     CMD_AUTH_HAND_SHAKE = 55,
+    CMD_AUTH_HAND_SHAKE_RSP = 56,
 
     CMD_V3_REQ = 100,
     CMD_V3_RSP = 101,
@@ -99,6 +100,7 @@ enum class NegotiateMessageKey {
     IS_PROXY_ENABLE = 16,
     CHANNEL_5G_LIST = 17,
     CHANNEL_5G_SCORE = 18,
+    CHALLENGE_CODE = 19,
 
     /* old p2p */
     GC_CHANNEL_LIST = 200,
@@ -185,6 +187,9 @@ public:
 
     void Set5GChannelScore(const std::string &value);
     std::string Get5GChannelScore() const;
+
+    void SetChallengeCode(uint32_t value);
+    uint32_t GetChallengeCode() const;
 
     void SetLegacyP2pGcChannelList(const std::string &value);
     std::string GetLegacyP2pGcChannelList() const;

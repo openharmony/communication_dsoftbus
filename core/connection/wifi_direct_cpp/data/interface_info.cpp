@@ -67,7 +67,7 @@ void InterfaceInfo::MarshallingString(
             protocol.Write(static_cast<int>(key), type, macArray.data(), macArray.size());
         }
     } else {
-        protocol.Write(static_cast<int>(key), type, (uint8_t *)value.c_str(), value.length() + 1);
+        protocol.Write(static_cast<int>(key), type, reinterpret_cast<const uint8_t*>(value.c_str()), value.length());
     }
 }
 
@@ -99,8 +99,8 @@ int InterfaceInfo::Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_t
                 break;
             }
             case Serializable::ValueType::BYTE_ARRAY: {
-                auto data = std::any_cast<uint8_t *>(value);
-                protocol.Write(static_cast<int>(key), type, data, sizeof(data));
+                const auto &data = std::any_cast<const std::vector<uint8_t> &>(value);
+                protocol.Write(static_cast<int>(key), type, data.data(), data.size());
                 break;
             }
             case Serializable::ValueType::STRING: {
@@ -152,12 +152,11 @@ int InterfaceInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector
                 break;
             }
             case Serializable::ValueType::STRING: {
-                std::string str(std::string(reinterpret_cast<const char *>(data)), 0, size);
-                Set(InterfaceInfoKey(key), str);
+                Set(InterfaceInfoKey(key), std::string(reinterpret_cast<const char *>(data), size));
                 break;
             }
             case Serializable::ValueType::BYTE_ARRAY: {
-                Set(InterfaceInfoKey(key), *data);
+                Set(InterfaceInfoKey(key), std::vector<uint8_t>(data, data + size));
                 break;
             }
             case Serializable::ValueType::IPV4_INFO: {
@@ -182,6 +181,11 @@ void InterfaceInfo::SetName(const std::string &value)
 std::string InterfaceInfo::GetName() const
 {
     return Get(InterfaceInfoKey::INTERFACE_NAME, std::string(""));
+}
+
+std::vector<uint8_t> InterfaceInfo::GetChannelAndBandWidth() const
+{
+    return Get(InterfaceInfoKey::CHANNEL_AND_BANDWIDTH, std::vector<uint8_t>());
 }
 
 void InterfaceInfo::SetIpString(const Ipv4Info &ipv4Info)
@@ -282,6 +286,16 @@ int InterfaceInfo::GetCenter20M() const
     return Get(InterfaceInfoKey::CENTER_20M, 0);
 }
 
+void InterfaceInfo::SetBandWidth(int value)
+{
+    Set(InterfaceInfoKey::BANDWIDTH, value);
+}
+
+int InterfaceInfo::GetBandWidth() const
+{
+    return Get(InterfaceInfoKey::BANDWIDTH, 0);
+}
+
 void InterfaceInfo::SetIsEnable(bool value)
 {
     Set(InterfaceInfoKey::IS_ENABLE, value);
@@ -378,5 +392,4 @@ void InterfaceInfo::DecreaseRefCount()
     Set(InterfaceInfoKey::REUSE_COUNT, count);
     CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount = %{public}d", count);
 }
-
 } // namespace OHOS::SoftBus

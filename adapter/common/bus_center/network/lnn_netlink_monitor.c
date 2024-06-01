@@ -37,6 +37,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_base_listener.h"
+#include "softbus_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
@@ -46,6 +48,8 @@
         ((int32_t)((nlh)->nlmsg_len) <= (len)))
 
 #define DEFAULT_NETLINK_RECVBUF (32 * 1024)
+
+static int32_t g_netlinkFd = -1;
 
 static int32_t CreateNetlinkSocket(void)
 {
@@ -143,68 +147,81 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     }
 }
 
-static void *NetlinkMonitorThread(void *para)
+static int32_t NetlinkOnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
-    struct nlmsghdr *nlh = NULL;
-    (void)para;
-    LNN_LOGI(LNN_BUILDER, "netlink monitor thread start");
-    int32_t sockFd = CreateNetlinkSocket();
-    if (sockFd < 0) {
-        LNN_LOGE(LNN_BUILDER, "create netlink socket failed");
-        return NULL;
+    if (module != NETLINK || events != SOFTBUS_SOCKET_IN || fd < 0) {
+        LNN_LOGE(LNN_BUILDER, "listening fail, moudle=%{public}d, events=%{public}d", module, events);
+        return SOFTBUS_INVALID_PARAM;
     }
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(DEFAULT_NETLINK_RECVBUF * sizeof(uint8_t));
     if (buffer == NULL) {
-        SoftBusSocketClose(sockFd);
-        return NULL;
+        LNN_LOGE(LNN_BUILDER, "malloc fail.");
+        return SOFTBUS_MALLOC_ERR;
     }
-    while (true) {
-        (void)memset_s(buffer, DEFAULT_NETLINK_RECVBUF, 0, DEFAULT_NETLINK_RECVBUF);
-        int32_t len = SoftBusSocketRecv(sockFd, buffer, DEFAULT_NETLINK_RECVBUF, 0);
-        if (len < 0 && len == SOFTBUS_ADAPTER_SOCKET_EINTR) {
-            continue;
-        }
-        if (len < 0) {
-            LNN_LOGE(LNN_BUILDER, "recv netlink socket error");
-            break;
-        }
-        if (len < (int32_t)sizeof(struct nlmsghdr)) {
-            LNN_LOGE(LNN_BUILDER, "recv buffer not enough");
-            continue;
-        }
-        nlh = (struct nlmsghdr *)buffer;
-        while (NLMSG_OK(nlh, len) && nlh->nlmsg_type != NLMSG_DONE) {
-            LNN_LOGD(LNN_BUILDER, "nlmsg_type=%{public}d", nlh->nlmsg_type);
-            switch (nlh->nlmsg_type) {
-                case RTM_NEWADDR:
-                case RTM_DELADDR:
-                    ProcessAddrEvent(nlh);
-                    break;
-                case RTM_NEWLINK:
-                case RTM_DELLINK:
-                    ProcessLinkEvent(nlh);
-                    break;
-                default:
-                    break;
-            }
-            nlh = NLMSG_NEXT(nlh, len);
-        }
+    struct nlmsghdr *nlh = NULL;
+    int32_t len = SoftBusSocketRecv(fd, buffer, DEFAULT_NETLINK_RECVBUF, 0);
+    if (len < 0 || len == SOFTBUS_ADAPTER_SOCKET_EINTR || len < (int32_t)sizeof(struct nlmsghdr)) {
+        LNN_LOGE(LNN_BUILDER, "recv netlink socket error");
+        SoftBusFree(buffer);
+        return SOFTBUS_SOCKET_EXCEPTION;
     }
-    SoftBusSocketClose(sockFd);
+    nlh = (struct nlmsghdr *)buffer;
+    while (NLMSG_OK(nlh, len) && nlh->nlmsg_type != NLMSG_DONE) {
+        LNN_LOGD(LNN_BUILDER, "nlmsg_type=%{public}d", nlh->nlmsg_type);
+        switch (nlh->nlmsg_type) {
+            case RTM_NEWADDR:
+            case RTM_DELADDR:
+                ProcessAddrEvent(nlh);
+                break;
+            case RTM_NEWLINK:
+            case RTM_DELLINK:
+                ProcessLinkEvent(nlh);
+                break;
+            default:
+                break;
+        }
+        nlh = NLMSG_NEXT(nlh, len);
+    }
     SoftBusFree(buffer);
-    LNN_LOGI(LNN_BUILDER, "netlink monitor thread exit");
-    return NULL;
+    return SOFTBUS_OK;
+}
+
+static int32_t NetlinkOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
+{
+    (void)module;
+    (void)cfd;
+    (void)clientAddr;
+    LNN_LOGD(LNN_BUILDER, "ignore this event");
+    return SOFTBUS_OK;
 }
 
 int32_t LnnInitNetlinkMonitorImpl(void)
 {
-    SoftBusThread tid;
-    SoftBusThreadAttr threadAttr;
-    SoftBusThreadAttrInit(&threadAttr);
-    threadAttr.taskName = "NetMonitor_Tsk";
-    if (SoftBusThreadCreate(&tid, &threadAttr, NetlinkMonitorThread, NULL) != 0) {
-        LNN_LOGE(LNN_INIT, "create ip change monitor thread failed");
+    SoftbusBaseListener listener = {
+        .onConnectEvent = NetlinkOnConnectEvent,
+        .onDataEvent = NetlinkOnDataEvent,
+    };
+    if (StartBaseClient(NETLINK, &listener) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "listening fail, moudle=%{public}d ", NETLINK);
+        return SOFTBUS_ERR;
+    }
+    int32_t sockFd = CreateNetlinkSocket();
+    if (sockFd < 0) {
+        LNN_LOGE(LNN_BUILDER, "create netlink socket failed");
+        return SOFTBUS_ERR;
+    }
+    g_netlinkFd = sockFd;
+    if (AddTrigger(NETLINK, sockFd, READ_TRIGGER) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "AddTrigger fail.");
+        SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+void LnnDeInitNetlinkMonitorImpl(void)
+{
+    if (g_netlinkFd > 0) {
+        SoftBusSocketClose(g_netlinkFd);
+    }
 }
