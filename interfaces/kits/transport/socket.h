@@ -44,6 +44,7 @@
 #define SOCKET_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "trans_type.h"
 
 #ifdef __cplusplus
@@ -178,6 +179,23 @@ typedef struct {
      * @version 2.0
      */
     void (*OnError)(int32_t socket, int32_t errCode);
+
+    /**
+     * @brief Called when a socket is negotiating.
+     *
+     * This callback is invoked to negotiating the socket, this callback be called on the server side.
+     * The server can determine whether to bind the socket based on the negotiation result.
+     *
+     *
+     * @param socket Indicates the unique socket fd.
+     * @param info Indicates the information of peer socket.
+     * @return If true is returned, it indicates that the negotiation is successful. If this method is not implemented,
+     * the negotiation is successful by default. if false is returned, the negotiation fails and the client is notified
+     * that the connection is rejected.
+     * @since 2.0
+     * @version 2.0
+     */
+    bool (*OnNegotiate)(int32_t socket, PeerSocketInfo info);
 } ISocketListener;
 
 /**

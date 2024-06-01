@@ -31,13 +31,13 @@
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_scenario_manager.h"
+#include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 #include "wifi_direct_manager.h"
-#include "trans_event.h"
 
 #define ID_NOT_USED 0
 #define ID_USED 1
@@ -65,7 +65,7 @@ static int32_t GenerateUdpChannelId(void)
         TRANS_LOGE(TRANS_CTRL, "generate udp channel id lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-    for (uint32_t id = g_idMark + 1; id != g_idMark; id++) {
+    for (uint32_t id = g_idMark + 1, cnt = 0; id != g_idMark && cnt < MAX_UDP_CHANNEL_ID_COUNT; id++, cnt++) {
         id = id % MAX_UDP_CHANNEL_ID_COUNT;
         if (((g_channelIdFlagBitsMap >> id) & ID_USED) == ID_NOT_USED) {
             g_channelIdFlagBitsMap |= (ID_USED << id);
@@ -85,7 +85,7 @@ void ReleaseUdpChannelId(int32_t channelId)
         return;
     }
     uint32_t id = (uint32_t)channelId;
-    g_channelIdFlagBitsMap &= (~(ID_USED << id));
+    g_channelIdFlagBitsMap &= (~(ID_USED << (uint64_t)id));
     SoftBusMutexUnlock(&g_udpNegLock);
 }
 
@@ -190,7 +190,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .linkType = info->connectType,
         .costTime = timediff,
         .errcode = errCode,
-        .osType = info->osType,
+        .osType = (info->osType < 0) ? UNKNOW_OS_TYPE : info->osType,
         .peerUdid = info->peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
@@ -239,6 +239,24 @@ int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount,
     return g_channelCb->OnQosEvent(pkgName, &param);
 }
 
+static int32_t CopyAppInfoFastTransData(UdpChannelInfo *newChannel, const AppInfo *appInfo)
+{
+    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
+        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+        if (fastTransData == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
+            appInfo->fastTransDataSize) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
+            SoftBusFree(fastTransData);
+            return SOFTBUS_MEM_ERR;
+        }
+        newChannel->info.fastTransData = fastTransData;
+    }
+    return SOFTBUS_OK;
+}
+
 static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
 {
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
@@ -252,6 +270,11 @@ static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
         SoftBusFree(newChannel);
         return NULL;
     }
+    if (CopyAppInfoFastTransData(newChannel, info) != SOFTBUS_OK) {
+        SoftBusFree(newChannel);
+        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
+        return NULL;
+    }
     return newChannel;
 }
 
@@ -261,7 +284,7 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo)
     int32_t udpChannelId = GenerateUdpChannelId();
     if (udpChannelId == INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "generate udp channel id failed.");
-        return SOFTBUS_TRANS_UDP_INVALID_ID;
+        return SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID;
     }
     appInfo->myData.channelId = udpChannelId;
     int32_t udpPort = NotifyUdpChannelOpened(appInfo, true);
@@ -458,53 +481,37 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     appInfo->peerHandleId = -1;
     int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
         appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "GetPkgNameBySessionName Failed, ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get pkgName failed, ret=%{public}d", ret);
 
     ret = g_channelCb->GetUidAndPidBySessionName(appInfo->myData.sessionName, &appInfo->myData.uid,
         &appInfo->myData.pid);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "GetUidAndPidBySessionName Failed, ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get uid and pid failed, ret=%{public}d", ret);
 
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
         return SOFTBUS_OK;
     }
 
-    if (SetPeerDeviceIdByAuth(authHandle, appInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get network id by auth id failed.");
-        return SOFTBUS_ERR;
-    }
+    ret = SetPeerDeviceIdByAuth(authHandle, appInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_PEER_PROC_ERR, TRANS_CTRL, "set deviceId failed.");
 
-    char localIp[IP_LEN] = {0};
+    char localIp[IP_LEN] = { 0 };
     if (appInfo->udpConnType == UDP_CONN_TYPE_WIFI) {
         appInfo->routeType = WIFI_STA;
-        int32_t ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, sizeof(localIp));
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get local ip from lnn failed.");
-            return ret;
-        }
+        ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, sizeof(localIp));
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get local strInfo failed.");
     } else {
         appInfo->routeType = WIFI_P2P;
         struct WifiDirectManager *mgr = GetWifiDirectManager();
-        if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
-            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(mgr != NULL && mgr->getLocalIpByRemoteIp != NULL,
+            SOFTBUS_WIFI_DIRECT_INIT_FAILED, TRANS_CTRL, "get mgr obj failed.");
 
         ret = mgr->getLocalIpByRemoteIp(appInfo->peerData.addr, localIp, sizeof(localIp));
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get localIp failed, ret=%{public}d", ret);
     }
-    if (strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s my ip addr failed.");
-        return SOFTBUS_STRCPY_ERR;
-    }
+    ret = strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, TRANS_CTRL, "strcpy_s my ip addr failed.");
 
     return SOFTBUS_OK;
 }
@@ -635,6 +642,7 @@ ERR_EXIT:
         TRANS_LOGE(TRANS_CTRL, "send reply error info failed.");
     }
 }
+
 static void TransOnExchangeUdpInfo(AuthHandle authHandle, int32_t isReply, int64_t seq, const cJSON *msg)
 {
     if (isReply) {
@@ -814,6 +822,9 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     int32_t ret = SOFTBUS_ERR;
     if (linkType == LANE_HML || linkType == LANE_P2P_REUSE) {
         TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", linkType);
+        ret = AuthGetHmlConnInfo(peerUdid, &auth, isMeta);
+    }
+    if (ret != SOFTBUS_OK && (linkType == LANE_P2P || linkType == LANE_P2P_REUSE)) {
         ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK) {
@@ -880,7 +891,7 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
         extra.result = EVENT_STAGE_RESULT_FAILED;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "open auth conn fail");
-        return SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED;
+        return SOFTBUS_TRANS_OPEN_AUTH_CHANNEL_FAILED;
     }
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
@@ -925,7 +936,7 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
     int32_t id = GenerateUdpChannelId();
     if (id == INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "generate udp channel id failed.");
-        return SOFTBUS_TRANS_UDP_INVALID_ID;
+        return SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID;
     }
     *channelId = id;
     appInfo->myData.channelId = id;

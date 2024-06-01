@@ -18,8 +18,11 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "bus_center_manager.h"
 #include "common_list.h"
+#include "lnn_common_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_parameter_utils.h"
 #include "lnn_select_rule.h"
@@ -27,8 +30,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
-#include "lnn_select_rule.h"
-#include "lnn_common_utils.h"
+#include "wifi_direct_manager.h"
 
 #define INVALID_LINK (-1)
 #define MESH_MAGIC_NUMBER 0x5A5A5A5A
@@ -56,6 +58,7 @@ static void GetMsgDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
     linkList[(*listNum)++] = LANE_BLE;
     linkList[(*listNum)++] = LANE_BR;
+    linkList[(*listNum)++] = LANE_COC_DIRECT;
 }
 
 static void GetBytesDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
@@ -64,6 +67,7 @@ static void GetBytesDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
     linkList[(*listNum)++] = LANE_BLE;
     linkList[(*listNum)++] = LANE_BR;
+    linkList[(*listNum)++] = LANE_COC_DIRECT;
 }
 
 static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType *optLink, uint32_t *linkNum)
@@ -89,7 +93,7 @@ static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType *optLink
             break;
         default:
             LNN_LOGE(LNN_LANE, "lane type is not supported. type=%{public}d", transType);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
     }
     *linkNum = 0;
     if (memcpy_s(optLink, optLinkMaxNum * sizeof(LaneLinkType), defaultLink, sizeof(defaultLink)) != EOK) {
@@ -215,7 +219,7 @@ static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *r
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LANE, "device not online, cancel selectLane, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     return SOFTBUS_OK;
 }
@@ -248,10 +252,9 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
 {
     int32_t resListScore[LANE_LINK_TYPE_BUTT];
     (void)memset_s(resListScore, sizeof(resListScore), INVALID_LINK, sizeof(resListScore));
-    int32_t ret = GetListScore(networkId, request->expectedBw, resList, resListScore, resNum);
-    if (ret != SOFTBUS_OK) {
+    if (GetListScore(networkId, request->expectedBw, resList, resListScore, resNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get linklist score fail");
-        return ret;
+        return SOFTBUS_LANE_GET_LINK_SCORE_ERR;
     }
     if ((resListScore[LANE_WLAN_2P4G] == INVALID_LINK && resListScore[LANE_WLAN_5G] == INVALID_LINK) ||
         (resListScore[LANE_P2P] == INVALID_LINK && resListScore[LANE_HML] == INVALID_LINK)) {
@@ -318,7 +321,7 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList, uint32_t *listNum)
 {
     if (PreProcLaneSelect(networkId, request, recommendList, listNum) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
@@ -336,15 +339,15 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     if (resNum == 0) {
         LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         *listNum = 0;
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
     if (!HmlIsExist(resList, resNum) && LaneAddHml(networkId, resList, &resNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "LaneAddHml fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
     if (AdjustLanePriority(networkId, request, resList, resNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
 
     recommendList->linkTypeNum = resNum;
@@ -377,7 +380,7 @@ static int32_t AddRecommendLinkType(LanePreferredLinkList *setRecommendLinkList,
 {
     if ((*linkNum) < 0 || (*linkNum) >= LANE_LINK_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "enum out of bounds");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     setRecommendLinkList->linkType[(*linkNum)++] = linkType;
     setRecommendLinkList->linkTypeNum = *linkNum;
@@ -417,7 +420,7 @@ int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
         LNN_LOGI(LNN_LANE, "ble_only = on");
         return SOFTBUS_OK;
     } else {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LANE_SELECT_FAIL;
     }
 }
 
@@ -482,14 +485,42 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     return SOFTBUS_OK;
 }
 
-int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
-    LanePreferredLinkList *recommendList)
+static bool IsAuthReuseWifiDirect(const char *networkId, LaneLinkType linkType)
+{
+    char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get peer udid fail");
+        return false;
+    }
+    LaneResource resoureItem;
+    if (memset_s(&resoureItem, sizeof(LaneResource), 0, sizeof(LaneResource)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memset_s LaneResource fail");
+        return false;
+    }
+    if (linkType == LANE_HML && FindLaneResourceByLinkType(udid, LANE_HML, &resoureItem) == SOFTBUS_OK &&
+        !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_HML)) {
+        LNN_LOGI(LNN_LANE, "can use HML");
+        return true;
+    } else if (linkType == LANE_P2P && FindLaneResourceByLinkType(udid, LANE_P2P, &resoureItem) == SOFTBUS_OK &&
+        !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_P2P)) {
+        LNN_LOGI(LNN_LANE, "can use P2P");
+        return true;
+    } else {
+        return false;
+    }
+}
+
+int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request, LanePreferredLinkList *recommendList)
 {
     if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
     recommendList->linkTypeNum = 0;
     for (uint32_t i = 0; i < request->linkTypeNum; ++i) {
+        if ((request->linkType[i] == LANE_HML || request->linkType[i] == LANE_P2P) &&
+            !IsAuthReuseWifiDirect(networkId, request->linkType[i])) {
+            continue;
+        }
         if (IsValidLane(networkId, request->linkType[i])) {
             recommendList->linkType[recommendList->linkTypeNum] = request->linkType[i];
             recommendList->linkTypeNum++;

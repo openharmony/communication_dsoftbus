@@ -46,6 +46,7 @@ public:
     virtual uint64_t LnnGetSupportedProtocols(const NodeInfo *info) = 0;
     virtual int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
     virtual bool LnnHasCapability(uint32_t capability, NetCapability type) = 0;
     virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type) = 0;
     virtual int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type) = 0;
@@ -116,6 +117,7 @@ public:
     MOCK_METHOD1(LnnGetSupportedProtocols, uint64_t (const NodeInfo *));
     MOCK_METHOD2(LnnConvertDeviceTypeToId, int32_t (const char *, uint16_t *));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t *));
+    MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey, uint32_t *));
     MOCK_METHOD2(LnnHasCapability, bool (uint32_t, NetCapability));
     MOCK_METHOD2(LnnSetNetCapability, int32_t (uint32_t *, NetCapability));
     MOCK_METHOD2(LnnClearNetCapability, int32_t (uint32_t *, NetCapability));

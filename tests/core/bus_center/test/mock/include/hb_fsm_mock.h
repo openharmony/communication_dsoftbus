@@ -51,7 +51,7 @@ public:
     virtual int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *type) = 0;
     virtual int32_t LnnGetHbStrategyManager(
         LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType) = 0;
-    virtual int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param) = 0;
+    virtual int32_t LnnHbMediumMgrSetParam(void *param) = 0;
     virtual int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type) = 0;
     virtual int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
@@ -84,7 +84,7 @@ public:
     MOCK_METHOD1(LnnHbMediumMgrSendEnd, int32_t(LnnHeartbeatSendEndData *));
     MOCK_METHOD3(
         LnnGetHbStrategyManager, int32_t(LnnHeartbeatStrategyManager *, LnnHeartbeatType, LnnHeartbeatStrategyType));
-    MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(const LnnHeartbeatMediumParam *));
+    MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(void *));
     MOCK_METHOD1(LnnHbMediumMgrUpdateSendInfo, int32_t(LnnHeartbeatUpdateInfoType));
     MOCK_METHOD2(LnnStartScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnStopScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));

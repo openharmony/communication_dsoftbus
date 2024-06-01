@@ -106,6 +106,11 @@ typedef struct {
     void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
 } LaneLinkCb;
 
+inline int32_t ErrCodeFilter(const int32_t errCode, const int32_t exceptErrCode)
+{
+    return ((errCode > SOFTBUS_PUBLIC_ERR_BASE) && (errCode < SOFTBUS_TRANS_ERR_BASE)) ? exceptErrCode : errCode;
+}
+
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
@@ -122,7 +127,7 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
 int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide);
 int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide);
 int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource);
-uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
+uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
 int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 
 #ifdef __cplusplus

@@ -33,10 +33,18 @@
 #define HML_IP_PREFIX "172.30."
 #define NETWORK_ID_LEN 7
 
+static void FreeFastTransData(AppInfo *appInfo)
+{
+    if (appInfo != NULL && appInfo->fastTransData != NULL) {
+        SoftBusFree((void *)(appInfo->fastTransData));
+    }
+}
+
 static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, SessionConn *newConn,
     ListenerModule module)
 {
     if (TransSrvAddDataBufNode(newchannelId, fd) != SOFTBUS_OK) {
+        FreeFastTransData(&(newConn->appInfo));
         SoftBusFree(newConn);
         TRANS_LOGE(TRANS_CTRL, "OpenTcpDirectChannel create databuf fail");
         return SOFTBUS_MALLOC_ERR;
@@ -44,6 +52,7 @@ static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, Sessio
 
     if (TransTdcAddSessionConn(newConn) != SOFTBUS_OK) {
         TransSrvDelDataBufNode(newchannelId);
+        FreeFastTransData(&(newConn->appInfo));
         SoftBusFree(newConn);
         return SOFTBUS_TRANS_ADD_SESSION_CONN_FAILED;
     }
@@ -84,8 +93,25 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
     return module;
 }
 
-int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
-    int32_t *channelId)
+static int32_t CopyAppInfoFastTransData(SessionConn *conn, const AppInfo *appInfo)
+{
+    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
+        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+        if (fastTransData == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
+            appInfo->fastTransDataSize) != EOK) {
+            SoftBusFree(fastTransData);
+            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        conn->appInfo.fastTransData = fastTransData;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
@@ -109,14 +135,24 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     TRANS_LOGI(TRANS_CTRL,
         "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(newConn->channelId + ID_OFFSET));
     int32_t newchannelId = newConn->channelId;
-    (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
-
+    if (memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy appInfo fail");
+        SoftBusFree(newConn);
+        return SOFTBUS_MEM_ERR;
+    }
+    int32_t ret = CopyAppInfoFastTransData(newConn, appInfo);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(newConn);
+        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
+        return ret;
+    }
     AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &newConn->authHandle);
     if ((newConn->authHandle.authId == AUTH_INVALID_ID) && (connInfo->type == CONNECT_P2P_REUSE)) {
         AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &newConn->authHandle);
     }
 
     if (newConn->authHandle.authId == AUTH_INVALID_ID) {
+        FreeFastTransData(&(newConn->appInfo));
         SoftBusFree(newConn);
         TRANS_LOGE(TRANS_CTRL, "get authId fail");
         return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
@@ -124,13 +160,14 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 
     int32_t fd = ConnOpenClientSocket(connInfo, BIND_ADDR_ALL, true);
     if (fd < 0) {
+        FreeFastTransData(&(newConn->appInfo));
         SoftBusFree(newConn);
         TRANS_LOGE(TRANS_CTRL, "connect fail");
         return fd;
     }
     newConn->appInfo.fd = fd;
 
-    int32_t ret = AddTcpConnAndSessionInfo(newchannelId, fd, newConn, module);
+    ret = AddTcpConnAndSessionInfo(newchannelId, fd, newConn, module);
     if (ret != SOFTBUS_OK) {
         return ret;
     }

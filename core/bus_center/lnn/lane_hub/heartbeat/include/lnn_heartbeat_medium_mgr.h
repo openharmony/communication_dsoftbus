@@ -84,7 +84,7 @@ typedef struct {
     void (*deinit)(void);
 } LnnHeartbeatMediumMgr;
 
-int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param);
+int32_t LnnHbMediumMgrSetParam(void *param);
 int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData);
 int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *custData);
 int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type);

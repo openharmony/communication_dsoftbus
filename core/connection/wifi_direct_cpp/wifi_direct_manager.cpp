@@ -124,17 +124,17 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     int32_t ret = OHOS::SoftBus::WifiDirectRoleOption::GetInstance().GetExpectedRole(
         info->remoteNetworkId, info->connectType, info->expectApiRole, info->isStrict);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
-    CONN_LOGI(CONN_WIFI_DIRECT,
-        "requestId=%{public}d, pid=%{public}d, type=%{public}d, expectRole=0x%{public}x",
-        info->requestId,
-        info->pid,
-        info->connectType,
-        info->expectApiRole);
     ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
     extra.errcode = ret;
     extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     return ret;
+}
+
+static int32_t CancelConnectDevice(const struct WifiDirectConnectInfo *info)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
+    return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().CancelConnectDevice(*info);
 }
 
 static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback)
@@ -154,6 +154,15 @@ static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirect
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
     return SOFTBUS_OK;
+}
+
+static void RefreshRelationShip(const char *remoteUuid, const char *remoteMac)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s, remoteMac=%{public}s",
+              OHOS::SoftBus::WifiDirectAnonymizeDeviceId(remoteUuid).c_str(),
+              OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str());
+    OHOS::SoftBus::LinkManager::GetInstance().RefreshRelationShip(remoteUuid, remoteMac);
+    OHOS::SoftBus::LinkManager::GetInstance().Dump();
 }
 
 static bool IsDeviceOnline(const char *remoteMac)
@@ -206,6 +215,13 @@ static int32_t GetLocalIpByRemoteIpOnce(const char *remoteIp, char *localIp, int
             }
             return true;
         }
+        if (innerLink.GetRemoteIpv6() == remoteIp) {
+            found = true;
+            if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv6().c_str()) != EOK) {
+                found = false;
+            }
+            return true;
+        }
         return false;
     });
 
@@ -241,6 +257,13 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     bool found = false;
     OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
         if (innerLink.GetRemoteIpv4() == remoteIp) {
+            found = true;
+            if (strcpy_s(uuid, uuidSize, innerLink.GetRemoteDeviceId().c_str()) != EOK) {
+                found = false;
+            }
+            return true;
+        }
+        if (innerLink.GetRemoteIpv6() == remoteIp) {
             found = true;
             if (strcpy_s(uuid, uuidSize, innerLink.GetRemoteDeviceId().c_str()) != EOK) {
                 found = false;
@@ -300,12 +323,12 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
 }
 
 static void NotifyConnectedForSink(
-    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type, int channelId)
 {
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onConnectedForSink != nullptr) {
-            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type, channelId);
         }
     }
 }
@@ -321,9 +344,9 @@ static void NotifyDisconnectedForSink(
     }
 }
 
-bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
+static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != NULL, true, CONN_WIFI_DIRECT, "remote networkid is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, true, CONN_WIFI_DIRECT, "remote networkid is null");
     auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
     CONN_CHECK_AND_RETURN_RET_LOGE(!remoteUuid.empty(), true, CONN_WIFI_DIRECT, "get remote uuid failed");
 
@@ -367,11 +390,14 @@ static struct WifiDirectManager g_manager = {
     .allocateListenerModuleId = AllocateListenerModuleId,
     .freeListenerModuleId = FreeListenerModuleId,
     .connectDevice = ConnectDevice,
+    .cancelConnectDevice = CancelConnectDevice,
     .disconnectDevice = DisconnectDevice,
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
 
     .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
+    .refreshRelationShip = RefreshRelationShip,
+
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,

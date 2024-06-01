@@ -26,20 +26,20 @@ class WifiDirectCommand;
 class WifiDirectProcessor {
 public:
     explicit WifiDirectProcessor(const std::string &remoteUuid)
-        : remoteDeviceId_(remoteUuid), acceptNegotiateData_(true) {};
+        : remoteDeviceId_(remoteUuid), acceptNegotiateData_(true) {}
     virtual ~WifiDirectProcessor() = default;
 
     void BindExecutor(WifiDirectExecutor *executor)
     {
         executor_ = executor;
-    };
+    }
 
     virtual void Run() = 0;
 
     void SetRejectNegotiateData()
     {
         acceptNegotiateData_ = false;
-    };
+    }
 
     bool CanAcceptNegotiateData(WifiDirectCommand &command)
     {
@@ -47,7 +47,7 @@ public:
             return false;
         }
         return CanAcceptNegotiateDataAtState(command);
-    };
+    }
 
     virtual bool CanAcceptNegotiateDataAtState(WifiDirectCommand &command) = 0;
     virtual void HandleCommandAfterTerminate(WifiDirectCommand &command) = 0;

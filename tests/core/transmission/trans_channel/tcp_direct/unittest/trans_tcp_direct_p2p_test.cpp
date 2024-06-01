@@ -233,14 +233,16 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, OpenAuthConnTest001, TestSize.Level1)
 {
     int32_t reqId = 1;
-    int32_t ret = OpenAuthConn(nullptr, reqId, true);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ConnectType type = CONNECT_TCP;
 
-    ret = OpenAuthConn(nullptr, reqId, false);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int32_t ret = OpenAuthConn(nullptr, reqId, true, type);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 
-    ret = OpenAuthConn(g_udid, reqId, true);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = OpenAuthConn(nullptr, reqId, false, type);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
+
+    ret = OpenAuthConn(g_udid, reqId, true, type);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 }
 
 /**
@@ -331,12 +333,13 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
     uint32_t requestId = 1;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     bool isMeta = 1;
+    ConnectType type = CONNECT_TCP;
 
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
     OnAuthConnOpenFailed(requestId, reason);
     OnAuthConnOpened(requestId, authHandle);
-    ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, isMeta);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, isMeta, type);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -384,10 +387,11 @@ HWTEST_F(TransTcpDirectP2pTest, OpenNewAuthConn004, TestSize.Level1)
     }
     int32_t ret;
     int32_t newChannelId = 1;
+    ConnectType type = CONNECT_P2P;
 
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
-    ret = OpenNewAuthConn(appInfo, conn, newChannelId, conn->requestId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = OpenNewAuthConn(appInfo, conn, newChannelId, type);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -414,13 +418,14 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
         return ;
     }
     int32_t ret;
+    ConnectType type = CONNECT_P2P;
 
     conn->authHandle.authId = AUTH_INVALID_ID;
-    ret = StartVerifyP2pInfo(appInfo, conn);
+    ret = StartVerifyP2pInfo(appInfo, conn, type);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     conn->authHandle.authId = 1;
-    ret = StartVerifyP2pInfo(appInfo, conn);
+    ret = StartVerifyP2pInfo(appInfo, conn, type);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     SoftBusFree(appInfo);
@@ -495,8 +500,9 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfoTest001, TestSize.Level1)
         appInfo = nullptr;
     }
     EXPECT_NE(conn, NULL);
+    ConnectType type = CONNECT_P2P;
 
-    int32_t ret = StartVerifyP2pInfo(appInfo, conn);
+    int32_t ret = StartVerifyP2pInfo(appInfo, conn, type);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(appInfo);
     appInfo = nullptr;

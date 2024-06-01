@@ -43,6 +43,7 @@ template<> InfoContainer<LinkInfoKey>::KeyTypeTable InfoContainer<LinkInfoKey>::
     { LinkInfoKey::REMOTE_BASE_MAC, Serializable::ValueType::STRING },
     { LinkInfoKey::LOCAL_IPV6, Serializable::ValueType::STRING },
     { LinkInfoKey::REMOTE_IPV6, Serializable::ValueType::STRING },
+    { LinkInfoKey::CUSTOM_PORT, Serializable::ValueType::INT },
 };
 
 LinkInfo::LinkInfo(const std::string &localInterface, const std::string &remoteInterface, LinkMode localMode,
@@ -72,7 +73,7 @@ int LinkInfo::Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_t> &ou
                 break;
             case Serializable::ValueType::STRING: {
                 const auto &data = std::any_cast<const std::string &>(value);
-                protocol.Write(static_cast<int>(key), type, (uint8_t *)data.c_str(), data.length() + 1);
+                protocol.Write(static_cast<int>(key), type, (uint8_t *)data.c_str(), data.length());
             }
                 break;
             case Serializable::ValueType::IPV4_INFO: {
@@ -107,11 +108,9 @@ int LinkInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint
             case Serializable::ValueType::INT:
                 Set(LinkInfoKey(key), *(int *)(data));
                 break;
-            case Serializable::ValueType::STRING: {
-                std::string str(std::string(reinterpret_cast<const char *>(data)), 0, size);
-                Set(LinkInfoKey(key), str);
+            case Serializable::ValueType::STRING:
+                Set(LinkInfoKey(key), std::string(reinterpret_cast<const char *>(data), size));
                 break;
-            }
             case Serializable::ValueType::IPV4_INFO: {
                 Ipv4Info ipv4Info;
                 ipv4Info.Unmarshalling(data, size);
@@ -343,7 +342,7 @@ void LinkInfo::SetLocalIpv6(const std::string &value)
     Set(LinkInfoKey::LOCAL_IPV6, value);
 }
 
-std::string LinkInfo::GetLocalIpv6()
+std::string LinkInfo::GetLocalIpv6() const
 {
     return Get(LinkInfoKey::LOCAL_IPV6, std::string());
 }
@@ -353,8 +352,18 @@ void LinkInfo::SetRemoteIpv6(const std::string &value)
     Set(LinkInfoKey::REMOTE_IPV6, value);
 }
 
-std::string LinkInfo::GetRemoteIpv6()
+std::string LinkInfo::GetRemoteIpv6() const
 {
     return Get(LinkInfoKey::REMOTE_IPV6, std::string());
+}
+
+void LinkInfo::SetCustomPort(int value)
+{
+    Set(LinkInfoKey::CUSTOM_PORT, value);
+}
+
+int LinkInfo::GetCustomPort()
+{
+    return Get(LinkInfoKey::CUSTOM_PORT, 0);
 }
 }

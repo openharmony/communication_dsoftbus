@@ -73,6 +73,7 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
         .lnnType = 11,
         .onlineNum = 12,
         .peerDeviceAbility = 13,
+        .onlineType = 14,
         .peerDeviceInfo = "testPeerDeviceInfo",
         .peerIp = "10.11.12.1",
         .peerBrMac = "dd:15:bc:b9:f2:04",
@@ -82,6 +83,8 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
         .peerUdid = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerDeviceType = "testPeerDeviceType",
+        .localUdidHash = "8f37c149495d2a45",
+        .peerUdidHash = "9ada389cd0898797",
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
     };
@@ -117,6 +120,7 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
         .lnnType = -11,
         .onlineNum = -12,
         .peerDeviceAbility = -13,
+        .onlineType = 0,
         .peerDeviceInfo = "",
         .peerIp = "",
         .peerBrMac = "",
@@ -126,6 +130,8 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
         .peerUdid = "",
         .peerNetworkId = "",
         .peerDeviceType = "",
+        .localUdidHash = "",
+        .peerUdidHash = "",
         .callerPkg = "\0",
         .calleePkg = nullptr,
     };

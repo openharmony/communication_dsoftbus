@@ -54,10 +54,11 @@
         }                                                       \
     } while (false)                                             \
 
-#define JUDG_CNT 1
 using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
+constexpr int32_t JUDG_CNT = 1;
+
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
@@ -657,10 +658,8 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
 {
     COMM_LOGD(COMM_SVC, "enter");
     int32_t retReply;
-    SessionParam param;
-    SessionAttribute getAttr;
-    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
-    (void)memset_s(&getAttr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    SessionParam param { 0 };
+    SessionAttribute getAttr { 0 };
 
     TransSerializer transSerializer;
     int64_t timeStart = 0;
@@ -669,10 +668,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     ReadSessionInfo(data, param);
     ReadSessionAttrs(data, &getAttr);
     param.attr = &getAttr;
-    if (!ReadQosInfo(data, param)) {
-        COMM_LOGE(COMM_SVC, "failed to read qos info");
-        return SOFTBUS_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(ReadQosInfo(data, param), SOFTBUS_IPC_ERR, COMM_SVC, "failed to read qos info");
 #ifdef SUPPORT_BUNDLENAME
     pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
 #endif
@@ -705,10 +701,8 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
 
 EXIT:
     transSerializer.ret = retReply;
-    if (!reply.WriteRawData(&transSerializer, sizeof(TransSerializer))) {
-        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed!");
-        return SOFTBUS_ERR;
-    }
+    bool result = reply.WriteRawData(&transSerializer, sizeof(TransSerializer));
+    COMM_CHECK_AND_RETURN_RET_LOGE(result, SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
@@ -870,11 +864,11 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "SendMessage dataInfo len failed!");
         return SOFTBUS_ERR;
     }
-    void *dataInfo = const_cast<void *>(reinterpret_cast<const void *>(data.ReadRawData(len)));
-    if (dataInfo == nullptr) {
-        COMM_LOGE(COMM_SVC, "SendMessage read dataInfo failed!");
-        return SOFTBUS_ERR;
-    }
+
+    auto rawData = data.ReadRawData(len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read rawData failed!");
+    void *dataInfo = const_cast<void *>(rawData);
+
     int32_t msgType;
     if (!data.ReadInt32(msgType)) {
         COMM_LOGE(COMM_SVC, "SendMessage message type failed!");

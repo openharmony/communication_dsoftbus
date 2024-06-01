@@ -48,6 +48,7 @@ enum class InnerLinKey {
     LISTENER_MODULE_ID = 18,
     LOCAL_IPV6 = 19,
     REMOTE_IPV6 = 20,
+    HAS_PTK = 21,
 };
 
 struct LinkIdStruct {
@@ -133,7 +134,10 @@ public:
     std::string GetRemoteIpv6() const;
     void SetRemoteIpv6(const std::string &value);
 
-    void GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link);
+    bool HasPtk() const;
+    void SetPtk(bool value);
+
+    void GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4);
     void RemoveId(int linkId);
     bool IsContainId(int linkId) const;
 

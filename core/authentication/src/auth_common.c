@@ -253,6 +253,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
 {
     CHECK_NULL_PTR_RETURN_VALUE(info1, false);
     CHECK_NULL_PTR_RETURN_VALUE(info2, false);
+    bool isLinkble = false;
     switch (info1->type) {
         case AUTH_LINK_TYPE_WIFI:
             if (info2->type == AUTH_LINK_TYPE_WIFI && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
@@ -266,10 +267,11 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
             }
             break;
         case AUTH_LINK_TYPE_BLE:
-            if (info2->type == AUTH_LINK_TYPE_BLE &&
+            isLinkble = (info2->type == AUTH_LINK_TYPE_BLE &&
                 (memcmp(info1->info.bleInfo.deviceIdHash, info2->info.bleInfo.deviceIdHash,
                 (cmpShortHash ? SHORT_HASH_LEN : UDID_HASH_LEN)) == 0 ||
-                StrCmpIgnoreCase(info1->info.bleInfo.bleMac, info2->info.bleInfo.bleMac) == 0)) {
+                StrCmpIgnoreCase(info1->info.bleInfo.bleMac, info2->info.bleInfo.bleMac) == 0));
+            if (isLinkble) {
                 return true;
             }
             break;

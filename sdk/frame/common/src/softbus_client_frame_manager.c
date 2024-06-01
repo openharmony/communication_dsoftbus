@@ -214,17 +214,17 @@ ERR_EXIT:
 
 int32_t InitSoftBus(const char *pkgName)
 {
-    CHECK_AND_RETURN_RET_LOG_INNER(IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1),
-        SOFTBUS_INVALID_PKGNAME, COMM_LOGE, COMM_SDK, "init softbus sdk fail.Package name is empty or length exceeds");
+    COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1),
+        SOFTBUS_INVALID_PKGNAME, COMM_SDK, "init softbus sdk fail.Package name is empty or length exceeds");
 
-    CHECK_AND_RETURN_RET_LOG_INNER(SoftBusMutexInit(
-        &g_pkgNameLock, NULL) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_LOGE, COMM_SDK, "lock init pkgName failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(
+        &g_pkgNameLock, NULL) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_SDK, "lock init pkgName failed");
 
-    CHECK_AND_RETURN_RET_LOG_INNER((g_isInited || SoftBusMutexInit(
-        &g_isInitedLock, NULL) == SOFTBUS_OK), SOFTBUS_LOCK_ERR, COMM_LOGE, COMM_SDK, "lock init failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE((g_isInited || SoftBusMutexInit(
+        &g_isInitedLock, NULL) == SOFTBUS_OK), SOFTBUS_LOCK_ERR, COMM_SDK, "lock init failed");
 
-    CHECK_AND_RETURN_RET_LOG_INNER(
-        SoftBusMutexLock(&g_isInitedLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_LOGE, COMM_SDK, "lock failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_isInitedLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_SDK, "lock failed");
 
     if (g_isInited) {
         (void)ClientRegisterPkgName(pkgName);

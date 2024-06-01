@@ -707,6 +707,44 @@ void BleOnClientFailed(uint32_t connectionId, int32_t error)
     g_connectionListener.onConnectFailed(connectionId, error);
 }
 
+static void HandleBasicInfo(ConnBleConnection *connection, uint8_t *data, uint32_t dataLen,
+    const BleUnifyInterface *interface)
+{
+    int32_t ret = ParseBasicInfo(connection, data, dataLen);
+    SoftBusFree(data);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "parse basic info failed, connId=%{public}u, side=%{public}d, handle=%{public}d, "
+            "err=%{public}d", connection->connectionId, connection->side, connection->underlayerHandle, ret);
+        if (connection->side == CONN_SIDE_CLIENT) {
+            g_connectionListener.onConnectFailed(connection->connectionId, ret);
+        } else {
+            interface->bleServerDisconnect(connection);
+        }
+        return;
+    }
+    ConnRemoveMsgFromLooper(
+        &g_bleConnectionAsyncHandler, MSG_CONNECTION_EXCHANGE_BASIC_INFO_TIMEOUT, connection->connectionId, 0, NULL);
+    if (connection->side == CONN_SIDE_SERVER) {
+        ret = SendBasicInfo(connection);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "send server side basic info failed, connId=%{public}u, handle=%{public}d, "
+                "err=%{public}d", connection->connectionId, connection->underlayerHandle, ret);
+            interface->bleServerDisconnect(connection);
+            return;
+        }
+        ret = interface->bleServerConnect(connection);
+        CONN_LOGI(CONN_BLE, "server side finish exchange basic info, connId=%{public}u, handle=%{public}d, "
+            "serverConnectStatus=%{public}d", connection->connectionId, connection->underlayerHandle, ret);
+        ConnBleRefreshIdleTimeout(connection);
+        g_connectionListener.onServerAccepted(connection->connectionId);
+    } else {
+        CONN_LOGI(CONN_BLE, "client side finish exchange basic info, connId=%{public}u, handle=%{public}d",
+            connection->connectionId, connection->underlayerHandle);
+        ConnBleRefreshIdleTimeout(connection);
+        g_connectionListener.onConnected(connection->connectionId);
+    }
+}
+
 // Memory Management Conventions: MUST free data if dispatch process is intercepted,
 // otherwise it is responsibity of uplayer to free data
 void BleOnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *data, uint32_t dataLen)
@@ -740,7 +778,6 @@ void BleOnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t
             break;
         }
         enum ConnBleConnectionState state = connection->state;
-        int32_t underlayerHandle = connection->underlayerHandle;
         (void)SoftBusMutexUnlock(&connection->lock);
         if (state != BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO) {
             ConnBleRefreshIdleTimeout(connection);
@@ -749,44 +786,7 @@ void BleOnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t
             break;
         }
 
-        status = ParseBasicInfo(connection, data, dataLen);
-        SoftBusFree(data);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE,
-                "parse basic info failed, connId=%{public}u, side=%{public}d, handle=%{public}d, err=%{public}d",
-                connectionId, connection->side, underlayerHandle, status);
-            if (connection->side == CONN_SIDE_CLIENT) {
-                g_connectionListener.onConnectFailed(connection->connectionId, status);
-            } else {
-                interface->bleServerDisconnect(connection);
-            }
-            break;
-        }
-        ConnRemoveMsgFromLooper(
-            &g_bleConnectionAsyncHandler, MSG_CONNECTION_EXCHANGE_BASIC_INFO_TIMEOUT, connectionId, 0, NULL);
-        if (connection->side == CONN_SIDE_SERVER) {
-            status = SendBasicInfo(connection);
-            if (status != SOFTBUS_OK) {
-                CONN_LOGE(CONN_BLE,
-                    "send server side basic info failed, connId=%{public}u, handle=%{public}d, err=%{public}d",
-                    connectionId, underlayerHandle, status);
-                interface->bleServerDisconnect(connection);
-                break;
-            }
-            status = interface->bleServerConnect(connection);
-            CONN_LOGI(CONN_BLE,
-                "server side finish exchange basic info, "
-                "connId=%{public}u, handle=%{public}d, serverConnectStatus=%{public}d",
-                connectionId, underlayerHandle, status);
-            ConnBleRefreshIdleTimeout(connection);
-            g_connectionListener.onServerAccepted(connection->connectionId);
-        } else {
-            CONN_LOGI(CONN_BLE,
-                "client side finish exchange basic info, connId=%{public}u, handle=%{public}d",
-                connectionId, underlayerHandle);
-            ConnBleRefreshIdleTimeout(connection);
-            g_connectionListener.onConnected(connection->connectionId);
-        }
+        HandleBasicInfo(connection, data, dataLen, interface);
     } while (false);
     ConnBleReturnConnection(&connection);
 }

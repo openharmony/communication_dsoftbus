@@ -15,19 +15,20 @@
 #ifndef WIFI_DIRECT_PROTOCOL_FACTORY_H
 #define WIFI_DIRECT_PROTOCOL_FACTORY_H
 
+#include <memory>
 #include "json_protocol.h"
 #include "tlv_protocol.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectProtocolFactory {
 public:
-    static WifiDirectProtocol *CreateProtocol(ProtocolType type)
+    static std::shared_ptr<WifiDirectProtocol> CreateProtocol(ProtocolType type)
     {
         switch (type) {
             case ProtocolType::JSON:
-                return new (std::nothrow) JsonProtocol();
+                return std::make_shared<JsonProtocol>();
             case ProtocolType::TLV:
-                return new (std::nothrow) TlvProtocol();
+                return std::make_shared<TlvProtocol>();
             default:
                 return nullptr;
         }

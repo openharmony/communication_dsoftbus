@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <string>
-#include "processor/wifi_direct_processor.h"
 
 namespace OHOS::SoftBus {
 enum class CommandType {
