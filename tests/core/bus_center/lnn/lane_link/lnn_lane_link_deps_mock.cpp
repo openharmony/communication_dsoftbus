@@ -81,5 +81,10 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
 {
     return GetLaneLinkDepsInterface()->FindLaneResourceByLinkType(peerUdid, type, resource);
 }
+
+int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo, const LaneLinkCb *callback)
+{
+    return GetLaneLinkDepsInterface()->LaneDetectReliability(laneReqId, linkInfo, callback);
+}
 }
 } // namespace OHOS

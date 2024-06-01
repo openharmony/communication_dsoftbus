@@ -306,18 +306,18 @@ static int32_t LaneDetectOnDataEvent(ListenerModule module, int32_t events, int3
     return SOFTBUS_OK;
 }
 
-int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *laneInfo, const LaneLinkCb *callback)
+int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo, const LaneLinkCb *callback)
 {
-    if (laneReqId == INVALID_LANE_REQ_ID || laneInfo == NULL || callback == NULL) {
+    if (laneReqId == INVALID_LANE_REQ_ID || linkInfo == NULL || callback == NULL) {
         LNN_LOGE(LNN_LANE, "invalid input parameter");
         return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGI(LNN_LANE, "lane detect start, linktype=%{public}d, laneReqId=%{public}u", laneInfo->type, laneReqId);
+    LNN_LOGI(LNN_LANE, "lane detect start, linktype=%{public}d, laneReqId=%{public}u", linkInfo->type, laneReqId);
     int32_t result = SOFTBUS_LANE_DETECT_FAIL;
-    switch (laneInfo->type) {
+    switch (linkInfo->type) {
         case LANE_WLAN_2P4G:
         case LANE_WLAN_5G:
-            result = WlanDetectReliability(laneReqId, laneInfo, callback);
+            result = WlanDetectReliability(laneReqId, linkInfo, callback);
             break;
         default:
             break;
