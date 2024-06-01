@@ -48,7 +48,8 @@ enum BrCtlMessageMethod {
 
 typedef struct {
     SoftBusMutex lock;
-    bool isStartSendLp;
+    bool messagePosted;
+    bool sendTaskRunning;
 } StartBrSendLPInfo;
 
 
