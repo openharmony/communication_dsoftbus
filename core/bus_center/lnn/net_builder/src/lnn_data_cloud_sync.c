@@ -767,9 +767,8 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
     char *anonyTrueValue = NULL;
     Anonymize(trueValue, &anonyTrueValue);
     LNN_LOGI(LNN_BUILDER,
-        "deviceUdid=%{public}s, fieldName=%{public}s update to %{public}s success, stateVersion=%{public}d, "
-        "time=%{public}s",
-        anonyDeviceUdid, fieldName, anonyTrueValue, stateVersion, splitValue[SPLIT_VALUE_NUM - 1]);
+        "deviceUdid=%{public}s, fieldName=%{public}s update to %{public}s success, stateVersion=%{public}d",
+        anonyDeviceUdid, fieldName, anonyTrueValue, stateVersion);
     AnonymizeFree(anonyDeviceUdid);
     AnonymizeFree(anonyTrueValue);
     (void)memset_s(trueValue, strlen(trueValue), 0, strlen(trueValue));
@@ -947,7 +946,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGE(LNN_BUILDER, "fail:data sync to DB fail, errorcode=%{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success. stateVersion=%{public}d, time=%{public}ld",
+    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success. stateVersion=%{public}d, time=%{public}lld",
         key, localCaheInfo.stateVersion, nowTime);
 
     ret = LnnCloudSync(dbId);
