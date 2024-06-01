@@ -47,6 +47,7 @@ bool CheckDeviceInGroupByType(const char *udid, const char *uuid, HichainGroup g
 bool CheckHasRelatedGroupInfo(HichainGroup groupType);
 void DestroyDeviceAuth(void);
 bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint);
+bool IsSameAccountGroupDevice(const char *deviceId);
 void CancelRequest(int64_t authReqId, const char *appId);
 
 #ifdef __cplusplus
