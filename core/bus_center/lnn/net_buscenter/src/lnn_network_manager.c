@@ -686,6 +686,13 @@ static void RetryCheckOOBEState(void *para)
     }
 }
 
+void LnnSetUnlockState(void)
+{
+    if (IsActiveOsAccountUnlocked()) {
+        g_isUnLock = true;
+    }
+}
+
 int32_t LnnInitNetworkManagerDelay(void)
 {
     uint32_t i;
@@ -694,10 +701,6 @@ int32_t LnnInitNetworkManagerDelay(void)
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get local udid error");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
-    }
-    if (GetActiveOsAccountIds() == SOFTBUS_ERR) {
-        LNN_LOGW(LNN_INIT, "try to get accountId fail");
-        return SOFTBUS_ERR;
     }
     LnnNetIfMgr *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_netIfNameList, LnnNetIfMgr, node) {
@@ -714,9 +717,6 @@ int32_t LnnInitNetworkManagerDelay(void)
                 LNN_LOGI(LNN_INIT, "enable for netif success. protocol=%{public}d, ifName=%{public}s", i, item->ifName);
             }
         }
-    }
-    if (IsActiveOsAccountUnlocked()) {
-        g_isUnLock = true;
     }
     RetryCheckOOBEState(NULL);
     return SOFTBUS_OK;

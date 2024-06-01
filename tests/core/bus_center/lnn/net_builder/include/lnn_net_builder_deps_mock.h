@@ -65,6 +65,7 @@ public:
     virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
         uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
+    virtual void LnnSetUnlockState(void) = 0;
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target,
         const char *pkgName, bool isNeedConnect);
@@ -196,6 +197,7 @@ public:
     MOCK_METHOD6(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *,
         uint32_t, uint32_t, int32_t, const AuthVerifyCallback *));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
+    MOCK_METHOD0(LnnSetUnlockState, void ());
     MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));

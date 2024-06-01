@@ -41,6 +41,7 @@ typedef enum {
     LNN_EVENT_NIGHT_MODE_CHANGED,
     LNN_EVENT_OOBE_STATE_CHANGED,
     LNN_EVENT_HOME_GROUP_CHANGED,
+    LNN_EVENT_USER_SWITCHED,
     /* event from internal lnn */
     LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
     LNN_EVENT_NODE_MIGRATE,
@@ -102,6 +103,11 @@ typedef enum {
     SOFTBUS_ACCOUNT_LOG_OUT,
     SOFTBUS_ACCOUNT_UNKNOWN,
 } SoftBusAccountState;
+
+typedef enum {
+    SOFTBUS_USER_SWITCHED,
+    SOFTBUS_USER_SWITCH_UNKNOWN,
+} SoftBusUserSwitchState;
 
 typedef enum {
     SOFTBUS_DIF_ACCOUNT_DEV_CHANGE,
@@ -267,6 +273,8 @@ void LnnNotifyNetworkIdChangeEvent(const char *networkId);
 void LnnNotifyLpReportEvent(SoftBusLpEventType type);
 
 void LnnNotifyHBRepeat(void);
+
+void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state);
 
 #ifdef __cplusplus
 }
