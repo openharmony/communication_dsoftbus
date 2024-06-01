@@ -209,7 +209,7 @@ HWTEST_F(TransPendingPktTest, TimeBefore001, TestSize.Level1)
     SoftBusSysTime outtime;
     SoftBusSysTime now;
     SoftBusGetTime(&now);
-    outtime.sec = now.sec + TIME_OUT;
+    outtime.sec = now.sec + MSG_TIMEOUT_S;
     outtime.usec = now.usec;
     bool res = TimeBefore(&outtime);
     EXPECT_TRUE(res);

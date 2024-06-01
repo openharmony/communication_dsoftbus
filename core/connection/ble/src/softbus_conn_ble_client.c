@@ -107,7 +107,7 @@ static int32_t UpdateBleConnectionStateInOrder(
     return SOFTBUS_OK;
 }
 
-static int32_t SetConnectionHandle(ConnBleConnection *connection, int32_t underlayerHandle)
+static int32_t SetConnectionHandleAndState(ConnBleConnection *connection, int32_t underlayerHandle)
 {
     int32_t ret = SoftBusMutexLock(&connection->lock);
     if (ret != SOFTBUS_OK) {
@@ -170,7 +170,7 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
         return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR;
     }
 
-    return SetConnectionHandle(connection, underlayerHandle);
+    return SetConnectionHandleAndState(connection, underlayerHandle);
 }
 
 static void BleGattcConnStateCallback(int32_t underlayerHandle, int32_t state, int32_t status)

@@ -35,7 +35,7 @@ static int32_t BrInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, 
     connInfo->type = LANE_BR;
     if (memcpy_s(connInfo->connInfo.br.brMac, BT_MAC_LEN,
         linkInfo->linkInfo.br.brMac, BT_MAC_LEN) != EOK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     profile->linkType = LANE_BR;
     return SOFTBUS_OK;
@@ -47,12 +47,12 @@ static int32_t BleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     if (memcpy_s(connInfo->connInfo.ble.bleMac, BT_MAC_LEN,
         linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy btMac fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(connInfo->connInfo.ble.deviceIdHash, UDID_HASH_LEN,
         linkInfo->linkInfo.ble.deviceIdHash, UDID_HASH_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy udidHash fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     connInfo->connInfo.ble.protoType = linkInfo->linkInfo.ble.protoType;
     connInfo->connInfo.ble.psm = linkInfo->linkInfo.ble.psm;
@@ -66,7 +66,7 @@ static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     if (memcpy_s(&connInfo->connInfo.p2p, sizeof(P2pConnInfo),
         &linkInfo->linkInfo.p2p.connInfo, sizeof(P2pConnInfo)) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy P2pConnInfo fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     profile->linkType = LANE_P2P;
     profile->bw = linkInfo->linkInfo.p2p.bw;
@@ -80,7 +80,7 @@ static int32_t HmlInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     if (memcpy_s(&connInfo->connInfo.p2p, sizeof(P2pConnInfo),
         &linkInfo->linkInfo.p2p.connInfo, sizeof(P2pConnInfo)) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy P2pConnInfo fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     profile->linkType = LANE_HML;
     profile->bw = linkInfo->linkInfo.p2p.bw;
@@ -102,7 +102,7 @@ static int32_t Wlan2P4GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *conn
     if (memcpy_s(&connInfo->connInfo.wlan, sizeof(WlanConnInfo),
         &linkInfo->linkInfo.wlan.connInfo, sizeof(WlanConnInfo)) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy WlanConnInfo fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     profile->linkType = LANE_WLAN_2P4G;
     profile->bw = linkInfo->linkInfo.wlan.bw;
@@ -116,7 +116,7 @@ static int32_t Wlan5GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connIn
     if (memcpy_s(&connInfo->connInfo.wlan, sizeof(WlanConnInfo),
         &linkInfo->linkInfo.wlan.connInfo, sizeof(WlanConnInfo)) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy WlanConnInfo fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     profile->linkType = LANE_WLAN_5G;
     profile->bw = linkInfo->linkInfo.wlan.bw;
@@ -129,7 +129,7 @@ static int32_t BleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *con
     if (strcpy_s(connInfo->connInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
         linkInfo->linkInfo.bleDirect.networkId) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy networkId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     connInfo->type = LANE_BLE_DIRECT;
     connInfo->connInfo.bleDirect.protoType = linkInfo->linkInfo.bleDirect.protoType;
@@ -143,12 +143,12 @@ static int32_t CocInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     if (memcpy_s(connInfo->connInfo.ble.bleMac, BT_MAC_LEN,
         linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy bleMac fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(connInfo->connInfo.ble.deviceIdHash, UDID_HASH_LEN,
         linkInfo->linkInfo.ble.deviceIdHash, UDID_HASH_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy deviceIdHash fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     connInfo->connInfo.ble.psm = linkInfo->linkInfo.ble.psm;
     profile->linkType = LANE_COC;
@@ -173,11 +173,11 @@ int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, La
 {
     if ((linkInfo == NULL) || (connInfo == NULL) || (profile == NULL)) {
         LNN_LOGE(LNN_LANE, "laneInfoProcess param invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if ((linkInfo->type >= LANE_LINK_TYPE_BUTT) || (g_funcList[linkInfo->type] == NULL)) {
         LNN_LOGE(LNN_LANE, "unsupport linkType=%{public}d", linkInfo->type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return g_funcList[linkInfo->type](linkInfo, connInfo, profile);
 }
@@ -187,11 +187,12 @@ int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueS
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
         LNN_LOGE(LNN_LANE, "convert dataType fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnMapSet(map, (const char *)keyStr, value, valueSize) != SOFTBUS_OK) {
+    int32_t ret = LnnMapSet(map, (const char *)keyStr, value, valueSize);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "save data fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }

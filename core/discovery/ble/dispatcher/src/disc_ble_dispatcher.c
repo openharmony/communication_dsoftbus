@@ -20,9 +20,10 @@
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "disc_share_ble.h"
+#include "disc_virtual_link_ble.h"
 #include "softbus_errcode.h"
 
-#define DISPATCHER_SIZE 3
+#define DISPATCHER_SIZE 4
 
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;
@@ -226,6 +227,15 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     }
     g_dispatchers[g_dispatcherSize++] = approachInterface;
     DfxRecordBleInitEnd(EVENT_STAGE_APPROACH_BLE_INIT, SOFTBUS_OK);
+
+    DiscoveryBleDispatcherInterface *vlinkInterface = DiscVLinkBleInit(discInnerCb);
+    if (vlinkInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_VLINK_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
+        DISC_LOGE(DISC_INIT, "DiscVLinkBleInit err");
+        return NULL;
+    }
+    g_dispatchers[g_dispatcherSize++] = vlinkInterface;
+    DfxRecordBleInitEnd(EVENT_STAGE_VLINK_BLE_INIT, SOFTBUS_OK);
 
     DfxRecordBleInitEnd(EVENT_STAGE_INIT, SOFTBUS_OK);
     return &g_discBleFrameFuncInterface;

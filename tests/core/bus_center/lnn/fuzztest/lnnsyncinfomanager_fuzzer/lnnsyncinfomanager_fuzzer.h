@@ -12,22 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "null_negotiate_channel.h"
-#include "softbus_errcode.h"
-#include "conn_log.h"
 
-namespace OHOS::SoftBus {
-NullNeotiateChannel::~NullNeotiateChannel() { }
+#ifndef TEST_FUZZTEST_LNNSYNCINFOMANAGER_FUZZER_H
+#define TEST_FUZZTEST_LNNSYNCINFOMANAGER_FUZZER_H
 
-int NullNeotiateChannel::SendMessage(const NegotiateMessage &msg) const
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "Empty implementation");
-    return SOFTBUS_OK;
-}
+#define FUZZ_PROJECT_NAME "lnnsyncinfomanager_fuzzer"
 
-std::string NullNeotiateChannel::GetRemoteDeviceId() const
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "Empty implementation");
-    return "";
-}
-} // namespace OHOS::SoftBus
+#endif /* TEST_FUZZTEST_LNNSYNCINFOMANAGER_FUZZER_H */

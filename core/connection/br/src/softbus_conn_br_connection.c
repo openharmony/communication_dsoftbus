@@ -135,7 +135,7 @@ static void BrConnectStatusCallback(const BdAddr *bdAddr, BtUuid uuid, int32_t s
     ConnBrReturnConnection(&connection);
 }
 
-static int32_t StartBrClientConnect(ConnBrConnection *connection)
+static int32_t StartBrClientConnect(ConnBrConnection *connection, const char *anomizeAddress)
 {
     uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
     int32_t status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
@@ -175,6 +175,7 @@ static int32_t StartBrClientConnect(ConnBrConnection *connection)
     connection->socketHandle = socketHandle;
     connection->state = BR_CONNECTION_STATE_CONNECTED;
     (void)SoftBusMutexUnlock(&connection->lock);
+    return SOFTBUS_OK;
 }
 
 static void *StartClientConnect(void *connectCtx)
@@ -192,9 +193,9 @@ static void *StartClientConnect(void *connectCtx)
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     CONN_LOGI(CONN_BR, "connId=%{public}u, address=%{public}s", connectionId, anomizeAddress);
     do {
-        int ret = StartBrClientConnect(connection);
+        int ret = StartBrClientConnect(connection, anomizeAddress);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGI(CONN_BR, "connId=%{public}u, error=%{public}s", connectionId, ret);
+            CONN_LOGI(CONN_BR, "connId=%{public}u, error=%{public}d", connectionId, ret);
             g_eventListener.onClientConnectFailed(connection->connectionId, ret);
             break;
         }
@@ -225,31 +226,7 @@ static void *StartClientConnect(void *connectCtx)
     return NULL;
 }
 
-static int32_t BrLoopReadSocket(ConnBrConnection *connection)
-{
-    CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId, connection->socketHandle);
-    g_eventListener.onServerAccepted(connection->connectionId);
-    int32_t ret = LoopRead(connection->connectionId, connection->socketHandle);
-    CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, ret=%{public}d",
-        connection->connectionId, connection->socketHandle, ret);
-
-    if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, socket=%{public}d", connection->connectionId,
-            connection->socketHandle);
-        g_sppDriver->DisConnect(connection->socketHandle);
-        return SOFTBUS_LOCK_ERR;
-    }
-    if (connection->socketHandle != INVALID_SOCKET_HANDLE) {
-        g_sppDriver->DisConnect(connection->socketHandle);
-        connection->socketHandle = INVALID_SOCKET_HANDLE;
-    }
-    connection->state = (ret == SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED ? BR_CONNECTION_STATE_CLOSED :
-                                                                            BR_CONNECTION_STATE_EXCEPTION);
-    (void)SoftBusMutexUnlock(&connection->lock);
-    return ret;
-}
-
-static void *StartServerServe(void *serveCtx)
+static ConnBrConnection *CreateAndSaveConnection(void *serveCtx)
 {
     ServerServeContext *ctx = (ServerServeContext *)serveCtx;
     int32_t socketHandle = ctx->socketHandle;
@@ -282,8 +259,37 @@ static void *StartServerServe(void *serveCtx)
         ConnBrFreeConnection(connection);
         return NULL;
     }
+    return connection;
+}
+
+static void *StartServerServe(void *serveCtx)
+{
+    ConnBrConnection *connection = CreateAndSaveConnection(serveCtx);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, NULL, CONN_BR,
+        "connection is not exist, connectionId=%{public}u", connection->connectionId);
     do {
-        g_eventListener.onConnectionException(connection->connectionId, BrLoopReadSocket(connection));
+        CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId,
+            connection->socketHandle);
+        g_eventListener.onServerAccepted(connection->connectionId);
+        int32_t ret = LoopRead(connection->connectionId, connection->socketHandle);
+        CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, ret=%{public}d",
+            connection->connectionId, connection->socketHandle, ret);
+
+        if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, socket=%{public}d", connection->connectionId,
+                connection->socketHandle);
+            g_sppDriver->DisConnect(connection->socketHandle);
+            g_eventListener.onConnectionException(connection->connectionId, SOFTBUS_LOCK_ERR);
+            break;
+        }
+        if (connection->socketHandle != INVALID_SOCKET_HANDLE) {
+            g_sppDriver->DisConnect(connection->socketHandle);
+            connection->socketHandle = INVALID_SOCKET_HANDLE;
+        }
+        connection->state = (ret == SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED ? BR_CONNECTION_STATE_CLOSED :
+                                                                                BR_CONNECTION_STATE_EXCEPTION);
+        (void)SoftBusMutexUnlock(&connection->lock);
+        g_eventListener.onConnectionException(connection->connectionId, ret);
     } while (false);
     ConnBrReturnConnection(&connection);
     return NULL;
@@ -649,9 +655,9 @@ int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *jso
     return SOFTBUS_OK;
 }
 
-static int32_t CheckBrServerStateAndOpenSppServer(void *arg)
+static int32_t CheckBrServerStateAndOpenSppServer(ServerState *serverState)
 {
-    ServerState *serverState = (ServerState *)arg;
+#define BR_ACCEPET_WAIT_TIME 1000
     const char *name = "BrManagerInsecure";
     int32_t status = SoftBusMutexLock(&serverState->mutex);
     if (status != SOFTBUS_OK) {
@@ -700,17 +706,17 @@ static int32_t CheckBrServerStateAndOpenSppServer(void *arg)
 
 static void *ListenTask(void *arg)
 {
-#define BR_ACCEPET_WAIT_TIME 1000
     CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_BR, "invalid param");
     ServerState *serverState = (ServerState *)arg;
     CONN_CHECK_AND_RETURN_RET_LOGE(serverState != NULL, NULL, CONN_BLE, "serverState is null");
     CONN_LOGI(CONN_BR, "traceId=%{public}u", serverState->traceId);
     int32_t status = SOFTBUS_OK;
     while (true) {
-        status= CheckBrServerStateAndOpenSppServer(arg);
+        status= CheckBrServerStateAndOpenSppServer(serverState);
         if (status == SOFTBUS_CONN_BR_RETRY_OPEN_SERVER) {
             continue;
-        } else if(status != SOFTBUS_OK) {
+        }
+        if (status != SOFTBUS_OK) {
             break;
         }
         int32_t serverId = serverState->serverId;

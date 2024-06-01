@@ -141,7 +141,7 @@ bool CheckDeviceInGroupByType(const char *udid, const char *uuid, HichainGroup g
     (void)udid;
     (void)uuid;
     (void)groupType;
-    return true;
+    return false;
 }
 
 void DestroyDeviceAuth(void)

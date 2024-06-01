@@ -41,7 +41,7 @@ static int32_t Apply(struct ConnSlideWindowController *self, int32_t expect)
     struct HistoryNode *next = NULL;
     int32_t appliedTotal = 0;
     timestamp_t now = SoftBusGetSysTimeMs();
-    timestamp_t expiredTimestamp = now - self->windowInMillis;
+    timestamp_t expiredTimestamp = now - (timestamp_t)self->windowInMillis;
     timestamp_t currentWindowStartTimestamp = 0;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &self->histories, struct HistoryNode, node) {
         if (it->timestamp > expiredTimestamp) {
@@ -54,7 +54,7 @@ static int32_t Apply(struct ConnSlideWindowController *self, int32_t expect)
     }
 
     if (self->quotaInBytes <= appliedTotal) {
-        unsigned int sleepMs = self->windowInMillis - (now - currentWindowStartTimestamp);
+        unsigned int sleepMs = (timestamp_t)self->windowInMillis - (now - currentWindowStartTimestamp);
         (void)SoftBusMutexUnlock(&self->lock);
         SoftBusSleepMs(sleepMs);
         return Apply(self, expect);

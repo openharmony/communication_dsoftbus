@@ -25,6 +25,7 @@ extern "C" {
 int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
 void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId);
 void LnnDestroyP2p(void);
+void LnnCancelWifiDirect(uint32_t laneReqId);
 
 #ifdef __cplusplus
 }

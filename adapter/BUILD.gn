@@ -228,11 +228,13 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
-    external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "c_utils:utilsbase",
-    ]
-    external_deps += [ "json:nlohmann_json_static" ]
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
+    if (is_standard_system) {
+      external_deps += [
+        "c_utils:utils",
+        "json:nlohmann_json_static",
+      ]
+    }
     sources = [
       "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
       "$softbus_adapter_common/dfx/softbus_adapter_hitrace.c",

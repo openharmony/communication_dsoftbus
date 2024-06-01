@@ -39,6 +39,7 @@ public:
     int ConnectDevice(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback,
                       bool markRetried = false);
     int ConnectDevice(const std::shared_ptr<ConnectCommand> &command, bool markRetried = false);
+    int CancelConnectDevice(const WifiDirectConnectInfo &info);
     int DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback);
 
     template<typename Command>
@@ -89,7 +90,8 @@ public:
         std::lock_guard lock(executorLock_);
         auto it = executors_.find(remoteDeviceId);
         if (it == executors_.end()) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "executor not exist");
+            CONN_LOGE(CONN_WIFI_DIRECT, "executor not exist, remoteDeviceId=%{public}s",
+                      WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
             return;
         }
 

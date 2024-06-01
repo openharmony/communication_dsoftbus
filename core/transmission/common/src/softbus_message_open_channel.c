@@ -292,6 +292,21 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static int32_t AddItemsToJsonObject(const AppInfo *appInfo, cJSON *json)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to add channels");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to add apiVersion");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to add deviceId");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, UID, appInfo->myData.uid),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to add uid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, PID, appInfo->myData.pid),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to add pid");
+    return SOFTBUS_OK;
+}
+
 char *PackReply(const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
@@ -303,12 +318,7 @@ char *PackReply(const AppInfo *appInfo)
         return NULL;
     }
     char *data = NULL;
-    if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
-        !AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion) ||
-        !AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId) ||
-        !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
-        !AddNumberToJsonObject(json, PID, appInfo->myData.pid)) {
-        TRANS_LOGE(TRANS_CTRL, "Failed to add items");
+    if (AddItemsToJsonObject(appInfo, json) != SOFTBUS_OK) {
         goto EXIT_FAIL;
     }
     if (appInfo->peerData.dataConfig != 0) {

@@ -19,10 +19,10 @@
 #include <securec.h>
 
 #include "lnn_trans_lane.h"
-
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_score_virtual.c"
 #include "lnn_trans_lane_deps_mock.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -148,10 +148,13 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
     uint32_t laneReqId = 1;
     LaneAllocInfo allocInfo;
     allocInfo.type = LANE_TYPE_TRANS;
-    EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_CALL(laneMock, SelectExpectLanesByQos).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    LaneAllocListener listenerCb = {
+        .onLaneAllocSuccess = OnLaneAllocSuccess,
+        .onLaneAllocFail = OnLaneAllocFail,
+    };
+    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->deinit();
 }
@@ -184,12 +187,12 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_004, TestSize.Level1)
     recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_WLAN_2P4G;
     EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(laneMock, SelectExpectLanesByQos).
-        WillRepeatedly(DoAll(SetArgPointee<2>(recommendLinkList), Return(SOFTBUS_OK)));
+        WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneMock, BuildLink(_, _, NotNull())).WillRepeatedly(laneMock.ActionOfLaneLinkSuccess);
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
-    EXPECT_EQ(g_errCode, SOFTBUS_LANE_TRIGGER_LINK_FAIL);
+    EXPECT_EQ(g_errCode, SOFTBUS_LANE_ID_GENERATE_FAIL);
     transObj->deinit();
 }
 
@@ -221,12 +224,12 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_005, TestSize.Level1)
     recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_WLAN_2P4G;
     EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(laneMock, SelectExpectLanesByQos).
-        WillRepeatedly(DoAll(SetArgPointee<2>(recommendLinkList), Return(SOFTBUS_OK)));
+        WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneMock, BuildLink(_, _, NotNull())).WillRepeatedly(laneMock.ActionOfLaneLinkFail);
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
-    EXPECT_EQ(g_errCode, SOFTBUS_LANE_ID_GENERATE_FAIL);
+    EXPECT_EQ(g_errCode, SOFTBUS_LANE_TRIGGER_LINK_FAIL);
     transObj->deinit();
 }
 
@@ -258,7 +261,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_006, TestSize.Level1)
     recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_WLAN_2P4G;
     EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(laneMock, SelectExpectLanesByQos)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(recommendLinkList), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneMock, BuildLink).WillRepeatedly(Return(SOFTBUS_LANE_DETECT_FAIL));
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -280,9 +283,9 @@ HWTEST_F(LNNTransLaneMockTest, LNN_LANE_SCORE_VIRTUAL_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDeinitScore();
     ret = LnnGetWlanLinkedInfo(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
     ret = LnnGetCurrChannelScore(CHANNEL_ID);
-    EXPECT_TRUE(ret == VIRTUAL_DEFAULT_SCORE);
+    EXPECT_EQ(ret, VIRTUAL_DEFAULT_SCORE);
     ret = LnnStartScoring(INTERVAL);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnStopScoring();

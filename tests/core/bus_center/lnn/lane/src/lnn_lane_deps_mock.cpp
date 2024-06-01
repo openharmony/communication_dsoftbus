@@ -62,17 +62,17 @@ void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_
     int32_t localFeatureCap, int32_t remoteFeatureCap)
 {
     EXPECT_CALL(*this, LnnGetLocalNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<1>(localNetCap), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(remoteNetCap), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remoteNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetLocalNumU32Info)
-        .WillRepeatedly(DoAll(SetArgPointee<1>(localNetCap), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteNumU32Info)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(remoteNetCap), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remoteNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetLocalNumU64Info)
-        .WillRepeatedly(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteNumU64Info)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(remoteFeatureCap), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remoteFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(ActionOfGetRemoteStrInfo);
     EXPECT_CALL(*this, SoftBusGenerateStrHash).WillRepeatedly(ActionOfGenerateStrHash);
 }
@@ -200,6 +200,11 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     return GetLaneDepsInterface()->AuthGetP2pConnInfo(uuid, connInfo, isMeta);
+}
+
+int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    return GetLaneDepsInterface()->AuthGetHmlConnInfo(uuid, connInfo, isMeta);
 }
 
 int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,

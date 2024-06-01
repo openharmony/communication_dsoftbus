@@ -34,7 +34,13 @@ public:
     virtual int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid,
         const LaneLinkInfo *laneLinkInfo) = 0;
     virtual int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *infoItem, LaneResource *resourceItem) = 0;
-    virtual uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType) = 0;
+    virtual uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType) = 0;
+    virtual int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource) = 0;
+    virtual void DelLogicAndLaneRelationship(uint64_t laneId) = 0;
+    virtual int32_t ClearLaneResourceByLaneId(uint64_t laneId) = 0;
+    virtual void RemoveDelayDestroyMessage(uint64_t laneId) = 0;
+    virtual int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide) = 0;
+    virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
 };
 
 class LaneListenerDepsInterfaceMock : public LaneListenerDepsInterface {
@@ -48,7 +54,14 @@ public:
     MOCK_METHOD3(PostLaneStateChangeMessage, int32_t (LaneState state, const char *peerUdid,
         const LaneLinkInfo *laneLinkInfo));
     MOCK_METHOD2(FindLaneResourceByLinkAddr, int32_t (const LaneLinkInfo *infoItem, LaneResource *resourceItem));
-    MOCK_METHOD3(ApplyLaneId, uint64_t (const char *localUdid, const char *remoteUdid, LaneLinkType linkType));
+    MOCK_METHOD3(GenerateLaneId, uint64_t (const char *localUdid, const char *remoteUdid, LaneLinkType linkType));
+    MOCK_METHOD3(FindLaneResourceByLinkType, int32_t (const char *peerUdid, LaneLinkType type, LaneResource *resource));
+    MOCK_METHOD1(DelLogicAndLaneRelationship, void (uint64_t laneId));
+    MOCK_METHOD1(ClearLaneResourceByLaneId, int32_t (uint64_t laneId));
+    MOCK_METHOD1(RemoveDelayDestroyMessage, void (uint64_t laneId));
+    MOCK_METHOD0(GetLaneManager, LnnLaneManager* (void));
+    MOCK_METHOD3(AddLaneResourceToPool, int32_t (const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide));
+    MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
 };
 } // namespace OHOS
 #endif // LNN_LANE_LISTENER_DEPS_MOCK_H
