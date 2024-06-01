@@ -2221,6 +2221,24 @@ static void AccountStateChangeHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void UserSwitchedHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
+        LNN_LOGW(LNN_BUILDER, "invalid param");
+        return;
+    }
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
+    SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
+    switch (userSwitchState) {
+        case SOFTBUS_USER_SWITCHED:
+            LNN_LOGI(LNN_BUILDER, "SOFTBUS_USER_SWITCHED");
+            LnnSetUnlockState();
+            break;
+        default:
+            return;
+    }
+}
+
 static void UpdateLocalNetCapability(void)
 {
     uint32_t netCapability = 0;
@@ -2319,6 +2337,10 @@ int32_t LnnInitNetBuilder(void)
     }
     if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, AccountStateChangeHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist account change evt handler fail!");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist user switch evt handler fail!");
         return SOFTBUS_ERR;
     }
     return InitNetBuilderLooper();
