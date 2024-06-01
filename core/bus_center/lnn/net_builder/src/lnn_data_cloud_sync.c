@@ -31,6 +31,7 @@
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
@@ -42,8 +43,8 @@
 #define KEY_MAX_LEN       128
 #define SPLIT_MAX_LEN     128
 #define SPLIT_KEY_NUM     3
-#define SPLIT_VALUE_NUM   2
-#define PUT_VALUE_MAX_LEN 136
+#define SPLIT_VALUE_NUM   3
+#define PUT_VALUE_MAX_LEN 156
 #define UDID_HASH_HEX_LEN 16
 static int32_t g_dbId = 0;
 
@@ -527,7 +528,7 @@ static int32_t GetInfoFromSplitKey(
         LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceUdid fail.");
         return SOFTBUS_STRCPY_ERR;
     }
-    if (strcpy_s(fieldName, FIELDNAME_MAX_LEN, splitKey[SPLIT_VALUE_NUM]) != EOK) {
+    if (strcpy_s(fieldName, FIELDNAME_MAX_LEN, splitKey[SPLIT_VALUE_NUM - 1]) != EOK) {
         LNN_LOGE(LNN_BUILDER, "fail:strcpy_s fieldName fail.");
         return SOFTBUS_STRCPY_ERR;
     }
@@ -579,7 +580,7 @@ static int32_t HandleDBAddChangeInternal(const char *key, const char *value, Nod
         LNN_LOGE(LNN_BUILDER, "fail:strcpy_s true value fail.");
         return SOFTBUS_STRCPY_ERR;
     }
-
+    LNN_LOGE(LNN_BUILDER, "DB data add device sync info, time=%{public}s", splitValue[SPLIT_VALUE_NUM - 1]);
     NodeInfo localCaheInfo = { 0 };
     if (LnnGetLocalCacheNodeInfo(&localCaheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
@@ -766,8 +767,9 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
     char *anonyTrueValue = NULL;
     Anonymize(trueValue, &anonyTrueValue);
     LNN_LOGI(LNN_BUILDER,
-        "deviceUdid=%{public}s, fieldName=%{public}s update to %{public}s success, stateVersion=%{public}d",
-        anonyDeviceUdid, fieldName, anonyTrueValue, stateVersion);
+        "deviceUdid=%{public}s, fieldName=%{public}s update to %{public}s success, stateVersion=%{public}d, "
+        "time=%{public}s",
+        anonyDeviceUdid, fieldName, anonyTrueValue, stateVersion, splitValue[SPLIT_VALUE_NUM - 1]);
     AnonymizeFree(anonyDeviceUdid);
     AnonymizeFree(anonyTrueValue);
     (void)memset_s(trueValue, strlen(trueValue), 0, strlen(trueValue));
@@ -923,6 +925,10 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGI(LNN_LEDGER, "no account info. no need sync to DB");
         return SOFTBUS_OK;
     }
+    int64_t nowTime = 0;
+    SoftBusSysTime time = { 0 };
+    SoftBusGetRealTime(&time);
+    nowTime = time.sec * CLOUD_SYNC_TIME_FACTOR + time.usec / CLOUD_SYNC_TIME_FACTOR;
     char putKey[KEY_MAX_LEN] = { 0 };
     if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%s", localCaheInfo.accountId, localCaheInfo.deviceInfo.deviceUdid, key) <
         0) {
@@ -930,7 +936,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         return SOFTBUS_ERR;
     }
     char putValue[PUT_VALUE_MAX_LEN] = { 0 };
-    if (sprintf_s(putValue, PUT_VALUE_MAX_LEN, "%s#%d", value, localCaheInfo.stateVersion) < 0) {
+    if (sprintf_s(putValue, PUT_VALUE_MAX_LEN, "%s#%d#%ld", value, localCaheInfo.stateVersion, nowTime) < 0) {
         LNN_LOGE(LNN_BUILDER, "sprintf_s value fail");
         return SOFTBUS_ERR;
     }
@@ -941,8 +947,8 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGE(LNN_BUILDER, "fail:data sync to DB fail, errorcode=%{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success. stateVersion=%{public}d", key,
-        localCaheInfo.stateVersion);
+    LNN_LOGI(LNN_BUILDER, "Lnn ledger %{public}s change sync to DB success. stateVersion=%{public}d, time=%{public}ld",
+        key, localCaheInfo.stateVersion, nowTime);
 
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
