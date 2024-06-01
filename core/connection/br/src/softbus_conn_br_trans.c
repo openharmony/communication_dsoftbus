@@ -326,19 +326,21 @@ int32_t ConnBrPostBytes(
         FreeSendNode(node);
         return status;
     }
-    
-    if (g_startBrSendLPInfo.isStartSendLp) {
+    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBrSendLPInfo.lock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, CONN_BR, "lock fail!");
+    g_startBrSendLPInfo.messagePosted = true;
+    if (!g_startBrSendLPInfo.sendTaskRunning) {
         status = ConnStartActionAsync(NULL, SendHandlerLoop, "BrSend_Tsk");
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "start br send task failed errno=%{public}d", status);
+            SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
             return status;
         }
-        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBrSendLPInfo.lock) == SOFTBUS_OK,
-            SOFTBUS_LOCK_ERR, CONN_BR, "lock fail!");
-        g_startBrSendLPInfo.isStartSendLp = false;
+        g_startBrSendLPInfo.sendTaskRunning = true;
         SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
         CONN_LOGI(CONN_BR, "start br send task succ");
     }
+    SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
     CONN_LOGI(CONN_BR,
         "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
         "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
@@ -432,15 +434,27 @@ void *SendHandlerLoop(void *arg)
     CONN_LOGI(CONN_BR, "br send data: send loop start");
     SendBrQueueNode *sendNode = NULL;
     while (true) {
-        int32_t status = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
-        CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_BR, "lock fail!");
-        status = ConnBrDequeueBlock((void **)(&sendNode));
+        int32_t status = ConnBrDequeueBlock((void **)(&sendNode));
         if (status == SOFTBUS_TIMOUT && sendNode == NULL) {
             CONN_LOGW(CONN_BR, "br dequeue time out err=%{public}d,", status);
-            g_startBrSendLPInfo.isStartSendLp = true;
+            status = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
+            CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_BR, "lock fail!");
+            if (g_startBrSendLPInfo.messagePosted) {
+                g_startBrSendLPInfo.messagePosted = false;
+                SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
+                continue;
+            }
+            g_startBrSendLPInfo.sendTaskRunning = false;
             SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
             break;
         }
+        status = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "lock fail!");
+            FreeSendNode(sendNode);
+            return NULL;
+        }
+        g_startBrSendLPInfo.messagePosted = false;
         SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
         if (status != SOFTBUS_OK || sendNode == NULL) {
             CONN_LOGE(CONN_BR, "br dequeue send node failed, error=%{public}d", status);
@@ -547,6 +561,5 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
     CONN_CHECK_AND_RETURN_RET_LOGW(
         status == SOFTBUS_OK, status, CONN_INIT,
         "init bbr trans module failed: init send lp lock failed, err=%{public}d", status);
-    g_startBrSendLPInfo.isStartSendLp = true;
     return SOFTBUS_OK;
 }
