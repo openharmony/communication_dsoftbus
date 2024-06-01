@@ -251,7 +251,7 @@ static void BuildTransEventExtra(
     extra->result = (ret == SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) ? EVENT_STAGE_RESULT_CANCELED : extra->result;
 }
 
-static void CallBackOpenChannelFailed(const SessionParam *param, const AppInfo *appInfo, int32_t errCode)
+static void CallbackOpenChannelFailed(const SessionParam *param, const AppInfo *appInfo, int32_t errCode)
 {
     if (param->isAsync) {
         ChannelMsg data = {
@@ -547,7 +547,9 @@ EXIT_ERR:
     TransAlarmExtra extraAlarm;
     TransBuildTransAlarmEvent(&extraAlarm, appInfo, ret);
     TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
-    CallBackOpenChannelFailed(param, appInfo, ret);
+    if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL && ret != SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT) {
+        CallbackOpenChannelFailed(param, appInfo, ret);
+    }
     TransFreeLane(laneHandle, param->isQosLane);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
@@ -637,7 +639,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     TRANS_CHECK_AND_RETURN_LOGW(appInfo != NULL, TRANS_SVC, "GetAppInfo is null.");
     appInfo->callingTokenId = callingTokenId;
     appInfo->timeStart = timeStart;
-    CallBackOpenChannelFailed(&param, appInfo, reason);
+    CallbackOpenChannelFailed(&param, appInfo, reason);
     if (!param.isQosLane) {
         TransFreeLane(laneHandle, param.isQosLane);
     }
