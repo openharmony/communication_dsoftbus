@@ -308,7 +308,7 @@ static void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std
 }
 
 static int32_t CipherAndRpaInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string> &values,
-    const std::string &keyPrefix, const std::string &valueSuffix, const int64_t &nowTime)
+    const std::string &keyPrefix, const std::string &valueSuffix)
 {
     char cipherKey[SESSION_KEY_STR_LEN] = { 0 };
     char cipherIv[BROADCAST_IV_STR_LEN] = { 0 };
@@ -372,7 +372,7 @@ static void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<s
     values[keyPrefix + DEVICE_INFO_JSON_KEY_CURRENT_INDEX] = std::to_string(localInfo->currentIndex) + valueSuffix;
     values[keyPrefix + DEVICE_INFO_DISTRIBUTED_SWITCH] =
         (localInfo->distributedSwitch ? "true" : "false") + valueSuffix;
-    if (CipherAndRpaInfoToMap(localInfo, values, keyPrefix, valueSuffix, nowTime) != SOFTBUS_OK) {
+    if (CipherAndRpaInfoToMap(localInfo, values, keyPrefix, valueSuffix) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert cipher and rpa info to map fail");
     }
 }
