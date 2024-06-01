@@ -185,7 +185,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
             TRANS_LOGE(TRANS_STREAM, "udp channel callback on udp channel opened is null.");
             return SOFTBUS_NO_INIT;
         }
-        g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
+        return g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
     }
     return SOFTBUS_OK;
 }
