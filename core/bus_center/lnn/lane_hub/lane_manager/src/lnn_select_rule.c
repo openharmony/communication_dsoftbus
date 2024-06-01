@@ -88,7 +88,7 @@ static bool GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remo
     return true;
 }
 
-static bool IsEnableWlan2P4G(const char *networkId)
+static int32_t Wlan2P4GCapCheck(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
     if (band != BAND_24G && band != BAND_UNKNOWN) {
@@ -96,7 +96,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LANE, "band isn't 2.4G or unknown, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return false;
+        return SOFTBUS_LANE_WIFI_BAND_ERR;
     }
     NodeInfo node;
     (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -105,7 +105,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LANE, "get remote node info fail, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         char *anonyNetworkId = NULL;
@@ -113,29 +113,33 @@ static bool IsEnableWlan2P4G(const char *networkId)
         LNN_LOGE(LNN_LANE, "anonyNetworkId=%{public}s, DISCOVERY_TYPE_WIFI=%{public}d, DISCOVERY_TYPE_LSA=%{public}d",
             anonyNetworkId, DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_LSA);
         AnonymizeFree(anonyNetworkId);
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     uint32_t local;
     uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_WIFI_24G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_5G))) &&
         ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)) ||
         (remote & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_WIFI_5G)))) {
-        return true;
+        return SOFTBUS_OK;
     }
     LNN_LOGE(LNN_LANE, "2.4G capa disable, local=%{public}u, remote=%{public}u", local, remote);
-    return false;
+    return ((local & (1 << BIT_WIFI_24G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_5G))) ?
+        SOFTBUS_LANE_REMOTE_NO_WIFI_CAP : SOFTBUS_LANE_LOCAL_NO_WIFI_CAP;
 }
 
-static bool IsEnableWlan5G(const char *networkId)
+static int32_t Wlan5GCapCheck(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
     if (band != BAND_5G && band != BAND_UNKNOWN) {
-        LNN_LOGE(LNN_LANE, "band isn't 5G or unknown");
-        return false;
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "band isn't 5G or unknown, networkId=%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_LANE_WIFI_BAND_ERR;
     }
     NodeInfo node;
     (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -144,7 +148,7 @@ static bool IsEnableWlan5G(const char *networkId)
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LANE, "get remote node info fail, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         char *anonyNetworkId = NULL;
@@ -152,156 +156,173 @@ static bool IsEnableWlan5G(const char *networkId)
         LNN_LOGE(LNN_LANE, "anonyNetworkId=%{public}s, DISCOVERY_TYPE_WIFI=%{public}d, DISCOVERY_TYPE_LSA=%{public}d",
             anonyNetworkId, DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_LSA);
         AnonymizeFree(anonyNetworkId);
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     uint32_t local;
     uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G))) &&
         ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)) ||
         (remote & (1 << BIT_WIFI_24G)) || (local & (1 << BIT_WIFI_24G)))) {
-        return true;
+        return SOFTBUS_OK;
     }
     LNN_LOGE(LNN_LANE, "5G capa disable, local=%{public}u, remote=%{public}u", local, remote);
-    return false;
+    return ((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G))) ?
+        SOFTBUS_LANE_REMOTE_NO_WIFI_CAP : SOFTBUS_LANE_LOCAL_NO_WIFI_CAP;
 }
 
-static bool IsEnableBr(const char *networkId)
+static int32_t BrCapCheck(const char *networkId)
 {
     uint32_t local;
     uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if ((local & (1 << BIT_BR)) && (remote & (1 << BIT_BR))) {
-        return true;
+        return SOFTBUS_OK;
     }
     LNN_LOGE(LNN_LANE, "BR capa disable, local=%{public}u, remote=%{public}u", local, remote);
-    return false;
+    return (local & (1 << BIT_BR)) ? SOFTBUS_LANE_REMOTE_NO_BR_CAP : SOFTBUS_LANE_LOCAL_NO_BR_CAP;
 }
 
-static bool IsEnableP2p(const char *networkId)
+static int32_t P2pCapCheck(const char *networkId)
 {
     uint32_t local;
     uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
         LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
-        return false;
+        return ((local & (1 << BIT_WIFI_P2P)) == 0) ?
+            SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP : SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
-static bool IsEnableHml(const char *networkId)
+static int32_t HmlCapCheck(const char *networkId)
 {
-    if (!IsEnableP2p(networkId)) {
-        return false;
+    int32_t ret = P2pCapCheck(networkId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "p2p cap check error");
+        return ret;
     }
     uint64_t local;
     uint64_t remote;
     if (!GetFeatureCap(networkId, &local, &remote)) {
-        return false;
+        LNN_LOGE(LNN_LANE, "get feature cap error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION)) == 0) ||
         ((remote & (1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION)) == 0)) {
-        return false;
+        LNN_LOGE(LNN_LANE, "hml capa disable, local=%{public}" PRIu64 ", remote=%{public}"  PRIu64, local, remote);
+        return ((local & (1 << BIT_WIFI_DIRECT_TLV_NEGOTIATION)) == 0) ?
+            SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP : SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
-static bool IsEnableP2pReuse(const char *networkId)
+static int32_t P2pReuseCapCheck(const char *networkId)
 {
-    if (!IsEnableP2p(networkId)) {
-        return false;
+    int32_t ret = P2pCapCheck(networkId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "p2p cap check error");
+        return ret;
     }
     uint64_t local;
     uint64_t remote;
     if (!GetFeatureCap(networkId, &local, &remote)) {
-        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
-        return false;
+        LNN_LOGE(LNN_LANE, "get feature cap error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_WIFI_P2P_REUSE)) == 0) || ((remote & (1 << BIT_WIFI_P2P_REUSE)) == 0)) {
         LNN_LOGE(LNN_LANE, "p2p reuse capa disable, local=%{public}" PRIu64 ", remote=%{public}"  PRIu64,
             local, remote);
-        return false;
+        return ((local & (1 << BIT_WIFI_P2P_REUSE)) == 0) ?
+            SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP : SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
-static bool IsEnableBle(const char *networkId)
+static int32_t BleCapCheck(const char *networkId)
 {
     uint32_t local;
     uint32_t remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_BLE)) == 0) || ((remote & (1 << BIT_BLE)) == 0)) {
-        return false;
+        LNN_LOGE(LNN_LANE, "ble capa disable, local=%{public}u, remote=%{public}u", local, remote);
+        return ((local & (1 << BIT_BLE)) == 0) ? SOFTBUS_LANE_LOCAL_NO_BLE_CAP : SOFTBUS_LANE_REMOTE_NO_BLE_CAP;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
-static bool IsEnableBleDirect(const char *networkId)
+static int32_t BleDirectCapCheck(const char *networkId)
 {
-    if (!IsEnableBle(networkId)) {
+    int32_t ret = BleCapCheck(networkId);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "ble is not enable");
-        return false;
+        return ret;
     }
 
     uint64_t local;
     uint64_t remote;
     if (!GetFeatureCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0) ||
         ((remote & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0)) {
         LNN_LOGE(LNN_LANE, "ble direct capa disable, local=%{public}" PRIu64 ", remote=%{public}" PRIu64,
             local, remote);
-        return false;
+        return ((local & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0) ?
+            SOFTBUS_LANE_LOCAL_NO_BLE_DIRECT_CAP : SOFTBUS_LANE_REMOTE_NO_BLE_DIRECT_CAP;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
-static bool IsEnableCoc(const char *networkId)
+static int32_t CocCapCheck(const char *networkId)
 {
-    if (!IsEnableBle(networkId)) {
+    int32_t ret = BleCapCheck(networkId);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "ble is not enable");
-        return false;
+        return ret;
     }
     uint64_t local;
     uint64_t remote;
     if (!GetFeatureCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
-        return false;
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (((local & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0) || ((remote & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0)) {
         LNN_LOGE(LNN_LANE, "coc capa disable, local=%{public}" PRIu64 ", remote=%{public}" PRIu64,
             local, remote);
-        return false;
+        return ((local & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0) ?
+            SOFTBUS_LANE_LOCAL_NO_COC_CAP : SOFTBUS_LANE_REMOTE_NO_COC_CAP;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
-static bool IsEnableCocDirect(const char *networkId)
+static int32_t CocDirectCapCheck(const char *networkId)
 {
-    if (!IsEnableCoc(networkId)) {
+    int32_t ret = CocCapCheck(networkId);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "coc is not enable");
-        return false;
+        return ret;
     }
-    if (!IsEnableBleDirect(networkId)) {
+    ret = BleDirectCapCheck(networkId);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "ble direct is not enable");
-        return false;
+        return ret;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
 static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
@@ -374,18 +395,18 @@ static int32_t GetCocScore(const char *networkId, uint32_t expectedBw)
 }
 
 static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
-    [LANE_BR] = {true,   IsEnableBr,        GetBrScore      },
-    [LANE_BLE] = { true,  IsEnableBle,       GetBleScore     },
-    [LANE_P2P] = { true,  IsEnableP2p,       GetP2pScore     },
-    [LANE_HML] = { true,  IsEnableHml,       GetHmlScore     },
-    [LANE_WLAN_2P4G] = { true,  IsEnableWlan2P4G,  GetWlan2P4GScore},
-    [LANE_WLAN_5G] = { true,  IsEnableWlan5G,    GetWlan5GScore  },
+    [LANE_BR] = {true,   BrCapCheck,        GetBrScore      },
+    [LANE_BLE] = { true,  BleCapCheck,       GetBleScore     },
+    [LANE_P2P] = { true,  P2pCapCheck,       GetP2pScore     },
+    [LANE_HML] = { true,  HmlCapCheck,       GetHmlScore     },
+    [LANE_WLAN_2P4G] = { true,  Wlan2P4GCapCheck,  GetWlan2P4GScore},
+    [LANE_WLAN_5G] = { true,  Wlan5GCapCheck,    GetWlan5GScore  },
     [LANE_ETH] = { false, NULL,              NULL            },
-    [LANE_P2P_REUSE] = { true,  IsEnableP2pReuse,  GetP2pScore     },
-    [LANE_BLE_DIRECT] = { true,  IsEnableBleDirect, GetBleScore     },
+    [LANE_P2P_REUSE] = { true,  P2pReuseCapCheck,  GetP2pScore     },
+    [LANE_BLE_DIRECT] = { true,  BleDirectCapCheck, GetBleScore     },
     [LANE_BLE_REUSE] = { false, NULL,              NULL            },
-    [LANE_COC] = { true,  IsEnableCoc,       GetCocScore     },
-    [LANE_COC_DIRECT] = { true,  IsEnableCocDirect, GetCocScore     },
+    [LANE_COC] = { true,  CocCapCheck,       GetCocScore     },
+    [LANE_COC_DIRECT] = { true,  CocDirectCapCheck, GetCocScore     },
 };
 
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
@@ -431,18 +452,19 @@ static bool IsLinkTypeValid(LaneLinkType type)
     return true;
 }
 
-static bool IsValidLane(const char *networkId, LaneLinkType linkType, LaneTransType transType)
+static int32_t CheckLaneValid(const char *networkId, LaneLinkType linkType, LaneTransType transType)
 {
     if (!IsLinkTypeValid(linkType)) {
-        return false;
+        return SOFTBUS_INVALID_PARAM;
     }
     LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
     if ((linkAttr == NULL) || (!linkAttr->available)) {
-        return false;
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (linkAttr->IsEnable(networkId) != true) {
+    int32_t ret = linkAttr->linkCapCheck(networkId);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "link capacity is not support. linkType=%{public}d", linkType);
-        return false;
+        return ret;
     }
     bool isStream = (transType == LANE_T_RAW_STREAM || transType == LANE_T_COMMON_VIDEO ||
                     transType == LANE_T_COMMON_VOICE);
@@ -450,9 +472,9 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, LaneTransT
                 linkType == LANE_BLE_REUSE || linkType == LANE_COC || linkType == LANE_COC_DIRECT);
     if (isStream && isBt) {
         LNN_LOGE(LNN_LANE, "Bt not support stream datatype, link=%{public}d", linkType);
-        return false;
+        return SOFTBUS_INVALID_PARAM;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
 static bool IsLaneFillMinLatency(uint32_t minLaneLatency, LaneLinkType linkType)
@@ -494,7 +516,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
         if (g_laneBandWidth[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
         }
-        if (IsValidLane(networkId, g_laneBandWidth[bandWidthType][i], request->transType) &&
+        if ((CheckLaneValid(networkId, g_laneBandWidth[bandWidthType][i], request->transType) == SOFTBUS_OK) &&
             IsLaneFillMinLatency(minLaneLatency, g_laneBandWidth[bandWidthType][i])) {
             linkList[(*linksNum)++] = g_laneBandWidth[bandWidthType][i];
             LNN_LOGI(LNN_LANE, "decide optimal linkType=%{public}d", g_laneBandWidth[bandWidthType][i]);
@@ -523,7 +545,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
         if (g_retryLaneList[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
         }
-        if (IsValidLane(networkId, g_retryLaneList[bandWidthType][i], request->transType) &&
+        if ((CheckLaneValid(networkId, g_retryLaneList[bandWidthType][i], request->transType) == SOFTBUS_OK) &&
             !IsLaneExist(linkList, g_retryLaneList[bandWidthType][i])) {
             linkList[(*linksNum)++] = g_retryLaneList[bandWidthType][i];
             LNN_LOGI(LNN_LANE, "decide retry linkType=%{public}d", g_retryLaneList[bandWidthType][i]);
@@ -542,7 +564,7 @@ static void UpdateHmlPriority(const char *peerNetWorkId, const LaneSelectParam *
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (FindLaneResourceByLinkType(peerUdid, LANE_HML, &resourceItem) != SOFTBUS_OK ||
-        !IsValidLane(peerNetWorkId, LANE_HML, request->transType)) {
+        (CheckLaneValid(peerNetWorkId, LANE_HML, request->transType) != SOFTBUS_OK)) {
         LNN_LOGE(LNN_LANE, "hml not support reuse");
         return;
     }
@@ -616,7 +638,7 @@ static int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList
 {
     if (listNum >= LANE_LINK_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "linkList size exceed limit, size=%{public}d", listNum);
-        return SOFTBUS_INVALID_NUM;
+        return SOFTBUS_INVALID_PARAM;
     }
     bool isFilterP2p = IsSupportWifiDirect(networkId);
     uint32_t availableLinkNums = 0;
@@ -630,9 +652,19 @@ static int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList
     recommendList->linkTypeNum = availableLinkNums;
     if (availableLinkNums == 0) {
         LNN_LOGE(LNN_LANE, "not available link");
-        return SOFTBUS_LANE_SELECT_FAIL;
+        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t GetErrCodeOfRequest(const char *networkId, const LaneSelectParam *request)
+{
+    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
+        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+        return SOFTBUS_LANE_WIFI_OFF;
+    }
+    int32_t bandWidthType = GetBwType(request->qosRequire.minBW);
+    return CheckLaneValid(networkId, g_laneBandWidth[bandWidthType][0], request->transType);
 }
 
 int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request, LanePreferredLinkList *recommendList)
@@ -649,5 +681,9 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     if (request->allocedLaneId != INVALID_LANE_ID) {
         DelHasAllocedLink(request->allocedLaneId, linkList, &linksNum);
     }
-    return FinalDecideLinkType(networkId, linkList, linksNum, recommendList);
+    int32_t ret = FinalDecideLinkType(networkId, linkList, linksNum, recommendList);
+    if (recommendList->linkTypeNum == 0) {
+        return GetErrCodeOfRequest(networkId, request);
+    }
+    return ret;
 }
