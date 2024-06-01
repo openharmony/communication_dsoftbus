@@ -475,7 +475,8 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "peer not support normalize or key error.");
         return;
     }
-    if (info->localState != AUTH_STATE_START && info->localState != AUTH_STATE_ACK) {
+    if (info->localState != AUTH_STATE_START && info->localState != AUTH_STATE_ACK &&
+        info->localState != AUTH_STATE_COMPATIBLE) {
         AUTH_LOGI(AUTH_FSM, "nego state, not send normalize data.");
         return;
     }
