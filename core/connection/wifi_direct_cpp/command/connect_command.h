@@ -46,7 +46,8 @@ public:
     bool HasRetried() const { return hasRetried_; }
 
     void OnSuccess(const WifiDirectLink &link) const;
-    void OnFailure(WifiDirectErrorCode reason) const;
+    void OnFailure(int reason) const;
+    bool IsSameCommand(const WifiDirectConnectInfo &info) const;
 
 protected:
     ConnectInfo info_;
@@ -54,7 +55,7 @@ protected:
     mutable std::string remoteDeviceId_;
     bool hasRetried_ = false;
 
-    void DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const;
+    void DfxRecord(bool isSuccess, int reason) const;
     void FillConnEventExtra(ConnEventExtra &extra) const;
 };
 }

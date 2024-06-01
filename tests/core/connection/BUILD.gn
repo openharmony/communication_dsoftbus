@@ -30,9 +30,7 @@ group("unittest") {
   if (support_bluetooth && dsoftbus_feature_conn_ble) {
     deps += [
       "ble:BleConnectionManagerTest",
-      "ble:BleConnectionServiceTest",
       "ble:BleTransTest",
-      "ble:ConnectionBleSwitchTest",
       "ble:ConnectionBleTest",
     ]
   }
@@ -41,9 +39,16 @@ group("unittest") {
   }
 
   # add wifi_direct cpp unit test here
+  if (softbus_communication_wifi_feature) {
+    deps += [ "wifi_direct_cpp:unittest" ]
+  }
 }
 
 group("fuzztest") {
   testonly = true
-  deps = [ "common/fuzztest/connectioncommon_fuzzer:ConnectionCommonFuzzTest" ]
+  deps = [
+    "ble/fuzztest/bleconnection_fuzzer:BleConnectionFuzzTest",
+    "br/fuzztest/brconnection_fuzzer:BrConnectionFuzzTest",
+    "common/fuzztest/connectioncommon_fuzzer:ConnectionCommonFuzzTest",
+  ]
 }

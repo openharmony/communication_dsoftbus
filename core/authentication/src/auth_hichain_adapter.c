@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,21 +100,24 @@ int32_t AuthDevice(int64_t authReqId, const char *authParams, const DeviceAuthCa
     }
     AUTH_CHECK_AND_RETURN_RET_LOGE(g_hichain != NULL, SOFTBUS_ERR, AUTH_HICHAIN, "hichain not initialized");
 
+    uint32_t authErrCode = 0;
     for (int32_t i = 1; i < RETRY_TIMES; i++) {
         int32_t ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authReqId, authParams, cb);
         if (ret == HC_SUCCESS) {
             AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice success, times=%{public}d", i);
             return SOFTBUS_OK;
         }
+        (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         if (ret != HC_ERR_INVALID_PARAMS) {
-            AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed, err=%{public}d", ret);
-            return SOFTBUS_ERR;
+            AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed, err=%{public}d, authErrCode=%{public}u", ret,
+                authErrCode);
+            return authErrCode;
         }
         AUTH_LOGW(AUTH_HICHAIN,
             "hichain retry call authDevice, current retry times=%{public}d, err=%{public}d", i, ret);
         (void)SoftBusSleepMs(RETRY_MILLSECONDS);
     }
-    return SOFTBUS_ERR;
+    return authErrCode;
 }
 
 int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, DeviceAuthCallback *cb)
@@ -138,7 +141,7 @@ bool CheckDeviceInGroupByType(const char *udid, const char *uuid, HichainGroup g
     (void)udid;
     (void)uuid;
     (void)groupType;
-    return true;
+    return false;
 }
 
 void DestroyDeviceAuth(void)

@@ -1133,4 +1133,232 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStopScan002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastStopScan002 end ----");
 }
 
+/*
+ * @tc.name: SoftbusBroadcastScannerTest001
+ * @tc.desc: Scanner start scan success when new listenerId is added.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest001 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t discListenerId = -1;
+    int32_t connListenerId = -1;
+    int32_t lpListenerId = -1;
+    uint8_t filterNum = 1;
+    BcScanFilter *discFilter = GetBcScanFilter();
+    BcScanFilter *connFilter = GetBcScanFilter();
+    BcScanFilter *lpFilter = GetBcScanFilter();
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_TRUE(discListenerId >= 0);
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
+    EXPECT_TRUE(connListenerId >= 0);
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_LP_HB, &lpListenerId, GetScanCallback()));
+    EXPECT_TRUE(lpListenerId  >= 0);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(connListenerId, connFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(lpListenerId, lpFilter, filterNum));
+
+    // First call, start scan.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+    // Scanning, new listenerId is added, stop and start.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(connListenerId, &scanParam));
+    // Another scanner, start scan.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(lpListenerId, &scanParam));
+
+    // Another listenerId is scanning, stop and start.
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+    // Stop scan.
+    EXPECT_EQ(SOFTBUS_OK, StopScan(connListenerId));
+    // Another scanner, stop scan.
+    EXPECT_EQ(SOFTBUS_OK, StopScan(lpListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(connListenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(lpListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest001 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastScannerTest002
+ * @tc.desc: Two Scanner stop and start success without interfering with each other.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest002 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t discListenerId = -1;
+    int32_t connListenerId = -1;
+    int32_t lpListenerId = -1;
+    uint8_t filterNum = 1;
+    BcScanFilter *discFilter = GetBcScanFilter();
+    BcScanFilter *connFilter = GetBcScanFilter();
+    BcScanFilter *lpFilter = GetBcScanFilter();
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_TRUE(discListenerId >= 0);
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
+    EXPECT_TRUE(connListenerId >= 0);
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_LP_HB, &lpListenerId, GetScanCallback()));
+    EXPECT_TRUE(lpListenerId  >= 0);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(connListenerId, connFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(lpListenerId, lpFilter, filterNum));
+
+    // First call, start scan.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+    // Scanning, new listenerId is added, stop and start.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(connListenerId, &scanParam));
+    // A listenerId is removed, stop and start.
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+    // Another scanner, start scan.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(lpListenerId, &scanParam));
+    // Scanning, new listenerId is added, stop and start.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, StopScan(connListenerId));
+    EXPECT_EQ(SOFTBUS_OK, StopScan(lpListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(connListenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(lpListenerId));
+    
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest002 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastScannerTest003
+ * @tc.desc: Scanner start scan success when updating frequency.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest003 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t discListenerId = -1;
+    uint8_t filterNum = 1;
+    BcScanFilter *discFilter = GetBcScanFilter();
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_TRUE(discListenerId >= 0);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
+
+    // First call, start scan.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+    // Scanning, update frequency, stop and start
+    scanParam.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
+    scanParam.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
+    
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest003 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastScannerTest004
+ * @tc.desc: Scanner start scan success when setting a new filter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest004, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest004 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t discListenerId = -1;
+    uint8_t filterNum = 1;
+    BcScanFilter *discFilter = GetBcScanFilter();
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_TRUE(discListenerId >= 0);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
+
+    // First call, start scan.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+    // Scanning, set a new filter, stop and start.
+    // Last filter is released in SetScanFilter.
+    BcScanFilter *newFilter = GetBcScanFilter();
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, newFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest004 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastScannerTest005
+ * @tc.desc: Scanner not start scan with same params.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest005, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest005 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t discListenerId = -1;
+    uint8_t filterNum = 1;
+    BcScanFilter *discFilter = GetBcScanFilter();
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_TRUE(discListenerId >= 0);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
+
+    // First call, start scan.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+    // Scanning, not start with same params.
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest005 end ----");
+}
+
 } // namespace OHOS

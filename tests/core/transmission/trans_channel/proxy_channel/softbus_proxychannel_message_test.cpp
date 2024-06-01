@@ -904,8 +904,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, Test
     ASSERT_TRUE(NULL != bufHead);
     ret = TransProxyParseMessageHead(bufHead, len, &msg);
     EXPECT_NE(SOFTBUS_OK, ret);
+    TransProxyPackMessageHead(NULL, NULL, 0);
     SoftBusFree(buf);
     SoftBusFree(bufHead);
+    ret = TransProxyUnPackRestErrMsg(NULL, NULL, 0);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**

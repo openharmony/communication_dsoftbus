@@ -573,15 +573,6 @@ static LnnPhysicalSubnet *CreateIpSubnetManager(const struct LnnProtocolManager 
     return NULL;
 }
 
-static VisitNextChoice NotifyIpAddressChanged(const LnnPhysicalSubnet *subnet, void *data)
-{
-    (void)data;
-    if (subnet->protocol->id == LNN_PROTOCOL_IP) {
-        LnnNotifyPhysicalSubnetStatusChanged(subnet->ifName, LNN_PROTOCOL_IP, NULL);
-    }
-    return CHOICE_VISIT_NEXT;
-}
-
 static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_IP_ADDR_CHANGED) {
@@ -589,10 +580,9 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
         return;
     }
     const LnnMonitorAddressChangedEvent *event = (const LnnMonitorAddressChangedEvent *)info;
+    LNN_LOGI(LNN_BUILDER, "ifName len=%{public}d", (int32_t)strlen(event->ifName));
     if (strlen(event->ifName) != 0) {
         LnnNotifyPhysicalSubnetStatusChanged(event->ifName, LNN_PROTOCOL_IP, NULL);
-    } else {
-        (void)LnnVisitPhysicalSubnet(NotifyIpAddressChanged, NULL);
     }
 }
 

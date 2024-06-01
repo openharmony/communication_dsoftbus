@@ -200,10 +200,11 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         return SOFTBUS_MALLOC_ERR;
     }
     if (CheckFileSchema(sessionId, fileSchemaListener) == SOFTBUS_OK) {
-        if (SetSchemaCallback(fileSchemaListener->schema, sFileList, fileCnt) != SOFTBUS_OK) {
+        ret = SetSchemaCallback(fileSchemaListener->schema, sFileList, fileCnt);
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "set schema callback failed");
             SoftBusFree(fileSchemaListener);
-            return SOFTBUS_ERR;
+            return ret;
         }
     }
 

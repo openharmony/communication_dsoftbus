@@ -202,7 +202,7 @@ int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
     if (memcpy_s(&stats, sizeof(StreamSendStats), &info->info.frameSendStats,
         sizeof(info->info.frameSendStats)) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "streamStats info memcpy fail");
-        return -1;
+        return SOFTBUS_MEM_ERR;
     }
 
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
@@ -231,7 +231,7 @@ int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
     if (memcpy_s(&stats.stats, sizeof(stats.stats), info->info.trafficData.stats,
         sizeof(info->info.trafficData.stats)) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "RipplePolicy info memcpy fail");
-        return -1;
+        return SOFTBUS_MEM_ERR;
     }
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     auto itListener = g_streamSocketMap.find(fd);
@@ -557,11 +557,33 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
     return true;
 }
 
+bool VtpStreamSocket::EncryptStreamPacket(std::unique_ptr<IStream> stream, std::unique_ptr<char[]> &data, ssize_t &len)
+{
+    StreamPacketizer packet(streamType_, std::move(stream));
+    auto plainData = packet.PacketizeStream();
+    if (plainData == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "PacketizeStream failed");
+        return false;
+    }
+    len = packet.GetPacketLen() + GetEncryptOverhead();
+    TRANS_LOGD(TRANS_STREAM, "packetLen=%{public}zd, encryptOverhead=%{public}zd",
+        packet.GetPacketLen(), GetEncryptOverhead());
+    data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
+    ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(), data.get() + FRAME_HEADER_LEN, len);
+    if (encLen != len) {
+        TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", len, encLen);
+        return false;
+    }
+    InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
+    len += FRAME_HEADER_LEN;
+
+    return true;
+}
+
 bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 {
-    TRANS_LOGD(TRANS_STREAM,
-        "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd", streamType_,
-        stream->GetBufferLen(), stream->GetExtBufferLen());
+    TRANS_LOGD(TRANS_STREAM, "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd",
+        streamType_, stream->GetBufferLen(), stream->GetExtBufferLen());
 
     if (!isBlocked_) {
         isBlocked_ = true;
@@ -586,24 +608,9 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
             TRANS_LOGE(TRANS_STREAM, "streamFrameInfo is null");
             return false;
         }
-
-        StreamPacketizer packet(streamType_, std::move(stream));
-        auto plainData = packet.PacketizeStream();
-        if (plainData == nullptr) {
-            TRANS_LOGE(TRANS_STREAM, "PacketizeStream failed");
+        if (!EncryptStreamPacket(std::move(stream), data, len)) {
             return false;
         }
-        len = packet.GetPacketLen() + GetEncryptOverhead();
-        TRANS_LOGD(TRANS_STREAM, "packetLen=%{public}zd, encryptOverhead=%{public}zd", packet.GetPacketLen(),
-            GetEncryptOverhead());
-        data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
-        ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(), data.get() + FRAME_HEADER_LEN, len);
-        if (encLen != len) {
-            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", len, encLen);
-            return false;
-        }
-        InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
-        len += FRAME_HEADER_LEN;
 
         FrameInfo frameInfo;
         ConvertStreamFrameInfo2FrameInfo(&frameInfo, streamFrameInfo);
@@ -1502,13 +1509,13 @@ ssize_t VtpStreamSocket::Encrypt(const void *in, ssize_t inLen, void *out, ssize
 
     if (inLen - OVERHEAD_LEN > outLen) {
         TRANS_LOGE(TRANS_STREAM, "Encrypt invalid para.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.first, sessionKey_.second) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     int ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
@@ -1530,13 +1537,13 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
 
     if (inLen - OVERHEAD_LEN > outLen) {
         TRANS_LOGE(TRANS_STREAM, "Decrypt invalid para.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.first, sessionKey_.second) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     int ret = SoftBusDecryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));

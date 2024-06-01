@@ -776,7 +776,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
             break;
         default:
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-            return SOFTBUS_ERR;
+            return SOFTBUS_MEM_ERR;
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
@@ -827,14 +827,10 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
             break;
         default:
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-            return SOFTBUS_ERR;
+            return SOFTBUS_NOT_FIND;
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    if (ret != EOK) {
-        TRANS_LOGE(TRANS_SDK, "copy data failed");
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 
@@ -1073,7 +1069,7 @@ int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync)
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     TRANS_LOGE(TRANS_SDK, "not found session with sessionId=%{public}d", sessionId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, int32_t *routeType)
@@ -2274,7 +2270,7 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%{public}s", sessionName);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)

@@ -52,7 +52,8 @@ typedef struct {
     void (*onRelay)(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType);
     int32_t (*onReceive)(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight, LnnHeartbeatType hbType,
         bool isOnlineDirectly, HbRespData *hbResp);
-    int32_t (*onRecvHigherWeight)(const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect);
+    int32_t (*onRecvHigherWeight)(const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect,
+        bool isPeerScreenOn);
     void (*onRecvLpInfo)(const char *networkId, uint64_t nowTime);
 } LnnHeartbeatMediumMgrCb;
 
@@ -83,7 +84,7 @@ typedef struct {
     void (*deinit)(void);
 } LnnHeartbeatMediumMgr;
 
-int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param);
+int32_t LnnHbMediumMgrSetParam(void *param);
 int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData);
 int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *custData);
 int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type);

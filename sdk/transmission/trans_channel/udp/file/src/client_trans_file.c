@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,9 +102,9 @@ static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
             notStartedIndex++;
         }
     }
-    event->statusList.completedList.fileCnt = completedIndex;
-    event->statusList.notCompletedList.fileCnt = notCompletedIndex;
-    event->statusList.notStartedList.fileCnt = notStartedIndex;
+    event->statusList.completedList.fileCnt = (uint32_t)completedIndex;
+    event->statusList.notCompletedList.fileCnt = (uint32_t)notCompletedIndex;
+    event->statusList.notStartedList.fileCnt = (uint32_t)notStartedIndex;
     TRANS_LOGI(TRANS_SDK,
         "status list totalFileNum=%{public}d, completedNum=%{public}d, notCompletedNum=%{public}d, "
         "notStartedNum=%{public}d",
@@ -385,10 +385,8 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
 static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener, int32_t fileSession)
 {
     int32_t sessionId = -1;
-    if (g_udpChannelMgrCb->OnFileGetSessionId(channelId, &sessionId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get sessionId by channelId failed");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = g_udpChannelMgrCb->OnFileGetSessionId(channelId, &sessionId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get sessionId by channelId failed");
 
     if (fileListener->socketRecvCallback != NULL) {
         FileEvent event;
@@ -397,7 +395,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
         fileListener->socketRecvCallback(sessionId, &event);
         if (event.UpdateRecvPath == NULL) {
             TRANS_LOGE(TRANS_SDK, "UpdateRecvPath is null");
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
 
         const char *rootDir = event.UpdateRecvPath();
@@ -406,7 +404,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
             TRANS_LOGE(TRANS_SDK,
                 "rootDir not exist, rootDir=%{public}s, errno=%{public}d.",
                 (rootDir == NULL ? "null" : rootDir), errno);
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
 
         if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, absPath) != EOK) {
@@ -420,7 +418,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
     if (NSTACKX_DFileSetStoragePath(fileSession, fileListener->rootDir) != SOFTBUS_OK) {
         NSTACKX_DFileClose(fileSession);
         TRANS_LOGE(TRANS_SDK, "set storage path failed. rootDir=%{public}s", fileListener->rootDir);
-        return SOFTBUS_ERR;
+        return SOFTBUS_FILE_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -438,34 +436,34 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
     if (channel->isServer) {
         FileListener fileListener;
         (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
-        if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_FILE, "get file listener failed");
-            return SOFTBUS_ERR;
-        }
+        int32_t ret = TransGetFileListener(sessionName, &fileListener);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "get file listener failed");
+
         fileSession = StartNStackXDFileServer(channel->myIp, (uint8_t *)channel->sessionKey,
             DEFAULT_KEY_LENGTH, FileReceiveListener, filePort);
         if (fileSession < 0) {
             TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
-        if (g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId) != SOFTBUS_OK) {
+        ret = g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "udp channel open failed.");
             NSTACKX_DFileClose(fileSession);
             *filePort = 0;
-            return SOFTBUS_ERR;
+            return ret;
         }
         if (UpdateFileRecvPath(channel->channelId, &fileListener, fileSession)) {
             TRANS_LOGE(TRANS_FILE, "update receive file path failed");
             NSTACKX_DFileClose(fileSession);
             *filePort = 0;
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
     } else {
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
             (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, FileSendListener);
         if (fileSession < 0) {
             TRANS_LOGE(TRANS_FILE, "start file channel as client failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
     }
     return fileSession;

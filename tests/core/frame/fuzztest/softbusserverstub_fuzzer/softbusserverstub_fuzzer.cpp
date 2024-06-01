@@ -30,6 +30,9 @@
 #include "softbus_server_stub.h"
 #include "softbus_server.h"
 
+#define TYPE_NUM 10
+#define QOS_NUM 8
+
 namespace OHOS {
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
@@ -84,6 +87,7 @@ enum SoftBusFuncId {
     SERVER_GET_ALL_META_NODE_INFO,
     SERVER_SHIFT_LNN_GEAR,
     SERVER_RIPPLE_STATS,
+    SERVER_EVALUATE_QOS = 164,
 };
 
 bool PublishServiceFuzzTest(const uint8_t* data, size_t size)
@@ -947,21 +951,18 @@ bool SoftbusRegisterServiceFuzzTest(const uint8_t* data, size_t size)
 
 bool CheckOpenSessionPermissionFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return false;
-    }
-    #define SESSION_NAME_SIZE_MAX 256
-    #define DEVICE_ID_SIZE_MAX 65
-    #define GROUP_ID_SIZE_MAX 128
-    if (size < GROUP_ID_SIZE_MAX) {
-        return false;
-    }
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
         return false;
     }
     sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
     if (object == nullptr) {
+        return false;
+    }
+    #define SESSION_NAME_SIZE_MAX 256
+    #define DEVICE_ID_SIZE_MAX 65
+    #define GROUP_ID_SIZE_MAX 128
+    if (size < GROUP_ID_SIZE_MAX) {
         return false;
     }
     SetAceessTokenPermission("SoftBusServerStubTest");
@@ -999,25 +1000,145 @@ bool CheckOpenSessionPermissionFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
+bool EvaLuateQosInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return false;
+    }
+    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    if (object == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    int32_t dataTypeNum = size % TYPE_NUM;
+    uint32_t qosCount = size % QOS_NUM;
+
+    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
+    datas.WriteCString("6B97BC8F6F85A2A1A6E0E262111F42D6A8541CBFF6CAF688FA5293956EC3FD43");
+
+    datas.WriteInt32(dataTypeNum);
+    datas.WriteUint32(qosCount);
+    datas.WriteBuffer(data, qosCount);
+    MessageParcel reply;
+    MessageOption option;
+    SetAceessTokenPermission("SoftBusServerStubTest");
+    if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
+        return false;
+    }
+    return true;
+}
+
+bool EvaLuateQosInnerNetworkIdFuzzTest(const uint8_t* data, size_t size)
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return false;
+    }
+    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    if (object == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    int32_t dataTypeNum = size % TYPE_NUM;
+    uint32_t qosCount = size % QOS_NUM;
+
+    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
+    datas.WriteCString((char *)data);
+
+    datas.WriteInt32(dataTypeNum);
+    datas.WriteUint32(qosCount);
+    datas.WriteBuffer(data, qosCount);
+    MessageParcel reply;
+    MessageOption option;
+    SetAceessTokenPermission("SoftBusServerStubTest");
+    if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
+        return false;
+    }
+    return true;
+}
+
+bool EvaLuateQosInnerDataTypeFuzzTest(const uint8_t* data, size_t size)
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return false;
+    }
+    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    if (object == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    uint32_t qosCount = size % QOS_NUM;
+
+    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
+    datas.WriteCString("6B97BC8F6F85A2A1A6E0E262111F42D6A8541CBFF6CAF688FA5293956EC3FD43");
+
+    datas.WriteInt32(size);
+    datas.WriteUint32(qosCount);
+    datas.WriteBuffer(data, qosCount);
+    MessageParcel reply;
+    MessageOption option;
+    SetAceessTokenPermission("SoftBusServerStubTest");
+    if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
+        return false;
+    }
+    return true;
+}
+
+bool EvaLuateQosInnerQosCountFuzzTest(const uint8_t* data, size_t size)
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return false;
+    }
+    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    if (object == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    int32_t dataTypeNum = size % TYPE_NUM;
+    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
+    datas.WriteCString("6B97BC8F6F85A2A1A6E0E262111F42D6A8541CBFF6CAF688FA5293956EC3FD43");
+
+    datas.WriteInt32(dataTypeNum);
+    datas.WriteUint32(size);
+    datas.WriteBuffer(data, size);
+    MessageParcel reply;
+    MessageOption option;
+    SetAceessTokenPermission("SoftBusServerStubTest");
+    if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
+        return false;
+    }
+    return true;
+}
+
+bool IsValidParam(const uint8_t* data, size_t size)
+{
+    /* Run your code on data */
+    if (data == nullptr) {
+        return false;
+    }
+    /* Validate the length of size */
+    if (size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+    if (size > OHOS::FOO_MAX_LEN) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
+    OHOS::EvaLuateQosInnerNetworkIdFuzzTest(data, size);
+    OHOS::EvaLuateQosInnerDataTypeFuzzTest(data, size);
+    OHOS::EvaLuateQosInnerQosCountFuzzTest(data, size);
+    if (!OHOS::IsValidParam(data, size)) {
         return 0;
     }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    if (size > OHOS::FOO_MAX_LEN) {
-        return 0;
-    }
-
     OHOS::OpenSessionFuzzTest(data, size);
     OHOS::OpenAuthSessionFuzzTest(data, size);
     OHOS::CreateSessionServerFuzzTest(data, size);
@@ -1054,6 +1175,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::PublishServiceFuzzTest(data, size);
     OHOS::UnPublishServiceFuzzTest(data, size);
     OHOS::SoftbusRegisterServiceFuzzTest(data, size);
+    OHOS::CheckOpenSessionPermissionFuzzTest(data, size);
+    OHOS::EvaLuateQosInnerFuzzTest(data, size);
     return 0;
 }
-
