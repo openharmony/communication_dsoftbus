@@ -541,8 +541,8 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     }
     int32_t error = SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR;
     if (option->socketOption.keepAlive == 1) {
-        if (ConnSetTcpKeepalive(fd, AUTH_P2P_KEEP_ALIVE_TIME,
-                AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
+        if (ConnSetTcpKeepalive(
+                fd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "set keepalive fail, fd=%{public}d", fd);
             ConnShutdownSocket(fd);
             result->OnConnectFailed(requestId, SOFTBUS_ERR);
