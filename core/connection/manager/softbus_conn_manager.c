@@ -663,10 +663,8 @@ int32_t ConnStopLocalListening(const LocalListenerInfo *info)
 
 ConnectCallback g_connManagerCb = { 0 };
 
-int32_t ConnServerInit(void)
+static int32_t ConnSocketsAndBaseListenerInit(void)
 {
-    ConnectFuncInterface *connectObj = NULL;
-
     if (g_isInited) {
         return SOFTBUS_ERR;
     }
@@ -682,13 +680,19 @@ int32_t ConnServerInit(void)
         CONN_LOGE(CONN_INIT, "InitBaseListener failed! ret=%{public}" PRId32 " \r\n", ret);
         return ret;
     }
+    return SOFTBUS_OK;
+}
 
+int32_t ConnServerInit(void)
+{
+    int32_t ret = ConnSocketsAndBaseListenerInit();
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "ConnSocketsAndBaseListenerInit init failed.");
     g_connManagerCb.OnConnected = ConnManagerConnected;
     g_connManagerCb.OnReusedConnected = ConnManagerReusedConnected;
     g_connManagerCb.OnDisconnected = ConnManagerDisconnected;
     g_connManagerCb.OnDataReceived = ConnManagerRecvData;
-
     int isSupportTcp = 0;
+    ConnectFuncInterface *connectObj = NULL;
     (void)SoftbusGetConfig(SOFTBUS_INT_SUPPORT_TCP_PROXY, (unsigned char *)&isSupportTcp, sizeof(isSupportTcp));
     if (isSupportTcp) {
         connectObj = ConnInitTcp(&g_connManagerCb);
