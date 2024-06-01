@@ -20,6 +20,7 @@
 
 #include "lnn_node_info.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_timer.h"
 
 #ifdef __cplusplus
 extern "C" {

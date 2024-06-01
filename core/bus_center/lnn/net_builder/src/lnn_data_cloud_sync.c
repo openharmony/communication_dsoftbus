@@ -42,8 +42,8 @@
 #define KEY_MAX_LEN       128
 #define SPLIT_MAX_LEN     128
 #define SPLIT_KEY_NUM     3
-#define SPLIT_VALUE_NUM   2
-#define PUT_VALUE_MAX_LEN 136
+#define SPLIT_VALUE_NUM   3
+#define PUT_VALUE_MAX_LEN 156
 #define UDID_HASH_HEX_LEN 16
 static int32_t g_dbId = 0;
 
@@ -527,7 +527,7 @@ static int32_t GetInfoFromSplitKey(
         LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceUdid fail.");
         return SOFTBUS_STRCPY_ERR;
     }
-    if (strcpy_s(fieldName, FIELDNAME_MAX_LEN, splitKey[SPLIT_VALUE_NUM]) != EOK) {
+    if (strcpy_s(fieldName, FIELDNAME_MAX_LEN, splitKey[SPLIT_VALUE_NUM - 1]) != EOK) {
         LNN_LOGE(LNN_BUILDER, "fail:strcpy_s fieldName fail.");
         return SOFTBUS_STRCPY_ERR;
     }
@@ -579,7 +579,7 @@ static int32_t HandleDBAddChangeInternal(const char *key, const char *value, Nod
         LNN_LOGE(LNN_BUILDER, "fail:strcpy_s true value fail.");
         return SOFTBUS_STRCPY_ERR;
     }
-
+    LNN_LOGI(LNN_BUILDER, "DB data add device sync info, time=%{public}s", splitValue[SPLIT_VALUE_NUM - 1]);
     NodeInfo localCaheInfo = { 0 };
     if (LnnGetLocalCacheNodeInfo(&localCaheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
@@ -923,6 +923,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         LNN_LOGI(LNN_LEDGER, "no account info. no need sync to DB");
         return SOFTBUS_OK;
     }
+    uint64_t nowTime = SoftBusGetSysTimeMs();
     char putKey[KEY_MAX_LEN] = { 0 };
     if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%s", localCaheInfo.accountId, localCaheInfo.deviceInfo.deviceUdid, key) <
         0) {
@@ -930,7 +931,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         return SOFTBUS_ERR;
     }
     char putValue[PUT_VALUE_MAX_LEN] = { 0 };
-    if (sprintf_s(putValue, PUT_VALUE_MAX_LEN, "%s#%d", value, localCaheInfo.stateVersion) < 0) {
+    if (sprintf_s(putValue, PUT_VALUE_MAX_LEN, "%s#%d#%llu", value, localCaheInfo.stateVersion, nowTime) < 0) {
         LNN_LOGE(LNN_BUILDER, "sprintf_s value fail");
         return SOFTBUS_ERR;
     }
