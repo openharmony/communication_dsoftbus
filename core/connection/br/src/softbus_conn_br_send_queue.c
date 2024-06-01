@@ -23,6 +23,7 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_queue.h"
+#define BR_WAIT_TIME_SEC (600)
 
 static LIST_HEAD(g_brQueueList);
 static SoftBusMutex g_brQueueLock;
@@ -155,6 +156,8 @@ int32_t ConnBrDequeueBlock(void **msg)
     int32_t status = SOFTBUS_ERR;
     ConnectionQueue *item = NULL;
     ConnectionQueue *next = NULL;
+    SoftBusSysTime waitTime = {0};
+    waitTime.sec = BR_WAIT_TIME_SEC;
 
     if (msg == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -184,9 +187,15 @@ int32_t ConnBrDequeueBlock(void **msg)
             break;
         }
         CONN_LOGD(CONN_BR, "br queue is empty, dequeue start wait ...");
-        if (SoftBusCondWait(&g_sendCond, &g_brQueueLock, NULL) != SOFTBUS_OK) {
-            CONN_LOGD(CONN_BR, "BrSendCondWait failed");
-            status = SOFTBUS_ERR;
+        int32_t ret = SoftBusCondWait(&g_sendCond, &g_brQueueLock, &waitTime);
+        if (ret != SOFTBUS_OK) {
+            if (ret == SOFTBUS_TIMOUT) {
+                CONN_LOGW(CONN_BR, "BrSendCondWait  600s time out");
+                status = SOFTBUS_TIMOUT;
+                break;
+            }
+            CONN_LOGE(CONN_BR, "BrSendCondWait fail");
+            status = SOFTBUS_CONN_COND_WAIT_FAIL;
             break;
         }
     } while (true);

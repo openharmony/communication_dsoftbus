@@ -458,7 +458,7 @@ void NotifyAuthSuccess(int sessionId)
 static int32_t CheckSessionIsOpened(int32_t sessionId, bool isCancelCheck)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
-#define SESSION_STATUS_CANCEL_CHECK_MAX_NUM 25
+#define SESSION_STATUS_CANCEL_CHECK_MAX_NUM 10
 #define SESSION_CHECK_PERIOD 200000
     int32_t checkMaxNum = isCancelCheck ? SESSION_STATUS_CANCEL_CHECK_MAX_NUM : SESSION_STATUS_CHECK_MAX_NUM;
     int32_t i = 0;
@@ -1033,6 +1033,33 @@ static int32_t GetMaxIdleTimeout(const QosTV *qos, uint32_t qosCount, uint32_t *
     return SOFTBUS_OK;
 }
 
+static int32_t CheckSessionCancelState(int32_t socket)
+{
+    SocketLifecycleData lifecycle;
+    (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
+    int32_t ret = GetSocketLifecycleAndSessionNameBySessionId(socket, NULL, &lifecycle);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socket state failed, socket=%{public}d failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
+    if (lifecycle.sessionState == SESSION_STATE_CANCELLING) {
+        TRANS_LOGW(TRANS_SDK, "This socket already in cancelling state. socket=%{public}d", socket);
+        int32_t channelId = INVALID_CHANNEL_ID;
+        int32_t type = CHANNEL_TYPE_BUTT;
+        ret = ClientGetChannelBySessionId(socket, &channelId, &type, NULL);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "get channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
+        }
+        ret = ClientTransCloseChannel(channelId, type);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,
+                channelId, type);
+        }
+        return lifecycle.bindErrCode;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync)
 {
     if (!IsValidSessionId(socket) || !IsValidSocketListener(listener, false) ||
@@ -1049,30 +1076,29 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
         ret == SOFTBUS_OK, ret, TRANS_SDK, "init session state failed, ret=%{public}d", ret);
 
     ret = ClientSetListenerBySessionId(socket, listener, false);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "set listener by socket=%{public}d failed, ret=%{public}d", socket, ret);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set listener by socket=%{public}d failed, ret=%{public}d", socket, ret);
 
     uint32_t maxIdleTimeout = 0;
     ret = GetMaxIdleTimeout(qos, qosCount, &maxIdleTimeout);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get maximum idle time failed, ret=%{public}d", ret);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "get maximum idle time failed, ret=%{public}d", ret);
+
     ret = SetSessionIsAsyncById(socket, isAsync);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_SDK, "set session is async failed, ret=%{public}d", ret);
+
     TransInfo transInfo;
     ret = ClientIpcOpenSession(socket, qos, qosCount, &transInfo, isAsync);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "open session failed, ret=%{public}d", ret);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "open session failed, ret=%{public}d", ret);
+
     if (!isAsync) {
         ret = ClientSetChannelBySessionId(socket, &transInfo);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
             ret == SOFTBUS_OK, ret, TRANS_SDK, "set channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
+        ret = CheckSessionCancelState(socket);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, ret, TRANS_SDK, "check session cancel state failed, ret=%{public}d", ret);
         SetSessionStateBySessionId(socket, SESSION_STATE_OPENED, 0);
         ret = ClientWaitSyncBind(socket);
         TRANS_CHECK_AND_RETURN_RET_LOGE(

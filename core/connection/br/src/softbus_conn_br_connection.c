@@ -226,11 +226,8 @@ static void *StartClientConnect(void *connectCtx)
     return NULL;
 }
 
-static ConnBrConnection *CreateAndSaveConnection(void *serveCtx)
+static ConnBrConnection *CreateAndSaveConnection(int32_t socketHandle)
 {
-    ServerServeContext *ctx = (ServerServeContext *)serveCtx;
-    int32_t socketHandle = ctx->socketHandle;
-    SoftBusFree(ctx);
     BluetoothRemoteDevice remote;
     (void)memset_s(&remote, sizeof(remote), 0, sizeof(remote));
     int32_t ret = g_sppDriver->GetRemoteDeviceInfo(socketHandle, &remote);
@@ -264,26 +261,28 @@ static ConnBrConnection *CreateAndSaveConnection(void *serveCtx)
 
 static void *StartServerServe(void *serveCtx)
 {
-    ConnBrConnection *connection = CreateAndSaveConnection(serveCtx);
+    ServerServeContext *ctx = (ServerServeContext *)serveCtx;
+    int32_t socketHandle = ctx->socketHandle;
+    SoftBusFree(ctx);
+    ConnBrConnection *connection = CreateAndSaveConnection(socketHandle);
     CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, NULL, CONN_BR,
         "connection is not exist, connectionId=%{public}u", connection->connectionId);
     do {
-        CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId,
-            connection->socketHandle);
+        CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId, socketHandle);
         g_eventListener.onServerAccepted(connection->connectionId);
-        int32_t ret = LoopRead(connection->connectionId, connection->socketHandle);
+        int32_t ret = LoopRead(connection->connectionId, socketHandle);
         CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, ret=%{public}d",
-            connection->connectionId, connection->socketHandle, ret);
+            connection->connectionId, socketHandle, ret);
 
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, socket=%{public}d", connection->connectionId,
-                connection->socketHandle);
-            g_sppDriver->DisConnect(connection->socketHandle);
+                socketHandle);
+            g_sppDriver->DisConnect(socketHandle);
             g_eventListener.onConnectionException(connection->connectionId, SOFTBUS_LOCK_ERR);
             break;
         }
         if (connection->socketHandle != INVALID_SOCKET_HANDLE) {
-            g_sppDriver->DisConnect(connection->socketHandle);
+            g_sppDriver->DisConnect(socketHandle);
             connection->socketHandle = INVALID_SOCKET_HANDLE;
         }
         connection->state = (ret == SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED ? BR_CONNECTION_STATE_CLOSED :
@@ -719,7 +718,10 @@ static void *ListenTask(void *arg)
         if (status != SOFTBUS_OK) {
             break;
         }
+        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&serverState->mutex) == SOFTBUS_OK,
+            NULL, CONN_BLE, "lock failed");
         int32_t serverId = serverState->serverId;
+        (void)SoftBusMutexUnlock(&serverState->mutex);
         while (true) {
             int32_t socketHandle = g_sppDriver->Accept(serverId);
             if (socketHandle == SOFTBUS_ERR) {

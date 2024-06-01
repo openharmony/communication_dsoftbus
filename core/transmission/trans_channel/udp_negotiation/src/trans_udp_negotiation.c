@@ -85,8 +85,13 @@ void ReleaseUdpChannelId(int32_t channelId)
         return;
     }
     uint32_t id = (uint32_t)channelId;
-    g_channelIdFlagBitsMap &= (~(ID_USED << (uint64_t)id));
-    SoftBusMutexUnlock(&g_udpNegLock);
+    if (id >= MAX_UDP_CHANNEL_ID_COUNT) {
+        TRANS_LOGE(TRANS_CTRL, "id invalid, release udp channelId failed, channelId=%{public}d", channelId);
+        (void)SoftBusMutexUnlock(&g_udpNegLock);
+        return;
+    }
+    g_channelIdFlagBitsMap &= (~(ID_USED << id));
+    (void)SoftBusMutexUnlock(&g_udpNegLock);
 }
 
 static int64_t GenerateSeq(bool isServer)

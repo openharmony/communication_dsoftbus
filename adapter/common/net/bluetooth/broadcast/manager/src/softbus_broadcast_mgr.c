@@ -506,7 +506,6 @@ static int32_t BuildBcPayload(int32_t maxPayloadLen, const SoftbusBroadcastPaylo
 
     dstData->type = (BroadcastDataType)srcData->type;
     dstData->id = srcData->id;
-    dstData->payloadLen = srcData->payloadLen;
 
     if (srcData->payloadLen > maxPayloadLen) {
         DISC_LOGW(DISC_BLE, "payloadLen=%{public}d is too long!", srcData->payloadLen);
@@ -520,6 +519,7 @@ static int32_t BuildBcPayload(int32_t maxPayloadLen, const SoftbusBroadcastPaylo
         SoftBusFree(dstData->payload);
         return SOFTBUS_MEM_ERR;
     }
+    dstData->payloadLen = bcDataLen;
 
     return SOFTBUS_OK;
 }

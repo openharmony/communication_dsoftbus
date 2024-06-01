@@ -1681,21 +1681,27 @@ static int32_t InitBrManager()
     return SOFTBUS_OK;
 }
 
-ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
+static int32_t CheckConnCallbackPara(const ConnectCallback *callback)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, NULL, CONN_INIT, "ConnInitBr: callback is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        callback->OnConnected != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnConnected is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        callback->OnDisconnected != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnDisconnected is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        callback->OnDataReceived != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnDataReceived is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "ConnInitBr: callback is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnConnected != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "ConnInitBr: callback OnConnected is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnDisconnected != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "ConnInitBr: callback OnDisconnected is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnDataReceived != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "ConnInitBr: callback OnDataReceived is null");
+    return SOFTBUS_OK;
+}
 
-    int32_t status = BrInitLooper();
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init looper failed, error=%{public}d", status);
+static int32_t InitBrEventListener(void)
+{
+    int32_t ret = BrInitLooper();
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
+        "ConnInitBr: init looper failed, error=%{public}d", ret);
     SppSocketDriver *sppDriver = InitSppSocketDriver();
-    CONN_CHECK_AND_RETURN_RET_LOGE(sppDriver != NULL, NULL, CONN_INIT, "ConnInitBr: init spp socket driver failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(sppDriver != NULL, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
+        "ConnInitBr: init spp socket driver failed");
 
     ConnBrEventListener connectionEventListener = {
         .onServerAccepted = OnServerAccepted,
@@ -1705,26 +1711,33 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
         .onConnectionException = OnConnectionException,
         .onConnectionResume = OnConnectionResume,
     };
-    status = ConnBrConnectionMuduleInit(g_brManagerAsyncHandler.handler.looper, sppDriver, &connectionEventListener);
+    ret = ConnBrConnectionMuduleInit(g_brManagerAsyncHandler.handler.looper, sppDriver, &connectionEventListener);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init connection failed, error=%{public}d ", status);
+        ret == SOFTBUS_OK, ret, CONN_INIT, "ConnInitBr: init connection failed, error=%{public}d ", ret);
 
     ConnBrTransEventListener transEventListener = {
         .onPostByteFinshed = OnPostByteFinshed,
     };
-    status = ConnBrTransMuduleInit(sppDriver, &transEventListener);
+    ret = ConnBrTransMuduleInit(sppDriver, &transEventListener);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init trans failed, error=%{public}d", status);
+        ret == SOFTBUS_OK, ret, CONN_INIT, "ConnInitBr: init trans failed, error=%{public}d", ret);
+    return SOFTBUS_OK;
+}
 
-    status = InitBrManager();
+ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        CheckConnCallbackPara(callback) == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr callback para failed");
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init manager failed, error=%{public}d", status);
-    status = ConnBrInitBrPendingPacket();
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_INIT,
-        "conn init br failed: init pending packet failed, error=%{public}d", status);
-    status = ConnBrInitBrPendingPacket();
+        InitBrEventListener() == SOFTBUS_OK, NULL, CONN_INIT, "InitBrEventListener init failed");
+
+    int32_t ret = InitBrManager();
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "conn init br failed: init br pending failed, error=%{public}d", status);
+        ret == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init manager failed, error=%{public}d", ret);
+    ret = ConnBrInitBrPendingPacket();
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, CONN_INIT,
+        "conn init br failed: init pending packet failed, error=%{public}d", ret);
+
     g_connectCallback = *callback;
     static ConnectFuncInterface connectFuncInterface = {
         .ConnectDevice = BrConnectDevice,

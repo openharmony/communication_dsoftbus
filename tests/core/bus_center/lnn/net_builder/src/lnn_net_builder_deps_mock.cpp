@@ -88,6 +88,11 @@ uint32_t AuthGenRequestId(void)
     return GetNetBuilderDepsInterface()->AuthGenRequestId();
 }
 
+void LnnSetUnlockState(void)
+{
+    return GetNetBuilderDepsInterface()->LnnSetUnlockState();
+}
+
 void AuthHandleLeaveLNN(AuthHandle authHandle)
 {
     return GetNetBuilderDepsInterface()->AuthHandleLeaveLNN(authHandle);
