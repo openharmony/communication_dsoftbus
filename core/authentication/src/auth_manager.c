@@ -129,8 +129,11 @@ AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
     } else {
         ListTailInsert(&g_authClientList, &auth->node);
     }
-    AUTH_LOGI(AUTH_FSM, "create auth manager, side=%{public}s, authId=%{public}" PRId64, GetAuthSideStr(auth->isServer),
-        auth->authId);
+    char *anonyUuid = NULL;
+    Anonymize(auth->uuid, &anonyUuid);
+    AUTH_LOGI(AUTH_FSM, "create auth manager, uuid=%{public}s, side=%{public}s, authId=%{public}" PRId64,
+        anonyUuid, GetAuthSideStr(auth->isServer), auth->authId);
+    AnonymizeFree(anonyUuid);
     return auth;
 }
 
@@ -663,10 +666,7 @@ static AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo 
     AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth != NULL && auth->connInfo[info->connInfo.type].type != 0) {
         if (strcpy_s(auth->uuid, UUID_BUF_LEN, info->uuid) != EOK) {
-            char *anonyUuid = NULL;
-            Anonymize(info->uuid, &anonyUuid);
-            AUTH_LOGE(AUTH_FSM, "str copy uuid fail, uuid=%{public}s", anonyUuid);
-            AnonymizeFree(anonyUuid);
+            AUTH_LOGE(AUTH_FSM, "str copy uuid fail");
         }
         if (auth->connId[info->connInfo.type] != info->connId &&
             auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI) {
@@ -674,6 +674,10 @@ static AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo 
             auth->hasAuthPassed = false;
             AUTH_LOGI(AUTH_FSM, "auth manager may single device on line");
         }
+        char *anonyUuid = NULL;
+        Anonymize(auth->uuid, &anonyUuid);
+        AUTH_LOGI(AUTH_FSM, "uuid=%{public}s, authId=%{public}" PRId64, anonyUuid, auth->authId);
+        AnonymizeFree(anonyUuid);
     } else {
         auth = GetExistAuthManager(authSeq, info);
         if (auth != NULL) {
@@ -2597,9 +2601,12 @@ int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer
     }
     AuthManager *auth = FindAuthManagerByUuid(uuid, type, isServer);
     if (auth == NULL) {
-        AUTH_LOGE(
-            AUTH_CONN, "not found auth manager, connType=%{public}d, side=%{public}s", type, GetAuthSideStr(isServer));
         ReleaseAuthLock();
+        char *anoyUuid = NULL;
+        Anonymize(uuid, &anoyUuid);
+        AUTH_LOGE(AUTH_CONN, "not found auth manager, uuid=%{public}s, connType=%{public}d, side=%{public}s",
+            anoyUuid, type, GetAuthSideStr(isServer));
+        AnonymizeFree(anoyUuid);
         return AUTH_INVALID_ID;
     }
     int64_t authId = auth->authId;
