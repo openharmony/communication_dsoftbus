@@ -557,6 +557,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         goto ERR_FAIL;
     }
     if (AddTrigger((ListenerModule)(option->socketOption.moduleId), fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+        DelTcpConnNode(connectionId);
         goto ERR_FAIL;
     }
     SoftBusFree(statistics);
