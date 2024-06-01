@@ -625,10 +625,8 @@ static int32_t StartScan(int32_t scannerId, const SoftBusBcScanParams *param, co
         DISC_LOGE(DISC_BLE_ADAPTER, "invalid param, scannerId=%{public}d", scannerId);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_scannerLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "lock failed, scannerId=%{public}d", scannerId);
-        return SOFTBUS_LOCK_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_scannerLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE_ADAPTER,
+        "lock failed, scannerId=%{public}d", scannerId);
     if (!CheckScanChannelInUsed(scannerId)) {
         DISC_LOGE(DISC_BLE_ADAPTER, "scanner is not in used, scannerId=%{public}d", scannerId);
         SoftBusMutexUnlock(&g_scannerLock);
