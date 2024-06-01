@@ -22,129 +22,63 @@
 #include "hisysevent_c.h"
 #include "softbus_event.h"
 
+static void MatchDiscEventNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchDiscEventNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index, const char * extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
+    EXPECT_STREQ(params[index].v.s, extraParam);
+}
+
+static void MatchDiscEventNameTypeExtraStrParamAnony(const HiSysEventParam *params, int32_t index,
+    const char * extraParam)
+{
+    char *anonyStr = NULL;
+    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
+    Anonymize(extraParam, &anonyStr);
+    EXPECT_STREQ(params[index].v.s, AnonymizeWrapper(anonyStr));
+    AnonymizeFree(anonyStr);
+}
+
 MATCHER_P2(DiscValidParamArrayMatcher, inExtra, validSize, "disc valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<DiscEventExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.result);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.initType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.serverType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.interFuncType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.capabilityBit);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.capabilityData);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.bleTurnState);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.ipLinkStatus);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.coapChangeType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.broadcastType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.broadcastFreq);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.scanType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.scanCycle);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.discType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.discMode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.costTime);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    char *anonyStr = NULL;
-    Anonymize(extra.localNetworkId, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    Anonymize(extra.peerIp, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    Anonymize(extra.peerBrMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    Anonymize(extra.peerBleMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    Anonymize(extra.peerWifiMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    Anonymize(extra.peerNetworkId, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerDeviceType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.callerPkg);
-
+    MatchDiscEventNameTypeExtraInt32Param(params, index, extra.result);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.initType);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.serverType);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.interFuncType);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.capabilityBit);
+    MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.capabilityData);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.bleTurnState);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.ipLinkStatus);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.coapChangeType);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.broadcastType);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.broadcastFreq);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.scanType);
+    MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.scanCycle);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.discType);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.discMode);
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, extra.costTime);
+    MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.localNetworkId);
+    MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
+    MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
+    MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBleMac);
+    MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.peerWifiMac);
+    MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.peerPort);
+    MatchDiscEventNameTypeExtraStrParamAnony(params, ++index, extra.peerNetworkId);
+    MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceType);
+    MatchDiscEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
     EXPECT_EQ(++index, validSize);
     return true;
 }
@@ -155,13 +89,8 @@ MATCHER_P2(DiscInvalidParamArrayMatcher, inExtra, validSize, "disc invalid param
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<DiscEventExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.result < 0) ? (-extra.result) : extra.result));
-    ++index;
-    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
+    MatchDiscEventNameTypeExtraInt32Param(params, index, ((extra.result < 0) ? (-extra.result) : extra.result));
+    MatchDiscEventNameTypeExtraInt32Param(params, ++index, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
     EXPECT_EQ(++index, validSize);
     return true;
 }
