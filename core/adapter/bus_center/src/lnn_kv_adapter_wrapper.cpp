@@ -23,7 +23,6 @@
 #include "lnn_kv_data_change_listener.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_def.h"
 #include "softbus_utils.h"
@@ -239,7 +238,7 @@ int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
         }
         int64_t nowTime = 0;
         SoftBusSysTime time = { 0 };
-        SoftBusGetRealTime(&time);
+        SoftBusGetTime(&time);
         nowTime = time.sec * CLOUD_SYNC_TIME_FACTOR + time.usec / CLOUD_SYNC_TIME_FACTOR;
         BasicCloudSyncInfoToMap(localInfo, values, nowTime);
         ComplexCloudSyncInfoToMap(localInfo, values, nowTime);
