@@ -90,13 +90,18 @@ enum SoftBusFuncId {
     SERVER_EVALUATE_QOS = 164,
 };
 
-bool PublishServiceFuzzTest(const uint8_t* data, size_t size)
+static sptr<IRemoteObject> GetRemoteObject(void)
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
+    if (samgr != nullptr) {
+        return samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
     }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    return nullptr;
+}
+
+static bool SendRequestByCommand(const uint8_t* data, size_t size, uint32_t command)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -107,226 +112,62 @@ bool PublishServiceFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_PUBLISH_SERVICE, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return object->SendRequest(command, datas, reply, option) == ERR_NONE;
+}
+
+bool PublishServiceFuzzTest(const uint8_t* data, size_t size)
+{
+    return SendRequestByCommand(data, size, SERVER_PUBLISH_SERVICE);
 }
 
 bool UnPublishServiceFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_UNPUBLISH_SERVICE, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_UNPUBLISH_SERVICE);
 }
 
 bool CreateSessionServerFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_CREATE_SESSION_SERVER, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_CREATE_SESSION_SERVER);
 }
 
 bool RemoveSessionServerFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_REMOVE_SESSION_SERVER, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_REMOVE_SESSION_SERVER);
 }
 
 bool OpenSessionFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_OPEN_SESSION, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_OPEN_SESSION);
 }
 
 bool OpenAuthSessionFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_OPEN_AUTH_SESSION, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_OPEN_AUTH_SESSION);
 }
 
 bool NotifyAuthSuccessFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_NOTIFY_AUTH_SUCCESS, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_NOTIFY_AUTH_SUCCESS);
 }
 
 bool CloseChannelFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_CLOSE_CHANNEL, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_CLOSE_CHANNEL);
 }
 
 bool SendMessageFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_SESSION_SENDMSG, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_SESSION_SENDMSG);
 }
 
 bool QosReportFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_QOS_REPORT, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_QOS_REPORT);
 }
 
 bool GrantPermissionFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -349,34 +190,12 @@ bool GrantPermissionFuzzTest(const uint8_t* data, size_t size)
 
 bool RemovePermissionFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_REMOVE_PERMISSION, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_REMOVE_PERMISSION);
 }
 
 bool StreamStatsFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -399,34 +218,12 @@ bool StreamStatsFuzzTest(const uint8_t* data, size_t size)
 
 bool GetSoftbusSpecObjectFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_GET_SOFTBUS_SPEC_OBJECT, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_GET_SOFTBUS_SPEC_OBJECT);
 }
 
 bool StartDiscoveryFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -456,34 +253,12 @@ bool StartDiscoveryFuzzTest(const uint8_t* data, size_t size)
 
 bool StopDiscoveryFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_STOP_DISCOVERY, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_STOP_DISCOVERY);
 }
 
 bool JoinLNNFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -504,11 +279,7 @@ bool JoinLNNFuzzTest(const uint8_t* data, size_t size)
 
 bool JoinMetaNodeFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -529,57 +300,17 @@ bool JoinMetaNodeFuzzTest(const uint8_t* data, size_t size)
 
 bool LeaveLNNFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_LEAVE_LNN, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_LEAVE_LNN);
 }
 
 bool LeaveMetaNodeFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_LEAVE_METANODE, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_LEAVE_METANODE);
 }
 
 bool GetAllOnlineNodeInfoFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -600,287 +331,67 @@ bool GetAllOnlineNodeInfoFuzzTest(const uint8_t* data, size_t size)
 
 bool GetLocalDeviceInfoFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_GET_LOCAL_DEVICE_INFO, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_GET_LOCAL_DEVICE_INFO);
 }
 
 bool GetNodeKeyInfoFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_GET_NODE_KEY_INFO, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_GET_NODE_KEY_INFO);
 }
 
 bool SetNodeDataChangeFlagFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_SET_NODE_DATA_CHANGE_FLAG, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_SET_NODE_DATA_CHANGE_FLAG);
 }
 
 bool StartTimeSyncFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_START_TIME_SYNC, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_START_TIME_SYNC);
 }
 
 bool StopTimeSyncFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_STOP_TIME_SYNC, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_STOP_TIME_SYNC);
 }
 
 bool PublishLNNFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_PUBLISH_LNN, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_PUBLISH_LNN);
 }
 
 bool StopPublishLNNFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_STOP_PUBLISH_LNN, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_STOP_PUBLISH_LNN);
 }
 
 bool RefreshLNNFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_REFRESH_LNN, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_REFRESH_LNN);
 }
 
 bool StopRefreshLNNFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_STOP_REFRESH_LNN, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_STOP_REFRESH_LNN);
 }
 
 bool ActiveMetaNodeFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteRawData(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_ACTIVE_META_NODE, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_ACTIVE_META_NODE);
 }
 
 bool DeactiveMetaNodeFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_DEACTIVE_META_NODE, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_DEACTIVE_META_NODE);
 }
 
 bool GetAllMetaNodeInfoFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_GET_ALL_META_NODE_INFO, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, SERVER_GET_ALL_META_NODE_INFO);
 }
 
 bool ShiftLNNGearFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -901,11 +412,7 @@ bool ShiftLNNGearFuzzTest(const uint8_t* data, size_t size)
 
 bool RippleStatsFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -928,34 +435,12 @@ bool RippleStatsFuzzTest(const uint8_t* data, size_t size)
 
 bool SoftbusRegisterServiceFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
-    if (object == nullptr) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(MANAGE_REGISTER_SERVICE, datas, reply, option) != ERR_NONE) {
-        return false;
-    }
-    return true;
+    return SendRequestByCommand(data, size, MANAGE_REGISTER_SERVICE);
 }
 
 bool CheckOpenSessionPermissionFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -1002,11 +487,7 @@ bool CheckOpenSessionPermissionFuzzTest(const uint8_t* data, size_t size)
 
 bool EvaLuateQosInnerFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -1031,11 +512,7 @@ bool EvaLuateQosInnerFuzzTest(const uint8_t* data, size_t size)
 
 bool EvaLuateQosInnerNetworkIdFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -1060,11 +537,7 @@ bool EvaLuateQosInnerNetworkIdFuzzTest(const uint8_t* data, size_t size)
 
 bool EvaLuateQosInnerDataTypeFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
@@ -1088,11 +561,7 @@ bool EvaLuateQosInnerDataTypeFuzzTest(const uint8_t* data, size_t size)
 
 bool EvaLuateQosInnerQosCountFuzzTest(const uint8_t* data, size_t size)
 {
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        return false;
-    }
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr) {
         return false;
     }
