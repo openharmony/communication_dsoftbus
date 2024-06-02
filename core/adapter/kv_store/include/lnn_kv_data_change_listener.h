@@ -16,6 +16,7 @@
 #ifndef LNN_KV_DATA_CHANGE_LISTENER_H
 #define LNN_KV_DATA_CHANGE_LISTENER_H
 
+#include <map>
 #include <vector>
 
 #include "kvstore_observer.h"
