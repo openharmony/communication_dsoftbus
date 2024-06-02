@@ -802,3 +802,71 @@ int32_t TransGetPidFromSocketChannelInfoBySession(const char *sessionName, int32
     AnonymizeLogSessionNameWhenNotFound(sessionName, sessionId);
     return SOFTBUS_NOT_FIND;
 }
+
+static ConnectType ConvertLaneLinkTypeToConnectType(LaneLinkType laneLinkType)
+{
+    switch (laneLinkType) {
+        case LANE_BR:
+            return CONNECT_BR;
+        case LANE_BLE:
+        case LANE_COC:
+            return CONNECT_BLE;
+        case LANE_P2P:
+            return CONNECT_P2P;
+        case LANE_WLAN_2P4G:
+        case LANE_WLAN_5G:
+        case LANE_ETH:
+            return CONNECT_TCP;
+        case LANE_P2P_REUSE:
+            return CONNECT_P2P_REUSE;
+        case LANE_BLE_DIRECT:
+        case LANE_COC_DIRECT:
+            return CONNECT_BLE_DIRECT;
+        case LANE_HML:
+            return CONNECT_HML;
+        case LANE_BLE_REUSE:
+            return CONNECT_BLE;
+        default:
+            return CONNECT_TYPE_MAX;
+    }
+}
+
+int32_t TransGetConnectTypeByChannelId(int32_t channelId, ConnectType *connectType)
+{
+    if (connectType == NULL) {
+        TRANS_LOGE(TRANS_INIT, "connectType is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_channelLaneList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    TransLaneInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_channelLaneList->list), TransLaneInfo, node) {
+        if (item->channelId != channelId) {
+            continue;
+        }
+
+        ConnectType connType = ConvertLaneLinkTypeToConnectType(item->laneConnInfo.type);
+        if (connType >= CONNECT_TYPE_MAX) {
+            TRANS_LOGE(TRANS_SVC, "invalid connectType=%{public}d. linkType=%{public}d, channelId=%{public}d",
+                connType, item->laneConnInfo.type, channelId);
+            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            return SOFTBUS_CONN_INVALID_CONN_TYPE;
+        }
+
+        *connectType = connType;
+        (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+    TRANS_LOGE(TRANS_SVC, "can not find connectType by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
+}

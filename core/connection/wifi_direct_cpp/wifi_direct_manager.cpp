@@ -284,6 +284,35 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     return SOFTBUS_OK;
 }
 
+static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp, char *localMac, size_t localMacSize, char *remoteMac,
+    size_t remoteMacSize)
+{
+    bool found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
+        if (innerLink.GetLocalIpv4() == localIp || innerLink.GetLocalIpv6() == localIp) {
+            found = true;
+            if (strcpy_s(localMac, localMacSize, innerLink.GetLocalDynamicMac().c_str()) != EOK) {
+                found = false;
+            }
+            if (strcpy_s(remoteMac, remoteMacSize, innerLink.GetRemoteDynamicMac().c_str()) != EOK) {
+                found = false;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    if (!found) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str());
+        return SOFTBUS_ERR;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s localMac=%{public}s remoteMac=%{public}s",
+        OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str(), OHOS::SoftBus::WifiDirectAnonymizeMac(localMac).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str());
+    return SOFTBUS_OK;
+}
+
 static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, remoteIp=%{public}s remoteUuid=%{public}s",
@@ -403,6 +432,7 @@ static struct WifiDirectManager g_manager = {
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
     .getRemoteUuidByIp = GetRemoteUuidByIp,
+    .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 
     .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,

@@ -508,6 +508,7 @@
         "UnregistDirSchema";
         "TransRegistDirSchema";
         "TransUnRegistDirSchema";
+        "GetMacInfoBySession";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

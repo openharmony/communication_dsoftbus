@@ -167,6 +167,11 @@ typedef struct {
 } QosInfo;
 
 typedef struct {
+    char localMac[MAX_MAC_LEN];
+    char remoteMac[MAX_MAC_LEN];
+} LnnMacInfo;
+
+typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LaneTransType transType;
     bool networkDelegate;
@@ -241,7 +246,7 @@ int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosI
 uint32_t ApplyLaneReqId(LaneType type);
 int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener);
 int32_t LnnFreeLane(uint32_t laneReqId);
-
+int32_t GetMacInfoByLaneId(uint64_t laneId, LnnMacInfo *macInfo);
 #ifdef __cplusplus
 }
 #endif
