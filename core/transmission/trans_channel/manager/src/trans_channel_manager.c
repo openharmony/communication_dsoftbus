@@ -282,10 +282,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         param->sessionName, param->sessionId, transInfo->channelId, transInfo->channelType);
     TransSetSocketChannelStateByChannel(
         transInfo->channelId, transInfo->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
-    if (((ChannelType)transInfo->channelType == CHANNEL_TYPE_TCP_DIRECT) &&
-        (connOpt.type != CONNECT_P2P) && (connOpt.type != CONNECT_HML)) {
-        TransFreeLane(laneHandle, param->isQosLane);
-    } else if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, &connInfo,
+    if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, &connInfo,
         laneHandle, param->isQosLane, &appInfo->myData) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - appInfo->timeStart);
