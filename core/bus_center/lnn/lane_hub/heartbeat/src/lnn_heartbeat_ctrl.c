@@ -34,6 +34,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_kv_adapter_wrapper.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
@@ -465,6 +466,7 @@ static void HbDelayConditionChanged(void *para)
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
     g_hbConditionState.heartbeatEnable = true;
     HbConditionChanged(false);
+    LnnClearRedundancyCache();
 }
 
 static int32_t HbTryCloudSync(void)
