@@ -972,6 +972,9 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add new udp channel failed.");
         ReleaseUdpChannelId(id);
+        if (newChannel->info.fastTransData != NULL) {
+            SoftBusFree((void *)newChannel->info.fastTransData);
+        }
         SoftBusFree(newChannel);
         return ret;
     }
