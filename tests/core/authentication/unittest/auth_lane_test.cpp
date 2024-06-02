@@ -18,8 +18,10 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "auth_device.c"
 #include "auth_interface.h"
 #include "auth_interface.c"
+#include "auth_lane.c"
 #include "auth_manager.h"
 #include "auth_manager.c"
 #include "auth_log.h"
