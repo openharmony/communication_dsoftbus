@@ -21,6 +21,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_deps_mock.h"
+#include "lnn_lane_interface.h"
 #include "lnn_lane_link_deps_mock.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_select_rule.h"
@@ -35,6 +36,8 @@ constexpr int32_t SYNCFAIL = 0;
 constexpr int32_t SYNCSUCC = 1;
 constexpr int32_t ASYNCFAIL = 2;
 constexpr int32_t ASYNCSUCC = 3;
+constexpr int32_t USEABLE_LANE_ID = 1234567;
+constexpr char USEABLE_IP[] = "192.168.1.1";
 
 int32_t g_laneLinkResult = SOFTBUS_INVALID_PARAM;
 
@@ -83,6 +86,21 @@ static void OnLaneLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType
     g_laneLinkResult = SOFTBUS_ERR;
     return;
 }
+
+static int32_t GetLocalAndRemoteMacByLocalIp(
+    const char *localIp, char *localMac, size_t localMacSize, char *remoteMac, size_t remoteMacSize)
+{
+    (void)localIp;
+    (void)localMac;
+    (void)localMacSize;
+    (void)remoteMac;
+    (void)remoteMacSize;
+    return SOFTBUS_OK;
+}
+
+static struct WifiDirectManager manager = {
+    .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
+};
 
 static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
@@ -1394,5 +1412,54 @@ HWTEST_F(LNNLaneLinkTest, LnnCancelWifiDirect_001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
+}
+
+/*
+* @tc.name: GET_MAC_INFO_BY_LANE_ID_TEST_001
+* @tc.desc: GetMacInfoByLaneId test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, GET_MAC_INFO_BY_LANE_ID_TEST_001, TestSize.Level1)
+{
+    uint64_t laneId = INVALID_LANE_ID;
+    LnnMacInfo macInfo;
+    memset_s(&macInfo, sizeof(LnnMacInfo), 0, sizeof(LnnMacInfo));
+    int32_t ret = GetMacInfoByLaneId(laneId, &macInfo);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = GetMacInfoByLaneId(USEABLE_LANE_ID, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: GET_MAC_INFO_BY_LANE_ID_MOCK_TEST_002
+* @tc.desc: GetMacInfoByLaneId test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, GET_MAC_INFO_BY_LANE_ID_MOCK_TEST_002, TestSize.Level1)
+{
+    LaneDepsInterfaceMock laneMock;
+    LaneLinkDepsInterfaceMock laneDepMock;
+    int32_t ret = InitLaneLink();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    LnnMacInfo macInfo;
+    LaneResource resource = {
+        .laneId = USEABLE_LANE_ID,
+        .link.type = LANE_HML,
+    };
+    (void)strcpy_s(resource.link.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, USEABLE_IP);
+    memset_s(&macInfo, sizeof(LnnMacInfo), 0, sizeof(LnnMacInfo));
+    EXPECT_CALL(laneMock, GetWifiDirectManager).WillOnce(Return(NULL)).WillRepeatedly(Return(&manager));
+    EXPECT_CALL(laneDepMock, FindLaneResourceByLaneId).WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(resource), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneDepMock, DelLaneResourceByLaneId).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = GetMacInfoByLaneId(USEABLE_LANE_ID, &macInfo);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    ret = GetMacInfoByLaneId(USEABLE_LANE_ID, &macInfo);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+
+    ret = DelLaneResourceByLaneId(USEABLE_LANE_ID, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
