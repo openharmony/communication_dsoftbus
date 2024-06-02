@@ -2441,7 +2441,8 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
 
-    LNN_LOGI(LNN_BUILDER, "notify discovery device enter! isNeedConnect=%{public}d", isNeedConnect);
+    LNN_LOGI(LNN_BUILDER, "notify discovery device enter! peer%{public}s, isNeedConnect=%{public}d",
+        addr != NULL ? LnnPrintConnectionAddr(addr) : "", isNeedConnect);
     if (g_netBuilder.isInit == false) {
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;

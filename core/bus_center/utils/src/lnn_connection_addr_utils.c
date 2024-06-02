@@ -23,7 +23,9 @@
 #include "softbus_def.h"
 
 #define LNN_MAX_PRINT_ADDR_LEN 100
-#define SHORT_UDID_HASH_LEN 8
+#define SHORT_UDID_HASH_LEN    8
+
+static __thread char g_printAddr[LNN_MAX_PRINT_ADDR_LEN] = { 0 };
 
 bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
 {
@@ -257,7 +259,6 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
 const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
 {
     int32_t ret = 0;
-    static char printAddr[LNN_MAX_PRINT_ADDR_LEN] = {0};
     char *anonyIp = NULL;
     char *anonyMac = NULL;
 
@@ -270,19 +271,19 @@ const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
         /* fall-through */
         case CONNECTION_ADDR_ETH:
             Anonymize(addr->info.ip.ip, &anonyIp);
-            ret = sprintf_s(printAddr, sizeof(printAddr),
+            ret = sprintf_s(g_printAddr, sizeof(g_printAddr),
                 "Ip=%s", anonyIp);
             AnonymizeFree(anonyIp);
             break;
         case CONNECTION_ADDR_BR:
             Anonymize(addr->info.br.brMac, &anonyMac);
-            ret = sprintf_s(printAddr, sizeof(printAddr),
+            ret = sprintf_s(g_printAddr, sizeof(g_printAddr),
                 "BrMac=%s", anonyMac);
             AnonymizeFree(anonyMac);
             break;
         case CONNECTION_ADDR_BLE:
             Anonymize(addr->info.ble.bleMac, &anonyMac);
-            ret = sprintf_s(printAddr, sizeof(printAddr),
+            ret = sprintf_s(g_printAddr, sizeof(g_printAddr),
                 "BleMac=%s", anonyMac);
             AnonymizeFree(anonyMac);
             break;
@@ -294,5 +295,5 @@ const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
         LNN_LOGE(LNN_STATE, "sprintf_s connection addr failed");
         return "Addr=";
     }
-    return printAddr;
+    return g_printAddr;
 }
