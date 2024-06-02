@@ -594,12 +594,16 @@ static int32_t UpdateStateVersion(const void *buf)
     if (*(int32_t *)buf > MAX_STATE_VERSION) {
         *(int32_t *)buf = 1;
     }
-    info->stateVersion = *(int32_t *)buf;
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+    if (info->stateVersion == *(int32_t *)buf) {
+        LNN_LOGI(LNN_LEDGER, "unchanged. no need update, stateVersion=%{public}d", info->stateVersion);
         return SOFTBUS_OK;
     }
-    char value[STATE_VERSION_VALUE_LENGTH] = {0};
+    info->stateVersion = *(int32_t *)buf;
+    if (g_localNetLedger.localInfo.accountId == 0) {
+        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud, stateVersion=%{public}d", info->stateVersion);
+        return SOFTBUS_OK;
+    }
+    char value[STATE_VERSION_VALUE_LENGTH] = { 0 };
     (void)sprintf_s(value, STATE_VERSION_VALUE_LENGTH, "%d", g_localNetLedger.localInfo.stateVersion);
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_STATE_VERSION, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger state version change sync to cloud failed");
