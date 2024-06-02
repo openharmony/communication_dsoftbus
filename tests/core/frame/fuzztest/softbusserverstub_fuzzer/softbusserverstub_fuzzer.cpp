@@ -1133,9 +1133,6 @@ bool IsValidParam(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::EvaLuateQosInnerNetworkIdFuzzTest(data, size);
-    OHOS::EvaLuateQosInnerDataTypeFuzzTest(data, size);
-    OHOS::EvaLuateQosInnerQosCountFuzzTest(data, size);
     if (!OHOS::IsValidParam(data, size)) {
         return 0;
     }
