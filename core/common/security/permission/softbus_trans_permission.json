@@ -487,7 +487,6 @@
     "SESSION_NAME": "Media_Session_RemoteCtrl",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "PKG_NAME": "AVSession",
