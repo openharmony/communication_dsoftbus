@@ -361,7 +361,7 @@ static void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<s
         remotePtkStr[i] = static_cast<char>(localInfo->remotePtk[i]);
     }
     values[keyPrefix + DEVICE_INFO_PTK] = remotePtkStr + valueSuffix;
-    values[keyPrefix + DEVICE_INFO_JSON_KEY_TABLE_MIAN] = localInfo->tableMain + valueSuffix;
+    values[keyPrefix + DEVICE_INFO_JSON_BROADCAST_KEY_TABLE] = localInfo->broadcastCipherKey + valueSuffix;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_TOTAL_LIFE] = std::to_string(localInfo->lifeTotal) + valueSuffix;
     values[keyPrefix + DEVICE_INFO_JSON_KEY_TIMESTAMP_BEGIN] =
         std::to_string(localInfo->curBeginTime) + valueSuffix;
