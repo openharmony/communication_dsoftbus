@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "lnn_async_callback_utils.h"
@@ -430,6 +431,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupCreated");
     LnnUpdateOhosAccount(true);
     LnnHbOnTrustedRelationIncreased(groupType);
+    LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
     RestartCoapDiscovery();
     EhLoginEventHandler();
 }
