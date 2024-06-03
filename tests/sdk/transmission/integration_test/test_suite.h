@@ -18,10 +18,24 @@
 
 #include <cstdio>
 
+#include "session.h"
+
 #define LOG(FMT, args...) printf(FMT "\n", ##args)
 
 #define ECHO_SERVICE_PKGNAME               "dms"
 #define ECHO_SERVICE_SESSION_NAME          "ohos.distributedschedule.dms.echo"
 #define ECHO_SERVICE_CONSUMER_SESSION_NAME "ohos.distributedschedule.dms.echo"
+
+inline void EsOnDataReceived(int sessionId, const void *data, unsigned int dataLen) { }
+
+inline void EsOnStreamReceived(
+    int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+{
+    LOG("%s:enter", __func__);
+}
+inline void EsOnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
+{
+    LOG("%s:enter", __func__);
+}
 
 #endif

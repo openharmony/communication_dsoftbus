@@ -55,21 +55,6 @@ static void EsOnSessionClosed(int sessionId)
     }
 }
 
-static void EsOnDataReceived(int sessionId, const void *data, unsigned int dataLen)
-{
-    LOG("%s:enter", __func__);
-}
-
-static void EsOnStreamReceived(
-    int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
-{
-    LOG("%s:enter", __func__);
-}
-static void EsOnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
-{
-    LOG("%s:enter", __func__);
-}
-
 static int TsOnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
 {
     LOG("%s:session=%d, files=%s, count=%d", __func__, sessionId, files, fileCnt);
