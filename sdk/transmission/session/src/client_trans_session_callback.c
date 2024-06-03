@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_udp_manager.h"
 #include "session_set_timer.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -288,7 +289,9 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         TRANS_LOGE(TRANS_SDK, "accept session failed, ret=%{public}d", ret);
         return ret;
     }
-
+    if (channel->channelType == CHANNEL_TYPE_UDP && channel->businessType == BUSINESS_TYPE_FILE) {
+        TransSetUdpChanelSessionId(channel->channelId, sessionId);
+    }
     int id = SetTimer("OnSessionOpened", DFX_TIMERS_S);
     if (sessionCallback.isSocketListener) {
         ret = HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
