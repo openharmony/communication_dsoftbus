@@ -321,7 +321,8 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
     DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->dataStatus == SOFTBUS_BC_DATA_COMPLETE,
         SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
         "dataStatus is invalid. dataStatus=%{public}u", reportInfo->dataStatus);
-    DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE, "advData is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL,
+                                   DISC_BLE, "advData is null");
     DISC_CHECK_AND_RETURN_RET_LOGE(advLen >= POS_TLV, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
         "advLen is too short, less than adv header length. advLen=%{public}u", advLen);
 
@@ -1193,7 +1194,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
                         "action: isStart=%{public}d, publishFlags=%{public}d, activeFlags=%{public}d, "
                         "oldCap=%{public}d, newCap=%{public}d, "
                         "oldRangingRefCount=%{public}d, newRangingRefCount=%{public}d",
-          isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount, newRangingRefCount);
+              isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount, newRangingRefCount);
 
     SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
@@ -1950,7 +1951,7 @@ static int32_t BleAdvertiserDump(int fd)
         SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
         SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
         SOFTBUS_DPRINTF(fd, "addr type                               : %u\n",
-                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
+                        g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
         DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac,
                     BT_MAC_LEN, MAC_DELIMITER, bleMac);
         SOFTBUS_DPRINTF(fd, "Connection bleMac                       : %s\n", bleMac);
@@ -1961,9 +1962,9 @@ static int32_t BleAdvertiserDump(int fd)
                     MAX_ACCOUNT_HASH_LEN, ID_DELIMITER, peerUid);
         SOFTBUS_DPRINTF(fd, "Connection peerUid                      : %s\n", peerUid);
         SOFTBUS_DPRINTF(fd, "capabilityBitmapNum                     : %u\n",
-                g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
+                        g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
         SOFTBUS_DPRINTF(fd, "capabilityBitmap                        : %u\n",
-                *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
+                        *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
         SOFTBUS_DPRINTF(fd, "custData                                : %s\n", g_bleAdvertiser[i].deviceInfo.custData);
         SOFTBUS_DPRINTF(fd, "range                                   : %d\n", g_bleAdvertiser[i].deviceInfo.range);
     }
