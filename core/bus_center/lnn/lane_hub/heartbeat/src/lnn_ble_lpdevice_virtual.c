@@ -15,22 +15,27 @@
 
 #include "lnn_ble_lpdevice.h"
 #include "softbus_errcode.h"
+#include "softbus_adapter_mem.h"
 
 int32_t LnnRegisterBleLpDeviceMediumMgr(void)
 {
     return SOFTBUS_OK;
 }
 
-void SendInfoToMlpsBleOnlineProcess(void *para)
+void SendDeviceStateToMlps(void *para)
 {
-    (void)para;
-    return;
+    if (para != NULL) {
+        SoftBusFree(para);
+    }
 }
 
-void SendInfoToMlpsBleOfflineProcess(void *para)
+void UpdateLocalDeviceInfoToMlps(const NodeInfo *localInfo)
 {
-    (void)para;
-    return;
+    (void)localInfo;
+}
+
+void UpdateRemoteDeviceInfoToMlps(void)
+{
 }
 
 int32_t GetBurstAdvId(void)
