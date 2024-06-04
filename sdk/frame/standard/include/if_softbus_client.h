@@ -77,6 +77,8 @@ public:
 
     virtual void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
 
+    virtual int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos);
+
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");
 };

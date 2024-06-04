@@ -111,6 +111,42 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     return SOFTBUS_OK;
 }
 
+int32_t TransClientProxy::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+    if (!data.WriteInt32(channelId)) {
+        TRANS_LOGE(TRANS_CTRL, "write channel id failed");
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+    if (!data.WriteUint8(tos)) {
+        TRANS_LOGE(TRANS_CTRL, "write tos failed");
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(CLIENT_ON_TRANS_LIMIT_CHANGE, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnClientTransLimitChange send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    int32_t serverRet;
+    if (!reply.ReadInt32(serverRet)) {
+        TRANS_LOGE(TRANS_CTRL, "OnChannelOpened read serverRet failed");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    return serverRet;
+}
+
 int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     sptr<IRemoteObject> remote = Remote();

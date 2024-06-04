@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,6 +144,17 @@ typedef struct {
 } QosTV;
 
 /**
+ * @brief Enumerates the file priority.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef enum {
+    FILE_PRIORITY_TYPE_DEFAUT = 0, /**< Default priority */
+    FILE_PRIORITY_TYPE_LOW,        /**< Low priority */
+} FilePriority;
+
+/**
  * @brief Enumerates the file types.
  *
  * @since 2.0
@@ -159,6 +170,7 @@ typedef enum {
     FILE_EVENT_RECV_FINISH,      /**< Receive file end */
     FILE_EVENT_RECV_ERROR,       /**< Receive file failed */
     FILE_EVENT_TRANS_STATUS,     /**< Transmission status of the files */
+    FILE_EVENT_TRANS_LIMIT_CHANGED, /**< Transmission limit changed */
     FILE_EVENT_BUTT,
 } FileEventType;
 
@@ -183,6 +195,7 @@ typedef struct {
     FileStatusList statusList;           /**< File status list */
     int32_t errorCode;                   /**< Error code */
     uint32_t rate;                       /**< Rate of the file transmission */
+    FilePriority filePriority;          /**< Priority of the file */
 } FileEvent;
 
 /**
