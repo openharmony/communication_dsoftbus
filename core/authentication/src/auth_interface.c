@@ -210,7 +210,8 @@ int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle)
     }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth == NULL) {
-        AUTH_LOGE(AUTH_CONN, "not found auth manager, authId=%{public}" PRId64, authHandle->authId);
+        AUTH_LOGE(AUTH_CONN, "not found auth manager, type=%{public}d, authId=%{public}" PRId64,
+            authHandle->type, authHandle->authId);
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     int32_t ret = SOFTBUS_OK;
