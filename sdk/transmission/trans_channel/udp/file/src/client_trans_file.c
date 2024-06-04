@@ -25,6 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "trans_log.h"
+#include "client_trans_session_manager.h"
 
 #define DEFAULT_KEY_LENGTH 32
 #define MAX_FILE_NUM       500
@@ -523,4 +524,40 @@ int32_t TransSendFile(int32_t dfileId, const char *sFileList[], const char *dFil
         return NSTACKX_DFileSendFiles(dfileId, sFileList, fileCnt, NULL);
     }
     return NSTACKX_DFileSendFilesWithRemotePath(dfileId, sFileList, dFileList, fileCnt, NULL);
+}
+
+int32_t NotifyTransLimitChanged(int32_t channelId, uint8_t tos)
+{
+    char sessionName[SESSION_NAME_SIZE_MAX + 1] = { 0 };
+    int32_t ret = ClientGetSessionNameByChannelId(channelId, CHANNEL_TYPE_UDP, sessionName, SESSION_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "failed to get sessionName, channelId=%{public}d", channelId);
+        return ret;
+    }
+    FileListener fileListener;
+    (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
+    ret = TransGetFileListener(sessionName, &fileListener);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "get file listener failed");
+        return ret;
+    }
+    int32_t sessionId = INVALID_SESSION_ID;
+    ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_UDP, &sessionId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "get file listener failed");
+        return ret;
+    }
+    if (fileListener.socketSendCallback != NULL) {
+        FileEvent event;
+        (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
+        event.type = FILE_EVENT_TRANS_LIMIT_CHANGED;
+        if (tos == FILE_PRIORITY_BE) {
+            event.filePriority = FILE_PRIORITY_TYPE_DEFAUT;
+        } else {
+            event.filePriority = FILE_PRIORITY_TYPE_LOW;
+        }
+        fileListener.socketSendCallback(sessionId, &event);
+        TRANS_LOGI(TRANS_FILE, "notify trans limit changed, file priority=%{public}d", event.filePriority);
+    }
+    return ret;
 }
