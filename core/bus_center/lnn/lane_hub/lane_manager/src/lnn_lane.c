@@ -41,6 +41,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "wifi_direct_manager.h"
 
 #define ID_SHIFT_STEP 5
 #define ID_CALC_MASK 0x1F
@@ -473,6 +474,68 @@ int32_t LnnFreeLane(uint32_t laneReqId)
         return result;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t GetWifiDirectMacInfo(char *localIp, LnnMacInfo *macInfo)
+{
+    LnnMacInfo dupMacInfo;
+    (void)memset_s(&dupMacInfo, sizeof(LnnMacInfo), 0, sizeof(LnnMacInfo));
+    struct WifiDirectManager *wifiDirectMgr = GetWifiDirectManager();
+    if (wifiDirectMgr == NULL) {
+        LNN_LOGE(LNN_LANE, "get wifi direct manager fail");
+        return SOFTBUS_NOT_FIND;
+    }
+    int32_t ret = wifiDirectMgr->getLocalAndRemoteMacByLocalIp(localIp, dupMacInfo.localMac, MAX_MAC_LEN,
+        dupMacInfo.remoteMac, MAX_MAC_LEN);
+    char *anonyIp = NULL;
+    Anonymize(localIp, &anonyIp);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "localIp=%{public}s get Mac fail, ret=%{public}d", anonyIp, ret);
+        AnonymizeFree(anonyIp);
+        return ret;
+    }
+    if (strcpy_s(macInfo->localMac, MAX_MAC_LEN, dupMacInfo.localMac) != EOK ||
+        strcpy_s(macInfo->remoteMac, MAX_MAC_LEN, dupMacInfo.remoteMac) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy MacInfo fail");
+        AnonymizeFree(anonyIp);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    char *anonyLocalMac = NULL;
+    char *anonyRemoteMac = NULL;
+    Anonymize(macInfo->localMac, &anonyLocalMac);
+    Anonymize(macInfo->remoteMac, &anonyRemoteMac);
+    LNN_LOGI(LNN_LANE, "get mac by ip done, localMac=%{public}s, remoteMac=%{public}s, localIp=%{public}s",
+        anonyLocalMac, anonyRemoteMac, anonyIp);
+    AnonymizeFree(anonyLocalMac);
+    AnonymizeFree(anonyRemoteMac);
+    AnonymizeFree(anonyIp);
+    return SOFTBUS_OK;
+}
+
+int32_t GetMacInfoByLaneId(uint64_t laneId, LnnMacInfo *macInfo)
+{
+    if (laneId == INVALID_LANE_ID || macInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "laneId is invalid or macInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneResource laneLinkInfo;
+    (void)memset_s(&laneLinkInfo, sizeof(LaneResource), 0, sizeof(LaneResource));
+    int32_t ret = FindLaneResourceByLaneId(laneId, &laneLinkInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "laneId=%{public}" PRIu64 " find lane link info fail, ret=%{public}d", laneId, ret);
+        return SOFTBUS_NOT_FIND;
+    }
+    if (laneLinkInfo.link.type != LANE_P2P && laneLinkInfo.link.type != LANE_P2P_REUSE &&
+        laneLinkInfo.link.type != LANE_HML) {
+        LNN_LOGE(LNN_LANE, "lane type=%{public}d is invalid", laneLinkInfo.link.type);
+        return SOFTBUS_ERR;
+    }
+    char localIp[IP_LEN] = {0};
+    if (memcpy_s(localIp, IP_LEN, laneLinkInfo.link.linkInfo.p2p.connInfo.localIp, IP_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy ip from lanelinkInfo fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return GetWifiDirectMacInfo(localIp, macInfo);
 }
 
 int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo)

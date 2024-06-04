@@ -58,6 +58,7 @@ typedef struct {
     bool isEnable;
     sessionNeed info;
     int32_t routeType;
+    int32_t sessionId;
 } UdpChannel;
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);
@@ -86,6 +87,8 @@ int32_t TransUdpOnCloseAckReceived(int32_t channelId);
 int32_t ClientEmitFileEvent(int32_t channelId);
 
 int32_t TransLimitChange(int32_t channelId, uint8_t tos);
+
+int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId);
 #ifdef __cplusplus
 }
 #endif

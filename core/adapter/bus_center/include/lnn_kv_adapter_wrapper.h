@@ -33,6 +33,7 @@ int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t key
 // *value need to be free by caller
 int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value);
 int32_t LnnCloudSync(int32_t dbId);
+void LnnClearRedundancyCache();
 #ifdef __cplusplus
 };
 #endif
