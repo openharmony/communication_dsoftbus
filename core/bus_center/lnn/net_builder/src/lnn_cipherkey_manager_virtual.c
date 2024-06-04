@@ -92,3 +92,10 @@ int32_t LnnGetLocalBroadcastCipherInfo(CloudSyncInfo *info)
     (void)info;
     return SOFTBUS_OK;
 }
+
+int32_t LnnSetRemoteBroadcastCipherInfo(const char *value, const char *udid)
+{
+    (void)value;
+    (void)udid;
+    return SOFTBUS_OK;
+}

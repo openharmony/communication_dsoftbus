@@ -281,14 +281,14 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     }
     ListNodeInsert(&g_authFsmList, &authFsm->node);
     AUTH_LOGI(AUTH_FSM,
-        "create auth fsm. authSeq=%{public}" PRId64 ", name=%{public}s, side=%{public}s, reqId=%{public}u, " CONN_INFO,
-        authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(isServer), requestId, CONN_DATA(connId));
+        "create auth fsm. authSeq=%{public}" PRId64 ", name=%{public}s, side=%{public}s, requestId=%{public}u, "
+        "" CONN_INFO, authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(isServer), requestId, CONN_DATA(connId));
     return authFsm;
 }
 
 static void DestroyAuthFsm(AuthFsm *authFsm)
 {
-    AUTH_LOGI(AUTH_FSM, "destroy auth. authSeq=%{public}" PRId64 ", side=%{public}s, reqId=%{public}u",
+    AUTH_LOGI(AUTH_FSM, "destroy auth. authSeq=%{public}" PRId64 ", side=%{public}s, requestId=%{public}u",
         authFsm->authSeq, GetAuthSideStr(authFsm->info.isServer), authFsm->info.requestId);
     ListDelete(&authFsm->node);
     if (authFsm->info.deviceInfoData != NULL) {

@@ -510,6 +510,8 @@
         "TransUnRegistDirSchema";
         "TransLimitChange";
         "NotifyTransLimitChanged";
+        "GetMacInfoBySession";
+        "TransSetUdpChanelSessionId";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

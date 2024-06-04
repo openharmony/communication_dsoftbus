@@ -1960,6 +1960,7 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
     if (IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_UNIFORM_NAME_CAPABILITY)) {
         UpdatePeerDeviceName(nodeInfo);
     }
+    nodeInfo->updateTimestamp = SoftBusGetSysTimeMs();
     return ret;
 }
 
