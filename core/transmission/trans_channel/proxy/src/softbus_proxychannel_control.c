@@ -69,7 +69,7 @@ static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
 static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)
 {
     AuthGetLatestIdByUuid(info->appInfo.peerData.deviceId, ConvertConnectType2AuthLinkType(info->type),
-         false, &info->authHandle);
+                          false, &info->authHandle);
     if (info->authHandle.authId == AUTH_INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "get authId for cipher err");
         return SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED;

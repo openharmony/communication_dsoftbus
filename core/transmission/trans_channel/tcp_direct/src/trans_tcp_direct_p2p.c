@@ -814,7 +814,7 @@ static int32_t TransProxyGetAuthId(SessionConn *conn)
         AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &conn->authHandle);
     }
     TRANS_CHECK_AND_RETURN_RET_LOGE(conn->authHandle.authId != AUTH_INVALID_ID, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED,
-            TRANS_CTRL, "get authManager failed");
+                                    TRANS_CTRL, "get authManager failed");
     return SOFTBUS_OK;
 }
 
