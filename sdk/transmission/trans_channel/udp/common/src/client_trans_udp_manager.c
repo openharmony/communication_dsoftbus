@@ -639,3 +639,28 @@ int32_t ClientEmitFileEvent(int32_t channelId)
     }
     return ret;
 }
+
+int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannel *channelNode = NULL;
+    LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
+        if (channelNode->channelId == channelId) {
+            channelNode->sessionId = sessionId;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_SDK, "udp channel not found, channelId=%{public}d.", channelId);
+    return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
+}
