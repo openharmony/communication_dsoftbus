@@ -93,6 +93,8 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo);
 
 int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t status);
 
+bool IsTdcRecoveryTransLimit(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

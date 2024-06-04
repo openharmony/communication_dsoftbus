@@ -80,6 +80,9 @@ extern "C" {
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #endif
 
+#define FILE_PRIORITY_BE 0x00
+#define FILE_PRIORITY_BK 0x08
+
 typedef struct {
     SoftBusMutex lock;
     unsigned int cnt;

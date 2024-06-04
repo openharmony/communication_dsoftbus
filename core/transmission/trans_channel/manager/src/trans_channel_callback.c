@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,8 @@
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
+#include "trans_tcp_direct_sessionconn.h"
+#include "trans_udp_channel_manager.h"
 
 static IServerChannelCallBack g_channelCallBack;
 
@@ -81,7 +83,9 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     TransSetSocketChannelStateByChannel(channel->channelId, channel->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
-    return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
+    int32_t ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
+    (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    return ret;
 }
 
 static int32_t TransServerOnChannelClosed(
@@ -108,6 +112,9 @@ static int32_t TransServerOnChannelClosed(
     if (ClientIpcOnChannelClosed(&data) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel close fail");
         return SOFTBUS_IPC_ERR;
+    }
+    if (IsTdcRecoveryTransLimit() && IsUdpRecoveryTransLimit()) {
+        UdpChannelFileTransRecoveryLimit(FILE_PRIORITY_BE);
     }
     return SOFTBUS_OK;
 }

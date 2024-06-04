@@ -30,6 +30,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "client_trans_udp_manager.h"
 
 namespace OHOS {
 SoftBusClientStub::SoftBusClientStub()
@@ -78,6 +79,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::SetChannelInfoInner;
     memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] =
         &SoftBusClientStub::OnDataLevelChangedInner;
+    memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] =
+        &SoftBusClientStub::OnClientTransLimitChangeInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -157,6 +160,32 @@ int32_t SoftBusClientStub::OnPublishFailInner(MessageParcel &data, MessageParcel
     int failReason = data.ReadInt32();
     OnPublishFail(publishId, failReason);
     return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SDK, "OnClientTransLimitChangeInner read channel id failed!");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    uint8_t tos;
+    if (!data.ReadUint8(tos)) {
+        COMM_LOGE(COMM_SDK, "OnClientTransLimitChangeInner read tos failed!");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    int32_t ret = OnClientTransLimitChange(channelId, tos);
+    bool res = reply.WriteInt32(ret);
+    if (!res) {
+        COMM_LOGE(COMM_SDK, "OnClientTransLimitChangeInner write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
+{
+    return TransLimitChange(channelId, tos);
 }
 
 void SoftBusClientStub::OnDeviceFound(const DeviceInfo *device)
