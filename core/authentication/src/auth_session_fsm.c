@@ -379,7 +379,7 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
     if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
         return;
     }
-    authFsm->statisticData.endAuthTime = LnnUpTimeMs();
+    authFsm->statisticData.endAuthTime = (uint64_t)LnnUpTimeMs();
     uint64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
     DfxRecordLnnAuthEnd(authFsm, costTime, result);
     AuthFailStage stage = AUTH_STAGE_BUTT;

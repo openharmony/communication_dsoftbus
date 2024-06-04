@@ -102,8 +102,8 @@ typedef struct {
 } LaneResource;
 
 typedef struct {
-    void (*OnLaneLinkSuccess)(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo);
-    void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
+    void (*onLaneLinkSuccess)(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo);
+    void (*onLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
 } LaneLinkCb;
 
 inline int32_t ErrCodeFilter(const int32_t errCode, const int32_t exceptErrCode)
