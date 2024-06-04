@@ -83,7 +83,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     TransSetSocketChannelStateByChannel(channel->channelId, channel->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
-    int32_t ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
+    ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
     (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
     return ret;
 }
