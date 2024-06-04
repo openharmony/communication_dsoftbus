@@ -456,8 +456,7 @@ int32_t TransAddSocketChannelInfo(
     return SOFTBUS_OK;
 }
 
-int32_t TransUpdateSocketChannelInfoBySession(
-    const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
+static int32_t CheckParamIsValid(const char *sessionName, int32_t sessionId)
 {
     if (sessionName == NULL) {
         TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
@@ -466,6 +465,16 @@ int32_t TransUpdateSocketChannelInfoBySession(
     if (sessionId <= 0) {
         TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransUpdateSocketChannelInfoBySession(
+    const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
+{
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (g_socketChannelList == NULL) {
         TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
@@ -490,13 +499,9 @@ int32_t TransUpdateSocketChannelInfoBySession(
 int32_t TransUpdateSocketChannelLaneInfoBySession(
     const char *sessionName, int32_t sessionId, uint32_t laneHandle, bool isQosLane, bool isAsync)
 {
-    if (sessionName == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
-        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
-    }
-    if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (g_socketChannelList == NULL) {
         TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
@@ -521,13 +526,9 @@ int32_t TransUpdateSocketChannelLaneInfoBySession(
 
 int32_t TransDeleteSocketChannelInfoBySession(const char *sessionName, int32_t sessionId)
 {
-    if (sessionName == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
-        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
-    }
-    if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (g_socketChannelList == NULL) {
         TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
@@ -619,13 +620,9 @@ int32_t TransDeleteSocketChannelInfoByPid(int32_t pid)
 
 int32_t TransSetSocketChannelStateBySession(const char *sessionName, int32_t sessionId, CoreSessionState state)
 {
-    if (sessionName == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
-        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
-    }
-    if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (g_socketChannelList == NULL) {
         TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
@@ -672,21 +669,17 @@ int32_t TransSetSocketChannelStateByChannel(int32_t channelId, int32_t channelTy
 
 int32_t TransGetSocketChannelStateBySession(const char *sessionName, int32_t sessionId, CoreSessionState *state)
 {
-    if (sessionName == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
-        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
-    }
-    if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
-    }
-    if (state == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, state is null");
-        return SOFTBUS_INVALID_PARAM;
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (g_socketChannelList == NULL) {
         TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
         return SOFTBUS_NO_INIT;
+    }
+    if (state == NULL) {
+        TRANS_LOGE(TRANS_SVC, "Invaild param, state is null");
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
@@ -706,13 +699,9 @@ int32_t TransGetSocketChannelStateBySession(const char *sessionName, int32_t ses
 int32_t TransGetSocketChannelLaneInfoBySession(
     const char *sessionName, int32_t sessionId, uint32_t *laneHandle, bool *isQosLane, bool *isAsync)
 {
-    if (sessionName == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
-        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
-    }
-    if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (g_socketChannelList == NULL) {
         TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
@@ -772,21 +761,17 @@ int32_t TransGetSocketChannelStateByChannel(int32_t channelId, int32_t channelTy
 
 int32_t TransGetPidFromSocketChannelInfoBySession(const char *sessionName, int32_t sessionId, int32_t *pid)
 {
-    if (sessionName == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
-        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
-    }
-    if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
-    }
-    if (pid == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, pid is null");
-        return SOFTBUS_INVALID_PARAM;
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (g_socketChannelList == NULL) {
         TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
         return SOFTBUS_NO_INIT;
+    }
+    if (pid == NULL) {
+        TRANS_LOGE(TRANS_SVC, "Invaild param, pid is null");
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
