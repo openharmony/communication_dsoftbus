@@ -214,7 +214,7 @@ int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
     }
     ReleaseSessonConnLock();
     TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_GET_APP_INFO_FAILED;
 }
 
 int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
@@ -231,7 +231,7 @@ int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
         }
     }
     ReleaseSessonConnLock();
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_SET_AUTH_HANDLE_FAILED;
 }
 
 int64_t GetAuthIdByChanId(int32_t channelId)
@@ -272,7 +272,7 @@ int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
         }
     }
     ReleaseSessonConnLock();
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_GET_AUTH_HANDLE_FAILED;
 }
 
 void TransDelSessionConnById(int32_t channelId)

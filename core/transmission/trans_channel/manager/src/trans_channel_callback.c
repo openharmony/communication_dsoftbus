@@ -68,10 +68,10 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
         return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
     }
-    if (!channel->isServer && channel->channelType == CHANNEL_TYPE_UDP &&
-        NotifyQosChannelOpened(channel) != SOFTBUS_OK) {
+    int32_t ret = !channel->isServer && channel->channelType == CHANNEL_TYPE_UDP && NotifyQosChannelOpened(channel);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_QOS, "NotifyQosChannelOpened failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (channel->isServer) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);

@@ -135,7 +135,7 @@ int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer)
             } else {
                 TRANS_LOGI(TRANS_CTRL, "connId=%{public}d, proxyConnRef=%{public}d", connId, removeNode->ref);
                 (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-                return SOFTBUS_ERR;
+                return SOFTBUS_TRANS_NOT_MATCH;
             }
         }
     }
@@ -168,7 +168,7 @@ int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer)
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED;
 }
 
 static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
@@ -353,7 +353,7 @@ static int32_t TransProxyLoopInit(void)
     g_transLoophandler.name = (char *)g_transProxyLoopName;
     g_transLoophandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_transLoophandler.looper == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_INIT_FAILED;
     }
     g_transLoophandler.HandleMessage = TransProxyLoopMsgHandler;
     return SOFTBUS_OK;
@@ -455,7 +455,7 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
         if (item->isServerSide == chan->isServerSide &&
             CompareConnectOption(&item->connInfo, &chan->connInfo) == true) {
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_NOT_MATCH;
         }
     }
     ListAdd(&(g_proxyConnectionList->list), &(chan->node));
@@ -566,7 +566,7 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     TRANS_LOGE(TRANS_CTRL, "can not find proxy conn in list.");
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NOT_MATCH;
 }
 
 void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId, uint32_t state)
@@ -833,13 +833,12 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg, const AuthHandle *
     TRANS_LOGW(TRANS_MSG, "send msg is bad key myChannelId=%{public}d, peerChannelId=%{public}d",
         msg->msgHead.myId, msg->msgHead.peerId);
     
-    if (PackPlaintextMessage(&msg->msgHead, &dataInfo) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (TransProxyTransSendMsg(msg->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH, 0) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "send bad key buf fail");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = PackPlaintextMessage(&msg->msgHead, &dataInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "PackPlaintextMessage fail");
+
+    ret = TransProxyTransSendMsg(msg->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH, 0);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "send bad key buf fail");
+
     return SOFTBUS_OK;
 }
 
@@ -885,23 +884,21 @@ int32_t TransProxyTransInit(void)
     proxyCallback.OnConnected = TransProxyOnConnected;
     proxyCallback.OnDisconnected = TransProxyOnDisConnect;
     proxyCallback.OnDataReceived = TransProxyOnDataReceived;
-    if (ConnSetConnectCallback(MODULE_PROXY_CHANNEL, &proxyCallback) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = ConnSetConnectCallback(MODULE_PROXY_CHANNEL, &proxyCallback);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "ConnSetConnectCallback fail");
 
     g_proxyConnectionList = CreateSoftBusList();
     if (g_proxyConnectionList == NULL) {
         TRANS_LOGE(TRANS_INIT, "create observer list failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (TransProxyLoopInit() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "create loopInit fail");
-        return SOFTBUS_NO_INIT;
-    }
-    if (TransProxyPipelineInit() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "init proxy pipeline failed");
-        return SOFTBUS_NO_INIT;
-    }
+
+    ret = TransProxyLoopInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "create loopInit fail");
+
+    ret = TransProxyPipelineInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "init proxy pipeline failed");
+
     return SOFTBUS_OK;
 }
 
