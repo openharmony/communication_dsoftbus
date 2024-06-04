@@ -60,7 +60,9 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_instance.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_key.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_manager.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message_hml.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_utils.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_generate_attest.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_validate_attest.c",
     ]
