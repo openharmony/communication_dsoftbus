@@ -318,7 +318,7 @@ int32_t TransAddDataBufNode(int32_t channelId, int32_t fd)
 
 int32_t TransDelDataBufNode(int32_t channelId)
 {
-    if (g_tcpDataList ==  NULL) {
+    if (g_tcpDataList == NULL) {
         return SOFTBUS_NO_INIT;
     }
 
@@ -345,7 +345,7 @@ int32_t TransDelDataBufNode(int32_t channelId)
 
 static int32_t TransDestroyDataBuf(void)
 {
-    if (g_tcpDataList ==  NULL) {
+    if (g_tcpDataList == NULL) {
         return SOFTBUS_NO_INIT;
     }
 
