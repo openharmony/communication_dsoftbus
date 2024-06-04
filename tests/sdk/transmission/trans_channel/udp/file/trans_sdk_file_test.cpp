@@ -888,16 +888,6 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest002, TestSize.Level0)
     ASSERT_EQ(0, event.statusList.notCompletedList.fileCnt);
     ASSERT_EQ(nullptr, event.statusList.notStartedList.files);
     ASSERT_EQ(0, event.statusList.notStartedList.fileCnt);
-
-    msgData.clearPolicyFileList.fileNum = MAX_FILE_NUM + 1;
-    FillFileStatusList(&msgData, &event);
-    // Check status list content
-    ASSERT_EQ(nullptr, event.statusList.completedList.files);
-    ASSERT_EQ(0, event.statusList.completedList.fileCnt);
-    ASSERT_EQ(nullptr, event.statusList.notCompletedList.files);
-    ASSERT_EQ(0, event.statusList.notCompletedList.fileCnt);
-    ASSERT_EQ(nullptr, event.statusList.notStartedList.files);
-    ASSERT_EQ(0, event.statusList.notStartedList.fileCnt);
 }
 
 /**

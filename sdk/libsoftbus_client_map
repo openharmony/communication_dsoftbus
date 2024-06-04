@@ -509,6 +509,7 @@
         "TransRegistDirSchema";
         "TransUnRegistDirSchema";
         "GetMacInfoBySession";
+        "TransSetUdpChanelSessionId";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
