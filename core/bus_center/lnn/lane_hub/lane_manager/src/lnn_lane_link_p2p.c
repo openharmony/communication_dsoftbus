@@ -557,9 +557,9 @@ static void NotifyLinkFail(AsyncResultType type, uint32_t requestId, int32_t rea
     }
     (void)DelP2pLinkReqByReqId(type, requestId);
     DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
-    if (reqInfo.laneRequestInfo.cb.OnLaneLinkFail != NULL) {
+    if (reqInfo.laneRequestInfo.cb.onLaneLinkFail != NULL) {
         LNN_LOGE(LNN_LANE, "wifidirect conn fail, laneReqId=%{public}u ", reqInfo.laneRequestInfo.laneReqId);
-        reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, reason,
+        reqInfo.laneRequestInfo.cb.onLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, reason,
             reqInfo.laneRequestInfo.linkType);
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
@@ -617,15 +617,15 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
     int32_t ret = AddNewP2pLinkedInfo(&reqInfo, linkId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new p2p linked info fail, laneReqId=%{public}u", reqInfo.laneRequestInfo.laneReqId);
-        if (reqInfo.laneRequestInfo.cb.OnLaneLinkFail != NULL) {
-            reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, ret, throryLinkType);
+        if (reqInfo.laneRequestInfo.cb.onLaneLinkFail != NULL) {
+            reqInfo.laneRequestInfo.cb.onLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, ret, throryLinkType);
         }
     } else {
-        if (reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess != NULL) {
+        if (reqInfo.laneRequestInfo.cb.onLaneLinkSuccess != NULL) {
             LNN_LOGI(LNN_LANE, "wifidirect conn succ, laneReqId=%{public}u, actual linkType=%{public}d, "
                 "requestId=%{public}u, linkId=%{public}d",
                 reqInfo.laneRequestInfo.laneReqId, linkInfo->type, requestId, linkId);
-            reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess(reqInfo.laneRequestInfo.laneReqId, throryLinkType, linkInfo);
+            reqInfo.laneRequestInfo.cb.onLaneLinkSuccess(reqInfo.laneRequestInfo.laneReqId, throryLinkType, linkInfo);
         }
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
@@ -732,7 +732,7 @@ static void HandleGuideChannelRetry(uint32_t laneReqId, LaneLinkType linkType, i
     return;
  FAIL:
     DelGuideInfoItem(laneReqId, linkType);
-    callback.OnLaneLinkFail(laneReqId, ErrCodeFilter(reason, SOFTBUS_LANE_GUIDE_BUILD_FAIL), linkType);
+    callback.onLaneLinkFail(laneReqId, ErrCodeFilter(reason, SOFTBUS_LANE_GUIDE_BUILD_FAIL), linkType);
 }
 
 static void HandleGuideChannelAsyncFail(AsyncResultType type, uint32_t requestId, int32_t reason)
@@ -1202,8 +1202,8 @@ static void GuideChannelDetect(uint32_t authRequestId, AuthHandle authHandle)
             goto FATL;
         }
         LaneLinkCb cb = {
-            .OnLaneLinkSuccess = DetectSuccess,
-            .OnLaneLinkFail = DetectFail,
+            .onLaneLinkSuccess = DetectSuccess,
+            .onLaneLinkFail = DetectFail,
         };
         linkInfo.type = LANE_WLAN_5G;
         LNN_LOGI(LNN_LANE, "auth channel need detect, laneReqId=%{public}u", laneReqId);

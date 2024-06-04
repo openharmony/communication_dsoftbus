@@ -252,7 +252,7 @@ static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSu
         if (!isSendSuc) {
             LNN_LOGI(LNN_LANE, "Detect failed, wlan=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
                 item->link.type, item->laneReqId, requestItem->laneDetectId);
-            item->cb.OnLaneLinkFail(item->laneReqId, SOFTBUS_CONN_FAIL, item->link.type);
+            item->cb.onLaneLinkFail(item->laneReqId, SOFTBUS_CONN_FAIL, item->link.type);
         } else {
             LaneLinkInfo laneInfo;
             (void)memset_s(&laneInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
@@ -264,7 +264,7 @@ static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSu
             }
             LNN_LOGI(LNN_LANE, "Detect success, wlan=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
                 item->link.type, item->laneReqId, requestItem->laneDetectId);
-            item->cb.OnLaneLinkSuccess(item->laneReqId, laneInfo.type, &laneInfo);
+            item->cb.onLaneLinkSuccess(item->laneReqId, laneInfo.type, &laneInfo);
         }
         ListDelete(&item->node);
         SoftBusFree(item);
@@ -338,7 +338,7 @@ void NotifyDetectTimeout(uint32_t detectId)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &detectInfoList, LaneDetectInfo, node) {
         LNN_LOGI(LNN_LANE, "Detect time out, link=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
             item->link.type, item->laneReqId, item->laneDetectId);
-        item->cb.OnLaneLinkFail(item->laneReqId, SOFTBUS_LANE_DETECT_TIMEOUT, item->link.type);
+        item->cb.onLaneLinkFail(item->laneReqId, SOFTBUS_LANE_DETECT_TIMEOUT, item->link.type);
         ListDelete(&item->node);
         SoftBusFree(item);
     }

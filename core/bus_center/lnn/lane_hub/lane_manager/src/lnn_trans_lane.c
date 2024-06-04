@@ -212,7 +212,7 @@ static void LinkFail(uint32_t laneReqId, int32_t reason, LaneLinkType linkType)
     }
     failInfo->reason = reason;
     failInfo->linkType = linkType;
-    if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneReqId, reason, failInfo, 0) != SOFTBUS_OK) {
+    if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneReqId, (uint64_t)reason, failInfo, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post lanelink fail msg err");
         SoftBusFree(failInfo);
     }
@@ -960,8 +960,8 @@ static void LaneTriggerLink(SoftBusMessage *msg)
 {
     uint32_t laneReqId = (uint32_t)msg->arg1;
     LaneLinkCb linkCb = {
-        .OnLaneLinkSuccess = LinkSuccess,
-        .OnLaneLinkFail = LinkFail,
+        .onLaneLinkSuccess = LinkSuccess,
+        .onLaneLinkFail = LinkFail,
     };
     LinkRequest requestInfo = {0};
     if (Lock() != SOFTBUS_OK) {
@@ -985,7 +985,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         nodeInfo->linkRetryIdx++;
         nodeInfo->statusList[requestInfo.linkType].status = BUILD_LINK_STATUS_BUILDING;
         Unlock();
-        uint64_t delayMillis = g_laneLatency[requestInfo.linkType];
+        uint64_t delayMillis = (uint64_t)g_laneLatency[requestInfo.linkType];
         (void)PostLinkTimeoutMessage(laneReqId, requestInfo.linkType, delayMillis);
         ret = BuildLink(&requestInfo, laneReqId, &linkCb);
         if (ret == SOFTBUS_OK) {
@@ -993,7 +993,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         }
     } while (false);
     ret = ErrCodeFilter(ret, SOFTBUS_LANE_BUILD_LINK_FAIL);
-    linkCb.OnLaneLinkFail(laneReqId, ret, requestInfo.linkType);
+    linkCb.onLaneLinkFail(laneReqId, ret, requestInfo.linkType);
 }
 
 static void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo)
