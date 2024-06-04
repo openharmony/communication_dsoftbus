@@ -157,3 +157,18 @@ int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
         param->tvCount, param->tvList);
     return SOFTBUS_OK;
 }
+
+int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t channelId, uint8_t tos)
+{
+    if (pkgName == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+    
+    return clientProxy->OnClientTransLimitChange(channelId, tos);
+}

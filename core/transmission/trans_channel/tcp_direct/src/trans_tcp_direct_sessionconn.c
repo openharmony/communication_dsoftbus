@@ -363,6 +363,24 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
     return SOFTBUS_NOT_FIND;
 }
 
+bool IsTdcRecoveryTransLimit(void)
+{
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed.");
+        return false;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->appInfo.businessType == BUSINESS_TYPE_BYTE) {
+            TRANS_LOGD(TRANS_CTRL, "tcp direct channel exists bytes business, no need to recovery limit.");
+            ReleaseSessonConnLock();
+            return false;
+        }
+    }
+    ReleaseSessonConnLock();
+    return true;
+}
+
 int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {

@@ -1648,3 +1648,8 @@ int32_t NSTACKX_DFileSessionGetFileList(int32_t sessionId)
 {
     return NSTACKX_EOK;
 }
+
+int32_t NSTACKX_DFileSetSessionOpt(int32_t sessionId, const DFileOpt *opt)
+{
+    return NSTACKX_EOK;
+}

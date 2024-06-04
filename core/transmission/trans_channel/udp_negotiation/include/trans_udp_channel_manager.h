@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@ typedef struct {
     uint32_t requestId;
     bool isMeta;
     int32_t errCode;
+    uint8_t tos;
 } UdpChannelInfo;
 
 SoftBusList *GetUdpChannelMgrHead(void);
@@ -69,6 +70,12 @@ UdpChannelInfo *TransGetChannelObj(int32_t channelId);
 
 int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo);
 int32_t TransUdpGetChannelIdByAddr(AppInfo *appInfo);
+
+int32_t UdpChannelFileTransLimit(const ChannelInfo *channel, uint8_t tos);
+
+int32_t UdpChannelFileTransRecoveryLimit(uint8_t tos);
+
+bool IsUdpRecoveryTransLimit(void);
 
 #ifdef __cplusplus
 }

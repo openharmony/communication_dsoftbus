@@ -555,7 +555,11 @@ int32_t TransReleaseUdpResources(int32_t channelId)
 
 int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
-    return TransCommonCloseChannel(sessionName, channelId, channelType);
+    int32_t ret = TransCommonCloseChannel(sessionName, channelId, channelType);
+    if (IsTdcRecoveryTransLimit() && IsUdpRecoveryTransLimit()) {
+        UdpChannelFileTransRecoveryLimit(FILE_PRIORITY_BE);
+    }
+    return ret;
 }
 
 int32_t TransCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
