@@ -468,6 +468,23 @@ static int32_t SetPeerDeviceIdByAuth(AuthHandle authHandle, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void TransSetUdpConnectTypeByAuthType(int32_t *connectType, AuthHandle authHandle)
+{
+    switch (authHandle.type) {
+        case AUTH_LINK_TYPE_P2P:
+            *connectType = CONNECT_P2P;
+            break;
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            *connectType = CONNECT_HML;
+            break;
+        case AUTH_LINK_TYPE_WIFI:
+            *connectType = CONNECT_TCP;
+            break;
+        default:
+            break;
+    }
+}
+
 static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppInfo *appInfo)
 {
     int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
@@ -492,6 +509,8 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
         return SOFTBUS_OK;
     }
+
+    TransSetUdpConnectTypeByAuthType(&appInfo->connectType, authHandle);
 
     ret = SetPeerDeviceIdByAuth(authHandle, appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_PEER_PROC_ERR, TRANS_CTRL, "set deviceId failed.");

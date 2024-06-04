@@ -50,6 +50,8 @@ public:
     void RemoveLink(const std::string &remoteMac);
     void RemoveLinks(InnerLink::LinkType type);
 
+    void GetAllLinksBasicInfo(std::vector<std::shared_ptr<InnerLinkBasicInfo>> &infos);
+
     std::shared_ptr<InnerLink> GetReuseLink(const std::string &remoteMac);
     std::shared_ptr<InnerLink> GetReuseLink(WifiDirectConnectType connectType, const std::string &remoteDeviceId);
     std::shared_ptr<InnerLink> GetReuseLink(WifiDirectLinkType linkType, const std::string &remoteDeviceId);

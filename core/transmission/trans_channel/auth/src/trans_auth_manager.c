@@ -42,14 +42,6 @@
 #define AUTH_SESSION_KEY "auth session key"
 
 typedef struct {
-    ListNode node;
-    AppInfo appInfo;
-    int32_t authId;
-    ConnectOption connOpt;
-    bool isClient;
-} AuthChannelInfo;
-
-typedef struct {
     int32_t channelType;
     int32_t businessType;
     ConfigType configType;
@@ -64,6 +56,31 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isCl
 static int32_t AddAuthChannelInfo(AuthChannelInfo *info);
 static void DelAuthChannelInfoByChanId(int32_t channelId);
 static void DelAuthChannelInfoByAuthId(int32_t authId);
+
+SoftBusList *GetAuthChannelListHead(void)
+{
+    return g_authChannelList;
+}
+
+int32_t GetAuthChannelLock(void)
+{
+    if (g_authChannelList == NULL) {
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void ReleaseAuthChannelLock(void)
+{
+    if (g_authChannelList == NULL) {
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+}
 
 static int32_t GetAuthChannelInfoByChanId(int32_t channelId, AuthChannelInfo *dstInfo)
 {

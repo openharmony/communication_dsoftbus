@@ -131,6 +131,17 @@ static int32_t StartVerifySession(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
+static void TransSetTcpDirectConnectType(int32_t *connectType, ListenerModule module)
+{
+    if (module >= DIRECT_CHANNEL_SERVER_HML_START && module <= DIRECT_CHANNEL_SERVER_HML_END) {
+        *connectType = CONNECT_HML;
+    } else if (module == DIRECT_CHANNEL_SERVER_P2P) {
+        *connectType = CONNECT_P2P;
+    } else if (module == DIRECT_CHANNEL_SERVER_WIFI) {
+        *connectType = CONNECT_TCP;
+    }
+}
+
 static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chanId, const ConnectOption *clientAddr)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
@@ -148,6 +159,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     conn->authHandle.authId = AUTH_INVALID_ID;
     conn->appInfo.routeType = (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.peerData.port = clientAddr->socketOption.port;
+    TransSetTcpDirectConnectType(&conn->appInfo.connectType, module);
     int32_t ret =
         LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId, sizeof(conn->appInfo.myData.deviceId));
     if (ret != SOFTBUS_OK) {

@@ -19,6 +19,7 @@
 #include "bus_center_manager.h"
 #include "comm_log.h"
 #include "disc_event_manager.h"
+#include "instant_statistics.h"
 #include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
@@ -106,6 +107,10 @@ static int32_t InitServicesAndModules(void)
         COMM_LOGE(COMM_SVC, "softbus dfx init failed.");
         return SOFTBUS_DFX_INIT_FAILED;
     }
+
+#ifdef INSTANT_REGISTER_COMMUNICATION_RADAR
+    InstRegister(NULL);
+#endif // INSTANT_REGISTER_COMMUNICATION_RADAR
 
     return SOFTBUS_OK;
 }
