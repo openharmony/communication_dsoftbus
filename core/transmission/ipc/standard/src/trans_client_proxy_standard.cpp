@@ -33,23 +33,15 @@ namespace OHOS {
 int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t state)
 {
     sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
-        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
-        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
-    }
-    if (!data.WriteInt32(state)) {
-        TRANS_LOGE(TRANS_CTRL, "write permStateChangeType failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteCString(pkgName)) {
-        TRANS_LOGE(TRANS_CTRL, "write pkgName failed");
-        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()),
+        SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(state),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write permStateChangeType failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteCString(pkgName),
+        SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED, TRANS_CTRL, "write pkgName failed");
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_ON_PERMISSION_CHANGE, data, reply, option);
@@ -114,10 +106,8 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
 int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
-        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
     MessageParcel data;
     int32_t ret = MessageParcelWrite(data, sessionName, channel);
     if (ret != SOFTBUS_OK) {
@@ -143,28 +133,19 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
 int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
-        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
-        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
-    }
-    if (!data.WriteInt32(channelId)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel id failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteInt32(channelType)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel type failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteInt32(errCode)) {
-        TRANS_LOGE(TRANS_CTRL, "write error code failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()),
+        SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelId),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel id failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelType),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel type failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(errCode),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write error code failed");
+
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_OPENFAILED, data, reply, option);
@@ -179,27 +160,19 @@ int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channel
 int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t routeType)
 {
     sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
-        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
-    }
-    if (networkId == nullptr) {
-        TRANS_LOGW(TRANS_CTRL, "invalid parameters");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(networkId != nullptr,
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid parameters");
+
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
-        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
-    }
-    if (!data.WriteCString(networkId)) {
-        TRANS_LOGE(TRANS_CTRL, "write networkId failed");
-        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
-    }
-    if (!data.WriteInt32(routeType)) {
-        TRANS_LOGE(TRANS_CTRL, "write routeType failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()),
+        SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteCString(networkId),
+        SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED, TRANS_CTRL, "write networkId failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(routeType),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write routeType failed");
+
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_LINKDOWN, data, reply, option);
@@ -213,28 +186,19 @@ int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t route
 int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
     sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
-        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
-        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
-    }
-    if (!data.WriteInt32(channelId)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel id failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteInt32(channelType)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel type failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteInt32(messageType)) {
-        TRANS_LOGE(TRANS_CTRL, "write message type failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()),
+        SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelId),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel id failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelType),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel type failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(messageType),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write message type failed");
+
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_CLOSED, data, reply, option);
@@ -249,36 +213,22 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channe
     uint32_t len, int32_t type)
 {
     sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
-        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
-        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
-    }
-    if (!data.WriteInt32(channelId)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel id failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteInt32(channelType)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel type failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteUint32(len)) {
-        TRANS_LOGE(TRANS_CTRL, "write data len failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteRawData(dataInfo, len)) {
-        TRANS_LOGE(TRANS_CTRL, "write (dataInfo, len) failed");
-        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
-    }
-    if (!data.WriteInt32(type)) {
-        TRANS_LOGE(TRANS_CTRL, "write data type failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()),
+        SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelId),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel id failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelType),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel type failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteUint32(len),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write data len failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(dataInfo, len),
+        SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED, TRANS_CTRL, "write (dataInfo, len) failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteUint32(len),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write data len failed");
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -296,37 +246,22 @@ int32_t TransClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelTy
     const QosTv *tvList)
 {
     sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
-        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
-        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
-    }
-    if (!data.WriteInt32(channelId)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel id failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteInt32(channelType)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel type failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteInt32(eventId)) {
-        TRANS_LOGE(TRANS_CTRL, "write channel type failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteInt32(tvCount)) {
-        TRANS_LOGE(TRANS_CTRL, "write tv count failed");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
-    }
-    if (!data.WriteRawData(tvList, sizeof(QosTv) * tvCount)) {
-        TRANS_LOGE(TRANS_CTRL, "write tv list failed");
-        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()),
+        SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelId),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel id failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelType),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel type failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(eventId),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write eventId failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(tvCount),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write tv count failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(tvList, sizeof(QosTv) * tvCount),
+        SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write tv list failed");
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_QOSEVENT, data, reply, option);

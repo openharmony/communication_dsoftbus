@@ -454,6 +454,15 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
     SoftBusFree(localScenarioCount);
 }
 
+static void ShowLocalScenarioCountMessage(const LocalScenarioCount *localScenarioCount)
+{
+    TRANS_LOGI(TRANS_CTRL,
+        "allMacTotalCount=%{public}d, allMacVideoCount=%{public}d, "
+        "allMacAudioCount=%{public}d, allMacFileCount=%{public}d",
+        localScenarioCount->allMacTotalCount, localScenarioCount->allMacVideoCount,
+        localScenarioCount->allMacAudioCount, localScenarioCount->allMacFileCount);
+}
+
 static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *info)
 {
     if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != SOFTBUS_OK) {
@@ -495,11 +504,7 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
         (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
         return SOFTBUS_MALLOC_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL,
-        "allMacTotalCount=%{public}d, allMacVideoCount=%{public}d, "
-        "allMacAudioCount=%{public}d, allMacFileCount=%{public}d",
-        localScenarioCount->allMacTotalCount, localScenarioCount->allMacVideoCount,
-        localScenarioCount->allMacAudioCount, localScenarioCount->allMacFileCount);
+    ShowLocalScenarioCountMessage(localScenarioCount);
     SoftBusFree(localScenarioCount);
     (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
     return SOFTBUS_OK;
@@ -545,11 +550,7 @@ static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *i
         (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
         return SOFTBUS_MALLOC_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL,
-        "allMacTotalCount=%{public}d, allMacVideoCount=%{public}d, "
-        "allMacAudioCount=%{public}d, allMacFileCount=%{public}d",
-        localScenarioCount->allMacTotalCount, localScenarioCount->allMacVideoCount,
-        localScenarioCount->allMacAudioCount, localScenarioCount->allMacFileCount);
+    ShowLocalScenarioCountMessage(localScenarioCount);
     SoftBusFree(localScenarioCount);
     (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
     return SOFTBUS_OK;
