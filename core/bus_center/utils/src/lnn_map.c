@@ -141,8 +141,9 @@ static MapNode *MapCreateNode(const char *key, uint32_t hash,
 int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSize)
 {
     MapNode *node = NULL;
-LNN_LOGE(LNN_STATE, "memcpy node value fail");
-    if (map == NULL || key == NULL || value == NULL || valueSize == 0) {
+
+    bool isParamsInvalid = (map == NULL || key == NULL || value == NULL || valueSize == 0);
+    if (isParamsInvalid) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (valueSize > HDF_MAP_VALUE_MAX_SIZE || strlen(key) > HDF_MAP_KEY_MAX_SIZE) {
