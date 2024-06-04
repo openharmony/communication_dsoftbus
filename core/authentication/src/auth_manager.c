@@ -427,6 +427,16 @@ static void RemoveAuthManagerByConnInfo(const AuthConnInfo *connInfo, bool isSer
     ReleaseAuthLock();
 }
 
+static bool HasAuthPassed(AuthManager *auth)
+{
+    for (uint32_t i = AUTH_LINK_TYPE_WIFI; i < AUTH_LINK_TYPE_MAX; i++) {
+        if (auth->hasAuthPassed[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void RemoveNotPassedAuthManagerByUdid(const char *udid)
 {
     if (!RequireAuthLock()) {
@@ -435,13 +445,13 @@ static void RemoveNotPassedAuthManagerByUdid(const char *udid)
     AuthManager *item = NULL;
     AuthManager *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authClientList, AuthManager, node) {
-        if (strcmp(item->udid, udid) != 0) {
+        if (HasAuthPassed(item) || strcmp(item->udid, udid) != 0) {
             continue;
         }
         DelAuthManager(item, AUTH_LINK_TYPE_MAX);
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authServerList, AuthManager, node) {
-        if (strcmp(item->udid, udid) != 0) {
+        if (HasAuthPassed(item) || strcmp(item->udid, udid) != 0) {
             continue;
         }
         DelAuthManager(item, AUTH_LINK_TYPE_MAX);
