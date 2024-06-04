@@ -115,7 +115,7 @@ static void ClearRecipientResources(FileRecipientInfo *info)
     if (info->recvState == TRANS_FILE_RECV_ERR_STATE) {
         SoftBusRemoveFile(info->recvFileInfo.filePath);
         if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
-            (void)SendFileTransResult(info->channelId, info->recvFileInfo.seq, SOFTBUS_ERR, IS_RECV_RESULT);
+            (void)SendFileTransResult(info->channelId, info->recvFileInfo.seq, SOFTBUS_FILE_ERR, IS_RECV_RESULT);
         }
 
         if (info->fileListener.socketRecvCallback != NULL) {

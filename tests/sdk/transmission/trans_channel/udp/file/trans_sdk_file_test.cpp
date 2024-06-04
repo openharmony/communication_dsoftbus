@@ -321,7 +321,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransGetFileListener(inValidName, fileListener);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 
     ret = TransGetFileListener(sessionName, fileListener);
     EXPECT_EQ(ret, SOFTBUS_OK);

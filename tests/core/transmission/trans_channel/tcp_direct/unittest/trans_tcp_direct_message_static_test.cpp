@@ -167,7 +167,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpened0002, TestSize.Leve
     int32_t ret;
 
     ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
 /**
@@ -292,11 +292,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetUuidByChanId0008, TestSize.Level1)
     AppInfo *appInfo = TestSetAppInfo();
 
     ret = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_AUTH_ID_FAILED);
     channelId = 0;
 
     ret = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_AUTH_ID_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -361,7 +361,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
     ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ProcessReceivedData(channelId, 0);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     TransSrvDataListDeinit();
 }
 
@@ -489,7 +489,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest001, TestSize.L
 {
     int32_t channelId = -1;
     int32_t ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
 /**
@@ -611,7 +611,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReplyTest001, TestSi
     uint32_t flags = 1;
 
     int32_t ret = OpenDataBusRequestReply(NULL, channelId, seq, flags);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
 /**
@@ -628,7 +628,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestErrorTest001, TestSi
     int32_t errCode = -1;
 
     int32_t ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
 /**

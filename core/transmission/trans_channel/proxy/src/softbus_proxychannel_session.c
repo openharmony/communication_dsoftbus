@@ -229,9 +229,9 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t chann
     TransReceiveData receiveData;
     receiveData.data = (void *)data;
     receiveData.dataLen = len;
-    if (NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "notify receive msg received err");
-        return SOFTBUS_ERR;
-    }
+
+    int32_t ret = NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "notify receive msg received err");
+
     return SOFTBUS_OK;
 }

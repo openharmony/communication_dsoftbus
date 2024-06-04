@@ -188,11 +188,9 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(connId, dataInfo.outData, dataInfo.outLen,
-        CONN_HIGH, chan->appInfo.myData.pid) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "send handshakeack buf fail");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = TransProxyTransSendMsg(connId, dataInfo.outData, dataInfo.outLen,
+        CONN_HIGH, chan->appInfo.myData.pid);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "send handshakeack buf fail");
     return SOFTBUS_OK;
 }
 
@@ -252,20 +250,21 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     payLoad = TransProxyPackIdentity(info->identity);
     if (payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack keepalive ack fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED;
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
+    int32_t ret = TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack keepalive ack head fail");
         cJSON_free(payLoad);
-        return SOFTBUS_ERR;
+        return ret;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
-        CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
+    ret = TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH, info->appInfo.myData.pid);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "send keepalive ack buf fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -291,18 +290,18 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
     payLoad = TransProxyPackIdentity(info->identity);
     if (payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack reset fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED;
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
+    int32_t ret = TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack reset head fail");
         cJSON_free(payLoad);
-        return SOFTBUS_ERR;
+        return ret;
     }
     cJSON_free(payLoad);
-    int32_t ret =
-        TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, CONN_LOW, info->appInfo.myData.pid);
+    ret = TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, CONN_LOW, info->appInfo.myData.pid);
     TransEventExtra extra = {
         .socketName = info->appInfo.myData.sessionName,
         .channelId = info->channelId,

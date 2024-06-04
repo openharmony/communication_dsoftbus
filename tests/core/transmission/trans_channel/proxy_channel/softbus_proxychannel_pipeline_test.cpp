@@ -288,7 +288,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineSendMessageTest001, 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     type = MSG_TYPE_P2P_NEGO;
     ret = TransProxyPipelineSendMessage(channelId, &data, dataLen, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 
 /**

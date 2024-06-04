@@ -221,7 +221,7 @@ int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len)
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoByIdWithIncSeq failed, channelId=%{public}d.", channelId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TDC_GET_INFO_FAILED;
     }
 
     int ret = TransTdcProcessPostData(&channel, data, len, FLAG_BYTES);
@@ -415,7 +415,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     if (node == NULL) {
         TRANS_LOGE(TRANS_SDK, "node is null. channelId=%{public}d ", channelId);
         SoftBusMutexUnlock(&g_tcpDataList->lock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_NODE_NOT_FOUND;
     }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
     int32_t seqNum = pktHead->seq;
@@ -487,7 +487,7 @@ static int32_t TransTdcProcAllData(int32_t channelId)
         if (node == NULL) {
             SoftBusMutexUnlock(&g_tcpDataList->lock);
             TRANS_LOGE(TRANS_SDK, "can not find data buf node. channelId=%{public}d", channelId);
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_NODE_NOT_FOUND;
         }
         uint32_t bufLen = node->w - node->data;
         if (bufLen == 0) {

@@ -1085,7 +1085,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     len = 10;
     ret = GetBrMacFromConnInfo(connId, brMac, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /**
