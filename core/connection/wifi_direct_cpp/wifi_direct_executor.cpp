@@ -126,6 +126,7 @@ void WifiDirectExecutor::ProcessUnHandleCommand()
             return;
         }
     });
+    GetSender().Clear();
 }
 
 }

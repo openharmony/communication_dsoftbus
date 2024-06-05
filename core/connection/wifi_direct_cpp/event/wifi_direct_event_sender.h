@@ -37,6 +37,13 @@ public:
         }
     }
 
+    void Clear()
+    {
+        if (queue_ != nullptr) {
+            queue_->Clear();
+        }
+    }
+
 private:
     WifiDirectEventQueue *queue_;
 };
