@@ -152,7 +152,7 @@ static void NotifyP2pSessionConnClear(ListNode *sessionConnList)
     SessionConn *nextItem = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, sessionConnList, SessionConn, node) {
-        (void)NotifyChannelOpenFailed(item->channelId, SOFTBUS_TRANS_NET_STATE_CHANGED);
+        (void)NotifyChannelOpenFailedBySessionConn(item, SOFTBUS_TRANS_NET_STATE_CHANGED);
         TransSrvDelDataBufNode(item->channelId);
         SoftBusFree(item);
     }

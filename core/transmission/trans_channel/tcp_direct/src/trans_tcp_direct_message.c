@@ -447,29 +447,25 @@ static int32_t NotifyChannelClosed(const AppInfo *appInfo, int32_t channelId)
     return ret;
 }
 
-int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
+int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t errCode)
 {
-    SessionConn conn;
-    if (GetSessionConnById(channelId, &conn) == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
-        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
-    }
-    int64_t timeStart = conn.appInfo.timeStart;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(conn != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
+    int64_t timeStart = conn->appInfo.timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     TransEventExtra extra = {
         .calleePkg = NULL,
-        .callerPkg = conn.appInfo.myData.pkgName,
-        .channelId = conn.channelId,
-        .peerNetworkId = conn.appInfo.peerNetWorkId,
-        .socketName = conn.appInfo.myData.sessionName,
-        .linkType = conn.appInfo.connectType,
+        .callerPkg = conn->appInfo.myData.pkgName,
+        .channelId = conn->channelId,
+        .peerNetworkId = conn->appInfo.peerNetWorkId,
+        .socketName = conn->appInfo.myData.sessionName,
+        .linkType = conn->appInfo.connectType,
         .costTime = timediff,
         .errcode = errCode,
-        .osType = (conn.appInfo.osType < 0) ? UNKNOW_OS_TYPE : (conn.appInfo.osType),
-        .peerUdid = conn.appInfo.peerUdid,
+        .osType = (conn->appInfo.osType < 0) ? UNKNOW_OS_TYPE : (conn->appInfo.osType),
+        .peerUdid = conn->appInfo.peerUdid,
         .result = EVENT_STAGE_RESULT_FAILED
     };
-    if (!conn.serverSide) {
+    if (!conn->serverSide) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     } else {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
@@ -479,30 +475,38 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .conflictedName = NULL,
         .occupyedName = NULL,
         .permissionName = NULL,
-        .linkType = conn.appInfo.linkType,
+        .linkType = conn->appInfo.linkType,
         .errcode = errCode,
-        .sessionName = conn.appInfo.myData.sessionName,
+        .sessionName = conn->appInfo.myData.sessionName,
     };
     TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
-
-    SoftbusRecordOpenSessionKpi(conn.appInfo.myData.pkgName,
-        conn.appInfo.linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+    SoftbusRecordOpenSessionKpi(conn->appInfo.myData.pkgName,
+        conn->appInfo.linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-
-    int32_t ret = TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
+    int32_t ret = TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
-
-    if (!(conn.serverSide)) {
-        AppInfoData *myData = &conn.appInfo.myData;
+    if (!(conn->serverSide)) {
+        const AppInfoData *myData = &conn->appInfo.myData;
         if (myData == NULL) {
             TRANS_LOGE(TRANS_CTRL, "myData is null");
             return SOFTBUS_INVALID_PARAM;
         }
-        int ret = TransTdcOnChannelOpenFailed(myData->pkgName, myData->pid, channelId, errCode);
-        TRANS_LOGW(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", channelId, ret);
+        int ret = TransTdcOnChannelOpenFailed(myData->pkgName, myData->pid, conn->channelId, errCode);
+        TRANS_LOGW(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", conn->channelId, ret);
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
+{
+    SessionConn conn;
+    if (GetSessionConnById(channelId, &conn) == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
+        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
+    }
+
+    return NotifyChannelOpenFailedBySessionConn(&conn, errCode);
 }
 
 static int TransTdcPostFisrtData(SessionConn *conn)
