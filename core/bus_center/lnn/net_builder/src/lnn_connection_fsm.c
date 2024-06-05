@@ -373,29 +373,21 @@ static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool i
         LNN_LOGE(LNN_BUILDER, "send mlps only support ble");
         return;
     }
-    char *outUdid = (char *)SoftBusCalloc(UDID_BUF_LEN);
-    if (outUdid == NULL) {
-        LNN_LOGE(LNN_BUILDER, "calloc outUdid fail");
+    LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "calloc info fail");
         return;
     }
-    if (strcpy_s(outUdid, UDID_BUF_LEN, udid) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "copy outUdid fail");
-        SoftBusFree(outUdid);
+    if (strcpy_s(info->udid, UDID_BUF_LEN, udid) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s outUdid fail");
+        SoftBusFree(info);
         return;
     }
+    info->isOnline = isOnline;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (isOnline) {
-        LNN_LOGI(LNN_BUILDER, "LP ap online");
-        if (LnnAsyncCallbackDelayHelper(looper, SendInfoToMlpsBleOnlineProcess, (void *)outUdid, 0) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "async call online process fail");
-            SoftBusFree(outUdid);
-        }
-    } else {
-        LNN_LOGI(LNN_BUILDER, "LP ap offline");
-        if (LnnAsyncCallbackDelayHelper(looper, SendInfoToMlpsBleOfflineProcess, (void *)outUdid, 0) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "async call online process fail");
-            SoftBusFree(outUdid);
-        }
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlps, (void *)info, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call online process fail");
+        SoftBusFree(info);
     }
 }
 
@@ -559,7 +551,7 @@ static void SetOnlineType(int32_t reason, NodeInfo *nodeInfo, LnnEventExtra extr
         extra.onlineType = ONLINE_TYPE_INVALID;
     }
 }
-  
+
 static int32_t FillDeviceBleReportExtra(const LnnEventExtra *extra, LnnBleReportExtra *bleExtra)
 {
     if (extra == NULL || bleExtra == NULL) {
@@ -717,7 +709,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         connFsm->isDead = true;
         LnnNotifyAuthHandleLeaveLNN(connInfo->authHandle);
     }
-    
+
     int32_t infoNum = 0;
     int32_t lnnType = 0;
     NodeBasicInfo *info = NULL;

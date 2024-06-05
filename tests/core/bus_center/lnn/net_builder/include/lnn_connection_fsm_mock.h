@@ -42,8 +42,7 @@ public:
     virtual int SoftBusGetBtState(void) = 0;
     virtual int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen) = 0;
     virtual void DeleteFromProfile(const char *udid) = 0;
-    virtual void SendInfoToMlpsBleOnlineProcess(void *para) = 0;
-    virtual void SendInfoToMlpsBleOfflineProcess(void *para) = 0;
+    virtual void SendDeviceStateToMlps(void *para) = 0;
     virtual int32_t LnnUpdateNetworkId(const NodeInfo *newInfo) = 0;
     virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
     virtual int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo) = 0;
@@ -67,8 +66,7 @@ public:
     MOCK_METHOD0(SoftBusGetBtState, int (void));
     MOCK_METHOD4(LnnGenerateBtMacHash, int32_t (const char *, int32_t, char *, int32_t));
     MOCK_METHOD1(DeleteFromProfile, void (const char *));
-    MOCK_METHOD1(SendInfoToMlpsBleOnlineProcess, void (void *));
-    MOCK_METHOD1(SendInfoToMlpsBleOfflineProcess, void (void *));
+    MOCK_METHOD1(SendDeviceStateToMlps, void (void *));
     MOCK_METHOD1(LnnUpdateNetworkId, int32_t (const NodeInfo *));
     MOCK_METHOD2(AuthGetServerSide, int32_t (int64_t, bool *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *, NodeInfo *));

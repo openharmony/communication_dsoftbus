@@ -56,14 +56,9 @@ void DeleteFromProfile(const char *udid)
     return GetLnnConnInterface()->DeleteFromProfile(udid);
 }
 
-void SendInfoToMlpsBleOnlineProcess(void *para)
+void SendDeviceStateToMlps(void *para)
 {
-    return GetLnnConnInterface()->SendInfoToMlpsBleOnlineProcess(para);
-}
-
-void SendInfoToMlpsBleOfflineProcess(void *para)
-{
-    return GetLnnConnInterface()->SendInfoToMlpsBleOfflineProcess(para);
+    return GetLnnConnInterface()->SendDeviceStateToMlps(para);
 }
 
 int32_t LnnUpdateNetworkId(const NodeInfo *newInfo)
