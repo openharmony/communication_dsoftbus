@@ -823,7 +823,7 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg, const AuthHandle *
     dataInfo.outLen = 0;
 
     msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    if (AuthCheckSessionKeyValidByAuthHandle(authHandle) != SOFTBUS_OK) {
+    if (AuthCheckSessionKeyValidByAuthHandle(authHandle) == SOFTBUS_AUTH_SESSION_KEY_INVALID) {
         TRANS_LOGE(TRANS_MSG, "ble single online, send renegotiate msg");
         msg->msgHead.cipher |= AUTH_SINGLE_CIPHER;
     } else {
