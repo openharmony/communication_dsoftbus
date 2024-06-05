@@ -282,7 +282,7 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
         strncmp(strMac, invalidAddr, BT_MAC_LEN) == 0) {
         COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_INVALID_PARAM;
-    } 
+    }
     char *tmpMac = (char *)SoftBusMalloc(strMacLen * sizeof(char));
     if (tmpMac == NULL) {
         COMM_LOGE(COMM_UTILS, "tmpMac is null");
