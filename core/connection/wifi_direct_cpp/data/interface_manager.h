@@ -36,7 +36,7 @@ public:
     int UpdateInterface(InterfaceInfo::InterfaceType type, const Updater &updater);
     int ReadInterface(InterfaceInfo::InterfaceType type, const Reader &reader);
 
-    bool IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare);
+    bool IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare) const;
 
     void LockInterface(InterfaceInfo::InterfaceType type, const std::string &owner);
     void UnlockInterface(InterfaceInfo::InterfaceType type);
@@ -60,7 +60,7 @@ private:
 
     static inline Initiator initiator_;
 
-    std::shared_mutex lock_;
+    mutable std::shared_mutex lock_;
     InterfaceInfo interfaces_[InterfaceInfo::MAX];
     ExclusiveHelper exclusives_[InterfaceInfo::MAX];
 };
