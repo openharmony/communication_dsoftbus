@@ -289,6 +289,40 @@ uint32_t HichainGetJoinedGroups(int32_t groupType)
     return groupCnt;
 }
 
+bool IsSameAccountGroupDevice(const char *deviceId)
+{
+    (void)deviceId;
+    uint32_t groupNum = 0;
+    char *returnGroupVec = NULL;
+
+    const DeviceGroupManager *gmInstance = GetGmInstance();
+    if (gmInstance == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "hichain GetGmInstance failed");
+        return false;
+    }
+    int32_t accountId = GetActiveOsAccountIds();
+    if (accountId <= 0) {
+        AUTH_LOGE(AUTH_HICHAIN, "accountId is invalid");
+        return false;
+    }
+
+    if (gmInstance->getJoinedGroups(accountId, AUTH_APPID, SAME_ACCOUNT_GROUY_TYPE, &returnGroupVec, &groupNum) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "getJoinedGroups fail, accountId=%{public}d", accountId);
+        gmInstance->destroyInfo(&returnGroupVec);
+        return false;
+    }
+    if (groupNum == 0) {
+        AUTH_LOGE(AUTH_HICHAIN, "getJoinedGroups zero");
+        gmInstance->destroyInfo(&returnGroupVec);
+        return false;
+    } else {
+        AUTH_LOGI(AUTH_HICHAIN, "getJoinedGroups: %{public}d", groupNum);
+        gmInstance->destroyInfo(&returnGroupVec);
+        return true;
+    }
+}
+
 void CancelRequest(int64_t authReqId, const char *appId)
 {
     AUTH_CHECK_AND_RETURN_LOGE(appId != NULL, AUTH_HICHAIN, "appId is null");
