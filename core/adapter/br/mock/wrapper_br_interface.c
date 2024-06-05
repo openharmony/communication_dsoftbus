@@ -35,7 +35,7 @@ static int32_t OpenSppServer(const char *name, int32_t nameLen, const char *uuid
 {
     if (name == NULL || nameLen <= 0) {
         CONN_LOGW(CONN_BR, "OpenSppServer invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     (void)isSecure;
 
@@ -57,7 +57,7 @@ static void CloseSppServer(int32_t serverFd)
 static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int socketPsmValue, void *connectCallback)
 {
     if (mac == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     BluetoothCreateSocketPara socketPara;
     (void)memset_s((char *)&socketPara, sizeof(socketPara), 0, sizeof(socketPara));
@@ -70,12 +70,12 @@ static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int sock
     (void)memset_s((char *)&bdAddr, sizeof(bdAddr), 0, sizeof(bdAddr));
     if (memcpy_s((char *)bdAddr.addr, OHOS_BD_ADDR_LEN, mac, BT_ADDR_LEN) != EOK) {
         CONN_LOGE(CONN_BR, "Connect memcpy_s failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     int ret = SocketConnectEx(&socketPara, &bdAddr, socketPsmValue, (BtSocketConnectionCallback *)connectCallback);
     if (ret < 0) {
         CONN_LOGE(CONN_BR, "connect failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BR_SOCKET_CONNECT_ERR;
     }
     CONN_LOGI(CONN_BR, "SocketConnectEx ok. clientId=%{public}d", ret);
     return ret;
@@ -104,7 +104,7 @@ static int32_t Accept(int32_t serverFd)
     int32_t ret = SppServerAccept(serverFd);
     if (ret == BT_SPP_INVALID_ID) {
         CONN_LOGE(CONN_BR, "Accept spp server failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BR_SPP_SERVER_ERR;
     }
     return ret;
 }
@@ -133,7 +133,7 @@ static int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice
     (void)SppGetRemoteAddr(clientFd, &bdAddr);
     if (memcpy_s((char *)device->mac, BT_ADDR_LEN, (char *)bdAddr.addr, OHOS_BD_ADDR_LEN) != EOK) {
         CONN_LOGE(CONN_BR, "GetRemoteDeviceInfo memcpy_s failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     return SOFTBUS_OK;

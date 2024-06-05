@@ -38,7 +38,7 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
     if (interface == NULL || interface->GetSockPort == NULL || interface->OpenClientSocket == NULL ||
         interface->OpenServerSocket == NULL || interface->AcceptClient == NULL) {
         CONN_LOGW(CONN_COMMON, "Bad socket interface!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int ret = SoftBusMutexLock(&g_socketsMutex);
     if (ret != SOFTBUS_OK) {
@@ -46,7 +46,7 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
         return ret;
     }
 
-    ret = SOFTBUS_ERR;
+    ret = SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     for (uint8_t i = 0; i < MAX_SOCKET_TYPE; i++) {
         if (g_socketInterfaces[i] == NULL) {
             g_socketInterfaces[i] = interface;
@@ -122,12 +122,12 @@ void ConnDeinitSockets(void)
 int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
 {
     if (option == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     const SocketInterface *socketInterface = GetSocketInterface(option->socketOption.protocol);
     if (socketInterface == NULL) {
         CONN_LOGE(CONN_COMMON, "protocol not supported! protocol=%{public}d", option->socketOption.protocol);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR;
     }
     return socketInterface->OpenClientSocket(option, bindAddr, isNonBlock);
 }
@@ -183,7 +183,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     int32_t flags = fcntl(fd, F_GETFL, 0);
     if (flags < 0) {
         CONN_LOGE(CONN_COMMON, "fcntl get flag failed, fd=%{public}d, errno=%{public}d", fd, errno);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_SOCKET_FCNTL_ERR;
     }
     if (isNonBlock && ((uint32_t)flags & O_NONBLOCK) == 0) {
         flags = (int32_t)((uint32_t)flags | O_NONBLOCK);
@@ -306,7 +306,7 @@ int32_t ConnGetLocalSocketPort(int32_t fd)
     const SocketInterface *socketInterface = GetSocketInterface(LNN_PROTOCOL_IP);
     if (socketInterface == NULL) {
         CONN_LOGW(CONN_COMMON, "LNN_PROTOCOL_IP not supported!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR;
     }
     return socketInterface->GetSockPort(fd);
 }

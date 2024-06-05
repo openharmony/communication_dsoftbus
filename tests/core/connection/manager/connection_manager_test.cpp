@@ -366,7 +366,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger005, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_AUTH_SDK, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ConnSetConnectCallback(MODULE_AUTH_SDK, &connCb);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_INTERNAL_ERR, ret);
 
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     ConnUnSetConnectCallback(MODULE_AUTH_SDK);

@@ -696,7 +696,7 @@ static void *ListenTask(void *arg)
         (void)SoftBusMutexUnlock(&serverState->mutex);
         while (true) {
             int32_t socketHandle = g_sppDriver->Accept(serverId);
-            if (socketHandle == SOFTBUS_ERR) {
+            if (socketHandle == SOFTBUS_CONN_BR_SPP_SERVER_ERR) {
                 CONN_LOGE(CONN_BR, "accept failed, traceId=%{public}u, serverId=%{public}d", serverState->traceId,
                     serverId);
                 break;
@@ -888,19 +888,19 @@ static int32_t InitProperty()
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH, (unsigned char *)&capacity, sizeof(capacity)) !=
         SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "get br buffer capacity config fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (capacity <= 0 || capacity > MAX_BR_READ_BUFFER_CAPACITY) {
         CONN_LOGE(CONN_INIT, "br buffer capacity is invalid, capacity=%{public}d", capacity);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN, (unsigned char *)&mtu, sizeof(mtu)) != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "get br mtu config fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (mtu <= 0 || mtu > MAX_BR_MTU_SIZE) {
         CONN_LOGE(CONN_INIT, "br mtu is invalid, mtu=%{public}d", mtu);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     CONN_LOGD(CONN_INIT, "init br config success, read buffer capacity=%{public}d, mtu=%{public}d", capacity, mtu);
     g_readBufferCapacity = capacity;

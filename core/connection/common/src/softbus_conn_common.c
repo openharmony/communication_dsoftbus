@@ -214,7 +214,7 @@ static int32_t ConnectSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, ui
     SoftBusSysTime now;
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "BrSoftBusCondWait SoftBusGetTime failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_GET_TIME_FAIL;
     }
     now.sec += (now.usec + ((int32_t)timeMillis * USECTONSEC)) / MICROSECONDS;
     now.usec = (now.usec + ((int32_t)timeMillis * USECTONSEC)) % MICROSECONDS;
@@ -239,7 +239,7 @@ int32_t WaitQueueLength(
         int32_t status = ConnectSoftBusCondWait(cond, mutex, WAIT_QUEUE_DELAY);
         if (status != SOFTBUS_OK && status != SOFTBUS_TIMOUT) {
             CONN_LOGE(CONN_COMMON, "wait queue length cond wait fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_CONN_COND_WAIT_FAIL;
         }
     }
     return SOFTBUS_OK;
@@ -263,7 +263,7 @@ int32_t GetMsg(ConnectionQueue *queue, void **msg, bool *isFull, QueuePriority l
         }
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_GET_MSG_FAIL;
 }
 
 uint32_t GetQueueLimit(int32_t index)

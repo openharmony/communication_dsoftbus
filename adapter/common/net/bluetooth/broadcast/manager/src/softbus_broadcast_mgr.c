@@ -192,7 +192,7 @@ int32_t InitBroadcastMgr(void)
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "call from adapter fail!");
 
     ret = SoftBusAddBtStateListener(&g_softbusBcBtStateLister);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret != SOFTBUS_ERR, ret, DISC_BLE, "add bt state listener fail!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret >= 0, ret, DISC_BLE, "add bt state listener fail!");
     g_btStateListenerId = ret;
     g_mgrInit = true;
 

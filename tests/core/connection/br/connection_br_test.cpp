@@ -657,7 +657,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket006, TestSize.Level1)
 
     ConnBrDelBrPendingPacket(id, seq);
     ret = ConnBrSetBrPendingPacket(id, seq, data);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_BR_SET_PENDING_PACKET_ERR, ret);
 }
 
 HWTEST_F(ConnectionBrTest, testBrPendingPacket007, TestSize.Level1)
