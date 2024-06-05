@@ -319,8 +319,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_001, TestSize.Level1)
     request.linkType = LANE_P2P;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -372,8 +372,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_002, TestSize.Level1)
     request.linkType = LANE_HML;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -423,8 +423,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_003, TestSize.Level1)
     request.linkType = LANE_HML;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -474,8 +474,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_004, TestSize.Level1)
     request.linkType = LANE_HML;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -521,8 +521,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_005, TestSize.Level1)
     request.linkType = LANE_HML;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -570,8 +570,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_006, TestSize.Level1)
     request.pid = SYNCFAIL;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -622,8 +622,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_007, TestSize.Level1)
     request.pid = SYNCFAIL;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -672,8 +672,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_008, TestSize.Level1)
     request.pid = SYNCSUCC;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -722,8 +722,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_009, TestSize.Level1)
     request.pid = SYNCSUCC;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -768,8 +768,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_001, TestSize.Level1)
     request.linkType = LANE_P2P;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -823,8 +823,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_002, TestSize.Level1)
     request.pid = ASYNCSUCC;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -881,8 +881,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_003, TestSize.Level1)
     request.pid = ASYNCSUCC;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -938,8 +938,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_004, TestSize.Level1)
     request.pid = ASYNCSUCC;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -995,8 +995,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_005, TestSize.Level1)
     request.pid = ASYNCFAIL;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -1046,8 +1046,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
     request.pid = ASYNCFAIL;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -1098,8 +1098,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     request.pid = ASYNCSUCC;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -1151,8 +1151,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_001, TestSize.Level1)
     request.linkType = LANE_P2P;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -1207,8 +1207,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_002, TestSize.Level1)
     request.linkType = LANE_P2P;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -1262,8 +1262,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_003, TestSize.Level1)
     request.linkType = LANE_P2P;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -1318,8 +1318,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_004, TestSize.Level1)
     request.pid = ASYNCSUCC;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 10;
@@ -1377,8 +1377,8 @@ HWTEST_F(LNNLaneLinkTest, LnnCancelWifiDirect_001, TestSize.Level1)
     request.pid = ASYNCSUCC;
 
     const LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     uint32_t laneReqId = 12;

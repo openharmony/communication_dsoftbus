@@ -312,8 +312,8 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
         return SOFTBUS_LANE_NOT_FOUND;
     }
     LaneLinkCb linkCb = {
-        .OnLaneLinkSuccess = CtrlLinkSuccess,
-        .OnLaneLinkFail = CtrlLinkFail,
+        .onLaneLinkSuccess = CtrlLinkSuccess,
+        .onLaneLinkFail = CtrlLinkFail,
     };
     LinkRequest requestInfo = {0};
     int32_t ret = SOFTBUS_LANE_TRIGGER_LINK_FAIL;
@@ -331,7 +331,7 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
             return SOFTBUS_OK;
         }
     } while (false);
-    linkCb.OnLaneLinkFail(laneHandle, ret, requestInfo.linkType);
+    linkCb.onLaneLinkFail(laneHandle, ret, requestInfo.linkType);
     return ret;
 }
 
