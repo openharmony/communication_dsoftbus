@@ -825,7 +825,7 @@ static int32_t SendOneFrameMiddle(SendListenerInfo *info, int32_t frameType)
         info->waitSeq = (int32_t)(info->seq);
         info->waitTimeoutCount = 0;
         if (SendFileAckReqAndResData(info->channelId, info->seq - FILE_SEND_ACK_INTERVAL + 1, info->seq,
-                TRANS_SESSION_FILE_ACK_REQUEST_SENT) != SOFTBUS_OK) {
+                                     TRANS_SESSION_FILE_ACK_REQUEST_SENT) != SOFTBUS_OK) {
             DeletePendingPacket((uint32_t)info->sessionId, (uint64_t)info->seq);
             info->waitSeq = 0;
             return SOFTBUS_ERR;

@@ -1625,7 +1625,7 @@ void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList)
     SessionInfo *sessionNode = NULL;
     SessionInfo *nextSessionNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        SessionServerInfo * info = CreateSessionServerInfoNode(serverNode);
+        SessionServerInfo *info = CreateSessionServerInfoNode(serverNode);
         if (info != NULL) {
             ListAdd(sessionServerInfoList, &info->node);
         }
