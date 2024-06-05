@@ -30,11 +30,11 @@ static __thread char g_printAddr[LNN_MAX_PRINT_ADDR_LEN] = { 0 };
 bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
 {
     if (addr1 == NULL || addr2 == NULL) {
-        LNN_LOGW(LNN_STATE, "addr1 or addr2 is null");
+        LNN_LOGD(LNN_STATE, "addr1 or addr2 is null");
         return false;
     }
     if (addr1->type != addr2->type) {
-        LNN_LOGW(LNN_STATE, "addr1 type not equal addr2 type");
+        LNN_LOGD(LNN_STATE, "addr1 type not equal addr2 type");
         return false;
     }
     if (addr1->type == CONNECTION_ADDR_BR) {
