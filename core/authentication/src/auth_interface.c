@@ -643,6 +643,34 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
     return false;
 }
 
+bool AuthHasSameAccountGroup(const DeviceInfo *device)
+{
+    if (device == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "device is null");
+        return false;
+    }
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    DeviceInfo defaultInfo;
+    (void)memset_s(&defaultInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    bool isSameAccountGroup = false;
+
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get local accountHash fail");
+        return false;
+    }
+    if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
+        isSameAccountGroup = true;
+        AUTH_LOGI(AUTH_HICHAIN, "account is same, continue check same account group relation.");
+    }
+    if (isSameAccountGroup) {
+        if (!IsSameAccountGroupDevice(device->devId)) {
+            AUTH_LOGE(AUTH_HICHAIN, "device has not same account group relation, stop verify progress");
+            return false;
+        }
+    }
+    return true;
+}
+
 TrustedReturnType AuthHasTrustedRelation(void)
 {
     uint32_t num = 0;
