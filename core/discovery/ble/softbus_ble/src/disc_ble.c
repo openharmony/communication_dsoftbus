@@ -38,6 +38,7 @@
 #include "softbus_errcode.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"
+#include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
 #define BLE_PUBLISH 0x0
@@ -644,6 +645,36 @@ static bool GetWakeRemote(void)
     return false;
 }
 
+static int32_t DiscBleGetCustData(DeviceInfo *info)
+{
+    uint32_t infoIndex = BLE_PUBLISH | BLE_PASSIVE;
+    uint32_t pos = 0;
+    for (pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
+        if (CheckCapBitMapExist(CAPABILITY_NUM, g_bleInfoManager[infoIndex].capBitMap, pos)) {
+            break;
+        }
+    }
+    cJSON *json = cJSON_ParseWithLength((const char *)g_bleInfoManager[infoIndex].capabilityData[pos],
+        g_bleInfoManager[infoIndex].capDataLen[pos]);
+    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "parse cJSON failed");
+
+    char custData[DISC_MAX_CUST_DATA_LEN] = {0};
+    if (!GetJsonObjectStringItem(json, g_capabilityMap[CASTPLUS_CAPABILITY_BITMAP].capability, custData,
+        DISC_MAX_CUST_DATA_LEN)) {
+        DISC_LOGE(DISC_BLE, "GetJsonObjectStringItem custData failed, custData=%{public}s", custData);
+        cJSON_Delete(json);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (ConvertHexStringToBytes((unsigned char *)info->custData, DISC_MAX_CUST_DATA_LEN, (const char *)custData,
+        strlen(custData)) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "ConvertHexStringToBytes custData failed, custData=%{public}s", info->custData);
+        cJSON_Delete(json);
+        return SOFTBUS_DISCOVER_BLE_CONVERT_BYTES_FAILED;
+    }
+    cJSON_Delete(json);
+    return SOFTBUS_OK;
+}
+
 static int32_t GetConDeviceInfo(DeviceInfo *info)
 {
     (void)memset_s(info, sizeof(DeviceInfo), 0x0, sizeof(DeviceInfo));
@@ -699,6 +730,9 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
     for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
         info->capabilityBitmap[pos] =
         g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].capBitMap[pos] | passiveCapBitMap[pos];
+    }
+    if (DiscBleGetCustData(info) != SOFTBUS_OK) {
+        DISC_LOGW(DISC_BLE, "get custData failed");
     }
 
     int32_t activeCnt = g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].rangingRefCnt;
@@ -792,6 +826,20 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
     }
 }
 
+static void AssembleCustData(DeviceInfo *info, BroadcastData *broadcastData)
+{
+    if ((info->capabilityBitmap[0] & 0x02) == 0) { // CastPlus
+        return;
+    }
+    uint8_t custData[CUST_CAPABILITY_TYPE_LEN + CUST_CAPABILITY_LEN] = {0};
+    custData[0] = CAST_PLUS;
+    // Only copy the target length from the copy source
+    int32_t ret = memcpy_s(&custData[1], CUST_CAPABILITY_LEN, info->custData, CUST_CAPABILITY_LEN);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "memcpy custData failed");
+    (void)AssembleTLV(broadcastData, TLV_TYPE_CUST, (const void *)custData,
+        CUST_CAPABILITY_LEN + CUST_CAPABILITY_TYPE_LEN);
+}
+
 static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
 {
     bool isWakeRemote = GetWakeRemote();
@@ -846,6 +894,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
     if (advId == NON_ADV_ID) {
         AssembleNonOptionalTlv(info, broadcastData);
     }
+    AssembleCustData(info, broadcastData);
     uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen - 1;
     uint32_t validLen = (strlen(info->devName) + 1 > remainLen) ? remainLen : strlen(info->devName) + 1;
     char deviceName[DISC_MAX_DEVICE_NAME_LEN] = {0};
