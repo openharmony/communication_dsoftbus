@@ -335,8 +335,8 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
     reqInfo.transType = LANE_T_BYTE;
     reqInfo.pid = DEFAULT_PID;
     LaneLinkCb linkCb = {
-        .OnLaneLinkSuccess = NotifyWlanLinkSuccess,
-        .OnLaneLinkFail = NotifyWlanLinkFail,
+        .onLaneLinkSuccess = NotifyWlanLinkSuccess,
+        .onLaneLinkFail = NotifyWlanLinkFail,
     };
     uint32_t requestId = 0x5A5A;
     ret = BuildLink(&reqInfo, requestId, &linkCb);
@@ -360,8 +360,8 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
     reqInfo.transType = LANE_T_BYTE;
     reqInfo.pid = DEFAULT_PID;
     LaneLinkCb linkCb = {
-        .OnLaneLinkSuccess = NotifyBrLinkSuccess,
-        .OnLaneLinkFail = NotifyBrLinkFail,
+        .onLaneLinkSuccess = NotifyBrLinkSuccess,
+        .onLaneLinkFail = NotifyBrLinkFail,
     };
     uint32_t requestId = 0x5A5A;
     ret = BuildLink(&reqInfo, requestId, &linkCb);
