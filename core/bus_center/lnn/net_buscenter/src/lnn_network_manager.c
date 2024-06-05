@@ -725,6 +725,9 @@ int32_t LnnInitNetworkManagerDelay(void)
 bool LnnIsAutoNetWorkingEnabled(void)
 {
     bool isConfigEnabled = false;
+    if (IsActiveOsAccountUnlocked()) {
+        g_isUnLock = true;
+    }
     if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char *)&isConfigEnabled,
         sizeof(isConfigEnabled)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Cannot get autoNetworkingSwitch from config file");
