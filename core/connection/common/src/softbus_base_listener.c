@@ -328,7 +328,7 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
         if (node->info.status != LISTENER_IDLE) {
             CONN_LOGE(CONN_COMMON, "listener is not idle status, module=%{public}d, status=%{public}d",
                 module, node->info.status);
-            status = SOFTBUS_ERR;
+            status = SOFTBUS_CONN_LISTENER_NOT_IDLE;
             break;
         }
         node->listener.onConnectEvent = listener->onConnectEvent;
@@ -458,7 +458,7 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
         if (node->info.status != LISTENER_IDLE) {
             CONN_LOGE(CONN_COMMON, "listener is not idle status, module=%{public}d, status=%{public}d",
                 module, node->info.status);
-            status = SOFTBUS_ERR;
+            status = SOFTBUS_CONN_LISTENER_NOT_IDLE;
             break;
         }
 
@@ -473,7 +473,7 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
         if (listenPort <= 0) {
             CONN_LOGE(CONN_COMMON, "start server failed, module=%{public}d, listenPort=%{public}d",
                 module, listenPort);
-            status = SOFTBUS_ERR;
+            status = SOFTBUS_CONN_FAIL;
             break;
         }
 
@@ -609,7 +609,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
         if (node->info.status != LISTENER_RUNNING) {
             CONN_LOGE(CONN_COMMON, "module is not running, module=%{public}d, fd=%{public}d, trigger=%{public}d",
                 module, fd, trigger);
-            status = SOFTBUS_ERR;
+            status = SOFTBUS_CONN_FAIL;
             break;
         }
 
@@ -618,7 +618,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
                 "can not trigger more, fd exceed more than MAX_LISTEN_EVENTS, MAX_LISTEN_EVENTS=%{public}d, "
                 "module=%{public}d, fd=%{public}d, trigger=%{public}d, waitEventFdsLen=%{public}d",
                 MAX_LISTEN_EVENTS, module, fd, trigger, node->info.waitEventFdsLen);
-            status = SOFTBUS_ERR;
+            status = SOFTBUS_CONN_FAIL;
             break;
         }
 
@@ -1186,7 +1186,7 @@ static int32_t StartSelectThread(void)
 
         SelectThreadState *state = SoftBusCalloc(sizeof(SelectThreadState));
         if (state == NULL) {
-            status = SOFTBUS_ERR;
+            status = SOFTBUS_MALLOC_ERR;
             break;
         }
         state->traceId = ++selectThreadTraceIdGenerator;
@@ -1198,7 +1198,7 @@ static int32_t StartSelectThread(void)
         if (rc != 0) {
             CONN_LOGE(CONN_COMMON, "create ctrl pipe failed, error=%{public}s", strerror(errno));
             SoftBusFree(state);
-            status = SOFTBUS_ERR;
+            status = SOFTBUS_INVALID_NUM;
             break;
         }
         state->ctrlRfd = fds[0];

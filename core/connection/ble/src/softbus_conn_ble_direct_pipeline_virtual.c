@@ -18,12 +18,12 @@
 
 int32_t ConnBleDirectPipelineOpen(const ConnBleDirectPipelineOption *option, const ConnectResult *result)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t ConnBleDirectPipelineClose(int32_t channelId)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t ConnBleDirectPipelineInit(ConnBleDirectPipelineCallback* cb)
@@ -35,7 +35,7 @@ int32_t ConnBleDirectPipelineInit(ConnBleDirectPipelineCallback* cb)
 int32_t ConnBleDirectPipelineSendMessage(int32_t channelId, const uint8_t *data, uint32_t dataLen,
     PipelineMsgType type)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void PipelineRegisterIpPortVerifyCallBack(const OnMessageReceivedFunc cb)

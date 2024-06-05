@@ -399,7 +399,7 @@ HWTEST_F(AdapterBleGattClientTest, EnableFastestConn, TestSize.Level3)
         .Times(2)
         .WillOnce(Return(OHOS_BT_STATUS_FAIL))
         .WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
-    ASSERT_EQ(SoftbusGattcSetFastestConn(1), SOFTBUS_ERR);
+    ASSERT_EQ(SoftbusGattcSetFastestConn(1), SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SET_FASTEST_ERR);
     ASSERT_EQ(SoftbusGattcSetFastestConn(1), SOFTBUS_OK);
 }
 
@@ -424,7 +424,8 @@ HWTEST_F(AdapterBleGattClientTest, SetBleConnectionPriority, TestSize.Level3)
         .Times(2)
         .WillOnce(Return(OHOS_BT_STATUS_FAIL))
         .WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
-    ASSERT_EQ(SoftbusGattcSetPriority(1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_ERR);
+    ASSERT_EQ(SoftbusGattcSetPriority(1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED),
+        SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SET_PRIORITY_ERR);
     ASSERT_EQ(SoftbusGattcSetPriority(1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_OK);
 }
 

@@ -46,7 +46,7 @@ HWTEST(AdapterBtCommonTest, SoftBusEnableBt, TestSize.Level3)
     MockBluetooth mocker;
     EXPECT_CALL(mocker, EnableBle()).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_EQ(SoftBusEnableBt(), SOFTBUS_OK);
-    EXPECT_EQ(SoftBusEnableBt(), SOFTBUS_ERR);
+    EXPECT_EQ(SoftBusEnableBt(), SOFTBUS_COMM_BLE_ENABLE_ERR);
 }
 
 /**
@@ -60,7 +60,7 @@ HWTEST(AdapterBtCommonTest, SoftBusDisableBt, TestSize.Level3)
     MockBluetooth mocker;
     EXPECT_CALL(mocker, DisableBle()).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_EQ(SoftBusDisableBt(), SOFTBUS_OK);
-    EXPECT_EQ(SoftBusDisableBt(), SOFTBUS_ERR);
+    EXPECT_EQ(SoftBusDisableBt(), SOFTBUS_COMM_BLE_DISABLE_ERR);
 }
 
 /**
@@ -85,12 +85,12 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtState, TestSize.Level3)
  */
 HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr, TestSize.Level3)
 {
-    EXPECT_EQ(SoftBusGetBtMacAddr(NULL), SOFTBUS_ERR);
+    EXPECT_EQ(SoftBusGetBtMacAddr(NULL), SOFTBUS_INVALID_PARAM);
     MockBluetooth mocker;
     SoftBusBtAddr mac = {0};
     EXPECT_CALL(mocker, GetLocalAddr(mac.addr, BT_ADDR_LEN)).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_EQ(SoftBusGetBtMacAddr(&mac), SOFTBUS_OK);
-    EXPECT_EQ(SoftBusGetBtMacAddr(&mac), SOFTBUS_ERR);
+    EXPECT_EQ(SoftBusGetBtMacAddr(&mac), SOFTBUS_COMM_BLUETOOTH_UNDERLAY_GET_ADDR_ERR);
 }
 
 /**
@@ -108,14 +108,14 @@ HWTEST(AdapterBtCommonTest, SoftBusSetBtName, TestSize.Level3)
         .WillOnce(Return(true))
         .WillOnce(Return(false));
     EXPECT_EQ(SoftBusSetBtName(name), SOFTBUS_OK);
-    EXPECT_EQ(SoftBusSetBtName(name), SOFTBUS_ERR);
+    EXPECT_EQ(SoftBusSetBtName(name), SOFTBUS_COMM_BLUETOOTH_UNDERLAY_SET_NAME_ERR);
 }
 
 static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, int *outlistenerId)
 {
     EXPECT_CALL(mocker, BleStopScan).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
     auto listenerId = SoftBusAddBtStateListener(GetMockBtStateListener());
-    if (listenerId == SOFTBUS_ERR) {
+    if (listenerId < 0) {
         return testing::AssertionFailure() << "SoftBusAddBtStateListener failed";
     }
     if (MockBluetooth::btGapCallback == nullptr) {

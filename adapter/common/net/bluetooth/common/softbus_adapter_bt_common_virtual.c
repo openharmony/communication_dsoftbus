@@ -20,7 +20,7 @@
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     (void)listener;
-    return SOFTBUS_ERR;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int SoftBusRemoveBtStateListener(int listenerId)
@@ -30,12 +30,12 @@ int SoftBusRemoveBtStateListener(int listenerId)
 
 int SoftBusEnableBt(void)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int SoftBusDisableBt(void)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int SoftBusGetBrState(void)
@@ -57,7 +57,7 @@ int SoftBusGetBtName(unsigned char *name, unsigned int *len)
 
 int SoftBusSetBtName(const char *name)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 void SoftBusBtInit(void)
