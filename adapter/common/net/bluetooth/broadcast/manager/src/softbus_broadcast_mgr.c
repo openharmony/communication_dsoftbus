@@ -29,7 +29,7 @@
 #include "softbus_utils.h"
 
 #define BC_WAIT_TIME_MILLISEC 50
-#define BC_WAIT_TIME_SEC 2
+#define BC_WAIT_TIME_SEC 1
 #define MGR_TIME_THOUSAND_MULTIPLIER 1000LL
 #define BC_WAIT_TIME_MICROSEC (BC_WAIT_TIME_MILLISEC * MGR_TIME_THOUSAND_MULTIPLIER)
 
@@ -1226,13 +1226,13 @@ static void DumpBroadcastPacket(const BroadcastPayload *bcData, const BroadcastP
     DumpSoftbusData("BroadcastPayload rspData", rspData->payloadLen, rspData->payload);
 }
 
-static int32_t SoftBusCondWaitTwoSec(int32_t bcId, SoftBusMutex *mutex)
+static int32_t SoftBusCondWaitSec(int64_t sec, int32_t bcId, SoftBusMutex *mutex)
 {
     SoftBusSysTime absTime = {0};
     int32_t ret = SoftBusGetTime(&absTime);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "softbus get time failed");
 
-    absTime.sec += BC_WAIT_TIME_SEC;
+    absTime.sec += sec;
     if (SoftBusCondWait(&g_bcManager[bcId].cond, mutex, &absTime) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "wait timeout");
         return SOFTBUS_TIMOUT;
@@ -1303,6 +1303,21 @@ static int64_t MgrGetSysTime(void)
     return time;
 }
 
+static void StartBroadcastingWaitSignal(int32_t bcId, SoftBusMutex *mutex)
+{
+    DISC_CHECK_AND_RETURN_LOGE(mutex != NULL, DISC_BLE, "invalid param");
+    if (SoftBusCondWaitSec(BC_WAIT_TIME_SEC, bcId, mutex) == SOFTBUS_OK) {
+        return;
+    }
+    DISC_LOGW(DISC_BLE, "Wait signal failed, srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d,"
+        "call StopBroadcast", GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
+    int32_t ret = g_interface[g_interfaceId]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
+    DISC_LOGW(DISC_BLE, "StopBroadcasting ret=%{public}d", ret);
+    ret = SoftBusCondWaitSec(BC_WAIT_TIME_SEC, bcId, mutex);
+    DISC_LOGW(DISC_BLE, "Wait signal ret=%{public}d", ret);
+    g_bcManager[bcId].isAdvertising = false;
+}
+
 int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
 {
     static uint32_t callCount = 0;
@@ -1322,11 +1337,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     }
     if (g_bcManager[bcId].isAdvertising) {
         DISC_LOGW(DISC_BLE, "wait condition managerId=%{public}d", bcId);
-        if (SoftBusCondWaitTwoSec(bcId, &g_bcLock) != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "SoftBusCondWaitTwoSec failed");
-            SoftBusMutexUnlock(&g_bcLock);
-            return SOFTBUS_BC_MGR_WAIT_COND_FAIL;
-        }
+        StartBroadcastingWaitSignal(bcId, &g_bcLock);
     }
 
     DumpBroadcastPacket(&(packet->bcData), &(packet->rspData));
