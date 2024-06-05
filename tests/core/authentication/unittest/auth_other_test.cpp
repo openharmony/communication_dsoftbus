@@ -985,7 +985,7 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     (void)strcpy_s(authSessionInfo.udid, UDID_BUF_LEN, udid);
     authFsm->info = authSessionInfo;
     authFsm->authSeq = 512;
-    const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(malloc(sizeof(uint8_t)));
     ASSERT_TRUE(data != nullptr);
     MessagePara *para = NewMessagePara(data, 1024);
     HandleMsgRecvDeviceInfo(authFsm, para);
