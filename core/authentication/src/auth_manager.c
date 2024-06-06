@@ -1964,7 +1964,6 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
         AUTH_LOGI(AUTH_FSM, "AuthHandleLeaveLNN disconnect");
         DisconnectAuthDevice(&auth->connId[authHandle.type]);
     }
-    AuthFreeConn(&authHandle);
     DelAuthManager(auth, authHandle.type);
     ReleaseAuthLock();
 }
