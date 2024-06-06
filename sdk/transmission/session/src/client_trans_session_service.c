@@ -1162,7 +1162,6 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
     }
     if (lifecycle.sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGW(TRANS_SDK, "This socket already in cancelling state. socket=%{public}d", socket);
-        return;
     }
     SetSessionStateBySessionId(socket, SESSION_STATE_CANCELLING, cancelReason);
     if (lifecycle.sessionState == SESSION_STATE_INIT) {
