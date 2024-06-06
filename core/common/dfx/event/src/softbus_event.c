@@ -29,6 +29,8 @@
 
 #define HISYSEVENT_WRITE_SUCCESS 0
 
+typedef void (*WriteEventAndFree)(HiSysEventParam *params, size_t size, SoftbusEventForm *form);
+
 static void ConstructHiSysEventParams(HiSysEventParam *eventParams, const HiSysEventParam *params, size_t size,
     const HiSysEventParam *extraParams, size_t extraSize)
 {
@@ -63,78 +65,98 @@ static void HiSysEventParamsFree(HiSysEventParam params[], size_t size)
     }
 }
 
+static void WriteConnEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam connParams[CONN_ASSIGNER_SIZE] = { 0 };
+    size_t connSize = ConvertConnForm2Param(connParams, CONN_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, connParams, connSize, form);
+    HiSysEventParamsFree(connParams, connSize);
+}
+
+static void WriteDiscEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam discParams[DISC_ASSIGNER_SIZE] = { 0 };
+    size_t discSize = ConvertDiscForm2Param(discParams, DISC_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, discParams, discSize, form);
+    HiSysEventParamsFree(discParams, discSize);
+}
+
+static void WriteLnnEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam lnnParams[LNN_ASSIGNER_SIZE] = { 0 };
+    size_t lnnSize = ConvertLnnForm2Param(lnnParams, LNN_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, lnnParams, lnnSize, form);
+    HiSysEventParamsFree(lnnParams, lnnSize);
+}
+
+static void WriteTransEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam transParams[TRANS_ASSIGNER_SIZE] = { 0 };
+    size_t transSize = ConvertTransForm2Param(transParams, TRANS_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, transParams, transSize, form);
+    HiSysEventParamsFree(transParams, transSize);
+}
+
+static void WriteTransAlarmEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam alarmParams[TRANS_ALARM_ASSIGNER_SIZE] = { 0 };
+    size_t alarmSize = ConvertTransAlarmForm2Param(alarmParams, TRANS_ALARM_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
+    HiSysEventParamsFree(alarmParams, alarmSize);
+}
+
+static void WriteConnAlarmEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam alarmParams[CONN_ALARM_ASSIGNER_SIZE] = { 0 };
+    size_t alarmSize = ConvertConnAlarmForm2Param(alarmParams, CONN_ALARM_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
+    HiSysEventParamsFree(alarmParams, alarmSize);
+}
+
+static void WriteLnnAlarmEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam alarmParams[LNN_ALARM_ASSIGNER_SIZE] = { 0 };
+    size_t alarmSize = ConvertLnnAlarmForm2Param(alarmParams, LNN_ALARM_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
+    HiSysEventParamsFree(alarmParams, alarmSize);
+}
+
+static void WriteDiscAlarmEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam alarmParams[DISC_ALARM_ASSIGNER_SIZE] = { 0 };
+    size_t alarmSize = ConvertDiscAlarmForm2Param(alarmParams, DISC_ALARM_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
+    HiSysEventParamsFree(alarmParams, alarmSize);
+}
+
+static void WriteStateEventAndFree(HiSysEventParam *params, size_t size, SoftbusEventForm *form)
+{
+    HiSysEventParam statsParams[STATS_ASSIGNER_SIZE] = { 0 };
+    size_t statsSize = ConvertStatsForm2Param(statsParams, STATS_ASSIGNER_SIZE, form);
+    WriteHiSysEvent(params, size, statsParams, statsSize, form);
+    HiSysEventParamsFree(statsParams, statsSize);
+}
+
+static WriteEventAndFree g_eventFunc[] = {
+    [EVENT_MODULE_CONN] = WriteConnEventAndFree,
+    [EVENT_MODULE_DISC] = WriteDiscEventAndFree,
+    [EVENT_MODULE_LNN] = WriteLnnEventAndFree,
+    [EVENT_MODULE_TRANS] = WriteTransEventAndFree,
+    [EVENT_MODULE_TRANS_ALARM] = WriteTransAlarmEventAndFree,
+    [EVENT_MODULE_CONN_ALARM] = WriteConnAlarmEventAndFree,
+    [EVENT_MODULE_LNN_ALARM] = WriteLnnAlarmEventAndFree,
+    [EVENT_MODULE_DISC_ALARM] = WriteDiscAlarmEventAndFree,
+    [EVENT_MODULE_STATS] = WriteStateEventAndFree
+};
+
 static void WriteSoftbusEvent(SoftbusEventModule module, SoftbusEventForm *form)
 {
     HiSysEventParam params[SOFTBUS_ASSIGNER_SIZE] = { 0 };
     size_t size = ConvertSoftbusForm2Param(params, SOFTBUS_ASSIGNER_SIZE, form);
-    switch (module) {
-        case EVENT_MODULE_CONN: {
-            HiSysEventParam connParams[CONN_ASSIGNER_SIZE] = { 0 };
-            size_t connSize = ConvertConnForm2Param(connParams, CONN_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, connParams, connSize, form);
-            HiSysEventParamsFree(connParams, connSize);
-            break;
-        }
-        case EVENT_MODULE_DISC: {
-            HiSysEventParam discParams[DISC_ASSIGNER_SIZE] = { 0 };
-            size_t discSize = ConvertDiscForm2Param(discParams, DISC_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, discParams, discSize, form);
-            HiSysEventParamsFree(discParams, discSize);
-            break;
-        }
-        case EVENT_MODULE_LNN: {
-            HiSysEventParam lnnParams[LNN_ASSIGNER_SIZE] = { 0 };
-            size_t lnnSize = ConvertLnnForm2Param(lnnParams, LNN_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, lnnParams, lnnSize, form);
-            HiSysEventParamsFree(lnnParams, lnnSize);
-            break;
-        }
-        case EVENT_MODULE_TRANS: {
-            HiSysEventParam transParams[TRANS_ASSIGNER_SIZE] = { 0 };
-            size_t transSize = ConvertTransForm2Param(transParams, TRANS_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, transParams, transSize, form);
-            HiSysEventParamsFree(transParams, transSize);
-            break;
-        }
-        case EVENT_MODULE_TRANS_ALARM: {
-            HiSysEventParam alarmParams[TRANS_ALARM_ASSIGNER_SIZE] = { 0 };
-            size_t alarmSize = ConvertTransAlarmForm2Param(alarmParams, TRANS_ALARM_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
-            HiSysEventParamsFree(alarmParams, alarmSize);
-            break;
-        }
-        case EVENT_MODULE_CONN_ALARM: {
-            HiSysEventParam alarmParams[CONN_ALARM_ASSIGNER_SIZE] = { 0 };
-            size_t alarmSize = ConvertConnAlarmForm2Param(alarmParams, CONN_ALARM_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
-            HiSysEventParamsFree(alarmParams, alarmSize);
-            break;
-        }
-        case EVENT_MODULE_LNN_ALARM: {
-            HiSysEventParam alarmParams[LNN_ALARM_ASSIGNER_SIZE] = { 0 };
-            size_t alarmSize = ConvertLnnAlarmForm2Param(alarmParams, LNN_ALARM_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
-            HiSysEventParamsFree(alarmParams, alarmSize);
-            break;
-        }
-        case EVENT_MODULE_DISC_ALARM: {
-            HiSysEventParam alarmParams[DISC_ALARM_ASSIGNER_SIZE] = { 0 };
-            size_t alarmSize = ConvertDiscAlarmForm2Param(alarmParams, DISC_ALARM_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
-            HiSysEventParamsFree(alarmParams, alarmSize);
-            break;
-        }
-        case EVENT_MODULE_STATS: {
-            HiSysEventParam statsParams[STATS_ASSIGNER_SIZE] = { 0 };
-            size_t statsSize = ConvertStatsForm2Param(statsParams, STATS_ASSIGNER_SIZE, form);
-            WriteHiSysEvent(params, size, statsParams, statsSize, form);
-            HiSysEventParamsFree(statsParams, statsSize);
-            break;
-        }
-        default: {
-            COMM_LOGW(COMM_DFX, "invalid module. module=%{public}d", (int32_t)module);
-            break;
-        }
+    if (module >= 0 && module < EVENT_MODULE_MAX) {
+        g_eventFunc[module](params, size, form);
+    } else {
+        COMM_LOGW(COMM_DFX, "invalid module. module=%{public}d", (int32_t)module);
     }
     HiSysEventParamsFree(params, size);
 }
