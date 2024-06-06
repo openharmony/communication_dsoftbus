@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "lnn_kv_store_launch_listener.h"
 #include "lnn_log.h"
 #include "system_ability_definition.h"
