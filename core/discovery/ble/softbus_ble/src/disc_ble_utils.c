@@ -34,7 +34,6 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
-#define CUST_CAPABILITY_LEN 2
 #define WIDE_CHAR_MAX_LEN 8
 #define WIDE_STR_MAX_LEN 128
 
