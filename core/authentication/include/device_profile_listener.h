@@ -32,3 +32,4 @@ typedef struct {
 #endif
 #endif
 #endif /* DEVICE_PROFILE_LISTENER_H */
+

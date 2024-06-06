@@ -159,3 +159,4 @@ void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
     g_deviceProfileChange = *deviceProfilePara;
     OHOS::AuthToDeviceProfile::RegisterToDpHelper();
 }
+

@@ -25,3 +25,4 @@ int32_t UnRegHichainSaStatusListener(void)
 {
     return SOFTBUS_NOT_IMPLEMENT;
 }
+

@@ -351,3 +351,4 @@ int32_t SoftBusRsaDecrypt(
     SoftBusFree(decryptedBlob.data);
     return SOFTBUS_OK;
 }
+
