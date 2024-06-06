@@ -214,7 +214,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Add socket channel record failed.");
     AppInfo *appInfo = TransCommonGetAppInfo(param);
-    TRANS_CHECK_AND_RETURN_RET_LOGW(appInfo != NULL, INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
+    TRANS_CHECK_AND_RETURN_RET_LOGW(appInfo != NULL, SOFTBUS_TRANS_INVALID_CHANNEL_ID, TRANS_CTRL,
+        "GetAppInfo is null.");
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
