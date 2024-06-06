@@ -416,7 +416,7 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
     kvAdapter->DeRegisterDataChangeListener();
 }
 
-void LnnClearRedundancyCache()
+void LnnClearRedundancyCache(void)
 {
     KvDataChangeListener::ClearCache();
 }
