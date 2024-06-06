@@ -22,6 +22,7 @@
 #include "client_trans_tcp_direct_listener.c"
 #include "client_trans_tcp_direct_message.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_session_callback.h"
 #include "session.h"
 #include "softbus_def.h"

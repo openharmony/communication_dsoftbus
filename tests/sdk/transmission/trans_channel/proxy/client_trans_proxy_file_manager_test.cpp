@@ -20,8 +20,10 @@
 #include "securec.h"
 
 #include "client_trans_proxy_file_manager.c"
+#include "client_trans_proxy_file_helper.c"
 #include "client_trans_proxy_manager.c"
 #include "client_trans_session_manager.c"
+#include "client_trans_socket_manager.c"
 #include "client_trans_file_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -519,7 +521,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest001, T
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = SendOneFrame(&info, &fileFrame);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     info.crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     uint32_t dataTest = TEST_DATA_LENGTH;

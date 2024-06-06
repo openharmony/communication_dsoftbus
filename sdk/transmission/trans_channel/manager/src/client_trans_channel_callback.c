@@ -18,6 +18,7 @@
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_statistics.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_callback.h"

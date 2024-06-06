@@ -26,6 +26,7 @@
 #include "client_trans_proxy_file_common.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_file.h"

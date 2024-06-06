@@ -27,6 +27,7 @@
 #include "client_trans_message_service.h"
 #include "client_trans_message_service.c"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "softbus_common.h"
 #include "trans_log.h"
 #include "softbus_feature_config.h"

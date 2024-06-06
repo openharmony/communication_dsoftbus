@@ -27,6 +27,7 @@
 #include "client_trans_file_listener.h"
 #include "client_trans_session_adapter.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "dfs_session.h"
 #include "inner_session.h"
 #include "securec.h"
