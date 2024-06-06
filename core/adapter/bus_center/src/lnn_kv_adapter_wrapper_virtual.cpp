@@ -95,6 +95,6 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
     (void)dbId;
 }
 
-void LnnClearRedundancyCache()
+void LnnClearRedundancyCache(void)
 {
 }
