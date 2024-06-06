@@ -1009,7 +1009,7 @@ HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
     uint32_t len = 0;
     int32_t ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    len = 1024;
+    len = sizeof(uint8_t);
     ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
