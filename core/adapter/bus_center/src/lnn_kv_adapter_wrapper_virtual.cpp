@@ -98,3 +98,8 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
 void LnnClearRedundancyCache(void)
 {
 }
+
+bool LnnSubcribeKvStoreService()
+{
+    return false;
+}

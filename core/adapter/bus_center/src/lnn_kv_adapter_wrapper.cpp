@@ -26,6 +26,9 @@
 #include "softbus_errcode.h"
 #include "softbus_def.h"
 #include "softbus_utils.h"
+#include "iservice_registry.h"
+#include "lnn_kv_store_launch_listener.h"
+#include "system_ability_definition.h"
 
 using namespace OHOS;
 using namespace OHOS::DistributedKv;
@@ -419,4 +422,24 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
 void LnnClearRedundancyCache(void)
 {
     KvDataChangeListener::ClearCache();
+}
+
+bool LnnSubcribeKvStoreService()
+{
+    auto abilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (abilityManager == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "abilityManager is nullptr");
+        return false;
+    }
+    auto listener = new (std::nothrow) KvStoreStatusChangeListener();
+    if (listener == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "failed to create listener");
+        return false;
+    }
+    int32_t ret = abilityManager->SubscribeSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID, listener);
+    if (ret != ERR_OK) {
+        LNN_LOGE(LNN_LEDGER, "subscribe system ability failed, ret=%{public}d", ret);
+        return false;
+    }
+    return true;
 }
