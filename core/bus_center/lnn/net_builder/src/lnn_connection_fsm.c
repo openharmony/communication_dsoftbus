@@ -307,7 +307,8 @@ static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
             LNN_LOGE(LNN_BUILDER, "report static lnn duration fail");
             return;
         }
-        uint64_t constTime = (uint64_t)(connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime);
+        uint64_t constTime =
+           (uint64_t)(connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime);
         if (SoftBusRecordBusCenterResult(linkType, constTime) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "report static lnn duration fail");
         }
