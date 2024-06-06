@@ -679,7 +679,7 @@ static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
             SoftBusFree(encodeFastData);
             return SOFTBUS_PARSE_JSON_ERR;
         }
-        appInfo->fastTransData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize + FAST_EXT_BYTE_SIZE);
+        appInfo->fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize + FAST_EXT_BYTE_SIZE);
         if (appInfo->fastTransData == NULL) {
             TRANS_LOGE(TRANS_CTRL, "malloc fast data fail.");
             SoftBusFree(encodeFastData);
