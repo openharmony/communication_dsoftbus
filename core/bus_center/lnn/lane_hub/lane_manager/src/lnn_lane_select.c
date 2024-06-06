@@ -569,5 +569,9 @@ int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request, La
             recommendList->linkTypeNum++;
         }
     }
+    if (recommendList->linkTypeNum == 0) {
+        LNN_LOGE(LNN_LANE, "no available link resources");
+        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
+    }
     return SOFTBUS_OK;
 }
