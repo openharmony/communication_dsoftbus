@@ -806,6 +806,18 @@ FAIL:
 static void OnAuthConnOpenFailed(uint32_t authRequestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "guide channel failed. authRequestId=%{public}u, reason=%{public}d.", authRequestId, reason);
+    P2pLinkReqList reqInfo;
+    (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+    if (GetP2pLinkReqByReqId(ASYNC_RESULT_AUTH, authRequestId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get p2p link req fail, authRequestId=%{public}u", authRequestId);
+        NotifyLinkFail(ASYNC_RESULT_AUTH, authRequestId, reason);
+        return;
+    }
+    bool isMetaAuth = GetAuthType(reqInfo.laneRequestInfo.networkId);
+    if (isMetaAuth) {
+        NotifyLinkFail(ASYNC_RESULT_AUTH, authRequestId, reason);
+        return;
+    }
     HandleGuideChannelAsyncFail(ASYNC_RESULT_AUTH, authRequestId, reason);
 }
 
@@ -1166,7 +1178,7 @@ static void DetectFail(uint32_t laneReqId, int32_t reason, LaneLinkType linkType
         return;
     }
     LNN_LOGI(LNN_LANE, "auth channel detect fail, laneReqId=%{public}u", laneReqId);
-    HandleGuideChannelAsyncFail(ASYNC_RESULT_AUTH, p2pLinkReqInfo.auth.requestId, reason);
+    OnAuthConnOpenFailed(p2pLinkReqInfo.auth.requestId, reason);
 }
 
 static int32_t GetWlanInfo(const char *networkId, LaneLinkInfo *linkInfo)
@@ -1177,7 +1189,7 @@ static int32_t GetWlanInfo(const char *networkId, LaneLinkInfo *linkInfo)
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     int32_t port;
-    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_SESSION_PORT, &port) != SOFTBUS_OK) {
+    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &port) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote wlan port fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
@@ -1207,8 +1219,10 @@ static void GuideChannelDetect(uint32_t authRequestId, AuthHandle authHandle)
         };
         linkInfo.type = LANE_WLAN_5G;
         LNN_LOGI(LNN_LANE, "auth channel need detect, laneReqId=%{public}u", laneReqId);
-        LaneDetectReliability(laneReqId, &linkInfo, &cb);
-        return;
+        if (LaneDetectReliability(laneReqId, &linkInfo, &cb) != SOFTBUS_OK) {
+            DetectFail(laneReqId, SOFTBUS_LANE_DETECT_FAIL, linkInfo.type);
+            return;
+        }
     }
 FATL:
     LNN_LOGI(LNN_LANE, "auth channel no need detect, authRequestId=%{public}u", authRequestId);

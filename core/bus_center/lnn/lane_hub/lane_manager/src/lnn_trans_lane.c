@@ -906,7 +906,7 @@ static int32_t GetErrCodeWithLock(uint32_t laneReqId)
     }
     LaneLinkType linkType;
     int32_t result = SOFTBUS_LANE_BUILD_LINK_FAIL;
-    for (int32_t i = 0; i < nodeInfo->linkList->linkTypeNum; i++) {
+    for (uint32_t i = 0; i < nodeInfo->linkList->linkTypeNum; i++) {
         linkType = nodeInfo->linkList->linkType[i];
         if (linkType == LANE_HML || linkType == LANE_P2P) {
             result = nodeInfo->statusList[linkType].result;
