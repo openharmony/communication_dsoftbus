@@ -590,7 +590,7 @@ int32_t TransProxyUnPackRestErrMsg(const char *msg, int *errCode, int32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode) && !GetJsonObjectInt32Item(root, "ERR_CODE", errCode)) {
+    if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode) && !GetJsonObjectInt32Item(root, "ERROR_CODE", errCode)) {
         TRANS_LOGE(TRANS_CTRL, "get errCode failed.");
         cJSON_Delete(root);
         return SOFTBUS_PARSE_JSON_ERR;
