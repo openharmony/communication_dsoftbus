@@ -490,8 +490,7 @@ void P2pV1Processor::OnWaitReuseResponseTimeoutEvent()
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "wait reuse response timeout");
     if (connectCommand_ != nullptr) {
-        CleanupIfNeed(ERROR_WIFI_DIRECT_WAIT_CONNECT_REQUEST_TIMEOUT, connectCommand_->GetRemoteDeviceId());
-        connectCommand_->OnFailure(ERROR_WIFI_DIRECT_WAIT_CONNECT_REQUEST_TIMEOUT);
+        connectCommand_->OnFailure(ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT);
         connectCommand_ = nullptr;
     }
     Terminate();
@@ -526,6 +525,11 @@ int P2pV1Processor::CreateLink()
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteDeviceId=%{public}s", requestId,
         WifiDirectAnonymizeDeviceId(connectCommand_->GetRemoteDeviceId()).c_str());
+
+    if (connectCommand_->GetConnectInfo().info_.reuseOnly) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "reuseOnly=true");
+        return ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT;
+    }
 
     auto role = LinkInfo::LinkMode::NONE;
     auto ret = InterfaceManager::GetInstance().UpdateInterface(
@@ -1592,7 +1596,7 @@ int P2pV1Processor::ReuseLink(const std::shared_ptr<ConnectCommand> &command, In
     auto ret = SendReuseRequest(*command->GetConnectInfo().channel_);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "post request failed, error=%{public}d", ret);
-    SwitchState(&P2pV1Processor::WaitingReuseResponseState, P2P_V1_WAITING_RESPONSE_TIME_MS);
+    SwitchState(&P2pV1Processor::WaitingReuseResponseState, P2P_V1_WAITING_REUSE_RESPONSE_TIME_MS);
     return SOFTBUS_OK;
 }
 
