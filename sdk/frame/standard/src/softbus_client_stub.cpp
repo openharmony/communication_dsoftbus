@@ -21,6 +21,7 @@
 #include "client_disc_manager.h"
 #include "client_trans_channel_callback.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"

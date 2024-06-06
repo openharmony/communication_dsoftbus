@@ -32,6 +32,7 @@
 #include "trans_server_proxy_standard.h"
 #include "trans_server_proxy_standard.cpp"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_session_service.h"
 
 using namespace testing::ext;

@@ -821,26 +821,6 @@ void ClientTransProxyCloseChannel(int32_t channelId)
     }
 }
 
-static int32_t ClientTransProxyEncryptWithSeq(const char *sessionKey, int32_t seqNum, const char *in,
-    uint32_t inLen, char *out, uint32_t *outLen)
-{
-    AesGcmCipherKey cipherKey = {0};
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy key error.");
-        return SOFTBUS_MEM_ERR;
-    }
-
-    int ret = SoftBusEncryptDataWithSeq(&cipherKey, (unsigned char*)in, inLen, (unsigned char*)out, outLen, seqNum);
-    (void)memset_s(cipherKey.key, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-
-    if (ret != SOFTBUS_OK || *outLen != inLen + OVERHEAD_LEN) {
-        TRANS_LOGE(TRANS_SDK, "encrypt error, ret=%{public}d", ret);
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t ClientTransProxyPackBytes(
     int32_t channelId, ClientProxyDataInfo *dataInfo, int seq, char *sessionKey, SessionPktType flag)
 {
@@ -856,8 +836,21 @@ static int32_t ClientTransProxyPackBytes(
     }
 
     uint32_t outLen = 0;
-    if (ClientTransProxyEncryptWithSeq(sessionKey, seq, (const char *)dataInfo->inData, dataInfo->inLen,
-                                       (char *)dataInfo->outData + sizeof(PacketHead), &outLen) != SOFTBUS_OK) {
+    AesGcmCipherKey cipherKey = { 0 };
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy key error.");
+        SoftBusFree(dataInfo->outData);
+        return SOFTBUS_MEM_ERR;
+    }
+    char *outData = (char *)dataInfo->outData + sizeof(PacketHead);
+    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, (const unsigned char *)dataInfo->inData,
+        dataInfo->inLen, (unsigned char *)outData, &outLen, seq);
+    (void)memset_s(cipherKey.key, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+
+    if (ret != SOFTBUS_OK || outLen != dataInfo->inLen + OVERHEAD_LEN) {
+        TRANS_LOGE(TRANS_SDK, "encrypt error, ret=%{public}d", ret);
+        outData = NULL;
         SoftBusFree(dataInfo->outData);
         TRANS_LOGE(TRANS_SDK, "ClientTransProxyEncryptWithSeq channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;

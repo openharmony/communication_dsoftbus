@@ -18,6 +18,7 @@
 
 #include "client_trans_session_callback.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
 #include "session.h"
 #include "softbus_def.h"

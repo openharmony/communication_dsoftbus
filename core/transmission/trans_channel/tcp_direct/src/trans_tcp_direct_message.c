@@ -50,6 +50,7 @@
 #define MIN_META_LEN 6
 #define META_SESSION "IShare"
 #define MAX_DATA_BUF 4096
+#define MAX_ERRDESC_LEN 128
 
 typedef struct {
     ListNode node;
@@ -798,109 +799,107 @@ static void ReleaseSessionConn(SessionConn *chan)
     SoftBusFree(chan);
 }
 
-static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
+static void ReportTransEventExtra(
+    TransEventExtra *extra, int32_t channelId, SessionConn *conn, NodeInfo *nodeInfo, char *peerUuid)
 {
-    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, seq=%{public}" PRIu64, channelId, seq);
-    SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request);
-    if (conn == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "conn is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    TransEventExtra extra = {
-        .socketName = conn->appInfo.myData.sessionName,
-        .calleePkg = NULL,
-        .callerPkg = NULL,
-        .channelId = channelId,
-        .peerChannelId = conn->appInfo.peerData.channelId,
-        .socketFd = conn->appInfo.fd,
-        .result = EVENT_STAGE_RESULT_OK
-    };
-    char peerUuid[DEVICE_ID_SIZE_MAX] = {0};
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    extra->socketName = conn->appInfo.myData.sessionName;
+    extra->calleePkg = NULL;
+    extra->callerPkg = NULL;
+    extra->channelId = channelId;
+    extra->peerChannelId = conn->appInfo.peerData.channelId;
+    extra->socketFd = conn->appInfo.fd;
+    extra->result = EVENT_STAGE_RESULT_OK;
     bool peerRet = GetUuidByChanId(channelId, peerUuid, DEVICE_ID_SIZE_MAX) == SOFTBUS_OK &&
-        LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo) == SOFTBUS_OK;
+        LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, nodeInfo) == SOFTBUS_OK;
     if (peerRet) {
-        extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
-        extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
+        extra->peerUdid = nodeInfo->deviceInfo.deviceUdid;
+        extra->peerDevVer = nodeInfo->deviceInfo.deviceVersion;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo.masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
-        extra.localUdid = nodeInfo.masterUdid;
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra->localUdid = nodeInfo->masterUdid;
     }
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
-    if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
-        char *tmpName = NULL;
-        Anonymize(conn->appInfo.myData.sessionName, &tmpName);
-        TRANS_LOGI(TRANS_CTRL,
-            "Request denied: session is not a meta session. sessionName=%{public}s", tmpName);
-        AnonymizeFree(tmpName);
-        ReleaseSessionConn(conn);
-        return SOFTBUS_TRANS_NOT_META_SESSION;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, *extra);
+}
+
+static void CheckStrcpy(char *dest, const int32_t destSize, const char *src)
+{
+    if (strcpy_s(dest, destSize, src) != EOK) {
+        TRANS_LOGW(TRANS_CTRL, "strcpy failed");
     }
-    char *errDesc = NULL;
-    int32_t errCode;
-    int myHandleId;
-    int32_t ret = SOFTBUS_ERR;
+    return;
+}
+
+static int32_t CheckAndFillAppinfo(SessionConn *conn, int32_t channelId, char *errDesc)
+{
+    char *ret = NULL;
+    int32_t errCode = SOFTBUS_OK;
     if (conn->appInfo.callingTokenId != TOKENID_NOT_SET &&
         TransCheckServerAccessControl(conn->appInfo.callingTokenId) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
-        errDesc = (char *)"Server check acl failed";
-        goto ERR_EXIT;
+        ret = (char *)"Server check acl failed";
+        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
+        return errCode;
     }
     if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
         &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
-        errDesc = (char *)"Peer Device Session Not Create";
-        goto ERR_EXIT;
+        ret = (char *)"Peer Device Session Not Create";
+        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
+        return errCode;
     }
     if (GetUuidByChanId(channelId, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Get Uuid By ChanId failed.");
         errCode = SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
-        errDesc = (char *)"Get Uuid By ChanId failed";
-        goto ERR_EXIT;
+        ret = (char *)"Get Uuid By ChanId failed";
+        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
+        return errCode;
     }
     if (TransTdcFillDataConfig(&conn->appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fill data config failed.");
         errCode = SOFTBUS_INVALID_PARAM;
-        errDesc = (char *)"fill data config failed";
-        goto ERR_EXIT;
+        ret = (char *)"fill data config failed";
+        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
+        return errCode;
     }
     if (SetAppInfoById(channelId, &conn->appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set app info by id failed.");
         errCode = SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
-        errDesc = (char *)"Set App Info By Id Failed";
-        goto ERR_EXIT;
+        ret = (char *)"Set App Info By Id Failed";
+        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
+        return errCode;
     }
 
-    OpenDataBusRequestOutSessionName(conn->appInfo.myData.sessionName,
-        conn->appInfo.peerData.sessionName);
+    OpenDataBusRequestOutSessionName(conn->appInfo.myData.sessionName, conn->appInfo.peerData.sessionName);
     TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%{public}d, peerPid=%{public}d",
         conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
     if (NotifyChannelOpened(channelId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Notify App Channel Opened Failed");
         errCode = SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED;
-        errDesc = (char *)"Notify App Channel Opened Failed";
-        goto ERR_EXIT;
+        ret = (char *)"Notify App Channel Opened Failed";
+        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
+        return errCode;
     }
-    if (conn->appInfo.fastTransDataSize > 0 && conn->appInfo.fastTransData != NULL) {
-        NotifyFastDataRecv(conn, channelId);
-    }
+    return SOFTBUS_OK;
+}
+
+static int32_t HandleDataBusReply(
+    SessionConn *conn, int32_t channelId, TransEventExtra *extra, uint32_t flags, uint64_t seq)
+{
+    int myHandleId;
     myHandleId = NotifyNearByUpdateHandleId(channelId);
     if (myHandleId != SOFTBUS_ERR) {
         TRANS_LOGE(TRANS_CTRL, "update handId notify failed");
         conn->appInfo.myHandleId = myHandleId;
     }
     (void)SetAppInfoById(channelId, &conn->appInfo);
-    ret = OpenDataBusRequestReply(&conn->appInfo, channelId, seq, flags);
+    int32_t ret = OpenDataBusRequestReply(&conn->appInfo, channelId, seq, flags);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequest reply err");
         (void)NotifyChannelClosed(&conn->appInfo, channelId);
-        ReleaseSessionConn(conn);
         return ret;
     } else {
-        extra.result = EVENT_STAGE_RESULT_OK;
-        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+        extra->result = EVENT_STAGE_RESULT_OK;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, *extra);
     }
 
     if (conn->appInfo.routeType == WIFI_P2P) {
@@ -910,18 +909,55 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
             LaneUpdateP2pAddressByIp(conn->appInfo.peerData.addr, conn->appInfo.peerNetWorkId);
         }
     }
+    return SOFTBUS_OK;
+}
+
+static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
+{
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, seq=%{public}" PRIu64, channelId, seq);
+    SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(conn != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "conn is null");
+
+    TransEventExtra extra;
+    char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    ReportTransEventExtra(&extra, channelId, conn, &nodeInfo, peerUuid);
+
+    if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
+        char *tmpName = NULL;
+        Anonymize(conn->appInfo.myData.sessionName, &tmpName);
+        TRANS_LOGI(TRANS_CTRL,
+            "Request denied: session is not a meta session. sessionName=%{public}s", tmpName);
+        AnonymizeFree(tmpName);
+        ReleaseSessionConn(conn);
+        return SOFTBUS_TRANS_NOT_META_SESSION;
+    }
+    char errDesc[MAX_ERRDESC_LEN] = { 0 };
+    int32_t errCode = CheckAndFillAppinfo(conn, channelId, errDesc);
+    if (errCode != SOFTBUS_OK) {
+        if (OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
+        }
+        ReleaseSessionConn(conn);
+        return errCode;
+    }
+
+    if (conn->appInfo.fastTransDataSize > 0 && conn->appInfo.fastTransData != NULL) {
+        NotifyFastDataRecv(conn, channelId);
+    }
+
+    errCode = HandleDataBusReply(conn, channelId, &extra, flags, seq);
+    if (errCode != SOFTBUS_OK) {
+        ReleaseSessionConn(conn);
+        return errCode;
+    }
 
     ReleaseSessionConn(conn);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
-
-ERR_EXIT:
-    if (OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
-    }
-    ReleaseSessionConn(conn);
-    return errCode;
 }
+    
 
 static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, const char *msg)
 {
