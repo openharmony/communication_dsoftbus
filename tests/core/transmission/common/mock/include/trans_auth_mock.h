@@ -67,8 +67,8 @@ public:
     virtual int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version) = 0;
     virtual int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth) = 0;
 
-    virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key,
-        uint32_t keyLen, uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
+    virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
+        int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
     virtual void AuthMetaReleaseVerify(int64_t authId) = 0;
 
     virtual int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData,
@@ -130,8 +130,8 @@ public:
     MOCK_METHOD2(AuthGetVersion, int32_t (int64_t, SoftBusVersion *));
     MOCK_METHOD2(AuthGetMetaType,     int32_t (int64_t, bool *));
 
-    MOCK_METHOD6(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *,
-        uint32_t, uint32_t, int32_t, const AuthVerifyCallback *));
+    MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *, uint32_t, int32_t,
+        const AuthVerifyCallback *));
     MOCK_METHOD1(AuthMetaReleaseVerify, void (int64_t));
     MOCK_METHOD5(AuthEncrypt, int32_t (AuthHandle *, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
     MOCK_METHOD5(AuthDecrypt, int32_t (AuthHandle *, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
