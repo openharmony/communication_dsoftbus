@@ -441,5 +441,6 @@ bool LnnSubcribeKvStoreService()
         LNN_LOGE(LNN_LEDGER, "subscribe system ability failed, ret=%{public}d", ret);
         return false;
     }
+    LNN_LOGI(LNN_LEDGER, "subscribe kv store service success");
     return true;
 }

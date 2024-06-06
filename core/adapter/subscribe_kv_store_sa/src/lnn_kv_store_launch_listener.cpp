@@ -18,7 +18,6 @@
 #include "lnn_log.h"
 #include "system_ability_definition.h"
 
-
 namespace OHOS {
 
 void KvStoreStatusChangeListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -35,4 +34,5 @@ void KvStoreStatusChangeListener::OnRemoveSystemAbility(int32_t systemAbilityId,
         LNN_LOGI(LNN_LEDGER, "kv store SA shutdown.");
     }
 }
+
 } // namespace OHOS
