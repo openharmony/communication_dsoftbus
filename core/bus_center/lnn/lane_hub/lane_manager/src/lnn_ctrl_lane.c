@@ -365,9 +365,9 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
     }
     recommendLinkList->linkTypeNum = 0;
     ret = SelectAuthLane(allocInfo->networkId, &request, recommendLinkList);
-    if (ret != SOFTBUS_OK || recommendLinkList->linkTypeNum == 0) {
+    if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
-        LNN_LOGE(LNN_LANE, "no abailable link resources, laneHandle=%{public}u", laneHandle);
+        LNN_LOGE(LNN_LANE, "select auth lane fail, laneHandle=%{public}u", laneHandle);
         return ret;
     }
     for (uint32_t i = 0; i < recommendLinkList->linkTypeNum; ++i) {
