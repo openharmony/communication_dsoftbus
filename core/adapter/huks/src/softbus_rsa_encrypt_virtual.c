@@ -43,3 +43,4 @@ int32_t SoftBusRsaDecrypt(
     (void)decryptedDataLen;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
