@@ -1324,7 +1324,6 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
         }
         AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
     } while (0);
-    AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
     (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
     (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
     (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
