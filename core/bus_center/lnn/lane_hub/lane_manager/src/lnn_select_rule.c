@@ -633,9 +633,13 @@ static bool IsSupportWifiDirect(const char *networkId)
     return true;
 }
 
-static int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
+int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
     uint32_t listNum, LanePreferredLinkList *recommendList)
 {
+    if (networkId == NULL || linkList == NULL || recommendList == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (listNum >= LANE_LINK_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "linkList size exceed limit, size=%{public}d", listNum);
         return SOFTBUS_INVALID_PARAM;
