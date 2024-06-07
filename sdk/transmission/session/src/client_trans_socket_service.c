@@ -17,6 +17,7 @@
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_socket_option.h"
 #include "inner_socket.h"
 #include "socket.h"

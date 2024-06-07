@@ -19,6 +19,7 @@
 #include "client_trans_pending.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 

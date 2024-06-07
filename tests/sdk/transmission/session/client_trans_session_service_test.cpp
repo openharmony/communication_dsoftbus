@@ -23,6 +23,7 @@
 #include "softbus_server_frame.h"
 #include "softbus_adapter_mem.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_session_service.h"
 #include "softbus_config_type.h"
 #include "trans_log.h"

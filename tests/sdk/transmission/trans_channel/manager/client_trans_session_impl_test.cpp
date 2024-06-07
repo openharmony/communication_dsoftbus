@@ -17,6 +17,7 @@
 #include "securec.h"
 
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "session_impl.h"
 #include "session_service_impl.h"
 #include "ISessionListener.h"

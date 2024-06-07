@@ -19,6 +19,7 @@
 #include "cJSON.h"
 
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"

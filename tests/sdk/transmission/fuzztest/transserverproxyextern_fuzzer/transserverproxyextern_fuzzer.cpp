@@ -25,6 +25,7 @@
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_callback.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "softbus_errcode.h"

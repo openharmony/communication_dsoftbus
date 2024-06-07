@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
 #include "session_set_timer.h"
 #include "softbus_adapter_mem.h"

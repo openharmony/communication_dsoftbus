@@ -22,6 +22,7 @@
 #include <thread>
 #include "client_bus_center_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "bus_center_server_proxy.h"
 #include "comm_log.h"
 #include "disc_server_proxy.h"

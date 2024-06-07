@@ -136,6 +136,17 @@ typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];
 } SessionServerInfo;
 
+typedef struct {
+    ListNode node;
+    int32_t sessionId;
+    int32_t channelId;
+    ChannelType channelType;
+    void (*OnSessionClosed)(int sessionId);
+    void (*OnShutdown)(int32_t socket, ShutdownReason reason);
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    char pkgName[PKG_NAME_SIZE_MAX];
+} DestroySessionInfo;
+
 int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
 
 /**
@@ -182,16 +193,11 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
 
 int32_t ClientGetSessionSide(int32_t sessionId);
 
-int32_t ClientGrantPermission(int uid, int pid, const char *busName);
-
-int32_t ClientRemovePermission(const char *busName);
-
 int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int32_t *algorithm, int32_t *crc);
 
 int TransClientInit(void);
 void TransClientDeinit(void);
 
-int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList);
 void ClientTransRegLnnOffline(void);
 
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
@@ -203,8 +209,6 @@ int32_t CheckPermissionState(int32_t sessionId);
 void PermissionStateChange(const char *pkgName, int32_t state);
 
 int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const char *sessionName);
-
-int32_t ClientDeleteSocketSession(int32_t sessionId);
 
 int32_t ClientAddSocketSession(
     const SessionParam *param, bool isEncyptedRawStream, int32_t *sessionId, SessionEnableStatus *isEnabled);
@@ -238,23 +242,35 @@ int32_t SetSessionIsAsyncById(int32_t sessionId, bool isAsync);
 
 int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType);
 
-int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo);
-
 void DelSessionStateClosing(void);
-int32_t GetSocketLifecycleAndSessionNameBySessionId(
-    int32_t sessionId, char *sessionName, SocketLifecycleData *lifecycle);
-int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState, int32_t optional);
+
 int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAction action);
-int32_t GetQosValue(const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal);
+
 inline bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
 {
     return (qos == NULL) ? (qosCount == 0) : (qosCount <= QOS_TYPE_BUTT);
 }
-int32_t ClientWaitSyncBind(int32_t socket);
-int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode);
+
 void AddSessionStateClosing(void);
+
 int32_t SetSessionInitInfoById(int32_t sessionId);
+
 int32_t ClientSetEnableStatusBySocket(int32_t socket, SessionEnableStatus enableStatus);
+
+int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName);
+
+int32_t DeleteSocketSession(int32_t sessionId, char *pkgName, char *sessionName);
+
+int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState, int32_t optional);
+
+int32_t GetSocketLifecycleAndSessionNameBySessionId(
+    int32_t sessionId, char *sessionName, SocketLifecycleData *lifecycle);
+
+int32_t ClientWaitSyncBind(int32_t socket);
+
+int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode);
+
+int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo);
 #ifdef __cplusplus
 }
 #endif
