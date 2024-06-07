@@ -28,6 +28,17 @@ extern "C" {
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
+typedef struct {
+    ListNode node;
+    AppInfo appInfo;
+    int32_t authId;
+    ConnectOption connOpt;
+    bool isClient;
+} AuthChannelInfo;
+
+SoftBusList *GetAuthChannelListHead(void);
+int32_t GetAuthChannelLock(void);
+void ReleaseAuthChannelLock(void);
 int32_t TransAuthInit(IServerChannelCallBack *cb);
 void TransAuthDeinit(void);
 int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,

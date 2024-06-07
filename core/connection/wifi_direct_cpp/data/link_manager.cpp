@@ -184,6 +184,22 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
     }
 }
 
+void LinkManager::GetAllLinksBasicInfo(std::vector<std::shared_ptr<InnerLinkBasicInfo>> &infos)
+{
+    std::lock_guard lock(lock_);
+    for (const auto &[key, value] : links_) {
+        std::shared_ptr<InnerLinkBasicInfo> info = std::make_shared<InnerLinkBasicInfo>();
+        info->isBeingUsedByRemote = value->IsBeingUsedByRemote();
+        info->state = value->GetState();
+        info->linkType = value->GetLinkType();
+        info->freq = value->GetFrequency();
+        info->remoteDeviceId = value->GetRemoteDeviceId();
+        info->remoteIpv4 = value->GetRemoteIpv4();
+        info->remoteBaseMac = value->GetRemoteBaseMac();
+        infos.push_back(info);
+    }
+}
+
 std::shared_ptr<InnerLink> LinkManager::GetReuseLink(const std::string &remoteMac)
 {
     std::lock_guard lock(lock_);

@@ -65,6 +65,31 @@ typedef struct {
     ConfigType configType;
 } ConfigTypeMap;
 
+SoftBusList *GetProxyChannelMgrHead(void)
+{
+    return g_proxyChannelList;
+}
+
+int32_t GetProxyChannelLock(void)
+{
+    if (g_proxyChannelList == NULL) {
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void ReleaseProxyChannelLock(void)
+{
+    if (g_proxyChannelList == NULL) {
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+}
+
 static bool ChanIsEqual(ProxyChannelInfo *a, ProxyChannelInfo *b)
 {
     if ((a->myId == b->myId) &&
