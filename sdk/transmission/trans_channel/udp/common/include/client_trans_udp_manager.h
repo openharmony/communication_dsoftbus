@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,7 @@ typedef struct {
     bool isEnable;
     sessionNeed info;
     int32_t routeType;
+    int32_t sessionId;
 } UdpChannel;
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);
@@ -84,6 +85,10 @@ void TransUdpDeleteFileListener(const char *sessionName);
 int32_t TransUdpOnCloseAckReceived(int32_t channelId);
 
 int32_t ClientEmitFileEvent(int32_t channelId);
+
+int32_t TransLimitChange(int32_t channelId, uint8_t tos);
+
+int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId);
 #ifdef __cplusplus
 }
 #endif

@@ -50,6 +50,7 @@ public:
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info) = 0;
+    virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId) = 0;
     virtual int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip,
@@ -111,6 +112,7 @@ public:
     MOCK_METHOD(int32_t, LnnGetRemoteStrInfo, (const char*, InfoKey, char*, uint32_t), (override));
     MOCK_METHOD(int32_t, LnnGetNetworkIdByUuid, (const char *, char *, uint32_t), (override));
     MOCK_METHOD(int32_t, LnnGetRemoteBoolInfo, (const char *, InfoKey, bool*), (override));
+    MOCK_METHOD(bool, LnnGetOnlineStateById, (const char *, IdCategory), (override));
     MOCK_METHOD(void, AuthCloseConn, (AuthHandle), (override));
     MOCK_METHOD(void, AuthStopListeningForWifiDirect, (AuthLinkType, ListenerModule), (override));
     MOCK_METHOD(int32_t, AuthStartListeningForWifiDirect,
@@ -127,7 +129,7 @@ public:
     MOCK_METHOD(int32_t, LnnSyncP2pInfo, (), (override));
     MOCK_METHOD(uint64_t, LnnGetFeatureCapabilty, (), (override));
     MOCK_METHOD(bool, IsFeatureSupport, (uint64_t, FeatureCapability), (override));
-    
+
     MOCK_METHOD(WifiErrorCode, GetLinkedInfo, (WifiLinkedInfo *), (override));
     MOCK_METHOD(WifiErrorCode, Hid2dGetRecommendChannel,
         (const RecommendChannelRequest *, RecommendChannelResponse *), (override));

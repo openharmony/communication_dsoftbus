@@ -38,6 +38,7 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
     auto ret = ScheduleActiveCommand(command, executor);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
     if (executor != nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
     }
     return ret;
@@ -76,6 +77,7 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
     auto ret = ScheduleActiveCommand(command, executor);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
     if (executor != nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
     }
     return ret;
@@ -107,8 +109,8 @@ bool WifiDirectScheduler::ProcessNextCommand(WifiDirectExecutor *executor,
             commandList_.erase(itc);
             processor = command->GetProcessor();
             executors_.insert({commandDeviceId, executorCopy});
-            CONN_LOGI(CONN_WIFI_DIRECT, "add executor=%{public}s",
-                      WifiDirectAnonymizeDeviceId(commandDeviceId).c_str());
+            CONN_LOGI(CONN_WIFI_DIRECT, "add executor=%{public}s, commandId=%{public}u",
+                      WifiDirectAnonymizeDeviceId(commandDeviceId).c_str(), command->GetId());
             executor->SetRemoteDeviceId(commandDeviceId);
             if (command->GetType() == CommandType::CONNECT_COMMAND) {
                 executor->SetActive(true);
@@ -142,7 +144,7 @@ int WifiDirectScheduler::ScheduleActiveCommand(const std::shared_ptr<WifiDirectC
     std::lock_guard executorLock(executorLock_);
     auto it = executors_.find(remoteDeviceId);
     if (it != executors_.end() || executors_.size() == MAX_EXECUTOR) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "push command to list");
+        CONN_LOGI(CONN_WIFI_DIRECT, "push command to list, commandId=%{public}u", command->GetId());
         std::lock_guard commandLock(commandLock_);
         commandList_.push_back(command);
         return SOFTBUS_OK;

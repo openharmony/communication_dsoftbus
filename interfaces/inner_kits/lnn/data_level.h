@@ -59,7 +59,7 @@ typedef struct {
      * @since 1.0
      * @version 1.0
      */
-    void (*OnDataLevelChanged)(const char *networkId, const DataLevel dataLevel);
+    void (*onDataLevelChanged)(const char *networkId, const DataLevel dataLevel);
 } IDataLevelCb;
 
 /**

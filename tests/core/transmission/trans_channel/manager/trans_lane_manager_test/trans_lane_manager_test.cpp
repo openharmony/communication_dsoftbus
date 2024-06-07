@@ -236,7 +236,7 @@ HWTEST_F(TransLaneManagerTest, TransGetLaneReqIdByChannelId001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     channelId = -1;
     ret = TransGetLaneHandleByChannelId(channelId, &laneHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -264,7 +264,7 @@ HWTEST_F(TransLaneManagerTest, TransGetChannelInfoByLaneReqId001, TestSize.Level
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransGetChannelInfoByLaneHandle(laneHandle, &channelId, &channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**

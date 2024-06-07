@@ -281,7 +281,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
     ASSERT_TRUE(memcpy_s(connInfo.info.ipInfo.ip, IP_LEN, IP_TEST, strlen(IP_TEST)) == EOK);
     AuthManager *auth = FindAuthManagerByConnInfo(&connInfo, false);
     EXPECT_TRUE(auth != nullptr);
-    auth->hasAuthPassed = true;
+    auth->hasAuthPassed[AUTH_LINK_TYPE_WIFI] = true;
     auth->authId = 1;
     auth->lastVerifyTime = 1;
 
@@ -327,7 +327,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
     ASSERT_TRUE(memcpy_s(connInfo.info.ipInfo.ip, IP_LEN, IP_TEST, strlen(IP_TEST)) == EOK);
     AuthManager *auth = FindAuthManagerByConnInfo(&connInfo, false);
     EXPECT_TRUE(auth != nullptr);
-    auth->hasAuthPassed = true;
+    auth->hasAuthPassed[AUTH_LINK_TYPE_WIFI] = true;
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
@@ -371,7 +371,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
     ASSERT_TRUE(memcpy_s(connInfo.info.ipInfo.ip, IP_LEN, IP_TEST, strlen(IP_TEST)) == EOK);
     AuthManager *auth = FindAuthManagerByConnInfo(&connInfo, false);
     EXPECT_TRUE(auth != nullptr);
-    auth->hasAuthPassed = true;
+    auth->hasAuthPassed[AUTH_LINK_TYPE_WIFI] = true;
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
@@ -411,7 +411,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
     ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
     AuthManager *auth = FindAuthManagerByConnInfo(&connInfo, false);
     EXPECT_TRUE(auth != nullptr);
-    auth->hasAuthPassed = true;
+    auth->hasAuthPassed[AUTH_LINK_TYPE_BLE] = true;
     auth->authId = 1;
     auth->lastVerifyTime = 1;
 
@@ -457,7 +457,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
     ASSERT_TRUE(memcpy_s(connInfo.info.brInfo.brMac, BT_MAC_LEN, BR_MAC, strlen(BR_MAC)) == EOK);
     AuthManager *auth = FindAuthManagerByConnInfo(&connInfo, false);
     EXPECT_TRUE(auth != nullptr);
-    auth->hasAuthPassed = true;
+    auth->hasAuthPassed[AUTH_LINK_TYPE_BR] = true;
     auth->authId = 1;
     auth->lastVerifyTime = 1;
 
@@ -504,7 +504,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
     connInfo.info.ipInfo.port = PORT;
     AuthManager *auth = FindAuthManagerByConnInfo(&connInfo, false);
     EXPECT_TRUE(auth != nullptr);
-    auth->hasAuthPassed = true;
+    auth->hasAuthPassed[AUTH_LINK_TYPE_P2P] = true;
     auth->authId = 1;
     auth->lastVerifyTime = 1;
 
@@ -547,7 +547,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)
     connInfo.info.ipInfo.port = PORT;
     AuthManager *auth = FindAuthManagerByConnInfo(&connInfo, false);
     EXPECT_TRUE(auth != nullptr);
-    auth->hasAuthPassed = true;
+    auth->hasAuthPassed[AUTH_LINK_TYPE_ENHANCED_P2P] = true;
     auth->authId = 1;
     auth->lastVerifyTime = 1;
 

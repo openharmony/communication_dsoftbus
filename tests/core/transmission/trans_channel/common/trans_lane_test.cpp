@@ -157,7 +157,7 @@ HWTEST_F(TransLaneTest, TransLaneTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransDelLaneReqFromPendingList(invalidId, false);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = TransDelLaneReqFromPendingList(laneHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -193,7 +193,7 @@ HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransGetLaneReqItemByLaneHandle(invalidId, &bSucc, connInfo, &errCode);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = TransGetLaneReqItemByLaneHandle(laneHandle, &bSucc, connInfo, &errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -234,7 +234,7 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(invalidId, bSucc, connInfo, false, errCode);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -451,18 +451,18 @@ HWTEST_F(TransLaneTest, TransLaneTest012, TestSize.Level1)
     uint32_t laneHandle = 1;
     uint32_t invalidId = 111;
     int32_t ret = TransWaitingRequestCallback(laneHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     (void)TransReqLanePendingInit();
     bool bSucc = true;
 
     ret = TransWaitingRequestCallback(laneHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     ret = TransAddLaneReqFromPendingList(laneHandle);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransWaitingRequestCallback(invalidId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     LaneConnInfo connInfo;
     connInfo.type = LANE_WLAN_5G;
@@ -551,7 +551,7 @@ HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, &connInfo, false, errCode);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -688,7 +688,7 @@ HWTEST_F(TransLaneTest, TransLaneTest019, TestSize.Level1)
 
     info.type = LANE_LINK_TYPE_BUTT;
     ret = TransGetConnectOptByConnInfo(&info, &connOpt);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CONN_OPT_FAILED, ret);
 }
 
 /**
@@ -833,7 +833,7 @@ HWTEST_F(TransLaneTest, TransLaneTest025, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, &connInfo, false, errCode);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);

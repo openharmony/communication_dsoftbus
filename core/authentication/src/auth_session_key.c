@@ -303,7 +303,7 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32
         }
     }
     if (latestKey == NULL) {
-        AUTH_LOGE(AUTH_FSM, "invalid session key item");
+        AUTH_LOGE(AUTH_FSM, "invalid session key item, type=%{public}d", type);
         DumpSessionkeyList(list);
         return SOFTBUS_ERR;
     }

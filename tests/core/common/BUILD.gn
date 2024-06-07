@@ -23,6 +23,7 @@ group("unittest") {
     "dfx/hidumper_adapter/unittest:unittest",
     "dfx/hisysevent_adapter/unittest:unittest",
     "dfx/log:unittest",
+    "json_utils:unittest",
     "network:unittest",
     "security/permission/common:unittest",
     "security/permission/standard:unittest",

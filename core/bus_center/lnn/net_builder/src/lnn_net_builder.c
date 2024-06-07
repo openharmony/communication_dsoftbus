@@ -1998,14 +1998,10 @@ static int32_t ConifgLocalLedger(void)
     if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local irk fail");
     }
+
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
-
-    // irk fail should not cause softbus init fail
-    if (LnnUpdateLinkFinderInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "sync rpa info to linkfinder fail.");
-    }
     return SOFTBUS_OK;
 }
 
@@ -2216,6 +2212,24 @@ static void AccountStateChangeHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void UserSwitchedHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
+        LNN_LOGW(LNN_BUILDER, "invalid param");
+        return;
+    }
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
+    SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
+    switch (userSwitchState) {
+        case SOFTBUS_USER_SWITCHED:
+            LNN_LOGI(LNN_BUILDER, "SOFTBUS_USER_SWITCHED");
+            LnnSetUnlockState();
+            break;
+        default:
+            return;
+    }
+}
+
 static void UpdateLocalNetCapability(void)
 {
     uint32_t netCapability = 0;
@@ -2327,6 +2341,10 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGE(LNN_INIT, "regist account change evt handler fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist user switch evt handler fail!");
+        return SOFTBUS_ERR;
+    }
     return InitNetBuilderLooper();
 }
 
@@ -2419,7 +2437,8 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
 
-    LNN_LOGI(LNN_BUILDER, "notify discovery device enter! isNeedConnect=%{public}d", isNeedConnect);
+    LNN_LOGI(LNN_BUILDER, "notify discovery device enter! peer%{public}s, isNeedConnect=%{public}d",
+        addr != NULL ? LnnPrintConnectionAddr(addr) : "", isNeedConnect);
     if (g_netBuilder.isInit == false) {
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;

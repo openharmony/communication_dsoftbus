@@ -339,11 +339,11 @@ HWTEST_F(TransIpcStandardTest, QosReportTest001, TestSize.Level0)
     int32_t appType = 0;
     int32_t quality = QOS_IMPROVE;
     int32_t ret = transServerProxy.QosReport(channelId, channelType, appType, quality);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.QosReport(channelId, channelType, appType, quality);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 }
 
 /**
@@ -366,7 +366,7 @@ HWTEST_F(TransIpcStandardTest, StreamStatsTest001, TestSize.Level0)
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.StreamStats(channelId, channelType, statsData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
     SoftBusFree(statsData);
 }
 
@@ -390,7 +390,7 @@ HWTEST_F(TransIpcStandardTest, RippleStatsTest0011, TestSize.Level0)
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.RippleStats(channelId, channelType, statsData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
     SoftBusFree(statsData);
 }
 
@@ -665,13 +665,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcQosReportTest001, TestSize.Level0)
     int32_t appType = 0;
     int32_t quality = QOS_IMPROVE;
     int32_t ret = ServerIpcQosReport(channelId, chanType, appType, quality);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcQosReport(channelId, chanType, appType, quality);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 
     TransClientDeinit();
 }

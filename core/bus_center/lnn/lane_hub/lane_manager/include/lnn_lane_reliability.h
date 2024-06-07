@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *resourceItem, const LaneLinkCb *callback);
+int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo, const LaneLinkCb *callback);
 int32_t LaneDetectFload(const LaneResource *resourceItem);
 int32_t InitLaneReliability(void);
 void NotifyDetectTimeout(uint32_t detectId);

@@ -426,7 +426,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransGetConn001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransGetConn(&connInfo, &proxyConn, isServer);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NOT_MATCH, ret);
     DestroySoftBusList(g_proxyConnectionList);
     g_proxyConnectionList = nullptr;
 }
@@ -446,6 +446,6 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessage001, TestSize.L
     msg.dateLen = 9;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     int32_t ret = TransProxySendBadKeyMessage(&msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 } // namespace OHOS

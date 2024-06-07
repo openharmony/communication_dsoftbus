@@ -106,10 +106,10 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
 
 int32_t SoftBusServerStub::CheckPidByChannelId(pid_t callingPid, int32_t channelId, int32_t channelType)
 {
-    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         COMM_LOGE(COMM_SVC, "malloc appInfo failed");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     int32_t ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
     if (ret != SOFTBUS_OK) {

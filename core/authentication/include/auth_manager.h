@@ -50,7 +50,7 @@ typedef struct {
     char uuid[UUID_BUF_LEN];
     SoftBusVersion version;
     /* 认证状态 */
-    bool hasAuthPassed;
+    bool hasAuthPassed[AUTH_LINK_TYPE_MAX];
     ListNode node;
 } AuthManager;
 

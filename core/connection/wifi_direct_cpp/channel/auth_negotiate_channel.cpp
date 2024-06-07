@@ -37,13 +37,18 @@ AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
     auto ret = AuthGetDeviceUuid(handle_.authId, remoteUuid, UUID_BUF_LEN);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get device id failed");
     remoteDeviceId_ = remoteUuid;
+    auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(remoteUuid);
+    if (!WifiDirectUtils::IsDeviceOnline(remoteNetworkId)) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "diff account");
+        remoteDeviceId_ = "";
+    }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
 }
 
 AuthNegotiateChannel::~AuthNegotiateChannel()
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     if (close_) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "close auth");
         AuthCloseConn(handle_);
     }
 }
@@ -84,14 +89,14 @@ static int64_t GenerateSequence()
 int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s", msg.MessageTypeToString().c_str());
-    ProtocolType type { ProtocolType::JSON };
-    if (WifiDirectUtils::IsLocalSupportTlv() && WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
-        type = ProtocolType::TLV;
+    ProtocolType type { ProtocolType::TLV };
+    if (!remoteDeviceId_.empty() && !WifiDirectUtils::IsLocalSupportTlv() &&
+        !WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
+        type = ProtocolType::JSON;
     }
-    auto *protocol = WifiDirectProtocolFactory::CreateProtocol(type);
+    auto protocol = WifiDirectProtocolFactory::CreateProtocol(type);
     std::vector<uint8_t> output;
     msg.Marshalling(*protocol, output);
-    delete protocol;
 
     AuthTransData dataInfo = {
         .module = MODULE_P2P_LINK,
@@ -107,18 +112,22 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
 
 static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
 {
-    ProtocolType type { ProtocolType::JSON };
+    ProtocolType type { ProtocolType::TLV };
     auto channel = std::make_shared<AuthNegotiateChannel>(handle);
     auto remoteDeviceId = channel->GetRemoteDeviceId();
-    if (WifiDirectUtils::IsLocalSupportTlv() && WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId)) {
-        type = ProtocolType::TLV;
+    if (!remoteDeviceId.empty() && !WifiDirectUtils::IsLocalSupportTlv() &&
+        !WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId)) {
+        type = ProtocolType::JSON;
     }
-    auto *protocol = WifiDirectProtocolFactory::CreateProtocol(type);
+    auto protocol = WifiDirectProtocolFactory::CreateProtocol(type);
     std::vector<uint8_t> input;
     input.insert(input.end(), data->data, data->data + data->len);
     NegotiateMessage msg;
     msg.Unmarshalling(*protocol, input);
-    delete protocol;
+    if (remoteDeviceId.empty()) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "use remote mac as device id");
+        remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
+    }
     msg.SetRemoteDeviceId(remoteDeviceId);
 
     NegotiateCommand command(msg, channel);
@@ -212,29 +221,35 @@ void AuthNegotiateChannel::OnConnOpenFailed(uint32_t requestId, int32_t reason)
 int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel)
 {
     bool isMeta = false;
+    bool needUdid = true;
     if (channel != nullptr) {
         isMeta = channel->IsMeta();
     }
+    if (param.remoteUuid.length() < UUID_BUF_LEN - 1) {
+        isMeta = true;
+        needUdid = false;
+    }
+
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, isMeta=%{public}d",
         WifiDirectAnonymizeDeviceId(param.remoteUuid).c_str(), WifiDirectAnonymizeIp(param.remoteIp).c_str(),
         param.remotePort, isMeta);
-
-    const char *remoteUdid = LnnConvertDLidToUdid(param.remoteUuid.c_str(), CATEGORY_UUID);
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        remoteUdid != nullptr && strlen(remoteUdid) != 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get remote udid failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUdid=%{public}s", WifiDirectAnonymizeDeviceId(remoteUdid).c_str());
 
     AuthConnInfo authConnInfo {};
     authConnInfo.type = param.type;
     authConnInfo.info.ipInfo.port = param.remotePort;
     authConnInfo.info.ipInfo.moduleId = param.module;
-    if (isMeta) {
+    if (isMeta && needUdid) {
         authConnInfo.info.ipInfo.authId = channel->handle_.authId;
     }
-    int32_t ret = strcpy_s(authConnInfo.info.ipInfo.ip, sizeof(authConnInfo.info.ipInfo.ip), param.remoteIp.c_str());
+    auto ret = strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, param.remoteIp.c_str());
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy ip failed");
-    ret = strcpy_s(authConnInfo.info.ipInfo.udid, UDID_BUF_LEN, remoteUdid);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy udid failed");
+    if (needUdid) {
+        const char *remoteUdid = LnnConvertDLidToUdid(param.remoteUuid.c_str(), CATEGORY_UUID);
+        CONN_CHECK_AND_RETURN_RET_LOGE(remoteUdid != nullptr && strlen(remoteUdid) != 0,
+                                       SOFTBUS_ERR, CONN_WIFI_DIRECT, "get remote udid failed");
+        ret = strcpy_s(authConnInfo.info.ipInfo.udid, UDID_BUF_LEN, remoteUdid);
+        CONN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy udid failed");
+    }
 
     AuthConnCallback authConnCallback = {
         .onConnOpened = AuthNegotiateChannel::OnConnOpened,
