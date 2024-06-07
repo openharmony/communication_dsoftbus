@@ -25,7 +25,7 @@ static constexpr int IPV6_END = 15;
 
 std::string WifiDirectAnonymizeMac(const std::string &mac)
 {
-    if (mac.empty()) {
+    if (mac.length() < MAC_ANONYMOUS_END) {
         return "";
     }
     std::string result = mac;
@@ -63,7 +63,7 @@ std::string AnonymizeIpv4(const std::string &ip)
 
 static std::string AnonymizeIpv6(const std::string &ip)
 {
-    if (ip.empty()) {
+    if (ip.length() < IPV6_END) {
         return "";
     }
     auto result = ip;
@@ -81,7 +81,7 @@ std::string WifiDirectAnonymizeIp(const std::string &ip)
 
 std::string WifiDirectAnonymizeDeviceId(const std::string &deviceId)
 {
-    if (deviceId.empty()) {
+    if (deviceId.length() < DEVICE_ID_PREFIX_LEN + DEVICE_ID_SUFFIX_LEN) {
         return "";
     }
     std::string result = deviceId;

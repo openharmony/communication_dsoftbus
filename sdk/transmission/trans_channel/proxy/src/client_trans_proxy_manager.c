@@ -152,11 +152,11 @@ int32_t ClientTransProxyInit(const IClientSessionCallBack *cb)
     }
 
     if (SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_NEW_LENGTH, (unsigned char *)&g_proxyMaxByteBufSize,
-            sizeof(g_proxyMaxByteBufSize)) != SOFTBUS_OK) {
+                         sizeof(g_proxyMaxByteBufSize)) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_INIT, "get auth proxy channel max bytes length fail");
     }
     if (SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH, (unsigned char *)&g_proxyMaxMessageBufSize,
-            sizeof(g_proxyMaxMessageBufSize)) != SOFTBUS_OK) {
+                         sizeof(g_proxyMaxMessageBufSize)) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_INIT, "get auth proxy channel max message length fail");
     }
     TRANS_LOGI(TRANS_INIT, "proxy auth byteSize=%{public}u, messageSize=%{public}u",
@@ -505,7 +505,7 @@ static int32_t ClientTransProxyProcessSessionData(int32_t channelId, const Packe
 
     TRANS_LOGD(TRANS_SDK, "ProcessData debug: outlen=%{public}d", dataInfo.outLen);
     if (ClientTransProxyNotifySession(channelId, (SessionPktType)dataHead->flags, dataHead->seq,
-            (const char *)dataInfo.outData, dataInfo.outLen) != SOFTBUS_OK) {
+                                      (const char *)dataInfo.outData, dataInfo.outLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "process data err");
         SoftBusFree(dataInfo.outData);
         return SOFTBUS_INVALID_DATA_HEAD;
@@ -857,7 +857,7 @@ static int32_t ClientTransProxyPackBytes(
 
     uint32_t outLen = 0;
     if (ClientTransProxyEncryptWithSeq(sessionKey, seq, (const char *)dataInfo->inData, dataInfo->inLen,
-            (char *)dataInfo->outData + sizeof(PacketHead), &outLen) != SOFTBUS_OK) {
+                                       (char *)dataInfo->outData + sizeof(PacketHead), &outLen) != SOFTBUS_OK) {
         SoftBusFree(dataInfo->outData);
         TRANS_LOGE(TRANS_SDK, "ClientTransProxyEncryptWithSeq channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;

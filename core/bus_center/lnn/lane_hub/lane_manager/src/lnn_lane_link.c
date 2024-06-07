@@ -27,6 +27,7 @@
 #include "lnn_lane_score.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_lane_reliability.h"
+#include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
@@ -172,6 +173,49 @@ static LaneResource* GetValidLaneResource(const LaneLinkInfo *linkInfoItem)
     return NULL;
 }
 
+static LnnVapType GetVapType(LaneLinkType linkType)
+{
+    switch (linkType) {
+        case LANE_HML:
+            return LNN_VAP_HML;
+        case LANE_P2P:
+            return LNN_VAP_P2P;
+        default:
+            LNN_LOGE(LNN_LANE, "unexcepted linkType=%{public}d", linkType);
+            return LNN_VAP_UNKNOWN;
+    }
+}
+
+static void AddVapInfo(const LaneLinkInfo *linkInfo)
+{
+    LnnVapType vapType = GetVapType(linkInfo->type);
+    if (vapType == LNN_VAP_UNKNOWN) {
+        LNN_LOGE(LNN_LANE, "addVap fail, vapType unknown");
+        return;
+    }
+    LnnVapAttr vapAttr;
+    (void)memset_s(&vapAttr, sizeof(vapAttr), 0, sizeof(vapAttr));
+    vapAttr.isEnable = true;
+    vapAttr.channelId = linkInfo->linkInfo.p2p.channel;
+    int32_t ret = LnnAddLocalVapInfo(vapType, (const LnnVapAttr *)&vapAttr);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "add vapInfo err, ret=%{public}d", ret);
+    }
+}
+
+static void DeleteVapInfo(LaneLinkType linkType)
+{
+    LnnVapType vapType = GetVapType(linkType);
+    if (vapType == LNN_VAP_UNKNOWN) {
+        LNN_LOGE(LNN_LANE, "deleteVap fail, vapType unknown");
+        return;
+    }
+    int32_t ret = LnnDeleteLocalVapInfo(vapType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "delete vapInfo fail=%{public}d", linkType);
+    }
+}
+
 static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide)
 {
     LaneResource* resourceItem = (LaneResource *)SoftBusCalloc(sizeof(LaneResource));
@@ -197,6 +241,7 @@ static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t lane
     LaneUnlock();
     LNN_LOGI(LNN_LANE, "create new laneId=%{public}" PRIu64 " to resource pool succ, isServerSide=%{public}u,"
         "clientRef=%{public}u", resourceItem->laneId, isServerSide, resourceItem->clientRef);
+    AddVapInfo(linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -311,6 +356,51 @@ static bool IsNeedDelResource(uint64_t laneId, bool isServerSide, LaneResource *
     return true;
 }
 
+static void DumpWifiDirectInfo(const LaneLinkInfo *resource)
+{
+    char *anonyPeerUdid = NULL;
+    Anonymize(resource->peerUdid, &anonyPeerUdid);
+    LNN_LOGI(LNN_LANE, "peerUdid=%{public}s, linkType=%{public}s, channel=%{public}d", anonyPeerUdid,
+        resource->type == LANE_HML ? "hml" : "p2p", resource->linkInfo.p2p.channel);
+    AnonymizeFree(anonyPeerUdid);
+}
+
+static void ProcessVapInfo(void)
+{
+    bool hasHmlVap = false;
+    bool hasP2pVap = false;
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return;
+    }
+    LaneResource *next = NULL;
+    LaneResource *item = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        if ((item->clientRef != 0 || item->isServerSide) && item->link.type == LANE_HML) {
+            hasHmlVap = true;
+            LNN_LOGI(LNN_LANE, "HML use: ref=%{public}d, server=%{public}d", item->clientRef, item->isServerSide);
+            DumpWifiDirectInfo((const LaneLinkInfo *)&item->link);
+        }
+        if (item->clientRef != 0 && item->link.type == LANE_P2P) {
+            hasP2pVap = true;
+            LNN_LOGI(LNN_LANE, "P2p use: ref=%{public}d", item->clientRef);
+            DumpWifiDirectInfo((const LaneLinkInfo *)&item->link);
+        }
+        if (hasHmlVap && hasP2pVap) {
+            break;
+        }
+    }
+    LaneUnlock();
+    if (!hasHmlVap) {
+        LNN_LOGI(LNN_LANE, "delete hml vap info");
+        DeleteVapInfo(LANE_HML);
+    }
+    if (!hasP2pVap) {
+        LNN_LOGI(LNN_LANE, "delete p2p vap info");
+        DeleteVapInfo(LANE_P2P);
+    }
+}
+
 int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
 {
     if (LaneLock() != SOFTBUS_OK) {
@@ -324,6 +414,7 @@ int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (IsNeedDelResource(laneId, isServerSide, item)) {
             LaneUnlock();
+            ProcessVapInfo();
             return SOFTBUS_OK;
         }
     }
@@ -347,6 +438,7 @@ int32_t ClearLaneResourceByLaneId(uint64_t laneId)
             g_laneResource.cnt--;
             LaneUnlock();
             LNN_LOGI(LNN_LANE, "clear laneId=%{public}" PRIu64 " resource succ", laneId);
+            ProcessVapInfo();
             return SOFTBUS_OK;
         }
     }
@@ -474,7 +566,7 @@ static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const La
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     linkInfo.type = LANE_BR;
-    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -690,7 +782,7 @@ static int32_t LaneLinkOfBleReuseCommon(uint32_t reqId, const LinkRequest *reqIn
         linkInfo.type = LANE_BLE;
     }
     ConnBleReturnConnection(&connection);
-    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -748,7 +840,7 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
     linkInfo.linkInfo.ble.protoType = BLE_GATT;
     linkInfo.linkInfo.ble.psm = 0;
     linkInfo.type = LANE_BLE;
-    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -767,7 +859,7 @@ static int32_t LaneLinkOfGattDirect(uint32_t reqId, const LinkRequest *reqInfo, 
     }
     linkInfo.type = LANE_BLE_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_GATT;
-    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -813,7 +905,7 @@ static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     if (memcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, ipAddr, MAX_SOCKET_ADDR_LEN) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
-    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -1019,7 +1111,7 @@ static int32_t LaneLinkOfCoc(uint32_t reqId, const LinkRequest *reqInfo, const L
     }
     linkInfo.linkInfo.ble.protoType = BLE_COC;
     linkInfo.type = LANE_COC;
-    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -1039,7 +1131,7 @@ static int32_t LaneLinkOfCocDirect(uint32_t reqId, const LinkRequest *reqInfo, c
     linkInfo.type = LANE_COC_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_COC;
 
-    callback->OnLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -1063,8 +1155,8 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
         LNN_LOGE(LNN_LANE, "the reqInfo or type is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (callback == NULL || callback->OnLaneLinkSuccess == NULL ||
-        callback->OnLaneLinkFail == NULL) {
+    if (callback == NULL || callback->onLaneLinkSuccess == NULL ||
+        callback->onLaneLinkFail == NULL) {
         LNN_LOGE(LNN_LANE, "the callback is invalid");
         return SOFTBUS_INVALID_PARAM;
     }

@@ -42,14 +42,14 @@ int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkSuccess(const LinkRequest *r
     LaneLinkInfo linkInfo = {
         .type = reqInfo->linkType,
     };
-    cb->OnLaneLinkSuccess(reqId, reqInfo->linkType, &linkInfo);
+    cb->onLaneLinkSuccess(reqId, reqInfo->linkType, &linkInfo);
     return SOFTBUS_OK;
 }
 
 int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkFail(const LinkRequest *reqInfo,
     uint32_t reqId, const LaneLinkCb *cb)
 {
-    cb->OnLaneLinkFail(reqId, SOFTBUS_LANE_TRIGGER_LINK_FAIL, reqInfo->linkType);
+    cb->onLaneLinkFail(reqId, SOFTBUS_LANE_TRIGGER_LINK_FAIL, reqInfo->linkType);
     return SOFTBUS_OK;
 }
 

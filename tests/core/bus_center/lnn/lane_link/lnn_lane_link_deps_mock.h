@@ -36,6 +36,10 @@ public:
     virtual int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource) = 0;
     virtual int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo,
         const LaneLinkCb *callback) = 0;
+    virtual int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource) = 0;
+    virtual int32_t InitLaneLink(void) = 0;
+    virtual int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide) = 0;
+    virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -52,6 +56,10 @@ public:
     MOCK_METHOD3(FindLaneResourceByLinkType, int32_t (const char *peerUdid, LaneLinkType type, LaneResource *resource));
     MOCK_METHOD3(LaneDetectReliability, int32_t (uint32_t laneReqId, const LaneLinkInfo *linkInfo,
         const LaneLinkCb *callback));
+    MOCK_METHOD2(FindLaneResourceByLaneId, int32_t (uint64_t laneId, LaneResource *resource));
+    MOCK_METHOD0(InitLaneLink, int32_t (void));
+    MOCK_METHOD3(AddLaneResourceToPool, int32_t (const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide));
+    MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);

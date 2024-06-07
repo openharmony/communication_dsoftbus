@@ -162,6 +162,17 @@ namespace OHOS {
         }
         TransDisableSessionListener((int32_t)size);
     }
+
+    static void ClientFillSessionCallBack(IClientSessionCallBack *cb)
+    {
+        cb->OnSessionOpened = TransOnSessionOpened;
+        cb->OnSessionClosed = TransOnSessionClosed;
+        cb->OnSessionOpenFailed = TransOnSessionOpenFailed;
+        cb->OnDataReceived = TransOnDataReceived;
+        cb->OnStreamReceived = TransOnOnStreamRecevied;
+        cb->OnGetSessionId = NULL;
+        cb->OnQosEvent = NULL;
+    }
     void ClientTransTdcOnSessionOpenedTest(const uint8_t* data, size_t size)
     {
         if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
@@ -173,13 +184,7 @@ namespace OHOS {
             return;
         }
         IClientSessionCallBack cb;
-        cb.OnSessionOpened = TransOnSessionOpened;
-        cb.OnSessionClosed = TransOnSessionClosed;
-        cb.OnSessionOpenFailed = TransOnSessionOpenFailed;
-        cb.OnDataReceived = TransOnDataReceived;
-        cb.OnStreamReceived = TransOnOnStreamRecevied;
-        cb.OnGetSessionId = NULL;
-        cb.OnQosEvent = NULL;
+        ClientFillSessionCallBack(&cb);
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
@@ -192,13 +197,7 @@ namespace OHOS {
             return;
         }
         IClientSessionCallBack cb;
-        cb.OnSessionOpened = TransOnSessionOpened;
-        cb.OnSessionClosed = TransOnSessionClosed;
-        cb.OnSessionOpenFailed = TransOnSessionOpenFailed;
-        cb.OnDataReceived = TransOnDataReceived;
-        cb.OnStreamReceived = TransOnOnStreamRecevied;
-        cb.OnGetSessionId = NULL;
-        cb.OnQosEvent = NULL;
+        ClientFillSessionCallBack(&cb);
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
@@ -211,13 +210,7 @@ namespace OHOS {
             return;
         }
         IClientSessionCallBack cb;
-        cb.OnSessionOpened = TransOnSessionOpened;
-        cb.OnSessionClosed = TransOnSessionClosed;
-        cb.OnSessionOpenFailed = TransOnSessionOpenFailed;
-        cb.OnDataReceived = TransOnDataReceived;
-        cb.OnStreamReceived = TransOnOnStreamRecevied;
-        cb.OnGetSessionId = NULL;
-        cb.OnQosEvent = NULL;
+        ClientFillSessionCallBack(&cb);
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
@@ -235,13 +228,7 @@ namespace OHOS {
             return;
         }
         IClientSessionCallBack cb;
-        cb.OnSessionOpened = TransOnSessionOpened;
-        cb.OnSessionClosed = TransOnSessionClosed;
-        cb.OnSessionOpenFailed = TransOnSessionOpenFailed;
-        cb.OnDataReceived = TransOnDataReceived;
-        cb.OnStreamReceived = TransOnOnStreamRecevied;
-        cb.OnGetSessionId = NULL;
-        cb.OnQosEvent = NULL;
+        ClientFillSessionCallBack(&cb);
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }

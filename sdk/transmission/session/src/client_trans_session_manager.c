@@ -1358,13 +1358,6 @@ static bool ClientTransCheckHmlIp(const char *ip)
 // determine connection type based on IP, delete session when connection type and parameter connType are consistent
 static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType, int32_t connType)
 {
-    /*
-     * When the channel type is UDP and the business type is file, the SessionNode is not cleared to ensure that the
-     * FileEvent can be reported when the link is disconnected abnormally.
-     */
-    if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
-        return false;
-    }
     if (connType == TRANS_CONN_ALL) {
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
             return false;
@@ -1426,6 +1419,13 @@ static void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
         if (destroyNode == NULL) {
             continue;
+        }
+        /*
+         * When the channel type is UDP and the business type is file, trigger DFILE_ON_CLEAR_POLICY_FILE_LIST event
+         * before cleaning up sessionNode.
+         */
+        if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
+            ClientEmitFileEvent(sessionNode->channelId);
         }
         DestroySessionId();
         ListDelete(&sessionNode->node);

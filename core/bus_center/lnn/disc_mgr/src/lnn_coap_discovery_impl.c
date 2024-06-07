@@ -42,6 +42,20 @@ static DiscInnerCallback g_discCb = {
     .OnDeviceFound = DeviceFound,
 };
 
+static int32_t LnnCheckDiscoveryDeviceInfo(const DeviceInfo *device)
+{
+    if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
+        LNN_LOGE(LNN_BUILDER, "discovery get invalid addrType=%{public}d", device->addr[0].type);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (device->addr[0].info.ip.port == 0) {
+        LNN_LOGD(LNN_BUILDER, "discovery get port is 0!");
+        LnnCoapConnect(device->addr[0].info.ip.ip);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
 static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     ConnectionAddr addr;
@@ -62,19 +76,20 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
         AnonymizeFree(anonyDevId);
         return;
     }
-    AnonymizeFree(anonyDevId);
-    if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
-        LNN_LOGE(LNN_BUILDER, "discovery get invalid addrType=%{public}d", device->addr[0].type);
+    if (!AuthHasSameAccountGroup(device)) {
+        LNN_LOGE(LNN_BUILDER, "device has not same account group relation with local device, devId=%{public}s",
+            anonyDevId);
+        AnonymizeFree(anonyDevId);
         return;
     }
-    if (device->addr[0].info.ip.port == 0) {
-        LNN_LOGD(LNN_BUILDER, "discovery get port is 0!");
-        LnnCoapConnect(device->addr[0].info.ip.ip);
+    AnonymizeFree(anonyDevId);
+    if (LnnCheckDiscoveryDeviceInfo(device) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get invalid device para");
         return;
     }
     addr.type = device->addr[0].type;
-    if (strncpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip,
-        strlen(device->addr[0].info.ip.ip)) != 0) {
+    if (strncpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip, strlen(device->addr[0].info.ip.ip)) !=
+        0) {
         LNN_LOGE(LNN_BUILDER, "strncpy ip failed");
         return;
     }

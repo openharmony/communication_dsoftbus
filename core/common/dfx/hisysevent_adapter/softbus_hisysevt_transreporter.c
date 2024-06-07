@@ -287,6 +287,21 @@ static char *GetApiNameByCode(uint32_t code)
     return NULL;
 }
 
+static void AddInfoNodeToList(bool isAppDiff, const char *appName, char *apiName)
+{
+    CalledApiInfoStruct *apiInfoNode = NULL;
+    if (isAppDiff) {
+        apiInfoNode = GetNewApiInfo(appName, apiName);
+        if (apiInfoNode == NULL) {
+            COMM_LOGE(COMM_EVENT, "GetNewApiInfo fail");
+            return;
+        }
+        ListAdd(&g_calledApiInfoList->list, &apiInfoNode->node);
+        g_calledApiInfoList->cnt++;
+        COMM_LOGD(COMM_EVENT, "GetNewApiInfo success");
+    }
+}
+
 void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
 {
     if (g_calledApiInfoList == NULL) {
@@ -321,17 +336,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
             }
         }
     }
-    if (isAppDiff) {
-        apiInfoNode = GetNewApiInfo(appName, apiName);
-        if (apiInfoNode == NULL) {
-            COMM_LOGE(COMM_EVENT, "GetNewApiInfo fail");
-            (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
-            return;
-        }
-        ListAdd(&g_calledApiInfoList->list, &apiInfoNode->node);
-        g_calledApiInfoList->cnt++;
-        COMM_LOGD(COMM_EVENT, "GetNewApiInfo success");
-    }
+    AddInfoNodeToList(isAppDiff, appName, apiName);
     if ((isAppDiff == false) && (isApiDiff == true)) {
         apiInfoNode = NULL;
         LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->list, CalledApiInfoStruct, node) {

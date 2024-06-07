@@ -322,7 +322,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest03, TestS
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BUTT);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_ON_SESSION_OPENED_FAILED);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     RelesseChannInfo(channel);
@@ -523,7 +523,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest09, TestS
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnOnStreamRecevied(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &data, &ext, &param);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
@@ -587,7 +587,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest11, TestS
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnQosEvent(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, TRANS_TEST_EVENT_ID, TRANS_TEST_TV_COUNT, tvList);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);

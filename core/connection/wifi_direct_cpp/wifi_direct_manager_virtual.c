@@ -115,6 +115,36 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
+static void RefreshRelationShip(const char *remoteUuid, const char *remoteMac)
+{
+    (void)remoteUuid;
+    (void)remoteMac;
+}
+
+static bool LinkHasPtk(const char *remoteDeviceId)
+{
+    (void)remoteDeviceId;
+    return true;
+}
+
+static int32_t SavePtk(const char *remoteDeviceId, const char *ptk)
+{
+    (void)remoteDeviceId;
+    (void)ptk;
+    return SOFTBUS_OK;
+}
+
+static int32_t SyncPtk(const char *remoteDeviceId)
+{
+    (void)remoteDeviceId;
+    return SOFTBUS_OK;
+}
+
+static void AddSyncPtkListener(SyncPtkListener listener)
+{
+    (void)listener;
+}
+
 static bool SupportHmlTwo(void)
 {
     return false;
@@ -128,6 +158,17 @@ static bool IsWifiP2pEnabled(void)
 static int GetStationFrequency(void)
 {
     return SOFTBUS_NOT_IMPLEMENT;
+}
+
+static void RegisterEnhanceManager(struct WifiDirectEnhanceManager *manager)
+{
+    (void)manager;
+}
+
+static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
+{
+    (void)remoteDeviceId;
+    (void)result;
 }
 
 static int32_t Init()
@@ -145,6 +186,12 @@ static struct WifiDirectManager g_manager = {
     .prejudgeAvailability = PrejudgeAvailability,
 
     .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
+    .refreshRelationShip = RefreshRelationShip,
+    .linkHasPtk = LinkHasPtk,
+    .savePTK = SavePtk,
+    .syncPTK = SyncPtk,
+    .addSyncPtkListener = AddSyncPtkListener,
+
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
@@ -158,6 +205,8 @@ static struct WifiDirectManager g_manager = {
     .notifyOnline = NotifyOnline,
     .notifyOffline = NotifyOffline,
     .notifyRoleChange = NotifyRoleChange,
+    .registerEnhanceManager = RegisterEnhanceManager,
+    .notifyPtkSyncResult = NotifyPtkSyncResult,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

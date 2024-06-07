@@ -206,7 +206,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutBatch001, TestSize.Level1)
         .peerIrk = {1},
         .publicAddress = {1},
         .remotePtk = "remotePtk",
-        .tableMain = "tableMain",
+        .broadcastCipherKey = NULL,
         .lifeTotal = 1,
         .curBeginTime = 1,
         .currentIndex = 1,

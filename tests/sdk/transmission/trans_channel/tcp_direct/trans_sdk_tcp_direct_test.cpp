@@ -49,19 +49,15 @@ static int32_t g_fd = socket(AF_INET, SOCK_STREAM, 0);
 class TransSdkTcpDirectTest : public testing::Test {
 public:
     TransSdkTcpDirectTest()
-    {
-    }
+    {}
     ~TransSdkTcpDirectTest()
-    {
-    }
+    {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override
-    {
-    }
+    {}
     void TearDown() override
-    {
-    }
+    {}
 };
 
 static int OnServerSessionOpened(int sessionId, int result)
@@ -585,7 +581,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransTdcSendBytes(channelId, data, len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TDC_GET_INFO_FAILED);
 
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
@@ -593,7 +589,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     ret = TransTdcSendBytes(channelId, data, len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TDC_GET_INFO_FAILED);
 
     SoftBusFree(channel);
 }

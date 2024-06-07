@@ -142,7 +142,8 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
 {
     MapNode *node = NULL;
 
-    if (map == NULL || key == NULL || value == NULL || valueSize == 0) {
+    bool isParamsInvalid = (map == NULL || key == NULL || value == NULL || valueSize == 0);
+    if (isParamsInvalid) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (valueSize > HDF_MAP_VALUE_MAX_SIZE || strlen(key) > HDF_MAP_KEY_MAX_SIZE) {

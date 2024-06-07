@@ -125,7 +125,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
         auto it = g_adaptorMap.find(channelId);
         if (it == g_adaptorMap.end()) {
             TRANS_LOGE(TRANS_STREAM, "adaptor not existed!");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED;
         }
         adaptor = it->second;
     }
@@ -138,9 +138,9 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
     }
     if (stream == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "make stream failed, stream is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_MAKE_STREAM_FAILED;
     }
-    return adaptor->GetStreamManager()->Send(std::move(stream)) ? SOFTBUS_OK : SOFTBUS_ERR;
+    return adaptor->GetStreamManager()->Send(std::move(stream)) ? SOFTBUS_OK : SOFTBUS_TRANS_MAKE_STREAM_FAILED;
 }
 
 int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam *param, const IStreamListener *callback)
@@ -153,7 +153,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED;
     }
 
     {
@@ -165,7 +165,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
                 std::make_shared<StreamAdaptor>(pkgStr))).first;
         } else {
             TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED;
         }
     }
 
@@ -176,8 +176,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
     ipPort.ip = param->myIp;
     ipPort.port = 0;
 
-    int32_t ret = SOFTBUS_ERR;
-    ret = newAdaptor->GetStreamManager()->CreateStreamServerChannel(ipPort, Communication::SoftBus::VTP,
+    int32_t ret = newAdaptor->GetStreamManager()->CreateStreamServerChannel(ipPort, Communication::SoftBus::VTP,
         param->type, newAdaptor->GetSessionKey());
     if (ret > 0) {
         newAdaptor->SetAliveState(true);
@@ -199,7 +198,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED;
     }
 
     {
@@ -211,7 +210,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
                 std::make_shared<StreamAdaptor>(pkgStr))).first;
         } else {
             TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED;
         }
     }
 
@@ -253,7 +252,7 @@ int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
         auto it = g_adaptorMap.find(channelId);
         if (it == g_adaptorMap.end()) {
             TRANS_LOGE(TRANS_STREAM, "adaptor not existed!");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED;
         }
         adaptor = it->second;
         g_adaptorMap.erase(it);
@@ -262,7 +261,7 @@ int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
     bool alive = adaptor->GetAliveState();
     if (!alive) {
         TRANS_LOGE(TRANS_STREAM, "VtpStreamChannel already closed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_ALREADY_TRIGGERED;
     }
 
     adaptor->ReleaseAdaptor();

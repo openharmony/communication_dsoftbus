@@ -32,6 +32,12 @@ struct WifiDirectStatusListener {
                                   enum WifiDirectLinkType type);
 };
 
+typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
+struct WifiDirectEnhanceManager {
+    int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
+    int32_t (*syncPTK)(const char *remoteDeviceId);
+};
+
 struct WifiDirectManager {
     uint32_t (*getRequestId)(void);
     int32_t (*allocateListenerModuleId)(void);
@@ -45,11 +51,17 @@ struct WifiDirectManager {
 
     bool (*isNegotiateChannelNeeded)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
     void (*refreshRelationShip)(const char *remoteUuid, const char *remoteMac);
+    bool (*linkHasPtk)(const char *remoteDeviceId);
+    int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
+    int32_t (*syncPTK)(const char *remoteDeviceId);
+    void (*addSyncPtkListener)(SyncPtkListener listener);
 
     bool (*isDeviceOnline)(const char *remoteMac);
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
     int32_t (*getLocalIpByRemoteIp)(const char *remoteIp, char *localIp, int32_t localIpSize);
     int32_t (*getRemoteUuidByIp)(const char *remoteIp, char *uuid, int32_t uuidSize);
+    int32_t (*getLocalAndRemoteMacByLocalIp)(const char *localIp, char *localMac, size_t localMacSize, char *remoteMac,
+        size_t remoteMacSize);
 
     bool (*supportHmlTwo)(void);
     bool (*isWifiP2pEnabled)(void);
@@ -65,6 +77,8 @@ struct WifiDirectManager {
                                    enum WifiDirectLinkType type, int channelId);
     void (*notifyDisconnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
                                       enum WifiDirectLinkType type);
+    void (*registerEnhanceManager)(struct WifiDirectEnhanceManager *manager);
+    void (*notifyPtkSyncResult)(const char *remoteDeviceId, int result);
 };
 
 /* singleton */

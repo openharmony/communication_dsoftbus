@@ -385,7 +385,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest003, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI), channelId, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
 }
 
 /**
@@ -471,7 +471,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSi
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
 /**
@@ -1057,7 +1057,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest001, TestSize.L
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
     int32_t ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
 /**
