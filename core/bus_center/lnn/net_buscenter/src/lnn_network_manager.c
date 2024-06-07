@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "lnn_async_callback_utils.h"
@@ -430,6 +431,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupCreated");
     LnnUpdateOhosAccount(true);
     LnnHbOnTrustedRelationIncreased(groupType);
+    LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
     RestartCoapDiscovery();
     EhLoginEventHandler();
 }
@@ -686,6 +688,13 @@ static void RetryCheckOOBEState(void *para)
     }
 }
 
+void LnnSetUnlockState(void)
+{
+    if (IsActiveOsAccountUnlocked()) {
+        g_isUnLock = true;
+    }
+}
+
 int32_t LnnInitNetworkManagerDelay(void)
 {
     uint32_t i;
@@ -694,10 +703,6 @@ int32_t LnnInitNetworkManagerDelay(void)
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get local udid error");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
-    }
-    if (GetActiveOsAccountIds() == SOFTBUS_ERR) {
-        LNN_LOGW(LNN_INIT, "try to get accountId fail");
-        return SOFTBUS_ERR;
     }
     LnnNetIfMgr *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_netIfNameList, LnnNetIfMgr, node) {
@@ -715,9 +720,6 @@ int32_t LnnInitNetworkManagerDelay(void)
             }
         }
     }
-    if (IsActiveOsAccountUnlocked()) {
-        g_isUnLock = true;
-    }
     RetryCheckOOBEState(NULL);
     return SOFTBUS_OK;
 }
@@ -725,6 +727,9 @@ int32_t LnnInitNetworkManagerDelay(void)
 bool LnnIsAutoNetWorkingEnabled(void)
 {
     bool isConfigEnabled = false;
+    if (IsActiveOsAccountUnlocked()) {
+        g_isUnLock = true;
+    }
     if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char *)&isConfigEnabled,
         sizeof(isConfigEnabled)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Cannot get autoNetworkingSwitch from config file");

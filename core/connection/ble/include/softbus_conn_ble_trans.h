@@ -34,6 +34,12 @@ extern "C" {
 #define CTRL_MSG_METHOD_NOTIFY_REQUEST 1
 
 typedef struct {
+    SoftBusMutex lock;
+    bool messagePosted;
+    bool sendTaskRunning;
+} StartBleSendLPInfo;
+
+typedef struct {
     uint32_t seq;
     uint32_t size;
     uint32_t offset;

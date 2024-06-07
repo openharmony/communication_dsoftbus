@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <string>
-#include "processor/wifi_direct_processor.h"
 
 namespace OHOS::SoftBus {
 enum class CommandType {
@@ -31,10 +30,24 @@ enum class CommandType {
 class WifiDirectProcessor;
 class WifiDirectCommand {
 public:
+    WifiDirectCommand()
+    {
+        id_ = commandId_++;
+    }
+
     virtual std::string GetRemoteDeviceId() const = 0;
     virtual std::shared_ptr<WifiDirectProcessor> GetProcessor() = 0;
     virtual CommandType GetType() const { return CommandType::NOT_COMMAND; }
     virtual ~WifiDirectCommand() = default;
+
+    uint32_t GetId() const
+    {
+        return id_;
+    }
+
+private:
+    uint32_t id_ = 0;
+    static inline std::atomic_uint32_t commandId_;
 };
 }
 #endif

@@ -34,6 +34,7 @@
 #include "softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.c"
+#include "lnn_distributed_net_ledger_manager.c"
 #include <cstring>
 
 namespace OHOS {

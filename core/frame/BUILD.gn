@@ -253,6 +253,7 @@ if (defined(ohos_lite)) {
         "hilog:libhilog",
         "ipc:ipc_core",
         "kv_store:distributeddata_inner",
+        "netmanager_base:net_conn_manager_if",
         "safwk:system_ability_fwk",
         "samgr:samgr_proxy",
       ]

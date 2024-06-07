@@ -174,7 +174,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest003, TestSize.Level1)
     ret = TransAddUdpChannel(Channel);
     EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST);
     ret = TransDelUdpChannel(invalidId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
     ret = TransDelUdpChannel(Channel->info.myData.channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -240,7 +240,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest006, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransGetUdpChannelBySeq(seq, newChannel);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
     SoftBusFree(newChannel);
     TransUdpChannelMgrDeinit();
 }
@@ -301,7 +301,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest008, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransGetUdpChannelById(channlId, newChannel);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
     TransUdpChannelMgrDeinit();
     SoftBusFree(newChannel);
 }
@@ -360,7 +360,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest010, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransGetUdpChannelByRequestId(requestId, newChannel);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 
     TransUdpChannelMgrDeinit();
     ret = TransGetUdpChannelByRequestId(requestId, newChannel);
@@ -387,9 +387,9 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest011, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_INIT);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
     ret = TransSetUdpChannelStatus(seq, (UdpChannelStatus)UDP_CHANNEL_STATUS_INIT);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 
     TransUdpChannelMgrDeinit();
     ret = TransSetUdpChannelStatus(seq, (UdpChannelStatus)UDP_CHANNEL_STATUS_INIT);
@@ -415,9 +415,9 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest012, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetUdpChannelOptType(channelId, (UdpChannelOptType)TYPE_UDP_CHANNEL_OPEN);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
     ret = TransSetUdpChannelOptType(channelId, (UdpChannelOptType)TYPE_UDP_CHANNEL_OPEN);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
     TransUdpChannelMgrDeinit();
 }
 
@@ -523,7 +523,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest016, TestSize.Level1)
 
     ret = TransUdpGetNameByChanId(channelId, pkgName, sessionName,
         PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 
     ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName, sessionName,
         PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);

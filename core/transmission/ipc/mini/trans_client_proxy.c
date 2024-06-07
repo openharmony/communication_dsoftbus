@@ -65,3 +65,12 @@ int32_t ClientIpcSetChannelInfo(
     (void)pid;
     return TransSetChannelInfo(sessionName, sessionId, transInfo->channelId, transInfo->channelType);
 }
+
+int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t channelId, uint8_t tos)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)channelId;
+    (void)tos;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

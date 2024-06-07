@@ -47,6 +47,7 @@ int32_t LnnGetLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
 int32_t LnnSaveLocalBroadcastCipherKey(const BroadcastCipherKey *broadcastKey);
 int32_t LnnUpdateLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
 int32_t LnnGetLocalBroadcastCipherInfo(CloudSyncInfo *info);
+int32_t LnnSetRemoteBroadcastCipherInfo(const char *value, const char *udid);
 #ifdef __cplusplus
 }
 #endif

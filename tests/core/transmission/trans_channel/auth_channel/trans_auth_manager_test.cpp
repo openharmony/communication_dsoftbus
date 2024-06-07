@@ -88,7 +88,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest01, TestSize.Level1)
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, pkgName, sessionName,
                              PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_NODE_NOT_FOUND);
 }
 
 /**
@@ -123,7 +123,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest03, TestSize.Level1)
     int32_t ret = TransAuthInit(cb);
     ASSERT_EQ(ret,  SOFTBUS_OK);
     ret = TransCloseAuthChannel(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_NODE_NOT_FOUND);
     TransAuthDeinit();
 }
 }
