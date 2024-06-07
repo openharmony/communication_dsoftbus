@@ -240,7 +240,7 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
     bool isLegacyOs = false;
 
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 
 /**
@@ -259,8 +259,8 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
     bool isLegacyOs = false;
 
     ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     EXPECT_FALSE(isAuthServer);
     TestDelAuthManager(TRANS_TEST_AUTH_SEQ);
 }
@@ -533,7 +533,7 @@ HWTEST_F(TransServerTcpDirectTest, SendAuthData001, TestSize.Level1)
     int64_t seq = 0;
     const char *data = TEST_MESSAGE;
     int32_t ret = SendAuthData(authHandle, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 
 /**

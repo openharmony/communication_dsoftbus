@@ -252,7 +252,6 @@ static void NstackxTestEntry(void)
     char ip[NSTACKX_MAX_IP_STRING_LEN] = {0};
     int32_t testCnt = 0;
     while (testCnt < MAX_TEST_COUNT) {
-        int32_t discTestCnt = 0;
         if (TestInit() != SOFTBUS_OK) {
             printf("init failed\n");
             return;
@@ -284,7 +283,7 @@ static void NstackxTestEntry(void)
             return;
         }
 
-        while (discTestCnt < TEST_DISCOVERY_COUNT) {
+        for (int32_t discTestCnt = 0; discTestCnt < TEST_DISCOVERY_COUNT;) {
             if (NSTACKX_StartDeviceFind() != 0) {
                 printf("start device find failed\n");
                 return;
@@ -294,8 +293,7 @@ static void NstackxTestEntry(void)
                 printf("stop device find failed\n");
                 return;
             }
-            discTestCnt++;
-            printf("disc test cnt = %d / %d\n", discTestCnt, TEST_DISCOVERY_COUNT);
+            printf("disc test cnt = %d / %d\n", ++discTestCnt, TEST_DISCOVERY_COUNT);
         }
 
         testCnt++;

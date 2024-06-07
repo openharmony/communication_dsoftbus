@@ -324,10 +324,8 @@ static int32_t OpensslAesGcmEncrypt(
         return SOFTBUS_INVALID_PARAM;
     }
     EVP_CIPHER_CTX *ctx = NULL;
-    if (GcmOpensslEvpInit(&ctx, cipherKey->keyLen, ENCRYPT_MODE) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_ADAPTER, "GcmOpensslEvpInit failed.");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = GcmOpensslEvpInit(&ctx, cipherKey->keyLen, ENCRYPT_MODE);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_ADAPTER, "GcmOpensslEvpInit failed.");
     if (EVP_EncryptInit_ex(ctx, NULL, NULL, cipherKey->key, cipherKey->iv) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptInit_ex failed.");
         goto EXIT;

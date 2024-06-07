@@ -904,8 +904,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, Test
     ASSERT_TRUE(NULL != bufHead);
     ret = TransProxyParseMessageHead(bufHead, len, &msg);
     EXPECT_NE(SOFTBUS_OK, ret);
+    TransProxyPackMessageHead(NULL, NULL, 0);
     SoftBusFree(buf);
     SoftBusFree(bufHead);
+    ret = TransProxyUnPackRestErrMsg(NULL, NULL, 0);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -1082,7 +1085,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     len = 10;
     ret = GetBrMacFromConnInfo(connId, brMac, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /**

@@ -273,6 +273,6 @@ HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level0)
 
     channelId = 1;
     ret = TransCloseStreamChannel(channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
 }
 } // OHOS

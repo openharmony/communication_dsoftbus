@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NULL_NEGOTIATE_CHANNEL_H
-#define NULL_NEGOTIATE_CHANNEL_H
+#ifndef DUMMY_NEGOTIATE_CHANNEL_H
+#define DUMMY_NEGOTIATE_CHANNEL_H
 
 #include "channel/negotiate_channel.h"
 
 namespace OHOS::SoftBus {
-class NullNeotiateChannel : public NegotiateChannel {
+class DummyNegotiateChannel : public NegotiateChannel {
 public:
-    ~NullNeotiateChannel() override;
+    ~DummyNegotiateChannel() override;
     int SendMessage(const NegotiateMessage &msg) const override;
     std::string GetRemoteDeviceId() const override;
 };

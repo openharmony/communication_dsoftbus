@@ -97,6 +97,22 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo)
+{
+    (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
+    (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
+    (void)GetJsonObjectStringItem(msg, "CLIENT_BUS_NAME", appInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX);
+    (void)GetJsonObjectStringItem(msg, "GROUP_ID", appInfo->groupId, GROUP_ID_SIZE_MAX);
+
+    (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
+    (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
+    (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
+    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int32_t *)&(appInfo->businessType));
+    (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int32_t *)&(appInfo->streamType));
+    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int32_t *)&(appInfo->udpChannelOptType));
+    (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int32_t *)&(appInfo->udpConnType));
+}
+
 int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
@@ -111,18 +127,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
         SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
 
-    (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
-    (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
-    (void)GetJsonObjectStringItem(msg, "CLIENT_BUS_NAME", appInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX);
-    (void)GetJsonObjectStringItem(msg, "GROUP_ID", appInfo->groupId, GROUP_ID_SIZE_MAX);
-
-    (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int*)&(appInfo->peerData.apiVersion));
-    (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
-    (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
-    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int*)&(appInfo->businessType));
-    (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int*)&(appInfo->streamType));
-    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int *)&(appInfo->udpChannelOptType));
-    (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int *)&(appInfo->udpConnType));
+    TransGetCommonUdpInfoFromJson(msg, appInfo);
 
     int code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
@@ -137,6 +142,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             if (!GetJsonObjectNumberItem(msg, "CALLING_TOKEN_ID", (int32_t *)&appInfo->callingTokenId)) {
                 appInfo->callingTokenId = TOKENID_NOT_SET;
             }
+            (void)GetJsonObjectNumberItem(msg, "LINK_TYPE", &appInfo->linkType);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
@@ -166,6 +172,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
             (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
             (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
             (void)AddNumberToJsonObject(msg, "CALLING_TOKEN_ID", (int32_t)appInfo->callingTokenId);
+            (void)AddNumberToJsonObject(msg, "LINK_TYPE", appInfo->linkType);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)AddNumber64ToJsonObject(msg, "PEER_CHANNEL_ID", appInfo->peerData.channelId);
@@ -174,7 +181,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
     size_t len = 0;

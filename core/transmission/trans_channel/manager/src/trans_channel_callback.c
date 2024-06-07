@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,8 @@
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
+#include "trans_tcp_direct_sessionconn.h"
+#include "trans_udp_channel_manager.h"
 
 static IServerChannelCallBack g_channelCallBack;
 
@@ -53,7 +55,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         .result = EVENT_STAGE_RESULT_OK,
         .callerPkg = pkgName,
         .socketName = sessionName,
-        .osType = osType,
+        .osType = (osType < 0) ? UNKNOW_OS_TYPE : osType,
         .peerUdid = peerUdid
     };
     CoreSessionState state = CORE_SESSION_STATE_INIT;
@@ -68,10 +70,10 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
         return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
     }
-    if (!channel->isServer && channel->channelType == CHANNEL_TYPE_UDP &&
-        NotifyQosChannelOpened(channel) != SOFTBUS_OK) {
+    int32_t ret = !channel->isServer && channel->channelType == CHANNEL_TYPE_UDP && NotifyQosChannelOpened(channel);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_QOS, "NotifyQosChannelOpened failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (channel->isServer) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
@@ -81,7 +83,9 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     TransSetSocketChannelStateByChannel(channel->channelId, channel->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
-    return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
+    ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
+    (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    return ret;
 }
 
 static int32_t TransServerOnChannelClosed(
@@ -108,6 +112,9 @@ static int32_t TransServerOnChannelClosed(
     if (ClientIpcOnChannelClosed(&data) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel close fail");
         return SOFTBUS_IPC_ERR;
+    }
+    if (IsTdcRecoveryTransLimit() && IsUdpRecoveryTransLimit()) {
+        UdpChannelFileTransRecoveryLimit(FILE_PRIORITY_BE);
     }
     return SOFTBUS_OK;
 }

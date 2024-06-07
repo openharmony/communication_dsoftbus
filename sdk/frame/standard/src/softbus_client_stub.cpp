@@ -13,22 +13,24 @@
  * limitations under the License.
  */
 
-#include <string>
-#include "softbus_adapter_mem.h"
-
 #include "softbus_client_stub.h"
-#include "client_trans_session_manager.h"
+
+#include <string>
+
 #include "client_bus_center_manager.h"
 #include "client_disc_manager.h"
 #include "client_trans_channel_callback.h"
+#include "client_trans_session_manager.h"
 #include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "securec.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "client_trans_udp_manager.h"
 
 namespace OHOS {
 SoftBusClientStub::SoftBusClientStub()
@@ -77,6 +79,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::SetChannelInfoInner;
     memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] =
         &SoftBusClientStub::OnDataLevelChangedInner;
+    memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] =
+        &SoftBusClientStub::OnClientTransLimitChangeInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -158,6 +162,32 @@ int32_t SoftBusClientStub::OnPublishFailInner(MessageParcel &data, MessageParcel
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SDK, "OnClientTransLimitChangeInner read channel id failed!");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    uint8_t tos;
+    if (!data.ReadUint8(tos)) {
+        COMM_LOGE(COMM_SDK, "OnClientTransLimitChangeInner read tos failed!");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    int32_t ret = OnClientTransLimitChange(channelId, tos);
+    bool res = reply.WriteInt32(ret);
+    if (!res) {
+        COMM_LOGE(COMM_SDK, "OnClientTransLimitChangeInner write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
+{
+    return TransLimitChange(channelId, tos);
+}
+
 void SoftBusClientStub::OnDeviceFound(const DeviceInfo *device)
 {
     DiscClientOnDeviceFound(device);
@@ -224,114 +254,56 @@ int32_t SoftBusClientStub::SetChannelInfo(
 int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *sessionName = data.ReadCString();
-    if (sessionName == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read sessionName failed!");
-        return SOFTBUS_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(sessionName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read sessionName failed");
 
-    ChannelInfo channel = {0};
-    if (!data.ReadInt32(channel.channelId)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.ReadInt32(channel.channelType)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.ReadUint64(channel.laneId)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read lane Id failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!data.ReadInt32(channel.connectType)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read connect type failed!");
-        return SOFTBUS_ERR;
-    }
+    ChannelInfo channel = { 0 };
+    READ_PARCEL_WITH_RET(data, Int32, channel.channelId, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel.channelType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint64, channel.laneId, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel.connectType, SOFTBUS_IPC_ERR);
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.fd = data.ReadFileDescriptor();
         channel.myIp = (char *)data.ReadCString();
-        if (channel.myIp == nullptr) {
-            COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read myIp failed!");
-            return SOFTBUS_IPC_ERR;
-        }
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel.myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
     }
-    if (!data.ReadBool(channel.isServer)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.ReadBool(channel.isEnabled)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.ReadBool(channel.isEncrypt)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read isEncrypt failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.ReadInt32(channel.peerUid)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.ReadInt32(channel.peerPid)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
-        return SOFTBUS_ERR;
-    }
+    READ_PARCEL_WITH_RET(data, Bool, channel.isServer, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, channel.isEnabled, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, channel.isEncrypt, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel.peerUid, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel.peerPid, SOFTBUS_IPC_ERR);
     channel.groupId = (char *)data.ReadCString();
-    if (channel.groupId == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read addr failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.ReadUint32(channel.keyLen)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner len failed!");
-        return SOFTBUS_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(channel.groupId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
+    READ_PARCEL_WITH_RET(data, Uint32, channel.keyLen, SOFTBUS_IPC_ERR);
     channel.sessionKey = (char *)data.ReadRawData(channel.keyLen);
-    if (channel.sessionKey == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read addr failed!");
-        return SOFTBUS_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(channel.sessionKey != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read rawData failed");
     channel.peerSessionName = (char *)data.ReadCString();
-    if (channel.peerSessionName == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read addr failed!");
-        return SOFTBUS_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        channel.peerSessionName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerSessionName failed");
     channel.peerDeviceId = (char *)data.ReadCString();
-    if (channel.peerDeviceId == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read addr failed!");
-        return SOFTBUS_ERR;
-    }
-    data.ReadInt32(channel.businessType);
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        channel.peerDeviceId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
+    READ_PARCEL_WITH_RET(data, Int32, channel.businessType, SOFTBUS_IPC_ERR);
     if (channel.channelType == CHANNEL_TYPE_UDP) {
         channel.myIp = (char *)data.ReadCString();
-        if (channel.myIp == nullptr) {
-            COMM_LOGE(COMM_SDK, "channel.myIp read addr failed!");
-            return SOFTBUS_ERR;
-        }
-        data.ReadInt32(channel.streamType);
-        data.ReadBool(channel.isUdpFile);
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel.myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
+        READ_PARCEL_WITH_RET(data, Int32, channel.streamType, SOFTBUS_IPC_ERR);
+        READ_PARCEL_WITH_RET(data, Bool, channel.isUdpFile, SOFTBUS_IPC_ERR);
         if (!channel.isServer) {
-            data.ReadInt32(channel.peerPort);
+            READ_PARCEL_WITH_RET(data, Int32, channel.peerPort, SOFTBUS_IPC_ERR);
             channel.peerIp = (char *)data.ReadCString();
-            if (channel.peerIp == nullptr) {
-                COMM_LOGE(COMM_SDK, "channel.peerIp read addr failed!");
-                return SOFTBUS_ERR;
-            }
+            COMM_CHECK_AND_RETURN_RET_LOGE(
+                channel.peerIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read channel.peerIp failed");
         }
     }
-    data.ReadInt32(channel.routeType);
-    data.ReadInt32(channel.encrypt);
-    data.ReadInt32(channel.algorithm);
-    data.ReadInt32(channel.crc);
-    if (!data.ReadUint32(channel.dataConfig)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner data config failed!");
-        return SOFTBUS_ERR;
-    }
-    data.ReadInt32(channel.linkType);
+    READ_PARCEL_WITH_RET(data, Int32, channel.routeType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel.encrypt, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel.algorithm, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel.crc, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint32, channel.dataConfig, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel.linkType, SOFTBUS_IPC_ERR);
 
-    int ret = OnChannelOpened(sessionName, &channel);
-    bool res = reply.WriteInt32(ret);
-    if (!res) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner write reply failed!");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = OnChannelOpened(sessionName, &channel);
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(ret), SOFTBUS_IPC_ERR, COMM_SDK, "write reply failed");
     return SOFTBUS_OK;
 }
 

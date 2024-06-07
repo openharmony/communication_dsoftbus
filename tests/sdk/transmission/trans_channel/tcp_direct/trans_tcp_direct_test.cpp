@@ -68,19 +68,15 @@ static SessionAttribute g_sessionAttr = {
 class TransTcpDirectTest : public testing::Test {
 public:
     TransTcpDirectTest()
-    {
-    }
+    {}
     ~TransTcpDirectTest()
-    {
-    }
+    {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override
-    {
-    }
+    {}
     void TearDown() override
-    {
-    }
+    {}
 };
 
 void TransTcpDirectTest::SetUpTestCase(void)
@@ -568,14 +564,14 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetPendingPacketTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
     len = ACK_SIZE;
     channelId = INVALID_VALUE;
     ret = TransTdcSetPendingPacket(channelId, data, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     channelId = 1;
     ret = TransTdcSetPendingPacket(channelId, data, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     PendingDeinit(type);
 }
 

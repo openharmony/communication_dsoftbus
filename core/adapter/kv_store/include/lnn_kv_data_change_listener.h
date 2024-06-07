@@ -16,6 +16,7 @@
 #ifndef LNN_KV_DATA_CHANGE_LISTENER_H
 #define LNN_KV_DATA_CHANGE_LISTENER_H
 
+#include <map>
 #include <vector>
 
 #include "kvstore_observer.h"
@@ -27,10 +28,11 @@ public:
     ~KvDataChangeListener();
 
     void OnChange(const DistributedKv::DataOrigin &origin, Keys &&keys) override;
+    static void ClearCache();
 
 private:
     std::vector<DistributedKv::Entry> ConvertCloudChangeDataToEntries(const std::vector<std::string> &keys);
-    void SelectChangeType(const std::vector<DistributedKv::Entry> &records);
+    void SelectChangeType(const std::vector<DistributedKv::Entry> &records, const bool &isInsert = false);
     void HandleAddChange(const std::vector<DistributedKv::Entry> &insertRecords);
     void HandleUpdateChange(const std::vector<DistributedKv::Entry> &updateRecords);
     void HandleDeleteChange(const std::vector<DistributedKv::Entry> &deleteRecords);
@@ -39,6 +41,7 @@ private:
 private:
     std::string appId_;
     std::string storeId_;
+    static std::map<std::string, std::vector<DistributedKv::Entry>> recordsCache_;
 };
 } // namespace OHOS
 #endif // LNN_KV_DATA_CHANGE_LISTENER_H

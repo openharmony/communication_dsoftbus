@@ -70,6 +70,7 @@ InfoContainer<NegotiateMessageKey>::KeyTypeTable InfoContainer<NegotiateMessageK
     { NegotiateMessageKey::IS_PROXY_ENABLE,       Serializable::ValueType::BOOL                 },
     { NegotiateMessageKey::CHANNEL_5G_LIST,       Serializable::ValueType::STRING               },
     { NegotiateMessageKey::CHANNEL_5G_SCORE,      Serializable::ValueType::STRING               },
+    { NegotiateMessageKey::CHALLENGE_CODE,        Serializable::ValueType::UINT                 },
 
     /* old p2p */
     { NegotiateMessageKey::GC_CHANNEL_LIST,       Serializable::ValueType::STRING               },
@@ -112,7 +113,9 @@ static std::map<NegotiateMessageType, std::string> g_messageNameMap = {
     { NegotiateMessageType::CMD_RENEGOTIATE_REQ,         "CMD_RENEGOTIATE_REQ"         },
     { NegotiateMessageType::CMD_RENEGOTIATE_RESP,        "CMD_RENEGOTIATE_RESP"        },
     { NegotiateMessageType::CMD_AUTH_HAND_SHAKE,         "CMD_AUTH_HAND_SHAKE"         },
+    { NegotiateMessageType::CMD_AUTH_HAND_SHAKE_RSP,     "CMD_AUTH_HAND_SHAKE_RSP"     },
     { NegotiateMessageType::CMD_V3_REQ,                  "CMD_V3_REQ"                  },
+    { NegotiateMessageType::CMD_V3_RSP,                  "CMD_V3_RSP"                  },
 };
 
 static std::map<LegacyCommandType, std::string> g_legacyMessageNameMap = {
@@ -169,7 +172,7 @@ int NegotiateMessage::Marshalling(WifiDirectProtocol &protocol, std::vector<uint
                 break;
             case Serializable::ValueType::STRING: {
                 auto data = std::any_cast<std::string>(value);
-                protocol.Write(static_cast<int>(key), type, (uint8_t *)data.c_str(), data.length() + 1);
+                protocol.Write(static_cast<int>(key), type, (uint8_t *)data.c_str(), data.length());
             }
                 break;
             case Serializable::ValueType::BYTE_ARRAY: {
@@ -211,21 +214,20 @@ void NegotiateMessage::MarshallingInterfaceArray(WifiDirectProtocol &protocol) c
 {
     auto interfaceArray = GetInterfaceInfoArray();
     for (const auto &interface : interfaceArray) {
-        WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
+        auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
         if (pro != nullptr) {
             std::vector<uint8_t> interfaceOutput;
             pro->SetFormat(protocol.GetFormat());
             interface.Marshalling(*pro, interfaceOutput);
             protocol.Write(static_cast<int>(NegotiateMessageKey::INTERFACE_INFO_ARRAY),
                 Serializable::ValueType::INTERFACE_INFO_ARRAY, interfaceOutput.data(), interfaceOutput.size());
-            delete pro;
         }
     }
 }
 
 void NegotiateMessage::MarshallingLinkInfo(WifiDirectProtocol &protocol) const
 {
-    WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
+    auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
     if (pro == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "create protocol failed");
         return;
@@ -237,7 +239,6 @@ void NegotiateMessage::MarshallingLinkInfo(WifiDirectProtocol &protocol) const
     linkInfo.Marshalling(*pro, output);
     protocol.Write(static_cast<int>(NegotiateMessageKey::LINK_INFO), Serializable::ValueType::LINK_INFO, output.data(),
         output.size());
-    delete pro;
 }
 
 int NegotiateMessage::Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint8_t> &input)
@@ -297,7 +298,7 @@ void NegotiateMessage::UnmarshallingIpv4Array(uint8_t *data, size_t size)
 
 void NegotiateMessage::UnmarshallingInterfaceArray(WifiDirectProtocol &protocol, uint8_t *data, size_t size)
 {
-    WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
+    auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
     if (pro == nullptr) {
         return;
     }
@@ -313,7 +314,7 @@ void NegotiateMessage::UnmarshallingInterfaceArray(WifiDirectProtocol &protocol,
 
 void NegotiateMessage::UnmarshallingLinkInfo(WifiDirectProtocol &protocol, uint8_t *data, size_t size)
 {
-    WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
+    auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
     if (pro == nullptr) {
         return;
     }
@@ -510,6 +511,16 @@ void NegotiateMessage::Set5GChannelScore(const std::string &value)
 std::string NegotiateMessage::Get5GChannelScore() const
 {
     return Get(NegotiateMessageKey::CHANNEL_5G_SCORE, std::string());
+}
+
+void NegotiateMessage::SetChallengeCode(uint32_t value)
+{
+    Set(NegotiateMessageKey::CHALLENGE_CODE, value);
+}
+
+uint32_t NegotiateMessage::GetChallengeCode() const
+{
+    return Get(NegotiateMessageKey::CHALLENGE_CODE, static_cast<uint32_t>(0));
 }
 
 void NegotiateMessage::SetLegacyP2pGcChannelList(const std::string &value)

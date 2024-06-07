@@ -18,6 +18,7 @@
 #include "conn_log.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
+#include "lnn_distributed_net_ledger.h"
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "syspara/parameters.h"
@@ -201,6 +202,16 @@ bool WifiDirectUtils::IsLocalSupportTlv()
     return IsFeatureSupport(capability, BIT_WIFI_DIRECT_TLV_NEGOTIATION);
 }
 
+void WifiDirectUtils::SetLocalWifiDirectMac(const std::string &mac)
+{
+    LnnSetLocalStrInfo(STRING_KEY_WIFIDIRECT_ADDR, mac.c_str());
+}
+
+bool WifiDirectUtils::IsDeviceOnline(const std::string &remoteNetworkId)
+{
+    return LnnGetOnlineStateById(remoteNetworkId.c_str(), CATEGORY_NETWORK_ID);
+}
+
 static constexpr int MAC_BYTE_HEX_SIZE = 4;
 std::string WifiDirectUtils::MacArrayToString(const std::vector<uint8_t> &macArray)
 {
@@ -215,6 +226,12 @@ std::string WifiDirectUtils::MacArrayToString(const std::vector<uint8_t> &macArr
     }
     macString.erase(macString.length() - 1);
     return macString;
+}
+
+std::string WifiDirectUtils::MacArrayToString(const uint8_t *mac, int size)
+{
+    std::vector<uint8_t> macArray(mac, mac + size);
+    return MacArrayToString(macArray);
 }
 
 static constexpr int BASE_HEX = 16;
@@ -245,6 +262,27 @@ std::vector<uint8_t> WifiDirectUtils::GetInterfaceMacAddr(const std::string &int
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == 0, macArray, CONN_WIFI_DIRECT, "get hw addr failed ret=%{public}d", ret);
     macArray.insert(macArray.end(), ifr.ifr_hwaddr.sa_data, ifr.ifr_hwaddr.sa_data + MAC_ADDR_ARRAY_SIZE);
     return macArray;
+}
+
+std::string WifiDirectUtils::GetInterfaceIpv6Addr(const std::string &name)
+{
+    struct ifaddrs *allAddr = nullptr;
+    auto ret = getifaddrs(&allAddr);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, "", CONN_WIFI_DIRECT, "getifaddrs failed, errno=%{public}d", errno);
+
+    for (struct ifaddrs *ifa = allAddr; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET6 || ifa->ifa_netmask == nullptr ||
+            strcmp(ifa->ifa_name, name.c_str()) != 0) {
+            continue;
+        }
+        char ip[IP_LEN] {};
+        auto *addr = reinterpret_cast<struct sockaddr_in6 *>(ifa->ifa_addr);
+        inet_ntop(AF_INET6, &addr->sin6_addr.s6_addr, ip, sizeof(ip));
+        return ip;
+    }
+
+    freeifaddrs(allAddr);
+    return "";
 }
 
 std::vector<Ipv4Info> WifiDirectUtils::GetLocalIpv4Infos()
@@ -419,5 +457,39 @@ int WifiDirectUtils::BandWidthEnumToNumber(WifiDirectBandWidth bandWidth)
         default:
             return BAND_WIDTH_80M_NUMBER;
     }
+}
+
+void WifiDirectUtils::SerialFlowEnter()
+{
+    std::unique_lock lock(serialParallelLock_);
+    CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
+    serialParallelCv_.wait(lock, [] () { return parallelCount_ == 0; });
+    serialCount_++;
+    CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
+}
+
+void WifiDirectUtils::SerialFlowExit()
+{
+    std::unique_lock lock(serialParallelLock_);
+    serialCount_--;
+    CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
+    serialParallelCv_.notify_all();
+}
+
+void WifiDirectUtils::ParallelFlowEnter()
+{
+    std::unique_lock lock(serialParallelLock_);
+    CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
+    serialParallelCv_.wait(lock, [] () { return serialCount_ == 0; });
+    parallelCount_++;
+    CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
+}
+
+void WifiDirectUtils::ParallelFlowExit()
+{
+    std::unique_lock lock(serialParallelLock_);
+    parallelCount_--;
+    CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
+    serialParallelCv_.notify_all();
 }
 } // namespace OHOS::SoftBus

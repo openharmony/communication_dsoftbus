@@ -39,6 +39,9 @@ group("unittest") {
   }
 
   # add wifi_direct cpp unit test here
+  if (softbus_communication_wifi_feature) {
+    deps += [ "wifi_direct_cpp:unittest" ]
+  }
 }
 
 group("fuzztest") {

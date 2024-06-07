@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 #include "disconnect_command.h"
-#include "conn_log.h"
+#include "channel/dummy_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
-#include "channel/null_negotiate_channel.h"
+#include "conn_log.h"
 #include "data/link_manager.h"
 #include "processor_selector_factory.h"
 
@@ -27,7 +27,7 @@ DisconnectCommand::DisconnectCommand(const WifiDirectDisconnectInfo &info, const
     auto innerLink = LinkManager::GetInstance().GetLinkById(info_.info_.linkId);
     if (innerLink == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "not find inner link, prefer input null channel");
-        info_.channel_ = std::make_shared<NullNeotiateChannel>();
+        info_.channel_ = std::make_shared<DummyNegotiateChannel>();
         return;
     }
 
@@ -40,7 +40,7 @@ DisconnectCommand::DisconnectCommand(const WifiDirectDisconnectInfo &info, const
             info_.channel_ = std::make_shared<CoCProxyNegotiateChannel>(info.negoChannel.handle.channelId);
         } else {
             CONN_LOGI(CONN_WIFI_DIRECT, "prefer input null channel");
-            info_.channel_ = std::make_shared<NullNeotiateChannel>();
+            info_.channel_ = std::make_shared<DummyNegotiateChannel>();
         }
         return;
     }
@@ -86,7 +86,7 @@ void DisconnectCommand::OnSuccess() const
     callback_.onDisconnectSuccess(info_.info_.requestId);
 }
 
-void DisconnectCommand::OnFailure(WifiDirectErrorCode reason) const
+void DisconnectCommand::OnFailure(int reason) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
     callback_.onDisconnectFailure(info_.info_.requestId, reason);

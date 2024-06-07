@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ static int32_t IsPendingListTypeLegal(int type)
     return SOFTBUS_OK;
 }
 
-int32_t PendingInit(int type)
+int32_t PendingInit(int32_t type)
 {
     int32_t ret = IsPendingListTypeLegal(type);
     if (ret != SOFTBUS_OK) {
@@ -66,7 +66,7 @@ int32_t PendingInit(int type)
     return SOFTBUS_OK;
 }
 
-void PendingDeinit(int type)
+void PendingDeinit(int32_t type)
 {
     int32_t ret = IsPendingListTypeLegal(type);
     if (ret != SOFTBUS_OK) {
@@ -166,7 +166,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
     while (item->status == PACKAGE_STATUS_PENDING && TimeBefore(&outTime)) {
         SoftBusCondWait(&item->cond, &item->lock, &outTime);
     }
-    ret = (item->status == PACKAGE_STATUS_FINISHED) ? SOFTBUS_OK : SOFTBUS_TIMOUT;
+    int32_t errCode = (item->status == PACKAGE_STATUS_FINISHED) ? SOFTBUS_OK : SOFTBUS_TIMOUT;
     (void)SoftBusMutexUnlock(&item->lock);
 
     ret = SoftBusMutexLock(&pendingList->lock);
@@ -176,10 +176,10 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
     pendingList->cnt--;
     (void)SoftBusMutexUnlock(&pendingList->lock);
     ReleasePendingItem(item);
-    return SOFTBUS_OK;
+    return errCode;
 }
 
-int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
+int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
 {
     int32_t ret = IsPendingListTypeLegal(type);
     if (ret != SOFTBUS_OK) {
@@ -206,10 +206,10 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
         }
     }
     SoftBusMutexUnlock(&pendingList->lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-int32_t DelPendingPacket(int32_t channelId, int type)
+int32_t DelPendingPacket(int32_t channelId, int32_t type)
 {
     int32_t ret = IsPendingListTypeLegal(type);
     if (ret != SOFTBUS_OK) {

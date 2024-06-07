@@ -76,16 +76,21 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* co
     return GetNetBuilderDepsInterface()->TransGetConnByChanId(channelId, channelType, connId);
 }
 
-int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-    uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack)
+int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
+    int32_t callingPid, const AuthVerifyCallback *callBack)
 {
-    return GetNetBuilderDepsInterface()->AuthMetaStartVerify(connectionId,
-        key, keyLen, requestId, callingPid, callBack);
+    return GetNetBuilderDepsInterface()->AuthMetaStartVerify(
+        connectionId, authKeyInfo, requestId, callingPid, callBack);
 }
 
 uint32_t AuthGenRequestId(void)
 {
     return GetNetBuilderDepsInterface()->AuthGenRequestId();
+}
+
+void LnnSetUnlockState(void)
+{
+    return GetNetBuilderDepsInterface()->LnnSetUnlockState();
 }
 
 void AuthHandleLeaveLNN(AuthHandle authHandle)
@@ -526,9 +531,14 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
     return GetNetBuilderDepsInterface()->GetAuthRequest(requestId, request);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetNetBuilderDepsInterface()->SoftBusGetBtState();
+}
+
+int32_t SoftBusGetBrState(void)
+{
+    return GetNetBuilderDepsInterface()->SoftBusGetBrState();
 }
 
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
@@ -645,6 +655,11 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
 int32_t AuthFlushDevice(const char *uuid)
 {
     return GetNetBuilderDepsInterface()->AuthFlushDevice(uuid);
+}
+
+bool IsSupportLpFeature(void)
+{
+    return GetNetBuilderDepsInterface()->IsSupportLpFeature();
 }
 } // extern "C"
 } // namespace OHOS

@@ -31,7 +31,7 @@ public:
     int Marshalling(std::vector<uint8_t> &output) const;
     int Unmarshalling(const uint8_t *input, size_t size);
 
-    int FromIpString(const std::string &ip);
+    int FromIpString(const std::string &ipString);
     std::string ToIpString() const;
     uint32_t GetSubNet() const;
     void SetIp(uint32_t ip)

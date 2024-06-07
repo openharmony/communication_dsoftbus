@@ -47,12 +47,17 @@ public:
         std::string interface;
     };
 
+    struct WifiDirectP2pDeviceInfo {
+        std::string address;
+        std::string randomMac;
+    };
+
     struct WifiDirectP2pGroupInfo {
         bool isGroupOwner;
         int32_t frequency;
         std::string interface;
-        std::string groupOwner;
-        std::vector<std::string> clientDevices;
+        WifiDirectP2pDeviceInfo groupOwner;
+        std::vector<WifiDirectP2pDeviceInfo> clientDevices;
     };
 
     static int32_t GetChannel5GListIntArray(std::vector<int> &channels);

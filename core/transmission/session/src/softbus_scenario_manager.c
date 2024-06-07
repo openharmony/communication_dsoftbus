@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,19 +15,19 @@
 
 #include "softbus_scenario_manager.h"
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "common_list.h"
+#include "kits/c/wifi_hid2d.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_bitmap.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
-#include "kits/c/wifi_hid2d.h"
-#include "securec.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
 
 #define MAC_STR_LEN   18
 #define IFACE_LEN_MAX 32
@@ -456,14 +456,6 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
 
 static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *info)
 {
-    if (manager == NULL || manager->scenarioItemList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "scenarioItemList hasn't initialized");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (info == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "OriginalScenario is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
         return SOFTBUS_LOCK_ERR;
@@ -510,19 +502,11 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
         localScenarioCount->allMacAudioCount, localScenarioCount->allMacFileCount);
     SoftBusFree(localScenarioCount);
     (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
-    return 0;
+    return SOFTBUS_OK;
 }
 
 static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *info)
 {
-    if (manager == NULL || manager->scenarioItemList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "scenarioItemList hasn't initialized");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (info == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "OriginalScenario is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
         return SOFTBUS_LOCK_ERR;
@@ -590,8 +574,12 @@ static int32_t UpdateOriginalScenario(ScenarioManager *manager, OriginalScenario
         "localPid=%{public}d, businessType=%{public}d, isAdd=%{public}d",
         info->localPid, info->businessType, isAdd);
 
-    int ret = isAdd ? AddOriginalScenario(manager, info) : DelOriginalScenario(manager, info);
-    if (ret != 0) {
+    if (manager == NULL || manager->scenarioItemList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "scenarioItemList hasn't initialized");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = isAdd ? AddOriginalScenario(manager, info) : DelOriginalScenario(manager, info);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "update scenario info failed: ret=%{public}d", ret);
         return ret;
     }
@@ -650,8 +638,8 @@ static int32_t ScenarioManagerAddScenario(ScenarioManager *manager, const char *
 {
     OriginalScenario scenarioInfo;
     OriginalScenarioInit(&scenarioInfo, localMac, peerMac, localPid, businessType);
-    int ret = UpdateOriginalScenario(manager, &scenarioInfo, true);
-    if (ret != 0) {
+    int32_t ret = UpdateOriginalScenario(manager, &scenarioInfo, true);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add scenario info failed!");
         return ret;
     }
@@ -663,8 +651,8 @@ static int32_t ScenarioManagerDelScenario(ScenarioManager *manager, const char *
 {
     OriginalScenario scenarioInfo;
     OriginalScenarioInit(&scenarioInfo, localMac, peerMac, localPid, businessType);
-    int ret = UpdateOriginalScenario(manager, &scenarioInfo, false);
-    if (ret != 0) {
+    int32_t ret = UpdateOriginalScenario(manager, &scenarioInfo, false);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "delete scenario info failed!");
         return ret;
     }

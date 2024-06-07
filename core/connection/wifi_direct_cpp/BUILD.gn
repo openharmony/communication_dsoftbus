@@ -50,6 +50,11 @@ ohos_static_library("wifi_direct") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
 
+  if (!defined(ohos_lite)) {
+    wifi_direct_connection_inc +=
+        [ "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux" ]
+  }
+
   wifi_direct_connection_external_deps = []
 
   if (dsoftbus_feature_conn_p2p == true &&
@@ -64,7 +69,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/adapter/p2p_adapter.cpp",
       "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
       "$wifi_direct_path/channel/proxy_negotiate_channel.cpp",
-      "$wifi_direct_path/channel/null_negotiate_channel.cpp",
+      "$wifi_direct_path/channel/dummy_negotiate_channel.cpp",
       "$wifi_direct_path/command/connect_command.cpp",
       "$wifi_direct_path/command/command_factory.cpp",
       "$wifi_direct_path/command/disconnect_command.cpp",
@@ -94,6 +99,8 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
       "$wifi_direct_path/utils/duration_statistic.cpp",
       "$wifi_direct_path/utils/wifi_direct_trace.cpp",
+      "$wifi_direct_path/utils/wifi_direct_timer.cpp",
+      "$wifi_direct_path/utils/wifi_direct_work_queue.cpp",
       "$wifi_direct_path/utils/wifi_direct_utils.cpp",
       "$wifi_direct_path/wifi_direct_executor.cpp",
       "$wifi_direct_path/wifi_direct_initiator.cpp",

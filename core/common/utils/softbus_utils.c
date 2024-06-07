@@ -55,6 +55,7 @@
 #define ONE_BYTE_SIZE 8
 
 static void *g_timerId = NULL;
+static bool g_timerOpen = false;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 static bool g_signalingMsgSwitch = false;
 
@@ -112,6 +113,18 @@ static void HandleTimeoutFun(void)
             g_timerFunList[i]();
         }
     }
+    if (!g_timerOpen) {
+        (void)SoftBusDeleteTimer(g_timerId);
+        g_timerId = NULL;
+        return;
+    }
+    (void)SoftBusDeleteTimer(g_timerId);
+    g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_ONCE);
+    if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "start timer failed.");
+        (void)SoftBusDeleteTimer(g_timerId);
+        g_timerId = NULL;
+    }
 }
 
 int32_t SoftBusTimerInit(void)
@@ -120,22 +133,22 @@ int32_t SoftBusTimerInit(void)
         return SOFTBUS_OK;
     }
     SetTimerFunc(HandleTimeoutFun);
-    g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_PERIOD);
+    g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_ONCE);
     if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "start timer failed.");
         (void)SoftBusDeleteTimer(g_timerId);
         g_timerId = NULL;
         return SOFTBUS_ERR;
     }
+    g_timerOpen = true;
+    COMM_LOGI(COMM_UTILS, "softbus timer start");
     return SOFTBUS_OK;
 }
 
 void SoftBusTimerDeInit(void)
 {
-    if (g_timerId != NULL) {
-        (void)SoftBusDeleteTimer(g_timerId);
-        g_timerId = NULL;
-    }
+    COMM_LOGI(COMM_UTILS, "softbus timer stop");
+    g_timerOpen = false;
 }
 
 int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char * inBuf,
@@ -277,7 +290,9 @@ bool IsValidString(const char *input, uint32_t maxLen)
 int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac,
     uint32_t binMacLen)
 {
-    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
+    const char *invalidAddr = "00:00:00:00:00:00";
+    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN ||
+        strncmp(strMac, invalidAddr, BT_MAC_LEN) == 0) {
         COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
