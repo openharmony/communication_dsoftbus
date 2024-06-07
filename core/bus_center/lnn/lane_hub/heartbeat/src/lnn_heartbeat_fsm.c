@@ -837,14 +837,15 @@ static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnH
     return true;
 }
 
-static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networkId, LnnCheckDevStatusMsgPara *msgPara,
-    uint64_t nowTime)
+static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networkId, LnnCheckDevStatusMsgPara *msgPara)
 {
     uint64_t oldTimeStamp;
     DiscoveryType discType;
     char *anonyNetworkId = NULL;
     LnnHeartbeatType hbType = msgPara->hbType;
     NodeInfo nodeInfo;
+    SoftBusSysTime times = {0};
+    uint64_t nowTime;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "check dev status get nodeInfo fail");
@@ -865,6 +866,8 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
         AnonymizeFree(anonyNetworkId);
         return;
     }
+    SoftBusGetTime(&times);
+    nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
     if (!IsTimestampExceedLimit(nowTime, oldTimeStamp, hbType)) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "check dev status receive heartbeat in time, networkId=%{public}s, "
@@ -936,8 +939,6 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
 {
     (void)msgType;
     int32_t ret = SOFTBUS_ERR;
-    uint64_t nowTime;
-    SoftBusSysTime times = {0};
 
     LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)para;
     if (msgPara == NULL) {
@@ -950,15 +951,13 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
             LNN_LOGI(LNN_HEART_BEAT, "screen if off, dont need hb check");
             break;
         }
-        SoftBusGetTime(&times);
-        nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
         if (!CheckHbFsmStateMsgArgs(fsm)) {
             LNN_LOGE(LNN_HEART_BEAT, "check dev status get invalid fsm");
             break;
         }
         LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
         if (msgPara->hasNetworkId) {
-            CheckDevStatusByNetworkId(hbFsm, msgPara->networkId, msgPara, nowTime);
+            CheckDevStatusByNetworkId(hbFsm, msgPara->networkId, msgPara);
             ret = SOFTBUS_OK;
             break;
         }
@@ -977,7 +976,7 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
             if (LnnIsLSANode(&info[i])) {
                 continue;
             }
-            CheckDevStatusByNetworkId(hbFsm, info[i].networkId, msgPara, nowTime);
+            CheckDevStatusByNetworkId(hbFsm, info[i].networkId, msgPara);
         }
         SoftBusFree(info);
         ret = SOFTBUS_OK;
