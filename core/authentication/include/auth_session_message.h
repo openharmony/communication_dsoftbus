@@ -36,6 +36,10 @@ typedef struct {
     SoftBusVersion version;
 } DevInfoData;
 
+#define UDID_SHORT_HASH_HEX_STR 17
+#define UDID_SHORT_HASH_LEN_TEMP 8
+/* DeviceInfo-common */
+#define CODE "CODE"
 /* VerifyDevice */
 #define CODE_VERIFY_DEVICE 2
 #define DEVICE_ID "DEVICE_ID"
