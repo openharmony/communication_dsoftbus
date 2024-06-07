@@ -20,7 +20,9 @@
 #include <stdbool.h>
 
 #include "auth_common.h"
+#include "auth_device.h"
 #include "auth_interface.h"
+#include "auth_lane.h"
 #include "auth_normalize_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
@@ -83,9 +85,6 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType typ
 void DelAuthManager(AuthManager *auth, int32_t type);
 void DelDupAuthManager(AuthManager *auth);
 void RemoveAuthManagerByAuthId(AuthHandle authHandle);
-int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
-int32_t AuthDevicePostTransData(AuthHandle authHandle, const AuthTransData *dataInfo);
-void AuthDeviceCloseConn(AuthHandle authHandle);
 int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo);
@@ -98,23 +97,19 @@ int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
 int32_t AuthDeviceGetAuthHandleByIndex(const char *udid, bool isServer, int32_t index, AuthHandle *authHandle);
 AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
-
-int32_t AuthDeviceEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
-    uint32_t *outLen);
-int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
-    uint32_t *outLen);
 int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac);
 
-int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo *info);
-int32_t AuthDeviceGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo);
-int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
-int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version);
-int32_t AuthDeviceGetServerSide(int64_t authId, bool *isServer);
 int32_t AuthDeviceInit(const AuthTransCallback *callback);
 int32_t RegTrustListenerOnHichainSaStart(void);
 int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num);
 void AuthDeviceDeinit(void);
-void AuthDeviceNotTrust(const char *udid);
+int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOut);
+int64_t GetLatestIdByConnInfo(const AuthConnInfo *connInfo);
+int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo);
+int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo);
+void RemoveNotPassedAuthManagerByUdid(const char *udid);
+AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, bool *isNewCreated,
+    int64_t lastAuthSeq);
 
 #ifdef __cplusplus
 #if __cplusplus

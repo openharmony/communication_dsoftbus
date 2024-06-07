@@ -18,6 +18,8 @@
 #include <securec.h>
 #include <sys/time.h>
 
+#include "auth_device.c"
+#include "auth_lane.c"
 #include "auth_manager.h"
 #include "auth_manager.c"
 #include "auth_request.h"
@@ -296,10 +298,10 @@ HWTEST_F(AuthManagerTest, RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001, TestSiz
 {
     AuthHandle authHandle = { .authId = AUTH_SEQ };
     NodeInfo nodeInfo;
-    NotifyDeviceVerifyPassed(authHandle, &nodeInfo);
+    AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo);
     authHandle.authId = AUTH_SEQ_2;
-    NotifyDeviceVerifyPassed(authHandle, &nodeInfo);
-    NotifyDeviceDisconnect(authHandle);
+    AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo);
+    AuthNotifyDeviceDisconnect(authHandle);
     OnDeviceNotTrusted(UDID_TEST);
     OnGroupCreated("myId", GROUP_TYPE);
     OnGroupDeleted("myId", GROUP_TYPE);
@@ -347,8 +349,8 @@ HWTEST_F(AuthManagerTest, START_VERIFY_DEVICE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(NewAuthManager(AUTH_SEQ, &info) != nullptr);
     AuthHandle authHandle = { .authId = AUTH_SEQ_1, .type = AUTH_LINK_TYPE_WIFI };
     AuthHandle authHandle2 = { .authId = AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI };
-    EXPECT_TRUE(StartReconnectDevice(authHandle, &connInfo, REQUEST_ID, &connCb) == SOFTBUS_AUTH_NOT_FOUND);
-    EXPECT_TRUE(StartReconnectDevice(authHandle2, &connInfo, REQUEST_ID, &connCb) == SOFTBUS_AUTH_CONN_FAIL);
+    EXPECT_TRUE(AuthStartReconnectDevice(authHandle, &connInfo, REQUEST_ID, &connCb) == SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_TRUE(AuthStartReconnectDevice(authHandle2, &connInfo, REQUEST_ID, &connCb) == SOFTBUS_AUTH_CONN_FAIL);
     NodeInfo nodeInfo;
     ReportAuthRequestPassed(REQUEST_ID_1, authHandle, &nodeInfo);
     ReportAuthRequestFailed(REQUEST_ID, SOFTBUS_AUTH_CONN_FAIL);
