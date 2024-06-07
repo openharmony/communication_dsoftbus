@@ -551,8 +551,8 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
         "init br trans module failed: init br send queue failed, error=%{public}d", status);
 
     struct ConnSlideWindowController *controller = ConnSlideWindowControllerNew();
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        controller, SOFTBUS_ERR, CONN_INIT, "init br trans module failed: init flow controller failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(controller, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
+        "init br trans module failed: init flow controller failed");
 
     g_sppDriver = sppDriver;
     g_transEventListener = *listener;

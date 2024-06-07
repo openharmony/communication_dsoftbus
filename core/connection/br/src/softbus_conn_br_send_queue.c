@@ -102,7 +102,7 @@ int32_t ConnBrEnqueueNonBlock(const void *msg)
     if (SoftBusMutexLock(&g_brQueueLock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_CONN_BR_INTERNAL_ERR;
     bool isListEmpty = true;
     if (queueNode->pid == 0 && queueNode->isInner) {
         ret = WaitQueueLength(g_innerQueue->queue[priority], GetQueueLimit(priority), WAIT_QUEUE_BUFFER_PERIOD_LEN,
@@ -153,7 +153,7 @@ END:
 int32_t ConnBrDequeueBlock(void **msg)
 {
     bool isFull = false;
-    int32_t status = SOFTBUS_ERR;
+    int32_t status = SOFTBUS_CONN_BR_INTERNAL_ERR;
     ConnectionQueue *item = NULL;
     ConnectionQueue *next = NULL;
     SoftBusSysTime waitTime = {0};
@@ -214,12 +214,12 @@ int32_t ConnBrInnerQueueInit(void)
     }
     if (SoftBusCondInit(&g_sendWaitCond) != SOFTBUS_OK) {
         (void)SoftBusMutexDestroy(&g_brQueueLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusCondInit(&g_sendCond) != SOFTBUS_OK) {
         (void)SoftBusMutexDestroy(&g_brQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     g_innerQueue = CreateBrQueue(0);
     if (g_innerQueue == NULL) {
@@ -227,7 +227,7 @@ int32_t ConnBrInnerQueueInit(void)
         (void)SoftBusMutexDestroy(&g_brQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BR_CREATE_QUEUE_FAIL;
     }
     return SOFTBUS_OK;
 }

@@ -80,7 +80,7 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection001, TestSize.Level1)
 {
     int32_t ret;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
-    EXPECT_CALL(bleMock, SoftBusGattsAddService(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, SoftBusGattsAddService(_, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = ConnGattServerStartService();
     EXPECT_EQ(SOFTBUS_CONN_BLE_UNDERLAY_SERVER_ADD_SERVICE_ERR, ret);
 }
@@ -97,7 +97,7 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection002, TestSize.Level1)
 {
     int32_t ret;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
-    EXPECT_CALL(bleMock, SoftBusGattsStopService).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, SoftBusGattsStopService).WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_ERR));
     ret = ConnGattServerStopService();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -128,13 +128,13 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection003, TestSize.Level1)
     connection.underlayerHandle = 1;
     connection.connectionId = 1;
     SoftBusMutexInit(&connection.lock, nullptr);
-    EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = ConnGattServerDisconnect(&connection);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     SoftBusMutexInit(&connection.lock, nullptr);
     EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(bleMock, SoftBusGattsDisconnect).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, SoftBusGattsDisconnect).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
     ret = ConnGattServerDisconnect(&connection);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
@@ -176,7 +176,7 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection004, TestSize.Level1)
     g_callback->RequestWriteCallback(writeCbPara);
     connection.underlayerHandle = INVALID_UNDERLAY_HANDLE;
     ret = ConnGattServerConnect(&connection);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
 }
 
 /*
@@ -277,12 +277,12 @@ HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
     connection.state = BLE_CONNECTION_STATE_CONNECTING;
     SoftBusMutexInit(&connection.lock, nullptr);
     ret = ConnGattClientUpdatePriority(&connection, priority);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
 
     connection.state = BLE_CONNECTION_STATE_SERVICE_SEARCHING;
-    EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     SoftBusMutexInit(&connection.lock, nullptr);
     ret = ConnGattClientUpdatePriority(&connection, priority);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 }
