@@ -21,5 +21,5 @@ int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
 {
     (void)channelId;
     (void)appInfo;
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_UDP_PREPARE_APP_INFO_FAILED;
 }

@@ -25,6 +25,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
+#include "softbus_proxychannel_common.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_proxychannel_pipeline.c"
@@ -41,40 +42,7 @@ using namespace testing::ext;
 using namespace std;
 
 namespace OHOS {
-#define TEST_AUTHSESSION "IShareAuthSession"
-#define TEST_CHANNEL_INDENTITY "12345678"
-#define TEST_PKG_NAME "com.trans.proxy.test.pkgname"
-#define VALID_BUSNAME "testbusName"
-#define VALID_PKGNAME "testPkgName"
-#define VALID_SESSIONNAME "testSessionName"
 
-#define TEST_ARRRY_SIZE 48
-#define TEST_BUF_LEN 32
-#define TEST_CHANNEL_IDENTITY_LEN 33
-#define TEST_DEATH_CHANNEL_ID 14
-#define TEST_INVALID_LARGE_SIZE (100 * 1024)
-#define TEST_MESSAGE_CHANNEL_ID 13
-#define TEST_MESSAGE_CHANNEL_VALID_ID 46
-#define TEST_NUMBER_ELEVEN 11
-#define TEST_NUMBER_ONE 1
-#define TEST_NUMBER_TEN 10
-#define TEST_NUMBER_THREE 3
-#define TEST_NUMBER_TWENTY 20
-#define TEST_NUMBER_TWO 2
-#define TEST_NUMBER_VALID (-1)
-#define TEST_NUMBER_ZERO (-1)
-#define TEST_NUMBER_25 25
-#define TEST_NUMBER_26 26
-#define TEST_NUMBER_5000 5000
-#define TEST_PARSE_MESSAGE_CHANNEL 45
-#define TEST_PAY_LOAD "testPayLoad"
-#define TEST_PKGNAME "com.test.pkgname"
-#define TEST_PKG_NAME_LEN 65
-#define PROXY_CHANNEL_BT_IDLE_TIMEOUT 240
-#define TEST_RESET_MESSAGE_CHANNEL_ID 30
-#define TEST_STRING_TEN "10"
-#define TEST_STRING_ELEVEN "11"
-#define SESSIONKEYSIZE 256
 
 class SoftbusProxyChannelPipelineTest : public testing::Test {
 public:
@@ -320,7 +288,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineSendMessageTest001, 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     type = MSG_TYPE_P2P_NEGO;
     ret = TransProxyPipelineSendMessage(channelId, &data, dataLen, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 
 /**

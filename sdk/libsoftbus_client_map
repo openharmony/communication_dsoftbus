@@ -508,6 +508,10 @@
         "UnregistDirSchema";
         "TransRegistDirSchema";
         "TransUnRegistDirSchema";
+        "TransLimitChange";
+        "NotifyTransLimitChanged";
+        "GetMacInfoBySession";
+        "TransSetUdpChanelSessionId";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
@@ -573,6 +577,7 @@
             "non-virtual thunk to OHOS::SoftBusClientStub::OnRefreshDeviceFound(void const*, unsigned int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnRefreshLNNResult(int, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnTimeSyncResult(void const*, unsigned int, int)";
+            "non-virtual thunk to OHOS::SoftBusClientStub::OnClientTransLimitChange(int, unsigned char)";
             "vtable for Communication::SoftBus::IStreamSocket";
             "vtable for Communication::SoftBus::RawStreamData";
             "vtable for Communication::SoftBus::SessionImpl";

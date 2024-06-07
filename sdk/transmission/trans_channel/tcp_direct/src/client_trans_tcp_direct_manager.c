@@ -220,30 +220,31 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "check tdc channel fail!");
 
     TcpDirectChannelInfo *item = TransGetNewTcpChannel(channel);
-    if (item == NULL) {
-        TRANS_LOGE(TRANS_SDK, "get new tcp channel err. channelId=%{public}d", channel->channelId);
-        return SOFTBUS_MEM_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MEM_ERR,
+        TRANS_SDK, "get new tcp channel err. channelId=%{public}d", channel->channelId);
     ret = TransAddDataBufNode(channel->channelId, channel->fd);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK,
-            "add data buf node fail. channelId=%{public}d, fd=%{public}d", channel->channelId, channel->fd);
+        TRANS_LOGE(TRANS_SDK, "add node fail. channelId=%{public}d, fd=%{public}d", channel->channelId, channel->fd);
         SoftBusFree(item);
         return ret;
     }
-    if (TransTdcCreateListener(channel->fd) != SOFTBUS_OK) {
+    ret = TransTdcCreateListener(channel->fd);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "trans tdc create listener failed. fd=%{public}d", channel->fd);
         goto EXIT_ERR;
     }
-    if (ConnSetTcpKeepalive(channel->fd, HEART_TIME, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_COUNT) != SOFTBUS_OK) {
+    ret = ConnSetTcpKeepalive(channel->fd, HEART_TIME, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_COUNT);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepalive failed, fd=%{public}d.", channel->fd);
         goto EXIT_ERR;
     }
-    if (ConnSetTcpUserTimeOut(channel->fd, USER_TIME_OUT) != SOFTBUS_OK) {
+    ret = ConnSetTcpUserTimeOut(channel->fd, USER_TIME_OUT);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "ConnSetTcpUserTimeOut failed, fd=%{public}d.", channel->fd);
         goto EXIT_ERR;
     }
-    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+    ret = SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed.");
         goto EXIT_ERR;
     }
@@ -262,7 +263,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
 EXIT_ERR:
     TransDelDataBufNode(channel->channelId);
     SoftBusFree(item);
-    return SOFTBUS_ERR;
+    return ret;
 }
 
 int32_t TransTdcManagerInit(const IClientSessionCallBack *callback)

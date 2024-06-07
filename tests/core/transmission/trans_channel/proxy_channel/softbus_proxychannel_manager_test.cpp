@@ -24,6 +24,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
+#include "softbus_proxychannel_common.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_manager.c"
@@ -39,40 +40,6 @@ using namespace testing::ext;
 using namespace std;
 
 namespace OHOS {
-#define TEST_AUTHSESSION "IShareAuthSession"
-#define TEST_CHANNEL_INDENTITY "12345678"
-#define TEST_PKG_NAME "com.trans.proxy.test.pkgname"
-#define VALID_BUSNAME "testbusName"
-#define VALID_PKGNAME "testPkgName"
-#define VALID_SESSIONNAME "testSessionName"
-
-#define TEST_ARRRY_SIZE 48
-#define TEST_BUF_LEN 32
-#define TEST_CHANNEL_IDENTITY_LEN 33
-#define TEST_DEATH_CHANNEL_ID 14
-#define TEST_INVALID_LARGE_SIZE (100 * 1024)
-#define TEST_MESSAGE_CHANNEL_ID 13
-#define TEST_MESSAGE_CHANNEL_VALID_ID 46
-#define TEST_NUMBER_ELEVEN 11
-#define TEST_NUMBER_ONE 1
-#define TEST_NUMBER_TEN 10
-#define TEST_NUMBER_THREE 3
-#define TEST_NUMBER_TWENTY 20
-#define TEST_NUMBER_TWO 2
-#define TEST_NUMBER_VALID (-1)
-#define TEST_NUMBER_ZERO (-1)
-#define TEST_NUMBER_25 25
-#define TEST_NUMBER_26 26
-#define TEST_NUMBER_5000 5000
-#define TEST_PARSE_MESSAGE_CHANNEL 45
-#define TEST_PAY_LOAD "testPayLoad"
-#define TEST_PKGNAME "com.test.pkgname"
-#define TEST_PKG_NAME_LEN 65
-#define PROXY_CHANNEL_BT_IDLE_TIMEOUT 240
-#define TEST_RESET_MESSAGE_CHANNEL_ID 30
-#define TEST_STRING_TEN "10"
-#define TEST_STRING_ELEVEN "11"
-#define SESSIONKEYSIZE 256
 
 static int32_t m_testProxyAuthChannelId = -1;
 static bool g_testProxyChannelOpenSuccessFlag = false;
@@ -189,11 +156,12 @@ void SoftbusProxyChannelManagerTest::TearDownTestCase(void)
     TransProxyManagerDeinit();
 }
 
-void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, ProxyChannelStatus status)
+static ProxyChannelInfo *BuildProxyChannelInfo(int32_t channelId, const char *identity, ProxyChannelStatus status)
 {
-    AppInfo appInfo;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    ASSERT_TRUE(NULL != chan);
+    if (chan == NULL) {
+        return nullptr;
+    }
     chan->authHandle.authId = channelId;
     chan->connId = channelId;
     chan->myId = channelId;
@@ -203,6 +171,14 @@ void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, Proxy
     chan->seq = channelId;
     (void)strcpy_s(chan->identity, TEST_CHANNEL_IDENTITY_LEN, identity);
     chan->status = status;
+    return chan;
+}
+
+void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, ProxyChannelStatus status)
+{
+    AppInfo appInfo;
+    ProxyChannelInfo *chan = BuildProxyChannelInfo(channelId, identity, status);
+    ASSERT_TRUE(chan != nullptr);
     appInfo.appType = APP_TYPE_AUTH;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -211,17 +187,8 @@ void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, Proxy
 void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, ProxyChannelStatus status)
 {
     AppInfo appInfo;
-    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    ASSERT_TRUE(NULL != chan);
-    chan->authHandle.authId = channelId;
-    chan->connId = channelId;
-    chan->myId = channelId;
-    chan->peerId = channelId;
-    chan->reqId = channelId;
-    chan->channelId = channelId;
-    chan->seq = channelId;
-    (void)strcpy_s(chan->identity, TEST_CHANNEL_IDENTITY_LEN, identity);
-    chan->status = status;
+    ProxyChannelInfo *chan = BuildProxyChannelInfo(channelId, identity, status);
+    ASSERT_TRUE(chan != nullptr);
     appInfo.appType = APP_TYPE_NORMAL;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -298,7 +265,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyKeepAlvieChanTest001, TestSiz
 
     chanInfo->peerId = TEST_MESSAGE_CHANNEL_VALID_ID;
     ret = TransProxyKeepAlvieChan(chanInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     TransProxyDelByConnId(connId);
     SoftBusFree(chanInfo);
 }
@@ -314,11 +281,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAuthIdTest001, TestSize.Le
     AuthHandle authHandle = { 0 };
     int32_t channelId = TEST_NUMBER_VALID;
     int32_t ret = TransProxyGetAuthId(channelId, &authHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channelId = m_testProxyAuthChannelId;
     ret = TransProxyGetAuthId(channelId, &authHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -507,15 +474,15 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest002,
     ConnectOption* connOpt = NULL;
 
     ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     connOpt = (ConnectOption *)SoftBusMalloc(sizeof(ConnectOption));
     ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channelId = TEST_MESSAGE_CHANNEL_ID;
     ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -831,7 +798,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest002, TestSize.
 
     chanInfo->peerId = TEST_MESSAGE_CHANNEL_VALID_ID;
     ret = TransProxyKeepAlvieChan(chanInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     SoftBusFree(chanInfo);
 }
 
@@ -847,6 +814,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     (void)strcpy_s(appInfo.myData.pkgName, TEST_PKG_NAME_LEN, TEST_PKGNAME);
     appInfo.appType = APP_TYPE_AUTH;
     appInfo.myData.pid = TEST_DEATH_CHANNEL_ID;
+    // will free in TransProxyDeathCallback
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
     chan->channelId = TEST_DEATH_CHANNEL_ID;
@@ -859,8 +827,15 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     TransProxyDeathCallback(NULL, TEST_DEATH_CHANNEL_ID);
     TransProxyDeathCallback(TEST_PKGNAME, TEST_DEATH_CHANNEL_ID);
 
-    ret = TransProxyGetSendMsgChanInfo(chan->channelId, chan);
+    ProxyChannelInfo *chanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ASSERT_TRUE(NULL != chanInfo);
+    chanInfo->channelId = TEST_DEATH_CHANNEL_ID;
+    chanInfo->connId = TEST_NUMBER_VALID;
+    chanInfo->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
+
+    ret = TransProxyGetSendMsgChanInfo(chanInfo->channelId, chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
+    SoftBusFree(chanInfo);
 }
 
 /**
@@ -932,8 +907,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransChanIsEqualTest001, TestSize.Level
     info2.peerId = TEST_NUMBER_ZERO;
     (void)strcpy_s(info2.identity, sizeof(info2.identity), TEST_CHANNEL_INDENTITY);
 
-    int ret = ChanIsEqual(&info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool ret = ChanIsEqual(&info1, &info2);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -956,14 +931,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransResetChanIsEqualTest001, TestSize.
     info2.peerId = TEST_NUMBER_ZERO;
     (void)strcpy_s(info2.identity, sizeof(info2.identity), TEST_CHANNEL_INDENTITY);
 
-    int32_t ret = ResetChanIsEqual(PROXY_CHANNEL_STATUS_HANDSHAKEING, &info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool ret = ResetChanIsEqual(PROXY_CHANNEL_STATUS_HANDSHAKEING, &info1, &info2);
+    EXPECT_EQ(ret, true);
     ret = ResetChanIsEqual(status, &info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, true);
 
     info1.myId = TEST_NUMBER_TWO;
     ret = ResetChanIsEqual(status, &info1, &info2);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(true, ret);
 }
 
 /**
@@ -1048,8 +1023,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransChanIsEqualTest002, TestSize.Level
     info2.peerId = 0;
     (void)strcpy_s(info2.identity, sizeof(info2.identity), TEST_CHANNEL_INDENTITY);
 
-    int ret = ChanIsEqual(&info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool ret = ChanIsEqual(&info1, &info2);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -1072,14 +1047,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransResetChanIsEqualTest002, TestSize.
     info2.peerId = 0;
     (void)strcpy_s(info2.identity, sizeof(info2.identity), TEST_CHANNEL_INDENTITY);
 
-    int ret = ResetChanIsEqual(PROXY_CHANNEL_STATUS_HANDSHAKEING, &info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool ret = ResetChanIsEqual(PROXY_CHANNEL_STATUS_HANDSHAKEING, &info1, &info2);
+    EXPECT_EQ(ret, true);
     ret = ResetChanIsEqual(status, &info1, &info2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, true);
 
     info1.myId = 2;
     ret = ResetChanIsEqual(status, &info1, &info2);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(true, ret);
 }
 
 /**
@@ -1197,10 +1172,10 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest001,
     channelInfo.status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
     channelInfo.connId = 1;
     ret = TransProxySpecialUpdateChanInfo(&channelInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     channelInfo.type = CONNECT_TYPE_MAX;
     ret = TransProxySpecialUpdateChanInfo(&channelInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -1218,7 +1193,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByChanIdTest001, TestS
     int32_t ret = TransProxyGetChanByChanId(chanId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyGetChanByChanId(chanId, &chan);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**

@@ -14,6 +14,7 @@
  */
 #include "p2p_entity.h"
 
+#include <algorithm>
 #include <future>
 
 #include "bus_center_manager.h"
@@ -48,7 +49,7 @@ void SyncLnnInfoForP2p(
         CONN_LOGE(CONN_WIFI_DIRECT, "set lnn my mac failed");
     }
 
-    auto goMac = groupInfo->isGroupOwner ? "" : groupInfo->groupOwner;
+    auto goMac = groupInfo->isGroupOwner ? "" : groupInfo->groupOwner.address;
     ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, goMac.c_str());
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "set lnn go mac failed");
@@ -465,34 +466,37 @@ void P2pEntity::UpdateInterfaceManager(
     UpdateInterfaceInfo(localMac, groupInfo);
 }
 
-static void UpdateInnerLink(const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo)
+static void UpdateInnerLink(const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo,
+    const std::string &localMac)
 {
     auto frequency = groupInfo->frequency;
     if (!groupInfo->isGroupOwner) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not group owner, groupOwnerMac=%{public}s",
-            WifiDirectAnonymizeMac(groupInfo->groupOwner).c_str());
-        LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner, [frequency](InnerLink &link) {
-            link.SetState(InnerLink::LinkState::CONNECTED);
-            link.SetFrequency(frequency);
-        });
+            WifiDirectAnonymizeMac(groupInfo->groupOwner.address).c_str());
+        LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner.address, [frequency, groupInfo, localMac]
+            (InnerLink &link) {
+                link.SetState(InnerLink::LinkState::CONNECTED);
+                link.SetFrequency(frequency);
+                link.SetRemoteDynamicMac(groupInfo->groupOwner.randomMac);
+                link.SetLocalDynamicMac(localMac);
+            });
         return;
     }
-
     std::string ip;
     InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&ip](const InterfaceInfo &interface) {
         ip = interface.GetIpString().ToIpString();
         return SOFTBUS_OK;
     });
-
     for (const auto &client : groupInfo->clientDevices) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(client).c_str());
-        LinkManager::GetInstance().ProcessIfPresent(client, [ip, frequency](InnerLink &link) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(client.address).c_str());
+        LinkManager::GetInstance().ProcessIfPresent(client.address, [ip, frequency, client, localMac](InnerLink &link) {
             link.SetState(InnerLink::LinkState::CONNECTED);
             link.SetFrequency(frequency);
             link.SetLocalIpv4(ip);
+            link.SetRemoteDynamicMac(client.randomMac);
+            link.SetLocalDynamicMac(localMac);
         });
     }
-
     std::vector<std::string> invalidLinks;
     auto clients = groupInfo->clientDevices;
     LinkManager::GetInstance().ForEach([&invalidLinks, clients](const InnerLink &link) {
@@ -502,8 +506,9 @@ static void UpdateInnerLink(const std::shared_ptr<P2pAdapter::WifiDirectP2pGroup
         if (link.GetState() == InnerLink::LinkState::CONNECTING) {
             return false;
         }
-        auto exist = std::find(clients.begin(), clients.end(), link.GetRemoteBaseMac()) != clients.end();
-        if (!exist) {
+        if (std::none_of(clients.begin(), clients.end(), [&link](const P2pAdapter::WifiDirectP2pDeviceInfo &item) {
+                return item.address == link.GetRemoteBaseMac();
+            })) {
             invalidLinks.push_back(link.GetRemoteDeviceId());
         }
         // return false to range all link
@@ -522,7 +527,10 @@ void P2pEntity::UpdateLinkManager(
         return;
     }
     CONN_CHECK_AND_RETURN_LOGE(groupInfo, CONN_WIFI_DIRECT, "groupInfo is null");
-    UpdateInnerLink(groupInfo);
+    std::string dynamicMac;
+    auto ret = P2pAdapter::GetDynamicMacAddress(dynamicMac);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%{public}d", ret);
+    UpdateInnerLink(groupInfo, dynamicMac);
 }
 
 void P2pEntity::UpdateInterfaceManagerWhenStateChanged(P2pState state)

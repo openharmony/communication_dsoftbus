@@ -175,11 +175,11 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, Te
     channel.dfileId = TEST_CHANNELID;
 
     int32_t ret = TransDeleteBusinnessChannel(&channel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_CLOSE_UDP_CHANNEL_FAILED, ret);
 
     channel.channelId = TEST_CHANNELID;
     ret = TransDeleteBusinnessChannel(&channel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_CLOSE_UDP_CHANNEL_FAILED, ret);
 
     channel.businessType = BUSINESS_TYPE_FILE;
     ret = TransDeleteBusinnessChannel(&channel);

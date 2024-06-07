@@ -247,7 +247,17 @@ void InnerLink::SetRemoteIpv6(const std::string &value)
     Set(InnerLinKey::REMOTE_IPV6, value);
 }
 
-void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link)
+bool InnerLink::HasPtk() const
+{
+    return Get(InnerLinKey::HAS_PTK, false);
+}
+
+void InnerLink::SetPtk(bool value)
+{
+    Set(InnerLinKey::HAS_PTK, value);
+}
+
+void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4)
 {
     link.linkId = LinkManager::GetInstance().AllocateLinkId();
     AddId(link.linkId, requestId, pid);
@@ -262,13 +272,20 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link)
             link.linkType = WIFI_DIRECT_LINK_TYPE_INVALID;
             break;
     }
-    auto localIpv4 = GetLocalIpv4();
-    if (strcpy_s(link.localIp, IP_STR_MAX_LEN, localIpv4.c_str()) != EOK) {
+    std::string localIp;
+    std::string remoteIp;
+    if (ipv4 || GetLocalIpv6().empty()) {
+        localIp = GetLocalIpv4();
+        remoteIp = GetRemoteIpv4();
+    } else {
+        localIp = GetLocalIpv6();
+        remoteIp = GetRemoteIpv6();
+    }
+    if (strcpy_s(link.localIp, IP_STR_MAX_LEN, localIp.c_str()) != EOK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "local ip cpy failed, link id=%{public}d", link.linkId);
         // fall-through
     }
-    auto remoteIpv4 = GetRemoteIpv4();
-    if (strcpy_s(link.remoteIp, IP_STR_MAX_LEN, remoteIpv4.c_str()) != EOK) {
+    if (strcpy_s(link.remoteIp, IP_STR_MAX_LEN, remoteIp.c_str()) != EOK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy failed, link id=%{public}d", link.linkId);
         // fall-through
     }
@@ -327,8 +344,8 @@ void InnerLink::Dump() const
     object["REMOTE_BASE_MAC"] = WifiDirectAnonymizeMac(GetRemoteBaseMac());
     object["LOCAL_IPV4"] = WifiDirectAnonymizeIp(GetLocalIpv4());
     object["REMOTE_IPV4"] = WifiDirectAnonymizeIp(GetRemoteIpv4());
-    object["LOCAL_IPV6"] = GetLocalIpv6();
-    object["REMOTE_IPV6"] = GetRemoteIpv6();
+    object["LOCAL_IPV6"] = WifiDirectAnonymizeIp(GetLocalIpv6());
+    object["REMOTE_IPV6"] = WifiDirectAnonymizeIp(GetRemoteIpv6());
     object["IS_BEING_USED_BY_LOCAL"] = IsBeingUsedByLocal();
     object["IS_BEING_USED_BY_REMOTE"] = IsBeingUsedByRemote();
     object["FREQUENCY"] = GetFrequency();

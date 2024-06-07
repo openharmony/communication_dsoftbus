@@ -119,7 +119,7 @@ HWTEST_F(TransTcpDirectListenerTest, CreateSessionConnNodeTest001, TestSize.Leve
     int32_t chanId = CHANID;
 
     int32_t ret = CreateSessionConnNode(module, fd, chanId, clientAddr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 }
 
 /**

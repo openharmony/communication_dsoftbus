@@ -19,19 +19,35 @@
 
 int32_t LnnSaveDeviceData(const char *data, LnnDataType dataType)
 {
+    (void)data;
+    (void)dataType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnAsyncSaveDeviceData(const char *data, LnnDataType dataType)
+{
+    (void)data;
+    (void)dataType;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnRetrieveDeviceData(LnnDataType dataType, char **data, uint32_t *dataLen)
 {
+    (void)dataType;
+    (void)data;
+    (void)dataLen;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnUpdateDeviceData(const char *data, LnnDataType dataType)
 {
+    (void)data;
+    (void)dataType;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
 int32_t LnnDeletaDeviceData(LnnDataType dataType)
 {
+    (void)dataType;
     return SOFTBUS_NOT_IMPLEMENT;
 }

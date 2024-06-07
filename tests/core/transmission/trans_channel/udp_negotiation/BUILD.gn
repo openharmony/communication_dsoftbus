@@ -73,6 +73,9 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/src",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/core/transmission/ipc/include",
   ]
 
   deps = [
@@ -232,6 +235,9 @@ ohos_unittest("TransUdpManagerTest") {
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/core/transmission/ipc/include",
   ]
 
   deps = [

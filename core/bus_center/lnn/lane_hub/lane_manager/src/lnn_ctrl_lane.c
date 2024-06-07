@@ -312,8 +312,8 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
         return SOFTBUS_LANE_NOT_FOUND;
     }
     LaneLinkCb linkCb = {
-        .OnLaneLinkSuccess = CtrlLinkSuccess,
-        .OnLaneLinkFail = CtrlLinkFail,
+        .onLaneLinkSuccess = CtrlLinkSuccess,
+        .onLaneLinkFail = CtrlLinkFail,
     };
     LinkRequest requestInfo = {0};
     int32_t ret = SOFTBUS_LANE_TRIGGER_LINK_FAIL;
@@ -331,7 +331,7 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
             return SOFTBUS_OK;
         }
     } while (false);
-    linkCb.OnLaneLinkFail(laneHandle, ret, requestInfo.linkType);
+    linkCb.onLaneLinkFail(laneHandle, ret, requestInfo.linkType);
     return ret;
 }
 
@@ -365,9 +365,9 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
     }
     recommendLinkList->linkTypeNum = 0;
     ret = SelectAuthLane(allocInfo->networkId, &request, recommendLinkList);
-    if (ret != SOFTBUS_OK || recommendLinkList->linkTypeNum == 0) {
+    if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
-        LNN_LOGE(LNN_LANE, "no abailable link resources, laneHandle=%{public}u", laneHandle);
+        LNN_LOGE(LNN_LANE, "select auth lane fail, laneHandle=%{public}u", laneHandle);
         return ret;
     }
     for (uint32_t i = 0; i < recommendLinkList->linkTypeNum; ++i) {

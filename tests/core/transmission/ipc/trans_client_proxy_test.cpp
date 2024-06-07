@@ -63,6 +63,16 @@ public:
 void TransClientProxyTest::SetUpTestCase(void) {}
 void TransClientProxyTest::TearDownTestCase(void) {}
 
+static void BuildChannelMsg(ChannelMsg *data)
+{
+    data->msgChannelId = TEST_CHANNELID;
+    data->msgChannelType = TEST_CHANNELTYPE;
+    data->msgPid = TEST_PID;
+    data->msgPkgName = g_pkgName;
+    data->msgUuid = nullptr;
+    data->msgUdid = nullptr;
+}
+
 /**
  * @tc.name: InformPermissionChangeTest001
  * @tc.desc: information permission change test, use the wrong or normal parameter.
@@ -153,14 +163,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Level0)
 {
     int32_t ret;
-    ChannelMsg data = {
-        .msgChannelId = TEST_CHANNELID,
-        .msgChannelType = TEST_CHANNELTYPE,
-        .msgPid = TEST_PID,
-        .msgPkgName = g_pkgName,
-        .msgUuid = nullptr,
-        .msgUdid = nullptr
-    };
+    ChannelMsg data;
+    BuildChannelMsg(&data);
     ret = ClientIpcOnChannelOpenFailed(&data, TEST_ERR_CODE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -172,14 +176,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ChannelMsg msg = {
-        .msgChannelId = TEST_CHANNELID,
-        .msgChannelType = TEST_CHANNELTYPE,
-        .msgPid = TEST_PID,
-        .msgPkgName = g_pkgName,
-        .msgUuid = nullptr,
-        .msgUdid = nullptr
-    };
+    ChannelMsg msg;
+    BuildChannelMsg(&msg);
     ret = ClientIpcOnChannelOpenFailed(&msg, TEST_ERR_CODE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -231,15 +229,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
 {
     int32_t ret;
-
-    ChannelMsg data = {
-        .msgChannelId = TEST_CHANNELID,
-        .msgChannelType = TEST_CHANNELTYPE,
-        .msgPid = TEST_PID,
-        .msgPkgName = g_pkgName,
-        .msgUuid = nullptr,
-        .msgUdid = nullptr
-    };
+    ChannelMsg data;
+    BuildChannelMsg(&data);
     ret = ClientIpcOnChannelClosed(&data);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -251,14 +242,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ChannelMsg msg = {
-        .msgChannelId = TEST_CHANNELID,
-        .msgChannelType = TEST_CHANNELTYPE,
-        .msgPid = TEST_PID,
-        .msgPkgName = g_pkgName,
-        .msgUuid = nullptr,
-        .msgUdid = nullptr
-    };
+    ChannelMsg msg;
+    BuildChannelMsg(&msg);
     ret = ClientIpcOnChannelClosed(&msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -279,14 +264,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
     receiveData.dataLen = TEST_LEN;
     receiveData.dataType = TEST_DATA_TYPE;
 
-    ChannelMsg data = {
-        .msgChannelId = TEST_CHANNELID,
-        .msgChannelType = TEST_CHANNELTYPE,
-        .msgPid = TEST_PID,
-        .msgPkgName = g_pkgName,
-        .msgUuid = nullptr,
-        .msgUdid = nullptr
-    };
+    ChannelMsg data;
+    BuildChannelMsg(&data);
     ret = ClientIpcOnChannelMsgReceived(&data, &receiveData);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -298,14 +277,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ChannelMsg msg = {
-        .msgChannelId = TEST_CHANNELID,
-        .msgChannelType = TEST_CHANNELTYPE,
-        .msgPid = TEST_PID,
-        .msgPkgName = g_pkgName,
-        .msgUuid = nullptr,
-        .msgUdid = nullptr
-    };
+    ChannelMsg msg;
+    BuildChannelMsg(&msg);
     ret = ClientIpcOnChannelMsgReceived(&msg, &receiveData);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

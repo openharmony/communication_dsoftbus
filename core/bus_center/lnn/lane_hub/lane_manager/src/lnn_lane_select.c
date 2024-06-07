@@ -26,10 +26,12 @@
 #include "lnn_log.h"
 #include "lnn_parameter_utils.h"
 #include "lnn_select_rule.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_manager.h"
 
 #define INVALID_LINK (-1)
@@ -112,20 +114,21 @@ static bool IsLinkTypeValid(LaneLinkType type)
     return true;
 }
 
-static bool IsValidLane(const char *networkId, LaneLinkType linkType)
+static int32_t LaneCapCheck(const char *networkId, LaneLinkType linkType)
 {
     if (!IsLinkTypeValid(linkType)) {
-        return false;
+        return SOFTBUS_INVALID_PARAM;
     }
     LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
     if ((linkAttr == NULL) || (!linkAttr->available)) {
-        return false;
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (!linkAttr->IsEnable(networkId)) {
+    int32_t ret = linkAttr->linkCapCheck(networkId);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "link capacity is not support. linkType=%{public}d", linkType);
-        return false;
+        return ret;
     }
-    return true;
+    return SOFTBUS_OK;
 }
 
 static char *GetLinkTypeStrng(LaneLinkType preferredLink)
@@ -163,7 +166,22 @@ static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
     LNN_LOGD(LNN_LANE, "priority=%{public}u, linkType=%{public}s", priority, GetLinkTypeStrng(preferredLink));
 }
 
-static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *request,
+static int32_t GetErrCodeOfLink(const char *networkId, LaneLinkType linkType)
+{
+    if ((linkType == LANE_WLAN_2P4G || linkType == LANE_WLAN_5G || linkType == LANE_P2P ||
+        linkType == LANE_P2P_REUSE || linkType == LANE_HML) &&
+        (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
+        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING)) {
+        return SOFTBUS_LANE_WIFI_OFF;
+    }
+    if ((linkType == LANE_BR || linkType == LANE_BLE || linkType == LANE_BLE_DIRECT || linkType == LANE_BLE_REUSE) &&
+        SoftBusGetBtState() != BLE_ENABLE) {
+        return SOFTBUS_LANE_BT_OFF;
+    }
+    return LaneCapCheck(networkId, linkType);
+}
+
+static int32_t SelectByPreferredLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
     LaneLinkType *preferredList = (LaneLinkType *)&(request->list.linkType[0]);
@@ -179,32 +197,40 @@ static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *
         if (isStream && isBt) {
             continue;
         }
-        if (!IsValidLane(networkId, preferredList[i])) {
+        if (LaneCapCheck(networkId, preferredList[i]) != SOFTBUS_OK) {
             continue;
         }
         resList[(*resNum)] = preferredList[i];
         (*resNum)++;
         DumpPreferredLink(preferredList[i], i);
     }
-    return;
+    if (*resNum == 0) {
+        return GetErrCodeOfLink(networkId, preferredList[0]);
+    }
+    return SOFTBUS_OK;
 }
-static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *request,
+static int32_t SelectByDefaultLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
     LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
     (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
     uint32_t optLinkNum = LANE_LINK_TYPE_BUTT;
-    if (GetLaneDefaultLink(request->transType, optionalLink, &optLinkNum) != SOFTBUS_OK) {
+    int32_t ret = GetLaneDefaultLink(request->transType, optionalLink, &optLinkNum);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get defaultLinkList fail");
-        return;
+        return ret;
     }
     *resNum = 0;
     for (uint32_t i = 0; i < optLinkNum; i++) {
-        if (!IsValidLane(networkId, optionalLink[i])) {
+        if (LaneCapCheck(networkId, optionalLink[i]) != SOFTBUS_OK) {
             continue;
         }
         resList[(*resNum)++] = optionalLink[i];
     }
+    if (*resNum == 0) {
+        return GetErrCodeOfLink(networkId, optionalLink[0]);
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *request,
@@ -304,7 +330,7 @@ static int32_t LaneAddHml(const char *networkId, LaneLinkType *resList, uint32_t
     (void)memset_s(laneList, sizeof(laneList), -1, sizeof(laneList));
     uint32_t laneNum = 0;
     for (uint32_t i = 0; i < *resNum; i++) {
-        if (resList[i] == LANE_P2P && IsValidLane(networkId, LANE_HML)) {
+        if (resList[i] == LANE_P2P && (LaneCapCheck(networkId, LANE_HML) == SOFTBUS_OK)) {
             laneList[laneNum++] = LANE_HML;
         }
         laneList[laneNum++] = resList[i];
@@ -320,8 +346,9 @@ static int32_t LaneAddHml(const char *networkId, LaneLinkType *resList, uint32_t
 int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList, uint32_t *listNum)
 {
-    if (PreProcLaneSelect(networkId, request, recommendList, listNum) != SOFTBUS_OK) {
-        return SOFTBUS_LANE_SELECT_FAIL;
+    int32_t ret = PreProcLaneSelect(networkId, request, recommendList, listNum);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
@@ -330,24 +357,25 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     (void)memset_s(resList, sizeof(resList), -1, sizeof(resList));
     if ((request->list.linkTypeNum > 0) && (request->list.linkTypeNum <= LANE_LINK_TYPE_BUTT)) {
         LNN_LOGI(LNN_LANE, "Select lane by preferred linklist, networkId=%{public}s", anonyNetworkId);
-        SelectByPreferredLink(networkId, request, resList, &resNum);
+        ret = SelectByPreferredLink(networkId, request, resList, &resNum);
     } else {
         LNN_LOGI(LNN_LANE, "Select lane by default linklist, networkId=%{public}s", anonyNetworkId);
-        SelectByDefaultLink(networkId, request, resList, &resNum);
+        ret = SelectByDefaultLink(networkId, request, resList, &resNum);
     }
     AnonymizeFree(anonyNetworkId);
     if (resNum == 0) {
         LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         *listNum = 0;
-        return SOFTBUS_LANE_SELECT_FAIL;
+        return ret;
     }
     if (!HmlIsExist(resList, resNum) && LaneAddHml(networkId, resList, &resNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "LaneAddHml fail");
         return SOFTBUS_LANE_SELECT_FAIL;
     }
-    if (AdjustLanePriority(networkId, request, resList, resNum) != SOFTBUS_OK) {
+    ret = AdjustLanePriority(networkId, request, resList, resNum);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
-        return SOFTBUS_LANE_SELECT_FAIL;
+        return ret;
     }
 
     recommendList->linkTypeNum = resNum;
@@ -358,7 +386,7 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     return SOFTBUS_OK;
 }
 
-static void SelectMeshLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
+static int32_t SelectMeshLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
 {
     LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
     (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
@@ -366,13 +394,18 @@ static void SelectMeshLinks(const char *networkId, LaneLinkType *resList, uint32
     optionalLink[optLinkNum++] = LANE_WLAN_5G;
     optionalLink[optLinkNum++] = LANE_WLAN_2P4G;
     optionalLink[optLinkNum++] = LANE_BR;
+    optionalLink[optLinkNum++] = LANE_COC_DIRECT;
     *resNum = 0;
     for (uint32_t i = 0; i < optLinkNum; i++) {
-        if (!IsValidLane(networkId, optionalLink[i])) {
+        if (LaneCapCheck(networkId, optionalLink[i]) != SOFTBUS_OK) {
             continue;
         }
         resList[(*resNum)++] = optionalLink[i];
     }
+    if (*resNum == 0) {
+        return GetErrCodeOfLink(networkId, optionalLink[0]);
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t AddRecommendLinkType(LanePreferredLinkList *setRecommendLinkList,
@@ -420,11 +453,11 @@ int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
         LNN_LOGI(LNN_LANE, "ble_only = on");
         return SOFTBUS_OK;
     } else {
-        return SOFTBUS_LANE_SELECT_FAIL;
+        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
 }
 
-static void SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
+static int32_t SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
 {
     LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
     (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
@@ -435,11 +468,15 @@ static void SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_
     optionalLink[optLinkNum++] = LANE_WLAN_2P4G;
     *resNum = 0;
     for (uint32_t i = 0; i < optLinkNum; i++) {
-        if (!IsValidLane(networkId, optionalLink[i])) {
+        if (LaneCapCheck(networkId, optionalLink[i]) != SOFTBUS_OK) {
             continue;
         }
         resList[(*resNum)++] = optionalLink[i];
     }
+    if (*resNum == 0) {
+        return GetErrCodeOfLink(networkId, optionalLink[0]);
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
@@ -456,28 +493,34 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     LanePreferredLinkList laneLinkList = {0};
+    int32_t ret = SOFTBUS_LANE_SELECT_FAIL;
     if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
         request->qosRequire.minLaneLatency == 0) {
         LNN_LOGI(LNN_LANE, "select lane by default linkList");
-        SelectByDefaultLink(networkId, request, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
+        ret = SelectByDefaultLink(networkId, request, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else if (request->qosRequire.minBW == MESH_MAGIC_NUMBER) {
         LNN_LOGI(LNN_LANE, "select lane by mesh linkList");
-        SelectMeshLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
+        ret = SelectMeshLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else if (request->qosRequire.rttLevel == LANE_RTT_LEVEL_LOW) {
         LNN_LOGI(LNN_LANE, "select lane by RTT linkList");
-        SelectRttLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
+        ret = SelectRttLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else {
         LNN_LOGI(LNN_LANE, "select lane by qos require");
-        if (DecideAvailableLane(networkId, request, &laneLinkList) != SOFTBUS_OK) {
-            return SOFTBUS_LANE_SELECT_FAIL;
+        ret = DecideAvailableLane(networkId, request, &laneLinkList);
+        if (ret != SOFTBUS_OK) {
+            return ret;
         }
+    }
+    if (laneLinkList.linkTypeNum == 0) {
+        LNN_LOGE(LNN_LANE, "no available link resources");
+        return ret;
     }
     recommendList->linkTypeNum = 0;
     for (uint32_t i = 0; i < laneLinkList.linkTypeNum; i++) {
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
         recommendList->linkTypeNum++;
     }
-    int32_t ret = AdjustLanePriority(networkId, request, recommendList->linkType, recommendList->linkTypeNum);
+    ret = AdjustLanePriority(networkId, request, recommendList->linkType, recommendList->linkTypeNum);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
         return ret;
@@ -521,10 +564,14 @@ int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request, La
             !IsAuthReuseWifiDirect(networkId, request->linkType[i])) {
             continue;
         }
-        if (IsValidLane(networkId, request->linkType[i])) {
+        if (LaneCapCheck(networkId, request->linkType[i]) == SOFTBUS_OK) {
             recommendList->linkType[recommendList->linkTypeNum] = request->linkType[i];
             recommendList->linkTypeNum++;
         }
+    }
+    if (recommendList->linkTypeNum == 0) {
+        LNN_LOGE(LNN_LANE, "no available link resources");
+        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
     return SOFTBUS_OK;
 }
