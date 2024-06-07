@@ -184,6 +184,7 @@ typedef struct {
     uint64_t heartbeatTimestamp;
     uint64_t bleDirectTimestamp;
     uint64_t onlinetTimestamp;
+    uint64_t updateTimestamp;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);

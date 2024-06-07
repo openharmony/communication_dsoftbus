@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include "lnn_lane_interface.h"
 #include "softbus_app_info.h"
+#include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,6 +82,8 @@ int32_t TransGetSocketChannelLaneInfoBySession(
     const char *sessionName, int32_t sessionId, uint32_t *laneHandle, bool *isQosLane, bool *isAsync);
 
 int32_t TransGetPidFromSocketChannelInfoBySession(const char *sessionName, int32_t sessionId, int32_t *pid);
+
+int32_t TransGetConnectTypeByChannelId(int32_t channelId, ConnectType *connectType);
 
 #ifdef __cplusplus
 }

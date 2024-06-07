@@ -17,7 +17,9 @@
 #define LNN_BLE_LPDEVICE_H
 
 #include <stdint.h>
+#include "lnn_node_info.h"
 #include "softbus_broadcast_type.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,9 +31,15 @@ typedef enum {
     SOFTBUS_SUPPORT_ALL_TYPE,
 } LpFeatureType;
 
+typedef struct {
+    bool isOnline;
+    char udid[UDID_BUF_LEN];
+} LpDeviceStateInfo;
+
 int32_t LnnRegisterBleLpDeviceMediumMgr(void);
-void SendInfoToMlpsBleOnlineProcess(void *para);
-void SendInfoToMlpsBleOfflineProcess(void *para);
+void SendDeviceStateToMlps(void *para);
+void UpdateLocalDeviceInfoToMlps(const NodeInfo *localInfo);
+void UpdateRemoteDeviceInfoToMlps(void);
 int32_t GetBurstAdvId(void);
 int32_t SendDeviceInfoToSHByType(LpFeatureType type);
 int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type);

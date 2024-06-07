@@ -206,7 +206,7 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
         }
     }
     SoftBusMutexUnlock(&pendingList->lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
 int32_t DelPendingPacket(int32_t channelId, int32_t type)

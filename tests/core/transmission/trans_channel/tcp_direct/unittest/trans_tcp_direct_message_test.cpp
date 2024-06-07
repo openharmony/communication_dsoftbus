@@ -12,50 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdint>
-#include <cstring>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <securec.h>
-
-#include "auth_interface.h"
-#include "auth_manager.h"
-#include "auth_session_fsm.h"
-#include "bus_center_manager.h"
-#include "cJSON.h"
-#include "gtest/gtest.h"
-#include "lnn_lane_interface.h"
 #include "lnn_decision_db.h"
-#include "session.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_app_info.h"
-#include "softbus_base_listener.h"
-#include "softbus_conn_interface.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
-#include "softbus_server_frame.h"
-#include "softbus_trans_def.h"
-#include "softbus_proxychannel_message.h"
-
+#include "softbus_feature_config.h"
+#include "softbus_proxychannel_pipeline.h"
+#include "trans_auth_message.h"
 #include "trans_channel_callback.h"
 #include "trans_channel_manager.c"
+#include "trans_lane_pending_ctl.h"
+#include "trans_session_service.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
-#include "trans_auth_message.h"
-#include "trans_lane_pending_ctl.h"
-#include "trans_session_manager.h"
-#include "trans_tcp_direct_json.h"
-#include "trans_tcp_direct_p2p.h"
-#include "trans_tcp_direct_message.h"
-#include "trans_tcp_direct_listener.h"
-#include "trans_tcp_direct_sessionconn.h"
-#include "trans_tcp_direct_sessionconn.c"
+#include "trans_tcp_direct_test.h"
 #include "trans_tcp_direct_wifi.h"
-#include "softbus_feature_config.h"
-#include "trans_session_service.h"
-#include "softbus_proxychannel_pipeline.h"
 
 using namespace testing::ext;
 
@@ -63,14 +31,6 @@ namespace OHOS {
 
 #define PID 2024
 #define UID 4000
-#define PKG_NAME_SIZE_MAX_LEN 65
-#define NETWORK_ID_BUF_MAX_LEN 65
-#define SESSION_NAME_MAX_LEN 256
-#define TEST_GROUP_ID_LEN 64
-#define IP_LEN 46
-#define ERRMOUDLE 13
-#define INVALID_VALUE (-1)
-#define EOK 0
 
 static const char *g_pkgName = "dms";
 static const char *g_ip = "192.168.8.1";
@@ -392,7 +352,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetAppInfoByIdTest0010, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     channelId = 0;
     ret = GetAppInfoById(channelId, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_APP_INFO_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -412,7 +372,7 @@ HWTEST_F(TransTcpDirectMessageTest, SetAuthHandleByChanIdTest0011, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
     channelId = 0;
     ret = SetAuthHandleByChanId(channelId, &authHandle);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SET_AUTH_HANDLE_FAILED);
 }
 
 /**

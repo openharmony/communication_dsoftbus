@@ -214,7 +214,7 @@ int32_t ConnBleConnect(ConnBleConnection *connection)
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble connection connect failed, invalid param, connection is null");
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
-    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_ERR, CONN_BLE,
+    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "ble connection connect failed, protocol not support");
     return interface->bleClientConnect(connection);
 }
@@ -247,7 +247,7 @@ int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconne
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble connection disconnect failed, invalid param, connection is null");
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
-    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_ERR, CONN_BLE,
+    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "ble connection disconnect failed, protocol not support");
     CONN_LOGI(CONN_BLE,
         "receive ble disconnect now, connId=%{public}u, side=%{public}d, reason=%{public}d",
@@ -430,7 +430,7 @@ int32_t ConnBleUpdateConnectionPriority(ConnBleConnection *connection, ConnectBl
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
-    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_ERR, CONN_BLE,
+    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "ble connection update connection priority failed, protocol not support");
     return interface->bleClientUpdatePriority(connection, priority);
 }
@@ -444,7 +444,7 @@ int32_t ConnBleSend(ConnBleConnection *connection, const uint8_t *data, uint32_t
     CONN_CHECK_AND_RETURN_RET_LOGW(dataLen != 0, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble connection send data failed, invalid param, data len is 0");
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
-    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_ERR, CONN_BLE,
+    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "ble connection send data failed, protocol not support");
     return connection->side == CONN_SIDE_SERVER ?
         interface->bleServerSend(connection, data, dataLen, module) :
@@ -494,7 +494,7 @@ static void ConnBlePackCtrlMsgHeader(ConnPktHead *header, uint32_t dataLen)
 // GATT connection keep exchange 'udid' as keeping compatibility
 static int32_t SendBasicInfo(ConnBleConnection *connection)
 {
-    int32_t status = SOFTBUS_ERR;
+    int32_t status = SOFTBUS_CONN_BLE_INTERNAL_ERR;
     char devId[DEVID_BUFF_LEN] = { 0 };
     BleProtocolType protocol = connection->protocol;
     ConnBleFeatureBitSet featureBitSet = connection->featureBitSet;
@@ -593,7 +593,7 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
     if (dataLen <= NET_CTRL_MSG_TYPE_HEADER_SIZE) {
         CONN_LOGI(CONN_BLE,
             "date len exceed, connId=%{public}u, dataLen=%{public}d", connection->connectionId, dataLen);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int offset = 0;
     if (connection->protocol == BLE_COC) {
@@ -603,7 +603,7 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
     if (netCtrlMsgHeader[0] != NET_CTRL_MSG_TYPE_BASIC_INFO) {
         CONN_LOGI(CONN_BLE,
             "not basic info type, connId=%{public}u, type=%{public}d", connection->connectionId, netCtrlMsgHeader[0]);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
     offset += NET_CTRL_MSG_TYPE_HEADER_SIZE;
     cJSON *json = cJSON_ParseWithLength((char *)(data + offset), dataLen - offset);
@@ -618,7 +618,7 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
         !GetJsonObjectNumberItem(json, BASIC_INFO_KEY_ROLE, &type)) {
         cJSON_Delete(json);
         CONN_LOGE(CONN_BLE, "basic info field not exist, connId=%{public}u", connection->connectionId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
     // optional field
     int32_t deviceType = 0;
@@ -902,7 +902,7 @@ static int32_t DoRetryAction(enum BleServerState expect)
         }
     }
 
-    return (statusGatt != SOFTBUS_OK || statusCoc != SOFTBUS_OK) ? SOFTBUS_ERR : SOFTBUS_OK;
+    return (statusGatt != SOFTBUS_OK || statusCoc != SOFTBUS_OK) ? SOFTBUS_CONN_BLE_CHECK_STATUS_ERR : SOFTBUS_OK;
 }
 
 static void RetryServerStatConsistentHandler(void)
@@ -1077,7 +1077,7 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         .onServerDataReceived = BleOnDataReceived,
         .onServerConnectionClosed = BleOnConnectionClosed,
     };
-    ret = SOFTBUS_ERR;
+    ret = SOFTBUS_CONN_BLE_INTERNAL_ERR;
     const BleUnifyInterface *interface;
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         interface = ConnBleGetUnifyInterface(i);

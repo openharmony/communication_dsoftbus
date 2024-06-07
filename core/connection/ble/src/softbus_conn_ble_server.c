@@ -938,7 +938,7 @@ int32_t ConnGattServerConnect(ConnBleConnection *connection)
     if (underlayerHandle == INVALID_UNDERLAY_HANDLE) {
         CONN_LOGE(CONN_BLE, "ble server connect failed, underlay handle is invalid. connId=%{public}u",
             connection->connectionId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
     SoftBusBtAddr binaryAddr = { 0 };
     status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);

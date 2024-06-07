@@ -466,6 +466,7 @@ static void LnnOnWifiDirectConnectedForSink(const char *remoteMac, const char *r
         return;
     }
     laneLinkInfo.type = LANE_HML;
+    laneLinkInfo.linkInfo.p2p.channel = channelId;
     uint64_t laneId = GenerateLaneId(localUdid, laneLinkInfo.peerUdid, laneLinkInfo.type);
     if (laneId == INVALID_LANE_ID) {
         LNN_LOGE(LNN_LANE, "generate laneid fail");

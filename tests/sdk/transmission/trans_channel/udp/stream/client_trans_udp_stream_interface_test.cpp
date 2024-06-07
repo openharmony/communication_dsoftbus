@@ -101,9 +101,9 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelServerTest002, 
 {
     int32_t channelId = 1;
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED, ret);
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 }
 
@@ -133,7 +133,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest002, 
     int32_t ret = StartVtpStreamChannelClient(channelId, &g_clientParam1, &g_callback);
     EXPECT_NE(SOFTBUS_ERR, ret);
     ret = CloseVtpStreamChannel(channelId, g_pkgName);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
 }
 
 /**
@@ -146,7 +146,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, CloseVtpStreamChannelTest001, TestSi
 {
     int32_t channelId = 1;
     int32_t ret =  CloseVtpStreamChannel(channelId, g_pkgName);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
 }
 
 /**
@@ -168,7 +168,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = SendVtpStream(channelId, &streamData, &extData, &frameInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
 }
 
 /**
@@ -188,7 +188,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_ERR, ret);
     ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     g_serverParam1.type = INVALID;
@@ -202,7 +202,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_ERR, ret);
     ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 }
 
@@ -235,7 +235,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest003, TestSize.Level
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_ERR, ret);
     ret = SendVtpStream(channelId, &streamData2, &streamData2, &frameInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 }
 }

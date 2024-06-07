@@ -68,11 +68,9 @@ int32_t LnnInitNetLedger(void)
 static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 {
     int64_t accountId = 0;
-    if (LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) {
-        if (accountId != info->accountId) {
-            LNN_LOGW(LNN_LEDGER, "account change");
-            return true;
-        }
+    if ((LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) && (accountId != info->accountId)) {
+        LNN_LOGW(LNN_LEDGER, "account change");
+        return true;
     }
     char softBusVersion[VERSION_MAX_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
@@ -90,11 +88,9 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
         }
     }
     char uuid[UUID_BUF_LEN] = {0};
-    if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) == SOFTBUS_OK) {
-        if (strcmp(uuid, info->uuid) != 0) {
-            LNN_LOGW(LNN_LEDGER, "uuid change.");
-            return true;
-        }
+    if ((LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) == SOFTBUS_OK) && (strcmp(uuid, info->uuid) != 0)) {
+        LNN_LOGW(LNN_LEDGER, "uuid change.");
+        return true;
     }
     int32_t osType = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
@@ -112,11 +108,10 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
         }
     }
     int32_t level = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, &level) == SOFTBUS_OK) {
-        if (level != info->deviceSecurityLevel) {
-            LNN_LOGW(LNN_LEDGER, "deviceSecuritylevel change %{public}d->%{public}d", info->deviceSecurityLevel, level);
-            return true;
-        }
+    if ((LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, &level) == SOFTBUS_OK) &&
+        (level != info->deviceSecurityLevel)) {
+        LNN_LOGW(LNN_LEDGER, "deviceSecuritylevel change %{public}d->%{public}d", info->deviceSecurityLevel, level);
+        return true;
     }
     return false;
 }

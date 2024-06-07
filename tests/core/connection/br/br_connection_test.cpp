@@ -139,6 +139,8 @@ public:
 
 void ConnectionBrConnectionTest::SetUpTestCase(void)
 {
+    NiceMock<ConnectionBrInterfaceMock>InitMock;
+    EXPECT_CALL(InitMock, SoftBusThreadCreate).WillOnce(Return(SOFTBUS_OK));
     LooperInit();
 }
 
@@ -166,7 +168,6 @@ ConnectFuncInterface *g_connectFuncInterface = NULL;
 
 ConnectFuncInterface *ConnInit(void)
 {
-    LooperInit();
     ConnectCallback callback = {
         .OnConnected = OnConnected,
         .OnDisconnected = OnDisconnected,
@@ -235,7 +236,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest002, TestSize.Level1)
     EXPECT_CALL(brMock, SoftbusGetConfig)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2);
-    EXPECT_CALL(brMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(brMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_NO_INIT));
     ConnectFuncInterface *ret = ConnInitBr(&callback);
     EXPECT_EQ(NULL, ret);
 
@@ -246,7 +247,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest002, TestSize.Level1)
     EXPECT_CALL(brMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, SoftBusThreadCreate)
         .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_ERR));
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = ConnInitBr(&callback);
     EXPECT_EQ(NULL, ret);
 }

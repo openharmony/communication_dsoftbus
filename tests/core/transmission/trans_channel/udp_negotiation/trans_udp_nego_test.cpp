@@ -214,21 +214,21 @@ HWTEST_F(TransUdpNegoTest, TransPackReplyErrInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: sendUdpInfo001
- * @tc.desc: sendUdpInfo, extern module active publish, stop session whitout start.
+ * @tc.name: SendUdpInfo001
+ * @tc.desc: SendUdpInfo, extern module active publish, stop session whitout start.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, sendUdpInfo001, TestSize.Level1)
+HWTEST_F(TransUdpNegoTest, SendUdpInfo001, TestSize.Level1)
 {
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     string msg = "ProcessMessage";
     cJSON *replyMsg = cJSON_Parse((char *)msg.c_str());
-    int32_t ret = sendUdpInfo(NULL, authHandle, seq);
+    int32_t ret = SendUdpInfo(NULL, authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     authHandle.authId = 0;
-    ret = sendUdpInfo(replyMsg, authHandle, 0);
+    ret = SendUdpInfo(replyMsg, authHandle, 0);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_Delete(replyMsg);
 }
@@ -245,10 +245,10 @@ HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
     string errDesc = "ProcessMessage";
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = SendReplyErrInfo(errCode, NULL, authHandle, 0);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = SendReplyErrInfo(errCode, (char *)errDesc.c_str(), authHandle, 0);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 
 /**
@@ -266,10 +266,10 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
     appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
 
     int32_t ret = SendReplyUdpInfo(NULL, authHandle, seq);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     authHandle.authId = 0;
     ret = SendReplyUdpInfo(&appInfo, authHandle, seq);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 
 /**

@@ -308,7 +308,7 @@ static int32_t RetrySearchService(ConnBleConnection *connection, enum RetrySearc
         CONN_LOGW(CONN_BLE, "retry search service just ignore. "
             "state=%{public}d, count=%{public}d, connId=%{public}u, handle=%{public}d, reason=%{public}d",
             state, retrySearchServiceCnt, connection->connectionId, underlayerHandle, reason);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
 
     status = SoftbusGattcRefreshServices(underlayerHandle);
@@ -829,7 +829,7 @@ int32_t ConnGattClientUpdatePriority(ConnBleConnection *connection, ConnectBlePr
     if (state < BLE_CONNECTION_STATE_CONNECTED || state > BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO) {
         CONN_LOGW(CONN_BLE, "current connection state not support update priority, connId=%{public}u, err=%{public}d",
             connection->connectionId, state);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
 
     SoftbusBleGattPriority gattPriority;
@@ -845,7 +845,7 @@ int32_t ConnGattClientUpdatePriority(ConnBleConnection *connection, ConnectBlePr
             break;
         default:
             CONN_LOGW(CONN_BLE, "connId=%{public}u, unknownPriority=%{public}d", connection->connectionId, priority);
-            return SOFTBUS_ERR;
+            return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
     SoftBusBtAddr binaryAddr = { 0 };
     status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);

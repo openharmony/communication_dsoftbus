@@ -49,6 +49,7 @@ HWTEST_F(ConnLogTest, ConnLogTest001, TestSize.Level0)
     ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BLE_DIRECT, ++connDomainBase, "ConnBD");
     ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BROADCAST, ++connDomainBase, "ConnBC");
     ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_NEWIP, ++connDomainBase, "ConnNewIp");
+    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_ACTION, ++connDomainBase, "ConnAction");
     ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_TEST, DOMAIN_ID_TEST, "ConnTest");
 }
 

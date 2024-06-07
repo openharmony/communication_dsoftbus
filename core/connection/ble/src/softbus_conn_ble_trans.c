@@ -40,7 +40,7 @@ static StartBleSendLPInfo g_startBleSendLPInfo = { 0 };
 static int32_t UnpackTransHeader(uint8_t *data, uint32_t dataLen, BleTransHeader *header)
 {
     if (dataLen < BLE_TRANS_HEADER_SIZE) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     BleTransHeader *tmp = (BleTransHeader *)data;
     header->seq = ntohl(tmp->seq);
@@ -52,7 +52,7 @@ static int32_t UnpackTransHeader(uint8_t *data, uint32_t dataLen, BleTransHeader
         CONN_LOGW(CONN_BLE,
             "unpack ble trans header failed, dataLen=%{public}u, total=%{public}u, currentPacketSize=%{public}u",
             dataLen, header->total, header->size);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -659,8 +659,8 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
         "init ble trans failed: invalid param, listener onPostByteFinshed is null");
 
     struct ConnSlideWindowController *controller = ConnSlideWindowControllerNew();
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        controller, SOFTBUS_ERR, CONN_INIT, "init br trans module failed: init flow controller failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(controller, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_INIT,
+        "init br trans module failed: init flow controller failed");
 
     int32_t status = ConnBleInitSendQueue();
     CONN_CHECK_AND_RETURN_RET_LOGW(

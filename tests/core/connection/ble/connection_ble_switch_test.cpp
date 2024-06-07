@@ -486,7 +486,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_INTERNAL_ERR, ret);
     info.type = CONNECT_BLE;
     (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     printf("brMac: %s\n", info.bleOption.bleMac);
@@ -546,7 +546,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger009, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_INTERNAL_ERR, ret);
     optionInfo.type = CONNECT_BLE;
     (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;

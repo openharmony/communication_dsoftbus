@@ -296,7 +296,7 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConfigureMtuSize, TestSize.Level3
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle, TestSize.Level3)
+HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle1, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
@@ -344,6 +344,33 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle, TestSize.Level3)
     ASSERT_EQ(SoftbusGattcConfigureMtuSize(clientId, mtu), SOFTBUS_OK);
     gattClientCallback->configureMtuSizeCb(clientId, mtu, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(configureMtuSizeCtx.Expect(clientId, OHOS_BT_STATUS_SUCCESS, mtu));
+}
+
+/**
+ * @tc.name: AdapterBleGattClientTest_ScanLifecycle
+ * @tc.desc: test complete gatt client connect life cycle
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle2, TestSize.Level3)
+{
+    MockBluetooth mocker;
+    MockAll(mocker);
+
+    auto clientId = SoftbusGattcRegister();
+    SoftbusGattcRegisterCallback(GetStubGattcCallback(), clientId);
+
+    const char *serviceUuidExample = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid serverUuid = {
+        .uuidLen = strlen(serviceUuidExample),
+        .uuid = (char *)serviceUuidExample,
+    };
+
+    const char *charaNetUuidExample = "00002B00-0000-1000-8000-00805F9B34FB";
+    SoftBusBtUuid netUuid = {
+        .uuidLen = strlen(charaNetUuidExample),
+        .uuid = (char *)charaNetUuidExample,
+    };
 
     const char *valueExample = "hello dsoftbus";
     SoftBusGattcData data = {
@@ -371,11 +398,10 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle, TestSize.Level3)
     gattClientCallback->notificationCb(clientId, &readData, OHOS_BT_STATUS_SUCCESS);
 
     SoftBusGattcNotify notify = {
-        .charaUuid =
-            {
-                        .uuidLen = strlen(charaNetUuidExample),
-                        .uuid = (char *)charaNetUuidExample,
-                        },
+        .charaUuid = {
+            .uuidLen = strlen(charaNetUuidExample),
+            .uuid = (char *)charaNetUuidExample,
+        },
         .dataLen = strlen(valueExample),
         .data = (unsigned char *)valueExample,
     };
@@ -399,7 +425,7 @@ HWTEST_F(AdapterBleGattClientTest, EnableFastestConn, TestSize.Level3)
         .Times(2)
         .WillOnce(Return(OHOS_BT_STATUS_FAIL))
         .WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
-    ASSERT_EQ(SoftbusGattcSetFastestConn(1), SOFTBUS_ERR);
+    ASSERT_EQ(SoftbusGattcSetFastestConn(1), SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SET_FASTEST_ERR);
     ASSERT_EQ(SoftbusGattcSetFastestConn(1), SOFTBUS_OK);
 }
 
@@ -424,7 +450,8 @@ HWTEST_F(AdapterBleGattClientTest, SetBleConnectionPriority, TestSize.Level3)
         .Times(2)
         .WillOnce(Return(OHOS_BT_STATUS_FAIL))
         .WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
-    ASSERT_EQ(SoftbusGattcSetPriority(1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_ERR);
+    ASSERT_EQ(SoftbusGattcSetPriority(1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED),
+        SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SET_PRIORITY_ERR);
     ASSERT_EQ(SoftbusGattcSetPriority(1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_OK);
 }
 

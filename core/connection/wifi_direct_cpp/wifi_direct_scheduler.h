@@ -45,25 +45,25 @@ public:
     template<typename Command>
     void ProcessNegotiateData(const std::string &remoteDeviceId, Command &command)
     {
-        CONN_LOGD(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s",
-                  WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+        auto aDeviceId = WifiDirectAnonymizeDeviceId(remoteDeviceId);
+        CONN_LOGD(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", aDeviceId.c_str());
         std::lock_guard executorLock(executorLock_);
         auto it = executors_.find(remoteDeviceId);
         if (it != executors_.end()) {
             if (it->second->CanAcceptNegotiateData(command)) {
-                CONN_LOGI(CONN_WIFI_DIRECT, "send data to executor=%{public}s",
-                          WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+                CONN_LOGI(CONN_WIFI_DIRECT, "send command to executor=%{public}s, commandId=%{public}d",
+                          aDeviceId.c_str(), command.GetId());
                 it->second->SendEvent(std::make_shared<Command>(command));
                 return;
             }
             std::lock_guard commandLock(commandLock_);
-            CONN_LOGI(CONN_WIFI_DIRECT, "push data to list");
+            CONN_LOGI(CONN_WIFI_DIRECT, "push command to list, commandId=%{public}u", command.GetId());
             commandList_.push_back(std::make_shared<Command>(command));
             return;
         }
 
         if (executors_.size() == MAX_EXECUTOR) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "push data to list");
+            CONN_LOGI(CONN_WIFI_DIRECT, "push command to list, commandId=%{public}u", command.GetId());
             std::lock_guard commandLock(commandLock_);
             commandList_.push_back(std::make_shared<Command>(command));
             return;
@@ -74,13 +74,13 @@ public:
             CONN_LOGE(CONN_WIFI_DIRECT, "get processor failed");
             return;
         }
-        CONN_LOGI(CONN_WIFI_DIRECT, "create executor=%{public}s",
-                  WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
         auto executor =  WifiDirectExecutorFactory::GetInstance().NewExecutor(remoteDeviceId, *this, processor, false);
         if (executor == nullptr) {
             return;
         }
         executors_.insert({ remoteDeviceId, executor });
+        CONN_LOGI(CONN_WIFI_DIRECT, "send command to executor=%{public}s, commandId=%{public}d",
+                  aDeviceId.c_str(), command.GetId());
         executor->SendEvent(std::make_shared<Command>(command));
     }
 
@@ -126,7 +126,8 @@ public:
             }
             auto cmd = std::dynamic_pointer_cast<Command>(command);
             if (cmd != nullptr) {
-                CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d", static_cast<int>(command->GetType()));
+                CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d, commandId=%{public}u",
+                          static_cast<int>(command->GetType()), command->GetId());
                 eit->second->SendEvent(cmd);
                 commandList_.erase(cit);
                 return;

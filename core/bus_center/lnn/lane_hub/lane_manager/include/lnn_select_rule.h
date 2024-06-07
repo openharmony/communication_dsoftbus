@@ -36,7 +36,7 @@ typedef enum {
 
 typedef struct {
     bool available;
-    bool (*IsEnable)(const char *networkId);
+    int32_t (*linkCapCheck)(const char *networkId);
     int32_t (*GetLinkScore)(const char *networkId, uint32_t expectedBw);
 } LinkAttribute;
 
@@ -46,6 +46,9 @@ LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType);
 
 int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList);
+
+int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
+    uint32_t listNum, LanePreferredLinkList *recommendList);
 
 #ifdef __cplusplus
 }

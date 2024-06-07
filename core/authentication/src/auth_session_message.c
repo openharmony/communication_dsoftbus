@@ -475,7 +475,8 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "peer not support normalize or key error.");
         return;
     }
-    if (info->localState != AUTH_STATE_START && info->localState != AUTH_STATE_ACK) {
+    if (info->localState != AUTH_STATE_START && info->localState != AUTH_STATE_ACK &&
+        info->localState != AUTH_STATE_COMPATIBLE) {
         AUTH_LOGI(AUTH_FSM, "nego state, not send normalize data.");
         return;
     }
@@ -1323,7 +1324,6 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
         }
         AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
     } while (0);
-    AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
     (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
     (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);
     (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
@@ -1959,6 +1959,7 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
     if (IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_UNIFORM_NAME_CAPABILITY)) {
         UpdatePeerDeviceName(nodeInfo);
     }
+    nodeInfo->updateTimestamp = SoftBusGetSysTimeMs();
     return ret;
 }
 

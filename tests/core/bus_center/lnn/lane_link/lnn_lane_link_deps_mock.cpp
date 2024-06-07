@@ -81,5 +81,30 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
 {
     return GetLaneLinkDepsInterface()->FindLaneResourceByLinkType(peerUdid, type, resource);
 }
+
+int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo, const LaneLinkCb *callback)
+{
+    return GetLaneLinkDepsInterface()->LaneDetectReliability(laneReqId, linkInfo, callback);
+}
+
+int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource)
+{
+    return GetLaneLinkDepsInterface()->FindLaneResourceByLaneId(laneId, resource);
+}
+
+int32_t InitLaneLink(void)
+{
+    return GetLaneLinkDepsInterface()->InitLaneLink();
+}
+
+int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide)
+{
+    return GetLaneLinkDepsInterface()->AddLaneResourceToPool(linkInfo, laneId, isServerSide);
+}
+
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
+{
+    return GetLaneLinkDepsInterface()->DelLaneResourceByLaneId(laneId, isServerSide);
+}
 }
 } // namespace OHOS

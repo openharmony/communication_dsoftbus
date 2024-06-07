@@ -214,7 +214,7 @@ int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
     }
     ReleaseSessonConnLock();
     TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_GET_APP_INFO_FAILED;
 }
 
 int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
@@ -231,7 +231,7 @@ int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
         }
     }
     ReleaseSessonConnLock();
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_SET_AUTH_HANDLE_FAILED;
 }
 
 int64_t GetAuthIdByChanId(int32_t channelId)
@@ -272,7 +272,7 @@ int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
         }
     }
     ReleaseSessonConnLock();
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_GET_AUTH_HANDLE_FAILED;
 }
 
 void TransDelSessionConnById(int32_t channelId)
@@ -361,6 +361,24 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
     ReleaseSessonConnLock();
     TRANS_LOGE(TRANS_CTRL, "not find: channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
+}
+
+bool IsTdcRecoveryTransLimit(void)
+{
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed.");
+        return false;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->appInfo.businessType == BUSINESS_TYPE_BYTE) {
+            TRANS_LOGD(TRANS_CTRL, "tcp direct channel exists bytes business, no need to recovery limit.");
+            ReleaseSessonConnLock();
+            return false;
+        }
+    }
+    ReleaseSessonConnLock();
+    return true;
 }
 
 int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
