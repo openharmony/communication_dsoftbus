@@ -20,6 +20,7 @@
 #include "client_trans_file_listener.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_session_service.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_statistics.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"

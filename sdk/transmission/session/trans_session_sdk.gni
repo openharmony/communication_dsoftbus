@@ -20,6 +20,7 @@ trans_session_sdk_src = [
   "$dsoftbus_sdk_path/transmission/session/src/client_trans_message_service.c",
   "$dsoftbus_sdk_path/transmission/session/src/client_trans_session_service.c",
   "$dsoftbus_sdk_path/transmission/session/src/client_trans_socket_service.c",
+  "$dsoftbus_sdk_path/transmission/session/src/client_trans_socket_manager.c",
 ]
 
 broadcast_dep_dir = "dsoftbus_enhance/interfaces/kits/broadcast"

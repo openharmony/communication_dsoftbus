@@ -19,6 +19,7 @@
 #include "client_trans_file.h"
 #include "client_trans_file_listener.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_stream.h"
 #include "nstackx_dfile.h"
 #include "securec.h"

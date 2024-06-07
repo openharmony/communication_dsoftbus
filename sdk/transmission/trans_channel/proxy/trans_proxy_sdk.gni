@@ -22,6 +22,7 @@ if (dsoftbus_feature_proxy_file == true) {
   trans_proxy_channel_sdk_src += [
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_common.c",
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager.c",
+    "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_helper.c",
   ]
 } else {
   trans_proxy_channel_sdk_src += [ "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager_virtual.c" ]

@@ -21,6 +21,7 @@
 #include "client_bus_center_manager.h"
 #include "client_disc_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "comm_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
