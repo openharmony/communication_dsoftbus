@@ -20,8 +20,10 @@
 
 #include "auth_connection.h"
 #include "auth_connection.c"
+#include "auth_device.c"
 #include "auth_interface.h"
 #include "auth_interface.c"
+#include "auth_lane.c"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_manager.c"
@@ -367,11 +369,11 @@ HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_VERIFY_PASSED_TEST_001, TestSize.Level1)
     EXPECT_TRUE(auth != nullptr);
     AuthHandle errHandle = {.authId = errAuthId, .type = AUTH_LINK_TYPE_BLE};
     AuthHandle authHandle = {.authId = authId, .type = AUTH_LINK_TYPE_BLE};
-    NotifyDeviceVerifyPassed(errHandle, &nodeInfo);
+    AuthNotifyDeviceVerifyPassed(errHandle, &nodeInfo);
     g_verifyListener.onDeviceVerifyPass = nullptr;
-    NotifyDeviceVerifyPassed(authHandle, &nodeInfo);
+    AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo);
     g_verifyListener.onDeviceVerifyPass = OnDeviceVerifyPassTest,
-    NotifyDeviceVerifyPassed(authHandle, &nodeInfo);
+    AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo);
     DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
@@ -1010,7 +1012,7 @@ HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
     AuthConnInfo connInfo;
     AuthConnCallback connCb;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
-    int32_t ret = StartReconnectDevice(authHandle, &connInfo, 1, &connCb);
+    int32_t ret = AuthStartReconnectDevice(authHandle, &connInfo, 1, &connCb);
     EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
 
     NodeInfo nodeInfo;

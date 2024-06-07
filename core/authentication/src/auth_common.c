@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "auth_log.h"
 #include "bus_center_manager.h"
 #include "message_handler.h"
@@ -481,4 +482,51 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid)
     }
     AUTH_LOGE(AUTH_CONN, "info or deviceUdid is null");
     return SOFTBUS_ERR;
+}
+
+bool CheckAuthConnInfoType(const AuthConnInfo *connInfo)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, false, AUTH_FSM, "connInfo is null");
+    if (connInfo->type >= AUTH_LINK_TYPE_WIFI && connInfo->type < AUTH_LINK_TYPE_MAX) {
+        return true;
+    }
+    return false;
+}
+
+void PrintAuthConnInfo(const AuthConnInfo *connInfo)
+{
+    if (connInfo == NULL) {
+        return;
+    }
+    char *anonyUdidHash = NULL;
+    char *anonyMac = NULL;
+    char *anonyIp = NULL;
+    char udidHash[UDID_BUF_LEN] = { 0 };
+    switch (connInfo->type) {
+        case AUTH_LINK_TYPE_WIFI:
+            Anonymize(connInfo->info.ipInfo.ip, &anonyIp);
+            AUTH_LOGD(AUTH_CONN, "print AuthConninfo ip=*.*.*%{public}s", anonyIp);
+            AnonymizeFree(anonyIp);
+            break;
+        case AUTH_LINK_TYPE_BR:
+            Anonymize(connInfo->info.brInfo.brMac, &anonyMac);
+            AUTH_LOGD(AUTH_CONN, "print AuthConninfo brMac=**:**:**:**:%{public}s", anonyMac);
+            AnonymizeFree(anonyMac);
+            break;
+        case AUTH_LINK_TYPE_BLE:
+            if (ConvertBytesToHexString(udidHash, UDID_BUF_LEN,
+                (const unsigned char *)connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "gen udid hash hex str err");
+                return;
+            }
+            Anonymize(udidHash, &anonyUdidHash);
+            Anonymize(connInfo->info.bleInfo.bleMac, &anonyMac);
+            AUTH_LOGD(AUTH_CONN, "print AuthConninfo bleMac=**:**:**:**:%{public}s, udidhash=%{public}s", anonyMac,
+                anonyUdidHash);
+            AnonymizeFree(anonyMac);
+            AnonymizeFree(anonyUdidHash);
+            break;
+        default:
+            break;
+    }
 }
