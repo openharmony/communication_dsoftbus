@@ -985,9 +985,9 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     (void)strcpy_s(authSessionInfo.udid, UDID_BUF_LEN, udid);
     authFsm->info = authSessionInfo;
     authFsm->authSeq = 512;
-    const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(malloc(sizeof(uint8_t)));
     ASSERT_TRUE(data != nullptr);
-    MessagePara *para = NewMessagePara(data, 1024);
+    MessagePara *para = NewMessagePara(data, sizeof(uint8_t));
     HandleMsgRecvDeviceInfo(authFsm, para);
     authSessionInfo.isServer= true;
     HandleMsgRecvDeviceInfo(authFsm, para);
@@ -1009,7 +1009,7 @@ HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
     uint32_t len = 0;
     int32_t ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    len = 1024;
+    len = sizeof(uint8_t);
     ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
