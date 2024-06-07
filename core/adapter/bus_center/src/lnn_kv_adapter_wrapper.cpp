@@ -440,7 +440,7 @@ void LnnClearRedundancyCache(void)
     KvDataChangeListener::ClearCache();
 }
 
-bool LnnSubcribeKvStoreService()
+bool LnnSubcribeKvStoreService(void)
 {
     auto abilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (abilityManager == nullptr) {
