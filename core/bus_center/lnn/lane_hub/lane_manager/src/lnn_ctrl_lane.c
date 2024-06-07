@@ -96,11 +96,13 @@ bool IsAuthReuseP2p(const char *networkId, const char *udid, AuthLinkType authTy
         LNN_LOGE(LNN_LANE, "memset_s LaneResource fail");
         return false;
     }
-    if (authType == AUTH_LINK_TYPE_ENHANCED_P2P && FindLaneResourceByLinkType(udid, LANE_HML, &resoureItem) == SOFTBUS_OK &&
+    if (authType == AUTH_LINK_TYPE_ENHANCED_P2P &&
+        FindLaneResourceByLinkType(udid, LANE_HML, &resoureItem) == SOFTBUS_OK &&
         !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_HML)) {
         LNN_LOGI(LNN_LANE, "can use HML");
         return true;
-    } else if (authType == AUTH_LINK_TYPE_P2P && FindLaneResourceByLinkType(udid, LANE_P2P, &resoureItem) == SOFTBUS_OK &&
+    } else if (authType == AUTH_LINK_TYPE_P2P &&
+        FindLaneResourceByLinkType(udid, LANE_P2P, &resoureItem) == SOFTBUS_OK &&
         !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_P2P)) {
         LNN_LOGI(LNN_LANE, "can use P2P");
         return true;
@@ -310,8 +312,8 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
         return SOFTBUS_LANE_NOT_FOUND;
     }
     LaneLinkCb linkCb = {
-        .OnLaneLinkSuccess = CtrlLinkSuccess,
-        .OnLaneLinkFail = CtrlLinkFail,
+        .onLaneLinkSuccess = CtrlLinkSuccess,
+        .onLaneLinkFail = CtrlLinkFail,
     };
     LinkRequest requestInfo = {0};
     int32_t ret = SOFTBUS_LANE_TRIGGER_LINK_FAIL;
@@ -329,7 +331,7 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
             return SOFTBUS_OK;
         }
     } while (false);
-    linkCb.OnLaneLinkFail(laneHandle, ret, requestInfo.linkType);
+    linkCb.onLaneLinkFail(laneHandle, ret, requestInfo.linkType);
     return ret;
 }
 
@@ -363,9 +365,9 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
     }
     recommendLinkList->linkTypeNum = 0;
     ret = SelectAuthLane(allocInfo->networkId, &request, recommendLinkList);
-    if (ret != SOFTBUS_OK || recommendLinkList->linkTypeNum == 0) {
+    if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
-        LNN_LOGE(LNN_LANE, "no abailable link resources, laneHandle=%{public}u", laneHandle);
+        LNN_LOGE(LNN_LANE, "select auth lane fail, laneHandle=%{public}u", laneHandle);
         return ret;
     }
     for (uint32_t i = 0; i < recommendLinkList->linkTypeNum; ++i) {

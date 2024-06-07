@@ -105,6 +105,7 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
     }
     if (groupInfo == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "group info is null, skip config ip");
+        return;
     }
     auto ret = P2pAdapter::P2pConfigGcIp(groupInfo->interface, operation->content_.gcIp);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "config gc ip failed, error=%d", ret);

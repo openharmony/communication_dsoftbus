@@ -135,7 +135,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewP2pListenerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
 
     ret = StartNewP2pListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 }
 
 /**
@@ -221,7 +221,7 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
 
     int32_t port = MY_PORT;
     ret = VerifyP2p(authHandle, g_ip, nullptr, port, seq);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 
 /**
@@ -362,9 +362,9 @@ HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
     SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", isAuthLink);
 
     ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", isAuthLink);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", notAuthLink);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID);
 }
 
 /**
@@ -422,11 +422,11 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
 
     conn->authHandle.authId = AUTH_INVALID_ID;
     ret = StartVerifyP2pInfo(appInfo, conn, type);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     conn->authHandle.authId = 1;
     ret = StartVerifyP2pInfo(appInfo, conn, type);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -447,7 +447,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
 
     ret = StartNewHmlListener(g_ip, &g_port, &moduleType);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 }
 
 /**
@@ -473,7 +473,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
     int32_t ret = CreatHmlListenerList();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StartHmlListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
     ListenerModule moduleType = GetMoudleByHmlIp(g_ip);
     EXPECT_EQ(moduleType, UNUSE_BUTT);
@@ -503,7 +503,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfoTest001, TestSize.Level1)
     ConnectType type = CONNECT_P2P;
 
     int32_t ret = StartVerifyP2pInfo(appInfo, conn, type);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     SoftBusFree(appInfo);
     appInfo = nullptr;
     SoftBusFree(conn);
@@ -538,7 +538,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest001, TestSize.Level1)
     const char *myAddr = HML_ADDR;
     int32_t seq = NOAMAL_SEQ;
     ret = AddP2pOrHmlTrigger(fd, myAddr, seq);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_ADD_HML_TRIGGER_FAILED, ret);
 }
 
 /**
@@ -556,6 +556,6 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
     const char *myAddr = MY_IP;
     int32_t seq = NOAMAL_SEQ;
     ret = AddP2pOrHmlTrigger(fd, myAddr, seq);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 }

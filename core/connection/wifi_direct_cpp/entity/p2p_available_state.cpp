@@ -129,7 +129,7 @@ void P2pAvailableState::OnP2pConnectionChangeEvent(
 
     CONN_LOGI(CONN_WIFI_DIRECT, "remove joining client, clientDeviceSize=%{public}zu", groupInfo->clientDevices.size());
     for (const auto &client : groupInfo->clientDevices) {
-        P2pEntity::GetInstance().RemoveNewClientJoining(client);
+        P2pEntity::GetInstance().RemoveNewClientJoining(client.address);
     }
 
     int reuseCount = 0;

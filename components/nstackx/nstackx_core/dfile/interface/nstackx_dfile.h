@@ -415,6 +415,26 @@ NSTACKX_EXPORT void NSTACKX_DFileRegisterDefaultLog(void);
  */
 NSTACKX_EXPORT int32_t NSTACKX_DFileSessionGetFileList(int32_t sessionId);
 
+typedef enum {
+    /* the priority of socket, value is same as IP_TOS, vallen is siezeof(uint8_t) */
+    OPT_TYPE_SOCK_PRIO,
+    OPT_TYPE_BUTT
+} DFileOptType;
+
+typedef struct {
+    DFileOptType optType;
+    uint32_t valLen; /* length of value */
+    uint64_t value;  /* the option value, could be a pointer */
+} DFileOpt;
+
+/*
+ * set dfile session opt
+ * @brief Sets DFile session options. for client session, Recommend to configure after DFILE_ON_CONNECT_SUCCESS.
+ * @param[in] sessionId the session id of the session
+ * @param[in] opt option tlv
+ * @return 0 on success, negative value on failure
+ */
+NSTACKX_EXPORT int32_t NSTACKX_DFileSetSessionOpt(int32_t sessionId, const DFileOpt *opt);
 #ifdef __cplusplus
 }
 #endif

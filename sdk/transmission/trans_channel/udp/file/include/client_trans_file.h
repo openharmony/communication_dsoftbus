@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,8 @@ void TransFileSchemaDeinit(void);
 int32_t CheckFileSchema(int32_t sessionId, FileSchemaListener *fileSchemaListener);
 
 int32_t SetSchemaCallback(FileSchema fileSchema, const char *sFileList[], uint32_t fileCnt);
+
+int32_t NotifyTransLimitChanged(int32_t channelId, uint8_t tos);
 #ifdef __cplusplus
 }
 #endif

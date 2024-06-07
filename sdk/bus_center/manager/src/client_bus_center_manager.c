@@ -91,7 +91,7 @@ static BusCenterClient g_busCenterClient = {
     .publishCb.OnPublishResult = NULL,
     .refreshCb.OnDeviceFound = NULL,
     .refreshCb.OnDiscoverResult = NULL,
-    .dataLevelCb.OnDataLevelChanged = NULL,
+    .dataLevelCb.onDataLevelChanged = NULL,
     .isInit = false,
 };
 
@@ -590,7 +590,7 @@ void BusCenterClientDeinit(void)
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "unlock in deinit");
     }
-    g_busCenterClient.dataLevelCb.OnDataLevelChanged = NULL;
+    g_busCenterClient.dataLevelCb.onDataLevelChanged = NULL;
     SoftBusMutexDestroy(&g_busCenterClient.lock);
     BusCenterServerProxyDeInit();
 }
@@ -678,7 +678,7 @@ int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback)
 int32_t UnregDataLevelChangeCbInner(const char *pkgName)
 {
     LNN_LOGI(LNN_STATE, "UnregDataLevelChangeCbInner enter");
-    g_busCenterClient.dataLevelCb.OnDataLevelChanged = NULL;
+    g_busCenterClient.dataLevelCb.onDataLevelChanged = NULL;
     int32_t ret = ServerIpcUnregDataLevelChangeCb(pkgName);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server UnregDataLevelChangeCb failed, ret=%{public}d", ret);
@@ -1215,7 +1215,7 @@ void LnnOnRefreshDeviceFound(const void *device)
 
 void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
 {
-    if (g_busCenterClient.dataLevelCb.OnDataLevelChanged == NULL) {
+    if (g_busCenterClient.dataLevelCb.onDataLevelChanged == NULL) {
         LNN_LOGW(LNN_STATE, "data level callback is null");
         return;
     }
@@ -1225,7 +1225,7 @@ void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevel
         .switchLevel = dataLevelInfo->switchLevel,
         .switchLength = dataLevelInfo->switchLength
     };
-    g_busCenterClient.dataLevelCb.OnDataLevelChanged(networkId, dataLevel);
+    g_busCenterClient.dataLevelCb.onDataLevelChanged(networkId, dataLevel);
 }
 
 int32_t DiscRecoveryPublish()

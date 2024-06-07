@@ -281,7 +281,7 @@ static uint64_t GetNetworkIdUpdateTime()
     int64_t networkIdTimestamp = 0;
     int64_t nowTime = 0;
     uint64_t delayTime = 0;
-    nowTime = SoftBusGetSysTimeMs();
+    nowTime = (int64_t)SoftBusGetSysTimeMs();
     if (LnnGetLocalNum64Info(NUM_KEY_NETWORK_ID_TIMESTAMP, &networkIdTimestamp) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get local networkIdTimestamp fail");
         return NETWORK_ID_UPDATE_DELAY_TIME;
@@ -290,57 +290,13 @@ static uint64_t GetNetworkIdUpdateTime()
     if (diff <= NETWORK_ID_MIN_UPDATE_DELAY_TIME) {
         delayTime = NETWORK_ID_MIN_UPDATE_DELAY_TIME;
     } else if (diff <= NETWORK_ID_UPDATE_DELAY_TIME) {
-        delayTime = diff;
+        delayTime = (uint64_t)diff;
     } else {
         delayTime = NETWORK_ID_UPDATE_DELAY_TIME;
     }
     LNN_LOGI(LNN_EVENT, "networkId update delayTime=%{public}" PRId64 ", nowTime=%{public}" PRId64
         ", networkIdTimestamp=%{public}" PRId64, delayTime, nowTime, networkIdTimestamp);
     return delayTime;
-}
-
-static void UpdateBroadcastInfo()
-{
-    BroadcastCipherKey broadcastKey;
-    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    do {
-        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "get local info failed.");
-            break;
-        }
-        if (SoftBusGetSysTimeMs() < broadcastKey.endTime) {
-            LNN_LOGI(LNN_EVENT, "the broadcastKey don't need to update.");
-            break;
-        }
-        if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "get udid fail");
-            break;
-        }
-        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "generate broadcast key error.");
-            break;
-        }
-        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "generate broadcast iv error.");
-            break;
-        }
-        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
-            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "set key error.");
-            break;
-        }
-        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
-            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "set iv error.");
-            break;
-        }
-        if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "update local broadcast key failed");
-            break;
-        }
-        LNN_LOGI(LNN_EVENT, "update local broadcast key success!");
-    } while (0);
-    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
 }
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
@@ -371,7 +327,6 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     }
     if (!isOnline && onlineNodeNum == 0) {
         LNN_LOGI(LNN_EVENT, "no online devices, post networkId update event");
-        UpdateBroadcastInfo();
         RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
         (void)PostNotifyMessageDelay(NOTIFY_NETWORKID_UPDATE, GetNetworkIdUpdateTime());
     }
@@ -509,6 +464,17 @@ void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_ACCOUNT_CHANGED,
+        .status = (uint8_t)state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state)
+{
+    if (state < SOFTBUS_USER_SWITCHED || state >= SOFTBUS_USER_SWITCH_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad userSwitchState=%{public}d", state);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_USER_SWITCHED,
         .status = (uint8_t)state};
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }

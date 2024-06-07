@@ -68,8 +68,8 @@ int main(void)
 {
     /*
      * 1. Device A calls CreateSessionServer() to create a session server based on
-     * the application bundle name and session name, and registers the callbacks for
-     * session opened, session closed, byte received, and message received.
+     * the application bundle name and session name, and registers the callbacks for session opened, session closed,
+     * byte received, and message received.
      */
     int ret = CreateSessionServer(g_pkgNameA, g_sessionNameA, &g_sessionlistenerA);
     printf("create session server result = %d\n", ret);

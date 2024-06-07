@@ -669,7 +669,7 @@ static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *par
         LNN_LOGE(LNN_HEART_BEAT, "set medium param get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    ret = LnnHbMediumMgrSetParam((const LnnHeartbeatMediumParam *)para);
+    ret = LnnHbMediumMgrSetParam(para);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "set medium param process fail, ret=%{public}d", ret);
     }

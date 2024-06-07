@@ -41,7 +41,7 @@ public:
     std::shared_ptr<NegotiateChannel> GetNegotiateChannel() const;
 
     void OnSuccess() const;
-    void OnFailure(WifiDirectErrorCode reason) const;
+    void OnFailure(int reason) const;
 
 protected:
     DisconnectInfo info_;

@@ -655,7 +655,10 @@ ohos_unittest("AuthManagerTest") {
 
 ohos_unittest("AuthSessionFsmTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/auth_session_fsm_test.cpp" ]
+  sources = [
+    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/ble_mock.cpp",
+    "unittest/auth_session_fsm_test.cpp",
+  ]
 
   include_dirs = [
     "//base/security/device_auth/interfaces/inner_api",
@@ -692,6 +695,10 @@ ohos_unittest("AuthSessionFsmTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/core/broadcast/common/include",
   ]
 
   deps = [
@@ -699,6 +706,7 @@ ohos_unittest("AuthSessionFsmTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
 

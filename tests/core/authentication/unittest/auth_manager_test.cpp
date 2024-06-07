@@ -609,28 +609,6 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_SERVER_SIDE_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_VERIFY_AFTER_NOTIFY_NORMALIZE_TEST_001
- * @tc.desc: AuthVerifyAfterNotifyNormalize test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthManagerTest, AUTH_VERIFY_AFTER_NOTIFY_NORMALIZE_TEST_001, TestSize.Level1)
-{
-    NormalizeRequest request;
-
-    (void)memset_s(&request, sizeof(NormalizeRequest), 0, sizeof(NormalizeRequest));
-    EXPECT_EQ(AuthVerifyAfterNotifyNormalize(nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_NE(AuthVerifyAfterNotifyNormalize(&request), SOFTBUS_OK);
-    EXPECT_EQ(LooperInit(), SOFTBUS_OK);
-    EXPECT_EQ(AuthVerifyAfterNotifyNormalize(&request), SOFTBUS_MEM_ERR);
-    AuthRequest authRequest;
-    (void)memset_s(&authRequest, sizeof(AuthRequest), 0, sizeof(AuthRequest));
-    EXPECT_EQ(AddAuthRequest(&authRequest), SOFTBUS_OK);
-    EXPECT_EQ(AuthVerifyAfterNotifyNormalize(&request), SOFTBUS_OK);
-    LooperDeinit();
-}
-
-/*
  * @tc.name: AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001
  * @tc.desc: AuthSetTcpKeepaliveByConnInfo test
  * @tc.type: FUNC

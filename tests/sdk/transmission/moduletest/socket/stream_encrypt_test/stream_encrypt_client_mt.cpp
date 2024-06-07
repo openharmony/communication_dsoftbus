@@ -85,6 +85,18 @@ bool IsTestOk(bool isLocalEncrypt, const std::string sendData, const std::shared
     }
 }
 
+static int32_t SendStreamExt(int32_t socket)
+{
+    std::string src = TEST_STREAM_DATA;
+    StreamData data = {
+        .buf = (char *)(src.c_str()),
+        .bufLen = src.size(),
+    };
+    StreamData ext = { 0 };
+    StreamFrameInfo param = { 0 };
+    return SendStream(socket, &data, &ext, &param);
+}
+
 /*
  * @tc.name: RawStreamEncryptTest001
  * @tc.desc: Unencrypted raw stream data transmission test
@@ -125,14 +137,7 @@ HWTEST_F(StreamEncryptClientMt, RawStreamEncryptTest001, TestSize.Level1)
      * @tc.steps: step 3. call 'SendStream' to send unencrypted raw stream data.
      * @tc.expect: 'SendStream' function return SOFTBUS_OK.
      */
-    std::string src = TEST_STREAM_DATA;
-    StreamData data = {
-        .buf = (char *)(src.c_str()),
-        .bufLen = src.size(),
-    };
-    StreamData ext = { 0 };
-    StreamFrameInfo param = { 0 };
-    ret = SendStream(socket, &data, &ext, &param);
+    ret = SendStreamExt(socket);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     /**
@@ -185,14 +190,7 @@ HWTEST_F(StreamEncryptClientMt, RawStreamEncryptTest002, TestSize.Level1)
      * @tc.steps: step 3. call 'SendStream' to send encrypted raw stream data.
      * @tc.expect: 'SendStream' function return SOFTBUS_OK.
      */
-    std::string src = TEST_STREAM_DATA;
-    StreamData data = {
-        .buf = (char *)(src.c_str()),
-        .bufLen = src.size(),
-    };
-    StreamData ext = { 0 };
-    StreamFrameInfo param = { 0 };
-    ret = SendStream(socket, &data, &ext, &param);
+    ret = SendStreamExt(socket);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     /**
@@ -333,14 +331,7 @@ HWTEST_F(StreamEncryptClientMt, RawStreamEncryptTest003, TestSize.Level1)
      * @tc.steps: step 4. call 'SendStream' function to send unencrypted raw stream data.
      * @tc.expect: 'SendStream' function return SOFTBUS_OK.
      */
-    std::string src = TEST_STREAM_DATA;
-    StreamData data = {
-        .buf = (char *)(src.c_str()),
-        .bufLen = src.size(),
-    };
-    StreamData ext = { 0 };
-    StreamFrameInfo param = { 0 };
-    ret = SendStream(sessionId, &data, &ext, &param);
+    ret = SendStreamExt(sessionId);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     /**

@@ -23,120 +23,65 @@
 #include "hisysevent_c.h"
 #include "softbus_event.h"
 
+static void MatchLnnEventNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchLnnEventNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index, const char *extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_STREQ(params[index].v.s, extraParam);
+}
+
+static void MatchLnnEventNameTypeExtraStrParamAnony(const HiSysEventParam *params, int32_t index,
+    const char *extraParam)
+{
+    char *anonyStr = NULL;
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+
+    Anonymize(extraParam, &anonyStr);
+    EXPECT_STREQ(params[index].v.s, AnonymizeWrapper(anonyStr));
+    AnonymizeFree(anonyStr);
+}
+
 MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<LnnEventExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.result);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.discServerType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.gearCycle);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.gearDuration);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connectionId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authLinkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authRequestId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authCostTime);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.lnnType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.onlineNum);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.peerDeviceAbility);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerDeviceInfo);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    char *anonyStr = NULL;
-    Anonymize(extra.peerIp, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    Anonymize(extra.peerBrMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    Anonymize(extra.peerBleMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    Anonymize(extra.peerWifiMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    Anonymize(extra.peerUdid, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    Anonymize(extra.peerNetworkId, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerDeviceType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.callerPkg);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.calleePkg);
+    MatchLnnEventNameTypeExtraInt32Param(params, index, extra.result);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.authId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.discServerType);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.gearCycle);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.gearDuration);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.connectionId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.authLinkType);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.authRequestId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.authCostTime);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.lnnType);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.onlineNum);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.peerDeviceAbility);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.onlineType);
+    MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceInfo);
+    MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
+    MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
+    MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBleMac);
+    MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerWifiMac);
+    MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerPort);
+    MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerUdid);
+    MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerNetworkId);
+    MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceType);
+    MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.localUdidHash);
+    MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerUdidHash);
+    MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
+    MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.calleePkg);
 
     EXPECT_EQ(++index, validSize);
     return true;
@@ -148,19 +93,40 @@ MATCHER_P2(LnnInvalidParamArrayMatcher, inExtra, validSize, "lnn invalid param a
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<LnnEventExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.result < 0) ? (-extra.result) : extra.result));
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.authId < 0) ? (-extra.authId) : extra.authId));
+    MatchLnnEventNameTypeExtraInt32Param(params, index, ((extra.result < 0) ? (-extra.result) : extra.result));
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, ((extra.authId < 0) ? (-extra.authId) : extra.authId));
+
     EXPECT_EQ(++index, validSize);
     return true;
+}
+
+static void MatchLnnAuditNameTypeInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchLnnAuditNameTypeUint32Param(const HiSysEventParam *params, int32_t index, uint32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
+    EXPECT_EQ(params[index].v.ui32, extraParam);
+}
+
+static void MatchLnnAuditNameTypeUint64Param(const HiSysEventParam *params, int32_t index, uint64_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
+    EXPECT_EQ(params[index].v.ui64, extraParam);
+}
+
+static void MatchLnnAuditNameTypeStrParam(const HiSysEventParam *params, int32_t index, const char *extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
+    EXPECT_STREQ(params[index].v.s, extraParam);
 }
 
 MATCHER_P2(LnnAuditValidParamArrayMatcher, inExtra, validSize, "lnn audit valid param array match fail")
@@ -169,125 +135,36 @@ MATCHER_P2(LnnAuditValidParamArrayMatcher, inExtra, validSize, "lnn audit valid 
     params += SOFTBUS_ASSIGNER_SIZE - 1; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<LnnAuditExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.result);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.errCode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.auditType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.ui64, extra.connId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authLinkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.ui32, extra.authRequestId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.onlineNum);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.hostPkg);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localIp);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localBrMac);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localBleMac);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localUdid);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localNetworkId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localDevName);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerIp);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerBrMac);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerBleMac);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerUdid);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerNetworkId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerDevName);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.localAuthPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.localProxyPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.localSessionPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.localDevType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.peerAuthPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.peerProxyPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.peerSessionPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.peerDevType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.attackTimes);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.beAttackedPort);
+    MatchLnnAuditNameTypeInt32Param(params, index, extra.result);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.errCode);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.auditType);
+    MatchLnnAuditNameTypeUint64Param(params, ++index, extra.connId);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.authLinkType);
+    MatchLnnAuditNameTypeUint32Param(params, ++index, extra.authRequestId);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.onlineNum);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.hostPkg);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.localIp);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.localBrMac);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.localBleMac);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.localUdid);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.localNetworkId);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.localDevName);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.peerIp);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.peerBrMac);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.peerBleMac);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.peerUdid);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.peerNetworkId);
+    MatchLnnAuditNameTypeStrParam(params, ++index, extra.peerDevName);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.localAuthPort);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.localProxyPort);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.localSessionPort);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.localDevType);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.peerAuthPort);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.peerProxyPort);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.peerSessionPort);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.peerDevType);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.attackTimes);
+    MatchLnnAuditNameTypeInt32Param(params, ++index, extra.beAttackedPort);
 
     EXPECT_EQ(++index, validSize);
     return true;
@@ -299,13 +176,8 @@ MATCHER_P2(LnnAuditInvalidParamArrayMatcher, inExtra, validSize, "lnn audit inva
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<LnnAuditExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.result < 0) ? (-extra.result) : extra.result));
-    ++index;
-    EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.errCode < 0) ? (-extra.errCode) : extra.errCode));
+    MatchLnnAuditNameTypeInt32Param(params, index, ((extra.result < 0) ? (-extra.result) : extra.result));
+    MatchLnnAuditNameTypeInt32Param(params, ++index, ((extra.errCode < 0) ? (-extra.errCode) : extra.errCode));
     EXPECT_EQ(++index, validSize);
     return true;
 }

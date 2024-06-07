@@ -20,6 +20,7 @@
 #include "bus_center_manager.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
+#include "lnn_net_builder.h"
 #include "ohos_account_kits.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -106,6 +107,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
         return;
     }
     ClearAuthLimitMap();
+    ClearLnnBleReportExtraMap();
     LNN_LOGI(LNN_STATE,
         "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);

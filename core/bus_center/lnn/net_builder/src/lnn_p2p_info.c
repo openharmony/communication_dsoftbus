@@ -255,7 +255,7 @@ static void ProcessSyncWifiDirectAddr(void *para)
             continue;
         }
         int32_t osType = 0;
-        if (LnnGetOsTypeByNetworkId(info->networkId, &osType) != SOFTBUS_OK) {
+        if (LnnGetOsTypeByNetworkId(info[i].networkId, &osType) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "get remote osType fail");
         }
         if (osType != OH_OS_TYPE &&

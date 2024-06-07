@@ -44,7 +44,7 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     if (version != VERSION || msg->msgHead.type >= PROXYCHANNEL_MSG_TYPE_MAX) {
         TRANS_LOGE(TRANS_CTRL, "parseMessage: unsupported message, version=%{public}d, type=%{public}d",
             version, msg->msgHead.type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_INVALID_MESSAGE_TYPE;
     }
 
     msg->msgHead.cipher = *ptr;
@@ -83,38 +83,33 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     char *tmpMac = NULL;
     Anonymize(peerMac, &tmpMac);
     AnonymizeFree(tmpMac);
-    if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail, peerMac=%{public}s", tmpMac);
-        return SOFTBUS_NOT_FIND;
-    }
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, len) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "LnnGetNetworkIdByBtMac fail, peerMac=%{public}s", tmpMac);
+    ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
     return SOFTBUS_OK;
 }
 
 static int32_t GetRemoteBtMacByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *brMac, int32_t len)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
-    if (LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByUdidHash fail");
-        return SOFTBUS_NOT_FIND;
-    }
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, brMac, len) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "GetRemoteBtMac fail");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, networkId, sizeof(networkId));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "LnnGetNetworkIdByUdidHash fail");
+
+    ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, brMac, len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "GetRemoteBtMac fail");
+
     return SOFTBUS_OK;
 }
 
 static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
 {
     ConnectionInfo info = { 0 };
-    if (ConnGetConnectionInfo(connId, &info) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "ConnGetConnectionInfo fail, connId=%{public}u", connId);
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = ConnGetConnectionInfo(connId, &info);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "ConnGetConnectionInfo fail, connId=%{public}u", connId);
     switch (info.type) {
         case CONNECT_TCP:
             connInfo->type = AUTH_LINK_TYPE_WIFI;
@@ -146,7 +141,7 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%{public}d.", info.type);
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_UNEXPECTED_CONN_TYPE;
     }
     return SOFTBUS_OK;
 }
@@ -154,15 +149,12 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
 static int32_t ConvertBrConnInfo2BleConnInfo(AuthConnInfo *connInfo)
 {
     char udid[UDID_BUF_LEN] = {0};
-    if (GetRemoteUdidByBtMac(connInfo->info.brInfo.brMac, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get udid by btmac fail");
-        return SOFTBUS_ERR;
-    }
-    if (SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid),
-        connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "generate udid hash fail");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = GetRemoteUdidByBtMac(connInfo->info.brInfo.brMac, udid, UDID_BUF_LEN);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get udid by btmac fail");
+
+    ret = SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid), connInfo->info.bleInfo.deviceIdHash);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "generate udid hash fail");
+
     connInfo->type = AUTH_LINK_TYPE_BLE;
     return SOFTBUS_OK;
 }
@@ -170,11 +162,9 @@ static int32_t ConvertBrConnInfo2BleConnInfo(AuthConnInfo *connInfo)
 static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
 {
     char brMac[BT_MAC_LEN] = {0};
-    if (GetRemoteBtMacByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN,
-        brMac, BT_MAC_LEN) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get btmac by udid fail");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = GetRemoteBtMacByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, brMac, BT_MAC_LEN);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get btmac by udid fail");
+
     if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, brMac) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy br mac fail");
         return SOFTBUS_STRCPY_ERR;
@@ -186,21 +176,18 @@ static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
 static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHandle *authHandle, int32_t index)
 {
     AuthConnInfo connInfo;
-    if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", connId);
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = TransProxyGetAuthConnInfo(connId, &connInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "get connInfo fail connId=%{public}d", connId);
     bool isBle = ((cipher & USE_BLE_CIPHER) != 0);
     if (isBle && connInfo.type == AUTH_LINK_TYPE_BR) {
-        if (ConvertBrConnInfo2BleConnInfo(&connInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "ConvertBrConnInfo2BleConnInfo fail, connInfoType=%{public}d", connInfo.type);
-            return SOFTBUS_ERR;
-        }
+        ret = ConvertBrConnInfo2BleConnInfo(&connInfo);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_CTRL, "ConvertBrConnInfo2BleConnInfo fail, connInfoType=%{public}d", connInfo.type);
     } else if (!isBle && connInfo.type == AUTH_LINK_TYPE_BLE) {
-        if (ConvertBleConnInfo2BrConnInfo(&connInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "ConvertBleConnInfo2BrConnInfo fail, connInfoType=%{public}d", connInfo.type);
-            return SOFTBUS_ERR;
-        }
+        ret = ConvertBleConnInfo2BrConnInfo(&connInfo);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_CTRL, "ConvertBleConnInfo2BrConnInfo fail, connInfoType=%{public}d", connInfo.type);
     }
     bool isAuthServer = !((cipher & AUTH_SERVER_SIDE) != 0);
     authHandle->type = connInfo.type;
@@ -220,10 +207,8 @@ static int32_t GetAuthIdReDecrypt(AuthHandle *authHandle, ProxyMessage *msg, uin
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     int32_t ret = TransProxyGetAuthConnInfo(msg->connId, &connInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", msg->connId);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_CTRL, "get connInfo fail connId=%{public}d", msg->connId);
     int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
     if (AuthGetAuthHandleByIndex(&connInfo, false, index, authHandle) != SOFTBUS_OK &&
         AuthGetAuthHandleByIndex(&connInfo, true, index, authHandle) != SOFTBUS_OK) {
@@ -240,10 +225,10 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
     if (peerBrMac == NULL || len <= 0 || len > BT_MAC_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", connId);
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = TransProxyGetAuthConnInfo(connId, &connInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_CTRL, "get connInfo fail connId=%{public}d", connId);
+
     if (strcpy_s(peerBrMac, len, connInfo.info.brInfo.brMac) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy brMac fail.");
         return SOFTBUS_STRCPY_ERR;
@@ -257,11 +242,10 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
         TRANS_LOGE(TRANS_CTRL, "parseMessage: invalid message len=%{public}d", len);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (TransProxyParseMessageHead(data, len, msg) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = TransProxyParseMessageHead(data, len, msg);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
+
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
-        int32_t ret;
         if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
             TRANS_LOGD(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
             ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, auth,
@@ -391,7 +375,7 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
         if (buf == NULL) {
             TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
             SoftBusFree(encodeFastData);
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_PACK_FAST_DATA_FAILED;
         }
         int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
             (const unsigned char *)buf, outLen);
@@ -619,58 +603,54 @@ int32_t TransProxyUnPackRestErrMsg(const char *msg, int *errCode, int32_t len)
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
     int32_t len, uint16_t *fastDataSize)
 {
-    cJSON *root = 0;
-    AppInfo *appInfo = &(chanInfo->appInfo);
-    if (appInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "appInfo is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    root = cJSON_ParseWithLength(msg, len);
-    if (root == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(msg != NULL && chanInfo != NULL && fastDataSize != NULL,
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "msg or chanInfo or fastDataSize is empty.");
+
+    TRANS_CHECK_AND_RETURN_RET_LOGE(&chanInfo->appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null");
+
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
 
     if (!GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chanInfo->identity, sizeof(chanInfo->identity)) ||
-        !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, appInfo->peerData.deviceId,
-                                 sizeof(appInfo->peerData.deviceId))) {
+        !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, chanInfo->appInfo.peerData.deviceId,
+                                 sizeof(chanInfo->appInfo.peerData.deviceId))) {
         TRANS_LOGE(TRANS_CTRL, "fail to get json item");
         cJSON_Delete(root);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(chanInfo->appInfo.peerData.dataConfig))) {
         TRANS_LOGD(TRANS_CTRL, "peer dataconfig is null.");
     }
-    appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
-    appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
-    appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
-    int32_t appType = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity);
-    if (appType == SOFTBUS_ERR || appType == SOFTBUS_LOCK_ERR) {
-        TRANS_LOGE(TRANS_CTRL, "fail to get app type");
+    chanInfo->appInfo.encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
+    chanInfo->appInfo.algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+    chanInfo->appInfo.crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+
+    int32_t ret = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity, &chanInfo->appInfo.appType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "failed to get app type");
         cJSON_Delete(root);
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
-    appInfo->appType = (AppType)appType;
-    if (appInfo->appType == APP_TYPE_NORMAL) {
-        if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &appInfo->peerData.uid) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_PID, &appInfo->peerData.pid) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &appInfo->encrypt) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc) ||
+    if (chanInfo->appInfo.appType == APP_TYPE_NORMAL) {
+        if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &chanInfo->appInfo.peerData.uid) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_PID, &chanInfo->appInfo.peerData.pid) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &chanInfo->appInfo.encrypt) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &chanInfo->appInfo.algorithm) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &chanInfo->appInfo.crc) ||
             !GetJsonObjectNumber16Item(root, JSON_KEY_FIRST_DATA_SIZE, fastDataSize) ||
-            !GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, appInfo->peerData.sessionName,
-                                     sizeof(appInfo->peerData.sessionName)) ||
-            !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, appInfo->myData.sessionName,
-                                     sizeof(appInfo->myData.sessionName))) {
+            !GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, chanInfo->appInfo.peerData.sessionName,
+                                     sizeof(chanInfo->appInfo.peerData.sessionName)) ||
+            !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, chanInfo->appInfo.myData.sessionName,
+                                     sizeof(chanInfo->appInfo.myData.sessionName))) {
             TRANS_LOGW(TRANS_CTRL, "unpack handshake ack old version");
         }
-        if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &(appInfo->peerHandleId))) {
-            appInfo->peerHandleId = -1;
+        if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &chanInfo->appInfo.peerHandleId)) {
+            chanInfo->appInfo.peerHandleId = -1;
         }
     }
 
-    if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
-                                 sizeof(appInfo->peerData.pkgName))) {
+    if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, chanInfo->appInfo.peerData.pkgName,
+                                 sizeof(chanInfo->appInfo.peerData.pkgName))) {
         TRANS_LOGW(TRANS_CTRL, "no item to get pkg name");
     }
     cJSON_Delete(root);
@@ -699,7 +679,7 @@ static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
             SoftBusFree(encodeFastData);
             return SOFTBUS_PARSE_JSON_ERR;
         }
-        appInfo->fastTransData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize + FAST_EXT_BYTE_SIZE);
+        appInfo->fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize + FAST_EXT_BYTE_SIZE);
         if (appInfo->fastTransData == NULL) {
             TRANS_LOGE(TRANS_CTRL, "malloc fast data fail.");
             SoftBusFree(encodeFastData);
@@ -797,15 +777,14 @@ static int32_t TransProxyUnpackInnerHandshakeMsg(cJSON *root, AppInfo *appInfo, 
 
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(msg != NULL && chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param invalid.");
     cJSON *root = cJSON_ParseWithLength(msg, len);
-    if (root == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    char sessionKey[BASE64KEY] = {0};
+    TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
+
+    char sessionKey[BASE64KEY] = { 0 };
     AppInfo *appInfo = &(chan->appInfo);
 
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_TYPE, (int32_t*)&(appInfo->appType)) ||
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_TYPE, (int32_t *)&(appInfo->appType)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chan->identity, sizeof(chan->identity)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, appInfo->peerData.deviceId,
                                  sizeof(appInfo->peerData.deviceId)) ||
@@ -819,10 +798,10 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
     
     if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        TRANS_LOGE(TRANS_CTRL, "peer dataconfig is null.");
+        TRANS_LOGW(TRANS_CTRL, "peer dataconfig is null.");
     }
 
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_TRANS_UNPACK_HANDSHAKE_MSG_FAILED;
     if (appInfo->appType == APP_TYPE_NORMAL) {
         ret = TransProxyUnpackNormalHandshakeMsg(root, appInfo, sessionKey, BASE64KEY);
         if (ret != SOFTBUS_OK) {

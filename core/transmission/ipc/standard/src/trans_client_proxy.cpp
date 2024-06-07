@@ -27,7 +27,7 @@ using namespace OHOS;
 static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
 {
     if (pkgName == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "pkgName is null");
+        TRANS_LOGE(TRANS_CTRL, "pkgName is null");
         return nullptr;
     }
     sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName, pid);
@@ -38,12 +38,12 @@ static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
 int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
 {
     if (pkgName == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "pkgName is null");
+        TRANS_LOGE(TRANS_CTRL, "pkgName is null");
         return SOFTBUS_INVALID_PKGNAME;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     return clientProxy->OnClientPermissonChange(pkgName, state);
@@ -54,7 +54,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     return clientProxy->OnChannelOpened(sessionName, channel);
@@ -63,12 +63,12 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
 int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
 {
     if (data == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "ClientIpcOnChannelOpenFailed data is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelOpenFailed data is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     clientProxy->OnChannelOpenFailed(data->msgChannelId, data->msgChannelType, errCode);
@@ -78,13 +78,13 @@ int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
 int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, const char *peerIp, int32_t routeType)
 {
     if (data == nullptr || networkId == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "ClientIpcOnChannelLinkDown data or networkId is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelLinkDown data or networkId is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     (void)peerIp;
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     clientProxy->OnChannelLinkDown(networkId, routeType);
@@ -94,12 +94,12 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
 int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
 {
     if (data == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "ClientIpcOnChannelClosed data is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelClosed data is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     int32_t ret = clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType, data->msgMessageType);
@@ -114,27 +114,31 @@ int32_t ClientIpcSetChannelInfo(
     const char *pkgName, const char *sessionName, int32_t sessionId, const TransInfo *transInfo, int32_t pid)
 {
     if (pkgName == nullptr || sessionName == nullptr || transInfo == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        TRANS_LOGE(TRANS_CTRL, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "Softbus client proxy is nullptr!, pkgName=%{public}s pid=%{public}d", pkgName, pid);
+        TRANS_LOGE(TRANS_CTRL, "Softbus client proxy is nullptr!, pkgName=%{public}s pid=%{public}d", pkgName, pid);
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
-    clientProxy->SetChannelInfo(sessionName, sessionId, transInfo->channelId, transInfo->channelType);
+    int32_t ret = clientProxy->SetChannelInfo(sessionName, sessionId, transInfo->channelId, transInfo->channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "SetChannelInfo failed, ret=%{public}d", ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 
 int32_t ClientIpcOnChannelMsgReceived(ChannelMsg *data, TransReceiveData *receiveData)
 {
     if (data == nullptr || receiveData == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "ClientIpcOnChannelMsgReceived data or receiveData is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelMsgReceived data or receiveData is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     clientProxy->OnChannelMsgReceived(data->msgChannelId, data->msgChannelType,
@@ -146,10 +150,25 @@ int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, param->pid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     clientProxy->OnChannelQosEvent(param->channelId, param->channelType, param->eventId,
         param->tvCount, param->tvList);
     return SOFTBUS_OK;
+}
+
+int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t channelId, uint8_t tos)
+{
+    if (pkgName == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+    
+    return clientProxy->OnClientTransLimitChange(channelId, tos);
 }

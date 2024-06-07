@@ -62,6 +62,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_P2P_NETWORKING_SYNC,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_AUTH_SYNC_INFO,
+        .listener = { NULL, NULL },
     }
 };
 
@@ -206,7 +210,8 @@ int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle)
     }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth == NULL) {
-        AUTH_LOGE(AUTH_CONN, "not found auth manager, authId=%{public}" PRId64, authHandle->authId);
+        AUTH_LOGE(AUTH_CONN, "not found auth manager, type=%{public}d, authId=%{public}" PRId64,
+            authHandle->type, authHandle->authId);
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     int32_t ret = SOFTBUS_OK;
@@ -264,7 +269,7 @@ void AuthCloseConn(AuthHandle authHandle)
 int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
 {
     if (networkId == NULL || callback == NULL) {
-        AUTH_LOGE(AUTH_CONN, "authHandle is null");
+        AUTH_LOGE(AUTH_CONN, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     return AuthAllocLane(networkId, authRequestId, callback);
@@ -273,7 +278,7 @@ int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCal
 void AuthFreeConn(const AuthHandle *authHandle)
 {
     if (authHandle == NULL) {
-        AUTH_LOGE(AUTH_CONN, "authHandle is null");
+        AUTH_LOGE(AUTH_CONN, "param invalid");
         return;
     }
     AuthFreeLane(authHandle);
@@ -636,6 +641,34 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
         return true;
     }
     return false;
+}
+
+bool AuthHasSameAccountGroup(const DeviceInfo *device)
+{
+    if (device == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "device is null");
+        return false;
+    }
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    DeviceInfo defaultInfo;
+    (void)memset_s(&defaultInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    bool isSameAccountGroup = false;
+
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get local accountHash fail");
+        return false;
+    }
+    if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
+        isSameAccountGroup = true;
+        AUTH_LOGI(AUTH_HICHAIN, "account is same, continue check same account group relation.");
+    }
+    if (isSameAccountGroup) {
+        if (!IsSameAccountGroupDevice(device->devId)) {
+            AUTH_LOGE(AUTH_HICHAIN, "device has not same account group relation, stop verify progress");
+            return false;
+        }
+    }
+    return true;
 }
 
 TrustedReturnType AuthHasTrustedRelation(void)

@@ -12,22 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "null_negotiate_channel.h"
-#include "softbus_errcode.h"
-#include "conn_log.h"
+#ifndef WIFI_DIRECT_WORK_QUEUE_H
+#define WIFI_DIRECT_WORK_QUEUE_H
+
+#include <functional>
+#include "message_handler.h"
 
 namespace OHOS::SoftBus {
-NullNeotiateChannel::~NullNeotiateChannel() { }
+class WifiDirectWorkQueue {
+public:
+    using WorkFunction = std::function<void(void *data)>;
+    struct Work {
+        WorkFunction work;
+        void *data;
+    };
 
-int NullNeotiateChannel::SendMessage(const NegotiateMessage &msg) const
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "Empty implementation");
-    return SOFTBUS_OK;
-}
+    WifiDirectWorkQueue();
+    ~WifiDirectWorkQueue();
 
-std::string NullNeotiateChannel::GetRemoteDeviceId() const
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "Empty implementation");
-    return "";
+    void ScheduleDelayWork(const Work *work, uint64_t timeMs);
+    void RemoveWork(const Work *work);
+
+private:
+    SoftBusHandler handler_ {};
+};
 }
-} // namespace OHOS::SoftBus
+#endif

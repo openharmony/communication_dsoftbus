@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,22 @@ trans_enhance_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                  ],
                                  "value")
 
+trans_enhance_fuzz_dir = "dsoftbus_enhance/test/sdk/transmission/fuzztest"
+trans_enhance_fuzz_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                      [
+                                        "$native_source_path",
+                                        "$trans_enhance_fuzz_dir",
+                                      ],
+                                      "value")
+
+trans_enhance_mt_dir = "dsoftbus_enhance/test/sdk/transmission/moduletest"
+trans_enhance_mt_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                    [
+                                      "$native_source_path",
+                                      "$trans_enhance_mt_dir",
+                                    ],
+                                    "value")
+
 group("benchmarktest") {
   testonly = true
   deps = [ "benchmarktest:benchmarktest" ]
@@ -33,6 +49,9 @@ group("benchmarktest") {
 group("fuzztest") {
   testonly = true
   deps = [ "fuzztest:fuzztest" ]
+  if (trans_enhance_fuzz_test) {
+    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/transmission/fuzztest:fuzztest" ]
+  }
 }
 
 group("integration_test") {
@@ -43,6 +62,9 @@ group("integration_test") {
 group("moduletest") {
   testonly = true
   deps = [ "moduletest:moduletest" ]
+  if (trans_enhance_mt_test) {
+    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/transmission/moduletest:moduletest" ]
+  }
 }
 
 group("unittest") {

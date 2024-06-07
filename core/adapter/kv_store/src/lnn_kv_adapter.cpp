@@ -303,12 +303,12 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
     DistributedKv::Options options = {
         .encrypt = true,
         .autoSync = false,
+        .isPublic = true,
         .securityLevel = DistributedKv::SecurityLevel::S1,
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
-        .isPublic = true,
-        .cloudConfig = { .enableCloud = true, .autoSync = false }
+        .cloudConfig = { .enableCloud = true, .autoSync = true }
     };
     DistributedKv::Status status;
     {

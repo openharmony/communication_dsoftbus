@@ -274,14 +274,12 @@ static void NotifyDeviceConnectResult(
     ConnBrRequest *it = NULL;
     if (connection == NULL) {
         LIST_FOR_EACH_ENTRY(it, &device->requests, ConnBrRequest, node) {
-            CONN_LOGD(CONN_BR,
-                "br notify connect request failed, requestId=%{public}u, addr=%{public}s, reason=%{public}d",
-                it->requestId, anomizeAddress, reason);
+            CONN_LOGD(CONN_BR, "br notify connect request failed, requestId=%{public}u, addr=%{public}s, "
+                "reason=%{public}d", it->requestId, anomizeAddress, reason);
             DfxRecordBrConnectFail(it->requestId, DEFAULT_PID, (ConnBrDevice *)device, &it->statistics, reason);
             it->result.OnConnectFailed(it->requestId, reason);
-            CONN_LOGE(CONN_BR,
-                "br notify connect request failed done, requestId=%{public}u, addr=%{public}s, reason=%{public}d",
-                it->requestId, anomizeAddress, reason);
+            CONN_LOGE(CONN_BR, "br notify connect request failed done, requestId=%{public}u, addr=%{public}s, "
+                "reason=%{public}d", it->requestId, anomizeAddress, reason);
         }
         return;
     }
@@ -312,15 +310,13 @@ static void NotifyDeviceConnectResult(
             ConnBrUpdateConnectionRc(connection, 1);
         }
         isReuse = true;
-        CONN_LOGD(CONN_BR,
-            "br notify connect request success, requestId=%{public}u, addr=%{public}s, connection=%{public}u",
-            it->requestId, anomizeAddress, connection->connectionId);
+        CONN_LOGD(CONN_BR, "br notify connect request success, requestId=%{public}u, addr=%{public}s, "
+            "connection=%{public}u", it->requestId, anomizeAddress, connection->connectionId);
         it->statistics.reqId = it->requestId;
         DfxRecordBrConnectSuccess(DEFAULT_PID, connection, &it->statistics);
         it->result.OnConnectSuccessed(it->requestId, connection->connectionId, &info);
-        CONN_LOGD(CONN_BR,
-            "br notify connect request success done, requestId=%{public}u, addr=%{public}s, connection=%{public}u",
-            it->requestId, anomizeAddress, connection->connectionId);
+        CONN_LOGD(CONN_BR, "br notify connect request success done, requestId=%{public}u, addr=%{public}s, "
+            "connection=%{public}u", it->requestId, anomizeAddress, connection->connectionId);
     }
 }
 
@@ -460,6 +456,23 @@ static bool CheckPending(const char *addr)
     return pending;
 }
 
+static void CheckPendingAndactionIfAbsent(ConnBrDevice *device, DeviceAction actionIfAbsent,
+    const char *anomizeAddress)
+{
+    if (CheckPending(device->addr)) {
+        device->state = BR_DEVICE_STATE_PENDING;
+        PendingDevice(device, anomizeAddress);
+        return;
+    }
+    device->state = BR_DEVICE_STATE_WAIT_SCHEDULE;
+    int32_t ret = actionIfAbsent(device, anomizeAddress);
+    if (ret != SOFTBUS_OK) {
+        NotifyDeviceConnectResult(device, NULL, false, ret);
+        FreeDevice(device);
+    }
+    return;
+}
+
 static void AttempReuseConnect(ConnBrDevice *device, DeviceAction actionIfAbsent)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
@@ -468,17 +481,7 @@ static void AttempReuseConnect(ConnBrDevice *device, DeviceAction actionIfAbsent
     ConnBrConnection *clientConnection = ConnBrGetConnectionByAddr(device->addr, CONN_SIDE_CLIENT);
     ConnBrConnection *serverConnection = ConnBrGetConnectionByAddr(device->addr, CONN_SIDE_SERVER);
     if (clientConnection == NULL && serverConnection == NULL) {
-        if (CheckPending(device->addr)) {
-            device->state = BR_DEVICE_STATE_PENDING;
-            PendingDevice(device, anomizeAddress);
-            return;
-        }
-        device->state = BR_DEVICE_STATE_WAIT_SCHEDULE;
-        int32_t status = actionIfAbsent(device, anomizeAddress);
-        if (status != SOFTBUS_OK) {
-            NotifyDeviceConnectResult(device, NULL, false, status);
-            FreeDevice(device);
-        }
+        CheckPendingAndactionIfAbsent(device, actionIfAbsent, anomizeAddress);
         return;
     }
     ConnBrConnection *connection = ConnBrGetConnectionById(device->connectionId);
@@ -659,6 +662,33 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
     NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
 }
 
+static int32_t AuthenticationFailedAndRetry(ConnBrConnection *connection, ConnBrDevice *connectingDevice,
+    const char *anomizeAddress)
+{
+    bool collision = false;
+    BrUnderlayerStatus *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
+        if (it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONNECTION_EXISTS ||
+            it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONTROLLER_BUSY ||
+            it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_SDP_BUSY ||
+            it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_AUTH_FAILED ||
+            it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_RFCOM_DM) {
+            connection->retryCount += 1;
+            collision = true;
+            break;
+        }
+    }
+    if (collision && connection->retryCount < MAX_RETRY_COUNT) {
+        CONN_LOGW(CONN_BR, "acl collision, wait for retry, id=%{public}u, addr=%{public}s, result=%{public}d",
+            connection->connectionId, anomizeAddress, it->result);
+        // NOTICE: assign connecting NULL first to prevent recursively pending in connecting
+        g_brManager.connecting = NULL;
+        ProcessAclCollisionException(connectingDevice, anomizeAddress);
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
+}
+
 static void ClientConnectFailed(uint32_t connectionId, int32_t error)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
@@ -701,24 +731,7 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
             break;
         }
 
-        bool collision = false;
-        BrUnderlayerStatus *it = NULL;
-        LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
-            if (it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONNECTION_EXISTS ||
-                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONTROLLER_BUSY ||
-                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_SDP_BUSY ||
-                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_AUTH_FAILED) {
-                connection->retryCount += 1;
-                collision = true;
-                break;
-            }
-        }
-        if (collision && connection->retryCount < MAX_RETRY_COUNT) {
-            CONN_LOGW(CONN_BR, "acl collision, wait for retry, id=%{public}u, addr=%{public}s, result=%{public}d",
-                connectionId, anomizeAddress, it->result);
-            // NOTICE: assign connecting NULL first to prevent recursively pending in connecting
-            g_brManager.connecting = NULL;
-            ProcessAclCollisionException(connectingDevice, anomizeAddress);
+        if (AuthenticationFailedAndRetry(connection, connectingDevice, anomizeAddress) == SOFTBUS_OK) {
             break;
         }
         ProcessConnectError(connectingDevice, connection, error);
@@ -1708,21 +1721,27 @@ static int32_t InitBrManager()
     return SOFTBUS_OK;
 }
 
-ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
+static int32_t CheckConnCallbackPara(const ConnectCallback *callback)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, NULL, CONN_INIT, "ConnInitBr: callback is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        callback->OnConnected != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnConnected is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        callback->OnDisconnected != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnDisconnected is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        callback->OnDataReceived != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnDataReceived is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "ConnInitBr: callback is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnConnected != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "ConnInitBr: callback OnConnected is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnDisconnected != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "ConnInitBr: callback OnDisconnected is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnDataReceived != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "ConnInitBr: callback OnDataReceived is null");
+    return SOFTBUS_OK;
+}
 
-    int32_t status = BrInitLooper();
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init looper failed, error=%{public}d", status);
+static int32_t InitBrEventListener(void)
+{
+    int32_t ret = BrInitLooper();
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
+        "ConnInitBr: init looper failed, error=%{public}d", ret);
     SppSocketDriver *sppDriver = InitSppSocketDriver();
-    CONN_CHECK_AND_RETURN_RET_LOGE(sppDriver != NULL, NULL, CONN_INIT, "ConnInitBr: init spp socket driver failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(sppDriver != NULL, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
+        "ConnInitBr: init spp socket driver failed");
 
     ConnBrEventListener connectionEventListener = {
         .onServerAccepted = OnServerAccepted,
@@ -1732,26 +1751,33 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
         .onConnectionException = OnConnectionException,
         .onConnectionResume = OnConnectionResume,
     };
-    status = ConnBrConnectionMuduleInit(g_brManagerAsyncHandler.handler.looper, sppDriver, &connectionEventListener);
+    ret = ConnBrConnectionMuduleInit(g_brManagerAsyncHandler.handler.looper, sppDriver, &connectionEventListener);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init connection failed, error=%{public}d ", status);
+        ret == SOFTBUS_OK, ret, CONN_INIT, "ConnInitBr: init connection failed, error=%{public}d ", ret);
 
     ConnBrTransEventListener transEventListener = {
         .onPostByteFinshed = OnPostByteFinshed,
     };
-    status = ConnBrTransMuduleInit(sppDriver, &transEventListener);
+    ret = ConnBrTransMuduleInit(sppDriver, &transEventListener);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init trans failed, error=%{public}d", status);
+        ret == SOFTBUS_OK, ret, CONN_INIT, "ConnInitBr: init trans failed, error=%{public}d", ret);
+    return SOFTBUS_OK;
+}
 
-    status = InitBrManager();
+ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        CheckConnCallbackPara(callback) == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr callback para failed");
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init manager failed, error=%{public}d", status);
-    status = ConnBrInitBrPendingPacket();
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_INIT,
-        "conn init br failed: init pending packet failed, error=%{public}d", status);
-    status = ConnBrInitBrPendingPacket();
+        InitBrEventListener() == SOFTBUS_OK, NULL, CONN_INIT, "InitBrEventListener init failed");
+
+    int32_t ret = InitBrManager();
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "conn init br failed: init br pending failed, error=%{public}d", status);
+        ret == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init manager failed, error=%{public}d", ret);
+    ret = ConnBrInitBrPendingPacket();
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, CONN_INIT,
+        "conn init br failed: init pending packet failed, error=%{public}d", ret);
+
     g_connectCallback = *callback;
     static ConnectFuncInterface connectFuncInterface = {
         .ConnectDevice = BrConnectDevice,

@@ -62,9 +62,10 @@ public:
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type) = 0;
     virtual int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId) = 0;
-    virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-        uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
+    virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
+        int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
+    virtual void LnnSetUnlockState(void) = 0;
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target,
         const char *pkgName, bool isNeedConnect);
@@ -162,6 +163,7 @@ public:
     virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request);
     virtual int SoftBusGetBtState(void);
+    virtual int SoftBusGetBrState(void);
     virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type);
     virtual int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type);
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
@@ -184,6 +186,7 @@ public:
     virtual void LnnDeinitBusCenterEvent(void);
     virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
         const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
+    virtual bool IsSupportLpFeature(void);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -193,9 +196,10 @@ public:
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char*, uint16_t));
     MOCK_METHOD2(LnnDeleteMetaInfo, int32_t (const char *, ConnectionAddrType));
     MOCK_METHOD3(TransGetConnByChanId, int32_t (int32_t, int32_t, int32_t *));
-    MOCK_METHOD6(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *,
-        uint32_t, uint32_t, int32_t, const AuthVerifyCallback *));
+    MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const AuthKeyInfo *, uint32_t, int32_t,
+        const AuthVerifyCallback *));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
+    MOCK_METHOD0(LnnSetUnlockState, void ());
     MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
@@ -286,6 +290,7 @@ public:
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
     MOCK_METHOD2(GetAuthRequest, int32_t (uint32_t, AuthRequest *));
     MOCK_METHOD0(SoftBusGetBtState, int ());
+    MOCK_METHOD0(SoftBusGetBrState, int ());
     MOCK_METHOD2(LnnSetNetCapability, int32_t (uint32_t *, NetCapability));
     MOCK_METHOD2(LnnClearNetCapability, int32_t (uint32_t *, NetCapability));
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));
@@ -310,7 +315,7 @@ public:
         AuthVerifyModule, bool));
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool (const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t (const char *uuid));
-
+    MOCK_METHOD0(IsSupportLpFeature, bool ());
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };
 } // namespace OHOS
