@@ -31,6 +31,9 @@ extern "C" {
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
+SoftBusList *GetProxyChannelMgrHead(void);
+int32_t GetProxyChannelLock(void);
+void ReleaseProxyChannelLock(void);
 int32_t TransProxyManagerInit(const IServerChannelCallBack *cb);
 void TransProxyManagerDeinit(void);
 

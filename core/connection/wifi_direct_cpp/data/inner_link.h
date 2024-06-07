@@ -151,5 +151,15 @@ private:
     std::map<int, std::shared_ptr<LinkIdStruct>> linkIds_;
     std::shared_ptr<NegotiateChannel> channel_;
 };
+
+using InnerLinkBasicInfo = struct {
+    bool isBeingUsedByRemote;
+    InnerLink::LinkState state;
+    InnerLink::LinkType linkType;
+    int freq;
+    std::string remoteDeviceId;
+    std::string remoteIpv4;
+    std::string remoteBaseMac;
+};
 } // namespace OHOS::SoftBus
 #endif
