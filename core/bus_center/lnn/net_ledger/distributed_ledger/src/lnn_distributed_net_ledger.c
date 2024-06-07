@@ -722,6 +722,11 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL && strcmp(oldInfo->networkId, info->networkId) == 0) {
         MetaInfo temp = info->metaInfo;
+        LNN_LOGI(LNN_LEDGER, "old sessionPort=%{public}d new sessionPort=%{public}d",
+            oldInfo->connectInfo.sessionPort, info->connectInfo.sessionPort);
+        oldInfo->connectInfo.sessionPort = info->connectInfo.sessionPort;
+        oldInfo->connectInfo.authPort = info->connectInfo.authPort;
+        oldInfo->connectInfo.proxyPort = info->connectInfo.proxyPort;
         if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "LnnAddMetaInfo copy fail!");
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
