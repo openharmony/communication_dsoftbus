@@ -1190,7 +1190,7 @@ static int32_t GetWlanInfo(const char *networkId, LaneLinkInfo *linkInfo)
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     int32_t port;
-    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &port) != SOFTBUS_OK) {
+    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_SESSION_PORT, &port) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote wlan port fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
