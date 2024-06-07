@@ -1164,7 +1164,8 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
 
 static int32_t HandleCloseAckMessage(AuthFsm *authFsm, const AuthSessionInfo *info)
 {
-    if ((SoftBusGetBrState() == BR_DISABLE) && (info->nodeInfo.feature & 1 << BIT_SUPPORT_THREE_STATE) == 0) {
+    if ((info->connInfo.type == AUTH_LINK_TYPE_BLE) && (SoftBusGetBrState() == BR_DISABLE) &&
+        (info->nodeInfo.feature & 1 << BIT_SUPPORT_THREE_STATE) == 0) {
         AUTH_LOGE(AUTH_FSM, "peer not support three state");
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_NOT_SUPPORT_THREE_STATE);
         return SOFTBUS_ERR;
