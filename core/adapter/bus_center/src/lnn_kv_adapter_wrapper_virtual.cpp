@@ -99,7 +99,7 @@ void LnnClearRedundancyCache(void)
 {
 }
 
-bool LnnSubcribeKvStoreService()
+bool LnnSubcribeKvStoreService(void)
 {
     return false;
 }
