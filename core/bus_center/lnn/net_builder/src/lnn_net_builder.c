@@ -756,10 +756,14 @@ int32_t ConifgLocalLedger(void)
     if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local irk fail");
     }
-
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
+
+    // irk fail should not cause softbus init fail
+    if (LnnUpdateLinkFinderInfo() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "sync rpa info to linkfinder fail.");
+    }
     return SOFTBUS_OK;
 }
 
@@ -890,24 +894,6 @@ int32_t LnnUpdateNodeAddr(const char *addr)
     return SOFTBUS_OK;
 }
 
-static void UserSwitchedHandler(const LnnEventBasicInfo *info)
-{
-    if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
-        LNN_LOGW(LNN_BUILDER, "invalid param");
-        return;
-    }
-    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
-    SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
-    switch (userSwitchState) {
-        case SOFTBUS_USER_SWITCHED:
-            LNN_LOGI(LNN_BUILDER, "SOFTBUS_USER_SWITCHED");
-            LnnSetUnlockState();
-            break;
-        default:
-            return;
-    }
-}
-
 void UpdateLocalNetCapability(void)
 {
     uint32_t netCapability = 0;
@@ -961,24 +947,6 @@ void UpdateLocalNetCapability(void)
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "set cap to local ledger fail");
     }
-}
-
-static int32_t InitNetBuilderLooper(void)
-{
-    ListInit(&g_netBuilder.fsmList);
-    ListInit(&g_netBuilder.pendingList);
-    g_netBuilder.nodeType = NODE_TYPE_L;
-    g_netBuilder.looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (g_netBuilder.looper == NULL) {
-        LNN_LOGE(LNN_INIT, "get default looper fail");
-        return SOFTBUS_LOOPER_ERR;
-    }
-    g_netBuilder.handler.name = (char *)"NetBuilderHandler";
-    g_netBuilder.handler.looper = g_netBuilder.looper;
-    g_netBuilder.handler.HandleMessage = NetBuilderMessageHandler;
-    g_netBuilder.isInit = true;
-    LNN_LOGI(LNN_INIT, "init net builder looper success");
-    return SOFTBUS_OK;
 }
 
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
