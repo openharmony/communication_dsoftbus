@@ -59,8 +59,8 @@ int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, c
     {
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (!g_dbID2KvAdapter.empty()) {
-            LNN_LOGI(LNN_LEDGER, "kvAdapter is exist, dbId=%{public}d", g_dbId);
             *dbId = g_dbID2KvAdapter.begin()->first;
+            LNN_LOGI(LNN_LEDGER, "kvAdapter is exist, dbId=%{public}d", dbId);
             return SOFTBUS_OK;
         }
     }
