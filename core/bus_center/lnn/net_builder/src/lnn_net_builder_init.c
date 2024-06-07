@@ -686,7 +686,7 @@ int32_t LnnInitNetBuilder(void)
     if (LnnLinkFinderInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "link finder init fail");
     }
-    if (RegAuthVerifyListener(LnnGetNetBuilder()) != SOFTBUS_OK) {
+    if (RegAuthVerifyListener(&g_verifyListener) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "register auth verify listener fail");
         return SOFTBUS_ERR;
     }
