@@ -401,8 +401,8 @@ int32_t KVAdapter::DeRegisterDataChangeListener()
         return ret;
     }
     DeleteDataChangeListener();
+    LNN_LOGI(LNN_LEDGER, "DeRegisterDataChangeListener success");
     return SOFTBUS_OK;
-    
 }
 
 } // namespace OHOS

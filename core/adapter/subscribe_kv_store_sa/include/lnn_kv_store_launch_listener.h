@@ -26,11 +26,8 @@ class KvStoreStatusChangeListener : public SystemAbilityStatusChangeStub {
 public:
     KvStoreStatusChangeListener() = default;
     ~KvStoreStatusChangeListener() = default;
-
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId);
-
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId);
-    
 };
 
 } // namespace OHOS

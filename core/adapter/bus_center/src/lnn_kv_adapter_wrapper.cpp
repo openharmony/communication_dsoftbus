@@ -406,7 +406,8 @@ void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appI
         LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
         return;
     }
-    int32_t status = kvAdapter->RegisterDataChangeListener(std::make_shared<KvDataChangeListener>(appIdStr, storeIdStr));
+    int32_t status = kvAdapter->RegisterDataChangeListener(std::make_shared<KvDataChangeListener>(appIdStr,
+        storeIdStr));
     if (status != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "RegisterDataChangeListener failed");
         return;
