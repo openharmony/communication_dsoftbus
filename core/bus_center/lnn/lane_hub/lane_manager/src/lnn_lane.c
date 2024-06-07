@@ -35,6 +35,7 @@
 #include "lnn_log.h"
 #include "lnn_trans_lane.h"
 #include "lnn_lane_reliability.h"
+#include "lnn_lane_vap_info.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
@@ -595,6 +596,11 @@ int32_t InitLane(void)
         LNN_LOGE(LNN_LANE, "[InitLane]laneDelayInit fail");
         return SOFTBUS_NO_INIT;
     }
+    int32_t ret = LnnInitVapInfo();
+    if (ret != SOFTBUS_OK) {
+        /* optional case, ignore result */
+        LNN_LOGW(LNN_LANE, "[InitLane]init vap info err, ret=%{public}d", ret);
+    }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_NO_INIT;
     }
@@ -620,6 +626,7 @@ void DeinitLane(void)
     DeinitLaneModel();
     DeinitLaneLink();
     LnnDeinitScore();
+    LnnDeinitVapInfo();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->deinit();
     }
