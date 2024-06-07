@@ -81,7 +81,7 @@ int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
     if (SoftBusCondInit(&pending->cond) != SOFTBUS_OK) {
         SoftBusMutexDestroy(&pending->lock);
         SoftBusFree(pending);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     ListTailInsert(&g_pendingList, &(pending->node));
     (void)SoftBusMutexUnlock(&g_pendingLock);
@@ -111,7 +111,8 @@ int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, 
 {
 #define USECTONSEC 1000LL
     CONN_CHECK_AND_RETURN_RET_LOGW(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "invalid param");
-    CONN_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BR, "lock failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        CONN_BR, "lock failed");
     PendingPacket *pending = NULL;
     PendingPacket *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
@@ -177,7 +178,7 @@ int32_t ConnBrSetBrPendingPacket(uint32_t id, int64_t seq, void *data)
         }
     }
     SoftBusMutexUnlock(&g_pendingLock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_BR_SET_PENDING_PACKET_ERR;
 }
 
 int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)

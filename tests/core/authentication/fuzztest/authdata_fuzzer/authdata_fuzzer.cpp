@@ -148,10 +148,13 @@ void AuthMetaStartVerifyFuzzTest(const uint8_t* data, size_t size)
     g_baseFuzzPos = 0;
     uint32_t connectionId = GetData<uint32_t>();
     int32_t callingPid = GetData<int32_t>();
-    uint32_t keyLen = GetData<uint32_t>();
+    AuthKeyInfo authKeyInfo = {
+        .key = data,
+        .keyLen = GetData<uint32_t>(),
+    };
     uint32_t requestId = GetData<uint32_t>();
     AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
-    AuthMetaStartVerify(connectionId, data, keyLen, requestId, callingPid, authVerifyCallback);
+    AuthMetaStartVerify(connectionId, &authKeyInfo, requestId, callingPid, authVerifyCallback);
 }
 
 /* Fuzzer entry point */

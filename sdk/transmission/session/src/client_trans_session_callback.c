@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_udp_manager.h"
 #include "session_set_timer.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -288,7 +289,9 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         TRANS_LOGE(TRANS_SDK, "accept session failed, ret=%{public}d", ret);
         return ret;
     }
-
+    if (channel->channelType == CHANNEL_TYPE_UDP && channel->businessType == BUSINESS_TYPE_FILE) {
+        TransSetUdpChanelSessionId(channel->channelId, sessionId);
+    }
     int id = SetTimer("OnSessionOpened", DFX_TIMERS_S);
     if (sessionCallback.isSocketListener) {
         ret = HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
@@ -301,7 +304,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         CancelTimer(id);
         TRANS_LOGE(TRANS_SDK, "OnSessionOpened failed");
         (void)ClientDeleteSession(sessionId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ON_SESSION_OPENED_FAILED;
     }
     CancelTimer(id);
     TRANS_LOGI(TRANS_SDK, "ok, sessionId=%{public}d", sessionId);
@@ -477,7 +480,7 @@ NO_SANITIZE("cfi") int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t ch
 
     if (sessionCallback.session.OnStreamReceived == NULL) {
         TRANS_LOGE(TRANS_STREAM, "listener OnStreamReceived is NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     sessionCallback.session.OnStreamReceived(sessionId, data, ext, param);
@@ -497,7 +500,7 @@ NO_SANITIZE("cfi") int32_t TransOnQosEvent(int32_t channelId, int32_t channelTyp
     if (listener.OnQosEvent == NULL) {
         TRANS_LOGE(TRANS_QOS, "listener OnQosEvent is NULL, channelId=%{public}d, sessionId=%{public}d",
                    channelId, sessionId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     listener.OnQosEvent(sessionId, eventId, tvCount, tvList);
     return SOFTBUS_OK;

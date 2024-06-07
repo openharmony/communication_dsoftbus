@@ -52,6 +52,7 @@ public:
         void *para, uint64_t delayMillis) = 0;
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
+    virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -75,6 +76,7 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void (SoftBusOOBEState));
+    MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H

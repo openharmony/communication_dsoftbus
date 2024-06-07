@@ -49,6 +49,7 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
         }
         connType = TRANS_CONN_HML;
     } else {
+        StopP2pSessionListener();
         connType = TRANS_CONN_P2P;
     }
 

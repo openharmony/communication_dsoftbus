@@ -331,7 +331,7 @@ int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOp
         TRANS_LOGE(TRANS_CTRL, "open invalid channel type.");
         return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     if (type == CHANNEL_TYPE_UDP) {
         ret = TransOpenUdpChannel(appInfo, connOpt, channelId);
         if (ret != SOFTBUS_OK) {
@@ -388,7 +388,7 @@ static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
 int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
     TRANS_LOGI(TRANS_CTRL, "close channel: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     if (channelType == CHANNEL_TYPE_UNDEFINED) {
         CoreSessionState state = CORE_SESSION_STATE_INIT;
         ret = TransGetSocketChannelStateBySession(sessionName, channelId, &state);

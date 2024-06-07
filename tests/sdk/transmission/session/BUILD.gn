@@ -117,6 +117,7 @@ ohos_unittest("TransClientSessionCallbackTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
   ]
 
   deps = [

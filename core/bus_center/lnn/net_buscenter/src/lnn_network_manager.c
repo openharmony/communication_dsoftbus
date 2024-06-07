@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "lnn_async_callback_utils.h"
@@ -430,6 +431,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupCreated");
     LnnUpdateOhosAccount(true);
     LnnHbOnTrustedRelationIncreased(groupType);
+    LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
     RestartCoapDiscovery();
     EhLoginEventHandler();
 }
@@ -725,6 +727,9 @@ int32_t LnnInitNetworkManagerDelay(void)
 bool LnnIsAutoNetWorkingEnabled(void)
 {
     bool isConfigEnabled = false;
+    if (IsActiveOsAccountUnlocked()) {
+        g_isUnLock = true;
+    }
     if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char *)&isConfigEnabled,
         sizeof(isConfigEnabled)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Cannot get autoNetworkingSwitch from config file");

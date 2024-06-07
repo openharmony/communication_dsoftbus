@@ -25,6 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "message_handler.h"
 
 static const uint32_t CONN_HEAD_SIZE = 24;
 static const uint32_t SHIFT_BITS = 16;
@@ -184,6 +185,7 @@ public:
 void ConnectionManagerTest::SetUpTestCase(void)
 {
     SoftbusConfigInit();
+    LooperInit();
     ConnServerInit();
 }
 
@@ -364,7 +366,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger005, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_AUTH_SDK, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ConnSetConnectCallback(MODULE_AUTH_SDK, &connCb);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_INTERNAL_ERR, ret);
 
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     ConnUnSetConnectCallback(MODULE_AUTH_SDK);

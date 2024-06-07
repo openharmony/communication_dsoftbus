@@ -191,6 +191,7 @@ void P2pV1Processor::WaitingReuseResponseState()
 
 void P2pV1Processor::ProcessConnectCommand(std::shared_ptr<ConnectCommand> &command)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
     connectCommand_ = command;
     Exclusive(connectCommand_->GetRemoteDeviceId());
 
@@ -228,6 +229,7 @@ static void RemoveLinkFromManager(const std::string &remoteDeviceId, int linkId,
 
 void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand> &command)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
     Exclusive(command->GetRemoteDeviceId());
     canAcceptNegotiateData_ = false;
 
@@ -278,6 +280,7 @@ void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand>
 
 void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<NegotiateCommand> &command)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
     Exclusive(command->GetRemoteDeviceId());
 
     bool reply = true;
@@ -319,6 +322,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<Neg
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingReqResponseState(std::shared_ptr<NegotiateCommand> &command)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
     int32_t ret = SOFTBUS_OK;
     switch (msgType) {
@@ -343,6 +347,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingReqResponseState(std::share
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingRequestState(std::shared_ptr<NegotiateCommand> &command)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
     int32_t ret = SOFTBUS_OK;
     switch (msgType) {
@@ -363,6 +368,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingRequestState(std::shared_pt
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingReuseResponseState(std::shared_ptr<NegotiateCommand> &command)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
     int32_t ret = SOFTBUS_OK;
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
     switch (msgType) {
@@ -379,6 +385,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingReuseResponseState(std::sha
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::shared_ptr<NegotiateCommand> &command)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
     int32_t ret = SOFTBUS_OK;
     bool terminate = false;
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
@@ -483,8 +490,7 @@ void P2pV1Processor::OnWaitReuseResponseTimeoutEvent()
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "wait reuse response timeout");
     if (connectCommand_ != nullptr) {
-        CleanupIfNeed(ERROR_WIFI_DIRECT_WAIT_CONNECT_REQUEST_TIMEOUT, connectCommand_->GetRemoteDeviceId());
-        connectCommand_->OnFailure(ERROR_WIFI_DIRECT_WAIT_CONNECT_REQUEST_TIMEOUT);
+        connectCommand_->OnFailure(ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT);
         connectCommand_ = nullptr;
     }
     Terminate();
@@ -519,6 +525,11 @@ int P2pV1Processor::CreateLink()
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteDeviceId=%{public}s", requestId,
         WifiDirectAnonymizeDeviceId(connectCommand_->GetRemoteDeviceId()).c_str());
+
+    if (connectCommand_->GetConnectInfo().info_.reuseOnly) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "reuseOnly=true");
+        return ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT;
+    }
 
     auto role = LinkInfo::LinkMode::NONE;
     auto ret = InterfaceManager::GetInstance().UpdateInterface(
@@ -1585,7 +1596,7 @@ int P2pV1Processor::ReuseLink(const std::shared_ptr<ConnectCommand> &command, In
     auto ret = SendReuseRequest(*command->GetConnectInfo().channel_);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "post request failed, error=%{public}d", ret);
-    SwitchState(&P2pV1Processor::WaitingReuseResponseState, P2P_V1_WAITING_RESPONSE_TIME_MS);
+    SwitchState(&P2pV1Processor::WaitingReuseResponseState, P2P_V1_WAITING_REUSE_RESPONSE_TIME_MS);
     return SOFTBUS_OK;
 }
 

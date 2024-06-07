@@ -111,5 +111,10 @@ void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 {
     return GetNetworkManagerInterface()->LnnNotifyOOBEStateChangeEvent(state);
 }
+
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
+{
+    return GetNetworkManagerInterface()->LnnNotifyAccountStateChangeEvent(state);
+}
 }
 }

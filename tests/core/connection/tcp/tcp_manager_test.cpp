@@ -220,7 +220,7 @@ HWTEST_F(TcpManagerTest, testTcpManager002, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager003, TestSize.Level1)
 {
-    EXPECT_EQ(SOFTBUS_ERR, TcpDisconnectDevice(g_connectionId));
+    EXPECT_EQ(SOFTBUS_CONN_SOCKET_INTERNAL_ERR, TcpDisconnectDevice(g_connectionId));
 };
 
 /*
@@ -233,7 +233,7 @@ HWTEST_F(TcpManagerTest, testTcpManager004, TestSize.Level1)
 {
     ConnectionInfo info = {};
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpGetConnectionInfo(g_connectionId, nullptr));
-    EXPECT_EQ(SOFTBUS_ERR, TcpGetConnectionInfo(g_connectionId, &info));
+    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, TcpGetConnectionInfo(g_connectionId, &info));
     EXPECT_EQ(false, info.isAvailable);
 };
 
@@ -1771,6 +1771,6 @@ HWTEST_F(TcpManagerTest, testTcpManager052, TestSize.Level1)
 HWTEST_F(TcpManagerTest, testTcpDisconnectDeviceNow001, TestSize.Level1)
 {
     int ret = TcpDisconnectDeviceNow(nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 }

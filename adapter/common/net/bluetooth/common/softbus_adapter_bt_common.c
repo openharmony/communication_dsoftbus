@@ -44,7 +44,7 @@ static int ConvertBtState(int transport, int state)
         case OHOS_GAP_STATE_TURN_OFF:
             return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURN_OFF : SOFTBUS_BLE_STATE_TURN_OFF;
         default:
-            return SOFTBUS_ERR;
+            return SOFTBUS_COMM_BLUETOOTH_SWITCH_STATE_ERR;
     }
 }
 
@@ -62,7 +62,7 @@ static int ConvertAclState(GapAclState state)
         default:
             break;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_COMM_BLUETOOTH_ACL_SWITCH_STATE_ERR;
 }
 
 static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
@@ -165,7 +165,7 @@ static int RegisterListenerCallback(void)
         return SOFTBUS_OK;
     }
     if (GapRegisterCallbacks(&g_softbusGapCb) != OHOS_BT_STATUS_SUCCESS) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_REGISTER_CB_ERR;
     }
     g_isRegCb = true;
     return SOFTBUS_OK;
@@ -174,10 +174,10 @@ static int RegisterListenerCallback(void)
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (RegisterListenerCallback() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_REGISTER_CB_ERR;
     }
     for (int index = 0; index < STATE_LISTENER_MAX_NUM; index++) {
         if (!g_stateListener[index].isUsed) {
@@ -186,7 +186,7 @@ int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
             return index;
         }
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR;
 }
 
 int SoftBusRemoveBtStateListener(int listenerId)
@@ -204,7 +204,7 @@ int SoftBusEnableBt(void)
     if (EnableBle()) {
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_COMM_BLE_ENABLE_ERR;
 }
 
 int SoftBusDisableBt(void)
@@ -212,7 +212,7 @@ int SoftBusDisableBt(void)
     if (DisableBle()) {
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_COMM_BLE_DISABLE_ERR;
 }
 
 int SoftBusGetBtState(void)
@@ -234,11 +234,11 @@ int SoftBusGetBrState(void)
 int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     if (mac == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (!GetLocalAddr(mac->addr, BT_ADDR_LEN)) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_GET_ADDR_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -259,7 +259,7 @@ int SoftBusSetBtName(const char *name)
     if (SetLocalName((unsigned char *)name, strlen(name))) {
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_SET_NAME_ERR;
 }
 
 void SoftBusBtInit(void)

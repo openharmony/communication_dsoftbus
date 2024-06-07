@@ -41,9 +41,9 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         !AddStringToJsonObject(msg, "SRC_BUS_NAME", appInfo->myData.sessionName) ||
         !AddStringToJsonObject(msg, "DST_BUS_NAME", appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(msg, "REQ_ID", appInfo->reqId) ||
-        !AddNumberToJsonObject(msg, "MTU_SIZE", (int)appInfo->myData.dataConfig)) {
+        !AddNumberToJsonObject(msg, "MTU_SIZE", (int32_t)appInfo->myData.dataConfig)) {
         TRANS_LOGE(TRANS_SVC, "failed");
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -56,13 +56,14 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
 
     cJSON *obj = cJSON_ParseWithLength(msg, len);
     if (obj == NULL) {
+        TRANS_LOGE(TRANS_SVC, "parse json failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     int32_t errcode;
-    if (GetJsonObjectNumberItem(obj, "ERR_CODE", &errcode)) {
-        TRANS_LOGE(TRANS_SVC, "unpack errcode=%{public}d", errcode);
+    if (GetJsonObjectInt32Item(obj, "ERR_CODE", &errcode)) {
+        TRANS_LOGE(TRANS_SVC, "peer failed: errcode=%{public}d.", errcode);
         cJSON_Delete(obj);
-        return SOFTBUS_PARSE_JSON_ERR;
+        return errcode;
     }
     if (!GetJsonObjectStringItem(obj, "DEVICE_ID", appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX) ||
         !GetJsonObjectStringItem(obj, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX) ||
@@ -70,6 +71,7 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
         !GetJsonObjectStringItem(obj, "DST_BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(obj, "REQ_ID", appInfo->reqId, REQ_ID_SIZE_MAX)) {
         cJSON_Delete(obj);
+        TRANS_LOGE(TRANS_SVC, "get json object failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectNumberItem(obj, "MTU_SIZE", (int32_t *)&(appInfo->peerData.dataConfig))) {
@@ -79,8 +81,7 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
     return SOFTBUS_OK;
 }
 
-int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr,
-    int32_t maxLen)
+int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr, int32_t maxLen)
 {
     if (errMsg == NULL || cJsonStr == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -94,12 +95,14 @@ int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJs
         !AddNumberToJsonObject(obj, "ERR_CODE", errcode) ||
         !AddStringToJsonObject(obj, "ERR_DESC", errMsg)) {
         cJSON_Delete(obj);
-        return SOFTBUS_PARSE_JSON_ERR;
+        TRANS_LOGE(TRANS_SVC, "add json object failed.");
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     char *data = cJSON_PrintUnformatted(obj);
     cJSON_Delete(obj);
     if (data == NULL) {
-        return SOFTBUS_PARSE_JSON_ERR;
+        TRANS_LOGE(TRANS_SVC, "convert json to string failed.");
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (memcpy_s(cJsonStr, maxLen, data, strlen(data)) != EOK) {
         cJSON_free(data);
