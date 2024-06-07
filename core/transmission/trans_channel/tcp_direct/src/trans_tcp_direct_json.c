@@ -82,9 +82,9 @@ int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *po
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t errCode = 0;
-    if (GetJsonObjectNumberItem(json, JSON_KEY_TYPE, &errCode)) {
-        TRANS_LOGE(TRANS_CTRL, "VerifyP2pUnPack peer proc fail: errCode=%{public}d", errCode);
-        return SOFTBUS_PEER_PROC_ERR;
+    if (GetJsonObjectInt32Item(json, ERR_CODE, &errCode)) {
+        TRANS_LOGE(TRANS_CTRL, "peer proc failed: errCode=%{public}d", errCode);
+        return errCode;
     }
     if (!GetJsonObjectNumberItem(json, P2P_PORT, port) ||
         !GetJsonObjectStringItem(json, P2P_IP, ip, ipLen)) {
@@ -93,4 +93,3 @@ int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *po
     }
     return SOFTBUS_OK;
 }
-

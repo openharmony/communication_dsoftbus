@@ -12,63 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdint>
-#include <cstring>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <securec.h>
-
-#include "auth_interface.h"
-#include "auth_manager.h"
-#include "auth_session_fsm.h"
-#include "bus_center_manager.h"
-#include "cJSON.h"
-#include "gtest/gtest.h"
-#include "lnn_lane_interface.h"
+#include "data_bus_native.h"
+#include "disc_event_manager.h"
 #include "lnn_decision_db.h"
-#include "session.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_app_info.h"
-#include "softbus_base_listener.h"
-#include "softbus_conn_interface.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
-#include "softbus_server_frame.h"
-#include "softbus_trans_def.h"
-#include "softbus_proxychannel_message.h"
-#include "wifi_direct_manager.h"
+#include "lnn_lane_link.h"
+#include "lnn_net_builder.h"
+#include "message_handler.h"
+
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_conn_ble_direct.h"
 #include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
-#include "data_bus_native.h"
-#include "lnn_lane_link.h"
-#include "lnn_net_builder.h"
+#include "trans_channel_manager.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_message.c"
+#include "trans_tcp_direct_test.h"
 #include "trans_session_service.h"
-#include "disc_event_manager.h"
-#include "softbus_conn_ble_direct.h"
-#include "message_handler.h"
-#include "trans_channel_manager.h"
+#include "wifi_direct_manager.h"
 
 using namespace testing::ext;
 
 namespace OHOS {
-#define PKG_NAME_SIZE_MAX_LEN 65
-#define NETWORK_ID_BUF_MAX_LEN 65
-#define SESSION_NAME_MAX_LEN 256
-#define TEST_GROUP_ID_LEN 64
-#define IP_LEN 46
-#define ERRMOUDLE 13
-#define INVALID_VALUE (-1)
-#define EOK 0
 
 static const char *g_pkgName = "dms";
 static int32_t g_netWorkId = 100;
@@ -198,7 +167,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpened0002, TestSize.Leve
     int32_t ret;
 
     ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
 /**
@@ -323,11 +292,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetUuidByChanId0008, TestSize.Level1)
     AppInfo *appInfo = TestSetAppInfo();
 
     ret = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_AUTH_ID_FAILED);
     channelId = 0;
 
     ret = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_AUTH_ID_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -392,7 +361,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
     ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ProcessReceivedData(channelId, 0);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     TransSrvDataListDeinit();
 }
 
@@ -520,7 +489,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest001, TestSize.L
 {
     int32_t channelId = -1;
     int32_t ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
 /**
@@ -642,7 +611,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReplyTest001, TestSi
     uint32_t flags = 1;
 
     int32_t ret = OpenDataBusRequestReply(NULL, channelId, seq, flags);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
 /**
@@ -659,7 +628,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestErrorTest001, TestSi
     int32_t errCode = -1;
 
     int32_t ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
 /**

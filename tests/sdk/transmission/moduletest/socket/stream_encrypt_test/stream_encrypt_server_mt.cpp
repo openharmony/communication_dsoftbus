@@ -97,6 +97,13 @@ static void OnStreamReceivedWithNoDataType(
 {
     OnStreamReceived(socket, "RawStreamEncryptTestServer001", data);
 }
+
+static QosTV g_qosInfo[] = {
+    { .qos = QOS_TYPE_MIN_BW,      .value = 80   },
+    { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000 },
+    { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000 },
+};
+
 /*
  * @tc.name: RawStreamEncryptTestServer001
  * @tc.desc: Unencrypted raw stream data transmission test
@@ -116,16 +123,6 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer001, TestSize.Level1)
     int32_t socket = Socket(info);
     ASSERT_GT(socket, 0);
 
-    /**
-     * @tc.steps: step 2. set Qos data and call 'Listen' function.
-     * @tc.expect: 'Listen' function return SOFTBUS_OK.
-     */
-    QosTV qosInfo[] = {
-        {.qos = QOS_TYPE_MIN_BW,       .value = 80  },
-        { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000},
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
-    };
-
     ISocketListener listener = {
         .OnBind = OnBindServer,
         .OnShutdown = OnShutdownServer,
@@ -136,7 +133,7 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer001, TestSize.Level1)
         .OnQos = NULL,
     };
 
-    int32_t ret = Listen(socket, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]), &listener);
+    int32_t ret = Listen(socket, g_qosInfo, sizeof(g_qosInfo) / sizeof(g_qosInfo[0]), &listener);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     /**
@@ -185,16 +182,6 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer002, TestSize.Level1)
     int32_t socket = Socket(info);
     ASSERT_GT(socket, 0);
 
-    /**
-     * @tc.steps: step 2. set Qos data and call 'Listen' function.
-     * @tc.expect: 'Listen' function return SOFTBUS_OK.
-     */
-    QosTV qosInfo[] = {
-        {.qos = QOS_TYPE_MIN_BW,       .value = 80  },
-        { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000},
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
-    };
-
     ISocketListener listener = {
         .OnBind = OnBindServer,
         .OnShutdown = OnShutdownServer,
@@ -205,7 +192,7 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer002, TestSize.Level1)
         .OnQos = nullptr,
     };
 
-    int32_t ret = Listen(socket, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]), &listener);
+    int32_t ret = Listen(socket, g_qosInfo, sizeof(g_qosInfo) / sizeof(g_qosInfo[0]), &listener);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     /**
@@ -255,16 +242,6 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer003, TestSize.Level1)
     int32_t socket = Socket(info);
     ASSERT_GT(socket, 0);
 
-    /**
-     * @tc.steps: step 2. set Qos data and call 'Listen' function.
-     * @tc.expect: 'Listen' function return SOFTBUS_OK.
-     */
-    QosTV qosInfo[] = {
-        {.qos = QOS_TYPE_MIN_BW,       .value = 80  },
-        { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000},
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
-    };
-
     ISocketListener listener = {
         .OnBind = OnBindServer,
         .OnShutdown = OnShutdownServer,
@@ -275,7 +252,7 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer003, TestSize.Level1)
         .OnQos = NULL,
     };
 
-    int32_t ret = Listen(socket, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]), &listener);
+    int32_t ret = Listen(socket, g_qosInfo, sizeof(g_qosInfo) / sizeof(g_qosInfo[0]), &listener);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     /**

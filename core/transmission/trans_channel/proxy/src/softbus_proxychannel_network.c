@@ -47,12 +47,12 @@ int32_t NotifyNetworkingChannelOpened(
     INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
     if (entry == NULL || entry->listener.onChannelOpened == NULL) {
         TRANS_LOGE(TRANS_CTRL, "net onChannelOpened is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     if (entry->listener.onChannelOpened(channelId, appInfo->peerData.deviceId, isServer) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "notify channel open fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_CHANNEL_OPEN_FAILED;
     }
 
     return SOFTBUS_OK;
@@ -101,7 +101,7 @@ int TransRegisterNetworkingChannelListener(const char *sessionName, const INetwo
     }
     if (unuse == -1) {
         TRANS_LOGE(TRANS_CTRL, "exceed max listener registered. maxlisten=%{public}d", MAX_LISTENER_CNT);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_REGISTER_LISTENER_FAILED;
     }
 
     if (strcpy_s(g_listeners[unuse].sessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {

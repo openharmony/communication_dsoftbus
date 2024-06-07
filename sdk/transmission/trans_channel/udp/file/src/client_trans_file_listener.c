@@ -261,7 +261,7 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
         }
     }
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
 void TransDeleteFileListener(const char *sessionName)

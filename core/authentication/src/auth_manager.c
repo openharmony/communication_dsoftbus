@@ -631,26 +631,6 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
     return auth;
 }
 
-static void UpdateNormalizeKeyIndex(const char *udid, int32_t index, bool isServer, const SessionKey *sessionKey)
-{
-    if (strlen(udid) == 0) {
-        AUTH_LOGE(AUTH_KEY, "udid hash is empty");
-        return;
-    }
-    uint8_t hash[SHA_256_HASH_LEN] = {0};
-    if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
-        return;
-    }
-    char udidShortHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN + 1,
-        hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
-        return;
-    }
-    AuthUpdateNormalizeKeyIndex(udidShortHash, index, AUTH_LINK_TYPE_BLE, (SessionKey *)sessionKey, isServer);
-}
-
 static int32_t ProcessEmptySessionKey(const AuthSessionInfo *info, int32_t index, bool isServer,
     const SessionKey *sessionKey)
 {
@@ -663,7 +643,6 @@ static int32_t ProcessEmptySessionKey(const AuthSessionInfo *info, int32_t index
     if (SetSessionKeyAuthLinkType(&auth->sessionKeyList, index, AUTH_LINK_TYPE_BLE) == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_FSM, "add keyType, index=%{public}d, type=%{public}d, authId=%{public}" PRId64,
             index, AUTH_LINK_TYPE_BLE, auth->authId);
-        UpdateNormalizeKeyIndex(info->udid, index, isServer, sessionKey);
         return SOFTBUS_OK;
     }
     if (AddSessionKey(&auth->sessionKeyList, index, sessionKey, AUTH_LINK_TYPE_BLE, false) != SOFTBUS_OK ||
@@ -674,7 +653,6 @@ static int32_t ProcessEmptySessionKey(const AuthSessionInfo *info, int32_t index
     }
     AUTH_LOGI(AUTH_FSM, "add sessionkey, index=%{public}d, type=%{public}d, authId=%{public}" PRId64,
         index, AUTH_LINK_TYPE_BLE, auth->authId);
-    UpdateNormalizeKeyIndex(info->udid, index, isServer, sessionKey);
     return SOFTBUS_OK;
 }
 
@@ -721,7 +699,7 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         return SOFTBUS_LOCK_ERR;
     }
     if (!isConnect && info->connInfo.type != AUTH_LINK_TYPE_BLE) {
-        AUTH_LOGI(AUTH_FSM, "only support ble direct on line");
+        AUTH_LOGE(AUTH_FSM, "only support ble direct on line");
         ReleaseAuthLock();
         return SOFTBUS_OK;
     }
@@ -1491,7 +1469,6 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
         AUTH_LOGI(AUTH_FSM, "AuthHandleLeaveLNN disconnect");
         DisconnectAuthDevice(&auth->connId[authHandle.type]);
     }
-    AuthFreeConn(&authHandle);
     DelAuthManager(auth, authHandle.type);
     ReleaseAuthLock();
 }

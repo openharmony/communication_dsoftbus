@@ -103,6 +103,7 @@ tests/core/common/dfx       zhusiyuan2@huawei.com
 [DFXInterface]
 hisysevent.yaml             litongxin3@huawei.com
 interfaces/kits/common/softbus_error_code.h     litongxin3@huawei.com
+core/common/dfx/interface   litongxin3@huawei.com
 
 [Framework]
 core/frame/                 zhangfengxi@huawei.com

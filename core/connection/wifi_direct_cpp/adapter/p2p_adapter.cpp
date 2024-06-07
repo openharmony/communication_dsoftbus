@@ -295,11 +295,20 @@ int32_t P2pAdapter::GetGroupInfo(WifiDirectP2pGroupInfo &groupInfoOut)
     groupInfoOut.frequency = info.frequency;
     groupInfoOut.interface = info.interface;
     std::vector<uint8_t> devAddrArray(info.owner.devAddr, info.owner.devAddr + sizeof(info.owner.devAddr));
-    groupInfoOut.groupOwner = WifiDirectUtils::MacArrayToString(devAddrArray);
+    std::vector<uint8_t> devRandomAddrArray(info.owner.randomDevAddr, info.owner.randomDevAddr +
+        sizeof(info.owner.randomDevAddr));
+    groupInfoOut.groupOwner.address = WifiDirectUtils::MacArrayToString(devAddrArray);
+    groupInfoOut.groupOwner.randomMac = WifiDirectUtils::MacArrayToString(devRandomAddrArray);
     for (auto i = 0; i < info.clientDevicesSize; i++) {
         std::vector<uint8_t> clientAddrArray(
             info.clientDevices[i].devAddr, info.clientDevices[i].devAddr + sizeof(info.clientDevices[i].devAddr));
-        groupInfoOut.clientDevices.push_back(WifiDirectUtils::MacArrayToString(clientAddrArray));
+        std::vector<uint8_t> clientRandomAddrArray(
+            info.clientDevices[i].randomDevAddr, info.clientDevices[i].randomDevAddr +
+            sizeof(info.clientDevices[i].randomDevAddr));
+        WifiDirectP2pDeviceInfo deviceInfo;
+        deviceInfo.address = WifiDirectUtils::MacArrayToString(clientAddrArray);
+        deviceInfo.randomMac = WifiDirectUtils::MacArrayToString(clientRandomAddrArray);
+        groupInfoOut.clientDevices.push_back(deviceInfo);
     }
     return SOFTBUS_OK;
 }

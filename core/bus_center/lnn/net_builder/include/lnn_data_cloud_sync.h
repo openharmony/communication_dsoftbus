@@ -55,7 +55,7 @@ typedef struct {
     uint8_t peerIrk[LFINDER_IRK_LEN];
     unsigned char publicAddress[LFINDER_MAC_ADDR_LEN];
     char remotePtk[PTK_DEFAULT_LEN];
-    char tableMain[BLE_BROADCAST_IV_LEN + 1];
+    char *broadcastCipherKey;
     int64_t lifeTotal;
     uint64_t curBeginTime;
     uint8_t currentIndex;

@@ -138,7 +138,7 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest002, Te
     msg = cJSON_CreateObject();
     appInfo->udpChannelOptType = TYPE_INVALID_CHANNEL;
     ret = TransPackRequestUdpInfo(msg, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON_Delete(msg);
     SoftBusFree(appInfo);

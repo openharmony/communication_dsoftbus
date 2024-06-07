@@ -242,10 +242,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_ERR);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_OK);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 
     info.appInfo.appType = APP_TYPE_NORMAL;
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_ERR);
@@ -326,11 +326,11 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransProxyAckKeepalive(&info);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 
     info.appInfo.appType = APP_TYPE_NORMAL;
     ret = TransProxyAckKeepalive(&info);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     TestDelTestProxyChannel();
 }
@@ -354,7 +354,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
     info.channelId = m_testProxyChannelId;
 
     int32_t ret = TransProxyAckKeepalive(&info);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 
     TestDelTestProxyChannel();
 }

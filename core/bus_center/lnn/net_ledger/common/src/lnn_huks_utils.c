@@ -21,9 +21,9 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 
-#define LNN_HUKS_MAX_UPDATE_TIMES 4
-#define LNN_HUKS_MAX_UPDATE_SIZE 64
-#define LNN_HUKS_MAX_OUTDATA_SIZE (LNN_HUKS_MAX_UPDATE_SIZE * LNN_HUKS_MAX_UPDATE_TIMES)
+#define LNN_HUKS_MAX_UPDATE_RESERVED 32
+#define LNN_HUKS_MAX_UPDATE_SIZE (8 * 1024)
+#define LNN_HUKS_MAX_OUTDATA_SIZE (LNN_HUKS_MAX_UPDATE_SIZE + LNN_HUKS_MAX_UPDATE_RESERVED)
 
 #define LNN_HUKS_IV_SIZE 16
 static uint8_t g_huksIv[LNN_HUKS_IV_SIZE] = {0};
@@ -110,7 +110,7 @@ static struct HksParamSet *g_decryptParamSet = NULL;
 static int32_t LoopFinishByHuks(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inDataSeg, uint8_t *cur, uint32_t *outDataSize)
 {
-    struct HksBlob outDataFinish = {inDataSeg->size * LNN_HUKS_MAX_UPDATE_TIMES, NULL};
+    struct HksBlob outDataFinish = {inDataSeg->size + LNN_HUKS_MAX_UPDATE_RESERVED, NULL};
     outDataFinish.data = (uint8_t *)SoftBusCalloc(outDataFinish.size);
     if (outDataFinish.data == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc outDataFinish.data fail");

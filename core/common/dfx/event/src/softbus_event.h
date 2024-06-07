@@ -47,6 +47,7 @@ typedef enum {
     EVENT_MODULE_LNN_ALARM,
     EVENT_MODULE_DISC_ALARM,
     EVENT_MODULE_STATS,
+    EVENT_MODULE_MAX,
 } SoftbusEventModule;
 
 void SoftbusEventInner(SoftbusEventModule module, SoftbusEventForm *form);

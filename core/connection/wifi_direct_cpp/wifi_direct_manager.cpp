@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include "wifi_direct_manager.h"
 #include <atomic>
 #include <list>
 #include <mutex>
 #include <securec.h>
-#include "wifi_direct_manager.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_initiator.h"
@@ -35,6 +35,8 @@ static std::recursive_mutex g_listenerLock;
 static std::list<WifiDirectStatusListener> g_listeners;
 static std::recursive_mutex g_listenerModuleIdLock;
 static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
+static WifiDirectEnhanceManager g_enhanceManager;
+static SyncPtkListener g_syncPtkListener;
 
 static uint32_t GetRequestId()
 {
@@ -165,6 +167,44 @@ static void RefreshRelationShip(const char *remoteUuid, const char *remoteMac)
     OHOS::SoftBus::LinkManager::GetInstance().Dump();
 }
 
+static bool LinkHasPtk(const char *remoteDeviceId)
+{
+    bool hasPtk = false;
+    OHOS::SoftBus::LinkManager::GetInstance()
+        .ProcessIfPresent(OHOS::SoftBus::InnerLink::LinkType::HML, remoteDeviceId,
+                          [&hasPtk] (OHOS::SoftBus::InnerLink &innerLink) {
+                              hasPtk = innerLink.HasPtk();
+                          });
+    CONN_LOGI(CONN_WIFI_DIRECT, "hasPtk=%{public}d", hasPtk);
+    return hasPtk;
+}
+
+static int32_t SavePtk(const char *remoteDeviceId, const char *ptk)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteDeviceId != nullptr && ptk != nullptr, SOFTBUS_INVALID_PARAM,
+                                   CONN_WIFI_DIRECT, "nullptr");
+    if (g_enhanceManager.savePTK == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return g_enhanceManager.savePTK(remoteDeviceId, ptk);
+}
+
+static int32_t SyncPtk(const char *remoteDeviceId)
+{
+    if (g_enhanceManager.syncPTK == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+
+    return g_enhanceManager.syncPTK(remoteDeviceId);
+}
+
+static void AddSyncPtkListener(SyncPtkListener listener)
+{
+    g_syncPtkListener = listener;
+}
+
 static bool IsDeviceOnline(const char *remoteMac)
 {
     bool isOnline = false;
@@ -257,14 +297,7 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
 {
     bool found = false;
     OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
-        if (innerLink.GetRemoteIpv4() == remoteIp) {
-            found = true;
-            if (strcpy_s(uuid, uuidSize, innerLink.GetRemoteDeviceId().c_str()) != EOK) {
-                found = false;
-            }
-            return true;
-        }
-        if (innerLink.GetRemoteIpv6() == remoteIp) {
+        if (innerLink.GetRemoteIpv4() == remoteIp || innerLink.GetRemoteIpv6() == remoteIp) {
             found = true;
             if (strcpy_s(uuid, uuidSize, innerLink.GetRemoteDeviceId().c_str()) != EOK) {
                 found = false;
@@ -281,6 +314,35 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteIp=%{public}s uuid=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeDeviceId(uuid).c_str());
+    return SOFTBUS_OK;
+}
+
+static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp, char *localMac, size_t localMacSize, char *remoteMac,
+    size_t remoteMacSize)
+{
+    bool found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
+        if (innerLink.GetLocalIpv4() == localIp || innerLink.GetLocalIpv6() == localIp) {
+            found = true;
+            if (strcpy_s(localMac, localMacSize, innerLink.GetLocalDynamicMac().c_str()) != EOK) {
+                found = false;
+            }
+            if (strcpy_s(remoteMac, remoteMacSize, innerLink.GetRemoteDynamicMac().c_str()) != EOK) {
+                found = false;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    if (!found) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str());
+        return SOFTBUS_ERR;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s localMac=%{public}s remoteMac=%{public}s",
+        OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str(), OHOS::SoftBus::WifiDirectAnonymizeMac(localMac).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str());
     return SOFTBUS_OK;
 }
 
@@ -379,6 +441,21 @@ static int GetStationFrequency()
     return OHOS::SoftBus::P2pAdapter::GetStationFrequency();
 }
 
+static void RegisterEnhanceManager(WifiDirectEnhanceManager *manager)
+{
+    CONN_CHECK_AND_RETURN_LOGE(manager != nullptr, CONN_WIFI_DIRECT, "manager is null");
+    g_enhanceManager = *manager;
+}
+
+static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
+{
+    if (g_syncPtkListener == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "listener is null.");
+        return;
+    }
+    g_syncPtkListener(remoteDeviceId, result);
+}
+
 static int32_t Init()
 {
     CONN_LOGI(CONN_INIT, "init enter");
@@ -398,11 +475,16 @@ static struct WifiDirectManager g_manager = {
 
     .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
     .refreshRelationShip = RefreshRelationShip,
+    .linkHasPtk = LinkHasPtk,
+    .savePTK = SavePtk,
+    .syncPTK = SyncPtk,
+    .addSyncPtkListener = AddSyncPtkListener,
 
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
     .getRemoteUuidByIp = GetRemoteUuidByIp,
+    .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 
     .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
@@ -414,6 +496,8 @@ static struct WifiDirectManager g_manager = {
     .notifyRoleChange = NotifyRoleChange,
     .notifyConnectedForSink = NotifyConnectedForSink,
     .notifyDisconnectedForSink = NotifyDisconnectedForSink,
+    .registerEnhanceManager = RegisterEnhanceManager,
+    .notifyPtkSyncResult = NotifyPtkSyncResult,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)
