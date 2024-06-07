@@ -303,7 +303,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener021, TestSize.Level1)
     int i;
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         info.socketOption.moduleId = static_cast<ListenerModule>(i);
-        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(&info, listener));
+        EXPECT_EQ(SOFTBUS_CONN_LISTENER_NOT_IDLE, StartBaseListener(&info, listener));
     }
     free(listener);
 };

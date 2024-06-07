@@ -1642,7 +1642,7 @@ static int32_t BrInitLooper(void)
 {
     g_brManagerAsyncHandler.handler.looper = GetLooper(LOOP_TYPE_CONN);
     if (g_brManagerAsyncHandler.handler.looper == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1703,7 +1703,8 @@ static int32_t InitBrManager()
     SoftBusList *connections = CreateSoftBusList();
     SoftBusList *pendings = CreateSoftBusList();
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        connections != NULL && pendings != NULL, SOFTBUS_ERR, CONN_INIT, "InitBrManager: create list failed");
+        connections != NULL && pendings != NULL, SOFTBUS_CREATE_LIST_ERR,
+        CONN_INIT, "InitBrManager: create list failed");
     g_brManager.connections = connections;
     g_brManager.pendings = pendings;
     ListInit(&g_brManager.waitings);
@@ -1715,7 +1716,7 @@ static int32_t InitBrManager()
         .OnBtStateChanged = OnBtStateChanged,
     };
     int32_t listenerId = SoftBusAddBtStateListener(&listener);
-    CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_ERR, CONN_INIT,
+    CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_INIT,
         "InitBrManager: add bt state change listener failed, invalid listenerId=%{public}d", listenerId);
     TransitionToState(BR_STATE_AVAILABLE);
     return SOFTBUS_OK;

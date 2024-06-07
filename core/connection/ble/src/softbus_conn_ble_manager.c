@@ -1418,14 +1418,14 @@ int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t tim
     CONN_CHECK_AND_RETURN_RET_LOGW(time != 0 && time <= BLE_CONNECT_KEEP_ALIVE_TIMEOUT_MILLIS,
         SOFTBUS_INVALID_PARAM, CONN_BLE, "time is invaliad, time=%{public}u", time);
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_ERR, CONN_BLE,
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "connection not exist, connectionId=%{public}u", connectionId);
     int32_t status = ConnBleUpdateConnectionRc(connection, 0, 1);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "update rc failed, status=%{public}d, connectionId=%{public}u, requestId=%{public}u",
             status, connectionId, requestId);
         ConnBleReturnConnection(&connection);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
     ConnBleReturnConnection(&connection);
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT, connectionId, requestId, NULL, time);
@@ -1436,12 +1436,12 @@ int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t tim
 int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_ERR, CONN_BLE,
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "connection not exist, connectionId=%{public}u", connectionId);
     bool isExist = false;
     ConnRemoveMsgFromLooper(
         &g_bleManagerSyncHandler, BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT, connectionId, requestId, &isExist);
-    int32_t status = SOFTBUS_ERR;
+    int32_t status = SOFTBUS_CONN_BLE_INTERNAL_ERR;
     do {
         if (!isExist) {
             status = SOFTBUS_OK;
@@ -2182,7 +2182,7 @@ static void ConflictCancelOccupy(const char *udid)
 static int32_t ConflictGetConnection(const char *udid)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        udid != NULL, SOFTBUS_ERR, CONN_BLE, "conflict get connection failed: invalid param, udid is null");
+        udid != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "conflict get connection failed: invalid param, udid is null");
 
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udid);
@@ -2191,7 +2191,7 @@ static int32_t ConflictGetConnection(const char *udid)
     ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, BLE_GATT);
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
         "conflict get connection failed: connection not exist, udid=%{public}s", anomizeUdid);
-    int32_t result = SOFTBUS_ERR;
+    int32_t result = SOFTBUS_CONN_BLE_INTERNAL_ERR;
     do {
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "try to lock failed, connId=%{public}u, udid=%{public}s", connection->connectionId,
@@ -2213,7 +2213,7 @@ static int32_t BleInitLooper(void)
     g_bleManagerSyncHandler.handler.looper = GetLooper(LOOP_TYPE_CONN);
     if (g_bleManagerSyncHandler.handler.looper == NULL) {
         CONN_LOGE(CONN_INIT, "init conn ble looper failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }
@@ -2223,7 +2223,8 @@ static int32_t InitBleManager(const ConnectCallback *callback)
     SoftBusList *connections = CreateSoftBusList();
     SoftBusList *prevents = CreateSoftBusList();
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        connections != NULL && prevents != NULL, SOFTBUS_ERR, CONN_INIT, "init ble manager failed: create list failed");
+        connections != NULL && prevents != NULL, SOFTBUS_CREATE_LIST_ERR,
+        CONN_INIT, "init ble manager failed: create list failed");
     g_bleManager.connections = connections;
     g_bleManager.prevents = prevents;
     ListInit(&g_bleManager.waitings);
@@ -2235,7 +2236,7 @@ static int32_t InitBleManager(const ConnectCallback *callback)
         .OnBtStateChanged = OnBtStateChanged,
     };
     int32_t listenerId = SoftBusAddBtStateListener(&btStateListener);
-    CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_ERR, CONN_INIT,
+    CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_INVALID_NUM, CONN_INIT,
         "int ble manager failed: add bluetooth state change listener failed, invalid listener id=%{public}d",
         listenerId);
     static SoftBusBleConflictListener bleConflictListener = {
@@ -2285,13 +2286,11 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
         .onPostBytesFinished = onPostBytesFinished,
     };
     status = ConnBleInitTransModule(&transEventListener);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "conn init ble failed: init ble trans mudule failed, err=%{public}d",
-        status);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, NULL, CONN_INIT,
+        "conn init ble failed: init ble trans mudule failed, err=%{public}d", status);
     status = InitBleManager(callback);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        status == SOFTBUS_OK, NULL, CONN_INIT, "conn init ble failed: init ble manager failed, err=%{public}d",
-        status);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, NULL, CONN_INIT,
+        "conn init ble failed: init ble manager failed, err=%{public}d", status);
 
     static ConnectFuncInterface bleFuncInterface = {
         .ConnectDevice = BleConnectDevice,

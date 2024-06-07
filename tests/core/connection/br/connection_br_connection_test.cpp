@@ -421,14 +421,14 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
 
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 0;
     ret = InitProperty();
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY + 1;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
     memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
         g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
     ret = InitProperty();
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
@@ -436,7 +436,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
         g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
     g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len = 0;
     ret = InitProperty();
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
@@ -447,7 +447,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
     memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
         g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len, (void *)(&mtu), sizeof(int));
     ret = InitProperty();
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
@@ -1202,7 +1202,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager038, TestSize.Level1)
 {
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
-    EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     DumpLocalBtMac();
 
     EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1215,7 +1215,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager039, TestSize.Level1)
     int state = SOFTBUS_BR_STATE_TURN_ON;
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
-    EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     OnBtStateChanged(listenerId, state);
 
     state = SOFTBUS_BR_STATE_TURN_OFF;

@@ -189,12 +189,12 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddService, TestSize.Level3)
         .uuidLen = 0,
         .uuid = nullptr,
     };
-    ASSERT_EQ(SoftBusGattsAddService(service, true, 1), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsAddService(service, true, 1), SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(mocker, BleGattsAddService).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
     service.uuid = (char *)serviceUuid;
     service.uuidLen = strlen(serviceUuid);
-    ASSERT_EQ(SoftBusGattsAddService(service, true, 1), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsAddService(service, true, 1), SOFTBUS_CONN_BLE_UNDERLAY_SERVER_ADD_SERVICE_ERR);
 
     EXPECT_CALL(mocker, BleGattsAddService).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(SoftBusGattsAddService(service, true, 1), SOFTBUS_OK);
@@ -227,14 +227,16 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic, TestSize.Level
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE;
     int permissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
     ASSERT_EQ(
-        SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions), SOFTBUS_ERR);
+        SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions),
+        SOFTBUS_INVALID_PARAM);
 
     const char *netCharacteristic = "00002B00-0000-1000-8000-00805F9B34FB";
     characteristic.uuid = (char *)netCharacteristic;
     characteristic.uuidLen = strlen(netCharacteristic);
     EXPECT_CALL(mocker, BleGattsAddCharacteristic).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
     ASSERT_EQ(
-        SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions), SOFTBUS_ERR);
+        SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions),
+        SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_ERR);
 
     EXPECT_CALL(mocker, BleGattsAddCharacteristic).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(
@@ -264,14 +266,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddDescriptor, TestSize.Level3)
         .uuid = nullptr,
     };
     int permissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
-    ASSERT_EQ(SoftBusGattsAddDescriptor(MOCK_GATT_SERVICE_HANDLE, desciptor, permissions), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsAddDescriptor(MOCK_GATT_SERVICE_HANDLE, desciptor, permissions), SOFTBUS_INVALID_PARAM);
 
     const char *connDesciptor = "00002902-0000-1000-8000-00805F9B34FB";
     desciptor.uuid = (char *)connDesciptor;
     desciptor.uuidLen = strlen(connDesciptor);
 
     EXPECT_CALL(mocker, BleGattsAddDescriptor).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusGattsAddDescriptor(MOCK_GATT_SERVICE_HANDLE, desciptor, permissions), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsAddDescriptor(MOCK_GATT_SERVICE_HANDLE, desciptor, permissions),
+        SOFTBUS_CONN_BLE_UNDERLAY_DESCRIPTOR_ADD_ERR);
     EXPECT_CALL(mocker, BleGattsAddDescriptor).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(SoftBusGattsAddDescriptor(MOCK_GATT_SERVICE_HANDLE, desciptor, permissions), SOFTBUS_OK);
 }
@@ -295,7 +298,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStartService, TestSize.Level3)
     ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     EXPECT_CALL(mocker, BleGattsStartService).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusGattsStartService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsStartService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_START_ERR);
 
     EXPECT_CALL(mocker, BleGattsStartService).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(SoftBusGattsStartService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_OK);
@@ -320,7 +323,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStopService, TestSize.Level3)
     ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     EXPECT_CALL(mocker, BleGattsStopService).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusGattsStopService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsStopService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_ERR);
 
     EXPECT_CALL(mocker, BleGattsStopService).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(SoftBusGattsStopService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_OK);
@@ -345,7 +348,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDeleteService, TestSize.Level3)
     ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     EXPECT_CALL(mocker, BleGattsDeleteService).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusGattsDeleteService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsDeleteService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_ERR);
 
     EXPECT_CALL(mocker, BleGattsDeleteService).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(SoftBusGattsDeleteService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_OK);
@@ -374,7 +377,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDisconnect, TestSize.Level3)
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
     EXPECT_CALL(mocker, BleGattsDisconnect).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusGattsDisconnect(addr, connId), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsDisconnect(addr, connId), SOFTBUS_CONN_BLE_UNDERLAY_SERVER_DISCONNECT_ERR);
 
     EXPECT_CALL(mocker, BleGattsDisconnect).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(SoftBusGattsDisconnect(addr, connId), SOFTBUS_OK);
@@ -400,7 +403,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendResponse, TestSize.Level3)
 
     SoftBusGattsResponse resp = {0};
     EXPECT_CALL(mocker, BleGattsSendResponse).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusGattsSendResponse(&resp), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsSendResponse(&resp), SOFTBUS_CONN_BLE_UNDERLAY_SERVER_SEND_RESPONSE_ERR);
 
     EXPECT_CALL(mocker, BleGattsSendResponse).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(SoftBusGattsSendResponse(&resp), SOFTBUS_OK);
@@ -426,7 +429,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendNotify, TestSize.Level3)
 
     SoftBusGattsNotify notify = {0};
     EXPECT_CALL(mocker, BleGattsSendIndication).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusGattsSendNotify(&notify), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusGattsSendNotify(&notify), SOFTBUS_CONN_BLE_UNDERLAY_SERVER_SEND_INDICATION_ERR);
 
     EXPECT_CALL(mocker, BleGattsSendIndication).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
     ASSERT_EQ(SoftBusGattsSendNotify(&notify), SOFTBUS_OK);

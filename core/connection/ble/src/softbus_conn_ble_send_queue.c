@@ -88,7 +88,7 @@ int32_t ConnBleEnqueueNonBlock(const void *msg)
         return SOFTBUS_LOCK_ERR;
     }
     bool isListEmpty = true;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_CONN_BLE_INTERNAL_ERR;
     if (queueNode->pid == 0) {
         ret = WaitQueueLength(g_innerQueue->queue[priority], GetQueueLimit(priority), WAIT_QUEUE_BUFFER_PERIOD_LEN,
             &g_sendWaitCond, &g_bleQueueLock);
@@ -133,7 +133,7 @@ END:
 int32_t ConnBleDequeueBlock(void **msg)
 {
     bool isFull = false;
-    int32_t status = SOFTBUS_ERR;
+    int32_t status = SOFTBUS_CONN_BLE_INTERNAL_ERR;
     ConnectionQueue *item = NULL;
     ConnectionQueue *next = NULL;
     SoftBusSysTime waitTime = {0};
@@ -191,17 +191,17 @@ int32_t ConnBleInitSendQueue(void)
 {
     if (SoftBusMutexInit(&g_bleQueueLock, NULL) != 0) {
         CONN_LOGE(CONN_INIT, "Mutex Init failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusCondInit(&g_sendWaitCond) != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "cond Init failed");
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusCondInit(&g_sendCond) != SOFTBUS_OK) {
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     g_innerQueue = CreateBleQueue(0);
     if (g_innerQueue == NULL) {
@@ -209,7 +209,7 @@ int32_t ConnBleInitSendQueue(void)
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }
