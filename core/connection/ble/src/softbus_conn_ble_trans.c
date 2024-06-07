@@ -522,8 +522,7 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
     if ((uint32_t)(head->magic) != MAGIC_NUMBER) {
         buffer->length = 0;
         CONN_LOGE(CONN_BLE,
-            "coc connection received unknown data, just discard. connId=%{public}u, magicError=0x%{public}x",
-            connectionId, head->magic);
+            "discard unknown data, connId=%{public}u, magicError=0x%{public}x", connectionId, head->magic);
         return NULL;
     }
     if (buffer->capacity - pktHeadLen < head->len) {
@@ -540,14 +539,12 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
     }
     uint8_t *dataCopy = SoftBusCalloc(packLen);
     if (dataCopy == NULL) {
-        CONN_LOGE(CONN_BLE,
-            "coc connection parse data failed: calloc failed, retry next time, connId=%{public}u, packLen=%{public}u",
-            connectionId, packLen);
+        CONN_LOGE(CONN_BLE, "coc connection parse data failed: calloc failed, retry next time, connId=%{public}u, "
+            "packLen=%{public}u", connectionId, packLen);
         return NULL;
     }
     if (memcpy_s(dataCopy, packLen, buffer->buffer, packLen) != EOK) {
-        CONN_LOGE(CONN_BLE,
-            "coc connection parse data failed: memcpy_s failed, retry next time, "
+        CONN_LOGE(CONN_BLE, "coc connection parse data failed: memcpy_s failed, retry next time, "
             "connId=%{public}u, packLen=%{public}u, bufferLen=%{public}u", connectionId, packLen, buffer->length);
         SoftBusFree(dataCopy);
         return NULL;
@@ -555,9 +552,8 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
 
     if (buffer->length > packLen &&
         memmove_s(buffer->buffer, buffer->length, buffer->buffer + packLen, buffer->length - packLen) != EOK) {
-        CONN_LOGE(
-            CONN_BLE, "coc connection parse data failed: memmove_s failed, retry next time. connectionId=%{public}u",
-            connectionId);
+        CONN_LOGE(CONN_BLE, "coc connection parse data failed: memmove_s failed, retry next time. "
+            "connectionId=%{public}u", connectionId);
         SoftBusFree(dataCopy);
         return NULL;
     }
