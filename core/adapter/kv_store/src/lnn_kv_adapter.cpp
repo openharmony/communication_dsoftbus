@@ -115,6 +115,10 @@ int32_t KVAdapter::RegisterDataChangeListener(
 int32_t KVAdapter::UnRegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "UnRegister db data change listener");
+    if (!IsCloudSyncEnabled()) {
+        LNN_LOGW(LNN_LEDGER, "not support cloud sync");
+        return SOFTBUS_ERR;
+    }
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
