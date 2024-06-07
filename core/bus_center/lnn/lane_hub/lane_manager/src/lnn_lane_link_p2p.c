@@ -653,6 +653,7 @@ static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLi
         LNN_LOGE(LNN_LANE, "strcpy localIp fail");
         return SOFTBUS_MEM_ERR;
     }
+    linkInfo->linkInfo.p2p.channel = link->channelId;
     P2pLinkReqList reqInfo;
     (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
     int32_t ret = GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo);
