@@ -47,6 +47,9 @@ LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType);
 int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList);
 
+int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
+    uint32_t listNum, LanePreferredLinkList *recommendList);
+
 #ifdef __cplusplus
 }
 #endif

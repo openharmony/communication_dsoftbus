@@ -377,12 +377,12 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
         return ret;
     }
-
-    recommendList->linkTypeNum = resNum;
-    for (uint32_t i = 0; i < resNum; i++) {
-        recommendList->linkType[i] = resList[i];
+    ret = FinalDecideLinkType(networkId, resList, resNum, recommendList);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "final decide linkType fail");
+        return ret;
     }
-    *listNum = resNum;
+    *listNum = recommendList->linkTypeNum;
     return SOFTBUS_OK;
 }
 
