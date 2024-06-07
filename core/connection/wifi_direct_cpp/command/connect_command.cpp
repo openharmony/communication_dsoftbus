@@ -17,7 +17,6 @@
 #include <cstring>
 
 #include "conn_log.h"
-
 #include "channel/auth_negotiate_channel.h"
 #include "channel/dummy_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
@@ -72,15 +71,16 @@ WifiDirectConnectCallback ConnectCommand::GetConnectCallback() const
 void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
-        "requestId=%{public}u linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
-        "linkType=%{public}d",
+        "requestId=%{public}u, linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
+        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d",
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
-        WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType);
+        WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType, link.isReuse,
+        link.bandWidth, link.channelId);
     DfxRecord(true, OK);
     callback_.onConnectSuccess(info_.info_.requestId, &link);
 }
 
-void ConnectCommand::OnFailure(WifiDirectErrorCode reason) const
+void ConnectCommand::OnFailure(int reason) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
     DfxRecord(false, reason);
@@ -108,12 +108,12 @@ void ConnectCommand::PreferNegotiateChannel()
     info_.channel_ = innerLink->GetNegotiateChannel();
 }
 
-bool ConnectCommand::IsSameCommand(const WifiDirectConnectInfo &info)
+bool ConnectCommand::IsSameCommand(const WifiDirectConnectInfo &info) const
 {
     return (info.requestId == info_.info_.requestId) && (info.pid == info_.info_.pid);
 }
 
-void ConnectCommand::DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const
+void ConnectCommand::DfxRecord(bool isSuccess, int reason) const
 {
     if (isSuccess) {
         DurationStatistic::GetInstance().Record(info_.info_.requestId, TotalEnd);
@@ -130,7 +130,7 @@ void ConnectCommand::DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const
         DurationStatistic::GetInstance().Clear(info_.info_.requestId);
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_FAILED,
-            .errcode = static_cast<int32_t>(reason),
+            .errcode = reason,
             .requestId = static_cast<int32_t>(info_.info_.requestId),
         };
         FillConnEventExtra(extra);

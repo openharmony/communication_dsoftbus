@@ -23,135 +23,68 @@
 #include "hisysevent_c.h"
 #include "softbus_event.h"
 
+static void MatchTransEventNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchTransEventNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index,
+    const char * extraParam)
+{
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_STREQ(params[index].v.s, extraParam);
+}
+
+static void MatchTransEventNameTypeExtraStrParamAnony(const HiSysEventParam *params, int32_t index,
+    const char * extraParam)
+{
+    char *anonyStr = NULL;
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+
+    Anonymize(extraParam, &anonyStr);
+    EXPECT_STREQ(params[index].v.s, AnonymizeWrapper(anonyStr));
+    AnonymizeFree(anonyStr);
+}
+
 MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransEventExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.result);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.socketName);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.dataType);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.channelType);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.laneId);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.preferLinkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.laneTransType);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.channelId);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.requestId);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connectionId);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.linkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authId);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.socketFd);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.costTime);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.channelScore);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.peerChannelId);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.btFlow);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    char *anonyStr = NULL;
-    Anonymize(extra.peerNetworkId, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    Anonymize(extra.peerUdid, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerDevVer);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    Anonymize(extra.localUdid, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.callerPkg);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.calleePkg);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.firstTokenName);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.firstTokenId);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.firstTokenType);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.trafficStats);
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.osType);
-
+    MatchTransEventNameTypeExtraInt32Param(params, index, extra.result);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.socketName);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.dataType);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.channelType);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.laneId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.preferLinkType);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.laneTransType);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.channelId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.requestId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.connectionId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.linkType);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.authId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.socketFd);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.costTime);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.channelScore);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.peerChannelId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.btFlow);
+    MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.peerNetworkId);
+    MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.peerUdid);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.peerDevVer);
+    MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.localUdid);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.calleePkg);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.firstTokenName);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.firstTokenId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.firstTokenType);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.trafficStats);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.osType);
     EXPECT_EQ(++index, validSize);
     return true;
 }
@@ -162,13 +95,8 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransEventExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.result < 0) ? (-extra.result) : extra.result));
-    ++index;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
-    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
+    MatchTransEventNameTypeExtraInt32Param(params, index, ((extra.result < 0) ? (-extra.result) : extra.result));
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
     ++index;
     int32_t num = 25;
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[num].name);
@@ -178,93 +106,62 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     return true;
 }
 
+static void MatchTransAlarmNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchTransAlarmNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index, const char *extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
+    EXPECT_STREQ(params[index].v.s, extraParam);
+}
+
 MATCHER_P2(TransAlarmValidParamArrayMatcher, inExtra, validSize, "trans alarm valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransAlarmExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.result);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.callerPid);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.linkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.minBw);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.methodId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.duration);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.curFlow);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.limitFlow);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.limitTime);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.occupyRes);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.syncType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.syncData);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.retryCount);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.retryReason);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.conflictName);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.conflictedName);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.occupyedName);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.permissionName);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.sessionName);
+    MatchTransAlarmNameTypeExtraInt32Param(params, index, extra.result);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.errcode);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.callerPid);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.linkType);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.minBw);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.methodId);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.duration);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.curFlow);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.limitFlow);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.limitTime);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.occupyRes);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.syncType);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.syncData);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.retryCount);
+    MatchTransAlarmNameTypeExtraInt32Param(params, ++index, extra.retryReason);
+    MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.conflictName);
+    MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.conflictedName);
+    MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.occupyedName);
+    MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.permissionName);
+    MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.sessionName);
     EXPECT_EQ(++index, validSize);
     return true;
+}
+
+static void MatchTransAuditNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchTransAuditNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index, const char *extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
+    EXPECT_STREQ(params[index].v.s, extraParam);
 }
 
 MATCHER_P2(TransAuditValidParamArrayMatcher, inExtra, validSize, "trans valid param array match fail")
@@ -273,118 +170,34 @@ MATCHER_P2(TransAuditValidParamArrayMatcher, inExtra, validSize, "trans valid pa
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransAuditExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.hostPkg);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.result);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.auditType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localIp);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localDevId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.localDevType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localSessName);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.localChannelId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerIp);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerDevId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.peerDevType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerSessName);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.peerChannelId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.channelType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.reqId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.linkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.socketFd);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.dataType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.dataLen);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.dataSeq);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.costTime);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.dataTraffic);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_transAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_transAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.reqCount);
-
+    MatchTransAuditNameTypeExtraStrParam(params, index, extra.hostPkg);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.result);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.errcode);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.auditType);
+    MatchTransAuditNameTypeExtraStrParam(params, ++index, extra.localIp);
+    MatchTransAuditNameTypeExtraStrParam(params, ++index, extra.localPort);
+    MatchTransAuditNameTypeExtraStrParam(params, ++index, extra.localDevId);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.localDevType);
+    MatchTransAuditNameTypeExtraStrParam(params, ++index, extra.localSessName);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.localChannelId);
+    MatchTransAuditNameTypeExtraStrParam(params, ++index, extra.peerIp);
+    MatchTransAuditNameTypeExtraStrParam(params, ++index, extra.peerPort);
+    MatchTransAuditNameTypeExtraStrParam(params, ++index, extra.peerDevId);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.peerDevType);
+    MatchTransAuditNameTypeExtraStrParam(params, ++index, extra.peerSessName);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.peerChannelId);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.channelType);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.authId);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.reqId);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.linkType);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.connId);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.socketFd);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.dataType);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.dataLen);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.dataSeq);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.costTime);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.dataTraffic);
+    MatchTransAuditNameTypeExtraInt32Param(params, ++index, extra.reqCount);
 
     EXPECT_EQ(++index, validSize);
     return true;

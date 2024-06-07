@@ -199,7 +199,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_UDP, udpMessageType, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, messageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);

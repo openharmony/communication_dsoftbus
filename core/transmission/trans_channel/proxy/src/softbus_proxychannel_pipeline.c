@@ -163,7 +163,7 @@ int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const
     }
     TRANS_LOGE(TRANS_CTRL, "register listener failed: no position. type=%{public}d", type);
     SoftBusMutexUnlock(&g_manager.lock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_REGISTER_LISTENER_FAILED;
 }
 
 int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
@@ -238,10 +238,11 @@ int32_t TransProxyPipelineSendMessage(
         SoftBusFree(sendData);
         return SOFTBUS_MEM_ERR;
     }
-    if (TransSendNetworkingMessage(channelId, sendData, dataLen + sizeof(uint32_t), CONN_HIGH) != SOFTBUS_OK) {
+    int32_t ret = TransSendNetworkingMessage(channelId, sendData, dataLen + sizeof(uint32_t), CONN_HIGH);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "trans send data failed");
         SoftBusFree(sendData);
-        return SOFTBUS_ERR;
+        return ret;
     }
     SoftBusFree(sendData);
     return SOFTBUS_OK;
@@ -479,7 +480,7 @@ static void InnerOnChannelOpenFailed(int32_t channelId)
     SoftBusFree(target);
     g_manager.channels->cnt -= 1;
     SoftBusMutexUnlock(&g_manager.channels->lock);
-    callback.onChannelOpenFailed(requestId, SOFTBUS_ERR);
+    callback.onChannelOpenFailed(requestId, SOFTBUS_TRANS_CHANNEL_OPEN_FAILED);
     TRANS_LOGI(TRANS_CTRL, "exit");
 }
 
@@ -671,7 +672,7 @@ exit:
     SoftBusMutexDestroy(&g_manager.lock);
     atomic_store_explicit(&(g_manager.inited), false, memory_order_release);
 
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_INIT_FAILED;
 }
 #ifdef  __cplusplus
 }

@@ -34,11 +34,6 @@
 #define DEFAULT_PREFIX_LEN 24
 
 #define REQUEST_ID_INVALID (-1)
-#define LINK_ID_INVALID (-1)
-#define TIMER_ID_INVALID (-1)
-
-#define DECIMAL_BASE 10
-#define HEX_BASE 16
 
 #define HML_IP_NET_PREFIX "172.30."
 #define BYPASS_MAC "FF:FF:FF:FF:FF:FF"

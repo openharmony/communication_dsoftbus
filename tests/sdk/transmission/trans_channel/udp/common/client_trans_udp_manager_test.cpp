@@ -158,12 +158,12 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
 
     channel.businessType = BUSINESS_TYPE_FILE;
     ret = TransOnUdpChannelOpened(strSessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channel.businessType = BUSINESS_TYPE_FILE;
     channel.channelId = TEST_CHANNELID + 1;
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channel.businessType = TEST_COUNT;
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);

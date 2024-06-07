@@ -571,6 +571,7 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
             }
             bleExtra.status = BLE_REPORT_EVENT_INIT;
             AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
+            // udidHash will free When the callback function HbProcessDfxMessage is started.
             return SOFTBUS_OK;
         }
         SoftBusFree(udidHash);
@@ -587,6 +588,12 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
         anonyUdid, device->addr[0].type, isConnect);
     AnonymizeFree(anonyUdid);
 
+    if (isConnect) {
+        if (!AuthHasSameAccountGroup(device)) {
+            LNN_LOGE(LNN_HEART_BEAT, "device has not same account group relation with local device");
+            return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
+        }
+    }
     if (HbAddAsyncProcessCallbackDelay(device) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HbAddAsyncProcessCallbackDelay fail");
     }
@@ -664,6 +671,32 @@ static void ProcessUdidAnonymize(char *devId)
     AnonymizeFree(anonyUdid);
 }
 
+static int32_t CheckReceiveDeviceInfo(
+    DeviceInfo *device, LnnHeartbeatType hbType, const LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
+{
+    if (HbIsRepeatedRecvInfo(hbType, storedInfo, nowTime)) {
+        LNN_LOGD(LNN_HEART_BEAT, "repeat receive info");
+        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
+    }
+    if (HbSuspendReAuth(device) == SOFTBUS_NETWORK_BLE_CONNECT_SUSPEND) {
+        return SOFTBUS_NETWORK_BLE_CONNECT_SUSPEND;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t CheckJoinLnnRequest(
+    DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, HbRespData *hbResp, uint64_t nowTime)
+{
+    if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
+        ProcessUdidAnonymize(device->devId);
+        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
+    }
+    if (!HbIsValidJoinLnnRequest(device, hbResp)) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -672,13 +705,10 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         return SOFTBUS_LOCK_ERR;
     }
     LnnHeartbeatRecvInfo *storedInfo = HbGetStoredRecvInfo(device->devId, device->addr[0].type, nowTime);
-    if (HbIsRepeatedRecvInfo(hbType, storedInfo, nowTime)) {
+    int32_t res = CheckReceiveDeviceInfo(device, hbType, storedInfo, nowTime);
+    if (res != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
-    }
-    if (HbSuspendReAuth(device) == SOFTBUS_NETWORK_BLE_CONNECT_SUSPEND) {
-        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return SOFTBUS_NETWORK_BLE_CONNECT_SUSPEND;
+        return res;
     }
     if (HbSaveRecvTimeToRemoveRepeat(
         storedInfo, device, mediumWeight->weight, mediumWeight->localMasterWeight, nowTime) != SOFTBUS_OK) {
@@ -702,14 +732,10 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return ret;
     }
-    if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
-        ProcessUdidAnonymize(device->devId);
+    res = CheckJoinLnnRequest(device, storedInfo, hbResp, nowTime);
+    if (res != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
-    }
-    if (!HbIsValidJoinLnnRequest(device, hbResp)) {
-        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return SOFTBUS_ERR;
+        return res;
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     bool isConnect = IsNeedConnectOnLine(device, hbResp);

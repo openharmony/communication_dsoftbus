@@ -1263,7 +1263,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
     selectParam.list.linkType[1] = LANE_LINK_TYPE_BUTT;
 
     int32_t ret = SelectLane(NODE_NETWORK_ID, nullptr, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -1272,7 +1272,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(0), Return(SOFTBUS_OK)));
@@ -1280,11 +1280,11 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     selectParam.transType = LANE_T_MIX;
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(linkList);
 }
 
@@ -1315,14 +1315,14 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(linkList);
 }
 
@@ -1362,7 +1362,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_ERR));
     wifiMock.SetDefaultResult();
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
 
     node.discoveryType = 3;
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById)
@@ -1376,7 +1376,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
     ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
 }
 
 /*
@@ -1462,8 +1462,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     reqInfo.linkType = LANE_P2P;
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
     int32_t ret;
     LnnWifiAdpterInterfaceMock wifiMock;
@@ -1477,11 +1477,11 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    cb.OnLaneLinkFail = nullptr;
+    cb.onLaneLinkFail = nullptr;
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    cb.OnLaneLinkSuccess = nullptr;
+    cb.onLaneLinkSuccess = nullptr;
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
@@ -1519,8 +1519,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     reqInfo.linkType = LANE_P2P;
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
     int32_t ret;
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
@@ -1549,12 +1549,12 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     reqInfo.linkType = LANE_P2P;
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
     int32_t ret;
     LnnWifiAdpterInterfaceMock wifiMock;
-    
+
     ConnBleConnection *connection = (ConnBleConnection*)SoftBusCalloc(sizeof(ConnBleConnection));
     if (connection == NULL) {
         return;
@@ -1590,8 +1590,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
     const char *udid = "testuuid";
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     reqInfo.linkType = LANE_BLE;
@@ -1623,8 +1623,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_005, TestSize.Level1)
     const char *udid = "testuuid";
     LnnWifiAdpterInterfaceMock wifiMock;
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
@@ -1659,8 +1659,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_006, TestSize.Level1)
     uint16_t portA = 22;
     uint16_t portB = 33;
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
     LaneDepsInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1695,8 +1695,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_007, TestSize.Level1)
     LaneDepsInterfaceMock mock;
     uint32_t reqId = 0;
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
     LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
     if (request == nullptr) {
@@ -1733,8 +1733,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_008, TestSize.Level1)
     const char *bleMac = "127.1.1.1";
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     reqInfo.linkType = LANE_COC;
@@ -1769,8 +1769,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_009, TestSize.Level1)
     const char *networkId = "testnetworkid123";
     const char *networkIdNotFound = "testnetworkid133";
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
     LaneDepsInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1809,8 +1809,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
     const char *bleMac = "127.1.1.1";
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     if (connection == nullptr) {
@@ -1885,20 +1885,20 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_CAP);
 
 
     selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_CAP);
 
     selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + HIGH_BW;
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
 
     selectParam.transType = LANE_T_MIX;
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP);
 }
 
 /*
@@ -1932,11 +1932,11 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_002, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_CAP);
 
     selectParam.transType = LANE_T_MIX;
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1961,7 +1961,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_003, TestSize.Level1)
 
     selectParam.qosRequire.rttLevel = LANE_RTT_LEVEL_LOW;
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_CAP);
 }
 
 /*
@@ -2100,7 +2100,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_008, TestSize.Leve
         WillOnce(Return(false)).WillOnce(Return(false));
 
     int32_t ret = SelectExpectLaneByParameter(&linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
 }
 
 /*
@@ -2146,7 +2146,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DECISION_MODELS_001, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
 
     int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_WIFI_CAP);
 }
 
 /*
@@ -2317,8 +2317,8 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_001, TestSize.Level1)
 {
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     LaneDepsInterfaceMock mock;
@@ -2356,8 +2356,8 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     ListenerModule module = LANE;
     EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     LaneLinkInfo linkInfo;
@@ -2411,8 +2411,8 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_003, TestSize.Level1)
     LaneDepsInterfaceMock mock;
     EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     LaneLinkCb cb = {
-        .OnLaneLinkSuccess = OnLaneLinkSuccess,
-        .OnLaneLinkFail = OnLaneLinkFail,
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
     };
 
     LaneLinkInfo linkInfo;

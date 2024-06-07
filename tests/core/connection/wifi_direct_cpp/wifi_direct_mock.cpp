@@ -82,6 +82,11 @@ int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteBoolInfo(networkId, key, info);
 }
 
+bool LnnGetOnlineStateById(const char *id, IdCategory type)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetOnlineStateById(id, type);
+}
+
 int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip,
     int32_t port, ListenerModule *moduleId)
 {

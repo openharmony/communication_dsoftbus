@@ -29,7 +29,10 @@
 namespace OHOS {
 namespace {
 constexpr int32_t MAX_DB_RECORD_SIZE = 10000;
+std::mutex g_LnnKvDataChangeListenerMutex;
 } // namespace
+
+std::map<std::string, std::vector<DistributedKv::Entry>> KvDataChangeListener::recordsCache_ = {};
 
 KvDataChangeListener::KvDataChangeListener(const std::string &appId, const std::string &storeId)
 {
@@ -106,7 +109,7 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
 
 void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entry> &insertRecords)
 {
-    int32_t insertSize = insertRecords.size();
+    int32_t insertSize = static_cast<int32_t>(insertRecords.size());
     LNN_LOGI(LNN_LEDGER, "Handle kv data add change! insertSize=%{public}d", insertSize);
     char **keys = (char **)SoftBusCalloc(insertSize * sizeof(char *));
     if (keys == nullptr) {
@@ -120,11 +123,13 @@ void KvDataChangeListener::HandleAddChange(const std::vector<DistributedKv::Entr
         return;
     }
 
-    for (int32_t i = 0; i < insertSize; ++i) {
-        std::string dbKey = insertRecords[i].key.ToString();
-        std::string dbValue = insertRecords[i].value.ToString();
+    int32_t i = 0;
+    for (const auto &item : insertRecords) {
+        std::string dbKey = item.key.ToString();
+        std::string dbValue = item.value.ToString();
         keys[i] = strdup(dbKey.c_str());
         values[i] = strdup(dbValue.c_str());
+        ++i;
     }
     LnnDBDataAddChangeSyncToCache(const_cast<const char **>(keys), const_cast<const char **>(values), insertSize);
 }
@@ -168,7 +173,27 @@ void KvDataChangeListener::SelectChangeType(const std::vector<DistributedKv::Ent
         if (entries.size() == CLOUD_SYNC_INFO_SIZE) {
             LNN_LOGI(LNN_LEDGER, "add! entriesSize=%{public}zu", entries.size());
             HandleAddChange(entries);
-        } else if (!isInsert) {
+            continue;
+        }
+        if (isInsert) {
+            {
+                std::lock_guard<std::mutex> lock(g_LnnKvDataChangeListenerMutex);
+                if (recordsCache_.find(keyPrefix) == recordsCache_.end()) {
+                    recordsCache_[keyPrefix] = entries;
+                    LNN_LOGI(LNN_LEDGER, "first add cache entriesSize=%{public}zu", entries.size());
+                } else {
+                    recordsCache_[keyPrefix].insert(recordsCache_[keyPrefix].end(), entries.begin(), entries.end());
+                    LNN_LOGI(LNN_LEDGER, "add cache entriesSize=%{public}zu", entries.size());
+                }
+                if (recordsCache_[keyPrefix].size() == CLOUD_SYNC_INFO_SIZE) {
+                    LNN_LOGI(LNN_LEDGER, "recordsCache full, add! size=%{public}zu", recordsCache_[keyPrefix].size());
+                    HandleAddChange(recordsCache_[keyPrefix]);
+                    recordsCache_.erase(keyPrefix);
+                }
+            }
+            continue;
+        }
+        if (!isInsert) {
             LNN_LOGI(LNN_LEDGER, "update! entriesSize=%{public}zu", entries.size());
             HandleUpdateChange(entries);
         }
@@ -186,5 +211,12 @@ std::string KvDataChangeListener::GetKeyPrefix(const std::string& key)
         return "";
     }
     return key.substr(0, pos2);
+}
+
+void KvDataChangeListener::ClearCache()
+{
+    std::lock_guard<std::mutex> lock(g_LnnKvDataChangeListenerMutex);
+    recordsCache_.clear();
+    LNN_LOGI(LNN_LEDGER, "ClearCache");
 }
 } // namespace OHOS

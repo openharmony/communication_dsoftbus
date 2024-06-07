@@ -281,14 +281,14 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     }
     ListNodeInsert(&g_authFsmList, &authFsm->node);
     AUTH_LOGI(AUTH_FSM,
-        "create auth fsm. authSeq=%{public}" PRId64 ", name=%{public}s, side=%{public}s, reqId=%{public}u, " CONN_INFO,
-        authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(isServer), requestId, CONN_DATA(connId));
+        "create auth fsm. authSeq=%{public}" PRId64 ", name=%{public}s, side=%{public}s, requestId=%{public}u, "
+        "" CONN_INFO, authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(isServer), requestId, CONN_DATA(connId));
     return authFsm;
 }
 
 static void DestroyAuthFsm(AuthFsm *authFsm)
 {
-    AUTH_LOGI(AUTH_FSM, "destroy auth. authSeq=%{public}" PRId64 ", side=%{public}s, reqId=%{public}u",
+    AUTH_LOGI(AUTH_FSM, "destroy auth. authSeq=%{public}" PRId64 ", side=%{public}s, requestId=%{public}u",
         authFsm->authSeq, GetAuthSideStr(authFsm->info.isServer), authFsm->info.requestId);
     ListDelete(&authFsm->node);
     if (authFsm->info.deviceInfoData != NULL) {
@@ -379,7 +379,7 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
     if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
         return;
     }
-    authFsm->statisticData.endAuthTime = LnnUpTimeMs();
+    authFsm->statisticData.endAuthTime = (uint64_t)LnnUpTimeMs();
     uint64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
     DfxRecordLnnAuthEnd(authFsm, costTime, result);
     AuthFailStage stage = AUTH_STAGE_BUTT;
@@ -1164,7 +1164,8 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
 
 static int32_t HandleCloseAckMessage(AuthFsm *authFsm, const AuthSessionInfo *info)
 {
-    if ((SoftBusGetBrState() == BR_DISABLE) && (info->nodeInfo.feature & 1 << BIT_SUPPORT_THREE_STATE) == 0) {
+    if ((info->connInfo.type == AUTH_LINK_TYPE_BLE) && (SoftBusGetBrState() == BR_DISABLE) &&
+        (info->nodeInfo.feature & 1 << BIT_SUPPORT_THREE_STATE) == 0) {
         AUTH_LOGE(AUTH_FSM, "peer not support three state");
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_NOT_SUPPORT_THREE_STATE);
         return SOFTBUS_ERR;

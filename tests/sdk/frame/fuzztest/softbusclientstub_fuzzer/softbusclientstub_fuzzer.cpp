@@ -357,11 +357,10 @@ bool OnTimeSyncResultInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnPublishLNNResultInnerTest(const uint8_t* data, size_t size)
+static bool OnClientEventByReasonAndCode(const uint8_t *data, size_t size, int32_t reason, uint32_t code)
 {
     (void)size;
     int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
-    constexpr int32_t reason = 2;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
     datas.WriteInt32(intNum);
@@ -373,28 +372,20 @@ bool OnPublishLNNResultInnerTest(const uint8_t* data, size_t size)
     if (softBusClientStub == nullptr) {
         return false;
     }
-    softBusClientStub->OnRemoteRequest(CLIENT_ON_PUBLISH_LNN_RESULT, datas, reply, option);
+    softBusClientStub->OnRemoteRequest(code, datas, reply, option);
     return true;
+}
+
+bool OnPublishLNNResultInnerTest(const uint8_t* data, size_t size)
+{
+    constexpr int32_t reason = 2;
+    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 
 bool OnRefreshLNNResultInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
     constexpr int32_t reason = 8;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(intNum);
-    datas.WriteInt32(reason);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr) {
-        return false;
-    }
-    softBusClientStub->OnRemoteRequest(CLIENT_ON_REFRESH_LNN_RESULT, datas, reply, option);
-    return true;
+    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_REFRESH_LNN_RESULT);
 }
 
 bool OnRefreshDeviceFoundInnerTest(const uint8_t* data, size_t size)
@@ -437,82 +428,26 @@ bool OnClientPermissonChangeInnerTest(const uint8_t* data, size_t size)
 
 bool OnDiscoverFailedInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
     constexpr int32_t reason = 2;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(intNum);
-    datas.WriteInt32(reason);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr) {
-        return false;
-    }
-    softBusClientStub->OnRemoteRequest(CLIENT_DISCOVERY_FAIL, datas, reply, option);
-    return true;
+    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 
 bool OnDiscoverySuccessInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
     constexpr int32_t reason = 2;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(intNum);
-    datas.WriteInt32(reason);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr) {
-        return false;
-    }
-    softBusClientStub->OnRemoteRequest(CLIENT_DISCOVERY_SUCC, datas, reply, option);
-    return true;
+    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 
 bool OnPublishSuccessInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
     constexpr int32_t reason = 2;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(intNum);
-    datas.WriteInt32(reason);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr) {
-        return false;
-    }
-    softBusClientStub->OnRemoteRequest(CLIENT_PUBLISH_SUCC, datas, reply, option);
-    return true;
+    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 
 bool OnPublishFailInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
     constexpr int32_t reason = 2;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(intNum);
-    datas.WriteInt32(reason);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr) {
-        return false;
-    }
-    softBusClientStub->OnRemoteRequest(CLIENT_PUBLISH_FAIL, datas, reply, option);
-    return true;
+    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 }
 

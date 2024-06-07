@@ -23,183 +23,91 @@
 #include "hisysevent_c.h"
 #include "softbus_event.h"
 
+static void MatchConnEventNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchConnEventNameTypeExtraUint32Param(const HiSysEventParam *params, int32_t index, uint32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
+    EXPECT_EQ(params[index].v.ui32, extraParam);
+}
+
+static void MatchConnEventNameTypeExtraUint64Param(const HiSysEventParam *params, int32_t index, uint64_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
+    EXPECT_EQ(params[index].v.ui64, extraParam);
+}
+
+static void MatchConnEventNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index, const char * extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
+    EXPECT_STREQ(params[index].v.s, extraParam);
+}
+
+static void MatchConnEventNameTypeExtraStrParamAnony(const HiSysEventParam *params, int32_t index,
+    const char * extraParam)
+{
+    char *anonyStr = NULL;
+    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
+
+    Anonymize(extraParam, &anonyStr);
+    EXPECT_STREQ(params[index].v.s, AnonymizeWrapper(anonyStr));
+    AnonymizeFree(anonyStr);
+}
+
 MATCHER_P2(ConnValidParamArrayMatcher, inExtra, validSize, "conn valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<ConnEventExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.result);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connectionId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.requestId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.linkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.lnnType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.expectRole);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.costTime);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.rssi);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.load);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.frequency);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connProtocol);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connRole);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connRcDelta);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connRc);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.supportFeature);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.moduleId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.ui32, extra.proType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.fd);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.cfd);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.challengeCode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    char *anonyStr = NULL;
-    Anonymize(extra.peerIp, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    Anonymize(extra.peerBrMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    Anonymize(extra.peerBleMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    Anonymize(extra.peerWifiMac, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerPort);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    Anonymize(extra.peerNetworkId, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    Anonymize(extra.peerUdid, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerDeviceType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    Anonymize(extra.localNetworkId, &anonyStr);
-    EXPECT_STREQ(params[index].v.s, anonyStr);
-    AnonymizeFree(anonyStr);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.callerPkg);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.calleePkg);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.bootLinkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.isRenegotiate);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.isReuse);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.ui64, extra.negotiateTime);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.ui64, extra.linkTime);
-
+    MatchConnEventNameTypeExtraInt32Param(params, index, extra.result);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectionId);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.requestId);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.linkType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.authType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.authId);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.lnnType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.expectRole);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.costTime);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.rssi);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.load);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.frequency);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connProtocol);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connRole);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connRcDelta);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connRc);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.supportFeature);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.moduleId);
+    MatchConnEventNameTypeExtraUint32Param(params, ++index, extra.proType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.fd);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.cfd);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.challengeCode);
+    MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
+    MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
+    MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBleMac);
+    MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerWifiMac);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.peerPort);
+    MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerNetworkId);
+    MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerUdid);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceType);
+    MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.localNetworkId);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.calleePkg);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.bootLinkType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.isRenegotiate);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.isReuse);
+    MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.negotiateTime);
+    MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.linkTime);
     EXPECT_EQ(++index, validSize);
     return true;
 }
@@ -210,15 +118,24 @@ MATCHER_P2(ConnInvalidParamArrayMatcher, inExtra, validSize, "conn invalid param
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<ConnEventExtra>(inExtra);
     int32_t index = 0;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.result < 0) ? (-extra.result) : extra.result));
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
+    MatchConnEventNameTypeExtraInt32Param(params, index, ((extra.result < 0) ? (-extra.result) : extra.result));
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
     EXPECT_EQ(++index, validSize);
     return true;
+}
+
+static void MatchConnAuditNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extraParam);
+}
+
+static void MatchConnAuditNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index, const char *extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
+    EXPECT_STREQ(params[index].v.s, extraParam);
 }
 
 MATCHER_P2(ConnAuditValidParamArrayMatcher, inExtra, validSize, "conn valid param array match fail")
@@ -228,123 +145,31 @@ MATCHER_P2(ConnAuditValidParamArrayMatcher, inExtra, validSize, "conn valid para
     auto extra = static_cast<ConnAuditExtra>(inExtra);
     int32_t index = 0;
 
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.auditType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connectionId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.requestId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.linkType);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.expectRole);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.costTime);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connectTimes);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.frequency);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.challengeCode);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerBrMac);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localBrMac);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerBleMac);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localBleMac);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerDeviceType);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerUdid);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localUdid);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.connPayload);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localDeviceName);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerIp);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localIp);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.callerPkg);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.calleePkg);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerPort);
-
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.localPort);
+    MatchConnAuditNameTypeExtraInt32Param(params, index, extra.errcode);
+    MatchConnAuditNameTypeExtraInt32Param(params, ++index, extra.auditType);
+    MatchConnAuditNameTypeExtraInt32Param(params, ++index, extra.connectionId);
+    MatchConnAuditNameTypeExtraInt32Param(params, ++index, extra.requestId);
+    MatchConnAuditNameTypeExtraInt32Param(params, ++index, extra.linkType);
+    MatchConnAuditNameTypeExtraInt32Param(params, ++index, extra.expectRole);
+    MatchConnAuditNameTypeExtraInt32Param(params, ++index, extra.costTime);
+    MatchConnAuditNameTypeExtraInt32Param(params, ++index, extra.connectTimes);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.frequency);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.challengeCode);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.peerBrMac);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.localBrMac);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.peerBleMac);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.localBleMac);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.peerDeviceType);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.peerUdid);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.localUdid);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.connPayload);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.localDeviceName);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.peerIp);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.localIp);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.callerPkg);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.calleePkg);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.peerPort);
+    MatchConnAuditNameTypeExtraStrParam(params, ++index, extra.localPort);
 
     EXPECT_EQ(++index, validSize);
     return true;

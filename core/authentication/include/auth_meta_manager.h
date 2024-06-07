@@ -30,8 +30,8 @@ extern "C" {
 int32_t AuthMetaInit(const AuthTransCallback *callback);
 void AuthMetaDeinit(void);
 
-int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-    uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack);
+int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
+    int32_t callingPid, const AuthVerifyCallback *callBack);
 void AuthMetaReleaseVerify(int64_t authId);
 
 int32_t AuthMetaEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen,

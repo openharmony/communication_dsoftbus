@@ -34,6 +34,7 @@ typedef enum {
 } LnnDataType;
 
 int32_t LnnSaveDeviceData(const char *data, LnnDataType dataType);
+int32_t LnnAsyncSaveDeviceData(const char *data, LnnDataType dataType);
 int32_t LnnRetrieveDeviceData(LnnDataType dataType, char **data, uint32_t *dataLen);
 int32_t LnnUpdateDeviceData(const char *data, LnnDataType dataType);
 int32_t LnnDeletaDeviceData(LnnDataType dataType);

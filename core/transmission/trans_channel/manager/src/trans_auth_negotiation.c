@@ -78,7 +78,7 @@ static int32_t TransAddAuthReqToPendingList(uint32_t authRequestId)
     TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "malloc auth request item failed");
     item->authRequestId = authRequestId;
     item->cnt = 0;
-    item->errCode = SOFTBUS_ERR;
+    item->errCode = SOFTBUS_TRANS_AUTH_REQUEST_NOT_FOUND;
     item->isFinished = false;
 
     if (SoftBusMutexLock(&g_reqAuthPendingList->lock) != SOFTBUS_OK) {
@@ -341,7 +341,7 @@ void TransAuthNegoTaskManager(uint32_t authRequestId, int32_t channelId)
 {
     TRANS_CHECK_AND_RETURN_LOGE(authRequestId != 0, TRANS_SVC, "invalid param");
     bool isFinished = false;
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_TRANS_AUTH_NEGO_TASK_NOT_FOUND;
     int32_t cnt = 0;
     int32_t ret = TransCheckAuthNegoStatusByReqId(authRequestId, &isFinished, &errCode, &cnt);
     if (ret != SOFTBUS_OK) {

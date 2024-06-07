@@ -78,6 +78,7 @@ uint32_t AddAuthRequest(const AuthRequest *request)
         SoftBusFree(newRequest);
         return 0;
     }
+    newRequest->addTime = GetCurrentTimeMs();
     ListTailInsert(&g_authRequestList, &newRequest->node);
     uint32_t waitNum = GetAuthRequestWaitNum(newRequest);
     ReleaseAuthLock();

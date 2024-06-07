@@ -80,21 +80,6 @@ static void EsOnSessionClosed(int sessionId)
         g_sessionId = -1;
     }
 }
-
-static void EsOnDataReceived(int sessionId, const void *data, unsigned int dataLen)
-{
-}
-
-static void EsOnStreamReceived(
-    int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
-{
-    LOG("%s:enter", __func__);
-}
-static  void EsOnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
-{
-    LOG("%s:enter", __func__);
-}
-
 void FileTest::SetUpTestCase()
 {
     static ISessionListener sessionListener = {.OnSessionOpened = EsOnSessionOpened,

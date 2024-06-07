@@ -452,7 +452,7 @@ HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
     int32_t channelType = CHANNEL_TYPE_UDP;
 
     int32_t ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 
     channelType = CHANNEL_TYPE_AUTH;
     ret = TransNotifyAuthSuccess(channelId, channelType);
@@ -489,12 +489,12 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
 
     channelId++;
     int32_t ret = TransCloseChannel(NULL, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_UDP;
     ret = TransCloseChannel(NULL, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_AUTH;

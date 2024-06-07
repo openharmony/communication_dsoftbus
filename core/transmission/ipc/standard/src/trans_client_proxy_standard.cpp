@@ -67,48 +67,84 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
         TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed.");
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
-    WRITE_PARCEL_WITH_RET(data, CString, sessionName, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->connectType, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, CString, sessionName, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->connectType, SOFTBUS_IPC_ERR);
     
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        WRITE_PARCEL_WITH_RET(data, FileDescriptor, channel->fd, SOFTBUS_ERR);
-        WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_ERR);
+        WRITE_PARCEL_WITH_RET(data, FileDescriptor, channel->fd, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_IPC_ERR);
     }
-    WRITE_PARCEL_WITH_RET(data, Bool, channel->isServer, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Bool, channel->isEnabled, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Bool, channel->isEncrypt, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->peerUid, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->peerPid, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, CString, channel->groupId, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Uint32, channel->keyLen, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->isServer, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->isEnabled, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->isEncrypt, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->peerUid, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->peerPid, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, CString, channel->groupId, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Uint32, channel->keyLen, SOFTBUS_IPC_ERR);
     if (!data.WriteRawData(channel->sessionKey, channel->keyLen)) {
         TRANS_LOGE(TRANS_CTRL, "write sessionKey and keyLen failed.");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
-    WRITE_PARCEL_WITH_RET(data, CString, channel->peerSessionName, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, CString, channel->peerDeviceId, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->businessType, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, CString, channel->peerSessionName, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, CString, channel->peerDeviceId, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->businessType, SOFTBUS_IPC_ERR);
     if (channel->channelType == CHANNEL_TYPE_UDP) {
-        WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_ERR);
-        WRITE_PARCEL_WITH_RET(data, Int32, channel->streamType, SOFTBUS_ERR);
-        WRITE_PARCEL_WITH_RET(data, Bool, channel->isUdpFile, SOFTBUS_ERR);
+        WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, Int32, channel->streamType, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, Bool, channel->isUdpFile, SOFTBUS_IPC_ERR);
         
         if (!channel->isServer) {
-            WRITE_PARCEL_WITH_RET(data, Int32, channel->peerPort, SOFTBUS_ERR);
-            WRITE_PARCEL_WITH_RET(data, CString, channel->peerIp, SOFTBUS_ERR);
+            WRITE_PARCEL_WITH_RET(data, Int32, channel->peerPort, SOFTBUS_IPC_ERR);
+            WRITE_PARCEL_WITH_RET(data, CString, channel->peerIp, SOFTBUS_IPC_ERR);
         }
     }
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_ERR);
-    WRITE_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
 
     return SOFTBUS_OK;
+}
+
+int32_t TransClientProxy::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+    if (!data.WriteInt32(channelId)) {
+        TRANS_LOGE(TRANS_CTRL, "write channel id failed");
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+    if (!data.WriteUint8(tos)) {
+        TRANS_LOGE(TRANS_CTRL, "write tos failed");
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(CLIENT_ON_TRANS_LIMIT_CHANGE, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnClientTransLimitChange send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    int32_t serverRet;
+    if (!reply.ReadInt32(serverRet)) {
+        TRANS_LOGE(TRANS_CTRL, "OnChannelOpened read serverRet failed");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    return serverRet;
 }
 
 int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)

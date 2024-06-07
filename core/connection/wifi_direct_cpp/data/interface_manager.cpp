@@ -35,7 +35,7 @@ int InterfaceManager::ReadInterface(InterfaceInfo::InterfaceType type, const Rea
     return reader(interfaces_[static_cast<int>(type)]);
 }
 
-bool InterfaceManager::IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare)
+bool InterfaceManager::IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare) const
 {
     std::shared_lock lock(lock_);
     auto info = interfaces_[static_cast<int>(type)];

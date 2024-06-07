@@ -443,7 +443,7 @@ int32_t UnRegisterLaneListener(LaneType type)
 }
 
 static void LnnOnWifiDirectConnectedForSink(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
-    enum WifiDirectLinkType type)
+    enum WifiDirectLinkType type, int channelId)
 {
     if (remoteMac == NULL || remoteIp == NULL || remoteUuid == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
@@ -466,6 +466,7 @@ static void LnnOnWifiDirectConnectedForSink(const char *remoteMac, const char *r
         return;
     }
     laneLinkInfo.type = LANE_HML;
+    laneLinkInfo.linkInfo.p2p.channel = channelId;
     uint64_t laneId = GenerateLaneId(localUdid, laneLinkInfo.peerUdid, laneLinkInfo.type);
     if (laneId == INVALID_LANE_ID) {
         LNN_LOGE(LNN_LANE, "generate laneid fail");

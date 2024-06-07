@@ -1511,117 +1511,156 @@ static void TransitionToState(enum BleMgrState target)
     g_bleManager.state->enter();
 }
 
+typedef struct {
+    int32_t cmd;
+    void (*func)(SoftBusMessage *msg);
+} MsgHandlerCommand;
+
+static void HandlePendingRequestFunc(SoftBusMessage *msg)
+{
+    (void)msg;
+    if (g_bleManager.state->handlePendingRequest != NULL) {
+        g_bleManager.state->handlePendingRequest();
+        return;
+    }
+}
+
+static void ConnectRequestFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->handlePendingRequest == NULL) {
+        return;
+    }
+    ConnBleConnectRequestContext *ctx = (ConnBleConnectRequestContext *)msg->obj;
+    g_bleManager.state->connectRequest(ctx);
+}
+
+static void ClientConnectedFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->clientConnected != NULL) {
+        g_bleManager.state->clientConnected((uint32_t)msg->arg1);
+        return;
+    }
+}
+
+static void ClientConnectTimeoutFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->clientConnectTimeout != NULL) {
+        g_bleManager.state->clientConnectTimeout((uint32_t)msg->arg1, (char *)msg->obj);
+        return;
+    }
+}
+
+static void ClientConnectFailedFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->clientConnectFailed == NULL) {
+        return;
+    }
+    BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
+    g_bleManager.state->clientConnectFailed(ctx->connectionId, ctx->status);
+}
+
+static void ServerAcceptedFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->serverAccepted != NULL) {
+        g_bleManager.state->serverAccepted((uint32_t)msg->arg1);
+        return;
+    }
+}
+
+static void DataReceivedFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->dataReceived == NULL) {
+        return;
+    }
+    ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)msg->obj;
+    g_bleManager.state->dataReceived(ctx);
+}
+
+static void ConnectionClosedFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->connectionClosed == NULL) {
+        return;
+    }
+    BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
+    g_bleManager.state->connectionClosed(ctx->connectionId, ctx->status);
+}
+
+static void ConnectionResumeFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->connectionResume != NULL) {
+        g_bleManager.state->connectionResume((uint32_t)msg->arg1);
+        return;
+    }
+}
+
+static void DisconnectRequestFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->disconnectRequest != NULL) {
+        g_bleManager.state->disconnectRequest((uint32_t)msg->arg1);
+        return;
+    }
+}
+
+static void PreventTimeoutFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->preventTimeout != NULL) {
+        char *udid = (char *)msg->obj;
+        g_bleManager.state->preventTimeout(udid);
+        return;
+    }
+}
+
+static void ResetFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->reset == NULL) {
+        return;
+    }
+    BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
+    g_bleManager.state->reset(ctx->status);
+}
+
+static void KeepAliveTimeoutFunc(SoftBusMessage *msg)
+{
+    if (g_bleManager.state->keepAliveTimeout != NULL) {
+        g_bleManager.state->keepAliveTimeout((uint32_t)msg->arg1, (uint32_t)msg->arg2);
+        return;
+    }
+}
+
+static MsgHandlerCommand g_commands[] = {
+    {BLE_MGR_MSG_NEXT_CMD, HandlePendingRequestFunc},
+    {BLE_MGR_MSG_CONNECT_REQUEST, ConnectRequestFunc},
+    {BLE_MGR_MSG_CONNECT_SUCCESS, ClientConnectedFunc},
+    {BLE_MGR_MSG_CONNECT_TIMEOUT, ClientConnectTimeoutFunc},
+    {BLE_MGR_MSG_CONNECT_FAIL, ClientConnectFailedFunc},
+    {BLE_MGR_MSG_SERVER_ACCEPTED, ServerAcceptedFunc},
+    {BLE_MGR_MSG_DATA_RECEIVED, DataReceivedFunc},
+    {BLE_MGR_MSG_CONNECTION_CLOSED, ConnectionClosedFunc},
+    {BLE_MGR_MSG_CONNECTION_RESUME, ConnectionResumeFunc},
+    {BLE_MGR_MSG_DISCONNECT_REQUEST, DisconnectRequestFunc},
+    {BLE_MGR_MSG_PREVENT_TIMEOUT, PreventTimeoutFunc},
+    {BLE_MGR_MSG_RESET, ResetFunc},
+    {BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT, KeepAliveTimeoutFunc},
+};
+
 static void BleManagerMsgHandler(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOGW(msg != NULL, CONN_BLE, "msg is null");
     if (msg->what != BLE_MGR_MSG_DATA_RECEIVED) {
         CONN_LOGI(CONN_BLE, "ble msg looper recv msg=%{public}d, curState=%{public}s",
             msg->what, g_bleManager.state->name());
     }
-    switch (msg->what) {
-        case BLE_MGR_MSG_NEXT_CMD: {
-            if (g_bleManager.state->handlePendingRequest != NULL) {
-                g_bleManager.state->handlePendingRequest();
-                return;
-            }
+    bool isInvaildCmd = false;
+    size_t commandSize = sizeof(g_commands) / sizeof(g_commands[0]);
+    for (size_t i = 0; i < commandSize; i++) {
+        if (g_commands[i].cmd == msg->what) {
+            g_commands[i].func(msg);
+            isInvaildCmd = true;
             break;
         }
-        case BLE_MGR_MSG_CONNECT_REQUEST: {
-            ConnBleConnectRequestContext *ctx = (ConnBleConnectRequestContext *)msg->obj;
-            if (g_bleManager.state->connectRequest != NULL) {
-                g_bleManager.state->connectRequest(ctx);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_CONNECT_SUCCESS: {
-            if (g_bleManager.state->clientConnected != NULL) {
-                g_bleManager.state->clientConnected((uint32_t)msg->arg1);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_CONNECT_TIMEOUT: {
-            if (g_bleManager.state->clientConnectTimeout != NULL) {
-                g_bleManager.state->clientConnectTimeout((uint32_t)msg->arg1, (char *)msg->obj);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_CONNECT_FAIL: {
-            BleStatusContext *ctx = (BleStatusContext *)msg->obj;
-            if (g_bleManager.state->clientConnectFailed != NULL) {
-                g_bleManager.state->clientConnectFailed(ctx->connectionId, ctx->status);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_SERVER_ACCEPTED: {
-            if (g_bleManager.state->serverAccepted != NULL) {
-                g_bleManager.state->serverAccepted((uint32_t)msg->arg1);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_DATA_RECEIVED: {
-            ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)msg->obj;
-            if (g_bleManager.state->dataReceived != NULL) {
-                g_bleManager.state->dataReceived(ctx);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_CONNECTION_CLOSED: {
-            BleStatusContext *ctx = (BleStatusContext *)msg->obj;
-            if (g_bleManager.state->connectionClosed != NULL) {
-                g_bleManager.state->connectionClosed(ctx->connectionId, ctx->status);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_CONNECTION_RESUME: {
-            if (g_bleManager.state->connectionResume != NULL) {
-                g_bleManager.state->connectionResume((uint32_t)msg->arg1);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_DISCONNECT_REQUEST: {
-            if (g_bleManager.state->disconnectRequest != NULL) {
-                g_bleManager.state->disconnectRequest((uint32_t)msg->arg1);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_PREVENT_TIMEOUT: {
-            char *udid = (char *)msg->obj;
-            if (g_bleManager.state->preventTimeout != NULL) {
-                g_bleManager.state->preventTimeout(udid);
-                return;
-            }
-            break;
-        }
-        case BLE_MGR_MSG_RESET: {
-            BleStatusContext *ctx = (BleStatusContext *)msg->obj;
-            if (g_bleManager.state->reset != NULL) {
-                g_bleManager.state->reset(ctx->status);
-                return;
-            }
-            break;
-        }
-        case BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT: {
-            if (g_bleManager.state->keepAliveTimeout != NULL) {
-                g_bleManager.state->keepAliveTimeout((uint32_t)msg->arg1, (uint32_t)msg->arg2);
-                return;
-            }
-            break;
-        }
-        default:
-            CONN_LOGW(CONN_BLE,
-                "ble manager looper receive unexpected msg just ignore, FIX it quickly. what=%{public}d", msg->what);
-            break;
     }
-    CONN_LOGW(CONN_BLE, "ble manager looper ignore handle message, what=%{public}d, currentState=%{public}s",
-        msg->what, g_bleManager.state->name());
+    CONN_CHECK_AND_RETURN_LOGW(isInvaildCmd == true, CONN_BLE,
+        "ble manager looper receive unexpected msg just ignore, FIX it quickly. what=%{public}d", msg->what);
 }
 
 static int BleCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args)

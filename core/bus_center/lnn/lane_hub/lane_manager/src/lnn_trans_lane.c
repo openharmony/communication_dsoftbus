@@ -212,7 +212,7 @@ static void LinkFail(uint32_t laneReqId, int32_t reason, LaneLinkType linkType)
     }
     failInfo->reason = reason;
     failInfo->linkType = linkType;
-    if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneReqId, reason, failInfo, 0) != SOFTBUS_OK) {
+    if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneReqId, (uint64_t)reason, failInfo, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post lanelink fail msg err");
         SoftBusFree(failInfo);
     }
@@ -656,20 +656,20 @@ static int32_t Alloc(uint32_t laneReqId, const LaneRequestOption *request, const
         &transRequest->expectedLink, sizeof(transRequest->expectedLink)) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
-    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
+    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     if (recommendLinkList == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    recommendLinkList->linkTypeNum = 0;
     uint32_t listNum = 0;
-    if (SelectLane((const char *)transRequest->networkId, &selectParam, recommendLinkList, &listNum) != SOFTBUS_OK) {
+    int32_t ret = SelectLane((const char *)transRequest->networkId, &selectParam, recommendLinkList, &listNum);
+    if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
-        return SOFTBUS_LANE_SELECT_FAIL;
+        return ErrCodeFilter(ret, SOFTBUS_LANE_SELECT_FAIL);
     }
     if (recommendLinkList->linkTypeNum == 0) {
         LNN_LOGE(LNN_LANE, "no link resources available, alloc fail");
         SoftBusFree(recommendLinkList);
-        return SOFTBUS_LANE_SELECT_FAIL;
+        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
     LNN_LOGI(LNN_LANE, "select lane link success, linkNum=%{public}d, laneReqId=%{public}u", listNum, laneReqId);
     TransReqInfo *newItem = CreateRequestNode(laneReqId, transRequest, listener);
@@ -685,11 +685,11 @@ static int32_t Alloc(uint32_t laneReqId, const LaneRequestOption *request, const
     ListTailInsert(&g_requestList->list, &newItem->node);
     g_requestList->cnt++;
     Unlock();
-    int32_t ret = TriggerLink(laneReqId, transRequest, recommendLinkList);
+    ret = TriggerLink(laneReqId, transRequest, recommendLinkList);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         DeleteRequestNode(laneReqId);
-        return ret;
+        return ErrCodeFilter(ret, SOFTBUS_LANE_TRIGGER_LINK_FAIL);
     }
     return SOFTBUS_OK;
 }
@@ -906,7 +906,7 @@ static int32_t GetErrCodeWithLock(uint32_t laneReqId)
     }
     LaneLinkType linkType;
     int32_t result = SOFTBUS_LANE_BUILD_LINK_FAIL;
-    for (int32_t i = 0; i < nodeInfo->linkList->linkTypeNum; i++) {
+    for (uint32_t i = 0; i < nodeInfo->linkList->linkTypeNum; i++) {
         linkType = nodeInfo->linkList->linkType[i];
         if (linkType == LANE_HML || linkType == LANE_P2P) {
             result = nodeInfo->statusList[linkType].result;
@@ -960,8 +960,8 @@ static void LaneTriggerLink(SoftBusMessage *msg)
 {
     uint32_t laneReqId = (uint32_t)msg->arg1;
     LaneLinkCb linkCb = {
-        .OnLaneLinkSuccess = LinkSuccess,
-        .OnLaneLinkFail = LinkFail,
+        .onLaneLinkSuccess = LinkSuccess,
+        .onLaneLinkFail = LinkFail,
     };
     LinkRequest requestInfo = {0};
     if (Lock() != SOFTBUS_OK) {
@@ -985,7 +985,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         nodeInfo->linkRetryIdx++;
         nodeInfo->statusList[requestInfo.linkType].status = BUILD_LINK_STATUS_BUILDING;
         Unlock();
-        uint64_t delayMillis = g_laneLatency[requestInfo.linkType];
+        uint64_t delayMillis = (uint64_t)g_laneLatency[requestInfo.linkType];
         (void)PostLinkTimeoutMessage(laneReqId, requestInfo.linkType, delayMillis);
         ret = BuildLink(&requestInfo, laneReqId, &linkCb);
         if (ret == SOFTBUS_OK) {
@@ -993,7 +993,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         }
     } while (false);
     ret = ErrCodeFilter(ret, SOFTBUS_LANE_BUILD_LINK_FAIL);
-    linkCb.OnLaneLinkFail(laneReqId, ret, requestInfo.linkType);
+    linkCb.onLaneLinkFail(laneReqId, ret, requestInfo.linkType);
 }
 
 static void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo)

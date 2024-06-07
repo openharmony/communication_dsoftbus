@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -194,7 +194,7 @@ static int32_t OnUdpChannelOpened(int32_t channelId)
     if ((g_sessionCb != NULL) && (g_sessionCb->OnSessionOpened != NULL)) {
         return g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_NO_INIT;
 }
 
 static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const ChannelInfo *channel)
@@ -279,7 +279,7 @@ static int32_t TransDeleteBusinnessChannel(UdpChannel *channel)
         case BUSINESS_TYPE_STREAM:
             if (TransCloseStreamChannel(channel->channelId) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_SDK, "trans close udp channel failed.");
-                return SOFTBUS_ERR;
+                return SOFTBUS_TRANS_CLOSE_UDP_CHANNEL_FAILED;
             }
             break;
         case BUSINESS_TYPE_FILE:
@@ -614,6 +614,42 @@ void TransUdpDeleteFileListener(const char *sessionName)
     return TransDeleteFileListener(sessionName);
 }
 
+int32_t TransLimitChange(int32_t channelId, uint8_t tos)
+{
+    if (tos != FILE_PRIORITY_BK && tos != FILE_PRIORITY_BE) {
+        TRANS_LOGE(TRANS_FILE, "invalid ip tos");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    UdpChannel channel;
+    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    int32_t ret = TransGetUdpChannel(channelId, &channel);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (channel.info.isServer) {
+        TRANS_LOGE(TRANS_FILE, "server side no need to set ip tos");
+        return SOFTBUS_NOT_NEED_UPDATE;
+    }
+    if (channel.businessType != BUSINESS_TYPE_FILE) {
+        TRANS_LOGE(TRANS_FILE, "bussiness type not match");
+        return SOFTBUS_NOT_NEED_UPDATE;
+    }
+    uint8_t dfileTos = tos;
+    DFileOpt dfileOpt = {
+        .optType = OPT_TYPE_SOCK_PRIO,
+        .valLen = sizeof(uint8_t),
+        .value = (uint64_t)&dfileTos,
+    };
+    ret = NSTACKX_DFileSetSessionOpt(channel.dfileId, &dfileOpt);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "NSTACKX_DFileSetOpt, channelId=%{public}d, ret=%{public}d, tos=%{public}hhu", channelId,
+            ret, tos);
+        return ret;
+    }
+    NotifyTransLimitChanged(channelId, tos);
+    return ret;
+}
+
 int32_t TransUdpOnCloseAckReceived(int32_t channelId)
 {
     return SetPendingPacket(channelId, 0, PENDING_TYPE_UDP);
@@ -638,4 +674,29 @@ int32_t ClientEmitFileEvent(int32_t channelId)
         }
     }
     return ret;
+}
+
+int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannel *channelNode = NULL;
+    LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
+        if (channelNode->channelId == channelId) {
+            channelNode->sessionId = sessionId;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_SDK, "udp channel not found, channelId=%{public}d.", channelId);
+    return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }

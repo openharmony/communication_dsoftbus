@@ -51,6 +51,12 @@ public:
         }
     }
 
+    void Clear()
+    {
+        std::lock_guard<std::mutex> lk(m_);
+        queue_.clear();
+    }
+
 private:
     std::mutex m_;
     std::condition_variable c_;
