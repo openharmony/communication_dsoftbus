@@ -96,6 +96,7 @@ typedef struct {
     bool newBleBrFlag;
 } NodeInfoAbility;
 
+NodeInfo *GetNodeInfoFromMap(const DoubleHashMap *map, const char *id);
 bool IsMetaNode(NodeInfo *info);
 DistributedNetLedger* LnnGetDistributedNetLedger(void);
 
