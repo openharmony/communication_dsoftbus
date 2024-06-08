@@ -334,7 +334,6 @@ ohos_unittest("LNNNetBuilderMockTest") {
   sources = [
     "$dsoftbus_root_path/adapter/common/net/wifi/common/softbus_wifi_api_adapter_virtual.c",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_deviceinfo_to_profile_virtual.c",
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_kv_adapter_wrapper_virtual.cpp",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_link_finder_virtul.c",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/src/auth_deviceprofile_virtual.cpp",
