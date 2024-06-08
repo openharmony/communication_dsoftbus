@@ -717,16 +717,21 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         return SOFTBUS_INVALID_PARAM;
     }
     Anonymize(targetNetworkId, &anonyNetworkId);
-    if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
-        LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", anonyNetworkId);
+    char uuid[UUID_BUF_LEN] = { 0 };
+    if (targetNetworkId != NULL) {
+        if (!LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
+            LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", anonyNetworkId);
+        }
+        if (LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "targetNetworkId convert uuid fail");
+            return SOFTBUS_ERR;
+        }
     }
     LNN_LOGD(LNN_HEART_BEAT, "shift lnn gear mode, callerId=%{public}s, networkId=%{public}s, cycle=%{public}d, "
         "duration=%{public}d, wakeupFlag=%{public}d, action=%{public}d", callerId,
         targetNetworkId != NULL ? anonyNetworkId : "",
         mode->cycle, mode->duration, mode->wakeupFlag, mode->action);
     AnonymizeFree(anonyNetworkId);
-    char uuid[UUID_BUF_LEN] = {0};
-    (void)LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
     if (mode->action == CHANGE_TCP_KEEPALIVE) {
         if (AuthSendKeepAlive(uuid, mode->cycle) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "auth send keepalive fail");
