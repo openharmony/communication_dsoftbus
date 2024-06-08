@@ -708,8 +708,7 @@ static void ReportBusinessDiscoveryResultEvt(const char *pkgName, int32_t discCn
     }
 }
 
-int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
-    const GearMode *mode)
+int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     char *anonyNetworkId = NULL;
     if (pkgName == NULL || mode == NULL || callerId == NULL) {
@@ -717,24 +716,25 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         return SOFTBUS_INVALID_PARAM;
     }
     Anonymize(targetNetworkId, &anonyNetworkId);
-    char uuid[UUID_BUF_LEN] = { 0 };
-    if (targetNetworkId != NULL) {
-        if (!LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
-            LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", anonyNetworkId);
-        }
-        if (LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "targetNetworkId convert uuid fail");
-            return SOFTBUS_ERR;
-        }
+    if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
+        LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", anonyNetworkId);
     }
-    LNN_LOGD(LNN_HEART_BEAT, "shift lnn gear mode, callerId=%{public}s, networkId=%{public}s, cycle=%{public}d, "
-        "duration=%{public}d, wakeupFlag=%{public}d, action=%{public}d", callerId,
-        targetNetworkId != NULL ? anonyNetworkId : "",
-        mode->cycle, mode->duration, mode->wakeupFlag, mode->action);
+    LNN_LOGD(LNN_HEART_BEAT,
+        "shift lnn gear mode, callerId=%{public}s, networkId=%{public}s, cycle=%{public}d, "
+        "duration=%{public}d, wakeupFlag=%{public}d, action=%{public}d",
+        callerId, targetNetworkId != NULL ? anonyNetworkId : "", mode->cycle, mode->duration, mode->wakeupFlag,
+        mode->action);
     AnonymizeFree(anonyNetworkId);
+    char uuid[UUID_BUF_LEN] = { 0 };
+    if (LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+    if (targetNetworkId != NULL &&
+        LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "targetNetworkId convert uuid fail");
+        return SOFTBUS_ERR;
+    }
     if (mode->action == CHANGE_TCP_KEEPALIVE) {
-        if (AuthSendKeepAlive(uuid, mode->cycle) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "auth send keepalive fail");
+        if (AuthSendKeepaliveOption(uuid, mode->cycle) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "auth send keepalive option fail");
             return SOFTBUS_ERR;
         }
         return SOFTBUS_OK;
@@ -752,55 +752,6 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         LNN_LOGI(LNN_HEART_BEAT, "tcp flush failed, wifi will offline");
         return LnnRequestLeaveSpecific(targetNetworkId, CONNECTION_ADDR_WLAN);
     }
-    return SOFTBUS_OK;
-}
-
-int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode,
-    LnnHeartbeatStrategyType strategyType)
-{
-    if (mode == NULL || callerId == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "shift lnn gear get invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ReportBusinessDiscoveryResultEvt(callerId, 1);
-    LNN_LOGD(LNN_HEART_BEAT, "shift lnn gear mode, callerId=%{public}s, cycle=%{public}d, "
-        "duration=%{public}d, wakeupFlag=%{public}d", callerId, mode->cycle, mode->duration, mode->wakeupFlag);
-    if (LnnSetGearModeBySpecificType(callerId, mode, HEARTBEAT_TYPE_BLE_V0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "ctrl reset medium mode fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, strategyType, false) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "ctrl start adjustable ble heatbeat fail");
-        return SOFTBUS_ERR;
-    }
-    int32_t i, infoNum;
-    char uuid[UUID_BUF_LEN] = {0};
-    NodeBasicInfo *info = NULL;
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
-        return SOFTBUS_ERR;
-    }
-    if (info == NULL || infoNum == 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
-        return SOFTBUS_ERR;
-    }
-    int32_t ret;
-    NodeInfo nodeInfo = {0};
-    for (i = 0; i < infoNum; ++i) {
-        ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
-        if (ret != SOFTBUS_OK || !LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI)) {
-            continue;
-        }
-        (void)LnnConvertDlId(info[i].networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
-        if (AuthFlushDevice(uuid) != SOFTBUS_OK) {
-            char *anonyUuid = NULL;
-            Anonymize(uuid, &anonyUuid);
-            LNN_LOGE(LNN_HEART_BEAT, "tcp flush failed, wifi will offline, uuid=%{public}s", anonyUuid);
-            AnonymizeFree(anonyUuid);
-            LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_WLAN);
-        }
-    }
-    SoftBusFree(info);
     return SOFTBUS_OK;
 }
 
