@@ -55,7 +55,7 @@ public:
     static constexpr char FOUND_DEVICE_ID[] = "e831f7630b7619ae";
 };
 
-static void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     DISC_LOGI(DISC_TEST, "OnDeviceFound, devId=%{public}s", device->devId);
     DiscBleTest::g_foundDeviceInfo = *device;

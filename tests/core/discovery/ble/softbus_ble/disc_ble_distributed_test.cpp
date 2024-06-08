@@ -46,11 +46,11 @@ void DiscDistributedBleTest::TearDownTestCase(void)
     LooperDeinit();
 }
 
-static void TestOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void TestOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     DISC_LOGI(DISC_TEST, "TestOnDeviceFound in");
     (void)device;
-    (void)addtions;
+    (void)additions;
 }
 
 static DiscInnerCallback g_testDiscInnerCallBack = {

@@ -812,11 +812,11 @@ HWTEST_F(LNNDisctributedLedgerTest, REFRESH_DEVICEONLINE_STATEINFO_Test_001, Tes
 {
     DeviceInfo device;
     memset_s(device.devId, sizeof(device.devId), '\0', sizeof(device.devId));
-    InnerDeviceInfoAddtions addtions;
-    addtions.medium = COAP;
-    (void)RefreshDeviceOnlineStateInfo(&device, &addtions);
-    addtions.medium = BLE;
-    (void)RefreshDeviceOnlineStateInfo(&device, &addtions);
+    InnerDeviceInfoAddtions additions;
+    additions.medium = COAP;
+    (void)RefreshDeviceOnlineStateInfo(&device, &additions);
+    additions.medium = BLE;
+    (void)RefreshDeviceOnlineStateInfo(&device, &additions);
     (void)LnnRemoveNode(nullptr);
     NodeInfo info;
     (void)OnlinePreventBrConnection(&info);
@@ -867,8 +867,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_NODEINFO_Test_001, TestSize.Le
 HWTEST_F(LNNDisctributedLedgerTest, LNN_REFRESH_DEVICEONLINE_ANDINFO_Test_001, TestSize.Level1)
 {
     DeviceInfo device;
-    InnerDeviceInfoAddtions addtions;
-    (void)LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &addtions);
+    InnerDeviceInfoAddtions additions;
+    (void)LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &additions);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)

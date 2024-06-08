@@ -20,10 +20,10 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
-int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     (void)pkgName;
-    (void)addtions;
+    (void)additions;
     DISC_LOGI(DISC_CONTROL, "ondevice found ipc server push.");
     DiscClientOnDeviceFound(device);
     return SOFTBUS_OK;

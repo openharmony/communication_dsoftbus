@@ -93,18 +93,18 @@ void DiscManagerTest::TearDownTestCase(void)
 {}
 
 static int32_t TestDeviceFound(const char *packageName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *addtions)
+    const InnerDeviceInfoAddtions *additions)
 {
-    (void)addtions;
+    (void)additions;
     g_devieceFoundCount++;
     DISC_LOGI(DISC_TEST, "[device found]success!\n");
     return 0;
 }
 
-static void TestInnerDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void TestInnerDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     (void)device;
-    (void)addtions;
+    (void)additions;
     g_devieceFoundCount++;
     DISC_LOGI(DISC_TEST, "[inner device found]success!\n");
 }

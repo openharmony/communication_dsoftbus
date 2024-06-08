@@ -27,21 +27,21 @@
 #include "softbus_errcode.h"
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *addtions);
+    const InnerDeviceInfoAddtions *additions);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
 };
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *addtions)
+    const InnerDeviceInfoAddtions *additions)
 {
     DeviceInfo newDevice;
     if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy new device info error");
         return SOFTBUS_MEM_ERR;
     }
-    LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
+    LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, additions);
     LnnOnRefreshDeviceFound(&newDevice);
     return SOFTBUS_OK;
 }

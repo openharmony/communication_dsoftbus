@@ -163,7 +163,7 @@ static void UpdateDdmpStartDiscoveryTime(DiscInfo *info)
     }
 }
 
-static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     DISC_LOGD(DISC_CONTROL, "record device found");
     if (infoNode->statistics.repTimes == 0) {
@@ -174,11 +174,11 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
         } else {
             DISC_LOGE(DISC_CONTROL, "CurTime < startTime");
         }
-        SoftbusRecordFirstDiscTime((SoftBusDiscMedium)addtions->medium, costTime);
+        SoftbusRecordFirstDiscTime((SoftBusDiscMedium)additions->medium, costTime);
         DiscEventExtra extra = { 0 };
         DiscEventExtraInit(&extra);
         extra.discMode = infoNode == NULL ? 0 : infoNode->mode;
-        extra.discType = addtions == NULL ? 0 : addtions->medium + 1;
+        extra.discType = additions == NULL ? 0 : additions->medium + 1;
         extra.costTime = (int32_t)costTime;
         extra.result = EVENT_STAGE_RESULT_OK;
         UpdateDiscEventAndReport(&extra, device);
