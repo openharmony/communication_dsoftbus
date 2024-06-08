@@ -40,6 +40,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_kv_adapter_wrapper.h"
 #include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
@@ -709,6 +710,9 @@ int32_t LnnInitNetBuilder(void)
     if (LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist user switch evt handler fail!");
         return SOFTBUS_ERR;
+    }
+    if (LnnSubcribeKvStoreService() != true) {
+        LNN_LOGE(LNN_INIT, "regist kv store service fail!");
     }
     return InitNetBuilderLooper();
 }
