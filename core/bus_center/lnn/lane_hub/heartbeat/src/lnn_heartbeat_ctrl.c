@@ -726,10 +726,12 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         mode->cycle, mode->duration, mode->wakeupFlag, mode->action);
     AnonymizeFree(anonyNetworkId);
     char uuid[UUID_BUF_LEN] = {0};
-    if (targetNetworkId != NULL &&
-        LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "targetNetworkId convert uuid fail");
-        return SOFTBUS_ERR;
+    if (targetNetworkId != NULL) {
+        int32_t ret = LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "targetNetworkId convert uuid fail");
+            return ret;
+        }
     }
     if (mode->action == CHANGE_TCP_KEEPALIVE) {
         if (AuthSendKeepAlive(uuid, mode->cycle) != SOFTBUS_OK) {
