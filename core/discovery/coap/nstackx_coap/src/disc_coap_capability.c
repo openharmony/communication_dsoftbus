@@ -59,14 +59,14 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     DISC_CHECK_AND_RETURN_RET_LOGE(discCb != NULL && discCb->OnDeviceFound != NULL,
         SOFTBUS_INVALID_PARAM, DISC_COAP, "discCb is NULL");
 
-    InnerDeviceInfoAddtions addtions = {
+    InnerDeviceInfoAddtions additions = {
         .medium = COAP,
     };
     if (nstackxInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||
         nstackxInfo->mode == PUBLISH_MODE_PROACTIVE) {
         DISC_LOGI(DISC_COAP,
             "DiscFound: devName=%{public}s, netIf=%{public}s", devInfo->devName, nstackxInfo->networkName);
-        discCb->OnDeviceFound(devInfo, &addtions);
+        discCb->OnDeviceFound(devInfo, &additions);
         return SOFTBUS_OK;
     }
 

@@ -48,13 +48,13 @@ static InnerDeviceInfoAddtions g_testAddtions = {
     .medium = AUTO
 };
 
-static void OnDeviceFoundTest(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void OnDeviceFoundTest(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     (void)device;
-    (void)addtions;
+    (void)additions;
     DISC_LOGI(DISC_TEST, "OnDeviceFoundTest in");
     isDeviceFound = true;
-    g_testAddtions.medium = addtions->medium;
+    g_testAddtions.medium = additions->medium;
 }
 
 static DiscInnerCallback g_discInnerCb = {

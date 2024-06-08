@@ -64,7 +64,7 @@ int32_t LnnIpcInit(void)
 }
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *addtions);
+    const InnerDeviceInfoAddtions *additions);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
@@ -184,14 +184,14 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
 }
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *addtions)
+    const InnerDeviceInfoAddtions *additions)
 {
     DeviceInfo newDevice;
     if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy new device info error");
         return SOFTBUS_MEM_ERR;
     }
-    LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
+    LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, additions);
     return ClientOnRefreshDeviceFound(pkgName, 0, &newDevice, sizeof(DeviceInfo));
 }
 
