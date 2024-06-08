@@ -56,7 +56,7 @@ HWTEST_F(NstackxAdapterTest, DiscCoapRegisterServiceData002, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL));
 
     uint32_t dataLen = 0;
-    EXPECT_EQ(DiscCoapRegisterServiceData(nullptr, dataLen, 0), SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+    EXPECT_EQ(DiscCoapRegisterServiceData(nullptr, dataLen, 0, 0), SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
     DISC_LOGI(DISC_TEST, "DiscCoapRegisterServiceData002 end ----");
 }
 }
