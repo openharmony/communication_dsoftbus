@@ -390,8 +390,8 @@ void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appI
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId || appId == nullptr || appIdLen < MIN_STRING_LEN ||
-    appIdLen > MAX_STRING_LEN || storeId == nullptr || storeIdLen < MIN_STRING_LEN ||
-    storeIdLen > MAX_STRING_LEN) {
+        appIdLen > MAX_STRING_LEN || storeId == nullptr || storeIdLen < MIN_STRING_LEN ||
+        storeIdLen > MAX_STRING_LEN) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return;
     }
