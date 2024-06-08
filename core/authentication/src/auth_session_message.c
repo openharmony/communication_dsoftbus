@@ -450,8 +450,8 @@ static bool IsEmptyShortHashStr(char *udidHash)
         return true;
     }
     uint8_t emptyHash[SHORT_HASH_LEN] = {0};
-    char emptyHashStr[UDID_SHORT_HASH_HEX_STR] = {0};
-    if (ConvertBytesToHexString(emptyHashStr, UDID_SHORT_HASH_HEX_STR, emptyHash, SHORT_HASH_LEN) != SOFTBUS_OK) {
+    char emptyHashStr[UDID_SHORT_HASH_HEX_STR + 1] = {0};
+    if (ConvertBytesToHexString(emptyHashStr, UDID_SHORT_HASH_HEX_STR + 1, emptyHash, SHORT_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return false;
     }
@@ -510,7 +510,7 @@ int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "get local udid hash fail");
         return SOFTBUS_ERR;
     }
-    if (!GetUdidOrShortHashForNormalized(info, udidHash, SHA_256_HEX_HASH_LEN) ||
+    if (!GetUdidShortHash(info, udidHash, SHA_256_HEX_HASH_LEN) ||
         IsEmptyShortHashStr(udidHash)) {
         AUTH_LOGI(AUTH_FSM, "unknow peer udidHash");
         info->localState = AUTH_STATE_UNKNOW;
