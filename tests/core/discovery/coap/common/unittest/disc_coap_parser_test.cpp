@@ -226,25 +226,26 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseHwAccountHash001, TestSize.Level1)
 HWTEST_F(DiscCoapParserTest, DiscCoapFillServiceData001, TestSize.Level1)
 {
     uint32_t capability = (1 << CASTPLUS_CAPABILITY_BITMAP);
+    uint32_t allCap = 8;
     std::string capabilityData;
     uint32_t dataLen = 0;
     char outData[MAX_SERVICE_DATA_LEN] = {0};
 
-    int32_t ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, nullptr, 0);
+    int32_t ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, nullptr, 0, allCap);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     capabilityData = "testCapabilityData";
     dataLen = capabilityData.length() - 1;
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     dataLen = capabilityData.length();
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
 
     capabilityData = R"({"testCapabilityData":"castPlus"})";
     dataLen = capabilityData.length();
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
@@ -257,27 +258,25 @@ HWTEST_F(DiscCoapParserTest, DiscCoapFillServiceData001, TestSize.Level1)
 HWTEST_F(DiscCoapParserTest, DiscCoapFillServiceData002, TestSize.Level1)
 {
     uint32_t capability = 0;
+    uint32_t allCap = 8;
     std::string capabilityData;
     uint32_t dataLen = 0;
     char outData[MAX_SERVICE_DATA_LEN] = {0};
 
+    int32_t ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData,
+        MAX_SERVICE_DATA_LEN, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_STREQ(outData, "");
+
     capability = 1;
-    int32_t ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_STREQ(outData, "");
 
     capability = (1 << CASTPLUS_CAPABILITY_BITMAP);
-    ret = DiscCoapFillServiceData(capability, nullptr, dataLen, outData, MAX_SERVICE_DATA_LEN);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_STREQ(outData, "");
-
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_STREQ(outData, "");
-
     capabilityData = R"({"castPlus":"test"})";
     dataLen = capabilityData.length();
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_STREQ(outData, "castPlus:test");
 }
