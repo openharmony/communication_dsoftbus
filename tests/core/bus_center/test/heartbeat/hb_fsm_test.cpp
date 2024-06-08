@@ -466,16 +466,16 @@ HWTEST_F(HeartBeatFSMTest, CheckDevStatusByNetworkIdTest_01, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     LnnCheckDevStatusMsgPara msgPara = { .hbType = HEARTBEAT_TYPE_BLE_V0 };
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara);
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara);
     EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<1>(oldTimeStamp), Return(SOFTBUS_OK)));
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME3);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara);
     SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }
