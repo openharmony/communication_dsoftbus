@@ -35,12 +35,9 @@ if (dsoftbus_feature_lnn_cloud_sync) {
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_kv_adapter_wrapper.cpp",
     "$dsoftbus_root_path/core/adapter/kv_store/src/lnn_kv_adapter.cpp",
     "$dsoftbus_root_path/core/adapter/kv_store/src/lnn_kv_data_change_listener.cpp",
-    "$dsoftbus_root_path/core/adapter/subscribe_kv_store_sa/src/lnn_kv_store_launch_listener.cpp",
   ]
-  bus_center_core_adapter_inc += [
-    "$dsoftbus_root_path/core/adapter/kv_store/include",
-    "$dsoftbus_root_path/core/adapter/subscribe_kv_store_sa/include",
-  ]
+  bus_center_core_adapter_inc +=
+      [ "$dsoftbus_root_path/core/adapter/kv_store/include" ]
 } else {
   bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_kv_adapter_wrapper_virtual.cpp" ]
 }

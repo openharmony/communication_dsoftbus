@@ -85,6 +85,7 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
     std::vector<DistributedKv::Entry> entries;
     if (keys.empty()) {
         LNN_LOGE(LNN_LEDGER, "keys empty");
+        LnnDestroyKvAdapter(dbId);
         return entries;
     }
     for (const auto &key : keys) {
@@ -102,6 +103,7 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
         entries.emplace_back(entry);
         SoftBusFree(value);
     }
+    LnnDestroyKvAdapter(dbId);
     return entries;
 }
 

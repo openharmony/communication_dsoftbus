@@ -171,6 +171,53 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LnnPutDBDataBatch
+ * @tc.desc: LnnPutDBDataBatch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnPutBatch001, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    CloudSyncInfo info {
+        .networkId = "networkId",
+        .deviceName = "deviceName",
+        .unifiedName = "unifiedName",
+        .unifiedDefaultName = "unifiedDefaultName",
+        .nickName = "nickName",
+        .deviceTypeId = 1,
+        .deviceUdid = "deviceUdid",
+        .uuid = "uuid",
+        .softBusVersion = "softBusVersion",
+        .isBleP2p = true,
+        .supportedProtocols = 1,
+        .pkgVersion = "pkgVersion",
+        .wifiVersion = 1,
+        .bleVersion = 1,
+        .macAddr = "macAddr",
+        .accountId = 1,
+        .feature = 1,
+        .connSubFeature = 1,
+        .authCapacity = 1,
+        .osType = 1,
+        .osVersion = "osVersion",
+        .stateVersion = 1,
+        .p2pMac = "p2pMac",
+        .peerIrk = {1},
+        .publicAddress = {1},
+        .remotePtk = "remotePtk",
+        .broadcastCipherKey = NULL,
+        .lifeTotal = 1,
+        .curBeginTime = 1,
+        .currentIndex = 1,
+        .cipherKey = {1},
+        .cipherIv = {1},
+        .distributedSwitch = true
+    };
+    EXPECT_EQ(LnnPutDBDataBatch(dbId, &info), SOFTBUS_OK);
+}
+
+/**
  * @tc.name: LnnDestroyKvAdapter
  * @tc.desc: LnnDestroyKvAdapter
  * @tc.type: FUNC

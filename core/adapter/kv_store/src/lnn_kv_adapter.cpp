@@ -392,17 +392,11 @@ void KVAdapter::CloudSyncCallback(DistributedKv::ProgressDetail &&detail)
     }
 }
 
-int32_t KVAdapter::DeRegisterDataChangeListener()
+void KVAdapter::DeRegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
-    int32_t ret = UnRegisterDataChangeListener();
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "UnRegisterDataChangeListener failed, ret=%{public}d", ret);
-        return ret;
-    }
+    UnRegisterDataChangeListener();
     DeleteDataChangeListener();
-    LNN_LOGI(LNN_LEDGER, "DeRegisterDataChangeListener success");
-    return SOFTBUS_OK;
 }
 
 } // namespace OHOS
