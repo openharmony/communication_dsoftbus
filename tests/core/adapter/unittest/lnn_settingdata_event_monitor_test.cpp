@@ -78,3 +78,4 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest001, TestSiz
     SoftBusFree(deviceName);
 }
 }
+
