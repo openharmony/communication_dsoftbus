@@ -755,6 +755,55 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_OK;
 }
 
+int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode,
+    LnnHeartbeatStrategyType strategyType)
+{
+    if (mode == NULL || callerId == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "shift lnn gear get invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ReportBusinessDiscoveryResultEvt(callerId, 1);
+    LNN_LOGD(LNN_HEART_BEAT, "shift lnn gear mode, callerId=%{public}s, cycle=%{public}d, "
+        "duration=%{public}d, wakeupFlag=%{public}d", callerId, mode->cycle, mode->duration, mode->wakeupFlag);
+    if (LnnSetGearModeBySpecificType(callerId, mode, HEARTBEAT_TYPE_BLE_V0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl reset medium mode fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, strategyType, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start adjustable ble heatbeat fail");
+        return SOFTBUS_ERR;
+    }
+    int32_t i, infoNum;
+    char uuid[UUID_BUF_LEN] = {0};
+    NodeBasicInfo *info = NULL;
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
+        return SOFTBUS_ERR;
+    }
+    if (info == NULL || infoNum == 0) {
+        LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret;
+    NodeInfo nodeInfo = {0};
+    for (i = 0; i < infoNum; ++i) {
+        ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
+        if (ret != SOFTBUS_OK || !LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI)) {
+            continue;
+        }
+        (void)LnnConvertDlId(info[i].networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+        if (AuthFlushDevice(uuid) != SOFTBUS_OK) {
+            char *anonyUuid = NULL;
+            Anonymize(uuid, &anonyUuid);
+            LNN_LOGE(LNN_HEART_BEAT, "tcp flush failed, wifi will offline, uuid=%{public}s", anonyUuid);
+            AnonymizeFree(anonyUuid);
+            LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_WLAN);
+        }
+    }
+    SoftBusFree(info);
+    return SOFTBUS_OK;
+}
+
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     LNN_LOGI(LNN_HEART_BEAT, "update heartbeat infoType=%{public}d", type);
