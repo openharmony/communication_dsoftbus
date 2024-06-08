@@ -31,4 +31,4 @@ void LnnDeinitMetaNodeExtLedger(void);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif //LNN_META_NODE_INTERFACE_H

@@ -343,3 +343,4 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, HksDecrypt001, TestSize.Level0)
     SoftBusFree(decryptedBlob.data);
 }
 } // namespace OHOS
+
