@@ -436,22 +436,25 @@ void *SendHandlerLoop(void *arg)
     while (true) {
         int32_t status = ConnBrDequeueBlock((void **)(&sendNode));
         if (status == SOFTBUS_TIMOUT && sendNode == NULL) {
-            CONN_LOGW(CONN_BR, "br dequeue time out err=%{public}d,", status);
-            status = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
-            CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_BR, "lock fail!");
+            CONN_LOGW(CONN_BR, "br dequeue time out err=%{public}d", status);
+            int32_t ret = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
+            CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, CONN_BR, "lock fail!");
             if (g_startBrSendLPInfo.messagePosted) {
+                CONN_LOGE(CONN_BR, "message posted not quit");
                 g_startBrSendLPInfo.messagePosted = false;
                 SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
                 continue;
             }
             g_startBrSendLPInfo.sendTaskRunning = false;
             SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
+            CONN_LOGE(CONN_BR, "quit send loop");
             break;
         }
-        status = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
-        if (status != SOFTBUS_OK) {
+        int32_t ret = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "lock fail!");
             FreeSendNode(sendNode);
+            sendNode = NULL;
             return NULL;
         }
         g_startBrSendLPInfo.messagePosted = false;
@@ -467,6 +470,7 @@ void *SendHandlerLoop(void *arg)
             g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
                 sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR);
             FreeSendNode(sendNode);
+            sendNode = NULL;
             continue;
         }
 
@@ -477,6 +481,7 @@ void *SendHandlerLoop(void *arg)
                 sendNode->module, sendNode->seq, SOFTBUS_LOCK_ERR);
             ConnBrReturnConnection(&connection);
             FreeSendNode(sendNode);
+            sendNode = NULL;
             continue;
         }
 
@@ -488,6 +493,7 @@ void *SendHandlerLoop(void *arg)
             g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
                 sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_INVALID_SOCKET);
             FreeSendNode(sendNode);
+            sendNode = NULL;
             continue;
         }
 
