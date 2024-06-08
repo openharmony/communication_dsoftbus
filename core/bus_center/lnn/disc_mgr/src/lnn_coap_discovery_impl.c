@@ -36,7 +36,7 @@
 
 static LnnDiscoveryImplCallback g_callback;
 
-static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions);
+static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions);
 
 static DiscInnerCallback g_discCb = {
     .OnDeviceFound = DeviceFound,
@@ -56,10 +56,10 @@ static int32_t LnnCheckDiscoveryDeviceInfo(const DeviceInfo *device)
     return SOFTBUS_OK;
 }
 
-static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     ConnectionAddr addr;
-    (void) addtions;
+    (void) additions;
 
     if (device == NULL) {
         LNN_LOGE(LNN_BUILDER, "device para is null");
