@@ -187,6 +187,7 @@ public:
     virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
         const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
     virtual bool IsSupportLpFeature(void);
+    virtual bool LnnSubcribeKvStoreService(void);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -297,6 +298,7 @@ public:
     MOCK_METHOD2(LnnUnregisterEventHandler, void (LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyDeviceVerified, void (const char *));
     MOCK_METHOD0(LnnInitBusCenterEvent, int32_t ());
+    MOCK_METHOD0(LnnSubcribeKvStoreService, bool ());
     MOCK_METHOD0(LnnInitBatteryInfo, int32_t ());
     MOCK_METHOD0(LnnDeinitBatteryInfo, void ());
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t (InfoKey, const uint8_t *, uint32_t));
