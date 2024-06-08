@@ -817,7 +817,8 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         mode->action);
     AnonymizeFree(anonyNetworkId);
     char uuid[UUID_BUF_LEN] = { 0 };
-    if (LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+    if (targetNetworkId != NULL &&
+        LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "targetNetworkId convert uuid fail");
         return SOFTBUS_ERR;
     }
