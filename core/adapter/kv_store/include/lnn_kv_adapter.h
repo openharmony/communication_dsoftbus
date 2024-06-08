@@ -39,7 +39,7 @@ public:
     int32_t DeleteKvStore();
     int32_t CloudSync();
     int32_t RegisterDataChangeListener(const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener);
-    void DeRegisterDataChangeListener();
+    int32_t DeRegisterDataChangeListener();
     static void CloudSyncCallback(DistributedKv::ProgressDetail &&detail);
 
 private:
