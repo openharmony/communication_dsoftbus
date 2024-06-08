@@ -708,7 +708,8 @@ static void ReportBusinessDiscoveryResultEvt(const char *pkgName, int32_t discCn
     }
 }
 
-int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
 {
     char *anonyNetworkId = NULL;
     if (pkgName == NULL || mode == NULL || callerId == NULL) {
@@ -719,22 +720,20 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
         LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", anonyNetworkId);
     }
-    LNN_LOGD(LNN_HEART_BEAT,
-        "shift lnn gear mode, callerId=%{public}s, networkId=%{public}s, cycle=%{public}d, "
-        "duration=%{public}d, wakeupFlag=%{public}d, action=%{public}d",
-        callerId, targetNetworkId != NULL ? anonyNetworkId : "", mode->cycle, mode->duration, mode->wakeupFlag,
-        mode->action);
+    LNN_LOGD(LNN_HEART_BEAT, "shift lnn gear mode, callerId=%{public}s, networkId=%{public}s, cycle=%{public}d, "
+        "duration=%{public}d, wakeupFlag=%{public}d, action=%{public}d", callerId,
+        targetNetworkId != NULL ? anonyNetworkId : "",
+        mode->cycle, mode->duration, mode->wakeupFlag, mode->action);
     AnonymizeFree(anonyNetworkId);
-    char uuid[UUID_BUF_LEN] = { 0 };
-    if (LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+    char uuid[UUID_BUF_LEN] = {0};
     if (targetNetworkId != NULL &&
         LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "targetNetworkId convert uuid fail");
         return SOFTBUS_ERR;
     }
     if (mode->action == CHANGE_TCP_KEEPALIVE) {
-        if (AuthSendKeepaliveOption(uuid, mode->cycle) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "auth send keepalive option fail");
+        if (AuthSendKeepAlive(uuid, mode->cycle) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "auth send keepalive fail");
             return SOFTBUS_ERR;
         }
         return SOFTBUS_OK;
