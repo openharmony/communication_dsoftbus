@@ -57,3 +57,4 @@ int32_t SoftBusAesGcmEncrypt(
     (void)outData;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+

@@ -27,4 +27,4 @@ void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* LNN_APP_BIND_INTERFACE_H */

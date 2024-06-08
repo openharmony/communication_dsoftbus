@@ -40,5 +40,4 @@ int32_t SoftBusRsaDecrypt(
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* SOFTBUS_RSA_ENCRYPT_H */

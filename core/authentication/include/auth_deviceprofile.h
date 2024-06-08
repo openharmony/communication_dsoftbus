@@ -31,3 +31,4 @@ void UpdateDpSameAccount(const char *accountHash, const char *deviceId);
 #endif
 #endif
 #endif /* AUTH_DEVICEPROFILE_H */
+

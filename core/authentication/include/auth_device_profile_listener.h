@@ -48,3 +48,4 @@ public:
 } // namespace AuthToDeviceProfile
 } // namespace OHOS
 #endif
+
