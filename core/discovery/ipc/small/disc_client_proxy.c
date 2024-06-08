@@ -37,9 +37,9 @@ static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
-    (void)addtions;
+    (void)additions;
     DISC_LOGI(DISC_CONTROL, "ondevice found ipc server push.");
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX] = {0};

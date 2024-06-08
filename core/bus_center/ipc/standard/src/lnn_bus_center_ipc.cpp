@@ -63,7 +63,7 @@ static std::vector<RefreshLnnRequestInfo *> g_refreshLnnRequestInfo;
 static std::vector<DataLevelChangeReqInfo *> g_dataLevelChangeRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *addtions);
+    const InnerDeviceInfoAddtions *additions);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
@@ -140,9 +140,9 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, int32_t callingPid, const ch
 }
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *addtions)
+    const InnerDeviceInfoAddtions *additions)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(addtions != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "addtions is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(additions != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "additions is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(device != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "device is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "pkgName is null");
     uint32_t pkgNameLen = strnlen(pkgName, PKG_NAME_SIZE_MAX);
@@ -158,7 +158,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
         if (strncmp(pkgName, iter->pkgName, pkgNameLen) != 0) {
             continue;
         }
-        LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
+        LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, additions);
         (void)ClientOnRefreshDeviceFound(pkgName, (*iter).pid, &newDevice, sizeof(DeviceInfo));
     }
     return SOFTBUS_OK;

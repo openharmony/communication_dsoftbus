@@ -58,14 +58,14 @@ const SubscribeOption g_subscribeOption = {
 
 bool g_isDeviceFound = false;
 
-void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     ASSERT_NE(device, nullptr);
-    ASSERT_NE(addtions, nullptr);
+    ASSERT_NE(additions, nullptr);
 
     g_isDeviceFound = true;
     std::stringstream ss;
-    ss << "OnDeviceFound medium=" << addtions->medium << ", name=" << device->devName;
+    ss << "OnDeviceFound medium=" << additions->medium << ", name=" << device->devName;
     ss << ", cap=" << device->capabilityBitmap[0] << ", cust=" << device->custData;
     for (uint32_t addrIndex = 0; addrIndex < device->addrNum; ++addrIndex) {
         if (device->addr[addrIndex].type == CONNECTION_ADDR_BR) {

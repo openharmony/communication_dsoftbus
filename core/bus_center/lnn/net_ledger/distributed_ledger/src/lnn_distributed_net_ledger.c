@@ -1632,23 +1632,23 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
     return NULL;
 }
 
-static void RefreshDeviceOnlineStateInfo(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void RefreshDeviceOnlineStateInfo(DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
-    if (addtions->medium == COAP || addtions->medium == BLE) {
+    if (additions->medium == COAP || additions->medium == BLE) {
         device->isOnline = ((LnnGetOnlineNodeByUdidHash(device->devId)) != NULL) ? true : false;
     }
 }
 
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
-    const InnerDeviceInfoAddtions *addtions)
+    const InnerDeviceInfoAddtions *additions)
 {
     (void)pkgName;
-    RefreshDeviceOnlineStateInfo(device, addtions);
+    RefreshDeviceOnlineStateInfo(device, additions);
     if (device->devId[0] != '\0') {
         char *anoyUdidHash = NULL;
         Anonymize(device->devId, &anoyUdidHash);
         LNN_LOGI(LNN_LEDGER, "device found. medium=%{public}d, udidhash=%{public}s, onlineStatus=%{public}d",
-            addtions->medium, anoyUdidHash, device->isOnline);
+            additions->medium, anoyUdidHash, device->isOnline);
         AnonymizeFree(anoyUdidHash);
     }
 }
