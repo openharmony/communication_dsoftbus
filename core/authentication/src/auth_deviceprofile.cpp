@@ -184,3 +184,4 @@ void UpdateDpSameAccount(const char *accountHash, const char *deviceId)
         InsertDpSameAccount(udid);
     }
 }
+
