@@ -32,10 +32,6 @@ extern "C" {
 #endif
 
 char *PackDeviceIdJson(const AuthSessionInfo *info);
-char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid,
-    const AuthSessionInfo *info);
-int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth,
-    const AuthSessionInfo *info);
 int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info);
 bool GetUdidOrShortHashForNormalized(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen);
 
