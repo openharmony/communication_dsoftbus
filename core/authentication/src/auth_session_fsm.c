@@ -26,6 +26,7 @@
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_request.h"
+#include "auth_session_json.h"
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
@@ -1387,14 +1388,36 @@ static void SetAuthStartTime(AuthFsm *authFsm)
     authFsm->statisticData.startAuthTime = (uint64_t)LnnUpTimeMs();
 }
 
-static int32_t GetFirstFsmState(AuthSessionInfo *info, AuthFsmStateIndex *state)
+static bool IsPeerSupportNegoAuth(AuthSessionInfo *info)
+{
+    char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (!GetUdidShortHash(info, udidHash, SHORT_UDID_HASH_HEX_LEN + 1)) {
+        return true;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
+    if (LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "retrive deviceInfo fail");
+        return true;
+    }
+    if (IsSupportFeatureByCapaBit(nodeInfo.authCapacity, BIT_SUPPORT_NEGOTIATION_AUTH)) {
+        return true;
+    }
+    return false;
+}
+
+static int32_t GetFirstFsmState(AuthSessionInfo *info, int64_t authSeq, AuthFsmStateIndex *state)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(state, SOFTBUS_INVALID_PARAM);
     if (info->isConnectServer) {
         *state = STATE_SYNC_NEGOTIATION;
     } else {
-        if (info->localState == AUTH_STATE_START) {
+        if (!IsPeerSupportNegoAuth(info)) {
+            info->localState = AUTH_STATE_COMPATIBLE;
+            AUTH_LOGI(AUTH_FSM, "peer not support nego, localState change, authSeq=%{public}" PRId64, authSeq);
+        }
+        if (info->localState == AUTH_STATE_START || info->localState == AUTH_STATE_COMPATIBLE) {
             *state = STATE_SYNC_DEVICE_ID;
         } else {
             *state = STATE_SYNC_NEGOTIATION;
@@ -1419,7 +1442,7 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
     authFsm->info.isNeedFastAuth = authParam->isFastAuth;
     (void)UpdateLocalAuthState(authFsm->authSeq, &authFsm->info);
     AuthFsmStateIndex nextState = STATE_SYNC_DEVICE_ID;
-    if (GetFirstFsmState(&authFsm->info, &nextState) != SOFTBUS_OK ||
+    if (GetFirstFsmState(&authFsm->info, authFsm->authSeq, &nextState) != SOFTBUS_OK ||
         LnnFsmStart(&authFsm->fsm, g_states + nextState) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "start auth fsm fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
         DestroyAuthFsm(authFsm);

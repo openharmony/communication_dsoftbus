@@ -48,8 +48,7 @@
 #define SOFTBUS_BUSCENTER_DUMP_LINKPARAM "link_param"
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
-#define SUPPORT_EXCHANGE_NETWORKID 1
-#define SUPPORT_NORMALIZED_LINK 2
+#define DEFAULT_SUPPORT_AUTHCAPACITY 0x7
 #define DEFAULT_CONN_SUB_FEATURE 1
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
@@ -2118,7 +2117,7 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->groupType = ALL_GROUP_TYPE;
     nodeInfo->discoveryType = 0;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
-    nodeInfo->authCapacity = SUPPORT_EXCHANGE_NETWORKID | SUPPORT_NORMALIZED_LINK;
+    nodeInfo->authCapacity = DEFAULT_SUPPORT_AUTHCAPACITY;
     nodeInfo->feature = LnnGetFeatureCapabilty();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
     if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {

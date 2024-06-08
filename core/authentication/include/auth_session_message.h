@@ -36,7 +36,7 @@ typedef struct {
     SoftBusVersion version;
 } DevInfoData;
 
-#define UDID_SHORT_HASH_HEX_STR 17
+#define UDID_SHORT_HASH_HEX_STR 16
 #define UDID_SHORT_HASH_LEN_TEMP 8
 /* DeviceInfo-common */
 #define CODE "CODE"

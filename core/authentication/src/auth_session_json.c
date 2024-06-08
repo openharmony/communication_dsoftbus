@@ -287,10 +287,12 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
     return false;
 }
 
-bool GetUdidOrShortHashForNormalized(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen)
+bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, false, AUTH_FSM, "info is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(udidBuf != NULL, false, AUTH_FSM, "udidBuf is NULL");
+    if (info == NULL || udidBuf == NULL || bufLen <= UDID_SHORT_HASH_HEX_STR) {
+        AUTH_LOGE(AUTH_FSM, "param error");
+        return false;
+    }
     if (strlen(info->udid) != 0) {
         AUTH_LOGI(AUTH_FSM, "use info->udid build normalize auth");
         return GenerateUdidShortHash(info->udid, udidBuf, bufLen);
@@ -463,7 +465,7 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info)
         return;
     }
     char udidHashHexStr[SHA_256_HEX_HASH_LEN] = {0};
-    if (!GetUdidOrShortHashForNormalized(info, udidHashHexStr, SHA_256_HEX_HASH_LEN)) {
+    if (!GetUdidShortHash(info, udidHashHexStr, SHA_256_HEX_HASH_LEN)) {
         AUTH_LOGE(AUTH_FSM, "get udid fail, bypass normalizedAuth");
         return;
     }
@@ -578,8 +580,8 @@ static int32_t ParseNormalizeData(AuthSessionInfo *info, char *encNormalizedKey,
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return SOFTBUS_ERR;
     }
-    char hashHexStr[UDID_SHORT_HASH_HEX_STR] = {0};
-    if (ConvertBytesToUpperCaseHexString(hashHexStr, UDID_SHORT_HASH_HEX_STR,
+    char hashHexStr[UDID_SHORT_HASH_HEX_STR + 1] = {0};
+    if (ConvertBytesToUpperCaseHexString(hashHexStr, UDID_SHORT_HASH_HEX_STR + 1,
         udidHash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "udid hash bytes to hexString fail");
         return SOFTBUS_ERR;
@@ -650,8 +652,8 @@ static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupp
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return;
     }
-    char hashHexStr[UDID_SHORT_HASH_HEX_STR] = {0};
-    if (ConvertBytesToUpperCaseHexString(hashHexStr, UDID_SHORT_HASH_HEX_STR,
+    char hashHexStr[UDID_SHORT_HASH_HEX_STR + 1] = {0};
+    if (ConvertBytesToUpperCaseHexString(hashHexStr, UDID_SHORT_HASH_HEX_STR + 1,
         udidHash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "udid hash bytes to hexString fail");
         return;
@@ -687,8 +689,8 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return;
     }
-    char udidShortHash[UDID_SHORT_HASH_HEX_STR] = {0};
-    if (ConvertBytesToHexString(udidShortHash, UDID_SHORT_HASH_HEX_STR,
+    char udidShortHash[UDID_SHORT_HASH_HEX_STR + 1] = {0};
+    if (ConvertBytesToHexString(udidShortHash, UDID_SHORT_HASH_HEX_STR + 1,
         udidHash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "udid hash bytes to hexString fail");
         return;
