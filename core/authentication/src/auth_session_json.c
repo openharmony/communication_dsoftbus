@@ -1826,8 +1826,7 @@ static int32_t UnpackCertificateInfo(JsonObj *json, NodeInfo *nodeInfo, const Au
 char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid,
     const AuthSessionInfo *info)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(remoteUuid != NULL, NULL, AUTH_FSM, "remoteUuid is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, AUTH_FSM, "info is NULL");
+    // uuid and info is null in meta, no need check param
     AUTH_LOGI(AUTH_FSM, "connType=%{public}d", linkType);
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
     if (nodeInfo == NULL) {
