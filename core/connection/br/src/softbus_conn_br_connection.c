@@ -130,10 +130,52 @@ static void BrConnectStatusCallback(const BdAddr *bdAddr, BtUuid uuid, int32_t s
     callbackStatus->status = status;
     callbackStatus->result = result;
     ListAdd(&connection->connectProcessStatus->list, &callbackStatus->node);
-    CONN_LOGD(CONN_BR, "br on connect calback, mac=%{public}s, connId=%{public}d, result=%{public}d, status=%{public}d",
-        anomizeAddress,
-        connection->connectionId, result, status);
+    CONN_LOGD(CONN_BR, "br on connect calback, mac=%{public}s, connId=%{public}d, result=%{public}d, "
+        "status=%{public}d", anomizeAddress, connection->connectionId, result, status);
     ConnBrReturnConnection(&connection);
+}
+
+static int32_t StartBrClientConnect(ConnBrConnection *connection, const char *anomizeAddress)
+{
+    uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
+    int32_t status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "convert string mac to binary fail, connId=%{public}u, address=%{public}s, "
+            "error=%{public}d", connection->connectionId, anomizeAddress, status);
+        return SOFTBUS_CONN_BR_INVALID_ADDRESS_ERR;
+    }
+    BtSocketConnectionCallback callback = {
+        .connStateCb = BrConnectStatusCallback,
+    };
+    int32_t socketHandle = g_sppDriver->Connect(UUID, binaryAddr, &callback);
+    if (socketHandle <= INVALID_SOCKET_HANDLE) {
+        CONN_LOGE(CONN_BR, "underlayer bluetooth connect failed, connId=%{public}u, address=%{public}s",
+            connection->connectionId, anomizeAddress);
+        ConnAlarmExtra extraAlarm = {
+            .linkType = CONNECT_BR,
+            .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+        };
+        CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
+        return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
+    }
+    if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, address=%{public}s", connection->connectionId,
+            anomizeAddress);
+        g_sppDriver->DisConnect(socketHandle);
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (connection->state != BR_CONNECTION_STATE_CONNECTING) {
+        CONN_LOGE(CONN_BR, "unexpected state, connId=%{public}u, address=%{public}s, state=%{public}d",
+            connection->connectionId, anomizeAddress, connection->state);
+        g_sppDriver->DisConnect(socketHandle);
+        connection->state = BR_CONNECTION_STATE_CLOSED;
+        (void)SoftBusMutexUnlock(&connection->lock);
+        return SOFTBUS_CONN_BR_INTERNAL_ERR;
+    }
+    connection->socketHandle = socketHandle;
+    connection->state = BR_CONNECTION_STATE_CONNECTED;
+    (void)SoftBusMutexUnlock(&connection->lock);
+    return SOFTBUS_OK;
 }
 
 static void *StartClientConnect(void *connectCtx)
@@ -151,59 +193,19 @@ static void *StartClientConnect(void *connectCtx)
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     CONN_LOGI(CONN_BR, "connId=%{public}u, address=%{public}s", connectionId, anomizeAddress);
     do {
-        uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
-        int32_t status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR,
-                "convert string mac to binary fail, connId=%{public}u, address=%{public}s, error=%{public}d",
-                connection->connectionId, anomizeAddress, status);
-            g_eventListener.onClientConnectFailed(connection->connectionId, SOFTBUS_CONN_BR_INVALID_ADDRESS_ERR);
+        int ret = StartBrClientConnect(connection, anomizeAddress);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGI(CONN_BR, "connId=%{public}u, error=%{public}d", connectionId, ret);
+            g_eventListener.onClientConnectFailed(connection->connectionId, ret);
             break;
         }
-        BtSocketConnectionCallback callback = {
-            .connStateCb = BrConnectStatusCallback,
-        };
-        int32_t socketHandle = g_sppDriver->Connect(UUID, binaryAddr, &callback);
-        if (socketHandle <= INVALID_SOCKET_HANDLE) {
-            CONN_LOGE(CONN_BR, "underlayer bluetooth connect failed, connId=%{public}u, address=%{public}s",
-                connection->connectionId, anomizeAddress);
-            ConnAlarmExtra extraAlarm = {
-                .linkType = CONNECT_BR,
-                .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
-            };
-            CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
-            g_eventListener.onClientConnectFailed(connection->connectionId, SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL);
-            break;
-        }
-        if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, address=%{public}s", connection->connectionId,
-                anomizeAddress);
-            g_sppDriver->DisConnect(socketHandle);
-            g_eventListener.onClientConnectFailed(connection->connectionId, SOFTBUS_LOCK_ERR);
-            break;
-        }
-        if (connection->state != BR_CONNECTION_STATE_CONNECTING) {
-            CONN_LOGE(CONN_BR, "unexpected state, connId=%{public}u, address=%{public}s, state=%{public}d",
-                connection->connectionId, anomizeAddress, connection->state);
-            g_sppDriver->DisConnect(socketHandle);
-            connection->state = BR_CONNECTION_STATE_CLOSED;
-            (void)SoftBusMutexUnlock(&connection->lock);
-            g_eventListener.onClientConnectFailed(connection->connectionId, SOFTBUS_CONN_BR_INTERNAL_ERR);
-            break;
-        }
-        connection->socketHandle = socketHandle;
-        connection->state = BR_CONNECTION_STATE_CONNECTED;
-        (void)SoftBusMutexUnlock(&connection->lock);
 
-        CONN_LOGI(CONN_BR, "connect ok, id=%{public}u, address=%{public}s, socket=%{public}d", connection->connectionId,
-            anomizeAddress,
-            socketHandle);
+        CONN_LOGI(CONN_BR, "connect ok, id=%{public}u, address=%{public}s, socket=%{public}d",
+            connection->connectionId, anomizeAddress, connection->socketHandle);
         g_eventListener.onClientConnected(connection->connectionId);
-        status = LoopRead(connection->connectionId, socketHandle);
-        CONN_LOGD(CONN_BR,
-            "br client loop read exit, connId=%{public}u, address=%{public}s, "
-            "socketHandle=%{public}d, error=%{public}d",
-            connection->connectionId, anomizeAddress, socketHandle, status);
+        ret = LoopRead(connection->connectionId, connection->socketHandle);
+        CONN_LOGD(CONN_BR, "br client loop read exit, connId=%{public}u, address=%{public}s, socketHandle=%{public}d, "
+            "error=%{public}d", connection->connectionId, anomizeAddress, connection->socketHandle, ret);
 
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, address=%{public}s", connection->connectionId,
@@ -215,13 +217,46 @@ static void *StartClientConnect(void *connectCtx)
             g_sppDriver->DisConnect(connection->socketHandle);
             connection->socketHandle = INVALID_SOCKET_HANDLE;
         }
-        connection->state = (status == SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED ? BR_CONNECTION_STATE_CLOSED :
+        connection->state = (ret == SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED ? BR_CONNECTION_STATE_CLOSED :
                                                                                 BR_CONNECTION_STATE_EXCEPTION);
         (void)SoftBusMutexUnlock(&connection->lock);
-        g_eventListener.onConnectionException(connection->connectionId, status);
+        g_eventListener.onConnectionException(connection->connectionId, ret);
     } while (false);
     ConnBrReturnConnection(&connection);
     return NULL;
+}
+
+static ConnBrConnection *CreateAndSaveConnection(int32_t socketHandle)
+{
+    BluetoothRemoteDevice remote;
+    (void)memset_s(&remote, sizeof(remote), 0, sizeof(remote));
+    int32_t ret = g_sppDriver->GetRemoteDeviceInfo(socketHandle, &remote);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "GetRemoteDeviceInfo failed, socket=%{public}u, error=%{public}d", socketHandle, ret);
+        g_sppDriver->DisConnect(socketHandle);
+        return NULL;
+    }
+    char mac[BT_MAC_LEN] = { 0 };
+    ret = ConvertBtMacToStr(mac, BT_MAC_LEN, (uint8_t *)remote.mac, BT_ADDR_LEN);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "ConvertBtMacToStr failed, socket=%{public}u, error=%{public}d", socketHandle, ret);
+        g_sppDriver->DisConnect(socketHandle);
+        return NULL;
+    }
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_SERVER, socketHandle);
+    if (connection == NULL) {
+        CONN_LOGE(CONN_BR, "create connection failed, socket=%{public}u, error=%{public}d", socketHandle, ret);
+        g_sppDriver->DisConnect(socketHandle);
+        return NULL;
+    }
+    ret = ConnBrSaveConnection(connection);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "ConnBrSaveConnection failed, socket=%{public}u, error=%{public}d", socketHandle, ret);
+        g_sppDriver->DisConnect(socketHandle);
+        ConnBrFreeConnection(connection);
+        return NULL;
+    }
+    return connection;
 }
 
 static void *StartServerServe(void *serveCtx)
@@ -229,40 +264,15 @@ static void *StartServerServe(void *serveCtx)
     ServerServeContext *ctx = (ServerServeContext *)serveCtx;
     int32_t socketHandle = ctx->socketHandle;
     SoftBusFree(ctx);
-    BluetoothRemoteDevice remote;
-    (void)memset_s(&remote, sizeof(remote), 0, sizeof(remote));
-    int32_t status = g_sppDriver->GetRemoteDeviceInfo(socketHandle, &remote);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "GetRemoteDeviceInfo failed, socket=%{public}u, error=%{public}d", socketHandle, status);
-        g_sppDriver->DisConnect(socketHandle);
-        return NULL;
-    }
-    char mac[BT_MAC_LEN] = { 0 };
-    status = ConvertBtMacToStr(mac, BT_MAC_LEN, (uint8_t *)remote.mac, BT_ADDR_LEN);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "ConvertBtMacToStr failed, socket=%{public}u, error=%{public}d", socketHandle, status);
-        g_sppDriver->DisConnect(socketHandle);
-        return NULL;
-    }
-    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_SERVER, socketHandle);
-    if (connection == NULL) {
-        CONN_LOGE(CONN_BR, "create connection failed, socket=%{public}u, error=%{public}d", socketHandle, status);
-        g_sppDriver->DisConnect(socketHandle);
-        return NULL;
-    }
-    status = ConnBrSaveConnection(connection);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "ConnBrSaveConnection failed, socket=%{public}u, error=%{public}d", socketHandle, status);
-        g_sppDriver->DisConnect(socketHandle);
-        ConnBrFreeConnection(connection);
-        return NULL;
-    }
+    ConnBrConnection *connection = CreateAndSaveConnection(socketHandle);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, NULL, CONN_BR,
+        "connection is not exist, connectionId=%{public}u", connection->connectionId);
     do {
         CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId, socketHandle);
         g_eventListener.onServerAccepted(connection->connectionId);
-        status = LoopRead(connection->connectionId, socketHandle);
-        CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, status=%{public}d",
-            connection->connectionId, socketHandle, status);
+        int32_t ret = LoopRead(connection->connectionId, socketHandle);
+        CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, ret=%{public}d",
+            connection->connectionId, socketHandle, ret);
 
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "get lock failed, connId=%{public}u, socket=%{public}d", connection->connectionId,
@@ -275,10 +285,10 @@ static void *StartServerServe(void *serveCtx)
             g_sppDriver->DisConnect(socketHandle);
             connection->socketHandle = INVALID_SOCKET_HANDLE;
         }
-        connection->state = (status == SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED ? BR_CONNECTION_STATE_CLOSED :
+        connection->state = (ret == SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED ? BR_CONNECTION_STATE_CLOSED :
                                                                                 BR_CONNECTION_STATE_EXCEPTION);
         (void)SoftBusMutexUnlock(&connection->lock);
-        g_eventListener.onConnectionException(connection->connectionId, status);
+        g_eventListener.onConnectionException(connection->connectionId, ret);
     } while (false);
     ConnBrReturnConnection(&connection);
     return NULL;
@@ -644,55 +654,73 @@ int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *jso
     return SOFTBUS_OK;
 }
 
-static void *ListenTask(void *arg)
+static int32_t CheckBrServerStateAndOpenSppServer(ServerState *serverState)
 {
 #define BR_ACCEPET_WAIT_TIME 1000
+    const char *name = "BrManagerInsecure";
+    int32_t status = SoftBusMutexLock(&serverState->mutex);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "lock failed, exit listen task, traceId=%{public}u, error=%{public}d",
+            serverState->traceId, status);
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!serverState->available) {
+        CONN_LOGW(CONN_BR, "server closed, exit listen task, traceId=%{public}u", serverState->traceId);
+        SoftBusMutexUnlock(&serverState->mutex);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (serverState->serverId != -1) {
+        g_sppDriver->CloseSppServer(serverState->serverId);
+        serverState->serverId = -1;
+    }
+    (void)SoftBusMutexUnlock(&serverState->mutex);
+    int32_t serverId = g_sppDriver->OpenSppServer(name, (int32_t)strlen(name), UUID, 0);
+    if (serverId == -1) {
+        CONN_LOGE(CONN_BR,
+            "open br server failed, retry after some times, retryDelay=%{public}d, traceId=%{public}u",
+            BR_ACCEPET_WAIT_TIME, serverState->traceId);
+        SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
+        return SOFTBUS_CONN_BR_RETRY_OPEN_SERVER;
+    }
+    CONN_LOGI(CONN_BR, "open br server ok, traceId=%{public}u, serverId=%{public}d", serverState->traceId,
+        serverId);
+    status = SoftBusMutexLock(&serverState->mutex);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "lock failed, exit listen task, traceId=%{public}u, error=%{public}d",
+            serverState->traceId, status);
+        g_sppDriver->CloseSppServer(serverId);
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!serverState->available) {
+        CONN_LOGW(CONN_BR, "server closed during create socket period, exit listen task. traceId=%{public}u",
+            serverState->traceId);
+        g_sppDriver->CloseSppServer(serverId);
+        (void)SoftBusMutexUnlock(&serverState->mutex);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    serverState->serverId = serverId;
+    (void)SoftBusMutexUnlock(&serverState->mutex);
+    return SOFTBUS_OK;
+}
+
+static void *ListenTask(void *arg)
+{
     CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_BR, "invalid param");
     ServerState *serverState = (ServerState *)arg;
+    CONN_CHECK_AND_RETURN_RET_LOGE(serverState != NULL, NULL, CONN_BLE, "serverState is null");
     CONN_LOGI(CONN_BR, "traceId=%{public}u", serverState->traceId);
-    const char *name = "BrManagerInsecure";
     int32_t status = SOFTBUS_OK;
     while (true) {
-        status = SoftBusMutexLock(&serverState->mutex);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "lock failed, exit listen task, traceId=%{public}u, error=%{public}d",
-                serverState->traceId, status);
-            break;
-        }
-        if (!serverState->available) {
-            CONN_LOGW(CONN_BR, "server closed, exit listen task, traceId=%{public}u", serverState->traceId);
-            SoftBusMutexUnlock(&serverState->mutex);
-            break;
-        }
-        if (serverState->serverId != -1) {
-            g_sppDriver->CloseSppServer(serverState->serverId);
-            serverState->serverId = -1;
-        }
-        (void)SoftBusMutexUnlock(&serverState->mutex);
-        int32_t serverId = g_sppDriver->OpenSppServer(name, (int32_t)strlen(name), UUID, 0);
-        if (serverId == -1) {
-            CONN_LOGE(CONN_BR,
-                "open br server failed, retry after some times, retryDelay=%{public}d, traceId=%{public}u",
-                BR_ACCEPET_WAIT_TIME, serverState->traceId);
-            SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
+        status= CheckBrServerStateAndOpenSppServer(serverState);
+        if (status == SOFTBUS_CONN_BR_RETRY_OPEN_SERVER) {
             continue;
         }
-        CONN_LOGI(CONN_BR, "open br server ok, traceId=%{public}u, serverId=%{public}d", serverState->traceId,
-            serverId);
-        status = SoftBusMutexLock(&serverState->mutex);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "lock failed, exit listen task, traceId=%{public}u, error=%{public}d",
-                serverState->traceId, status);
-            g_sppDriver->CloseSppServer(serverId);
             break;
         }
-        if (!serverState->available) {
-            CONN_LOGW(CONN_BR, "server closed during create socket period, exit listen task. traceId=%{public}u",
-                serverState->traceId);
-            g_sppDriver->CloseSppServer(serverId);
-            break;
-        }
-        serverState->serverId = serverId;
+        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&serverState->mutex) == SOFTBUS_OK,
+            NULL, CONN_BLE, "lock failed");
+        int32_t serverId = serverState->serverId;
         (void)SoftBusMutexUnlock(&serverState->mutex);
         while (true) {
             int32_t socketHandle = g_sppDriver->Accept(serverId);
@@ -703,19 +731,16 @@ static void *ListenTask(void *arg)
             }
             ServerServeContext *ctx = (ServerServeContext *)SoftBusCalloc(sizeof(ServerServeContext));
             if (ctx == NULL) {
-                CONN_LOGE(CONN_BR,
-                    "calloc serve context failed, traceId=%{public}u, serverId=%{public}d, socketHandle=%{public}d",
-                    serverState->traceId, serverId, socketHandle);
+                CONN_LOGE(CONN_BR, "calloc serve context failed, traceId=%{public}u, serverId=%{public}d, "
+                    "socketHandle=%{public}d", serverState->traceId, serverId, socketHandle);
                 g_sppDriver->DisConnect(socketHandle);
                 continue;
             }
             ctx->socketHandle = socketHandle;
             status = ConnStartActionAsync(ctx, StartServerServe, NULL);
             if (status != SOFTBUS_OK) {
-                CONN_LOGE(CONN_BR,
-                    "start serve thread failed, "
-                    "traceId=%{public}u, serverId=%{public}d, socket=%{public}d, error=%{public}d",
-                    serverState->traceId, serverId, socketHandle, status);
+                CONN_LOGE(CONN_BR, "start serve thread failed, traceId=%{public}u, serverId=%{public}d, "
+                    "socket=%{public}d, error=%{public}d", serverState->traceId, serverId, socketHandle, status);
                 SoftBusFree(ctx);
                 g_sppDriver->DisConnect(socketHandle);
                 continue;
