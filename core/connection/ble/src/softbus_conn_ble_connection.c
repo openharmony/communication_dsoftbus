@@ -71,6 +71,13 @@ typedef struct {
     int32_t underlayerHandle;
 } RcPackCtlMsgPara;
 
+typedef struct {
+    char devId[DEVID_BUFF_LEN];
+    int32_t deviceType;
+    int32_t feature;
+    int32_t type;
+} BaseInfo;
+
 static void BleConnectionMsgHandler(SoftBusMessage *msg);
 static int BleCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *args);
 
@@ -588,7 +595,8 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
     return status;
 }
 
-static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen)
+static int32_t ParsePeerBasicInfoInner(ConnBleConnection *connection, const uint8_t *data,
+    uint32_t dataLen, BaseInfo *baseInfo)
 {
     if (dataLen <= NET_CTRL_MSG_TYPE_HEADER_SIZE) {
         CONN_LOGI(CONN_BLE,
@@ -612,78 +620,78 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
         return SOFTBUS_PARSE_JSON_ERR;
     }
     // mandatory fields
-    char devId[DEVID_BUFF_LEN] = { 0 };
-    int32_t type = 0;
-    if (!GetJsonObjectStringItem(json, BASIC_INFO_KEY_DEVID, devId, DEVID_BUFF_LEN) ||
-        !GetJsonObjectNumberItem(json, BASIC_INFO_KEY_ROLE, &type)) {
+    if (!GetJsonObjectStringItem(json, BASIC_INFO_KEY_DEVID, baseInfo->devId, DEVID_BUFF_LEN) ||
+        !GetJsonObjectNumberItem(json, BASIC_INFO_KEY_ROLE, &(baseInfo->type))) {
         cJSON_Delete(json);
         CONN_LOGE(CONN_BLE, "basic info field not exist, connId=%{public}u", connection->connectionId);
         return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
     // optional field
-    int32_t deviceType = 0;
-    if (!GetJsonObjectNumberItem(json, BASIC_INFO_KEY_DEVTYPE, &deviceType)) {
+    if (!GetJsonObjectNumberItem(json, BASIC_INFO_KEY_DEVTYPE, &(baseInfo->deviceType))) {
         CONN_LOGE(CONN_BLE, "ble parse basic info warning, 'devType' is not exist, connId=%{public}u",
             connection->connectionId);
         // fall through
     }
-    int32_t feature = 0;
-    if (!GetJsonObjectNumberItem(json, BASIC_INFO_KEY_FEATURE, &feature)) {
+    if (!GetJsonObjectNumberItem(json, BASIC_INFO_KEY_FEATURE, &(baseInfo->feature))) {
         CONN_LOGE(CONN_BLE, "ble parse basic info warning, 'FEATURE_SUPPORT' is not exist, connId=%{public}u",
             connection->connectionId);
         // fall through
     }
     cJSON_Delete(json);
-    bool isSupportNetWorkIdExchange = ((uint32_t)feature &
+    return SOFTBUS_OK;
+}
+
+static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen)
+{
+    BaseInfo baseInfo = {0};
+    int32_t ret = ParsePeerBasicInfoInner(connection, data, dataLen, &baseInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_BLE, "ble parse data failed, error=%{public}d", ret);
+    bool isSupportNetWorkIdExchange = ((uint32_t)(baseInfo.feature) &
         (1 << BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE)) != 0;
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE,
-            "try to lock connection failed, connId=%{public}u, err=%{public}d", connection->connectionId, status);
-        return SOFTBUS_LOCK_ERR;
-    }
+    ret = SoftBusMutexLock(&connection->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE,
+        "try to lock failed, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
 
     if (connection->protocol == BLE_COC || isSupportNetWorkIdExchange) {
-        if (memcpy_s(connection->networkId, NETWORK_ID_BUF_LEN, devId, DEVID_BUFF_LEN) != EOK) {
+        if (memcpy_s(connection->networkId, NETWORK_ID_BUF_LEN, baseInfo.devId, DEVID_BUFF_LEN) != EOK) {
             (void)SoftBusMutexUnlock(&connection->lock);
             CONN_LOGE(CONN_BLE, "memcpy_s network id failed, connId=%{public}u", connection->connectionId);
             return SOFTBUS_MEM_ERR;
         }
         ConnBleInnerComplementDeviceId(connection);
     } else if (connection->protocol == BLE_GATT) {
-        if (memcpy_s(connection->udid, UDID_BUF_LEN, devId, DEVID_BUFF_LEN) != EOK) {
+        if (memcpy_s(connection->udid, UDID_BUF_LEN, baseInfo.devId, DEVID_BUFF_LEN) != EOK) {
             (void)SoftBusMutexUnlock(&connection->lock);
             CONN_LOGE(CONN_BLE, "memcpy_s udid failed, connId=%{public}u", connection->connectionId);
             return SOFTBUS_MEM_ERR;
         }
     }
-    connection->featureBitSet = (ConnBleFeatureBitSet)feature;
+    connection->featureBitSet = (ConnBleFeatureBitSet)(baseInfo.feature);
     connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
     (void)SoftBusMutexUnlock(&connection->lock);
 
     // revert current side role is peer side role
     int32_t expectedPeerType = connection->side == CONN_SIDE_CLIENT ? 2 : 1;
-    if (expectedPeerType != type) {
-        CONN_LOGW(CONN_BLE,
-            "parse basic info, the role of connection is mismatch, "
-            "expectedPeerType=%{public}d, actualPeerType=%{public}d", expectedPeerType, type);
+    if (expectedPeerType != baseInfo.type) {
+        CONN_LOGW(CONN_BLE, "parse basic info, the role of connection is mismatch, "
+            "expectedPeerType=%{public}d, actualPeerType=%{public}d", expectedPeerType, baseInfo.type);
     }
     ConnEventExtra extra = {
         .connectionId = (int32_t)connection->connectionId,
         .connRole = connection->side,
-        .supportFeature = feature,
+        .supportFeature = baseInfo.feature,
         .linkType = CONNECT_BLE,
         .peerBleMac = connection->addr,
         .result = EVENT_STAGE_RESULT_OK
     };
     char devType[DEVICE_TYPE_MAX_SIZE + 1] = {0};
-    if (snprintf_s(devType, DEVICE_TYPE_MAX_SIZE + 1, DEVICE_TYPE_MAX_SIZE, "%03X", deviceType) >= 0) {
+    if (snprintf_s(devType, DEVICE_TYPE_MAX_SIZE + 1, DEVICE_TYPE_MAX_SIZE, "%03X", baseInfo.deviceType) >= 0) {
         extra.peerDeviceType = devType;
     }
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_PARSE_BASIC_INFO, extra);
-    CONN_LOGI(CONN_BLE,
-        "ble parse basic info, connId=%{public}u, side=%{public}s, deviceType=%{public}d, supportFeature=%{public}u",
-        connection->connectionId, connection->side == CONN_SIDE_CLIENT ? "client" : "server", deviceType, feature);
+    CONN_LOGI(CONN_BLE, "ble parse basic info, connId=%{public}u, side=%{public}s, deviceType=%{public}d, "
+        "supportFeature=%{public}u", connection->connectionId,
+        connection->side == CONN_SIDE_CLIENT ? "client" : "server", baseInfo.deviceType, baseInfo.feature);
     return SOFTBUS_OK;
 }
 
