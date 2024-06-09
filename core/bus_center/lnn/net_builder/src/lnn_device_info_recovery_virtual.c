@@ -99,3 +99,17 @@ int32_t LnnGetAccountIdFromLocalCache(int64_t *buf)
     (void)buf;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnPackCloudSyncDeviceInfo(cJSON *json, const NodeInfo *cloudSyncInfo)
+{
+    (void)json;
+    (void)cloudSyncInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnUnPackCloudSyncDeviceInfo(cJSON *json, NodeInfo *cloudSyncInfo)
+{
+    (void)json;
+    (void)cloudSyncInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

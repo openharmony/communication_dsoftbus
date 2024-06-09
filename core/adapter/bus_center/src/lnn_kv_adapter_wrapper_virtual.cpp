@@ -67,13 +67,6 @@ int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t key
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
-{
-    (void)dbId;
-    (void)localInfo;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
 int32_t LnnCloudSync(int32_t dbId)
 {
     (void)dbId;
@@ -93,10 +86,6 @@ void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appI
 void LnnUnRegisterDataChangeListener(int32_t dbId)
 {
     (void)dbId;
-}
-
-void LnnClearRedundancyCache(void)
-{
 }
 
 bool LnnSubcribeKvStoreService(void)

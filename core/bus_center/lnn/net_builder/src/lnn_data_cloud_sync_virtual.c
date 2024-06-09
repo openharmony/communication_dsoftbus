@@ -27,7 +27,7 @@ void LnnDeInitCloudSyncModule(void)
     return;
 }
 
-int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
 {
     (void)info;
     return SOFTBUS_NOT_IMPLEMENT;
@@ -59,5 +59,12 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
     (void)key;
     (void)value;
     (void)keySize;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
+{
+    (void)key;
+    (void)value;
     return SOFTBUS_NOT_IMPLEMENT;
 }

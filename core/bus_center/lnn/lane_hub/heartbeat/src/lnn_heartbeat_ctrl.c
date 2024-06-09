@@ -466,7 +466,6 @@ static void HbDelayConditionChanged(void *para)
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
     g_hbConditionState.heartbeatEnable = true;
     HbConditionChanged(false);
-    LnnClearRedundancyCache();
 }
 
 static int32_t HbTryCloudSync(void)

@@ -56,12 +56,10 @@ typedef struct {
     unsigned char publicAddress[LFINDER_MAC_ADDR_LEN];
     char remotePtk[PTK_DEFAULT_LEN];
     char *broadcastCipherKey;
-    int64_t lifeTotal;
-    uint64_t curBeginTime;
-    uint8_t currentIndex;
     unsigned char cipherKey[SESSION_KEY_LENGTH];
     unsigned char cipherIv[BROADCAST_IV_LEN];
     bool distributedSwitch;
+    uint64_t timestamp;
 } CloudSyncInfo;
 
 typedef enum {
@@ -73,11 +71,12 @@ typedef enum {
 
 void LnnInitCloudSyncModule(void);
 void LnnDeInitCloudSyncModule(void);
-int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info);
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info);
 int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t valueLength);
 int32_t LnnDeleteSyncToDB(void);
 int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeType changeType);
 int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize);
+int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value);
 #ifdef __cplusplus
 }
 #endif
