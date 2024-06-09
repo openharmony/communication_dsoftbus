@@ -878,7 +878,6 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
     }
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        LNN_LOGE(LNN_BUILDER, "create jsonObj failed");
         return SOFTBUS_ERR;
     }
     if (LnnPackCloudSyncDeviceInfo(json, info) != SOFTBUS_OK) {
@@ -887,7 +886,6 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
         return SOFTBUS_ERR;
     }
     if (!AddStringToJsonObject(json, DEVICE_INFO_JSON_BROADCAST_KEY_TABLE, syncInfo.broadcastCipherKey)) {
-        LNN_LOGE(LNN_BUILDER, "pack broadcastCipherKey info fail");
         cJSON_Delete(json);
         return SOFTBUS_ERR;
     }
