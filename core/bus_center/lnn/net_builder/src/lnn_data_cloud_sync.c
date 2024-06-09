@@ -54,150 +54,6 @@ typedef struct {
     uint64_t timestamp;
 } CloudSyncValue;
 
-static int32_t ConvertNameInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
-{
-    cloudSyncInfo->accountId = nodeInfo->accountId;
-    if (strcpy_s(cloudSyncInfo->deviceName, DEVICE_NAME_BUF_LEN, nodeInfo->deviceInfo.deviceName) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s devicename fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(cloudSyncInfo->unifiedName, DEVICE_NAME_BUF_LEN, nodeInfo->deviceInfo.unifiedName) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s unifiedname fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(cloudSyncInfo->unifiedDefaultName, DEVICE_NAME_BUF_LEN, nodeInfo->deviceInfo.unifiedDefaultName) !=
-        EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s unifieddefaultname fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(cloudSyncInfo->nickName, DEVICE_NAME_BUF_LEN, nodeInfo->deviceInfo.nickName) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s nickname fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertVersionInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
-{
-    if (strcpy_s(cloudSyncInfo->softBusVersion, VERSION_MAX_LEN, nodeInfo->softBusVersion) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s softbusversion fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(cloudSyncInfo->pkgVersion, VERSION_MAX_LEN, nodeInfo->pkgVersion) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s pkgversion fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(cloudSyncInfo->osVersion, OS_VERSION_BUF_LEN, nodeInfo->deviceInfo.osVersion) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s osversion fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    cloudSyncInfo->wifiVersion = nodeInfo->wifiVersion;
-    cloudSyncInfo->bleVersion = nodeInfo->bleVersion;
-    cloudSyncInfo->osType = nodeInfo->deviceInfo.osType;
-    cloudSyncInfo->stateVersion = nodeInfo->stateVersion;
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertDevIdInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
-{
-    if (strcpy_s(cloudSyncInfo->networkId, NETWORK_ID_BUF_LEN, nodeInfo->networkId) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s networkid fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    cloudSyncInfo->deviceTypeId = nodeInfo->deviceInfo.deviceTypeId;
-    if (strcpy_s(cloudSyncInfo->deviceUdid, UDID_BUF_LEN, nodeInfo->deviceInfo.deviceUdid) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s deviceudid fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(cloudSyncInfo->uuid, UUID_BUF_LEN, nodeInfo->uuid) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s uuid fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertCipherInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
-{
-    if (memcpy_s(cloudSyncInfo->cipherKey, SESSION_KEY_LENGTH, nodeInfo->cipherInfo.key, SESSION_KEY_LENGTH) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:memcpy_s cipherkey fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (memcpy_s(cloudSyncInfo->cipherIv, BROADCAST_IV_LEN, nodeInfo->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:memcpy_s cipheriv fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertAbilityInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
-{
-    cloudSyncInfo->isBleP2p = nodeInfo->isBleP2p;
-    cloudSyncInfo->supportedProtocols = nodeInfo->supportedProtocols;
-    cloudSyncInfo->feature = nodeInfo->feature;
-    cloudSyncInfo->connSubFeature = nodeInfo->connSubFeature;
-    cloudSyncInfo->authCapacity = nodeInfo->authCapacity;
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertAddressInfoInternal(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
-{
-    if (strcpy_s(cloudSyncInfo->macAddr, MAC_LEN, nodeInfo->connectInfo.macAddr) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s macaddr fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(cloudSyncInfo->p2pMac, MAC_LEN, nodeInfo->p2pInfo.p2pMac) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s p2pmac fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (memcpy_s(cloudSyncInfo->peerIrk, LFINDER_IRK_LEN, nodeInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:memcpy_s peerirk fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (memcpy_s(cloudSyncInfo->publicAddress, LFINDER_MAC_ADDR_LEN, nodeInfo->rpaInfo.publicAddress,
-        LFINDER_MAC_ADDR_LEN) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:memcpy_s publicaddress fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (memcpy_s(cloudSyncInfo->remotePtk, PTK_DEFAULT_LEN, nodeInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "fail:memcpy_s remoteptk fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertNodeInfoToCloudSyncInfo(CloudSyncInfo *cloudSyncInfo, const NodeInfo *nodeInfo)
-{
-    if (cloudSyncInfo == NULL || nodeInfo == NULL) {
-        LNN_LOGE(LNN_BUILDER, "fail:invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (ConvertNameInfoInternal(cloudSyncInfo, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s name info fail");
-        return SOFTBUS_ERR;
-    }
-    if (ConvertVersionInfoInternal(cloudSyncInfo, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s version info fail");
-        return SOFTBUS_ERR;
-    }
-    if (ConvertDevIdInfoInternal(cloudSyncInfo, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s devid info fail");
-        return SOFTBUS_ERR;
-    }
-    if (ConvertAbilityInfoInternal(cloudSyncInfo, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s alibity info fail");
-        return SOFTBUS_ERR;
-    }
-    if (ConvertAddressInfoInternal(cloudSyncInfo, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s address info fail");
-        return SOFTBUS_ERR;
-    }
-    if (ConvertCipherInfoInternal(cloudSyncInfo, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:strcpy_s cipher info fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t DBCipherInfoSyncToCache(
     NodeInfo *cacheInfo, char *fieldName, const char *value, size_t valueLength, const char *udid)
 {
@@ -215,12 +71,6 @@ static int32_t DBCipherInfoSyncToCache(
         }
     } else if (strcmp(fieldName, DEVICE_INFO_JSON_BROADCAST_KEY_TABLE) == 0) {
         LnnSetRemoteBroadcastCipherInfo(value, udid);
-    } else if (strcmp(fieldName, DEVICE_INFO_JSON_KEY_TOTAL_LIFE) == 0) {
-        LNN_LOGD(LNN_BUILDER, "cipher total life info no need update into nodeinfo");
-    } else if (strcmp(fieldName, DEVICE_INFO_JSON_KEY_TIMESTAMP_BEGIN) == 0) {
-        LNN_LOGD(LNN_BUILDER, "cipher timestamp begin info no need update into nodeinfo");
-    } else if (strcmp(fieldName, DEVICE_INFO_JSON_KEY_CURRENT_INDEX) == 0) {
-        LNN_LOGD(LNN_BUILDER, "cipher current index info no need update into nodeinfo");
     } else if (strcmp(fieldName, DEVICE_INFO_DISTRIBUTED_SWITCH) == 0) {
         LNN_LOGD(LNN_BUILDER, "distributed switch info no need update into nodeinfo");
     } else {
@@ -885,6 +735,51 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
     return SOFTBUS_OK;
 }
 
+int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
+{
+    if (key == NULL || value == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    cJSON *json = cJSON_Parse(value);
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "parse json fail");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo cacheInfo = { 0 };
+    if (LnnUnPackCloudSyncDeviceInfo(json, &cacheInfo) != SOFTBUS_OK) {
+        cJSON_Delete(json);
+        return SOFTBUS_ERR;
+    }
+    cJSON_Delete(json);
+    char udidHash[UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (LnnGenerateHexStringHash((const unsigned char *)cacheInfo.deviceInfo.deviceUdid, udidHash, UDID_HASH_HEX_LEN) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Generate UDID HexStringHash fail");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo oldCacheInfo = { 0 };
+    if (LnnRetrieveDeviceInfo(udidHash, &oldCacheInfo) == SOFTBUS_OK &&
+        IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp, cacheInfo.stateVersion,
+            cacheInfo.updateTimestamp)) {
+        return SOFTBUS_ERR;
+    }
+    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
+    char *anonyUdid = NULL;
+    Anonymize(cacheInfo.deviceInfo.deviceUdid, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER,
+        "success. udid=%{public}s, stateVersion=%{public}d, localStateVersion=%{public}d, updateTimestamp=%{public}"
+        "" PRIu64, anonyUdid, cacheInfo.stateVersion, cacheInfo.localStateVersion, cacheInfo.updateTimestamp);
+    AnonymizeFree(anonyUdid);
+    if (LnnUpdateDistributedNodeInfo(&cacheInfo, cacheInfo.deviceInfo.deviceUdid) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "fail:Cache info sync to Ledger fail");
+        (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    return SOFTBUS_OK;
+}
+
 int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeType changeType)
 {
     if (key == NULL) {
@@ -960,7 +855,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
     return SOFTBUS_OK;
 }
 
-int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param, info is NULL");
@@ -970,24 +865,42 @@ int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
         LNN_LOGI(LNN_BUILDER, "ledger accountid is null, all data no need sync to cloud");
         return SOFTBUS_OK;
     }
-    CloudSyncInfo syncInfo = { 0 };
-    syncInfo.distributedSwitch = true;
-    if (ConvertNodeInfoToCloudSyncInfo(&syncInfo, info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:Ledger all data sync to cache fail.");
+    char putKey[KEY_MAX_LEN] = { 0 };
+    if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s", info->accountId, info->deviceInfo.deviceUdid) < 0) {
+        LNN_LOGE(LNN_BUILDER, "sprintf_s key fail");
         return SOFTBUS_ERR;
     }
+    info->updateTimestamp = SoftBusGetSysTimeMs();
+    CloudSyncInfo syncInfo = { 0 };
     if (LnnGetLocalBroadcastCipherInfo(&syncInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get broadcastcipherinfo fail");
         return SOFTBUS_ERR;
     }
+    cJSON *json = cJSON_CreateObject();
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create jsonObj failed");
+        return SOFTBUS_ERR;
+    }
+    if (LnnPackCloudSyncDeviceInfo(json, info) != SOFTBUS_OK) {
+        cJSON_Delete(json);
+        LNN_LOGE(LNN_BUILDER, "pack cloud sync info fail");
+        return SOFTBUS_ERR;
+    }
+    if (!AddStringToJsonObject(json, DEVICE_INFO_JSON_BROADCAST_KEY_TABLE, syncInfo.broadcastCipherKey)) {
+        LNN_LOGE(LNN_BUILDER, "pack broadcastCipherKey info fail");
+        cJSON_Delete(json);
+        return SOFTBUS_ERR;
+    }
+    char *putValue = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
     int32_t dbId = g_dbId;
-    int32_t ret = LnnPutDBDataBatch(dbId, &syncInfo);
+    int32_t ret = LnnPutDBData(dbId, putKey, strlen(putKey), putValue, strlen(putValue));
     JSON_Free(syncInfo.broadcastCipherKey);
     if (ret != 0) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode=%{public}d", ret);
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "sync all data to db success. stateVersion=%{public}d", syncInfo.stateVersion);
+    LNN_LOGI(LNN_BUILDER, "sync all data to db success. stateVersion=%{public}d", info->stateVersion);
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch cloud sync fail, errorcode=%{public}d", ret);
