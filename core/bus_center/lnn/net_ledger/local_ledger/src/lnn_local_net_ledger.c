@@ -1040,6 +1040,14 @@ static int32_t UpdateLocalDeviceName(const void *name)
             LNN_LOGE(LNN_LEDGER, "set device name fail");
             return SOFTBUS_ERR;
         }
+
+        NodeInfo localNodeInfo = { 0 };
+        (void)LnnGetLocalDevInfo(&localNodeInfo);
+        if (strcmp((char *)name, localNodeInfo.deviceInfo.deviceName) == 0) {
+            LNN_LOGI(LNN_LEDGER, "device name is same as localcache");
+            return SOFTBUS_OK;
+        }
+
         UpdateStateVersionAndStore(STRING_KEY_DEV_NAME);
         if (g_localNetLedger.localInfo.accountId == 0) {
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
