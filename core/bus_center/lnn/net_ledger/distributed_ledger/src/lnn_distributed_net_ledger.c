@@ -1386,6 +1386,7 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     oldInfo->authCapacity = newInfo->authCapacity;
     oldInfo->deviceInfo.osType = newInfo->deviceInfo.osType;
     oldInfo->stateVersion = newInfo->stateVersion;
+    oldInfo->updateTimestamp = newInfo->updateTimestamp;
 }
 
 static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
@@ -1430,6 +1431,19 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     UpdateDevBasicInfoToDLedger(newInfo, oldInfo);
 }
 
+static bool IsIgnoreUpdateToLedger(
+    int32_t oldStateVersion, uint64_t oldTimestamp, int32_t newStateVersion, uint64_t newTimestamp)
+{
+    bool isIgnore = oldTimestamp > newTimestamp || (oldTimestamp == 0 && oldStateVersion > newStateVersion);
+    if (isIgnore) {
+        LNN_LOGE(LNN_BUILDER,
+            "sync info is older, oldDLeger.stateVersion=%{public}d, oldDLegerTimestamp=%{public}" PRIu64
+            ", newSyncInfo.stateVersion=%{public}d, newTimestamp=%{public}" PRIu64 "",
+            oldStateVersion, oldTimestamp, newStateVersion, newTimestamp);
+    }
+    return isIgnore;
+}
+
 int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
 {
     if (newInfo == NULL || udid == NULL) {
@@ -1451,11 +1465,16 @@ int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
             return SOFTBUS_ERR;
         }
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        LNN_LOGD(LNN_LEDGER, "DB data new device nodeinfo insert to distributed ledger success.");
         return SOFTBUS_OK;
     }
-
+    if (IsIgnoreUpdateToLedger(oldInfo->stateVersion, oldInfo->updateTimestamp, newInfo->stateVersion,
+        newInfo->updateTimestamp)) {
+        return SOFTBUS_OK;
+    }
     UpdateDistributedLedger(newInfo, oldInfo);
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    LNN_LOGD(LNN_LEDGER, "DB data update to distributed ledger success.");
     return SOFTBUS_OK;
 }
 
