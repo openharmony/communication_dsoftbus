@@ -603,7 +603,7 @@ static int32_t UpdateStateVersion(const void *buf)
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_LEDGER, "stateVersion is changed, stateVersion=%{public}d", info->stateVersion);
-    NodeInfo nodeInfo = { 0 };
+    NodeInfo nodeInfo = {};
     if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
@@ -1046,7 +1046,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "device name is changed");
-        NodeInfo nodeInfo = { 0 };
+        NodeInfo nodeInfo = {};
         if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
@@ -1075,7 +1075,7 @@ static int32_t UpdateUnifiedName(const void *name)
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "unified device name is changed");
-        NodeInfo nodeInfo = { 0 };
+        NodeInfo nodeInfo = {};
         if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
@@ -1104,7 +1104,7 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "device unified default name is changed");
-        NodeInfo nodeInfo = { 0 };
+        NodeInfo nodeInfo = {};
         if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
@@ -1133,7 +1133,7 @@ static int32_t UpdateNickName(const void *name)
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "device nick name is changed");
-        NodeInfo nodeInfo = { 0 };
+        NodeInfo nodeInfo = {};
         if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
@@ -1173,7 +1173,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    NodeInfo nodeInfo =  { 0 };
+    NodeInfo nodeInfo =  {};
     if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
@@ -1298,7 +1298,7 @@ static int32_t UpdateLocalBtMac(const void *mac)
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_LEDGER, "device bt mac is changed");
-    NodeInfo nodeInfo = { 0 };
+    NodeInfo nodeInfo = {};
     if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
@@ -1457,7 +1457,7 @@ void LnnUpdateStateVersion(void)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return;
     }
-    NodeInfo nodeInfo = { 0 };
+    NodeInfo nodeInfo = {};
     if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return;
