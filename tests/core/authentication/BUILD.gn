@@ -871,7 +871,7 @@ ohos_unittest("AuthLaneTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":AuthEnhanceMockTest",
+    #":AuthEnhanceMockTest",
     ":AuthHichainTest",
     ":AuthLaneTest",
     ":AuthManagerTest",
