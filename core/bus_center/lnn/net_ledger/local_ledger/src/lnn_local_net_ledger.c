@@ -602,10 +602,14 @@ static int32_t UpdateStateVersion(const void *buf)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud, stateVersion=%{public}d", info->stateVersion);
         return SOFTBUS_OK;
     }
-    char value[STATE_VERSION_VALUE_LENGTH] = { 0 };
-    (void)sprintf_s(value, STATE_VERSION_VALUE_LENGTH, "%d", g_localNetLedger.localInfo.stateVersion);
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_STATE_VERSION, value, strlen(value)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "ledger state version change sync to cloud failed");
+    LNN_LOGI(LNN_LEDGER, "stateVersion is changed, stateVersion=%{public}d", info->stateVersion);
+    NodeInfo nodeInfo = { 0 };
+    if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger stateversion change sync to cloud failed");
     }
     return SOFTBUS_OK;
 }
@@ -1041,8 +1045,13 @@ static int32_t UpdateLocalDeviceName(const void *name)
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
         }
-        char *value = g_localNetLedger.localInfo.deviceInfo.deviceName;
-        if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_DEVICE_NAME, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "device name is changed");
+        NodeInfo nodeInfo = { 0 };
+        if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "memcpy fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger device name change sync to cloud failed");
         }
     }
@@ -1065,8 +1074,13 @@ static int32_t UpdateUnifiedName(const void *name)
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
         }
-        char *value = g_localNetLedger.localInfo.deviceInfo.unifiedName;
-        if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_UNIFIED_DEVICE_NAME, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "unified device name is changed");
+        NodeInfo nodeInfo = { 0 };
+        if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "memcpy fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified device name change sync to cloud failed");
         }
     }
@@ -1089,8 +1103,13 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
         }
-        char *value = g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName;
-        if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_UNIFIED_DEFAULT_DEVICE_NAME, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "device unified default name is changed");
+        NodeInfo nodeInfo = { 0 };
+        if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "memcpy fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified default device name change sync to cloud failed");
         }
     }
@@ -1113,8 +1132,13 @@ static int32_t UpdateNickName(const void *name)
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
         }
-        char *value = g_localNetLedger.localInfo.deviceInfo.nickName;
-        if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_SETTINGS_NICK_NAME, value, strlen(value)) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "device nick name is changed");
+        NodeInfo nodeInfo = { 0 };
+        if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "memcpy fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger nick name change sync to cloud failed");
         }
     }
@@ -1149,8 +1173,12 @@ static int32_t UpdateLocalNetworkId(const void *id)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    char *value = g_localNetLedger.localInfo.networkId;
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_NETWORK_ID, value, strlen(value)) != SOFTBUS_OK) {
+    NodeInfo nodeInfo =  { 0 };
+    if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger networkId change sync to cloud failed");
     }
     return SOFTBUS_OK;
@@ -1269,8 +1297,13 @@ static int32_t UpdateLocalBtMac(const void *mac)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
     }
-    char *value = g_localNetLedger.localInfo.connectInfo.macAddr;
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_BT_MAC, value, strlen(value)) != SOFTBUS_OK) {
+    LNN_LOGI(LNN_LEDGER, "device bt mac is changed");
+    NodeInfo nodeInfo = { 0 };
+    if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger btMac change sync to cloud failed");
     }
     return SOFTBUS_OK;
@@ -1424,10 +1457,13 @@ void LnnUpdateStateVersion(void)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return;
     }
-    char value[STATE_VERSION_VALUE_LENGTH] = { 0 };
-    (void)sprintf_s(value, STATE_VERSION_VALUE_LENGTH, "%d", g_localNetLedger.localInfo.stateVersion);
-    if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_STATE_VERSION, value, strlen(value)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "ledger state version change sync to cloud failed");
+    NodeInfo nodeInfo = { 0 };
+    if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy fail");
+        return;
+    }
+    if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "ledger stateversion change sync to cloud failed");
     }
 }
 

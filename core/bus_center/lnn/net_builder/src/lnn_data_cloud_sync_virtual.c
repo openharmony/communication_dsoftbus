@@ -61,3 +61,10 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
     (void)keySize;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
+{
+    (void)key;
+    (void)value;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
