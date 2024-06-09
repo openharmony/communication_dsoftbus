@@ -27,7 +27,7 @@ void LnnDeInitCloudSyncModule(void)
     return;
 }
 
-int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
 {
     (void)info;
     return SOFTBUS_NOT_IMPLEMENT;
