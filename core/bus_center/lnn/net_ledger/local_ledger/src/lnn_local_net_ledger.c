@@ -1041,7 +1041,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
             return SOFTBUS_ERR;
         }
 
-        NodeInfo localNodeInfo = { 0 };
+        NodeInfo localNodeInfo = {};
         (void)LnnGetLocalDevInfo(&localNodeInfo);
         if (strcmp((char *)name, localNodeInfo.deviceInfo.deviceName) == 0) {
             LNN_LOGI(LNN_LEDGER, "device name is same as localcache");
