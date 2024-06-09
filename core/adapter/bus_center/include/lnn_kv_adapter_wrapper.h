@@ -27,7 +27,6 @@ void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appI
     int32_t storeIdLen);
 void LnnUnRegisterDataChangeListener(int32_t dbId);
 int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *value, int32_t valueLen);
-int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo);
 int32_t LnnDeleteDBData(int32_t dbId, const char *key, int32_t keyLen);
 int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t keyPrefixLen);
 // *value need to be free by caller
