@@ -178,7 +178,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DiscCoapRegisterServiceData(nullptr, 0, 0, 0);
+    ret = DiscCoapRegisterServiceData(nullptr, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
