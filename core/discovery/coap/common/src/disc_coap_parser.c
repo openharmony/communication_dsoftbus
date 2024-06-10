@@ -159,6 +159,9 @@ int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint
         return SOFTBUS_OK;
     }
     if (option->capabilityBitmap[0] != (1 << CASTPLUS_CAPABILITY_BITMAP)) {
+        if (!g_castJson[0]) {
+            return SOFTBUS_OK;
+        }
         if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, g_castJson) < 0) {
             DISC_LOGE(DISC_COAP, "write last cast capability data failed");
             return SOFTBUS_STRCPY_ERR;
@@ -166,7 +169,7 @@ int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint
         DISC_LOGI(DISC_COAP, "write last cast capability data to fill service data");
         return SOFTBUS_OK;
     }
-    
+
     const char *capabilityData = (const char *)option->capabilityData;
     DISC_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == option->dataLen, SOFTBUS_INVALID_PARAM, DISC_COAP,
         "capabilityDataLen != expectedLen. capabilityDataLen=%{public}zu, expectedLen%{public}u, data=%{public}s",
@@ -175,22 +178,16 @@ int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint
     cJSON *json = cJSON_ParseWithLength(capabilityData, option->dataLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_COAP,
         "trans capability data to json failed");
-    
-    char jsonStr[MAX_SERVICE_DATA_LEN] = {0};
-    if (!GetJsonObjectStringItem(json, JSON_KEY_CAST_PLUS, jsonStr, MAX_SERVICE_DATA_LEN)) {
-        DISC_LOGE(DISC_COAP, "parse cast capability data failed");
-        cJSON_Delete(json);
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, jsonStr) < 0) {
-        DISC_LOGE(DISC_COAP, "write cast capability data failed");
-        cJSON_Delete(json);
-        return SOFTBUS_STRCPY_ERR;
-    }
+
     if (!GetJsonObjectStringItem(json, JSON_KEY_CAST_PLUS, g_castJson, MAX_SERVICE_DATA_LEN)) {
         DISC_LOGE(DISC_COAP, "parse cast capability data failed");
         cJSON_Delete(json);
         return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, g_castJson) < 0) {
+        DISC_LOGE(DISC_COAP, "write cast capability data failed");
+        cJSON_Delete(json);
+        return SOFTBUS_STRCPY_ERR;
     }
     cJSON_Delete(json);
     return SOFTBUS_OK;
