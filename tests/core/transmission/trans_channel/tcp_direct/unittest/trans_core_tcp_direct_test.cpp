@@ -527,16 +527,19 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level1)
 {
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
     int errCode = SOFTBUS_OK;
-    int32_t channelId = 1;
-    int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    int32_t channelId = 2;
+    ret = NotifyChannelOpenFailed(channelId, errCode);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 
     SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
-    conn->channelId = 1;
+    conn->channelId = channelId;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = INVALID_VALUE;
@@ -544,24 +547,69 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     conn->requestId = 0;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;
-    (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
+    conn->serverSide = false;
+    (void)strcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName);
+    (void)strcpy_s(conn->appInfo.myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName);
 
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
-
-    conn->serverSide = false;
-    ret = TransSessionMgrInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
 
     SessionServer *newNode = TestSetPack();
     ret = TransSessionServerAddItem(newNode);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = NotifyChannelOpenFailed(channelId, errCode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransSessionMgrDeinit();
+    SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: NotifyChannelOpenFailedBySessionConnTest0018
+ * @tc.desc: NotifyChannelOpenFailedBySessionConn, use correct parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedBySessionConnTest0018, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int errCode = SOFTBUS_OK;
+    ret = NotifyChannelOpenFailedBySessionConn(nullptr, errCode);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
+    conn->serverSide = true;
+    conn->channelId = 3;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
+    conn->timeout = 0;
+    conn->req = INVALID_VALUE;
+    conn->authHandle.authId = 1;
+    conn->requestId = 0;
+    conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
+    conn->appInfo.myData.pid = 1;
+    conn->serverSide = false;
+    (void)strcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName);
+    (void)strcpy_s(conn->appInfo.myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName);
+
+    ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = NotifyChannelOpenFailedBySessionConn(conn, errCode);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+
+    SessionServer *newNode = TestSetPack();
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = NotifyChannelOpenFailedBySessionConn(conn, errCode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransSessionMgrDeinit();
     SoftBusFree(conn);
 }
