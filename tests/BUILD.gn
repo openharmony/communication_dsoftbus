@@ -23,6 +23,7 @@ lite_component("softbus_test") {
         "sdk/discovery/unittest:DiscSdkTest",
         "adapter/unittest:AdapterTest",
         "sdk/transmission/trans_channel:TransSdkStreamTest",
+        "sdk/bus_center/unittest:BusCenterSdkRefreshSmall",
       ]
     }
   }
