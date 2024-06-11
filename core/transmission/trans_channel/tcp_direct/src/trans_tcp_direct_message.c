@@ -829,56 +829,60 @@ static void CheckStrcpy(char *dest, const int32_t destSize, const char *src)
     return;
 }
 
-static int32_t CheckAndFillAppinfo(SessionConn *conn, int32_t channelId, char *errDesc)
+static int32_t CheckAndFillAppInfo(AppInfo *appInfo, int32_t channelId, char *errDesc)
 {
     char *ret = NULL;
     int32_t errCode = SOFTBUS_OK;
-    if (conn->appInfo.callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(conn->appInfo.callingTokenId) != SOFTBUS_OK) {
-        errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
         ret = (char *)"Server check acl failed";
         CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
-        return errCode;
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
-    if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
-        &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
+
+    if (TransTdcGetUidAndPid(appInfo->myData.sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         ret = (char *)"Peer Device Session Not Create";
         CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
         return errCode;
     }
-    if (GetUuidByChanId(channelId, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Get Uuid By ChanId failed.");
-        errCode = SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
+
+    errCode = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
+    if (errCode != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Auth: Get Uuid By ChanId failed.");
         ret = (char *)"Get Uuid By ChanId failed";
         CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
         return errCode;
     }
-    if (TransTdcFillDataConfig(&conn->appInfo) != SOFTBUS_OK) {
+
+    errCode = TransTdcFillDataConfig(appInfo);
+    if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fill data config failed.");
-        errCode = SOFTBUS_INVALID_PARAM;
         ret = (char *)"fill data config failed";
         CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
         return errCode;
     }
-    if (SetAppInfoById(channelId, &conn->appInfo) != SOFTBUS_OK) {
+
+    errCode = SetAppInfoById(channelId, appInfo);
+    if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set app info by id failed.");
-        errCode = SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
         ret = (char *)"Set App Info By Id Failed";
         CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
         return errCode;
     }
 
-    OpenDataBusRequestOutSessionName(conn->appInfo.myData.sessionName, conn->appInfo.peerData.sessionName);
+    OpenDataBusRequestOutSessionName(appInfo->myData.sessionName, appInfo->peerData.sessionName);
     TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%{public}d, peerPid=%{public}d",
-        conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
-    if (NotifyChannelOpened(channelId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Notify App Channel Opened Failed");
-        errCode = SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED;
-        ret = (char *)"Notify App Channel Opened Failed";
+        appInfo->myData.pid, appInfo->peerData.pid);
+
+    errCode = NotifyChannelOpened(channelId);
+    if (errCode != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Notify SDK Channel Opened Failed");
+        ret = (char *)"Notify SDK Channel Opened Failed";
         CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
         return errCode;
     }
+
     return SOFTBUS_OK;
 }
 
@@ -934,7 +938,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         return SOFTBUS_TRANS_NOT_META_SESSION;
     }
     char errDesc[MAX_ERRDESC_LEN] = { 0 };
-    int32_t errCode = CheckAndFillAppinfo(conn, channelId, errDesc);
+    int32_t errCode = CheckAndFillAppInfo(&conn->appInfo, channelId, errDesc);
     if (errCode != SOFTBUS_OK) {
         if (OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
