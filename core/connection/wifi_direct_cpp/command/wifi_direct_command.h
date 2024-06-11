@@ -15,6 +15,7 @@
 #ifndef WIFI_DIRECT_COMMAND_H
 #define WIFI_DIRECT_COMMAND_H
 
+#include <chrono>
 #include <memory>
 #include <string>
 
@@ -33,6 +34,7 @@ public:
     WifiDirectCommand()
     {
         id_ = commandId_++;
+        startTime_ = std::chrono::steady_clock::now();
     }
 
     virtual std::string GetRemoteDeviceId() const = 0;
@@ -45,9 +47,17 @@ public:
         return id_;
     }
 
+    bool IsValid(int validDuration)
+    {
+        auto duration =
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime_);
+        return duration.count() < validDuration;
+    }
+
 private:
     uint32_t id_ = 0;
     static inline std::atomic_uint32_t commandId_;
+    std::chrono::time_point<std::chrono::steady_clock> startTime_;
 };
 }
 #endif
