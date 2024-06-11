@@ -67,3 +67,4 @@ int32_t LnnGetRemoteVapInfo(const char *udid, LnnVapType type, LnnVapAttr *vapAt
     (void)vapAttr;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+

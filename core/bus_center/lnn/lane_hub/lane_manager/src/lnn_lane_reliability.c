@@ -362,3 +362,4 @@ int32_t InitLaneReliability(void)
     g_laneDetectList.cnt = 0;
     return SOFTBUS_OK;
 }
+
