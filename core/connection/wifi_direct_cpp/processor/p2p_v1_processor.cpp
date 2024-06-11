@@ -1532,7 +1532,7 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
 
     for (auto goChannel : goChannels) {
         if (std::find(gcChannels.begin(), gcChannels.end(), goChannel) != gcChannels.end()) {
-            return goChannel;
+            return WifiDirectUtils::ChannelToFrequency(goChannel);
         }
     }
 
