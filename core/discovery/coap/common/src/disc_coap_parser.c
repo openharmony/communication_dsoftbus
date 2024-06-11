@@ -29,6 +29,8 @@
 
 #define HEX_HASH_LEN 16
 
+char g_castJson[MAX_SERVICE_DATA_LEN] = {0};
+
 int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(raw != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "raw string is NULL");
@@ -148,33 +150,42 @@ void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device)
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "generate account hash failed, ret=%{public}d", ret);
 }
 
-int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
-    uint32_t outDataLen)
+int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(outData != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "out data is NULL");
-    if (capability != (1 << CASTPLUS_CAPABILITY_BITMAP)) {
+    if ((allCap & (1 << CASTPLUS_CAPABILITY_BITMAP)) == 0) {
+        memset_s(g_castJson, sizeof(g_castJson), 0, sizeof(g_castJson));
         // only castPlus need add extra service data
         return SOFTBUS_OK;
     }
-    if (capabilityData == NULL || dataLen == 0) {
-        DISC_LOGI(DISC_COAP, "no capability data, no need to fill service data");
+    if (option->capabilityBitmap[0] != (1 << CASTPLUS_CAPABILITY_BITMAP)) {
+        if (!g_castJson[0]) {
+            return SOFTBUS_OK;
+        }
+        if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, g_castJson) < 0) {
+            DISC_LOGE(DISC_COAP, "write last cast capability data failed");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        DISC_LOGI(DISC_COAP, "write last cast capability data to fill service data");
         return SOFTBUS_OK;
     }
-    DISC_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == dataLen, SOFTBUS_INVALID_PARAM, DISC_COAP,
-        "capabilityDataLen != expectedLen. capabilityDataLen=%{public}zu, expectedLen%{public}u, data=%{public}s",
-        strlen(capabilityData), dataLen, capabilityData);
 
-    cJSON *json = cJSON_ParseWithLength(capabilityData, dataLen);
+    const char *capabilityData = (const char *)option->capabilityData;
+    DISC_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == option->dataLen, SOFTBUS_INVALID_PARAM, DISC_COAP,
+        "capabilityDataLen != expectedLen. capabilityDataLen=%{public}zu, expectedLen%{public}u, data=%{public}s",
+        strlen(capabilityData), option->dataLen, capabilityData);
+
+    cJSON *json = cJSON_ParseWithLength(capabilityData, option->dataLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_COAP,
         "trans capability data to json failed");
-    
-    char jsonStr[MAX_SERVICE_DATA_LEN] = {0};
-    if (!GetJsonObjectStringItem(json, JSON_KEY_CAST_PLUS, jsonStr, MAX_SERVICE_DATA_LEN)) {
+
+    if (!GetJsonObjectStringItem(json, JSON_KEY_CAST_PLUS, g_castJson, MAX_SERVICE_DATA_LEN)) {
         DISC_LOGE(DISC_COAP, "parse cast capability data failed");
         cJSON_Delete(json);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, jsonStr) < 0) {
+    if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, g_castJson) < 0) {
         DISC_LOGE(DISC_COAP, "write cast capability data failed");
         cJSON_Delete(json);
         return SOFTBUS_STRCPY_ERR;
