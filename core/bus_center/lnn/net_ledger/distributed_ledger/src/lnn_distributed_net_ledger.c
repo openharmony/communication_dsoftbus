@@ -1387,6 +1387,7 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     oldInfo->deviceInfo.osType = newInfo->deviceInfo.osType;
     oldInfo->stateVersion = newInfo->stateVersion;
     oldInfo->updateTimestamp = newInfo->updateTimestamp;
+    oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
 }
 
 static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
