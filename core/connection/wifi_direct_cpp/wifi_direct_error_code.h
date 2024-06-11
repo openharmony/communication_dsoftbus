@@ -363,6 +363,9 @@ enum WifiDirectErrorCode {
     /* Error code start action listen failed */
     ERROR_START_ACTION_LISTEN_FAILED = ERROR_BASE - 6626,
 
+    /* Error code trigger message not handled */
+    ERROR_TRIGGER_MSG_NOT_HANDLED = ERROR_BASE - 6627,
+
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
 };
