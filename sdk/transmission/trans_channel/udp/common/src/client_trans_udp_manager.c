@@ -320,6 +320,16 @@ int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
     return g_sessionCb->OnSessionOpenFailed(channelId, CHANNEL_TYPE_UDP, errCode);
 }
 
+int32_t TransOnUdpChannelBind(int32_t channelId, int32_t channelType)
+{
+    if ((g_sessionCb == NULL) || (g_sessionCb->OnChannelBind == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "client trans udp manager OnChannelBind is null");
+        return SOFTBUS_NO_INIT;
+    }
+
+    return g_sessionCb->OnChannelBind(channelId, CHANNEL_TYPE_UDP);
+}
+
 static int32_t ClosePeerUdpChannel(int32_t channelId)
 {
     return ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_UDP);

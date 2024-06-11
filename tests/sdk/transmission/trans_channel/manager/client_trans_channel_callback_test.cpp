@@ -66,6 +66,13 @@ static int32_t OnQosEvent(int32_t channelId, int32_t channelType, int32_t eventI
     return SOFTBUS_OK;
 }
 
+static int32_t OnChannelBind(int32_t channelId, int32_t channelType)
+{
+    (void)channelId;
+    (void)channelType;
+    return SOFTBUS_OK;
+}
+
 static IClientSessionCallBack g_clientSessionCb = {
     .OnSessionOpened = OnSessionOpened,
     .OnSessionClosed = OnSessionClosed,
@@ -73,6 +80,7 @@ static IClientSessionCallBack g_clientSessionCb = {
     .OnDataReceived = OnDataReceived,
     .OnStreamReceived = OnStreamReceived,
     .OnQosEvent = OnQosEvent,
+    .OnChannelBind = OnChannelBind,
 };
 
 class ClientTransChannelCallbackTest : public testing::Test {
@@ -243,6 +251,34 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelQosEventTest001, TestSize
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_BUTT, eventId, tvCount, &tvList);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+}
+
+/**
+ * @tc.name: TransOnChannelBindTest001
+ * @tc.desc: trans on channel bind test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelBindTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t ret = TransOnChannelBind(channelId, CHANNEL_TYPE_UDP);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelBind(channelId, CHANNEL_TYPE_TCP_DIRECT);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelBind(channelId, CHANNEL_TYPE_PROXY);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelBind(channelId, CHANNEL_TYPE_AUTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelBind(channelId, CHANNEL_TYPE_UNDEFINED);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelBind(channelId, CHANNEL_TYPE_BUTT);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
 } // namespace OHOS

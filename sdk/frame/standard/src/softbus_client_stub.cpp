@@ -82,6 +82,7 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnDataLevelChangedInner;
     memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] =
         &SoftBusClientStub::OnClientTransLimitChangeInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_BIND] = &SoftBusClientStub::OnChannelBindInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -690,6 +691,32 @@ int32_t SoftBusClientStub::OnDataLevelChangedInner(MessageParcel &data, MessageP
     }
     OnDataLevelChanged(networkId, info);
     return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnChannelBind(int32_t channelId, int32_t channelType)
+{
+    return TransOnChannelBind(channelId, channelType);
+}
+
+int32_t SoftBusClientStub::OnChannelBindInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SDK, "OnChannelBindInner read channel id failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        COMM_LOGE(COMM_SDK, "OnChannelBindInner read channel type failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t ret = OnChannelBind(channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "OnChannelBindInner failed! ret=%{public}d.", ret);
+    }
+    return ret;
 }
 
 int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)

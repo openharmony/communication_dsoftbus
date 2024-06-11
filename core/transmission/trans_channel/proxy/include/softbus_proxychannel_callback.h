@@ -34,6 +34,8 @@ int32_t TransProxyOnChannelOpened(const char *pkgName, int32_t pid, const char *
 
 int32_t TransProxyOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId);
 
+int32_t TransProxyOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId);
+
 int32_t TransProxyOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode);
 
 int32_t TransProxyOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,

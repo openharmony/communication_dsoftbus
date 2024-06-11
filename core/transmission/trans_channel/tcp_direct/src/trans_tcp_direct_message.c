@@ -440,6 +440,23 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     return ret;
 }
 
+static int32_t NotifyChannelBind(int32_t channelId)
+{
+    SessionConn conn;
+    if (GetSessionConnById(channelId, &conn) == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "notify channel bind, get tdcInfo is null");
+        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
+    }
+
+    char pkgName[PKG_NAME_SIZE_MAX] = {0};
+    int32_t ret = TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
+
+    ret = TransTdcOnChannelBind(pkgName, conn.appInfo.myData.pid, channelId);
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", channelId, ret);
+    return ret;
+}
+
 static int32_t NotifyChannelClosed(const AppInfo *appInfo, int32_t channelId)
 {
     AppInfoData myData = appInfo->myData;
@@ -866,7 +883,7 @@ static int32_t CheckAndFillAppInfo(AppInfo *appInfo, int32_t channelId, char *er
         CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
         return errCode;
     }
-
+    appInfo->myHandleId = 0;
     errCode = SetAppInfoById(channelId, appInfo);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set app info by id failed.");
@@ -893,13 +910,6 @@ static int32_t CheckAndFillAppInfo(AppInfo *appInfo, int32_t channelId, char *er
 static int32_t HandleDataBusReply(
     SessionConn *conn, int32_t channelId, TransEventExtra *extra, uint32_t flags, uint64_t seq)
 {
-    int myHandleId;
-    myHandleId = NotifyNearByUpdateHandleId(channelId);
-    if (myHandleId != SOFTBUS_ERR) {
-        TRANS_LOGE(TRANS_CTRL, "update handId notify failed");
-        conn->appInfo.myHandleId = myHandleId;
-    }
-    (void)SetAppInfoById(channelId, &conn->appInfo);
     int32_t ret = OpenDataBusRequestReply(&conn->appInfo, channelId, seq, flags);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequest reply err");
@@ -961,9 +971,9 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         return errCode;
     }
 
+    errCode = NotifyChannelBind(channelId);
     ReleaseSessionConn(conn);
-    TRANS_LOGD(TRANS_CTRL, "ok");
-    return SOFTBUS_OK;
+    return errCode;
 }
     
 

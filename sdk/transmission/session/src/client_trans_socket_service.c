@@ -145,6 +145,9 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
     ret = ClientBind(socket, qos, qosCount, listener, false);
     TRANS_LOGI(TRANS_SDK, "Bind end, stop timer, socket=%{public}d", socket);
     (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
+    if (ret != SOFTBUS_OK) {
+        (void)SetSessionStateBySessionId(socket, SESSION_STATE_INIT, 0);
+    }
     return ret;
 }
 
@@ -169,6 +172,7 @@ int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const IS
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "BindAsync fail, stop timer, ret=%{public}d, socket=%{public}d", ret, socket);
         (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
+        (void)SetSessionStateBySessionId(socket, SESSION_STATE_INIT, 0);
     }
     return ret;
 }

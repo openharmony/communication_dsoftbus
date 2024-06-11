@@ -144,3 +144,21 @@ int32_t ClientSetChannelInfo(IpcIo *data, IpcIo *reply)
     (void)TransSetChannelInfo(sessionName, sessionId, channelId, channelType);
     return SOFTBUS_OK;
 }
+
+int32_t ClientOnChannelBind(IpcIo *data, IpcIo *reply)
+{
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    (void)reply;
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    ReadInt32(data, &channelId);
+    ReadInt32(data, &channelType);
+    int32_t ret = TransOnChannelBind(channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "OnChannelBindInner failed! ret=%{public}d.", ret);
+    }
+    return ret;
+}

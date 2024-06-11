@@ -166,6 +166,31 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
     return serverRet;
 }
 
+int32_t TransClientProxy::OnChannelBind(int32_t channelId, int32_t channelType)
+{
+    sptr<IRemoteObject> remote = Remote();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
+
+    MessageParcel data;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()),
+        SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelId),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel id failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelType),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel type failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_BIND, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnChannelOpenBind send request failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+    }
+
+    return SOFTBUS_OK;
+}
+
 int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     sptr<IRemoteObject> remote = Remote();

@@ -174,6 +174,22 @@ int32_t NotifyUdpChannelClosed(const AppInfo *info, int32_t messageType)
     return SOFTBUS_OK;
 }
 
+static int32_t NotifyUdpChannelBind(const AppInfo *info)
+{
+    TRANS_LOGW(TRANS_CTRL, "enter.");
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "appInfo is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = g_channelCb->OnChannelBind(info->myData.pkgName, info->myData.pid,
+        (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "on channel bind failed, ret=%{public}d.", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 {
     TRANS_LOGW(TRANS_CTRL, "enter.");
@@ -652,6 +668,13 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
     if (info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
         extra.result = EVENT_STAGE_RESULT_OK;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+        ret = NotifyUdpChannelBind(&info);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "notify OnBind failed. ret=%{public}d.", ret);
+            errDesc = (char *)"notify OnBind failed";
+            ProcessAbnormalUdpChannelState(&info, ret, false);
+            goto ERR_EXIT;
+        }
     }
     return;
 
