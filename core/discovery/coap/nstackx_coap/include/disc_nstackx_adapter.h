@@ -52,7 +52,7 @@ void DiscNstackxDeinit(void);
 int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb);
 int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
-int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability);
+int32_t DiscCoapRegisterServiceData(const PublishOption *option, uint32_t allCap);
 int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability);
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option);
 int32_t DiscCoapStopDiscovery(void);

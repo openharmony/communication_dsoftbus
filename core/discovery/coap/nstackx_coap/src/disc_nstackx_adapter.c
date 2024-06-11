@@ -230,7 +230,7 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
     return SOFTBUS_OK;
 }
 
-int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability)
+int32_t DiscCoapRegisterServiceData(const PublishOption *option, uint32_t allCap)
 {
     int32_t authPort = 0;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort);
@@ -244,8 +244,7 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_
         return SOFTBUS_STRCPY_ERR;
     }
     // capabilityData can be NULL, it will be check in this func
-    ret = DiscCoapFillServiceData(capability, (const char *)capabilityData, dataLen, serviceData,
-        NSTACKX_MAX_SERVICE_DATA_LEN);
+    ret = DiscCoapFillServiceData(option, serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, allCap);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "fill service data failed. ret=%{public}d", ret);
 
     ret = NSTACKX_RegisterServiceData(serviceData);

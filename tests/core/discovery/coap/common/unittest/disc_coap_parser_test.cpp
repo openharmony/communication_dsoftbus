@@ -19,6 +19,7 @@
 #include "cJSON.h"
 #include "disc_coap_parser.h"
 #include "disc_log.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
 using namespace testing::ext;
@@ -225,27 +226,30 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseHwAccountHash001, TestSize.Level1)
  */
 HWTEST_F(DiscCoapParserTest, DiscCoapFillServiceData001, TestSize.Level1)
 {
-    uint32_t capability = (1 << CASTPLUS_CAPABILITY_BITMAP);
-    std::string capabilityData;
-    uint32_t dataLen = 0;
+    PublishOption *option = (PublishOption *)SoftBusCalloc(sizeof(PublishOption));
+    option->capabilityBitmap[0] = (1 << CASTPLUS_CAPABILITY_BITMAP);
+    option->capabilityData = NULL;
+    option->dataLen = 0;
+    uint32_t allCap = 8;
     char outData[MAX_SERVICE_DATA_LEN] = {0};
 
-    int32_t ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, nullptr, 0);
+    int32_t ret = DiscCoapFillServiceData(option, nullptr, 0, allCap);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    capabilityData = "testCapabilityData";
-    dataLen = capabilityData.length() - 1;
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    option->capabilityData = (uint8_t *)"testCapabilityData";
+    ret = DiscCoapFillServiceData(option, outData, MAX_SERVICE_DATA_LEN, allCap);
+
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    dataLen = capabilityData.length();
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    option->dataLen = strlen("testCapabilityData");
+    ret = DiscCoapFillServiceData(option, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
 
-    capabilityData = R"({"testCapabilityData":"castPlus"})";
-    dataLen = capabilityData.length();
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    option->capabilityData = (uint8_t *)R"({"testCapabilityData":"castPlus"})";
+    option->dataLen = strlen(R"({"testCapabilityData":"castPlus"})");
+    ret = DiscCoapFillServiceData(option, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    SoftBusFree(option);
 }
 
 /*
@@ -256,29 +260,29 @@ HWTEST_F(DiscCoapParserTest, DiscCoapFillServiceData001, TestSize.Level1)
  */
 HWTEST_F(DiscCoapParserTest, DiscCoapFillServiceData002, TestSize.Level1)
 {
-    uint32_t capability = 0;
-    std::string capabilityData;
-    uint32_t dataLen = 0;
+    PublishOption *option = (PublishOption *)SoftBusCalloc(sizeof(PublishOption));
+    option->capabilityBitmap[0] = 0;
+    option->capabilityData = NULL;
+    option->dataLen = 0;
+    uint32_t allCap = 8;
     char outData[MAX_SERVICE_DATA_LEN] = {0};
 
-    capability = 1;
-    int32_t ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    int32_t ret = DiscCoapFillServiceData(option, outData, MAX_SERVICE_DATA_LEN, 0);
+
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_STREQ(outData, "");
 
-    capability = (1 << CASTPLUS_CAPABILITY_BITMAP);
-    ret = DiscCoapFillServiceData(capability, nullptr, dataLen, outData, MAX_SERVICE_DATA_LEN);
+    option->capabilityBitmap[0] = 1;
+    ret = DiscCoapFillServiceData(option, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_STREQ(outData, "");
 
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_STREQ(outData, "");
-
-    capabilityData = R"({"castPlus":"test"})";
-    dataLen = capabilityData.length();
-    ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData, MAX_SERVICE_DATA_LEN);
+    option->capabilityBitmap[0] = (1 << CASTPLUS_CAPABILITY_BITMAP);
+    option->capabilityData = (uint8_t *)R"({"castPlus":"test"})";
+    option->dataLen = strlen(R"({"castPlus":"test"})");
+    ret = DiscCoapFillServiceData(option, outData, MAX_SERVICE_DATA_LEN, allCap);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_STREQ(outData, "castPlus:test");
+    SoftBusFree(option);
 }
 } // namespace OHOS
