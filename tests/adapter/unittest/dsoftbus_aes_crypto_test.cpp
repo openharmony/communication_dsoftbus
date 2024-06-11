@@ -639,3 +639,4 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftBusAesCfbEncrypt004, TestSize.Level0)
     SoftBusFree(encryptOutData.data);
 }
 } // namespace OHOS
+

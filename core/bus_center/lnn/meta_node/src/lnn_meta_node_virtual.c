@@ -37,3 +37,4 @@ void LnnDeinitMetaNodeExtLedger(void)
 {
     return;
 }
+
