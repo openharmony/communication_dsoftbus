@@ -1020,7 +1020,9 @@ static int32_t UpdateAdvertiser(int32_t adv)
         DISC_LOGE(DISC_BLE, "BuildBleConfigAdvData failed, ret=%{public}d", ret);
         return SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL;
     }
-    ret = SchedulerSetBroadcastData(advertiser->channel, &packet);
+    BroadcastParam advParam = {0};
+    BuildAdvParam(&advParam);
+    ret = SchedulerUpdateBroadcast(advertiser->channel, &advParam, &packet);
     if (ret != SOFTBUS_OK) {
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "UpdateAdv failed, ret=%{public}d", ret);

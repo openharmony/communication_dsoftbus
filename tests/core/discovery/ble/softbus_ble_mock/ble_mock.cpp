@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "ble_mock.h"
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -252,6 +253,7 @@ void BleMock::HexDump(const uint8_t *data, uint32_t len)
             << static_cast<uint32_t>(data[i]) << " ";
     }
     DISC_LOGI(DISC_TEST, "ss=%{public}s", ss.str().c_str());
+    std::cout << ss.str() << std::endl;
 }
 
 void BleMock::ShowAdvData(int32_t bcId, const BroadcastPacket *packet)
@@ -285,6 +287,28 @@ int32_t BleMock::ActionOfSetAdvDataForActiveDiscovery(int32_t bcId, const Broadc
     return SOFTBUS_OK;
 }
 
+int32_t BleMock::ActionOfUpdateAdvForActiveDiscovery(int32_t bcId, const BroadcastParam *param,
+    const BroadcastPacket *packet)
+{
+    ShowAdvData(bcId, packet);
+
+    if (packet->bcData.payloadLen != sizeof(activeDiscoveryAdvData) ||
+        packet->rspData.payloadLen != sizeof(activeDiscoveryRspData) ||
+        memcmp(packet->bcData.payload, activeDiscoveryAdvData, packet->bcData.payloadLen) != 0 ||
+        memcmp(packet->rspData.payload, activeDiscoveryRspData, packet->rspData.payloadLen) != 0) {
+        isAsyncAdvertiseSuccess = false;
+        GetMock()->AsyncAdvertiseDone();
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
+    }
+    if (advCallback) {
+        advCallback->OnUpdateBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
+    GetMock()->AsyncAdvertiseDone();
+    return SOFTBUS_OK;
+}
+
 int32_t BleMock::ActionOfSetAdvDataForActivePublish(int32_t bcId, const BroadcastPacket *packet)
 {
     ShowAdvData(bcId, packet);
@@ -299,6 +323,28 @@ int32_t BleMock::ActionOfSetAdvDataForActivePublish(int32_t bcId, const Broadcas
     }
     if (advCallback) {
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
+    GetMock()->AsyncAdvertiseDone();
+    return SOFTBUS_OK;
+}
+
+int32_t BleMock::ActionOfUpdateAdvForActivePublish(int32_t bcId, const BroadcastParam *param,
+    const BroadcastPacket *packet)
+{
+    ShowAdvData(bcId, packet);
+
+    if (packet->bcData.payloadLen != sizeof(activePublishAdvData) ||
+        packet->rspData.payloadLen != sizeof(activePublishRspData) ||
+        memcmp(packet->bcData.payload, activePublishAdvData, packet->bcData.payloadLen) != 0 ||
+        memcmp(packet->rspData.payload, activePublishRspData, packet->rspData.payloadLen) != 0) {
+        isAsyncAdvertiseSuccess = false;
+        GetMock()->AsyncAdvertiseDone();
+        return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
+    }
+    if (advCallback) {
+        advCallback->OnUpdateBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
