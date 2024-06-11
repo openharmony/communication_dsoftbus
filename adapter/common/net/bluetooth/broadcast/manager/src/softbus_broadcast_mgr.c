@@ -1306,6 +1306,7 @@ static int64_t MgrGetSysTime(void)
 static void StartBroadcastingWaitSignal(int32_t bcId, SoftBusMutex *mutex)
 {
     DISC_CHECK_AND_RETURN_LOGE(mutex != NULL, DISC_BLE, "invalid param");
+    DISC_CHECK_AND_RETURN_LOGE(CheckMediumIsValid(g_interfaceId), DISC_BLE, "invalid id!");
     if (SoftBusCondWaitSec(BC_WAIT_TIME_SEC, bcId, mutex) == SOFTBUS_OK) {
         return;
     }
