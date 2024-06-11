@@ -264,7 +264,7 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channe
     TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(dataInfo, len),
         SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED, TRANS_CTRL, "write (dataInfo, len) failed");
     TRANS_CHECK_AND_RETURN_RET_LOGE(data.Writeint32(type),
-        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write data len failed");
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write type failed");
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
