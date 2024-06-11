@@ -1136,16 +1136,6 @@ void TransProxyProcessHandshakeAuthMsg(const ProxyMessage *msg)
     AuthSessionProcessAuthData(authSeq, (uint8_t *)msg->data, msg->dateLen);
 }
 
-static void ProcessHandshakeMsgNotifyNearBy(ProxyChannelInfo *chan)
-{
-    if (chan->appInfo.appType == APP_TYPE_NORMAL) {
-        int myHandleId = NotifyNearByUpdateHandleId(chan->channelId);
-        if (myHandleId != SOFTBUS_ERR) {
-            chan->appInfo.myHandleId = myHandleId;
-        }
-    }
-}
-
 static void TransProxyFastDataRecv(ProxyChannelInfo *chan)
 {
     TRANS_LOGD(TRANS_CTRL, "begin, fastTransDataSize=%{public}d", chan->appInfo.fastTransDataSize);
@@ -1255,11 +1245,17 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
         TransProxyFastDataRecv(chan);
     }
-    ProcessHandshakeMsgNotifyNearBy(chan);
+    chan->appInfo.myHandleId = 0;
 
     if ((ret = TransProxyAckHandshake(msg->connId, chan, SOFTBUS_OK)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AckHandshake fail");
         OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(chan->channelId);
+        goto EXIT_ERR;
+    }
+    if ((ret = OnProxyChannelBind(chan->channelId, &(chan->appInfo))) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelBind fail");
+        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
         TransProxyDelChanByChanId(chan->channelId);
         goto EXIT_ERR;
     }

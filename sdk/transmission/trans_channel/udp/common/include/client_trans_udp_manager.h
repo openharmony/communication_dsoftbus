@@ -68,6 +68,7 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
 int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode);
 int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason);
 int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList);
+int32_t TransOnUdpChannelBind(int32_t channelId, int32_t channelType);
 
 int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason);
 

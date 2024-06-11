@@ -31,6 +31,8 @@ int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb);
 int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel);
 
+int32_t TransTdcOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId);
+
 int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId);
 
 int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode);
