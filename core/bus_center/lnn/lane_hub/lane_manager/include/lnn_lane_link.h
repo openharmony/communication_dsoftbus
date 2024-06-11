@@ -42,6 +42,9 @@ typedef struct {
     LaneLinkType linkType;
     ProtocolType acceptableProtocols;
     int32_t pid;
+    uint32_t bandWidth;
+    uint64_t triggerLinkTime;
+    uint64_t availableLinkTime;
     //OldInfo
     LaneTransType transType;
     char peerBleMac[MAX_MAC_LEN];

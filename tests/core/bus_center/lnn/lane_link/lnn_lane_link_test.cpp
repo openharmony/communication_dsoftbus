@@ -38,6 +38,7 @@ constexpr int32_t ASYNCFAIL = 2;
 constexpr int32_t ASYNCSUCC = 3;
 constexpr int32_t USEABLE_LANE_ID = 1234567;
 constexpr char USEABLE_IP[] = "192.168.1.1";
+constexpr uint64_t DEFAULT_LINK_LATENCY = 30000;
 
 int32_t g_laneLinkResult = SOFTBUS_INVALID_PARAM;
 
@@ -317,6 +318,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_001, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_P2P;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -370,6 +373,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_002, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -421,6 +426,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_003, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -472,6 +479,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_004, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -519,6 +528,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_005, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -568,6 +579,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_006, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = SYNCFAIL;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -620,6 +633,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_007, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = SYNCFAIL;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -670,6 +685,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_008, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = SYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -720,6 +737,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_009, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = SYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -766,6 +785,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_001, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_P2P;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -821,6 +842,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_002, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = ASYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -879,6 +902,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_003, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = ASYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -936,6 +961,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_004, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = ASYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -993,6 +1020,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_005, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = ASYNCFAIL;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1044,6 +1073,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = ASYNCFAIL;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1096,6 +1127,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
     request.pid = ASYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1149,6 +1182,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_001, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_P2P;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1205,6 +1240,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_002, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_P2P;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1260,6 +1297,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_003, TestSize.Level1)
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_P2P;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1316,6 +1355,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_004, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_P2P;
     request.pid = ASYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1375,6 +1416,8 @@ HWTEST_F(LNNLaneLinkTest, LnnCancelWifiDirect_001, TestSize.Level1)
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_P2P;
     request.pid = ASYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
 
     const LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
