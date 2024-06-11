@@ -825,54 +825,42 @@ static void ReportTransEventExtra(
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, *extra);
 }
 
-static void CheckStrcpy(char *dest, const int32_t destSize, const char *src)
-{
-    if (strcpy_s(dest, destSize, src) != EOK) {
-        TRANS_LOGW(TRANS_CTRL, "strcpy failed");
-    }
-    return;
-}
-
 static int32_t CheckAndFillAppInfo(AppInfo *appInfo, int32_t channelId, char *errDesc)
 {
     char *ret = NULL;
     int32_t errCode = SOFTBUS_OK;
     if (appInfo->callingTokenId != TOKENID_NOT_SET &&
         TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
+        errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
         ret = (char *)"Server check acl failed";
-        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
-        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+        goto ERR_EXIT;
     }
 
     if (TransTdcGetUidAndPid(appInfo->myData.sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         ret = (char *)"Peer Device Session Not Create";
-        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
-        return errCode;
+        goto ERR_EXIT;
     }
 
     errCode = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Auth: Get Uuid By ChanId failed.");
         ret = (char *)"Get Uuid By ChanId failed";
-        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
-        return errCode;
+        goto ERR_EXIT;
     }
 
     errCode = TransTdcFillDataConfig(appInfo);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fill data config failed.");
         ret = (char *)"fill data config failed";
-        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
-        return errCode;
+        goto ERR_EXIT;
     }
 
     errCode = SetAppInfoById(channelId, appInfo);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set app info by id failed.");
         ret = (char *)"Set App Info By Id Failed";
-        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
-        return errCode;
+        goto ERR_EXIT;
     }
 
     OpenDataBusRequestOutSessionName(appInfo->myData.sessionName, appInfo->peerData.sessionName);
@@ -883,11 +871,15 @@ static int32_t CheckAndFillAppInfo(AppInfo *appInfo, int32_t channelId, char *er
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Notify SDK Channel Opened Failed");
         ret = (char *)"Notify SDK Channel Opened Failed";
-        CheckStrcpy(errDesc, MAX_ERRDESC_LEN, ret);
-        return errCode;
+        goto ERR_EXIT;
     }
 
     return SOFTBUS_OK;
+ERR_EXIT:
+    if (strcpy_s(errDesc, MAX_ERRDESC_LEN, ret) != EOK) {
+        TRANS_LOGW(TRANS_CTRL, "strcpy failed");
+    }
+    return errCode;
 }
 
 static int32_t HandleDataBusReply(
@@ -965,7 +957,6 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
 }
-    
 
 static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, const char *msg)
 {
