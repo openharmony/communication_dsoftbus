@@ -44,6 +44,9 @@ static struct HksParam g_genParams[] = {
     }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
+        .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE
     }
 };
 
@@ -72,6 +75,9 @@ static struct HksParam g_encryptParams[] = {
             .size = LNN_HUKS_IV_SIZE,
             .data = (uint8_t *)g_huksIv
         }
+    }, {
+        .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
+        .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE
     }
 };
 
@@ -100,6 +106,9 @@ static struct HksParam g_decryptParams[] = {
             .size = LNN_HUKS_IV_SIZE,
             .data = (uint8_t *)g_huksIv
         }
+    }, {
+        .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
+        .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE
     }
 };
 
@@ -226,21 +235,54 @@ void LnnDeinitHuksInterface(void)
     }
 }
 
+static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramCount)
+{
+    if (HksInitParamSet(paramSet) != HKS_SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "HksInitParamSet failed.");
+        return SOFTBUS_HUKS_ERR;
+    }
+    if (HksAddParams(*paramSet, params, paramCount) != HKS_SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "HksAddParams failed.");
+        HksFreeParamSet(paramSet);
+        *paramSet = NULL;
+        return SOFTBUS_HUKS_ERR;
+    }
+    if (HksBuildParamSet(paramSet) != HKS_SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "HksBuildParamSet failed.");
+        HksFreeParamSet(paramSet);
+        *paramSet = NULL;
+        return SOFTBUS_HUKS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
 {
     if (keyAlias == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (HksKeyExist(keyAlias, NULL) == HKS_SUCCESS) {
+    struct HksParamSet *paramSet = NULL;
+    struct HksParam keyExistparams[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    if (ConstructKeyParamSet(&paramSet, keyExistparams, sizeof(keyExistparams) / sizeof(struct HksParam)) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate key ConstructKeyParamSet failed.");
+        return SOFTBUS_HUKS_ERR;
+    }
+    if (HksKeyExist(keyAlias, paramSet) == HKS_SUCCESS) {
         LNN_LOGD(LNN_LEDGER, "huks key has generated");
+        HksFreeParamSet(&paramSet);
         return SOFTBUS_OK;
     }
     int32_t ret = HksGenerateKey(keyAlias, g_genParamSet, NULL);
     if (ret != HKS_SUCCESS) {
         LNN_LOGE(LNN_LEDGER, "huks generate key fail, errcode=%{public}d", ret);
+        HksFreeParamSet(&paramSet);
         return SOFTBUS_ERR;
     }
+    HksFreeParamSet(&paramSet);
     return SOFTBUS_OK;
 }
 
@@ -250,16 +292,27 @@ int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (HksKeyExist(keyAlias, NULL) != HKS_SUCCESS) {
+    struct HksParamSet *paramSet = NULL;
+    struct HksParam keyExistparams[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    if (ConstructKeyParamSet(&paramSet, keyExistparams, sizeof(keyExistparams) / sizeof(struct HksParam)) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delete key ConstructKeyParamSet failed.");
+        return SOFTBUS_HUKS_ERR;
+    }
+    if (HksKeyExist(keyAlias, paramSet) != HKS_SUCCESS) {
         LNN_LOGD(LNN_LEDGER, "huks key has deleted");
+        HksFreeParamSet(&paramSet);
         return SOFTBUS_OK;
     }
     int32_t ret = HksDeleteKey(keyAlias, g_genParamSet);
     if (ret != HKS_SUCCESS) {
         LNN_LOGE(LNN_LEDGER, "huks delete key fail, errcode=%{public}d", ret);
+        HksFreeParamSet(&paramSet);
         return SOFTBUS_ERR;
     }
+    HksFreeParamSet(&paramSet);
     return SOFTBUS_OK;
 }
 
