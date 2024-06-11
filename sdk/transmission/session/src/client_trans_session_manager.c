@@ -49,7 +49,6 @@ static int32_t LockClientSessionServerList()
     }
     int32_t ret = SoftBusMutexLock(&(g_clientSessionServerList->lock));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
@@ -64,6 +63,7 @@ int32_t CheckPermissionState(int32_t sessionId)
 {
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
     ClientSessionServer *serverNode = NULL;
@@ -88,6 +88,7 @@ int32_t CheckPermissionState(int32_t sessionId)
 void PermissionStateChange(const char *pkgName, int32_t state)
 {
     if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
 
@@ -192,6 +193,7 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
     }
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -228,6 +230,7 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
 void TransClientDeinit(void)
 {
     if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
     ClientSessionServer *serverNode = NULL;
@@ -287,6 +290,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
     if (SessionServerIsExist(sessionName)) {
@@ -391,6 +395,7 @@ int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -413,6 +418,7 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, SessionE
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -477,6 +483,7 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -504,6 +511,7 @@ int32_t ClientDeleteSession(int32_t sessionId)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -541,6 +549,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -586,6 +595,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -627,6 +637,7 @@ int32_t ClientGetChannelBySessionId(
     }
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -660,6 +671,7 @@ int32_t ClientSetEnableStatusBySocket(int32_t socket, SessionEnableStatus enable
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -683,6 +695,7 @@ int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *busi
     }
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -709,6 +722,7 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -735,6 +749,7 @@ int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *d
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -769,6 +784,7 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -803,6 +819,7 @@ int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
     ClientSessionServer *serverNode = NULL;
@@ -835,6 +852,7 @@ int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, in
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -869,6 +887,7 @@ int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, u
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -901,6 +920,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -955,6 +975,7 @@ int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener *callba
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -983,6 +1004,7 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1013,6 +1035,7 @@ int32_t ClientGetSessionSide(int32_t sessionId)
 {
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1044,6 +1067,7 @@ static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
         return;
     }
     if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
 
@@ -1078,6 +1102,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
         return;
     }
     if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
     char *anonyNetworkId = NULL;
@@ -1105,6 +1130,7 @@ int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1130,6 +1156,7 @@ void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList)
     }
 
     if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
     uint32_t destroyCnt = 0;
@@ -1175,6 +1202,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
     if (SessionServerIsExist(sessionName)) {
@@ -1207,6 +1235,7 @@ int32_t DeleteSocketSession(int32_t sessionId, char *pkgName, char *sessionName)
 {
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1272,6 +1301,7 @@ int32_t ClientAddSocketSession(
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1311,6 +1341,7 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
     }
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1359,6 +1390,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1409,6 +1441,7 @@ int32_t ClientSetActionIdBySessionId(int32_t sessionId, uint32_t actionId)
     }
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1447,6 +1480,7 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1488,6 +1522,7 @@ int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRol
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1519,6 +1554,7 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1554,6 +1590,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1586,6 +1623,7 @@ int32_t ClientGetPeerSocketInfoById(int32_t socket, PeerSocketInfo *peerSocketIn
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1608,6 +1646,7 @@ int32_t ClientGetPeerSocketInfoById(int32_t socket, PeerSocketInfo *peerSocketIn
 bool IsSessionExceedLimit(void)
 {
     if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return true;
     }
     if (g_sessionIdNum >= MAX_SESSION_ID) {
@@ -1622,6 +1661,7 @@ bool IsSessionExceedLimit(void)
 static void ClientTransSessionTimerProc(void)
 {
     if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
 
@@ -1655,6 +1695,7 @@ int32_t ClientResetIdleTimeoutById(int32_t sessionId)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1688,6 +1729,7 @@ int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, 
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1722,6 +1764,7 @@ int32_t ClientRawStreamEncryptDefOptGet(const char *sessionName, bool *isEncrypt
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1750,6 +1793,7 @@ int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, boo
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1782,6 +1826,7 @@ int32_t SetSessionIsAsyncById(int32_t sessionId, bool isAsync)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1812,6 +1857,7 @@ int32_t SetSessionInitInfoById(int32_t sessionId)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1845,6 +1891,7 @@ int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, in
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
     ClientSessionServer *serverNode = NULL;
@@ -1876,6 +1923,7 @@ int32_t GetSocketLifecycleAndSessionNameBySessionId(
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1916,6 +1964,7 @@ int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState,
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1947,6 +1996,7 @@ int32_t ClientWaitSyncBind(int32_t socket)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -1997,6 +2047,7 @@ int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
@@ -2036,6 +2087,7 @@ int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo)
 
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
 
