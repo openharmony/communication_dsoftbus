@@ -21,6 +21,7 @@
 #include "stdbool.h"
 #include "stdint.h"
 #include "trans_tcp_direct_manager.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +37,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
 int32_t TransTdcProcessPacket(int32_t channelId);
 int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type);
 
+int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t errCode);
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 #ifdef __cplusplus
