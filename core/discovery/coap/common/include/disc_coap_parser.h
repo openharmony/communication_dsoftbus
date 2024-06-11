@@ -16,9 +16,9 @@
 #ifndef DISC_COAP_PARSER_H
 #define DISC_COAP_PARSER_H
 
+#include "disc_manager.h"
 #include "softbus_common.h"
 #include "softbus_json_utils.h"
-#include "disc_manager.h"
 
 #define SERVICE_DATA_PORT "port"
 #define DEVICE_UDID       "UDID"
