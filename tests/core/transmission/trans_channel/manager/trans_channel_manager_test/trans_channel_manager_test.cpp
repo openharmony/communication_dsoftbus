@@ -175,22 +175,22 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     TransSocketLaneMgrInit();
     int ret = TransOpenChannel(param, transInfo);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     tmp++;
     param->attr = &g_sessionAttr[tmp];
     ret = TransOpenChannel(param, transInfo);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     tmp++;
     param->attr = &g_sessionAttr[tmp];
     ret = TransOpenChannel(param, transInfo);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     tmp++;
     param->attr = &g_sessionAttr[tmp];
     ret = TransOpenChannel(param, transInfo);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     SoftBusFree(param);
     SoftBusFree(transInfo);

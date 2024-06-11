@@ -264,24 +264,36 @@ static int32_t StartHmlListener(const char *ip, int32_t *port)
     return SOFTBUS_OK;
 }
 
+static void AnonymizeIp(const char *ip, char *sessionIp, int32_t port)
+{
+    char *temp = NULL;
+    char *anonyP2pIp = NULL;
+    Anonymize(ip, &temp);
+    Anonymize(sessionIp, &anonyP2pIp);
+    TRANS_LOGE(TRANS_CTRL, "param invalid g_p2pSessionPort=%{public}d, ip=%{public}s, g_p2pSessionIp=%{public}s",
+        port, temp, anonyP2pIp);
+    AnonymizeFree(temp);
+    AnonymizeFree(anonyP2pIp);
+}
+
 static int32_t StartP2pListener(const char *ip, int32_t *port)
 {
     if (ip == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ip is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
     if (SoftBusMutexLock(&g_p2pLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (g_p2pSessionPort > 0 && strcmp(ip, g_p2pSessionIp) != 0) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        AnonymizeIp(ip, g_p2pSessionIp, g_p2pSessionPort);
         ClearP2pSessionConn();
         StopP2pSessionListener();
     }
     if (g_p2pSessionPort > 0) {
         *port = g_p2pSessionPort;
+        TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
         (void)SoftBusMutexUnlock(&g_p2pLock);
         return SOFTBUS_OK;
     }
