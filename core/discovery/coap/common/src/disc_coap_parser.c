@@ -152,6 +152,7 @@ void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device)
 
 int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(outData != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "out data is NULL");
     if ((allCap & (1 << CASTPLUS_CAPABILITY_BITMAP)) == 0) {
         memset_s(g_castJson, sizeof(g_castJson), 0, sizeof(g_castJson));
