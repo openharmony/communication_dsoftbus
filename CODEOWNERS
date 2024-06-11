@@ -124,7 +124,7 @@ components/mbedtls/         chenbotong1@huawei.com
 core/adapter/huks/          chenbotong1@huawei.com
 
 ^[2nd-Party]
-components/nstackx/         libing3@huawei.com xuxiaoqing16@huawei.com libaolong3@huawei.com lumin17@huawei.com
+components/nstackx/         libing3@huawei.com libaolong3@huawei.com
 
 [InterfaceCode]
 # any change to core/common/include/softbus_server_ipc_interface_code.h needs to be reviewed by @leonchan5
