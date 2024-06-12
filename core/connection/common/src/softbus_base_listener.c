@@ -15,8 +15,9 @@
 
 #include "softbus_base_listener.h"
 
-#include <securec.h>
 #include <fcntl.h>
+#include <securec.h>
+#include <stdatomic.h>
 #include <unistd.h>
 
 #include "common_list.h"
@@ -91,6 +92,7 @@ static SoftBusMutex g_listenerListLock = { 0 };
 static SoftbusListenerNode *g_listenerList[UNUSE_BUTT] = { 0 };
 static SoftBusMutex g_selectThreadStateLock = { 0 };
 static SelectThreadState *g_selectThreadState = NULL;
+static _Atomic bool g_initBaseListener = false;
 
 static SoftbusListenerNode *GetListenerNodeCommon(ListenerModule module, bool create)
 {
@@ -208,6 +210,9 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
 
 int32_t InitBaseListener(void)
 {
+    if (atomic_load_explicit(&g_initBaseListener, memory_order_acquire)) {
+        return SOFTBUS_OK;
+    }
     // flag : if the client and server are in the same process, this function can be executed only once.
     static bool flag = false;
     if (flag) {
@@ -247,12 +252,16 @@ int32_t InitBaseListener(void)
         SoftBusMutexDestroy(&g_listenerListLock);
         return status;
     }
-
+    atomic_store_explicit(&g_initBaseListener, true, memory_order_release);
     return SOFTBUS_OK;
 }
 
 void DeinitBaseListener(void)
 {
+    if (!atomic_load_explicit(&g_initBaseListener, memory_order_acquire)) {
+        return;
+    }
+
     for (ListenerModule module = 0; module < UNUSE_BUTT; module++) {
         SoftbusListenerNode *node = GetListenerNode(module);
         if (node == NULL) {
@@ -261,6 +270,7 @@ void DeinitBaseListener(void)
         RemoveListenerNode(node);
         ReturnListenerNode(&node);
     }
+    atomic_store_explicit(&g_initBaseListener, false, memory_order_release);
 }
 
 uint32_t CreateListenerModule(void)
