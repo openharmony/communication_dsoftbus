@@ -1275,7 +1275,8 @@ static void GuideChannelDetect(uint32_t authRequestId, AuthHandle authHandle)
         (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
         if (UpdateP2pLinkInfoWithAuth(authRequestId, authHandle) != SOFTBUS_OK ||
             GetWlanInfo(p2pLinkReqInfo.laneRequestInfo.networkId, &linkInfo) != SOFTBUS_OK) {
-            goto FATL;
+            AuthChannelDetectSucc(laneReqId, authRequestId, authHandle);
+            return;
         }
         LaneLinkCb cb = {
             .onLaneLinkSuccess = DetectSuccess,
@@ -1285,10 +1286,9 @@ static void GuideChannelDetect(uint32_t authRequestId, AuthHandle authHandle)
         LNN_LOGI(LNN_LANE, "auth channel need detect, laneReqId=%{public}u", laneReqId);
         if (LaneDetectReliability(laneReqId, &linkInfo, &cb) != SOFTBUS_OK) {
             DetectFail(laneReqId, SOFTBUS_LANE_DETECT_FAIL, linkInfo.type);
-            return;
         }
+        return;
     }
-FATL:
     LNN_LOGI(LNN_LANE, "auth channel no need detect, authRequestId=%{public}u", authRequestId);
     AuthChannelDetectSucc(laneReqId, authRequestId, authHandle);
 }
