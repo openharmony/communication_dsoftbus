@@ -35,7 +35,7 @@ int32_t LnnGetUnifiedDefaultDeviceName(char *unifiedDefaultName, uint32_t len);
 int32_t LnnGetSettingNickName(const char *defaultName, const char *unifiedName, char *nickName, uint32_t len);
 int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName, uint32_t len);
 int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler);
-int32_t LnnInitDeviceNameMonitorImpl(void);
+int32_t LnnInitDeviceNameMonitor(void);
 void RegisterNameMonitor(void);
 
 #ifdef __cplusplus
