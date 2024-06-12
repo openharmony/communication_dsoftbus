@@ -48,6 +48,7 @@ public:
     void OnSuccess(const WifiDirectLink &link) const;
     void OnFailure(int reason) const;
     bool IsSameCommand(const WifiDirectConnectInfo &info) const;
+    bool IsValid();
 
 protected:
     ConnectInfo info_;
@@ -57,6 +58,9 @@ protected:
 
     void DfxRecord(bool isSuccess, int reason) const;
     void FillConnEventExtra(ConnEventExtra &extra) const;
+
+private:
+    static constexpr uint64_t ABANDON_CONNECT_COMMAND_PERIOD = 500;
 };
 }
 #endif
