@@ -129,6 +129,7 @@ void DelAuthManager(AuthManager *auth, int32_t type)
             AnonymizeFree(anonyUdid);
             return;
         }
+        auth->hasAuthPassed[type] = false;
         auth->connId[type] = 0;
         (void)memset_s(&auth->connInfo[type], sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
         for (int32_t i = AUTH_LINK_TYPE_WIFI; i < AUTH_LINK_TYPE_MAX; i++) {
