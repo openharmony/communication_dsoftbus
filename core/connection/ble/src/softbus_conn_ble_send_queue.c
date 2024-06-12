@@ -139,13 +139,9 @@ int32_t ConnBleDequeueBlock(void **msg)
     SoftBusSysTime waitTime = {0};
     waitTime.sec = BLE_WAIT_TIME_SEC;
 
-    if (msg == NULL) {
-        CONN_LOGE(CONN_BLE, "msg is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
-        return SOFTBUS_LOCK_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "msg is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_bleQueueLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
     do {
         if (GetMsg(g_innerQueue, msg, &isFull, MIDDLE_PRIORITY) == SOFTBUS_OK) {
             status = SOFTBUS_OK;
@@ -180,6 +176,7 @@ int32_t ConnBleDequeueBlock(void **msg)
         }
         CONN_LOGI(CONN_BLE, "ble queue wakeup.");
     } while (true);
+    
     if (isFull) {
         (void)SoftBusCondBroadcast(&g_sendWaitCond);
     }

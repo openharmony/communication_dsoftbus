@@ -1650,16 +1650,15 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
         CONN_LOGI(CONN_BLE, "ble msg looper recv msg=%{public}d, curState=%{public}s",
             msg->what, g_bleManager.state->name());
     }
-    bool isInvaildCmd = false;
+
     size_t commandSize = sizeof(g_commands) / sizeof(g_commands[0]);
     for (size_t i = 0; i < commandSize; i++) {
         if (g_commands[i].cmd == msg->what) {
             g_commands[i].func(msg);
-            isInvaildCmd = true;
-            break;
+            return;
         }
     }
-    CONN_CHECK_AND_RETURN_LOGW(isInvaildCmd == true, CONN_BLE,
+    CONN_LOGE(CONN_BLE,
         "ble manager looper receive unexpected msg just ignore, FIX it quickly. what=%{public}d", msg->what);
 }
 
