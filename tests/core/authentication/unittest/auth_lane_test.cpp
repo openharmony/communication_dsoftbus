@@ -566,3 +566,4 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)
     DeInitAuthReqInfo();
 }
 } // namespace OHOS
+
