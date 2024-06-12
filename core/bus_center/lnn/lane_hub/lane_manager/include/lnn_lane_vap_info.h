@@ -54,3 +54,4 @@ int32_t LnnGetRemoteVapInfo(const char *udid, LnnVapType type, LnnVapAttr *vapAt
 }
 #endif
 #endif // LNN_LANE_VAP_INFO_H
+
