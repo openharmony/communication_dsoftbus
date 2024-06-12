@@ -1034,26 +1034,25 @@ static int32_t UpdateLocalDeviceName(const void *name)
     if (name == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+    NodeInfo localNodeInfo = {};
+    (void)LnnGetLocalDevInfo(&localNodeInfo);
     const char *beforeName = LnnGetDeviceName(&g_localNetLedger.localInfo.deviceInfo);
+    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s", (char *)beforeName, (char *)name,
+        localNodeInfo.deviceInfo.deviceName);
     if (strcmp(beforeName, (char *)name) != 0) {
         if (LnnSetDeviceName(&g_localNetLedger.localInfo.deviceInfo, (char *)name) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "set device name fail");
             return SOFTBUS_ERR;
         }
-
-        NodeInfo localNodeInfo = {};
-        (void)LnnGetLocalDevInfo(&localNodeInfo);
         if (strcmp((char *)name, localNodeInfo.deviceInfo.deviceName) == 0) {
             LNN_LOGI(LNN_LEDGER, "device name is same as localcache");
             return SOFTBUS_OK;
         }
-
         UpdateStateVersionAndStore(STRING_KEY_DEV_NAME);
         if (g_localNetLedger.localInfo.accountId == 0) {
             LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
             return SOFTBUS_OK;
         }
-        LNN_LOGI(LNN_LEDGER, "device name is changed");
         NodeInfo nodeInfo = {};
         if (memcpy_s(&nodeInfo, sizeof(NodeInfo), &g_localNetLedger.localInfo, sizeof(NodeInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
