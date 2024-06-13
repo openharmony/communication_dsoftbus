@@ -47,6 +47,7 @@ public:
     virtual int32_t SoftbusGattcSearchServices(int32_t clientId) = 0;
     virtual bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target) = 0;
     virtual int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number) = 0;
+    virtual int BleGattcUnRegister(int clientId) = 0;
 };
 
 class ConnectionBleInterfaceMock : public ConnectionBleInterface {
@@ -64,6 +65,7 @@ public:
     MOCK_METHOD1(SoftbusGattcSearchServices, int32_t (int32_t));
     MOCK_METHOD3(GetJsonObjectSignedNumberItem, bool (const cJSON *, const char * const, int *));
     MOCK_METHOD(int, BleGattsAddService, (int, BtUuid, bool, int), (override));
+    MOCK_METHOD(int, BleGattcUnRegister, (int), (override));
 };
 } // namespace OHOS
 #endif // CONNECTION_BLE_MOCK_H

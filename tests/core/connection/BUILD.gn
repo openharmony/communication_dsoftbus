@@ -30,7 +30,9 @@ group("unittest") {
   if (support_bluetooth && dsoftbus_feature_conn_ble) {
     deps += [
       "ble:BleConnectionManagerTest",
+      "ble:BleConnectionServiceTest",
       "ble:BleTransTest",
+      "ble:ConnectionBleSwitchTest",
       "ble:ConnectionBleTest",
     ]
   }
