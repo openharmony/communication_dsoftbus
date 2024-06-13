@@ -181,7 +181,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
 
     PublishOption option = {
         .freq = LOW,
-    }
+    };
     ret = DiscCoapRegisterServiceData(&option, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
