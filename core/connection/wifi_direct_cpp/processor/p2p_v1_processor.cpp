@@ -293,6 +293,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<Neg
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
             break;
         case LegacyCommandType::CMD_REUSE_REQ:
+            terminate = true;
             ret = ProcessReuseRequest(command);
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
             break;
