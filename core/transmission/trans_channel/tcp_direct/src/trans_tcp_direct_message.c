@@ -972,7 +972,17 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
         ret = OpenDataBusRequest(channelId, flags, seq, json);
     }
     cJSON_Delete(json);
-    TRANS_LOGI(TRANS_CTRL, "ret=%{public}d", ret);
+    AppInfo appInfo;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetAppInfoById(channelId, &appInfo) == SOFTBUS_OK, ret,
+        TRANS_CTRL, "get appInfo fail");
+    char *tmpNetWorkId = NULL;
+    char *tmpUdid = NULL;
+    Anonymize(appInfo.peerNetWorkId, &tmpNetWorkId);
+    Anonymize(appInfo.peerUdid, &tmpUdid);
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, peerNetWorkId=%{public}s, peerUdid=%{public}s, ret=%{public}d",
+        channelId, tmpNetWorkId, tmpUdid, ret);
+    AnonymizeFree(tmpNetWorkId);
+    AnonymizeFree(tmpUdid);
     return ret;
 }
 
