@@ -179,7 +179,6 @@ int32_t LnnInitNetLedgerDelay(void)
 {
     LnnSetLocalFeature();
     LnnLoadLocalDeviceAccountIdInfo();
-    LnnInitCloudSyncModule();
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
         return SOFTBUS_ERR;
