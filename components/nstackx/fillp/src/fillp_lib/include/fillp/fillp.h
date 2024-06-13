@@ -388,7 +388,7 @@ typedef enum InnerfillpClientfourhandshakestateEnum {
 
 static __inline FILLP_INT FillpNumIsbigger(FILLP_UINT32 value1, FILLP_UINT32 value2)
 {
-    return ((FILLP_INT32)(value1 - value2)) > 0;
+    return value1 > value2;
 }
 
 void FillpSendConnConfirmAck(struct FillpPcb *pcb);

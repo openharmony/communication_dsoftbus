@@ -43,17 +43,18 @@ Return         : NA
 ******************************************************************************/
 static void FillpCleanSedata(void *ptr, size_t len, struct SpungeInstance *pcbInst)
 {
-    FILLP_UINT8 *pptr = ptr;
-    size_t loop = len;
-    size_t ctr = pcbInst->cleanseDataCtr;
-
     if (ptr == FILLP_NULL_PTR) {
         return;
     }
 
-    while (loop--) {
+    FILLP_UINT8 *pptr = ptr;
+    size_t loop = len;
+    size_t ctr = pcbInst->cleanseDataCtr;
+
+    while (loop > 0) {
         *(pptr++) = (FILLP_UINT8)ctr;
         ctr += (CSE_DATA_ONE_PAR + ((size_t)(uintptr_t)pptr & 0xF));
+        loop--;
     }
 
     pptr = FILLP_MEMCHR(ptr, (FILLP_UINT8)ctr, len);
