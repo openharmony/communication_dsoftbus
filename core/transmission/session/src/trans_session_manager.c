@@ -29,8 +29,8 @@
 
 #define MAX_SESSION_SERVER_NUM 100
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
-#define GET_ROUTE_TYPE(type) ((type) & 0xff)
-#define GET_CONN_TYPE(type) (((type) >> 8) & 0xff)
+#define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)
+#define GET_CONN_TYPE(type) (((uint32_t)(type) >> 8) & 0xff)
 
 static SoftBusList *g_sessionServerList = NULL;
 
@@ -379,8 +379,8 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
-    int32_t routeType = GET_ROUTE_TYPE(type);
-    int32_t connType = GET_CONN_TYPE(type);
+    int32_t routeType = (int32_t)GET_ROUTE_TYPE(type);
+    int32_t connType = (int32_t)GET_CONN_TYPE(type);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     TRANS_LOGI(TRANS_CTRL,
