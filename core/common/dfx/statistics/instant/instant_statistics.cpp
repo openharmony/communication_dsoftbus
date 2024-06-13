@@ -386,7 +386,7 @@ static void InstUpdateRemoteInfoBySessionConn(SoftBusList *remoteChannelInfoList
         }
         InstAddSessionConnToRemoteInfo(rInfo, item);
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 }
 
 static bool InstIsMatchUdpChannel(const InstantRemoteInfo *rInfo, const UdpChannelInfo *conn)

@@ -558,7 +558,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetServerSideIpInfoTest001, TestSize.L
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR));
-    int32_t ret = GetServerSideIpInfo(conn, const_cast<char *>(IP), len);
+    int32_t ret = GetServerSideIpInfo(&conn->appInfo, const_cast<char *>(IP), len);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_LOCAL_IP_FAILED);
 
     SoftBusFree(conn);
@@ -578,9 +578,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetClientSideIpInfoTest001, TestSize.L
     conn->appInfo.routeType = WIFI_STA;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR));
-    int32_t ret = GetClientSideIpInfo(conn, const_cast<char *>(IP), len);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_LOCAL_IP_FAILED);
+    char myIp[IP_LEN] = { 0 };
+    int32_t ret = GetClientSideIpInfo(&conn->appInfo, myIp, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(conn);
 }
@@ -598,7 +598,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostFisrtDataTest001, TestSize
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, TransTdcPackFastData).WillOnce(Return(nullptr));
-    int32_t ret = TransTdcPostFisrtData(&conn);
+    int32_t ret = TransTdcPostFastData(&conn);
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 }
 
