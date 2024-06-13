@@ -194,6 +194,7 @@ if (defined(ohos_lite)) {
     install_enable = true
     relative_install_dir = "communication/softbus"
     part_name = "dsoftbus"
+    subsystem_name = "communication"
   }
   ohos_shared_library("softbus_server") {
     sanitize = {
@@ -269,7 +270,10 @@ if (defined(ohos_lite)) {
       }
       if (!defined(global_parts_info) ||
           defined(global_parts_info.bundlemanager_bundle_framework)) {
-        external_deps += [ "bundle_framework:appexecfwk_core" ]
+        external_deps += [
+          "bundle_framework:appexecfwk_base",
+          "bundle_framework:appexecfwk_core",
+        ]
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
       }
       if (!defined(global_parts_info) ||
