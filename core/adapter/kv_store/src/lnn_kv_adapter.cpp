@@ -28,8 +28,8 @@ namespace OHOS {
 using namespace OHOS::DistributedKv;
 namespace {
 constexpr int32_t MAX_STRING_LEN = 4096;
-constexpr int32_t MAX_INIT_RETRY_TIMES = 30;
-constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 500 * 1000; // 500ms
+constexpr int32_t MAX_INIT_RETRY_TIMES = 3;
+constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 100 * 1000; // 500ms
 constexpr int32_t MAX_MAP_SIZE = 10000;
 const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
 }
