@@ -90,5 +90,10 @@ int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number
 {
     return GetConnectionBleInterface()->BleGattsAddService(serverId, srvcUuid, isPrimary, number);
 }
+ 
+int BleGattcUnRegister(int clientId)
+{
+    return GetConnectionBleInterface()->BleGattcUnRegister(clientId);
+}
 }
 }
