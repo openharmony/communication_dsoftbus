@@ -269,7 +269,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         }
         DelTrigger(module, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
-        NotifyChannelOpenFailed(channelId, ret);
+        (void)NotifyChannelOpenFailed(channelId, ret);
     } else {
         CloseTcpDirectFd(fd);
     }
@@ -295,7 +295,10 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
         return ret;
     }
     DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
-    AddTrigger(conn->listenMod, fd, READ_TRIGGER);
+    if (AddTrigger(conn->listenMod, fd, READ_TRIGGER) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "add trigger fail, module=%{public}d, fd=%{public}d", conn->listenMod, fd);
+        return SOFTBUS_TRANS_ADD_TRIGGER_FAILED;
+    }
     ret = StartVerifySession(conn);
     TransEventExtra extra = { .socketName = NULL,
         .peerNetworkId = NULL,
@@ -311,7 +314,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
         TRANS_LOGE(TRANS_CTRL, "start verify session fail.");
         DelTrigger(conn->listenMod, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
-        NotifyChannelOpenFailed(conn->channelId, ret);
+        (void)NotifyChannelOpenFailed(conn->channelId, ret);
         TransDelSessionConnById(conn->channelId);
         TransSrvDelDataBufNode(conn->channelId);
     }
