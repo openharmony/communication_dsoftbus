@@ -103,7 +103,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
-    EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_LOOPER_ERR);
 }
 
 /*

@@ -144,6 +144,7 @@ enum SoftBusErrNo {
     SOFTBUS_NOT_NEED_UPDATE, // not need update
     SOFTBUS_NO_RESOURCE_ERR, // no available resource
     SOFTBUS_INVALID_APPTYPE,
+    SOFTBUS_CMP_FAIL, // strcmp failed
     SOFTBUS_CREATE_LIST_ERR,
     SOFTBUS_LIST_EMPTY,
     SOFTBUS_STRCMP_ERR,

@@ -1122,12 +1122,15 @@ HWTEST_F(AuthOtherTest, GET_AUTH_CONN_001, TestSize.Level1)
     ret = GetAuthConn(nullptr, LANE_BR, connInfo);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
+    connInfo->type = AUTH_LINK_TYPE_BR;
     ret = GetAuthConn(uuid, LANE_BR, connInfo);
     EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
 
+    connInfo->type = AUTH_LINK_TYPE_BLE;
     ret = GetAuthConn(uuid, LANE_BLE, connInfo);
     EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
 
+    connInfo->type = AUTH_LINK_TYPE_P2P;
     ret = GetAuthConn(uuid, LANE_P2P, connInfo);
     EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
 
