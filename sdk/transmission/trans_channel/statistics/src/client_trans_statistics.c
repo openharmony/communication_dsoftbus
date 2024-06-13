@@ -38,7 +38,7 @@ static void CreateSocketResource(SocketResource *item, const char *sessionName, 
     }
     item->laneId = channel->laneId;
     item->channelId = channel->channelId;
-    item->startTime = SoftBusGetSysTimeMs();
+    item->startTime = (int64_t)SoftBusGetSysTimeMs();
 
     if (strcpy_s(item->socketName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
         TRANS_LOGE(TRANS_SDK, "strcpy failed");
@@ -92,7 +92,7 @@ void UpdateChannelStatistics(int32_t socketId, int64_t len)
     LIST_FOR_EACH_ENTRY(item, &g_channelStatisticsList->list, SocketResource, node) {
         if (item->socketId == socketId) {
             item->traffic += len;
-            item->endTime = SoftBusGetSysTimeMs();
+            item->endTime = (int64_t)SoftBusGetSysTimeMs();
             (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
             return;
         }
