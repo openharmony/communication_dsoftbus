@@ -870,7 +870,11 @@ static bool IsDeviceInfoChanged(NodeInfo *info)
         LNN_LOGI(LNN_LEDGER, "convert udidhash to hexstr fail");
         return false;
     }
-    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+    int32_t ret = LnnRetrieveDeviceInfo(hashStr, &deviceInfo);
+    if (ret == SOFTBUS_NETWORK_NOT_FOUND) {
+        return true;
+    }
+    if (ret != SOFTBUS_OK) {
         LNN_LOGI(LNN_LEDGER, "get deviceInfo by udidhash fail");
         return false;
     }
@@ -1500,7 +1504,7 @@ static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNu
             ret = SOFTBUS_OK;
             break;
         }
-        *info = (NodeBasicInfo*)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
+        *info = (NodeBasicInfo*)SoftBusCalloc((*infoNum) * sizeof(NodeBasicInfo));
         if (*info == NULL) {
             LNN_LOGE(LNN_LEDGER, "malloc node info buffer failed");
             break;
