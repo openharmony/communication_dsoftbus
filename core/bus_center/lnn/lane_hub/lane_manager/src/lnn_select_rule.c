@@ -110,8 +110,7 @@ static int32_t Wlan2P4GCapCheck(const char *networkId)
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "anonyNetworkId=%{public}s, DISCOVERY_TYPE_WIFI=%{public}d, DISCOVERY_TYPE_LSA=%{public}d",
-            anonyNetworkId, DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_LSA);
+        LNN_LOGE(LNN_LANE, "wlan not online, anonyNetworkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
@@ -153,8 +152,7 @@ static int32_t Wlan5GCapCheck(const char *networkId)
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "anonyNetworkId=%{public}s, DISCOVERY_TYPE_WIFI=%{public}d, DISCOVERY_TYPE_LSA=%{public}d",
-            anonyNetworkId, DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_LSA);
+        LNN_LOGE(LNN_LANE, "wlan not online, anonyNetworkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
@@ -648,7 +646,7 @@ int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
     uint32_t availableLinkNums = 0;
     for (uint32_t i = 0; i < listNum; i++) {
         if (isFilterP2p && linkList[i] == LANE_P2P) {
-            LNN_LOGE(LNN_LANE, "p2pLink is filtered");
+            LNN_LOGI(LNN_LANE, "p2pLink is filtered");
             continue;
         }
         recommendList->linkType[availableLinkNums++] = linkList[i];
