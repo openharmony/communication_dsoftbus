@@ -1203,18 +1203,14 @@ static void AuthChannelDetectSucc(uint32_t laneReqId, uint32_t authRequestId, Au
         NotifyLinkFail(ASYNC_RESULT_AUTH, authRequestId, SOFTBUS_LANE_GUIDE_BUILD_FAIL);
         return;
     }
-    bool isMetaAuth = GetAuthType(p2pLinkReqInfo.laneRequestInfo.networkId);
-    if (isMetaAuth) {
-        OnAuthConnOpened(authRequestId, authHandle);
-        return;
-    }
     WdGuideInfo guideInfo;
     (void)memset_s(&guideInfo, sizeof(WdGuideInfo), -1, sizeof(WdGuideInfo));
     if (GetGuideInfo(laneReqId, p2pLinkReqInfo.laneRequestInfo.linkType, &guideInfo) != SOFTBUS_OK) {
         NotifyLinkFail(ASYNC_RESULT_AUTH, authRequestId, SOFTBUS_LANE_GUIDE_BUILD_FAIL);
         return;
     }
-    if (guideInfo.guideList[guideInfo.guideIdx] == LANE_ACTIVE_AUTH_TRIGGER) {
+    if (guideInfo.guideList[guideInfo.guideIdx] == LANE_ACTIVE_AUTH_TRIGGER ||
+        guideInfo.guideList[guideInfo.guideIdx] == LANE_NEW_AUTH_TRIGGER) {
         OnAuthTriggerConnOpened(authRequestId, authHandle);
     } else {
         OnAuthConnOpened(authRequestId, authHandle);
@@ -1258,6 +1254,11 @@ static int32_t GetWlanInfo(const char *networkId, LaneLinkInfo *linkInfo)
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     linkInfo->linkInfo.wlan.connInfo.port = (uint16_t)port;
+    if (strncmp(linkInfo->linkInfo.wlan.connInfo.addr, "127.0.0.1", strlen("127.0.0.1")) == 0 ||
+        linkInfo->linkInfo.wlan.connInfo.port == 0) {
+        LNN_LOGE(LNN_LANE, "invaild addr or port");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1267,6 +1268,11 @@ static void GuideChannelDetect(uint32_t authRequestId, AuthHandle authHandle)
     (void)memset_s(&p2pLinkReqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
     if (GetP2pLinkReqByReqId(ASYNC_RESULT_AUTH, authRequestId, &p2pLinkReqInfo) != SOFTBUS_OK) {
         NotifyLinkFail(ASYNC_RESULT_AUTH, authRequestId, SOFTBUS_LANE_GUIDE_BUILD_FAIL);
+        return;
+    }
+    bool isMetaAuth = GetAuthType(p2pLinkReqInfo.laneRequestInfo.networkId);
+    if (isMetaAuth) {
+        OnAuthConnOpened(authRequestId, authHandle);
         return;
     }
     uint32_t laneReqId = p2pLinkReqInfo.laneRequestInfo.laneReqId;
