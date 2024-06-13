@@ -1025,12 +1025,12 @@ static int32_t UnpackWifiInfoFromJsonObj(JsonObj *obj, AuthSessionInfo *info)
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isConnectServer) {
         if (strncmp(cmd, CMD_GET_AUTH_INFO, strlen(CMD_GET_AUTH_INFO)) != 0) {
             AUTH_LOGE(AUTH_FSM, "CMD_GET not match");
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_CMP_FAIL;
         }
     } else {
         if (strncmp(cmd, CMD_RET_AUTH_INFO, strlen(CMD_RET_AUTH_INFO)) != 0) {
             AUTH_LOGE(AUTH_FSM, "CMD_RET not match");
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_CMP_FAIL;
         }
     }
     return SOFTBUS_OK;
