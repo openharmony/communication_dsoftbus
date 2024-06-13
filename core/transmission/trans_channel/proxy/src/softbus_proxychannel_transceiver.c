@@ -321,9 +321,6 @@ void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan, int32_t errCo
     if (msg == NULL) {
         TRANS_LOGE(TRANS_MSG, "msg create failed");
         if (chan != NULL) {
-            if (chan->appInfo.fastTransData != NULL) {
-                SoftBusFree((void *)chan->appInfo.fastTransData);
-            }
             SoftBusFree((void *)chan);
         }
         return;

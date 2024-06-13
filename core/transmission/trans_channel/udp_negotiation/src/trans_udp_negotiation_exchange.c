@@ -16,6 +16,7 @@
 #include "trans_udp_negotiation_exchange.h"
 
 #include "regex.h"
+#include <securec.h>
 #include "softbus_message_open_channel.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
@@ -123,6 +124,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectStringItem(msg, "SESSION_KEY", (char*)encodeSessionKey, BASE64_SESSION_KEY_LEN);
     int32_t ret = SoftBusBase64Decode((unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
         (unsigned char*)encodeSessionKey, strlen((char*)encodeSessionKey));
+    (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
     TRANS_CHECK_AND_RETURN_RET_LOGE(len == sizeof(appInfo->sessionKey),
         SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
@@ -206,7 +208,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddStringToJsonObject(msg, "CLIENT_BUS_NAME", appInfo->myData.sessionName);
     (void)AddStringToJsonObject(msg, "GROUP_ID", appInfo->groupId);
     (void)AddStringToJsonObject(msg, "PKG_NAME", appInfo->myData.pkgName);
-
+    (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
     return SOFTBUS_OK;
 }
 

@@ -326,6 +326,8 @@ void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
             ListDelete(&(item->node));
             g_proxyChannelList->cnt--;
             TRANS_LOGI(TRANS_CTRL, "del channelId by reqId. channelId=%{public}d", item->channelId);
+            SoftBusFree((void *)item->appInfo.fastTransData);
+            item->appInfo.fastTransData = NULL;
             TransProxyPostOpenFailMsgToLoop(item, errCode);
         }
     }
@@ -1700,6 +1702,8 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyProcList, ProxyChannelInfo, node) {
         ListDelete(&(removeNode->node));
         status = removeNode->status;
+        SoftBusFree((void *)removeNode->appInfo.fastTransData);
+        removeNode->appInfo.fastTransData = NULL;
         if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             isServer = removeNode->isServer;
@@ -1939,6 +1943,9 @@ static void TransProxyManagerDeinitInner(void)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         ReleaseProxyChannelId(item->channelId);
         ListDelete(&(item->node));
+        if (item->appInfo.fastTransData != NULL) {
+            SoftBusFree((void *)item->appInfo.fastTransData);
+        }
         SoftBusFree(item);
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
@@ -1966,6 +1973,9 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
         ListDelete(&(destroyNode->node));
         TransProxyResetPeer(destroyNode);
         TransProxyCloseConnChannel(destroyNode->connId, destroyNode->isServer);
+        if (destroyNode->appInfo.fastTransData != NULL) {
+            SoftBusFree((void *)destroyNode->appInfo.fastTransData);
+        }
         SoftBusFree(destroyNode);
     }
     return;
