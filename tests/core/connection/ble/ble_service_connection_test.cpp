@@ -64,6 +64,7 @@ public:
 
 void ServiceConnectionTest::SetUpTestCase()
 {
+    LooperInit();
     SoftbusConfigInit();
     ConnServerInit();
 }
@@ -130,13 +131,13 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection003, TestSize.Level1)
     SoftBusMutexInit(&connection.lock, nullptr);
     EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = ConnGattServerDisconnect(&connection);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusMutexInit(&connection.lock, nullptr);
     EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, SoftBusGattsDisconnect).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
     ret = ConnGattServerDisconnect(&connection);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     SoftBusMutexInit(&connection.lock, nullptr);
     EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_OK));
@@ -284,5 +285,91 @@ HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
     SoftBusMutexInit(&connection.lock, nullptr);
     ret = ConnGattClientUpdatePriority(&connection, priority);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: ConnGattClientDisconnect001
+* @tc.desc: Test ConnGattClientDisconnect.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ServiceConnectionTest, ConnGattClientDisconnect001, TestSize.Level1)
+{
+    ConnBleConnection bleConnection = {{0}};
+    int32_t ret = ConnGattClientDisconnect(&bleConnection, false, false);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
+
+    const char *bleMac = "11:22:33:44:55:66";
+    
+    ConnBleConnection *connection =
+        ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
+    ASSERT_NE(nullptr, connection);
+
+    connection->featureBitSet = (false ? (1 << BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE) : 0);
+    connection->psm = 10;
+
+    connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
+    ret = ConnBleSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ret = ConnGattClientDisconnect(connection, false, false);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusSleepMs(500);
+}
+
+/*
+* @tc.name: ConnGattClientDisconnect002
+* @tc.desc: Test ConnGattClientDisconnect.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ServiceConnectionTest, ConnGattClientDisconnect002, TestSize.Level1)
+{
+    ConnBleConnection bleConnection = {{0}};
+    int32_t ret = ConnGattClientDisconnect(&bleConnection, false, false);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
+
+    const char *bleMac = "11:22:33:44:55:66";
+    
+    ConnBleConnection *connection =
+        ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, false);
+    ASSERT_NE(nullptr, connection);
+
+    connection->featureBitSet = (false ? (1 << BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE) : 0);
+    connection->psm = 10;
+
+    connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
+    connection->underlayerHandle = 1;
+    ret = ConnBleSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    NiceMock<ConnectionBleInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_GATTC_INTERFACE_FAILED));
+    EXPECT_CALL(bleMock, BleGattcUnRegister).WillRepeatedly(Return(SOFTBUS_GATTC_INTERFACE_FAILED));
+    ret = ConnGattClientDisconnect(connection, false, false);
+    EXPECT_EQ(SOFTBUS_GATTC_INTERFACE_FAILED, ret);
+
+    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(bleMock, BleGattcUnRegister).WillRepeatedly(Return(SOFTBUS_GATTC_INTERFACE_FAILED));
+    ret = ConnGattClientDisconnect(connection, false, false);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_GATTC_INTERFACE_FAILED));
+    EXPECT_CALL(bleMock, BleGattcUnRegister).WillRepeatedly(Return(SOFTBUS_GATTC_INTERFACE_FAILED));
+    ret = ConnGattClientDisconnect(connection, true, false);
+    EXPECT_EQ(SOFTBUS_GATTC_INTERFACE_FAILED, ret);
+
+    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(bleMock, BleGattcUnRegister).WillRepeatedly(Return(SOFTBUS_GATTC_INTERFACE_FAILED));
+    ret = ConnGattClientDisconnect(connection, true, false);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_GATTC_INTERFACE_FAILED));
+    EXPECT_CALL(bleMock, BleGattcUnRegister).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = ConnGattClientDisconnect(connection, true, false);
+    EXPECT_EQ(SOFTBUS_GATTC_INTERFACE_FAILED, ret);
 }
 }
