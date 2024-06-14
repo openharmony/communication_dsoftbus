@@ -1748,6 +1748,7 @@ static void GuideChannelMsgHandler(SoftBusMessage *msg)
     switch (msg->what) {
         case MSG_TYPE_GUIDE_CHANNEL_TRIGGER:
             GuideChannelTrigger(msg);
+            break;
         case MSG_TYPE_GUIDE_CHANNEL_SELECT:
             GuideChannelSelect(msg);
             break;
