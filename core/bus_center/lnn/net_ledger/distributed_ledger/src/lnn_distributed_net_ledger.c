@@ -892,6 +892,11 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "strcpy_s uuid fail");
         return;
     }
+    if (memcpy_s(deviceInfo->rpaInfo.peerIrk, sizeof(deviceInfo->rpaInfo.peerIrk), info->rpaInfo.peerIrk,
+        sizeof(info->rpaInfo.peerIrk)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
+        return;
+    }
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return;
