@@ -304,6 +304,12 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
                 return SOFTBUS_OK;
             }
         } else {
+            if (resourceItem->isServerSide && resourceItem->clientRef == 0 &&
+                memcpy_s(&(resourceItem->link), sizeof(LaneLinkInfo), linkInfo, sizeof(LaneLinkInfo)) != EOK) {
+                LaneUnlock();
+                LNN_LOGE(LNN_LANE, "memcpy laneLinkInfo fail");
+                return SOFTBUS_MEM_ERR;
+            }
             resourceItem->clientRef++;
             LNN_LOGI(LNN_LANE, "add client laneId=%{public}" PRIu64 " to resource pool succ, clientRef=%{public}u",
                 resourceItem->laneId, resourceItem->clientRef);

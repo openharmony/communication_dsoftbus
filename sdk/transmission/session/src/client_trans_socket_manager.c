@@ -35,8 +35,8 @@
 
 #define NETWORK_ID_LEN 7
 #define HML_IP_PREFIX "172.30."
-#define GET_ROUTE_TYPE(type) ((type) & 0xff)
-#define GET_CONN_TYPE(type) (((type) >> 8) & 0xff)
+#define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)
+#define GET_CONN_TYPE(type) (((uint32_t)(type) >> 8) & 0xff)
 
 #define DISTRIBUTED_DATA_SESSION "distributeddata-default"
 
@@ -329,8 +329,8 @@ void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
     SessionInfo *sessionNode = NULL;
     SessionInfo *sessionNodeNext = NULL;
     // connType is set only in function OnWifiDirectDeviceOffLine, others is TRANS_CONN_ALL, and routeType is WIFI_P2P
-    int32_t routeType = GET_ROUTE_TYPE(type);
-    int32_t connType = GET_CONN_TYPE(type);
+    int32_t routeType = (int32_t)GET_ROUTE_TYPE(type);
+    int32_t connType = (int32_t)GET_CONN_TYPE(type);
 
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
         if (strcmp(sessionNode->info.peerDeviceId, networkId) != 0) {

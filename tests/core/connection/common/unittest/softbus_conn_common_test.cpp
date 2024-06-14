@@ -162,7 +162,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener007, TestSize.Level1)
     int fd = 1;
     for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
-            EXPECT_EQ(SOFTBUS_ERR, AddTrigger(static_cast<ListenerModule>(module),
+            EXPECT_EQ(SOFTBUS_CONN_FAIL, AddTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
             EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
