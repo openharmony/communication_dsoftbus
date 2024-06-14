@@ -484,7 +484,7 @@ static int32_t GetWifiDirectMacInfo(char *localIp, LnnMacInfo *macInfo)
     struct WifiDirectManager *wifiDirectMgr = GetWifiDirectManager();
     if (wifiDirectMgr == NULL) {
         LNN_LOGE(LNN_LANE, "get wifi direct manager fail");
-        return SOFTBUS_NOT_FIND;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = wifiDirectMgr->getLocalAndRemoteMacByLocalIp(localIp, dupMacInfo.localMac, MAX_MAC_LEN,
         dupMacInfo.remoteMac, MAX_MAC_LEN);
@@ -524,12 +524,12 @@ int32_t GetMacInfoByLaneId(uint64_t laneId, LnnMacInfo *macInfo)
     int32_t ret = FindLaneResourceByLaneId(laneId, &laneLinkInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "laneId=%{public}" PRIu64 " find lane link info fail, ret=%{public}d", laneId, ret);
-        return SOFTBUS_NOT_FIND;
+        return ret;
     }
     if (laneLinkInfo.link.type != LANE_P2P && laneLinkInfo.link.type != LANE_P2P_REUSE &&
         laneLinkInfo.link.type != LANE_HML) {
         LNN_LOGE(LNN_LANE, "lane type=%{public}d is invalid", laneLinkInfo.link.type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     char localIp[IP_LEN] = {0};
     if (memcpy_s(localIp, IP_LEN, laneLinkInfo.link.linkInfo.p2p.connInfo.localIp, IP_LEN) != EOK) {

@@ -37,7 +37,7 @@ typedef enum {
 typedef struct {
     bool available;
     int32_t (*linkCapCheck)(const char *networkId);
-    int32_t (*GetLinkScore)(const char *networkId, uint32_t expectedBw);
+    int32_t (*getLinkScore)(const char *networkId, uint32_t expectedBw);
 } LinkAttribute;
 
 int32_t GetWlanLinkedFrequency(void);
