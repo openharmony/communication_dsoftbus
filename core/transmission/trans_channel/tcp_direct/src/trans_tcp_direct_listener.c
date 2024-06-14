@@ -355,6 +355,7 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
         ProcessSocketSocketExceptionEvent(conn, fd);
     }
+    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
     SoftBusFree(conn);
     return ret;
 }

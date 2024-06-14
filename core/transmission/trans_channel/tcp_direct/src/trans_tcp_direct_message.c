@@ -727,6 +727,7 @@ static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
         return NULL;
     }
     if (UnpackRequest(request, &conn->appInfo) != SOFTBUS_OK) {
+        (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "UnpackRequest error");
         return NULL;
@@ -930,6 +931,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         TRANS_LOGI(TRANS_CTRL,
             "Request denied: session is not a meta session. sessionName=%{public}s", tmpName);
         AnonymizeFree(tmpName);
+        (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
         ReleaseSessionConn(conn);
         return SOFTBUS_TRANS_NOT_META_SESSION;
     }
@@ -939,6 +941,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         if (OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
         }
+        (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
         ReleaseSessionConn(conn);
         return errCode;
     }
@@ -949,10 +952,12 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
 
     errCode = HandleDataBusReply(conn, channelId, &extra, flags, seq);
     if (errCode != SOFTBUS_OK) {
+        (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
         ReleaseSessionConn(conn);
         return errCode;
     }
 
+    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
     ReleaseSessionConn(conn);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
@@ -1014,6 +1019,7 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
     ret = mgr->getRemoteUuidByIp(appInfo.peerData.addr, uuid, sizeof(uuid));
+    (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         AuthConnInfo connInfo;
         connInfo.type = AUTH_LINK_TYPE_WIFI;

@@ -276,6 +276,8 @@ static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
         return NULL;
     }
     if (CopyAppInfoFastTransData(newChannel, info) != SOFTBUS_OK) {
+        (void)memset_s(newChannel->info.sessionKey, sizeof(newChannel->info.sessionKey), 0,
+            sizeof(newChannel->info.sessionKey));
         SoftBusFree(newChannel);
         TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
         return NULL;
@@ -992,6 +994,8 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
         if (newChannel->info.fastTransData != NULL) {
             SoftBusFree((void *)newChannel->info.fastTransData);
         }
+        (void)memset_s(newChannel->info.sessionKey, sizeof(newChannel->info.sessionKey), 0,
+            sizeof(newChannel->info.sessionKey));
         SoftBusFree(newChannel);
         return ret;
     }
