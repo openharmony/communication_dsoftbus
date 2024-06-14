@@ -71,6 +71,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":WifiDirectIpManagerTest",
+    "data:unittest",
     "entity:unittest",
   ]
 }
