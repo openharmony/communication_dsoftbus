@@ -45,6 +45,7 @@ constexpr uint8_t PEER_IRK[LFINDER_IRK_LEN] = "123456irktest";
 constexpr unsigned char PUBLIC_ADDRESS[LFINDER_MAC_ADDR_LEN] = "addr";
 constexpr uint8_t STATIC_CAPABILITY[STATIC_CAP_LEN] = "staticCapability";
 constexpr char REMOTE_PTK[PTK_DEFAULT_LEN] = "remotePtktest";
+
 class AuthSessionMessageTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -721,3 +722,4 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
     SoftBusFree(info);
 }
 } // namespace OHOS
+

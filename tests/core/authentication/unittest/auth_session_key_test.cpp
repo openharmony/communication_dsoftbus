@@ -225,10 +225,10 @@ HWTEST_F(AuthSessionKeyTest, OLD_SESSION_KEY_TEST_001, TestSize.Level1)
     ListInit(&clientList);
     int32_t ret = AddSessionKey(&clientList, SESSIONKEY_INDEX, &sessionKey, AUTH_LINK_TYPE_BLE, true);
     EXPECT_EQ(ret, SOFTBUS_OK);
-
     EXPECT_EQ(CheckSessionKeyListHasOldKey(&clientList, AUTH_LINK_TYPE_BLE), true);
     EXPECT_EQ(ClearOldKey(&clientList, AUTH_LINK_TYPE_BLE), SOFTBUS_OK);
     EXPECT_EQ(CheckSessionKeyListHasOldKey(&clientList, AUTH_LINK_TYPE_BLE), false);
     DestroySessionKeyList(&clientList);
 }
 } // namespace OHOS
+
