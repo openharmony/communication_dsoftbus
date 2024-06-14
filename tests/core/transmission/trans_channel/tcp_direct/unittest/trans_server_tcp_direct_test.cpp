@@ -387,7 +387,7 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStartSessionListener001, TestSize.Lev
     info->socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info->socketOption.protocol = LNN_PROTOCOL_IP;
     int32_t ret = TransTdcStartSessionListener(UNUSE_BUTT, info);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_FAIL);
 
     (void)strcpy_s(info->socketOption.addr, strlen(TEST_SOCKET_ADDR) + 1, TEST_SOCKET_ADDR);
     info->socketOption.port = TEST_SOCKET_INVALID_PORT;
