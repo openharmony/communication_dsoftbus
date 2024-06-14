@@ -665,11 +665,10 @@ static int32_t DiscBleGetCustData(DeviceInfo *info)
         cJSON_Delete(json);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (ConvertHexStringToBytes((unsigned char *)info->custData, DISC_MAX_CUST_DATA_LEN, (const char *)custData,
-        strlen(custData)) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "ConvertHexStringToBytes custData failed, custData=%{public}s", info->custData);
+    if (strcpy_s(info->custData, DISC_MAX_CUST_DATA_LEN, custData) != EOK) {
+        DISC_LOGE(DISC_BLE, "strcpy_s custData failed");
         cJSON_Delete(json);
-        return SOFTBUS_DISCOVER_BLE_CONVERT_BYTES_FAILED;
+        return SOFTBUS_STRCPY_ERR;
     }
     cJSON_Delete(json);
     return SOFTBUS_OK;
@@ -805,6 +804,21 @@ static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastDat
     return SOFTBUS_OK;
 }
 
+static void AssembleCustData(DeviceInfo *info, BroadcastData *broadcastData)
+{
+    if ((info->capabilityBitmap[0] & 0x02) == 0) { // CastPlus
+        return;
+    }
+    uint8_t custData[CUST_CAPABILITY_TYPE_LEN + CUST_CAPABILITY_LEN] = {0};
+    custData[0] = CAST_PLUS;
+    int32_t ret = ConvertHexStringToBytes(&custData[1], CUST_CAPABILITY_LEN, (const char *)info->custData,
+        strlen(info->custData));
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE,
+        "ConvertHexStringToBytes custData failed, ret=%{public}d", ret);
+    (void)AssembleTLV(broadcastData, TLV_TYPE_CUST, (const void *)custData,
+        CUST_CAPABILITY_LEN + CUST_CAPABILITY_TYPE_LEN);
+}
+
 static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastData)
 {
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
@@ -824,20 +838,9 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
             (void)AssembleTLV(broadcastData, TLV_TYPE_RANGE_POWER, (const void *)&power, RANGE_POWER_TYPE_LEN);
         }
     }
-}
-
-static void AssembleCustData(DeviceInfo *info, BroadcastData *broadcastData)
-{
-    if ((info->capabilityBitmap[0] & 0x02) == 0) { // CastPlus
-        return;
+    if (info->custData[0] != 0) {
+        AssembleCustData(info, broadcastData);
     }
-    uint8_t custData[CUST_CAPABILITY_TYPE_LEN + CUST_CAPABILITY_LEN] = {0};
-    custData[0] = CAST_PLUS;
-    // Only copy the target length from the copy source
-    int32_t ret = memcpy_s(&custData[1], CUST_CAPABILITY_LEN, info->custData, CUST_CAPABILITY_LEN);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "memcpy custData failed");
-    (void)AssembleTLV(broadcastData, TLV_TYPE_CUST, (const void *)custData,
-        CUST_CAPABILITY_LEN + CUST_CAPABILITY_TYPE_LEN);
 }
 
 static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
@@ -894,7 +897,6 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
     if (advId == NON_ADV_ID) {
         AssembleNonOptionalTlv(info, broadcastData);
     }
-    AssembleCustData(info, broadcastData);
     uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen - 1;
     uint32_t validLen = (strlen(info->devName) + 1 > remainLen) ? remainLen : strlen(info->devName) + 1;
     char deviceName[DISC_MAX_DEVICE_NAME_LEN] = {0};
