@@ -242,8 +242,8 @@ static void DelSendListenerInfo(SendListenerInfo *info)
         return;
     }
     ListDelete(&info->node);
-    SoftBusFree(info);
     TRANS_LOGI(TRANS_FILE, "delete sessionId = %{public}d", info->sessionId);
+    SoftBusFree(info);
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
 }
 
