@@ -20,6 +20,7 @@
 #include "auth_interface.h"
 #include "gtest/gtest.h"
 #include "trans_auth_message.h"
+#include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_p2p.h"
 #include "trans_tcp_direct_p2p.c"
 #include "trans_tcp_direct_sessionconn.h"
@@ -50,6 +51,7 @@ static int32_t g_port = 6000;
 static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
+static IServerChannelCallBack g_channelCallBack;
 class TransTcpDirectP2pTest : public testing::Test {
 public:
     TransTcpDirectP2pTest()
@@ -90,8 +92,67 @@ SessionConn *TestSetSessionConn()
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;
     conn->appInfo.routeType = WIFI_P2P;
-    (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
+    (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName) + 1));
+    (void)memcpy_s(conn->appInfo.myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName, (strlen(g_sessionName) + 1));
     return conn;
+}
+
+static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
+    const ChannelInfo *channel)
+{
+    TRANS_LOGE(TRANS_QOS, "TransServerOnChannelOpened");
+    return SOFTBUS_OK;
+}
+
+static int32_t TransServerOnChannelClosed(
+    const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t messageType)
+{
+    TRANS_LOGE(TRANS_QOS, "TransServerOnChannelClosed");
+    return SOFTBUS_OK;
+}
+
+static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
+    int32_t channelType, int32_t errCode)
+{
+    TRANS_LOGE(TRANS_QOS, "TransServerOnChannelOpenFailed");
+    return SOFTBUS_OK;
+}
+
+static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
+    TransReceiveData *receiveData)
+{
+    TRANS_LOGE(TRANS_QOS, "TransServerOnChannelOpenFailed");
+    return SOFTBUS_OK;
+}
+
+static int32_t TransServerOnQosEvent(const char *pkgName, const QosParam *param)
+{
+    TRANS_LOGE(TRANS_QOS, "TransServerOnChannelOpenFailed");
+    return SOFTBUS_OK;
+}
+
+static int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
+{
+    TRANS_LOGE(TRANS_QOS, "TransGetPkgNameBySessionName");
+    return SOFTBUS_OK;
+}
+
+static int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
+{
+    TRANS_LOGE(TRANS_QOS, "TransGetUidAndPid");
+    return SOFTBUS_OK;
+}
+
+IServerChannelCallBack *TestTransServerGetChannelCb(void)
+{
+    g_channelCallBack.OnChannelOpened = TransServerOnChannelOpened;
+    g_channelCallBack.OnChannelClosed = TransServerOnChannelClosed;
+    g_channelCallBack.OnChannelOpenFailed = TransServerOnChannelOpenFailed;
+    g_channelCallBack.OnDataReceived = TransServerOnMsgReceived;
+    g_channelCallBack.OnQosEvent = TransServerOnQosEvent;
+    g_channelCallBack.GetPkgNameBySessionName = TransGetPkgNameBySessionName;
+    g_channelCallBack.GetUidAndPidBySessionName = TransGetUidAndPid;
+    return &g_channelCallBack;
 }
 
 string TestGetMsgPack()
@@ -146,14 +207,19 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewP2pListenerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level1)
 {
+    IServerChannelCallBack *testCallBack = TestTransServerGetChannelCb();
+    ASSERT_NE(testCallBack, nullptr);
+    int32_t ret = TransTdcSetCallBack(testCallBack);
+    ASSERT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = 1;
-    ListNode *sessionConnList = (ListNode*)SoftBusMalloc(sizeof(ListNode));
+    // will free in ClearP2pSessionConn
+    ListNode *sessionConnList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
     ASSERT_NE(sessionConnList, nullptr);
-
     NotifyP2pSessionConnClear(NULL);
-
     ClearP2pSessionConn();
-    int32_t ret = CreatSessionConnList();
+    ListNode *testsessionConnList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+    ASSERT_NE(testsessionConnList, nullptr);
+    ret = CreatSessionConnList();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *conn = TestSetSessionConn();
@@ -166,6 +232,7 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
     TransDelSessionConnById(channelId);
 
     SoftBusFree(sessionConnList);
+    SoftBusFree(testsessionConnList);
 }
 
 /**
@@ -282,7 +349,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
 {
     int32_t ret = ConnectTcpDirectPeer(g_addr, g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
 }
 
 /**
