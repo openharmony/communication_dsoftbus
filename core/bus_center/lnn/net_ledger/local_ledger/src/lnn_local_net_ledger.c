@@ -1555,7 +1555,7 @@ static int32_t LnnLoadBroadcastCipherInfo(BroadcastCipherKey *broadcastKey)
         LNN_LOGE(LNN_LEDGER, "set iv error.");
         return SOFTBUS_ERR;
     }
-     LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
+    LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
     return SOFTBUS_OK;
 }
 
