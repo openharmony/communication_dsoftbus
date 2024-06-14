@@ -27,19 +27,19 @@ int32_t LnnInitLaneHub(void)
 {
     if (InitLane() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init lane fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (LnnInitQos() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init laneQos fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (LnnInitTimeSync() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init time sync fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (LnnInitHeartbeat() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init heart beat fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }
@@ -48,7 +48,7 @@ int32_t LnnInitLaneHubDelay(void)
 {
     if (LnnStartHeartbeatFrameDelay() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "start heartbeat delay fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }

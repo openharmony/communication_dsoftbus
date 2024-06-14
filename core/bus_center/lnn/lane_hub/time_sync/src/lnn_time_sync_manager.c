@@ -164,7 +164,7 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
     item = CreateStartTimeSyncReq(startReq->pkgName, startReq->accuracy, startReq->period);
     if (item == NULL) {
         LNN_LOGE(LNN_CLOCK, "create start time sync request fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     ListAdd(&info->startReqList, &item->node);
     return SOFTBUS_OK;
@@ -205,7 +205,7 @@ static int32_t ProcessStartTimeSyncRequest(const StartTimeSyncReqMsgPara *para)
     TimeSyncReqInfo *existInfo = NULL;
     bool isCreateTimeSyncReq = false;
     bool isUpdateTimeSyncReq = false;
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_NOT_FIND;
 
     if (para == NULL) {
         LNN_LOGE(LNN_CLOCK, "start time sync request msg para null");
@@ -295,7 +295,7 @@ static int32_t ProcessStopTimeSyncRequest(const StopTimeSyncReqMsgPara *para)
     if (info == NULL) {
         LNN_LOGI(LNN_CLOCK, "no specific networkId. pkgName=%{public}s", para->pkgName);
         SoftBusFree((void *)para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NOT_FIND;
     }
     RemoveStartTimeSyncReq(info, para->pkgName, para->pid);
     TryUpdateTimeSyncReq(info);
@@ -359,12 +359,12 @@ static int32_t ProcessTimeSyncComplete(const TimeSyncCompleteMsgPara *para)
     if (info == NULL) {
         LNN_LOGE(LNN_CLOCK, "no specific networkId");
         SoftBusFree((void *)para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NOT_FIND;
     }
     LNN_LOGI(LNN_CLOCK, "time sync complete result. offset=%{public}.6lf, retCode=%{public}d",
         para->offset, para->retCode);
     NotifyTimeSyncResult(info, para->offset, para->retCode);
-    if (para->retCode == SOFTBUS_NETWORK_TIME_SYNC_HANDSHAKE_ERR || para->retCode == SOFTBUS_ERR) {
+    if (para->retCode == SOFTBUS_NETWORK_TIME_SYNC_HANDSHAKE_ERR || para->retCode == SOFTBUS_INVALID_PARAM) {
         LNN_LOGE(LNN_CLOCK, "time sync fail, stop it internal. retCode=%{public}d", para->retCode);
         RemoveAllStartTimeSyncReq(info);
     }
@@ -425,7 +425,7 @@ static int32_t PostMessageToHandler(int32_t msgType, void *para)
     SoftBusMessage *msg = CreateTimeSyncMessage(msgType, para);
     if (msg == NULL) {
         LNN_LOGE(LNN_CLOCK, "create time sync message failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     g_timeSyncCtrl.looper->PostMessage(g_timeSyncCtrl.looper, msg);
     return SOFTBUS_OK;
@@ -474,7 +474,7 @@ int32_t LnnInitTimeSync(void)
     g_timeSyncCtrl.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_timeSyncCtrl.looper == NULL) {
         LNN_LOGE(LNN_INIT, "time sync get default looper fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     g_timeSyncCtrl.handler.name = (char *)"TimeSync";
     g_timeSyncCtrl.handler.looper = g_timeSyncCtrl.looper;
@@ -517,7 +517,7 @@ int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *ta
         strncpy_s(para->targetNetworkId, NETWORK_ID_BUF_LEN, targetNetworkId, strlen(targetNetworkId)) != EOK) {
         LNN_LOGE(LNN_CLOCK, "copy time sync request info fail");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     para->accuracy = accuracy;
     para->period = period;
@@ -557,7 +557,7 @@ int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_
         strncpy_s(para->targetNetworkId, NETWORK_ID_BUF_LEN, targetNetworkId, strlen(targetNetworkId)) != EOK) {
         LNN_LOGE(LNN_CLOCK, "copy time sync request info fail");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (PostMessageToHandler(MSG_TYPE_STOP_TIME_SYNC, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_CLOCK, "post stop time sync msg fail");

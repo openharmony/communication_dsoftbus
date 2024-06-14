@@ -410,7 +410,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
 
     LinkUnlock();
     LNN_LOGE(LNN_LANE, "request item not found, channelRequestId=%{public}d", channelRequestId);
-    return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
+    return SOFTBUS_LANE_NOT_FOUND;
 }
 
 static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p2pRequestId,
@@ -456,7 +456,7 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
     }
     LinkUnlock();
     LNN_LOGE(LNN_LANE, "request item not found, authRequestId=%{public}u", authRequestId);
-    return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
+    return SOFTBUS_LANE_NOT_FOUND;
 }
 
 static int32_t GetP2pLinkReqByReqId(AsyncResultType type, uint32_t requestId, P2pLinkReqList *info)
@@ -806,7 +806,7 @@ static void HandleGuideChannelRetry(uint32_t laneReqId, LaneLinkType linkType, i
     return;
  FAIL:
     DelGuideInfoItem(laneReqId, linkType);
-    callback.onLaneLinkFail(laneReqId, ErrCodeFilter(reason, SOFTBUS_LANE_GUIDE_BUILD_FAIL), linkType);
+    callback.onLaneLinkFail(laneReqId, reason, linkType);
 }
 
 static void HandleGuideChannelAsyncFail(AsyncResultType type, uint32_t requestId, int32_t reason)
@@ -952,7 +952,7 @@ static int32_t UpdateP2pLinkedList(int32_t linkId, uint32_t authRequestId)
         }
     }
     LinkUnlock();
-    return SOFTBUS_NOT_FIND;
+    return SOFTBUS_LANE_NOT_FOUND;
 }
 
 static int32_t OpenAuthToDisconnP2p(const char *networkId, int32_t linkId)
@@ -1152,7 +1152,7 @@ static int32_t UpdateP2pLinkInfoWithAuth(uint32_t authRequestId, AuthHandle auth
     }
     LinkUnlock();
     LNN_LOGE(LNN_LANE, "not found p2p link with authRequestId=%{public}u", authRequestId);
-    return SOFTBUS_NOT_FIND;
+    return SOFTBUS_LANE_NOT_FOUND;
 }
 
 static int32_t GetP2pLinkByLaneReqId(uint32_t laneReqId, P2pLinkReqList *info)
@@ -1626,7 +1626,7 @@ static int32_t LnnSelectDirectLink(uint32_t laneReqId, LaneLinkType linkType)
     (void)memset_s(&guideInfo, sizeof(WdGuideInfo), -1, sizeof(WdGuideInfo));
     if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get guide channel info fail.");
-        return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
+        return SOFTBUS_LANE_NOT_FOUND;
     }
     if (guideInfo.guideIdx >= guideInfo.guideNum) {
         LNN_LOGE(LNN_LANE, "all guide channel type have been tried.");
@@ -1677,7 +1677,7 @@ static int32_t SelectGuideChannel(const LinkRequest *request, uint32_t laneReqId
     guideInfo.guideIdx = 0;
     if (AddGuideInfoItem(&guideInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add guide channel info fail.");
-        return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
+        return SOFTBUS_LANE_LIST_ERR;
     }
     BuildGuideChannel(laneReqId, request->linkType);
     return SOFTBUS_OK;
@@ -1730,7 +1730,7 @@ static void GuideChannelSelect(SoftBusMessage *msg)
     int32_t ret = SelectGuideChannel(&request, laneReqId, &callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "guide channel select fail, laneReqId=%{public}u", laneReqId);
-        callback.onLaneLinkFail(laneReqId, ErrCodeFilter(ret, SOFTBUS_LANE_GUIDE_BUILD_FAIL), request.linkType);
+        callback.onLaneLinkFail(laneReqId, ret, request.linkType);
     }
 }
 
