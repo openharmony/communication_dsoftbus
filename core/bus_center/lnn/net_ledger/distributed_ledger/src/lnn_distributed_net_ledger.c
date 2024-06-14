@@ -870,7 +870,11 @@ static bool IsDeviceInfoChanged(NodeInfo *info)
         LNN_LOGI(LNN_LEDGER, "convert udidhash to hexstr fail");
         return false;
     }
-    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+    int32_t ret = LnnRetrieveDeviceInfo(hashStr, &deviceInfo);
+    if (ret == SOFTBUS_NETWORK_NOT_FOUND) {
+        return true;
+    }
+    if (ret != SOFTBUS_OK) {
         LNN_LOGI(LNN_LEDGER, "get deviceInfo by udidhash fail");
         return false;
     }
@@ -886,6 +890,11 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
     }
     if (strcpy_s(deviceInfo->uuid, sizeof(deviceInfo->uuid), info->uuid) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s uuid fail");
+        return;
+    }
+    if (memcpy_s(deviceInfo->rpaInfo.peerIrk, sizeof(deviceInfo->rpaInfo.peerIrk), info->rpaInfo.peerIrk,
+        sizeof(info->rpaInfo.peerIrk)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
         return;
     }
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
@@ -1471,6 +1480,7 @@ int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
     }
     if (IsIgnoreUpdateToLedger(oldInfo->stateVersion, oldInfo->updateTimestamp, newInfo->stateVersion,
         newInfo->updateTimestamp)) {
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_OK;
     }
     UpdateDistributedLedger(newInfo, oldInfo);
@@ -1500,7 +1510,7 @@ static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNu
             ret = SOFTBUS_OK;
             break;
         }
-        *info = (NodeBasicInfo*)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
+        *info = (NodeBasicInfo*)SoftBusCalloc((*infoNum) * sizeof(NodeBasicInfo));
         if (*info == NULL) {
             LNN_LOGE(LNN_LEDGER, "malloc node info buffer failed");
             break;

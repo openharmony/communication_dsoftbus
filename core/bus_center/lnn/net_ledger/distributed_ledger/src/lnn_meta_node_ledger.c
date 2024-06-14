@@ -65,7 +65,7 @@ static MetaNodeStorageInfo *FindMetaNodeStorageInfo(const char *id, bool isUdid)
 
 static MetaNodeStorageInfo *CreateMetaNodeStorageInfo(const MetaNodeConfigInfo *info, const char *networkId)
 {
-    MetaNodeStorageInfo *storageInfo = SoftBusMalloc(sizeof(MetaNodeStorageInfo));
+    MetaNodeStorageInfo *storageInfo = SoftBusCalloc(sizeof(MetaNodeStorageInfo));
     if (storageInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "create meta node storage info fail");
         return NULL;

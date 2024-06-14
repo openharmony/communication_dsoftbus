@@ -440,7 +440,6 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
 
     optionInfo.type = CONNECT_BLE;
     (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("bleMac: %s\n", optionInfo.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     req1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -454,11 +453,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
         ret = ConnDisconnectDeviceAllConn(&optionInfo);
         g_connId = 0;
         EXPECT_EQ(SOFTBUS_OK, ret);
-        printf("testConnmanger006 ConnDisconnectDeviceAllConn\r\n");
     }
-    printf("testConnmanger006 ConnUnSetConnectCallback\r\n");
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-    printf("testConnmanger006 ConnUnSetConnectCallback end 11\r\n");
 };
 
 /*
@@ -478,7 +474,6 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
     ConnPostData data;
     ConnectOption info;
     const char *str = "send msg local2\r\n";
-    printf("test begin testConnmanger006 \r\n");
 
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
@@ -489,7 +484,6 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_CONN_INTERNAL_ERR, ret);
     info.type = CONNECT_BLE;
     (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);

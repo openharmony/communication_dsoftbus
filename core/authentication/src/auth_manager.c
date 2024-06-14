@@ -381,10 +381,12 @@ void RemoveNotPassedAuthManagerByUdid(const char *udid)
 
 int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "uuid is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "connInfo is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(connInfo), SOFTBUS_INVALID_PARAM,
-        AUTH_FSM, "connInfo type error");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "uuid is NULL");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connInfo is NULL");
+    if (type < AUTH_LINK_TYPE_WIFI || type > AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "connInfo type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }

@@ -221,7 +221,8 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     }
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     TRANS_LOGI(TRANS_CTRL,
-        "proxy channel openfailed: channelId=%{public}d, appType=%{public}d", channelId, appInfo->appType);
+        "proxy channel openfailed:sessionName=%{public}s, channelId=%{public}d, appType=%{public}d, errCode=%{public}d",
+        appInfo->myData.sessionName, channelId, appInfo->appType, errCode);
     return SelectAppType(appInfo, appInfo->appType, channelId, errCode);
 }
 

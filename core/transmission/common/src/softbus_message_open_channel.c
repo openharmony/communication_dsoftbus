@@ -157,6 +157,7 @@ char *PackRequest(const AppInfo *appInfo)
         return NULL;
     }
     ret = JsonObjectPackRequestEx(appInfo, json, encodeSessionKey);
+    (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
     if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
         TRANS_LOGE(TRANS_CTRL, "pack jsonObj failed.");

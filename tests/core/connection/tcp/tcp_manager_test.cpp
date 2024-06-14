@@ -257,7 +257,7 @@ HWTEST_F(TcpManagerTest, testTcpManager005, TestSize.Level1)
 
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_CONN_FAIL, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
@@ -671,7 +671,7 @@ HWTEST_F(TcpManagerTest, testTcpManager015, TestSize.Level1)
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_CONN_LISTENER_NOT_IDLE, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
@@ -784,7 +784,7 @@ HWTEST_F(TcpManagerTest, testTcpManager019, TestSize.Level1)
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_CONN_LISTENER_NOT_IDLE, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
@@ -841,7 +841,7 @@ HWTEST_F(TcpManagerTest, testTcpManager021, TestSize.Level1)
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_CONN_LISTENER_NOT_IDLE, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
@@ -1162,7 +1162,7 @@ HWTEST_F(TcpManagerTest, testTcpManager031, TestSize.Level1)
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_CONN_LISTENER_NOT_IDLE, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
@@ -1219,7 +1219,7 @@ HWTEST_F(TcpManagerTest, testTcpManager033, TestSize.Level1)
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_CONN_LISTENER_NOT_IDLE, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
