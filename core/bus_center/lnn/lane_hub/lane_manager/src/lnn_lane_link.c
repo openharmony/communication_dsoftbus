@@ -105,7 +105,7 @@ uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkT
         char *anonyRemoteUdid = NULL;
         Anonymize(localUdid, &anonyLocalUdid);
         Anonymize(remoteUdid, &anonyRemoteUdid);
-        LNN_LOGI(LNN_LANE, "apply laneId=%{public}" PRIu64 " with localUdid=%{public}s,"
+        LNN_LOGI(LNN_LANE, "generate laneId=%{public}" PRIu64 " with localUdid=%{public}s,"
             "remoteUdid=%{public}s, linkType=%{public}d", laneId, anonyLocalUdid, anonyRemoteUdid, linkType);
         AnonymizeFree(anonyLocalUdid);
         AnonymizeFree(anonyRemoteUdid);
@@ -413,7 +413,7 @@ int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    LNN_LOGI(LNN_LANE, "start to del laneId=%{public}" PRIu64 " resource, isServer=%{public}d ",
+    LNN_LOGI(LNN_LANE, "start to del laneId=%{public}" PRIu64 " resource, isServer=%{public}d",
             laneId, isServerSide);
     LaneResource *next = NULL;
     LaneResource *item = NULL;
