@@ -1480,6 +1480,7 @@ int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
     }
     if (IsIgnoreUpdateToLedger(oldInfo->stateVersion, oldInfo->updateTimestamp, newInfo->stateVersion,
         newInfo->updateTimestamp)) {
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_OK;
     }
     UpdateDistributedLedger(newInfo, oldInfo);
