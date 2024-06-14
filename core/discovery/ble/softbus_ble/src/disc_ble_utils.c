@@ -421,6 +421,9 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                 ret = CopyBrAddrValue(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_RANGE_POWER:
+                if (len > RANGE_POWER_TYPE_LEN) {
+                    break;
+                }
                 ret = CopyValue(&device->power, RANGE_POWER_TYPE_LEN, (void *)&data[curLen + 1], len,
                                 "TLV_TYPE_RANGE_POWER");
                 break;
