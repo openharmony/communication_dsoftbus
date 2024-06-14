@@ -183,6 +183,7 @@ static void LinkSuccess(uint32_t laneReqId, LaneLinkType linkType, const LaneLin
         LNN_LOGE(LNN_LANE, "linkSuccess param invalid");
         return;
     }
+    LNN_LOGI(LNN_LANE, "build link succ, laneReqId=%{public}u, link=%{public}d", laneReqId, linkType);
     RemoveLinkTimeoutMessage(laneReqId, linkType);
     LaneLinkInfo *linkParam = (LaneLinkInfo *)SoftBusCalloc(sizeof(LaneLinkInfo));
     if (linkParam == NULL) {
@@ -204,6 +205,8 @@ static void LinkSuccess(uint32_t laneReqId, LaneLinkType linkType, const LaneLin
 
 static void LinkFail(uint32_t laneReqId, int32_t reason, LaneLinkType linkType)
 {
+    LNN_LOGE(LNN_LANE, "build link fail, laneReqId=%{public}u, link=%{public}d, reason=%{public}d",
+        laneReqId, linkType, reason);
     RemoveLinkTimeoutMessage(laneReqId, linkType);
     LinkFailInfo *failInfo = (LinkFailInfo *)SoftBusCalloc(sizeof(LinkFailInfo));
     if (failInfo == NULL) {
@@ -468,7 +471,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
     }
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
-        LNN_LOGE(LNN_LANE, "no available link resources, laneReqId=%{public}u", laneReqId);
+        LNN_LOGE(LNN_LANE, "no available link to alloc, laneReqId=%{public}u", laneReqId);
         return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
     for (uint32_t i = 0; i < recommendLinkList->linkTypeNum; i++) {
@@ -670,7 +673,7 @@ static int32_t Alloc(uint32_t laneReqId, const LaneRequestOption *request, const
         return ErrCodeFilter(ret, SOFTBUS_LANE_SELECT_FAIL);
     }
     if (recommendLinkList->linkTypeNum == 0) {
-        LNN_LOGE(LNN_LANE, "no link resources available, alloc fail");
+        LNN_LOGE(LNN_LANE, "no available link to request, laneReqId=%{public}u", laneReqId);
         SoftBusFree(recommendLinkList);
         return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
@@ -1025,7 +1028,7 @@ static int32_t UpdateLinkStatus(uint32_t laneReqId, BuildLinkStatus status, Lane
     LaneLinkNodeInfo *nodeInfo = GetLaneLinkNodeWithoutLock(laneReqId);
     if (nodeInfo == NULL) {
         Unlock();
-        LNN_LOGE(LNN_LANE, "get lane link node info fail, laneReqId=%{public}u", laneReqId);
+        LNN_LOGI(LNN_LANE, "link result has notified, not need update link status. laneReqId=%{public}u", laneReqId);
         if (status == BUILD_LINK_STATUS_SUCC) {
             FreeUnusedLink(laneReqId, linkInfo);
         }
@@ -1297,10 +1300,8 @@ static void LaneLinkFail(SoftBusMessage *msg)
         return;
     }
     LinkFailInfo *failInfo = (LinkFailInfo *)msg->obj;
-    int32_t reason = failInfo->reason;
     LaneLinkType linkType = failInfo->linkType;
     SoftBusFree(failInfo);
-    LNN_LOGI(LNN_LANE, "lane link fail, laneReqId=%{public}u, reason=%{public}d", laneReqId, reason);
     if (UpdateLinkStatus(laneReqId, BUILD_LINK_STATUS_FAIL, linkType, NULL, failReason) != SOFTBUS_OK) {
         return;
     }
