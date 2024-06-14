@@ -29,6 +29,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event_monitor.h"
 #include "lnn_feature_capability.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
@@ -68,11 +69,6 @@ int32_t LnnInitNetLedger(void)
 
 static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 {
-    int64_t accountId = 0;
-    if ((LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) && (accountId != info->accountId)) {
-        LNN_LOGW(LNN_LEDGER, "accountId=%{public}" PRId64 "->%{public}" PRId64, accountId, info->accountId);
-        return true;
-    }
     char softBusVersion[VERSION_MAX_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
         if (strcmp(softBusVersion, info->softBusVersion) != 0) {
@@ -179,6 +175,7 @@ int32_t LnnInitNetLedgerDelay(void)
 {
     LnnSetLocalFeature();
     LnnLoadLocalDeviceAccountIdInfo();
+    RestoreLocalDeviceInfo();
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
         return SOFTBUS_ERR;
@@ -187,8 +184,10 @@ int32_t LnnInitNetLedgerDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
         return SOFTBUS_ERR;
     }
-    RestoreLocalDeviceInfo();
-    LnnInitDeviceNameMonitor();
+    if (LnnInitEventMonitor() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init event monitor fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
