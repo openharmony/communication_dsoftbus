@@ -1527,7 +1527,7 @@ static void HandlePendingRequestFunc(SoftBusMessage *msg)
 
 static void ConnectRequestFunc(SoftBusMessage *msg)
 {
-    if (g_bleManager.state->handlePendingRequest == NULL) {
+    if (g_bleManager.state->connectRequest == NULL) {
         return;
     }
     ConnBleConnectRequestContext *ctx = (ConnBleConnectRequestContext *)msg->obj;
