@@ -365,7 +365,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessagel001, TestSize.
 HWTEST_F(SoftbusProxyTransceiverTest, TransProxyTransInit001, TestSize.Level1)
 {
     int32_t ret = TransProxyTransInit();
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     DestroySoftBusList(g_proxyConnectionList);
     g_proxyConnectionList = nullptr;
 }
