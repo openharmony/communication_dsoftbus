@@ -165,7 +165,7 @@ int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitDeviceNameMonitor(void)
+int32_t LnnInitDeviceNameMonitorImpl(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (looper == NULL) {

@@ -29,7 +29,7 @@ int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitDeviceNameMonitor(void)
+int32_t LnnInitDeviceNameMonitorImpl(void)
 {
     return SOFTBUS_OK;
 }
