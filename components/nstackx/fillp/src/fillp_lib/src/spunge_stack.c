@@ -354,7 +354,7 @@ FILLP_BOOL SpungeConnCheckUnsendBoxEmpty(struct FtNetconn *conn)
     con = unsendBox->ring.cons.head + 1;
     prod = unsendBox->ring.prod.tail;
 
-    while (((FILLP_LLONG)(prod - con)) >= 0) {
+    while (prod >= con) {
         data = unsendBox->ring.ringCache[con % unsendBox->ring.size];
         con++;
 
