@@ -295,6 +295,8 @@ void TransDelSessionConnById(int32_t channelId)
             if (item->appInfo.fastTransData != NULL) {
                 SoftBusFree((void*)item->appInfo.fastTransData);
             }
+            (void)memset_s(item->appInfo.sessionKey, sizeof(item->appInfo.sessionKey), 0,
+                sizeof(item->appInfo.sessionKey));
             SoftBusFree(item);
             g_sessionConnList->cnt--;
             ReleaseSessionConnLock();
