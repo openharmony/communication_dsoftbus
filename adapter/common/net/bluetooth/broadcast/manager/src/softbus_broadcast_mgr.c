@@ -121,7 +121,9 @@ static void BcBtStateChanged(int32_t listenerId, int32_t state)
             SoftBusMutexUnlock(&g_bcLock);
             continue;
         }
+        SoftBusMutexUnlock(&g_bcLock);
         (void)g_interface[g_interfaceId]->StopBroadcasting(bcManager->adapterBcId);
+        DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK, DISC_BLE, "bcLock mutex err!");
         bcManager->isAdvertising = false;
         bcManager->time = 0;
         SoftBusCondBroadcast(&bcManager->cond);
@@ -1312,8 +1314,10 @@ static void StartBroadcastingWaitSignal(int32_t bcId, SoftBusMutex *mutex)
     }
     DISC_LOGW(DISC_BLE, "Wait signal failed, srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d,"
         "call StopBroadcast", GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
+    SoftBusMutexUnlock(mutex);
     int32_t ret = g_interface[g_interfaceId]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
     DISC_LOGW(DISC_BLE, "StopBroadcasting ret=%{public}d", ret);
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(mutex) == SOFTBUS_OK, DISC_BLE, "bcLock mutex err!");
     ret = SoftBusCondWaitSec(BC_WAIT_TIME_SEC, bcId, mutex);
     DISC_LOGW(DISC_BLE, "Wait signal ret=%{public}d", ret);
     g_bcManager[bcId].isAdvertising = false;
