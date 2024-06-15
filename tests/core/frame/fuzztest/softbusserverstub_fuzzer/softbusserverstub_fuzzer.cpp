@@ -21,6 +21,7 @@
 #include "message_parcel.h"
 #include "rpc_errno.h"
 #include "softbus_access_token_test.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_server_frame.h"
@@ -34,8 +35,6 @@
 #define QOS_NUM 8
 
 namespace OHOS {
-constexpr size_t FOO_MAX_LEN = 1024;
-constexpr size_t U32_AT_SIZE = 4;
 constexpr int32_t SOFTBUS_FUZZ_TEST_UID = 1;
 constexpr int32_t SOFTBUS_FUZZ_TEST_PID = 1;
 constexpr int32_t SOFTBUS_FUZZ_TEST_CHANNEL_ID = 3;
@@ -521,7 +520,7 @@ bool EvaLuateQosInnerNetworkIdFuzzTest(const uint8_t* data, size_t size)
     uint32_t qosCount = size % QOS_NUM;
 
     datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteCString((char *)data);
+    datas.WriteCString((const char *)data);
 
     datas.WriteInt32(dataTypeNum);
     datas.WriteUint32(qosCount);
@@ -582,29 +581,10 @@ bool EvaLuateQosInnerQosCountFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool IsValidParam(const uint8_t* data, size_t size)
+bool RunFuzzTestCase(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        return false;
-    }
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return false;
-    }
-    if (size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    return true;
-}
-} // namespace OHOS
-
-/* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
-{
-    if (!OHOS::IsValidParam(data, size)) {
-        return 0;
-    }
+    OHOS::EvaLuateQosInnerDataTypeFuzzTest(data, size);
+    OHOS::EvaLuateQosInnerQosCountFuzzTest(data, size);
     OHOS::OpenSessionFuzzTest(data, size);
     OHOS::OpenAuthSessionFuzzTest(data, size);
     OHOS::CreateSessionServerFuzzTest(data, size);
@@ -643,5 +623,26 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::SoftbusRegisterServiceFuzzTest(data, size);
     OHOS::CheckOpenSessionPermissionFuzzTest(data, size);
     OHOS::EvaLuateQosInnerFuzzTest(data, size);
+    return true;
+}
+} // namespace OHOS
+
+/* Fuzzer entry point */
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* ptr, size_t size)
+{
+    if (size == 0 || size >= INT32_MAX - 1) {
+        return 0;
+    }
+    OHOS::RunFuzzTestCase(ptr, size);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(size + 1);
+    if (data == nullptr) {
+        return 0;
+    }
+    if (memcpy_s(data, size, ptr, size) != EOK) {
+        SoftBusFree(data);
+        return 0;
+    }
+    OHOS::EvaLuateQosInnerNetworkIdFuzzTest(data, size);
+    SoftBusFree(data);
     return 0;
 }
