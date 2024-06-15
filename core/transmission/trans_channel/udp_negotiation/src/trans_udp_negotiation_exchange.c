@@ -189,7 +189,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     size_t len = 0;
     int32_t ret = SoftBusBase64Encode((unsigned char*)encodeSessionKey, BASE64_SESSION_KEY_LEN, &len,
         (unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey));
-    if (ret != 0) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "mbedtls base64 encode failed.");
         return SOFTBUS_DECRYPT_ERR;
     }
