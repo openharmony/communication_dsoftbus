@@ -193,6 +193,33 @@ ohos_unittest("InterfaceManagerTest") {
   ]
 }
 
+ohos_unittest("WifiConfigInfoTest") {
+  module_out_path = ut_out_path
+  configs = [ ":wifi_direct_include_dirs" ]
+  sources = [
+    "$wifi_direct_cpp_path/data/interface_info.cpp",
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/data/negotiate_message.cpp",
+    "$wifi_direct_cpp_path/data/wifi_config_info.cpp",
+    "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "wifi_config_info_test.cpp",
+  ]
+
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -200,5 +227,6 @@ group("unittest") {
     ":InterfaceManagerTest",
     ":LinkInfoTest",
     ":NegotiateMessageTest",
+    ":WifiConfigInfoTest",
   ]
 }
