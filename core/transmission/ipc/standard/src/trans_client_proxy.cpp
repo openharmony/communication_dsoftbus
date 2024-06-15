@@ -68,7 +68,8 @@ int32_t ClientIpcOnChannelBind(ChannelMsg *data)
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
-        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr, msgPkgName=%{public}s, msgPid=%{public}d",
+            data->msgPkgName, data->msgPid);
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     return clientProxy->OnChannelBind(data->msgChannelId, data->msgChannelType);
