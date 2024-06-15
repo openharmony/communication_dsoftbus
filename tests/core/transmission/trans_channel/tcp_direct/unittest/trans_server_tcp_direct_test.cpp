@@ -593,17 +593,15 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUpdAppInfo001
- * @tc.desc: TransUpdAppInfo, with wrong parms.
+ * @tc.name: TransUpdateAppInfo001
+ * @tc.desc: TransUpdateAppInfo, with wrong parms.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, TransUpdAppInfo001, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, TransUpdateAppInfo001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    ConnectOption *connInfo = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    (void)memset_s(connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ConnectOption *connInfo = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
     connInfo->type = CONNECT_TCP;
     connInfo->socketOption.port = TEST_SOCKET_PORT;
     connInfo->socketOption.moduleId = MODULE_MESSAGE_SERVICE;
@@ -611,7 +609,7 @@ HWTEST_F(TransServerTcpDirectTest, TransUpdAppInfo001, TestSize.Level1)
     (void)strcpy_s(connInfo->socketOption.addr, sizeof(connInfo->socketOption.addr), TEST_SOCKET_ADDR);
     (void)strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), TEST_SOCKET_ADDR);
 
-    int32_t ret = TransUpdAppInfo(appInfo, connInfo);
+    int32_t ret = TransUpdateAppInfo(appInfo, connInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(appInfo);
