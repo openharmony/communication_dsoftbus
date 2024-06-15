@@ -290,6 +290,7 @@ void TransProxyPostDisConnectMsgToLoop(uint32_t connId, bool isServer, const Pro
     SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_DISCONNECT_MSG, isServer, connId, (char *)chan);
     if (msg == NULL) {
         TRANS_LOGE(TRANS_MSG, "msg create failed");
+        SoftBusFree((void *)chan);
         return;
     }
     g_transLoopHandler.looper->PostMessage(g_transLoopHandler.looper, msg);
@@ -791,6 +792,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     if (TransProxyCreateChanInfo(chan, chanNewId, appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "TransProxyCreateChanInfo err");
         ReleaseProxyChannelId(chanNewId);
+        (void)memset_s(chan->appInfo.sessionKey, sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
         SoftBusFree(chan);
         return SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED;
     }
