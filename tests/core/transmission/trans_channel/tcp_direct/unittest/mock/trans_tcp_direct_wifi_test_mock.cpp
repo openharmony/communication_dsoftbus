@@ -51,9 +51,9 @@ void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, Aut
     return GetTransTcpDirectWifiInterface()->AuthGetLatestIdByUuid(uuid, type, isMeta, authHandle);
 }
 
-ListenerModule GetMoudleByHmlIp(const char *ip)
+ListenerModule GetModuleByHmlIp(const char *ip)
 {
-    return GetTransTcpDirectWifiInterface()->GetMoudleByHmlIp(ip);
+    return GetTransTcpDirectWifiInterface()->GetModuleByHmlIp(ip);
 }
 
 int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)

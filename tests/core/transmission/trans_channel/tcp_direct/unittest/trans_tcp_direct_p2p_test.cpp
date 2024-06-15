@@ -542,7 +542,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
     ret = StartHmlListener(g_ip, &g_port);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
-    ListenerModule moduleType = GetMoudleByHmlIp(g_ip);
+    ListenerModule moduleType = GetModuleByHmlIp(g_ip);
     EXPECT_EQ(moduleType, UNUSE_BUTT);
 
     for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {

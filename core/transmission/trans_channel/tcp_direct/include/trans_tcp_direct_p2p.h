@@ -36,7 +36,7 @@ void StopP2pSessionListener(void);
 
 void StopHmlListener(ListenerModule module);
 
-ListenerModule GetMoudleByHmlIp(const char *ip);
+ListenerModule GetModuleByHmlIp(const char *ip);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -665,7 +665,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest001, TestSize.Lev
     msg.msgHead.myId = 11;
     msg.msgHead.peerId = 11;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_TRUE(g_testProxyChannelOpenSuccessFlag);
 }
 
@@ -686,7 +686,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest002, TestSize.Lev
     msg.dateLen = strlen(msg.data) + 1;
 
     /* test receive errcode msg */
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelOpenSuccessFlag);
 
     /* test receive normal msg */
@@ -700,7 +700,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest002, TestSize.Lev
 
     msg.dateLen = strlen(msg.data) + 1;
     msg.msgHead.myId = 10;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_TRUE(g_testProxyChannelOpenSuccessFlag);
 }
 
@@ -724,7 +724,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest003, TestSize.Lev
     msg.msgHead.myId = -1;
     msg.msgHead.peerId = -1;
     g_testProxyChannelClosedFlag = false;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelClosedFlag);
 
     /* test cpmpare exist channel */
@@ -736,7 +736,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest003, TestSize.Lev
     g_testProxyChannelOpenFailFlag = false;
     msg.msgHead.myId = TEST_RESET_MESSAGE_CHANNEL_ID;
     msg.msgHead.peerId = TEST_RESET_MESSAGE_CHANNEL_ID;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_TRUE(g_testProxyChannelClosedFlag || g_testProxyChannelOpenFailFlag);
 }
 
@@ -770,7 +770,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest004, TestSize.Lev
         .WillRepeatedly(Return(sizeof(ConnPktHead)));
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_KEEPALIVE;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
 
     ProxyChannelInfo chanInfo;
     ret = TransProxyGetSendMsgChanInfo(channelId, &chanInfo);
@@ -778,7 +778,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest004, TestSize.Lev
     EXPECT_EQ(PROXY_CHANNEL_STATUS_COMPLETED, chanInfo.status);
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_KEEPALIVE_ACK;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     ret = TransProxyGetSendMsgChanInfo(channelId, &chanInfo);
     ASSERT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(PROXY_CHANNEL_STATUS_COMPLETED, chanInfo.status);
@@ -798,18 +798,18 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest005, TestSize.Lev
     msg.msgHead.myId = -1;
     msg.msgHead.peerId = -1;
     g_testProxyChannelReceiveFlag = false;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelReceiveFlag);
 
     msg.msgHead.myId = 10;
     msg.msgHead.peerId = 10;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelReceiveFlag);
 
     g_testProxyChannelReceiveFlag = false;
     msg.msgHead.myId = 11;
     msg.msgHead.peerId = 11;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelReceiveFlag);
 }
 
