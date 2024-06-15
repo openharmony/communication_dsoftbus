@@ -685,6 +685,7 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     }
     int32_t ret = FinalDecideLinkType(networkId, linkList, linksNum, recommendList);
     if (recommendList->linkTypeNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         return GetErrCodeOfRequest(networkId, request);
     }
     return ret;
