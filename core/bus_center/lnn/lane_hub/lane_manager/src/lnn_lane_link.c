@@ -296,7 +296,7 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
                 LNN_LOGE(LNN_LANE, "server laneId=%{public}" PRIu64 " is existed, add server lane resource fail",
                 resourceItem->laneId);
                 LaneUnlock();
-                return SOFTBUS_LANE_TRIGGER_LINK_FAIL;
+                return SOFTBUS_LANE_RESULT_REPORT_ERR;
             } else {
                 resourceItem->isServerSide = true;
                 LNN_LOGI(LNN_LANE, "add server laneId=%{public}" PRIu64 " to resource pool succ", resourceItem->laneId);
@@ -426,7 +426,7 @@ int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
     }
     LaneUnlock();
     LNN_LOGI(LNN_LANE, "not found laneId=%{public}" PRIu64 " resource when del", laneId);
-    return SOFTBUS_OK;
+    return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
 int32_t ClearLaneResourceByLaneId(uint64_t laneId)
@@ -450,7 +450,7 @@ int32_t ClearLaneResourceByLaneId(uint64_t laneId)
     }
     LaneUnlock();
     LNN_LOGI(LNN_LANE, "not found laneId=%{public}" PRIu64 " resource when clear", laneId);
-    return SOFTBUS_OK;
+    return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
 static bool LinkTypeCheck(LaneLinkType type)
@@ -829,7 +829,7 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
     if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
         if (LaneLinkSetBleMac(reqInfo, &linkInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "get peerBleMac error");
-            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+            return SOFTBUS_INVALID_PARAM;
         }
     }
     char peerUdid[UDID_BUF_LEN] = {0};
@@ -861,7 +861,7 @@ static int32_t LaneLinkOfGattDirect(uint32_t reqId, const LinkRequest *reqInfo, 
     }
     if (strcpy_s(linkInfo.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN, reqInfo->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_LANE, "copy networkId fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     linkInfo.type = LANE_BLE_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_GATT;
@@ -1081,7 +1081,7 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     ret = LaneDetectReliability(reqId, &linkInfo, callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane detect reliability fail, laneReqId=%{public}u", reqId);
-        return ErrCodeFilter(ret, SOFTBUS_LANE_DETECT_FAIL);
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -1102,7 +1102,7 @@ static int32_t LaneLinkOfCoc(uint32_t reqId, const LinkRequest *reqInfo, const L
     linkInfo.linkInfo.ble.psm = reqInfo->psm;
     if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
         LNN_LOGE(LNN_LANE, "get peerBleMac error");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
@@ -1132,7 +1132,7 @@ static int32_t LaneLinkOfCocDirect(uint32_t reqId, const LinkRequest *reqInfo, c
     }
     if (strcpy_s(linkInfo.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN, reqInfo->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_LANE, "copy networkId fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     linkInfo.type = LANE_COC_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_COC;

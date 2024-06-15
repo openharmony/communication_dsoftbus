@@ -39,7 +39,7 @@ static LaneLinkDepsInterface *GetLaneLinkDepsInterface()
 int32_t LaneLinkDepsInterfaceMock::ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
     const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
 {
-    callback->onChannelOpenFailed(requestId, SOFTBUS_ERR);
+    callback->onChannelOpenFailed(requestId, SOFTBUS_LANE_GUIDE_BUILD_FAIL);
     return SOFTBUS_OK;
 }
 
