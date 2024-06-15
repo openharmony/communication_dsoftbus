@@ -575,6 +575,7 @@ static int32_t TransTdcProcessDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+// the channel open failed while be notified when function OpenDataBusReply return ERR
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
     (void)seq;
@@ -585,18 +586,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
         SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
     int32_t errCode = SOFTBUS_OK;
     if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
-        TransEventExtra extra = {
-            .socketName = NULL,
-            .peerNetworkId = NULL,
-            .calleePkg = NULL,
-            .callerPkg = NULL,
-            .channelId = channelId,
-            .errcode = errCode,
-            .result = EVENT_STAGE_RESULT_FAILED };
-        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TRANS_LOGE(TRANS_CTRL, "receive err reply msg");
-        int32_t status = NotifyChannelOpenFailed(channelId, errCode);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, TRANS_CTRL, "channel open failed.");
         return errCode;
     }
     uint16_t fastDataSize = 0;
