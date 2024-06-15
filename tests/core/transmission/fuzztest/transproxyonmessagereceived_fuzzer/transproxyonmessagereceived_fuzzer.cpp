@@ -41,7 +41,7 @@ void TransProxyonMessageReceivedTest(const uint8_t* data, size_t size)
     mad.peerId = *(reinterpret_cast<const int16_t*>(data));
     mad.reserved = *(reinterpret_cast<const int16_t*>(data));
     msg.data = const_cast<char*>(reinterpret_cast<const char*>(data));
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
 }
 }
 

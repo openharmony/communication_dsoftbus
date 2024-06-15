@@ -40,7 +40,7 @@ void StopHmlListener(ListenerModule module)
 {
 }
 
-ListenerModule GetMoudleByHmlIp(const char *ip)
+ListenerModule GetModuleByHmlIp(const char *ip)
 {
     return UNUSE_BUTT;
 }

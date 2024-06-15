@@ -124,7 +124,7 @@ typedef struct {
     int16_t peerId;
     uint32_t connId;
     ConnectType type;
-    BleProtocolType blePrototolType;
+    BleProtocolType bleProtocolType;
     int32_t seq;
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;

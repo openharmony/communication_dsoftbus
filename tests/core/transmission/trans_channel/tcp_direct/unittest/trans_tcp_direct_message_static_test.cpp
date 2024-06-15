@@ -172,7 +172,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpened0002, TestSize.Leve
 
 /**
  * @tc.name: TransTdcPostFisrtData0003
- * @tc.desc: TransTdcPostFisrtData.
+ * @tc.desc: TransTdcPostFastData.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -184,7 +184,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtData0003, TestSize.Le
         return;
     }
 
-    ret = TransTdcPostFisrtData(conn);
+    ret = TransTdcPostFastData(conn);
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 
     SoftBusFree(conn);
@@ -510,7 +510,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SendFailToFlushDeviceTest001, TestSize
 
 /**
  * @tc.name: TransTdcPostFisrtDataTest001
- * @tc.desc: TransTdcPostFisrtData
+ * @tc.desc: TransTdcPostFastData
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -519,7 +519,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtDataTest001, TestSize
     SessionConn *con = TestSetSessionConn();
     EXPECT_NE(con, NULL);
 
-    int32_t ret = TransTdcPostFisrtData(con);
+    int32_t ret = TransTdcPostFastData(con);
     EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(con);
 }

@@ -194,7 +194,7 @@ HWTEST_F(TransTcpDirectMessageTest, GenerateTdcChannelIdTest003, TestSize.Level1
     res = GetSessionConnLock();
     EXPECT_EQ(res, SOFTBUS_OK);
 
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     TransTcpDirectDeinit();
 }
 

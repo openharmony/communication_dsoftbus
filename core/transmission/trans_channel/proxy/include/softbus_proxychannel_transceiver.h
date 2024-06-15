@@ -36,7 +36,7 @@ typedef struct {
 } ProxyConnInfo;
 
 void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan);
-void TransProxyPostHandshakeMsgToLoop(int32_t chanId);
+void TransProxyPostHandshakeMsgToLoop(int32_t channelId);
 void TransProxyPostDisConnectMsgToLoop(uint32_t connId, bool isServer, const ProxyChannelInfo *chan);
 void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan, int32_t errCode);
@@ -51,7 +51,7 @@ void TransCreateConnByConnId(uint32_t connId, bool isServer);
 int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer);
 int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer);
 int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo);
-int32_t TransDelConnByReqId(uint32_t reqId);
+int32_t TransDelConnByReqId(uint32_t requestId);
 
 #ifdef __cplusplus
 }
