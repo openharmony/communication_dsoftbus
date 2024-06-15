@@ -70,6 +70,8 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
             return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
         }
+        TransSetSocketChannelStateByChannel(
+            channel->channelId, channel->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     }
     int32_t ret = !channel->isServer && channel->channelType == CHANNEL_TYPE_UDP && NotifyQosChannelOpened(channel);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "NotifyQosChannelOpened failed.");
@@ -78,7 +80,6 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
 
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
-    TransSetSocketChannelStateByChannel(channel->channelId, channel->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
     (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
     return ret;
@@ -198,7 +199,7 @@ static int32_t TransServerOnChannelBind(const char *pkgName, int32_t pid, int32_
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel bind fail, ret=%{public}d, channelId=%{public}d", ret, channelId);
         return ret;
     }
-    TRANS_LOGW(TRANS_CTRL,
+    TRANS_LOGI(TRANS_CTRL,
         "trasn server on channel bind. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
         pkgName, channelId, channelType);
     return SOFTBUS_OK;

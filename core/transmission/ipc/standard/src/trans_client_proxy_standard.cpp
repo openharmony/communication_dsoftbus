@@ -184,7 +184,7 @@ int32_t TransClientProxy::OnChannelBind(int32_t channelId, int32_t channelType)
     MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_BIND, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OnChannelOpenBind send request failed, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_CTRL, "OnChannelOpenBind send request failed, ret=%{public}d, channelId=%{public}d", ret, channelId);
         return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
     }
 

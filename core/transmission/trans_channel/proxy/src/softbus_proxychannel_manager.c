@@ -1174,9 +1174,8 @@ static void ReleaseChannelInfo(ProxyChannelInfo *chan)
 static void FillProxyHandshakeExtra(
     TransEventExtra *extra, ProxyChannelInfo *chan, char *socketName, NodeInfo *nodeInfo)
 {
-    if (memcpy_s(socketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName,
-        strlen(chan->appInfo.myData.sessionName)) != EOK) {
-        TRANS_LOGW(TRANS_CTRL, "memcpy socketName failed");
+    if (strcpy_s(socketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName) != EOK) {
+        TRANS_LOGW(TRANS_CTRL, "strcpy_s socketName failed");
     }
     extra->calleePkg = NULL;
     extra->callerPkg = NULL;
@@ -1192,7 +1191,7 @@ static void FillProxyHandshakeExtra(
         extra->localUdid = nodeInfo->masterUdid;
     }
     if (chan->appInfo.appType == APP_TYPE_AUTH &&
-        strcpy_s(nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) == EOK) {
+        strcpy_s(nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) != EOK) {
         extra->peerUdid = nodeInfo->deviceInfo.deviceUdid;
     } else if (chan->appInfo.appType != APP_TYPE_AUTH &&
         LnnGetRemoteNodeInfoById(chan->appInfo.peerData.deviceId, CATEGORY_UUID, nodeInfo) == SOFTBUS_OK) {

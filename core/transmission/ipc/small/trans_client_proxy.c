@@ -126,7 +126,7 @@ int32_t ClientIpcOnChannelBind(ChannelMsg *data)
     SvcIdentity svc = {0};
     int32_t ret = GetSvcIdentityByPkgName(data->msgPkgName, &svc);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind get svc failed.");
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind get svc failed, msgPkgName=%{public}s", data->msgPkgName);
         return ret;
     }
     MessageOption option;
@@ -134,7 +134,7 @@ int32_t ClientIpcOnChannelBind(ChannelMsg *data)
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_CHANNEL_BIND, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind SendRequest failed");
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind SendRequest failed, msgPkgName=%{public}s", data->msgPkgName);
     }
     return ans;
 }
