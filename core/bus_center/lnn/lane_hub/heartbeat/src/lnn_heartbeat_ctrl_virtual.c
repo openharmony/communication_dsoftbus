@@ -99,11 +99,6 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnTriggerDataLevelHeartbeat(void)
-{
-    return SOFTBUS_OK;
-}
-
 int32_t LnnTriggerCloudSyncHeartbeat(void)
 {
     return SOFTBUS_OK;
