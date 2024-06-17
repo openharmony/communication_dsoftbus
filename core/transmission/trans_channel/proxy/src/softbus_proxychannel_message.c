@@ -379,7 +379,7 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
         }
         int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
             (const unsigned char *)buf, outLen);
-        if (ret != 0) {
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "mbedtls base64 encode failed.");
             SoftBusFree(encodeFastData);
             SoftBusFree(buf);
@@ -406,7 +406,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     int32_t ret = SoftBusBase64Encode((unsigned char *)sessionBase64->sessionKeyBase64,
         sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
         (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
-    if (ret != 0) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%{public}d", ret);
         return ret;
     }
@@ -495,7 +495,7 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
     } else {
         ret = SoftBusBase64Encode((uint8_t *)sessionBase64.sessionKeyBase64, sizeof(sessionBase64.sessionKeyBase64),
             &(sessionBase64.len), (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
-        if (ret != 0) {
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%{public}d", ret);
             goto EXIT;
         }
@@ -688,7 +688,7 @@ static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 
         int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->fastTransData, appInfo->fastTransDataSize +
             FAST_EXT_BYTE_SIZE, &fastDataSize, encodeFastData, strlen((char*)encodeFastData));
-        if (ret != 0) {
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "mbedtls decode failed.");
             SoftBusFree((void *)appInfo->fastTransData);
             appInfo->fastTransData = NULL;
@@ -731,7 +731,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
     size_t len = 0;
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
         &len, (uint8_t *)sessionKey, strlen(sessionKey));
-    if (len != sizeof(appInfo->sessionKey) || ret != 0) {
+    if (len != sizeof(appInfo->sessionKey) || ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%{public}d", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -768,7 +768,7 @@ static int32_t TransProxyUnpackInnerHandshakeMsg(cJSON *root, AppInfo *appInfo, 
     size_t len = 0;
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
         &len, (uint8_t *)sessionKey, strlen(sessionKey));
-    if (len != sizeof(appInfo->sessionKey) || ret != 0) {
+    if (len != sizeof(appInfo->sessionKey) || ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%{public}d", ret);
         return SOFTBUS_DECRYPT_ERR;
     }

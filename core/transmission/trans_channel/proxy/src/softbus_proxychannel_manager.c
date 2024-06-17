@@ -100,7 +100,7 @@ static bool ChanIsEqual(ProxyChannelInfo *a, ProxyChannelInfo *b)
     return false;
 }
 
-static bool ResetChanIsEqual(int status, ProxyChannelInfo *a, ProxyChannelInfo *b)
+static bool ResetChanIsEqual(int8_t status, ProxyChannelInfo *a, ProxyChannelInfo *b)
 {
     if (status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
         if ((a->myId == b->myId) &&
@@ -171,7 +171,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-int32_t TransRefreshProxyTimesNative(int channelId)
+int32_t TransRefreshProxyTimesNative(int32_t channelId)
 {
     if (g_proxyChannelList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList or item is null");
@@ -326,6 +326,8 @@ void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
             ListDelete(&(item->node));
             g_proxyChannelList->cnt--;
             TRANS_LOGI(TRANS_CTRL, "del channelId by reqId. channelId=%{public}d", item->channelId);
+            SoftBusFree((void *)item->appInfo.fastTransData);
+            item->appInfo.fastTransData = NULL;
             TransProxyPostOpenFailMsgToLoop(item, errCode);
         }
     }
@@ -548,7 +550,7 @@ static int32_t TransProxyGetRecvMsgChanInfo(int16_t myId, int16_t peerId, ProxyC
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-static int32_t TransProxyKeepAlvieChan(ProxyChannelInfo *chanInfo)
+static int32_t TransProxyKeepAliveChan(ProxyChannelInfo *chanInfo)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -772,7 +774,7 @@ static int32_t FindConfigType(int32_t channelType, int32_t businessType)
     return SOFTBUS_CONFIG_TYPE_MAX;
 }
 
-static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
+static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
@@ -938,7 +940,7 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     }
 }
 
-static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
+static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
 {
     bool noNeedGetPkg = (chan->appInfo.appType == APP_TYPE_INNER) ||
         ((chan->appInfo.appType == APP_TYPE_AUTH) && (IsNoPkgNameSession(chan->appInfo.myData.sessionName)));
@@ -989,7 +991,7 @@ static void ConstructProxyChannelInfo(
     chan->authHandle = msg->authHandle;
     chan->type = info->type;
     if (chan->type == CONNECT_BLE || chan->type == CONNECT_BLE_DIRECT) {
-        chan->blePrototolType = info->bleInfo.protocol;
+        chan->bleProtocolType = info->bleInfo.protocol;
     }
 
     if (info->type == CONNECT_TCP) {
@@ -1429,7 +1431,7 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
     info->peerId = msg->msgHead.peerId;
     info->myId = msg->msgHead.myId;
 
-    if (TransProxyKeepAlvieChan(info) != SOFTBUS_OK) {
+    if (TransProxyKeepAliveChan(info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset keep alive proc fail myChannelId=%{public}d, peerChannelId=%{public}d",
             msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
@@ -1457,7 +1459,7 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
     info->peerId = msg->msgHead.peerId;
     info->myId = msg->msgHead.myId;
 
-    if (TransProxyKeepAlvieChan(info) != SOFTBUS_OK) {
+    if (TransProxyKeepAliveChan(info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset keep alive ack proc fail myChannelId=%{public}d, peerChannelId=%{public}d",
             msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
@@ -1485,7 +1487,7 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
     SoftBusFree(info);
 }
 
-void TransProxyonMessageReceived(const ProxyMessage *msg)
+void TransProxyOnMessageReceived(const ProxyMessage *msg)
 {
     if (msg == NULL) {
         return;
@@ -1710,6 +1712,8 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyProcList, ProxyChannelInfo, node) {
         ListDelete(&(removeNode->node));
         status = removeNode->status;
+        SoftBusFree((void *)removeNode->appInfo.fastTransData);
+        removeNode->appInfo.fastTransData = NULL;
         if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             isServer = removeNode->isServer;
@@ -1949,6 +1953,9 @@ static void TransProxyManagerDeinitInner(void)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         ReleaseProxyChannelId(item->channelId);
         ListDelete(&(item->node));
+        if (item->appInfo.fastTransData != NULL) {
+            SoftBusFree((void *)item->appInfo.fastTransData);
+        }
         SoftBusFree(item);
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
@@ -1976,6 +1983,9 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
         ListDelete(&(destroyNode->node));
         TransProxyResetPeer(destroyNode);
         TransProxyCloseConnChannel(destroyNode->connId, destroyNode->isServer);
+        if (destroyNode->appInfo.fastTransData != NULL) {
+            SoftBusFree((void *)destroyNode->appInfo.fastTransData);
+        }
         SoftBusFree(destroyNode);
     }
     return;

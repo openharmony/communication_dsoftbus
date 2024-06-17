@@ -19,23 +19,25 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "auth_interface.h"
 #include "auth_device_common_key.h"
+#include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "lnn_ble_lpdevice.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event_monitor.h"
+#include "lnn_feature_capability.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "lnn_meta_node_ledger.h"
 #include "lnn_meta_node_interface.h"
+#include "lnn_meta_node_ledger.h"
 #include "lnn_p2p_info.h"
-#include "lnn_device_info_recovery.h"
-#include "lnn_feature_capability.h"
-#include "lnn_ble_lpdevice.h"
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
@@ -67,50 +69,46 @@ int32_t LnnInitNetLedger(void)
 
 static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 {
-    int64_t accountId = 0;
-    if ((LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) && (accountId != info->accountId)) {
-        LNN_LOGW(LNN_LEDGER, "account change");
-        return true;
-    }
-    char softBusVersion[VERSION_MAX_LEN] = {0};
+    char softBusVersion[VERSION_MAX_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
         if (strcmp(softBusVersion, info->softBusVersion) != 0) {
-            LNN_LOGW(LNN_LEDGER, "softbus version change, version:%{public}s", softBusVersion);
+            LNN_LOGW(LNN_LEDGER, "softbus version=%{public}s->%{public}s", softBusVersion, info->softBusVersion);
             return true;
         }
     }
     uint64_t softbusFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
         if (softbusFeature != info->feature) {
-            LNN_LOGW(LNN_LEDGER, "feature change, old:%{public}" PRIu64 ", new:%{public}" PRIu64,
-                info->feature, softbusFeature);
+            LNN_LOGW(LNN_LEDGER, "feature=%{public}" PRIu64 "->%{public}" PRIu64, info->feature, softbusFeature);
             return true;
         }
     }
-    char uuid[UUID_BUF_LEN] = {0};
+    char *anonyNewUuid = NULL;
+    char uuid[UUID_BUF_LEN] = { 0 };
     if ((LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) == SOFTBUS_OK) && (strcmp(uuid, info->uuid) != 0)) {
-        LNN_LOGW(LNN_LEDGER, "uuid change.");
+        Anonymize(info->uuid, &anonyNewUuid);
+        LNN_LOGW(LNN_LEDGER, "uuid change, new=%{public}s", anonyNewUuid);
+        AnonymizeFree(anonyNewUuid);
         return true;
     }
     int32_t osType = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
         if (osType != info->deviceInfo.osType) {
-            LNN_LOGW(LNN_LEDGER, "osType change, old:%{public}d, new:%{public}d", info->deviceInfo.osType, osType);
+            LNN_LOGW(LNN_LEDGER, "osType=%{public}d->%{public}d", info->deviceInfo.osType, osType);
             return true;
         }
     }
     uint32_t authCapacity = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_AUTH_CAP, (int32_t *)&authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
-            LNN_LOGW(LNN_LEDGER, "authCapacity change, old:%{public}d, new:%{public}d",
-                info->authCapacity, authCapacity);
+            LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
             return true;
         }
     }
     int32_t level = 0;
     if ((LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, &level) == SOFTBUS_OK) &&
         (level != info->deviceSecurityLevel)) {
-        LNN_LOGW(LNN_LEDGER, "deviceSecuritylevel change %{public}d->%{public}d", info->deviceSecurityLevel, level);
+        LNN_LOGW(LNN_LEDGER, "deviceSecurityLevel=%{public}d->%{public}d", info->deviceSecurityLevel, level);
         return true;
     }
     return false;
@@ -177,7 +175,7 @@ int32_t LnnInitNetLedgerDelay(void)
 {
     LnnSetLocalFeature();
     LnnLoadLocalDeviceAccountIdInfo();
-    LnnInitCloudSyncModule();
+    RestoreLocalDeviceInfo();
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
         return SOFTBUS_ERR;
@@ -186,7 +184,10 @@ int32_t LnnInitNetLedgerDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
         return SOFTBUS_ERR;
     }
-    RestoreLocalDeviceInfo();
+    if (LnnInitEventMonitor() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init event monitor fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 

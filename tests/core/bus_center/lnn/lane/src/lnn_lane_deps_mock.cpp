@@ -141,7 +141,7 @@ int32_t LaneDepsInterfaceMock::ActionOfAddTrigger(ListenerModule module, int32_t
 int32_t LaneDepsInterfaceMock::ActionOfConnOpenFailed(const AuthConnInfo *info, uint32_t requestId,
     const AuthConnCallback *callback, bool isMeta)
 {
-    callback->onConnOpenFailed(requestId, SOFTBUS_ERR);
+    callback->onConnOpenFailed(requestId, SOFTBUS_LANE_GUIDE_BUILD_FAIL);
     return SOFTBUS_OK;
 }
 

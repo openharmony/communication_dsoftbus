@@ -41,7 +41,7 @@ static LIST_HEAD(g_pendingList);
 
 int32_t InitPendingPacket(void)
 {
-    if (SoftBusMutexInit(&g_pendingLock, NULL) != 0) {
+    if (SoftBusMutexInit(&g_pendingLock, NULL) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;

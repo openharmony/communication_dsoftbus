@@ -205,10 +205,12 @@ static int32_t SelectByPreferredLink(const char *networkId, const LaneSelectPara
         DumpPreferredLink(preferredList[i], i);
     }
     if (*resNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         return GetErrCodeOfLink(networkId, preferredList[0]);
     }
     return SOFTBUS_OK;
 }
+
 static int32_t SelectByDefaultLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
@@ -228,6 +230,7 @@ static int32_t SelectByDefaultLink(const char *networkId, const LaneSelectParam 
         resList[(*resNum)++] = optionalLink[i];
     }
     if (*resNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         return GetErrCodeOfLink(networkId, optionalLink[0]);
     }
     return SOFTBUS_OK;
@@ -259,7 +262,7 @@ static int32_t GetListScore(const char *networkId, uint32_t expectedBw, const La
             continue;
         }
         LinkAttribute *linkAttr = GetLinkAttrByLinkType(resList[i]);
-        resListScore[resList[i]] = linkAttr->GetLinkScore(networkId, expectedBw);
+        resListScore[resList[i]] = linkAttr->getLinkScore(networkId, expectedBw);
         LNN_LOGI(LNN_LANE, "LaneLinkType=%{public}d, Score=%{public}d",
             resList[i], resListScore[resList[i]]);
     }
@@ -363,8 +366,8 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
         ret = SelectByDefaultLink(networkId, request, resList, &resNum);
     }
     AnonymizeFree(anonyNetworkId);
-    if (resNum == 0) {
-        LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "select lane fail");
         *listNum = 0;
         return ret;
     }
@@ -403,6 +406,7 @@ static int32_t SelectMeshLinks(const char *networkId, LaneLinkType *resList, uin
         resList[(*resNum)++] = optionalLink[i];
     }
     if (*resNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         return GetErrCodeOfLink(networkId, optionalLink[0]);
     }
     return SOFTBUS_OK;
@@ -474,6 +478,7 @@ static int32_t SelectRttLinks(const char *networkId, LaneLinkType *resList, uint
         resList[(*resNum)++] = optionalLink[i];
     }
     if (*resNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         return GetErrCodeOfLink(networkId, optionalLink[0]);
     }
     return SOFTBUS_OK;
@@ -507,12 +512,9 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     } else {
         LNN_LOGI(LNN_LANE, "select lane by qos require");
         ret = DecideAvailableLane(networkId, request, &laneLinkList);
-        if (ret != SOFTBUS_OK) {
-            return ret;
-        }
     }
-    if (laneLinkList.linkTypeNum == 0) {
-        LNN_LOGE(LNN_LANE, "no available link resources");
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane select fail");
         return ret;
     }
     recommendList->linkTypeNum = 0;

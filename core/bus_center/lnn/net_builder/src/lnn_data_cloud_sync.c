@@ -764,6 +764,13 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
             cacheInfo.updateTimestamp)) {
         return SOFTBUS_ERR;
     }
+    NodeInfo localCacheInfo = { 0 };
+    int32_t ret = LnnGetLocalCacheNodeInfo(&localCacheInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
+        return ret;
+    }
+    cacheInfo.localStateVersion = localCacheInfo.stateVersion;
     (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
     char *anonyUdid = NULL;
     Anonymize(cacheInfo.deviceInfo.deviceUdid, &anonyUdid);

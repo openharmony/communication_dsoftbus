@@ -293,6 +293,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<Neg
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
             break;
         case LegacyCommandType::CMD_REUSE_REQ:
+            terminate = true;
             ret = ProcessReuseRequest(command);
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
             break;
@@ -1532,7 +1533,7 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
 
     for (auto goChannel : goChannels) {
         if (std::find(gcChannels.begin(), gcChannels.end(), goChannel) != gcChannels.end()) {
-            return goChannel;
+            return WifiDirectUtils::ChannelToFrequency(goChannel);
         }
     }
 

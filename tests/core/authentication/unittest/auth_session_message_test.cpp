@@ -45,6 +45,7 @@ constexpr uint8_t PEER_IRK[LFINDER_IRK_LEN] = "123456irktest";
 constexpr unsigned char PUBLIC_ADDRESS[LFINDER_MAC_ADDR_LEN] = "addr";
 constexpr uint8_t STATIC_CAPABILITY[STATIC_CAP_LEN] = "staticCapability";
 constexpr char REMOTE_PTK[PTK_DEFAULT_LEN] = "remotePtktest";
+
 class AuthSessionMessageTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -330,10 +331,10 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     EXPECT_TRUE(obj != nullptr);
     AuthSessionInfo info;
-    EXPECT_TRUE(UnpackDeviceIdJson(nullptr, 0, &info) == SOFTBUS_ERR);
+    EXPECT_TRUE(UnpackDeviceIdJson(nullptr, 0, &info) == SOFTBUS_INVALID_PARAM);
     JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, EXCHANGE_FAIL);
     char *msg = JSON_PrintUnformatted(obj);
-    EXPECT_TRUE(UnpackDeviceIdJson(msg, strlen(msg), &info) == SOFTBUS_ERR);
+    EXPECT_TRUE(UnpackDeviceIdJson(msg, strlen(msg), &info) == SOFTBUS_NOT_FIND);
     if (msg != nullptr) {
         JSON_Free(msg);
     }
@@ -349,11 +350,11 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
     JSON_AddStringToObject(obj1, SUPPORT_INFO_COMPRESS, TRUE_STRING_TAG);
     char *msg1 = JSON_PrintUnformatted(obj1);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
-    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info) == SOFTBUS_ERR);
+    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info) == SOFTBUS_CMP_FAIL);
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = false;
-    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info) == SOFTBUS_ERR);
-    info.isServer = true;
+    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info) == SOFTBUS_CMP_FAIL);
+    info.isConnectServer = true;
     EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info) == SOFTBUS_OK);
     if (msg1 != nullptr) {
         JSON_Free(msg1);
@@ -502,7 +503,7 @@ HWTEST_F(AuthSessionMessageTest, CheckBusVersion_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionMessageTest, PackDeviceInfoBtV1_TEST_001, TestSize.Level1)
 {
     NodeInfo info;
-    EXPECT_TRUE(PackDeviceInfoBtV1(nullptr, &info, false) == SOFTBUS_ERR);
+    EXPECT_TRUE(PackDeviceInfoBtV1(nullptr, &info, false) == SOFTBUS_AUTH_REG_DATA_FAIL);
     JsonObj *json = JSON_CreateObject();
     EXPECT_TRUE(json != nullptr);
     EXPECT_TRUE(PackDeviceInfoBtV1(json, &info, false) == SOFTBUS_OK);
@@ -565,11 +566,11 @@ HWTEST_F(AuthSessionMessageTest, ProcessDeviceIdMessage_TEST_001, TestSize.Level
     AuthSessionInfo info;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     uint8_t data[] = "test";
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_INVALID_PARAM);
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN + 1) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN + 1) == SOFTBUS_INVALID_PARAM);
     info.isServer = false;
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_INVALID_PARAM);
     info.isServer = true;
     EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_OK);
 }
@@ -721,3 +722,4 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
     SoftBusFree(info);
 }
 } // namespace OHOS
+

@@ -178,7 +178,7 @@ static void ClearP2pSessionConn(void)
             ListAdd(&tempSessionConnList, &item->node);
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 
     NotifyP2pSessionConnClear(&tempSessionConnList);
 }
@@ -195,7 +195,7 @@ static int32_t CreatHmlListenerList(void)
     return SOFTBUS_OK;
 }
 
-ListenerModule GetMoudleByHmlIp(const char *ip)
+ListenerModule GetModuleByHmlIp(const char *ip)
 {
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
@@ -379,13 +379,13 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     conn = GetSessionConnByRequestId(requestId);
     if (conn == NULL) {
         TRANS_LOGE(TRANS_CTRL, "not find session");
-        ReleaseSessonConnLock();
+        ReleaseSessionConnLock();
         goto EXIT_ERR;
     }
     channelId = conn->channelId;
     conn->authHandle = authHandle;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 
     if (VerifyP2p(authHandle, conn->appInfo.myData.addr, conn->appInfo.peerData.addr,
         conn->appInfo.myData.port, conn->req) != SOFTBUS_OK) {
@@ -412,12 +412,12 @@ static void OnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     }
     conn = GetSessionConnByRequestId(requestId);
     if (conn == NULL) {
-        ReleaseSessonConnLock();
+        ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "get session conn by requestid fail");
         return;
     }
     channelId = conn->channelId;
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 
     (void)OnChannelOpenFail(channelId, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
     TRANS_LOGW(TRANS_CTRL, "ok");
@@ -630,11 +630,11 @@ static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq)
             }
             conn = GetSessionConnByReq(seq);
             if (conn == NULL) {
-                ReleaseSessonConnLock();
+                ReleaseSessionConnLock();
                 return SOFTBUS_NOT_FIND;
             }
             conn->listenMod = moudleType;
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
     }
@@ -672,7 +672,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     }
     conn = GetSessionConnByReq(seq);
     if (conn == NULL) {
-        ReleaseSessonConnLock();
+        ReleaseSessionConnLock();
         return SOFTBUS_NOT_FIND;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
@@ -680,7 +680,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
 
     ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, IP_LEN, &conn->appInfo.peerData.port);
     if (ret != SOFTBUS_OK) {
-        ReleaseSessonConnLock();
+        ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "unpack fail: ret=%{public}d", ret);
         goto EXIT_ERR;
     }
@@ -688,7 +688,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
 
     fd = ConnectTcpDirectPeer(conn->appInfo.peerData.addr, conn->appInfo.peerData.port);
     if (fd <= 0) {
-        ReleaseSessonConnLock();
+        ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "conn fail: fd=%{public}d", fd);
         goto EXIT_ERR;
     }
@@ -697,12 +697,12 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     if (strcpy_s(peerNetworkId, sizeof(peerNetworkId), conn->appInfo.peerNetWorkId) != EOK ||
         strcpy_s(peerAddr, sizeof(peerAddr), conn->appInfo.peerData.addr) != EOK ||
         strcpy_s(myAddr, sizeof(myAddr), conn->appInfo.myData.addr) != EOK) {
-        ReleaseSessonConnLock();
+        ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "strcpy_s failed!");
         goto EXIT_ERR;
     }
     peerPort = conn->appInfo.peerData.port;
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 
     if (TransSrvAddDataBufNode(channelId, fd) != SOFTBUS_OK) {
         goto EXIT_ERR;

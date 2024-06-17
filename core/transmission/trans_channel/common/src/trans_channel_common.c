@@ -309,7 +309,7 @@ EXIT_ERR:
 void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
 {
     if (connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP) {
-        TRANS_LOGE(TRANS_CTRL, "param err.");
+        TRANS_LOGD(TRANS_CTRL, "param err.");
         return;
     }
 

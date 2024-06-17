@@ -42,7 +42,7 @@ uint64_t TransTdcGetNewSeqId(void)
 
     uint64_t retseq = seq;
 
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 
     return retseq;
 }
@@ -78,7 +78,7 @@ int32_t GetSessionConnLock(void)
     return SOFTBUS_OK;
 }
 
-void ReleaseSessonConnLock(void)
+void ReleaseSessionConnLock(void)
 {
     if (g_sessionConnList == NULL) {
         return;
@@ -151,11 +151,11 @@ SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn)
             if (conn != NULL) {
                 (void)memcpy_s(conn, sizeof(SessionConn), connInfo, sizeof(SessionConn));
             }
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return connInfo;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 
     return NULL;
 }
@@ -171,11 +171,11 @@ SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
             if (conn != NULL) {
                 (void)memcpy_s(conn, sizeof(SessionConn), connInfo, sizeof(SessionConn));
             }
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return connInfo;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 
     TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
     return NULL;
@@ -190,11 +190,11 @@ int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
             (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
     return SOFTBUS_TRANS_SET_APP_INFO_FAILED;
 }
@@ -208,11 +208,11 @@ int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
             (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
     return SOFTBUS_TRANS_GET_APP_INFO_FAILED;
 }
@@ -226,11 +226,11 @@ int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
             conn->authHandle = *authHandle;
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     return SOFTBUS_TRANS_SET_AUTH_HANDLE_FAILED;
 }
 
@@ -244,11 +244,11 @@ int64_t GetAuthIdByChanId(int32_t channelId)
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
             authId = conn->authHandle.authId;
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return authId;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     return AUTH_INVALID_ID;
 }
 
@@ -267,11 +267,11 @@ int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
             *authHandle = conn->authHandle;
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     return SOFTBUS_TRANS_GET_AUTH_HANDLE_FAILED;
 }
 
@@ -295,13 +295,15 @@ void TransDelSessionConnById(int32_t channelId)
             if (item->appInfo.fastTransData != NULL) {
                 SoftBusFree((void*)item->appInfo.fastTransData);
             }
+            (void)memset_s(item->appInfo.sessionKey, sizeof(item->appInfo.sessionKey), 0,
+                sizeof(item->appInfo.sessionKey));
             SoftBusFree(item);
             g_sessionConnList->cnt--;
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 }
 
 int32_t TransTdcAddSessionConn(SessionConn *conn)
@@ -315,7 +317,7 @@ int32_t TransTdcAddSessionConn(SessionConn *conn)
     ListInit(&conn->node);
     ListTailInsert(&g_sessionConnList->list, &conn->node);
     g_sessionConnList->cnt++;
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     return SOFTBUS_OK;
 }
 
@@ -338,11 +340,11 @@ void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLe
     if (isFind && conn != NULL) {
         if (memcpy_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), sessionKey, keyLen) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "memcpy fail");
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 }
 
 int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
@@ -354,11 +356,11 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == channelId) {
             connInfo->status = status;
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     TRANS_LOGE(TRANS_CTRL, "not find: channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
 }
@@ -373,11 +375,11 @@ bool IsTdcRecoveryTransLimit(void)
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->appInfo.businessType == BUSINESS_TYPE_BYTE) {
             TRANS_LOGD(TRANS_CTRL, "tcp direct channel exists bytes business, no need to recovery limit.");
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return false;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     return true;
 }
 
@@ -390,11 +392,11 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == channelId) {
             memcpy_s(appInfo, sizeof(AppInfo), &connInfo->appInfo, sizeof(AppInfo));
-            ReleaseSessonConnLock();
+            ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     TRANS_LOGE(TRANS_CTRL, "not find: channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
 }
@@ -418,7 +420,7 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t s
         }
     }
     if (count == 0) {
-        ReleaseSessonConnLock();
+        ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "Not find channle id with authId=%{public}" PRId64 ",status=%{public}d", authId, status);
         return NULL;
     }
@@ -431,6 +433,6 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t s
             result[tmp++] = connInfo->channelId;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     return result;
 }

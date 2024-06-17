@@ -865,7 +865,9 @@ static void HandleMsgRecvDeviceIdNego(AuthFsm *authFsm, const MessagePara *para)
             info->isServer = true;
             ret = PostDeviceIdMessage(authFsm->authSeq, info);
         } else if (info->localState == AUTH_STATE_COMPATIBLE) {
-            ret = PostDeviceIdMessage(authFsm->authSeq, info);
+            if (info->isServer) {
+                ret = PostDeviceIdMessage(authFsm->authSeq, info);
+            }
             LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
         } else if (info->localState == AUTH_STATE_UNKNOW) {
             ret = PostDeviceIdMessage(authFsm->authSeq, info);

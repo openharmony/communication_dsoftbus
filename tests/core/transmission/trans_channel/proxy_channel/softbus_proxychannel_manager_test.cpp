@@ -260,11 +260,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyKeepAlvieChanTest001, TestSiz
     chanInfo->channelId = TEST_NUMBER_TEN;
     chanInfo->peerId = TEST_PARSE_MESSAGE_CHANNEL;
 
-    int32_t ret = TransProxyKeepAlvieChan(chanInfo);
+    int32_t ret = TransProxyKeepAliveChan(chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     chanInfo->peerId = TEST_MESSAGE_CHANNEL_VALID_ID;
-    ret = TransProxyKeepAlvieChan(chanInfo);
+    ret = TransProxyKeepAliveChan(chanInfo);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     TransProxyDelByConnId(connId);
     SoftBusFree(chanInfo);
@@ -546,7 +546,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest001, Tes
     msg.msgHead.myId = TEST_NUMBER_ELEVEN;
     msg.msgHead.peerId = TEST_NUMBER_ELEVEN;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelOpenSuccessFlag);
 }
 
@@ -567,7 +567,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest002, Tes
     msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
 
     /* test receive errcode msg */
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelOpenSuccessFlag);
 
     /* test receive normal msg */
@@ -581,7 +581,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest002, Tes
 
     msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.msgHead.myId = TEST_NUMBER_TEN;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelOpenSuccessFlag);
 }
 
@@ -605,7 +605,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest003, Tes
     msg.msgHead.myId = TEST_NUMBER_VALID;
     msg.msgHead.peerId = TEST_NUMBER_VALID;
     g_testProxyChannelClosedFlag = false;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelClosedFlag);
 
     TestTransProxyAddAuthChannel(TEST_RESET_MESSAGE_CHANNEL_ID, identity, PROXY_CHANNEL_STATUS_COMPLETED);
@@ -613,7 +613,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest003, Tes
     g_testProxyChannelOpenFailFlag = false;
     msg.msgHead.myId = TEST_RESET_MESSAGE_CHANNEL_ID;
     msg.msgHead.peerId = TEST_RESET_MESSAGE_CHANNEL_ID;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelClosedFlag || g_testProxyChannelOpenFailFlag);
 }
 
@@ -636,7 +636,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest004, Tes
     msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_KEEPALIVE;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
 
     ProxyChannelInfo chanInfo;
     ret = TransProxyGetSendMsgChanInfo(channelId, &chanInfo);
@@ -644,7 +644,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest004, Tes
     EXPECT_NE(PROXY_CHANNEL_STATUS_COMPLETED, chanInfo.status);
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_KEEPALIVE_ACK;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     ret = TransProxyGetSendMsgChanInfo(channelId, &chanInfo);
     ASSERT_EQ(SOFTBUS_OK, ret);
     EXPECT_NE(PROXY_CHANNEL_STATUS_COMPLETED, chanInfo.status);
@@ -664,18 +664,18 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest005, Tes
     msg.msgHead.myId = TEST_NUMBER_VALID;
     msg.msgHead.peerId = TEST_NUMBER_VALID;
     g_testProxyChannelReceiveFlag = false;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelReceiveFlag);
 
     msg.msgHead.myId = TEST_NUMBER_TEN;
     msg.msgHead.peerId = TEST_NUMBER_TEN;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelReceiveFlag);
 
     g_testProxyChannelReceiveFlag = false;
     msg.msgHead.myId = TEST_NUMBER_ELEVEN;
     msg.msgHead.peerId = TEST_NUMBER_ELEVEN;
-    TransProxyonMessageReceived(&msg);
+    TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelReceiveFlag);
 }
 
@@ -793,11 +793,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest002, TestSize.
     chanInfo->channelId = TEST_PARSE_MESSAGE_CHANNEL;
     chanInfo->peerId = TEST_PARSE_MESSAGE_CHANNEL;
 
-    int32_t ret = TransProxyKeepAlvieChan(chanInfo);
+    int32_t ret = TransProxyKeepAliveChan(chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     chanInfo->peerId = TEST_MESSAGE_CHANNEL_VALID_ID;
-    ret = TransProxyKeepAlvieChan(chanInfo);
+    ret = TransProxyKeepAliveChan(chanInfo);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     SoftBusFree(chanInfo);
 }

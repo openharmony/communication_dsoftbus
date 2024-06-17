@@ -496,3 +496,4 @@ LaneInterface *CtrlLaneGetInstance(void)
 {
     return &g_ctrlLaneObject;
 }
+

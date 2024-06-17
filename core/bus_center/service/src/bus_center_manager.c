@@ -181,10 +181,6 @@ static int32_t BusCenterServerInitFirstStep(void)
         LNN_LOGE(LNN_INIT, "init bus center event fail");
         return SOFTBUS_ERR;
     }
-    if (LnnInitEventMonitor() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init event monitor fail");
-        return SOFTBUS_ERR;
-    }
     if (LnnInitDiscoveryManager() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init discovery manager fail");
         return SOFTBUS_ERR;
