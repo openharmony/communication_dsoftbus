@@ -1237,7 +1237,7 @@ int32_t DiscMgrInit(void)
 
 void DiscMgrDeinit(void)
 {
-    DISC_CHECK_AND_RETURN_LOGW(g_isInited == true, DISC_CONTROL, "disc manager is not inited");
+    DISC_CHECK_AND_RETURN_LOGW(g_isInited == true, DISC_INIT, "disc manager is not inited");
 
     RemoveAllDiscInfoForPublish();
     RemoveAllDiscInfoForDiscovery();
@@ -1249,5 +1249,5 @@ void DiscMgrDeinit(void)
     DiscBleDeinit();
 
     g_isInited = false;
-    DISC_LOGI(DISC_BLE, "disc manager deinit success");
+    DISC_LOGI(DISC_INIT, "disc manager deinit success");
 }
