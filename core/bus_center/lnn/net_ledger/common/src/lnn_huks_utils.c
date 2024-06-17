@@ -276,13 +276,12 @@ int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
         HksFreeParamSet(&paramSet);
         return SOFTBUS_OK;
     }
+    HksFreeParamSet(&paramSet);
     int32_t ret = HksGenerateKey(keyAlias, g_genParamSet, NULL);
     if (ret != HKS_SUCCESS) {
         LNN_LOGE(LNN_LEDGER, "huks generate key fail, errcode=%{public}d", ret);
-        HksFreeParamSet(&paramSet);
         return SOFTBUS_ERR;
     }
-    HksFreeParamSet(&paramSet);
     return SOFTBUS_OK;
 }
 
@@ -306,13 +305,12 @@ int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
         HksFreeParamSet(&paramSet);
         return SOFTBUS_OK;
     }
+    HksFreeParamSet(&paramSet);
     int32_t ret = HksDeleteKey(keyAlias, g_genParamSet);
     if (ret != HKS_SUCCESS) {
         LNN_LOGE(LNN_LEDGER, "huks delete key fail, errcode=%{public}d", ret);
-        HksFreeParamSet(&paramSet);
         return SOFTBUS_ERR;
     }
-    HksFreeParamSet(&paramSet);
     return SOFTBUS_OK;
 }
 
