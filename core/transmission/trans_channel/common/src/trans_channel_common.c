@@ -193,9 +193,26 @@ void GetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 
 void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len)
 {
-    int32_t errCode = LnnGetRemoteStrInfo(networkId, STRING_KEY_MASTER_NODE_UDID, info, len);
+    int32_t errCode = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, info, len);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get remote node udid err, errCode=%{public}d", errCode);
+        return;
+    }
+}
+
+void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVersion, uint32_t len)
+{
+    if (id == NULL || deviceVersion == NULL) {
+        return;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(id, type, &nodeInfo) != SOFTBUS_OK) {
+        return;
+    }
+    if (strncpy_s(deviceVersion, len, nodeInfo.deviceInfo.deviceVersion,
+        strlen(nodeInfo.deviceInfo.deviceVersion)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "STR COPY ERROR!");
         return;
     }
 }
@@ -249,6 +266,8 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
     }
     GetRemoteUdidWithNetworkId(appInfo->peerNetWorkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
     GetOsTypeByNetworkId(appInfo->peerNetWorkId, &appInfo->osType);
+    TransGetRemoteDeviceVersion(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, appInfo->peerVersion,
+        sizeof(appInfo->peerVersion));
     return SOFTBUS_OK;
 }
 

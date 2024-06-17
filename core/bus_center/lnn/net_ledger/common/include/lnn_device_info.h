@@ -20,6 +20,7 @@
 
 #include "bus_center_info_key.h"
 #include "softbus_bus_center.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +47,7 @@ typedef struct {
     uint16_t deviceTypeId;
     int32_t osType;
     char osVersion[OS_VERSION_BUF_LEN];
-    char deviceVersion[DEVICE_VERSION_BUF_LEN];
+    char deviceVersion[DEVICE_VERSION_SIZE_MAX];
 } DeviceBasicInfo;
 
 int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name);

@@ -31,6 +31,7 @@
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_scenario_manager.h"
+#include "trans_channel_common.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
@@ -184,8 +185,8 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 
     int64_t timeStart = info->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
-    UdpChannelInfo channel;
-    (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = info->myData.pkgName,
@@ -196,7 +197,9 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .costTime = timediff,
         .errcode = errCode,
         .osType = (info->osType < 0) ? UNKNOW_OS_TYPE : info->osType,
+        .localUdid = localUdid,
         .peerUdid = info->peerUdid,
+        .peerDevVer = info->peerVersion,
         .result = EVENT_STAGE_RESULT_FAILED
     };
     if (info->isClient) {

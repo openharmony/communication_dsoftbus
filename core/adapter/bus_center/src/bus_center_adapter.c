@@ -28,6 +28,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
@@ -237,12 +238,12 @@ int32_t GetCommonDeviceVersion(char *value, uint32_t len)
         LNN_LOGE(LNN_STATE, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    char *deviceVersion = (char *)SoftBusCalloc(DEVICE_VERSION_BUF_LEN);
+    char *deviceVersion = (char *)SoftBusCalloc(DEVICE_VERSION_SIZE_MAX);
     if (deviceVersion == NULL) {
         LNN_LOGE(LNN_STATE, "calloc deviceVersion failed!");
         return SOFTBUS_MEM_ERR;
     }
-    GetParameter(DEVICE_VERSION, UNDEFINED_VALUE, deviceVersion, DEVICE_VERSION_BUF_LEN);
+    GetParameter(DEVICE_VERSION, UNDEFINED_VALUE, deviceVersion, DEVICE_VERSION_SIZE_MAX);
     if (strcmp(deviceVersion, UNDEFINED_VALUE) != 0) {
         if (strcpy_s(value, len, deviceVersion) != EOK) {
             LNN_LOGE(LNN_STATE, "strcpy_s deviceVersion failed.");

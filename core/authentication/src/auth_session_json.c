@@ -1461,7 +1461,7 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
         AUTH_LOGD(AUTH_FSM, "info->deviceInfo.osType: %{public}d", info->deviceInfo.osType);
     }
     OptString(json, OS_VERSION, info->deviceInfo.osVersion, OS_VERSION_BUF_LEN, "");
-    OptString(json, DEVICE_VERSION, info->deviceInfo.deviceVersion, DEVICE_VERSION_BUF_LEN, "");
+    OptString(json, DEVICE_VERSION, info->deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, "");
     // IS_SUPPORT_TCP_HEARTBEAT
     OptInt(json, NEW_CONN_CAP, (int32_t *)&info->netCapacity, -1);
     if (info->netCapacity == (uint32_t)-1) {

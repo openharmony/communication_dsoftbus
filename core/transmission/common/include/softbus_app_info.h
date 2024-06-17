@@ -98,6 +98,7 @@ typedef struct {
     char reqId[REQ_ID_SIZE_MAX];
     char peerNetWorkId[DEVICE_ID_SIZE_MAX];
     char peerUdid[DEVICE_ID_SIZE_MAX];
+    char peerVersion[DEVICE_VERSION_SIZE_MAX];
     RouteType routeType;
     BusinessType businessType;
     StreamType streamType;
