@@ -1234,7 +1234,7 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t ty
         return SOFTBUS_MALLOC_ERR;
     }
     int32_t recvLen = ConnRecvSocketData(fd, recvBuf, len, 0);
-    if (recvLen < 0) {
+    if (recvLen < 0) {  // socket recv under zero data len, an error occurs
         SoftBusFree(recvBuf);
         TRANS_LOGE(TRANS_CTRL, " recv tcp data fail, channelId=%{public}d, retLen=%{public}d.", channelId, recvLen);
         return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
