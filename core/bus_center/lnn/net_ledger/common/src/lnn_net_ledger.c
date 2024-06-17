@@ -355,7 +355,7 @@ int32_t LnnSetDataLevel(const DataLevel *dataLevel, bool *isSwitchLevelChanged)
         LNN_LOGE(LNN_LEDGER, "Set data switch length failed");
         return SOFTBUS_ERR;
     }
-    *isSwitchLevelChanged = (curSwitchLevel != switchLevel)
+    *isSwitchLevelChanged = (curSwitchLevel != switchLevel);
     return SOFTBUS_OK;
 }
 
