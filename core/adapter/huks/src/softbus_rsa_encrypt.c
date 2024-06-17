@@ -144,14 +144,14 @@ int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
         HksFreeParamSet(&paramSet);
         return SOFTBUS_HUKS_ERR;
     }
+    HksFreeParamSet(&paramSet);
     COMM_LOGD(COMM_UTILS, "public key is X509, size=%{public}u.", publicKeyBlob.size);
-    if (memcpy_s(publicKey, publicKeyBlob.size, publicKeyBlob.data, publicKeyBlob.size) != EOK) {
+    if (memcpy_s(publicKey, publicKeyLen, publicKeyBlob.data, publicKeyBlob.size) != EOK) {
         COMM_LOGE(COMM_UTILS, "publicKey memcpy_s failed.");
         (void)memset_s(pubKey, sizeof(pubKey), 0, sizeof(pubKey));
-        HksFreeParamSet(&paramSet);
         return SOFTBUS_MEM_ERR;
     }
-    HksFreeParamSet(&paramSet);
+    (void)memset_s(pubKey, sizeof(pubKey), 0, sizeof(pubKey));
     return SOFTBUS_OK;
 }
 
