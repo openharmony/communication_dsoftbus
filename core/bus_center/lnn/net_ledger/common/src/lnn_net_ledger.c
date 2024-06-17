@@ -323,8 +323,8 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
 
 int32_t LnnSetDataLevel(const DataLevel *dataLevel, bool *isSwitchLevelChanged)
 {
-    if (dataLevel == NULL) {
-        LNN_LOGE(LNN_LEDGER, "LnnSetDataLevel data level is null");
+    if (dataLevel == NULL || isSwitchLevelChanged == NULL) {
+        LNN_LOGE(LNN_LEDGER, "LnnSetDataLevel data level or switch level change flag is null");
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_LEDGER, "LnnSetDataLevel, dynamic: %{public}hu, static: %{public}hu, "
