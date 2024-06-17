@@ -185,7 +185,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_004, TestSize.Level1)
     (void)memset_s(&recommendLinkList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     recommendLinkList.linkTypeNum = 0;
     recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_WLAN_2P4G;
-    EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_LANE_NO_AVAILABLE_LINK));
     EXPECT_CALL(laneMock, SelectExpectLanesByQos).
         WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneMock, BuildLink(_, _, NotNull())).WillRepeatedly(laneMock.ActionOfLaneLinkSuccess);
@@ -222,7 +222,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_005, TestSize.Level1)
     (void)memset_s(&recommendLinkList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     recommendLinkList.linkTypeNum = 0;
     recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_WLAN_2P4G;
-    EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_LANE_NO_AVAILABLE_LINK));
     EXPECT_CALL(laneMock, SelectExpectLanesByQos).
         WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneMock, BuildLink(_, _, NotNull())).WillRepeatedly(laneMock.ActionOfLaneLinkFail);
@@ -259,7 +259,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_006, TestSize.Level1)
     (void)memset_s(&recommendLinkList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     recommendLinkList.linkTypeNum = 0;
     recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_WLAN_2P4G;
-    EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_LANE_NO_AVAILABLE_LINK));
     EXPECT_CALL(laneMock, SelectExpectLanesByQos)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneMock, BuildLink).WillRepeatedly(Return(SOFTBUS_LANE_DETECT_FAIL));
@@ -362,7 +362,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_LANE_DELETE_LANE_BUSINESS_INFO_001, TestSize.
     TransLaneDepsInterfaceMock transLaneMock;
     EXPECT_CALL(transLaneMock, DelLaneBusinessInfoItem).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = transObj->freeLane(LANE_REQ_ID);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
     transObj->deinit();
 }
 } // namespace OHOS

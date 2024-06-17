@@ -66,6 +66,9 @@ static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
             (void)NotifyUdpChannelClosed(&(udpChannel->info), MESSAGE_TYPE_NOMAL);
         }
         ListDelete(&(udpChannel->node));
+        if (udpChannel->info.fastTransData != NULL) {
+            SoftBusFree((void *)udpChannel->info.fastTransData);
+        }
         SoftBusFree(udpChannel);
     }
 }
@@ -136,6 +139,9 @@ void TransUdpChannelMgrDeinit(void)
     LIST_FOR_EACH_ENTRY_SAFE(udpChannel, nextUdpChannel, &g_udpChannelMgr->list, UdpChannelInfo, node) {
         ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
         ListDelete(&(udpChannel->node));
+        if (udpChannel->info.fastTransData != NULL) {
+            SoftBusFree((void *)udpChannel->info.fastTransData);
+        }
         SoftBusFree(udpChannel);
     }
     (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);

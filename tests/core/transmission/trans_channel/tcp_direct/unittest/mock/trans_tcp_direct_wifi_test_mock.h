@@ -31,7 +31,7 @@ public:
     virtual SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid) = 0;
     virtual ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode) = 0;
     virtual void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle) = 0;
-    virtual ListenerModule GetMoudleByHmlIp(const char *ip) = 0;
+    virtual ListenerModule GetModuleByHmlIp(const char *ip) = 0;
     virtual int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd) = 0;
     virtual int32_t TransTdcAddSessionConn(SessionConn *conn) = 0;
     virtual int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock) = 0;
@@ -46,7 +46,7 @@ public:
     MOCK_METHOD2(LnnGetProtocolListenerModule, ListenerModule (ProtocolType protocol, ListenerMode mode));
     MOCK_METHOD4(AuthGetLatestIdByUuid, void (const char *uuid, AuthLinkType type, bool isMeta,
         AuthHandle *authHandle));
-    MOCK_METHOD1(GetMoudleByHmlIp, ListenerModule (const char *ip));
+    MOCK_METHOD1(GetModuleByHmlIp, ListenerModule (const char *ip));
     MOCK_METHOD2(TransSrvAddDataBufNode, int32_t (int32_t channelId, int32_t fd));
     MOCK_METHOD1(TransTdcAddSessionConn, int32_t (SessionConn *conn));
     MOCK_METHOD3(ConnOpenClientSocket, int32_t (const ConnectOption *option, const char *bindAddr, bool isNonBlock));

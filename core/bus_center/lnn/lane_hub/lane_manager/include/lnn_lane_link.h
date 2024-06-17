@@ -42,6 +42,9 @@ typedef struct {
     LaneLinkType linkType;
     ProtocolType acceptableProtocols;
     int32_t pid;
+    uint32_t bandWidth;
+    uint64_t triggerLinkTime;
+    uint64_t availableLinkTime;
     //OldInfo
     LaneTransType transType;
     char peerBleMac[MAX_MAC_LEN];
@@ -105,11 +108,6 @@ typedef struct {
     void (*onLaneLinkSuccess)(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo);
     void (*onLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
 } LaneLinkCb;
-
-inline int32_t ErrCodeFilter(const int32_t errCode, const int32_t exceptErrCode)
-{
-    return ((errCode > SOFTBUS_PUBLIC_ERR_BASE) && (errCode < SOFTBUS_TRANS_ERR_BASE)) ? exceptErrCode : errCode;
-}
 
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);

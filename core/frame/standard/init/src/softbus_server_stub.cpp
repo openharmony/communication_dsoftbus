@@ -833,11 +833,10 @@ int32_t SoftBusServerStub::CloseChannelWithStatisticsInner(MessageParcel &data, 
         COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner dataInfo len failed!");
         return SOFTBUS_ERR;
     }
-    void *dataInfo = const_cast<void *>(reinterpret_cast<const void *>(data.ReadRawData(len)));
-    if (dataInfo == nullptr) {
-        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read dataInfo failed!");
-        return SOFTBUS_ERR;
-    }
+
+    auto rawData = data.ReadRawData(len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read len failed.");
+    void *dataInfo = const_cast<void *>(rawData);
 
     int32_t retReply = CloseChannelWithStatistics(channelId, laneId, dataInfo, len);
     if (!reply.WriteInt32(retReply)) {
@@ -950,11 +949,11 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read addr type failed! length=%{public}d", addrTypeLen);
         return SOFTBUS_IPC_ERR;
     }
-    void *addr = const_cast<void *>(reinterpret_cast<const void *>(data.ReadRawData(addrTypeLen)));
-    if (addr == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read addr failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+
+    auto rawData = data.ReadRawData(addrTypeLen);
+    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read addrTypeLen failed.");
+    void *addr = const_cast<void *>(rawData);
+
     int32_t retReply = JoinLNN(clientName, addr, addrTypeLen);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner write reply failed!");

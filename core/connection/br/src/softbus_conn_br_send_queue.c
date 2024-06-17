@@ -159,12 +159,9 @@ int32_t ConnBrDequeueBlock(void **msg)
     SoftBusSysTime waitTime = {0};
     waitTime.sec = BR_WAIT_TIME_SEC;
 
-    if (msg == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (SoftBusMutexLock(&g_brQueueLock) != SOFTBUS_OK) {
-        return SOFTBUS_LOCK_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "msg is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_brQueueLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BR, "lock fail!");
     do {
         if (GetMsg(g_innerQueue, msg, &isFull, MIDDLE_PRIORITY) == SOFTBUS_OK) {
             status = SOFTBUS_OK;

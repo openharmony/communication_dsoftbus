@@ -119,7 +119,7 @@ static void TransTdcTimerProc(void)
             }
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 
     NotifyTdcChannelTimeOut(&tempTdcChannelList);
 }
@@ -167,7 +167,7 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
 
         ListAdd(&tempTdcChannelList, &item->node);
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
     NotifyTdcChannelStopProc(&tempTdcChannelList);
     TRANS_LOGD(TRANS_CTRL, "ok");
 }
@@ -223,13 +223,13 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
     SoftBusList *sessionList = GetSessionConnList();
     if (sessionList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "get session conn list failed");
-        ReleaseSessonConnLock();
+        ReleaseSessionConnLock();
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if ((strcmp(item->appInfo.myData.pkgName, pkgName) == 0) && (item->appInfo.myData.pid == pid)) {
             ListDelete(&item->node);
-            TRANS_LOGI(TRANS_CTRL, "delete pkgName = %{public}s, pid = %{public}d", pkgName, pid);
+            TRANS_LOGI(TRANS_CTRL, "delete pkgName=%{public}s, pid=%{public}d", pkgName, pid);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
             ConnShutdownSocket(item->appInfo.fd);
@@ -237,14 +237,14 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
             continue;
         }
     }
-    ReleaseSessonConnLock();
+    ReleaseSessionConnLock();
 }
 
-static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
+static int32_t TransUpdateAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
 {
     appInfo->peerData.port = connInfo->socketOption.port;
     if (strcpy_s(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), connInfo->socketOption.addr) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo cpy fail");
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s remote ip fail.");
         return SOFTBUS_STRCPY_ERR;
     }
     appInfo->routeType = connInfo->type == CONNECT_TCP ? WIFI_STA : WIFI_P2P;
@@ -252,14 +252,14 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
     if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP) {
         if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
             SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get local nip fail");
+            TRANS_LOGE(TRANS_CTRL, "Lnn: get local ip fail.");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
         }
     } else {
         if (connInfo->type == CONNECT_TCP) {
             if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
                 SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get local ip fail");
+                TRANS_LOGE(TRANS_CTRL, "Lnn: get local ip fail.");
                 return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
             }
         }
@@ -273,7 +273,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = TransUpdAppInfo((AppInfo *)appInfo, connInfo);
+    int32_t ret = TransUpdateAppInfo(appInfo, connInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "udp app fail");
         return ret;

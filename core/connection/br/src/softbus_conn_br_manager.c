@@ -1052,7 +1052,7 @@ static void HandlePendingRequestFunc(SoftBusMessage *msg)
 
 static void ConnectRequestFunc(SoftBusMessage *msg)
 {
-    if (g_brManager.state->handlePendingRequest == NULL) {
+    if (g_brManager.state->connectRequest == NULL) {
         return;
     }
     ConnBrConnectRequestContext *ctx = (ConnBrConnectRequestContext *)msg->obj;
@@ -1164,16 +1164,15 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
     if (msg->what != MSG_DATA_RECEIVED) {
         CONN_LOGI(CONN_BR, "recvMsg=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
     }
-    bool isInvaildCmd = false;
+
     size_t commandSize = sizeof(g_commands) / sizeof(g_commands[0]);
     for (size_t i = 0; i < commandSize; i++) {
         if (g_commands[i].cmd == msg->what) {
             g_commands[i].func(msg);
-            isInvaildCmd = true;
-            break;
+            return;
         }
     }
-    COMM_CHECK_AND_RETURN_LOGW(isInvaildCmd == true, CONN_BR, "unexpected msg, what=%{public}d", msg->what);
+    CONN_LOGE(CONN_BR, "unexpected msg, what=%{public}d", msg->what);
 }
 
 static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args)

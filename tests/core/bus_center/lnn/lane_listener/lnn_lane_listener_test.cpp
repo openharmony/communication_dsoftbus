@@ -419,7 +419,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_GET_STATE_NOTIFY_INFO_001, TestSize.Level
     (void)strncpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN);
     LaneDepsInterfaceMock laneMock;
     EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoById)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(nodeInfo), Return(SOFTBUS_OK)));
     ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_LANE_GET_LEDGER_INFO_ERR, ret);
@@ -451,12 +451,14 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKUP_NOTIFY_001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     LaneDepsInterfaceMock laneMock;
-    EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneMock, LnnGetLocalStrInfo)
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     LaneListenerDepsInterfaceMock listenerMock;
-    EXPECT_CALL(listenerMock, LaneInfoProcess).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(listenerMock, LaneInfoProcess)
+        .WillOnce(Return(SOFTBUS_LANE_RESULT_REPORT_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(listenerMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_HML));
     ret = LaneLinkupNotify(PEER_UDID, &linkInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LANE_RESULT_REPORT_ERR, ret);
 
     const LnnLaneManager *laneManager = GetLaneManager();
     ret = laneManager->registerLaneListener(LANE_TYPE_TRANS, &g_listener);
@@ -561,7 +563,7 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKDOWN_NOTIFY_002, TestSize.Level1)
     EXPECT_CALL(listenerMock, FindLaneResourceByLinkAddr)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(laneResource), Return(SOFTBUS_OK)));
     EXPECT_CALL(listenerMock, LaneInfoProcess)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_LANE_RESULT_REPORT_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(listenerMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_HML));
     LaneDepsInterfaceMock laneMock;

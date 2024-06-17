@@ -21,6 +21,7 @@
 #include "message_parcel.h"
 #include "rpc_errno.h"
 #include "softbus_access_token_test.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_server_frame.h"
@@ -30,21 +31,20 @@
 #include "softbus_server_stub.h"
 #include "softbus_server.h"
 
-#define TYPE_NUM 10
-#define QOS_NUM 8
+#define TYPE_NUM            10
+#define QOS_NUM             8
+#define INPUT_NAME_SIZE_MAX 20
+#define NETWORKID_SIZE_MAX  20
 
 namespace OHOS {
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 constexpr int32_t SOFTBUS_FUZZ_TEST_UID = 1;
 constexpr int32_t SOFTBUS_FUZZ_TEST_PID = 1;
-constexpr int32_t SOFTBUS_FUZZ_TEST_CHANNEL_ID = 3;
-constexpr int32_t SOFTBUS_FUZZ_TEST_CHANNEL_TYPE = 4;
 constexpr int32_t SOFTBUS_FUZZ_TEST_START_DISCOVERY_SUB_SCRIBE_ID = 5;
 constexpr int32_t SOFTBUS_FUZZ_TEST_START_DISCOVERY_MODE = 6;
 constexpr int32_t SOFTBUS_FUZZ_TEST_START_DISCOVERY_MEDIUM = 7;
 constexpr int32_t SOFTBUS_FUZZ_TEST_START_DISCOVERY_FREQ = 8;
-constexpr int32_t SOFTBUS_FUZZ_TEST_INFO_TYPE_LEN = 196;
 constexpr int32_t SOFTBUS_FUZZ_TEST_ADDR_TYPE_LEN = 160;
 
 const std::u16string SOFTBUS_SERVER_STUB_INTERFACE_TOKEN = u"OHOS.ISoftBusServer";
@@ -120,9 +120,31 @@ bool PublishServiceFuzzTest(const uint8_t* data, size_t size)
     return SendRequestByCommand(data, size, SERVER_PUBLISH_SERVICE);
 }
 
-bool UnPublishServiceFuzzTest(const uint8_t* data, size_t size)
+bool UnPublishServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    return SendRequestByCommand(data, size, SERVER_UNPUBLISH_SERVICE);
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + sizeof(int32_t)) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char pkgname[INPUT_NAME_SIZE_MAX] = "distribdata_test";
+    if (memcpy_s(pkgname, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    pkgname[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset = INPUT_NAME_SIZE_MAX;
+    int32_t publishId = *reinterpret_cast<const int32_t *>(data + offset);
+
+    MessageParcel datas;
+    datas.WriteCString(pkgname);
+    datas.WriteInt32(publishId);
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->UnpublishServiceInner(datas, reply);
+    return true;
 }
 
 bool CreateSessionServerFuzzTest(const uint8_t* data, size_t size)
@@ -135,9 +157,55 @@ bool RemoveSessionServerFuzzTest(const uint8_t* data, size_t size)
     return SendRequestByCommand(data, size, SERVER_REMOVE_SESSION_SERVER);
 }
 
-bool OpenSessionFuzzTest(const uint8_t* data, size_t size)
+bool OpenSessionFuzzTest(const uint8_t *data, size_t size)
 {
-    return SendRequestByCommand(data, size, SERVER_OPEN_SESSION);
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr ||
+        size < INPUT_NAME_SIZE_MAX + INPUT_NAME_SIZE_MAX + NETWORKID_SIZE_MAX + NETWORKID_SIZE_MAX + sizeof(bool) +
+        sizeof(int32_t)) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char sesName[INPUT_NAME_SIZE_MAX] = { 0 };
+    char peerSessionName[INPUT_NAME_SIZE_MAX] = { 0 };
+    char peerDeviceId[NETWORKID_SIZE_MAX] = { 0 };
+    char groupId[NETWORKID_SIZE_MAX] = { 0 };
+    if (memcpy_s(sesName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    offset += INPUT_NAME_SIZE_MAX;
+    if (memcpy_s(peerSessionName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
+        INPUT_NAME_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    offset += INPUT_NAME_SIZE_MAX;
+    if (memcpy_s(peerDeviceId, NETWORKID_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
+        NETWORKID_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    offset += NETWORKID_SIZE_MAX;
+    if (memcpy_s(groupId, NETWORKID_SIZE_MAX, reinterpret_cast<const char *>(data + offset), NETWORKID_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    offset += NETWORKID_SIZE_MAX;
+    bool isAsync = *reinterpret_cast<const bool *>(data + offset);
+    offset += sizeof(bool);
+    int32_t sessionId = *reinterpret_cast<const int32_t *>(data + offset);
+    MessageParcel datas;
+    datas.WriteCString(sesName);
+    datas.WriteCString(peerSessionName);
+    datas.WriteCString(peerDeviceId);
+    datas.WriteCString(groupId);
+    datas.WriteBool(isAsync);
+    datas.WriteInt32(sessionId);
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->OpenSessionInner(datas, reply);
+    return true;
 }
 
 bool OpenAuthSessionFuzzTest(const uint8_t* data, size_t size)
@@ -188,31 +256,33 @@ bool GrantPermissionFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool RemovePermissionFuzzTest(const uint8_t* data, size_t size)
+bool RemovePermissionFuzzTest(const uint8_t *data, size_t size)
 {
     return SendRequestByCommand(data, size, SERVER_REMOVE_PERMISSION);
 }
 
-bool StreamStatsFuzzTest(const uint8_t* data, size_t size)
+bool StreamStatsFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr) {
+    if (object == nullptr || data == nullptr || size < sizeof(int32_t) + sizeof(int32_t) + sizeof(StreamSendStats)) {
         return false;
     }
-    int32_t channelId = SOFTBUS_FUZZ_TEST_CHANNEL_ID;
-    int32_t channelType = SOFTBUS_FUZZ_TEST_CHANNEL_TYPE;
+    uint32_t offset = 0;
+    int32_t channelId = *reinterpret_cast<const int32_t *>(data);
+    offset += sizeof(int32_t);
+    int32_t channelType = *reinterpret_cast<const int32_t *>(data + offset);
+    offset += sizeof(int32_t);
+
     MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
     datas.WriteInt32(channelId);
     datas.WriteInt32(channelType);
-    datas.WriteRawData(data, size);
-    datas.RewindRead(0);
+    datas.WriteRawData(data + offset, sizeof(StreamSendStats));
     MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_STREAM_STATS, datas, reply, option) != ERR_NONE) {
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
         return false;
     }
+    SoftBusServer->StreamStatsInner(datas, reply);
     return true;
 }
 
@@ -256,24 +326,42 @@ bool StopDiscoveryFuzzTest(const uint8_t* data, size_t size)
     return SendRequestByCommand(data, size, SERVER_STOP_DISCOVERY);
 }
 
-bool JoinLNNFuzzTest(const uint8_t* data, size_t size)
+bool JoinLNNFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr) {
+    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + sizeof(ConnectionAddr)) {
         return false;
     }
-    uint32_t addrTypeLen = SOFTBUS_FUZZ_TEST_ADDR_TYPE_LEN;
+    uint32_t offset = 0;
+    char pkgname[INPUT_NAME_SIZE_MAX] = "distribdata_test";
+    if (memcpy_s(pkgname, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    pkgname[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    ConnectionAddr *addr = nullptr;
+    addr = (ConnectionAddr *)SoftBusCalloc(sizeof(ConnectionAddr));
+    if (addr == nullptr) {
+        return false;
+    }
+    if (memcpy_s(addr, sizeof(ConnectionAddr), reinterpret_cast<const char *>(data + offset), sizeof(ConnectionAddr)) !=
+        EOK) {
+        SoftBusFree(addr);
+        return false;
+    }
+
     MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.WriteUint32(addrTypeLen);
-    datas.RewindRead(0);
+    datas.WriteCString(pkgname);
+    datas.WriteUint32(sizeof(ConnectionAddr));
+    datas.WriteRawData(addr, sizeof(ConnectionAddr));
     MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_JOIN_LNN, datas, reply, option) != ERR_NONE) {
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        SoftBusFree(addr);
         return false;
     }
+    SoftBusServer->JoinLNNInner(datas, reply);
+    SoftBusFree(addr);
     return true;
 }
 
@@ -298,9 +386,38 @@ bool JoinMetaNodeFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool LeaveLNNFuzzTest(const uint8_t* data, size_t size)
+bool LeaveLNNFuzzTest(const uint8_t *data, size_t size)
 {
-    return SendRequestByCommand(data, size, SERVER_LEAVE_LNN);
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + NETWORKID_SIZE_MAX) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char pkgname[INPUT_NAME_SIZE_MAX] = "distribdata_test";
+    char networkId[NETWORKID_SIZE_MAX] = "123456789asc";
+
+    if (memcpy_s(pkgname, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    pkgname[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    if (memcpy_s(networkId, NETWORKID_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
+        NETWORKID_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    networkId[NETWORKID_SIZE_MAX - 1] = '\0';
+    offset += NETWORKID_SIZE_MAX;
+
+    MessageParcel datas;
+    datas.WriteCString(pkgname);
+    datas.WriteCString(networkId);
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->LeaveLNNInner(datas, reply);
+    return true;
 }
 
 bool LeaveMetaNodeFuzzTest(const uint8_t* data, size_t size)
@@ -308,40 +425,140 @@ bool LeaveMetaNodeFuzzTest(const uint8_t* data, size_t size)
     return SendRequestByCommand(data, size, SERVER_LEAVE_METANODE);
 }
 
-bool GetAllOnlineNodeInfoFuzzTest(const uint8_t* data, size_t size)
+bool GetAllOnlineNodeInfoFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr) {
+    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + sizeof(uint32_t)) {
         return false;
     }
-    uint32_t infoTypeLen = SOFTBUS_FUZZ_TEST_INFO_TYPE_LEN;
+    uint32_t offset = 0;
+    char clientName[INPUT_NAME_SIZE_MAX] = "client_test";
+
+    if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    clientName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    uint32_t infoTypeLen = *reinterpret_cast<const int32_t *>(data + offset);
+
     MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
+    datas.WriteCString(clientName);
     datas.WriteUint32(infoTypeLen);
-    datas.RewindRead(0);
     MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_GET_ALL_ONLINE_NODE_INFO, datas, reply, option) != ERR_NONE) {
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
         return false;
     }
+    SoftBusServer->GetAllOnlineNodeInfoInner(datas, reply);
     return true;
 }
 
 bool GetLocalDeviceInfoFuzzTest(const uint8_t* data, size_t size)
 {
-    return SendRequestByCommand(data, size, SERVER_GET_LOCAL_DEVICE_INFO);
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + sizeof(uint32_t)) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char clientName[INPUT_NAME_SIZE_MAX] = "client_test";
+
+    if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    clientName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    uint32_t infoTypeLen = *reinterpret_cast<const int32_t *>(data + offset);
+
+    MessageParcel datas;
+    datas.WriteCString(clientName);
+    datas.WriteUint32(infoTypeLen);
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->GetLocalDeviceInfoInner(datas, reply);
+    return true;
 }
 
-bool GetNodeKeyInfoFuzzTest(const uint8_t* data, size_t size)
+bool GetNodeKeyInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    return SendRequestByCommand(data, size, SERVER_GET_NODE_KEY_INFO);
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr ||
+        size < INPUT_NAME_SIZE_MAX + NETWORKID_SIZE_MAX + sizeof(int32_t) + sizeof(uint32_t)) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char clientName[INPUT_NAME_SIZE_MAX] = "client_test";
+    char networkId[NETWORKID_SIZE_MAX] = "networkid_test";
+
+    if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    clientName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    if (memcpy_s(networkId, NETWORKID_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
+        NETWORKID_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    networkId[NETWORKID_SIZE_MAX - 1] = '\0';
+    offset += NETWORKID_SIZE_MAX;
+    int32_t key = *reinterpret_cast<const int32_t *>(data + offset);
+    offset += sizeof(int32_t);
+    uint32_t len = *reinterpret_cast<const uint32_t *>(data + offset);
+
+    MessageParcel datas;
+    datas.WriteCString(clientName);
+    datas.WriteCString(networkId);
+    datas.WriteInt32(key);
+    datas.WriteUint32(len);
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->GetNodeKeyInfoInner(datas, reply);
+    return true;
 }
 
-bool SetNodeDataChangeFlagFuzzTest(const uint8_t* data, size_t size)
+bool SetNodeDataChangeFlagFuzzTest(const uint8_t *data, size_t size)
 {
-    return SendRequestByCommand(data, size, SERVER_SET_NODE_DATA_CHANGE_FLAG);
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + NETWORKID_SIZE_MAX + sizeof(uint16_t)) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char clientName[INPUT_NAME_SIZE_MAX] = "client_test";
+    char networkId[NETWORKID_SIZE_MAX] = "networkid_test";
+
+    if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    clientName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    if (memcpy_s(networkId, NETWORKID_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
+        NETWORKID_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    networkId[NETWORKID_SIZE_MAX - 1] = '\0';
+    offset += NETWORKID_SIZE_MAX;
+    uint16_t dataChangeFlag = *reinterpret_cast<const uint16_t *>(data + offset);
+
+    MessageParcel datas;
+    datas.WriteCString(clientName);
+    datas.WriteCString(networkId);
+    datas.WriteUint16(dataChangeFlag);
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->SetNodeDataChangeFlagInner(datas, reply);
+    return true;
 }
 
 bool StartTimeSyncFuzzTest(const uint8_t* data, size_t size)
@@ -410,26 +627,28 @@ bool ShiftLNNGearFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool RippleStatsFuzzTest(const uint8_t* data, size_t size)
+bool RippleStatsFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr) {
+    if (object == nullptr || data == nullptr || size < sizeof(int32_t) + sizeof(int32_t) + sizeof(TrafficStats)) {
         return false;
     }
-    int32_t channelId = SOFTBUS_FUZZ_TEST_CHANNEL_ID;
-    int32_t channelType = SOFTBUS_FUZZ_TEST_CHANNEL_TYPE;
+    uint32_t offset = 0;
+    int32_t channelId = *reinterpret_cast<const uint16_t *>(data);
+    offset = sizeof(int32_t);
+    int32_t channelType = *reinterpret_cast<const uint16_t *>(data + offset);
+    offset += sizeof(int32_t);
+
     MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
     datas.WriteInt32(channelId);
     datas.WriteInt32(channelType);
-    datas.WriteRawData(data, size);
-    datas.RewindRead(0);
+    datas.WriteRawData(data + offset, sizeof(TrafficStats));
     MessageParcel reply;
-    MessageOption option;
-    SetAceessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_RIPPLE_STATS, datas, reply, option) != ERR_NONE) {
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
         return false;
     }
+    SoftBusServer->RippleStatsInner(datas, reply);
     return true;
 }
 
@@ -438,16 +657,13 @@ bool SoftbusRegisterServiceFuzzTest(const uint8_t* data, size_t size)
     return SendRequestByCommand(data, size, MANAGE_REGISTER_SERVICE);
 }
 
-bool CheckOpenSessionPermissionFuzzTest(const uint8_t* data, size_t size)
+bool CheckOpenSessionPermissionFuzzTest(const uint8_t *data, size_t size)
 {
+#define SESSION_NAME_SIZE_MAX 256
+#define DEVICE_ID_SIZE_MAX    50
+#define GROUP_ID_SIZE_MAX     50
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr) {
-        return false;
-    }
-    #define SESSION_NAME_SIZE_MAX 256
-    #define DEVICE_ID_SIZE_MAX 65
-    #define GROUP_ID_SIZE_MAX 128
-    if (size < GROUP_ID_SIZE_MAX) {
+    if (object == nullptr || data == nullptr || size < DEVICE_ID_SIZE_MAX + GROUP_ID_SIZE_MAX) {
         return false;
     }
     SetAceessTokenPermission("SoftBusServerStubTest");
@@ -456,14 +672,14 @@ bool CheckOpenSessionPermissionFuzzTest(const uint8_t* data, size_t size)
     char peerDeviceId[DEVICE_ID_SIZE_MAX] = "com.test.trans.session.sendfile";
     char groupId[GROUP_ID_SIZE_MAX] = "com.test.trans.session.sendfile";
 
-    if (memcpy_s(peerDeviceId, DEVICE_ID_SIZE_MAX, reinterpret_cast<const char*>(data), DEVICE_ID_SIZE_MAX - 1)
-        != EOK) {
+    if (memcpy_s(peerDeviceId, DEVICE_ID_SIZE_MAX, reinterpret_cast<const char *>(data), DEVICE_ID_SIZE_MAX - 1) !=
+        EOK) {
         return false;
     }
     peerDeviceId[DEVICE_ID_SIZE_MAX - 1] = '\0';
 
-    if (memcpy_s(groupId, GROUP_ID_SIZE_MAX, reinterpret_cast<const char*>(data), GROUP_ID_SIZE_MAX - 1)
-        != EOK) {
+    if (memcpy_s(groupId, GROUP_ID_SIZE_MAX, reinterpret_cast<const char *>(data + DEVICE_ID_SIZE_MAX),
+        GROUP_ID_SIZE_MAX - 1) != EOK) {
         return false;
     }
     groupId[GROUP_ID_SIZE_MAX - 1] = '\0';

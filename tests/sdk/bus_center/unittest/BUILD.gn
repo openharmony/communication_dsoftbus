@@ -16,9 +16,6 @@ import("../../../../dsoftbus.gni")
 
 dsoftbus_root_path = "../../../.."
 
-bus_center_sdk_test_src = [ "bus_center_sdk_test.cpp" ]
-client_bus_center_test_src = [ "client_bus_center_test.cpp" ]
-softbus_center_sdk_test_src = [ "softbus_center_sdk_test.cpp" ]
 bus_center_sdk_test_inc = [
   "$dsoftbus_root_path/adapter/default_config/spec_config",
   "$dsoftbus_root_path/sdk/bus_center/manager/src",
@@ -52,53 +49,7 @@ bus_center_sdk_test_deps = [
   "$dsoftbus_root_path/core/frame:softbus_server",
   "$dsoftbus_root_path/sdk:softbus_client",
   "../../../../sdk:softbus_client",
-  "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-  "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-  "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
   "//third_party/bounds_checking_function:libsec_static",
-]
-
-client_bus_center_manager_test_src = [
-  "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
-  "client_bus_center_manager_mock.cpp",
-  "client_bus_center_manager_test.cpp",
-]
-client_bus_center_manager_test_inc = [
-  "$dsoftbus_root_path/adapter/default_config/spec_config",
-  "$dsoftbus_root_path/sdk/bus_center/manager/src",
-  "$dsoftbus_root_path/sdk/bus_center/manager/include",
-  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
-  "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
-  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
-  "$dsoftbus_root_path/adapter/common/include",
-  "$dsoftbus_root_path/core/bus_center/interface",
-  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-  "$dsoftbus_root_path/core/common/include",
-  "$dsoftbus_root_path/core/discovery/interface",
-  "$dsoftbus_root_path/core/discovery/manager/include",
-  "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-  "$dsoftbus_root_path/interfaces/kits/bus_center",
-  "$dsoftbus_root_path/interfaces/kits/common",
-  "$dsoftbus_root_path/tests/sdk/common/include",
-  "//commonlibrary/c_utils/base/include",
-  "//third_party/bounds_checking_function/include",
-  "$dsoftbus_root_path/sdk/bus_center/manager/include",
-  "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
-  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
-  "$dsoftbus_root_path/core/frame/standard/init/include",
-  "$dsoftbus_root_path/core/transmission/common/include",
-]
-client_bus_center_manager_test_deps = [
-  "$dsoftbus_root_path/adapter:softbus_adapter",
-  "$dsoftbus_root_path/core/common:softbus_utils",
-  "$dsoftbus_root_path/core/frame:softbus_server",
-  "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-  "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-  "//third_party/bounds_checking_function:libsec_static",
-  "//third_party/googletest:gmock",
-  "//third_party/googletest:gtest_main",
 ]
 
 if (dsoftbus_feature_lnn_meta_node) {
@@ -133,33 +84,29 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/test.gni")
 
   if (ohos_build_type == "debug") {
-    unittest("BusCenterSdkTest") {
+    unittest("BusCenterSdkRefreshSmall") {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
-      sources = bus_center_sdk_test_src
+      sources = [
+        "$dsoftbus_root_path/adapter/common/bus_center/network/lnn_netmanager_listener_virtual.cpp",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_strategy_virtual.c",
+        "bus_center_sdk_refresh_small_test.cpp",
+      ]
       include_dirs = bus_center_sdk_test_inc
+      include_dirs += [
+        "$dsoftbus_root_path/adapter/common/bus_center/include",
+        "$dsoftbus_root_path/core/bus_center/service/include",
+        "$dsoftbus_root_path/core/bus_center/utils/include",
+        "$dsoftbus_root_path/sdk/frame/small/include",
+        "//commonlibrary/c_utils/base/include",
+        "unittest/common/",
+      ]
       deps = bus_center_sdk_test_deps
-      deps += [ "$hilog_lite_deps_path" ]
-    }
-  }
-  if (ohos_build_type == "debug") {
-    unittest("SoftbusCenterSdkTest") {
-      output_extension = "bin"
-      output_dir = "$root_out_dir/test/unittest/dsoftbus"
-      sources = softbus_center_sdk_test_src
-      include_dirs = bus_center_sdk_test_inc
-      deps = bus_center_sdk_test_deps
-      deps += [ "$hilog_lite_deps_path" ]
-    }
-  }
-  if (ohos_build_type == "debug") {
-    unittest("ClientBusCentManagerTest") {
-      output_extension = "bin"
-      output_dir = "$root_out_dir/test/unittest/dsoftbus"
-      sources = client_bus_center_manager_test_src
-      include_dirs = client_bus_center_manager_test_inc
-      deps = client_bus_center_manager_test_deps
-      deps += [ "$hilog_lite_deps_path" ]
+      deps += [
+        "$dsoftbus_root_path/core/frame:softbus_server_frame",
+        "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+        "$hilog_lite_deps_path",
+      ]
     }
   }
 } else {
@@ -168,7 +115,7 @@ if (defined(ohos_lite)) {
   module_output_path = "dsoftbus/bus_center"
   ohos_unittest("BusCenterSdkTest") {
     module_out_path = module_output_path
-    sources = bus_center_sdk_test_src
+    sources = [ "bus_center_sdk_test.cpp" ]
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [
       "unittest/common/",
@@ -185,6 +132,8 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_core",
     ]
@@ -192,7 +141,7 @@ if (defined(ohos_lite)) {
 
   ohos_unittest("ClientBusCenterSdkTest") {
     module_out_path = module_output_path
-    sources = softbus_center_sdk_test_src
+    sources = [ "softbus_center_sdk_test.cpp" ]
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [
       "unittest/common/",
@@ -209,6 +158,8 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_core",
     ]
@@ -216,7 +167,7 @@ if (defined(ohos_lite)) {
 
   ohos_unittest("ClientBusMangerTest") {
     module_out_path = module_output_path
-    sources = client_bus_center_test_src
+    sources = [ "client_bus_center_test.cpp" ]
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [
       "unittest/common/",
@@ -233,6 +184,8 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_core",
     ]
@@ -257,6 +210,8 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_core",
     ]
@@ -281,6 +236,8 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_core",
     ]
@@ -288,20 +245,51 @@ if (defined(ohos_lite)) {
 
   ohos_unittest("ClientBusCentManagerTest") {
     module_out_path = module_output_path
-    sources = client_bus_center_manager_test_src
-    include_dirs = client_bus_center_manager_test_inc
-    include_dirs += [
-      "unittest/common/",
-      "//commonlibrary/c_utils/base/include",
+    sources = [
+      "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
+      "client_bus_center_manager_mock.cpp",
+      "client_bus_center_manager_test.cpp",
     ]
-    deps = client_bus_center_manager_test_deps
-    deps += [
+    include_dirs = [
+      "$dsoftbus_root_path/adapter/default_config/spec_config",
+      "$dsoftbus_root_path/sdk/bus_center/manager/src",
+      "$dsoftbus_root_path/sdk/bus_center/manager/include",
+      "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+      "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+      "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/discovery/interface",
+      "$dsoftbus_root_path/core/discovery/manager/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/tests/sdk/common/include",
+      "$dsoftbus_root_path/sdk/bus_center/manager/include",
+      "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+      "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+      "$dsoftbus_root_path/core/frame/standard/init/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+    ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
       "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+      "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
       external_deps = [
+        "access_token:libnativetoken",
+        "access_token:libtoken_setproc",
         "c_utils:utils",
+        "googletest:gmock",
         "hilog:libhilog",
       ]
     } else {
@@ -331,6 +319,8 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
     external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
       "c_utils:utils",
       "ipc:ipc_core",
     ]

@@ -62,7 +62,7 @@ SoftBusList *GetSessionConnList(void);
 
 int32_t GetSessionConnLock(void);
 
-void ReleaseSessonConnLock(void);
+void ReleaseSessionConnLock(void);
 
 SessionConn *GetSessionConnByRequestId(uint32_t requestId);
 

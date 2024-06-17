@@ -160,7 +160,7 @@ int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint
         return SOFTBUS_OK;
     }
     if (option->capabilityBitmap[0] != (1 << CASTPLUS_CAPABILITY_BITMAP)) {
-        if (!g_castJson[0]) {
+        if (g_castJson[0] == '\0') {
             return SOFTBUS_OK;
         }
         if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, g_castJson) < 0) {
@@ -171,6 +171,11 @@ int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint
         return SOFTBUS_OK;
     }
 
+    if (option->capabilityData == NULL) {
+        memset_s(g_castJson, sizeof(g_castJson), 0, sizeof(g_castJson));
+        DISC_LOGE(DISC_COAP, "no capability data to fill service data");
+        return SOFTBUS_OK;
+    }
     const char *capabilityData = (const char *)option->capabilityData;
     DISC_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == option->dataLen, SOFTBUS_INVALID_PARAM, DISC_COAP,
         "capabilityDataLen != expectedLen. capabilityDataLen=%{public}zu, expectedLen%{public}u, data=%{public}s",

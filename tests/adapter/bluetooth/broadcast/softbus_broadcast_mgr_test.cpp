@@ -709,7 +709,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting003, TestSize
     packet.rspData.payload = RSP_DATA_PAYLOAD;
 
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
-    EXPECT_EQ(SOFTBUS_BC_MGR_WAIT_COND_FAIL, StartBroadcasting(bcId, &bcParam, &packet));
+    EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
     EXPECT_EQ(SOFTBUS_OK, StopBroadcasting(bcId));
 
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));

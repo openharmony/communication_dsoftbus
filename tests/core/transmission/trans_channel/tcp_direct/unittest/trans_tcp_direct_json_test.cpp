@@ -22,13 +22,8 @@
 #include "trans_log.h"
 #include "trans_tcp_direct_p2p.h"
 
-#define MSG_CODE "CODE"
-#define P2P_IP "P2P_IP"
-#define P2P_PORT "P2P_PORT"
-#define PEER_IP "PEER_IP"
-#define ERR_CODE "ERR_CODE"
-#define ERR_DESC "ERR_DESC"
 #define MY_IP "1111"
+#define PEER_IP "2222"
 #define MY_PORT 1111
 #define IP_LENGTH 16
 #define CODE 1
@@ -65,7 +60,6 @@ void TransTcpDirectJsonTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackErrorTest001, TestSize.Level1)
 {
     int32_t code = CODE;
@@ -73,7 +67,7 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackErrorTest001, TestSize.Level1)
     char *ret = VerifyP2pPackError(code, errCode, NULL);
     EXPECT_EQ(NULL, ret);
     
-    const char *errDesc = ERR_DESC;
+    const char *errDesc = "P2p Pack Err Test";
     ret = VerifyP2pPackError(code, errCode, errDesc);
     EXPECT_NE(NULL, ret);
 }
@@ -84,7 +78,6 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackErrorTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackTest001, TestSize.Level1)
 {
     int32_t myPort = MY_PORT;
@@ -127,4 +120,3 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pUnPackTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_PEER_PROC_ERR, ret);
 }
 }
-

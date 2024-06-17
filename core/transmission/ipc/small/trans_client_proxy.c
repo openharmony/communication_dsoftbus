@@ -83,12 +83,9 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
         !WriteFileDescriptor(&io, channel->fd))) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
-    SvcIdentity svc = {0};
+    SvcIdentity svc = { 0 };
     int32_t ret = GetSvcIdentityByPkgName(pkgName, &svc);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OnChannelOpened get svc failed.");
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "OnChannelOpened get svc failed.");
     WriteInt32(&io, channel->businessType);
     if (channel->channelType == CHANNEL_TYPE_UDP) {
         WriteString(&io, channel->myIp);

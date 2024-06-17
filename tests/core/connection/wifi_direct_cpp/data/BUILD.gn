@@ -1,0 +1,232 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../../dsoftbus.gni")
+
+ut_out_path = "dsoftbus/connection/wifi_direct_cpp/data"
+wifi_direct_cpp_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
+wifi_direct_cpp_unit_path =
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
+
+config("wifi_direct_include_dirs") {
+  include_dirs = [
+    "//third_party/cJSON",
+    "//third_party/json/include",
+    "//third_party/googletest/googletest/include",
+    "//third_party/googletest/googletest/src",
+    "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$wifi_direct_cpp_path",
+    "$wifi_direct_cpp_unit_path",
+  ]
+}
+
+ohos_unittest("LinkInfoTest") {
+  module_out_path = ut_out_path
+  configs = [ ":wifi_direct_include_dirs" ]
+  sources = [
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/data/link_info.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "link_info_test.cpp",
+  ]
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+}
+
+ohos_unittest("NegotiateMessageTest") {
+  module_out_path = ut_out_path
+  configs = [ ":wifi_direct_include_dirs" ]
+  sources = [
+    "$wifi_direct_cpp_path/data/interface_info.cpp",
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/data/link_info.cpp",
+    "$wifi_direct_cpp_path/data/negotiate_message.cpp",
+    "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "negotiate_message_test.cpp",
+  ]
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+}
+
+ohos_unittest("InnerLinkTest") {
+  module_out_path = ut_out_path
+  configs = [ ":wifi_direct_include_dirs" ]
+  sources = [
+    "$wifi_direct_cpp_path/data/inner_link.cpp",
+    "$wifi_direct_cpp_path/data/link_manager.cpp",
+    "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
+    "inner_link_test.cpp",
+  ]
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("LinkManagerTest") {
+  module_out_path = ut_out_path
+  configs = [ ":wifi_direct_include_dirs" ]
+  sources = [
+    "$wifi_direct_cpp_path/data/inner_link.cpp",
+    "$wifi_direct_cpp_path/data/link_manager.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
+    "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
+    "link_manager_test.cpp",
+  ]
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("InterfaceInfoTest") {
+  module_out_path = ut_out_path
+  configs = [ ":wifi_direct_include_dirs" ]
+  sources = [
+    "$wifi_direct_cpp_path/data/interface_info.cpp",
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "interface_info_test.cpp",
+  ]
+
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+}
+
+ohos_unittest("InterfaceManagerTest") {
+  module_out_path = ut_out_path
+  configs = [ ":wifi_direct_include_dirs" ]
+  sources = [
+    "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
+    "$wifi_direct_cpp_path/data/interface_info.cpp",
+    "$wifi_direct_cpp_path/data/interface_manager.cpp",
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
+    "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
+    "interface_manager_test.cpp",
+  ]
+
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+}
+
+ohos_unittest("WifiConfigInfoTest") {
+  module_out_path = ut_out_path
+  configs = [ ":wifi_direct_include_dirs" ]
+  sources = [
+    "$wifi_direct_cpp_path/data/interface_info.cpp",
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/data/negotiate_message.cpp",
+    "$wifi_direct_cpp_path/data/wifi_config_info.cpp",
+    "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "wifi_config_info_test.cpp",
+  ]
+
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+}
+
+group("unittest") {
+  testonly = true
+  deps = [
+    ":InterfaceInfoTest",
+    ":InterfaceManagerTest",
+    ":LinkInfoTest",
+    ":NegotiateMessageTest",
+    ":WifiConfigInfoTest",
+  ]
+}

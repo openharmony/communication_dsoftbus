@@ -83,7 +83,7 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
         }
 
         if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
-            module = GetMoudleByHmlIp(myIp);
+            module = GetModuleByHmlIp(myIp);
         } else {
             module = DIRECT_CHANNEL_SERVER_P2P;
         }

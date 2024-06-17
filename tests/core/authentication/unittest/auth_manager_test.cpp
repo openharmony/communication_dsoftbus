@@ -685,3 +685,4 @@ HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001, TestSi
     EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, &info) == SOFTBUS_OK);
 }
 } // namespace OHOS
+

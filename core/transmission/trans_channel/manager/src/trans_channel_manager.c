@@ -205,10 +205,13 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel");
+    char *tmpName = NULL;
+    Anonymize(param->sessionName, &tmpName);
+    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel, sessionName=%{public}s, sessionId=%{public}d",
+        tmpName, param->sessionId);
+    AnonymizeFree(tmpName);
     int32_t ret = INVALID_CHANNEL_ID;
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
-    char *tmpName = NULL;
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     ret = TransAddSocketChannelInfo(
         param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
@@ -252,8 +255,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
-        "sessionName=%{public}s, laneHandle=%{public}u, linkType=%{public}u.",
-        tmpName, laneHandle, connInfo.type);
+        "sessionName=%{public}s, sessionId=%{public}d, laneHandle=%{public}u, linkType=%{public}u.",
+        tmpName, param->sessionId, laneHandle, connInfo.type);
     AnonymizeFree(tmpName);
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
     if (ret != SOFTBUS_OK) {
@@ -273,6 +276,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     TransSetSocketChannelStateBySession(param->sessionName, param->sessionId, CORE_SESSION_STATE_LAN_COMPLETE);
     ret = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId));
+    (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
     if (ret != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
@@ -291,8 +295,9 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         goto EXIT_ERR;
     }
     TransFreeAppInfo(appInfo);
-    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel ok: channelId=%{public}d, channelType=%{public}d",
-        transInfo->channelId, transInfo->channelType);
+    TRANS_LOGI(TRANS_CTRL,
+        "server TransOpenChannel ok: channelId=%{public}d, channelType=%{public}d, laneHandle=%{public}u",
+        transInfo->channelId, transInfo->channelType, laneHandle);
     return SOFTBUS_OK;
 EXIT_ERR:
     TransBuildTransOpenChannelEndEvent(&extra, transInfo, appInfo->timeStart, ret);
