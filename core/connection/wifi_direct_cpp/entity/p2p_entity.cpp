@@ -439,7 +439,7 @@ static void UpdateInterfaceInfo(
     std::string ip;
     ret = P2pAdapter::GetIpAddress(ip);
     if (ret != SOFTBUS_OK) {
-        CONN_LOG(CONN_WIFI_DIRECT, "get ip failed, error=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "get ip failed, error=%{public}d", ret);
     } else {
         CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s", WifiDirectAnonymizeIp(ip).c_str());
     }
