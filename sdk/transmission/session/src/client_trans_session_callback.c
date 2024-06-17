@@ -185,19 +185,19 @@ static int32_t HandleAsyncBindSuccess(
 NO_SANITIZE("cfi") static int32_t TransOnNegotiate(int32_t socket, const ISocketListener *socketCallback)
 {
     if (socketCallback == NULL) {
-        TRANS_LOGE(TRANS_SDK, "Invalid socketCallback");
+        TRANS_LOGE(TRANS_SDK, "Invalid socketCallback socket=%{public}d", socket);
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (socketCallback->OnNegotiate == NULL) {
-        TRANS_LOGW(TRANS_SDK, "no OnNegotiate callback function");
+        TRANS_LOGW(TRANS_SDK, "no OnNegotiate callback function socket=%{public}d", socket);
         return SOFTBUS_OK;
     }
 
     PeerSocketInfo info = {0};
     int32_t ret = ClientGetPeerSocketInfoById(socket, &info);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "Get peer socket info failed, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "Get peer socket info failed, ret=%{public}d, socket=%{public}d", ret, socket);
         return ret;
     }
 
@@ -538,7 +538,7 @@ int32_t ClientTransOnChannelBind(int32_t channelId, int32_t channelType)
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &socket, &sessionCallback, &isServer);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get session callback failed");
+        TRANS_LOGE(TRANS_SDK, "get session callback failed channelId=%{public}d", channelId);
         return ret;
     }
 
@@ -555,7 +555,7 @@ int32_t ClientTransOnChannelBind(int32_t channelId, int32_t channelType)
     ISocketListener *listener = &sessionCallback.socketServer;
     ret = TransOnBindSuccess(socket, listener);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client on bind failed");
+        TRANS_LOGE(TRANS_SDK, "client on bind failed channelId=%{public}d", channelId);
         return ret;
     }
     TRANS_LOGI(TRANS_SDK, "ok, channelId=%{public}d", channelId);

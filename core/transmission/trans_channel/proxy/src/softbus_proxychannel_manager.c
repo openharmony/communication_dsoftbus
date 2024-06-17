@@ -1206,7 +1206,7 @@ static int32_t TransProxyProcessHandshake(ProxyChannelInfo *chan, const ProxyMes
 {
     int32_t ret = OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened fail");
+        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened fail channelId=%{public}d", chan->channelId);
         (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
         TransProxyDelChanByChanId(chan->channelId);
         return ret;
@@ -1217,13 +1217,16 @@ static int32_t TransProxyProcessHandshake(ProxyChannelInfo *chan, const ProxyMes
     chan->appInfo.myHandleId = 0;
 
     if ((ret = TransProxyAckHandshake(msg->connId, chan, SOFTBUS_OK)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "AckHandshake fail");
+        TRANS_LOGE(
+            TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, msg->connId);
+        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
         OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
         TransProxyDelChanByChanId(chan->channelId);
         return ret;
     }
     if ((ret = OnProxyChannelBind(chan->channelId, &(chan->appInfo))) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelBind fail");
+        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelBind fail channelId=%{public}d, connId=%{public}u", chan->channelId,
+            msg->connId);
         (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
         TransProxyDelChanByChanId(chan->channelId);
         return ret;

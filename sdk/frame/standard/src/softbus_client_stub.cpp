@@ -714,7 +714,8 @@ int32_t SoftBusClientStub::OnChannelBindInner(MessageParcel &data, MessageParcel
 
     int32_t ret = OnChannelBind(channelId, channelType);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "OnChannelBindInner failed! ret=%{public}d.", ret);
+        COMM_LOGE(COMM_SDK, "OnChannelBindInner failed! ret=%{public}d, channelId=%{public}d, channelType=%{public}d.",
+            ret, channelId, channelType);
     }
     return ret;
 }

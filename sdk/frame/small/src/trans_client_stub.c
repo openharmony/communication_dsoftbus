@@ -158,7 +158,7 @@ int32_t ClientOnChannelBind(IpcIo *data, IpcIo *reply)
     ReadInt32(data, &channelType);
     int32_t ret = TransOnChannelBind(channelId, channelType);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "OnChannelBindInner failed! ret=%{public}d.", ret);
+        COMM_LOGE(COMM_SDK, "OnChannelBindInner failed! ret=%{public}d, channelId=%{public}d.", ret, channelId);
     }
     return ret;
 }

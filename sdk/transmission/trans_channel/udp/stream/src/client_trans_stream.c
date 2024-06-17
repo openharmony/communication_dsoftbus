@@ -137,7 +137,7 @@ static int32_t GetRawStreamEncryptOptByChannelId(int32_t channelId, bool *isEncr
 static int32_t OnStreamUdpChannelOpened(int32_t channelId)
 {
     if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnUdpChannelOpened == NULL)) {
-        TRANS_LOGE(TRANS_STREAM, "udp channel callback on udp channel opened is null.");
+        TRANS_LOGE(TRANS_STREAM, "udp channel callback on udp channel opened is null channelId=%{public}d", channelId);
         return SOFTBUS_NO_INIT;
     }
 
@@ -176,7 +176,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
 
         ret = OnStreamUdpChannelOpened(channel->channelId);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_STREAM, "OnUdpChannelOpened fail");
+            TRANS_LOGE(TRANS_STREAM, "OnUdpChannelOpened fail channelId=%{public}d", channel->channelId);
             return ret;
         }
 

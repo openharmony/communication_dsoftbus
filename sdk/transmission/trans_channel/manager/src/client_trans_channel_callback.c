@@ -187,8 +187,7 @@ int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t 
 
 int32_t TransOnChannelBind(int32_t channelId, int32_t channelType)
 {
-    TRANS_LOGI(TRANS_SDK, "[client]: channelId=%{public}d, channelType=%{public}d", channelId,
-        channelType);
+    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
             return ClientTransProxyOnChannelBind(channelId, channelType);

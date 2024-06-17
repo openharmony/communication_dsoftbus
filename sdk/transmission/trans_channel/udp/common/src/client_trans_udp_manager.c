@@ -323,7 +323,7 @@ int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
 int32_t TransOnUdpChannelBind(int32_t channelId, int32_t channelType)
 {
     if ((g_sessionCb == NULL) || (g_sessionCb->OnChannelBind == NULL)) {
-        TRANS_LOGE(TRANS_SDK, "client trans udp manager OnChannelBind is null");
+        TRANS_LOGE(TRANS_SDK, "client trans udp manager OnChannelBind is null channelId=%{public}d", channelId);
         return SOFTBUS_NO_INIT;
     }
 

@@ -188,7 +188,7 @@ int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
 {
     int32_t ret = SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     if (appInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "proxy channel bind app info invalid.");
+        TRANS_LOGE(TRANS_CTRL, "proxy channel bind app info invalid channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
 
