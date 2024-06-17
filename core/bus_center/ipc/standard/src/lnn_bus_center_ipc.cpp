@@ -290,9 +290,18 @@ int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid)
 
 int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel)
 {
-    int32_t ret = LnnSetDataLevel(dataLevel);
+    bool isSwitchLevelChanged = false;
+    int32_t ret = LnnSetDataLevel(dataLevel, &isSwitchLevelChanged);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "Set Data Level failed, ret=%{public}d", ret);
+        return ret;
+    }
+    if (!isSwitchLevelChanged) {
+        return SOFTBUS_OK;
+    }
+    ret = LnnTriggerDataLevelHeartbeat();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "Set Data Level but trigger heartbeat failed, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
