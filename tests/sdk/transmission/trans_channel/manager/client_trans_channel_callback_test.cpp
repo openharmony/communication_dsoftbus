@@ -262,7 +262,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelQosEventTest001, TestSize
  */
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelBindTest001, TestSize.Level0)
 {
-    int32_t channelId = 1;
+    const int32_t channelId = 1;
     int32_t ret = TransOnChannelBind(channelId, CHANNEL_TYPE_UDP);
     EXPECT_EQ(SOFTBUS_OK, ret);
 

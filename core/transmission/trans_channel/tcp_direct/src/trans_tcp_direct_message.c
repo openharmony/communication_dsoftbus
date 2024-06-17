@@ -285,6 +285,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
     int fd = conn->appInfo.fd;
+    SetIpTos(fd, FAST_MESSAGE_TOS);
     if (ConnSendSocketData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
         SendFailToFlushDevice(conn);
         SoftBusFree(buffer);
@@ -425,9 +426,10 @@ static int32_t NotifyChannelBind(int32_t channelId)
 {
     SessionConn conn;
     if (GetSessionConnById(channelId, &conn) == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "notify channel bind, get tdcInfo is null");
+        TRANS_LOGE(TRANS_CTRL, "notify channel bind, get tdcInfo is null channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
+    (void)memset_s(&conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
 
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
     int32_t ret = TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);

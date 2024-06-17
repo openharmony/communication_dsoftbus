@@ -184,6 +184,7 @@ static int32_t TransServerOnQosEvent(const char *pkgName, const QosParam *param)
 static int32_t TransServerOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
 {
     if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "pkgName is null channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
     ChannelMsg data = {
