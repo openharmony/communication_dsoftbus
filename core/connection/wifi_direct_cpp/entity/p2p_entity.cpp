@@ -438,13 +438,20 @@ static void UpdateInterfaceInfo(
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%d", ret);
     std::string ip;
     ret = P2pAdapter::GetIpAddress(ip);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get ip failed, error=%{public}d", ret);
+    } else {
+        CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s", WifiDirectAnonymizeIp(ip).c_str());
+    }
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get ip failed, error=%d", ret);
 
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [localMac, dynamicMac, ip, groupInfo, groupConfig](InterfaceInfo &interface) {
             interface.SetBaseMac(localMac);
             interface.SetDynamicMac(dynamicMac);
-            interface.SetIpString(Ipv4Info(ip));
+            if (!ip.empty()) {
+                interface.SetIpString(Ipv4Info(ip));
+            }
             interface.SetConnectedDeviceCount(groupInfo->clientDevices.size());
             interface.SetRole(groupInfo->isGroupOwner ? LinkInfo::LinkMode::GO : LinkInfo::LinkMode::GC);
             if (groupInfo->isGroupOwner) {
