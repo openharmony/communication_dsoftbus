@@ -1090,6 +1090,16 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler);
 }
 
+int32_t LnnTriggerDataLevelHeartbeat(void)
+{
+    LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDataLevelHeartbeat");
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V1, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnTriggerCloudSyncHeartbeat(void)
 {
     LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerCloudSyncHeartbeat");
