@@ -29,6 +29,7 @@
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_utils.h"
 #include "trans_auth_message.h"
+#include "trans_channel_common.h"
 #include "trans_channel_limit.h"
 #include "trans_event.h"
 #include "trans_session_manager.h"
@@ -440,6 +441,21 @@ static int32_t TransAuthProcessDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void FillExtraByAuthChannelErrorEnd(TransEventExtra *extra, AuthChannelInfo *info, int32_t ret)
+{
+    if (extra == NULL || info == NULL) {
+        return;
+    }
+    extra->result = EVENT_STAGE_RESULT_FAILED;
+    extra->errcode = ret;
+    extra->localUdid = info->appInfo.myData.deviceId;
+    if (strlen(info->appInfo.peerVersion) == 0) {
+        TransGetRemoteDeviceVersion(extra->peerUdid, CATEGORY_UDID, info->appInfo.peerVersion,
+            sizeof(info->appInfo.peerVersion));
+    }
+    extra->peerDevVer = info->appInfo.peerVersion;
+}
+
 static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len)
 {
     if (data == NULL || len <= 0) {
@@ -467,7 +483,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         TRANS_LOGE(TRANS_SVC, "unpackReply failed");
         goto EXIT_ERR;
     }
-    extra.peerUdid = info.appInfo.peerUdid;
+    extra.peerUdid = strlen(info.appInfo.peerUdid) != 0 ? info.appInfo.peerUdid : info.appInfo.peerData.deviceId;
     ret = TransAuthProcessDataConfig(&info.appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "ProcessDataConfig failed");
@@ -482,8 +498,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
     }
     return;
 EXIT_ERR:
-    extra.result = EVENT_STAGE_RESULT_FAILED;
-    extra.errcode = ret;
+    FillExtraByAuthChannelErrorEnd(&extra, &info, ret);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     AuthCloseChannel(authId);
     DelAuthChannelInfoByChanId((int32_t)(info.appInfo.myData.channelId));

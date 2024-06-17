@@ -41,9 +41,16 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         return SOFTBUS_INVALID_PARAM;
     }
     char peerUdid[DEVICE_ID_SIZE_MAX] = { 0 };
-    GetRemoteUdidWithNetworkId(channel->peerDeviceId, peerUdid, sizeof(peerUdid));
+    if (channel->isEncrypt) {
+        GetRemoteUdidWithNetworkId(channel->peerDeviceId, peerUdid, sizeof(peerUdid));
+    }
     int32_t osType = 0;
     GetOsTypeByNetworkId(channel->peerDeviceId, &osType);
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
+    char deviceVersion[DEVICE_VERSION_SIZE_MAX] = { 0 };
+    TransGetRemoteDeviceVersion(channel->peerDeviceId, channel->isEncrypt ? CATEGORY_NETWORK_ID : CATEGORY_UDID,
+        deviceVersion, sizeof(deviceVersion));
     int64_t timeStart = channel->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     TransEventExtra extra = {
@@ -56,7 +63,9 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         .callerPkg = pkgName,
         .socketName = sessionName,
         .osType = (osType < 0) ? UNKNOW_OS_TYPE : osType,
-        .peerUdid = peerUdid
+        .peerDevVer = deviceVersion,
+        .localUdid = localUdid,
+        .peerUdid = channel->isEncrypt ? peerUdid : channel->peerDeviceId
     };
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     TransGetSocketChannelStateByChannel(channel->channelId, channel->channelType, &state);
