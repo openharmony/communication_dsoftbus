@@ -415,16 +415,6 @@ LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
     return &g_linkAttr[linkType];
 }
 
-static int32_t g_laneLatency[LANE_LINK_TYPE_BUTT] = {
-    [LANE_BR] = BR_LATENCY,
-    [LANE_P2P] = P2P_LATENCY,
-    [LANE_HML] = HML_LATENCY,
-    [LANE_WLAN_2P4G] = WLAN_LATENCY,
-    [LANE_WLAN_5G] = WLAN_LATENCY,
-    [LANE_COC_DIRECT] = COC_DIRECT_LATENCY,
-    [LANE_BLE] = BLE_LATENCY,
-};
-
 static uint32_t g_laneBandWidth[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
     [HIGH_BAND_WIDTH] = {LANE_HML, LANE_P2P, LANE_LINK_TYPE_BUTT},
     [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_LINK_TYPE_BUTT},
@@ -475,14 +465,6 @@ static int32_t CheckLaneValid(const char *networkId, LaneLinkType linkType, Lane
     return SOFTBUS_OK;
 }
 
-static bool IsLaneFillMinLatency(uint32_t minLaneLatency, LaneLinkType linkType)
-{
-    if (minLaneLatency >= (uint32_t)g_laneLatency[linkType]) {
-        return true;
-    }
-    return false;
-}
-
 static int32_t GetBwType(uint32_t bandWidth)
 {
     int32_t bandWidthType;
@@ -514,8 +496,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
         if (g_laneBandWidth[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
         }
-        if ((CheckLaneValid(networkId, g_laneBandWidth[bandWidthType][i], request->transType) == SOFTBUS_OK) &&
-            IsLaneFillMinLatency(minLaneLatency, g_laneBandWidth[bandWidthType][i])) {
+        if ((CheckLaneValid(networkId, g_laneBandWidth[bandWidthType][i], request->transType) == SOFTBUS_OK)) {
             linkList[(*linksNum)++] = g_laneBandWidth[bandWidthType][i];
             LNN_LOGI(LNN_LANE, "decide optimal linkType=%{public}d", g_laneBandWidth[bandWidthType][i]);
             continue;
