@@ -135,6 +135,7 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
 bool LnnIsSupportBurstFeature(const char *networkId);
 bool LnnIsLocalSupportBurstFeature(void);
 void LnnDumpLocalBasicInfo(void);
+void LnnDumpOnlineDeviceInfo(void);
 
 #ifdef __cplusplus
 }

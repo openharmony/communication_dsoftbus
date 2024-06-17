@@ -98,6 +98,8 @@ public:
     virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
     virtual int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info) = 0;
     virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
+    virtual void LnnDumpLocalBasicInfo(void) = 0;
+    virtual void LnnDumpOnlineDeviceInfo(void) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -149,6 +151,8 @@ public:
     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
     MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *networkId, InfoKey key, uint32_t *info));
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey key, uint32_t *info));
+    MOCK_METHOD0(LnnDumpLocalBasicInfo, void (void));
+    MOCK_METHOD0(LnnDumpOnlineDeviceInfo, void (void));
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
         int32_t localFeatureCap, int32_t remoteFeatureCap);
