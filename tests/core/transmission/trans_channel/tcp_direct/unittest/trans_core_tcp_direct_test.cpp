@@ -514,7 +514,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId, 0);
-    EXPECT_EQ(ret, SOFTBUS_DATA_NOT_ENOUGH);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
 
     TransSrvDataListDeinit();
 }
