@@ -67,10 +67,57 @@ ohos_unittest("WifiDirectIpManagerTest") {
   ]
 }
 
+ohos_unittest("WifiDirectRoleOptionTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "//third_party/cJSON",
+    "//third_party/googletest/googletest/include",
+    "//third_party/googletest/googletest/src",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$wifi_direct_cpp_path/utils",
+    "$wifi_direct_cpp_path/adapter",
+    "$wifi_direct_cpp_path",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
+  ]
+  sources = [
+    "$wifi_direct_cpp_path/wifi_direct_role_option.cpp",
+    "wifi_direct_mock.cpp",
+    "wifi_direct_role_option_test.cpp",
+  ]
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":WifiDirectIpManagerTest",
+    ":WifiDirectRoleOptionTest",
     "data:unittest",
     "entity:unittest",
   ]
