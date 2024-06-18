@@ -32,31 +32,45 @@
 
 static const uint8_t SOFTBUS_RSA_KEY_ALIAS[] = "DsoftbusRsaKey";
 static const struct HksBlob g_rsaKeyAlias = { sizeof(SOFTBUS_RSA_KEY_ALIAS), (uint8_t *)SOFTBUS_RSA_KEY_ALIAS };
+static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramCount);
 static struct HksParam g_generateParams[] = {
-    { .tag = HKS_TAG_ALGORITHM,  .uint32Param = HKS_ALG_RSA                                      },
-    { .tag = HKS_TAG_KEY_SIZE,   .uint32Param = HKS_RSA_KEY_SIZE_2048                            },
-    { .tag = HKS_TAG_PURPOSE,    .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT},
-    { .tag = HKS_TAG_DIGEST,     .uint32Param = HKS_DIGEST_SHA256                                },
-    { .tag = HKS_TAG_PADDING,    .uint32Param = HKS_PADDING_OAEP                                 },
-    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB                                     },
+    { .tag = HKS_TAG_ALGORITHM,          .uint32Param = HKS_ALG_RSA                                      },
+    { .tag = HKS_TAG_KEY_SIZE,           .uint32Param = HKS_RSA_KEY_SIZE_2048                            },
+    { .tag = HKS_TAG_PURPOSE,            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT},
+    { .tag = HKS_TAG_DIGEST,             .uint32Param = HKS_DIGEST_SHA256                                },
+    { .tag = HKS_TAG_PADDING,            .uint32Param = HKS_PADDING_OAEP                                 },
+    { .tag = HKS_TAG_BLOCK_MODE,         .uint32Param = HKS_MODE_ECB                                     },
+    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE                        },
 };
 static struct HksParam g_decryptParams[] = {
-    { .tag = HKS_TAG_ALGORITHM,  .uint32Param = HKS_ALG_RSA            },
-    { .tag = HKS_TAG_PURPOSE,    .uint32Param = HKS_KEY_PURPOSE_DECRYPT},
-    { .tag = HKS_TAG_KEY_SIZE,   .uint32Param = HKS_RSA_KEY_SIZE_2048  },
-    { .tag = HKS_TAG_PADDING,    .uint32Param = HKS_PADDING_OAEP       },
-    { .tag = HKS_TAG_DIGEST,     .uint32Param = HKS_DIGEST_SHA256      },
-    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB           },
-    { .tag = HKS_TAG_MGF_DIGEST, .uint32Param = HKS_DIGEST_SHA1        },
+    { .tag = HKS_TAG_ALGORITHM,          .uint32Param = HKS_ALG_RSA              },
+    { .tag = HKS_TAG_PURPOSE,            .uint32Param = HKS_KEY_PURPOSE_DECRYPT  },
+    { .tag = HKS_TAG_KEY_SIZE,           .uint32Param = HKS_RSA_KEY_SIZE_2048    },
+    { .tag = HKS_TAG_PADDING,            .uint32Param = HKS_PADDING_OAEP         },
+    { .tag = HKS_TAG_DIGEST,             .uint32Param = HKS_DIGEST_SHA256        },
+    { .tag = HKS_TAG_BLOCK_MODE,         .uint32Param = HKS_MODE_ECB             },
+    { .tag = HKS_TAG_MGF_DIGEST,         .uint32Param = HKS_DIGEST_SHA1          },
+    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
 };
 
 static bool IsRsaKeyPairExist(struct HksBlob Alias)
 {
-    if (HksKeyExist(&Alias, NULL) == HKS_SUCCESS) {
+    struct HksParamSet *paramSet = NULL;
+    struct HksParam keyExistparams[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    if (ConstructKeyParamSet(&paramSet, keyExistparams, sizeof(keyExistparams) / sizeof(struct HksParam)) !=
+        SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "rsa keypair ConstructKeyParamSet failed.");
+        return false;
+    }
+    if (HksKeyExist(&Alias, paramSet) == HKS_SUCCESS) {
         COMM_LOGI(COMM_UTILS, "rsa keypair already exist.");
+        HksFreeParamSet(&paramSet);
         return true;
     } else {
         COMM_LOGE(COMM_UTILS, "rsa keypair do not exist.");
+        HksFreeParamSet(&paramSet);
         return false;
     }
 }
@@ -116,16 +130,28 @@ int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
     // Export public key
     uint8_t pubKey[HKS_RSA_KEY_SIZE_4096] = { 0 };
     struct HksBlob publicKeyBlob = { HKS_RSA_KEY_SIZE_4096, pubKey };
-    if (HksExportPublicKey(&g_rsaKeyAlias, NULL, &publicKeyBlob) != HKS_SUCCESS) {
-        COMM_LOGE(COMM_UTILS, "HksExportPubKey failed.");
+    struct HksParamSet *paramSet = NULL;
+    struct HksParam publicKeyParams[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    if (ConstructKeyParamSet(&paramSet, publicKeyParams, sizeof(publicKeyParams) / sizeof(struct HksParam)) !=
+        SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "pubilc key ConstructKeyParamSet failed.");
         return SOFTBUS_HUKS_ERR;
     }
+    if (HksExportPublicKey(&g_rsaKeyAlias, paramSet, &publicKeyBlob) != HKS_SUCCESS) {
+        COMM_LOGE(COMM_UTILS, "HksExportPubKey failed.");
+        HksFreeParamSet(&paramSet);
+        return SOFTBUS_HUKS_ERR;
+    }
+    HksFreeParamSet(&paramSet);
     COMM_LOGD(COMM_UTILS, "public key is X509, size=%{public}u.", publicKeyBlob.size);
-    if (memcpy_s(publicKey, publicKeyBlob.size, publicKeyBlob.data, publicKeyBlob.size) != EOK) {
+    if (memcpy_s(publicKey, publicKeyLen, publicKeyBlob.data, publicKeyBlob.size) != EOK) {
         COMM_LOGE(COMM_UTILS, "publicKey memcpy_s failed.");
         (void)memset_s(pubKey, sizeof(pubKey), 0, sizeof(pubKey));
         return SOFTBUS_MEM_ERR;
     }
+    (void)memset_s(pubKey, sizeof(pubKey), 0, sizeof(pubKey));
     return SOFTBUS_OK;
 }
 
