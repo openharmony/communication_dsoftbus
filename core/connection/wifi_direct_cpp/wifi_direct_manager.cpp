@@ -38,7 +38,7 @@ static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static WifiDirectEnhanceManager g_enhanceManager;
 static SyncPtkListener g_syncPtkListener;
 
-static uint32_t GetRequestId()
+static uint32_t GetRequestId(void)
 {
     return g_requestId++;
 }
@@ -64,7 +64,7 @@ static void SetElementType(struct WifiDirectConnectInfo *info)
     }
 }
 
-static int32_t AllocateListenerModuleId()
+static int32_t AllocateListenerModuleId(void)
 {
     std::lock_guard lock(g_listenerModuleIdLock);
     ListenerModule moduleId = UNUSE_BUTT;
@@ -426,17 +426,17 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
-static bool SupportHmlTwo()
+static bool SupportHmlTwo(void)
 {
     return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
 }
 
-static bool IsWifiP2pEnabled()
+static bool IsWifiP2pEnabled(void)
 {
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
 }
 
-static int GetStationFrequency()
+static int GetStationFrequency(void)
 {
     return OHOS::SoftBus::P2pAdapter::GetStationFrequency();
 }
@@ -456,7 +456,7 @@ static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
     g_syncPtkListener(remoteDeviceId, result);
 }
 
-static int32_t Init()
+static int32_t Init(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
     OHOS::SoftBus::WifiDirectInitiator::GetInstance().Init();
