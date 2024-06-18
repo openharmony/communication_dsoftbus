@@ -199,6 +199,14 @@ static void TransSetFirstTokenInfo(AppInfo *appInfo, TransEventExtra *event)
     event->firstTokenName = appInfo->tokenName;
 }
 
+static bool IsLaneModuleError(int32_t errcode)
+{
+    if (errcode >= SOFTBUS_LANE_ERR_BASE && errcode < SOFTBUS_CONN_ERR_BASE) {
+        return true;
+    }
+    return false;
+}
+
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     if (param == NULL || transInfo == NULL) {
@@ -300,6 +308,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         transInfo->channelId, transInfo->channelType, laneHandle);
     return SOFTBUS_OK;
 EXIT_ERR:
+    extra.linkType = IsLaneModuleError(ret) ? extra.linkType : CONNECT_HML;
     TransBuildTransOpenChannelEndEvent(&extra, transInfo, appInfo->timeStart, ret);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransAlarmExtra extraAlarm;
