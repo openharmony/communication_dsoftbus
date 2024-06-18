@@ -742,7 +742,7 @@ static bool SetLpParam(LpServerType type,
     lpParam.scanConfig = &scanConfig;
     lpParam.rawData.advData = (unsigned char *)AssembleAdvData(&bcParam->advData,
         (uint16_t *)&lpParam.rawData.advDataLen);
-    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, false, DISC_BLE, "assemble adv data failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, false, DISC_BLE_ADAPTER, "assemble advData fail");
     if (SetBtUuidByBroadCastType(type, &lpParam.uuid) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "set bt uuid fail, advHandle=%{public}d", bcParam->advHandle);
         return false;
