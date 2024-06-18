@@ -59,17 +59,17 @@ int P2pCreateGroupState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P
 
 int P2pCreateGroupState::Connect(const std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> &operation)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pCreateGroupState::DestroyGroup(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pCreateGroupState::RemoveLink(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 void P2pCreateGroupState::OnP2pStateChangeEvent(P2pState state)
@@ -81,7 +81,7 @@ void P2pCreateGroupState::OnP2pStateChangeEvent(P2pState state)
     } else {
         timer_.Unregister(operation_->timerId_);
         if (operation_ != nullptr) {
-            result.errorCode_ = SOFTBUS_ERR;
+            result.errorCode_ = SOFTBUS_CONN_P2P_CONNECT_STATE_WIFI_STATE_NOT_STARTED;
             operation_->promise_.set_value(result);
         }
         ChangeState(P2pUnavailableState::Instance(), nullptr);
@@ -94,7 +94,7 @@ void P2pCreateGroupState::OnP2pConnectionChangeEvent(
     timer_.Unregister(operation_->timerId_);
     P2pOperationResult result;
     if (info.connectState == P2P_DISCONNECTED) {
-        result.errorCode_ = SOFTBUS_ERR;
+        result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
     } else {
         P2pEntity::GetInstance().currentFrequency_ = groupInfo->frequency;
         result.errorCode_ = SOFTBUS_OK;

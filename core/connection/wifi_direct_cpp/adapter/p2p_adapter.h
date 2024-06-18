@@ -64,7 +64,6 @@ public:
     static bool IsWifiP2pEnabled();
     static std::string GetInterfaceCoexistCap();
     static int32_t GetStationFrequency();
-    static bool IsThreeVapConflict();
 
     static int32_t P2pCreateGroup(const CreateGroupParam &param);
     static int32_t P2pConnectGroup(const ConnectParam &param);
@@ -82,7 +81,6 @@ public:
     static int32_t GetDynamicMacAddress(std::string &macString);
     static int32_t RequestGcIp(const std::string &macString, std::string &ipString);
     static int32_t P2pConfigGcIp(const std::string &interface, const std::string &ip);
-    static int32_t SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size);
     static bool IsWideBandSupported();
     static bool IsWifiEnable();
     static bool IsWifiConnected();

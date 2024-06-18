@@ -340,7 +340,8 @@ int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std:
     CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s", interface.c_str());
 
     int32_t socketFd = socket(AF_INET, SOCK_DGRAM, 0);
-    CONN_CHECK_AND_RETURN_RET_LOGW(socketFd >= 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "open socket failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        socketFd >= 0, SOFTBUS_CONN_OPEN_SOCKET_FAILED, CONN_WIFI_DIRECT, "open socket failed");
 
     struct ifreq request { };
     (void)memset_s(&request, sizeof(request), 0, sizeof(request));
@@ -348,18 +349,19 @@ int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std:
     if (ret != EOK) {
         CONN_LOGW(CONN_WIFI_DIRECT, "copy interface name failed");
         close(socketFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_COPY_INTERFACE_NAME_FAILED;
     }
 
     ret = ioctl(socketFd, SIOCGIFADDR, &request);
     close(socketFd);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret >= 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get ifr conf failed ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret >= 0, SOFTBUS_CONN_GET_IFR_CONF_FAILED, CONN_WIFI_DIRECT, "get ifr conf failed ret=%{public}d", ret);
 
     auto *sockAddrIn = (struct sockaddr_in *)&request.ifr_addr;
     char ipString[IP_LEN] = { 0 };
     if (!inet_ntop(sockAddrIn->sin_family, &sockAddrIn->sin_addr, ipString, IP_LEN)) {
         CONN_LOGW(CONN_WIFI_DIRECT, "inet_ntop failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_INET_NTOP_FAILED;
     }
     ip = std::string(ipString);
     return SOFTBUS_OK;
@@ -382,7 +384,8 @@ int32_t WifiDirectUtils::IpStringToIntArray(const char *addrString, uint32_t *ad
         addrArraySize >= IPV4_ADDR_ARRAY_LEN, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "array to small");
 
     int32_t ret = sscanf_s(addrString, "%u.%u.%u.%u", addrArray, addrArray + 1, addrArray + 2, addrArray + 3);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret > 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "scan ip number failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret > 0, SOFTBUS_CONN_SCAN_IP_NUMBER_FAILED, CONN_WIFI_DIRECT, "scan ip number failed");
     return SOFTBUS_OK;
 }
 
