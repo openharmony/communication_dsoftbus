@@ -26,3 +26,8 @@ void UpdateDpSameAccount(const char *accountHash, const char *deviceId)
     (void)accountHash;
     (void)deviceId;
 }
+
+void DelNotTrustDevice(const char *udid)
+{
+    (void)udid;
+}

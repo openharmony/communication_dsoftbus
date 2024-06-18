@@ -17,6 +17,8 @@
 
 #include <cstdint>
 #include <cstring>
+#include <set>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -40,31 +42,62 @@
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
 static constexpr uint32_t ACCOUNT_HASH_SHORT_LEN = 2;
+static std::set<std::string> g_notTrustedDevices;
+static std::mutex g_mutex;
 
-bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
+static bool IsNotTrustDevice(std::string deviceIdHash)
 {
-    if (deviceIdHash == nullptr) {
-        LNN_LOGE(LNN_STATE, "deviceIdHash is null");
-        return false;
+    std::lock_guard<std::mutex> autoLock(g_mutex);
+    if (g_notTrustedDevices.find(deviceIdHash) != g_notTrustedDevices.end()) {
+        LNN_LOGI(LNN_STATE, "device not trusted");
+        return true;
     }
-    std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> trustDevices;
-    int32_t ret = DpClient::GetInstance().GetAllTrustDeviceProfile(trustDevices);
-    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS || trustDevices.empty()) {
-        LNN_LOGE(LNN_STATE, "GetAllTrustDeviceProfile ret=%{public}d, size=%{public}zu", ret, trustDevices.size());
-        return false;
+    return false;
+}
+
+static void InsertNotTrustDevice(std::string deviceIdHash)
+{
+    std::lock_guard<std::mutex> autoLock(g_mutex);
+    g_notTrustedDevices.insert(deviceIdHash);
+}
+
+void DelNotTrustDevice(const char *udid)
+{
+    if (udid == nullptr) {
+        LNN_LOGE(LNN_STATE, "udid is null");
+        return;
     }
-    char *anonyDeviceIdHash = nullptr;
-    Anonymize(deviceIdHash, &anonyDeviceIdHash);
-    static uint32_t callCount = 0;
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    char hashStr[CUST_UDID_LEN + 1] = {0};
+    if (SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "generate udidhash fail");
+        return;
+    }
+    if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash, CUST_UDID_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "convert udidhash hex string fail");
+        return;
+    }
+    std::lock_guard<std::mutex> autoLock(g_mutex);
+    if (g_notTrustedDevices.find(hashStr) != g_notTrustedDevices.end()) {
+        LNN_LOGI(LNN_STATE, "remove not trust device");
+        g_notTrustedDevices.erase(hashStr);
+        return;
+    }
+    LNN_LOGI(LNN_STATE, "not need remove");
+}
+
+static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> &trustDevices,
+    const char *deviceIdHash, const char *anonyDeviceIdHash)
+{
     for (const auto &trustDevice : trustDevices) {
         if (trustDevice.GetDeviceIdType() != (int32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
+            trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
             trustDevice.GetDeviceId().empty()) {
             continue;
         }
         char *anonyUdid = nullptr;
         Anonymize(trustDevice.GetDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s, callCount=%{public}u",
-            anonyUdid, anonyDeviceIdHash, callCount++);
+        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", anonyUdid, anonyDeviceIdHash);
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};
@@ -80,10 +113,37 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         }
         if (strncmp(hashStr, deviceIdHash, strlen(deviceIdHash)) == 0) {
             LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s", anonyDeviceIdHash);
-            AnonymizeFree(anonyDeviceIdHash);
             return true;
         }
     }
+    return false;
+}
+
+bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
+{
+    if (deviceIdHash == nullptr || IsNotTrustDevice(deviceIdHash)) {
+        LNN_LOGE(LNN_STATE, "deviceIdHash is null or device not trusted");
+        return false;
+    }
+    std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> trustDevices;
+    int32_t ret = DpClient::GetInstance().GetAllTrustDeviceProfile(trustDevices);
+    if (ret != OHOS::DistributedDeviceProfile::DP_NOT_FIND_DATA && ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllTrustDeviceProfile ret=%{public}d", ret);
+        return false;
+    }
+    if (trustDevices.empty()) {
+        LNN_LOGE(LNN_STATE, "trustDevices is empty");
+        InsertNotTrustDevice(deviceIdHash);
+        return false;
+    }
+    char *anonyDeviceIdHash = nullptr;
+    Anonymize(deviceIdHash, &anonyDeviceIdHash);
+    static uint32_t callCount = 0;
+    if (IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash)) {
+        AnonymizeFree(anonyDeviceIdHash);
+        return true;
+    }
+    InsertNotTrustDevice(deviceIdHash);
     LNN_LOGI(LNN_STATE, "device is not trusted in dp, deviceIdHash=%{public}s, callCount=%{public}u",
         anonyDeviceIdHash, callCount++);
     AnonymizeFree(anonyDeviceIdHash);
