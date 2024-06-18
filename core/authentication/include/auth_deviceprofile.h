@@ -24,6 +24,7 @@ extern "C" {
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash);
 void UpdateDpSameAccount(const char *accountHash, const char *deviceId);
+void DelNotTrustDevice(const char *udid);
 
 #ifdef __cplusplus
 #if __cplusplus
