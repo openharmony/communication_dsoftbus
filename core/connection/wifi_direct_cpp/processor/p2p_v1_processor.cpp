@@ -40,6 +40,43 @@ std::map<std::string, P2pV1Processor::ProcessorState> P2pV1Processor::stateNameM
     { "NullState",                 nullptr                                   }
 };
 
+// SoftBusErrNo to WifiDirectErrorCode
+static std::map<int, int> p1ErrorMapping = {
+    {SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE,                     V1_ERROR_IF_NOT_AVAILABLE                   },
+    { SOFTBUS_CONN_PV1_BOTH_GO_ERR,                         V1_ERROR_BOTH_GO                            },
+    { SOFTBUS_CONN_PV1_APPLY_GC_IP_FAIL,                    ERROR_P2P_APPLY_GC_IP_FAIL                  },
+    { SOFTBUS_CONN_PV1_REUSE_FAIL,                          V1_ERROR_REUSE_FAILED                       },
+    { SOFTBUS_CONN_PV1_CONNECT_GROUP_FAIL,                  V1_ERROR_CONNECT_GROUP_FAILED               },
+    { SOFTBUS_CONN_PV1_BUSY_ERR,                            V1_ERROR_BUSY                               },
+    { SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE, V1_ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE},
+};
+
+static inline int ErrorCodeToV1ProtocolCode(int reason)
+{
+    if (p1ErrorMapping.find(reason) != p1ErrorMapping.end()) {
+        auto code = p1ErrorMapping[reason];
+        if (code > V1_ERROR_END && code < V1_ERROR_START) {
+            return code - V1_ERROR_START;
+        }
+        return code;
+    }
+    return reason;
+}
+
+static inline int ErrorCodeFromV1ProtocolCode(int reason)
+{
+    if (reason < 0 && reason > V1_ERROR_END - V1_ERROR_START) {
+        auto code = reason + V1_ERROR_START;
+        for (const auto it : p1ErrorMapping) {
+            if (it.second == code) {
+                return it.first;
+            }
+        }
+        return code;
+    }
+    return reason;
+}
+
 P2pV1Processor::P2pV1Processor(const std::string &remoteDeviceId)
     : WifiDirectProcessor(remoteDeviceId), state_(&P2pV1Processor::AvailableState), timer_("P2pProcessor", TIMER_TIME),
     timerId_(Utils::TIMER_ERR_INVALID_VALUE)
@@ -145,7 +182,7 @@ void P2pV1Processor::WaitingClientJoiningState()
             CleanupIfNeed(ret, event->remoteDeviceId_);
             if (ret != SOFTBUS_OK) {
                 if (connectCommand_ != nullptr) {
-                    connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(ret));
+                    connectCommand_->OnFailure(ret);
                     connectCommand_ = nullptr;
                 }
                 Terminate();
@@ -206,7 +243,7 @@ void P2pV1Processor::ProcessConnectCommand(std::shared_ptr<ConnectCommand> &comm
     }
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "connect failed, error=%{public}d", ret);
-        command->OnFailure(static_cast<WifiDirectErrorCode>(ret));
+        command->OnFailure(ret);
         Terminate();
     }
 }
@@ -247,7 +284,7 @@ void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand>
     auto ret = SendDisconnectRequest(*command->GetNegotiateChannel());
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "send disconnect request failed, error=%{public}d", ret);
-        command->OnFailure(static_cast<WifiDirectErrorCode>(ret));
+        command->OnFailure(ret);
         Terminate();
     }
 
@@ -270,7 +307,7 @@ void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand>
     ret = RemoveLink(command->GetRemoteDeviceId());
     if (ret != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remove link failed, error=%{public}d", ret);
-        command->OnFailure(static_cast<WifiDirectErrorCode>(ret));
+        command->OnFailure(ret);
         Terminate();
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "remove link success");
@@ -286,7 +323,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<Neg
     bool reply = true;
     bool terminate = false;
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_CONN_PV1_INTERNAL_ERR0R;
     switch (msgType) {
         case LegacyCommandType::CMD_CONN_V1_REQ:
             ret = ProcessConnectRequest(command);
@@ -313,7 +350,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<Neg
     if (ret != SOFTBUS_OK) {
         terminate = true;
         if (reply) {
-            SendNegotiateResult(*command->GetNegotiateChannel(), static_cast<WifiDirectErrorCode>(ret));
+            SendNegotiateResult(*command->GetNegotiateChannel(), ret);
         }
     }
     if (terminate) {
@@ -340,7 +377,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingReqResponseState(std::share
             break;
     }
     if (ret != SOFTBUS_OK) {
-        connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(ret));
+        connectCommand_->OnFailure(ret);
         connectCommand_ = nullptr;
         Terminate();
     }
@@ -408,7 +445,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::sha
     if (ret != SOFTBUS_OK) {
         terminate = true;
         if (connectCommand_ != nullptr) {
-            connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(ret));
+            connectCommand_->OnFailure(ret);
             connectCommand_ = nullptr;
         }
     }
@@ -439,7 +476,7 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingClientJoiningState(std::sha
     }
     if (ret != SOFTBUS_OK) {
         if (connectCommand_ != nullptr) {
-            connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(ret));
+            connectCommand_->OnFailure(ret);
             connectCommand_ = nullptr;
         }
         Terminate();
@@ -491,7 +528,7 @@ void P2pV1Processor::OnWaitReuseResponseTimeoutEvent()
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "wait reuse response timeout");
     if (connectCommand_ != nullptr) {
-        connectCommand_->OnFailure(ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT);
+        connectCommand_->OnFailure(SOFTBUS_CONN_PV1_WAIT_REUSE_RESPONSE_TIMEOUT);
         connectCommand_ = nullptr;
     }
     Terminate();
@@ -501,7 +538,7 @@ void P2pV1Processor::OnWaitAuthHandShakeTimeoutEvent()
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "wait auth hand shake timeout");
     if (connectCommand_ != nullptr) {
-        connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(SOFTBUS_TIMOUT));
+        connectCommand_->OnFailure(SOFTBUS_CONN_PV1_WAIT_AUTH_HANDSHAKE_TIMEOUT);
         connectCommand_ = nullptr;
     }
     Terminate();
@@ -550,7 +587,7 @@ int P2pV1Processor::CreateLink()
         case LinkInfo::LinkMode::GC:
             return CreateLinkAsGc();
         default:
-            return SOFTBUS_ERR;
+            return SOFTBUS_CONN_PV1_IF_ROLE_INVALID;
     }
 }
 
@@ -562,8 +599,8 @@ int P2pV1Processor::CreateLinkAsNone()
         return SOFTBUS_OK;
     });
     if (!p2pEnable) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "V1_ERROR_IF_NOT_AVAILABLE");
-        return V1_ERROR_IF_NOT_AVAILABLE;
+        CONN_LOGE(CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE");
+        return SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE;
     }
 
     auto expectApiRole = connectCommand_->GetConnectInfo().info_.expectApiRole;
@@ -583,7 +620,7 @@ int P2pV1Processor::CreateLinkAsNone()
             break;
         default:
             CONN_LOGE(CONN_WIFI_DIRECT, "illegal expected role, role=%{public}d", expectApiRole);
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_CONN_PV1_REQUEST_ROLE_INVALID;
     }
 
     connectCommand_->PreferNegotiateChannel();
@@ -615,7 +652,7 @@ int P2pV1Processor::CreateLinkAsGo()
     std::string gcIp;
     ret = P2pAdapter::RequestGcIp(remoteMac, gcIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ERROR_P2P_APPLY_GC_IP_FAIL, CONN_WIFI_DIRECT, "request gc ip failed, error=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "request gc ip failed, error=%{public}d", ret);
     auto success = LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P,
         connectCommand_->GetRemoteDeviceId(), [remoteMac, gcIp, localIp, localMac](InnerLink &link) {
             link.SetRemoteBaseMac(remoteMac);
@@ -624,7 +661,7 @@ int P2pV1Processor::CreateLinkAsGo()
             link.SetLocalIpv4(localIp);
             link.SetState(InnerLink::LinkState::CONNECTING);
         });
-    CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "save remote ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "save remote ip failed");
 
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
 
@@ -638,8 +675,8 @@ int P2pV1Processor::CreateLinkAsGo()
 
 int P2pV1Processor::CreateLinkAsGc()
 {
-    CONN_LOGE(CONN_WIFI_DIRECT, "V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE");
-    return V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE;
+    CONN_LOGE(CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE");
+    return SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE;
 }
 
 int P2pV1Processor::ProcessConnectRequest(std::shared_ptr<NegotiateCommand> &command)
@@ -659,8 +696,8 @@ int P2pV1Processor::ProcessConnectRequest(std::shared_ptr<NegotiateCommand> &com
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get role info failed, error=%{public}d", ret);
 
     if (myRole == LinkInfo::LinkMode::NONE && !p2pEnable) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "V1_ERROR_IF_NOT_AVAILABLE");
-        return V1_ERROR_IF_NOT_AVAILABLE;
+        CONN_LOGE(CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE");
+        return SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE;
     }
 
     auto remoteConfig = msg.GetLegacyP2pWifiConfigInfo();
@@ -680,7 +717,7 @@ int P2pV1Processor::ProcessConnectRequest(std::shared_ptr<NegotiateCommand> &com
         return ProcessConnectRequestAsGo(command, myRole);
     } else if (finalRole == static_cast<int>(WifiDirectRole::WIFI_DIRECT_ROLE_GC)) {
         return ProcessConnectRequestAsGc(command, myRole);
-    } else if (finalRole == static_cast<int>(ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE)) {
+    } else if (finalRole == static_cast<int>(SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE)) {
         return ProcessNoAvailableInterface(command, myRole);
     }
 
@@ -691,8 +728,8 @@ int P2pV1Processor::ProcessConnectRequest(std::shared_ptr<NegotiateCommand> &com
 int P2pV1Processor::ProcessConnectRequestAsGo(std::shared_ptr<NegotiateCommand> &command, LinkInfo::LinkMode myRole)
 {
     auto msg = command->GetNegotiateMessage();
-    CONN_CHECK_AND_RETURN_RET_LOGW(msg.GetLegacyP2pContentType() == LegacyContentType::GC_INFO, V1_ERROR_BOTH_GO,
-        CONN_WIFI_DIRECT, "content type not equal gc info");
+    CONN_CHECK_AND_RETURN_RET_LOGW(msg.GetLegacyP2pContentType() == LegacyContentType::GC_INFO,
+        SOFTBUS_CONN_PV1_BOTH_GO_ERR, CONN_WIFI_DIRECT, "content type not equal gc info");
 
     auto remoteMac = msg.GetLegacyP2pGcMac();
     if (myRole != LinkInfo::LinkMode::GO) {
@@ -702,13 +739,13 @@ int P2pV1Processor::ProcessConnectRequestAsGo(std::shared_ptr<NegotiateCommand> 
     } else {
         std::string remoteIp;
         auto ret = P2pAdapter::RequestGcIp(remoteMac, remoteIp);
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ERROR_P2P_APPLY_GC_IP_FAIL, CONN_WIFI_DIRECT,
-            "apply gc ip failed, error=%{public}d", ret);
+        CONN_CHECK_AND_RETURN_RET_LOGW(
+            ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "apply gc ip failed, error=%{public}d", ret);
         CONN_LOGI(CONN_WIFI_DIRECT, "apply gc ip %{public}s", WifiDirectAnonymizeIp(remoteIp).c_str());
 
         ret = ReuseP2p();
         CONN_CHECK_AND_RETURN_RET_LOGW(
-            ret == SOFTBUS_OK, V1_ERROR_REUSE_FAILED, CONN_WIFI_DIRECT, "reuse p2p failed, error=%{public}d", ret);
+            ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "reuse p2p failed, error=%{public}d", ret);
 
         std::string localMac;
         std::string localIp;
@@ -718,7 +755,7 @@ int P2pV1Processor::ProcessConnectRequestAsGo(std::shared_ptr<NegotiateCommand> 
                 localIp = interface.GetIpString().ToIpString();
                 return SOFTBUS_OK;
             });
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, V1_ERROR_REUSE_FAILED, CONN_WIFI_DIRECT,
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_PV1_REUSE_FAIL, CONN_WIFI_DIRECT,
             "update inner link failed, error=%{public}d", ret);
         auto success = LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(),
             [localMac, remoteMac, localIp, remoteIp](InnerLink &link) {
@@ -730,16 +767,17 @@ int P2pV1Processor::ProcessConnectRequestAsGo(std::shared_ptr<NegotiateCommand> 
 
                 link.SetState(InnerLink::LinkState::CONNECTING);
             });
-        CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
+        CONN_CHECK_AND_RETURN_RET_LOGW(
+            success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     }
 
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
     auto ret = SendConnectResponseAsGo(*command->GetNegotiateChannel(), remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "send connection response failed, error=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "send connection response failed, error=%{public}d", ret);
 
     SwitchState(&P2pV1Processor::WaitingClientJoiningState, -1);
-    return ret;
+    return SOFTBUS_OK;
 }
 
 int P2pV1Processor::SendConnectResponseAsGo(const NegotiateChannel &channel, const std::string &remoteMac)
@@ -804,9 +842,8 @@ int P2pV1Processor::ProcessConnectRequestAsGc(std::shared_ptr<NegotiateCommand> 
 
     if (myRole == LinkInfo::LinkMode::GC) {
         ret = ReuseP2p();
-        CONN_CHECK_AND_RETURN_RET_LOGW(
-            ret == SOFTBUS_OK, V1_ERROR_REUSE_FAILED, CONN_WIFI_DIRECT, "V1_ERROR_REUSE_FAILED");
-        ret = SendNegotiateResult(*command->GetNegotiateChannel(), OK);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_REUSE_FAIL");
+        ret = SendNegotiateResult(*command->GetNegotiateChannel(), SOFTBUS_OK);
         CONN_CHECK_AND_RETURN_RET_LOGW(
             ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "send result message failed, error=%{public}d", ret);
         Terminate();
@@ -814,9 +851,9 @@ int P2pV1Processor::ProcessConnectRequestAsGc(std::shared_ptr<NegotiateCommand> 
 
     CONN_LOGI(CONN_WIFI_DIRECT, "start connect group");
     ret = ConnectGroup(msg, command->GetNegotiateChannel());
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, V1_ERROR_CONNECT_GROUP_FAILED, CONN_WIFI_DIRECT,
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_PV1_CONNECT_GROUP_FAIL, CONN_WIFI_DIRECT,
         "connect group failed, error=%{public}d", ret);
-    ret = SendNegotiateResult(*command->GetNegotiateChannel(), OK);
+    ret = SendNegotiateResult(*command->GetNegotiateChannel(), SOFTBUS_OK);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "send result message failed, error=%{public}d", ret);
 
@@ -874,7 +911,7 @@ int P2pV1Processor::SendInterfaceInfoResponse(const NegotiateChannel &channel)
     return channel.SendMessage(response);
 }
 
-int P2pV1Processor::SendNegotiateResult(const NegotiateChannel &channel, enum WifiDirectErrorCode reason)
+int P2pV1Processor::SendNegotiateResult(const NegotiateChannel &channel, int reason)
 {
     NegotiateMessage result;
     result.SetLegacyP2pVersion(P2P_VERSION);
@@ -958,10 +995,10 @@ int P2pV1Processor::ProcessNoAvailableInterface(std::shared_ptr<NegotiateCommand
     if (needFix) {
         CONN_LOGI(CONN_WIFI_DIRECT, "fix the obsolete link");
         (void)DestroyGroup();
-        return ERROR_WIFI_DIRECT_LOCAL_DISCONNECTED_REMOTE_CONNECTED;
+        return SOFTBUS_CONN_PV1_LOCAL_DISCONNECTED_REMOTE_CONNECTED;
     }
 
-    return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
+    return SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR;
 }
 
 int P2pV1Processor::ProcessConflictRequest(std::shared_ptr<NegotiateCommand> &command)
@@ -974,7 +1011,7 @@ int P2pV1Processor::ProcessConflictRequest(std::shared_ptr<NegotiateCommand> &co
     auto reversal = WifiDirectUtils::CompareIgnoreCase(localMac, remoteMac) < 0;
     if (!reversal) {
         CONN_LOGI(CONN_WIFI_DIRECT, "no need reversal, ignore remote request");
-        auto ret = SendNegotiateResult(*command->GetNegotiateChannel(), V1_ERROR_BUSY);
+        auto ret = SendNegotiateResult(*command->GetNegotiateChannel(), SOFTBUS_CONN_PV1_BUSY_ERR);
         CONN_CHECK_AND_RETURN_RET_LOGW(
             ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "send result message failed, error=%{public}d", ret);
         return SOFTBUS_OK;
@@ -1006,7 +1043,7 @@ int P2pV1Processor::ProcessReuseRequest(std::shared_ptr<NegotiateCommand> &comma
 {
     auto msg = command->GetNegotiateMessage();
     auto remoteMac = msg.GetLegacyP2pMac();
-    auto result = V1_ERROR_REUSE_FAILED;
+    int result = SOFTBUS_CONN_PV1_REUSE_FAIL;
 
     int ret = SOFTBUS_OK;
     bool success = false;
@@ -1020,7 +1057,7 @@ int P2pV1Processor::ProcessReuseRequest(std::shared_ptr<NegotiateCommand> &comma
 
     ret = ReuseP2p();
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "V1_ERROR_REUSE_FAILED");
+        CONN_LOGE(CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_REUSE_FAIL");
         goto Failed;
     }
 
@@ -1031,7 +1068,7 @@ int P2pV1Processor::ProcessReuseRequest(std::shared_ptr<NegotiateCommand> &comma
         CONN_LOGE(CONN_WIFI_DIRECT, "update inner link failed");
         goto Failed;
     }
-    result = OK;
+    result = SOFTBUS_OK;
 
 Failed:
     ret = SendReuseResponse(*command->GetNegotiateChannel(), result);
@@ -1050,7 +1087,7 @@ int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &comm
     CONN_LOGI(
         CONN_WIFI_DIRECT, "result=%{public}d, remoteMac=%{public}s", result, WifiDirectAnonymizeMac(remoteMac).c_str());
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        result == OK, result, CONN_WIFI_DIRECT, "remote response failed. result=%{public}d", result);
+        result == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "remote response failed. result=%{public}d", result);
 
     auto ret = ReuseP2p();
     if (ret != SOFTBUS_OK) {
@@ -1060,7 +1097,6 @@ int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &comm
         return SOFTBUS_OK;
     }
 
-    ret = SOFTBUS_ERR;
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
     auto pid = connectCommand_->GetConnectInfo().info_.pid;
     WifiDirectLink dlink {};
@@ -1068,7 +1104,8 @@ int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &comm
         link.GenerateLink(requestId, pid, dlink, true);
         dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
     });
-    CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     connectCommand_->OnSuccess(dlink);
     connectCommand_ = nullptr;
     Terminate();
@@ -1229,7 +1266,7 @@ int P2pV1Processor::ProcessConnectResponseAtWaitingReqResponseState(std::shared_
         return ProcessConnectResponseAsNone(command);
     }
     CONN_LOGE(CONN_WIFI_DIRECT, "negotiate failed, my role invalid and changed during negotiation");
-    return V1_ERROR_CONNECTED_WITH_MISMATCHED_ROLE;
+    return SOFTBUS_CONN_PV1_CONNECTED_WITH_MISMATCHED_ROLE_ERR;
 }
 
 int P2pV1Processor::ProcessConnectResponseAtWaitingClientJoiningState(std::shared_ptr<NegotiateCommand> &command)
@@ -1247,7 +1284,7 @@ int P2pV1Processor::ProcessConnectResponseAtWaitingClientJoiningState(std::share
         return ProcessConnectResponseAsGo(command);
     }
     CONN_LOGE(CONN_WIFI_DIRECT, "negotiate failed, my role invalid and changed during negotiation");
-    return V1_ERROR_CONNECTED_WITH_MISMATCHED_ROLE;
+    return SOFTBUS_CONN_PV1_CONNECTED_WITH_MISMATCHED_ROLE_ERR;
 }
 
 int P2pV1Processor::ProcessConnectResponseAsGo(std::shared_ptr<NegotiateCommand> &command)
@@ -1256,7 +1293,7 @@ int P2pV1Processor::ProcessConnectResponseAsGo(std::shared_ptr<NegotiateCommand>
     auto contentType = msg.GetLegacyP2pContentType();
     if (contentType != LegacyContentType::RESULT) {
         CONN_LOGE(CONN_WIFI_DIRECT, "content type not equal result type");
-        return ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG;
+        return SOFTBUS_CONN_PV1_WRONG_NEGOTIATION_MSG_ERR;
     }
 
     auto remoteMac = msg.GetLegacyP2pMac();
@@ -1264,7 +1301,7 @@ int P2pV1Processor::ProcessConnectResponseAsGo(std::shared_ptr<NegotiateCommand>
 
     auto result = ErrorCodeFromV1ProtocolCode(static_cast<int32_t>(msg.GetLegacyP2pResult()));
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        result == OK, result, CONN_WIFI_DIRECT, "peer response error. result=%{public}d", result);
+        result == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "peer response error. result=%{public}d", result);
 
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
     auto pid = connectCommand_->GetConnectInfo().info_.pid;
@@ -1312,9 +1349,9 @@ int P2pV1Processor::ProcessConnectResponseAsNone(std::shared_ptr<NegotiateComman
 
     auto errorCode = ErrorCodeFromV1ProtocolCode(static_cast<int32_t>(msg.GetLegacyP2pResult()));
     CONN_LOGI(CONN_WIFI_DIRECT, "contentType=%{public}d, errorCode=%{public}d", contentType, errorCode);
-    if (errorCode == OK) {
+    if (errorCode == SOFTBUS_OK) {
         // when content type is invalid and error code is OK
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_PV1_INTERNAL_ERR0R;
     }
     return errorCode;
 }
@@ -1323,7 +1360,7 @@ int P2pV1Processor::ProcessConnectResponseWithGoInfoAsNone(std::shared_ptr<Negot
 {
     auto msg = command->GetNegotiateMessage();
     auto ret = ConnectGroup(msg, command->GetNegotiateChannel());
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, V1_ERROR_CONNECT_GROUP_FAILED, CONN_WIFI_DIRECT,
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_PV1_CONNECT_GROUP_FAIL, CONN_WIFI_DIRECT,
         "connect group failed, error=%{public}d", ret);
 
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
@@ -1334,7 +1371,8 @@ int P2pV1Processor::ProcessConnectResponseWithGoInfoAsNone(std::shared_ptr<Negot
             link.GenerateLink(requestId, pid, dlink, true);
             dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
         });
-    CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     connectCommand_->OnSuccess(dlink);
     connectCommand_ = nullptr;
 
@@ -1367,12 +1405,12 @@ int P2pV1Processor::ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<Ne
     auto contentType = msg.GetLegacyP2pContentType();
     if (contentType != LegacyContentType::RESULT) {
         CONN_LOGE(CONN_WIFI_DIRECT, "content type not equal result type");
-        return ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG;
+        return SOFTBUS_CONN_PV1_WRONG_NEGOTIATION_MSG_ERR;
     }
 
     auto result = ErrorCodeFromV1ProtocolCode(static_cast<int32_t>(msg.GetLegacyP2pResult()));
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        result == OK, result, CONN_WIFI_DIRECT, "peer response error. result=%{public}d", result);
+        result == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "peer response error. result=%{public}d", result);
 
     if (connectCommand_ != nullptr) {
         auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
@@ -1418,8 +1456,8 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
     std::string remoteMac = msg.GetLegacyP2pMac();
     std::string remoteIp;
     int32_t ret = P2pAdapter::RequestGcIp(remoteMac, remoteIp);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "apply gc ip failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_PV1_APPLY_GC_IP_FAIL, CONN_WIFI_DIRECT,
+        "apply gc ip failed, error=%{public}d", ret);
 
     std::string localMac;
     std::string localIp;
@@ -1442,7 +1480,8 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
             link.SetRemoteIpv4(remoteIp);
             link.SetState(InnerLink::LinkState::CONNECTING);
         });
-    CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
 
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
     return StartAuthListening(localIp);
@@ -1487,7 +1526,8 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
             link.SetLocalIpv4(localIp);
             link.SetState(InnerLink::LinkState::CONNECTED);
         });
-    CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     ret = StartAuthListening(localIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "start auth listen failed, error=%{public}d", ret);
@@ -1590,8 +1630,8 @@ int P2pV1Processor::ReuseLink(const std::shared_ptr<ConnectCommand> &command, In
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s", requestId,
         WifiDirectAnonymizeMac(command->GetConnectInfo().info_.remoteMac).c_str());
     auto ipv4Info = link.GetRemoteIpv4();
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        !ipv4Info.empty(), SOFTBUS_ERR, CONN_WIFI_DIRECT, "p2p link is used by another service");
+    CONN_CHECK_AND_RETURN_RET_LOGW(!ipv4Info.empty(), SOFTBUS_CONN_PV1_USED_BY_OTHER_SERVICE_ERR, CONN_WIFI_DIRECT,
+        "p2p link is used by another service");
 
     command->PreferNegotiateChannel();
     auto ret = SendReuseRequest(*command->GetConnectInfo().channel_);
@@ -1736,29 +1776,29 @@ int P2pV1Processor::GetFinalRoleAsGo(
     WifiDirectRole peerRole, WifiDirectRole expectedRole, const std::string &localGoMac, const std::string &remoteGoMac)
 {
     if (peerRole == WifiDirectRole::WIFI_DIRECT_ROLE_GO) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_P2P_BOTH_GO");
-        return ERROR_P2P_BOTH_GO;
+        CONN_LOGE(CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_BOTH_GO_ERR");
+        return SOFTBUS_CONN_PV1_BOTH_GO_ERR;
     }
     if (peerRole == WifiDirectRole::WIFI_DIRECT_ROLE_GC) {
         if (remoteGoMac.empty() || WifiDirectUtils::CompareIgnoreCase(remoteGoMac, localGoMac) != 0) {
-            return ERROR_P2P_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE;
+            return SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE;
         }
         if (expectedRole == WifiDirectRole::WIFI_DIRECT_ROLE_GO) {
             CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, remote expect GO");
-            return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
+            return SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR;
         }
         return WifiDirectRole::WIFI_DIRECT_ROLE_GO;
     }
     if (peerRole == WifiDirectRole::WIFI_DIRECT_ROLE_NONE) {
         if (expectedRole == WifiDirectRole::WIFI_DIRECT_ROLE_GO) {
             CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, remote expect GO");
-            return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
+            return SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR;
         }
         return WifiDirectRole::WIFI_DIRECT_ROLE_GO;
     }
 
     CONN_LOGE(CONN_WIFI_DIRECT, "peer role invalid. peerRole=%{public}d ", static_cast<int>(peerRole));
-    return ERROR_INVALID_INPUT_PARAMETERS;
+    return SOFTBUS_CONN_PV1_PEER_ROLE_INVALID;
 }
 
 int P2pV1Processor::GetFinalRoleAsGc(
@@ -1768,15 +1808,15 @@ int P2pV1Processor::GetFinalRoleAsGc(
         if (!localGoMac.empty() && WifiDirectUtils::CompareIgnoreCase(localGoMac, remoteGoMac) == 0) {
             return WifiDirectRole::WIFI_DIRECT_ROLE_GC;
         }
-        CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE");
-        return ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE;
+        CONN_LOGE(CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE");
+        return SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE;
     }
     if (peerRole == WifiDirectRole::WIFI_DIRECT_ROLE_NONE) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE");
-        return ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE;
+        CONN_LOGE(CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE");
+        return SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE;
     }
-    CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE");
-    return ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE;
+    CONN_LOGE(CONN_WIFI_DIRECT, "SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE");
+    return SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE;
 }
 
 int P2pV1Processor::GetFinalRoleAsNone(WifiDirectRole peerRole, WifiDirectRole expectedRole)
@@ -1785,16 +1825,16 @@ int P2pV1Processor::GetFinalRoleAsNone(WifiDirectRole peerRole, WifiDirectRole e
         if (expectedRole == WifiDirectRole::WIFI_DIRECT_ROLE_GC) {
             CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, peerRole=%{public}d, expectRole=%{public}d",
                 static_cast<int>(peerRole), static_cast<int>(expectedRole));
-            return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
+            return SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR;
         }
         return WifiDirectRole::WIFI_DIRECT_ROLE_GC;
     }
     if (peerRole == WifiDirectRole::WIFI_DIRECT_ROLE_GC) {
         if (expectedRole == WifiDirectRole::WIFI_DIRECT_ROLE_GO) {
             CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, remote expect GO");
-            return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
+            return SOFTBUS_CONN_PV1_GC_AVAILABLE_WITH_MISMATCHED_ROLE_ERR;
         }
-        return ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE;
+        return SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE;
     }
     if (peerRole == WifiDirectRole::WIFI_DIRECT_ROLE_NONE) {
         if (expectedRole == WifiDirectRole::WIFI_DIRECT_ROLE_GC) {

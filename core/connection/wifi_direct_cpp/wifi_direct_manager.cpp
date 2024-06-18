@@ -239,7 +239,7 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeDeviceId(uuid).c_str());
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "uuid=%{public}s localIp=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeDeviceId(uuid).c_str(),
@@ -270,7 +270,7 @@ static int32_t GetLocalIpByRemoteIpOnce(const char *remoteIp, char *localIp, int
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteIp=%{public}s localIp=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
@@ -292,7 +292,7 @@ static int32_t GetLocalIpByRemoteIp(const char *remoteIp, char *localIp, int32_t
         }
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_GET_LOCAL_IP_BY_REMOTE_IP_FAILED;
 }
 
 static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidSize)
@@ -311,7 +311,7 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteIp=%{public}s uuid=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
@@ -340,7 +340,7 @@ static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp, char *localMac
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str());
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s localMac=%{public}s remoteMac=%{public}s",
         OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str(), OHOS::SoftBus::WifiDirectAnonymizeMac(localMac).c_str(),
