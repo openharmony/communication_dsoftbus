@@ -436,7 +436,7 @@ void *SendHandlerLoop(void *arg)
     while (true) {
         int32_t status = ConnBrDequeueBlock((void **)(&sendNode));
         if (status == SOFTBUS_TIMOUT && sendNode == NULL) {
-            CONN_LOGW(CONN_BR, "br dequeue time out err=%{public}d", status);
+            CONN_LOGE(CONN_BR, "br dequeue time out err=%{public}d", status);
             CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBrSendLPInfo.lock) == SOFTBUS_OK,
                 NULL, CONN_BR, "lock fail!");
             if (g_startBrSendLPInfo.messagePosted) {
