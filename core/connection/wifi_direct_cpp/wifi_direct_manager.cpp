@@ -66,6 +66,7 @@ static void SetElementType(struct WifiDirectConnectInfo *info)
 
 static int32_t AllocateListenerModuleId()
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerModuleIdLock);
     ListenerModule moduleId = UNUSE_BUTT;
     for (int32_t i = 0; i < AUTH_ENHANCED_P2P_NUM; i++) {
@@ -93,6 +94,7 @@ static bool IsEnhanceP2pModuleId(int32_t moduleId)
 
 static void FreeListenerModuleId(int32_t moduleId)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerModuleIdLock);
     if (IsEnhanceP2pModuleId(moduleId)) {
         g_listenerModuleIds[moduleId - AUTH_ENHANCED_P2P_START] = false;
@@ -377,6 +379,7 @@ static void NotifyOffline(const char *remoteMac, const char *remoteIp, const cha
 
 static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onLocalRoleChange != nullptr) {
@@ -388,6 +391,7 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
 static void NotifyConnectedForSink(
     const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type, int channelId)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onConnectedForSink != nullptr) {
@@ -399,6 +403,7 @@ static void NotifyConnectedForSink(
 static void NotifyDisconnectedForSink(
     const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDisconnectedForSink != nullptr) {
@@ -409,6 +414,7 @@ static void NotifyDisconnectedForSink(
 
 static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, true, CONN_WIFI_DIRECT, "remote networkid is null");
     auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
     CONN_CHECK_AND_RETURN_RET_LOGE(!remoteUuid.empty(), true, CONN_WIFI_DIRECT, "get remote uuid failed");
