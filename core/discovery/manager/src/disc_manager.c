@@ -241,7 +241,8 @@ static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
     }
 }
 
-static void DfxCallInterfaceByMedium(const ExchangeMedium medium, const DiscoverMode mode, InterfaceFuncType type, int32_t reason)
+static void DfxCallInterfaceByMedium(
+    const ExchangeMedium medium, const DiscoverMode mode, InterfaceFuncType type, int32_t reason)
 {
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
