@@ -751,7 +751,7 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     Anonymize(cacheInfo->uuid, &anonyUuid);
     char *anonyNetworkId = NULL;
     Anonymize(cacheInfo->networkId, &anonyNetworkId);
-    LNN_LOGD(LNN_BUILDER,
+    LNN_LOGI(LNN_BUILDER,
         "Sync NodeInfo: WIFI_VERSION=%{public}" PRId64 ", BLE_VERSION=%{public}" PRId64
         ", ACCOUNT_ID=%{public}" PRId64 ", TRANSPORT_PROTOCOL=%{public}" PRIu64 ", FEATURE=%{public}" PRIu64
         ", CONN_SUB_FEATURE=%{public}" PRIu64 ", TIMESTAMP=%{public}" PRIu64 ", "
