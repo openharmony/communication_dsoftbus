@@ -39,6 +39,7 @@ typedef struct {
     int32_t (*OnQosEvent)(const char *pkgName, const QosParam *param);
     int32_t (*GetPkgNameBySessionName)(const char *sessionName, char *pkgName, uint16_t len);
     int32_t (*GetUidAndPidBySessionName)(const char *sessionName, int32_t *uid, int32_t *pid);
+    int32_t (*OnChannelBind)(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType);
 } IServerChannelCallBack;
 
 IServerChannelCallBack *TransServerGetChannelCb(void);

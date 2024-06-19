@@ -47,10 +47,10 @@ typedef enum {
  * @version 2.0
  */
 typedef struct {
-    char *name;             /**< My socket name */
-    char *peerName;         /**< Peer socket name */
-    char *peerNetworkId;    /**< Peer network ID */
-    char *pkgName;          /**< Package name */
+    char *name;             /**< My socket name, maximum length 255 bytes */
+    char *peerName;         /**< Peer socket name, maximum length 255 bytes */
+    char *peerNetworkId;    /**< Peer network ID, maximum length 64 bytes */
+    char *pkgName;          /**< Package name, maximum length 64 bytes */
     TransDataType dataType; /**< Data type */
 } SocketInfo;
 
@@ -61,9 +61,9 @@ typedef struct {
  * @version 2.0
  */
 typedef struct {
-    char *name;             /**< Peer socket name */
-    char *networkId;         /**< Peer network ID */
-    char *pkgName;          /**< Peer package name */
+    char *name;              /**< Peer socket name, maximum length 255 bytes */
+    char *networkId;         /**< Peer network ID, maximum length 64 bytes */
+    char *pkgName;           /**< Peer package name, maximum length 64 bytes */
     TransDataType dataType; /**< Data type of peer socket*/
 } PeerSocketInfo;
 

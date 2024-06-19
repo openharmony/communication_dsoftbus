@@ -264,10 +264,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, DataBusNativeVirtual001, TestSize.Level0)
 {
     int channelId = 0;
-    int ret = NotifyNearByUpdateHandleId(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = NotifyNearByUpdateMigrateOption(channelId);
+    int32_t ret = NotifyNearByUpdateMigrateOption(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     const char *peerDeviceId = NULL;

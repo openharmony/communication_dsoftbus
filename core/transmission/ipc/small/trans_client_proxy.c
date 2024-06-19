@@ -108,6 +108,34 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     return ans;
 }
 
+int32_t ClientIpcOnChannelBind(ChannelMsg *data)
+{
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind data is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteInt32(&io, data->msgChannelId);
+    WriteInt32(&io, data->msgChannelType);
+    SvcIdentity svc = {0};
+    int32_t ret = GetSvcIdentityByPkgName(data->msgPkgName, &svc);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind get svc failed, msgPkgName=%{public}s", data->msgPkgName);
+        return ret;
+    }
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    ret = SendRequest(svc, CLIENT_ON_CHANNEL_BIND, &io, NULL, option, NULL);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelBind SendRequest failed, msgPkgName=%{public}s", data->msgPkgName);
+    }
+    return ret;
+}
+
 int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
 {
     if (data == NULL) {
