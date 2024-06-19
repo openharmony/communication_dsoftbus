@@ -14,6 +14,7 @@
  */
 #include "trans_link_listener.h"
 
+#include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "securec.h"
 #include "softbus_common.h"
@@ -45,11 +46,23 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
         ListenerModule type = GetModuleByHmlIp(localIp);
         if (type != UNUSE_BUTT) {
             StopHmlListener(type);
+            if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, "") != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_SVC, "ServerSide set local p2p ip fail");
+            }
+            if (LnnSetDLP2pIp(peerUuid, CATEGORY_UUID, "") != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_SVC, "ServerSide set peer p2p ip fail");
+            }
             TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");
         }
         connType = TRANS_CONN_HML;
     } else {
         StopP2pSessionListener();
+        if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, "") != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_SVC, "ServerSide set local p2p ip fail");
+        }
+        if (LnnSetDLP2pIp(peerUuid, CATEGORY_UUID, "") != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_SVC, "ServerSide set peer p2p ip fail");
+        }
         connType = TRANS_CONN_P2P;
     }
 
