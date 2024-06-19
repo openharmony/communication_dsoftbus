@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer);
+int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo);
 int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode);
 int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo);
 int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, const char *data, uint32_t len);
