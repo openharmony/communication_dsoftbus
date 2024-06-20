@@ -271,9 +271,7 @@ static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageNa
             DfxCallInterfaceByMedium(info, packageName, type, bleRet);
 
             DISC_CHECK_AND_RETURN_RET_LOGE(coapRet == SOFTBUS_OK || bleRet == SOFTBUS_OK,
-                SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL,
-                DISC_CONTROL,
-                "all medium failed");
+                SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL, DISC_CONTROL, "all medium failed");
             return SOFTBUS_OK;
         }
         default:
