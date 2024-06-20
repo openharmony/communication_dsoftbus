@@ -421,7 +421,7 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if (!CheckSessionNameValidOnAuthChannel(appInfo.myData.sessionName)) {
         TRANS_LOGE(TRANS_SVC, "check auth channel pkginfo invalid.");
-        TransPostAuthChannelErrMsg(authId, ret, "check msginfo failed");
+        TransPostAuthChannelErrMsg(authId, SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED, "check msginfo failed");
         TransHandleErrorAndCloseChannel(&extra, authId, ret);
         return;
     }
@@ -604,7 +604,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
     LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
         if (item->appInfo.myData.channelId == info->appInfo.myData.channelId) {
             (void)SoftBusMutexUnlock(&g_authChannelList->lock);
-            TRANS_LOGE(TRANS_SVC, "not found authChannel, channelId=%{public}" PRId64,
+            TRANS_LOGE(TRANS_SVC, "the authChannel already exists, channelId=%{public}" PRId64,
                 info->appInfo.myData.channelId);
             return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
         }

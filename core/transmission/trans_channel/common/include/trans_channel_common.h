@@ -34,7 +34,7 @@ extern "C" {
 void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
     TransInfo *transInfo, LaneConnInfo *connInfo);
 
-AppInfo *TransCommonGetAppInfo(const SessionParam *param);
+int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo);
 
 void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt);
 
