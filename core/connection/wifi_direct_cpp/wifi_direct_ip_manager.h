@@ -25,6 +25,7 @@
 
 #include "conn_log.h"
 #include "data/ipv4_info.h"
+#include "wifi_direct_initiator.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectIpManager {
@@ -34,6 +35,7 @@ public:
         static WifiDirectIpManager instance;
         return instance;
     }
+    static void Init();
 
     std::string ApplyIpv6(const std::string &mac);
     int32_t ApplyIpv4(const std::vector<Ipv4Info> &localArray, const std::vector<Ipv4Info> &remoteArray,
@@ -43,6 +45,7 @@ public:
         const std::string &interface, const Ipv4Info &local, const Ipv4Info &remote, const std::string &remoteMac);
     void ReleaseIpv4(
         const std::string &interface, const Ipv4Info &local, const Ipv4Info &remote, const std::string &remoteMac);
+    static void ClearAllIpv4();
 
     void Lock()
     {
@@ -70,8 +73,18 @@ public:
         const std::string &interface, const std::string &ipString, const std::string &macString);
     static int32_t DeleteStaticArp(
         const std::string &interface, const std::string &ipString, const std::string &macString);
+
 private:
+    class Initiator {
+    public:
+        Initiator()
+        {
+            WifiDirectInitiator::GetInstance().Add(WifiDirectIpManager::Init);
+        }
+    };
+
     std::recursive_mutex mutex_;
+    static inline Initiator initiator_;
 };
 } // namespace OHOS::SoftBus
 #endif /* WIFI_DIRECT_IP_MANAGER_H */
