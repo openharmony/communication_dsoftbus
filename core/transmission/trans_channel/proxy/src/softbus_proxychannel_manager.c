@@ -975,6 +975,19 @@ static inline int32_t CheckAppTypeAndMsgHead(const ProxyMessageHead *msgHead, co
     return SOFTBUS_OK;
 }
 
+static void SelectRouteType(ConnectType type, RouteType *routeType)
+{
+    if (type == CONNECT_TCP) {
+        *routeType = WIFI_STA;
+    } else if (type == CONNECT_BR) {
+        *routeType = BT_BR;
+    } else if (type == CONNECT_BLE) {
+        *routeType = BT_BLE;
+    } else if (type == CONNECT_BLE_DIRECT) {
+        *routeType = BT_BLE;
+    }
+}
+
 static void ConstructProxyChannelInfo(
     ProxyChannelInfo *chan, const ProxyMessage *msg, int16_t newChanId, const ConnectionInfo *info)
 {
@@ -994,15 +1007,7 @@ static void ConstructProxyChannelInfo(
         chan->bleProtocolType = info->bleInfo.protocol;
     }
 
-    if (info->type == CONNECT_TCP) {
-        chan->appInfo.routeType = WIFI_STA;
-    } else if (info->type == CONNECT_BR) {
-        chan->appInfo.routeType = BT_BR;
-    } else if (info->type == CONNECT_BLE) {
-        chan->appInfo.routeType = BT_BLE;
-    } else if (info->type == CONNECT_BLE_DIRECT) {
-        chan->appInfo.routeType = BT_BLE;
-    }
+    SelectRouteType(info->type, &chan->appInfo.routeType);
 }
 
 static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
@@ -1058,19 +1063,6 @@ static void TransProxyReportAuditEvent(int32_t ret)
     TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, extra);
 }
 
-static void SelectRouteType(ConnectType type, ProxyChannelInfo *chan)
-{
-    if (type == CONNECT_TCP) {
-        chan->appInfo.routeType = WIFI_STA;
-    } else if (type == CONNECT_BR) {
-        chan->appInfo.routeType = BT_BR;
-    } else if (type == CONNECT_BLE) {
-        chan->appInfo.routeType = BT_BLE;
-    } else if (type == CONNECT_BLE_DIRECT) {
-        chan->appInfo.routeType = BT_BLE;
-    }
-}
-
 static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan)
 {
     int32_t ret = TransProxyUnpackHandshakeMsg(msg->data, chan, msg->dateLen);
@@ -1101,7 +1093,7 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     if (ConnGetTypeByConnectionId(msg->connId, &type) != SOFTBUS_OK) {
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
-    SelectRouteType(type, chan);
+    SelectRouteType(type, &chan->appInfo.routeType);
 
     int16_t newChanId = (int16_t)(GenerateChannelId(false));
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
@@ -1673,15 +1665,7 @@ int32_t TransProxyOpenProxyChannel(AppInfo *appInfo, const ConnectOption *connIn
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (connInfo->type == CONNECT_TCP) {
-        appInfo->routeType = WIFI_STA;
-    } else if (connInfo->type == CONNECT_BR) {
-        appInfo->routeType = BT_BR;
-    } else if (connInfo->type == CONNECT_BLE) {
-        appInfo->routeType = BT_BLE;
-    } else if (connInfo->type == CONNECT_BLE_DIRECT) {
-        appInfo->routeType = BT_BLE;
-    }
+    SelectRouteType(connInfo->type, &appInfo->routeType);
     return TransProxyOpenConnChannel(appInfo, connInfo, channelId);
 }
 
