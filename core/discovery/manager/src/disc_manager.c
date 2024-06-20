@@ -241,17 +241,36 @@ static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
     }
 }
 
+static void DfxCallInterfaceByMedium(
+    const DiscInfo *infoNode, const char *packageName, const InterfaceFuncType type, int32_t reason)
+{
+    DiscEventExtra extra = {0};
+    DiscEventExtraInit(&extra);
+    extra.errcode = reason;
+    BuildDiscCallEvent(&extra, infoNode, packageName, type);
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_CALL_INTERFACE, extra);
+}
+
 static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageName, const InterfaceFuncType type)
 {
+    int32_t ret = SOFTBUS_OK;
     switch (info->medium) {
         case COAP:
-            return CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
+            ret = CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, ret);
+            return ret;
         case BLE:
-            return CallSpecificInterfaceFunc(&(info->option), g_discBleInterface, info->mode, type);
+            ret = CallSpecificInterfaceFunc(&(info->option), g_discBleInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, ret);
+            return ret;
         case AUTO: {
-            int coapRes = CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
-            int bleRes = CallSpecificInterfaceFunc(&(info->option), g_discBleInterface, info->mode, type);
-            DISC_CHECK_AND_RETURN_RET_LOGE(coapRes == SOFTBUS_OK || bleRes == SOFTBUS_OK,
+            int32_t coapRet = CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, coapRet);
+            int32_t bleRet = CallSpecificInterfaceFunc(&(info->option), g_discBleInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, bleRet);
+
+            DISC_CHECK_AND_RETURN_RET_LOGE(coapRet == SOFTBUS_OK || bleRet == SOFTBUS_OK,
                 SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL, DISC_CONTROL, "all medium failed");
             return SOFTBUS_OK;
         }
