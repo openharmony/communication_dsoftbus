@@ -48,7 +48,10 @@ if (dsoftbus_feature_ex_kits) {
   disc_coap_src += coap_enhance_src
   disc_coap_inc += coap_enhance_inc
 } else {
-  disc_coap_src += [ "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap_capability.c" ]
+  disc_coap_src += [
+    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap_capability.c",
+    "$dsoftbus_root_path/core/discovery/coap/common/src/disc_coap_parser_virtual.c",
+  ]
 }
 disc_coap_deps = [
   "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
