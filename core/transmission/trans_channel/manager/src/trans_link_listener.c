@@ -34,10 +34,10 @@
 static void ClearIpInfo(const char *peerUuid)
 {
     if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, "") != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_SVC, "ServerSide set local p2p ip fail");
+        TRANS_LOGW(TRANS_SVC, "set local p2p ip fail");
     }
     if (LnnSetDLP2pIp(peerUuid, CATEGORY_UUID, "") != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_SVC, "ServerSide set peer p2p ip fail");
+        TRANS_LOGW(TRANS_SVC, "set peer p2p ip fail");
     }
 }
 
@@ -56,7 +56,6 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
         ListenerModule type = GetModuleByHmlIp(localIp);
         if (type != UNUSE_BUTT) {
             StopHmlListener(type);
-            ClearIpInfo(peerUuid);
             TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");
         }
         connType = TRANS_CONN_HML;
