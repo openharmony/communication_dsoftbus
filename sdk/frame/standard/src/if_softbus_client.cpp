@@ -155,4 +155,10 @@ int32_t ISoftBusClient::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
+
+int32_t ISoftBusClient::OnChannelBind(int32_t channelId, int32_t channelType)
+{
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

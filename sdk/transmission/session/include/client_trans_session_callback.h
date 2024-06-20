@@ -37,6 +37,7 @@ typedef struct {
     int32_t (*OnIdleTimeoutReset)(int32_t sessionId);
     int32_t (*OnRawStreamEncryptDefOptGet)(const char *sessionName, bool *isEncrypt);
     int32_t (*OnRawStreamEncryptOptGet)(int32_t channelId, int32_t channelType, bool *isEncrypt);
+    int32_t (*OnChannelBind)(int32_t channelId, int32_t channelType);
 } IClientSessionCallBack;
 
 IClientSessionCallBack *GetClientSessionCb(void);

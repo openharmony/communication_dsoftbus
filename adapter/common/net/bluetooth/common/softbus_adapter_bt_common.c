@@ -75,9 +75,47 @@ static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
 }
 
 static StateListener g_stateListener[STATE_LISTENER_MAX_NUM];
-static bool g_isRegCb = false;
+static bool g_isBleTurnOn = false;
+static bool g_isBrTurnOn = false;
+static SoftBusMutex g_lock = {0};
+static bool IsRepeatNotify(int status)
+{
+    COMM_LOGI(COMM_ADAPTER, "current state=%{public}d, isbleTurnOn=%{public}d, isbrTurnOn=%{public}d",
+        status, g_isBleTurnOn, g_isBrTurnOn);
+    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_lock) == SOFTBUS_OK, false,
+        COMM_ADAPTER, "try to lock failed");
+    bool result = false;
+    switch (status) {
+        case SOFTBUS_BLE_STATE_TURN_ON:
+            result = g_isBleTurnOn;
+            g_isBleTurnOn = true;
+            break;
+        case SOFTBUS_BR_STATE_TURN_ON:
+            result = g_isBrTurnOn;
+            g_isBrTurnOn = true;
+            break;
+        case SOFTBUS_BLE_STATE_TURN_OFF:
+            result = !g_isBleTurnOn;
+            g_isBleTurnOn = false;
+            break;
+        case SOFTBUS_BR_STATE_TURN_OFF:
+            result = !g_isBrTurnOn;
+            g_isBrTurnOn = false;
+            break;
+        default:
+            break;
+    }
+    (void)SoftBusMutexUnlock(&g_lock);
+    return result;
+}
+
 static void SoftBusOnBtSateChanged(int32_t status)
 {
+    if (IsRepeatNotify(status)) {
+        COMM_LOGI(COMM_ADAPTER, "current state=%{public}d, isbleTurnOn=%{public}d, isbrTurnOn=%{public}d",
+            status, g_isBleTurnOn, g_isBrTurnOn);
+        return;
+    }
     int listenerId;
     for (listenerId = 0; listenerId < STATE_LISTENER_MAX_NUM; listenerId++) {
         if (g_stateListener[listenerId].isUsed &&
@@ -159,25 +197,10 @@ static BtGapCallBacks g_softbusGapCb = {
     .pairConfiremedCallback = WrapperPairConfiremedCallback
 };
 
-static int RegisterListenerCallback(void)
-{
-    if (g_isRegCb) {
-        return SOFTBUS_OK;
-    }
-    if (GapRegisterCallbacks(&g_softbusGapCb) != OHOS_BT_STATUS_SUCCESS) {
-        return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_REGISTER_CB_ERR;
-    }
-    g_isRegCb = true;
-    return SOFTBUS_OK;
-}
-
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
-    }
-    if (RegisterListenerCallback() != SOFTBUS_OK) {
-        return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_REGISTER_CB_ERR;
     }
     for (int index = 0; index < STATE_LISTENER_MAX_NUM; index++) {
         if (!g_stateListener[index].isUsed) {
@@ -262,12 +285,21 @@ int SoftBusSetBtName(const char *name)
     return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_SET_NAME_ERR;
 }
 
-void SoftBusBtInit(void)
+int SoftBusBtInit(void)
 {
+    if (SoftBusMutexInit(&g_lock, NULL) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_ADAPTER, "init lock error");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (GapRegisterCallbacks(&g_softbusGapCb) != OHOS_BT_STATUS_SUCCESS) {
+        SoftBusMutexDestroy(&g_lock);
+        return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_REGISTER_CB_ERR;
+    }
     if (SoftBusGetBtState() == BLE_ENABLE) {
         SoftBusOnBtSateChanged(SOFTBUS_BLE_STATE_TURN_ON);
     }
     if (SoftBusGetBrState() == BR_ENABLE) {
         SoftBusOnBtSateChanged(SOFTBUS_BR_STATE_TURN_ON);
     }
+    return SOFTBUS_OK;
 }

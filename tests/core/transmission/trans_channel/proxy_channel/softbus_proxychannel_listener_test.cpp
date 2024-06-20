@@ -122,6 +122,15 @@ int32_t TestGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint
 }
 }
 
+static int32_t TestOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    return SOFTBUS_OK;
+}
+
 void SoftbusProxyChannelListenerTest::SetUpTestCase(void)
 {
     IServerChannelCallBack callBack;
@@ -132,6 +141,7 @@ void SoftbusProxyChannelListenerTest::SetUpTestCase(void)
     callBack.OnQosEvent = NULL;
     callBack.GetPkgNameBySessionName = TestGetPkgNameBySessionName;
     callBack.GetUidAndPidBySessionName = TestGetUidAndPidBySessionName;
+    callBack.OnChannelBind = TestOnChannelBind;
     ASSERT_EQ(SOFTBUS_OK, TransProxyManagerInitInner(&callBack));
 }
 
@@ -333,5 +343,20 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest001, Tes
 
     int32_t ret = TransSendNetworkingMessage(TEST_NUMBER_25, sendData, PROXY_CHANNEL_BT_IDLE_TIMEOUT, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
+}
+
+/**
+ * @tc.name: OnProxyChannelBindTest001
+ * @tc.desc: test OnProxyChannelBind.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelBindTest001, TestSize.Level1)
+{
+    AppInfo appInfo;
+
+    appInfo.appType = APP_TYPE_NORMAL;
+    int32_t ret = OnProxyChannelBind(TEST_NUMBER_25, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

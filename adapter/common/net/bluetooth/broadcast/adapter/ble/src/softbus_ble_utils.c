@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -333,7 +333,7 @@ void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
         (void)ConvertBytesToHexString(serviceData, hexLen, (nativeFilter + filterSize)->serviceData, len);
         (void)ConvertBytesToHexString(serviceDataMask, hexLen, (nativeFilter + filterSize)->serviceDataMask, len);
         DISC_LOGD(DISC_BLE_ADAPTER,
-            "BLE Scan Filter size=%{public}d, serviceData=%{public}s, serviceDataMask=%{public}s,"
+            "ble scan filter size=%{public}d, serviceData=%{public}s, serviceDataMask=%{public}s,"
             "advIndReport=%{public}d", filterSize, serviceData, serviceDataMask, advIndReport);
         SoftBusFree(serviceData);
         SoftBusFree(serviceDataMask);
@@ -369,6 +369,7 @@ uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen)
         DISC_LOGE(DISC_BLE_ADAPTER, "malloc adv data failed");
         return NULL;
     }
+
     int8_t offset = -BC_FLAG_LEN;
     if (data->isSupportFlag) {
         advData[IDX_BC_FLAG_BYTE_LEN] = BC_FLAG_BYTE_LEN;
@@ -376,6 +377,7 @@ uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen)
         advData[IDX_BC_FLAG_AD_DATA] = data->flag;
         offset += BC_FLAG_LEN;
     }
+
     advData[IDX_PACKET_LEN + offset] = payloadLen + BC_HEAD_LEN - BC_FLAG_LEN - 1;
     advData[IDX_BC_TYPE + offset] = SoftbusAdvDataTypeToBt(data->bcData.type);
     uint16_t payloadId = data->bcData.id;
@@ -463,7 +465,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
         } else {
             if (type != SERVICE_BC_TYPE && type != MANUFACTURE_BC_TYPE) {
                 index += len;
-                DISC_LOGD(DISC_BLE_ADAPTER, "unsupported type. type=%{public}hhu", type);
+                DISC_LOGD(DISC_BLE_ADAPTER, "unsupported type, type=%{public}hhu", type);
                 continue;
             }
             SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;

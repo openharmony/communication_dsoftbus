@@ -274,7 +274,14 @@ int32_t P2pAdapter::SetPeerWifiConfigInfo(const std::string &config)
         CONN_WIFI_DIRECT, "set wifi cfg failed, error=%{public}d",
         ToSoftBusErrorCode(ret));
     CONN_LOGI(CONN_WIFI_DIRECT, "set success");
-    return SOFTBUS_CONN_PV2_SET_PEER_WIFI_CONFIG_FAILED;
+    return SOFTBUS_OK;
+}
+
+int32_t P2pAdapter::SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size)
+{
+    (void)cfg;
+    (void)size;
+    return SOFTBUS_ERR;
 }
 
 bool P2pAdapter::IsWideBandSupported()
