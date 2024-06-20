@@ -286,11 +286,11 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByFdTest007, TestSize.Level1)
     ret = TransTdcAddSessionConn(con);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    SessionConn *session = GetSessionConnByFd(fd, conn);
-    EXPECT_TRUE(session != nullptr);
+    int32_t session = GetSessionConnByFd(fd, conn);
+    EXPECT_TRUE(session == SOFTBUS_OK);
     fd = 123;
     session = GetSessionConnByFd(fd, conn);
-    EXPECT_TRUE(session == nullptr);
+    EXPECT_TRUE(session == SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 
     SoftBusFree(conn);
 }
@@ -308,12 +308,12 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByIdTest008, TestSize.Level1)
     ASSERT_TRUE(conn != nullptr);
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
 
-    SessionConn *session = GetSessionConnById(channelId, nullptr);
-    EXPECT_TRUE(session != nullptr);
+    int32_t session = GetSessionConnById(channelId, nullptr);
+    EXPECT_TRUE(session == SOFTBUS_OK);
 
     channelId = 0;
     session = GetSessionConnById(channelId, conn);
-    EXPECT_TRUE(session == nullptr);
+    EXPECT_TRUE(session != SOFTBUS_OK);
 
     SoftBusFree(conn);
 }

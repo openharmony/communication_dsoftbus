@@ -932,7 +932,7 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     }
     channelObj->requestId = requestId;
     channelObj->status = UDP_CHANNEL_STATUS_OPEN_AUTH;
-    channelObj->isMeta = TransGetAuthTypeByNetWorkId(channel->info.peerNetWorkId);
+    bool isMeta = TransGetAuthTypeByNetWorkId(channel->info.peerNetWorkId);
     ReleaseUdpChannelLock();
 
     TransEventExtra extra = {
@@ -945,8 +945,7 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
         .peerNetworkId = channel->info.peerNetWorkId
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
-    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta,
-        channel->info.linkType);
+    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, isMeta, channel->info.linkType);
     if (ret != SOFTBUS_OK) {
         extra.errcode = ret;
         extra.result = EVENT_STAGE_RESULT_FAILED;

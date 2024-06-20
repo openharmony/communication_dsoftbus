@@ -262,7 +262,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
             .result = EVENT_STAGE_RESULT_FAILED
         };
         SessionConn conn;
-        if (GetSessionConnById(channelId, &conn) == NULL || !conn.serverSide) {
+        if (GetSessionConnById(channelId, &conn) != SOFTBUS_OK || !conn.serverSide) {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         } else {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
@@ -338,7 +338,7 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
         TRANS_LOGE(TRANS_CTRL, "OnDataEvent malloc fail.");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
+    if (GetSessionConnByFd(fd, conn) != SOFTBUS_OK || conn->appInfo.fd != fd) {
         TRANS_LOGE(TRANS_CTRL, "fd=%{public}d is not exist tdc info. appfd=%{public}d", fd, conn->appInfo.fd);
         for (uint32_t i = DIRECT_CHANNEL_SERVER_P2P; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
             DelTrigger((ListenerModule)i, fd, READ_TRIGGER);

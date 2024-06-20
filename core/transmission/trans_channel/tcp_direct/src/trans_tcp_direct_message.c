@@ -232,7 +232,6 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
 
     TRANS_LOGI(TRANS_BYTES, "PackBytes: flag=%{public}u, seq=%{public}" PRIu64,
         packetHead->flags, packetHead->seq);
-
     PackTdcPacketHead(packetHead);
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
         TRANS_LOGE(TRANS_BYTES, "memcpy_s buffer fail");
@@ -278,7 +277,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SoftBusFree(buffer);
         return SOFTBUS_MALLOC_ERR;
     }
-    if (GetSessionConnById(channelId, conn) == NULL) {
+    if (GetSessionConnById(channelId, conn) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_BYTES, "Get SessionConn fail");
         SoftBusFree(buffer);
         SoftBusFree(conn);
@@ -377,7 +376,7 @@ static int32_t GetClientSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t le
 static int32_t NotifyChannelOpened(int32_t channelId)
 {
     SessionConn conn;
-    if (GetSessionConnById(channelId, &conn) == NULL) {
+    if (GetSessionConnById(channelId, &conn) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
@@ -425,7 +424,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
 static int32_t NotifyChannelBind(int32_t channelId)
 {
     SessionConn conn;
-    if (GetSessionConnById(channelId, &conn) == NULL) {
+    if (GetSessionConnById(channelId, &conn) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "notify channel bind, get tdcInfo is null channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
@@ -495,7 +494,7 @@ int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t er
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     SessionConn conn;
-    if (GetSessionConnById(channelId, &conn) == NULL) {
+    if (GetSessionConnById(channelId, &conn) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
@@ -601,7 +600,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d", channelId);
     SessionConn conn;
     (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(GetSessionConnById(channelId, &conn) != NULL,
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetSessionConnById(channelId, &conn) == SOFTBUS_OK,
         SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
     int32_t errCode = SOFTBUS_OK;
     if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
@@ -704,7 +703,7 @@ static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
         TRANS_LOGE(TRANS_CTRL, "conn calloc failed");
         return NULL;
     }
-    if (GetSessionConnById(channelId, conn) == NULL) {
+    if (GetSessionConnById(channelId, conn) != SOFTBUS_OK) {
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "get session conn failed");
         return NULL;
