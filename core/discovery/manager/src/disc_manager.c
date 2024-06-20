@@ -265,12 +265,12 @@ static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageNa
             DfxCallInterfaceByMedium(info, packageName, type, ret);
             return ret;
         case AUTO: {
-            int32_t coapRes = CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
-            DfxCallInterfaceByMedium(info, packageName, type, coapRes);
-            int32_t bleRes = CallSpecificInterfaceFunc(&(info->option), g_discBleInterface, info->mode, type);
-            DfxCallInterfaceByMedium(info, packageName, type, bleRes);
+            int32_t coapRet = CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, coapRet);
+            int32_t bleRet = CallSpecificInterfaceFunc(&(info->option), g_discBleInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, bleRet);
 
-            DISC_CHECK_AND_RETURN_RET_LOGE(coapRes == SOFTBUS_OK || bleRes == SOFTBUS_OK,
+            DISC_CHECK_AND_RETURN_RET_LOGE(coapRet == SOFTBUS_OK || bleRet == SOFTBUS_OK,
                 SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL,
                 DISC_CONTROL,
                 "all medium failed");
