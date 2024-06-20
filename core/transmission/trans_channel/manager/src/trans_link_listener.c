@@ -31,6 +31,15 @@
 #define HML_IP_PREFIX "172.30."
 #define COMBINE_TYPE(routeType, connType) ((routeType) | ((uint8_t)(connType) << 8))
 
+static void ClearIpInfo(const char *peerUuid)
+{
+    if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, "") != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_SVC, "ServerSide set local p2p ip fail");
+    }
+    if (LnnSetDLP2pIp(peerUuid, CATEGORY_UUID, "") != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_SVC, "ServerSide set peer p2p ip fail");
+    }
+}
 static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid,
     const char *localIp)
 {
@@ -46,23 +55,13 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
         ListenerModule type = GetModuleByHmlIp(localIp);
         if (type != UNUSE_BUTT) {
             StopHmlListener(type);
-            if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, "") != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_SVC, "ServerSide set local p2p ip fail");
-            }
-            if (LnnSetDLP2pIp(peerUuid, CATEGORY_UUID, "") != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_SVC, "ServerSide set peer p2p ip fail");
-            }
+            ClearIpInfo(peerUuid);
             TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");
         }
         connType = TRANS_CONN_HML;
     } else {
         StopP2pSessionListener();
-        if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, "") != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_SVC, "ServerSide set local p2p ip fail");
-        }
-        if (LnnSetDLP2pIp(peerUuid, CATEGORY_UUID, "") != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_SVC, "ServerSide set peer p2p ip fail");
-        }
+        ClearIpInfo(peerUuid);
         connType = TRANS_CONN_P2P;
     }
 
