@@ -25,6 +25,7 @@ group("unittest") {
     "dfx/log:unittest",
     "json_utils:unittest",
     "network:unittest",
+    "queue:unittest",
     "security/permission/common:unittest",
     "security/permission/standard:unittest",
     "sequence_verification:unittest",
