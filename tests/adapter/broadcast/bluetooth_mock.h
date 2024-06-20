@@ -22,6 +22,7 @@
 #include "c_header/ohos_bt_gatt.h"
 #include "c_header/ohos_bt_gatt_client.h"
 #include "c_header/ohos_bt_gatt_server.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_broadcast_adapter_interface.h"
 
 // declare mock symbols explicitly which hava C implement, redirected to mocker when linking
@@ -79,6 +80,7 @@ public:
 
     virtual int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type,
         const SoftbusBroadcastMediumInterface *interface) = 0;
+    virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
 };
 
 class MockBluetooth : public BluetoothInterface {
@@ -138,6 +140,7 @@ public:
     MOCK_METHOD(int, BleGattsSendIndication, (int serverId, GattsSendIndParam *param), (override));
     MOCK_METHOD(int32_t, RegisterBroadcastMediumFunction, (SoftbusMediumType type,
         const SoftbusBroadcastMediumInterface *interface), (override));
+    MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
     static MockBluetooth *GetMocker();
 
     static BtGapCallBacks *btGapCallback;

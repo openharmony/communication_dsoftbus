@@ -210,3 +210,8 @@ static void ActionOfSoftbusBleAdapterInit()
         DISC_LOGE(DISC_TEST, "Register gatt interface failed.");
     }
 }
+
+void SoftbusBleAdapterDeInit(void)
+{
+    DISC_LOGI(DISC_TEST, "enter");
+}
