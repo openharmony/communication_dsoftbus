@@ -344,8 +344,9 @@ static void BcSetBroadcastingCallback(int32_t adapterBcId, int32_t status)
             SoftBusMutexUnlock(&g_bcLock);
             continue;
         }
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d",
-            GetSrvType(bcManager->srvType), managerId, adapterBcId, status);
+        static uint32_t callCount = 0;
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d,"
+            "callCount=%{public}u", GetSrvType(bcManager->srvType), managerId, adapterBcId, status, callCount++);
         SoftBusMutexUnlock(&g_bcLock);
         bcManager->bcCallback->OnSetBroadcastingCallback((int32_t)managerId, status);
         break; // The broadcast channel cannot be multiplexed.
@@ -1407,9 +1408,9 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_BC_MGR_NOT_BROADCASTING;
     }
-
-    DISC_LOGI(DISC_BROADCAST, "replace BroadcastPacket srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d",
-              GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
+    DISC_LOGI(DISC_BROADCAST, "replace BroadcastPacket srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d,"
+        "callCount=%{public}u", GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId,
+        callCount++);
     SoftbusBroadcastData softbusBcData = {0};
     ret = BuildSoftbusBroadcastData(packet, &softbusBcData);
     if (ret != SOFTBUS_OK) {
