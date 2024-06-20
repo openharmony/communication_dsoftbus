@@ -189,7 +189,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest002, TestSize.Lev
     ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
         .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(&connInfo));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, ConnSendSocketData).WillOnce(Return(bufferLen));
     int32_t ret = TransTdcPostBytes(channelId, &packetHead, data);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -220,7 +220,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest003, TestSize.Lev
     ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
         .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(&connInfo));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, ConnSendSocketData).WillOnce(Return(0));
     int32_t ret = TransTdcPostBytes(channelId, &packetHead, data);
     EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
@@ -247,7 +247,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest004, TestSize.Lev
     ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
         .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED));
     int32_t ret = TransTdcPostBytes(channelId, &packetHead, data);
     EXPECT_EQ(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, ret);
 }
@@ -385,7 +385,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest003, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI), channelId, type);
-    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
 /**
@@ -408,7 +408,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest004, TestSize.L
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI),
         channelId, type);
-    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
 /**
@@ -431,7 +431,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest005, TestSize.L
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI),
         channelId, type);
-    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
 /**
@@ -469,7 +469,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSi
     int32_t channelId = TEST_CHANNELID;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED));
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
@@ -488,7 +488,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest002, TestSi
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, TransTdcGetPkgName).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -510,7 +510,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest003, TestSi
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, TransTdcGetPkgName).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -534,7 +534,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest004, TestSi
     GetChannelInfoFromConn(&info, conn, channelId);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, TransTdcGetPkgName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, TransTdcOnChannelOpenFailed).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
@@ -615,7 +615,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest001, TestSize.Leve
     cJSON *reply = cJSON_CreateObject();
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED));
     int32_t ret = OpenDataBusReply(channelId, seq, reply);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     cJSON_Delete(reply);
@@ -636,7 +636,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest002, TestSize.Leve
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillRepeatedly(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = OpenDataBusReply(channelId, seq, reply);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -660,7 +660,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest003, TestSize.Leve
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(TcpMessageMock, UnpackReply).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = OpenDataBusReply(channelId, seq, reply);
@@ -685,7 +685,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest004, TestSize.Leve
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillRepeatedly(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(TcpMessageMock, UnpackReply).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -711,7 +711,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest005, TestSize.Leve
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillRepeatedly(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(TcpMessageMock, UnpackReply).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
@@ -757,7 +757,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
     SessionConn *connect = GetSessionConnFromDataBusRequest(channelId, reply);
     EXPECT_TRUE(connect != nullptr);
@@ -780,7 +780,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_ERR));
     SessionConn *connect = GetSessionConnFromDataBusRequest(channelId, reply);
     EXPECT_TRUE(connect == nullptr);
@@ -801,7 +801,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     cJSON *reply = cJSON_CreateObject();
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED));
     SessionConn *connect = GetSessionConnFromDataBusRequest(channelId, reply);
     EXPECT_TRUE(connect == nullptr);
 
@@ -864,7 +864,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest001, TestSize.Le
     cJSON *reply = cJSON_CreateObject();
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED));
     int32_t ret = OpenDataBusRequest(channelId, flags, seq, reply);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -1055,7 +1055,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest001, TestSize.L
     int32_t channelId = TEST_CHANNELID;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED));
     int32_t ret = NotifyChannelOpened(channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
@@ -1073,7 +1073,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest002, TestSize.L
     EXPECT_TRUE(conn != nullptr);
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = NotifyChannelOpened(channelId);
     EXPECT_NE(ret, SOFTBUS_OK);
 
@@ -1271,7 +1271,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, cJSON_Parse).WillRepeatedly(Return(reply));
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillRepeatedly(Return(conn));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = ProcessMessage(channelId, flags, seq, msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1296,7 +1296,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, cJSON_Parse).WillRepeatedly(Return(reply));
-    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
+    EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED));
     int32_t ret = ProcessMessage(channelId, flags, seq, msg);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }

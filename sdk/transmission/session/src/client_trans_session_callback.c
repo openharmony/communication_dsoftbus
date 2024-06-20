@@ -28,7 +28,7 @@
 #include "softbus_errcode.h"
 #include "trans_log.h"
 
-#define DFX_TIMERS_S 15
+#define DFX_TIMERS_S            15
 #define RETRY_GET_INFO_TIMES_MS 300
 
 static IClientSessionCallBack g_sessionCb;
@@ -133,13 +133,7 @@ NO_SANITIZE("cfi") static int32_t TransOnBindSuccess(int32_t sessionId, const IS
         return ret;
     }
 
-    if ((socketCallback->OnNegotiate != NULL) && (!socketCallback->OnNegotiate(sessionId, info))) {
-        TRANS_LOGW(TRANS_SDK, "The negotiate rejected the socket=%{public}d", sessionId);
-        return SOFTBUS_TRANS_NEGOTIATE_REJECTED;
-    }
-
     (void)socketCallback->OnBind(sessionId, info);
-    TRANS_LOGI(TRANS_SDK, "OnBind success, socket=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
@@ -155,6 +149,7 @@ static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socke
     SocketLifecycleData lifecycle;
     (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
     int32_t ret = GetSocketLifecycleAndSessionNameBySessionId(sessionId, NULL, &lifecycle);
+    (void)SetSessionStateBySessionId(sessionId, SESSION_STATE_INIT, 0);
     if (ret == SOFTBUS_OK && lifecycle.sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGW(TRANS_SDK, "socket is cancelling, no need call back, socket=%{public}d, bindErrCode=%{public}d",
             sessionId, lifecycle.bindErrCode);
@@ -187,12 +182,39 @@ static int32_t HandleAsyncBindSuccess(
     return TransOnBindSuccess(sessionId, socketClient);
 }
 
-static int32_t HandleServerOnBindSuccess(int32_t sessionId, const ISocketListener *socketServer)
+NO_SANITIZE("cfi") static int32_t TransOnNegotiate(int32_t socket, const ISocketListener *socketCallback)
 {
-    int32_t ret = TransOnBindSuccess(sessionId, socketServer);
+    if (socketCallback == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid socketCallback socket=%{public}d", socket);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (socketCallback->OnNegotiate == NULL) {
+        TRANS_LOGW(TRANS_SDK, "no OnNegotiate callback function socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    }
+
+    PeerSocketInfo info = {0};
+    int32_t ret = ClientGetPeerSocketInfoById(socket, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get peer socket info failed, ret=%{public}d, socket=%{public}d", ret, socket);
+        return ret;
+    }
+
+    if (!socketCallback->OnNegotiate(socket, info)) {
+        TRANS_LOGW(TRANS_SDK, "The negotiate rejected the socket=%{public}d", socket);
+        return SOFTBUS_TRANS_NEGOTIATE_REJECTED;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t HandleServerOnNegotiate(int32_t socket, const ISocketListener *socketServer)
+{
+    int32_t ret = TransOnNegotiate(socket, socketServer);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "OnBind failed, ret=%{public}d", ret);
-        (void)ClientDeleteSocketSession(sessionId);
+        (void)ClientDeleteSocketSession(socket);
         return ret;
     }
     return SOFTBUS_OK;
@@ -239,7 +261,7 @@ static int32_t HandleOnBindSuccess(int32_t sessionId, SessionListenerAdapter ses
     }
 
     if (isServer) {
-        return HandleServerOnBindSuccess(sessionId, &sessionCallback.socketServer);
+        return HandleServerOnNegotiate(sessionId, &sessionCallback.socketServer);
     } else if (isAsync) {
         return HandleAsyncBindSuccess(sessionId, &sessionCallback.socketClient, &lifecycle);
     } else { // sync bind
@@ -507,6 +529,39 @@ NO_SANITIZE("cfi") int32_t TransOnQosEvent(int32_t channelId, int32_t channelTyp
     return SOFTBUS_OK;
 }
 
+int32_t ClientTransOnChannelBind(int32_t channelId, int32_t channelType)
+{
+    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
+    int32_t socket = INVALID_SESSION_ID;
+    SessionListenerAdapter sessionCallback;
+    bool isServer = false;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &socket, &sessionCallback, &isServer);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get session callback failed channelId=%{public}d", channelId);
+        return ret;
+    }
+
+    if (!sessionCallback.isSocketListener) {
+        TRANS_LOGW(TRANS_SDK, "QoS recv session callback channelId=%{public}d", channelId);
+        return SOFTBUS_OK;
+    }
+
+    if (!isServer) {
+        TRANS_LOGW(TRANS_SDK, "only server need OnChannelBind channelId=%{public}d", channelId);
+        return SOFTBUS_OK;
+    }
+
+    ISocketListener *listener = &sessionCallback.socketServer;
+    ret = TransOnBindSuccess(socket, listener);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "client on bind failed channelId=%{public}d", channelId);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SDK, "ok, channelId=%{public}d", channelId);
+    return SOFTBUS_OK;
+}
+
 IClientSessionCallBack *GetClientSessionCb(void)
 {
     g_sessionCb.OnSessionOpened = TransOnSessionOpened;
@@ -519,5 +574,6 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnIdleTimeoutReset = ClientResetIdleTimeoutById;
     g_sessionCb.OnRawStreamEncryptDefOptGet = ClientRawStreamEncryptDefOptGet;
     g_sessionCb.OnRawStreamEncryptOptGet = ClientRawStreamEncryptOptGet;
+    g_sessionCb.OnChannelBind = ClientTransOnChannelBind;
     return &g_sessionCb;
 }

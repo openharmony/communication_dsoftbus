@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -338,6 +338,59 @@ static int32_t TransAuthFillDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void TransHandleErrorAndCloseChannel(TransEventExtra *extra, int32_t authId, int32_t ret)
+{
+    if (extra != NULL && extra->socketName != NULL) {
+        extra->result = EVENT_STAGE_RESULT_FAILED;
+        extra->errcode = ret;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, *extra);
+    }
+    DelAuthChannelInfoByAuthId(authId);
+    AuthCloseChannel(authId);
+}
+
+static void TransHandleAuthChannelSetupProcess(TransEventExtra *extra, int32_t authId, AppInfo *appInfo)
+{
+    int32_t ret = AuthGetUidAndPidBySessionName(
+        appInfo->myData.sessionName, &appInfo->myData.uid, &appInfo->myData.pid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed and send msg to peer");
+        TransPostAuthChannelErrMsg(authId, ret, "session not created");
+        TransHandleErrorAndCloseChannel(extra, authId, ret);
+        return;
+    }
+    ret = TransAuthFillDataConfig(appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "TransAuthFillDataConfig failed");
+        TransHandleErrorAndCloseChannel(extra, authId, ret);
+        return;
+    }
+    ret = OnRequsetUpdateAuthChannel(authId, appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "update auth channel failed");
+        TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
+        TransHandleErrorAndCloseChannel(extra, authId, ret);
+        return;
+    }
+    extra->result = EVENT_STAGE_RESULT_OK;
+    extra->channelId = appInfo->myData.channelId;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, *extra);
+    ret = NotifyOpenAuthChannelSuccess(appInfo, true);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "NotifyOpenAuthChannelSuccess failed");
+        TransPostAuthChannelErrMsg(authId, ret, "NotifyOpenAuthChannelSuccess failed");
+        TransHandleErrorAndCloseChannel(extra, authId, ret);
+        return;
+    }
+    ret = TransPostAuthChannelMsg(appInfo, authId, AUTH_CHANNEL_REPLY);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "send reply failed");
+        TransPostAuthChannelErrMsg(authId, ret, "send reply failed");
+        TransHandleErrorAndCloseChannel(extra, authId, ret);
+        return;
+    }
+}
+
 static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t len)
 {
     if (data == NULL || len <= 0) {
@@ -352,7 +405,7 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         .channelType = CHANNEL_TYPE_AUTH,
         .authId = authId
     };
-    char localUdid[UDID_BUF_LEN] = {0};
+    char localUdid[UDID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
         extra.localUdid = localUdid;
     }
@@ -361,58 +414,21 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "unpackRequest failed");
         TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
-        goto EXIT_ERR;
+        TransHandleErrorAndCloseChannel(&extra, authId, ret);
+        return;
     }
     extra.socketName = appInfo.myData.sessionName;
     extra.peerUdid = appInfo.peerData.deviceId;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if (!CheckSessionNameValidOnAuthChannel(appInfo.myData.sessionName)) {
         TRANS_LOGE(TRANS_SVC, "check auth channel pkginfo invalid.");
-        TransPostAuthChannelErrMsg(authId, ret, "check msginfo failed");
-        goto EXIT_ERR;
+        TransPostAuthChannelErrMsg(authId, SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED, "check msginfo failed");
+        TransHandleErrorAndCloseChannel(&extra, authId, ret);
+        return;
     }
-    ret = AuthGetUidAndPidBySessionName(appInfo.myData.sessionName, &appInfo.myData.uid, &appInfo.myData.pid);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed and send msg to peer");
-        TransPostAuthChannelErrMsg(authId, ret, "session not created");
-        goto EXIT_ERR;
-    }
-    ret = TransAuthFillDataConfig(&appInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "TransAuthFillDataConfig failed");
-        goto EXIT_ERR;
-    }
-    ret = OnRequsetUpdateAuthChannel(authId, &appInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "update auth channel failed");
-        TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
-        goto EXIT_ERR;
-    }
-    extra.result = EVENT_STAGE_RESULT_OK;
-    extra.channelId = appInfo.myData.channelId;
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
-    ret = NotifyOpenAuthChannelSuccess(&appInfo, true);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "NotifyOpenAuthChannelSuccess failed");
-        TransPostAuthChannelErrMsg(authId, ret, "NotifyOpenAuthChannelSuccess failed");
-        goto EXIT_ERR;
-    }
-    ret = TransPostAuthChannelMsg(&appInfo, authId, AUTH_CHANNEL_REPLY);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "send reply failed");
-        TransPostAuthChannelErrMsg(authId, ret, "send reply failed");
-        goto EXIT_ERR;
-    }
+
+    TransHandleAuthChannelSetupProcess(&extra, authId, &appInfo);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
-    return;
-EXIT_ERR:
-    if (extra.socketName != NULL) {
-        extra.result = EVENT_STAGE_RESULT_FAILED;
-        extra.errcode = ret;
-        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
-    }
-    DelAuthChannelInfoByAuthId(authId);
-    AuthCloseChannel(authId);
 }
 
 static int32_t TransAuthProcessDataConfig(AppInfo *appInfo)
@@ -603,7 +619,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
     LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
         if (item->appInfo.myData.channelId == info->appInfo.myData.channelId) {
             (void)SoftBusMutexUnlock(&g_authChannelList->lock);
-            TRANS_LOGE(TRANS_SVC, "not found authChannel, channelId=%{public}" PRId64,
+            TRANS_LOGE(TRANS_SVC, "the authChannel already exists, channelId=%{public}" PRId64,
                 info->appInfo.myData.channelId);
             return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
         }

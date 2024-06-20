@@ -312,7 +312,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
     SessionConn conn;
-    if (GetSessionConnById(*channelId, &conn) != NULL) {
+    if (GetSessionConnById(*channelId, &conn) == SOFTBUS_OK) {
         extra.authId = conn.authHandle.authId;
         extra.socketFd = conn.appInfo.fd;
         extra.requestId = (int32_t)conn.requestId;

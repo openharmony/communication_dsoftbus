@@ -1165,8 +1165,8 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
     (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
     int32_t ret = LnnGetRemoteNodeInfoById(nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo);
-    if (ret != SOFTBUS_OK || !LnnIsNodeOnline(nodeInfo)) {
-        LNN_LOGW(LNN_BUILDER, "device is node online");
+    if (ret != SOFTBUS_OK || !LnnIsNodeOnline(&oldNodeInfo)) {
+        LNN_LOGW(LNN_BUILDER, "device is not online, ret=%{public}d", ret);
         return false;
     }
     if (IsBasicNodeInfoChanged(&oldNodeInfo, nodeInfo, false)) {

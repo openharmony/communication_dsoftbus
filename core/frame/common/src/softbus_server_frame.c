@@ -141,7 +141,12 @@ void InitSoftBusServer(void)
         return;
     }
 
-    SoftBusBtInit();
+    ret = SoftBusBtInit();
+    if (ret != SOFTBUS_OK) {
+        ServerModuleDeinit();
+        COMM_LOGE(COMM_SVC, "softbus bt init failed, err = %{public}d", ret);
+        return;
+    }
     g_isInit = true;
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
 }

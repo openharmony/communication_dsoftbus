@@ -199,6 +199,14 @@ static void TransSetFirstTokenInfo(AppInfo *appInfo, TransEventExtra *event)
     event->firstTokenName = appInfo->tokenName;
 }
 
+static bool IsLaneModuleError(int32_t errcode)
+{
+    if (errcode >= SOFTBUS_LANE_ERR_BASE && errcode < SOFTBUS_CONN_ERR_BASE) {
+        return true;
+    }
+    return false;
+}
+
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     if (param == NULL || transInfo == NULL) {
@@ -216,9 +224,13 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     ret = TransAddSocketChannelInfo(
         param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Add socket channel record failed.");
-    AppInfo *appInfo = TransCommonGetAppInfo(param);
-    TRANS_CHECK_AND_RETURN_RET_LOGW(appInfo != NULL, SOFTBUS_TRANS_INVALID_CHANNEL_ID, TRANS_CTRL,
-        "GetAppInfo is null.");
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ret = TransCommonGetAppInfo(param, appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get appinfo failed");
+        TransFreeAppInfo(appInfo);
+        return ret;
+    }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
@@ -300,6 +312,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         transInfo->channelId, transInfo->channelType, laneHandle);
     return SOFTBUS_OK;
 EXIT_ERR:
+    extra.linkType = IsLaneModuleError(ret) ? extra.linkType : CONNECT_HML;
     TransBuildTransOpenChannelEndEvent(&extra, transInfo, appInfo->timeStart, ret);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransAlarmExtra extraAlarm;

@@ -75,7 +75,7 @@ int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum);
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info);
 int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen);
 int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag);
-int32_t LnnSetDataLevel(const DataLevel *dataLevel);
+int32_t LnnSetDataLevel(const DataLevel *dataLevel, bool *isSwitchLevelChanged);
 int32_t LnnGetNodeKeyInfoLen(int32_t key);
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len);
 int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);

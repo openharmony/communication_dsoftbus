@@ -140,11 +140,11 @@ SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
     return conn;
 }
 
-SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn)
+int32_t GetSessionConnByFd(int32_t fd, SessionConn *conn)
 {
     SessionConn *connInfo = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
-        return NULL;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->appInfo.fd == fd) {
@@ -152,19 +152,19 @@ SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn)
                 (void)memcpy_s(conn, sizeof(SessionConn), connInfo, sizeof(SessionConn));
             }
             ReleaseSessionConnLock();
-            return connInfo;
+            return SOFTBUS_OK;
         }
     }
     ReleaseSessionConnLock();
 
-    return NULL;
+    return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
 }
 
-SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
+int32_t GetSessionConnById(int32_t channelId, SessionConn *conn)
 {
     SessionConn *connInfo = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
-        return NULL;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == channelId) {
@@ -172,13 +172,13 @@ SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
                 (void)memcpy_s(conn, sizeof(SessionConn), connInfo, sizeof(SessionConn));
             }
             ReleaseSessionConnLock();
-            return connInfo;
+            return SOFTBUS_OK;
         }
     }
     ReleaseSessionConnLock();
 
     TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
-    return NULL;
+    return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
 }
 
 int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)

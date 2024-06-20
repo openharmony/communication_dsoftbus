@@ -202,6 +202,31 @@ static int32_t SelectAppType(const AppInfo *appInfo, AppType appType, int32_t ch
     }
 }
 
+int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
+{
+    int32_t ret = SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "proxy channel bind app info invalid channelId=%{public}d", channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    switch (appInfo->appType) {
+        case APP_TYPE_NORMAL:
+        case APP_TYPE_AUTH:
+            ret = TransProxyOnChannelBind(appInfo->myData.pkgName, appInfo->myData.pid, channelId);
+            break;
+        case APP_TYPE_INNER:
+            ret = SOFTBUS_OK;
+            break;
+        default:
+            ret = SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+            break;
+    }
+    TRANS_LOGI(
+        TRANS_CTRL, "channelId=%{public}d, ret=%{public}d, appType=%{public}d", channelId, ret, appInfo->appType);
+    return ret;
+}
+
 int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     if (appInfo == NULL) {
