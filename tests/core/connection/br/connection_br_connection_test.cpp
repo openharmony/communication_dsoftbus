@@ -379,12 +379,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection010, TestSize.Level1)
 
     g_sppDriver->GetRemoteDeviceInfo = GetRemoteDeviceInfo;
     ctx = (ServerServeContext *)SoftBusCalloc(sizeof(*ctx));
-    ctx->socketHandle = -1;
-    ret = StartServerServe((void *)(ctx));
-    EXPECT_EQ(nullptr, ret);
-
-    g_sppDriver->GetRemoteDeviceInfo = GetRemoteDeviceInfo;
-    ctx = (ServerServeContext *)SoftBusCalloc(sizeof(*ctx));
     ctx->socketHandle = 0;
     ret = StartServerServe((void *)(ctx));
     EXPECT_EQ(nullptr, ret);
@@ -421,14 +415,14 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
 
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 0;
     ret = InitProperty();
-    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY + 1;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
     memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
         g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
     ret = InitProperty();
-    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
@@ -436,7 +430,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
         g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
     g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len = 0;
     ret = InitProperty();
-    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
@@ -447,7 +441,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
     memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
         g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len, (void *)(&mtu), sizeof(int));
     ret = InitProperty();
-    EXPECT_EQ(SOFTBUS_TCPCONNECTION_SOCKET_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;

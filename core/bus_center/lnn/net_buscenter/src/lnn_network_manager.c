@@ -428,10 +428,12 @@ void RestartCoapDiscovery(void)
 static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     (void)groupId;
-    LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupCreated");
+    LNN_LOGI(LNN_BUILDER, "OnGroupCreated, groupType=%{public}d", groupType);
     LnnUpdateOhosAccount(true);
     LnnHbOnTrustedRelationIncreased(groupType);
-    LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+    if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+    }
     RestartCoapDiscovery();
     EhLoginEventHandler();
 }

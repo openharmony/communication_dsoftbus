@@ -75,7 +75,12 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     return SOFTBUS_OK;
 }
 
-class TransTcpDirectCallbackTest : public testing::Test {
+static int32_t TransServerOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+{
+    return SOFTBUS_OK;
+}
+
+    class TransTcpDirectCallbackTest : public testing::Test {
 public:
     TransTcpDirectCallbackTest()
     {
@@ -86,6 +91,7 @@ public:
         g_channelCallBack.OnQosEvent = TransServerOnQosEvent;
         g_channelCallBack.GetPkgNameBySessionName = TransGetPkgNameBySessionName;
         g_channelCallBack.GetUidAndPidBySessionName = TransGetUidAndPid;
+        g_channelCallBack.OnChannelBind = TransServerOnChannelBind;
         int32_t ret = TransTdcSetCallBack(&g_channelCallBack);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
@@ -221,5 +227,22 @@ HWTEST_F(TransTcpDirectCallbackTest, TransTdcOnMsgReceivedTest001, TestSize.Leve
     ret = TransTdcOnMsgReceived(pkgName, pid, channelId, receiveData);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(receiveData);
+}
+
+/**
+ * @tc.name: TransTdcOnChannelBindTest001
+ * @tc.desc: OnChannelBind test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectCallbackTest, TransTdcOnChannelBindTest001, TestSize.Level1)
+{
+    int32_t ret;
+    const char *pkgName = TEST_PKG_NAME;
+    int32_t pid = PID;
+    int32_t channelId = CHANNELID;
+
+    ret = TransTdcOnChannelBind(pkgName, pid, channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }

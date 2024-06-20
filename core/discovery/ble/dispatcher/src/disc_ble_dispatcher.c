@@ -252,7 +252,7 @@ DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *inte
 
 void DiscBleDeinit(void)
 {
-    DISC_LOGI(DISC_BLE, "deinit DiscBleFrameDeinit");
+    DISC_LOGI(DISC_INIT, "deinit DiscBleFrameDeinit");
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         g_dispatchers[i] = NULL;
     }

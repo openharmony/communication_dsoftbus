@@ -32,6 +32,12 @@ static constexpr char HML_IP_PREFIX[] = "172.30.";
 static constexpr char HML_IP_SOURCE_SUFFIX[] = ".2";
 static constexpr char HML_IP_SINK_SUFFIX[] = ".1";
 
+void WifiDirectIpManager::Init()
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    ClearAllIpv4();
+}
+
 std::string WifiDirectIpManager::ApplyIpv6(const std::string &mac)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(!mac.empty(), "", CONN_WIFI_DIRECT, "mac is null");
@@ -131,6 +137,17 @@ void WifiDirectIpManager::ReleaseIpv4(
     if (DeleteStaticArp(interface, remoteIpStr, remoteMac) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. remoteIp=%{public}s, remoteMac=%{public}s",
             WifiDirectAnonymizeIp(remoteIpStr).c_str(), WifiDirectAnonymizeMac(remoteMac).c_str());
+    }
+}
+
+void WifiDirectIpManager::ClearAllIpv4()
+{
+    auto localIpv4Array = WifiDirectUtils::GetLocalIpv4Infos();
+    for (const auto &ipv4 : localIpv4Array) {
+        std::string ipStr = ipv4.ToIpString();
+        if (DeleteInterfaceAddress("chba0", ipStr, ipv4.GetPrefixLength()) != SOFTBUS_OK) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "delete ip failed. ip=%{public}s", WifiDirectAnonymizeIp(ipStr).c_str());
+        }
     }
 }
 

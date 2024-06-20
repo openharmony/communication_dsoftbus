@@ -121,7 +121,7 @@ int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener);
 
 int SoftBusRemoveBtStateListener(int listenerId);
 
-void SoftBusBtInit(void);
+int SoftBusBtInit(void);
 
 #ifdef __cplusplus
 }

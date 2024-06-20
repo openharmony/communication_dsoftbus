@@ -59,6 +59,7 @@ public:
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
     void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
     int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override;
+    int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
 
 private:
     int32_t OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
@@ -84,6 +85,7 @@ private:
     int32_t OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnChannelBindInner(MessageParcel &data, MessageParcel &reply);
 
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);

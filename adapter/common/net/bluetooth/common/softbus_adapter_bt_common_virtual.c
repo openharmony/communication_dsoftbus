@@ -60,7 +60,7 @@ int SoftBusSetBtName(const char *name)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-void SoftBusBtInit(void)
+int SoftBusBtInit(void)
 {
-
+    return SOFTBUS_OK;
 }

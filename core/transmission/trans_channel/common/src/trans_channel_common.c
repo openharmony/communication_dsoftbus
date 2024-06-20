@@ -271,17 +271,14 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
     return SOFTBUS_OK;
 }
 
-AppInfo *TransCommonGetAppInfo(const SessionParam *param)
+int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(param != NULL, NULL, TRANS_CTRL, "Invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid appInfo");
     char *tmpId = NULL;
     Anonymize(param->peerDeviceId, &tmpId);
     TRANS_LOGI(TRANS_CTRL, "GetAppInfo, deviceId=%{public}s", tmpId);
     AnonymizeFree(tmpId);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == NULL) {
-        return NULL;
-    }
     appInfo->appType = APP_TYPE_NORMAL;
     appInfo->myData.apiVersion = API_V2;
     if (param->attr->dataType == TYPE_STREAM) {
@@ -294,13 +291,16 @@ AppInfo *TransCommonGetAppInfo(const SessionParam *param)
     } else if (param->attr->dataType == TYPE_BYTES) {
         appInfo->businessType = BUSINESS_TYPE_BYTE;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
-        goto EXIT_ERR;
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetLocalStrInfo failed ret=%{public}d", ret);
+        return ret;
     }
-    if (CopyAppInfoFromSessionParam(appInfo, param) != SOFTBUS_OK) {
-        goto EXIT_ERR;
+    ret = CopyAppInfoFromSessionParam(appInfo, param);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "CopyAppInfoFromSessionParam failed ret=%{public}d", ret);
+        return ret;
     }
-
     appInfo->fd = -1;
     appInfo->peerData.apiVersion = API_V2;
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
@@ -312,17 +312,8 @@ AppInfo *TransCommonGetAppInfo(const SessionParam *param)
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
     appInfo->callingTokenId = TransACLGetCallingTokenID();
     appInfo->isClient = true;
-
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
-    return appInfo;
-EXIT_ERR:
-    if (appInfo != NULL) {
-        if (appInfo->fastTransData != NULL) {
-            SoftBusFree((void*)appInfo->fastTransData);
-        }
-        SoftBusFree(appInfo);
-    }
-    return NULL;
+    return SOFTBUS_OK;
 }
 
 void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)

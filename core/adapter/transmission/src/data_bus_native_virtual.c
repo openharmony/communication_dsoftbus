@@ -15,13 +15,6 @@
 
 #include "data_bus_native.h"
 #include "softbus_error_code.h"
-
-int NotifyNearByUpdateHandleId(int channeId)
-{
-    (void)channeId;
-    return SOFTBUS_OK;
-}
-
 int NotifyNearByUpdateMigrateOption(int channeId)
 {
     (void)channeId;

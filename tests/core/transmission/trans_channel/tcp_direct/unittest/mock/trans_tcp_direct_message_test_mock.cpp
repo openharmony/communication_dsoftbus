@@ -57,7 +57,7 @@ int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLe
     return GetTransTcpDirectMessageInterface()->AuthEncrypt(authHandle, inData, inLen, outData, outLen);
 }
 
-SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
+int32_t GetSessionConnById(int32_t channelId, SessionConn *conn)
 {
     return GetTransTcpDirectMessageInterface()->GetSessionConnById(channelId, conn);
 }

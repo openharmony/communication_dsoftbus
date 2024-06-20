@@ -35,6 +35,7 @@ typedef struct {
 }ChannelMsg;
 
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel, int32_t pid);
+int32_t ClientIpcOnChannelBind(ChannelMsg *data);
 int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode);
 int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, const char *peerIp, int32_t routeType);
 int32_t ClientIpcOnChannelClosed(ChannelMsg *data);
