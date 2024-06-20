@@ -27,6 +27,11 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     return TransOnChannelOpened(sessionName, channel);
 }
 
+int32_t ClientIpcOnChannelBind(ChannelMsg *data)
+{
+    return TransOnChannelBind(data->msgChannelId, data->msgChannelType);
+}
+
 int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
 {
     return TransOnChannelOpenFailed(data->msgChannelId, data->msgChannelType, errCode);

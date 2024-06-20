@@ -24,9 +24,6 @@
 extern "C" {
 #endif
 #endif
-
-int NotifyNearByUpdateHandleId(int channeId);
-
 int NotifyNearByUpdateMigrateOption(int channeId);
 
 int NotifyNearByOnMigrateEvents(const char *peerDeviceId, int routeType, bool isUpgrade);

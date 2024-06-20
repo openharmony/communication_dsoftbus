@@ -1138,16 +1138,6 @@ void TransProxyProcessHandshakeAuthMsg(const ProxyMessage *msg)
     AuthSessionProcessAuthData(authSeq, (uint8_t *)msg->data, msg->dateLen);
 }
 
-static void ProcessHandshakeMsgNotifyNearBy(ProxyChannelInfo *chan)
-{
-    if (chan->appInfo.appType == APP_TYPE_NORMAL) {
-        int myHandleId = NotifyNearByUpdateHandleId(chan->channelId);
-        if (myHandleId != SOFTBUS_ERR) {
-            chan->appInfo.myHandleId = myHandleId;
-        }
-    }
-}
-
 static void TransProxyFastDataRecv(ProxyChannelInfo *chan)
 {
     TRANS_LOGD(TRANS_CTRL, "begin, fastTransDataSize=%{public}d", chan->appInfo.fastTransDataSize);
@@ -1183,6 +1173,68 @@ static void ReleaseChannelInfo(ProxyChannelInfo *chan)
     SoftBusFree(chan);
 }
 
+static void FillProxyHandshakeExtra(
+    TransEventExtra *extra, ProxyChannelInfo *chan, char *socketName, NodeInfo *nodeInfo)
+{
+    if (strcpy_s(socketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName) != EOK) {
+        TRANS_LOGW(TRANS_CTRL, "strcpy_s socketName failed");
+    }
+    extra->calleePkg = NULL;
+    extra->callerPkg = NULL;
+    extra->channelId = chan->myId;
+    extra->peerChannelId = chan->peerId;
+    extra->socketName = socketName;
+    extra->authId = chan->authHandle.authId;
+    extra->connectionId = chan->connId;
+    extra->channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY;
+    extra->linkType = chan->type;
+
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra->localUdid = nodeInfo->masterUdid;
+    }
+    if (chan->appInfo.appType == APP_TYPE_AUTH &&
+        strcpy_s(nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) != EOK) {
+        extra->peerUdid = nodeInfo->deviceInfo.deviceUdid;
+    } else if (chan->appInfo.appType != APP_TYPE_AUTH &&
+        LnnGetRemoteNodeInfoById(chan->appInfo.peerData.deviceId, CATEGORY_UUID, nodeInfo) == SOFTBUS_OK) {
+        extra->peerUdid = nodeInfo->deviceInfo.deviceUdid;
+        extra->peerDevVer = nodeInfo->deviceInfo.deviceVersion;
+    }
+}
+
+static int32_t TransProxyProcessHandshake(ProxyChannelInfo *chan, const ProxyMessage *msg)
+{
+    int32_t ret = OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened fail channelId=%{public}d", chan->channelId);
+        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
+        TransProxyDelChanByChanId(chan->channelId);
+        return ret;
+    }
+    if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
+        TransProxyFastDataRecv(chan);
+    }
+    chan->appInfo.myHandleId = 0;
+
+    if ((ret = TransProxyAckHandshake(msg->connId, chan, SOFTBUS_OK)) != SOFTBUS_OK) {
+        TRANS_LOGE(
+            TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, msg->connId);
+        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
+        OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(chan->channelId);
+        return ret;
+    }
+    if ((ret = OnProxyChannelBind(chan->channelId, &(chan->appInfo))) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelBind fail channelId=%{public}d, connId=%{public}u", chan->channelId,
+            msg->connId);
+        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
+        TransProxyDelChanByChanId(chan->channelId);
+        return ret;
+    }
+
+    return SOFTBUS_OK;
+}
+
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
     if (msg == NULL) {
@@ -1200,42 +1252,15 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         TRANS_LOGE(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
     }
     char tmpSocketName[SESSION_NAME_SIZE_MAX] = { 0 };
-    if (memcpy_s(tmpSocketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName,
-        strlen(chan->appInfo.myData.sessionName)) != EOK) {
-        ReleaseProxyChannelId(chan->channelId);
-        ReleaseChannelInfo(chan);
-        TRANS_LOGE(TRANS_CTRL, "memcpy socketName failed");
-        return;
-    }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    TransEventExtra extra = {
-        .calleePkg = NULL,
-        .callerPkg = NULL,
-        .channelId = chan->myId,
-        .peerChannelId = chan->peerId,
-        .socketName = tmpSocketName,
-        .authId = chan->authHandle.authId,
-        .connectionId = chan->connId,
-        .channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY,
-        .linkType = chan->type
-    };
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo.masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
-        extra.localUdid = nodeInfo.masterUdid;
-    }
+    TransEventExtra extra = { 0 };
+    FillProxyHandshakeExtra(&extra, chan, tmpSocketName, &nodeInfo);
+
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(chan->channelId);
         ReleaseChannelInfo(chan);
         goto EXIT_ERR;
-    }
-
-    if (chan->appInfo.appType == APP_TYPE_AUTH &&
-        strcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) == EOK) {
-        extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
-    } else if (chan->appInfo.appType != APP_TYPE_AUTH &&
-        LnnGetRemoteNodeInfoById(chan->appInfo.peerData.deviceId, CATEGORY_UUID, &nodeInfo) == SOFTBUS_OK) {
-        extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
-        extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
     }
 
     TransCreateConnByConnId(msg->connId, (bool)chan->isServer);
@@ -1248,21 +1273,9 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 
     extra.result = EVENT_STAGE_RESULT_OK;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
-    if ((ret = OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened fail");
-        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
-        TransProxyDelChanByChanId(chan->channelId);
-        goto EXIT_ERR;
-    }
-    if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
-        TransProxyFastDataRecv(chan);
-    }
-    ProcessHandshakeMsgNotifyNearBy(chan);
 
-    if ((ret = TransProxyAckHandshake(msg->connId, chan, SOFTBUS_OK)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "AckHandshake fail");
-        OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
-        TransProxyDelChanByChanId(chan->channelId);
+    ret = TransProxyProcessHandshake(chan, msg);
+    if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);

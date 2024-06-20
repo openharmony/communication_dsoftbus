@@ -1428,9 +1428,6 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
             LFINDER_MAC_ADDR_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s publicAddress to distributed ledger fail");
     }
-    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy_s remotePtk to distributed ledger fail");
-    }
     if (memcpy_s((char *)oldInfo->cipherInfo.key, SESSION_KEY_LENGTH, newInfo->cipherInfo.key, SESSION_KEY_LENGTH) !=
         EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo key to distributed ledger fail");
