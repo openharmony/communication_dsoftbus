@@ -52,6 +52,7 @@ typedef struct {
     int32_t adapterBcId;
     bool isUsed;
     bool isAdvertising;
+    bool isStarted;
     int64_t time;
     SoftBusCond cond;
     BroadcastCallback *bcCallback;
@@ -125,6 +126,7 @@ static void BcBtStateChanged(int32_t listenerId, int32_t state)
         (void)g_interface[g_interfaceId]->StopBroadcasting(bcManager->adapterBcId);
         DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK, DISC_BROADCAST, "bcLock mutex err!");
         bcManager->isAdvertising = false;
+        bcManager->isStarted = false;
         bcManager->time = 0;
         SoftBusCondBroadcast(&bcManager->cond);
 
@@ -236,6 +238,7 @@ int32_t DeInitBroadcastMgr(void)
     }
     g_mgrLockInit = false;
     g_mgrInit = false;
+    SoftbusBleAdapterDeInit();
     int32_t ret;
     if (g_btStateListenerId != -1) {
         ret = SoftBusRemoveBtStateListener(g_btStateListenerId);
@@ -1340,7 +1343,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
-    if (g_bcManager[bcId].isAdvertising) {
+    if (g_bcManager[bcId].isAdvertising && !g_bcManager[bcId].isStarted) {
         DISC_LOGW(DISC_BROADCAST, "wait condition managerId=%{public}d", bcId);
         StartBroadcastingWaitSignal(bcId, &g_bcLock);
     }
@@ -1367,6 +1370,11 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
         ReleaseSoftbusBroadcastData(&softbusBcData);
         return ret;
     }
+
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BROADCAST, "lock failed");
+    g_bcManager[bcId].isStarted = true;
+    SoftBusMutexUnlock(&g_bcLock);
     ReleaseSoftbusBroadcastData(&softbusBcData);
     return SOFTBUS_OK;
 }
@@ -1466,7 +1474,10 @@ int32_t StopBroadcasting(int32_t bcId)
         DISC_LOGE(DISC_BROADCAST, "call from adapter fail!");
         return ret;
     }
-
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BROADCAST, "lock failed");
+    g_bcManager[bcId].isStarted = false;
+    SoftBusMutexUnlock(&g_bcLock);
     g_bcManager[bcId].bcCallback->OnStopBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }

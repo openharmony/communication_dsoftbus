@@ -269,6 +269,11 @@ int BleGattsSendIndication(int serverId, GattsSendIndParam *param)
     return MockBluetooth::GetMocker()->BleGattsSendIndication(serverId, param);
 }
 
+int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+{
+    return MockBluetooth::GetMocker()->SoftBusAddBtStateListener(listener);
+}
+
 int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface)
 {
     DISC_LOGI(DISC_TEST, "begin to register func");
