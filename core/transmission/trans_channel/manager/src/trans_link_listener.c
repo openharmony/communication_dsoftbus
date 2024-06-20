@@ -40,6 +40,7 @@ static void ClearIpInfo(const char *peerUuid)
         TRANS_LOGW(TRANS_SVC, "ServerSide set peer p2p ip fail");
     }
 }
+
 static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid,
     const char *localIp)
 {
