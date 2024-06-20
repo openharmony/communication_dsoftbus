@@ -268,7 +268,7 @@ int32_t P2pAdapter::SetPeerWifiConfigInfo(const std::string &config)
     CONN_CHECK_AND_RETURN_RET_LOGE(
         ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "set wifi cfg failed, error=%{public}d", ret);
     CONN_LOGI(CONN_WIFI_DIRECT, "set success");
-    return SOFTBUS_ERR;
+    return SOFTBUS_OK;
 }
 
 int32_t P2pAdapter::SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size)
