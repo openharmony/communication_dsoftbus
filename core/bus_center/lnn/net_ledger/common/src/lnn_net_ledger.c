@@ -30,6 +30,7 @@
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
+#include "lnn_event_monitor_impl.h"
 #include "lnn_feature_capability.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
@@ -184,8 +185,12 @@ int32_t LnnInitNetLedgerDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
         return SOFTBUS_ERR;
     }
-    if (LnnInitEventMonitor() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init event monitor fail");
+    if (LnnInitCommonEventMonitorImpl() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delay init LnnInitCommonEventMonitorImpl fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitDeviceNameMonitorImpl() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delay init LnnInitDeviceNameMonitorImpl fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
