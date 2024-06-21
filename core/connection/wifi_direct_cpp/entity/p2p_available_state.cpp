@@ -61,8 +61,8 @@ int P2pAvailableState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2p
             operation->promise_.set_value(result);
             return SOFTBUS_OK;
         } else {
-            result.errorCode_ = SOFTBUS_ERR;
-            return SOFTBUS_ERR;
+            result.errorCode_ = SOFTBUS_CONN_CREATE_GROUP_FAILED;
+            return SOFTBUS_CONN_CREATE_GROUP_FAILED;
         }
     }
     int ret = P2pAdapter::P2pCreateGroup(operation->content_);

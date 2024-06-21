@@ -106,7 +106,7 @@ private:
     static int SendReuseResponse(const NegotiateChannel &channel, int32_t result);
     static int SendDisconnectRequest(const NegotiateChannel &channel);
     static int SendInterfaceInfoResponse(const NegotiateChannel &channel);
-    static int SendNegotiateResult(const NegotiateChannel &channel, enum WifiDirectErrorCode reason);
+    static int SendNegotiateResult(const NegotiateChannel &channel, int32_t reason);
     static int SendHandShakeMessage(const NegotiateChannel &channel);
 
     int ProcessConnectResponseAtWaitingReqResponseState(std::shared_ptr<NegotiateCommand> &command);

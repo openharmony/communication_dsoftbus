@@ -63,7 +63,7 @@ int Ipv4Info::FromIpString(const std::string &ipString)
     }
     if (inet_pton(AF_INET, ipString.c_str(), &ip_) != 1) {
         CONN_LOGW(CONN_WIFI_DIRECT, "inet_pton failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_INET_PTON_FAILED;
     }
     ip_ = htonl(ip_);
     return SOFTBUS_OK;
