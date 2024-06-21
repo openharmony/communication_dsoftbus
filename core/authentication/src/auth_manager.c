@@ -830,6 +830,7 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "info is null");
     AUTH_CHECK_AND_RETURN_LOGE(CheckAuthConnInfoType(&info->connInfo), AUTH_FSM, "connInfo type error");
     AUTH_LOGI(AUTH_FSM, "AuthNotifyAuthPassed, authSeq=%{public}" PRId64, authSeq);
+    DelAuthNormalizeRequest(authSeq);
     if (!RequireAuthLock()) {
         return;
     }
