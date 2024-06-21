@@ -51,32 +51,6 @@ static std::map<int, int> p1ErrorMapping = {
     { SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE, V1_ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE},
 };
 
-static inline int ErrorCodeToV1ProtocolCode(int reason)
-{
-    if (p1ErrorMapping.find(reason) != p1ErrorMapping.end()) {
-        auto code = p1ErrorMapping[reason];
-        if (code > V1_ERROR_END && code < V1_ERROR_START) {
-            return code - V1_ERROR_START;
-        }
-        return code;
-    }
-    return reason;
-}
-
-static inline int ErrorCodeFromV1ProtocolCode(int reason)
-{
-    if (reason < 0 && reason > V1_ERROR_END - V1_ERROR_START) {
-        auto code = reason + V1_ERROR_START;
-        for (const auto it : p1ErrorMapping) {
-            if (it.second == code) {
-                return it.first;
-            }
-        }
-        return code;
-    }
-    return reason;
-}
-
 P2pV1Processor::P2pV1Processor(const std::string &remoteDeviceId)
     : WifiDirectProcessor(remoteDeviceId), state_(&P2pV1Processor::AvailableState), timer_("P2pProcessor", TIMER_TIME),
     timerId_(Utils::TIMER_ERR_INVALID_VALUE)
@@ -528,7 +502,7 @@ void P2pV1Processor::OnWaitReuseResponseTimeoutEvent()
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "wait reuse response timeout");
     if (connectCommand_ != nullptr) {
-        connectCommand_->OnFailure(SOFTBUS_CONN_PV1_WAIT_REUSE_RESPONSE_TIMEOUT);
+        connectCommand_->OnFailure(SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED);
         connectCommand_ = nullptr;
     }
     Terminate();
@@ -566,7 +540,7 @@ int P2pV1Processor::CreateLink()
 
     if (connectCommand_->GetConnectInfo().info_.reuseOnly) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseOnly=true");
-        return ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT;
+        return SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED;
     }
 
     auto role = LinkInfo::LinkMode::NONE;
