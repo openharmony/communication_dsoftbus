@@ -317,12 +317,10 @@ bool LnnSubcribeKvStoreService(void)
 
 int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
 {
-    {
-        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
-        if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
-            LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
-            return SOFTBUS_INVALID_PARAM;
-        }
+    std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+    if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+        LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
+        return SOFTBUS_INVALID_PARAM;
     }
     auto kvAdapter = FindKvStorePtr(dbId);
     if (kvAdapter == nullptr) {
