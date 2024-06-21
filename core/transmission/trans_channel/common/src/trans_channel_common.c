@@ -203,6 +203,7 @@ void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len)
 void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVersion, uint32_t len)
 {
     if (id == NULL || deviceVersion == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return;
     }
     NodeInfo nodeInfo;
