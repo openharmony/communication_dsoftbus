@@ -502,12 +502,6 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, appInfo->timeStart);
         goto EXIT_ERR;
     }
-    ret = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_MASTER_NODE_UDID,
-                              appInfo->peerUdid, sizeof(appInfo->peerUdid));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get remote uuid err, ret=%{public}d", ret);
-        goto EXIT_ERR;
-    }
     extra->peerUdid = appInfo->peerUdid;
     extra->osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     appInfo->connectType = connOpt.type;
@@ -678,6 +672,11 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     if (!param.isQosLane) {
         TransFreeLane(laneHandle, param.isQosLane);
     }
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
+    extra.localUdid = localUdid;
+    extra.peerUdid = appInfo->peerUdid;
+    extra.peerDevVer = appInfo->peerVersion;
     TransBuildTransOpenChannelEndEvent(&extra, &transInfo, appInfo->timeStart, reason);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransFreeAppInfo(appInfo);
