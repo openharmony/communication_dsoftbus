@@ -77,6 +77,7 @@ int32_t LnnDeleteSyncToDB(void);
 int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeType changeType);
 int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize);
 int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value);
+int32_t LnnSetCloudAbility(const bool isEnableCloud);
 #ifdef __cplusplus
 }
 #endif

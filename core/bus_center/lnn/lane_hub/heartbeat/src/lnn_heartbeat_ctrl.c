@@ -553,6 +553,7 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
+            LnnSetCloudAbility(false);
             if (LnnDeleteSyncToDB() != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LEDGER, "HB clear local cache fail");
             }
