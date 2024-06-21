@@ -308,7 +308,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
-        .cloudConfig = { .enableCloud = true, .autoSync = true }
+        .cloudConfig = { .enableCloud = false, .autoSync = true }
     };
     DistributedKv::Status status;
     {
@@ -405,4 +405,26 @@ int32_t KVAdapter::DeRegisterDataChangeListener()
     return SOFTBUS_OK;
 }
 
+int32_t KVAdapter::SetCloudAbility(const bool isEnableCloud)
+{
+    LNN_LOGI(LNN_LEDGER, "call! isEnableCloud=%{public}d", isEnableCloud);
+    DistributedKv::CloudConfig cloudConfig = {
+        .enableCloud = isEnableCloud,
+        .autoSync = true
+    };
+    DistributedKv::StoreConfig storeConfig = {
+        .cloudConfig = cloudConfig
+    };
+    if (kvStorePtr_ == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "kvDBPtr is null!");
+        return SOFTBUS_KV_DB_PTR_NULL;
+    }
+    DistributedKv::Status status = kvStorePtr_->SetConfig(storeConfig);
+    if (status != DistributedKv::Status::SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "SetCloudAbility failed, ret=%{public}d", status);
+        return SOFTBUS_KV_SET_CLOUD_ABILITY_FAILED;
+    }
+    LNN_LOGI(LNN_LEDGER, "SetCloudAbility success, isEnableCloud=%{public}d", isEnableCloud);
+    return SOFTBUS_OK;
+}
 } // namespace OHOS
