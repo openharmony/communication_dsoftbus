@@ -116,6 +116,24 @@ static int32_t GetNormalizeRequestList(int64_t authSeq, bool isNeedClear, Normal
     return ret;
 }
 
+void DelAuthNormalizeRequest(int64_t authSeq)
+{
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_HICHAIN, "RequireAuthLock fail");
+        return;
+    }
+    NormalizeRequest *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_normalizeRequestList, NormalizeRequest, node) {
+        if (item->authSeq == authSeq) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            AUTH_LOGI(AUTH_HICHAIN, "del normalize request authSeq=%{public}" PRId64, authSeq);
+            break;
+        }
+    }
+    ReleaseAuthLock();
+}
+
 bool AuthIsRepeatedAuthRequest(int64_t authSeq)
 {
     if (!RequireAuthLock()) {
