@@ -908,17 +908,17 @@ static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
 {
     if (LnnPackCloudSyncDeviceInfo(json, info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "pack cloud sync info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
     }
     CloudSyncInfo syncInfo = { 0 };
     if (LnnGetLocalBroadcastCipherInfo(&syncInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cipher info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
     }
     if (!AddStringToJsonObject(json, DEVICE_INFO_JSON_BROADCAST_KEY_TABLE, syncInfo.broadcastCipherKey)) {
         JSON_Free(syncInfo.broadcastCipherKey);
         LNN_LOGE(LNN_BUILDER, "add string info fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
     }
     JSON_Free(syncInfo.broadcastCipherKey);
     return SOFTBUS_OK;
