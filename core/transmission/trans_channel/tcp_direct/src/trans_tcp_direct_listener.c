@@ -267,6 +267,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         } else {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         }
+        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         DelTrigger(module, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
         (void)NotifyChannelOpenFailed(channelId, ret);
