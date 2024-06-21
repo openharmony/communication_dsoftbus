@@ -16,6 +16,9 @@
 #ifndef WIFI_DIRECT_ERROR_CODE_H
 #define WIFI_DIRECT_ERROR_CODE_H
 
+#include <stdlib.h>
+#include "softbus_error_code.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -386,6 +389,10 @@ static inline int32_t ErrorCodeFromV1ProtocolCode(int32_t reason)
     return reason;
 }
 
+static inline int32_t ToSoftBusErrorCode(int32_t errorCode)
+{
+    return SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + abs(errorCode);
+}
 #ifdef __cplusplus
 }
 #endif

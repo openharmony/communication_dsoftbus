@@ -30,6 +30,7 @@
 #include "softbus_adapter_crypto.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
+#include "wifi_direct_error_code.h"
 
 namespace OHOS::SoftBus {
 static constexpr char DEFAULT_NET_MASK[] = "255.255.255.0";
@@ -40,7 +41,8 @@ int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
 {
     int array[CHANNEL_ARRAY_NUM_MAX] {};
     auto ret = Hid2dGetChannelListFor5G(array, CHANNEL_ARRAY_NUM_MAX);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(static_cast<int32_t>(ret)),
+        CONN_WIFI_DIRECT, "ret=%{public}d", ToSoftBusErrorCode(static_cast<int32_t>(ret)));
 
     int count = 0;
     while (array[count]) {
@@ -80,23 +82,19 @@ int32_t P2pAdapter::GetStationFrequency()
     WifiLinkedInfo linkedInfo;
     int32_t ret = GetLinkedInfo(&linkedInfo);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "get wifi linked info failed");
+        ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret), CONN_WIFI_DIRECT, "get wifi linked info failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "frequency=%{public}d", linkedInfo.frequency);
 
     return linkedInfo.frequency;
-}
-
-bool P2pAdapter::IsThreeVapConflict()
-{
-    return false;
 }
 
 int32_t P2pAdapter::P2pCreateGroup(const CreateGroupParam &param)
 {
     FreqType type = param.isWideBandSupported ? FREQUENCY_160M : FREQUENCY_DEFAULT;
     int32_t ret = Hid2dCreateGroup(param.frequency, type);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT,
-        "create group failed, frequency=%{public}d, type=%{public}d, error=%{public}d", param.frequency, type, ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
+        CONN_WIFI_DIRECT, "create group failed, frequency=%{public}d, type=%{public}d, error=%{public}d",
+        param.frequency, type, ToSoftBusErrorCode(ret));
 
     CONN_LOGI(CONN_WIFI_DIRECT, "create group success");
     return SOFTBUS_OK;
@@ -111,14 +109,15 @@ int32_t P2pAdapter::P2pConnectGroup(const ConnectParam &param)
 
     int32_t ret =
         strcpy_s(connectConfig.ssid, sizeof(connectConfig.ssid), configs[P2P_GROUP_CONFIG_INDEX_SSID].c_str());
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy ssid failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_CONN_PV2_COPY_SSID_FAILED, CONN_WIFI_DIRECT, "copy ssid failed");
 
     std::vector<uint8_t> bssid = WifiDirectUtils::MacStringToArray(configs[P2P_GROUP_CONFIG_INDEX_BSSID]);
     memcpy_s(connectConfig.bssid, sizeof(connectConfig.bssid), bssid.data(), sizeof(connectConfig.bssid));
 
     ret = strcpy_s(connectConfig.preSharedKey, sizeof(connectConfig.preSharedKey),
         configs[P2P_GROUP_CONFIG_INDEX_SHARE_KEY].c_str());
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy share key failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == EOK, SOFTBUS_CONN_PV2_COPY_SHARE_KEY_FAILED, CONN_WIFI_DIRECT, "copy share key failed");
 
     connectConfig.frequency = strtol(configs[P2P_GROUP_CONFIG_INDEX_FREQ].c_str(), nullptr, DECIMAL_BASE);
 
@@ -133,7 +132,8 @@ int32_t P2pAdapter::P2pConnectGroup(const ConnectParam &param)
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "dhcpMode=%{public}d", connectConfig.dhcpMode);
     ret = Hid2dConnect(&connectConfig);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "connect group failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
+        CONN_WIFI_DIRECT, "connect group failed");
 
     CONN_LOGI(CONN_WIFI_DIRECT, "connect group success");
     return SOFTBUS_OK;
@@ -142,14 +142,16 @@ int32_t P2pAdapter::P2pConnectGroup(const ConnectParam &param)
 int32_t P2pAdapter::P2pShareLinkReuse()
 {
     WifiErrorCode ret = Hid2dSharedlinkIncrease();
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "failed ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(static_cast<int32_t>(ret)),
+        CONN_WIFI_DIRECT, "failed ret=%{public}d", ToSoftBusErrorCode(static_cast<int32_t>(ret)));
     return SOFTBUS_OK;
 }
 
 int32_t P2pAdapter::P2pShareLinkRemoveGroup(const DestroyGroupParam &param)
 {
     WifiErrorCode ret = Hid2dSharedlinkDecrease();
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "failed ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(static_cast<int32_t>(ret)),
+        CONN_WIFI_DIRECT, "failed ret=%{public}d", ToSoftBusErrorCode(static_cast<int32_t>(ret)));
     return SOFTBUS_OK;
 }
 
@@ -165,15 +167,17 @@ int32_t P2pAdapter::DestroyGroup(const DestroyGroupParam &param)
     WifiErrorCode ret;
     if (role == LinkInfo::LinkMode::GO) {
         ret = RemoveGroup();
-        CONN_CHECK_AND_RETURN_RET_LOGW(
-            ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "remove group failed, ret=%{public}d", ret);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(static_cast<int32_t>(ret)),
+            CONN_WIFI_DIRECT, "remove group failed, ret=%{public}d",
+            ToSoftBusErrorCode(static_cast<int32_t>(ret)));
     } else if (role == LinkInfo::LinkMode::GC) {
         ret = Hid2dRemoveGcGroup(param.interface.c_str());
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT,
-            "remove gc group of interface failed, interface=%{public}s, ret=%{public}d", param.interface.c_str(), ret);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(static_cast<int32_t>(ret)),
+            CONN_WIFI_DIRECT, "remove gc group of interface failed, interface=%{public}s, ret=%{public}d",
+            param.interface.c_str(), ToSoftBusErrorCode(static_cast<int32_t>(ret)));
     } else {
-        CONN_LOGW(CONN_WIFI_DIRECT, "unknonwn api role. role=%{public}d", role);
-        return SOFTBUS_ERR;
+        CONN_LOGW(CONN_WIFI_DIRECT, "unknown api role. role=%{public}d", role);
+        return SOFTBUS_CONN_UNKNOWN_ROLE;
     }
 
     return SOFTBUS_OK;
@@ -213,7 +217,7 @@ int32_t P2pAdapter::GetRecommendChannel(void)
 
     int32_t ret = Hid2dGetRecommendChannel(&request, &response);
     if (ret != WIFI_SUCCESS) {
-        return ret;
+        return ToSoftBusErrorCode(ret);
     }
 
     if (response.centerFreq) {
@@ -232,8 +236,9 @@ int32_t P2pAdapter::GetSelfWifiConfigInfo(std::string &config)
     uint8_t wifiConfig[CFG_DATA_MAX_BYTES] = { 0 };
     int32_t wifiConfigSize = 0;
     int32_t ret = Hid2dGetSelfWifiCfgInfo(TYPE_OF_GET_SELF_CONFIG, (char *)wifiConfig, &wifiConfigSize);
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "get self wifi config failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
+        CONN_WIFI_DIRECT, "get self wifi config failed, error=%{public}d",
+        ToSoftBusErrorCode(ret));
 
     CONN_LOGI(CONN_WIFI_DIRECT, "wifiConfigSize=%{public}d", wifiConfigSize);
     if (wifiConfigSize == 0) {
@@ -265,8 +270,9 @@ int32_t P2pAdapter::SetPeerWifiConfigInfo(const std::string &config)
     }
     ret = Hid2dSetPeerWifiCfgInfo(TYPE_OF_SET_PEER_CONFIG, (char *)decodeCfg, (int32_t)decodeLen);
     delete[] decodeCfg;
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "set wifi cfg failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
+        CONN_WIFI_DIRECT, "set wifi cfg failed, error=%{public}d",
+        ToSoftBusErrorCode(ret));
     CONN_LOGI(CONN_WIFI_DIRECT, "set success");
     return SOFTBUS_OK;
 }
@@ -288,8 +294,9 @@ int32_t P2pAdapter::GetGroupInfo(WifiDirectP2pGroupInfo &groupInfoOut)
     WifiP2pGroupInfo info {};
     auto ret = GetCurrentGroup(&info);
     if (ret != WIFI_SUCCESS) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ret);
-        return ret;
+        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d",
+            ToSoftBusErrorCode(static_cast<int32_t>(ret)));
+        return ToSoftBusErrorCode(static_cast<int32_t>(ret));
     }
     groupInfoOut.isGroupOwner = info.isP2pGroupOwner;
     groupInfoOut.frequency = info.frequency;
@@ -318,8 +325,9 @@ int32_t P2pAdapter::GetGroupConfig(std::string &groupConfigString)
     auto groupInfo = std::make_shared<WifiP2pGroupInfo>();
     auto ret = GetCurrentGroup(groupInfo.get());
     if (ret != WIFI_SUCCESS) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ret);
-        return ret;
+        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d",
+            ToSoftBusErrorCode(static_cast<int32_t>(ret)));
+        return ToSoftBusErrorCode(static_cast<int32_t>(ret));
     }
 
     std::string interface = groupInfo->interface;
@@ -349,8 +357,8 @@ int32_t P2pAdapter::GetIpAddress(std::string &ipString)
     }
     int32_t ret = GetCurrentGroup(groupInfo.get());
     if (ret != WIFI_SUCCESS) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ret);
-        return ret;
+        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ToSoftBusErrorCode(ret));
+        return ToSoftBusErrorCode(ret);
     }
 
     std::string interface = groupInfo->interface;
@@ -380,8 +388,8 @@ int32_t P2pAdapter::GetDynamicMacAddress(std::string &macString)
     WifiP2pGroupInfo groupInfo;
     int32_t ret = GetCurrentGroup(&groupInfo);
     if (ret != WIFI_SUCCESS) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ret);
-        return ret;
+        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ToSoftBusErrorCode(ret));
+        return ToSoftBusErrorCode(ret);
     }
     std::vector<uint8_t> macArray = WifiDirectUtils::GetInterfaceMacAddr(groupInfo.interface);
     macString = WifiDirectUtils::MacArrayToString(macArray);
@@ -399,8 +407,8 @@ int32_t P2pAdapter::RequestGcIp(const std::string &macString, std::string &ipStr
     uint32_t ipArray[IPV4_ADDR_ARRAY_LEN];
     int ret = Hid2dRequestGcIp(macArray.data(), ipArray);
     if (ret != WIFI_SUCCESS) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "request Gc Ip failed, error=%{public}d", ret);
-        return ret;
+        CONN_LOGE(CONN_WIFI_DIRECT, "request Gc Ip failed, error=%{public}d", ToSoftBusErrorCode(ret));
+        return ToSoftBusErrorCode(ret);
     }
 
     std::stringstream ss;
@@ -422,14 +430,15 @@ int32_t P2pAdapter::P2pConfigGcIp(const std::string &interface, const std::strin
 
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "convert ip to int array failed");
     ret = WifiDirectUtils::IpStringToIntArray(ip.c_str(), addrInfo.gateway, IPV4_ARRAY_LEN);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "convert gateway to int array failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_CONVERT_GATEWAY_TO_INTARRAY_FAILED, CONN_WIFI_DIRECT,
+        "convert gateway to int array failed");
     ret = WifiDirectUtils::IpStringToIntArray(DEFAULT_NET_MASK, addrInfo.netmask, IPV4_ARRAY_LEN);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "convert gateway to int array failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_CONVERT_GATEWAY_TO_INTARRAY_FAILED, CONN_WIFI_DIRECT,
+        "convert gateway to int array failed");
 
     ret = Hid2dConfigIPAddr(interface.c_str(), &addrInfo);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "hid2d config ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret), CONN_WIFI_DIRECT, "hid2d config ip failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "success");
     return SOFTBUS_OK;
 }

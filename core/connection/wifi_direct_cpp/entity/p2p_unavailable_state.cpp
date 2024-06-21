@@ -44,22 +44,22 @@ void P2pUnavailableState::Exit()
 
 int P2pUnavailableState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pUnavailableState::Connect(const std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> &operation)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pUnavailableState::DestroyGroup(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pUnavailableState::RemoveLink(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 void P2pUnavailableState::OnP2pStateChangeEvent(P2pState state)
