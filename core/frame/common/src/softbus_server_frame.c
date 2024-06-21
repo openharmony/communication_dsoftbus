@@ -108,10 +108,7 @@ static int32_t InitServicesAndModules(void)
         return SOFTBUS_DFX_INIT_FAILED;
     }
 
-#ifdef INSTANT_REGISTER_COMMUNICATION_RADAR
     InstRegister(NULL);
-#endif // INSTANT_REGISTER_COMMUNICATION_RADAR
-
     return SOFTBUS_OK;
 }
 

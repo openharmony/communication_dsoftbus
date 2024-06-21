@@ -13,18 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef INSTANT_STATISTICS_H
-#define INSTANT_STATISTICS_H
+#include "instant_statistics.h"
 
-#include "message_handler.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void InstRegister(SoftBusMessage *msg);
-
-#ifdef __cplusplus
+void InstRegister(SoftBusMessage *msg)
+{
+    return;
 }
-#endif
-#endif // INSTANT_STATISTICS_H

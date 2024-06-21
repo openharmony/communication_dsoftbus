@@ -195,19 +195,18 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
     }
 }
 
-void LinkManager::GetAllLinksBasicInfo(std::vector<std::shared_ptr<InnerLinkBasicInfo>> &infos)
+void LinkManager::GetAllLinksBasicInfo(std::vector<InnerLinkBasicInfo> &infos)
 {
-    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     for (const auto &[key, value] : links_) {
-        std::shared_ptr<InnerLinkBasicInfo> info = std::make_shared<InnerLinkBasicInfo>();
-        info->isBeingUsedByRemote = value->IsBeingUsedByRemote();
-        info->state = value->GetState();
-        info->linkType = value->GetLinkType();
-        info->freq = value->GetFrequency();
-        info->remoteDeviceId = value->GetRemoteDeviceId();
-        info->remoteIpv4 = value->GetRemoteIpv4();
-        info->remoteBaseMac = value->GetRemoteBaseMac();
+        InnerLinkBasicInfo info = { 0 };
+        info.isBeingUsedByRemote = value->IsBeingUsedByRemote();
+        info.state = value->GetState();
+        info.linkType = value->GetLinkType();
+        info.freq = value->GetFrequency();
+        info.remoteDeviceId = value->GetRemoteDeviceId();
+        info.remoteIpv4 = value->GetRemoteIpv4();
+        info.remoteBaseMac = value->GetRemoteBaseMac();
         infos.push_back(info);
     }
 }

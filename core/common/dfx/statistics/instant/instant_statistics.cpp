@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "instant_statistics.h"
 
-#ifdef INSTANT_REGISTER_COMMUNICATION_RADAR
 #include "bus_center_manager.h"
 #include "comm_log.h"
 #include "communication_radar.h"
@@ -46,7 +46,6 @@ static constexpr const uint32_t WLAN_IP = 3;
 
 static constexpr const int INST_MINUTE_TIME = 60 * 1000;
 static constexpr const int INST_DELAY_REGISTER = 0;
-static char INSTANT_HANDLER_NAME[] = "Instant_statistics";
 using InstAsyncCallbackFunc = void (*)(SoftBusMessage *);
 
 using InstantChannelInfo = struct {
@@ -115,7 +114,7 @@ static int32_t InstSetPeerDeviceIdForRemoteInfo(std::string &dst, const std::str
 }
 
 static void InstUpdateRemoteInfoByInnerLink(InstantRemoteInfo *remoteInfo,
-    const std::shared_ptr<InnerLinkBasicInfo> &link, const std::string &remoteUuid)
+    const InnerLinkBasicInfo &link, const std::string &remoteUuid)
 {
     if (remoteInfo == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
@@ -125,21 +124,21 @@ static void InstUpdateRemoteInfoByInnerLink(InstantRemoteInfo *remoteInfo,
         return;
     }
     InstSetPeerDeviceIdForRemoteInfo(remoteInfo->uuid, remoteUuid);
-    InnerLink::LinkType linkType = link->linkType;
+    InnerLink::LinkType linkType = link.linkType;
     if (linkType != InnerLink::LinkType::P2P && linkType != InnerLink::LinkType::HML) {
         return;
     }
-    InnerLink::LinkState state = link->state;
+    InnerLink::LinkState state = link.state;
     if (linkType == InnerLink::LinkType::P2P) {
-        remoteInfo->p2pFreq = link->freq;
+        remoteInfo->p2pFreq = link.freq;
         remoteInfo->p2pLinkState = (int32_t)state;
-        InstSetPeerDeviceIdForRemoteInfo(remoteInfo->p2pMac, link->remoteBaseMac);
-        InstSetPeerDeviceIdForRemoteInfo(remoteInfo->p2pIp, link->remoteIpv4);
+        InstSetPeerDeviceIdForRemoteInfo(remoteInfo->p2pMac, link.remoteBaseMac);
+        InstSetPeerDeviceIdForRemoteInfo(remoteInfo->p2pIp, link.remoteIpv4);
     } else if (linkType == InnerLink::LinkType::HML) {
-        remoteInfo->hmlFreq = link->freq;
+        remoteInfo->hmlFreq = link.freq;
         remoteInfo->hmlLinkState = (int32_t)state;
-        InstSetPeerDeviceIdForRemoteInfo(remoteInfo->hmlMac, link->remoteBaseMac);
-        InstSetPeerDeviceIdForRemoteInfo(remoteInfo->hmlIp, link->remoteIpv4);
+        InstSetPeerDeviceIdForRemoteInfo(remoteInfo->hmlMac, link.remoteBaseMac);
+        InstSetPeerDeviceIdForRemoteInfo(remoteInfo->hmlIp, link.remoteIpv4);
     }
 }
 
@@ -165,17 +164,16 @@ static InstantRemoteInfo *InstCreateAndAddRemoteInfo(SoftBusList *remoteChannelI
 
 static void InstAddRemoteInfoByLinkManager(SoftBusList *remoteChannelInfoList)
 {
-    std::vector<std::shared_ptr<InnerLinkBasicInfo>> links;
+    std::vector<InnerLinkBasicInfo> links;
     LinkManager::GetInstance().GetAllLinksBasicInfo(links);
     for (const auto &link : links) {
-        std::string remoteUuid = link->remoteDeviceId;
+        std::string remoteUuid = link.remoteDeviceId;
         if (remoteUuid.empty()) {
             continue;
         }
         InstantRemoteInfo *rInfo = NULL;
         bool matched = false;
-        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node)
-        {
+        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstantIsParaMatch(rInfo->uuid, remoteUuid)) {
                 matched = true;
                 InstUpdateRemoteInfoByInnerLink(rInfo, link, remoteUuid);
@@ -198,31 +196,17 @@ static int32_t InstGetIpFromLinkTypeOrConnectType(const InstantRemoteInfo *remot
         COMM_LOGE(COMM_DFX, "invalid param");
         return UNKNOWN_IP;
     }
-    int32_t ret = UNKNOWN_IP;
-    if (linkType == LANE_WLAN_2P4G || linkType == LANE_WLAN_5G) {
-        ret = WLAN_IP;
-    } else if (linkType == LANE_P2P || linkType == LANE_P2P_REUSE) {
-        ret = P2P_IP;
-    } else if (linkType == LANE_HML) {
-        ret = HML_IP;
-    } else {
-        switch (connectType) {
-            case CONNECT_P2P:
-            case CONNECT_P2P_REUSE:
-                ret = P2P_IP;
-                break;
-            case CONNECT_HML:
-            case CONNECT_TRIGGER_HML:
-                ret = HML_IP;
-                break;
-            case CONNECT_TCP:
-                ret = WLAN_IP;
-                break;
-            default:
-                ret = UNKNOWN_IP;
-        }
+    if (linkType == LANE_WLAN_2P4G || linkType == LANE_WLAN_5G || connectType == CONNECT_TCP) {
+        return WLAN_IP;
     }
-    return ret;
+    if (linkType == LANE_P2P || linkType == LANE_P2P_REUSE || connectType == CONNECT_P2P ||
+        connectType == CONNECT_P2P_REUSE) {
+        return P2P_IP;
+    }
+    if (linkType == LANE_HML || connectType == CONNECT_HML || connectType == CONNECT_TRIGGER_HML) {
+        return HML_IP;
+    }
+    return UNKNOWN_IP;
 }
 
 static bool InstIsMatchSessionConn(const InstantRemoteInfo *rInfo, const SessionConn *conn)
@@ -235,21 +219,16 @@ static bool InstIsMatchSessionConn(const InstantRemoteInfo *rInfo, const Session
         return true;
     }
     int32_t type = InstGetIpFromLinkTypeOrConnectType(rInfo, conn->appInfo.linkType, conn->appInfo.connectType);
-    bool ret = false;
     switch (type) {
         case HML_IP:
-            ret = InstantIsParaMatch(rInfo->hmlIp, conn->appInfo.peerData.addr);
-            break;
+            return InstantIsParaMatch(rInfo->hmlIp, conn->appInfo.peerData.addr);
         case P2P_IP:
-            ret = InstantIsParaMatch(rInfo->p2pIp, conn->appInfo.peerData.addr);
-            break;
+            return InstantIsParaMatch(rInfo->p2pIp, conn->appInfo.peerData.addr);
         case WLAN_IP:
-            ret = InstantIsParaMatch(rInfo->wlanIp, conn->appInfo.peerData.addr);
-            break;
+            return InstantIsParaMatch(rInfo->wlanIp, conn->appInfo.peerData.addr);
         default:
-            ret = false;
+            return false;
     }
-    return ret;
 }
 
 static void InstSetIpForRemoteInfo(InstantRemoteInfo *remoteInfo, const AppInfo *appInfo)
@@ -280,15 +259,10 @@ static void InstSetUdidForRemoteInfoByUuid(InstantRemoteInfo *remoteInfo)
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    NodeInfo *nodeInfo = static_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
-    if (nodeInfo == NULL) {
-        COMM_LOGE(COMM_DFX, "nodeInfo Calloc fail for udid");
-        return;
+    NodeInfo nodeInfo = { 0 };
+    if (LnnGetRemoteNodeInfoById(remoteInfo->uuid.c_str(), CATEGORY_UUID, &nodeInfo) == SOFTBUS_OK) {
+        (void)InstSetPeerDeviceIdForRemoteInfo(remoteInfo->udid, nodeInfo.deviceInfo.deviceUdid);
     }
-    if (LnnGetRemoteNodeInfoById(remoteInfo->uuid.c_str(), CATEGORY_UUID, nodeInfo) == SOFTBUS_OK) {
-        (void)InstSetPeerDeviceIdForRemoteInfo(remoteInfo->udid, nodeInfo->deviceInfo.deviceUdid);
-    }
-    SoftBusFree(nodeInfo);
 }
 
 static void InstSetUuidForRemoteInfoByUdid(InstantRemoteInfo *remoteInfo)
@@ -297,15 +271,10 @@ static void InstSetUuidForRemoteInfoByUdid(InstantRemoteInfo *remoteInfo)
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    NodeInfo *nodeInfo = static_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
-    if (nodeInfo == NULL) {
-        COMM_LOGE(COMM_DFX, "nodeInfo Calloc fail for uuid");
-        return;
+    NodeInfo nodeInfo = { 0 };
+    if (LnnGetRemoteNodeInfoById(remoteInfo->udid.c_str(), CATEGORY_UDID, &nodeInfo) == SOFTBUS_OK) {
+        (void)InstSetPeerDeviceIdForRemoteInfo(remoteInfo->uuid, nodeInfo.uuid);
     }
-    if (LnnGetRemoteNodeInfoById(remoteInfo->udid.c_str(), CATEGORY_UDID, nodeInfo) == SOFTBUS_OK) {
-        (void)InstSetPeerDeviceIdForRemoteInfo(remoteInfo->uuid, nodeInfo->uuid);
-    }
-    SoftBusFree(nodeInfo);
 }
 
 static void UpdateRemoteInfoBySessionConn(InstantRemoteInfo *remoteInfo, const SessionConn *conn)
@@ -355,7 +324,7 @@ static void InstAddSessionConnToRemoteInfo(InstantRemoteInfo *remoteInfo, Sessio
     channelInfo->laneLinkType = conn->appInfo.linkType;
     channelInfo->connectType = conn->appInfo.connectType;
     channelInfo->startTime = GetSoftbusRecordTimeMillis() - conn->appInfo.timeStart;
-    channelInfo->status = conn->status;
+    channelInfo->status = static_cast<int32_t>(conn->status);
     channelInfo->channelType = CHANNEL_TYPE_TCP_DIRECT;
     channelInfo->socketName = conn->appInfo.myData.sessionName;
     UpdateRemoteInfoBySessionConn(remoteInfo, conn);
@@ -368,12 +337,10 @@ static void InstUpdateRemoteInfoBySessionConn(SoftBusList *remoteChannelInfoList
     if (sessionList == NULL || GetSessionConnLock() != SOFTBUS_OK) {
         return;
     }
-    LIST_FOR_EACH_ENTRY(item, &sessionList->list, SessionConn, node)
-    {
+    LIST_FOR_EACH_ENTRY(item, &sessionList->list, SessionConn, node) {
         InstantRemoteInfo *rInfo = NULL;
         bool matched = false;
-        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node)
-        {
+        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchSessionConn(rInfo, item)) {
                 matched = true;
                 InstAddSessionConnToRemoteInfo(rInfo, item);
@@ -389,49 +356,44 @@ static void InstUpdateRemoteInfoBySessionConn(SoftBusList *remoteChannelInfoList
     ReleaseSessionConnLock();
 }
 
-static bool InstIsMatchUdpChannel(const InstantRemoteInfo *rInfo, const UdpChannelInfo *conn)
+static bool InstIsMatchUdpChannel(const InstantRemoteInfo *rInfo, const UdpChannelInfo *info)
 {
-    if (rInfo == NULL || conn == NULL) {
+    if (rInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return false;
     }
-    if (InstantIsParaMatch(rInfo->uuid, conn->info.peerData.deviceId)) {
+    if (InstantIsParaMatch(rInfo->uuid, info->info.peerData.deviceId)) {
         return true;
     }
-    int32_t type = InstGetIpFromLinkTypeOrConnectType(rInfo, conn->info.linkType, conn->info.connectType);
-    bool ret = false;
+    int32_t type = InstGetIpFromLinkTypeOrConnectType(rInfo, info->info.linkType, info->info.connectType);
     switch (type) {
         case HML_IP:
-            ret = InstantIsParaMatch(rInfo->hmlIp, conn->info.peerData.addr);
-            break;
+            return InstantIsParaMatch(rInfo->hmlIp, info->info.peerData.addr);
         case P2P_IP:
-            ret = InstantIsParaMatch(rInfo->p2pIp, conn->info.peerData.addr);
-            break;
+            return InstantIsParaMatch(rInfo->p2pIp, info->info.peerData.addr);
         case WLAN_IP:
-            ret = InstantIsParaMatch(rInfo->wlanIp, conn->info.peerData.addr);
-            break;
+            return InstantIsParaMatch(rInfo->wlanIp, info->info.peerData.addr);
         default:
-            ret = false;
+            return false;
     }
-    return ret;
 }
 
-static void UpdateRemoteInfoByUdpChannel(InstantRemoteInfo *remoteInfo, const UdpChannelInfo *conn)
+static void UpdateRemoteInfoByUdpChannel(InstantRemoteInfo *remoteInfo, const UdpChannelInfo *info)
 {
-    if (remoteInfo == NULL || conn == NULL) {
+    if (remoteInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    InstSetIpForRemoteInfo(remoteInfo, &conn->info);
-    if (InstSetPeerDeviceIdForRemoteInfo(remoteInfo->uuid, conn->info.peerData.deviceId) == SOFTBUS_OK &&
+    InstSetIpForRemoteInfo(remoteInfo, &info->info);
+    if (InstSetPeerDeviceIdForRemoteInfo(remoteInfo->uuid, info->info.peerData.deviceId) == SOFTBUS_OK &&
         remoteInfo->udid.empty()) {
         InstSetUdidForRemoteInfoByUuid(remoteInfo);
     }
 }
 
-static void InstAddUdpChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const UdpChannelInfo *conn)
+static void InstAddUdpChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const UdpChannelInfo *info)
 {
-    if (remoteInfo == NULL || conn == NULL) {
+    if (remoteInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -439,14 +401,14 @@ static void InstAddUdpChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const U
     if (channelInfo == NULL) {
         return;
     }
-    channelInfo->serverSide = !conn->info.isClient;
-    channelInfo->laneLinkType = conn->info.linkType;
-    channelInfo->connectType = conn->info.connectType;
-    channelInfo->startTime = GetSoftbusRecordTimeMillis() - conn->info.timeStart;
-    channelInfo->status = conn->status;
+    channelInfo->serverSide = !info->info.isClient;
+    channelInfo->laneLinkType = info->info.linkType;
+    channelInfo->connectType = info->info.connectType;
+    channelInfo->startTime = GetSoftbusRecordTimeMillis() - info->info.timeStart;
+    channelInfo->status = info->status;
     channelInfo->channelType = CHANNEL_TYPE_UDP;
-    channelInfo->socketName = conn->info.myData.sessionName;
-    UpdateRemoteInfoByUdpChannel(remoteInfo, conn);
+    channelInfo->socketName = info->info.myData.sessionName;
+    UpdateRemoteInfoByUdpChannel(remoteInfo, info);
 }
 
 static void InstUpdateRemoteInfoByUdpChannel(SoftBusList *remoteChannelInfoList)
@@ -456,12 +418,10 @@ static void InstUpdateRemoteInfoByUdpChannel(SoftBusList *remoteChannelInfoList)
     if (sessionList == NULL || GetUdpChannelLock() != SOFTBUS_OK) {
         return;
     }
-    LIST_FOR_EACH_ENTRY(item, &sessionList->list, UdpChannelInfo, node)
-    {
+    LIST_FOR_EACH_ENTRY(item, &sessionList->list, UdpChannelInfo, node) {
         InstantRemoteInfo *rInfo = NULL;
         bool matched = false;
-        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node)
-        {
+        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchUdpChannel(rInfo, item)) {
                 matched = true;
                 InstAddUdpChannelToRemoteInfo(rInfo, item);
@@ -485,25 +445,22 @@ static bool InstIsMatchProxyChannel(const InstantRemoteInfo *rInfo, const ProxyC
     }
 
     std::string deviceId = conn->appInfo.appType == APP_TYPE_AUTH ? rInfo->udid : rInfo->uuid;
-    if (InstantIsParaMatch(deviceId, conn->appInfo.peerData.deviceId)) {
-        return true;
-    }
-    return false;
+    return InstantIsParaMatch(deviceId, conn->appInfo.peerData.deviceId);
 }
 
-static void UpdateRemoteInfoByProxyChannel(InstantRemoteInfo *remoteInfo, const ProxyChannelInfo *conn)
+static void UpdateRemoteInfoByProxyChannel(InstantRemoteInfo *remoteInfo, const ProxyChannelInfo *info)
 {
-    if (remoteInfo == NULL || conn == NULL) {
+    if (remoteInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    if (conn->appInfo.appType == APP_TYPE_AUTH) {
-        if (InstSetPeerDeviceIdForRemoteInfo(remoteInfo->udid, conn->appInfo.peerData.deviceId) == SOFTBUS_OK &&
+    if (info->appInfo.appType == APP_TYPE_AUTH) {
+        if (InstSetPeerDeviceIdForRemoteInfo(remoteInfo->udid, info->appInfo.peerData.deviceId) == SOFTBUS_OK &&
             remoteInfo->uuid.empty()) {
             InstSetUuidForRemoteInfoByUdid(remoteInfo);
         }
     } else {
-        if (InstSetPeerDeviceIdForRemoteInfo(remoteInfo->uuid, conn->appInfo.peerData.deviceId) == SOFTBUS_OK &&
+        if (InstSetPeerDeviceIdForRemoteInfo(remoteInfo->uuid, info->appInfo.peerData.deviceId) == SOFTBUS_OK &&
             remoteInfo->udid.empty()) {
             InstSetUdidForRemoteInfoByUuid(remoteInfo);
         }
@@ -535,27 +492,27 @@ static void InstSetDeviceIdByConnId(InstantRemoteInfo *remoteInfo, InstantChanne
 }
 
 static void SetParamByProxyChannelInfo(InstantRemoteInfo *remoteInfo, InstantChannelInfo *channelInfo,
-    const ProxyChannelInfo *conn)
+    const ProxyChannelInfo *info)
 {
-    if (remoteInfo == NULL || channelInfo == NULL || conn == NULL) {
+    if (remoteInfo == NULL || channelInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    channelInfo->serverSide = conn->isServer;
-    channelInfo->laneLinkType = conn->appInfo.linkType;
-    channelInfo->connectType = conn->appInfo.connectType;
-    channelInfo->startTime = GetSoftbusRecordTimeMillis() - conn->appInfo.timeStart;
-    channelInfo->status = conn->status;
-    channelInfo->appType = conn->appInfo.appType;
+    channelInfo->serverSide = info->isServer;
+    channelInfo->laneLinkType = info->appInfo.linkType;
+    channelInfo->connectType = info->appInfo.connectType;
+    channelInfo->startTime = GetSoftbusRecordTimeMillis() - info->appInfo.timeStart;
+    channelInfo->status = info->status;
+    channelInfo->appType = info->appInfo.appType;
     channelInfo->channelType = CHANNEL_TYPE_PROXY;
-    channelInfo->socketName = conn->appInfo.myData.sessionName;
-    UpdateRemoteInfoByProxyChannel(remoteInfo, conn);
-    InstSetDeviceIdByConnId(remoteInfo, channelInfo, conn->connId);
+    channelInfo->socketName = info->appInfo.myData.sessionName;
+    UpdateRemoteInfoByProxyChannel(remoteInfo, info);
+    InstSetDeviceIdByConnId(remoteInfo, channelInfo, info->connId);
 }
 
-static void InstAddProxyChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const ProxyChannelInfo *conn)
+static void InstAddProxyChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const ProxyChannelInfo *info)
 {
-    if (remoteInfo == NULL || conn == NULL) {
+    if (remoteInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -563,7 +520,7 @@ static void InstAddProxyChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const
     if (channelInfo == NULL) {
         return;
     }
-    SetParamByProxyChannelInfo(remoteInfo, channelInfo, conn);
+    SetParamByProxyChannelInfo(remoteInfo, channelInfo, info);
 }
 
 static void InstUpdateRemoteInfoByProxyChannel(SoftBusList *remoteChannelInfoList)
@@ -573,12 +530,10 @@ static void InstUpdateRemoteInfoByProxyChannel(SoftBusList *remoteChannelInfoLis
     if (sessionList == NULL || GetProxyChannelLock() != SOFTBUS_OK) {
         return;
     }
-    LIST_FOR_EACH_ENTRY(item, &sessionList->list, ProxyChannelInfo, node)
-    {
+    LIST_FOR_EACH_ENTRY(item, &sessionList->list, ProxyChannelInfo, node) {
         InstantRemoteInfo *rInfo = NULL;
         bool matched = false;
-        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node)
-        {
+        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchProxyChannel(rInfo, item)) {
                 matched = true;
                 InstAddProxyChannelToRemoteInfo(rInfo, item);
@@ -594,49 +549,44 @@ static void InstUpdateRemoteInfoByProxyChannel(SoftBusList *remoteChannelInfoLis
     ReleaseProxyChannelLock();
 }
 
-static bool InstIsMatchAuthChannel(const InstantRemoteInfo *rInfo, const AuthChannelInfo *conn)
+static bool InstIsMatchAuthChannel(const InstantRemoteInfo *rInfo, const AuthChannelInfo *info)
 {
-    if (rInfo == NULL || conn == NULL) {
+    if (rInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return false;
     }
-    if (InstantIsParaMatch(rInfo->udid, conn->appInfo.peerData.deviceId)) {
-        return true;
-    }
-    if (InstantIsParaMatch(rInfo->wlanIp, conn->connOpt.socketOption.addr)) {
-        return true;
-    }
-    return false;
+    return InstantIsParaMatch(rInfo->udid, info->appInfo.peerData.deviceId) ||
+        InstantIsParaMatch(rInfo->wlanIp, info->connOpt.socketOption.addr);
 }
 
-static void InstUpdateRemoteInfoByAuthChannel(InstantRemoteInfo *remoteInfo, const AuthChannelInfo *conn)
+static void InstUpdateRemoteInfoByAuthChannel(InstantRemoteInfo *remoteInfo, const AuthChannelInfo *info)
 {
-    if (remoteInfo == NULL || conn == NULL) {
+    if (remoteInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    InstSetPeerDeviceIdForRemoteInfo(remoteInfo->udid, conn->appInfo.peerData.deviceId);
-    InstSetPeerDeviceIdForRemoteInfo(remoteInfo->wlanIp, conn->connOpt.socketOption.addr);
+    InstSetPeerDeviceIdForRemoteInfo(remoteInfo->udid, info->appInfo.peerData.deviceId);
+    InstSetPeerDeviceIdForRemoteInfo(remoteInfo->wlanIp, info->connOpt.socketOption.addr);
 }
 
 static void InstSetParamByAuthChannelInfo(InstantRemoteInfo *remoteInfo, InstantChannelInfo *channelInfo,
-    const AuthChannelInfo *conn)
+    const AuthChannelInfo *info)
 {
-    if (remoteInfo == NULL || channelInfo == NULL || conn == NULL) {
+    if (remoteInfo == NULL || channelInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    channelInfo->serverSide = !conn->isClient;
+    channelInfo->serverSide = !info->isClient;
     channelInfo->connectType = CONNECT_TCP;
-    channelInfo->startTime = GetSoftbusRecordTimeMillis() - conn->appInfo.timeStart;
-    channelInfo->channelType = conn->appInfo.channelType;
-    channelInfo->socketName = conn->appInfo.myData.sessionName;
-    InstUpdateRemoteInfoByAuthChannel(remoteInfo, conn);
+    channelInfo->startTime = GetSoftbusRecordTimeMillis() - info->appInfo.timeStart;
+    channelInfo->channelType = info->appInfo.channelType;
+    channelInfo->socketName = info->appInfo.myData.sessionName;
+    InstUpdateRemoteInfoByAuthChannel(remoteInfo, info);
 }
 
-static void InstAddAuthChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const AuthChannelInfo *conn)
+static void InstAddAuthChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const AuthChannelInfo *info)
 {
-    if (remoteInfo == NULL || conn == NULL) {
+    if (remoteInfo == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -644,7 +594,7 @@ static void InstAddAuthChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const 
     if (channelInfo == NULL) {
         return;
     }
-    InstSetParamByAuthChannelInfo(remoteInfo, channelInfo, conn);
+    InstSetParamByAuthChannelInfo(remoteInfo, channelInfo, info);
 }
 
 static void InstUpdateByAuthChannelList(SoftBusList *remoteChannelInfoList)
@@ -654,12 +604,10 @@ static void InstUpdateByAuthChannelList(SoftBusList *remoteChannelInfoList)
     if (sessionList == NULL || GetAuthChannelLock() != SOFTBUS_OK) {
         return;
     }
-    LIST_FOR_EACH_ENTRY(item, &sessionList->list, AuthChannelInfo, node)
-    {
+    LIST_FOR_EACH_ENTRY(item, &sessionList->list, AuthChannelInfo, node) {
         InstantRemoteInfo *rInfo = NULL;
         bool matched = false;
-        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node)
-        {
+        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchAuthChannel(rInfo, item)) {
                 matched = true;
                 InstAddAuthChannelToRemoteInfo(rInfo, item);
@@ -679,13 +627,11 @@ static void InstReleaseRemoteChannelInfoList(SoftBusList *remoteChannelInfoList)
 {
     InstantRemoteInfo *item = NULL;
     InstantRemoteInfo *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &remoteChannelInfoList->list, InstantRemoteInfo, node)
-    {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
         if (!IsListEmpty(&item->channels)) {
             InstantChannelInfo *channelItem = NULL;
             InstantChannelInfo *channelNext = NULL;
-            LIST_FOR_EACH_ENTRY_SAFE(channelItem, channelNext, &item->channels, InstantChannelInfo, node)
-            {
+            LIST_FOR_EACH_ENTRY_SAFE(channelItem, channelNext, &item->channels, InstantChannelInfo, node) {
                 ListDelete(&channelItem->node);
                 SoftBusFree(channelItem);
             }
@@ -745,8 +691,7 @@ static void InstPackRemoteInfo(cJSON *json, SoftBusList *remoteChannelInfoList)
     }
     (void)AddNumberToJsonObject(json, "remoteNum", remoteChannelInfoList->cnt);
     InstantRemoteInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &remoteChannelInfoList->list, InstantRemoteInfo, node)
-    {
+    LIST_FOR_EACH_ENTRY(item, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
         cJSON *deviceJson = cJSON_AddObjectToObject(json, "remoteInfo");
         if (deviceJson == NULL) {
             continue;
@@ -754,8 +699,7 @@ static void InstPackRemoteInfo(cJSON *json, SoftBusList *remoteChannelInfoList)
         InstPackRemoteBasicInfo(deviceJson, item);
         if (!IsListEmpty(&item->channels)) {
             InstantChannelInfo *channelItem = NULL;
-            LIST_FOR_EACH_ENTRY(channelItem, &item->channels, InstantChannelInfo, node)
-            {
+            LIST_FOR_EACH_ENTRY(channelItem, &item->channels, InstantChannelInfo, node) {
                 InstPackChannelInfo(deviceJson, channelItem);
             }
         }
@@ -767,25 +711,20 @@ static void InstUpdateRemoteInfoByLnn(InstantRemoteInfo *remoteInfo, NodeBasicIn
     if (remoteInfo == NULL || info == NULL) {
         return;
     }
-    NodeInfo *nodeInfo = static_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
-    if (nodeInfo == NULL) {
-        COMM_LOGE(COMM_DFX, "nodeInfo Calloc fail for uuid");
-        return;
+    NodeInfo nodeInfo = { 0 };
+    if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &nodeInfo) == SOFTBUS_OK) {
+        remoteInfo->udid = std::string(nodeInfo.deviceInfo.deviceUdid);
+        remoteInfo->uuid = std::string(nodeInfo.uuid);
+        remoteInfo->wlanIp = std::string(nodeInfo.connectInfo.deviceIp);
+        remoteInfo->bleMac = std::string(nodeInfo.connectInfo.bleMacAddr);
+        remoteInfo->brMac = std::string(nodeInfo.connectInfo.macAddr);
+        remoteInfo->p2pRole = nodeInfo.p2pInfo.p2pRole;
+        remoteInfo->p2pIp = nodeInfo.p2pInfo.p2pIp;
+        remoteInfo->staFreq = nodeInfo.p2pInfo.staFrequency;
+        remoteInfo->discoveryType = nodeInfo.discoveryType;
+        remoteInfo->netCapability = nodeInfo.netCapacity;
+        remoteInfo->deviceType = nodeInfo.deviceInfo.deviceTypeId;
     }
-    if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, nodeInfo) == SOFTBUS_OK) {
-        remoteInfo->udid = std::string(nodeInfo->deviceInfo.deviceUdid);
-        remoteInfo->uuid = std::string(nodeInfo->uuid);
-        remoteInfo->wlanIp = std::string(nodeInfo->connectInfo.deviceIp);
-        remoteInfo->bleMac = std::string(nodeInfo->connectInfo.bleMacAddr);
-        remoteInfo->brMac = std::string(nodeInfo->connectInfo.macAddr);
-        remoteInfo->p2pRole = nodeInfo->p2pInfo.p2pRole;
-        remoteInfo->p2pIp = nodeInfo->p2pInfo.p2pIp;
-        remoteInfo->staFreq = nodeInfo->p2pInfo.staFrequency;
-        remoteInfo->discoveryType = nodeInfo->discoveryType;
-        remoteInfo->netCapability = nodeInfo->netCapacity;
-        remoteInfo->deviceType = nodeInfo->deviceInfo.deviceTypeId;
-    }
-    SoftBusFree(nodeInfo);
 }
 
 static int32_t InstAddRemoteInfoByLnn(SoftBusList *remoteChannelInfoList)
@@ -846,6 +785,7 @@ static int32_t InstGetAllInfo(int32_t radarId, int32_t errorCode)
     }
 
     char *info = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
     COMM_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_PARSE_JSON_ERR, COMM_DFX, "cJSON_PrintUnformatted fail");
 
     TransEventExtra extra = {
@@ -854,19 +794,19 @@ static int32_t InstGetAllInfo(int32_t radarId, int32_t errorCode)
     };
     TRANS_EVENT(EVENT_SCENE_TRANS_CHANNEL_INSTANT, EVENT_STAGE_TRANS_COMMON_ONE, extra);
     cJSON_free(info);
-    cJSON_Delete(json);
     return SOFTBUS_OK;
 }
 
 static inline SoftBusHandler *CreateHandler(SoftBusLooper *looper, InstAsyncCallbackFunc callback)
 {
+    static char handlerName[] = "Instant_statistics";
     SoftBusHandler *handler = static_cast<SoftBusHandler *>(SoftBusMalloc(sizeof(SoftBusHandler)));
     if (handler == NULL) {
         COMM_LOGI(COMM_DFX, "create handler failed");
         return NULL;
     }
     handler->looper = looper;
-    handler->name = INSTANT_HANDLER_NAME;
+    handler->name = handlerName;
     handler->HandleMessage = callback;
     return handler;
 }
@@ -917,9 +857,8 @@ void InstRegister(SoftBusMessage *msg)
     if (msg == NULL) {
         (void)InstantRegisterMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), InstRegister, INST_MINUTE_TIME);
     } else {
-        struct radarCallback callback;
-        callback.resourceNotificationCallBack = InstGetAllInfo;
-        RegisterRadarCallback(callback);
+        struct RadarCallback callback = { 0 };
+        callback.resourceNotificationCallback = InstGetAllInfo;
+        (void)OHOS::CommunicationRadar::CommunicationRadar::GetInstance().RegisterRadarCallback(callback);
     }
 }
-#endif // INSTANT_REGISTER_COMMUNICATION_RADAR

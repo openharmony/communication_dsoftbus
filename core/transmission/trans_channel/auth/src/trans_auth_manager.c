@@ -460,6 +460,7 @@ static int32_t TransAuthProcessDataConfig(AppInfo *appInfo)
 static void FillExtraByAuthChannelErrorEnd(TransEventExtra *extra, AuthChannelInfo *info, int32_t ret)
 {
     if (extra == NULL || info == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param.");
         return;
     }
     extra->result = EVENT_STAGE_RESULT_FAILED;
