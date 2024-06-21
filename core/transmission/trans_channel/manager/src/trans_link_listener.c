@@ -14,6 +14,7 @@
  */
 #include "trans_link_listener.h"
 
+#include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "securec.h"
 #include "softbus_common.h"
@@ -29,6 +30,16 @@
 #define NETWORK_ID_LEN 7
 #define HML_IP_PREFIX "172.30."
 #define COMBINE_TYPE(routeType, connType) ((routeType) | ((uint8_t)(connType) << 8))
+
+static void ClearIpInfo(const char *peerUuid)
+{
+    if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, "") != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_SVC, "set local p2p ip fail");
+    }
+    if (LnnSetDLP2pIp(peerUuid, CATEGORY_UUID, "") != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_SVC, "set peer p2p ip fail");
+    }
+}
 
 static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid,
     const char *localIp)
@@ -50,6 +61,7 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
         connType = TRANS_CONN_HML;
     } else {
         StopP2pSessionListener();
+        ClearIpInfo(peerUuid);
         connType = TRANS_CONN_P2P;
     }
 
