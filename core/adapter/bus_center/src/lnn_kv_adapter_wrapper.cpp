@@ -63,14 +63,14 @@ int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, c
     std::string appIdStr(appId, appIdLen);
     std::string storeIdStr(storeId, storeIdLen);
     std::shared_ptr<KVAdapter> kvAdapter = nullptr;
+    kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr);
+    int32_t initRet = kvAdapter->Init();
+    if (initRet != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret=%{public}d", initRet);
+        return initRet;
+    }
     {
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
-        kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr);
-        int32_t initRet = kvAdapter->Init();
-        if (initRet != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret=%{public}d", initRet);
-            return initRet;
-        }
         *dbId = g_dbId;
         g_dbID2KvAdapter.insert(std::make_pair(g_dbId, kvAdapter));
         g_dbId++;
