@@ -14,6 +14,7 @@
  */
 
 #include "softbus_ble_gatt.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_broadcast_type.h"
@@ -36,6 +37,7 @@ static atomic_bool g_init = false;
 static atomic_bool g_bcCbReg = false;
 static SoftBusMutex g_advLock = { 0 };
 static SoftBusMutex g_scannerLock = { 0 };
+static int32_t g_adapterBtStateListenerId = -1;
 
 typedef struct {
     int32_t advId;
@@ -860,6 +862,27 @@ static int32_t SoftbusSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, i
     return SOFTBUS_OK;
 }
 
+static void BcAdapterBtStateChanged(int32_t listenerId, int32_t state)
+{
+    (void)listenerId;
+    if (state != SOFTBUS_BC_BT_STATE_TURN_OFF) {
+        return;
+    }
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_advLock) == SOFTBUS_OK, DISC_BLE_ADAPTER, "lock failed");
+    for (uint8_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
+        AdvChannel *advChannel = &g_advChannel[channelId];
+        advChannel->isAdvertising = false;
+        advChannel->advId = -1;
+    }
+    SoftBusMutexUnlock(&g_advLock);
+    DISC_LOGI(DISC_BLE_ADAPTER, "receive bt turn off event, reset gatt state success");
+}
+
+static SoftBusBtStateListener g_softbusBcAdapterBtStateListener = {
+    .OnBtStateChanged = BcAdapterBtStateChanged,
+    .OnBtAclStateChanged = NULL,
+};
+
 void SoftbusBleAdapterInit(void)
 {
     DISC_LOGI(DISC_BLE_ADAPTER, "enter");
@@ -886,5 +909,17 @@ void SoftbusBleAdapterInit(void)
     };
     if (RegisterBroadcastMediumFunction(BROADCAST_MEDIUM_TYPE_BLE, &interface) != 0) {
         DISC_LOGE(DISC_BLE_ADAPTER, "register gatt interface failed");
+    }
+    int32_t ret = SoftBusAddBtStateListener(&g_softbusBcAdapterBtStateListener);
+    DISC_CHECK_AND_RETURN_LOGE(ret >= 0, DISC_BLE_ADAPTER, "add bt state listener failed.");
+    g_adapterBtStateListenerId = ret;
+}
+
+void SoftbusBleAdapterDeInit(void)
+{
+    if (g_adapterBtStateListenerId != -1) {
+        int32_t ret = SoftBusRemoveBtStateListener(g_adapterBtStateListenerId);
+        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE_ADAPTER, "RemoveBtStateListener fail!");
+        g_adapterBtStateListenerId = -1;
     }
 }
