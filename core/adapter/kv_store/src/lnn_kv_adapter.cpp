@@ -415,11 +415,15 @@ int32_t KVAdapter::SetCloudAbility(const bool isEnableCloud)
     DistributedKv::StoreConfig storeConfig = {
         .cloudConfig = cloudConfig
     };
-    if (kvStorePtr_ == nullptr) {
-        LNN_LOGE(LNN_LEDGER, "kvDBPtr is null!");
-        return SOFTBUS_KV_DB_PTR_NULL;
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvAdapterMutex_);
+        if (kvStorePtr_ == nullptr) {
+            LNN_LOGE(LNN_LEDGER, "kvDBPtr is null!");
+            return SOFTBUS_KV_DB_PTR_NULL;
+        }
+        status = kvStorePtr_->SetConfig(storeConfig);
     }
-    DistributedKv::Status status = kvStorePtr_->SetConfig(storeConfig);
     if (status != DistributedKv::Status::SUCCESS) {
         LNN_LOGE(LNN_LEDGER, "SetCloudAbility failed, ret=%{public}d", status);
         return SOFTBUS_KV_SET_CLOUD_ABILITY_FAILED;
