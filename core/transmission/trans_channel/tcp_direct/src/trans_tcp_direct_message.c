@@ -452,6 +452,8 @@ int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t er
     TRANS_CHECK_AND_RETURN_RET_LOGE(conn != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
     int64_t timeStart = conn->appInfo.timeStart;
     int64_t timeDiff = GetSoftbusRecordTimeMillis() - timeStart;
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = conn->appInfo.myData.pkgName,
@@ -462,7 +464,9 @@ int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t er
         .costTime = timeDiff,
         .errcode = errCode,
         .osType = (conn->appInfo.osType < 0) ? UNKNOW_OS_TYPE : (conn->appInfo.osType),
+        .localUdid = localUdid,
         .peerUdid = conn->appInfo.peerUdid,
+        .peerDevVer = conn->appInfo.peerVersion,
         .result = EVENT_STAGE_RESULT_FAILED
     };
     int32_t sceneCommand = conn->serverSide ? EVENT_SCENE_OPEN_CHANNEL_SERVER : EVENT_SCENE_OPEN_CHANNEL;

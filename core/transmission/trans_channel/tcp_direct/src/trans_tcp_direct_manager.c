@@ -23,6 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_socket.h"
+#include "trans_channel_common.h"
 #include "trans_event.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_callback.h"
@@ -42,6 +43,8 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
         node->channelId, node->serverSide, node->status);
     int64_t timeStart = node->appInfo.timeStart;
     int64_t timeDiff = GetSoftbusRecordTimeMillis() - timeStart;
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = node->appInfo.myData.pkgName,
@@ -53,7 +56,9 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
         .costTime = (int32_t)timeDiff,
         .errcode = errCode,
         .osType = (node->appInfo.osType < 0) ? UNKNOW_OS_TYPE : node->appInfo.osType,
+        .localUdid = localUdid,
         .peerUdid = node->appInfo.peerUdid,
+        .peerDevVer = node->appInfo.peerVersion,
         .result = EVENT_STAGE_RESULT_FAILED
     };
     if (!node->serverSide) {
