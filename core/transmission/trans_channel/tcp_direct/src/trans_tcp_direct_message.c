@@ -283,6 +283,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SoftBusFree(conn);
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
+    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
     int fd = conn->appInfo.fd;
     SetIpTos(fd, FAST_MESSAGE_TOS);
     if (ConnSendSocketData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
@@ -387,6 +388,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
                                   : GetClientSideIpInfo(&conn.appInfo, myIp, IP_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get ip failed, ret=%{public}d.", ret);
+        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         return ret;
     }
     info.myIp = myIp;
@@ -395,6 +397,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get info networkId fail.");
+        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         return ret;
     }
     info.peerDeviceId = buf;
@@ -409,6 +412,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     int32_t pid = 0;
     if (TransTdcGetUidAndPid(conn.appInfo.myData.sessionName, &uid, &pid) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get uid and pid fail.");
+        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         return SOFTBUS_TRANS_GET_PID_FAILED;
     }
     if (conn.appInfo.fastTransDataSize > 0) {
@@ -416,6 +420,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     }
     TransGetLaneIdByChannelId(channelId, &info.laneId);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
+    (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
     SetSessionConnStatusById(channelId, conn.status);
     return ret;
@@ -499,6 +504,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
 
+    (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
     return NotifyChannelOpenFailedBySessionConn(&conn, errCode);
 }
 
@@ -619,9 +625,11 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
 
     if ((fastDataSize > 0 && (conn.appInfo.fastTransDataSize == fastDataSize)) || conn.appInfo.fastTransDataSize == 0) {
         ret = NotifyChannelOpened(channelId);
+        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");
     } else {
         ret = TransTdcPostFastData(&conn);
+        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "tdc send fast data failed");
         ret = NotifyChannelOpened(channelId);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");

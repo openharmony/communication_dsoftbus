@@ -109,6 +109,7 @@ static int32_t TransLaneChannelForEachShowInfo(int fd)
             ConvertLaneLinkTypeToDumper(laneItem->laneConnInfo.type), appInfo);
     }
 
+    (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     SoftBusFree(appInfo);
     return SOFTBUS_OK;
