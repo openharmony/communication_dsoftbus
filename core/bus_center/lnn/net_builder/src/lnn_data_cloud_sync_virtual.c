@@ -68,3 +68,9 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
     (void)value;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnSetCloudAbility(const bool isEnableCloud)
+{
+    (void)isEnableCloud;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
