@@ -714,7 +714,6 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         return SOFTBUS_ERR;
     }
     if (ProcessSessionKey(&auth->sessionKeyList, sessionKey, info, isOldKey, &sessionKeyIndex) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "failed to add a sessionkey");
         if (isNewCreated) {
             DelAuthManager(auth, info->connInfo.type);
         }
@@ -730,6 +729,7 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         ret = SetSessionKeyAvailable(&auth->sessionKeyList, TO_INT32(sessionKeyIndex));
         auth->hasAuthPassed[info->connInfo.type] = true;
     }
+    info->isSavedSessionKey = true;
     AUTH_LOGI(AUTH_FSM,
         "authId=%{public}" PRId64 ", authSeq=%{public}" PRId64 ", index=%{public}d, lastVerifyTime=%{public}" PRId64,
         auth->authId, authSeq, TO_INT32(sessionKeyIndex), auth->lastVerifyTime);
@@ -913,8 +913,11 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
         info->requestId, reason);
     AuthManager *auth = NULL;
     if (reason == SOFTBUS_AUTH_DEVICE_DISCONNECTED || reason == SOFTBUS_AUTH_TIMEOUT) {
-        int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
-        auth = GetAuthManagerByAuthId(authId);
+        if (info->isSavedSessionKey) {
+            int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
+            auth = GetAuthManagerByAuthId(authId);
+            AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
+        }
     } else {
         auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
     }
