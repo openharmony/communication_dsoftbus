@@ -1164,6 +1164,7 @@ static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *
         AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
         return;
     }
+    LnnDumpRemotePtk(NULL, localPtk, "pack wifi direct info");
     size_t keyLen = 0;
     if (SoftBusBase64Encode(encodePtk, PTK_ENCODE_LEN, &keyLen, (unsigned char *)localPtk,
         PTK_DEFAULT_LEN) != SOFTBUS_OK) {
@@ -1417,6 +1418,7 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info)
         AUTH_LOGE(AUTH_FSM, "decode static cap fail");
         return;
     }
+    LnnDumpRemotePtk(NULL, info->remotePtk, "unpack wifi direct info");
     if (len != PTK_DEFAULT_LEN) {
         AUTH_LOGE(AUTH_FSM, "decode data len error");
         return;
