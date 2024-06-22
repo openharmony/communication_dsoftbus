@@ -94,6 +94,7 @@ typedef struct {
     SessionKey *normalizedKey;
     int64_t normalizedIndex;
     bool isOldKey;
+    bool isSavedSessionKey;
     AuthStartState localState;
     AuthStartState peerState;
 } AuthSessionInfo;
