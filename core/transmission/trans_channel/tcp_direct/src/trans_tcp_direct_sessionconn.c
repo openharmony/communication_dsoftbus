@@ -401,13 +401,13 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t status)
+int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHandle, uint32_t status)
 {
     if (num == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invaild param");
         return NULL;
     }
-    TRANS_LOGD(TRANS_CTRL, "AuthId=%{public}" PRId64 ",status=%{public}d", authId, status);
+    TRANS_LOGD(TRANS_CTRL, "AuthId=%{public}" PRId64 ",status=%{public}d", authHandle->authId, status);
     if (GetSessionConnLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "GetSessionConnLock failed");
         return NULL;
@@ -415,13 +415,15 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t s
     SessionConn *connInfo = NULL;
     int32_t count = 0;
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (connInfo->authHandle.authId == authId && connInfo->status == status) {
+        if (connInfo->authHandle.authId == authHandle->authId && connInfo->status == status &&
+            connInfo->authHandle.type == authHandle->type) {
             count++;
         }
     }
     if (count == 0) {
         ReleaseSessionConnLock();
-        TRANS_LOGE(TRANS_CTRL, "Not find channle id with authId=%{public}" PRId64 ",status=%{public}d", authId, status);
+        TRANS_LOGE(TRANS_CTRL, "Not find channle id with authId=%{public}" PRId64 ", status=%{public}d",
+            authHandle->authId, status);
         return NULL;
     }
     *num = count;
@@ -429,7 +431,8 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t s
     int32_t tmp = 0;
     int32_t *result = (int32_t *)SoftBusCalloc(count * sizeof(int32_t));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (connInfo->authHandle.authId == authId && connInfo->status == status) {
+        if (connInfo->authHandle.authId == authHandle->authId && connInfo->status == status &&
+            connInfo->authHandle.type == authHandle->type) {
             result[tmp++] = connInfo->channelId;
         }
     }

@@ -408,7 +408,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest004, TestSize.L
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI),
         channelId, type);
-    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
 }
 
 /**
@@ -431,7 +431,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest005, TestSize.L
 
     ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI),
         channelId, type);
-    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
 }
 
 /**
