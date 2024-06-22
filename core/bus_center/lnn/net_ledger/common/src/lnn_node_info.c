@@ -19,8 +19,10 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "lnn_log.h"
 #include "softbus_errcode.h"
+#include "softbus_utils.h"
 
 #define DYNAMIC_LEVEL_INVALID 0xFFFF
 #define STATIC_LEVEL_INVALID 0xFFFF
@@ -572,4 +574,30 @@ int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
+}
+
+void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
+{
+    char ptkStr[PTK_STR_LEN] = { 0 };
+    char oldPtkStr[PTK_STR_LEN] = { 0 };
+
+    if (log == NULL) {
+        return;
+    }
+    if (newPtk != NULL &&
+        ConvertBytesToUpperCaseHexString(ptkStr, PTK_STR_LEN, (unsigned char *)newPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert new ptk fail");
+    }
+    if (oldPtk != NULL &&
+        ConvertBytesToUpperCaseHexString(oldPtkStr, PTK_STR_LEN, (unsigned char *)oldPtk, PTK_DEFAULT_LEN) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert old ptk fail");
+    }
+    char *anonyPtk = NULL;
+    char *anonyOldPtk = NULL;
+    Anonymize(ptkStr, &anonyPtk);
+    Anonymize(oldPtkStr, &anonyOldPtk);
+    LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{public}s, oldPtk=%{public}s", log, anonyPtk, anonyOldPtk);
+    AnonymizeFree(anonyPtk);
+    AnonymizeFree(anonyOldPtk);
 }

@@ -57,6 +57,22 @@ int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
     return SOFTBUS_OK;
 }
 
+int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
+{
+    (void)uuid;
+    (void)localPtk;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len)
+{
+    (void)uuid;
+    (void)remotePtk;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
 int32_t LnnSyncPtk(char *networkId)
 {
     (void)networkId;

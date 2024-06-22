@@ -180,6 +180,16 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
 {
     return GetNetLedgerInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
+
+bool LnnSetDlPtk(const char *networkId, const char *remotePtk)
+{
+    return GetNetLedgerInterface()->LnnSetDlPtk(networkId, remotePtk);
+}
+
+void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
+{
+    return GetNetLedgerInterface()->LnnDumpRemotePtk(oldPtk, newPtk, log);
+}
 }
 
 

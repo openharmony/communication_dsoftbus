@@ -19,6 +19,7 @@
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_node_info.h"
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "syspara/parameters.h"
@@ -172,6 +173,9 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
     auto ret = LnnGetLocalPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    if (ret == SOFTBUS_NOT_FIND) {
+        ret = LnnGetLocalDefaultPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get local ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
     return result;
@@ -181,7 +185,12 @@ std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetw
 {
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
+    uint8_t zeroPtkBytes[PTK_DEFAULT_LEN] {};
+    auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
     int32_t ret = LnnGetRemoteByteInfo(remoteNetworkId.c_str(), BYTE_KEY_REMOTE_PTK, ptkBytes, sizeof(ptkBytes));
+    if (ret == SOFTBUS_OK && memcmp(ptkBytes, zeroPtkBytes, PTK_DEFAULT_LEN) == 0) {
+        ret = LnnGetRemoteDefaultPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get remote ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
     return result;
