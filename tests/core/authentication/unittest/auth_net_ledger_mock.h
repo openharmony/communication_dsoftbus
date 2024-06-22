@@ -63,6 +63,8 @@ public:
     virtual bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target,
                                          uint32_t targetLen) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
+    virtual bool LnnSetDlPtk(const char *networkId, const char *remotePtk) = 0;
+    virtual void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log) = 0;
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
@@ -95,6 +97,8 @@ public:
     MOCK_METHOD(bool, GetJsonObjectStringItem, (const cJSON *json, const char * const string, char *target,
                 uint32_t targetLen), (override));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
+    MOCK_METHOD2(LnnSetDlPtk, bool (const char *, const char *));
+    MOCK_METHOD3(LnnDumpRemotePtk, void (const char *, const char *, const char *));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;
