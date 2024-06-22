@@ -812,7 +812,7 @@ static void ReportTransEventExtra(
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, *extra);
 }
 
-static int32_t CheckAndFillAppInfo(AppInfo *appInfo, int32_t channelId, char *errDesc)
+static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t channelId, char *errDesc)
 {
     char *ret = NULL;
     int32_t errCode = SOFTBUS_OK;
@@ -915,7 +915,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         return SOFTBUS_TRANS_NOT_META_SESSION;
     }
     char errDesc[MAX_ERRDESC_LEN] = { 0 };
-    int32_t errCode = CheckAndFillAppInfo(&conn->appInfo, channelId, errDesc);
+    int32_t errCode = TransTdcFillAppInfoAndNotifyChannel(&conn->appInfo, channelId, errDesc);
     if (errCode != SOFTBUS_OK) {
         if (OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
