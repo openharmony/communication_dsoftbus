@@ -646,6 +646,7 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
     }
     AppInfo appInfo;
     int32_t ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
+    (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, ret = %{public}d", ret);
         return ret;
