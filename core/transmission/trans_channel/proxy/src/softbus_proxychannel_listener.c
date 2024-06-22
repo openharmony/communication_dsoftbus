@@ -106,7 +106,8 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
 static void FillExtraByProxyChannelErrorEnd(TransEventExtra *extra, const AppInfo *appInfo, char *localUdid,
     uint32_t len)
 {
-    if (extra == NULL || appInfo == NULL) {
+    if (extra == NULL || appInfo == NULL || localUdid == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return;
     }
     extra->socketName = appInfo->myData.sessionName;
