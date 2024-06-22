@@ -389,6 +389,7 @@ static void TransHandleAuthChannelSetupProcess(TransEventExtra *extra, int32_t a
         TransHandleErrorAndCloseChannel(extra, authId, ret);
         return;
     }
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, *extra);
 }
 
 static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t len)
@@ -428,7 +429,6 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
     }
 
     TransHandleAuthChannelSetupProcess(&extra, authId, &appInfo);
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
 }
 
 static int32_t TransAuthProcessDataConfig(AppInfo *appInfo)
