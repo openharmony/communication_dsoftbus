@@ -125,7 +125,7 @@ void SoftBusSocketSendFuzzTest(const uint8_t* data, size_t size)
 
 void SoftBusSocketSendToFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
+    if (data == nullptr || size < sizeof(SoftBusSockAddr)) {
         COMM_LOGE(COMM_TEST, "Invalid param");
         return;
     }
