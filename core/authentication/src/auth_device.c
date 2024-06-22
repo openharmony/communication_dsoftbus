@@ -33,7 +33,7 @@
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 
-#define DELAY_AUTH_TIME                    (20 * 1000L)
+#define DELAY_AUTH_TIME                    (8 * 1000L)
 #define SOFTBUS_AUTH_HICHAIN_LOCAL_IDENTITY_NOT_EXIST \
     (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x040C)))
 #define SOFTBUS_AUTH_HICHAIN_GROUP_NOT_EXIST \
@@ -112,7 +112,7 @@ bool IsNeedAuthLimit(const char *udidHash)
     currentTime = GetCurrentTimeMs();
     AUTH_LOGI(AUTH_FSM, "currentTime=%{public}" PRIu64 ", time=%{public}" PRIu64 "", currentTime, time);
     if (currentTime - time < DELAY_AUTH_TIME) {
-        AUTH_LOGI(AUTH_FSM, "lastest retcode authentication time less than 20s");
+        AUTH_LOGI(AUTH_FSM, "lastest retcode authentication time less than 8s");
         return true;
     }
     return false;

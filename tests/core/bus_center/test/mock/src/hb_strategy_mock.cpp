@@ -147,5 +147,10 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
 {
     return HeartBeatStrategyInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
 }
+
+bool IsSameAccountGroupDevice(void)
+{
+    return HeartBeatStrategyInterface()->IsSameAccountGroupDevice();
+}
 }
 } // namespace OHOS
