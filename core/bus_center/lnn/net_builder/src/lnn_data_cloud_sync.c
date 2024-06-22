@@ -223,11 +223,6 @@ static int32_t DBConnectInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, co
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s pkgVersion fail");
             return SOFTBUS_STRCPY_ERR;
         }
-    } else if (strcmp(fieldName, DEVICE_INFO_PTK) == 0) {
-        if (memcpy_s(cacheInfo->remotePtk, PTK_DEFAULT_LEN, value, PTK_DEFAULT_LEN) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fail:memcpy_s remotePtk fail");
-            return SOFTBUS_MEM_ERR;
-        }
     } else if (strcmp(fieldName, DEVICE_INFO_SW_VERSION) == 0 && valueLength < VERSION_MAX_LEN) {
         if (strcpy_s(cacheInfo->softBusVersion, VERSION_MAX_LEN, value) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s softbusVersion fail");

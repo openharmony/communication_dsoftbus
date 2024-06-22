@@ -24,17 +24,18 @@
 #include "auth_hichain.h"
 #include "auth_interface.h"
 #include "auth_log.h"
-#include "auth_request.h"
 #include "auth_normalize_request.h"
+#include "auth_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_message.h"
 #include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
-#include "lnn_async_callback_utils.h"
 #include "lnn_app_bind_interface.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_net_builder.h"
@@ -896,6 +897,9 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
         }
     }
     ReleaseAuthLock();
+    if (!LnnSetDlPtk(info->nodeInfo.networkId, info->nodeInfo.remotePtk)) {
+        AUTH_LOGE(AUTH_FSM, "set remote ptk error, index=%{public}d", TO_INT32(index));
+    }
     AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     if (info->isConnectServer) {
         AuthNotifyDeviceVerifyPassed(authHandle, &info->nodeInfo);
