@@ -363,6 +363,13 @@
         "ClientTransOnScanResultCallback";
         "ClientAddEventListener";
         "ClientDeleteEventListener";
+        "SendLinkEvent";
+        "StopLinkEvent";
+        "RegisterLinkEventListener";
+        "UnregisterLinkEventListener";
+        "ClientTransOnLinkEventCallback";
+        "ClientAddLinkEventListener";
+        "ClientDeleteLinkEventListener";
         "TransProxyPackAndSendData";
         "ClientTransProxyGetInfoByChannelId";
         "ClientTransProxyGetLinkTypeByChannelId";
