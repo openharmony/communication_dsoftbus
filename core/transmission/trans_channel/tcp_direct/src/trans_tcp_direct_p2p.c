@@ -765,7 +765,7 @@ static void OnAuthDataRecv(AuthHandle authHandle, const AuthTransData *data)
 static void OnAuthChannelClose(AuthHandle authHandle)
 {
     int32_t num = 0;
-    int32_t *channelIds = GetChannelIdsByAuthIdAndStatus(&num, authHandle.authId, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
+    int32_t *channelIds = GetChannelIdsByAuthIdAndStatus(&num, &authHandle, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
     if (channelIds == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Fail to get channel ids with auth id %{public}" PRId64, authHandle.authId);
         return;
