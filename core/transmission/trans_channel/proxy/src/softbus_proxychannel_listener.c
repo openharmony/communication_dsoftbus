@@ -440,7 +440,9 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
         return SOFTBUS_MALLOC_ERR;
     }
 
-    if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
+    int32_t ret = TransProxyGetSendMsgChanInfo(channelId, info);
+    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
@@ -458,7 +460,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
-    int32_t ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
+    ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
     SoftBusFree(info);
     return ret;
 }
