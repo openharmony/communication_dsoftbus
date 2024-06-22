@@ -98,7 +98,7 @@ SessionConn *GetSessionConnByRequestId(uint32_t requestId)
             return item;
         }
     }
-    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%{public}u", requestId);
+    TRANS_LOGE(TRANS_CTRL, "get session conn by requestId failed: requestId=%{public}u", requestId);
     return NULL;
 }
 
@@ -114,7 +114,7 @@ SessionConn *GetSessionConnByReq(int64_t req)
             return item;
         }
     }
-    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%{public}" PRIu64, req);
+    TRANS_LOGE(TRANS_CTRL, "get session conn by req failed: req=%{public}" PRIu64, req);
     return NULL;
 }
 
