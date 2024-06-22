@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -187,7 +187,8 @@ static int32_t TransProxyGetChannelIsServer(int32_t channelId, int8_t *isServer)
     return SOFTBUS_OK;
 }
 
-static int32_t SelectAppType(const AppInfo *appInfo, AppType appType, int32_t channelId, int32_t errCode)
+static int32_t TransProxyNotifyOpenFailedByType(
+    const AppInfo *appInfo, AppType appType, int32_t channelId, int32_t errCode)
 {
     switch (appType) {
         case APP_TYPE_NORMAL:
@@ -274,7 +275,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     TRANS_LOGI(TRANS_CTRL,
         "proxy channel openfailed:sessionName=%{public}s, channelId=%{public}d, appType=%{public}d, errCode=%{public}d",
         appInfo->myData.sessionName, channelId, appInfo->appType, errCode);
-    return SelectAppType(appInfo, appInfo->appType, channelId, errCode);
+    return TransProxyNotifyOpenFailedByType(appInfo, appInfo->appType, channelId, errCode);
 }
 
 int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
