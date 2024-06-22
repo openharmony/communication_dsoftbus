@@ -55,6 +55,7 @@ public:
     virtual bool IsNeedAuthLimit(const char *udidHash) = 0;
     virtual bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExtra) = 0;
     virtual int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo) = 0;
+    virtual bool IsSameAccountGroupDevice(void) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
 public:
@@ -83,6 +84,7 @@ public:
     MOCK_METHOD1(IsNeedAuthLimit, bool(const char *));
     MOCK_METHOD2(IsExistLnnDfxNodeByUdidHash, bool(const char *, LnnBleReportExtra *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *, NodeInfo *));
+    MOCK_METHOD1(IsSameAccountGroupDevice, bool (void));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_STRATEGY_H
