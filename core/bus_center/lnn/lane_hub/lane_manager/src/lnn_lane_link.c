@@ -557,6 +557,75 @@ int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource)
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
+static int32_t CopyAllDevIdWithoutLock(LaneLinkType type, uint8_t resourceNum, char **devIdList, uint8_t *devIdCnt)
+{
+    char (*itemList)[NETWORK_ID_BUF_LEN] =
+        (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(resourceNum * NETWORK_ID_BUF_LEN);
+    if (itemList == NULL) {
+        LNN_LOGE(LNN_LANE, "device id list calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    char (*tmpList)[NETWORK_ID_BUF_LEN] = itemList;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    uint8_t tmpCnt = 0;
+    LaneResource *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_laneResource.list, LaneResource, node) {
+        if (item->link.type == type) {
+            if (LnnGetNetworkIdByUdid(item->link.peerUdid, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LANE, "get networkid fail");
+                continue;
+            }
+            if (memcpy_s(*tmpList, NETWORK_ID_BUF_LEN, networkId, NETWORK_ID_BUF_LEN) != EOK) {
+                LNN_LOGE(LNN_LANE, "memcpy networkid fail");
+                continue;
+            }
+            char *anonyNetworkId = NULL;
+            Anonymize(networkId, &anonyNetworkId);
+            LNN_LOGI(LNN_LANE, "networkId=%{public}s exist link=%{public}d", anonyNetworkId, type);
+            AnonymizeFree(anonyNetworkId);
+            tmpList += 1;
+            tmpCnt += 1;
+        }
+    }
+    if (tmpCnt == 0) {
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    *devIdList = (char *)itemList;
+    *devIdCnt = tmpCnt;
+    return SOFTBUS_OK;
+}
+
+int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt)
+{
+    if (devIdList == NULL || devIdCnt ==NULL || type == LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "invalid parem");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint8_t resourceNum = 0;
+    LaneResource *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_laneResource.list, LaneResource, node) {
+        if (item->link.type == type) {
+            ++resourceNum;
+        }
+    }
+    if (resourceNum == 0) {
+        LaneUnlock();
+        LNN_LOGE(LNN_LANE, "lane resource no link=%{public}d", type);
+        return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
+    }
+    LNN_LOGE(LNN_LANE, "lane resource exist link=%{public}d, num=%{public}u", type, resourceNum);
+    int32_t ret = CopyAllDevIdWithoutLock(type, resourceNum, devIdList, devIdCnt);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "cpoy all device id fail");
+    }
+    LaneUnlock();
+    return ret;
+}
+
 static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
