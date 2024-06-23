@@ -602,6 +602,8 @@ static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON
     }
     TransUpdateUdpChannelInfo(seq, &(channel.info));
     ret = ProcessUdpChannelState(&(channel.info), false);
+    (void)memset_s(channel.appInfo.sessionKey, sizeof(channel.appInfo.sessionKey), 0,
+        sizeof(channel.appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
             "process udp channelId=%{public}" PRId64 " failed, close peer", channel.info.myData.channelId);
@@ -796,6 +798,8 @@ static void UdpOnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     }
     extra.channelId = (int32_t)channel->info.myData.channelId;
     ret = StartExchangeUdpInfo(channel, authHandle, channel->seq);
+    (void)memset_s(channel->appInfo.sessionKey, sizeof(channel->appInfo.sessionKey), 0,
+        sizeof(channel->appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         channel->errCode = ret;
         TRANS_LOGE(TRANS_CTRL, "neg fail");
@@ -828,7 +832,10 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
         TRANS_LOGE(TRANS_CTRL, "malloc fail");
         return;
     }
-    if (TransGetUdpChannelByRequestId(requestId, channel) != SOFTBUS_OK) {
+    int32_t ret = TransGetUdpChannelByRequestId(requestId, channel);
+    (void)memset_s(channel->appInfo.sessionKey, sizeof(channel->appInfo.sessionKey), 0,
+        sizeof(channel->appInfo.sessionKey));
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "UdpOnAuthConnOpened get channel fail");
         SoftBusFree(channel);
         return;
@@ -863,6 +870,8 @@ static void TransCloseUdpChannelByRequestId(uint32_t requestId)
         SoftBusFree(channel);
         return;
     }
+    (void)memset_s(channel->appInfo.sessionKey, sizeof(channel->appInfo.sessionKey), 0,
+        sizeof(channel->appInfo.sessionKey));
     ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, true);
     SoftBusFree(channel);
     TRANS_LOGD(TRANS_CTRL, "ok");
@@ -875,6 +884,8 @@ static int32_t CheckAuthConnStatus(const uint32_t requestId)
         TRANS_LOGE(TRANS_CTRL, "get channel fail");
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
+    (void)memset_s(channel.appInfo.sessionKey, sizeof(channel.appInfo.sessionKey), 0,
+        sizeof(channel.appInfo.sessionKey));
     return channel.errCode;
 }
 
@@ -1058,6 +1069,8 @@ int32_t TransCloseUdpChannel(int32_t channelId)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "set udp channel close type failed.");
 
     ret = TransGetUdpChannelById(channelId, &channel);
+    (void)memset_s(channel.appInfo.sessionKey, sizeof(channel.appInfo.sessionKey), 0,
+        sizeof(channel.appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udp channel by channel id failed. channelId=%{public}d", channelId);
         return ret;
