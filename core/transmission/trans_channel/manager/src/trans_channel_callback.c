@@ -76,7 +76,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
             TRANS_LOGW(TRANS_CTRL, "Cancel bind name=%{public}s, channelId=%{public}d", tmpName, channel->channelId);
             AnonymizeFree(tmpName);
             extra.result = EVENT_STAGE_RESULT_CANCELED;
-            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
             return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
         }
         TransSetSocketChannelStateByChannel(
