@@ -306,7 +306,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         LNN_LOGI(LNN_LEDGER, "no account log in, enableCloud=false");
         isLogIn = false;
     } else {
-        LNN_LOGI(LNN_LEDGER, "account already log in, enableCloud=true")
+        LNN_LOGI(LNN_LEDGER, "account already log in, enableCloud=true");
         isLogIn = true;
     }
     DistributedKv::Options options = {
