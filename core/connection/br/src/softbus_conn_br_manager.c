@@ -628,6 +628,24 @@ static void ClientConnected(uint32_t connectionId)
     }
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
+
+    ConnBrDevice *it = NULL;
+    ConnBrDevice *targetDevice = NULL;
+    LIST_FOR_EACH_ENTRY(it, &g_brManager.waitings, ConnBrDevice, node) {
+        if (StrCmpIgnoreCase(it->addr, connection->addr) == 0) {
+            targetDevice = it;
+            break;
+        }
+    }
+    if (targetDevice != NULL) {
+        CONN_LOGI(CONN_BR, "reuse conn, connId=%{public}u, address=%{public}s", connectionId, anomizeAddress);
+        connection->retryCount = 0;
+        NotifyDeviceConnectResult(targetDevice, connection, false, 0);
+        ListDelete(&targetDevice->node);
+        ConnBrReturnConnection(&connection);
+        return;
+    }
+
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
         CONN_LOGE(CONN_BR, "no connecting device, connId=%{public}u, address=%{public}s", connectionId, anomizeAddress);
@@ -751,17 +769,6 @@ static void ClientConnectTimeoutOnConnectingState(uint32_t connectionId, const c
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, address, BT_MAC_LEN);
 
     CONN_LOGI(CONN_BR, "addr=%{public}s, connId=%{public}u", anomizeAddress, connectionId);
-
-    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
-    if (connection != NULL) {
-        CONN_LOGI(CONN_BR, "interrupt connect progress. addr=%{public}s, connId=%{public}u", anomizeAddress,
-            connection->connectionId);
-        ConnBrDisconnectNow(connection);
-        ConnBrRemoveConnection(connection);
-        ConnBrReturnConnection(&connection);
-    } else {
-        CONN_LOGE(CONN_BR, "connection not exist. addr=%{public}s, connId=%{public}u", anomizeAddress, connectionId);
-    }
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, address) != 0) {
         CONN_LOGE(

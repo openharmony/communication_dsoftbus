@@ -184,3 +184,23 @@ int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t 
 {
     return ClientTransSetChannelInfo(sessionName, sessionId, channleId, channelType);
 }
+
+int32_t TransOnChannelBind(int32_t channelId, int32_t channelType)
+{
+    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            return ClientTransProxyOnChannelBind(channelId, channelType);
+        case CHANNEL_TYPE_TCP_DIRECT:
+            return ClientTransTdcOnChannelBind(channelId, channelType);
+        case CHANNEL_TYPE_UDP:
+            return TransOnUdpChannelBind(channelId, channelType);
+        case CHANNEL_TYPE_AUTH:
+        case CHANNEL_TYPE_UNDEFINED:
+            TRANS_LOGW(TRANS_SDK, "The channel no need OnChannelBind");
+            return SOFTBUS_OK;
+        default:
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+    return SOFTBUS_OK;
+}

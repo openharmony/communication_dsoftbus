@@ -48,7 +48,6 @@
 #include "softbus_hisysevt_bus_center.h"
 #include "bus_center_event.h"
 
-
 DistributedNetLedger g_distributedNetLedger;
 
 DistributedNetLedger* LnnGetDistributedNetLedger(void)
@@ -698,6 +697,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
+    LnnDumpRemotePtk(oldInfo->remotePtk, newInfo->remotePtk, "update node info");
     if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy ptk failed");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -881,7 +881,6 @@ static bool IsDeviceInfoChanged(NodeInfo *info)
     return memcmp(info, &deviceInfo, (size_t)&(((NodeInfo *)0)->relation)) != 0 ? true : false;
 }
 
-
 static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
 {
     if (strcpy_s(deviceInfo->networkId, sizeof(deviceInfo->networkId), info->networkId) != EOK) {
@@ -895,6 +894,11 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
     if (memcpy_s(deviceInfo->rpaInfo.peerIrk, sizeof(deviceInfo->rpaInfo.peerIrk), info->rpaInfo.peerIrk,
         sizeof(info->rpaInfo.peerIrk)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s Irk fail");
+        return;
+    }
+    LnnDumpRemotePtk(deviceInfo->remotePtk, info->remotePtk, "get and save remote device info");
+    if (memcpy_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
         return;
     }
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
@@ -1203,6 +1207,7 @@ static void LnnCleanNodeInfo(NodeInfo *info)
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
+
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
@@ -1427,9 +1432,6 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     if (memcpy_s((char *)oldInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, (char *)newInfo->rpaInfo.publicAddress,
             LFINDER_MAC_ADDR_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s publicAddress to distributed ledger fail");
-    }
-    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy_s remotePtk to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->cipherInfo.key, SESSION_KEY_LENGTH, newInfo->cipherInfo.key, SESSION_KEY_LENGTH) !=
         EOK) {

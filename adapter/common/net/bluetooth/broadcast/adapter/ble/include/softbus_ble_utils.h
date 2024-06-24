@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,29 +33,18 @@ extern "C"{
 #endif
 
 int32_t BtStatusToSoftBus(BtStatus btStatus);
-
 void SoftbusAdvParamToBt(const SoftbusBroadcastParam *src, BleAdvParams *dst);
-
 void BtScanResultToSoftbus(const BtScanResultData *src, SoftBusBcScanResult *dst);
-
 void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFilter *filter, uint8_t filterSize);
-
 void SoftbusSetManufactureData(BleScanNativeFilter *nativeFilter, uint8_t filterSize);
-
 void FreeBtFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize);
-
 void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize);
-
 int GetBtScanMode(uint16_t scanInterval, uint16_t scanWindow);
-
 uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen);
-
 uint8_t *AssembleRspData(const SoftbusBroadcastPayload *data, uint16_t *dataLen);
-
 int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* SOFTBUS_BLE_UTILS_H */

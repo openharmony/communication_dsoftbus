@@ -15,6 +15,7 @@
 
 #include "auth_device_profile_listener.h"
 
+#include "auth_deviceprofile.h"
 #include "auth_log.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
@@ -39,10 +40,15 @@ AuthDeviceProfileListener::~AuthDeviceProfileListener()
 int32_t AuthDeviceProfileListener::OnTrustDeviceProfileAdd(const TrustDeviceProfile &profile)
 {
     AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileAdd start!");
+    if (profile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+        AUTH_LOGI(AUTH_INIT, "ignore same account udid");
+        return SOFTBUS_OK;
+    }
     if (g_deviceProfileChange.onDeviceProfileAdd == NULL) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileAdd failed!");
         return SOFTBUS_ERR;
     }
+    DelNotTrustDevice(profile.GetDeviceId().c_str());
     g_deviceProfileChange.onDeviceProfileAdd(profile.GetDeviceId().c_str(), NULL);
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileAdd success!");
     return SOFTBUS_OK;

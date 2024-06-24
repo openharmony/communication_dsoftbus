@@ -79,6 +79,7 @@ public:
 
     virtual int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos);
 
+    virtual int32_t OnChannelBind(int32_t channelId, int32_t channelType);
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");
 };

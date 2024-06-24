@@ -185,7 +185,7 @@ void P2pEntity::NotifyNewClientJoining(const std::string &remoteMac)
         [this, remoteMac]() {
             CONN_LOGI(CONN_WIFI_DIRECT, "enter");
             std::lock_guard lock(joiningClientsLock_);
-            SendClientJoinEvent(remoteMac, V1_ERROR_CONNECT_TIMEOUT);
+            SendClientJoinEvent(remoteMac, SOFTBUS_CONN_PV1_CONNECT_GROUP_TIMEOUT);
             joiningClients_.erase(remoteMac);
             if (joiningClients_.empty()) {
                 timer_.Shutdown(false);
@@ -245,7 +245,7 @@ void P2pEntity::ClearJoiningClient()
     }
     for (const auto &kv : joiningClients_) {
         timer_.Unregister(kv.second);
-        SendClientJoinEvent(kv.first, SOFTBUS_ERR);
+        SendClientJoinEvent(kv.first, SOFTBUS_CONN_P2P_CLEAR_JOIN_CLIENTS_FAILED);
     }
     joiningClients_.clear();
     timer_.Shutdown(false);
@@ -438,13 +438,20 @@ static void UpdateInterfaceInfo(
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%d", ret);
     std::string ip;
     ret = P2pAdapter::GetIpAddress(ip);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get ip failed, error=%{public}d", ret);
+    } else {
+        CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s", WifiDirectAnonymizeIp(ip).c_str());
+    }
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get ip failed, error=%d", ret);
 
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [localMac, dynamicMac, ip, groupInfo, groupConfig](InterfaceInfo &interface) {
             interface.SetBaseMac(localMac);
             interface.SetDynamicMac(dynamicMac);
-            interface.SetIpString(Ipv4Info(ip));
+            if (!ip.empty()) {
+                interface.SetIpString(Ipv4Info(ip));
+            }
             interface.SetConnectedDeviceCount(groupInfo->clientDevices.size());
             interface.SetRole(groupInfo->isGroupOwner ? LinkInfo::LinkMode::GO : LinkInfo::LinkMode::GC);
             if (groupInfo->isGroupOwner) {

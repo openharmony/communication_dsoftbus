@@ -286,11 +286,11 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByFdTest007, TestSize.Level1)
     ret = TransTdcAddSessionConn(con);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    SessionConn *session = GetSessionConnByFd(fd, conn);
-    EXPECT_TRUE(session != nullptr);
+    int32_t session = GetSessionConnByFd(fd, conn);
+    EXPECT_TRUE(session == SOFTBUS_OK);
     fd = 123;
     session = GetSessionConnByFd(fd, conn);
-    EXPECT_TRUE(session == nullptr);
+    EXPECT_TRUE(session == SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 
     SoftBusFree(conn);
 }
@@ -308,12 +308,12 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByIdTest008, TestSize.Level1)
     ASSERT_TRUE(conn != nullptr);
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
 
-    SessionConn *session = GetSessionConnById(channelId, nullptr);
-    EXPECT_TRUE(session != nullptr);
+    int32_t session = GetSessionConnById(channelId, nullptr);
+    EXPECT_TRUE(session == SOFTBUS_OK);
 
     channelId = 0;
     session = GetSessionConnById(channelId, conn);
-    EXPECT_TRUE(session == nullptr);
+    EXPECT_TRUE(session != SOFTBUS_OK);
 
     SoftBusFree(conn);
 }
@@ -566,29 +566,36 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetLocalConfigTest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectMessageTest, TransGetChannelIdsByAuthIdAndStatus001, TestSize.Level1)
 {
+    AuthHandle authHandle = {
+        .type = 1,
+        .authId = 1,
+    };
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     con->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
+    con->authHandle.type = 1;
     ret = TransTdcAddSessionConn(con);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *con2 = TestSetSessionConn();
     con2->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
     con2->channelId = 1;
+    con2->authHandle.type = 1;
     ret = TransTdcAddSessionConn(con2);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *con3 = TestSetSessionConn();
     con3->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
     con3->channelId = 2;
+    con3->authHandle.type = 1;
     ret = TransTdcAddSessionConn(con3);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     int count = 0;
-    int32_t *channelId = GetChannelIdsByAuthIdAndStatus(&count, 1, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
+    int32_t *channelId = GetChannelIdsByAuthIdAndStatus(&count, &authHandle, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
     EXPECT_EQ(count, 2);
     EXPECT_EQ(channelId[0], 1);
     EXPECT_EQ(channelId[1], 2);

@@ -58,3 +58,11 @@ int32_t ClientTransTdcOnDataReceived(int32_t channelId,
     return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_TCP_DIRECT, data, len, type);
 }
 
+int32_t ClientTransTdcOnChannelBind(int32_t channelId, int32_t channelType)
+{
+    if (g_sessionCb.OnChannelBind == NULL) {
+        TRANS_LOGW(TRANS_SDK, "OnChannelBind is null channelId=%{public}d", channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return g_sessionCb.OnChannelBind(channelId, channelType);
+}

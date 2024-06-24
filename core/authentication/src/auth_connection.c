@@ -815,8 +815,8 @@ void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId)
         },
     };
 
-    GetWifiDirectManager()->freeListenerModuleId(moduleId);
     if (ConnStopLocalListening(&local) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "ConnStopLocalListening fail");
     }
+    GetWifiDirectManager()->freeListenerModuleId(moduleId);
 }

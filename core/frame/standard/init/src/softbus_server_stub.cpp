@@ -112,6 +112,7 @@ int32_t SoftBusServerStub::CheckPidByChannelId(pid_t callingPid, int32_t channel
         return SOFTBUS_MALLOC_ERR;
     }
     int32_t ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
+    (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "get AppInfo by channelId failed!");
         SoftBusFree(appInfo);

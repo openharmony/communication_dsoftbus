@@ -394,7 +394,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level1)
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));

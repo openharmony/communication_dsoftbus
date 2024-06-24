@@ -30,6 +30,7 @@
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
+#include "lnn_event_monitor_impl.h"
 #include "lnn_feature_capability.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
@@ -184,8 +185,12 @@ int32_t LnnInitNetLedgerDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
         return SOFTBUS_ERR;
     }
-    if (LnnInitEventMonitor() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init event monitor fail");
+    if (LnnInitCommonEventMonitorImpl() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delay init LnnInitCommonEventMonitorImpl fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitDeviceNameMonitorImpl() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delay init LnnInitDeviceNameMonitorImpl fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -321,10 +326,10 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnSetDataLevel(const DataLevel *dataLevel)
+int32_t LnnSetDataLevel(const DataLevel *dataLevel, bool *isSwitchLevelChanged)
 {
-    if (dataLevel == NULL) {
-        LNN_LOGE(LNN_LEDGER, "LnnSetDataLevel data level is null");
+    if (dataLevel == NULL || isSwitchLevelChanged == NULL) {
+        LNN_LOGE(LNN_LEDGER, "LnnSetDataLevel data level or switch level change flag is null");
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_LEDGER, "LnnSetDataLevel, dynamic: %{public}hu, static: %{public}hu, "
@@ -340,6 +345,11 @@ int32_t LnnSetDataLevel(const DataLevel *dataLevel)
         LNN_LOGE(LNN_LEDGER, "Set data static level failed");
         return SOFTBUS_ERR;
     }
+    uint32_t curSwitchLevel = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, &curSwitchLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Get current data switch level faield");
+        return SOFTBUS_ERR;
+    }
     uint32_t switchLevel = dataLevel->switchLevel;
     if (LnnSetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, switchLevel) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Set data switch level faield");
@@ -350,6 +360,7 @@ int32_t LnnSetDataLevel(const DataLevel *dataLevel)
         LNN_LOGE(LNN_LEDGER, "Set data switch length failed");
         return SOFTBUS_ERR;
     }
+    *isSwitchLevelChanged = (curSwitchLevel != switchLevel);
     return SOFTBUS_OK;
 }
 

@@ -62,6 +62,7 @@ static struct SoftBusIpcClientCmd g_softBusIpcClientCmdTbl[] = {
     { CLIENT_ON_CHANNEL_CLOSED, ClientOnChannelClosed },
     { CLIENT_ON_CHANNEL_MSGRECEIVED, ClientOnChannelMsgreceived },
     { CLIENT_SET_CHANNEL_INFO, ClientSetChannelInfo },
+    { CLIENT_ON_CHANNEL_BIND, ClientOnChannelBind },
 };
 
 static int ClientIpcInterfaceMsgHandle(uint32_t code, IpcIo *data, IpcIo *reply, MessageOption option)

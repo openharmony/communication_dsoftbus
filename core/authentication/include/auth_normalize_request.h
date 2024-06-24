@@ -39,6 +39,7 @@ bool AuthIsRepeatedAuthRequest(int64_t authSeq);
 uint32_t AddNormalizeRequest(const NormalizeRequest *request);
 void NotifyNormalizeRequestSuccess(int64_t authSeq, bool isSupportNego);
 void NotifyNormalizeRequestFail(int64_t authSeq, int32_t ret);
+void DelAuthNormalizeRequest(int64_t authSeq);
 
 #ifdef __cplusplus
 #if __cplusplus

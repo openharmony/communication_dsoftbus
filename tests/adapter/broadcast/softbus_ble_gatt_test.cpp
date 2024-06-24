@@ -119,9 +119,9 @@ static int ActionSuccessBleStartAdvEx(int *advId, const StartAdvRawData rawData,
 
 static int ActionSuccessBleStopAdv(int advId)
 {
-    DISC_LOGI(DISC_BLE_ADAPTER, "ActionSuccessBleStopAdv, advId=%{public}d", advId);
+    DISC_LOGI(DISC_TEST, "ActionSuccessBleStopAdv, advId=%{public}d", advId);
     MockBluetooth::btGattCallback->advDisableCb(advId, OHOS_BT_STATUS_SUCCESS);
-    DISC_LOGI(DISC_BLE_ADAPTER, "ActionSuccessBleStopAdv, advId=%{public}d", advId);
+    DISC_LOGI(DISC_TEST, "ActionSuccessBleStopAdv, advId=%{public}d", advId);
     return OHOS_BT_STATUS_SUCCESS;
 }
 
@@ -347,34 +347,34 @@ HWTEST_F(SoftbusBleGattTest, AdvertiseLifecycle, TestSize.Level3)
     data.rspData.payload = (uint8_t *)scanRspDataExample;
 
     SoftbusBroadcastParam params = {};
-    DISC_LOGI(DISC_BLE_ADAPTER, "start to StartBroadcasting");
+    DISC_LOGI(DISC_TEST, "start to StartBroadcasting");
     ASSERT_EQ(MockBluetooth::interface->StartBroadcasting(advId, &params, &data), SOFTBUS_OK);
     ASSERT_FALSE(advEnableCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
-    DISC_LOGI(DISC_BLE_ADAPTER, "start to advEnableCb");
+    DISC_LOGI(DISC_TEST, "start to advEnableCb");
     MockBluetooth::btGattCallback->advEnableCb(btInnerAdvId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(advEnableCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
 
-    DISC_LOGI(DISC_BLE_ADAPTER, "start to advDataCb");
+    DISC_LOGI(DISC_TEST, "start to advDataCb");
     MockBluetooth::btGattCallback->advDataCb(btInnerAdvId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(advDataCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
 
-    DISC_LOGI(DISC_BLE_ADAPTER, "start to UpdateBroadcasting");
+    DISC_LOGI(DISC_TEST, "start to UpdateBroadcasting");
     ASSERT_EQ(MockBluetooth::interface->UpdateBroadcasting(advId, &params, nullptr), SOFTBUS_INVALID_PARAM);
     ASSERT_EQ(MockBluetooth::interface->UpdateBroadcasting(advId, nullptr, &data), SOFTBUS_INVALID_PARAM);
     ASSERT_EQ(MockBluetooth::interface->UpdateBroadcasting(advId, &params, &data), SOFTBUS_OK);
     ASSERT_FALSE(advEnableCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
-    DISC_LOGI(DISC_BLE_ADAPTER, "start to advEnableCb");
+    DISC_LOGI(DISC_TEST, "start to advEnableCb");
     MockBluetooth::btGattCallback->advEnableCb(btInnerAdvId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(advEnableCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
 
-    DISC_LOGI(DISC_BLE_ADAPTER, "start to advUpdateCb");
+    DISC_LOGI(DISC_TEST, "start to advUpdateCb");
     MockBluetooth::btGattCallback->advUpdateCb(btInnerAdvId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(advUpdateCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
 
-    DISC_LOGI(DISC_BLE_ADAPTER, "start to StopBroadcasting");
+    DISC_LOGI(DISC_TEST, "start to StopBroadcasting");
     ASSERT_EQ(MockBluetooth::interface->StopBroadcasting(advId), SOFTBUS_OK);
 
-    DISC_LOGI(DISC_BLE_ADAPTER, "start to UnRegisterBroadcaster");
+    DISC_LOGI(DISC_TEST, "start to UnRegisterBroadcaster");
     ASSERT_EQ(MockBluetooth::interface->UnRegisterBroadcaster(-1), SOFTBUS_INVALID_PARAM);
     ASSERT_EQ(MockBluetooth::interface->UnRegisterBroadcaster(GATT_ADV_MAX_NUM), SOFTBUS_INVALID_PARAM);
     ASSERT_EQ(MockBluetooth::interface->UnRegisterBroadcaster(advId), SOFTBUS_OK);
@@ -427,13 +427,13 @@ bool ScanResultCtx::Update(int id, const SoftBusBcScanResult *scanResult)
     this->scanResult = *scanResult;
     unsigned char *cpyAdvData = static_cast<unsigned char *>(SoftBusCalloc(this->scanResult.data.bcData.payloadLen));
     if (cpyAdvData == nullptr) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "malloc failed in OnReportScanDataCallback, can not save ctx, id=%{public}d", id);
+        DISC_LOGE(DISC_TEST, "malloc failed in OnReportScanDataCallback, can not save ctx, id=%{public}d", id);
         return false;
     }
 
     if (memcpy_s(cpyAdvData, this->scanResult.data.bcData.payloadLen, scanResult->data.bcData.payload,
         scanResult->data.bcData.payloadLen) != EOK) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "malloc failed in OnReportScanDataCallback, can not save ctx, id=%{public}d", id);
+        DISC_LOGE(DISC_TEST, "malloc failed in OnReportScanDataCallback, can not save ctx, id=%{public}d", id);
         SoftBusFree(cpyAdvData);
         return false;
     }

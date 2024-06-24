@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,31 +24,31 @@
 
 namespace OHOS {
 
-void TransProxyonMessageReceivedTest(const uint8_t* data, size_t size)
+void TransProxyOnMessageReceivedTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(ProxyMessage))) {
         return;
     }
     ProxyMessage msg;
     ProxyMessageHead mad;
-    msg.authHandle.authId = *(reinterpret_cast<const int64_t*>(data));
-    msg.authHandle.type = *(reinterpret_cast<const int32_t*>(data));
-    msg.connId = *(reinterpret_cast<const uint32_t*>(data));
-    msg.dateLen = *(reinterpret_cast<const int32_t*>(data));
-    mad.type = *(reinterpret_cast<const uint8_t*>(data));
-    mad.cipher = *(reinterpret_cast<const uint8_t*>(data));
-    mad.myId = *(reinterpret_cast<const int16_t*>(data));
-    mad.peerId = *(reinterpret_cast<const int16_t*>(data));
-    mad.reserved = *(reinterpret_cast<const int16_t*>(data));
-    msg.data = const_cast<char*>(reinterpret_cast<const char*>(data));
+    msg.authHandle.authId = *(reinterpret_cast<const int64_t *>(data));
+    msg.authHandle.type = *(reinterpret_cast<const int32_t *>(data));
+    msg.connId = *(reinterpret_cast<const uint32_t *>(data));
+    msg.dateLen = *(reinterpret_cast<const int32_t *>(data));
+    mad.type = *(reinterpret_cast<const uint8_t *>(data));
+    mad.cipher = *(reinterpret_cast<const uint8_t *>(data));
+    mad.myId = *(reinterpret_cast<const int16_t *>(data));
+    mad.peerId = *(reinterpret_cast<const int16_t *>(data));
+    mad.reserved = *(reinterpret_cast<const int16_t *>(data));
+    msg.data = const_cast<char *>(reinterpret_cast<const char *>(data));
     TransProxyOnMessageReceived(&msg);
 }
 }
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    OHOS::TransProxyonMessageReceivedTest(data, size);
+    OHOS::TransProxyOnMessageReceivedTest(data, size);
     return 0;
 }

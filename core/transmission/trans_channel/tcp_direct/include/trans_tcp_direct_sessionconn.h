@@ -70,9 +70,9 @@ SessionConn *GetSessionConnByReq(int64_t req);
 
 SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid);
 
-SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn);
+int32_t GetSessionConnByFd(int32_t fd, SessionConn *conn);
 
-SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn);
+int32_t GetSessionConnById(int32_t channelId, SessionConn *conn);
 
 int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo);
 int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo);
@@ -91,7 +91,7 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status);
 
 int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo);
 
-int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t status);
+int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHandle, uint32_t status);
 
 bool IsTdcRecoveryTransLimit(void);
 

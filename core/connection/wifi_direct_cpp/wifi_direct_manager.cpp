@@ -38,7 +38,7 @@ static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static WifiDirectEnhanceManager g_enhanceManager;
 static SyncPtkListener g_syncPtkListener;
 
-static uint32_t GetRequestId()
+static uint32_t GetRequestId(void)
 {
     return g_requestId++;
 }
@@ -64,8 +64,9 @@ static void SetElementType(struct WifiDirectConnectInfo *info)
     }
 }
 
-static int32_t AllocateListenerModuleId()
+static int32_t AllocateListenerModuleId(void)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerModuleIdLock);
     ListenerModule moduleId = UNUSE_BUTT;
     for (int32_t i = 0; i < AUTH_ENHANCED_P2P_NUM; i++) {
@@ -93,6 +94,7 @@ static bool IsEnhanceP2pModuleId(int32_t moduleId)
 
 static void FreeListenerModuleId(int32_t moduleId)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerModuleIdLock);
     if (IsEnhanceP2pModuleId(moduleId)) {
         g_listenerModuleIds[moduleId - AUTH_ENHANCED_P2P_START] = false;
@@ -237,7 +239,7 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeDeviceId(uuid).c_str());
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "uuid=%{public}s localIp=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeDeviceId(uuid).c_str(),
@@ -268,7 +270,7 @@ static int32_t GetLocalIpByRemoteIpOnce(const char *remoteIp, char *localIp, int
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteIp=%{public}s localIp=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
@@ -290,7 +292,7 @@ static int32_t GetLocalIpByRemoteIp(const char *remoteIp, char *localIp, int32_t
         }
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_GET_LOCAL_IP_BY_REMOTE_IP_FAILED;
 }
 
 static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidSize)
@@ -309,7 +311,7 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteIp=%{public}s uuid=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
@@ -338,7 +340,7 @@ static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp, char *localMac
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str());
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s localMac=%{public}s remoteMac=%{public}s",
         OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str(), OHOS::SoftBus::WifiDirectAnonymizeMac(localMac).c_str(),
@@ -377,6 +379,7 @@ static void NotifyOffline(const char *remoteMac, const char *remoteIp, const cha
 
 static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onLocalRoleChange != nullptr) {
@@ -388,6 +391,7 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
 static void NotifyConnectedForSink(
     const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type, int channelId)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onConnectedForSink != nullptr) {
@@ -399,6 +403,7 @@ static void NotifyConnectedForSink(
 static void NotifyDisconnectedForSink(
     const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDisconnectedForSink != nullptr) {
@@ -409,6 +414,7 @@ static void NotifyDisconnectedForSink(
 
 static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, true, CONN_WIFI_DIRECT, "remote networkid is null");
     auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
     CONN_CHECK_AND_RETURN_RET_LOGE(!remoteUuid.empty(), true, CONN_WIFI_DIRECT, "get remote uuid failed");
@@ -426,17 +432,17 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
-static bool SupportHmlTwo()
+static bool SupportHmlTwo(void)
 {
     return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
 }
 
-static bool IsWifiP2pEnabled()
+static bool IsWifiP2pEnabled(void)
 {
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
 }
 
-static int GetStationFrequency()
+static int GetStationFrequency(void)
 {
     return OHOS::SoftBus::P2pAdapter::GetStationFrequency();
 }
@@ -456,7 +462,7 @@ static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
     g_syncPtkListener(remoteDeviceId, result);
 }
 
-static int32_t Init()
+static int32_t Init(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
     OHOS::SoftBus::WifiDirectInitiator::GetInstance().Init();

@@ -154,6 +154,7 @@ struct WifiDirectConnectInfo {
     int renegotiate;
     int reuse;
     int costTime;
+    uint64_t timeoutInMs;
 };
 
 struct WifiDirectDisconnectInfo {

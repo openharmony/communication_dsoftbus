@@ -22,6 +22,7 @@
 namespace OHOS::SoftBus {
 int LinkManager::AllocateLinkId()
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     if (currentLinkId_ < 0) {
         currentLinkId_ = 0;
@@ -35,6 +36,7 @@ int LinkManager::AllocateLinkId()
 
 std::shared_ptr<InnerLink> LinkManager::GetLinkById(int linkId)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     for (const auto &link : links_) {
         if (link.second->IsContainId(linkId)) {
@@ -46,6 +48,7 @@ std::shared_ptr<InnerLink> LinkManager::GetLinkById(int linkId)
 
 void LinkManager::ForEach(const Checker &checker)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     for (auto &[key, link] : links_) {
         if (checker(*link)) {
@@ -56,6 +59,7 @@ void LinkManager::ForEach(const Checker &checker)
 
 bool LinkManager::ProcessIfPresent(InnerLink::LinkType type, const std::string &remoteDeviceId, const Handler &handler)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     auto iterator = links_.find({ type, remoteDeviceId });
     if (iterator == links_.end()) {
@@ -70,6 +74,7 @@ bool LinkManager::ProcessIfPresent(InnerLink::LinkType type, const std::string &
 
 bool LinkManager::ProcessIfAbsent(InnerLink::LinkType type, const std::string &remoteDeviceId, const Handler &handler)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     auto iterator = links_.find({ type, remoteDeviceId });
     if (iterator != links_.end()) {
@@ -89,6 +94,7 @@ bool LinkManager::ProcessIfAbsent(InnerLink::LinkType type, const std::string &r
 
 bool LinkManager::ProcessIfPresent(const std::string &remoteMac, const Handler &handler)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     auto iterator = std::find_if(links_.begin(), links_.end(), [&remoteMac](const auto &link) {
         return link.second->GetRemoteBaseMac() == remoteMac;
@@ -104,6 +110,7 @@ bool LinkManager::ProcessIfPresent(const std::string &remoteMac, const Handler &
 
 bool LinkManager::ProcessIfAbsent(const std::string &remoteMac, const Handler &handler)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     auto iterator = std::find_if(links_.begin(), links_.end(), [&remoteMac](const auto &link) {
         return link.second->GetRemoteBaseMac() == remoteMac;
@@ -126,6 +133,7 @@ bool LinkManager::ProcessIfAbsent(const std::string &remoteMac, const Handler &h
 
 bool LinkManager::ProcessIfPresent(int linkId, const Handler &handler)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     auto iterator = std::find_if(links_.begin(), links_.end(), [&linkId](const auto &link) {
         return link.second->IsContainId(linkId);
@@ -141,6 +149,7 @@ bool LinkManager::ProcessIfPresent(int linkId, const Handler &handler)
 
 void LinkManager::RemoveLink(InnerLink::LinkType type, const std::string &remoteDeviceId)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     auto it = links_.find({ type, remoteDeviceId });
     if (it != links_.end()) {
@@ -155,6 +164,7 @@ void LinkManager::RemoveLink(InnerLink::LinkType type, const std::string &remote
 
 void LinkManager::RemoveLink(const std::string &remoteMac)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     for (const auto &[key, value] : links_) {
         if (remoteMac == value->GetRemoteBaseMac() && value->GetState() == InnerLink::LinkState::CONNECTED) {
@@ -167,6 +177,7 @@ void LinkManager::RemoveLink(const std::string &remoteMac)
 
 void LinkManager::RemoveLinks(InnerLink::LinkType type)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     auto it = links_.begin();
     while (it != links_.end()) {
@@ -184,24 +195,25 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
     }
 }
 
-void LinkManager::GetAllLinksBasicInfo(std::vector<std::shared_ptr<InnerLinkBasicInfo>> &infos)
+void LinkManager::GetAllLinksBasicInfo(std::vector<InnerLinkBasicInfo> &infos)
 {
     std::lock_guard lock(lock_);
     for (const auto &[key, value] : links_) {
-        std::shared_ptr<InnerLinkBasicInfo> info = std::make_shared<InnerLinkBasicInfo>();
-        info->isBeingUsedByRemote = value->IsBeingUsedByRemote();
-        info->state = value->GetState();
-        info->linkType = value->GetLinkType();
-        info->freq = value->GetFrequency();
-        info->remoteDeviceId = value->GetRemoteDeviceId();
-        info->remoteIpv4 = value->GetRemoteIpv4();
-        info->remoteBaseMac = value->GetRemoteBaseMac();
+        InnerLinkBasicInfo info = { 0 };
+        info.isBeingUsedByRemote = value->IsBeingUsedByRemote();
+        info.state = value->GetState();
+        info.linkType = value->GetLinkType();
+        info.freq = value->GetFrequency();
+        info.remoteDeviceId = value->GetRemoteDeviceId();
+        info.remoteIpv4 = value->GetRemoteIpv4();
+        info.remoteBaseMac = value->GetRemoteBaseMac();
         infos.push_back(info);
     }
 }
 
 std::shared_ptr<InnerLink> LinkManager::GetReuseLink(const std::string &remoteMac)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     for (const auto &[key, link] : links_) {
         if (link->GetRemoteBaseMac() == remoteMac && link->GetState() == InnerLink::LinkState::CONNECTED) {
@@ -229,6 +241,7 @@ std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
 std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
     WifiDirectLinkType wifiDirectLinkType, const std::string &remoteDeviceId)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     InnerLink::LinkType linkType { InnerLink::LinkType::INVALID_TYPE };
     if (wifiDirectLinkType == WIFI_DIRECT_LINK_TYPE_HML) {
         linkType = InnerLink::LinkType::HML;
@@ -248,6 +261,7 @@ std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
 
 void LinkManager::RefreshRelationShip(const std::string &remoteDeviceId, const std::string &remoteMac)
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     auto it = links_.find({ InnerLink::LinkType::HML, remoteMac });
     if (it == links_.end()) {
@@ -263,6 +277,7 @@ void LinkManager::RefreshRelationShip(const std::string &remoteDeviceId, const s
 
 void LinkManager::Dump() const
 {
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(lock_);
     for (const auto &[key, value] : links_) {
         value->Dump();

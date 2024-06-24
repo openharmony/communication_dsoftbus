@@ -52,11 +52,6 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
     switch (status) {
         case STREAM_CONNECTED:
             TRANS_LOGI(TRANS_STREAM, "dstream connected. channelId=%{public}d", channelId);
-            if (g_udpChannelMgrCb->OnUdpChannelOpened == NULL) {
-                TRANS_LOGE(TRANS_STREAM, "udp channel callback on udp channel opened is null.");
-                return;
-            }
-            g_udpChannelMgrCb->OnUdpChannelOpened(channelId);
             break;
         case STREAM_CLOSED:
             TRANS_LOGI(TRANS_STREAM, "dstream closed. channelId=%{public}d", channelId);
@@ -139,6 +134,22 @@ static int32_t GetRawStreamEncryptOptByChannelId(int32_t channelId, bool *isEncr
     return g_udpChannelMgrCb->OnRawStreamEncryptOptGet(channelId, isEncryptRawStream);
 }
 
+static int32_t OnStreamUdpChannelOpened(int32_t channelId)
+{
+    if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnUdpChannelOpened == NULL)) {
+        TRANS_LOGE(TRANS_STREAM, "udp channel callback on udp channel opened is null channelId=%{public}d", channelId);
+        return SOFTBUS_NO_INIT;
+    }
+
+    int32_t ret = g_udpChannelMgrCb->OnUdpChannelOpened(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_STREAM, "OnUdpChannelOpened fail, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+
+    return SOFTBUS_OK;
+}
+
 int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort)
 {
     TRANS_LOGD(TRANS_STREAM, "enter.");
@@ -162,6 +173,13 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
             *streamPort = 0;
             return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
         }
+
+        ret = OnStreamUdpChannelOpened(channel->channelId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_STREAM, "OnUdpChannelOpened fail channelId=%{public}d", channel->channelId);
+            return ret;
+        }
+
         VtpStreamOpenParam p1 = { "DSOFTBUS_STREAM", channel->myIp,
             NULL, -1, streamType, (uint8_t*)channel->sessionKey, channel->keyLen, isEncryptedRawStream};
 
@@ -182,11 +200,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
             return SOFTBUS_TRANS_UDP_START_STREAM_CLIENT_FAILED;
         }
         TRANS_LOGI(TRANS_STREAM, "stream start client success.");
-        if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnUdpChannelOpened == NULL)) {
-            TRANS_LOGE(TRANS_STREAM, "udp channel callback on udp channel opened is null.");
-            return SOFTBUS_NO_INIT;
-        }
-        return g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
+        return OnStreamUdpChannelOpened(channel->channelId);
     }
     return SOFTBUS_OK;
 }

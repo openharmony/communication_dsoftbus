@@ -64,7 +64,6 @@ public:
     static bool IsWifiP2pEnabled();
     static std::string GetInterfaceCoexistCap();
     static int32_t GetStationFrequency();
-    static bool IsThreeVapConflict();
 
     static int32_t P2pCreateGroup(const CreateGroupParam &param);
     static int32_t P2pConnectGroup(const ConnectParam &param);

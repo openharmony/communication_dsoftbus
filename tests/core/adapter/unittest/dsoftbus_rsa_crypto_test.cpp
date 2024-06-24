@@ -40,22 +40,24 @@ protected:
 };
 
 static struct HksParam g_encryptParams[] = {
-    { .tag = HKS_TAG_ALGORITHM,  .uint32Param = HKS_ALG_RSA            },
-    { .tag = HKS_TAG_PURPOSE,    .uint32Param = HKS_KEY_PURPOSE_ENCRYPT},
-    { .tag = HKS_TAG_KEY_SIZE,   .uint32Param = HKS_RSA_KEY_SIZE_2048  },
-    { .tag = HKS_TAG_PADDING,    .uint32Param = HKS_PADDING_OAEP       },
-    { .tag = HKS_TAG_DIGEST,     .uint32Param = HKS_DIGEST_SHA256      },
-    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB           },
-    { .tag = HKS_TAG_MGF_DIGEST, .uint32Param = HKS_DIGEST_SHA1        },
+    { .tag = HKS_TAG_ALGORITHM,          .uint32Param = HKS_ALG_RSA              },
+    { .tag = HKS_TAG_PURPOSE,            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT  },
+    { .tag = HKS_TAG_KEY_SIZE,           .uint32Param = HKS_RSA_KEY_SIZE_2048    },
+    { .tag = HKS_TAG_PADDING,            .uint32Param = HKS_PADDING_OAEP         },
+    { .tag = HKS_TAG_DIGEST,             .uint32Param = HKS_DIGEST_SHA256        },
+    { .tag = HKS_TAG_BLOCK_MODE,         .uint32Param = HKS_MODE_ECB             },
+    { .tag = HKS_TAG_MGF_DIGEST,         .uint32Param = HKS_DIGEST_SHA1          },
+    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
 };
 static struct HksParam g_decryptParams[] = {
-    { .tag = HKS_TAG_ALGORITHM,  .uint32Param = HKS_ALG_RSA            },
-    { .tag = HKS_TAG_PURPOSE,    .uint32Param = HKS_KEY_PURPOSE_DECRYPT},
-    { .tag = HKS_TAG_KEY_SIZE,   .uint32Param = HKS_RSA_KEY_SIZE_2048  },
-    { .tag = HKS_TAG_PADDING,    .uint32Param = HKS_PADDING_OAEP       },
-    { .tag = HKS_TAG_DIGEST,     .uint32Param = HKS_DIGEST_SHA256      },
-    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB           },
-    { .tag = HKS_TAG_MGF_DIGEST, .uint32Param = HKS_DIGEST_SHA1        },
+    { .tag = HKS_TAG_ALGORITHM,          .uint32Param = HKS_ALG_RSA              },
+    { .tag = HKS_TAG_PURPOSE,            .uint32Param = HKS_KEY_PURPOSE_DECRYPT  },
+    { .tag = HKS_TAG_KEY_SIZE,           .uint32Param = HKS_RSA_KEY_SIZE_2048    },
+    { .tag = HKS_TAG_PADDING,            .uint32Param = HKS_PADDING_OAEP         },
+    { .tag = HKS_TAG_DIGEST,             .uint32Param = HKS_DIGEST_SHA256        },
+    { .tag = HKS_TAG_BLOCK_MODE,         .uint32Param = HKS_MODE_ECB             },
+    { .tag = HKS_TAG_MGF_DIGEST,         .uint32Param = HKS_DIGEST_SHA1          },
+    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
 };
 
 void AdapterDsoftbusRsaCryptoTest::SetUpTestCase(void) { }
@@ -262,10 +264,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, DataBusNativeVirtual001, TestSize.Level0)
 {
     int channelId = 0;
-    int ret = NotifyNearByUpdateHandleId(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = NotifyNearByUpdateMigrateOption(channelId);
+    int32_t ret = NotifyNearByUpdateMigrateOption(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     const char *peerDeviceId = NULL;
