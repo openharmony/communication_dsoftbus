@@ -643,11 +643,14 @@ static void InstReleaseRemoteChannelInfoList(SoftBusList *remoteChannelInfoList)
     DestroySoftBusList(remoteChannelInfoList);
 }
 
-static void InstPackRemoteBasicInfo(cJSON *json, InstantRemoteInfo *remoteInfo)
+static void InstPackRemoteBasicInfo(cJSON *upperJson, InstantRemoteInfo *remoteInfo)
 {
-    if (json == NULL || remoteInfo == NULL) {
+    if (upperJson == NULL || remoteInfo == NULL) {
         return;
     }
+    cJSON *json = cJSON_CreateObject();
+    COMM_CHECK_AND_RETURN_LOGE(json != NULL, COMM_DFX, "cJSON_CreateObject fail");
+
     (void)AddNumber64ToJsonObject(json, "deviceType", remoteInfo->deviceType);
     InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->udid, "udid", true);
     InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->hmlMac, "hmlMac", false);
@@ -663,17 +666,22 @@ static void InstPackRemoteBasicInfo(cJSON *json, InstantRemoteInfo *remoteInfo)
     (void)AddNumberToJsonObject(json, "hmlLinkState", remoteInfo->hmlLinkState);
     (void)AddNumber64ToJsonObject(json, "discoveryType", remoteInfo->discoveryType);
     (void)AddNumber64ToJsonObject(json, "netCapability", remoteInfo->netCapability);
+
+    char *str = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    COMM_CHECK_AND_RETURN_LOGE(str != NULL, COMM_DFX, "cJSON_PrintUnformatted fail");
+    cJSON_AddItemToArray(upperJson, cJSON_CreateString(str));
+    cJSON_free(str);
 }
 
-static void InstPackChannelInfo(cJSON *json, InstantChannelInfo *channelInfo)
+static void InstPackChannelInfo(cJSON *upperJson, InstantChannelInfo *channelInfo)
 {
-    if (json == NULL || channelInfo == NULL) {
+    if (upperJson == NULL || channelInfo == NULL) {
         return;
     }
-    cJSON *channelJson = cJSON_AddObjectToObject(json, "channelInfo");
-    if (channelJson == NULL) {
-        return;
-    }
+    cJSON *channelJson = cJSON_CreateObject();
+    COMM_CHECK_AND_RETURN_LOGE(channelJson != NULL, COMM_DFX, "cJSON_CreateObject fail");
+
     (void)AddStringToJsonObject(channelJson, "socketName", channelInfo->socketName.c_str());
     (void)AddNumberToJsonObject(channelJson, "channelType", channelInfo->channelType);
     (void)AddNumberToJsonObject(channelJson, "appType", channelInfo->appType);
@@ -682,6 +690,12 @@ static void InstPackChannelInfo(cJSON *json, InstantChannelInfo *channelInfo)
     (void)AddNumberToJsonObject(channelJson, "status", channelInfo->status);
     (void)AddBoolToJsonObject(channelJson, "serverSide", channelInfo->serverSide);
     (void)AddNumberToJsonObject(channelJson, "keepTime", channelInfo->startTime);
+
+    char *str = cJSON_PrintUnformatted(channelJson);
+    cJSON_Delete(channelJson);
+    COMM_CHECK_AND_RETURN_LOGE(str != NULL, COMM_DFX, "cJSON_PrintUnformatted fail");
+    cJSON_AddItemToArray(upperJson, cJSON_CreateString(str));
+    cJSON_free(str);
 }
 
 static void InstPackRemoteInfo(cJSON *json, SoftBusList *remoteChannelInfoList)
@@ -689,10 +703,9 @@ static void InstPackRemoteInfo(cJSON *json, SoftBusList *remoteChannelInfoList)
     if (json == NULL || remoteChannelInfoList == NULL) {
         return;
     }
-    (void)AddNumberToJsonObject(json, "remoteNum", remoteChannelInfoList->cnt);
     InstantRemoteInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
-        cJSON *deviceJson = cJSON_AddObjectToObject(json, "remoteInfo");
+        cJSON *deviceJson = cJSON_AddArrayToObject(json, "remoteInfo");
         if (deviceJson == NULL) {
             continue;
         }
@@ -779,7 +792,7 @@ static int32_t InstGetAllInfo(int32_t radarId, int32_t errorCode)
     COMM_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, COMM_DFX, "cJSON_CreateObject fail");
     (void)AddNumberToJsonObject(json, "radarId", radarId);
     (void)AddNumberToJsonObject(json, "errorCode", errorCode);
-    cJSON *remoteDevicesJson = cJSON_AddObjectToObject(json, "remoteDevices");
+    cJSON *remoteDevicesJson = cJSON_AddArrayToObject(json, "remoteDevices");
     if (remoteDevicesJson != NULL) {
         InstGetRemoteInfo(remoteDevicesJson);
     }
