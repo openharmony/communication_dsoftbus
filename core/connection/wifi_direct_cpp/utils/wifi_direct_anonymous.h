@@ -23,6 +23,8 @@ std::string WifiDirectAnonymizeMac(const std::string &mac);
 std::string WifiDirectAnonymizeMac(const std::vector<uint8_t> &mac);
 std::string WifiDirectAnonymizeIp(const std::string &ip);
 std::string WifiDirectAnonymizeDeviceId(const std::string &deviceId);
+std::string WifiDirectAnonymizeSsid(const std::string &ssid);
+std::string WifiDirectAnonymizePsk(const std::string &psk);
 }
 
 #endif

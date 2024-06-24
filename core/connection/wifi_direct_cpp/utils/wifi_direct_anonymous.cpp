@@ -22,6 +22,10 @@ static constexpr int DEVICE_ID_PREFIX_LEN = 4;
 static constexpr int DEVICE_ID_SUFFIX_LEN = 4;
 static constexpr int IPV6_START = 5;
 static constexpr int IPV6_END = 15;
+static constexpr int SSID_ANON_BEGIN = 2;
+static constexpr int SSID_ANON_END = 4;
+static constexpr int PSK_ANON_BEGIN = 2;
+static constexpr int PSK_ANON_END = 6;
 
 std::string WifiDirectAnonymizeMac(const std::string &mac)
 {
@@ -86,6 +90,26 @@ std::string WifiDirectAnonymizeDeviceId(const std::string &deviceId)
     }
     std::string result = deviceId;
     result.replace(DEVICE_ID_PREFIX_LEN, result.length() - DEVICE_ID_SUFFIX_LEN - DEVICE_ID_PREFIX_LEN, "**");
+    return result;
+}
+
+std::string WifiDirectAnonymizeSsid(const std::string &ssid)
+{
+    if (ssid.empty() || ssid.length() < SSID_ANON_END) {
+        return "";
+    }
+    std::string result = ssid;
+    result.replace(SSID_ANON_BEGIN, SSID_ANON_END, "**");
+    return result;
+}
+
+std::string WifiDirectAnonymizePsk(const std::string &psk)
+{
+    if (psk.empty() || psk.length() < PSK_ANON_END) {
+        return "";
+    }
+    std::string result = psk;
+    result.replace(PSK_ANON_BEGIN, PSK_ANON_END, "****");
     return result;
 }
 }
