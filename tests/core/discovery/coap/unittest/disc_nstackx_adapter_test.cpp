@@ -197,8 +197,8 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapaData001, TestSize.Lev
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    const unsigned char *capabilityData = "test";
-    uint32_t dataLen = strlen(capabilityData);
+    const unsigned char capabilityData[] = "test";
+    uint32_t dataLen = 4;
     uint32_t capability = 1;
 
     ret = DiscCoapRegisterCapabilityData(NULL, dataLen, capability);
@@ -275,16 +275,19 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testOption.freq = MID;
+    ret = DiscCoapStartDiscovery(&testOption);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testOption.freq = HIGH;
+    ret = DiscCoapStartDiscovery(&testOption);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testOption.freq = SUPER_HIGH;
+    ret = DiscCoapStartDiscovery(&testOption);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -558,7 +561,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegisterCb001, TestSize.Leve
     ret = DiscCoapRegisterCb(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
-} // namespace OHOS
 
 /*
  * @tc.name: TestDiscCoapSendRsp001
@@ -583,3 +585,4 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
     ret = DiscCoapSendRsp(testDiscDevInfo, bType);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+} // namespace OHOS
