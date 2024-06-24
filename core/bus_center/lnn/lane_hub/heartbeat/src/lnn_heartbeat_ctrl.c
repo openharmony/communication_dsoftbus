@@ -698,6 +698,7 @@ static void HbTryRecoveryNetwork(void)
     }
     if (!LnnIsDefaultOhosAccount()) {
         g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
+        LnnSetCloudAbility(true);
     }
     if (IsActiveOsAccountUnlocked()) {
         g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
