@@ -26,6 +26,7 @@
 #include "lnn_lane_def.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_link_p2p.h"
+#include "lnn_parameter_utils.h"
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"

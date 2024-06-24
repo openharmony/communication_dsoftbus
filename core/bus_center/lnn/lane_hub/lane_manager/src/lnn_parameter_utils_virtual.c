@@ -24,3 +24,8 @@ bool IsCloudSyncEnabled(void)
 {
     return false;
 }
+
+bool IsPowerControlEnabled(void)
+{
+    return false;
+}

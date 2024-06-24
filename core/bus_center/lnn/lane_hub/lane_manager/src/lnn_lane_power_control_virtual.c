@@ -12,22 +12,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef LNN_PARAMETER_UTILS_H
-#define LNN_PARAMETER_UTILS_H
-
-#include <stdbool.h>
-#include "lnn_lane_interface.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-bool IsLinkEnabled(LaneLinkType parameter);
-bool IsCloudSyncEnabled(void);
-bool IsPowerControlEnabled(void);
-
-#ifdef __cplusplus
-}
-#endif
-#endif // LNN_PARAMETER_UTILS_H
