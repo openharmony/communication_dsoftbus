@@ -388,11 +388,14 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
         }
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
-        uint64_t costTime = SoftBusGetSysTimeMs() - item->p2pInfo.triggerLinkTime;
-        if (costTime >= item->p2pInfo.availableLinkTime) {
-            LNN_LOGE(LNN_LANE, "no more time to build wifidirect");
-            LinkUnlock();
-            return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
+        uint64_t currentTime = SoftBusGetSysTimeMs();
+        if (currentTime >= item->p2pInfo.triggerLinkTime) {
+            uint64_t costTime = currentTime - item->p2pInfo.triggerLinkTime;
+            if (costTime >= item->p2pInfo.availableLinkTime) {
+                LNN_LOGE(LNN_LANE, "no more time to build wifidirect");
+                LinkUnlock();
+                return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
+            }
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
         if (strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
@@ -442,11 +445,14 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
             return SOFTBUS_STRCPY_ERR;
         }
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
-        uint64_t costTime = SoftBusGetSysTimeMs() - item->p2pInfo.triggerLinkTime;
-        if (costTime >= item->p2pInfo.availableLinkTime) {
-            LNN_LOGE(LNN_LANE, "no more time to build wifidirect");
-            LinkUnlock();
-            return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
+        uint64_t currentTime = SoftBusGetSysTimeMs();
+        if (currentTime >= item->p2pInfo.triggerLinkTime) {
+            uint64_t costTime = currentTime - item->p2pInfo.triggerLinkTime;
+            if (costTime >= item->p2pInfo.availableLinkTime) {
+                LNN_LOGE(LNN_LANE, "no more time to build wifidirect");
+                LinkUnlock();
+                return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
+            }
         }
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
@@ -1073,11 +1079,14 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
         }
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
-        uint64_t costTime = SoftBusGetSysTimeMs() - item->p2pInfo.triggerLinkTime;
-        if (costTime >= item->p2pInfo.availableLinkTime) {
-            LNN_LOGE(LNN_LANE, "no more time to build wifidirect");
-            LinkUnlock();
-            return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
+        uint64_t currentTime = SoftBusGetSysTimeMs();
+        if (currentTime >= item->p2pInfo.triggerLinkTime) {
+            uint64_t costTime = currentTime - item->p2pInfo.triggerLinkTime;
+            if (costTime >= item->p2pInfo.availableLinkTime) {
+                LNN_LOGE(LNN_LANE, "no more time to build wifidirect");
+                LinkUnlock();
+                return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
+            }
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
         int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
@@ -1373,10 +1382,13 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
     struct WifiDirectConnectInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     wifiDirectInfo.bandWidth = request->bandWidth;
-    uint64_t costTime = SoftBusGetSysTimeMs() - request->triggerLinkTime;
-    if (costTime >= request->availableLinkTime) {
-        LNN_LOGE(LNN_LANE, "no more time to build wifidirect");
-        return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
+    uint64_t currentTime = SoftBusGetSysTimeMs();
+    if (currentTime >= request->triggerLinkTime) {
+        uint64_t costTime = currentTime - request->triggerLinkTime;
+        if (costTime >= request->availableLinkTime) {
+            LNN_LOGE(LNN_LANE, "no more time to build wifidirect");
+            return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
+        }
     }
     LNN_LOGI(LNN_LANE, "open ble trigger with laneReqId=%{public}u", laneReqId);
     wifiDirectInfo.requestId = GetWifiDirectManager()->getRequestId();
