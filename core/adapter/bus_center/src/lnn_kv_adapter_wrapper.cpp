@@ -301,7 +301,7 @@ bool LnnSubcribeKvStoreService(void)
         LNN_LOGE(LNN_LEDGER, "abilityManager is nullptr");
         return false;
     }
-    auto listener = new (std::nothrow) KvStoreStatusChangeListener();
+    sptr<KvStoreStatusChangeListener> listener = new (std::nothrow) KvStoreStatusChangeListener();
     if (listener == nullptr) {
         LNN_LOGE(LNN_LEDGER, "failed to create listener");
         return false;
