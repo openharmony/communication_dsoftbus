@@ -26,10 +26,8 @@ struct WifiDirectStatusListener {
     void (*onLocalRoleChange)(enum WifiDirectRole oldRole, enum WifiDirectRole newRole);
     void (*onDeviceOnLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource);
     void (*onDeviceOffLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
-    void (*onConnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
-                               enum WifiDirectLinkType type, int channelId);
-    void (*onDisconnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
-                                  enum WifiDirectLinkType type);
+    void (*onConnectedForSink)(const struct WifiDirectSinkLink *link);
+    void (*onDisconnectedForSink)(const struct WifiDirectSinkLink *link);
 };
 
 typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
@@ -73,10 +71,8 @@ struct WifiDirectManager {
     void (*notifyOnline)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource);
     void (*notifyOffline)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
     void (*notifyRoleChange)(enum WifiDirectRole oldRole, enum WifiDirectRole newRole);
-    void (*notifyConnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
-                                   enum WifiDirectLinkType type, int channelId);
-    void (*notifyDisconnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
-                                      enum WifiDirectLinkType type);
+    void (*notifyConnectedForSink)(const struct WifiDirectSinkLink *link);
+    void (*notifyDisconnectedForSink)(const struct WifiDirectSinkLink *link);
     void (*registerEnhanceManager)(struct WifiDirectEnhanceManager *manager);
     void (*notifyPtkSyncResult)(const char *remoteDeviceId, int result);
 };
