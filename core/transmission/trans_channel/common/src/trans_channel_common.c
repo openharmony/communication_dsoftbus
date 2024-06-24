@@ -420,6 +420,7 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
                 break;
             case CHANNEL_TYPE_TCP_DIRECT:
                 (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransDelTcpChannelInfoByChannelId(channelId);
                 ret = SOFTBUS_OK;
                 break;
             case CHANNEL_TYPE_UDP:
