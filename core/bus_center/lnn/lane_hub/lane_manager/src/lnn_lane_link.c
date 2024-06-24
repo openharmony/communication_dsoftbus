@@ -27,6 +27,7 @@
 #include "lnn_lane_score.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_parameter_utils.h"
+#include "lnn_lane_power_control.h"
 #include "lnn_lane_reliability.h"
 #include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
@@ -46,6 +47,7 @@
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
 #include "trans_network_statistics.h"
+#include "wifi_direct_manager.h"
 
 #define IF_NAME_BR  "br0"
 #define IF_NAME_BLE "ble0"
@@ -54,6 +56,7 @@
 #define TYPE_BUF_LEN 2
 #define LANE_ID_BUF_LEN (UDID_BUF_LEN + UDID_BUF_LEN + TYPE_BUF_LEN)
 #define LANE_ID_HASH_LEN 32
+static bool g_enabledLowPower = false;
 
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
 
