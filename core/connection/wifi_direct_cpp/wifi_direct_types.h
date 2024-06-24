@@ -96,6 +96,18 @@ struct WifiDirectLink {
     int channelId;
 };
 
+struct WifiDirectSinkLink {
+    char remoteUuid[UUID_BUF_LEN];
+    int channelId;
+    enum WifiDirectBandWidth bandWidth;
+    enum WifiDirectLinkType linkType;
+
+    char localIp[IP_STR_MAX_LEN];
+    char remoteIp[IP_STR_MAX_LEN];
+
+    char remoteMac[MAC_ADDR_STR_LEN];
+};
+
 enum WifiDirectNegoChannelType {
     NEGO_CHANNEL_NULL = 0,
     NEGO_CHANNEL_AUTH = 1,
