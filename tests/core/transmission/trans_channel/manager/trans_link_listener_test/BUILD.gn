@@ -41,7 +41,6 @@ ohos_unittest("TransLinkListenerTest") {
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -54,10 +53,7 @@ ohos_unittest("TransLinkListenerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -79,13 +75,18 @@ ohos_unittest("TransLinkListenerTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
+      "hilog_lite:hilog_lite",
     ]
   }
 }

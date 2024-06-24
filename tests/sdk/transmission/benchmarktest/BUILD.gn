@@ -26,26 +26,19 @@ ohos_benchmarktest("TransTest") {
     "$dsoftbus_root_path/interfaces/kits/transmission",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/discovery/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/sdk/discovery/manager/include",
-    "//base/security/access_token/interfaces/innerkits/token_setproc/include",
-    "//base/security/access_token/interfaces/innerkits/nativetoken/include",
-    "//base/security/access_token/interfaces/innerkits/accesstoken/include",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//base/security/access_token/interfaces/innerkits/accesstoken:libaccesstoken_sdk",
-    "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-    "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-    "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-    "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+    "googletest:gtest_main",
+  ]
 }
 
 group("benchmarktest") {
