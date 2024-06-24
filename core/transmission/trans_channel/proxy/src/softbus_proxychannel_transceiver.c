@@ -735,7 +735,7 @@ static int32_t TransProxyOpenNewConnChannel(
     connChan->ref = 0;
     connChan->isServerSide = false;
 
-    TRANS_LOGI(TRANS_CTRL, "Connect dev requestId=%{public}u", requestId);
+    TRANS_LOGI(TRANS_CTRL, "Connect dev, channelId=%{public}d, requestId=%{public}u", channelId, requestId);
     connChan->connInfo = (*connInfo);
     if (connInfo->type == CONNECT_TCP) {
         connChan->connInfo.socketOption.moduleId = moduleId;

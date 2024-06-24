@@ -379,5 +379,15 @@ struct WifiDirectManager* GetWifiDirectManager(void)
 {
     return GetLaneDepsInterface()->GetWifiDirectManager();
 }
+
+void LnnDumpLocalBasicInfo(void)
+{
+    GetLaneDepsInterface()->LnnDumpLocalBasicInfo();
+}
+
+void LnnDumpOnlineDeviceInfo(void)
+{
+    GetLaneDepsInterface()->LnnDumpOnlineDeviceInfo();
+}
 }
 } // namespace OHOS
