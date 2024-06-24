@@ -32,16 +32,15 @@ ohos_unittest("SoftBusDfxEventTest") {
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "mock",
-    "//third_party/bounds_checking_function/include",
   ]
   deps = [
     "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_dfx_path/event:softbus_dfx_event",
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "googletest:gmock",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
   ]

@@ -28,7 +28,6 @@ ohos_fuzztest("CreateSessionServerFuzzTest") {
     "../../../../../core/common/dfx/interface/include",
     "../../../../../interfaces/kits/common",
     "../../../../../interfaces/inner_kits/transport",
-    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]
   cflags = [
@@ -41,6 +40,7 @@ ohos_fuzztest("CreateSessionServerFuzzTest") {
   sources = [ "createsessionserver_fuzzer.cpp" ]
   deps = [ "../../../../../sdk:softbus_client" ]
   external_deps = [
+    "bounds_checking_function:libsec_static",
     "c_utils:utils",
     "hilog:libhilog",
   ]
