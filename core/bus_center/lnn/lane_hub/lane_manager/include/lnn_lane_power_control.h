@@ -12,3 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef LNN_LANE_POWER_CONTROL_H
+#define LNN_LANE_POWER_CONTROL_H
+ 
+#include <stdint.h>
+#include "lnn_lane_interface.h"
+ 
+#ifdef __cplusplus
+extern "C" {
+#endif
+ 
+#define LNN_MAC_LEN 18
+ 
+typedef struct {
+    LaneLinkType linkType;
+    char wifiDirectMac[LNN_MAC_LEN];
+    uint32_t bandWidth;
+} WifiDirectLinkInfo;
+ 
+int32_t EnablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo);
+void DisablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo);
+ 
+#ifdef __cplusplus
+}
+#endif
+#endif // LNN_LANE_POWER_CONTROL_H
