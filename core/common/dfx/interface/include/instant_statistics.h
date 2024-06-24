@@ -22,9 +22,8 @@
 extern "C" {
 #endif
 
-#ifdef INSTANT_REGISTER_COMMUNICATION_RADAR
 void InstRegister(SoftBusMessage *msg);
-#endif // INSTANT_REGISTER_COMMUNICATION_RADAR
+
 #ifdef __cplusplus
 }
 #endif

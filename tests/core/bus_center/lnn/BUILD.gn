@@ -1934,6 +1934,7 @@ group("unittest") {
   if (enhanced_test) {
     deps += [
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/authentication:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/decision_center:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/heartbeat:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_channel_rating:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_qos:unittest",

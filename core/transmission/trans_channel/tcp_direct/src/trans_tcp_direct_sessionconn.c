@@ -98,7 +98,7 @@ SessionConn *GetSessionConnByRequestId(uint32_t requestId)
             return item;
         }
     }
-    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%{public}u", requestId);
+    TRANS_LOGE(TRANS_CTRL, "get session conn by requestId failed: requestId=%{public}u", requestId);
     return NULL;
 }
 
@@ -114,7 +114,7 @@ SessionConn *GetSessionConnByReq(int64_t req)
             return item;
         }
     }
-    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%{public}" PRIu64, req);
+    TRANS_LOGE(TRANS_CTRL, "get session conn by req failed: req=%{public}" PRIu64, req);
     return NULL;
 }
 
@@ -140,11 +140,11 @@ SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
     return conn;
 }
 
-SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn)
+int32_t GetSessionConnByFd(int32_t fd, SessionConn *conn)
 {
     SessionConn *connInfo = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
-        return NULL;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->appInfo.fd == fd) {
@@ -152,19 +152,19 @@ SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn)
                 (void)memcpy_s(conn, sizeof(SessionConn), connInfo, sizeof(SessionConn));
             }
             ReleaseSessionConnLock();
-            return connInfo;
+            return SOFTBUS_OK;
         }
     }
     ReleaseSessionConnLock();
 
-    return NULL;
+    return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
 }
 
-SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
+int32_t GetSessionConnById(int32_t channelId, SessionConn *conn)
 {
     SessionConn *connInfo = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
-        return NULL;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == channelId) {
@@ -172,13 +172,13 @@ SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
                 (void)memcpy_s(conn, sizeof(SessionConn), connInfo, sizeof(SessionConn));
             }
             ReleaseSessionConnLock();
-            return connInfo;
+            return SOFTBUS_OK;
         }
     }
     ReleaseSessionConnLock();
 
     TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
-    return NULL;
+    return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
 }
 
 int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
@@ -401,13 +401,13 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t status)
+int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHandle, uint32_t status)
 {
     if (num == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invaild param");
         return NULL;
     }
-    TRANS_LOGD(TRANS_CTRL, "AuthId=%{public}" PRId64 ",status=%{public}d", authId, status);
+    TRANS_LOGD(TRANS_CTRL, "AuthId=%{public}" PRId64 ",status=%{public}d", authHandle->authId, status);
     if (GetSessionConnLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "GetSessionConnLock failed");
         return NULL;
@@ -415,13 +415,15 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t s
     SessionConn *connInfo = NULL;
     int32_t count = 0;
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (connInfo->authHandle.authId == authId && connInfo->status == status) {
+        if (connInfo->authHandle.authId == authHandle->authId && connInfo->status == status &&
+            connInfo->authHandle.type == authHandle->type) {
             count++;
         }
     }
     if (count == 0) {
         ReleaseSessionConnLock();
-        TRANS_LOGE(TRANS_CTRL, "Not find channle id with authId=%{public}" PRId64 ",status=%{public}d", authId, status);
+        TRANS_LOGE(TRANS_CTRL, "Not find channle id with authId=%{public}" PRId64 ", status=%{public}d",
+            authHandle->authId, status);
         return NULL;
     }
     *num = count;
@@ -429,7 +431,8 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t s
     int32_t tmp = 0;
     int32_t *result = (int32_t *)SoftBusCalloc(count * sizeof(int32_t));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (connInfo->authHandle.authId == authId && connInfo->status == status) {
+        if (connInfo->authHandle.authId == authHandle->authId && connInfo->status == status &&
+            connInfo->authHandle.type == authHandle->type) {
             result[tmp++] = connInfo->channelId;
         }
     }

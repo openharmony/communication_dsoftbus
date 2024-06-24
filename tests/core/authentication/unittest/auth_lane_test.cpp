@@ -289,7 +289,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     LaneConnInfo laneConnInfo;
@@ -333,7 +333,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     LaneConnInfo laneConnInfo;
@@ -377,7 +377,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     AuthOnLaneAllocFail(laneReqId, SOFTBUS_ERR);
@@ -512,7 +512,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     AuthOnLaneAllocFail(laneReqId, SOFTBUS_ERR);
@@ -555,7 +555,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)
 
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AuthAllocConn(NETWORK_ID, authRequestId, &authConnCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     AuthOnLaneAllocFail(laneReqId, SOFTBUS_ERR);

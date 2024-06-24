@@ -38,7 +38,7 @@ public:
     virtual int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle) = 0;
     virtual int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
         uint32_t *outLen) = 0;
-    virtual SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn) = 0;
+    virtual int32_t GetSessionConnById(int32_t channelId, SessionConn *conn) = 0;
     virtual ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout) = 0;
     virtual ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout) = 0;
     virtual int32_t TransTdcOnChannelOpenFailed(const char *pkgName,
@@ -71,7 +71,7 @@ public:
     MOCK_METHOD2(GetAuthHandleByChanId, int32_t (int32_t channelId, AuthHandle *authHandle));
     MOCK_METHOD5(AuthEncrypt, int32_t (AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
         uint32_t *outLen));
-    MOCK_METHOD2(GetSessionConnById, SessionConn * (int32_t channelId, SessionConn *conn));
+    MOCK_METHOD2(GetSessionConnById, int32_t (int32_t channelId, SessionConn *conn));
     MOCK_METHOD4(ConnSendSocketData, ssize_t (int32_t fd, const char *buf, size_t len, int32_t timeout));
     MOCK_METHOD4(ConnRecvSocketData, ssize_t (int32_t fd, char *buf, size_t len, int32_t timeout));
     MOCK_METHOD4(TransTdcOnChannelOpenFailed, int32_t (const char *pkgName,

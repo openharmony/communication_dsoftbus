@@ -156,14 +156,6 @@ extern "C" {
 #define OS_VERSION_BUF_LEN 128
 
 /**
- * @brief Indicates the length of device version buffer, including the terminating null character <b>\0</b>.
- *
- * @since 1.0
- * @version 1.0
- */
-#define DEVICE_VERSION_BUF_LEN 128
-
-/**
  * @brief Enumerates keys for an online device.
  * The key can be obtained via {@link GetNodeKeyInfo}.
  *

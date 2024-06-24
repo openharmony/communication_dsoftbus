@@ -193,9 +193,27 @@ void GetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 
 void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len)
 {
-    int32_t errCode = LnnGetRemoteStrInfo(networkId, STRING_KEY_MASTER_NODE_UDID, info, len);
+    int32_t errCode = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, info, len);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get remote node udid err, errCode=%{public}d", errCode);
+        return;
+    }
+}
+
+void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVersion, uint32_t len)
+{
+    if (id == NULL || deviceVersion == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(id, type, &nodeInfo) != SOFTBUS_OK) {
+        return;
+    }
+    if (strncpy_s(deviceVersion, len, nodeInfo.deviceInfo.deviceVersion,
+        strlen(nodeInfo.deviceInfo.deviceVersion)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "STR COPY ERROR!");
         return;
     }
 }
@@ -249,20 +267,19 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
     }
     GetRemoteUdidWithNetworkId(appInfo->peerNetWorkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
     GetOsTypeByNetworkId(appInfo->peerNetWorkId, &appInfo->osType);
+    TransGetRemoteDeviceVersion(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, appInfo->peerVersion,
+        sizeof(appInfo->peerVersion));
     return SOFTBUS_OK;
 }
 
-AppInfo *TransCommonGetAppInfo(const SessionParam *param)
+int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(param != NULL, NULL, TRANS_CTRL, "Invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid appInfo");
     char *tmpId = NULL;
     Anonymize(param->peerDeviceId, &tmpId);
     TRANS_LOGI(TRANS_CTRL, "GetAppInfo, deviceId=%{public}s", tmpId);
     AnonymizeFree(tmpId);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == NULL) {
-        return NULL;
-    }
     appInfo->appType = APP_TYPE_NORMAL;
     appInfo->myData.apiVersion = API_V2;
     if (param->attr->dataType == TYPE_STREAM) {
@@ -275,13 +292,16 @@ AppInfo *TransCommonGetAppInfo(const SessionParam *param)
     } else if (param->attr->dataType == TYPE_BYTES) {
         appInfo->businessType = BUSINESS_TYPE_BYTE;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
-        goto EXIT_ERR;
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetLocalStrInfo failed ret=%{public}d", ret);
+        return ret;
     }
-    if (CopyAppInfoFromSessionParam(appInfo, param) != SOFTBUS_OK) {
-        goto EXIT_ERR;
+    ret = CopyAppInfoFromSessionParam(appInfo, param);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "CopyAppInfoFromSessionParam failed ret=%{public}d", ret);
+        return ret;
     }
-
     appInfo->fd = -1;
     appInfo->peerData.apiVersion = API_V2;
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
@@ -293,17 +313,8 @@ AppInfo *TransCommonGetAppInfo(const SessionParam *param)
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
     appInfo->callingTokenId = TransACLGetCallingTokenID();
     appInfo->isClient = true;
-
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
-    return appInfo;
-EXIT_ERR:
-    if (appInfo != NULL) {
-        if (appInfo->fastTransData != NULL) {
-            SoftBusFree((void*)appInfo->fastTransData);
-        }
-        SoftBusFree(appInfo);
-    }
-    return NULL;
+    return SOFTBUS_OK;
 }
 
 void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)

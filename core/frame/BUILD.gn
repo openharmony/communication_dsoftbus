@@ -62,7 +62,6 @@ if (defined(ohos_lite)) {
       ]
       sources = dsoftbus_server_common_src
       sources += [
-        "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
         "common/src/softbus_server_frame.c",
         "mini/src/softbus_server_stub.c",
       ]
@@ -93,6 +92,15 @@ if (defined(ohos_lite)) {
       ]
       external_deps = [ "device_auth:deviceauth_sdk" ]
       external_deps += auth_server_ex_deps
+      if (defined(global_parts_info) &&
+          defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
+        include_dirs += [ "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar" ]
+        sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp" ]
+        external_deps +=
+            [ "hiview_xcommradar_plugin:communication_radar_client" ]
+      } else {
+        sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics_virtual.cpp" ]
+      }
       public_deps =
           [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       if (support_bluetooth &&
@@ -124,7 +132,6 @@ if (defined(ohos_lite)) {
       ]
       sources = dsoftbus_server_common_src
       sources += [
-        "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
         "common/src/softbus_server_frame.c",
         "small/client_manager/src/softbus_client_info_manager.c",
         "small/init/src/bus_center_server_stub.c",
@@ -156,6 +163,15 @@ if (defined(ohos_lite)) {
         "device_auth:deviceauth_sdk",
       ]
       external_deps += auth_server_ex_deps
+      if (defined(global_parts_info) &&
+          defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
+        include_dirs += [ "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar" ]
+        sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp" ]
+        external_deps +=
+            [ "hiview_xcommradar_plugin:communication_radar_client" ]
+      } else {
+        sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics_virtual.cpp" ]
+      }
       public_deps =
           [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       if (support_bluetooth &&
@@ -221,7 +237,6 @@ if (defined(ohos_lite)) {
     ]
     sources = dsoftbus_server_common_src
     sources += [
-      "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
       "$dsoftbus_root_path/sdk/frame/$os_type/src/if_softbus_client.cpp",
       "$os_type/client_manager/src/permission_status_change_cb.cpp",
       "$os_type/client_manager/src/softbus_client_info_manager.cpp",
@@ -288,7 +303,14 @@ if (defined(ohos_lite)) {
         ]
       }
     }
-
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
+      include_dirs += [ "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar" ]
+      sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp" ]
+      external_deps += [ "hiview_xcommradar_plugin:communication_radar_client" ]
+    } else {
+      sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics_virtual.cpp" ]
+    }
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }

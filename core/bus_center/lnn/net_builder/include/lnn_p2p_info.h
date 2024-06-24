@@ -46,6 +46,8 @@ int32_t LnnInitPtk(void);
 void LnnDeinitPtk(void);
 int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk, uint32_t len);
 int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len);
+int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len);
+int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len);
 void LnnLoadPtkInfo(void);
 int32_t LnnSyncPtk(char *networkId);
 int32_t UpdateLocalPtkIfValid(char *udid);

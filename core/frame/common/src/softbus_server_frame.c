@@ -108,10 +108,7 @@ static int32_t InitServicesAndModules(void)
         return SOFTBUS_DFX_INIT_FAILED;
     }
 
-#ifdef INSTANT_REGISTER_COMMUNICATION_RADAR
     InstRegister(NULL);
-#endif // INSTANT_REGISTER_COMMUNICATION_RADAR
-
     return SOFTBUS_OK;
 }
 
@@ -141,7 +138,12 @@ void InitSoftBusServer(void)
         return;
     }
 
-    SoftBusBtInit();
+    ret = SoftBusBtInit();
+    if (ret != SOFTBUS_OK) {
+        ServerModuleDeinit();
+        COMM_LOGE(COMM_SVC, "softbus bt init failed, err = %{public}d", ret);
+        return;
+    }
     g_isInit = true;
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
 }

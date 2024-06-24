@@ -24,17 +24,18 @@
 #include "auth_hichain.h"
 #include "auth_interface.h"
 #include "auth_log.h"
-#include "auth_request.h"
 #include "auth_normalize_request.h"
+#include "auth_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_message.h"
 #include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
-#include "lnn_async_callback_utils.h"
 #include "lnn_app_bind_interface.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_net_builder.h"
@@ -714,7 +715,6 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         return SOFTBUS_ERR;
     }
     if (ProcessSessionKey(&auth->sessionKeyList, sessionKey, info, isOldKey, &sessionKeyIndex) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "failed to add a sessionkey");
         if (isNewCreated) {
             DelAuthManager(auth, info->connInfo.type);
         }
@@ -730,6 +730,7 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
         ret = SetSessionKeyAvailable(&auth->sessionKeyList, TO_INT32(sessionKeyIndex));
         auth->hasAuthPassed[info->connInfo.type] = true;
     }
+    info->isSavedSessionKey = true;
     AUTH_LOGI(AUTH_FSM,
         "authId=%{public}" PRId64 ", authSeq=%{public}" PRId64 ", index=%{public}d, lastVerifyTime=%{public}" PRId64,
         auth->authId, authSeq, TO_INT32(sessionKeyIndex), auth->lastVerifyTime);
@@ -830,6 +831,7 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "info is null");
     AUTH_CHECK_AND_RETURN_LOGE(CheckAuthConnInfoType(&info->connInfo), AUTH_FSM, "connInfo type error");
     AUTH_LOGI(AUTH_FSM, "AuthNotifyAuthPassed, authSeq=%{public}" PRId64, authSeq);
+    DelAuthNormalizeRequest(authSeq);
     if (!RequireAuthLock()) {
         return;
     }
@@ -895,6 +897,9 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
         }
     }
     ReleaseAuthLock();
+    if (!LnnSetDlPtk(info->nodeInfo.networkId, info->nodeInfo.remotePtk)) {
+        AUTH_LOGE(AUTH_FSM, "set remote ptk error, index=%{public}d", TO_INT32(index));
+    }
     AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     if (info->isConnectServer) {
         AuthNotifyDeviceVerifyPassed(authHandle, &info->nodeInfo);
@@ -912,8 +917,11 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
         info->requestId, reason);
     AuthManager *auth = NULL;
     if (reason == SOFTBUS_AUTH_DEVICE_DISCONNECTED || reason == SOFTBUS_AUTH_TIMEOUT) {
-        int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
-        auth = GetAuthManagerByAuthId(authId);
+        if (info->isSavedSessionKey) {
+            int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
+            auth = GetAuthManagerByAuthId(authId);
+            AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
+        }
     } else {
         auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
     }

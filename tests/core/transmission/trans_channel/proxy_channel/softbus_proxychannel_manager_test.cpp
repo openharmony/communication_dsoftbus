@@ -526,12 +526,12 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyChanProcessByReqIdTest001, Te
 }
 
 /**@
- * @tc.name: TransProxyonMessageReceivedTest001
+ * @tc.name: TransProxyOnMessageReceivedTest001
  * @tc.desc: test proxy received handshake message.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest001, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest001, TestSize.Level1)
 {
     g_testProxyChannelOpenSuccessFlag = false;
     ProxyMessage msg;
@@ -551,12 +551,12 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest001, Tes
 }
 
 /**@
- * @tc.name: TransProxyonMessageReceivedTest002
+ * @tc.name: TransProxyOnMessageReceivedTest002
  * @tc.desc: test proxy received handshake ack message.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest002, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, TestSize.Level1)
 {
     ProxyMessage msg;
 
@@ -587,12 +587,12 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest002, Tes
 
 
 /**@
- * @tc.name: TransProxyonMessageReceivedTest003
+ * @tc.name: TransProxyOnMessageReceivedTest003
  * @tc.desc: test proxy received reset message.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest003, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest003, TestSize.Level1)
 {
     ProxyMessage msg;
     const char *identity = TEST_STRING_ELEVEN;
@@ -618,12 +618,12 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest003, Tes
 }
 
 /**@
- * @tc.name: TransProxyonMessageReceivedTest004
+ * @tc.name: TransProxyOnMessageReceivedTest004
  * @tc.desc: test proxy received  keepalive message.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest004, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest004, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
     int32_t channelId = 15;
@@ -651,12 +651,12 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest004, Tes
 }
 
 /**@
- * @tc.name: TransProxyonMessageReceivedTest005
+ * @tc.name: TransProxyOnMessageReceivedTest005
  * @tc.desc: test proxy received normal message.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyonMessageReceivedTest005, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest005, TestSize.Level1)
 {
     ProxyMessage msg;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_NORMAL;

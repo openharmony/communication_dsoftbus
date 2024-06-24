@@ -49,6 +49,10 @@ public:
     {
         return SOFTBUS_OK;
     }
+    int32_t OnChannelBind([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType) override
+    {
+        return SOFTBUS_OK;
+    }
     int32_t OnChannelLinkDown([[maybe_unused]] const char *networkId, [[maybe_unused]] int32_t routeType) override
     {
         return SOFTBUS_OK;

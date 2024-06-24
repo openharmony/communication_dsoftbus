@@ -63,14 +63,14 @@ int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, c
     std::string appIdStr(appId, appIdLen);
     std::string storeIdStr(storeId, storeIdLen);
     std::shared_ptr<KVAdapter> kvAdapter = nullptr;
+    kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr);
+    int32_t initRet = kvAdapter->Init();
+    if (initRet != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret=%{public}d", initRet);
+        return initRet;
+    }
     {
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
-        kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr);
-        int32_t initRet = kvAdapter->Init();
-        if (initRet != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret=%{public}d", initRet);
-            return initRet;
-        }
         *dbId = g_dbId;
         g_dbID2KvAdapter.insert(std::make_pair(g_dbId, kvAdapter));
         g_dbId++;
@@ -232,7 +232,7 @@ int32_t LnnCloudSync(int32_t dbId)
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
-        LNN_LOGI(LNN_LEDGER, "Invalid dbId ");
+        LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
         return SOFTBUS_INVALID_PARAM;
     }
     auto kvAdapter = FindKvStorePtr(dbId);
@@ -278,7 +278,7 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
-        LNN_LOGI(LNN_LEDGER, "Invalid dbId ");
+        LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
         return;
     }
     auto kvAdapter = FindKvStorePtr(dbId);
@@ -313,4 +313,19 @@ bool LnnSubcribeKvStoreService(void)
     }
     LNN_LOGI(LNN_LEDGER, "subscribe kv store service success");
     return true;
+}
+
+int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
+{
+    std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+    if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+        LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    auto kvAdapter = FindKvStorePtr(dbId);
+    if (kvAdapter == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
+        return SOFTBUS_NOT_FIND;
+    }
+    return (kvAdapter->SetCloudAbility(isEnableCloud));
 }

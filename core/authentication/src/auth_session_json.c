@@ -1164,6 +1164,7 @@ static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *
         AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
         return;
     }
+    LnnDumpRemotePtk(NULL, localPtk, "pack wifi direct info");
     size_t keyLen = 0;
     if (SoftBusBase64Encode(encodePtk, PTK_ENCODE_LEN, &keyLen, (unsigned char *)localPtk,
         PTK_DEFAULT_LEN) != SOFTBUS_OK) {
@@ -1417,6 +1418,7 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info)
         AUTH_LOGE(AUTH_FSM, "decode static cap fail");
         return;
     }
+    LnnDumpRemotePtk(NULL, info->remotePtk, "unpack wifi direct info");
     if (len != PTK_DEFAULT_LEN) {
         AUTH_LOGE(AUTH_FSM, "decode data len error");
         return;
@@ -1461,7 +1463,7 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
         AUTH_LOGD(AUTH_FSM, "info->deviceInfo.osType: %{public}d", info->deviceInfo.osType);
     }
     OptString(json, OS_VERSION, info->deviceInfo.osVersion, OS_VERSION_BUF_LEN, "");
-    OptString(json, DEVICE_VERSION, info->deviceInfo.deviceVersion, DEVICE_VERSION_BUF_LEN, "");
+    OptString(json, DEVICE_VERSION, info->deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, "");
     // IS_SUPPORT_TCP_HEARTBEAT
     OptInt(json, NEW_CONN_CAP, (int32_t *)&info->netCapacity, -1);
     if (info->netCapacity == (uint32_t)-1) {

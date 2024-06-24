@@ -971,3 +971,18 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
     }
     return ProcPendingPacket(channelId, info.sequence, PENDING_TYPE_PROXY);
 }
+
+int32_t ClientTransProxyOnChannelBind(int32_t channelId, int32_t channelType)
+{
+    if (g_sessionCb.OnChannelBind == NULL) {
+        TRANS_LOGE(TRANS_SDK, "OnChannelBind is null, channelId=%{public}d.", channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = g_sessionCb.OnChannelBind(channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "notify OnChannelBind openfail channelId=%{public}d.", channelId);
+        return ret;
+    }
+
+    return SOFTBUS_OK;
+}

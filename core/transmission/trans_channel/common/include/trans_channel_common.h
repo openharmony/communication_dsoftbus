@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "lnn_node_info.h"
 #include "softbus_app_info.h"
@@ -34,7 +35,7 @@ extern "C" {
 void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
     TransInfo *transInfo, LaneConnInfo *connInfo);
 
-AppInfo *TransCommonGetAppInfo(const SessionParam *param);
+int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo);
 
 void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt);
 
@@ -71,6 +72,8 @@ bool IsPeerDeviceLegacyOs(int32_t osType);
 void GetOsTypeByNetworkId(const char *networkId, int32_t *osType);
 
 void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len);
+
+void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVersion, uint32_t len);
 
 #ifdef __cplusplus
 }

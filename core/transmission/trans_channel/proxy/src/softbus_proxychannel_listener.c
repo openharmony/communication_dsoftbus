@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "softbus_proxychannel_control.h"
 #include "softbus_utils.h"
 #include "softbus_adapter_mem.h"
+#include "trans_channel_common.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
@@ -102,6 +103,25 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     return ret;
 }
 
+static void FillExtraByProxyChannelErrorEnd(TransEventExtra *extra, const AppInfo *appInfo, char *localUdid,
+    uint32_t len)
+{
+    if (extra == NULL || appInfo == NULL || localUdid == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    extra->socketName = appInfo->myData.sessionName;
+    extra->callerPkg = appInfo->myData.pkgName;
+    extra->linkType = appInfo->connectType;
+    if (appInfo->appType == APP_TYPE_AUTH && strlen(appInfo->peerVersion) == 0) {
+        TransGetRemoteDeviceVersion(extra->peerUdid, CATEGORY_UDID, (char *)(appInfo->peerVersion),
+            sizeof(appInfo->peerVersion));
+    }
+    extra->peerDevVer = appInfo->peerVersion;
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, len);
+    extra->localUdid = localUdid;
+}
+
 int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
 {
     int32_t ret = SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
@@ -137,11 +157,10 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     extra.osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     extra.peerUdid = appInfo->peerUdid;
     if (!isServer) {
-        extra.peerUdid = appInfo->appType == APP_TYPE_AUTH ? appInfo->peerData.deviceId : NULL;
+        extra.peerUdid = appInfo->appType == APP_TYPE_AUTH ? appInfo->peerData.deviceId : extra.peerUdid;
         if (extra.result == EVENT_STAGE_RESULT_FAILED) {
-            extra.socketName = appInfo->myData.sessionName;
-            extra.callerPkg = appInfo->myData.pkgName;
-            extra.linkType = appInfo->connectType;
+            char localUdid[UDID_BUF_LEN] = { 0 };
+            FillExtraByProxyChannelErrorEnd(&extra, appInfo, localUdid, sizeof(localUdid));
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
         } else {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
@@ -169,7 +188,8 @@ static int32_t TransProxyGetChannelIsServer(int32_t channelId, int8_t *isServer)
     return SOFTBUS_OK;
 }
 
-static int32_t SelectAppType(const AppInfo *appInfo, AppType appType, int32_t channelId, int32_t errCode)
+static int32_t TransProxyNotifyOpenFailedByType(
+    const AppInfo *appInfo, AppType appType, int32_t channelId, int32_t errCode)
 {
     switch (appType) {
         case APP_TYPE_NORMAL:
@@ -184,6 +204,31 @@ static int32_t SelectAppType(const AppInfo *appInfo, AppType appType, int32_t ch
     }
 }
 
+int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
+{
+    int32_t ret = SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "proxy channel bind app info invalid channelId=%{public}d", channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    switch (appInfo->appType) {
+        case APP_TYPE_NORMAL:
+        case APP_TYPE_AUTH:
+            ret = TransProxyOnChannelBind(appInfo->myData.pkgName, appInfo->myData.pid, channelId);
+            break;
+        case APP_TYPE_INNER:
+            ret = SOFTBUS_OK;
+            break;
+        default:
+            ret = SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+            break;
+    }
+    TRANS_LOGI(
+        TRANS_CTRL, "channelId=%{public}d, ret=%{public}d, appType=%{public}d", channelId, ret, appInfo->appType);
+    return ret;
+}
+
 int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     if (appInfo == NULL) {
@@ -194,6 +239,8 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     int8_t isServer;
 
     if ((TransProxyGetChannelIsServer(channelId, &isServer) == SOFTBUS_OK && !isServer) || appInfo->isClient) {
+        char localUdid[UDID_BUF_LEN] = { 0 };
+        (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
         TransEventExtra extra = {
             .calleePkg = NULL,
             .peerNetworkId = appInfo->peerData.deviceId,
@@ -203,10 +250,16 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
             .errcode = errCode,
             .callerPkg = appInfo->myData.pkgName,
             .socketName = appInfo->myData.sessionName,
-            .peerUdid = appInfo->peerUdid,
+            .localUdid = localUdid,
+            .peerUdid = appInfo->appType == APP_TYPE_AUTH ? appInfo->peerData.deviceId : appInfo->peerUdid,
             .osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType,
             .result = EVENT_STAGE_RESULT_FAILED
         };
+        if (appInfo->appType == APP_TYPE_AUTH && strlen(appInfo->peerVersion) == 0) {
+            TransGetRemoteDeviceVersion(extra.peerUdid, CATEGORY_UDID, (char *)(appInfo->peerVersion),
+                sizeof(appInfo->peerVersion));
+        }
+        extra.peerDevVer = appInfo->peerVersion;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
         TransAlarmExtra extraAlarm = {
             .conflictName = NULL,
@@ -226,7 +279,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         "proxy channel openfailed:sessionName=%{public}s, channelId=%{public}d, appType=%{public}d, errCode=%{public}d",
         tmpName, channelId, appInfo->appType, errCode);
     AnonymizeFree(tmpName);
-    return SelectAppType(appInfo, appInfo->appType, channelId, errCode);
+    return TransProxyNotifyOpenFailedByType(appInfo, appInfo->appType, channelId, errCode);
 }
 
 int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
@@ -307,6 +360,9 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
         TRANS_LOGE(TRANS_CTRL, "get remote node uuid err. ret=%{public}d", ret);
         return SOFTBUS_GET_REMOTE_UUID_ERR;
     }
+
+    GetRemoteUdidWithNetworkId(peerNetworkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
+    TransGetRemoteDeviceVersion(peerNetworkId, CATEGORY_NETWORK_ID, appInfo->peerVersion, sizeof(appInfo->peerVersion));
 
     return SOFTBUS_OK;
 }
@@ -389,7 +445,9 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
         return SOFTBUS_MALLOC_ERR;
     }
 
-    if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
+    int32_t ret = TransProxyGetSendMsgChanInfo(channelId, info);
+    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
@@ -407,7 +465,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
-    int32_t ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
+    ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
     SoftBusFree(info);
     return ret;
 }
