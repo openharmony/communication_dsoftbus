@@ -18,6 +18,7 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_hitrace.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -33,6 +34,21 @@
 #include "trans_udp_channel_manager.h"
 
 static IServerChannelCallBack g_channelCallBack;
+
+static int32_t TransAddTcpChannel(const ChannelInfo *channel)
+{
+    TcpChannelInfo *info = CreateTcpChannelInfo(channel);
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create new TcpChannelInfo failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    int32_t ret = TransAddTcpChannelInfo(info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "TransAddTcpChannelInfo failed.");
+        SoftBusFree(info);
+    }
+    return ret;
+}
 
 static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel)
@@ -90,7 +106,12 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
-    (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    if (ret == SOFTBUS_OK && channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        TransAddTcpChannel(channel);
+    }
+    if (!IsTdcRecoveryTransLimit() || !IsUdpRecoveryTransLimit()) {
+        (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    }
     return ret;
 }
 

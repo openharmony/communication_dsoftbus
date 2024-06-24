@@ -29,6 +29,7 @@
 #define TRANS_SEQ_STEP 2
 
 static SoftBusList *g_sessionConnList = NULL;
+static SoftBusList *g_tcpChannelInfoList = NULL;
 
 uint64_t TransTdcGetNewSeqId(void)
 {
@@ -321,6 +322,78 @@ int32_t TransTdcAddSessionConn(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
+int32_t CreateTcpChannelInfoList(void)
+{
+    if (g_tcpChannelInfoList == NULL) {
+        g_tcpChannelInfoList = CreateSoftBusList();
+        if (g_tcpChannelInfoList == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "CreateSoftBusList fail");
+            return SOFTBUS_MALLOC_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel)
+{
+    TcpChannelInfo *tcpChannelInfo = (TcpChannelInfo *)SoftBusCalloc(sizeof(TcpChannelInfo));
+    if (tcpChannelInfo == NULL) {
+        return NULL;
+    }
+    tcpChannelInfo->channelId = channel->channelId;
+    tcpChannelInfo->businessType = channel->businessType;
+    return tcpChannelInfo;
+}
+
+int32_t TransAddTcpChannelInfo(TcpChannelInfo *info)
+{
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param, info is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList not init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_tcpChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock error.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&info->node);
+    ListAdd(&g_tcpChannelInfoList->list, &(info->node));
+    g_tcpChannelInfoList->cnt++;
+    (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+    TRANS_LOGI(TRANS_CTRL, "TcpChannelInfo add success, channelId=%{public}d.", info->channelId);
+    return SOFTBUS_OK;
+}
+
+int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
+{
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_tcpChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    TcpChannelInfo *item = NULL;
+    TcpChannelInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
+        if (item->channelId == channelId) {
+            ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
+            SoftBusFree(item);
+            g_tcpChannelInfoList->cnt--;
+            (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+    TRANS_LOGE(TRANS_CTRL, "TcpChannelInfo not found. channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
+}
+
 void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLen)
 {
     if (sessionKey == NULL || keyLen <= 0) {
@@ -367,19 +440,23 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
 
 bool IsTdcRecoveryTransLimit(void)
 {
-    if (GetSessionConnLock() != SOFTBUS_OK) {
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
+        return false;
+    }
+    if (SoftBusMutexLock(&g_tcpChannelInfoList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return false;
     }
-    SessionConn *connInfo = NULL;
-    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (connInfo->appInfo.businessType == BUSINESS_TYPE_BYTE) {
-            TRANS_LOGD(TRANS_CTRL, "tcp direct channel exists bytes business, no need to recovery limit.");
-            ReleaseSessionConnLock();
+    TcpChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
+        if (info->businessType == BUSINESS_TYPE_BYTE) {
+            TRANS_LOGI(TRANS_CTRL, "tcp direct channel exists bytes business, channelId=%{public}d.", info->channelId);
+            (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
             return false;
         }
     }
-    ReleaseSessionConnLock();
+    (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
     return true;
 }
 
