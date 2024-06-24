@@ -566,6 +566,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegisterCb001, TestSize.Leve
  * @tc.name: TestDiscCoapSendRsp001
  * @tc.desc: Test DiscCoapSendRsp should return SOFTBUS_OK when given valid,
  *           should return SOFTBUS_INVALID_PARAM when given nullptr DeviceInfo
+ *           should return SOFTBUS_LOCK_ERR when localledger not init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -582,7 +583,12 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
     ret = DiscCoapSendRsp(NULL, bType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = DiscCoapSendRsp(testDiscDevInfo, bType);
+    ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    ret = LnnInitLocalLedger();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
