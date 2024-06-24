@@ -18,8 +18,8 @@
 
 int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap)
 {
-    (void *)option;
-    (void *)outData;
+    (void)option;
+    (void)outData;
     (void)outDataLen;
     (void)allCap;
     return SOFTBUS_OK;
