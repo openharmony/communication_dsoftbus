@@ -62,7 +62,7 @@ HWTEST_F(P2pEntityTest, CreateGroupTest001, TestSize.Level1)
         EXPECT_CALL(mock, Hid2dCreateGroup(_, _)).WillOnce(WifiDirectInterfaceMock::CreateGroupFailureAction);
         P2pCreateGroupParam param{5180, true};
         P2pOperationResult result = P2pEntity::GetInstance().CreateGroup(param);
-        EXPECT_EQ(result.errorCode_, SOFTBUS_ERR);
+        EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION);
     }
     sleep(1);
     {
@@ -81,18 +81,16 @@ HWTEST_F(P2pEntityTest, CreateGroupTest001, TestSize.Level1)
 */
 HWTEST_F(P2pEntityTest, CreateGroupTest002, TestSize.Level1)
 {
+    sleep(2);
     WifiDirectInterfaceMock mock;
     WifiP2pGroupInfo groupInfoOut;
     groupInfoOut.frequency = 5180;
     EXPECT_CALL(mock, AuthStopListeningForWifiDirect).WillRepeatedly(Return());
-    EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(DoAll(SetArgPointee<0>(groupInfoOut), Return(WIFI_SUCCESS)));
-    sleep(1);
     EXPECT_CALL(mock, Hid2dCreateGroup(_, _)).WillOnce(Return(ERROR_WIFI_UNKNOWN));
     P2pCreateGroupParam param{5180, true};
     P2pOperationResult result = P2pEntity::GetInstance().CreateGroup(param);
-    EXPECT_EQ(result.errorCode_, ERROR_WIFI_UNKNOWN);
+    EXPECT_EQ(result.errorCode_, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
 }
-
 
 /*
 * @tc.name: ConnectTest001
@@ -115,7 +113,7 @@ HWTEST_F(P2pEntityTest, ConnectTest001, TestSize.Level1)
         EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(WifiDirectInterfaceMock::ConnectFailureAction);
         P2pConnectParam param{"123\n01:02:03:04:05:06\n555\n16\n1", false, false};
         P2pOperationResult result = P2pEntity::GetInstance().Connect(param);
-        EXPECT_EQ(result.errorCode_, SOFTBUS_ERR);
+        EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION);
     }
     sleep(1);
     {
@@ -138,7 +136,7 @@ HWTEST_F(P2pEntityTest, ConnectTest002, TestSize.Level1)
     EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(Return(ERROR_WIFI_UNKNOWN));
     P2pConnectParam param{"123\n01:02:03:04:05:06\n555\n16\n1", false, false};
     P2pOperationResult result = P2pEntity::GetInstance().Connect(param);
-    EXPECT_EQ(result.errorCode_, ERROR_WIFI_UNKNOWN);
+    EXPECT_EQ(result.errorCode_, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
 }
 
 /*
@@ -149,6 +147,7 @@ HWTEST_F(P2pEntityTest, ConnectTest002, TestSize.Level1)
 */
 HWTEST_F(P2pEntityTest, DestroyGroupTest001, TestSize.Level1)
 {
+    sleep(1);
     WifiDirectInterfaceMock mock;
     {
         EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(ERROR_WIFI_UNKNOWN));
@@ -162,7 +161,7 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest001, TestSize.Level1)
         P2pOperationResult result = P2pEntity::GetInstance().DestroyGroup(param);
         EXPECT_EQ(result.errorCode_, SOFTBUS_OK);
     }
-
+    sleep(1);
     EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
     {
         InterfaceManager::GetInstance().UpdateInterface(
@@ -173,7 +172,7 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest001, TestSize.Level1)
         EXPECT_CALL(mock, RemoveGroup).WillOnce(WifiDirectInterfaceMock::DestroyGroupFailureAction);
         P2pDestroyGroupParam param;
         P2pOperationResult result = P2pEntity::GetInstance().DestroyGroup(param);
-        EXPECT_EQ(result.errorCode_, SOFTBUS_ERR);
+        EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED);
     }
     sleep(1);
     {
@@ -208,7 +207,7 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest002, TestSize.Level1)
         EXPECT_CALL(mock, RemoveGroup).WillOnce(Return(ERROR_WIFI_UNKNOWN));
         P2pDestroyGroupParam param;
         P2pOperationResult result = P2pEntity::GetInstance().DestroyGroup(param);
-        EXPECT_EQ(result.errorCode_, ERROR_WIFI_UNKNOWN);
+        EXPECT_EQ(result.errorCode_, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
     }
 
     {
@@ -220,7 +219,7 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest002, TestSize.Level1)
         EXPECT_CALL(mock, Hid2dRemoveGcGroup).WillOnce(Return(ERROR_WIFI_UNKNOWN));
         P2pDestroyGroupParam param;
         P2pOperationResult result = P2pEntity::GetInstance().DestroyGroup(param);
-        EXPECT_EQ(result.errorCode_, ERROR_WIFI_UNKNOWN);
+        EXPECT_EQ(result.errorCode_, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
     }
 }
 
@@ -239,7 +238,7 @@ HWTEST_F(P2pEntityTest, ReuseLinkTest001, TestSize.Level1)
 
     EXPECT_CALL(mock, Hid2dSharedlinkIncrease).WillOnce(Return(ERROR_WIFI_UNKNOWN));
     ret = P2pEntity::GetInstance().ReuseLink();
-    EXPECT_EQ(ret, ERROR_WIFI_UNKNOWN);
+    EXPECT_EQ(ret, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
 }
 
 /*
@@ -264,7 +263,7 @@ HWTEST_F(P2pEntityTest, DisconnectTest001, TestSize.Level1)
         EXPECT_EQ(result.errorCode_, SOFTBUS_OK);
 
         result = P2pEntity::GetInstance().Disconnect(param);
-        EXPECT_EQ(result.errorCode_, ERROR_WIFI_UNKNOWN);
+        EXPECT_EQ(result.errorCode_, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
     }
 
     {
@@ -277,10 +276,10 @@ HWTEST_F(P2pEntityTest, DisconnectTest001, TestSize.Level1)
             .WillOnce(WifiDirectInterfaceMock::DestroyGroupFailureAction);
         P2pDestroyGroupParam param;
         P2pOperationResult result = P2pEntity::GetInstance().Disconnect(param);
-        EXPECT_EQ(result.errorCode_, ERROR_WIFI_UNKNOWN);
+        EXPECT_EQ(result.errorCode_, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
 
         result = P2pEntity::GetInstance().Disconnect(param);
-        EXPECT_EQ(result.errorCode_, SOFTBUS_ERR);
+        EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED);
     }
 }
 }
