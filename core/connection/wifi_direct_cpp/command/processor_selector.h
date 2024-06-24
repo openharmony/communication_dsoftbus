@@ -29,6 +29,8 @@ public:
     virtual std::shared_ptr<WifiDirectProcessor> operator()(const WifiDirectConnectInfo &info) = 0;
     virtual std::shared_ptr<WifiDirectProcessor> operator()(const WifiDirectDisconnectInfo &info) = 0;
     virtual std::shared_ptr<WifiDirectProcessor> operator()(NegotiateMessage &msg) = 0;
+    virtual std::shared_ptr<WifiDirectProcessor> operator()(
+        const char *remoteNetworkId, enum WifiDirectLinkType linkType) = 0;
 };
 }
 #endif

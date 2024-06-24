@@ -29,6 +29,7 @@
 #include "utils/duration_statistic.h"
 #include "conn_event.h"
 #include "wifi_direct_role_option.h"
+#include "command/processor_selector_factory.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::recursive_mutex g_listenerLock;
@@ -156,8 +157,12 @@ static void RegisterStatusListener(struct WifiDirectStatusListener *listener)
 
 static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectLinkType connectType)
 {
-    CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
-    return SOFTBUS_OK;
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        remoteNetworkId != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "remote networkid is null");
+    auto selector = OHOS::SoftBus::ProcessorSelectorFactory::GetInstance().NewSelector();
+    auto processor = (*selector)(remoteNetworkId, connectType);
+    return processor->PrejudgeAvailability(connectType);
 }
 
 static void RefreshRelationShip(const char *remoteUuid, const char *remoteMac)
@@ -388,26 +393,29 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
     }
 }
 
-static void NotifyConnectedForSink(
-    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type, int channelId)
+static void NotifyConnectedForSink(const struct WifiDirectSinkLink *link)
 {
-    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "remoteUuid=%{public}s, localIp=%{public}s, remoteIp=%{public}s remoteMac=%{public}s bandWidth=%{public}d",
+        OHOS::SoftBus::WifiDirectAnonymizeDeviceId(link->remoteUuid).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeIp(link->localIp).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeIp(link->remoteIp).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeMac(link->remoteMac).c_str(), link->bandWidth);
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onConnectedForSink != nullptr) {
-            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type, channelId);
+            listener.onConnectedForSink(link);
         }
     }
 }
 
-static void NotifyDisconnectedForSink(
-    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+static void NotifyDisconnectedForSink(const struct WifiDirectSinkLink *link)
 {
-    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDisconnectedForSink != nullptr) {
-            listener.onDisconnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+            listener.onDisconnectedForSink(link);
         }
     }
 }

@@ -19,11 +19,13 @@
 #include "processor/p2p_v1_processor.h"
 #include "data/link_manager.h"
 #include "data/inner_link.h"
+#include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
 std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(const WifiDirectConnectInfo &info)
 {
-    return std::make_shared<P2pV1Processor>(info.remoteNetworkId);
+    auto remoteDeviceId = WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId);
+    return std::make_shared<P2pV1Processor>(remoteDeviceId);
 }
 
 std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(const WifiDirectDisconnectInfo &info)
@@ -36,5 +38,13 @@ std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(const W
 std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(NegotiateMessage &msg)
 {
     return std::make_shared<P2pV1Processor>(msg.GetRemoteDeviceId());
+}
+
+std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(
+    const char *remoteNetworkId, enum WifiDirectLinkType linkType)
+{
+    (void)linkType;
+    auto remoteDeviceId = WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
+    return std::make_shared<P2pV1Processor>(remoteDeviceId);
 }
 }
