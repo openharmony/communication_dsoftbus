@@ -12,3 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "lnn_lane_power_control.h"
+#include "softbus_errcode.h"
+ 
+int32_t EnablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo)
+{
+    (void)wifiDirectInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+ 
+void DisablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo)
+{
+    (void)wifiDirectInfo;
+}
