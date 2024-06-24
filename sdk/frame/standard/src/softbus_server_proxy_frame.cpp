@@ -44,6 +44,7 @@
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
+OHOS::sptr<OHOS::IRemoteObject> g_oldServerProxy = nullptr;
 OHOS::sptr<OHOS::IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
 std::mutex g_mutex;
 uint32_t g_waitServerInterval = 2;
@@ -127,6 +128,11 @@ static int32_t ServerProxyInit(void)
         if (g_serverProxy == nullptr) {
             return SOFTBUS_ERR;
         }
+        if (g_oldServerProxy != nullptr && g_oldServerProxy == g_serverProxy) {
+            COMM_LOGE(COMM_SDK, "g_serverProxy not update\n");
+            return SOFTBUS_ERR;
+        }
+
         g_clientDeath =
             OHOS::sptr<OHOS::IRemoteObject::DeathRecipient>(new (std::nothrow) OHOS::SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
@@ -177,6 +183,7 @@ void ClientDeathProcTask(void)
 {
     {
         std::lock_guard<std::mutex> lock(g_mutex);
+        g_oldServerProxy = g_serverProxy;
         if (g_serverProxy != nullptr && g_clientDeath != nullptr) {
             g_serverProxy->RemoveDeathRecipient(g_clientDeath);
         }
