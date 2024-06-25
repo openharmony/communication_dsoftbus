@@ -66,30 +66,20 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
 
     "$dsoftbus_root_path/third_party/dfinder/include",
-
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("SoftbusProxyChannelManagerTest") {
@@ -136,21 +126,19 @@ ohos_unittest("SoftbusProxyChannelManagerTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/third_party/dfinder/include",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/proxy_channel",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }
@@ -198,21 +186,19 @@ ohos_unittest("SoftbusProxyChannelMessageTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }
@@ -260,21 +246,19 @@ ohos_unittest("SoftbusProxyNetworkTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }
@@ -322,21 +306,19 @@ ohos_unittest("SoftbusProxySessionTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }
@@ -384,21 +366,19 @@ ohos_unittest("SoftbusProxyTransceiverTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }
@@ -447,21 +427,19 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/third_party/dfinder/include",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/proxy_channel",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }
@@ -509,21 +487,19 @@ ohos_unittest("SoftbusProxyChannelPipelineTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/third_party/dfinder/include",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/proxy_channel",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }
