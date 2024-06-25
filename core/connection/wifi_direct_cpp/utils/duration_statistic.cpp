@@ -28,25 +28,29 @@ uint64_t DurationStatistic::GetTime()
 
 void DurationStatistic::Start(uint32_t requestId, const std::shared_ptr<DurationStatisticCalculator> &calculator)
 {
-    calculators.insert(std::make_pair(requestId, calculator));
+    std::lock_guard lock(mutex_);
+    calculators_.insert(std::make_pair(requestId, calculator));
 }
 
 void DurationStatistic::Record(uint32_t requestId, const DurationStatisticEvent &event)
 {
-    stateTimeMap[requestId].insert(std::make_pair(event, GetTime()));
+    std::lock_guard lock(mutex_);
+    stateTimeMap_[requestId].insert(std::make_pair(event, GetTime()));
 }
 
 void DurationStatistic::End(uint32_t requestId)
 {
-    if (calculators[requestId] != nullptr) {
-        calculators[requestId]->CalculateAllEvent(requestId, stateTimeMap[requestId]);
+    std::shared_lock lock(mutex_);
+    if (calculators_[requestId] != nullptr) {
+        calculators_[requestId]->CalculateAllEvent(requestId, stateTimeMap_[requestId]);
     }
 }
 
 void DurationStatistic::Clear(uint32_t requestId)
 {
-    stateTimeMap.erase(requestId);
-    calculators.erase(requestId);
+    std::lock_guard lock(mutex_);
+    stateTimeMap_.erase(requestId);
+    calculators_.erase(requestId);
 }
 
 void P2pCalculator::CalculateAllEvent(uint32_t requestId, std::map<DurationStatisticEvent, uint64_t> records)
@@ -68,5 +72,11 @@ std::shared_ptr<DurationStatisticCalculator> DurationStatisticCalculatorFactory:
         return std::make_shared<P2pCalculator>(P2pCalculator::GetInstance());
     }
     return creator_(type);
+}
+
+std::map<DurationStatisticEvent, uint64_t> DurationStatistic::GetStateTimeMapElement(uint32_t requestId)
+{
+    std::shared_lock lock(mutex_);
+    return stateTimeMap_[requestId];
 }
 } // namespace OHOS::SoftBus

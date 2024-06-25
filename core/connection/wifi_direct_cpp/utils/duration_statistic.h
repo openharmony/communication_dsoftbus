@@ -16,6 +16,8 @@
 #ifndef DURATION_STATISTIC_H
 #define DURATION_STATISTIC_H
 
+#include <mutex>
+#include <shared_mutex>
 #include <functional>
 #include <map>
 #include <memory>
@@ -75,14 +77,18 @@ public:
         return instance;
     }
 
-    static uint64_t GetTime();
-    std::map<uint32_t, std::map<DurationStatisticEvent, uint64_t>> stateTimeMap;
-    std::map<uint32_t, std::shared_ptr<DurationStatisticCalculator>> calculators;
-
     void Start(uint32_t requestId, const std::shared_ptr<DurationStatisticCalculator> &calculator);
     void Record(uint32_t requestId, const DurationStatisticEvent &event);
     void End(uint32_t requestId);
     void Clear(uint32_t requestId);
+    std::map<DurationStatisticEvent, uint64_t> GetStateTimeMapElement(uint32_t requestId);
+
+private:
+    static uint64_t GetTime();
+    std::map<uint32_t, std::map<DurationStatisticEvent, uint64_t>> stateTimeMap_;
+    std::map<uint32_t, std::shared_ptr<DurationStatisticCalculator>> calculators_;
+
+    std::shared_mutex mutex_;
 };
 
 } // namespace OHOS::SoftBus
