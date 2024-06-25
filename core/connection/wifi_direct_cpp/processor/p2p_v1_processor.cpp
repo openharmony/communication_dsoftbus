@@ -53,6 +53,32 @@ static std::map<int, int> p1ErrorMapping = {
     { SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE, V1_ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE},
 };
 
+static inline int ErrorCodeToV1ProtocolCode(int reason)
+{
+    if (p1ErrorMapping.find(reason) != p1ErrorMapping.end()) {
+        auto code = p1ErrorMapping[reason];
+        if (code > V1_ERROR_END && code < V1_ERROR_START) {
+            return code - V1_ERROR_START;
+        }
+        return code;
+    }
+    return reason;
+}
+
+static inline int ErrorCodeFromV1ProtocolCode(int reason)
+{
+    if (reason < 0 && reason > V1_ERROR_END - V1_ERROR_START) {
+        auto code = reason + V1_ERROR_START;
+        for (const auto it : p1ErrorMapping) {
+            if (it.second == code) {
+                return it.first;
+            }
+        }
+        return code;
+    }
+    return reason;
+}
+
 P2pV1Processor::P2pV1Processor(const std::string &remoteDeviceId)
     : WifiDirectProcessor(remoteDeviceId), state_(&P2pV1Processor::AvailableState), timer_("P2pProcessor", TIMER_TIME),
     timerId_(Utils::TIMER_ERR_INVALID_VALUE)
