@@ -84,8 +84,8 @@ void P2pConnectState::OnP2pStateChangeEvent(P2pState state)
     if (state == P2P_STATE_STARTED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "state is P2P_STATE_STARTED");
     } else {
-        timer_.Unregister(operation_->timerId_);
         if (operation_ != nullptr) {
+            timer_.Unregister(operation_->timerId_);
             result.errorCode_ = SOFTBUS_CONN_P2P_CONNECT_STATE_WIFI_STATE_NOT_STARTED;
             operation_->promise_.set_value(result);
         }
@@ -116,7 +116,10 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
 {
     P2pAdapter::WifiDirectP2pGroupInfo ignore {};
     auto ret = P2pAdapter::GetGroupInfo(ignore);
-
+    if (operation_ == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
+        return;
+    }
     timer_.Unregister(operation_->timerId_);
     P2pOperationResult result;
     if (ret != SOFTBUS_OK || info.connectState == P2P_DISCONNECTED) {
