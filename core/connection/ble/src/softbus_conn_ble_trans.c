@@ -588,22 +588,25 @@ void *BleSendTask(void *arg)
     while (true) {
         int32_t status = ConnBleDequeueBlock((void **)(&sendNode));
         if (status == SOFTBUS_TIMOUT && sendNode == NULL) {
-            CONN_LOGW(CONN_BLE, "ble dequeue time out err=%{public}d,", status);
-            status = SoftBusMutexLock(&g_startBleSendLPInfo.lock);
-            CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_BLE, "lock fail!");
+            CONN_LOGE(CONN_BLE, "ble dequeue time out err=%{public}d", status);
+            CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBleSendLPInfo.lock) == SOFTBUS_OK,
+                NULL, CONN_BLE, "lock fail!");
             if (g_startBleSendLPInfo.messagePosted) {
+                CONN_LOGE(CONN_BLE, "message posted not quit");
                 g_startBleSendLPInfo.messagePosted = false;
                 SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
                 continue;
             }
             g_startBleSendLPInfo.sendTaskRunning = false;
             SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
+            CONN_LOGE(CONN_BLE, "quit send loop");
             break;
         }
-        status = SoftBusMutexLock(&g_startBleSendLPInfo.lock);
-        if (status != SOFTBUS_OK) {
+        int32_t ret = SoftBusMutexLock(&g_startBleSendLPInfo.lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "lock fail!");
             FreeSendNode(sendNode);
+            sendNode = NULL;
             return NULL;
         }
         g_startBleSendLPInfo.messagePosted = false;
@@ -621,6 +624,7 @@ void *BleSendTask(void *arg)
                 sendNode->connectionId, sendNode->pid, sendNode->dataLen, sendNode->flag,
                 sendNode->module, sendNode->seq);
             FreeSendNode(sendNode);
+            sendNode = NULL;
             continue;
         }
 
