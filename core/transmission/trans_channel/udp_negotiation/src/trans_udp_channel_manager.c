@@ -575,7 +575,7 @@ static int32_t ModifyUdpChannelTos(uint8_t tos)
         return SOFTBUS_LOCK_ERR;
     }
     UdpChannelInfo *udpChannelNode = NULL;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_OK;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.businessType == BUSINESS_TYPE_FILE && udpChannelNode->info.isClient &&
             udpChannelNode->tos != tos) {
