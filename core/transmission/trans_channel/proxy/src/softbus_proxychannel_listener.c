@@ -273,9 +273,12 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
     }
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+    char *tmpName = NULL;
+    Anonymize(appInfo->myData.sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
         "proxy channel openfailed:sessionName=%{public}s, channelId=%{public}d, appType=%{public}d, errCode=%{public}d",
-        appInfo->myData.sessionName, channelId, appInfo->appType, errCode);
+        tmpName, channelId, appInfo->appType, errCode);
+    AnonymizeFree(tmpName);
     return TransProxyNotifyOpenFailedByType(appInfo, appInfo->appType, channelId, errCode);
 }
 
@@ -442,7 +445,9 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
         return SOFTBUS_MALLOC_ERR;
     }
 
-    if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
+    int32_t ret = TransProxyGetSendMsgChanInfo(channelId, info);
+    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
@@ -460,7 +465,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
-    int32_t ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
+    ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
     SoftBusFree(info);
     return ret;
 }

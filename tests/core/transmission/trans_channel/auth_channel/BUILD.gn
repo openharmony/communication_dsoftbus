@@ -42,7 +42,6 @@ ohos_unittest("TransAuthChannelTest") {
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -61,8 +60,6 @@ ohos_unittest("TransAuthChannelTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -78,21 +75,15 @@ ohos_unittest("TransAuthChannelTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransAuthManagerTest") {
@@ -117,7 +108,6 @@ ohos_unittest("TransAuthManagerTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -148,7 +138,6 @@ ohos_unittest("TransAuthMessageTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {

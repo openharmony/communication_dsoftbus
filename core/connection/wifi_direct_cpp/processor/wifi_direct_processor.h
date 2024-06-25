@@ -17,8 +17,12 @@
 
 #include <string>
 
+#include "conn_log.h"
+#include "softbus_error_code.h"
+
 #include "command/wifi_direct_command.h"
 #include "event/wifi_direct_event_base.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectExecutor;
@@ -51,6 +55,11 @@ public:
 
     virtual bool CanAcceptNegotiateDataAtState(WifiDirectCommand &command) = 0;
     virtual void HandleCommandAfterTerminate(WifiDirectCommand &command) = 0;
+    virtual int32_t PrejudgeAvailability(WifiDirectLinkType linkType)
+    {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
+        return SOFTBUS_OK;
+    };
 
 protected:
     std::string remoteDeviceId_;

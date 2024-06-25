@@ -387,7 +387,7 @@ static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
         }
     }
     if (!isAsync && laneHandle != INVALID_LANE_REQ_ID) {
-        TransCancelLaneItemCondByLaneHandle(laneHandle, false, false, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
+        TransCancelLaneItemCondByLaneHandle(laneHandle, false, false, SOFTBUS_TRANS_REQUEST_LANE_TIMEOUT);
     }
     if (isAsync && laneHandle != INVALID_LANE_REQ_ID) {
         (void)TransDeleteLaneReqItemByLaneHandle(laneHandle, isAsync);
@@ -420,6 +420,7 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
                 break;
             case CHANNEL_TYPE_TCP_DIRECT:
                 (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransDelTcpChannelInfoByChannelId(channelId);
                 ret = SOFTBUS_OK;
                 break;
             case CHANNEL_TYPE_UDP:

@@ -124,7 +124,7 @@ int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *
         std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (key == nullptr || keyLen < MIN_STRING_LEN || keyLen > MAX_STRING_LEN || value == nullptr ||
             valueLen < MIN_STRING_LEN || valueLen > MAX_STRING_LEN || dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
-            LNN_LOGE(LNN_LEDGER, "invalid param");
+            LNN_LOGE(LNN_LEDGER, "invalid param, dbId=%{public}d", dbId);
             return SOFTBUS_INVALID_PARAM;
         }
         std::string keyStr(key, keyLen);
@@ -301,7 +301,7 @@ bool LnnSubcribeKvStoreService(void)
         LNN_LOGE(LNN_LEDGER, "abilityManager is nullptr");
         return false;
     }
-    auto listener = new (std::nothrow) KvStoreStatusChangeListener();
+    sptr<KvStoreStatusChangeListener> listener = new (std::nothrow) KvStoreStatusChangeListener();
     if (listener == nullptr) {
         LNN_LOGE(LNN_LEDGER, "failed to create listener");
         return false;

@@ -711,7 +711,7 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGE(LNN_INIT, "regist user switch evt handler fail!");
         return SOFTBUS_ERR;
     }
-    if (LnnSubcribeKvStoreService() != true) {
+    if (!LnnSubcribeKvStoreService()) {
         LNN_LOGE(LNN_INIT, "regist kv store service fail!");
     }
     return InitNetBuilderLooper();

@@ -24,6 +24,8 @@ public:
     std::shared_ptr<WifiDirectProcessor> operator()(const WifiDirectConnectInfo &info) override;
     std::shared_ptr<WifiDirectProcessor> operator()(const WifiDirectDisconnectInfo &info) override;
     std::shared_ptr<WifiDirectProcessor> operator()(NegotiateMessage &msg) override;
+    std::shared_ptr<WifiDirectProcessor> operator()(
+        const char *remoteNetworkId, enum WifiDirectLinkType linkType) override;
 };
 }
 #endif

@@ -203,6 +203,9 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
     ret = CreatSessionConnList();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "CreatSessionConnList failed");
 
+    ret = CreateTcpChannelInfoList();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "CreateTcpChannelInfoList failed");
+
     return SOFTBUS_OK;
 }
 

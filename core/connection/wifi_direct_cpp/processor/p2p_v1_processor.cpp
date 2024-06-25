@@ -15,6 +15,7 @@
 #include "p2p_v1_processor.h"
 
 #include <memory>
+#include "securec.h"
 
 #include "conn_log.h"
 #include "softbus_adapter_timer.h"
@@ -28,6 +29,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_scheduler_factory.h"
+#include "wifi_direct_manager.h"
 
 namespace OHOS::SoftBus {
 std::map<std::string, P2pV1Processor::ProcessorState> P2pV1Processor::stateNameMapping = {
@@ -51,12 +53,39 @@ static std::map<int, int> p1ErrorMapping = {
     { SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE, V1_ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE},
 };
 
+static inline int ErrorCodeToV1ProtocolCode(int reason)
+{
+    if (p1ErrorMapping.find(reason) != p1ErrorMapping.end()) {
+        auto code = p1ErrorMapping[reason];
+        if (code > V1_ERROR_END && code < V1_ERROR_START) {
+            return code - V1_ERROR_START;
+        }
+        return code;
+    }
+    return reason;
+}
+
+static inline int ErrorCodeFromV1ProtocolCode(int reason)
+{
+    if (reason < 0 && reason > V1_ERROR_END - V1_ERROR_START) {
+        auto code = reason + V1_ERROR_START;
+        for (const auto it : p1ErrorMapping) {
+            if (it.second == code) {
+                return it.first;
+            }
+        }
+        return code;
+    }
+    return reason;
+}
+
 P2pV1Processor::P2pV1Processor(const std::string &remoteDeviceId)
     : WifiDirectProcessor(remoteDeviceId), state_(&P2pV1Processor::AvailableState), timer_("P2pProcessor", TIMER_TIME),
     timerId_(Utils::TIMER_ERR_INVALID_VALUE)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
     timer_.Setup();
+    active_ = false;
 }
 
 P2pV1Processor::~P2pV1Processor()
@@ -204,6 +233,7 @@ void P2pV1Processor::ProcessConnectCommand(std::shared_ptr<ConnectCommand> &comm
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
     connectCommand_ = command;
+    active_ = true;
     Exclusive(connectCommand_->GetRemoteDeviceId());
 
     auto info = command->GetConnectInfo().info_;
@@ -423,6 +453,12 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::sha
             connectCommand_ = nullptr;
         }
     }
+    if (ret == SOFTBUS_OK && terminate && !active_) {
+        WifiDirectSinkLink sinkLink {};
+        if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+            GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
+        }
+    }
     if (terminate) {
         Terminate();
     }
@@ -484,6 +520,12 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
         Terminate();
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "send hand shake message success");
+    if (!active_) {
+        WifiDirectSinkLink sinkLink {};
+        if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+            GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
+        }
+    }
     Terminate();
 }
 
@@ -1099,6 +1141,11 @@ int P2pV1Processor::ProcessDisconnectRequest(std::shared_ptr<NegotiateCommand> &
     if (reuseCountOld <= 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCountOld already 0, do not call RemoveLink");
         return static_cast<int>(SOFTBUS_OK);
+    }
+
+    WifiDirectSinkLink sinkLink {};
+    if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+        GetWifiDirectManager()->notifyDisconnectedForSink(&sinkLink);
     }
 
     ret = RemoveLink(command->GetRemoteDeviceId());
@@ -1819,6 +1866,29 @@ int P2pV1Processor::GetFinalRoleAsNone(WifiDirectRole peerRole, WifiDirectRole e
 
     CONN_LOGE(CONN_WIFI_DIRECT, "peer role invalid. peerRole=%{public}d ", static_cast<int>(peerRole));
     return SOFTBUS_INVALID_PARAM;
+}
+
+int P2pV1Processor::GenerateSinkLink(WifiDirectSinkLink &sinkLink)
+{
+    bool cpyRet = strcpy_s(sinkLink.remoteUuid, sizeof(sinkLink.remoteUuid), remoteDeviceId_.c_str()) == EOK;
+    CONN_CHECK_AND_RETURN_RET_LOGW(cpyRet, SOFTBUS_STRCPY_ERR, CONN_WIFI_DIRECT, "strcpy failed");
+
+    InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&sinkLink](const InterfaceInfo &interface) {
+        sinkLink.bandWidth = static_cast<WifiDirectBandWidth>(interface.GetBandWidth());
+        sinkLink.channelId = WifiDirectUtils::FrequencyToChannel(interface.GetCenter20M());
+        return SOFTBUS_OK;
+    });
+    sinkLink.linkType = WIFI_DIRECT_LINK_TYPE_P2P;
+    LinkManager::GetInstance().ProcessIfPresent(
+        InnerLink::LinkType::P2P, remoteDeviceId_, [&sinkLink, &cpyRet](InnerLink &link) {
+            cpyRet = cpyRet &&
+                (strcpy_s(sinkLink.localIp, sizeof(sinkLink.localIp), link.GetLocalIpv4().c_str()) == EOK) &&
+                (strcpy_s(sinkLink.remoteIp, sizeof(sinkLink.remoteIp), link.GetRemoteIpv4().c_str()) == EOK) &&
+                (strcpy_s(sinkLink.remoteMac, sizeof(sinkLink.remoteMac), link.GetRemoteBaseMac().c_str()) == EOK);
+        });
+
+    CONN_CHECK_AND_RETURN_RET_LOGW(cpyRet, SOFTBUS_STRCPY_ERR, CONN_WIFI_DIRECT, "strcpy failed");
+    return SOFTBUS_OK;
 }
 
 void P2pV1Processor::CleanupIfNeed(int32_t reason, const std::string &remoteDeviceId)

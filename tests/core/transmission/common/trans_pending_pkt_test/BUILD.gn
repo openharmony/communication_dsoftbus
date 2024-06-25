@@ -37,15 +37,11 @@ ohos_unittest("TransPendingPktTest") {
     "$dsoftbus_core_path/transmission/session/include",
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
     "$dsoftbus_core_path/transmission/pending_packet/include",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
     "$dsoftbus_core_path/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_core_path/adapter/bus_center/include",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -57,18 +53,21 @@ ohos_unittest("TransPendingPktTest") {
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
-
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
+      "hilog_lite:hilog_lite",
     ]
   }
 }

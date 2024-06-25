@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
@@ -1299,6 +1300,8 @@ static void LaneLinkFail(SoftBusMessage *msg)
     LinkFailInfo *failInfo = (LinkFailInfo *)msg->obj;
     LaneLinkType linkType = failInfo->linkType;
     SoftBusFree(failInfo);
+    LnnDumpLocalBasicInfo();
+    LnnDumpOnlineDeviceInfo();
     if (UpdateLinkStatus(laneReqId, BUILD_LINK_STATUS_FAIL, linkType, NULL, failReason) != SOFTBUS_OK) {
         return;
     }
