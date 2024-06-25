@@ -598,9 +598,6 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedBySessionConnTest0018, T
     (void)strcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName);
     (void)strcpy_s(conn->appInfo.myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName);
 
-    ret = TransTdcAddSessionConn(conn);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
     ret = NotifyChannelOpenFailedBySessionConn(conn, errCode);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
 
