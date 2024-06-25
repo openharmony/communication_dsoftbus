@@ -35,6 +35,7 @@
 #include "softbus_conn_ble_client.h"
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_ble_connection.h"
+//#include "softbus_conn_ble_client.c"
 
 using namespace testing::ext;
 using namespace testing;
@@ -371,5 +372,30 @@ HWTEST_F(ServiceConnectionTest, ConnGattClientDisconnect002, TestSize.Level1)
     EXPECT_CALL(bleMock, BleGattcUnRegister).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ConnGattClientDisconnect(connection, true, false);
     EXPECT_EQ(SOFTBUS_GATTC_INTERFACE_FAILED, ret);
+}
+
+/*
+* @tc.name: ConnGattClientSend
+* @tc.desc: Test ConnGattClientSend.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ServiceConnectionTest, ConnGattClientSend, TestSize.Level1)
+{
+    ConnBleConnection bleConnection = {{0}};
+
+    int32_t ret = SoftBusMutexInit(&bleConnection.lock, NULL);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    bleConnection.connectionId = 10;
+    bleConnection.underlayerHandle = 0;
+    uint8_t data[] = "testdata";
+    uint32_t dataLen = sizeof(data);
+    ret = ConnGattClientSend(&bleConnection, data, dataLen, MODULE_BLE_NET);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    
+    ret = ConnGattClientSend(bleConnection, data, dataLen, MODULE_BLE_CONN);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 }
