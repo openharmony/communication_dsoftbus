@@ -162,10 +162,24 @@ static void OnAuthDisconnected(AuthHandle authHandle)
     }
 }
 
+static void OnAuthException(AuthHandle authHandle, int32_t error)
+{
+    auto channel = std::make_shared<AuthNegotiateChannel>(authHandle);
+    auto remoteDeviceId = channel->GetRemoteDeviceId();
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s auth exception error=%{public}d",
+        WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(), error);
+    AuthExceptionEvent event { error, authHandle };
+    WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
+}
+
 void AuthNegotiateChannel::Init()
 {
     CONN_LOGI(CONN_INIT, "enter");
-    AuthTransListener authListener = { .onDataReceived = OnAuthDataReceived, .onDisconnected = OnAuthDisconnected };
+    AuthTransListener authListener = {
+        .onDataReceived = OnAuthDataReceived,
+        .onDisconnected = OnAuthDisconnected,
+        .onException = OnAuthException,
+    };
 
     int32_t ret = RegAuthTransListener(MODULE_P2P_LINK, &authListener);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register auth transfer listener failed");
