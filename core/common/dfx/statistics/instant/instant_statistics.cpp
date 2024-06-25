@@ -646,6 +646,7 @@ static void InstReleaseRemoteChannelInfoList(SoftBusList *remoteChannelInfoList)
 static void InstPackRemoteBasicInfo(cJSON *upperJson, InstantRemoteInfo *remoteInfo)
 {
     if (upperJson == NULL || remoteInfo == NULL) {
+        COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     cJSON *json = cJSON_CreateObject();
@@ -677,6 +678,7 @@ static void InstPackRemoteBasicInfo(cJSON *upperJson, InstantRemoteInfo *remoteI
 static void InstPackChannelInfo(cJSON *upperJson, InstantChannelInfo *channelInfo)
 {
     if (upperJson == NULL || channelInfo == NULL) {
+        COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     cJSON *channelJson = cJSON_CreateObject();
@@ -701,6 +703,7 @@ static void InstPackChannelInfo(cJSON *upperJson, InstantChannelInfo *channelInf
 static void InstPackRemoteInfo(cJSON *json, SoftBusList *remoteChannelInfoList)
 {
     if (json == NULL || remoteChannelInfoList == NULL) {
+        COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     InstantRemoteInfo *item = NULL;
