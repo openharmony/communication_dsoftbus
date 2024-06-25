@@ -33,11 +33,8 @@ ohos_unittest("TransIpcStandardTest") {
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$softbus_adapter_config/spec_config",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//utils/system/safwk/native/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
+
+    #"//utils/system/safwk/native/include",
     "unittest/common/",
     "$dsoftbus_root_path/sdk/transmission/session/include",
   ]
@@ -45,25 +42,17 @@ ohos_unittest("TransIpcStandardTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
   ]
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-      "ipc:ipc_core",
-      "ipc:ipc_single",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-      "ipc:ipc_core",
-      "ipc:ipc_single",
-    ]
-  }
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_single",
+  ]
 }
 group("unittest") {
   testonly = true

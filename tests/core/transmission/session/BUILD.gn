@@ -37,7 +37,6 @@ ohos_unittest("TransSessionManagerTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -73,7 +72,6 @@ ohos_unittest("TransSessionServiceTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {

@@ -31,16 +31,12 @@ ohos_unittest("TransClientProxyTest") {
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/sdk/frame/standard/include",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include/",
     "//foundation/window/window_manager/previewer/mock",
-    "//foundation/communication/ipc/interfaces/innerkits/c/ipc/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -69,16 +65,12 @@ ohos_unittest("TransClientProxyStandardTest") {
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/sdk/frame/standard/include",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include/",
     "//foundation/window/window_manager/previewer/mock",
-    "//foundation/communication/ipc/interfaces/innerkits/c/ipc/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {

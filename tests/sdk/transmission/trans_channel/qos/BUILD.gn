@@ -25,29 +25,17 @@ ohos_unittest("TransQosTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
     "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/qos/include",
     "//foundation/communication/dsoftbus/sdk/transmission/session/include",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransQosStatClientTest") {
@@ -58,27 +46,15 @@ ohos_unittest("TransQosStatClientTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransQosStatServerTest") {
@@ -89,27 +65,15 @@ ohos_unittest("TransQosStatServerTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 group("unittest") {
