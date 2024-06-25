@@ -25,9 +25,7 @@
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
 #include "net_conn_client.h"
-#include "net_handle.h"
 #include "net_interface_callback_stub.h"
-#include "net_link_info.h"
 #include "net_manager_constants.h"
 #include "singleton.h"
 #include "softbus_adapter_thread.h"
@@ -38,9 +36,6 @@
 namespace OHOS {
 namespace LnnNetManager {
 using namespace OHOS::NetManagerStandard;
-
-#define MAX_RETRY_COUNT 10
-#define GET_CONNECTION_PROPERTIES_DELAY 1000
 
 class LnnNetManagerListener : public NetInterfaceStateCallbackStub {
 public:
@@ -148,41 +143,6 @@ int32_t LnnNetManagerListener::OnInterfaceAddressRemoved(
 
 } // namespace LnnNetManager
 } // namespace OHOS
-
-static void InitEthNetCapability(void *para)
-{
-    static int32_t retry = 0;
-
-    (void)para;
-    if (retry >= MAX_RETRY_COUNT) {
-        return;
-    }
-    OHOS::NetManagerStandard::NetHandle netHandle;
-    auto ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
-    if (ret != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "get GetDefaultNet netHandle failed=%{public}d", retry);
-        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitEthNetCapability,
-            NULL, GET_CONNECTION_PROPERTIES_DELAY);
-        ++retry;
-        return;
-    }
-    OHOS::NetManagerStandard::NetLinkInfo linkInfo;
-    ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().GetConnectionProperties(netHandle, linkInfo);
-    if (ret != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
-        LNN_LOGI(LNN_INIT, "get GetConnectionProperties linkInfo filed=%{public}d", retry);
-        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitEthNetCapability,
-            NULL, GET_CONNECTION_PROPERTIES_DELAY);
-        ++retry;
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "get GetConnectionProperties linkInfo.ifaceName_=%{public}s", linkInfo.ifaceName_.c_str());
-    ret = OHOS::LnnNetManager::g_lnnNetManagerListener->OnInterfaceLinkStateChanged(linkInfo.ifaceName_, true);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set cap in OnInterfaceLinkStateChanged failed");
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "init eth capability succ");
-}
 static void RegEthernetEvent(void *para)
 {
     (void)para;
@@ -206,9 +166,6 @@ static void RegEthernetEvent(void *para)
         return;
     }
     LNN_LOGI(LNN_BUILDER, "RegisterIfacesStateChanged succ");
-
-    LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitEthNetCapability,
-        NULL, GET_CONNECTION_PROPERTIES_DELAY);
 }
 
 int32_t LnnInitNetManagerMonitorImpl(void)
