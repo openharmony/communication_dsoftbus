@@ -35,7 +35,6 @@
 #include "softbus_conn_ble_client.h"
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_ble_connection.h"
-//#include "softbus_conn_ble_client.c"
 
 using namespace testing::ext;
 using namespace testing;
