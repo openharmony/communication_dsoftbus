@@ -22,6 +22,7 @@
 #include "anonymizer.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_log.h"
+#include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
 #include "softbus_errcode.h"
 
@@ -300,6 +301,14 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
 DistributedKv::Status KVAdapter::GetKvStorePtr()
 {
     LNN_LOGI(LNN_LEDGER, "called");
+    bool isLogIn = false;
+    if (LnnIsDefaultOhosAccount()) {
+        LNN_LOGI(LNN_LEDGER, "no account log in, enableCloud=false");
+        isLogIn = false;
+    } else {
+        LNN_LOGI(LNN_LEDGER, "account already log in, enableCloud=true");
+        isLogIn = true;
+    }
     DistributedKv::Options options = {
         .encrypt = true,
         .autoSync = false,
@@ -308,7 +317,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
-        .cloudConfig = { .enableCloud = false, .autoSync = true }
+        .cloudConfig = { .enableCloud = isLogIn, .autoSync = true }
     };
     DistributedKv::Status status;
     {
