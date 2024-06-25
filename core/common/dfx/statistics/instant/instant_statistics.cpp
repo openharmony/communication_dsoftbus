@@ -725,6 +725,7 @@ static void InstPackRemoteInfo(cJSON *json, SoftBusList *remoteChannelInfoList)
 static void InstUpdateRemoteInfoByLnn(InstantRemoteInfo *remoteInfo, NodeBasicInfo *info)
 {
     if (remoteInfo == NULL || info == NULL) {
+        COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     NodeInfo nodeInfo = { 0 };
