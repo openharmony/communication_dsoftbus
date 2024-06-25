@@ -503,12 +503,13 @@ static void CopyBleReportExtra(const LnnBleReportExtra *bleExtra, LnnEventExtra 
     extra->result = bleExtra->extra.result;
     extra->localUdidHash = bleExtra->extra.localUdidHash;
     extra->peerUdidHash = bleExtra->extra.peerUdidHash;
+    extra->osType = bleExtra->extra.osType;
+    extra->peerDeviceType = bleExtra->extra.peerDeviceType;
     if (bleExtra->extra.peerNetworkId[0] != '\0') {
         extra->onlineType = bleExtra->extra.onlineType;
         extra->peerNetworkId = bleExtra->extra.peerNetworkId;
         extra->peerUdid = bleExtra->extra.peerUdid;
         extra->peerBleMac = bleExtra->extra.peerBleMac;
-        extra->peerDeviceType = bleExtra->extra.peerDeviceType;
     }
 }
 
@@ -579,7 +580,7 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
+static int32_t SoftBusNetNodeResult(DeviceInfo *device, HbRespData *hbResp, bool isConnect)
 {
     char *anonyUdid = NULL;
     Anonymize(device->devId, &anonyUdid);
@@ -594,10 +595,16 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
             return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
         }
     }
+    LnnDfxDeviceInfoReport info;
+    (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    if (hbResp != NULL) {
+        info.osType = ((hbResp->capabiltiy & BLE_TRIGGER_HML) != 0) ? OH_OS_TYPE : HO_OS_TYPE;
+    }
+    info.type = device->devType;
     if (HbAddAsyncProcessCallbackDelay(device) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HbAddAsyncProcessCallbackDelay fail");
     }
-    if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
+    if (LnnNotifyDiscoveryDevice(device->addr, &info, isConnect) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
         return SOFTBUS_ERR;
     }
@@ -743,7 +750,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         LNN_LOGD(LNN_HEART_BEAT, "ignore lnn request, not support connect");
         return SOFTBUS_NETWORK_NOT_CONNECTABLE;
     }
-    return SoftBusNetNodeResult(device, isConnect);
+    return SoftBusNetNodeResult(device, hbResp, isConnect);
 }
 
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
