@@ -90,7 +90,7 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
         COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!\n");
         return ret;
     }
-    COMM_LOGI(COMM_SDK, "softbus server register service success!\n");
+    COMM_LOGD(COMM_SDK, "softbus server register service success!\n");
     return SOFTBUS_OK;
 }
 
@@ -154,7 +154,7 @@ static RestartEventCallback g_restartMetaCallback = nullptr;
 static void RestartEventNotify(void)
 {
     if (g_restartEventCallback == nullptr) {
-        COMM_LOGI(COMM_SDK, "Restart event notify is not used!\n");
+        COMM_LOGD(COMM_SDK, "Restart event notify is not used!\n");
         return;
     }
     if (g_restartEventCallback() != SOFTBUS_OK) {
@@ -162,13 +162,13 @@ static void RestartEventNotify(void)
         COMM_LOGE(COMM_SDK, "Restart event notify failed!\n");\
         return;
     }
-    COMM_LOGI(COMM_SDK, "Restart event notify success!\n");
+    COMM_LOGD(COMM_SDK, "Restart event notify success!\n");
 }
 
 static void RestartMetaNotify(void)
 {
     if (g_restartMetaCallback == nullptr) {
-        COMM_LOGI(COMM_SDK, "Restart meta notify is not used!\n");
+        COMM_LOGD(COMM_SDK, "Restart meta notify is not used!\n");
         return;
     }
     if (g_restartMetaCallback() != SOFTBUS_OK) {
@@ -176,7 +176,7 @@ static void RestartMetaNotify(void)
         COMM_LOGE(COMM_SDK, "Restart meta notify failed!\n");\
         return;
     }
-    COMM_LOGI(COMM_SDK, "Restart meta notify success!\n");
+    COMM_LOGD(COMM_SDK, "Restart meta notify success!\n");
 }
 
 void ClientDeathProcTask(void)
@@ -242,7 +242,7 @@ int32_t RestartMetaCallbackRegister(RestartEventCallback callback)
         return SOFTBUS_ERR;
     }
     g_restartMetaCallback = callback;
-    COMM_LOGI(COMM_SDK, "Restart meta callback register success!\n");
+    COMM_LOGD(COMM_SDK, "Restart meta callback register success!\n");
     return SOFTBUS_OK;
 }
 
@@ -281,6 +281,6 @@ int ClientRegisterService(const char *pkgName)
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
     }
 
-    COMM_LOGI(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
+    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
     return SOFTBUS_OK;
 }

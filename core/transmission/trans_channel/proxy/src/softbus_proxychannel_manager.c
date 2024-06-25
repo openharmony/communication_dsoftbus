@@ -1051,7 +1051,7 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
         TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
+    TRANS_LOGD(TRANS_CTRL, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
     return SOFTBUS_OK;
 }
 
