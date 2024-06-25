@@ -41,7 +41,6 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
 
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -55,8 +54,6 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -83,20 +80,14 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransUdpNegotiationTest") {
@@ -134,7 +125,6 @@ ohos_unittest("TransUdpNegotiationTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -168,7 +158,6 @@ ohos_unittest("TransUdpNegotiationExchangeTest") {
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -205,7 +194,6 @@ ohos_unittest("TransUdpManagerTest") {
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/src",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -217,11 +205,8 @@ ohos_unittest("TransUdpManagerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -244,18 +229,22 @@ ohos_unittest("TransUdpManagerTest") {
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
+      "hilog_lite:hilog_lite",
     ]
   }
 }

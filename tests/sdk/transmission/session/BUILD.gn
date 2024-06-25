@@ -41,7 +41,6 @@ ohos_unittest("TransClientSessionManagerTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -81,7 +80,6 @@ ohos_unittest("TransClientSessionServiceTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -125,7 +123,6 @@ ohos_unittest("TransClientSessionCallbackTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -173,7 +170,6 @@ ohos_unittest("TransClientMsgServiceTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -225,7 +221,6 @@ ohos_unittest("TransClientSessionTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -246,10 +241,7 @@ ohos_unittest("TransClientSocketServiceTest") {
   module_out_path = module_output_path
   sources = [ "client_trans_socket_service_test.cpp" ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
   if (is_standard_system) {
     external_deps = [
@@ -268,10 +260,7 @@ ohos_unittest("TransClientSocketTest") {
   module_out_path = module_output_path
   sources = [ "client_trans_inner_socket_test.cpp" ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
   if (is_standard_system) {
     external_deps = [
@@ -297,10 +286,7 @@ ohos_unittest("SessionMockTest") {
     "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
   if (is_standard_system) {
     external_deps = [

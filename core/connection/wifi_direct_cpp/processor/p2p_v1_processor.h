@@ -138,6 +138,7 @@ private:
     int GetFinalRoleAsGc(WifiDirectRole peerRole, WifiDirectRole expectedRole, const std::string &localGoMac,
         const std::string &remoteGoMac);
     int GetFinalRoleAsNone(WifiDirectRole peerRole, WifiDirectRole expectedRole);
+    int GenerateSinkLink(WifiDirectSinkLink &sinkLink);
 
     void CleanupIfNeed(int32_t ret, const std::string &remoteDeviceId);
     void Exclusive(const std::string &remoteDeviceId);
@@ -155,6 +156,8 @@ private:
 
     std::shared_ptr<ConnectCommand> connectCommand_;
     std::string clientJoiningMac_;
+
+    bool active_;
 
     Utils::Timer timer_;
     uint32_t timerId_;

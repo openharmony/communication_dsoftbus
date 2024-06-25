@@ -54,6 +54,12 @@ typedef struct {
     ListenerModule listenMod;
 } SessionConn;
 
+typedef struct {
+    ListNode node;
+    int32_t channelId;
+    int32_t businessType;
+} TcpChannelInfo;
+
 uint64_t TransTdcGetNewSeqId(void);
 
 int32_t CreatSessionConnList(void);
@@ -94,6 +100,14 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo);
 int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHandle, uint32_t status);
 
 bool IsTdcRecoveryTransLimit(void);
+
+int32_t CreateTcpChannelInfoList(void);
+
+TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel);
+
+int32_t TransAddTcpChannelInfo(TcpChannelInfo *info);
+
+int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId);
 
 #ifdef __cplusplus
 #if __cplusplus

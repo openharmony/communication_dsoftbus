@@ -25,10 +25,7 @@ ohos_moduletest("TransSocketStreamEncryptMt") {
     "tmessenger.cpp",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
   install_enable = false
 
@@ -44,6 +41,7 @@ ohos_moduletest("TransSocketStreamEncryptMt") {
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
       "c_utils:utils",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }

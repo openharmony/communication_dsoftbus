@@ -563,6 +563,39 @@ static void DelGuideInfoItem(uint32_t laneReqId, LaneLinkType linkType)
     LinkUnlock();
 }
 
+static int32_t GetFirstGuideType(uint32_t laneReqId, LaneLinkType linkType, WdGuideType *guideType)
+{
+    WdGuideInfo guideInfo = {0};
+    if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get guide channel info fail.");
+        return SOFTBUS_LANE_NOT_FOUND;
+    }
+    *guideType = guideInfo.guideList[0];
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateReason(const AuthLinkType authType, const WdGuideType guideType, int32_t reason)
+{
+    if (reason != SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT) {
+        return reason;
+    }
+    if (guideType == LANE_BLE_TRIGGER) {
+        return SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT;
+    }
+    if (guideType == LANE_ACTIVE_AUTH_TRIGGER || guideType == LANE_NEW_AUTH_TRIGGER) {
+        if (authType == AUTH_LINK_TYPE_WIFI) {
+            return SOFTBUS_CONN_HV2_AUTH_WIFI_TRIGGER_TIMEOUT;
+        }
+        if (authType == AUTH_LINK_TYPE_BLE) {
+            return SOFTBUS_CONN_HV2_AUTH_BLE_TRIGGER_TIMEOUT;
+        }
+        if (authType == AUTH_LINK_TYPE_BR) {
+            return SOFTBUS_CONN_HV2_AUTH_BR_TRIGGER_TIMEOUT;
+        }
+    }
+    return reason;
+}
+
 static void NotifyLinkFail(AsyncResultType type, uint32_t requestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "type=%{public}d, requestId=%{public}u, reason=%{public}d", type, requestId, reason);
@@ -572,9 +605,16 @@ static void NotifyLinkFail(AsyncResultType type, uint32_t requestId, int32_t rea
         LNN_LOGE(LNN_LANE, "get p2p link req fail, type=%{public}d, requestId=%{public}u", type, requestId);
         return;
     }
+    WdGuideType guideType = LANE_CHANNEL_BUTT;
+    int32_t result = GetFirstGuideType(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType, &guideType);
+    if (result == SOFTBUS_OK) {
+        reason = UpdateReason(reqInfo.auth.authHandle.type, guideType, reason);
+    }
     (void)DelP2pLinkReqByReqId(type, requestId);
     DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
     if (reqInfo.laneRequestInfo.cb.onLaneLinkFail != NULL) {
+        LNN_LOGI(LNN_LANE, "wifidirect conn fail, laneReqId=%{public}u, guideType=%{public}d, reason=%{public}d",
+            reqInfo.laneRequestInfo.laneReqId, guideType, reason);
         reqInfo.laneRequestInfo.cb.onLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, reason,
             reqInfo.laneRequestInfo.linkType);
     }

@@ -115,6 +115,8 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
         TRANS_LOGE(TRANS_MSG, "can not find proxy channel channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
     }
+    (void)memset_s(chanInfo->appInfo.sessionKey, sizeof(chanInfo->appInfo.sessionKey), 0,
+        sizeof(chanInfo->appInfo.sessionKey));
     TRANS_LOGI(TRANS_MSG, "send msg len=%{public}d, seq=%{public}d, flags=%{public}d", len, seq, flags);
     int32_t ret = TransProxyTransDataSendMsg(chanInfo, data, len, flags);
     if (ret != SOFTBUS_OK) {

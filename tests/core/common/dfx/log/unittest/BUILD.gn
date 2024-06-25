@@ -37,8 +37,10 @@ ohos_unittest("SoftBusDfxLogTest") {
   deps = [
     "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock",
   ]
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
 }

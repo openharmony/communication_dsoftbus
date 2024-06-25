@@ -872,6 +872,7 @@ static void BcAdapterBtStateChanged(int32_t listenerId, int32_t state)
     for (uint8_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
         AdvChannel *advChannel = &g_advChannel[channelId];
         advChannel->isAdvertising = false;
+        (void)BleStopAdv(advChannel->advId);
         advChannel->advId = -1;
     }
     SoftBusMutexUnlock(&g_advLock);
