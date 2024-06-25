@@ -321,7 +321,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *uid = pos->uid;
             *pid = pos->pid;
-            TRANS_LOGI(TRANS_CTRL, "sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
+            TRANS_LOGD(TRANS_CTRL, "sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
                 tmpName, pos->uid, pos->pid);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             AnonymizeFree(tmpName);

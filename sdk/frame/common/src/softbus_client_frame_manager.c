@@ -124,7 +124,7 @@ static int32_t ClientRegisterPkgName(const char *pkgName)
         DelClientPkgName(pkgName);
         return ret;
     }
-    COMM_LOGI(COMM_SDK, "ClientRegisterService success");
+    COMM_LOGD(COMM_SDK, "ClientRegisterService success");
     return SOFTBUS_OK;
 }
 
@@ -208,7 +208,7 @@ static int32_t ClientModuleInit(void)
     return SOFTBUS_OK;
 
 ERR_EXIT:
-    COMM_LOGE(COMM_SDK, "softbus sdk frame init failed.");
+    COMM_LOGD(COMM_SDK, "softbus sdk frame init failed.");
     ClientModuleDeinit();
     return SOFTBUS_ERR;
 }
