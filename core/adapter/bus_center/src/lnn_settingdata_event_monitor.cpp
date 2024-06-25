@@ -31,7 +31,6 @@
 #include "system_ability_definition.h"
 #include "uri.h"
 
-static const int32_t DELAY_LEN = 1000;
 static LnnDeviceNameHandler g_eventHandler = nullptr;
 
 namespace OHOS {
