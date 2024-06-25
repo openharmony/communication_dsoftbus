@@ -172,9 +172,9 @@ int32_t LnnInitDeviceNameMonitorImpl(void)
         LNN_LOGE(LNN_INIT, "looper is null");
         return SOFTBUS_ERR;
     }
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, UpdateDeviceName, NULL, DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackHelper(looper, UpdateDeviceName, NULL);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
+        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackHelper fail");
     }
     return ret;
 }
