@@ -380,16 +380,22 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
         return;
     }
 
+    bool isUsing = false;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->reqId == reqId && item->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
             item->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
             item->connId = connId;
+            isUsing = true;
             TransAddConnRefByConnId(connId, (bool)item->isServer);
             TransProxyPostHandshakeMsgToLoop(item->channelId);
         }
     }
+
+    if (!isUsing) {
+        TRANS_LOGW(TRANS_CTRL, "logical channel is already closed, connId=%{public}u", connId);
+        TransProxyCloseConnChannel(connId, false);
+    }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return;
 }
 
 static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
