@@ -520,9 +520,8 @@ static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requ
 
 int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    if (TcpConnectDeviceCheckArg(option, requestId, result) != SOFTBUS_OK) {
-        return SOFTBUS_INVALID_PARAM;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(TcpConnectDeviceCheckArg(option, requestId, result) == SOFTBUS_OK,
+        SOFTBUS_INVALID_PARAM, CONN_COMMON, "CheckArg fail");
     ConnectStatistics *statistics = (ConnectStatistics *)SoftBusCalloc(sizeof(ConnectStatistics));
     CONN_CHECK_AND_RETURN_RET_LOGE(statistics != NULL, SOFTBUS_MALLOC_ERR, CONN_COMMON, "calloc Connstatistics fail");
     statistics->startTime = SoftBusGetSysTimeMs();
