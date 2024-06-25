@@ -395,7 +395,7 @@ HWTEST_F(ServiceConnectionTest, ConnGattClientSend, TestSize.Level1)
     ret = ConnGattClientSend(&bleConnection, data, dataLen, MODULE_BLE_NET);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
-    ret = ConnGattClientSend(bleConnection, data, dataLen, MODULE_BLE_CONN);
+    ret = ConnGattClientSend(&bleConnection, data, dataLen, MODULE_BLE_CONN);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 }
