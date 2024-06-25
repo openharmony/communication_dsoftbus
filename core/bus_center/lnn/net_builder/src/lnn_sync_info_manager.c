@@ -750,6 +750,7 @@ int32_t LnnInitSyncInfoManager(void)
     AuthTransListener wifiDirectSyncCb = {
         .onDataReceived = OnWifiDirectSyncMsgRecv,
         .onDisconnected = OnWifiDirectSyncAuthClose,
+        .onException = NULL,
     };
     if (RegAuthTransListener(MODULE_AUTH_SYNC_INFO, &wifiDirectSyncCb) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "reg auth lister fail");
@@ -770,6 +771,7 @@ int32_t LnnInitSyncInfoManager(void)
     AuthTransListener p2pNetworkingCb = {
         .onDataReceived = OnP2pNetworkingDataRecv,
         .onDisconnected = NULL,
+        .onException = NULL,
     };
     if (RegAuthTransListener(MODULE_P2P_NETWORKING_SYNC, &p2pNetworkingCb) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "p2p networking sync set cb fail");

@@ -964,6 +964,7 @@ HWTEST_F(AuthTest, REGAUTH_TRANS_LISTENER_Test_001, TestSize.Level1)
     AuthTransListener listener = {
         .onDataReceived = AuthOnDataReceived,
         .onDisconnected = AuthOnDisconnected,
+        .onException = NULL,
     };
     int32_t ret;
     ret = RegAuthTransListener(module, nullptr);
@@ -1381,6 +1382,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
     AuthTransCallback callBack = {
         .OnDataReceived = AuthOnDataReceivedTest,
         .OnDisconnected = AuthOnDisconnectedTest,
+        .OnException = NULL,
     };
     ret = AuthDeviceInit(&callBack);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -1983,6 +1985,7 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
     AuthTransListener listener = {
         .onDataReceived = AuthOnDataReceived,
         .onDisconnected = AuthOnDisconnected,
+        .onException = NULL,
     };
     int32_t ret;
     ret = RegAuthTransListener(MODULE_UDP_INFO, &listener);
