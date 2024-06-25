@@ -56,6 +56,27 @@ static int32_t LnnCheckDiscoveryDeviceInfo(const DeviceInfo *device)
     return SOFTBUS_OK;
 }
 
+static int32_t GetConnectDeviceInfo(const DeviceInfo *device, ConnectionAddr *addr, LnnDfxDeviceInfoReport *info)
+{
+    addr->type = device->addr[0].type;
+    info->type = device->devType;
+    if (strncpy_s(addr->info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip, strlen(device->addr[0].info.ip.ip)) !=
+        0) {
+        LNN_LOGE(LNN_BUILDER, "strncpy ip failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s((char *)addr->info.ip.udidHash, UDID_HASH_LEN, device->devId) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy udidHash failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    addr->info.ip.port = device->addr[0].info.ip.port;
+    if (memcpy_s(addr->peerUid, MAX_ACCOUNT_HASH_LEN, device->accountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
+        LNN_LOGE(LNN_BUILDER, "memcpy_s peer uid failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     ConnectionAddr addr;
@@ -87,23 +108,14 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
         LNN_LOGE(LNN_BUILDER, "get invalid device para");
         return;
     }
-    addr.type = device->addr[0].type;
-    if (strncpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip, strlen(device->addr[0].info.ip.ip)) !=
-        0) {
-        LNN_LOGE(LNN_BUILDER, "strncpy ip failed");
-        return;
-    }
-    if (strcpy_s((char *)addr.info.ip.udidHash, UDID_HASH_LEN, device->devId) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "strcpy udidHash failed");
-        return;
-    }
-    addr.info.ip.port = device->addr[0].info.ip.port;
-    if (memcpy_s(addr.peerUid, MAX_ACCOUNT_HASH_LEN, device->accountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
-        LNN_LOGE(LNN_BUILDER, "memcpy_s peer uid failed");
+    LnnDfxDeviceInfoReport info;
+    (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    if (GetConnectDeviceInfo(device, &addr, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get connect device info fail");
         return;
     }
     if (g_callback.OnDeviceFound) {
-        g_callback.OnDeviceFound(&addr);
+        g_callback.OnDeviceFound(&addr, &info);
     }
 }
 
