@@ -72,11 +72,11 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
         "requestId=%{public}u, linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
-        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d",
+        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d, remoteDeviceId=%{public}s",
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
-        WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType, link.isReuse,
-        link.bandWidth, link.channelId);
-    DfxRecord(true, OK);
+        WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType, link.isReuse, link.bandWidth,
+        link.channelId, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+    DfxRecord(true, SOFTBUS_OK);
     callback_.onConnectSuccess(info_.info_.requestId, &link);
 }
 
@@ -165,10 +165,9 @@ void ConnectCommand::FillConnEventExtra(ConnEventExtra &extra) const
     extra.bootLinkType = info_.info_.bootLinkType;
     extra.isRenegotiate = info_.info_.renegotiate;
     extra.isReuse = info_.info_.reuse;
-    DurationStatistic instance = DurationStatistic::GetInstance();
-    std::map<DurationStatisticEvent, uint64_t> map = instance.stateTimeMap[info_.info_.requestId];
-    uint64_t startTime = map[TotalStart];
-    uint64_t endTime = map[TotalEnd];
+    auto stateMapElement = DurationStatistic::GetInstance().GetStateTimeMapElement(info_.info_.requestId);
+    uint64_t startTime = stateMapElement[TotalStart];
+    uint64_t endTime = stateMapElement[TotalEnd];
     if (startTime != 0 && endTime != 0) {
         extra.costTime = int32_t(endTime - startTime);
         extra.negotiateTime = int32_t(endTime - startTime);
