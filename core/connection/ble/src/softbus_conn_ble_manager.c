@@ -261,6 +261,7 @@ static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestC
     device->state = BLE_DEVICE_STATE_INIT;
     device->protocol = ctx->protocol;
     device->psm = ctx->psm;
+    device->retryCount = 0;
     uint64_t feature = 0;
     if (LnnGetConnSubFeatureByUdidHashStr(ctx->udid, &feature) != SOFTBUS_OK) {
         CONN_LOGD(CONN_BLE, "get connSubFeature failed");
@@ -682,7 +683,7 @@ static void BleClientConnected(uint32_t connectionId)
     ConnRemoveMsgFromLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
     CONN_LOGI(
         CONN_BLE, "ble client connect success, clientId=%{public}d, addr=%{public}s", connectionId, anomizeAddress);
-
+    connection->underlayerFastConnectFailedScanFailure = false;
     BleNotifyDeviceConnectResult(connectingDevice, connection, 0, false);
     FreeDevice(connectingDevice);
     g_bleManager.connecting = NULL;
@@ -717,6 +718,28 @@ static void BleClientConnectFailed(uint32_t connectionId, int32_t error)
         return;
     }
     ConnRemoveMsgFromLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
+
+    if (connection->underlayerFastConnectFailedScanFailure) {
+        int32_t ret = SoftBusMutexLock(&connection->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "try to lock failed, connId=%{public}u, err=%{public}d", connectionId, ret);
+            ConnBleRemoveConnection(connection);
+            ConnBleReturnConnection(&connection);
+            return;
+        }
+        connectingDevice->retryCount += 1;
+        if (connectingDevice->retryCount < BLE_GATT_CONNECT_MAX_RETRY_COUNT) {
+            connectingDevice->state = BLE_DEVICE_STATE_WAIT_SCHEDULE;
+            (void)SoftBusMutexUnlock(&connection->lock);
+            ListNodeInsert(&g_bleManager.waitings, &connectingDevice->node);
+            g_bleManager.connecting = NULL;
+            ConnBleRemoveConnection(connection);
+            ConnBleReturnConnection(&connection);
+            TransitionToState(BLE_MGR_STATE_AVAILABLE);
+            return;
+        }
+        (void)SoftBusMutexUnlock(&connection->lock);
+    }
 
     ConnBleConnection *serverConnection =
         ConnBleGetConnectionByAddr(connection->addr, CONN_SIDE_SERVER, connectingDevice->protocol);

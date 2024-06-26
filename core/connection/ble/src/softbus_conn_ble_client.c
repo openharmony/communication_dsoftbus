@@ -189,26 +189,34 @@ static void BleGattcConnStateCallback(int32_t underlayerHandle, int32_t state, i
         (void)SoftbusGattcUnRegister(underlayerHandle);
         return;
     }
+    if (state == SOFTBUS_BT_DISCONNECT && connection->state == BLE_CONNECTION_STATE_CONNECTING) {
+        CONN_LOGI(CONN_BLE, "Unable to scan broadcast for 3 seconds during ble connection, failed. Waiting for retry, "
+            "connId=%{public}u", connection->connectionId);
+        int32_t ret = SoftBusMutexLock(&connection->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE,
+                "try to lock failed, connId=%{public}u, error=%{public}d", connection->connectionId, ret);
+            (void)SoftbusGattcUnRegister(underlayerHandle);
+            ConnBleReturnConnection(&connection);
+            return;
+        }
+        connection->underlayerFastConnectFailedScanFailure = true;
+        (void)SoftBusMutexUnlock(&connection->lock);
+    }
     ConnRemoveMsgFromLooper(
         &g_bleGattClientAsyncHandler, MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT, connection->connectionId, 0, NULL);
     ConnBleReturnConnection(&connection);
 
     CommonStatusContext *ctx = (CommonStatusContext *)SoftBusCalloc(sizeof(CommonStatusContext));
-    if (ctx == NULL) {
-        CONN_LOGE(CONN_BLE,
-            "connection state changed handle failed: calloc failed, handle=%{public}d, status=%{public}d",
-            underlayerHandle, status);
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BLE, "connection state changed handle failed: calloc failed, "
+        "handle=%{public}d, status=%{public}d", underlayerHandle, status);
     ctx->underlayerHandle = underlayerHandle;
     ctx->status = status;
     enum ClientLoopMsgType what = state == SOFTBUS_BT_CONNECT ? MSG_CLIENT_CONNECTED : MSG_CLIENT_DISCONNECTED;
     int32_t rc = ConnPostMsgToLooper(&g_bleGattClientAsyncHandler, what, 0, 0, ctx, 0);
     if (rc != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BLE,
-            "connection state changed handle failed: post msg to looper failed: handle=%{public}d, "
-            "state=%{public}d, status=%{public}d, err=%{public}d",
-            underlayerHandle, state, status, rc);
+        CONN_LOGW(CONN_BLE, "connection state changed handle failed: post msg to looper failed: handle=%{public}d, "
+            "state=%{public}d, status=%{public}d, err=%{public}d", underlayerHandle, state, status, rc);
         SoftBusFree(ctx);
     }
 }

@@ -31,6 +31,7 @@ extern "C" {
 
 #define BLE_CONNECT_TIMEOUT_MILLIS (10 * 1000)
 #define BLE_CONNECT_KEEP_ALIVE_TIMEOUT_MILLIS (10 * 1000)
+#define BLE_GATT_CONNECT_MAX_RETRY_COUNT (2)
 
 enum ConnBleDeviceState {
     BLE_DEVICE_STATE_INIT,
@@ -51,6 +52,8 @@ typedef struct {
     bool isSupportNetworkIdExchange;
     enum ConnBleDeviceState state;
     ListNode requests;
+    // The ble connection failed to scan the broadcast due to a timeout of 3.1 seconds and was retried
+    uint32_t retryCount;
 } ConnBleDevice;
 
 typedef struct {
