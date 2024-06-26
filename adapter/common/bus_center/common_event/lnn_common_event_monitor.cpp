@@ -139,9 +139,9 @@ static void LnnSubscribeCommonEvent(void *para)
 int32_t LnnInitCommonEventMonitorImpl(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeCommonEvent, NULL, DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackHelper(looper, LnnSubscribeCommonEvent, NULL);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
+        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackHelper fail");
     }
     return ret;
 }
