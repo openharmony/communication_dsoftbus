@@ -629,12 +629,7 @@ void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle authHandle
     para->requestId = requestId;
     para->retCode = retCode;
     if (retCode == SOFTBUS_OK) {
-        para->nodeInfo = DupNodeInfo(info);
-        if (para->nodeInfo == NULL) {
-            LNN_LOGE(LNN_BUILDER, "dup NodeInfo fail");
-            SoftBusFree(para);
-            return;
-        }
+        para->nodeInfo = (info == NULL) ? NULL : DupNodeInfo(info);
         para->authHandle = authHandle;
     }
     if (PostBuildMessageToHandler(MSG_TYPE_VERIFY_RESULT, para) != SOFTBUS_OK) {
@@ -650,10 +645,6 @@ void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle authHandle
 static void OnVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
     LNN_LOGI(LNN_BUILDER, "verify passed. requestId=%{public}u, authId=%{public}" PRId64, requestId, authHandle.authId);
-    if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "post verify result message failed");
-        return;
-    }
     if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
         LNN_LOGE(LNN_BUILDER, "authHandle type error");
         return;
