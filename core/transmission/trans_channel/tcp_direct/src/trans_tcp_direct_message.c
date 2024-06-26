@@ -1122,24 +1122,24 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
 
 static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int32_t type)
 {
-    if (g_tcpSrvDataList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is NULL");
-        return SOFTBUS_NO_INIT;
-    }
-    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock failed.");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_tcpSrvDataList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is NULL");
+    int32_t ret = SoftBusMutexLock(&g_tcpSrvDataList->lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed.");
+
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-        TRANS_LOGE(TRANS_CTRL, "srv can not get buf node.");
+        TRANS_LOGE(TRANS_CTRL,
+            "srv can not get buf node. listenerModule=%{public}d, "
+            "channelId=%{public}d, type=%{public}d", (int32_t)module, channelId, type);
         return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
     }
     uint32_t bufLen = node->w - node->data;
     if (bufLen < DC_MSG_PACKET_HEAD_SIZE) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-        TRANS_LOGE(TRANS_CTRL, "srv head not enough, recv next time.");
+        TRANS_LOGE(TRANS_CTRL,
+            "srv head not enough, recv next time. listenerModule=%{public}d, bufLen=%{public}u "
+            "channelId=%{public}d, type=%{public}d", (int32_t)module, bufLen, channelId, type);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
 
@@ -1147,22 +1147,27 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int
     UnpackTdcPacketHead(pktHead);
     if (pktHead->magicNumber != MAGIC_NUMBER) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-        TRANS_LOGE(TRANS_CTRL, "srv recv invalid packet head");
+        TRANS_LOGE(TRANS_CTRL,
+            "srv recv invalid packet head listenerModule=%{public}d, "
+            "channelId=%{public}d, type=%{public}d", (int32_t)module, channelId, type);
         return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED;
     }
 
     uint32_t dataLen = pktHead->dataLen;
     if (dataLen > node->size - DC_MSG_PACKET_HEAD_SIZE) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-        TRANS_LOGE(TRANS_CTRL, "srv out of recv dataLen=%{public}d", dataLen);
+        TRANS_LOGE(TRANS_CTRL,
+            "srv out of recv dataLen=%{public}u, listenerModule=%{public}d, "
+            "channelId=%{public}d, type=%{public}d", dataLen, (int32_t)module, channelId, type);
         return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED;
     }
 
     if (bufLen < dataLen + DC_MSG_PACKET_HEAD_SIZE) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         TRANS_LOGE(TRANS_CTRL,
-            "srv data not enough, recv next time. bufLen=%{public}d, dataLen=%{public}d, headLen=%{public}d",
-            bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
+            "srv data not enough, recv next time. bufLen=%{public}u, dataLen=%{public}u, headLen=%{public}d "
+            "listenerModule=%{public}d, channelId=%{public}d, type=%{public}d",
+            bufLen, dataLen, (int32_t)DC_MSG_PACKET_HEAD_SIZE, (int32_t)module, channelId, type);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
     DelTrigger(module, node->fd, READ_TRIGGER);
