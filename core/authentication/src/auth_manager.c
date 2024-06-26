@@ -1330,19 +1330,26 @@ static void HandleDecryptFailData(
     uint32_t decDataLen = 0;
     int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)data);
     InDataInfo inDataInfo = { .inData = data, .inLen = head->len };
+    AuthHandle authHandle = { .type = connInfo->type };
     if (auth[0] != NULL && DecryptInner(&auth[0]->sessionKeyList, connInfo->type, &inDataInfo,
         &decData, &decDataLen) == SOFTBUS_OK) {
         ReleaseAuthLock();
         SoftBusFree(decData);
         RemoveAuthSessionKeyByIndex(auth[0]->authId, index, connInfo->type);
+        authHandle.authId = auth[0]->authId;
     } else if (auth[1] != NULL && DecryptInner(&auth[1]->sessionKeyList, connInfo->type, &inDataInfo,
         &decData, &decDataLen) == SOFTBUS_OK) {
         ReleaseAuthLock();
         SoftBusFree(decData);
         RemoveAuthSessionKeyByIndex(auth[1]->authId, index, connInfo->type);
+        authHandle.authId = auth[1]->authId;
     } else {
         ReleaseAuthLock();
         AUTH_LOGE(AUTH_CONN, "decrypt trans data fail.");
+    }
+    if (g_transCallback.OnException != NULL) {
+        AUTH_LOGE(AUTH_CONN, "notify exception");
+        g_transCallback.OnException(authHandle, SOFTBUS_AUTH_DECRYPT_ERR);
     }
 }
 
