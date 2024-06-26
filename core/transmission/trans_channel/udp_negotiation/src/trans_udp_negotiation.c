@@ -1132,6 +1132,7 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
     AuthTransListener transUdpCb = {
         .onDataReceived = UdpModuleCb,
         .onDisconnected = NULL,
+        .onException = NULL,
     };
 
     ret = RegAuthTransListener(MODULE_UDP_INFO, &transUdpCb);
