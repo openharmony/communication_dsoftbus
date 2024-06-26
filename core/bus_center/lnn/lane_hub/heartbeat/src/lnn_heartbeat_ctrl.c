@@ -415,6 +415,7 @@ static void HbDelayConditionChanged(void *para)
     (void)para;
 
     LNN_LOGI(LNN_HEART_BEAT, "HB handle delay condition changed");
+    LnnUpdateOhosAccount(true);
     LnnUpdateSendInfoStrategy(UPDATE_HB_ACCOUNT_INFO);
     LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
     g_hbConditionState.heartbeatEnable = IsEnableSoftBusHeartbeat();
@@ -520,7 +521,6 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     switch (lockState) {
         case SOFTBUS_SCREEN_UNLOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
-            LnnUpdateOhosAccount(false);
             if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON &&
                 g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN) {
                 LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
