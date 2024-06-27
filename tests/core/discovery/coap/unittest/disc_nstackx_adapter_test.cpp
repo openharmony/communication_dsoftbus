@@ -201,7 +201,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapaData001, TestSize.Lev
     uint32_t dataLen = 4;
     uint32_t capability = 1;
 
-    ret = DiscCoapRegisterCapabilityData(NULL, dataLen, capability);
+    ret = DiscCoapRegisterCapabilityData(nullptr, dataLen, capability);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapRegisterCapabilityData(capabilityData, 0, capability);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -580,7 +580,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
     };
     uint8_t bType = 0;
 
-    ret = DiscCoapSendRsp(NULL, bType);
+    ret = DiscCoapSendRsp(nullptr, bType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
