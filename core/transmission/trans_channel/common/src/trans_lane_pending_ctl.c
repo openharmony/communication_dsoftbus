@@ -618,6 +618,12 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "CheckSocketChannelState failed");
     TransSetSocketChannelStateBySession(param.sessionName, param.sessionId, CORE_SESSION_STATE_LAN_COMPLETE);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_SVC, "malloc appInfo failed");
+        (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
+        (void)TransDelLaneReqFromPendingList(laneHandle, true);
+        return;
+    }
     ret = CreateAppInfoByParam(laneHandle, &param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "CreateAppInfoByParam failed");
