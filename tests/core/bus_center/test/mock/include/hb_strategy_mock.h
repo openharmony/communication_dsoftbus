@@ -32,7 +32,8 @@ public:
 
     virtual int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
-    virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect) = 0;
+    virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+        bool isNeedConnect) = 0;
     virtual int32_t LnnSetHbAsMasterNodeState(bool isMasterNode) = 0;
     virtual int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategy(
@@ -63,7 +64,7 @@ public:
 
     MOCK_METHOD2(LnnStartOfflineTimingStrategy, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnStopOfflineTimingStrategy, int32_t(const char *, ConnectionAddrType));
-    MOCK_METHOD2(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, bool));
+    MOCK_METHOD3(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool));
     MOCK_METHOD3(LnnNotifyMasterElect, int32_t(const char *, const char *, int32_t));
     MOCK_METHOD1(LnnSetHbAsMasterNodeState, int32_t(bool));
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t (LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
