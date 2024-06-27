@@ -47,9 +47,10 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
     return HeartBeatFSMInterfaceInstance()->LnnStopOfflineTimingStrategy(networkId, addrType);
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+    bool isNeedConnect)
 {
-    return HeartBeatFSMInterfaceInstance()->LnnNotifyDiscoveryDevice(addr, isNeedConnect);
+    return HeartBeatFSMInterfaceInstance()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
 
 int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight)

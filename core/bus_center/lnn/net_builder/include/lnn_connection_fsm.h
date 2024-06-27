@@ -66,6 +66,7 @@ typedef struct {
     uint32_t requestId;
     uint32_t flag;
     SoftBusVersion version;
+    LnnDfxDeviceInfoReport infoReport;
 } LnnConntionInfo;
 
 struct tagLnnConnectionFsm;
