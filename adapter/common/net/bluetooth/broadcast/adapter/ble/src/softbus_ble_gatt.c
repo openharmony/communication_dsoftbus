@@ -871,6 +871,9 @@ static void BcAdapterBtStateChanged(int32_t listenerId, int32_t state)
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_advLock) == SOFTBUS_OK, DISC_BLE_ADAPTER, "lock failed");
     for (uint8_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
         AdvChannel *advChannel = &g_advChannel[channelId];
+        if (advChannel->advId < 0) {
+            continue;
+        }
         advChannel->isAdvertising = false;
         (void)BleStopAdv(advChannel->advId);
         advChannel->advId = -1;
