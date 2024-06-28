@@ -523,17 +523,21 @@ int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOu
     /* Check auth valid period */
     uint64_t currentTime = GetCurrentTimeMs();
     for (uint32_t i = 0; i < num; i++) {
-        if (auth[i] != NULL && !auth[i]->hasAuthPassed[connInfo->type]) {
+        if (auth[i] == NULL) {
+            continue;
+        }
+        if (!auth[i]->hasAuthPassed[connInfo->type]) {
             AUTH_LOGI(AUTH_CONN, "auth manager has not auth pass. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
+            continue;
         }
-        if (auth[i] != NULL &&
-            CheckSessionKeyListExistType(&auth[i]->sessionKeyList, connInfo->type) &&
+        if (CheckSessionKeyListExistType(&auth[i]->sessionKeyList, connInfo->type) &&
             GetLatestAvailableSessionKeyTime(&auth[i]->sessionKeyList, connInfo->type) == 0) {
             AUTH_LOGI(AUTH_CONN, "auth manager has not available key. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
+            continue;
         }
-        if (auth[i] != NULL && (currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD) && judgeTimeOut) {
+        if ((currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD) && judgeTimeOut) {
             AUTH_LOGI(AUTH_CONN, "auth manager timeout. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
         }
@@ -546,7 +550,7 @@ int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOu
         if (auth[i] == NULL) {
             continue;
         }
-        if (auth[i] != NULL && auth[i]->lastVerifyTime > maxVerifyTime) {
+        if (auth[i]->lastVerifyTime > maxVerifyTime) {
             authId = auth[i]->authId;
         }
     }
