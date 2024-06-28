@@ -1383,6 +1383,10 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     if (strcpy_s(oldInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, newInfo->deviceInfo.deviceUdid) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s deviceUdid to distributed ledger fail");
     }
+    if (strcpy_s(oldInfo->deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, newInfo->deviceInfo.deviceVersion) !=
+        EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s deviceVersion to distributed ledger fail");
+    }
     if (strcpy_s(oldInfo->networkId, NETWORK_ID_BUF_LEN, newInfo->networkId) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s networkId to distributed ledger fail");
     }
