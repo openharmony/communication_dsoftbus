@@ -157,7 +157,7 @@ static ChannelType TransGetChannelType(const SessionParam *param, const int32_t 
     return CHANNEL_TYPE_TCP_DIRECT;
 }
 
-void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transInfo, LaneConnInfo *connInfo)
+void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transInfo, const LaneConnInfo *connInfo)
 {
     if (appInfo == NULL || param == NULL || transInfo == NULL || connInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invalid param");

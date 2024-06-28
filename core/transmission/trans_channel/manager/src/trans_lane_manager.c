@@ -196,16 +196,16 @@ void TransSocketLaneMgrDeinit(void)
     g_socketChannelList = NULL;
 }
 
-int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo,
-    uint32_t laneHandle, bool isQosLane, AppInfoData *myData)
+int32_t TransLaneMgrAddLane(
+    const TransInfo *transInfo, const LaneConnInfo *connInfo, uint32_t laneHandle, bool isQosLane, AppInfoData *myData)
 {
-    if (g_channelLaneList == NULL || connInfo == NULL || myData == NULL) {
+    if (transInfo == NULL || g_channelLaneList == NULL || connInfo == NULL || myData == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     TransLaneInfo *newLane = (TransLaneInfo *)SoftBusCalloc(sizeof(TransLaneInfo));
     TRANS_CHECK_AND_RETURN_RET_LOGE(newLane != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "calloc laneInfo failed.");
-    newLane->channelId = channelId;
-    newLane->channelType = channelType;
+    newLane->channelId = transInfo->channelId;
+    newLane->channelType = transInfo->channelType;
     newLane->laneHandle = laneHandle;
     newLane->isQosLane = isQosLane;
     newLane->pid = myData->pid;
@@ -227,11 +227,11 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
 
     TransLaneInfo *laneItem = NULL;
     LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
-        if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
+        if (laneItem->channelId == transInfo->channelId && laneItem->channelType == transInfo->channelType) {
             SoftBusFree(newLane);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-            TRANS_LOGI(TRANS_SVC,
-                "trans lane info has existed. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
+            TRANS_LOGI(TRANS_SVC, "trans lane info has existed. channelId=%{public}d, channelType=%{public}d",
+                transInfo->channelId, transInfo->channelType);
             return SOFTBUS_ALREADY_EXISTED;
         }
     }
