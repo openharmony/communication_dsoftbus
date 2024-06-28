@@ -155,7 +155,7 @@ AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
 int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara *para, bool needReportFailure)
 {
     if (para == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid param");
+        LNN_LOGE(LNN_BUILDER, "JoinLnnMsgPara is null");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t rc = SOFTBUS_OK;
@@ -203,15 +203,14 @@ void TryRemovePendingJoinRequest(void)
         }
         ListDelete(&item->node);
         (void)memset_s(&para, sizeof(JoinLnnMsgPara), 0, sizeof(JoinLnnMsgPara));
-        para.addr = item->addr;
         para.isNeedConnect = true;
-        if (strcpy_s(para.pkgName, strlen(DEFAULT_PKG_NAME), DEFAULT_PKG_NAME) != EOK) {
+        para.addr = item->addr;
+        if (strcpy_s(para.pkgName, PKG_NAME_SIZE_MAX, DEFAULT_PKG_NAME) != EOK) {
             LNN_LOGE(LNN_BUILDER, "strcpy_s pkgName failed");
             SoftBusFree(item);
             continue;
         }
-        if (PostJoinRequestToConnFsm(NULL, &para, item->needReportFailure)
-            != SOFTBUS_OK) {
+        if (PostJoinRequestToConnFsm(NULL, &para, item->needReportFailure) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "post pending join request failed");
         }
         LNN_LOGI(
