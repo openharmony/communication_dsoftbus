@@ -27,6 +27,8 @@ extern "C" {
 typedef struct {
     TransOption info;
     ILaneListener listener;
+    uint32_t actionAddr;
+    bool isSupportIpv6;
 } ExtraReqInfo;
 
 typedef struct {
@@ -49,6 +51,7 @@ void RemoveDetectTimeoutMessage(uint32_t detectId);
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
 void RemoveDelayDestroyMessage(uint64_t laneId);
 void DelLogicAndLaneRelationship(uint64_t laneId);
+int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId);
 
 #ifdef __cplusplus
 }

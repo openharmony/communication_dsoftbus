@@ -456,7 +456,7 @@ int32_t ClearLaneResourceByLaneId(uint64_t laneId)
 static bool LinkTypeCheck(LaneLinkType type)
 {
     static const LaneLinkType supportList[] = { LANE_P2P, LANE_HML, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE,
-        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT, LANE_BLE_REUSE };
+        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT, LANE_BLE_REUSE, LANE_HML_RAW };
     uint32_t size = sizeof(supportList) / sizeof(LaneLinkType);
     for (uint32_t i = 0; i < size; i++) {
         if (supportList[i] == type) {
@@ -593,6 +593,65 @@ static int32_t CopyAllDevIdWithoutLock(LaneLinkType type, uint8_t resourceNum, c
     *devIdList = (char *)itemList;
     *devIdCnt = tmpCnt;
     return SOFTBUS_OK;
+}
+
+int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, char *peerUdid)
+{
+    if (oldLaneId == INVALID_LANE_ID || newLaneId == INVALID_LANE_ID) {
+        LNN_LOGE(LNN_LANE, "get invalid laneId");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        if (item->laneId == oldLaneId) {
+            item->laneId = newLaneId;
+            if (strcpy_s(item->link.peerUdid, UDID_BUF_LEN, peerUdid) != EOK) {
+                LNN_LOGE(LNN_LANE, "strcpy udid fail");
+                LaneUnlock();
+                return SOFTBUS_STRCPY_ERR;
+            }
+            LNN_LOGI(LNN_LANE, "find and refresh oldLaneId=%{public}" PRIu64 "newLaneId=%{public}" PRIu64,
+                oldLaneId, newLaneId);
+            LaneUnlock();
+            return SOFTBUS_OK;
+        }
+    }
+    LaneUnlock();
+    LNN_LOGE(LNN_LANE, "no found lane resource by laneId=%{public}" PRIu64 "", oldLaneId);
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, int32_t *laneNum)
+{
+    if (peerUdid == NULL || type >= LANE_LINK_TYPE_BUTT) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t num = 0;
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        if (strcmp(peerUdid, item->link.peerUdid) == 0 && type == item->link.type) {
+            num++;
+            LaneUnlock();
+            *laneNum = num;
+            return SOFTBUS_OK;
+        }
+    }
+    LaneUnlock();
+    char *anonyPeerUdid = NULL;
+    Anonymize(peerUdid, &anonyPeerUdid);
+    LNN_LOGE(LNN_LANE, "no find lane resource by linktype=%{public}d, peerUdid=%{public}s", type, anonyPeerUdid);
+    AnonymizeFree(anonyPeerUdid);
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt)
@@ -960,6 +1019,17 @@ static int32_t LaneLinkOfHml(uint32_t reqId, const LinkRequest *reqInfo, const L
     return LnnConnectP2p(&linkInfo, reqId, callback);
 }
 
+static int32_t LaneLinkOfHmlRaw(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+{
+    LinkRequest linkInfo;
+    if (memcpy_s(&linkInfo, sizeof(LinkRequest), reqInfo, sizeof(LinkRequest)) != EOK) {
+        LNN_LOGE(LNN_LANE, "hml copy linkreqinfo fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    linkInfo.linkType = LANE_HML_RAW;
+    return LnnConnectP2p(&linkInfo, reqId, callback);
+}
+
 static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
@@ -1222,6 +1292,7 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC] = LaneLinkOfCoc,
     [LANE_COC_DIRECT] = LaneLinkOfCocDirect,
     [LANE_HML] = LaneLinkOfHml,
+    [LANE_HML_RAW] = LaneLinkOfHmlRaw,
 };
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
@@ -1255,7 +1326,7 @@ void DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type)
         LNN_LOGE(LNN_LANE, "the networkId is nullptr");
         return;
     }
-    if (type == LANE_P2P || type == LANE_HML) {
+    if (type == LANE_P2P || type == LANE_HML || type == LANE_HML_RAW) {
         LaneDeleteP2pAddress(networkId, false);
         LnnDisconnectP2p(networkId, laneReqId);
     } else {

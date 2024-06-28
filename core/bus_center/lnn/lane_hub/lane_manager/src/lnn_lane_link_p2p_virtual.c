@@ -39,3 +39,22 @@ void LnnCancelWifiDirect(uint32_t laneReqId)
     (void)laneReqId;
     return;
 }
+
+int32_t CheckIsAuthSessionServer(const char *peerIp, bool *isServer)
+{
+    (void)peerIp;
+    (void)isServer;
+    return SOFTBUS_P2P_NOT_SUPPORT;
+}
+
+int32_t RemoveAuthSessionServer(const char *peerIp)
+{
+    (void)peerIp;
+    return SOFTBUS_P2P_NOT_SUPPORT;
+}
+
+void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId)
+{
+    (void)laneReqId;
+    return;
+}

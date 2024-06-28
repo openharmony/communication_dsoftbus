@@ -46,6 +46,7 @@ int32_t SetSocketCallback(const SocketCallback *cb);
 void UnsetSocketCallback(void);
 
 // connect succ, return fd; otherwise, return -1.
+int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *remoteIp, int32_t port, bool isBlockMode);
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode);
 int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode);
 
@@ -55,7 +56,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
 int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer);
 
 int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info);
-void StopSocketListening(void);
+void StopSocketListening(ListenerModule moduleId);
 
 int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle);
 

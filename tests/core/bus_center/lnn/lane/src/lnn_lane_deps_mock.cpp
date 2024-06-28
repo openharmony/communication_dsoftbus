@@ -380,6 +380,17 @@ struct WifiDirectManager* GetWifiDirectManager(void)
     return GetLaneDepsInterface()->GetWifiDirectManager();
 }
 
+int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+    char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    return GetLaneDepsInterface()->LnnConvertDlId(srcId, srcIdType, dstIdType, dstIdBuf, dstIdBufLen);
+}
+
+void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle)
+{
+    GetLaneDepsInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
+}
+
 void LnnDumpLocalBasicInfo(void)
 {
     GetLaneDepsInterface()->LnnDumpLocalBasicInfo();

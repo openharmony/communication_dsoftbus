@@ -122,6 +122,7 @@ typedef enum {
     EVENT_AUTH_META_TIMEOUT,
     EVENT_AUTH_DISCONNECT,
     EVENT_BLE_DISCONNECT_DELAY,
+    EVENT_AUTH_META_SYNC_PTK_TIMEOUT,
 } EventType;
 typedef void(*EventHandler)(const void *obj);
 int32_t PostAuthEvent(EventType event, EventHandler handler,
