@@ -36,6 +36,7 @@ static SoftBusList *g_publishMsgList = NULL;
 static SoftBusList *g_discoveryMsgList = NULL;
 static bool g_isInited = false;
 static SoftBusMutex g_isInitedLock;
+static char g_regDataLevelChangePkgName[PKG_NAME_SIZE_MAX] = {0};
 
 typedef struct {
     ListNode node;
@@ -668,11 +669,30 @@ int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback)
 {
     LNN_LOGI(LNN_STATE, "RegDataLevelChangeCbInner enter");
     g_busCenterClient.dataLevelCb = *callback;
+    if (strcpy_s(g_regDataLevelChangePkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        LNN_LOGE(LNN_STATE, "copy pkgName fail");
+        return SOFTBUS_MEM_ERR;
+    }
     int32_t ret = ServerIpcRegDataLevelChangeCb(pkgName);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server RegDataLevelChangeCb failed, ret=%{public}d", ret);
     }
     return ret;
+}
+
+void RestartRegDataLevelChange(void)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    if (g_regDataLevelChangePkgName[0] == '\0') {
+        LNN_LOGI(LNN_STATE, "restart regDataLevelChange is not used");
+        return;
+    }
+    int32_t ret = ServerIpcRegDataLevelChangeCb(g_regDataLevelChangePkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server RegDataLevelChangeCb failed, ret=%{public}d", ret);
+        return;
+    }
+    LNN_LOGI(LNN_STATE, "Server RegDataLevelChangeCb succeed");
 }
 
 int32_t UnregDataLevelChangeCbInner(const char *pkgName)

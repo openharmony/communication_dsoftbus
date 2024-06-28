@@ -212,6 +212,7 @@ void ClientDeathProcTask(void)
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
+    RestartRegDataLevelChange();
 }
 
 void RestartEventCallbackUnregister(void)
