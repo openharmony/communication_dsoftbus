@@ -94,6 +94,7 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
         }
         option->socketOption.port = addr->info.ip.port;
         option->socketOption.protocol = LNN_PROTOCOL_IP;
+        option->socketOption.moduleId = AUTH;
         return true;
     }
     LNN_LOGE(LNN_STATE, "not supported type=%{public}d", addr->type);

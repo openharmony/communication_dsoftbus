@@ -141,7 +141,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_001, TestSize.Leve
     bool isClient = true;
     NotifyConnected(AUTH, fd, isClient);
     NotifyDisconnected(fd);
-    StopSocketListening();
+    StopSocketListening(AUTH);
 
     int32_t ret = ProcessSocketOutEvent(AUTH, fd);
     EXPECT_TRUE(ret == SOFTBUS_ERR);

@@ -468,4 +468,3 @@ int32_t Ipv4AddrToAddrIn(SoftBusSockAddrIn *addrIn, const char *ip, uint16_t por
     addrIn->sinPort = SoftBusHtoNs(port);
     return SOFTBUS_OK;
 }
-
