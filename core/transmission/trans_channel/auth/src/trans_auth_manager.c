@@ -291,7 +291,7 @@ static int32_t FindConfigType(int32_t channelType, int32_t businessType)
     return SOFTBUS_CONFIG_TYPE_MAX;
 }
 
-static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
+static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
@@ -318,7 +318,7 @@ static int32_t TransAuthFillDataConfig(AppInfo *appInfo)
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     if (appInfo->peerData.dataConfig != 0) {
         uint32_t localDataConfig = 0;
-        int ret = TransGetLocalConfig(CHANNEL_TYPE_AUTH, appInfo->businessType, &localDataConfig);
+        int32_t ret = TransGetLocalConfig(CHANNEL_TYPE_AUTH, appInfo->businessType, &localDataConfig);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SVC, "get local config failed");
             return ret;
@@ -424,7 +424,7 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
     if (!CheckSessionNameValidOnAuthChannel(appInfo.myData.sessionName)) {
         TRANS_LOGE(TRANS_SVC, "check auth channel pkginfo invalid.");
         TransPostAuthChannelErrMsg(authId, SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED, "check msginfo failed");
-        TransHandleErrorAndCloseChannel(&extra, authId, ret);
+        TransHandleErrorAndCloseChannel(&extra, authId, SOFTBUS_TRANS_INVALID_SESSION_NAME);
         return;
     }
 
@@ -811,12 +811,7 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isCl
     if (info == NULL) {
         return NULL;
     }
-    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "lock failed");
-        goto EXIT_ERR;
-    }
     info->appInfo.myData.channelId = GenerateChannelId(true);
-    SoftBusMutexUnlock(&g_authChannelList->lock);
     if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo, isClient) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
