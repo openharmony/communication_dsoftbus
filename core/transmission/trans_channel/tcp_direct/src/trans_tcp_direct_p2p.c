@@ -174,6 +174,9 @@ static void ClearP2pSessionConn(void)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED && item->appInfo.routeType == WIFI_P2P) {
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL,
+                "clear sessionConn pkgName=%{public}s, pid=%{public}d, status=%{public}u, channelId=%{public}d",
+                item->appInfo.myData.pkgName, item->appInfo.myData.pid, item->status, item->channelId);
             sessionList->cnt--;
             ListAdd(&tempSessionConnList, &item->node);
         }
