@@ -223,7 +223,7 @@ static DiscDetailNode *GetDiscDetailByModuleName(char *moduleName)
 
 static int32_t AddDiscDetailNode(DiscDetailNode **discDetailNode, char *moduleName)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(discDetailNode != NULL, SOFTBUS_INVALID_PARAM, COMM_EVENT, "invald discDetailNode");
+    COMM_CHECK_AND_RETURN_RET_LOGE(discDetailNode != NULL, SOFTBUS_INVALID_PARAM, COMM_EVENT, "invalid discDetailNode");
     DiscDetailNode *newNode = (DiscDetailNode *)SoftBusCalloc(sizeof(DiscDetailNode));
     COMM_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_ERR, COMM_EVENT, "malloc fail");
     if (strcpy_s(newNode->moduleName, MODULE_NAME_MAX_LEN, moduleName) != EOK) {
