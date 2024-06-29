@@ -617,6 +617,7 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
         TRANS_LOGE(TRANS_SVC, "malloc appInfo failed");
         (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
         (void)TransDelLaneReqFromPendingList(laneHandle, true);
+        TransFreeLane(laneHandle, param.isQosLane);
         return;
     }
     ret = CreateAppInfoByParam(laneHandle, &param, appInfo);
