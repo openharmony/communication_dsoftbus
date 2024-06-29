@@ -121,5 +121,6 @@ group("unittest") {
     ":WifiDirectRoleOptionTest",
     "data:unittest",
     "entity:unittest",
+    "processor:unittest",
   ]
 }

@@ -71,6 +71,7 @@ DISCOVER_BEHAVIOR:
   PEER_PORT: { type: STRING, desc: peer device port }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
+  OS_TYPE: { type: INT32, desc: peer os type}
 
 DISCOVER_AUDIT:
   __BASE: {type: SECURITY, level: CRITICAL, desc: discovery security audit }

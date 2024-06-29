@@ -87,13 +87,15 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
         .type = CONNECTION_ADDR_WLAN,
         .info.ip.port = PORT
     };
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
-    int32_t ret = LnnNotifyDiscoveryDevice(&target, false);
+    int32_t ret = LnnNotifyDiscoveryDevice(&target, &infoReport, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnNotifyDiscoveryDevice(nullptr, false);
+    ret = LnnNotifyDiscoveryDevice(nullptr, &infoReport, false);
     EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
 }
 

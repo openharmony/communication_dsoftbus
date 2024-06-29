@@ -360,9 +360,15 @@ static int32_t GetAndCheckFileSize(
     if (crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         oneFrameSize -= (FRAME_HEAD_LEN + FRAME_CRC_LEN);
     }
-    uint64_t frameNumTemp = (*fileSize) / oneFrameSize;
-    if (((*fileSize) % oneFrameSize) != 0) {
-        frameNumTemp++;
+    uint64_t frameNumTemp;
+    if (oneFrameSize != 0) {
+        frameNumTemp = (*fileSize) / oneFrameSize;
+        if (((*fileSize) % oneFrameSize) != 0) {
+            frameNumTemp++;
+        }
+    } else {
+        TRANS_LOGE(TRANS_FILE, "there's division by zero risk");
+        return SOFTBUS_FILE_ERR;
     }
 
     /* add 1 means reserve frame to send destFile string */

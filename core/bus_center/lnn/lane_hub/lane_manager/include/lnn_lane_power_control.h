@@ -13,21 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef LNN_PARAMETER_UTILS_H
-#define LNN_PARAMETER_UTILS_H
-
-#include <stdbool.h>
+#ifndef LNN_LANE_POWER_CONTROL_H
+#define LNN_LANE_POWER_CONTROL_H
+ 
+#include <stdint.h>
 #include "lnn_lane_interface.h"
-
+ 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-bool IsLinkEnabled(LaneLinkType parameter);
-bool IsCloudSyncEnabled(void);
-bool IsPowerControlEnabled(void);
-
+ 
+#define LNN_MAC_LEN 18
+ 
+typedef struct {
+    LaneLinkType linkType;
+    char wifiDirectMac[LNN_MAC_LEN];
+    uint32_t bandWidth;
+} WifiDirectLinkInfo;
+ 
+int32_t EnablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo);
+void DisablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo);
+ 
 #ifdef __cplusplus
 }
 #endif
-#endif // LNN_PARAMETER_UTILS_H
+#endif // LNN_LANE_POWER_CONTROL_H
