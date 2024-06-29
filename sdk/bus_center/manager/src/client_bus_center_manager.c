@@ -680,7 +680,7 @@ int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback)
     return ret;
 }
 
-void RestartRegDataLevelChange(void)
+void RestartRegDataLevelChange()
 {
     LNN_LOGI(LNN_STATE, "enter");
     if (g_regDataLevelChangePkgName[0] == '\0') {
