@@ -372,7 +372,7 @@ static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
     bool isQosLane = false;
     int32_t ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId, &laneHandle, &isQosLane, &isAsync);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, TRANS_CTRL, ret, "get socket channel lane info failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "get socket channel lane info failed, ret=%{public}d", ret);
     TRANS_LOGI(TRANS_CTRL, "wait lane state, sessionId=%{public}d, laneHandle=%{public}u", sessionId, laneHandle);
     if (isQosLane && laneHandle != INVALID_LANE_REQ_ID) {
         TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -404,12 +404,12 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
         CoreSessionState state = CORE_SESSION_STATE_INIT;
         ret = TransGetSocketChannelStateBySession(sessionName, channelId, &state);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
-            ret == SOFTBUS_OK, TRANS_CTRL, ret, "get socket channel info failed, ret=%{public}d", ret);
+            ret == SOFTBUS_OK, ret, TRANS_CTRL, "get socket channel info failed, ret=%{public}d", ret);
         (void)TransSetSocketChannelStateBySession(sessionName, channelId, CORE_SESSION_STATE_CANCELLING);
         if (state == CORE_SESSION_STATE_WAIT_LANE) {
             ret = CancelWaitLaneState(sessionName, channelId);
             TRANS_CHECK_AND_RETURN_RET_LOGE(
-                ret == SOFTBUS_OK, TRANS_CTRL, ret, "cancel wait lane failed, ret=%{public}d", ret);
+                ret == SOFTBUS_OK, ret, TRANS_CTRL, "cancel wait lane failed, ret=%{public}d", ret);
         }
     } else {
         (void)TransSetSocketChannelStateByChannel(channelId, channelType, CORE_SESSION_STATE_CANCELLING);
