@@ -209,6 +209,7 @@ void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVe
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(id, type, &nodeInfo) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "GetRemoteNodeInfo failed IdCategory type=%{public}d", type);
         return;
     }
     if (strncpy_s(deviceVersion, len, nodeInfo.deviceInfo.deviceVersion,
