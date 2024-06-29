@@ -1190,7 +1190,7 @@ static void FillProxyHandshakeExtra(
     extra->peerChannelId = chan->peerId;
     extra->socketName = socketName;
     extra->authId = chan->authHandle.authId;
-    extra->connectionId = chan->connId;
+    extra->connectionId = (int32_t)chan->connId;
     extra->channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY;
     extra->linkType = chan->type;
 

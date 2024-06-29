@@ -36,6 +36,7 @@ void P2pDestroyGroupState::Enter(const std::shared_ptr<P2pOperation> &operation)
     operation_ = operation;
     operation_->timerId_ = timer_.Register(
         [this]() {
+            CONN_LOGE(CONN_WIFI_DIRECT, "timeout");
             P2pOperationResult result {};
             result.errorCode_ = SOFTBUS_TIMOUT;
             P2pEntity::GetInstance().currentFrequency_ = 0;
@@ -53,21 +54,25 @@ void P2pDestroyGroupState::Exit()
 
 int P2pDestroyGroupState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pDestroyGroupState::Connect(const std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pDestroyGroupState::DestroyGroup(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pDestroyGroupState::RemoveLink(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
@@ -98,6 +103,7 @@ void P2pDestroyGroupState::OnP2pConnectionChangeEvent(
         result.errorCode_ = SOFTBUS_OK;
     } else {
         result.errorCode_ = SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED;
+        CONN_LOGE(CONN_WIFI_DIRECT, "destroy group call event failed, error=%d", result.errorCode_);
     }
     operation_->promise_.set_value(result);
     ChangeState(P2pAvailableState::Instance(), nullptr);

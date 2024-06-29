@@ -1231,10 +1231,7 @@ int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, 
 {
     uint32_t i;
     int32_t ret;
-    if (!IsValidString(networkId, ID_MAX_LEN)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (info == NULL) {
+    if (!IsValidString(networkId, ID_MAX_LEN) || info == NULL) {
         LNN_LOGE(LNN_LEDGER, "para error.");
         return SOFTBUS_INVALID_PARAM;
     }

@@ -267,17 +267,6 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
     return SOFTBUS_OK;
 }
 
-/* A helper function for copying TLV value to destination */
-static int32_t CopyValue(void *dst, uint32_t dstLen, const void *src, uint32_t srcLen, const char *hint)
-{
-    if (memcpy_s(dst, dstLen, src, srcLen) != EOK) {
-        DISC_LOGE(DISC_BLE, "parse tlv memcpy failed, tlvType=%{public}s, tlvLen=%{public}u, dstLen=%{public}u",
-            hint, srcLen, dstLen);
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 /* A helper function for convert br mac bin address to string address */
 static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32_t srcLen)
 {
@@ -295,18 +284,12 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32
 
 static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data, uint32_t len)
 {
-    int32_t ret = CopyValue(device->info->addr[0].info.ble.udidHash, UDID_HASH_LEN,
-        (void *)data, len, "TLV_TYPE_DEVICE_ID_HASH");
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "parse tlv copy device id hash value failed");
-        return ret;
-    }
-    ret = ConvertBytesToHexString((char *)device->info->devId, DISC_MAX_DEVICE_ID_LEN,
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(device->info->addr[0].info.ble.udidHash, UDID_HASH_LEN,
+        (void *)data, len) == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "parse tlv copy device id hash value failed");
+
+    int32_t ret = ConvertBytesToHexString((char *)device->info->devId, DISC_MAX_DEVICE_ID_LEN,
         (const uint8_t *)device->info->addr[0].info.ble.udidHash, len);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "ConvertBytesToHexString failed");
-        return ret;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "ConvertBytesToHexString failed");
     return SOFTBUS_OK;
 }
 
@@ -317,22 +300,16 @@ static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, u
         uint32_t devNameLen = strlen((char *)data) + 1; // +1 is device name end '\0'
         *len = (devNameLen > remainLen) ? remainLen : devNameLen;
     }
-    int32_t ret = CopyValue(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
-        (void *)data, *len, "TLV_TYPE_DEVICE_NAME");
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "parse tlv copy device name value failed");
-        return ret;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
+        (void *)data, *len) == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "parse tlv copy device name value failed");
     return SOFTBUS_OK;
 }
 
 static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const uint32_t len)
 {
     uint8_t recvDevType[DEVICE_TYPE_LEN] = {0};
-    int32_t ret = CopyValue(recvDevType, DEVICE_TYPE_LEN, (void *)data, len, "TLV_TYPE_DEVICE_TYPE");
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(recvDevType, DEVICE_TYPE_LEN, (void *)data, len) == EOK,
+        SOFTBUS_MEM_ERR, DISC_BLE, "parse tlv copy device type value failed");
     device->info->devType = recvDevType[0];
     if (len == DEVICE_TYPE_LEN) {
         device->info->devType = (recvDevType[1] << ONE_BYTE_LENGTH) | recvDevType[0];
@@ -424,8 +401,9 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                 if (len > RANGE_POWER_TYPE_LEN) {
                     break;
                 }
-                ret = CopyValue(&device->power, RANGE_POWER_TYPE_LEN, (void *)&data[curLen + 1], len,
-                                "TLV_TYPE_RANGE_POWER");
+                DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(&device->power, RANGE_POWER_TYPE_LEN,
+                    (void *)&data[curLen + 1], len) == EOK,
+                    SOFTBUS_MEM_ERR, DISC_BLE, "parse tlv copy range power failed");
                 break;
             default:
                 DISC_LOGW(DISC_BLE, "Unknown TLV, just skip, tlvType=%{public}d, tlvLen=%{public}u", type, len);
