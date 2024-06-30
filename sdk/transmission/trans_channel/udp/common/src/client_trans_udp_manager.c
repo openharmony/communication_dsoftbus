@@ -227,6 +227,31 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
     return newChannel;
 }
 
+static int32_t TransSetdFileIdByChannelId(int32_t channelId, int32_t value)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannel *channelNode = NULL;
+    LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
+        if (channelNode->channelId == channelId) {
+            channelNode->dfileId = value;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_SDK, "udp channel not found, channelId=%{public}d.", channelId);
+    return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
+}
+
 int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort)
 {
     TRANS_LOGD(TRANS_SDK, "TransOnUdpChannelOpened enter");
@@ -245,29 +270,33 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
         return SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED;
     }
     TRANS_LOGI(TRANS_SDK, "add new udp channel success, channelId=%{public}d, businessType=%{public}d",
-        newChannel->channelId, newChannel->businessType);
+        channel->channelId, channel->businessType);
 
     int32_t ret = SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     switch (channel->businessType) {
         case BUSINESS_TYPE_STREAM:
             ret = TransOnstreamChannelOpened(channel, udpPort);
             if (ret != SOFTBUS_OK) {
-                (void)TransDeleteUdpChannel(newChannel->channelId);
+                (void)TransDeleteUdpChannel(channel->channelId);
                 TRANS_LOGE(TRANS_SDK, "on stream channel opened failed.");
             }
             break;
         case BUSINESS_TYPE_FILE:
             ret = TransOnFileChannelOpened(sessionName, channel, udpPort);
             if (ret < SOFTBUS_OK) {
-                (void)TransDeleteUdpChannel(newChannel->channelId);
+                (void)TransDeleteUdpChannel(channel->channelId);
                 TRANS_LOGE(TRANS_SDK, "on file channel open failed.");
                 return ret;
             }
-            newChannel->dfileId = ret;
+            ret = TransSetdFileIdByChannelId(channel->channelId, ret);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_SDK, "set dfileId failed, ret = %{public}d", ret);
+                return ret;
+            }
             ret = SOFTBUS_OK;
             break;
         default:
-            (void)TransDeleteUdpChannel(newChannel->channelId);
+            (void)TransDeleteUdpChannel(channel->channelId);
             TRANS_LOGE(TRANS_SDK, "unsupport businessType=%{public}d.", channel->businessType);
             break;
     }
