@@ -377,6 +377,7 @@ static bool IsLocalSupportThreeState()
 
 static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *hbResp)
 {
+    uint32_t oldNetCapa = *deviceInfoNetCapacity;
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI);
     } else {
@@ -395,6 +396,7 @@ static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *
         (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
     }
     (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
+    LNN_LOGI(LNN_HEART_BEAT, "capability change:%{public}u->%{public}u", oldNetCapa, *deviceInfoNetCapacity);
 }
 
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
