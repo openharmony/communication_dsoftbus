@@ -31,6 +31,7 @@
 #include "lnn_node_info.h"
 #include "lnn_trans_lane.h"
 #include "lnn_lane_reliability.h"
+#include "lnn_lane_vap_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
@@ -1860,12 +1861,30 @@ static int32_t LnnP2pInit(void)
     return SOFTBUS_OK;
 }
 
+static void DumpHmlPreferChannel(const LinkRequest *request)
+{
+    char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(request->peerNetworkId, STRING_KEY_DEV_UDID,
+        udid, sizeof(udid)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid err");
+        return;
+    }
+    int32_t preferChannel = 0;
+    int32_t ret = LnnGetRecommendChannel(udid, &preferChannel);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get recommend channel fail, ret=%{public}d", ret);
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "[HML]prefer channel=%{public}d", preferChannel);
+}
+
 int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
 {
     if (request == NULL || callback == NULL) {
         LNN_LOGE(LNN_LANE, "invalid null request or callback");
         return SOFTBUS_INVALID_PARAM;
     }
+    DumpHmlPreferChannel(request);
     if (g_p2pLinkList == NULL) {
         int32_t ret = LnnP2pInit();
         LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_LANE, "p2p not init");
