@@ -459,15 +459,11 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
         return SOFTBUS_MALLOC_ERR;
     }
     recommendLinkList->linkTypeNum = 0;
-    if (SelectExpectLaneByParameter(recommendLinkList) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "SelectExpectLaneByParameter succ, laneReqId=%{public}u", laneReqId);
-    } else {
-        int32_t ret = SelectExpectLanesByQos((const char *)allocInfo->networkId, &selectParam, recommendLinkList);
-        if (ret != SOFTBUS_OK) {
-            SoftBusFree(recommendLinkList);
-            LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneReqId=%{public}u", laneReqId);
-            return ret;
-        }
+    int32_t ret = SelectExpectLanesByQos((const char *)allocInfo->networkId, &selectParam, recommendLinkList);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(recommendLinkList);
+        LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneReqId=%{public}u", laneReqId);
+        return ret;
     }
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
@@ -478,7 +474,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
         LNN_LOGI(LNN_LANE, "expect linklist nums=%{public}u, priority=%{public}u, link=%{public}u",
             recommendLinkList->linkTypeNum, i, recommendLinkList->linkType[i]);
     }
-    int32_t ret = StartTriggerLink(laneReqId, allocInfo, listener, recommendLinkList);
+    ret = StartTriggerLink(laneReqId, allocInfo, listener, recommendLinkList);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "trigger link fail, laneReqId=%{public}u", laneReqId);
