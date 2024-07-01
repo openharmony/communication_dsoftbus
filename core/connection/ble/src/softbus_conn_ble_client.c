@@ -190,7 +190,7 @@ static void BleGattcConnStateCallback(int32_t underlayerHandle, int32_t state, i
         return;
     }
     if (state == SOFTBUS_BT_DISCONNECT && connection->state == BLE_CONNECTION_STATE_CONNECTING) {
-        CONN_LOGI(CONN_BLE, "Unable to scan broadcast for 3 seconds during ble connection, failed. Waiting for retry, "
+        CONN_LOGI(CONN_BLE, "unable to scan broadcast for 3 seconds during ble connection, failed. Waiting for retry, "
             "connId=%{public}u", connection->connectionId);
         int32_t ret = SoftBusMutexLock(&connection->lock);
         if (ret != SOFTBUS_OK) {

@@ -987,7 +987,9 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connO
         TRANS_LOGE(TRANS_SVC, "channelId convert addr fail. channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_CHANNELID_CONVERT_ADDR_FAILED;
     }
-    return LnnNotifyDiscoveryDevice(&addr, true);
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    return LnnNotifyDiscoveryDevice(&addr, &infoReport, true);
 }
 
 int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)

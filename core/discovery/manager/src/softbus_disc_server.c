@@ -74,6 +74,8 @@ static int32_t DiscoveryErroCodeProcess(int32_t erroCode)
 
 int32_t DiscIpcPublishService(const char *packageName, const PublishInfo *info)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
+        "invalid parameters");
     int32_t ret = DiscPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "ServerPublishService failed");
@@ -99,6 +101,8 @@ int32_t DiscIpcUnPublishService(const char *packageName, int32_t publishId)
 
 int32_t DiscIpcStartDiscovery(const char *packageName, const SubscribeInfo *info)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
+        "invalid parameters");
     int32_t ret = DiscStartDiscovery(packageName, info, &g_discInnerCb);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "ServerStartDiscovery failed");

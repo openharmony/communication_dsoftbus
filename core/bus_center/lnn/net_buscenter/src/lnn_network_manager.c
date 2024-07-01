@@ -481,8 +481,10 @@ static void RestoreBrNetworkDevices(void)
 {
     DeviceNightMode *item = NULL;
     DeviceNightMode *next = NULL;
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_nightOnCache, DeviceNightMode, node) {
-        if (LnnNotifyDiscoveryDevice(&(item->addrs), true) != SOFTBUS_OK) {
+        if (LnnNotifyDiscoveryDevice(&(item->addrs), &infoReport, true) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "notify device found failed\n");
         }
         ListDelete(&item->node);
