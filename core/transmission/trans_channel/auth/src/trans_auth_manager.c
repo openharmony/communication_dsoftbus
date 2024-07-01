@@ -106,7 +106,7 @@ static int32_t GetAuthChannelInfoByChanId(int32_t channelId, AuthChannelInfo *ds
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&g_authChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
@@ -120,7 +120,7 @@ static int32_t GetAuthIdByChannelId(int32_t channelId)
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-    int32_t authId = -1;
+    int32_t authId = AUTH_INVALID_ID;
     AuthChannelInfo *info = NULL;
     LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
         if (info->appInfo.myData.channelId == channelId) {
@@ -129,7 +129,7 @@ static int32_t GetAuthIdByChannelId(int32_t channelId)
             return authId;
         }
     }
-    SoftBusMutexUnlock(&g_authChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return authId;
 }
 
@@ -154,7 +154,7 @@ static int32_t GetChannelInfoByAuthId(int32_t authId, AuthChannelInfo *dstInfo)
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&g_authChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
@@ -173,7 +173,7 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
     channelInfo.sessionKey = (char *)AUTH_SESSION_KEY;
     channelInfo.keyLen = strlen(channelInfo.sessionKey) + 1;
     channelInfo.autoCloseTime = appInfo->autoCloseTime;
-    channelInfo.reqId = (char*)appInfo->reqId;
+    channelInfo.reqId = (char *)appInfo->reqId;
     channelInfo.dataConfig = appInfo->myData.dataConfig;
     channelInfo.timeStart = appInfo->timeStart;
     channelInfo.connectType = appInfo->connectType;
@@ -249,7 +249,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
         item = CreateAuthChannelInfo(appInfo->myData.sessionName, false);
         if (item == NULL) {
             TRANS_LOGE(TRANS_SVC, "CreateAuthChannelInfo failed");
-            SoftBusMutexUnlock(&g_authChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
             return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
         }
         item->authId = authId;
@@ -259,7 +259,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SVC, "AddAuthChannelInfo failed");
             SoftBusFree(item);
-            SoftBusMutexUnlock(&g_authChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
             return ret;
         }
     }
@@ -268,10 +268,10 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
         ListDelete(&item->node);
         TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}" PRId64, item->appInfo.myData.channelId);
         SoftBusFree(item);
-        SoftBusMutexUnlock(&g_authChannelList->lock);
+        (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_MEM_ERR;
     }
-    SoftBusMutexUnlock(&g_authChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_OK;
 }
 
@@ -295,8 +295,7 @@ static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, ui
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        TRANS_LOGE(TRANS_SVC, "Invalid channelType=%{public}d, businessType=%{public}d",
-            channelType, businessType);
+        TRANS_LOGE(TRANS_SVC, "Invalid channelType=%{public}d, businessType=%{public}d", channelType, businessType);
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t maxLen;
@@ -678,8 +677,7 @@ static void DelAuthChannelInfoByAuthId(int32_t authId)
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
 }
 
-int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
-    uint16_t pkgLen, uint16_t sessionLen)
+int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName, uint16_t pkgLen, uint16_t sessionLen)
 {
     if (pkgName == NULL || sessionName == NULL) {
         TRANS_LOGE(TRANS_SVC, "invalid param");
@@ -811,7 +809,12 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isCl
     if (info == NULL) {
         return NULL;
     }
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        goto EXIT_ERR;
+    }
     info->appInfo.myData.channelId = GenerateChannelId(true);
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo, isClient) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -915,10 +918,10 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         AuthCloseChannel(channel->authId);
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
         SoftBusFree(channel);
-        SoftBusMutexUnlock(&g_authChannelList->lock);
+        (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_OK;
     }
-    SoftBusMutexUnlock(&g_authChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
@@ -1009,7 +1012,7 @@ int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&g_authChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     TRANS_LOGE(TRANS_CTRL, "Auth channel not find: channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
 }
@@ -1034,7 +1037,7 @@ int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&g_authChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     TRANS_LOGE(TRANS_SVC, "get connid failed");
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
