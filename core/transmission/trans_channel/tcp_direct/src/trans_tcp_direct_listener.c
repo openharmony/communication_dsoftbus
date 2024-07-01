@@ -187,7 +187,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         SoftBusFree(conn);
         return ret;
     }
-    ret = AddTrigger(conn->listenMod, fd, READ_TRIGGER);
+    ret = AddTrigger(module, fd, READ_TRIGGER);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add trigger failed, delete session conn.");
         TransDelSessionConnById(chanId);
