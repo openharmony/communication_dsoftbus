@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef LNN_PARAMETER_UTILS_H
-#define LNN_PARAMETER_UTILS_H
-
-#include <stdbool.h>
-#include "lnn_lane_interface.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-bool IsLinkEnabled(LaneLinkType parameter);
-bool IsCloudSyncEnabled(void);
-bool IsPowerControlEnabled(void);
-
-#ifdef __cplusplus
+#include "lnn_lane_power_control.h"
+#include "softbus_errcode.h"
+ 
+int32_t EnablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo)
+{
+    (void)wifiDirectInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
-#endif
-#endif // LNN_PARAMETER_UTILS_H
+ 
+void DisablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo)
+{
+    (void)wifiDirectInfo;
+}

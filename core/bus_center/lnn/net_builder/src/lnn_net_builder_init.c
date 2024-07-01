@@ -152,23 +152,26 @@ AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
     return &g_reAuthVerifyCallback;
 }
 
-int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const ConnectionAddr *addr,
-    const char* pkgName, bool isNeedConnect, bool needReportFailure)
+int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara *para, bool needReportFailure)
 {
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t rc = SOFTBUS_OK;
     bool isCreate = false;
 
     if (connFsm == NULL) {
-        connFsm = FindConnectionFsmByAddr(addr, false);
+        connFsm = FindConnectionFsmByAddr(&para->addr, false);
     }
     if (connFsm == NULL || connFsm->isDead) {
-        connFsm = StartNewConnectionFsm(addr, pkgName, isNeedConnect);
+        connFsm = StartNewConnectionFsm(&para->addr, para->pkgName, para->isNeedConnect);
         isCreate = true;
     }
     if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "process join lnn request failed");
         if (needReportFailure) {
-            LnnNotifyJoinResult((ConnectionAddr *)addr, NULL, SOFTBUS_ERR);
+            LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_ERR);
         }
         if (connFsm != NULL && isCreate) {
             LnnFsmRemoveMessageByType(&connFsm->fsm, FSM_CTRL_MSG_START);
@@ -179,8 +182,11 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const ConnectionAddr
         rc = SOFTBUS_ERR;
     }
     if (rc == SOFTBUS_OK) {
+        connFsm->connInfo.infoReport = para->infoReport;
         connFsm->connInfo.flag |=
             (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
+        LNN_LOGI(LNN_BUILDER, "infoReport.osType=%{public}d, infoReport.type=%{public}X",
+            connFsm->connInfo.infoReport.osType, connFsm->connInfo.infoReport.type);
     }
     return rc;
 }
@@ -189,13 +195,22 @@ void TryRemovePendingJoinRequest(void)
 {
     PendingJoinRequestNode *item = NULL;
     PendingJoinRequestNode *next = NULL;
+    JoinLnnMsgPara para;
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &LnnGetNetBuilder()->pendingList, PendingJoinRequestNode, node) {
         if (NeedPendingJoinRequest()) {
             return;
         }
         ListDelete(&item->node);
-        if (PostJoinRequestToConnFsm(NULL, &item->addr, DEFAULT_PKG_NAME, true, item->needReportFailure)
+        (void)memset_s(&para, sizeof(JoinLnnMsgPara), 0, sizeof(JoinLnnMsgPara));
+        para.addr = item->addr;
+        para.isNeedConnect = true;
+        if (strcpy_s(para.pkgName, strlen(DEFAULT_PKG_NAME), DEFAULT_PKG_NAME) != EOK) {
+            LNN_LOGE(LNN_BUILDER, "strcpy_s pkgName failed");
+            SoftBusFree(item);
+            continue;
+        }
+        if (PostJoinRequestToConnFsm(NULL, &para, item->needReportFailure)
             != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "post pending join request failed");
         }

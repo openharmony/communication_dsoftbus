@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include "form/lnn_event_form.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -27,7 +28,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    void (*OnDeviceFound)(const ConnectionAddr *addr);
+    void (*OnDeviceFound)(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport);
 } LnnDiscoveryImplCallback;
 
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);

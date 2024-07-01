@@ -984,6 +984,7 @@ int32_t P2pDirectChannelInit(void)
     AuthTransListener p2pTransCb = {
         .onDataReceived = OnAuthDataRecv,
         .onDisconnected = OnAuthChannelClose,
+        .onException = NULL,
     };
 
     ret = RegAuthTransListener(MODULE_P2P_LISTEN, &p2pTransCb);

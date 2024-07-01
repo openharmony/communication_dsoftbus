@@ -32,6 +32,11 @@ struct AuthOpenEvent {
     AuthHandle handle_;
 };
 
+struct AuthExceptionEvent {
+    int32_t error_;
+    AuthHandle handle_;
+};
+
 class AuthNegotiateChannel : public NegotiateChannel {
 public:
     struct OpenParam {

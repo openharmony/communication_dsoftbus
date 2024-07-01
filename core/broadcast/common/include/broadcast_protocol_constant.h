@@ -78,6 +78,7 @@ extern "C" {
 #define BYTE_SHIFT_BIT              1
 #define BYTE_SHIFT_2BIT             2
 #define BYTE_SHIFT_4BIT             4
+#define BYTE_SHIFT_7BIT             7
 #define BYTE_SHIFT_8BIT             8
 #define BYTE_SHIFT_13BIT            13
 

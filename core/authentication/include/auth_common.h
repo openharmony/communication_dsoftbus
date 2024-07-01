@@ -110,6 +110,7 @@ typedef struct {
 typedef struct {
     void (*OnDataReceived)(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len);
     void (*OnDisconnected)(AuthHandle authHandle);
+    void (*OnException)(AuthHandle authHandle, int32_t error);
 } AuthTransCallback;
 
 /* Auth handler */
