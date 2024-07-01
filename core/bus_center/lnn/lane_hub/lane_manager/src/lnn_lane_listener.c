@@ -442,20 +442,46 @@ int32_t UnRegisterLaneListener(LaneType type)
     return SOFTBUS_OK;
 }
 
+static int32_t CreateSinkLinkInfo(const struct WifiDirectSinkLink *link, LaneLinkInfo *linkInfo)
+{
+    if (link == NULL || linkInfo == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    linkInfo->type = link->linkType == WIFI_DIRECT_LINK_TYPE_HML ? LANE_HML : LANE_P2P;
+    LNN_LOGI(LNN_LANE, "bandWidth=%{public}d", link->bandWidth);
+    linkInfo->linkInfo.p2p.bw = (LaneBandwidth)link->bandWidth;
+    if (strcpy_s(linkInfo->linkInfo.p2p.connInfo.localIp, IP_LEN, link->localIp) != EOK ||
+        strcpy_s(linkInfo->linkInfo.p2p.connInfo.peerIp, IP_LEN, link->remoteIp) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy Ip fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    linkInfo->linkInfo.p2p.channel = link->channelId;
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(link->remoteUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
+        char *anonyUuid = NULL;
+        Anonymize(link->remoteUuid, &anonyUuid);
+        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, remoteUuid=%{public}s", anonyUuid);
+        AnonymizeFree(anonyUuid);
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    if (strncpy_s(linkInfo->peerUdid, UDID_BUF_LEN, nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "copy peerudid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *link)
 {
     if (link == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    if (link->linkType != WIFI_DIRECT_LINK_TYPE_HML) {
-        LNN_LOGE(LNN_LANE, "on server wifidirect connected not support");
-        return;
-    }
-    LNN_LOGI(LNN_LANE, "on server wifidirect connected");
+    LNN_LOGI(LNN_LANE, "on server wifidirect link=%{public}d connected", link->linkType);
     LaneLinkInfo laneLinkInfo;
     (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    if (GetStateNotifyInfo(link->remoteIp, link->remoteUuid, &laneLinkInfo) != SOFTBUS_OK) {
+    if (CreateSinkLinkInfo(link, &laneLinkInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "generate link info fail");
         return;
     }
@@ -464,8 +490,6 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
         LNN_LOGE(LNN_LANE, "get local udid fail");
         return;
     }
-    laneLinkInfo.type = LANE_HML;
-    laneLinkInfo.linkInfo.p2p.channel = link->channelId;
     uint64_t laneId = GenerateLaneId(localUdid, laneLinkInfo.peerUdid, laneLinkInfo.type);
     if (laneId == INVALID_LANE_ID) {
         LNN_LOGE(LNN_LANE, "generate laneid fail");
@@ -482,11 +506,7 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    if (link->linkType != WIFI_DIRECT_LINK_TYPE_HML) {
-        LNN_LOGE(LNN_LANE, "on server wifidirect disconnected not support");
-        return;
-    }
-    LNN_LOGI(LNN_LANE, "on server wifidirect disconnected");
+    LNN_LOGI(LNN_LANE, "on server wifidirect link=%{public}d disconnected", link->linkType);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(link->remoteUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
