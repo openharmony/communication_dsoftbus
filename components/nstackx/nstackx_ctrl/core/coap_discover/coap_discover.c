@@ -675,7 +675,7 @@ static void CoapServiceDiscoverStop(void)
     SetModeInfo(DISCOVER_MODE);
 #ifdef DFINDER_SAVE_DEVICE_LIST
     ClearRemoteDeviceListBackup();
-    DFINDER_LOGW(TAG, "clear device list backup");
+    DFINDER_LOGD(TAG, "clear device list backup");
 #endif
     g_coapDiscoverType = COAP_BROADCAST_TYPE_DEFAULT;
     g_coapMaxDiscoverCount = COAP_DEFAULT_DISCOVER_COUNT;
