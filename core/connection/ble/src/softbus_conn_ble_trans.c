@@ -588,7 +588,7 @@ void *BleSendTask(void *arg)
     while (true) {
         int32_t status = ConnBleDequeueBlock((void **)(&sendNode));
         if (status == SOFTBUS_TIMOUT && sendNode == NULL) {
-            CONN_LOGE(CONN_BLE, "ble dequeue time out err=%{public}d", status);
+            CONN_LOGD(CONN_BLE, "ble dequeue time out err=%{public}d", status);
             CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBleSendLPInfo.lock) == SOFTBUS_OK,
                 NULL, CONN_BLE, "lock fail!");
             if (g_startBleSendLPInfo.messagePosted) {

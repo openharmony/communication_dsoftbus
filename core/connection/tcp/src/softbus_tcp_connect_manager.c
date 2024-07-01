@@ -215,7 +215,7 @@ static void DelTcpConnNode(uint32_t connectionId)
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
-    CONN_LOGE(CONN_COMMON, "DelTcpConnNode failed. ConnectionId not found. connId=%{public}08x", connectionId);
+    CONN_LOGE(CONN_COMMON, "ConnectionId not found. connId=%{public}08x", connectionId);
     return;
 }
 
@@ -246,7 +246,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const Conne
 
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
     if (tcpConnInfoNode == NULL) {
-        CONN_LOGE(CONN_COMMON, "malloc TcpConnInfoNode");
+        CONN_LOGE(CONN_COMMON, "malloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -325,7 +325,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->info.socketInfo.fd == fd) {
             if (memcpy_s(tcpInfo, sizeof(TcpConnInfoNode), item, sizeof(TcpConnInfoNode)) != EOK) {
-                CONN_LOGE(CONN_COMMON, "GetTcpInfoByFd:memcpy_s failed");
+                CONN_LOGE(CONN_COMMON, "memcpy_s failed");
                 (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
                 return SOFTBUS_MEM_ERR;
             }
@@ -470,14 +470,14 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
 {
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
     if (tcpConnInfoNode == NULL) {
-        CONN_LOGE(CONN_COMMON, "malloc TcpConnInfoNode failed");
+        CONN_LOGE(CONN_COMMON, "malloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
 
     if (strcpy_s(tcpConnInfoNode->info.socketInfo.addr, sizeof(tcpConnInfoNode->info.socketInfo.addr),
             option->socketOption.addr) != EOK ||
         memcpy_s(&tcpConnInfoNode->result, sizeof(ConnectResult), result, sizeof(ConnectResult)) != EOK) {
-        CONN_LOGE(CONN_COMMON, "copy TcpConnInfoNode failed");
+        CONN_LOGE(CONN_COMMON, "copy failed");
         SoftBusFree(tcpConnInfoNode);
         return SOFTBUS_STRCPY_ERR;
     }
@@ -643,7 +643,7 @@ int32_t TcpPostBytes(
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     if (fd == -1) {
         SoftBusFree((void*)data);
-        CONN_LOGE(CONN_COMMON, "TcpPostBytes failed, connectionId not found. connectionId=%{public}08x", connectionId);
+        CONN_LOGE(CONN_COMMON, "connectionId not found. connectionId=%{public}08x", connectionId);
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
     ssize_t bytes = ConnSendSocketData(fd, (const char *)data, len, flag);
@@ -767,7 +767,7 @@ static void InitTcpInterface(void)
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     if (callback == NULL) {
-        CONN_LOGW(CONN_INIT, "ConnectCallback is NULL.");
+        CONN_LOGW(CONN_INIT, "callback is NULL.");
         return NULL;
     }
     if (InitProperty() != SOFTBUS_OK) {
