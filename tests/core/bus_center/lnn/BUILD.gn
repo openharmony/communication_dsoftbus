@@ -1049,7 +1049,6 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger_manager.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
-    "lane/src/lnn_parameter_utils_mock.cpp",
     "net_ledger/lnn_local_ledger_deps_mock.cpp",
     "net_ledger/lnn_local_ledger_test.cpp",
   ]
@@ -1344,7 +1343,6 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "lane/src/lnn_lane_deps_mock.cpp",
     "lane/src/lnn_lane_test.cpp",
-    "lane/src/lnn_link_enabled_mock.cpp",
     "lane/src/lnn_wifi_adpter_mock.cpp",
   ]
 

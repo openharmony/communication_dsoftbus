@@ -23,7 +23,6 @@
 extern "C" {
 #endif
 
-bool IsLinkEnabled(LaneLinkType parameter);
 bool IsCloudSyncEnabled(void);
 bool IsPowerControlEnabled(void);
 
