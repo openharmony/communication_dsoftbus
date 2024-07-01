@@ -15,11 +15,6 @@
 
 #include "lnn_parameter_utils.h"
 
-bool IsLinkEnabled(LaneLinkType parameter)
-{
-    return false;
-}
-
 bool IsCloudSyncEnabled(void)
 {
     return false;

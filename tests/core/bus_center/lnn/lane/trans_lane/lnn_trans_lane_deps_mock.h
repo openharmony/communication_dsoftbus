@@ -45,7 +45,6 @@ public:
     virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
     virtual int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resourceItem) = 0;
     virtual void FreeLaneReqId(uint32_t laneReqId) = 0;
-    virtual int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList) = 0;
     virtual int32_t AddLaneBusinessInfoItem(LaneType laneType, uint64_t laneId) = 0;
     virtual int32_t DelLaneBusinessInfoItem(LaneType laneType, uint64_t laneId) = 0;
     virtual int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo) = 0;
@@ -69,7 +68,6 @@ public:
     MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
     MOCK_METHOD2(FindLaneResourceByLaneId, int32_t (uint64_t laneId, LaneResource *resourceItem));
     MOCK_METHOD1(FreeLaneReqId, void (uint32_t laneReqId));
-    MOCK_METHOD1(SelectExpectLaneByParameter, int32_t (LanePreferredLinkList *));
     MOCK_METHOD2(AddLaneBusinessInfoItem, int32_t (LaneType laneType, uint64_t laneId));
     MOCK_METHOD2(DelLaneBusinessInfoItem, int32_t (LaneType laneType, uint64_t laneId));
     MOCK_METHOD2(LaneLinkupNotify, int32_t (const char *peerUdid, const LaneLinkInfo *laneLinkInfo));
