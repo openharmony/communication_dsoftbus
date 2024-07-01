@@ -392,68 +392,52 @@ static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t lane
     return SOFTBUS_OK;
 }
 
-static int32_t ProcExistLaneResource(bool isServerResourceAdd, LaneResource *laneResource)
+static int32_t UpdateExistLaneResource(LaneResource *resourceItem, bool isServerSide)
 {
-    if (isServerResourceAdd) {
-        if (laneResource->isServerSide) {
+    if (isServerSide) {
+        if (resourceItem->isServerSide) {
             LNN_LOGE(LNN_LANE, "server laneId=%{public}" PRIu64 " is existed, add server lane resource fail",
-            laneResource->laneId);
+            resourceItem->laneId);
             return SOFTBUS_LANE_TRIGGER_LINK_FAIL;
-        } else {
-            laneResource->isServerSide = true;
-            LNN_LOGI(LNN_LANE, "add server laneId=%{public}" PRIu64 " to resource pool succ",
-                laneResource->laneId);
-            return SOFTBUS_OK;
         }
-    } else {
-        laneResource->clientRef++;
-        LNN_LOGI(LNN_LANE, "add client laneId=%{public}" PRIu64 " to resource pool succ, clientRef=%{public}u",
-            laneResource->laneId, laneResource->clientRef);
+        resourceItem->isServerSide = true;
+        LNN_LOGI(LNN_LANE, "add server laneId=%{public}" PRIu64 " to resource pool succ",
+            resourceItem->laneId);
         return SOFTBUS_OK;
     }
-}
- 
-static int32_t AddExistResource(const LaneLinkInfo *linkInfo, bool isServerSide)
-{
-    if (LaneLock() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "lane lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    LaneResource* resourceItem = GetValidLaneResource(linkInfo);
-    if (resourceItem == NULL) {
-        LNN_LOGE(LNN_LANE, "resource not found");
-        LaneUnlock();
-        return SOFTBUS_LANE_NOT_FOUND;
-    }
-    int32_t ret = ProcExistLaneResource(isServerSide, resourceItem);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "proc laneResource fail, ret=%{public}d", ret);
-        LaneUnlock();
-        return ret;
-    }
-    LaneUnlock();
+    resourceItem->clientRef++;
+    LNN_LOGI(LNN_LANE, "add client laneId=%{public}" PRIu64 " to resource pool succ, clientRef=%{public}u",
+        resourceItem->laneId, resourceItem->clientRef);
     return SOFTBUS_OK;
 }
 
 int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide)
 {
     if (linkInfo == NULL || laneId == INVALID_LANE_ID) {
-        LNN_LOGE(LNN_LANE, "linkInfo is nullptr");
+        LNN_LOGE(LNN_LANE, "linkInfo is nullptr or invalid laneId");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = AddExistResource(linkInfo, isServerSide);
-    if (ret == SOFTBUS_LANE_NOT_FOUND) {
-        ret = CreateNewLaneResource(linkInfo, laneId, isServerSide);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "create laneResource fail, ret=%{public}d", ret);
-        }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
-    if (IsPowerControlEnabled()) {
-        if (ret == SOFTBUS_OK && linkInfo->type == LANE_HML) {
-            DetectEnableWifiDirectApply();
-        }
+    int32_t addResult = SOFTBUS_ERR;
+    LaneResource* resourceItem = GetValidLaneResource(linkInfo);
+    if (resourceItem != NULL) {
+        addResult = UpdateExistLaneResource(resourceItem, isServerSide);
+        LaneUnlock();
+        return addResult;
     }
-    return ret;
+    LaneUnlock();
+    addResult = CreateNewLaneResource(linkInfo, laneId, isServerSide);
+    if (addResult != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "create laneResource fail, result=%{public}d", addResult);
+        return addResult;
+    }
+    if (linkInfo->type == LANE_HML && IsPowerControlEnabled()) {
+        DetectEnableWifiDirectApply();
+    }
+    return SOFTBUS_OK;
 }
 
 static bool IsNeedDelResource(uint64_t laneId, bool isServerSide, LaneResource *item)
@@ -720,6 +704,7 @@ static int32_t CopyAllDevIdWithoutLock(LaneLinkType type, uint8_t resourceNum, c
         }
     }
     if (tmpCnt == 0) {
+        SoftBusFree(itemList);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     *devIdList = (char *)itemList;
@@ -729,7 +714,7 @@ static int32_t CopyAllDevIdWithoutLock(LaneLinkType type, uint8_t resourceNum, c
 
 int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt)
 {
-    if (devIdList == NULL || devIdCnt ==NULL || type == LANE_LINK_TYPE_BUTT) {
+    if (devIdList == NULL || devIdCnt == NULL || type == LANE_LINK_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "invalid parem");
         return SOFTBUS_INVALID_PARAM;
     }
