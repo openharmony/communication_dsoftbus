@@ -120,5 +120,15 @@ void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType a
 {
     return GetLnnConnInterface()->LnnStopOfflineTimingByHeartbeat(networkId, addrType);
 }
+
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
+{
+    return GetLnnConnInterface()->LnnGetLocalNodeInfoSafe(info);
+}
+
+int32_t LnnSetLocalStateVersionReason(void)
+{
+    return GetLnnConnInterface()->LnnSetLocalStateVersionReason();
+}
 }
 } // namespace OHOS
