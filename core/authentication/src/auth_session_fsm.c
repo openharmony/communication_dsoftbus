@@ -598,7 +598,9 @@ static void HandleMsgPostDeviceId(AuthFsm *authFsm, const MessagePara *para)
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVID_FAIL);
         return;
     }
-    LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
+    if (info->isServer) {
+        LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
+    }
 }
 
 static void SyncDevIdStateEnter(FsmStateMachine *fsm)
@@ -1105,6 +1107,7 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
         AUTH_LOGE(AUTH_FSM, "authFsm is null");
         return;
     }
+    AUTH_LOGI(AUTH_FSM, "auth state enter, authSeq=%{public}" PRId64, authFsm->authSeq);
     authFsm->curState = STATE_DEVICE_AUTH;
     AuthSessionInfo *info = &authFsm->info;
     if (info->normalizedType == NORMALIZED_SUPPORT || info->isSupportFastAuth) {
@@ -1122,7 +1125,7 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
     }
     return;
 ERR_EXIT:
-    AUTH_LOGE(AUTH_FSM, "auth state enter, ret=%{public}d", ret);
+    AUTH_LOGE(AUTH_FSM, "auth state enter, fail ret=%{public}d", ret);
     CompleteAuthSession(authFsm, ret);
 }
 
