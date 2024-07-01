@@ -780,6 +780,14 @@ int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
 
 static void OnlinePreventBrConnection(const NodeInfo *info)
 {
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(info->networkId, &osType)) {
+        LNN_LOGE(LNN_BUILDER, "get remote osType fail");
+    }
+    if (osType != HO_OS_TYPE) {
+        LNN_LOGD(LNN_BUILDER, "not pend br connection");
+        return;
+    }
     const NodeInfo *localNodeInfo = LnnGetLocalNodeInfo();
     if (localNodeInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "get local node info fail");
@@ -791,7 +799,6 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "copy br mac fail");
         return;
     }
-
     bool preventFlag = false;
     do {
         LNN_LOGI(LNN_LEDGER, "check the ble start timestamp, local=%{public}" PRId64", peer=%{public}" PRId64"",
