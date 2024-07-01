@@ -39,6 +39,7 @@ int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, u
 int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback);
 int32_t UnregDataLevelChangeCbInner(const char *pkgName);
 int32_t SetDataLevelInner(const DataLevel *dataLevel);
+void RestartRegDataLevelChange(void);
 
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb);

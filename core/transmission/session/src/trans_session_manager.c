@@ -397,9 +397,16 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
+    LinkDownInfo info = {
+        .uuid = uuid,
+        .udid = udid,
+        .peerIp = peerIp,
+        .networkId = networkId,
+        .routeType = type
+    };
 
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &sessionServerList, SessionServer, node) {
-        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, uuid, udid, peerIp, networkId, type);
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, &info);
     }
 
     if (routeType == WIFI_P2P) {
