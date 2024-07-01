@@ -447,6 +447,12 @@ void LnnNotifyBtStateChangeEvent(void *state)
     SoftBusFree(btState);
 }
 
+void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
+{
+    LnnLaneVapChangeEvent event = {.basic.event = LNN_EVENT_LANE_VAP_CHANGE, .vapPreferChannel = preferChannel};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state)
 {
     if (state < SOFTBUS_SCREEN_LOCK || state >= SOFTBUS_SCREEN_LOCK_UNKNOWN) {

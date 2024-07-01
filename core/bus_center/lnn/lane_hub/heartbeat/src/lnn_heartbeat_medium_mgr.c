@@ -37,6 +37,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_lane_vap_info.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
@@ -704,9 +705,54 @@ static int32_t CheckJoinLnnRequest(
     return SOFTBUS_OK;
 }
 
+static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
+{
+    if (device == NULL || hbResp == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "param is nullptr");
+        return;
+    }
+    int32_t infoNum = 0;
+    NodeBasicInfo *info = NULL;
+    char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    int32_t ret = LnnGetAllOnlineNodeInfo(&info, &infoNum);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get all online node info fail");
+        return;
+    }
+    if (info == NULL) {
+        LNN_LOGW(LNN_HEART_BEAT, "online info is null");
+        return;
+    }
+    if (infoNum == 0) {
+        LNN_LOGW(LNN_HEART_BEAT, "none online node");
+        SoftBusFree(info);
+        return;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    for (int32_t i = 0; i < infoNum; i++) {
+        if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+            LNN_LOGD(LNN_HEART_BEAT, "get nodeInfo fail");
+            continue;
+        }
+        if (LnnGenerateHexStringHash((const unsigned char *)nodeInfo.deviceInfo.deviceUdid, udidHash,
+            HB_SHORT_UDID_HASH_HEX_LEN) != SOFTBUS_OK) {
+            continue;
+        }
+        if (strncmp(udidHash, device->devId, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
+            LNN_LOGI(LNN_HEART_BEAT, "hbResp preChannelCode=%{public}d", hbResp->preferChannel);
+            (void)LnnAddRemoteChannelCode(nodeInfo.deviceInfo.deviceUdid, hbResp->preferChannel);
+            SoftBusFree(info);
+            return;
+        }
+    }
+    SoftBusFree(info);
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
+    ProcRespVapChange(device, hbResp);
     uint64_t nowTime = GetNowTime();
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
         return SOFTBUS_LOCK_ERR;
