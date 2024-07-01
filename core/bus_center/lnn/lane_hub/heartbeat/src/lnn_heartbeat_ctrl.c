@@ -1097,7 +1097,7 @@ void LnnDeinitHeartbeat(void)
 int32_t LnnTriggerDataLevelHeartbeat(void)
 {
     LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDataLevelHeartbeat");
-    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V1, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
         return SOFTBUS_ERR;
     }
