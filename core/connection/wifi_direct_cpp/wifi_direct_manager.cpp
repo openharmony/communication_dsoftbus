@@ -44,24 +44,29 @@ static uint32_t GetRequestId(void)
     return g_requestId++;
 }
 
-static void SetElementType(struct WifiDirectConnectInfo *info)
+static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExtra *extra)
 {
+    extra->requestId = static_cast<int32_t>(info->requestId);
+    extra->linkType = info->connectType;
+    extra->expectRole = static_cast<int32_t>(info->expectApiRole);
+    extra->peerIp = info->remoteMac;
+    
     if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
-        info->linkType = STATISTIC_P2P;
+        info->dfxInfo.linkType = STATISTIC_P2P;
     } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
-        info->linkType = STATISTIC_HML;
+        info->dfxInfo.linkType = STATISTIC_HML;
     } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
-        info->linkType = STATISTIC_TRIGGER_HML;
-        info->bootLinkType = STATISTIC_NONE;
+        info->dfxInfo.linkType = STATISTIC_TRIGGER_HML;
+        info->dfxInfo.bootLinkType = STATISTIC_NONE;
     } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
-        info->linkType = STATISTIC_TRIGGER_HML;
+        info->dfxInfo.linkType = STATISTIC_TRIGGER_HML;
     }
 
     WifiDirectNegoChannelType type = info->negoChannel.type;
     if (type == NEGO_CHANNEL_AUTH) {
-        info->bootLinkType = STATISTIC_WLAN;
+        info->dfxInfo.bootLinkType = STATISTIC_WLAN;
     } else if (type == NEGO_CHANNEL_COC) {
-        info->bootLinkType = STATISTIC_COC;
+        info->dfxInfo.bootLinkType = STATISTIC_COC;
     }
 }
 
@@ -118,18 +123,16 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
     OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
-
-    ConnEventExtra extra = { .requestId = static_cast<int32_t>(info->requestId),
-        .linkType = info->connectType,
-        .expectRole = static_cast<int32_t>(info->expectApiRole),
-        .peerIp = info->remoteMac };
+    
+    ConnEventExtra extra;
+    SetElementTypeExtra(info, &extra);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
-    SetElementType(info);
-
+    
     int32_t ret = OHOS::SoftBus::WifiDirectRoleOption::GetInstance().GetExpectedRole(
         info->remoteNetworkId, info->connectType, info->expectApiRole, info->isStrict);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
     ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
+    
     extra.errcode = ret;
     extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
