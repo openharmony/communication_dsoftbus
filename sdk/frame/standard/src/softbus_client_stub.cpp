@@ -66,6 +66,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnNodeOnlineStateChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] =
         &SoftBusClientStub::OnNodeBasicInfoChangedInner;
+    memberFuncMap_[CLIENT_ON_LOCAL_NETWORK_ID_CHANGED] =
+        &SoftBusClientStub::OnLocalNetworkIdChangedInner;
     memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] =
         &SoftBusClientStub::OnTimeSyncResultInner;
     memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] =
@@ -600,6 +602,21 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnLocalNetworkIdChangedInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strlen(pkgName) == 0) {
+        COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = OnLocalNetworkIdChanged(pkgName);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SDK, "OnLocalNetworkIdChangedInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t infoTypeLen;
@@ -742,6 +759,11 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChanged(const char *pkgName, void *inf
 {
     (void)infoTypeLen;
     return LnnOnNodeBasicInfoChanged(pkgName, info, type);
+}
+
+int32_t SoftBusClientStub::OnLocalNetworkIdChanged(const char *pkgName)
+{
+    return LnnOnLocalNetworkIdChanged(pkgName);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
