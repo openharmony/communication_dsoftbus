@@ -74,7 +74,9 @@ typedef enum {
 #define TO_CONN_FSM(ptr) CONTAINER_OF(ptr, LnnConnectionFsm, fsm)
 
 #define CONN_CODE_SHIFT 16
-
+#define PC_DEV_TYPE "00C"
+#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
+    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
 typedef enum {
     FSM_MSG_TYPE_JOIN_LNN,
     FSM_MSG_TYPE_AUTH_DONE,
@@ -520,6 +522,28 @@ static int32_t GetUdidHashForDfx(char *localUdidHash, char *peerUdidHash, LnnCon
     return SOFTBUS_OK;
 }
 
+static int32_t GetPeerUdidHash(NodeInfo *nodeInfo, char *peerUdidHash)
+{
+    if (nodeInfo == NULL || peerUdidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t rc = SOFTBUS_OK;
+    uint8_t hash[UDID_HASH_LEN] = { 0 };
+    rc = SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), hash);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate udidhash fail");
+        return rc;
+    }
+    rc = ConvertBytesToHexString(peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert bytes to string fail");
+        return rc;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdidHash)
 {
     int32_t rc = SOFTBUS_OK;
@@ -528,16 +552,9 @@ static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdi
         return SOFTBUS_STRCPY_ERR;
     }
     if (IsEmptyShortHashStr(peerUdidHash) || strlen(peerUdidHash) != HB_SHORT_UDID_HASH_HEX_LEN) {
-        uint8_t hash[UDID_HASH_LEN] = { 0 };
-        rc = SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
-            strlen(nodeInfo->deviceInfo.deviceUdid), hash);
+        rc = GetPeerUdidHash(nodeInfo, peerUdidHash);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "generate udidhash fail");
-            return rc;
-        }
-        rc = ConvertBytesToHexString(peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
-        if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "convert bytes to string fail");
+            LNN_LOGE(LNN_BUILDER, "get udidhash fail");
             return rc;
         }
     }
@@ -603,6 +620,16 @@ static void DfxAddBleReportExtra(
         LNN_LOGE(LNN_BUILDER, "strcpy_s peerDeviceType fail");
         return;
     }
+    if (extra->errcode == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP &&
+        (strncmp(extra->peerDeviceType, PC_DEV_TYPE, strlen(PC_DEV_TYPE)) == 0)) {
+        LnnBleWinPcRestrictMapInit();
+        uint32_t count = 0;
+        if (GetNodeFromWinPcRestrictMap(extra->peerUdidHash, &count) == SOFTBUS_OK) {
+            UpdateNodeFromWinPcRestrictMap(extra->peerUdidHash);
+        } else {
+            AddNodeToWinPcRestrictMap(extra->peerUdidHash);
+        }
+    }
     if (connInfo->nodeInfo == NULL) {
         bleExtra->status = BLE_REPORT_EVENT_FAIL;
         AddNodeToLnnBleReportExtraMap(bleExtra->extra.peerUdidHash, bleExtra);
@@ -651,7 +678,7 @@ static int32_t GetPeerConnInfo(const LnnConntionInfo *connInfo, char *netWorkId,
         LNN_LOGE(LNN_BUILDER, "strcpy_s bleMacAddr fail");
         return SOFTBUS_STRCPY_ERR;
     }
-    if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%X",
+    if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%03X",
         connInfo->nodeInfo->deviceInfo.deviceTypeId) < 0) {
         LNN_LOGE(LNN_BUILDER, "snprintf_s deviceType fail");
         return SOFTBUS_STRCPY_ERR;
@@ -677,7 +704,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     extra.localUdidHash = localUdidHash;
     extra.peerUdidHash = peerUdidHash;
     if (connInfo->nodeInfo == NULL) {
-        if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%X",
+        if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%03X",
             (uint16_t)connInfo->infoReport.type) < 0) {
             LNN_LOGE(LNN_BUILDER, "snprintf_s deviceType by infoReport fail");
             return;
@@ -707,6 +734,17 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     extra.peerBleMac = bleMacAddr;
     extra.peerDeviceType = deviceType;
     DfxReportOnlineEvent(connInfo, reason, extra);
+}
+
+static void DeleteWinPcRestrictNode(int32_t retCode, NodeInfo *nodeInfo)
+{
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    uint32_t count = 0;
+    if (retCode == SOFTBUS_OK && GetPeerUdidHash(nodeInfo, peerUdidHash) == SOFTBUS_OK) {
+        if (GetNodeFromWinPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
+            DeleteNodeFromWinPcRestrictMap(peerUdidHash);
+        }
+    }
 }
 
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
@@ -748,7 +786,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         DfxRecordLnnAddOnlineNodeEnd(connInfo, infoNum, lnnType, retCode);
         SoftBusFree(info);
     }
-
+    DeleteWinPcRestrictNode(retCode, connInfo->nodeInfo);
     if (connInfo->nodeInfo != NULL) {
         SoftBusFree(connInfo->nodeInfo);
         connInfo->nodeInfo = NULL;

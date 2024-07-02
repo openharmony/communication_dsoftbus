@@ -108,6 +108,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
     }
     ClearAuthLimitMap();
     ClearLnnBleReportExtraMap();
+    ClearWinPcRestrictMap();
     LNN_LOGI(LNN_STATE,
         "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
