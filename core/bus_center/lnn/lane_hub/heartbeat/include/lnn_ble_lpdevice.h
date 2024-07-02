@@ -45,6 +45,7 @@ int32_t SendDeviceInfoToSHByType(LpFeatureType type);
 int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type);
 int32_t SwtichHeartbeatReportChannel(bool isToAP);
 bool IsSupportLpFeature(void);
+void SetLpKeepAliveState(void *para);
 
 #ifdef __cplusplus
 }

@@ -38,6 +38,8 @@
 #include "lnn_lane_interface.h"
 #include <unistd.h>
 
+#define SOFTBUS_IPC_THREAD_NUM 32
+
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
 
@@ -354,6 +356,7 @@ void SoftBusServer::OnStart()
     if (!Publish(this)) {
         COMM_LOGE(COMM_SVC, "SoftBusServer publish failed!");
     }
+    IPCSkeleton::SetMaxWorkThreadNum(SOFTBUS_IPC_THREAD_NUM);
 }
 
 void SoftBusServer::OnStop() {}
