@@ -108,6 +108,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/wifi_direct_manager.cpp",
       "$wifi_direct_path/wifi_direct_role_option.cpp",
       "$wifi_direct_path/wifi_direct_scheduler.cpp",
+      "$wifi_direct_path/utils/wifi_direct_dfx.cpp",
     ]
 
     if (dsoftbus_feature_ex_kits == true) {
