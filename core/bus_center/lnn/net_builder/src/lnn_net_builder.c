@@ -83,6 +83,10 @@ static Map g_lnnDfxReportMap;
 static SoftBusMutex g_lnnDfxReportMutex;
 static bool g_lnnDfxReportIsInit = false;
 
+static Map g_lnnDfxWinPcMap;
+static SoftBusMutex g_lnnDfxWinPcMutex;
+static bool g_lnnDfxWinPcIsInit = false;
+
 void __attribute__((weak)) SfcSyncNodeAddrHandle(const char *networkId, int32_t code)
 {
     (void)networkId;
@@ -1400,6 +1404,125 @@ void ClearLnnBleReportExtraMap(void)
         return;
     }
     LnnMapDelete(&g_lnnDfxReportMap);
-    LNN_LOGI(LNN_BUILDER, "ClearLnnBleReportExtraMap success");
+    LNN_LOGI(LNN_BUILDER, "ClearLnnBleReportExtraMap succ");
     (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+}
+
+void LnnBleWinPcRestrictMapInit(void)
+{
+    if (g_lnnDfxWinPcIsInit) {
+        return;
+    }
+    if (SoftBusMutexInit(&g_lnnDfxWinPcMutex, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "mutex init fail");
+        return;
+    }
+    LnnMapInit(&g_lnnDfxWinPcMap);
+    g_lnnDfxWinPcIsInit = true;
+    LNN_LOGI(LNN_BUILDER, "map init succ");
+    return;
+}
+
+void AddNodeToWinPcRestrictMap(const char *udidHash)
+{
+    if (!g_lnnDfxWinPcIsInit || udidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxWinPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    uint32_t count = 1;
+    if (LnnMapSet(&g_lnnDfxWinPcMap, udidHash, &count, sizeof(uint32_t)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "LnnMapSet fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+    char *anonyUdid = NULL;
+    Anonymize(udidHash, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "add %{public}s to map succ", anonyUdid);
+    AnonymizeFree(anonyUdid);
+}
+
+void ClearWinPcRestrictMap(void)
+{
+    if (!g_lnnDfxWinPcIsInit) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxWinPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    LnnMapDelete(&g_lnnDfxWinPcMap);
+    LNN_LOGI(LNN_BUILDER, "Clear Map succ");
+    (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+}
+
+void DeleteNodeFromWinPcRestrictMap(const char *udidHash)
+{
+    if (!g_lnnDfxWinPcIsInit || udidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxWinPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    int32_t ret = LnnMapErase(&g_lnnDfxWinPcMap, udidHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "delete item fail, ret=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+    char *anonyUdid = NULL;
+    Anonymize(udidHash, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "delete %{public}s from map succ", anonyUdid);
+    AnonymizeFree(anonyUdid);
+}
+
+int32_t GetNodeFromWinPcRestrictMap(const char *udidHash, uint32_t *count)
+{
+    if (!g_lnnDfxWinPcIsInit || udidHash == NULL || count == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxWinPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t *tempCount = (uint32_t *)LnnMapGet(&g_lnnDfxWinPcMap, udidHash);
+    if (tempCount == NULL) {
+        LNN_LOGE(LNN_BUILDER, "LnnMapGet fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+        return SOFTBUS_NOT_FIND;
+    }
+    *count = *tempCount;
+    (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+    return SOFTBUS_OK;
+}
+
+int32_t UpdateNodeFromWinPcRestrictMap(const char *udidHash)
+{
+    if (!g_lnnDfxWinPcIsInit || udidHash == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxWinPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t *tempCount = (uint32_t *)LnnMapGet(&g_lnnDfxWinPcMap, udidHash);
+    if (tempCount == NULL) {
+        LNN_LOGE(LNN_BUILDER, "LnnMapGet fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+        return SOFTBUS_NOT_FIND;
+    }
+    *tempCount = ++(*tempCount);
+    (void)SoftBusMutexUnlock(&g_lnnDfxWinPcMutex);
+    char *anonyUdid = NULL;
+    Anonymize(udidHash, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "update %{public}s succ count=%{public}u", anonyUdid, *tempCount);
+    AnonymizeFree(anonyUdid);
+    return SOFTBUS_OK;
 }
