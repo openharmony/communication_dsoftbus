@@ -432,6 +432,7 @@ static void SaveDeviceKey(AuthFsm *authFsm, int32_t keyType, AuthLinkType type)
     if (memcpy_s(deviceKey.deviceKey, sizeof(deviceKey.deviceKey),
         sessionKey.value, sizeof(sessionKey.value)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "session key cpy fail");
+        (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return;
     }
     deviceKey.keyLen = sessionKey.len;
@@ -440,8 +441,9 @@ static void SaveDeviceKey(AuthFsm *authFsm, int32_t keyType, AuthLinkType type)
     deviceKey.isServerSide = authFsm->info.isServer;
     if (AuthInsertDeviceKey(&authFsm->info.nodeInfo, &deviceKey, type) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "insert deviceKey fail");
-        return;
     }
+    (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }
 
 static AuthFsm *GetAuthFsmByConnInfo(const AuthConnInfo *connInfo, bool isServer)
@@ -689,8 +691,10 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
     ret = AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post save sessionKey event");
+        (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
         return ret;
     }
+    (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     return AuthSessionHandleAuthFinish(authFsm->authSeq);
 }
 
