@@ -188,6 +188,7 @@ public:
         const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
     virtual bool IsSupportLpFeature(void);
     virtual bool LnnSubcribeKvStoreService(void);
+    virtual void LnnNotifyLocalNetworkIdChanged(void);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -318,6 +319,7 @@ public:
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool (const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t (const char *uuid));
     MOCK_METHOD0(IsSupportLpFeature, bool ());
+    MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void ());
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };
 } // namespace OHOS
