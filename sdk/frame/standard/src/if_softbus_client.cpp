@@ -124,12 +124,6 @@ int32_t ISoftBusClient::OnNodeBasicInfoChanged(const char *pkgName, void *info, 
     return SOFTBUS_OK;
 }
 
-int32_t ISoftBusClient::OnLocalNetworkIdChanged(const char *pkgName)
-{
-    COMM_LOGI(COMM_EVENT, "ipc default impl");
-    return SOFTBUS_OK;
-}
-
 int32_t ISoftBusClient::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");

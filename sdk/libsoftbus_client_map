@@ -197,7 +197,6 @@
         "TransUdpChannelSendStream";
         "ServerIpcDeactiveMetaNode";
         "LnnOnNodeBasicInfoChanged";
-        "LnnOnLocalNetworkIdChanged";
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
         "ReadSessionLinkType";
