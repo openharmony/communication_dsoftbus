@@ -293,6 +293,38 @@ static int32_t HbHandleLeaveLnn(void)
     return SOFTBUS_OK;
 }
 
+static void HbDelaySetNormalScanParam(void *para)
+{
+    (void)para;
+
+    LnnHeartbeatMediumParam param = {
+        .type = HEARTBEAT_TYPE_BLE_V1,
+        .info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10,
+        .info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10,
+    };
+    LNN_LOGI(LNN_HEART_BEAT, "scanInterval=%{public}d, scanWindow=%{public}d", param.info.ble.scanInterval,
+        param.info.ble.scanWindow);
+    if (LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl reset ble scan medium param fail");
+    }
+}
+
+static void HbDelaySetHighScanParam(void *para)
+{
+    (void)para;
+
+    LnnHeartbeatMediumParam param = {
+        .type = HEARTBEAT_TYPE_BLE_V1,
+        .info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P25,
+        .info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P25,
+    };
+    LNN_LOGI(LNN_HEART_BEAT, "scanInterval=%{public}d, scanWindow=%{public}d", param.info.ble.scanInterval,
+        param.info.ble.scanWindow);
+    if (LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl reset ble scan medium param fail");
+    }
+}
+
 static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_BT_STATE_CHANGED) {
@@ -311,6 +343,9 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
             ClearAuthLimitMap();
             ClearLnnBleReportExtraMap();
             HbConditionChanged(false);
+            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, 0);
+            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
+                                        HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
             if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) !=
                 SOFTBUS_OK) {
                 LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
@@ -414,8 +449,8 @@ static void HbChangeMediumParamByState(SoftBusScreenState state)
             param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
             break;
         case SOFTBUS_SCREEN_OFF:
-            param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
-            param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
+            param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
+            param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
             break;
         default:
             LNN_LOGD(LNN_HEART_BEAT, "ctrl reset ble scan medium param get invalid state");
@@ -541,6 +576,10 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
             if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON &&
                 g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN) {
+                LnnAsyncCallbackDelayHelper(
+                    GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, HB_CLOUD_SYNC_DELAY_LEN);
+                LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
+                    HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
                 LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
                     HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
             }
@@ -566,6 +605,10 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_ACCOUNT_LOG_IN:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
             LnnUpdateOhosAccount(false);
+            LnnAsyncCallbackDelayHelper(
+                GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, HB_CLOUD_SYNC_DELAY_LEN);
+            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
+                HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
             LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
                 HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
             break;

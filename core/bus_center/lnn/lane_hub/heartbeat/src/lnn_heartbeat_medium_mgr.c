@@ -119,6 +119,7 @@ static int32_t HbSaveRecvTimeToRemoveRepeat(
         storedInfo->lastRecvTime = recvTime;
         storedInfo->weight = weight != 0 ? weight : storedInfo->weight;
         storedInfo->masterWeight = masterWeight;
+        storedInfo->device->isOnline = device->isOnline;
         return SOFTBUS_OK;
     }
     int32_t ret = HbFirstSaveRecvTime(storedInfo, device, weight, masterWeight, recvTime);
@@ -133,6 +134,9 @@ static int32_t HbSaveRecvTimeToRemoveRepeat(
 
 static uint64_t HbGetRepeatThresholdByType(LnnHeartbeatType hbType)
 {
+    if (LnnIsMultiDeviceOnline()) {
+        return HB_REPEAD_RECV_THRESHOLD_MULTI_DEVICE;
+    }
     switch (hbType) {
         case HEARTBEAT_TYPE_BLE_V0:
             return HB_REPEAD_RECV_THRESHOLD;
@@ -304,12 +308,19 @@ static LnnHeartbeatRecvInfo *HbGetStoredRecvInfo(const char *udidHash, Connectio
     return NULL;
 }
 
-static bool HbIsRepeatedRecvInfo(LnnHeartbeatType hbType, const LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
+static bool HbIsRepeatedRecvInfo(
+    LnnHeartbeatType hbType, const LnnHeartbeatRecvInfo *storedInfo, DeviceInfo *device, uint64_t nowTime)
 {
     if (storedInfo == NULL) {
         return false;
     }
-    return nowTime - storedInfo->lastRecvTime < HbGetRepeatThresholdByType(hbType);
+    if (nowTime - storedInfo->lastRecvTime >= HbGetRepeatThresholdByType(hbType)) {
+        return false;
+    }
+    if (!storedInfo->device->isOnline && device->isOnline) {
+        return false;
+    }
+    return true;
 }
 
 static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
@@ -684,7 +695,7 @@ static void ProcessUdidAnonymize(char *devId)
 static int32_t CheckReceiveDeviceInfo(
     DeviceInfo *device, LnnHeartbeatType hbType, const LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
-    if (HbIsRepeatedRecvInfo(hbType, storedInfo, nowTime)) {
+    if (HbIsRepeatedRecvInfo(hbType, storedInfo, device, nowTime)) {
         LNN_LOGD(LNN_HEART_BEAT, "repeat receive info");
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
