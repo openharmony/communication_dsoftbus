@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include "securec.h"
-
 #include "client_trans_session_callback.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
