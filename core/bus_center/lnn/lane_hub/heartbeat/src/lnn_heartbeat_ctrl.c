@@ -342,6 +342,24 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbLaneVapChangeEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_LANE_VAP_CHANGE) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return;
+    }
+    LnnLaneVapChangeEvent *vap = (LnnLaneVapChangeEvent *)info;
+    if (SoftBusGetBtState() == BLE_DISABLE) {
+        LNN_LOGE(LNN_HEART_BEAT, "ble is off");
+        return;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle vapChange, channel=%{public}d", vap->vapPreferChannel);
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
+    }
+}
+
 static void HbMasterNodeChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_NODE_MASTER_STATE_CHANGED) {
@@ -1015,6 +1033,10 @@ static int32_t LnnRegisterNetworkEvent(void)
         LNN_LOGE(LNN_INIT, "regist bt state change evt handler fail");
         return SOFTBUS_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_LANE_VAP_CHANGE, HbLaneVapChangeEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist vap state change evt handler fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1082,6 +1104,7 @@ void LnnDeinitHeartbeat(void)
     LnnHbMediumMgrDeinit();
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, HbBtStateChangeEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_LANE_VAP_CHANGE, HbLaneVapChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_NODE_MASTER_STATE_CHANGED, HbMasterNodeChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_HOME_GROUP_CHANGED, HbHomeGroupStateChangeEventHandler);

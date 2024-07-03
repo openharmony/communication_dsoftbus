@@ -108,6 +108,7 @@ typedef struct {
     uint16_t staticLevel;
     uint16_t switchLength;
     uint32_t switchLevel;
+    int32_t preferChannel;
 } HbRespData;
 
 #define STATE_VERSION_INVALID (-1)
