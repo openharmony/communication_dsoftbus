@@ -77,6 +77,9 @@ int32_t UdpChannelFileTransRecoveryLimit(uint8_t tos);
 
 bool IsUdpRecoveryTransLimit(void);
 
+int32_t TransUdpGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+    int32_t *connectType);
+
 #ifdef __cplusplus
 }
 #endif
