@@ -100,44 +100,157 @@ ohos_unittest("NegotiateMessageTest") {
 
 ohos_unittest("InnerLinkTest") {
   module_out_path = ut_out_path
-  configs = [ ":wifi_direct_include_dirs" ]
+
+  configs = [
+    ":wifi_direct_include_dirs",
+    "//build/config/compiler:rtti",
+    "//build/config/compiler:exceptions",
+  ]
+
   sources = [
+    "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
+    "$wifi_direct_cpp_path/channel/auth_negotiate_channel.cpp",
+    "$wifi_direct_cpp_path/channel/dummy_negotiate_channel.cpp",
+    "$wifi_direct_cpp_path/channel/proxy_negotiate_channel.cpp",
+    "$wifi_direct_cpp_path/command/command_factory.cpp",
+    "$wifi_direct_cpp_path/command/connect_command.cpp",
+    "$wifi_direct_cpp_path/command/disconnect_command.cpp",
+    "$wifi_direct_cpp_path/command/negotiate_command.cpp",
+    "$wifi_direct_cpp_path/command/processor_selector_factory.cpp",
+    "$wifi_direct_cpp_path/command/simple_processor_selector.cpp",
     "$wifi_direct_cpp_path/data/inner_link.cpp",
+    "$wifi_direct_cpp_path/data/interface_info.cpp",
+    "$wifi_direct_cpp_path/data/interface_manager.cpp",
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/data/link_info.cpp",
     "$wifi_direct_cpp_path/data/link_manager.cpp",
+    "$wifi_direct_cpp_path/data/negotiate_message.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_available_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_broadcast_receiver.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_connect_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_create_group_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_destroy_group_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_entity.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_entity_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_unavailable_state.cpp",
+    "$wifi_direct_cpp_path/event/wifi_direct_event_dispatcher.cpp",
+    "$wifi_direct_cpp_path/processor/p2p_v1_processor.cpp",
+    "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/duration_statistic.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_dfx.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_trace.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_executor.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_ip_manager.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_manager.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_role_option.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_scheduler.cpp",
+    "$wifi_direct_cpp_unit_path/net_conn_client.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
     "inner_link_test.cpp",
   ]
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gmock_rtti",
     "//third_party/googletest:gtest_main",
+    "//third_party/googletest:gtest_rtti",
   ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+
+  remove_configs = [
+    "//build/config/compiler:no_rtti",
+    "//build/config/compiler:no_exceptions",
+  ]
+
+  cflags = [
+    "-fexceptions",
+    "-frtti",
   ]
 }
 
 ohos_unittest("LinkManagerTest") {
   module_out_path = ut_out_path
-  configs = [ ":wifi_direct_include_dirs" ]
+  configs = [
+    ":wifi_direct_include_dirs",
+    "//build/config/compiler:rtti",
+    "//build/config/compiler:exceptions",
+  ]
   sources = [
+    "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
+    "$wifi_direct_cpp_path/channel/auth_negotiate_channel.cpp",
+    "$wifi_direct_cpp_path/channel/dummy_negotiate_channel.cpp",
+    "$wifi_direct_cpp_path/channel/proxy_negotiate_channel.cpp",
+    "$wifi_direct_cpp_path/command/command_factory.cpp",
+    "$wifi_direct_cpp_path/command/connect_command.cpp",
+    "$wifi_direct_cpp_path/command/disconnect_command.cpp",
+    "$wifi_direct_cpp_path/command/negotiate_command.cpp",
+    "$wifi_direct_cpp_path/command/processor_selector_factory.cpp",
+    "$wifi_direct_cpp_path/command/simple_processor_selector.cpp",
     "$wifi_direct_cpp_path/data/inner_link.cpp",
+    "$wifi_direct_cpp_path/data/interface_info.cpp",
+    "$wifi_direct_cpp_path/data/interface_manager.cpp",
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/data/link_info.cpp",
     "$wifi_direct_cpp_path/data/link_manager.cpp",
+    "$wifi_direct_cpp_path/data/negotiate_message.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_available_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_broadcast_receiver.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_connect_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_create_group_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_destroy_group_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_entity.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_entity_state.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_unavailable_state.cpp",
+    "$wifi_direct_cpp_path/event/wifi_direct_event_dispatcher.cpp",
+    "$wifi_direct_cpp_path/processor/p2p_v1_processor.cpp",
+    "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/duration_statistic.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_dfx.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_trace.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_executor.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_ip_manager.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_manager.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_role_option.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_scheduler.cpp",
+    "$wifi_direct_cpp_unit_path/net_conn_client.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
     "link_manager_test.cpp",
   ]
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gmock_rtti",
     "//third_party/googletest:gtest_main",
+    "//third_party/googletest:gtest_rtti",
   ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+
+  remove_configs = [
+    "//build/config/compiler:no_rtti",
+    "//build/config/compiler:no_exceptions",
+  ]
+
+  cflags = [
+    "-fexceptions",
+    "-frtti",
   ]
 }
 
@@ -226,6 +339,7 @@ group("unittest") {
     ":InterfaceInfoTest",
     ":InterfaceManagerTest",
     ":LinkInfoTest",
+    ":LinkManagerTest",
     ":NegotiateMessageTest",
     ":WifiConfigInfoTest",
   ]
