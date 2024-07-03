@@ -661,10 +661,5 @@ bool IsSupportLpFeature(void)
 {
     return GetNetBuilderDepsInterface()->IsSupportLpFeature();
 }
-
-void LnnNotifyLocalNetworkIdChanged(void)
-{
-    return GetNetBuilderDepsInterface()->LnnNotifyLocalNetworkIdChanged();
-}
 } // extern "C"
 } // namespace OHOS

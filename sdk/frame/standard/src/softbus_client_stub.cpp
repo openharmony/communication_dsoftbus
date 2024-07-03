@@ -36,30 +36,52 @@
 namespace OHOS {
 SoftBusClientStub::SoftBusClientStub()
 {
-    memberFuncMap_[CLIENT_DISCOVERY_DEVICE_FOUND] = &SoftBusClientStub::OnDeviceFoundInner;
-    memberFuncMap_[CLIENT_DISCOVERY_SUCC] = &SoftBusClientStub::OnDiscoverySuccessInner;
-    memberFuncMap_[CLIENT_DISCOVERY_FAIL] = &SoftBusClientStub::OnDiscoverFailedInner;
-    memberFuncMap_[CLIENT_PUBLISH_SUCC] = &SoftBusClientStub::OnPublishSuccessInner;
-    memberFuncMap_[CLIENT_PUBLISH_FAIL] = &SoftBusClientStub::OnPublishFailInner;
-    memberFuncMap_[CLIENT_ON_CHANNEL_OPENED] = &SoftBusClientStub::OnChannelOpenedInner;
-    memberFuncMap_[CLIENT_ON_CHANNEL_OPENFAILED] = &SoftBusClientStub::OnChannelOpenFailedInner;
-    memberFuncMap_[CLIENT_ON_CHANNEL_LINKDOWN] = &SoftBusClientStub::OnChannelLinkDownInner;
-    memberFuncMap_[CLIENT_ON_CHANNEL_CLOSED] = &SoftBusClientStub::OnChannelClosedInner;
-    memberFuncMap_[CLIENT_ON_CHANNEL_MSGRECEIVED] = &SoftBusClientStub::OnChannelMsgReceivedInner;
-    memberFuncMap_[CLIENT_ON_CHANNEL_QOSEVENT] = &SoftBusClientStub::OnChannelQosEventInner;
-    memberFuncMap_[CLIENT_ON_JOIN_RESULT] = &SoftBusClientStub::OnJoinLNNResultInner;
-    memberFuncMap_[CLIENT_ON_LEAVE_RESULT] = &SoftBusClientStub::OnLeaveLNNResultInner;
-    memberFuncMap_[CLIENT_ON_NODE_ONLINE_STATE_CHANGED] = &SoftBusClientStub::OnNodeOnlineStateChangedInner;
-    memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] = &SoftBusClientStub::OnNodeBasicInfoChangedInner;
-    memberFuncMap_[CLIENT_ON_LOCAL_NETWORK_ID_CHANGED] = &SoftBusClientStub::OnLocalNetworkIdChangedInner;
-    memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] = &SoftBusClientStub::OnTimeSyncResultInner;
-    memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] = &SoftBusClientStub::OnPublishLNNResultInner;
-    memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] = &SoftBusClientStub::OnRefreshLNNResultInner;
-    memberFuncMap_[CLIENT_ON_REFRESH_DEVICE_FOUND] = &SoftBusClientStub::OnRefreshDeviceFoundInner;
-    memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] = &SoftBusClientStub::OnClientPermissonChangeInner;
-    memberFuncMap_[CLIENT_SET_CHANNEL_INFO] = &SoftBusClientStub::SetChannelInfoInner;
-    memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] = &SoftBusClientStub::OnDataLevelChangedInner;
-    memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] = &SoftBusClientStub::OnClientTransLimitChangeInner;
+    memberFuncMap_[CLIENT_DISCOVERY_DEVICE_FOUND] =
+        &SoftBusClientStub::OnDeviceFoundInner;
+    memberFuncMap_[CLIENT_DISCOVERY_SUCC] =
+        &SoftBusClientStub::OnDiscoverySuccessInner;
+    memberFuncMap_[CLIENT_DISCOVERY_FAIL] =
+        &SoftBusClientStub::OnDiscoverFailedInner;
+    memberFuncMap_[CLIENT_PUBLISH_SUCC] =
+        &SoftBusClientStub::OnPublishSuccessInner;
+    memberFuncMap_[CLIENT_PUBLISH_FAIL] =
+        &SoftBusClientStub::OnPublishFailInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_OPENED] =
+        &SoftBusClientStub::OnChannelOpenedInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_OPENFAILED] =
+        &SoftBusClientStub::OnChannelOpenFailedInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_LINKDOWN] =
+        &SoftBusClientStub::OnChannelLinkDownInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_CLOSED] =
+        &SoftBusClientStub::OnChannelClosedInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_MSGRECEIVED] =
+        &SoftBusClientStub::OnChannelMsgReceivedInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_QOSEVENT] =
+        &SoftBusClientStub::OnChannelQosEventInner;
+    memberFuncMap_[CLIENT_ON_JOIN_RESULT] =
+        &SoftBusClientStub::OnJoinLNNResultInner;
+    memberFuncMap_[CLIENT_ON_LEAVE_RESULT] =
+        &SoftBusClientStub::OnLeaveLNNResultInner;
+    memberFuncMap_[CLIENT_ON_NODE_ONLINE_STATE_CHANGED] =
+        &SoftBusClientStub::OnNodeOnlineStateChangedInner;
+    memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] =
+        &SoftBusClientStub::OnNodeBasicInfoChangedInner;
+    memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] =
+        &SoftBusClientStub::OnTimeSyncResultInner;
+    memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] =
+        &SoftBusClientStub::OnPublishLNNResultInner;
+    memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] =
+        &SoftBusClientStub::OnRefreshLNNResultInner;
+    memberFuncMap_[CLIENT_ON_REFRESH_DEVICE_FOUND] =
+        &SoftBusClientStub::OnRefreshDeviceFoundInner;
+    memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] =
+        &SoftBusClientStub::OnClientPermissonChangeInner;
+    memberFuncMap_[CLIENT_SET_CHANNEL_INFO] =
+        &SoftBusClientStub::SetChannelInfoInner;
+    memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] =
+        &SoftBusClientStub::OnDataLevelChangedInner;
+    memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] =
+        &SoftBusClientStub::OnClientTransLimitChangeInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_BIND] = &SoftBusClientStub::OnChannelBindInner;
 }
 
@@ -578,21 +600,6 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusClientStub::OnLocalNetworkIdChangedInner(MessageParcel &data, MessageParcel &reply)
-{
-    const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr || strlen(pkgName) == 0) {
-        COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
-        return SOFTBUS_ERR;
-    }
-    int32_t retReply = OnLocalNetworkIdChanged(pkgName);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SDK, "OnLocalNetworkIdChangedInner write reply failed!");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t infoTypeLen;
@@ -735,11 +742,6 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChanged(const char *pkgName, void *inf
 {
     (void)infoTypeLen;
     return LnnOnNodeBasicInfoChanged(pkgName, info, type);
-}
-
-int32_t SoftBusClientStub::OnLocalNetworkIdChanged(const char *pkgName)
-{
-    return LnnOnLocalNetworkIdChanged(pkgName);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
