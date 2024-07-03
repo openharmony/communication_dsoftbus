@@ -46,6 +46,7 @@ config("wifi_direct_include_dirs") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$wifi_direct_cpp_path",
     "$wifi_direct_cpp_unit_path",
   ]
