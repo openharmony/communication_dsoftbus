@@ -994,7 +994,10 @@ int32_t LnnNotifyDiscoveryDevice(
     const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
-
+    if (LnnIsConnectionAddrInvalid(addr)) {
+        LNN_LOGE(LNN_BUILDER, "invalid connection addr");
+        return SOFTBUS_INVALID_PARAM;
+    }
     LNN_LOGI(LNN_BUILDER, "notify discovery device enter! peer%{public}s, isNeedConnect=%{public}d",
         addr != NULL ? LnnPrintConnectionAddr(addr) : "", isNeedConnect);
     if (g_netBuilder.isInit == false) {
