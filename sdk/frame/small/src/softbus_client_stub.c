@@ -107,7 +107,7 @@ static int InnerRegisterService(void)
         SoftBusFree(clientName[i]);
     }
 
-    COMM_LOGI(COMM_SDK, "InnerRegisterService success");
+    COMM_LOGD(COMM_SDK, "InnerRegisterService success");
     return SOFTBUS_OK;
 }
 
