@@ -68,3 +68,26 @@ int32_t LnnGetRemoteVapInfo(const char *udid, LnnVapType type, LnnVapAttr *vapAt
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnGetLocalPreferChannel(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetLocalChannelCode(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnAddRemoteChannelCode(const char *udid, int32_t channelCode)
+{
+    (void)udid;
+    (void)channelCode;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetRecommendChannel(const char *udid, int32_t *preferChannel)
+{
+    (void)udid;
+    (void)preferChannel;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
