@@ -106,28 +106,27 @@ static void DelHmlListenerByMoudle(ListenerModule type)
 {
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
-    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock fail");
-        return;
-    }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (item->moudleType == type) {
             ListDelete(&item->node);
             SoftBusFree(item);
             g_hmlListenerList->cnt--;
-            (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
             return;
         }
     }
-    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
 }
 
 void StopHmlListener(ListenerModule module)
 {
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock fail");
+        return;
+    }
     if (StopBaseListener(module) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "StopHmlListener stop listener fail. module=%{public}d", module);
     }
     DelHmlListenerByMoudle(module);
+    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
 }
 
 void StopP2pSessionListener()
