@@ -333,41 +333,6 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(const char *pkgName, void *
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterClientProxy::OnLocalNetworkIdChanged(const char *pkgName)
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
-        return SOFTBUS_ERR;
-    }
-    if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is nullptr");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteCString(pkgName)) {
-        LNN_LOGE(LNN_EVENT, "write pkgName failed");
-        return SOFTBUS_ERR;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int ret = remote->SendRequest(CLIENT_ON_LOCAL_NETWORK_ID_CHANGED, data, reply, option);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
-    }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        LNN_LOGE(LNN_EVENT, "read serverRet failed");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     sptr<IRemoteObject> remote = Remote();
