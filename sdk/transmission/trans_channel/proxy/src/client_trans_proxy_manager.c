@@ -755,7 +755,7 @@ static int32_t ClientTransProxySliceProc(int32_t channelId, const char *data, ui
 
     uint32_t dataLen = len - sizeof(SliceHead);
     if (headSlice.sliceNum == 1) { // no sub packets
-        TRANS_LOGI(TRANS_SDK, "no sub packets proc, channelId=%{public}d", channelId);
+        TRANS_LOGD(TRANS_SDK, "no sub packets proc, channelId=%{public}d", channelId);
         return ClientTransProxyNoSubPacketProc(channelId, data + sizeof(SliceHead), dataLen);
     } else {
         TRANS_LOGI(TRANS_SDK, "sub packets proc sliceNum=%{public}d", headSlice.sliceNum);

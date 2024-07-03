@@ -227,25 +227,26 @@ static void FileSendErrorEvent(UdpChannel *udpChannel, FileListener *fileListene
 
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
-    TRANS_LOGI(TRANS_FILE, "send dfileId=%{public}d type=%{public}d", dfileId, msgType);
     if (!IsParmasValid(msgType, msgData)) {
+        TRANS_LOGE(TRANS_SDK, "Invalid parameter, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "trans get udp channel failed");
+        TRANS_LOGE(TRANS_SDK, "trans get udp channel failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
     if (msgType == DFILE_ON_CONNECT_SUCCESS) {
         g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
-        TRANS_LOGE(TRANS_SDK, "msgType failed");
+        TRANS_LOGE(TRANS_SDK, "msgType failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
 
     FileListener fileListener;
     (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
     if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "TransGetFileListener failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
     if (msgType == DFILE_ON_CLEAR_POLICY_FILE_LIST) {
@@ -258,11 +259,12 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
 
     int32_t sessionId = -1;
     if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get sessionId failed");
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
 
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
+        TRANS_LOGE(TRANS_SDK, "FileSendErrorEvent, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         FileSendErrorEvent(&udpChannel, &fileListener, msgData, msgType, sessionId);
         return;
     }
@@ -372,7 +374,7 @@ static void FileRecvErrorEvent(UdpChannel *udpChannel, FileListener *fileListene
 
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
-    TRANS_LOGI(TRANS_FILE, "recv dfileId=%{public}d, type=%{public}d", dfileId, msgType);
+    TRANS_LOGD(TRANS_FILE, "recv dfileId=%{public}d, type=%{public}d", dfileId, msgType);
     if (!IsParmasValid(msgType, msgData)) {
         return;
     }

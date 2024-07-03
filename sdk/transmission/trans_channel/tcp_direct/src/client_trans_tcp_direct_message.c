@@ -422,10 +422,9 @@ static int32_t TransTdcProcessData(int32_t channelId)
     int32_t seqNum = pktHead->seq;
     uint32_t flag = pktHead->flags;
     uint32_t dataLen = pktHead->dataLen;
-    TRANS_LOGE(TRANS_SDK, "data has all received, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
-        TRANS_LOGE(TRANS_SDK, "malloc fail.");
+        TRANS_LOGE(TRANS_SDK, "malloc fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
         SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -433,14 +432,14 @@ static int32_t TransTdcProcessData(int32_t channelId)
     uint32_t plainLen;
     int ret = TransTdcDecrypt(channel.detail.sessionKey, node->data + DC_DATA_HEAD_SIZE, dataLen, plain, &plainLen);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "decrypt fail.");
+        TRANS_LOGE(TRANS_SDK, "decrypt fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
         SoftBusFree(plain);
         SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_DECRYPT_ERR;
     }
     char *end = node->data + DC_DATA_HEAD_SIZE + dataLen;
     if (memmove_s(node->data, node->size, end, node->w - end) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memmove fail.");
+        TRANS_LOGE(TRANS_SDK, "memmove fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
         SoftBusFree(plain);
         SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_MEM_ERR;
@@ -450,7 +449,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
 
     ret = TransTdcProcessDataByFlag(flag, seqNum, &channel, plain, plainLen);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "process data fail");
+        TRANS_LOGE(TRANS_SDK, "process data fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
     }
     SoftBusFree(plain);
     return ret;
