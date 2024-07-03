@@ -222,7 +222,7 @@ int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len)
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoByIdWithIncSeq failed, channelId=%{public}d.", channelId);
-        return SOFTBUS_TDC_GET_INFO_FAILED;
+        return SOFTBUS_TRANS_TDC_GET_INFO_FAILED;
     }
 
     int ret = TransTdcProcessPostData(&channel, data, len, FLAG_BYTES);
