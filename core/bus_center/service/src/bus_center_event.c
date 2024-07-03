@@ -20,6 +20,7 @@
 
 #include "anonymizer.h"
 #include "bus_center_decision_center.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_cipherkey_manager.h"
@@ -51,6 +52,7 @@ typedef enum {
     NOTIFY_ONLINE_STATE_CHANGED = 0,
     NOTIFY_NODE_BASIC_INFO_CHANGED,
     NOTIFY_NETWORKID_UPDATE,
+    NOTIFY_LOCAL_NETWORKID_UPDATE,
 } NotifyType;
 
 #define NETWORK_ID_UPDATE_DELAY_TIME (60 * 60 * 1000 * 24) // 24 hour
@@ -114,6 +116,11 @@ static void HandleNodeBasicInfoChangedMessage(SoftBusMessage *msg)
     LnnIpcNotifyBasicInfoChanged(msg->obj, sizeof(NodeBasicInfo), type);
 }
 
+static void HandleLocalNetworkIdChangedMessage(void)
+{
+    LnnIpcLocalNetworkIdChanged();
+}
+
 static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
 {
     (void)msg;
@@ -124,6 +131,7 @@ static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
     }
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnNotifyNetworkIdChangeEvent(networkId);
+    LnnNotifyLocalNetworkIdChanged();
     LNN_LOGD(LNN_EVENT, "offline exceted 5min, process networkId update event");
 }
 
@@ -140,6 +148,9 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             break;
         case NOTIFY_NODE_BASIC_INFO_CHANGED:
             HandleNodeBasicInfoChangedMessage(msg);
+            break;
+        case NOTIFY_LOCAL_NETWORKID_UPDATE:
+            HandleLocalNetworkIdChangedMessage();
             break;
         case NOTIFY_NETWORKID_UPDATE:
             HandleNetworkUpdateMessage(msg);
@@ -360,6 +371,11 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
         LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s", info->deviceName);
     }
     (void)PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
+}
+
+void LnnNotifyLocalNetworkIdChanged(void)
+{
+    (void)PostNotifyMessageDelay(NOTIFY_LOCAL_NETWORKID_UPDATE, 0);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)

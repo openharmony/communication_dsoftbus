@@ -146,6 +146,7 @@ static void RestoreLocalDeviceInfo(void)
             LNN_LOGE(LNN_LEDGER, "set networkId fail");
         }
         LnnNotifyNetworkIdChangeEvent(info.networkId);
+        LnnNotifyLocalNetworkIdChanged();
         if (info.networkIdTimestamp != 0) {
             LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
             LNN_LOGD(LNN_LEDGER, "update networkIdTimestamp=%" PRId64, info.networkIdTimestamp);

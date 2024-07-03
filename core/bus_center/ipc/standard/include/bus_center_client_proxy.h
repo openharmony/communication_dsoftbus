@@ -38,6 +38,7 @@ int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addr
 int32_t ClientOnLeaveLNNResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode);
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen);
 int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
+int32_t ClinetOnLocalNetworkIdChanged(void);
 int32_t ClientOnTimeSyncResult(
     const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen, int32_t retCode);
 int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId, int32_t reason);
