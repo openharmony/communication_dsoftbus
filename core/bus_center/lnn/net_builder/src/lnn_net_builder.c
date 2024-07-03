@@ -752,7 +752,6 @@ int32_t ConifgLocalLedger(void)
     }
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
-    LnnNotifyLocalNetworkIdChanged();
     LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
 
     // irk fail should not cause softbus init fail
