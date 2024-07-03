@@ -253,58 +253,68 @@ int32_t SoftBusClientStub::SetChannelInfo(
     return TransSetChannelInfo(sessionName, sessionId, channelId, channelType);
 }
 
+static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
+{
+    READ_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint64, channel->laneId, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->connectType, SOFTBUS_IPC_ERR);
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        channel->fd = data.ReadFileDescriptor();
+        channel->myIp = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
+    }
+    READ_PARCEL_WITH_RET(data, Bool, channel->isServer, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, channel->isEnabled, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, channel->isEncrypt, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->peerUid, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->peerPid, SOFTBUS_IPC_ERR);
+    channel->groupId = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
+    READ_PARCEL_WITH_RET(data, Uint32, channel->keyLen, SOFTBUS_IPC_ERR);
+    channel->sessionKey = (char *)data.ReadRawData(channel->keyLen);
+    COMM_CHECK_AND_RETURN_RET_LOGE(channel->sessionKey != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read rawData failed");
+    channel->peerSessionName = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        channel->peerSessionName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerSessionName failed");
+    channel->peerDeviceId = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        channel->peerDeviceId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
+    READ_PARCEL_WITH_RET(data, Int32, channel->businessType, SOFTBUS_IPC_ERR);
+    if (channel->channelType == CHANNEL_TYPE_UDP) {
+        channel->myIp = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
+        READ_PARCEL_WITH_RET(data, Int32, channel->streamType, SOFTBUS_IPC_ERR);
+        READ_PARCEL_WITH_RET(data, Bool, channel->isUdpFile, SOFTBUS_IPC_ERR);
+        if (!channel->isServer) {
+            READ_PARCEL_WITH_RET(data, Int32, channel->peerPort, SOFTBUS_IPC_ERR);
+            channel->peerIp = (char *)data.ReadCString();
+            COMM_CHECK_AND_RETURN_RET_LOGE(
+                channel->peerIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read channel.peerIp failed");
+        }
+    }
+    READ_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *sessionName = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(sessionName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read sessionName failed");
 
     ChannelInfo channel = { 0 };
-    READ_PARCEL_WITH_RET(data, Int32, channel.channelId, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel.channelType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Uint64, channel.laneId, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel.connectType, SOFTBUS_IPC_ERR);
-    if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        channel.fd = data.ReadFileDescriptor();
-        channel.myIp = (char *)data.ReadCString();
-        COMM_CHECK_AND_RETURN_RET_LOGE(channel.myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
+    int32_t ret = MessageParcelRead(data, &channel);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "read channel info failed!");
+        return ret;
     }
-    READ_PARCEL_WITH_RET(data, Bool, channel.isServer, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Bool, channel.isEnabled, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Bool, channel.isEncrypt, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel.peerUid, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel.peerPid, SOFTBUS_IPC_ERR);
-    channel.groupId = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(channel.groupId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
-    READ_PARCEL_WITH_RET(data, Uint32, channel.keyLen, SOFTBUS_IPC_ERR);
-    channel.sessionKey = (char *)data.ReadRawData(channel.keyLen);
-    COMM_CHECK_AND_RETURN_RET_LOGE(channel.sessionKey != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read rawData failed");
-    channel.peerSessionName = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(
-        channel.peerSessionName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerSessionName failed");
-    channel.peerDeviceId = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(
-        channel.peerDeviceId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
-    READ_PARCEL_WITH_RET(data, Int32, channel.businessType, SOFTBUS_IPC_ERR);
-    if (channel.channelType == CHANNEL_TYPE_UDP) {
-        channel.myIp = (char *)data.ReadCString();
-        COMM_CHECK_AND_RETURN_RET_LOGE(channel.myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
-        READ_PARCEL_WITH_RET(data, Int32, channel.streamType, SOFTBUS_IPC_ERR);
-        READ_PARCEL_WITH_RET(data, Bool, channel.isUdpFile, SOFTBUS_IPC_ERR);
-        if (!channel.isServer) {
-            READ_PARCEL_WITH_RET(data, Int32, channel.peerPort, SOFTBUS_IPC_ERR);
-            channel.peerIp = (char *)data.ReadCString();
-            COMM_CHECK_AND_RETURN_RET_LOGE(
-                channel.peerIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read channel.peerIp failed");
-        }
-    }
-    READ_PARCEL_WITH_RET(data, Int32, channel.routeType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel.encrypt, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel.algorithm, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel.crc, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Uint32, channel.dataConfig, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel.linkType, SOFTBUS_IPC_ERR);
-
-    int32_t ret = OnChannelOpened(sessionName, &channel);
+    ret = OnChannelOpened(sessionName, &channel);
     COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(ret), SOFTBUS_IPC_ERR, COMM_SDK, "write reply failed");
     return SOFTBUS_OK;
 }
