@@ -48,29 +48,6 @@ template <class T> T GetData()
     return objetct;
 }
 
-void ConnBleOnReferenceRequestFuzzTest(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size < sizeof(int32_t)) {
-        COMM_LOGE(COMM_TEST, "Invalid param");
-        return;
-    }
-    const char *dataInfo = reinterpret_cast<const char*>(data);
-    cJSON *json = cJSON_ParseWithLength(dataInfo, size);
-    if (json == nullptr) {
-        COMM_LOGE(COMM_TEST, "json is null");
-        return;
-    }
-    ConnBleConnection connection;
-    if (memcpy_s(&connection, sizeof(ConnBleConnection), data, size) != EOK) {
-        COMM_LOGE(COMM_TEST, "memcpy err");
-        cJSON_Delete(json);
-        return;
-    }
-    ConnBleOnReferenceRequest(&connection, json);
-    cJSON_Delete(json);
-    return;
-}
-
 void BleOnDataReceivedFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
@@ -103,7 +80,6 @@ void BleOnDataReceivedFuzzTest(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::ConnBleOnReferenceRequestFuzzTest(data, size);
     OHOS::BleOnDataReceivedFuzzTest(data, size);
     return 0;
 }
