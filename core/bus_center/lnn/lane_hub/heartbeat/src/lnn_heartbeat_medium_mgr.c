@@ -159,6 +159,10 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         LNN_LOGD(LNN_HEART_BEAT, "get nodeInfo fail");
         return;
     }
+    if (nodeInfo.deviceInfo.deviceTypeId == TYPE_PC_ID) {
+        LNN_LOGI(LNN_HEART_BEAT, "winpc no need update netCapacity");
+        return;
+    }
     uint32_t oldNetCapa = nodeInfo.netCapacity;
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
