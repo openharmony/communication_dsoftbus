@@ -247,18 +247,8 @@ int32_t RestartMetaCallbackRegister(RestartEventCallback callback)
     return SOFTBUS_OK;
 }
 
-static bool g_deathRecipientFlag = true;
-void SetDeathRecipientFlag(bool flag)
-{
-    g_deathRecipientFlag = flag;
-}
-
 int32_t ClientStubInit(void)
 {
-    if (!g_deathRecipientFlag) {
-        g_serverProxy = g_serverProxy == nullptr ? GetSystemAbility() : g_serverProxy;
-        return SOFTBUS_OK;
-    }
     if (ServerProxyInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
         return SOFTBUS_NO_INIT;

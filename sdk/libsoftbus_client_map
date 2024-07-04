@@ -434,7 +434,6 @@
         "RestartRegDataLevelChange";
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
-        "SetDeathRecipientFlag";
         "LnnOnDataLevelChanged";
         "SoftBusFtInit";
         "SoftBusFtDestroyNonblock";
