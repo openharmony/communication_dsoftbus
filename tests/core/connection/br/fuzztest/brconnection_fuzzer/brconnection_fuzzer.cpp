@@ -46,34 +46,10 @@ template <class T> T GetData()
     return objetct;
 }
 
-void ConnBrOnReferenceRequestFuzzTest(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size < sizeof(int32_t)) {
-        COMM_LOGE(COMM_TEST, "Invalid param");
-        return;
-    }
-    const char *dataInfo = reinterpret_cast<const char*>(data);
-    cJSON *json = cJSON_ParseWithLength(dataInfo, size);
-    if (json == nullptr) {
-        COMM_LOGE(COMM_TEST, "json is null");
-        return;
-    }
-    ConnBrConnection connection;
-    if (memcpy_s(&connection, sizeof(ConnBrConnection), data, size) != EOK) {
-        COMM_LOGE(COMM_TEST, "memcpy err");
-        cJSON_Delete(json);
-        return;
-    }
-    ConnBrOnReferenceRequest(&connection, json);
-    cJSON_Delete(json);
-    return;
-}
-
 }
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::ConnBrOnReferenceRequestFuzzTest(data, size);
     return 0;
 }

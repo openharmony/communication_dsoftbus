@@ -326,6 +326,10 @@ int32_t ConnBrPostBytes(
         FreeSendNode(node);
         return status;
     }
+    CONN_LOGI(CONN_BR,
+        "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
+        "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
+        connectionId, pid, len, flag, module, seq);
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBrSendLPInfo.lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, CONN_BR, "lock fail!");
     g_startBrSendLPInfo.messagePosted = true;
@@ -339,12 +343,9 @@ int32_t ConnBrPostBytes(
         g_startBrSendLPInfo.sendTaskRunning = true;
         SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
         CONN_LOGD(CONN_BR, "start br send task succ");
+        return SOFTBUS_OK;
     }
     SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
-    CONN_LOGI(CONN_BR,
-        "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
-        "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
-        connectionId, pid, len, flag, module, seq);
     return SOFTBUS_OK;
 }
 
