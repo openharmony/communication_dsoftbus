@@ -56,3 +56,8 @@ int32_t LnnInitDecisionDbDelay(void)
     LNN_LOGE(LNN_INIT, "init decision db not implemented");
     return SOFTBUS_OK;
 }
+
+int32_t UpdateRecoveryDeviceInfoFromDb(void)
+{
+    return SOFTBUS_OK;
+}
