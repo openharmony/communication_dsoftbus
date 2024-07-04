@@ -97,7 +97,7 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     if (abilityDeath == nullptr) {
         COMM_LOGE(COMM_SVC, "DeathRecipient object is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
     }
     int32_t callingPid = pid;
     int32_t selfPid = (int32_t)getpid();
@@ -106,12 +106,12 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
         COMM_LOGI(COMM_SVC, "this is spe pid");
     } else if (!ret) {
         COMM_LOGE(COMM_SVC, "AddDeathRecipient failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
     }
     if (SoftbusClientInfoManager::GetInstance().SoftbusAddService(clientPkgName,
         object, abilityDeath, pid) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus add client service failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ADD_CLIENT_SERVICE_FAILED;
     }
     COMM_LOGI(COMM_SVC, "softbus register service success. clientPkgName=%{public}s", clientPkgName);
     return SOFTBUS_OK;
@@ -175,7 +175,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             break;
         default:
             COMM_LOGE(COMM_SVC, "connect type error");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_INVALID_CONNECT_TYPE;
     }
     return TransOpenAuthChannel(sessionName, &connOpt, "");
 }
@@ -332,7 +332,7 @@ int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {
         COMM_LOGE(COMM_SVC, "hidumper fd is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     std::vector<std::string> argsStr;
     for (auto item : args) {

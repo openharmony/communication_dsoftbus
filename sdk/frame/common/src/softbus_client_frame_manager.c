@@ -210,7 +210,7 @@ static int32_t ClientModuleInit(void)
 ERR_EXIT:
     COMM_LOGD(COMM_SDK, "softbus sdk frame init failed.");
     ClientModuleDeinit();
-    return SOFTBUS_ERR;
+    return SOFTBUS_NO_INIT;
 }
 
 int32_t InitSoftBus(const char *pkgName)
