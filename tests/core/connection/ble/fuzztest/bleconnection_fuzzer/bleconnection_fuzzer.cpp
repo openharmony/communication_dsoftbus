@@ -50,7 +50,7 @@ template <class T> T GetData()
 
 void ConnBleOnReferenceRequestFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
+    if (data == nullptr || size < sizeof(ConnBleConnection)) {
         COMM_LOGE(COMM_TEST, "Invalid param");
         return;
     }

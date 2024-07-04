@@ -411,6 +411,7 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
         g_startBleSendLPInfo.sendTaskRunning = true;
         SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
         CONN_LOGI(CONN_BLE, "start ble send task succ");
+        return SOFTBUS_OK;
     }
     SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
     return SOFTBUS_OK;
