@@ -772,7 +772,7 @@ int32_t SoftBusServerStub::ReleaseResourcesInner(MessageParcel &data, MessagePar
             COMM_LOGE(COMM_SVC, "failed to write ret failed");
             return SOFTBUS_IPC_ERR;
         }
-        return SOFTBUS_NOT_FIND;
+        return ret;
     }
     int32_t retReply = ReleaseResources(channelId);
     if (!reply.WriteInt32(retReply)) {
