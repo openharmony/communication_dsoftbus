@@ -154,7 +154,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, SoftbusRegisterServiceTest, TestSize.Level
 {
     sptr<SoftBusServerProxyFrame> serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(nullptr);
     ASSERT_TRUE(serverProxyFrame != nullptr);
-    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr), SOFTBUS_ERR);
+    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr), SOFTBUS_IPC_ERR);
 
     sptr<IRemoteObject> serverProxy = GetSystemAbility();
     ASSERT_TRUE(serverProxy != nullptr);
@@ -162,7 +162,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, SoftbusRegisterServiceTest, TestSize.Level
     ASSERT_TRUE(serverProxyFrame != nullptr);
     EXPECT_EQ(serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr), SOFTBUS_OK);
 
-    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService(nullptr, nullptr), SOFTBUS_ERR);
+    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService(nullptr, nullptr), SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
 }
 
 /**
@@ -180,7 +180,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteRequestTest, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    EXPECT_EQ(g_stub->OnRemoteRequest(code, data, reply, option), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnRemoteRequest(code, data, reply, option), SOFTBUS_TRANS_PROXY_READTOKEN_FAILED);
 
     data.WriteInterfaceToken(g_stub->GetDescriptor());
     EXPECT_EQ(g_stub->OnRemoteRequest(code, data, reply, option), IPC_STUB_UNKNOW_TRANS_ERR);
@@ -205,10 +205,10 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnClientPermissonChangeInnerTest, TestSize
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
 
     data.WriteInt32(0);
     data.WriteCString("OnClientPermissonChangeInnerTest");
@@ -227,7 +227,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnDeviceFoundInnerTest, TestSize.Level1)
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnDeviceFoundInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnDeviceFoundInner(data, reply), SOFTBUS_TRANS_PROXY_READBUFFER_FAILED);
 
     DeviceInfo info;
     data.WriteBuffer(&info, sizeof(DeviceInfo));
@@ -399,14 +399,14 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenFailedInnerTest, TestSize.Lev
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnChannelOpenFailedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenFailedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelOpenFailedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenFailedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteInt32(0);
     data.WriteInt32(99);
-    EXPECT_EQ(g_stub->OnChannelOpenFailedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenFailedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteInt32(0);
     data.WriteInt32(0);
@@ -427,10 +427,10 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelLinkDownInnerTest, TestSize.Level
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnChannelLinkDownInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelLinkDownInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
 
     data.WriteCString("OnChannelLinkDownInnerTest");
-    EXPECT_EQ(g_stub->OnChannelLinkDownInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelLinkDownInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteCString("OnChannelLinkDownInnerTest");
     data.WriteInt32(0);
@@ -471,26 +471,26 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelMsgReceivedInnerTest, TestSize.Le
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteInt32(0);
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_TRANS_PROXY_READUINT_FAILED);
 
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteUint32(0);
-    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 
     std::string buffer = "OnChannelMsgReceivedInnerTest";
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteUint32(buffer.size());
     data.WriteRawData(buffer.c_str(), buffer.size());
-    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteInt32(0);
     data.WriteInt32(0);

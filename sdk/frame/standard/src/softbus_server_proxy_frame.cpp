@@ -77,7 +77,7 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
     uint32_t clientNameNum = GetSoftBusClientNameList(clientName, SOFTBUS_PKGNAME_MAX_NUM);
     if (clientNameNum == 0) {
         COMM_LOGE(COMM_SDK, "get client name failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_GET_CLIENT_NAME_FAILED;
     }
     for (uint32_t i = 0; i < clientNameNum; i++) {
         while (serverProxyFrame->SoftbusRegisterService(clientName[i], nullptr) != SOFTBUS_OK) {
@@ -126,22 +126,22 @@ static int32_t ServerProxyInit(void)
     if (g_serverProxy == nullptr) {
         g_serverProxy = GetSystemAbility();
         if (g_serverProxy == nullptr) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_IPC_ERR;
         }
         if (g_oldServerProxy != nullptr && g_oldServerProxy == g_serverProxy) {
             COMM_LOGE(COMM_SDK, "g_serverProxy not update\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_IPC_ERR;
         }
 
         g_clientDeath =
             OHOS::sptr<OHOS::IRemoteObject::DeathRecipient>(new (std::nothrow) OHOS::SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
             COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
         }
         if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
             COMM_LOGE(COMM_SDK, "AddDeathRecipient failed\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
         }
     }
     return SOFTBUS_OK;
@@ -229,7 +229,7 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
 {
     if (callback == nullptr) {
         COMM_LOGE(COMM_SDK, "Restart event callback register param is invalid!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_restartEventCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
@@ -240,7 +240,7 @@ int32_t RestartMetaCallbackRegister(RestartEventCallback callback)
 {
     if (callback == nullptr) {
         COMM_LOGE(COMM_SDK, "Restart meta callback register param is invalid!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_restartMetaCallback = callback;
     COMM_LOGD(COMM_SDK, "Restart meta callback register success!\n");
@@ -261,7 +261,7 @@ int32_t ClientStubInit(void)
     }
     if (ServerProxyInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }
