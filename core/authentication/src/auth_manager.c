@@ -50,6 +50,7 @@
 #define FLAG_ACTIVE                        0
 #define AUTH_COUNT                         2
 #define DELAY_REG_DP_TIME                  10000
+#define RECV_DATA_WAIT_TIME                100
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
@@ -1313,6 +1314,7 @@ static void HandleConnectionData(
     if (!RequireAuthLock()) {
         return;
     }
+    char udid[UDID_BUF_LEN] = { 0 };
     AuthManager *auth = FindAuthManagerByConnInfo(connInfo, !fromServer);
     if (auth == NULL) {
         PrintAuthConnInfo(connInfo);
@@ -1340,7 +1342,16 @@ static void HandleConnectionData(
     auth->lastActiveTime = GetCurrentTimeMs();
     auth->connId[type] = connId;
     AuthHandle authHandle = { .authId = authId, .type = GetConnType(connId) };
+    int32_t ret = SOFTBUS_OK;
+    if (strcpy_s(udid, UDID_BUF_LEN, auth->udid) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy udid fail");
+        ret = SOFTBUS_MEM_ERR;
+    }
     ReleaseAuthLock();
+    if (ret == SOFTBUS_OK && !LnnGetOnlineStateById(udid, CATEGORY_UDID)) {
+        AUTH_LOGE(AUTH_CONN, "device is offline, need wait");
+        (void)SoftBusSleepMs(RECV_DATA_WAIT_TIME);
+    }
     if (g_transCallback.OnDataReceived != NULL) {
         g_transCallback.OnDataReceived(authHandle, head, decData, decDataLen);
     }
