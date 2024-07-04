@@ -1760,7 +1760,6 @@ void TransProxyTimerProc(void)
         return;
     }
     if (g_proxyChannelList->cnt <= 0) {
-        TRANS_LOGW(TRANS_INIT, "g_proxyChannelList count invalid");
         (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
         return;
     }
