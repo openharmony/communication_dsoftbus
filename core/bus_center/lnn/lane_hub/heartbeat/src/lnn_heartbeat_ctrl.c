@@ -28,6 +28,7 @@
 #include "lnn_common_utils.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_decision_center.h"
+#include "lnn_decision_db.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
