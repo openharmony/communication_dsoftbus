@@ -58,7 +58,7 @@ void ConnBrOnReferenceRequestFuzzTest(const uint8_t* data, size_t size)
         COMM_LOGE(COMM_TEST, "json is null");
         return;
     }
-    ConnBrConnection connection;
+    ConnBrConnection connection = { 0 };
     if (memcpy_s(&connection, sizeof(ConnBrConnection), data, size) != EOK) {
         COMM_LOGE(COMM_TEST, "memcpy err");
         cJSON_Delete(json);
