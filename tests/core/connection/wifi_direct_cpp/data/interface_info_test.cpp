@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <gtest/gtest.h>
 #include "data/info_container.h"
 #include "data/interface_info.h"
 #include "protocol/wifi_direct_protocol_factory.h"
-#include <gtest/gtest.h>
 
 using namespace testing::ext;
 
@@ -39,6 +40,7 @@ HWTEST_F(InterfaceInfoTest, MarshallingTest, TestSize.Level1)
     InterfaceInfo info1;
     info1.SetName("TestName");
     Ipv4Info ipv4Info("172.30.1.1");
+    info1.SetBaseMac("00:00:00:00:00:00");
     info1.SetIpString(ipv4Info);
     info1.SetSsid("TestSsid");
     info1.SetDynamicMac("00:00:00:00:00:00");
@@ -72,6 +74,7 @@ HWTEST_F(InterfaceInfoTest, MarshallingTest, TestSize.Level1)
     EXPECT_EQ(info2.GetReuseCount(), 1);
     EXPECT_EQ(info2.IsAvailable(), true);
     EXPECT_EQ(info2.GetPhysicalRate(), 1);
+    EXPECT_EQ(info2.GetBaseMac(), "00:00:00:00:00:00");
 }
 
 /*
@@ -111,6 +114,10 @@ HWTEST_F(InterfaceInfoTest, GetAndSetTest01, TestSize.Level1)
     EXPECT_EQ(info.GetCenter20M(), 0);
     info.SetCenter20M(10);
     EXPECT_EQ(info.GetCenter20M(), 10);
+
+    EXPECT_EQ(info.GetConnectedDeviceCount(), 0);
+    info.SetConnectedDeviceCount(1);
+    EXPECT_EQ(info.GetConnectedDeviceCount(), 1);
 }
 
 /*
