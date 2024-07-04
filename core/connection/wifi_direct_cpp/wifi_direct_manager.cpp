@@ -32,7 +32,6 @@
 #include "command/processor_selector_factory.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
-static std::recursive_mutex g_listenerLock;
 static std::list<WifiDirectStatusListener> g_listeners;
 static std::recursive_mutex g_listenerModuleIdLock;
 static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
@@ -50,7 +49,7 @@ static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExt
     extra->linkType = info->connectType;
     extra->expectRole = static_cast<int32_t>(info->expectApiRole);
     extra->peerIp = info->remoteMac;
-    
+
     if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
         info->dfxInfo.linkType = STATISTIC_P2P;
     } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
@@ -123,16 +122,16 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
     OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
-    
+
     ConnEventExtra extra;
     SetElementTypeExtra(info, &extra);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
-    
+
     int32_t ret = OHOS::SoftBus::WifiDirectRoleOption::GetInstance().GetExpectedRole(
         info->remoteNetworkId, info->connectType, info->expectApiRole, info->isStrict);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
     ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
-    
+
     extra.errcode = ret;
     extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
@@ -154,7 +153,6 @@ static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct Wi
 
 static void RegisterStatusListener(struct WifiDirectStatusListener *listener)
 {
-    std::lock_guard lock(g_listenerLock);
     g_listeners.push_back(*listener);
 }
 
@@ -362,7 +360,6 @@ static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char
               OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeDeviceId(remoteUuid).c_str());
-    std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDeviceOnLine != nullptr) {
             listener.onDeviceOnLine(remoteMac, remoteIp, remoteUuid, isSource);
@@ -377,7 +374,6 @@ static void NotifyOffline(const char *remoteMac, const char *remoteIp, const cha
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeDeviceId(remoteUuid).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str());
-    std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDeviceOffLine != nullptr) {
             listener.onDeviceOffLine(remoteMac, remoteIp, remoteUuid, localIp);
@@ -388,7 +384,6 @@ static void NotifyOffline(const char *remoteMac, const char *remoteIp, const cha
 static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
-    std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onLocalRoleChange != nullptr) {
             listener.onLocalRoleChange(oldRole, newRole);
@@ -404,7 +399,6 @@ static void NotifyConnectedForSink(const struct WifiDirectSinkLink *link)
         OHOS::SoftBus::WifiDirectAnonymizeIp(link->localIp).c_str(),
         OHOS::SoftBus::WifiDirectAnonymizeIp(link->remoteIp).c_str(),
         OHOS::SoftBus::WifiDirectAnonymizeMac(link->remoteMac).c_str(), link->bandWidth);
-    std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onConnectedForSink != nullptr) {
             listener.onConnectedForSink(link);
@@ -415,7 +409,6 @@ static void NotifyConnectedForSink(const struct WifiDirectSinkLink *link)
 static void NotifyDisconnectedForSink(const struct WifiDirectSinkLink *link)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-    std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDisconnectedForSink != nullptr) {
             listener.onDisconnectedForSink(link);
