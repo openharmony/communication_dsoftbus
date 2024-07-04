@@ -764,6 +764,16 @@ int32_t SoftBusServerStub::ReleaseResourcesInner(MessageParcel &data, MessagePar
         return SOFTBUS_IPC_ERR;
     }
 
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, CHANNEL_TYPE_UDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "Pid not find, ret = %{public}d", ret);
+        if (!reply.WriteInt32(ret)) {
+            COMM_LOGE(COMM_SVC, "failed to write ret failed");
+            return SOFTBUS_IPC_ERR;
+        }
+        return SOFTBUS_NOT_FIND;
+    }
     int32_t retReply = ReleaseResources(channelId);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "failed to write reply failed");
