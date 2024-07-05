@@ -141,5 +141,10 @@ uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkT
 {
     return GetTransLaneIf()->GenerateLaneId(localUdid, remoteUdid, linkType);
 }
+
+int32_t LaneCapCheck(const char *networkId, LaneLinkType linkType)
+{
+    return GetTransLaneIf()->LaneCapCheck(networkId, linkType);
+}
 }
 } // namespace OHOS
