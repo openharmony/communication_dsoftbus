@@ -112,7 +112,7 @@ typedef struct {
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
-void DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type);
+int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type);
 
 void LaneDeleteP2pAddress(const char *networkId, bool isDestroy);
 void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port);

@@ -352,6 +352,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_LANE_BUILD_LINK_FAIL)).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
     EXPECT_CALL(laneLinkMock, TransProxyPipelineGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
     std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
