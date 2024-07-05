@@ -24,6 +24,7 @@
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
+#include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "softbus_hidumper_trans.h"
 #include "trans_session_manager.h"
@@ -160,9 +161,7 @@ void TransLaneMgrDeinit(void)
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, nextLaneItem, &g_channelLaneList->list, TransLaneInfo, node) {
         ListDelete(&(laneItem->node));
         if (laneItem->isQosLane) {
-            TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
-            TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");
-            GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
+            TransFreeLaneByLaneHandle(laneItem->laneHandle, false);
         } else {
             LnnFreeLane(laneItem->laneHandle);
         }
@@ -264,11 +263,7 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
                 laneItem->channelId, laneItem->channelType);
             g_channelLaneList->cnt--;
             if (laneItem->isQosLane) {
-                TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager() != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
-                    TRANS_CTRL, "GetLaneManager is null");
-                TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnFreeLane != NULL,
-                    SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_CTRL, "lnnFreeLane is null");
-                GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
+                TransFreeLaneByLaneHandle(laneItem->laneHandle, false);
             } else {
                 LnnFreeLane(laneItem->laneHandle);
             }
@@ -304,9 +299,7 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
             TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
                 pkgName, laneItem->channelId, laneItem->channelType);
             if (laneItem->isQosLane) {
-                TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
-                TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");
-                GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
+                TransFreeLaneByLaneHandle(laneItem->laneHandle, false);
             } else {
                 LnnFreeLane(laneItem->laneHandle);
             }
