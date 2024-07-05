@@ -197,6 +197,30 @@ int32_t ClientTransProxyGetInfoByChannelId(int32_t channelId, ProxyChannelInfoDe
     return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
 }
 
+int32_t ClientTransProxyGetOsTypeByChannelId(int32_t channelId, int32_t *osType)
+{
+    if (osType == NULL || g_proxyChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid channelId=%{public}d", channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_proxyChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ClientProxyChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_proxyChannelInfoList->list), ClientProxyChannelInfo, node) {
+        if (item->channelId == channelId) {
+            *osType = item->detail.osType;
+            (void)SoftBusMutexUnlock(&g_proxyChannelInfoList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&g_proxyChannelInfoList->lock);
+    TRANS_LOGE(TRANS_SDK, "can not find proxy channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t ClientTransProxyGetLinkTypeByChannelId(int32_t channelId, int32_t *linkType)
 {
     if (linkType == NULL) {
@@ -287,6 +311,7 @@ static ClientProxyChannelInfo *ClientTransProxyCreateChannelInfo(const ChannelIn
     info->detail.isEncrypted = channel->isEncrypt;
     info->detail.sequence = 0;
     info->detail.linkType = channel->linkType;
+    info->detail.osType = channel->osType;
     return info;
 }
 
