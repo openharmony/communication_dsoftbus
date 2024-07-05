@@ -612,7 +612,8 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusNetNodeResult(DeviceInfo *device, HbRespData *hbResp, bool isConnect, ConnectOnlineReason connectReason)
+static int32_t SoftBusNetNodeResult(
+    DeviceInfo *device, HbRespData *hbResp, bool isConnect, ConnectOnlineReason connectReason)
 {
     char *anonyUdid = NULL;
     Anonymize(device->devId, &anonyUdid);
