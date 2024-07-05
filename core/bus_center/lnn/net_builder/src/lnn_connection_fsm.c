@@ -541,7 +541,7 @@ static int32_t GetDevTypeForDfx(char *localDeviceType, char *peerDeviceType, Lnn
     NodeInfo localInfo;
     (void)memset_s(&localInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetLocalNodeInfoSafe(&localInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get local device info fail");
+        LNN_LOGE(LNN_BUILDER, "get local device info fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     if (snprintf_s(localDeviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%03X",
@@ -715,10 +715,10 @@ static void GetConnectOnlineReason(LnnConntionInfo *connInfo, uint32_t *connOnli
     NodeInfo localInfo;
     (void)memset_s(&localInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetLocalNodeInfoSafe(&localInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get local device info fail");
+        LNN_LOGE(LNN_BUILDER, "get local device info fail");
         return;
     }
-    if ((int32_t)connInfo->infoReport.bleConnectReason > REASON_OVERFLOW_MAX ||
+    if ((uint32_t)connInfo->infoReport.bleConnectReason > REASON_OVERFLOW_MAX ||
         localInfo.stateVersionReason > REASON_OVERFLOW_MAX ||
         (connInfo->nodeInfo != NULL && connInfo->nodeInfo->stateVersionReason > REASON_OVERFLOW_MAX)) {
         LNN_LOGE(LNN_BUILDER, "reason convert will overflow");
