@@ -123,6 +123,8 @@ typedef struct {
 typedef struct {
     void (*onLaneAllocSuccess)(uint32_t laneHandle, const LaneConnInfo *info);
     void (*onLaneAllocFail)(uint32_t laneHandle, int32_t errCode);
+    void (*onLaneFreeSuccess)(uint32_t laneHandle);
+    void (*onLaneFreeFail)(uint32_t laneHandle, int32_t errCode);
 } LaneAllocListener;
 
 typedef struct {

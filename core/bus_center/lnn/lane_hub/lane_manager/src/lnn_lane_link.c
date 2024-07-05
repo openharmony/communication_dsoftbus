@@ -1380,22 +1380,27 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     return SOFTBUS_OK;
 }
 
-void DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type)
+int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type)
 {
     LNN_LOGI(LNN_LANE, "destroy link=%{public}d, laneReqId=%{public}u", type, laneReqId);
     if (networkId == NULL) {
         LNN_LOGE(LNN_LANE, "the networkId is nullptr");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (type == LANE_P2P || type == LANE_HML) {
         if (IsPowerControlEnabled()) {
             DetectDisableWifiDirectApply();
         }
         LaneDeleteP2pAddress(networkId, false);
-        LnnDisconnectP2p(networkId, laneReqId);
+        int32_t errCode = LnnDisconnectP2p(networkId, laneReqId);
+        if (errCode != SOFTBUS_OK) {
+            return errCode;
+        }
     } else {
         LNN_LOGI(LNN_LANE, "ignore destroy linkType=%{public}d, laneReqId=%{public}u", type, laneReqId);
+        PostDelayDestroyMessage(laneReqId, INVALID_LANE_ID, 0);
     }
+    return SOFTBUS_OK;
 }
 
 int32_t InitLaneLink(void)
