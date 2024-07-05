@@ -147,6 +147,15 @@ enum StatisticBootLinkType {
     STATISTIC_BOOT_LINK_TYPE_NUM = 6,
 };
 
+struct WifiDirectDfxInfo {
+    enum StatisticLinkType linkType;
+    enum StatisticBootLinkType bootLinkType;
+    int renegotiate;
+    int reuse;
+    int costTime;
+    uint16_t challengeCode;
+};
+
 struct WifiDirectConnectInfo {
     uint32_t requestId;
     int32_t pid;
@@ -161,11 +170,7 @@ struct WifiDirectConnectInfo {
     int32_t bandWidth;
     enum IpAddrType ipAddrType;
 
-    enum StatisticLinkType linkType;
-    enum StatisticBootLinkType bootLinkType;
-    int renegotiate;
-    int reuse;
-    int costTime;
+    struct WifiDirectDfxInfo dfxInfo;
     uint64_t timeoutInMs;
 };
 

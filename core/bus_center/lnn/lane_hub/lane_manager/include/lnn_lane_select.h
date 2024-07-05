@@ -36,8 +36,6 @@ typedef struct {
 int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList, uint32_t *listNum);
 
-int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList);
-
 int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList);
 

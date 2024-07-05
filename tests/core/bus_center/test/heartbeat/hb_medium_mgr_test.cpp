@@ -168,14 +168,14 @@ HWTEST_F(HeartBeatMediumTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
     uint64_t recvTime1 = TEST_RECVTIME_FIRST;
     int32_t ret1 = HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
-    bool ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, TEST_RECVTIME_FIRST);
+    bool ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, &device, TEST_RECVTIME_FIRST);
     EXPECT_TRUE(ret2);
-    ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, TEST_RECVTIME_LAST);
+    ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, &device, TEST_RECVTIME_LAST);
     EXPECT_TRUE(ret2);
     uint64_t nowTime = TEST_RECVTIME_LAST + HB_RECV_INFO_SAVE_LEN;
-    ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, nowTime);
+    ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, &device, nowTime);
     EXPECT_FALSE(ret2);
-    ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, nullptr, nowTime);
+    ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, nullptr, &device, nowTime);
     EXPECT_FALSE(ret2);
     ret2 = HbIsRepeatedJoinLnnRequest(nullptr, nowTime);
     EXPECT_FALSE(ret2);

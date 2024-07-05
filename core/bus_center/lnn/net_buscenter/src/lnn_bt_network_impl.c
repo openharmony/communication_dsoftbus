@@ -255,7 +255,7 @@ static VisitNextChoice NotifyBtStatusChanged(const LnnNetIfMgr *netifManager, vo
 static void BtNetworkInfoUpdate(SoftBusBtState btState)
 {
     if (btState == SOFTBUS_BLE_TURN_ON) {
-        LnnSetLocalNum64Info(NUM_KEY_BLE_START_TIME, (int64_t)SoftBusGetSysTimeMs());
+        LnnSetLocalNum64Info(NUM_KEY_BLE_START_TIME, 0);
     }
     if (btState == SOFTBUS_BLE_TURN_OFF) {
         LnnSetLocalNum64Info(NUM_KEY_BLE_START_TIME, 0);

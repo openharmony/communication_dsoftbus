@@ -436,7 +436,9 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     g_openSessionCnt.failCnt += (isSucc != SOFTBUS_EVT_OPEN_SESSION_SUCC);
     g_openSessionCnt.successCnt += (isSucc == SOFTBUS_EVT_OPEN_SESSION_SUCC);
     uint32_t totalCnt = g_openSessionCnt.failCnt + g_openSessionCnt.successCnt;
-    g_openSessionCnt.successRate = (float)(g_openSessionCnt.successCnt)/(float)(totalCnt);
+    if (totalCnt != 0) {
+        g_openSessionCnt.successRate = (float)(g_openSessionCnt.successCnt) / (float)(totalCnt);
+    }
 
     (void)SoftBusMutexUnlock(&g_openSessionCnt.lock);
 
@@ -454,8 +456,10 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
         g_openSessionTime.minTimeCost = time;
     }
 
-    uint64_t totalTimeCost = (g_openSessionTime.aveTimeCost) * (g_openSessionCnt.successCnt - 1) + time;
-    g_openSessionTime.aveTimeCost = (uint32_t)(totalTimeCost / g_openSessionCnt.successCnt);
+    if (g_openSessionCnt.successCnt != 0) {
+        uint64_t totalTimeCost = (g_openSessionTime.aveTimeCost) * (g_openSessionCnt.successCnt - 1) + time;
+        g_openSessionTime.aveTimeCost = (uint32_t)(totalTimeCost / g_openSessionCnt.successCnt);
+    }
 
     if (time < TIME_COST_500MS) {
         g_openSessionTime.timesIn500ms++;

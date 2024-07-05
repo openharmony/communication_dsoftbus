@@ -50,6 +50,7 @@
 #define FLAG_ACTIVE                        0
 #define AUTH_COUNT                         2
 #define DELAY_REG_DP_TIME                  10000
+#define RECV_DATA_WAIT_TIME                100
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
@@ -1145,6 +1146,43 @@ static void HandleDeviceIdData(
     }
 }
 
+static void HandleRecvDeviceId(const void *para)
+{
+    RecvDeviceIdData *recvData = (RecvDeviceIdData *)para;
+    if (recvData == NULL) {
+        AUTH_LOGE(AUTH_FSM, "recvData is null");
+        SoftBusFree(recvData->data);
+        return;
+    }
+    HandleDeviceIdData(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
+    SoftBusFree(recvData->data);
+}
+
+static void NotifyRecvDeviceId(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    uint8_t *postData = (uint8_t *)SoftBusCalloc(head->len);
+    if (postData == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc postData fail");
+        return;
+    }
+    if (memcpy_s(postData, head->len, data, head->len) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy postData fail");
+        SoftBusFree(postData);
+        return;
+    }
+
+    RecvDeviceIdData recvData = {
+        .connId = connId,
+        .connInfo = *connInfo,
+        .fromServer = fromServer,
+        .head = *head,
+        .len = head->len,
+        .data = postData,
+    };
+    (void)PostAuthEvent(EVENT_RECV_AUTH_DATA, HandleRecvDeviceId, &recvData, sizeof(RecvDeviceIdData), 0);
+}
+
 static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)
 {
     int32_t ret = AuthSessionProcessAuthData(head->seq, data, head->len);
@@ -1276,6 +1314,7 @@ static void HandleConnectionData(
     if (!RequireAuthLock()) {
         return;
     }
+    char udid[UDID_BUF_LEN] = { 0 };
     AuthManager *auth = FindAuthManagerByConnInfo(connInfo, !fromServer);
     if (auth == NULL) {
         PrintAuthConnInfo(connInfo);
@@ -1303,7 +1342,16 @@ static void HandleConnectionData(
     auth->lastActiveTime = GetCurrentTimeMs();
     auth->connId[type] = connId;
     AuthHandle authHandle = { .authId = authId, .type = GetConnType(connId) };
+    int32_t ret = SOFTBUS_OK;
+    if (strcpy_s(udid, UDID_BUF_LEN, auth->udid) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy udid fail");
+        ret = SOFTBUS_MEM_ERR;
+    }
     ReleaseAuthLock();
+    if (ret == SOFTBUS_OK && !LnnGetOnlineStateById(udid, CATEGORY_UDID)) {
+        AUTH_LOGE(AUTH_CONN, "device is offline, need wait");
+        (void)SoftBusSleepMs(RECV_DATA_WAIT_TIME);
+    }
     if (g_transCallback.OnDataReceived != NULL) {
         g_transCallback.OnDataReceived(authHandle, head, decData, decDataLen);
     }
@@ -1389,7 +1437,7 @@ static void OnDataReceived(
         head->dataType, head->module, head->seq, head->flag, head->len, CONN_DATA(connId), GetAuthSideStr(fromServer));
     switch (head->dataType) {
         case DATA_TYPE_DEVICE_ID:
-            HandleDeviceIdData(connId, connInfo, fromServer, head, data);
+            NotifyRecvDeviceId(connId, connInfo, fromServer, head, data);
             break;
         case DATA_TYPE_AUTH:
             HandleAuthData(connInfo, head, data);
@@ -1412,10 +1460,8 @@ static void OnDataReceived(
     SoftbusHitraceStop();
 }
 
-static void HandleDisconnectedEvent(const void *para)
+static void HandleDisconnectedEvent(uint64_t connId)
 {
-    AUTH_CHECK_AND_RETURN_LOGE(para != NULL, AUTH_FSM, "para is null");
-    uint64_t connId = *((uint64_t *)para);
     uint32_t num = 0;
     uint64_t dupConnId = connId;
     int64_t authIds[2]; /* 2: client and server may use same connection. */
@@ -1446,7 +1492,7 @@ static void HandleDisconnectedEvent(const void *para)
 static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
 {
     (void)connInfo;
-    (void)PostAuthEvent(EVENT_AUTH_DISCONNECT, HandleDisconnectedEvent, &connId, sizeof(connId), 0);
+    HandleDisconnectedEvent(connId);
 }
 
 uint32_t AuthGenRequestId(void)

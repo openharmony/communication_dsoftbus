@@ -582,6 +582,11 @@ void ClientConvertRetVal(int32_t socket, int32_t *retOut)
         TRANS_LOGE(TRANS_SDK, "bindErrCode is SOFTBUS_OK, socket=%{public}d", socket);
         return;
     }
+
+    if (lifecycle.bindErrCode == SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT) {
+        *retOut = SOFTBUS_TRANS_REQUEST_LANE_TIMEOUT;
+        return;
+    }
     *retOut = lifecycle.bindErrCode;
 }
 

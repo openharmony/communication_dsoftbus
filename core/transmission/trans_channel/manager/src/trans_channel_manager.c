@@ -300,10 +300,9 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         param->sessionName, param->sessionId, transInfo->channelId, transInfo->channelType);
     TransSetSocketChannelStateByChannel(
         transInfo->channelId, transInfo->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
-    if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, &connInfo,
-        laneHandle, param->isQosLane, &appInfo->myData) != SOFTBUS_OK) {
-        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
-            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - appInfo->timeStart);
+    if (TransLaneMgrAddLane(transInfo, &connInfo, laneHandle, param->isQosLane, &appInfo->myData) != SOFTBUS_OK) {
+        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL,
+            GetSoftbusRecordTimeMillis() - appInfo->timeStart);
         TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
@@ -599,7 +598,7 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
             ret = TransSendAuthMsg(channelId, (char*)data, (int32_t)len);
             break;
         case CHANNEL_TYPE_PROXY:
-            TRANS_LOGI(TRANS_MSG,
+            TRANS_LOGD(TRANS_MSG,
                 "send msg proxy channelType. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
             ret = TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
             break;
@@ -642,7 +641,7 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
 int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
 {
     if ((ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        TRANS_LOGI(TRANS_CTRL, "channel type is tcp direct!");
+        TRANS_LOGD(TRANS_CTRL, "channel type is tcp direct!");
         return SOFTBUS_OK;
     }
     AppInfo appInfo;

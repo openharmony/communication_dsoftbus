@@ -50,40 +50,46 @@ static int32_t NotifyNormalChannelOpenFailed(const char *pkgName, int32_t pid, i
     return ret;
 }
 
+static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool isServer, ChannelInfo *info)
+{
+    info->channelId = channelId;
+    info->channelType = CHANNEL_TYPE_PROXY;
+    info->isServer = isServer;
+    info->isEnabled = true;
+    info->isEncrypt = appInfo->appType != APP_TYPE_AUTH;
+    info->groupId = (char *)appInfo->groupId;
+    info->peerSessionName = (char *)appInfo->peerData.sessionName;
+    info->peerPid = appInfo->peerData.pid;
+    info->peerUid = appInfo->peerData.uid;
+    info->sessionKey = (char *)appInfo->sessionKey;
+    info->keyLen = SESSION_KEY_LENGTH;
+    info->fileEncrypt = appInfo->encrypt;
+    info->algorithm = appInfo->algorithm;
+    info->crc = appInfo->crc;
+    info->routeType = appInfo->routeType;
+    info->businessType = (int32_t)(appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType);
+    info->autoCloseTime = appInfo->autoCloseTime;
+    info->myHandleId = appInfo->myHandleId;
+    info->peerHandleId = appInfo->peerHandleId;
+    info->linkType = appInfo->linkType;
+    info->dataConfig = appInfo->myData.dataConfig;
+    if (appInfo->appType == APP_TYPE_AUTH) {
+        info->reqId = (char *)appInfo->reqId;
+    }
+    info->timeStart = appInfo->timeStart;
+    info->linkType = appInfo->linkType;
+    info->connectType = appInfo->connectType;
+    info->osType = appInfo->osType;
+    TransGetLaneIdByChannelId(channelId, &info->laneId);
+}
+
 static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appInfo, bool isServer)
 {
     ChannelInfo info = {0};
-    info.channelId = channelId;
-    info.channelType = CHANNEL_TYPE_PROXY;
-    info.isServer = isServer;
-    info.isEnabled = true;
-    info.isEncrypt = appInfo->appType != APP_TYPE_AUTH;
-    info.groupId = (char*)appInfo->groupId;
-    info.peerSessionName = (char*)appInfo->peerData.sessionName;
-    info.peerPid = appInfo->peerData.pid;
-    info.peerUid = appInfo->peerData.uid;
-    char buf[NETWORK_ID_BUF_LEN] = {0};
-    info.sessionKey = (char*)appInfo->sessionKey;
-    info.keyLen = SESSION_KEY_LENGTH;
-    info.fileEncrypt = appInfo->encrypt;
-    info.algorithm = appInfo->algorithm;
-    info.crc = appInfo->crc;
-    info.routeType = appInfo->routeType;
-    info.businessType = (int32_t)(appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType);
-    info.autoCloseTime = appInfo->autoCloseTime;
-    info.myHandleId = appInfo->myHandleId;
-    info.peerHandleId = appInfo->peerHandleId;
-    info.linkType = appInfo->linkType;
-    info.dataConfig = appInfo->myData.dataConfig;
-    if (appInfo->appType == APP_TYPE_AUTH) {
-        info.reqId = (char*)appInfo->reqId;
-    }
-    info.timeStart = appInfo->timeStart;
-    info.linkType = appInfo->linkType;
-    info.connectType = appInfo->connectType;
-    TransGetLaneIdByChannelId(channelId, &info.laneId);
-
     int32_t ret = SOFTBUS_ERR;
+    char buf[NETWORK_ID_BUF_LEN] = {0};
+
+    GetProxyChannelInfo(channelId, appInfo, isServer, &info);
     if (appInfo->appType != APP_TYPE_AUTH) {
         ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
         if (ret != SOFTBUS_OK) {
@@ -94,6 +100,9 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
             return ret;
         }
         info.peerDeviceId = buf;
+        if (LnnGetOsTypeByNetworkId(buf, &(info.osType)) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get remote osType fail, channelId=%{public}d", channelId);
+        }
     } else {
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
@@ -243,7 +252,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
         TransEventExtra extra = {
             .calleePkg = NULL,
-            .peerNetworkId = appInfo->peerData.deviceId,
+            .peerNetworkId = appInfo->peerNetWorkId,
             .linkType = appInfo->connectType,
             .channelId = channelId,
             .costTime = timediff,

@@ -66,3 +66,8 @@ bool IsSupportLpFeature(void)
 {
     return false;
 }
+
+void SetLpKeepAliveState(void *para)
+{
+    (void)para;
+}

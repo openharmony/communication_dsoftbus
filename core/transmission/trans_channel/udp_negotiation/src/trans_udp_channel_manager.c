@@ -645,3 +645,39 @@ bool IsUdpRecoveryTransLimit(void)
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     return true;
 }
+
+int32_t TransUdpGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+    int32_t *connectType)
+{
+    if (localIp == NULL || maxIpLen < IP_LEN || connectType == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "udp channel manager not initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->info.myData.channelId == channelId) {
+            if (strcpy_s(localIp, maxIpLen, udpChannelNode->info.myData.addr) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "failed to strcpy localIp, channelId=%{public}d", channelId);
+                (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+                return SOFTBUS_MEM_ERR;
+            }
+            *connectType = udpChannelNode->info.connectType;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "not found locapIp and connectType by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}

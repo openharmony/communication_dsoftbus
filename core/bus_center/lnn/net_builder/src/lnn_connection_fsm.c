@@ -425,6 +425,9 @@ static void SetLnnConnNodeInfo(
         IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT)) {
         DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
     }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), SetLpKeepAliveState, NULL, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call online process fail");
+    }
     NotifyJoinResult(connFsm, networkId, retCode);
     ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
     connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
