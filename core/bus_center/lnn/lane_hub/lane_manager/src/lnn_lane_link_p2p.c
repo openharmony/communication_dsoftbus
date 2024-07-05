@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_info_key.h"
@@ -137,6 +138,8 @@ static SoftBusHandler g_guideChannelHandler;
 #define INVAILD_AUTH_ID (-1)
 #define INVALID_P2P_REQUEST_ID (-1)
 #define LANE_REQ_ID_TYPE_SHIFT 28
+#define SHORT_RANGE_PTK_NOT_MATCH_CODE 4
+#define SOFTBUS_LNN_PTK_NOT_MATCH (SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + SHORT_RANGE_PTK_NOT_MATCH_CODE)
 
 typedef int32_t (*GuideLinkByType)(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
 
@@ -339,7 +342,7 @@ static bool GetAuthType(const char *peerNetWorkId)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "fail, ret=%{public}d", ret);
     }
-    LNN_LOGD(LNN_LANE, "success, value=%{public}d", value);
+    LNN_LOGI(LNN_LANE, "success, value=%{public}d", value);
     return ((1 << ONLINE_METANODE) == value);
 }
 
@@ -728,6 +731,22 @@ static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLi
     return SOFTBUS_OK;
 }
 
+static int32_t GetWifiDirectAuthByNetworkId(const char *networkId, AuthHandle *authHandle)
+{
+    char uuid[UUID_BUF_LEN] = {0};
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+    AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, authHandle);
+    if (authHandle->authId != AUTH_INVALID_ID) {
+        LNN_LOGI(LNN_BUILDER, "find wifidirect authHandle, networkId=%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_OK;
+    }
+    AnonymizeFree(anonyNetworkId);
+    return SOFTBUS_NOT_FIND;
+}
+
 static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiDirectLink *link)
 {
     int ret = SOFTBUS_OK;
@@ -741,6 +760,21 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
     ret = CreateWDLinkInfo(p2pRequestId, link, &linkInfo);
     if (ret != SOFTBUS_OK) {
         goto FAIL;
+    }
+    P2pLinkReqList reqInfo;
+    (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+    if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get p2p link req fail, type=%{public}d, requestId=%{public}u",
+            ASYNC_RESULT_P2P, p2pRequestId);
+        return;
+    }
+    AuthHandle authHandle;
+    (void)memset_s(&authHandle, sizeof(AuthHandle), 0, sizeof(AuthHandle));
+    if (linkInfo.type == LANE_HML && link->isReuse != true &&
+        GetWifiDirectAuthByNetworkId(reqInfo.laneRequestInfo.networkId, &authHandle) == SOFTBUS_OK) {
+        int32_t ret = UpdatePtkByAuth(reqInfo.laneRequestInfo.networkId, authHandle);
+        LNN_LOGI(LNN_LANE, "try update ptk by auth, authId=%{public}" PRId64 " ret=%{public}d",
+            authHandle.authId, ret);
     }
     LNN_LOGI(LNN_LANE, "wifidirect conn succ, requestId=%{public}u, linkType=%{public}d, linkId=%{public}d",
         p2pRequestId, linkInfo.type, link->linkId);
@@ -882,6 +916,20 @@ static void HandleGuideChannelAsyncFail(AsyncResultType type, uint32_t requestId
 static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "wifidirect conn fail, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
+    if (reason == SOFTBUS_LNN_PTK_NOT_MATCH) {
+        LNN_LOGE(LNN_LANE, "connect device fail due to ptk not match, requestId=%{public}u, reason=%{public}d",
+            p2pRequestId, reason);
+        P2pLinkReqList reqInfo;
+        (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+        if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get p2p link req fail, type=%{public}d, requestId=%{public}d",
+                ASYNC_RESULT_P2P, p2pRequestId);
+            NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
+            return;
+        }
+        int32_t ret = LnnSyncPtk(reqInfo.laneRequestInfo.networkId);
+        LNN_LOGI(LNN_LANE, "syncptk done, ret=%{public}d", ret);
+    }
     if (reason == SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED || reason == SOFTBUS_CONN_POST_DATA_FAILED) {
         LNN_LOGI(LNN_LANE, "guide channel retry, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
         HandleGuideChannelAsyncFail(ASYNC_RESULT_P2P, p2pRequestId, reason);

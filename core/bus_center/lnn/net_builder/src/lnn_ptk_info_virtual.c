@@ -79,6 +79,13 @@ int32_t LnnSyncPtk(char *networkId)
     return SOFTBUS_OK;
 }
 
+int32_t UpdatePtkByAuth(char *networkId, AuthHandle authHandle)
+{
+    (void)networkId;
+    (void)authHandle;
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitPtk(void)
 {
     return SOFTBUS_OK;
