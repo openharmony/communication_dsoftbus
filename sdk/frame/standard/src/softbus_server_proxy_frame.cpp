@@ -50,8 +50,8 @@ std::mutex g_mutex;
 uint32_t g_waitServerInterval = 2;
 uint32_t g_getSystemAbilityId = 2;
 uint32_t g_printRequestFailedCount = 0;
-int32_t g_randomMax = 501; // range of random numbers is (0, 500ms)
-constexpr uint32_t g_printInterval = 200;
+constexpr int32_t RANDOM_RANGE_MAX = 501; // range of random numbers is (0, 500ms)
+constexpr uint32_t PRINT_INTERVAL = 200;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
@@ -59,7 +59,7 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
 {
     srand(time(nullptr));
     int32_t randomNum = rand();
-    int32_t scaledNum = randomNum % g_randomMax;
+    int32_t scaledNum = randomNum % RANDOM_RANGE_MAX;
 
     // Prevent high-concurrency conflicts
     std::this_thread::sleep_for(std::chrono::milliseconds(scaledNum));
@@ -112,7 +112,7 @@ static OHOS::sptr<OHOS::IRemoteObject> GetSystemAbility()
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        if ((++g_printRequestFailedCount) % g_printInterval == 0) {
+        if ((++g_printRequestFailedCount) % PRINT_INTERVAL == 0) {
             COMM_LOGD(COMM_EVENT, "Get GetSystemAbility failed!");
         }
         return nullptr;
