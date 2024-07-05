@@ -53,6 +53,7 @@ int32_t LnnSyncPtk(char *networkId);
 int32_t UpdateLocalPtkIfValid(char *udid);
 int32_t LnnSetLocalPtkConn(char *udid);
 int32_t LnnGenerateLocalPtk(char *udid, char *uuid);
+int32_t UpdatePtkByAuth(char *networkId, AuthHandle authHandle);
 
 #ifdef __cplusplus
 }

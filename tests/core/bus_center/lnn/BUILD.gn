@@ -1477,6 +1477,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_vap_info_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_select_rule.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_ptk_info_virtual.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_deps_mock.cpp",
@@ -1519,6 +1520,8 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
