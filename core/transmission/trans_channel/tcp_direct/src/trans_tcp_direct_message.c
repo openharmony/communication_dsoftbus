@@ -1244,39 +1244,67 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
     return SOFTBUS_TRANS_TCP_DATABUF_NOT_FOUND;
 }
 
-int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type)
+static int32_t TransRecvTdcSocketData(int32_t channelId, char *buffer, int32_t bufferSize)
 {
     int32_t fd = -1;
     size_t len = 0;
-    if (TransTdcGetDataBufInfoByChannelId(channelId, &fd, &len) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get info failed");
-        return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
-    }
-    if (len == 0) {
-        TRANS_LOGE(TRANS_CTRL, "trans free databuf less zero. channelId=%{public}d", channelId);
-        return SOFTBUS_TRANS_TCP_DATABUF_LESS_ZERO;
-    }
-    char *recvBuf = (char *)SoftBusCalloc(len);
-    if (recvBuf == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "trans malloc failed. channelId=%{public}d, len%{public}zu", channelId, len);
-        return SOFTBUS_MALLOC_ERR;
-    }
-    int32_t recvLen = ConnRecvSocketData(fd, recvBuf, len, 0);
-    if (recvLen < 0) { // socket recv datalen less than zero, an error occurs
-        SoftBusFree(recvBuf);
-        TRANS_LOGD(TRANS_CTRL, " recv tcp data fail, channelId=%{public}d, retLen=%{public}d.", channelId, recvLen);
-        return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
+    int32_t ret = TransTdcGetDataBufInfoByChannelId(channelId, &fd, &len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL, "get info failed, ret=%{public}d", ret);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(len >= bufferSize, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL,
+        "freeBufferLen=%{public}d less than bufferSize=%{public}d. channelId=%{public}d", len, bufferSize, channelId);
+    int32_t recvLen = ConnRecvSocketData(fd, buffer, bufferSize, 0);
+    if (recvLen < 0) {
+        TRANS_LOGE(TRANS_CTRL, " recv tcp data fail, channelId=%{public}d, retLen=%{public}d.", channelId, recvLen);
+        return SOFTBUS_DATA_NOT_ENOUGH;
     } else if (recvLen == 0) {
-        SoftBusFree(recvBuf);
         TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, retLen=0, channelId=%{public}d", channelId);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
-    if (TransTdcUpdateDataBufWInfo(channelId, recvBuf, recvLen) != SOFTBUS_OK) {
-        SoftBusFree(recvBuf);
+    if (TransTdcUpdateDataBufWInfo(channelId, buffer, bufferSize) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "update channel data buf failed. channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_UPDATE_DATA_BUF_FAILED;
     }
-    SoftBusFree(recvBuf);
+
+    return SOFTBUS_OK;
+}
+
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type)
+{
+    int32_t headSize = sizeof(TdcPacketHead);
+    char *headBuf = (char *)SoftBusCalloc(headSize);
+    if (headBuf == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc failed. channelId=%{public}d, len=%{public}d", channelId, headSize);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    int32_t ret = TransRecvTdcSocketData(channelId, headBuf, headSize);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(headBuf);
+        return ret;
+    }
+    TdcPacketHead *pktHead = (TdcPacketHead *)headBuf;
+    UnpackTdcPacketHead(pktHead);
+    if (pktHead->magicNumber != MAGIC_NUMBER) {
+        TRANS_LOGE(TRANS_CTRL,
+            "srv recv invalid packet head listenerModule=%{public}d, channelId=%{public}d, type=%{public}d",
+            (int32_t)module, channelId, type);
+        SoftBusFree(headBuf);
+        return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED;
+    }
+    int32_t dataSize = pktHead->dataLen;
+    SoftBusFree(headBuf);
+
+    char *dataBuffer = (char *)SoftBusCalloc(dataSize);
+    if (dataBuffer == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc failed. channelId=%{public}d, len=%{public}d", channelId, dataSize);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ret = TransRecvTdcSocketData(channelId, dataBuffer, dataSize);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(dataBuffer);
+        return ret;
+    }
+    SoftBusFree(dataBuffer);
 
     return TransTdcSrvProcData(module, channelId, type);
 }
