@@ -1519,6 +1519,22 @@ static bool IsSupportProxyNego(const char *networkId)
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0);
 }
 
+static bool CheckHasBleConnection(void)
+{
+    uint32_t local;
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &local);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d", ret);
+        return false;
+    }
+    if (!(local & (1 << BIT_BLE))) {
+        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}u", local);
+        return false;
+    }
+    LNN_LOGI(LNN_LANE, "ble link ok, local=%{public}u", local);
+    return true;
+}
+
 static int32_t UpdateP2pReuseInfoByReqId(AsyncResultType type, uint32_t requestId)
 {
     if (LinkLock() != 0) {
@@ -1627,7 +1643,9 @@ static int32_t GetGuideChannelInfo(const char *networkId, LaneLinkType linkType,
         if (IsHasAuthConnInfo(networkId)) {
             guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
         }
-        guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
+        if (CheckHasBleConnection()) {
+            guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
+        }
         guideList[(*linksNum)++] = LANE_NEW_AUTH_TRIGGER;
     } else {
         if (IsHasAuthConnInfo(networkId)) {
