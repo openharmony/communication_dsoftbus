@@ -467,7 +467,6 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
         }
     }
     return SOFTBUS_OK;
-
 }
 
 static void SetDiscItemCallback(DiscItem *itemNode, const InnerCallback *cb, const ServiceType type)
@@ -581,6 +580,8 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
             DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            SoftBusFree(option->capabilityData);
+            option->capabilityData = NULL;
             return NULL;
         }
     }
