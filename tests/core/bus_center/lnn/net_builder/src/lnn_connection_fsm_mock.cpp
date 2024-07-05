@@ -130,5 +130,10 @@ int32_t LnnSetLocalStateVersionReason(void)
 {
     return GetLnnConnInterface()->LnnSetLocalStateVersionReason();
 }
+
+void SetLpKeepAliveState(void *para)
+{
+    return GetLnnConnInterface()->SetLpKeepAliveState(para);
+}
 }
 } // namespace OHOS

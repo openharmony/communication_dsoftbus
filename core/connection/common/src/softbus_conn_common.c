@@ -213,7 +213,7 @@ static int32_t ConnectSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, ui
     }
     SoftBusSysTime now;
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "BrSoftBusCondWait SoftBusGetTime failed");
+        CONN_LOGE(CONN_COMMON, "get time failed");
         return SOFTBUS_CONN_GET_TIME_FAIL;
     }
     now.sec += (now.usec + ((int32_t)timeMillis * USECTONSEC)) / MICROSECONDS;

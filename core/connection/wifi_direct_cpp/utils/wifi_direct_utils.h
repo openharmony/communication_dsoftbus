@@ -89,6 +89,7 @@ public:
     static constexpr int BAND_WIDTH_160M_NUMBER = 160 << 20;
     static WifiDirectBandWidth BandWidthNumberToEnum(int bandWidth);
     static int BandWidthEnumToNumber(WifiDirectBandWidth bandWidth);
+    static int GetRecommendChannelFromLnn(const std::string &networkId);
 
     static void SerialFlowEnter();
     static void SerialFlowExit();

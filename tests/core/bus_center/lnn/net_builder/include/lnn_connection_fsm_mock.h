@@ -58,6 +58,7 @@ public:
     virtual void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual int32_t LnnSetLocalStateVersionReason(void) = 0;
+    virtual void SetLpKeepAliveState(void *para) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -84,6 +85,7 @@ public:
     MOCK_METHOD2(LnnStopOfflineTimingByHeartbeat, void (const char *, ConnectionAddrType));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));
     MOCK_METHOD0(LnnSetLocalStateVersionReason, int32_t (void));
+    MOCK_METHOD1(SetLpKeepAliveState, void (void *));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H

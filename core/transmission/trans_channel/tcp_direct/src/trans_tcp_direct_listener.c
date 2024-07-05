@@ -187,7 +187,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         SoftBusFree(conn);
         return ret;
     }
-    ret = AddTrigger(conn->listenMod, fd, READ_TRIGGER);
+    ret = AddTrigger(module, fd, READ_TRIGGER);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add trigger failed, delete session conn.");
         TransDelSessionConnById(chanId);
@@ -281,10 +281,10 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
 static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
 {
     int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId, conn->authHandle.type);
-    TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%{public}d. ", ret);
     if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
         return SOFTBUS_OK;
     }
+    TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data Failed, ret=%{public}d.", ret);
     TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
     return ret;
 }

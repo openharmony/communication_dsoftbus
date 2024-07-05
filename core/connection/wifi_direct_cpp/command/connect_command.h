@@ -56,9 +56,6 @@ protected:
     mutable std::string remoteDeviceId_;
     bool hasRetried_ = false;
 
-    void DfxRecord(bool isSuccess, int reason) const;
-    void FillConnEventExtra(ConnEventExtra &extra) const;
-
 private:
     static constexpr uint64_t ABANDON_CONNECT_COMMAND_PERIOD = 500;
 };

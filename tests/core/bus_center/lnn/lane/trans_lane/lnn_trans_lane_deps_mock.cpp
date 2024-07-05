@@ -117,11 +117,6 @@ void FreeLaneReqId(uint32_t laneReqId)
     GetTransLaneIf()->FreeLaneReqId(laneReqId);
 }
 
-int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
-{
-    return GetTransLaneIf()->SelectExpectLaneByParameter(setRecommendLinkList);
-}
-
 int32_t AddLaneBusinessInfoItem(LaneType laneType, uint64_t laneId)
 {
     return GetTransLaneIf()->AddLaneBusinessInfoItem(laneType, laneId);

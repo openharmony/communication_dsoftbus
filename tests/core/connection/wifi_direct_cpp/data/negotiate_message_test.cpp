@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <gtest/gtest.h>
 #include "data/link_info.h"
 #include "data/negotiate_message.h"
 #include "protocol/wifi_direct_protocol_factory.h"
-#include <gtest/gtest.h>
-
 using namespace testing::ext;
 
 namespace OHOS::SoftBus {
@@ -177,6 +177,7 @@ HWTEST_F(NegotiateMessageTest, MarshallingAndUnmarshallingOfTlv, TestSize.Level1
 {
     NegotiateMessage msg1;
     msg1.SetSessionId(1);
+    msg1.SetIsModeStrict(true);
     msg1.SetMessageType(NegotiateMessageType::CMD_CONN_V2_REQ_1);
     msg1.SetIpv4InfoArray({ Ipv4Info("172.30.1.1"), Ipv4Info("172.30.2.1") });
     LinkInfo linkInfo1;
@@ -198,6 +199,7 @@ HWTEST_F(NegotiateMessageTest, MarshallingAndUnmarshallingOfTlv, TestSize.Level1
     LinkInfo linkInfo2 = msg2.GetLinkInfo();
     EXPECT_EQ(msg1.GetSessionId(), msg2.GetSessionId());
     EXPECT_EQ(msg1.GetMessageType(), msg2.GetMessageType());
+    EXPECT_EQ(msg1.GetIsModeStrict(), msg2.GetIsModeStrict());
     EXPECT_EQ(linkInfo1.GetCenter20M(), linkInfo2.GetCenter20M());
     EXPECT_EQ(linkInfo1.GetLocalBaseMac(), linkInfo2.GetLocalBaseMac());
 
@@ -205,6 +207,17 @@ HWTEST_F(NegotiateMessageTest, MarshallingAndUnmarshallingOfTlv, TestSize.Level1
     std::vector<Ipv4Info> ipv4Array2 = msg2.GetIpv4InfoArray();
     EXPECT_EQ(linkInfo1.GetCenter20M(), linkInfo2.GetCenter20M());
     EXPECT_EQ(linkInfo1.GetLocalBaseMac(), linkInfo2.GetLocalBaseMac());
+
+    NegotiateMessage msg3;
+    auto protocol3 = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
+    protocol1->SetFormat({ TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE2 });
+    std::vector<uint8_t> output3;
+    msg1.Marshalling(*protocol3, output3);
+
+    NegotiateMessage msg4;
+    auto protocol4 = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
+    protocol2->SetFormat({ TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE2 });
+    msg2.Unmarshalling(*protocol4, output3);
 }
 
 /*
@@ -325,5 +338,41 @@ HWTEST_F(NegotiateMessageTest, MarshallingAndUnmarshallingOfJson, TestSize.Level
     EXPECT_EQ(msg1.GetLegacyP2pContentType(), msg2.GetLegacyP2pContentType());
     EXPECT_EQ(msg1.GetLegacyP2pRole(), msg2.GetLegacyP2pRole());
     EXPECT_EQ(msg1.GetLegacyP2pGroupConfig(), msg2.GetLegacyP2pGroupConfig());
+}
+
+/*
+ * @tc.name: SetAndGet
+ * @tc.desc: check set and get methods
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NegotiateMessageTest, SetAndGetMsg, TestSize.Level1)
+{
+    NegotiateMessage msg;
+    EXPECT_EQ(msg.GetMessageType(), NegotiateMessageType::CMD_INVALID);
+    msg.SetMessageType(NegotiateMessageType::CMD_V3_REQ);
+    EXPECT_EQ(msg.GetMessageType(), NegotiateMessageType::CMD_V3_REQ);
+
+    std::vector<uint8_t> ret;
+    EXPECT_EQ(msg.GetExtraData(), ret);
+    std::vector<uint8_t> vec = { 65, 66, 67, 68, 69 };
+    msg.SetExtraData(vec);
+    EXPECT_EQ(msg.GetExtraData(), vec);
+
+    EXPECT_EQ(msg.GetChallengeCode(), 0);
+    msg.SetChallengeCode(1);
+    EXPECT_EQ(msg.GetChallengeCode(), 1);
+
+    EXPECT_EQ(msg.GetLegacyP2pBridgeSupport(), false);
+    msg.SetLegacyP2pBridgeSupport(true);
+    EXPECT_EQ(msg.GetLegacyP2pBridgeSupport(), true);
+
+    EXPECT_EQ(msg.GetLegacyP2pWifiConfigInfo(), "");
+    msg.SetLegacyP2pWifiConfigInfo("test");
+    EXPECT_EQ(msg.GetLegacyP2pWifiConfigInfo(), "test");
+
+    EXPECT_EQ(msg.GetLegacyInterfaceName(), "");
+    msg.SetLegacyInterfaceName("test");
+    EXPECT_EQ(msg.GetLegacyInterfaceName(), "test");
 }
 } // namespace OHOS::SoftBus

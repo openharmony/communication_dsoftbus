@@ -479,7 +479,7 @@ HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level1)
 {
     uint64_t connId = CONN_ID;
-    HandleDisconnectedEvent(reinterpret_cast<void *>(&connId));
+    HandleDisconnectedEvent(connId);
     AuthHandle authHandle = { .authId = AUTH_SEQ_1, .type = AUTH_LINK_TYPE_WIFI };
     AuthHandleLeaveLNN(authHandle);
     authHandle.authId = AUTH_SEQ;

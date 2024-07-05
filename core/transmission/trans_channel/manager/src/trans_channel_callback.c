@@ -249,10 +249,9 @@ IServerChannelCallBack *TransServerGetChannelCb(void)
     return &g_channelCallBack;
 }
 
-int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const char *uuid,
-    const char *udid, const char *peerIp, const char *networkId, int32_t routeType)
+int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const LinkDownInfo *info)
 {
-    if (pkgName == NULL || networkId == NULL) {
+    if (pkgName == NULL || info == NULL || info->networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGD(TRANS_CTRL, "pkgName=%{public}s", pkgName);
@@ -260,10 +259,10 @@ int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const cha
     ChannelMsg data = {
         .msgPid = pid,
         .msgPkgName = pkgName,
-        .msgUuid = uuid,
-        .msgUdid = udid
+        .msgUuid = info->uuid,
+        .msgUdid = info->udid
     };
-    if (ClientIpcOnChannelLinkDown(&data, networkId, peerIp, routeType) != SOFTBUS_OK) {
+    if (ClientIpcOnChannelLinkDown(&data, info->networkId, info->peerIp, info->routeType) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel link down fail");
         return SOFTBUS_IPC_ERR;
     }

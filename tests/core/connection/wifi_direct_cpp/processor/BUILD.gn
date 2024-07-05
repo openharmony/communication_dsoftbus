@@ -87,6 +87,7 @@ ohos_unittest("P2pv1ProcessorTest") {
     "$wifi_direct_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_path/utils/duration_statistic.cpp",
     "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
+    "$wifi_direct_path/utils/wifi_direct_dfx.cpp",
     "$wifi_direct_path/utils/wifi_direct_trace.cpp",
     "$wifi_direct_path/utils/wifi_direct_utils.cpp",
     "$wifi_direct_path/wifi_direct_executor.cpp",

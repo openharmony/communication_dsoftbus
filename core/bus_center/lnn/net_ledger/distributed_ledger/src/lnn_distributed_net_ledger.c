@@ -710,6 +710,10 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
 
 int32_t LnnAddMetaInfo(NodeInfo *info)
 {
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
@@ -722,11 +726,11 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL && strcmp(oldInfo->networkId, info->networkId) == 0) {
         MetaInfo temp = info->metaInfo;
-        LNN_LOGI(LNN_LEDGER, "old sessionPort=%{public}d new sessionPort=%{public}d",
-            oldInfo->connectInfo.sessionPort, info->connectInfo.sessionPort);
+        LNN_LOGI(LNN_LEDGER, "old capa=%{public}u new capa=%{public}u", oldInfo->netCapacity, info->netCapacity);
         oldInfo->connectInfo.sessionPort = info->connectInfo.sessionPort;
         oldInfo->connectInfo.authPort = info->connectInfo.authPort;
         oldInfo->connectInfo.proxyPort = info->connectInfo.proxyPort;
+        oldInfo->netCapacity = info->netCapacity;
         if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "LnnAddMetaInfo copy fail!");
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -780,6 +784,14 @@ int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
 
 static void OnlinePreventBrConnection(const NodeInfo *info)
 {
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(info->networkId, &osType)) {
+        LNN_LOGE(LNN_BUILDER, "get remote osType fail");
+    }
+    if (osType != HO_OS_TYPE) {
+        LNN_LOGD(LNN_BUILDER, "not pend br connection");
+        return;
+    }
     const NodeInfo *localNodeInfo = LnnGetLocalNodeInfo();
     if (localNodeInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "get local node info fail");
@@ -791,7 +803,6 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "copy br mac fail");
         return;
     }
-
     bool preventFlag = false;
     do {
         LNN_LOGI(LNN_LEDGER, "check the ble start timestamp, local=%{public}" PRId64", peer=%{public}" PRId64"",
