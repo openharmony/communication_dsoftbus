@@ -82,6 +82,7 @@ int32_t DiscClientInit(void)
 {
     if (g_discInfo != NULL) {
         SoftBusFree(g_discInfo);
+        g_discInfo = NULL;
     }
     g_discInfo = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
     if (g_discInfo == NULL) {
@@ -91,6 +92,7 @@ int32_t DiscClientInit(void)
     if (DiscServerProxyInit() != SOFTBUS_OK) {
         DISC_LOGE(DISC_INIT, "disc server proxy init failed.");
         SoftBusFree(g_discInfo);
+        g_discInfo = NULL;
         return SOFTBUS_DISC_SERVER_INIT_FAILED;
     }
     DISC_LOGI(DISC_INIT, "Init success as client side");
@@ -113,7 +115,7 @@ void DiscClientOnDeviceFound(const DeviceInfo *device)
     if (device == NULL) {
         DISC_LOGE(DISC_SDK, "invalid parameter:null");
         return;
-    }   
+    }
     DISC_LOGI(DISC_SDK, "Sdk OnDeviceFound, capabilityBitmap=%{public}d",
         device->capabilityBitmap[0]);
     if (g_discInfo == NULL) {

@@ -467,6 +467,7 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
         }
     }
     return SOFTBUS_OK;
+
 }
 
 static void SetDiscItemCallback(DiscItem *itemNode, const InnerCallback *cb, const ServiceType type)
@@ -530,10 +531,13 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info)
         if (option->capabilityData == NULL) {
             DISC_LOGE(DISC_CONTROL, "alloc capability data failed");
             SoftBusFree(infoNode);
+            infoNode = NULL;
             return NULL;
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
             DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            SoftBusFree(option->capabilityData);
+            option->capabilityData = NULL;
             return NULL;
         }
     }
@@ -572,6 +576,7 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
         if (option->capabilityData == NULL) {
             DISC_LOGE(DISC_CONTROL, "alloc capability data failed");
             SoftBusFree(infoNode);
+            infoNode = NULL;
             return NULL;
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
@@ -1110,13 +1115,16 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
     if (container->pkgName == NULL) {
         DISC_LOGE(DISC_CONTROL, "Container pkgName calloc failed");
         SoftBusFree(container);
+        container = NULL;
         return NULL;
     }
 
     if (strcpy_s(container->pkgName, nameLen, pkgName) != EOK) {
         DISC_LOGE(DISC_CONTROL, "strcpy_s failed");
         SoftBusFree(container->pkgName);
+        container->pkgName = NULL;
         SoftBusFree(container);
+        container = NULL;
         return NULL;
     }
 
