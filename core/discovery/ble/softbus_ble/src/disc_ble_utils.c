@@ -351,19 +351,25 @@ static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const u
 
     char *custData = cJSON_PrintUnformatted(custJson);
     cJSON_Delete(custJson);
+    custJson = NULL;
     if (custData == NULL) {
         DISC_LOGE(DISC_BLE, "cJSON_PrintUnformatted failed");
         SoftBusFree(custString);
+        custString = NULL;
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (memcpy_s(device->info->custData, DISC_MAX_CUST_DATA_LEN, custData, strlen(custData) + 1) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy custData failed");
         cJSON_free(custData);
+        custData = NULL;
         SoftBusFree(custString);
+        custString = NULL;
         return SOFTBUS_MEM_ERR;
     }
     cJSON_free(custData);
+    custData = NULL;
     SoftBusFree(custString);
+    custString = NULL;
     return SOFTBUS_OK;
 }
 
@@ -453,6 +459,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     if (memcpy_s(copyData, bcTlvLen, &serviceData[POS_TLV], bcTlvLen) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy_s adv failed, bcTlvLen=%{public}u", bcTlvLen);
         SoftBusFree(copyData);
+        copyData = NULL;
         return SOFTBUS_MEM_ERR;
     }
 
@@ -460,12 +467,14 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
         if (memcpy_s(copyData + bcTlvLen, rspLen, reportInfo->packet.rspData.payload, rspLen) != EOK) {
             DISC_LOGE(DISC_BLE, "memcpy_s rsp data failed, rspLen=%{public}u", rspLen);
             SoftBusFree(copyData);
+            copyData = NULL;
             return SOFTBUS_MEM_ERR;
         }
     }
 
     int32_t ret = ParseRecvTlvs(device, copyData, bcTlvLen + rspLen);
     SoftBusFree(copyData);
+    copyData = NULL;
     return ret;
 }
 
