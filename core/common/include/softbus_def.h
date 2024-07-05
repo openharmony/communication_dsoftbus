@@ -180,6 +180,7 @@ typedef struct {
     bool isFastData;
     uint32_t dataConfig;
     uint64_t laneId;
+    int32_t osType;
 } ChannelInfo;
 
 #ifdef __cplusplus
