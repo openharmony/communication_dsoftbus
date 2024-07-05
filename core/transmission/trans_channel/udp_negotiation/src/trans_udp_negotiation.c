@@ -209,7 +209,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .calleePkg = NULL,
         .callerPkg = info->myData.pkgName,
         .channelId = info->myData.channelId,
-        .peerNetworkId = info->myData.deviceId,
+        .peerNetworkId = info->peerNetWorkId,
         .socketName = info->myData.sessionName,
         .linkType = info->connectType,
         .costTime = timediff,
