@@ -40,6 +40,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 #define TRANS_REQUEST_PENDING_TIMEOUT (5000)
+#define TRANS_FREE_LANE_TIMEOUT (2000)
 #define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
 #define SESSION_NAME_CASTPLUS "CastPlusSessionName"
 #define SESSION_NAME_DISTRIBUTE_COMMUNICATION "com.huawei.boosterd.user"
@@ -65,7 +66,17 @@ typedef struct {
     int64_t timeStart;
 } TransReqLaneItem;
 
+typedef struct {
+    ListNode node;
+    uint32_t laneHandle;
+    int32_t errCode;
+    SoftBusCond condVar;
+    bool isSucc;
+    bool isFinished;
+} TransFreeLaneItem;
+
 static SoftBusList *g_reqLanePendingList = NULL;
+static SoftBusList *g_freeLanePendingList = NULL;
 
 static SoftBusList *g_asyncReqLanePendingList = NULL;
 
@@ -86,6 +97,18 @@ int32_t TransAsyncReqLanePendingInit(void)
         TRANS_LOGE(TRANS_INIT, "g_asyncReqLanePendingList is null.");
         return SOFTBUS_MALLOC_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t TransFreeLanePendingInit(void)
+{
+    if (g_freeLanePendingList != NULL) {
+        TRANS_LOGI(TRANS_INIT, "g_freeLanePendingList is initialized.");
+        return SOFTBUS_OK;
+    }
+    g_freeLanePendingList = CreateSoftBusList();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_freeLanePendingList != NULL,
+        SOFTBUS_MALLOC_ERR, TRANS_INIT, "SoftBusCalloc groupId failed");
     return SOFTBUS_OK;
 }
 
@@ -161,6 +184,24 @@ void TransAsyncReqLanePendingDeinit(void)
     (void)SoftBusMutexUnlock(&g_asyncReqLanePendingList->lock);
     DestroySoftBusList(g_asyncReqLanePendingList);
     g_asyncReqLanePendingList = NULL;
+}
+
+void TransFreeLanePendingDeinit(void)
+{
+    TRANS_CHECK_AND_RETURN_LOGE(g_freeLanePendingList != NULL, TRANS_INIT, "g_freeLanePendingList is null.");
+    TRANS_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_freeLanePendingList->lock) == SOFTBUS_OK,
+        TRANS_INIT, "lock failed.");
+
+    TransFreeLaneItem *item = NULL;
+    TransFreeLaneItem *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_freeLanePendingList->list, TransFreeLaneItem, node) {
+        (void)SoftBusCondDestroy(&item->condVar);
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    (void)SoftBusMutexUnlock(&g_freeLanePendingList->lock);
+    DestroySoftBusList(g_freeLanePendingList);
+    g_freeLanePendingList = NULL;
 }
 
 static int32_t TransDelLaneReqFromPendingList(uint32_t laneHandle, bool isAsync)
@@ -697,6 +738,50 @@ static void TransOnLaneRequestFail(uint32_t laneHandle, int32_t reason)
     }
 }
 
+static int32_t TransUpdateFreeLaneStatus(uint32_t laneHandle, bool isSucc, bool isAsync, int32_t errCode)
+{
+    SoftBusList *freePendingList = g_freeLanePendingList;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(freePendingList != NULL,
+        SOFTBUS_NO_INIT, TRANS_INIT, "free lane pending list no init.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&freePendingList->lock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, TRANS_SVC, "lock failed.");
+
+    TransFreeLaneItem *freeItem = NULL;
+    LIST_FOR_EACH_ENTRY(freeItem, &(freePendingList->list), TransFreeLaneItem, node) {
+        if (freeItem->laneHandle == laneHandle) {
+            freeItem->isSucc = isSucc;
+            freeItem->errCode = errCode;
+            freeItem->isFinished = true;
+            if (!isAsync) {
+                (void)SoftBusCondSignal(&freeItem->condVar);
+            }
+            (void)SoftBusMutexUnlock(&(freePendingList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(freePendingList->lock));
+    TRANS_LOGE(TRANS_SVC, "trans free lane not found. laneHandle=%{public}u", laneHandle);
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
+}
+
+static void TransOnLaneFreeSuccess(uint32_t laneHandle)
+{
+    TRANS_LOGI(TRANS_SVC, "free lane success. laneHandle=%{public}u", laneHandle);
+    int32_t ret = TransUpdateFreeLaneStatus(laneHandle, true, false, SOFTBUS_OK);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "update  status failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+    }
+}
+
+static void TransOnLaneFreeFail(uint32_t laneHandle, int32_t reason)
+{
+    TRANS_LOGI(TRANS_SVC, "free lane failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    int32_t ret = TransUpdateFreeLaneStatus(laneHandle, false, false, reason);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "update  status failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+    }
+}
+
 static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
     LANE_LINK_TYPE_BUTT,
     LANE_WLAN_5G,
@@ -1047,6 +1132,8 @@ static int32_t TransAddLaneAllocToPendingAndWaiting(uint32_t laneHandle, const L
     LaneAllocListener allocListener;
     allocListener.onLaneAllocSuccess = TransOnLaneRequestSuccess;
     allocListener.onLaneAllocFail = TransOnLaneRequestFail;
+    allocListener.onLaneFreeSuccess = TransOnLaneFreeSuccess;
+    allocListener.onLaneFreeFail = TransOnLaneFreeFail;
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         GetLaneManager() != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_SVC, "GetLaneManager is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
@@ -1252,6 +1339,8 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
     LaneAllocListener allocListener;
     allocListener.onLaneAllocSuccess = TransOnAsyncLaneSuccess;
     allocListener.onLaneAllocFail = TransOnAsyncLaneFail;
+    allocListener.onLaneFreeSuccess = TransOnLaneFreeSuccess;
+    allocListener.onLaneFreeFail = TransOnLaneFreeFail;
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
         TRANS_SVC, "lnnAllocLane is null");
     ret = GetLaneManager()->lnnAllocLane(*laneHandle, allocInfo, &allocListener);
@@ -1470,4 +1559,140 @@ int32_t TransCancelLaneItemCondByLaneHandle(uint32_t laneHandle, bool bSucc, boo
     (void)SoftBusMutexUnlock(&(pendingList->lock));
     TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneHandle=%{public}u", laneHandle);
     return SOFTBUS_NOT_FIND;
+}
+
+static int32_t TransAddFreeLaneToPending(uint32_t laneHandle)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_freeLanePendingList != NULL,
+        SOFTBUS_NO_INIT, TRANS_INIT, "lane pending list no init.");
+
+    TransFreeLaneItem *freeItem = (TransFreeLaneItem *)SoftBusCalloc(sizeof(TransFreeLaneItem));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(freeItem != NULL,
+        SOFTBUS_MALLOC_ERR, TRANS_SVC, "malloc lane free item err.");
+
+    freeItem->errCode = SOFTBUS_OK;
+    freeItem->laneHandle = laneHandle;
+    freeItem->isSucc = false;
+    freeItem->isFinished = false;
+
+    if (SoftBusCondInit(&freeItem->condVar) != SOFTBUS_OK) {
+        SoftBusFree(freeItem);
+        TRANS_LOGE(TRANS_SVC, "cond var init failed.");
+        return SOFTBUS_TRANS_INIT_FAILED;
+    }
+    if (SoftBusMutexLock(&g_freeLanePendingList->lock) != SOFTBUS_OK) {
+        SoftBusFree(freeItem);
+        TRANS_LOGE(TRANS_SVC, "lock failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&(freeItem->node));
+    ListAdd(&(g_freeLanePendingList->list), &(freeItem->node));
+    g_freeLanePendingList->cnt++;
+    (void)SoftBusMutexUnlock(&g_freeLanePendingList->lock);
+
+    TRANS_LOGI(TRANS_SVC, "add tran free lane to pending laneHandle=%{public}u", laneHandle);
+    return SOFTBUS_OK;
+}
+
+static int32_t TransWaitingFreeCallback(uint32_t laneHandle)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_freeLanePendingList != NULL,
+        SOFTBUS_NO_INIT, TRANS_INIT, "free lane pending list no init.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_freeLanePendingList->lock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, TRANS_SVC, "lock failed.");
+
+    bool isFound = false;
+    TransFreeLaneItem *freeItem = NULL;
+    LIST_FOR_EACH_ENTRY(freeItem, &(g_freeLanePendingList->list), TransFreeLaneItem, node) {
+        if (freeItem->laneHandle == laneHandle) {
+            isFound = true;
+            break;
+        }
+    }
+    if (!isFound) {
+        (void)SoftBusMutexUnlock(&(g_freeLanePendingList->lock));
+        TRANS_LOGI(TRANS_SVC, "not found laneHandle in free pending. laneHandle=%{public}u", laneHandle);
+        return SOFTBUS_NOT_FIND;
+    }
+    if (freeItem->isFinished == false) {
+        int32_t rc = TransSoftBusCondWait(&freeItem->condVar, &g_freeLanePendingList->lock, TRANS_FREE_LANE_TIMEOUT);
+        if (rc != SOFTBUS_OK) {
+            (void)SoftBusMutexUnlock(&(g_freeLanePendingList->lock));
+            TRANS_LOGI(TRANS_SVC, "wait cond var failed laneHandle=%{public}u", laneHandle);
+            return rc;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_freeLanePendingList->lock));
+    TRANS_LOGI(TRANS_SVC, "wait free lane succ laneHandle=%{public}u", laneHandle);
+    return SOFTBUS_OK;
+}
+
+static int32_t TransDelLaneFreeFromPending(uint32_t laneHandle, bool isAsync)
+{
+    TRANS_LOGD(TRANS_SVC, "del tran free from pending laneHandle=%{public}u, isAsync=%{public}d",
+        laneHandle, isAsync);
+    SoftBusList *pendingList = g_freeLanePendingList;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(pendingList != NULL,
+        SOFTBUS_NO_INIT, TRANS_SVC, "free lane pending list no init.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(pendingList->lock)) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, TRANS_SVC, "lock failed.");
+
+    TransFreeLaneItem *laneItem = NULL;
+    TransFreeLaneItem *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(pendingList->list), TransFreeLaneItem, node) {
+        if (laneItem->laneHandle == laneHandle) {
+            if (!isAsync) {
+                (void)SoftBusCondDestroy(&laneItem->condVar);
+            }
+            ListDelete(&(laneItem->node));
+            TRANS_LOGI(TRANS_SVC, "delete free lane laneHandle = %{public}u", laneItem->laneHandle);
+            pendingList->cnt--;
+            SoftBusFree(laneItem);
+            (void)SoftBusMutexUnlock(&(pendingList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(pendingList->lock));
+    TRANS_LOGE(TRANS_SVC, "trans free lane not found, laneHandle=%{public}u", laneHandle);
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
+}
+
+static int32_t TransWaitingFreeLane(uint32_t laneHandle)
+{
+    int32_t ret = TransAddFreeLaneToPending(laneHandle);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "add free lane to pending failed. laneHandle=%{public}u, ret=%{public}d",
+            laneHandle, ret);
+        return ret;
+    }
+
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager() != NULL,
+        SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_CTRL, "GetLaneManager is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnFreeLane != NULL,
+        SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_CTRL, "lnnFreeLane is null");
+    ret = GetLaneManager()->lnnFreeLane(laneHandle);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "trans free lane failed. ret=%{public}d", ret);
+        (void)TransDelLaneFreeFromPending(laneHandle, false);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SVC, "free lane start waiting. laneHandle=%{public}u", laneHandle);
+    ret = TransWaitingFreeCallback(laneHandle);
+    (void)TransDelLaneFreeFromPending(laneHandle, false);
+    return ret;
+}
+
+int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (isAsync) {
+        TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager() != NULL,
+            SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_CTRL, "GetLaneManager is null");
+        TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnFreeLane != NULL,
+            SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_CTRL, "lnnFreeLane is null");
+        ret = GetLaneManager()->lnnFreeLane(laneHandle);
+    } else {
+        ret = TransWaitingFreeLane(laneHandle);
+    }
+    return ret;
 }
