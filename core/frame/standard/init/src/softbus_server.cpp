@@ -36,7 +36,6 @@
 #include "trans_session_service.h"
 #include "trans_spec_object.h"
 #include "lnn_lane_interface.h"
-#include <unistd.h>
 
 #define SOFTBUS_IPC_THREAD_NUM 32
 
@@ -99,12 +98,8 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
         COMM_LOGE(COMM_SVC, "DeathRecipient object is nullptr");
         return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
     }
-    int32_t callingPid = pid;
-    int32_t selfPid = (int32_t)getpid();
     bool ret = object->AddDeathRecipient(abilityDeath);
-    if (callingPid == selfPid) {
-        COMM_LOGI(COMM_SVC, "this is spe pid");
-    } else if (!ret) {
+    if (!ret) {
         COMM_LOGE(COMM_SVC, "AddDeathRecipient failed");
         return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
     }
