@@ -35,7 +35,7 @@ namespace OHOS {
         .onDataLevelChanged = FuzzOnDataLevelChanged,
     };
 
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size == 0 || size > MAX_MACLLOC_SIZE) {
             return true;
