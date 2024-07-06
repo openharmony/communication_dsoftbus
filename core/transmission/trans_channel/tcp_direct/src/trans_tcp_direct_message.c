@@ -607,14 +607,16 @@ static int32_t TransTdcProcessDataConfig(AppInfo *appInfo)
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
     (void)seq;
-    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d", channelId);
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, seq=%{public}" PRIu64, channelId, seq);
     SessionConn conn;
     (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetSessionConnById(channelId, &conn) == SOFTBUS_OK,
         SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
     int32_t errCode = SOFTBUS_OK;
     if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "receive err reply msg");
+        TRANS_LOGE(TRANS_CTRL,
+            "receive err reply msg channelId=%{public}d, errCode=%{public}d, seq=%{public}" PRIu64,
+            channelId, errCode, seq);
         return errCode;
     }
     uint16_t fastDataSize = 0;
@@ -644,7 +646,8 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
         .calleePkg = NULL,
         .callerPkg = NULL,
         .channelId = channelId,
-        .result = EVENT_STAGE_RESULT_OK };
+        .result = EVENT_STAGE_RESULT_OK
+    };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
@@ -1098,7 +1101,9 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
     seq = pktHead->seq;
     flags = pktHead->flags;
 
-    TRANS_LOGI(TRANS_CTRL, "recv tdc packet, flags=%{public}d, seq=%{public}" PRIu64, flags, seq);
+    TRANS_LOGI(TRANS_CTRL,
+        "recv tdc packet. channelId=%{public}d, flags=%{public}d, seq=%{public}" PRIu64,
+        channelId, flags, seq);
     if (DecryptMessage(channelId, pktHead, pktData, &data, &dataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt fail.");
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);

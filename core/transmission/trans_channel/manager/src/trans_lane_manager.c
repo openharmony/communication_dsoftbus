@@ -246,7 +246,6 @@ int32_t TransLaneMgrAddLane(
 
 int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
 {
-    TRANS_LOGI(TRANS_SVC, "del trans land mgr. chanId=%{public}d channelType=%{public}d", channelId, channelType);
     if (g_channelLaneList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return SOFTBUS_NO_INIT;
