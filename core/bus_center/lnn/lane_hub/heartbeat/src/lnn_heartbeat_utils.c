@@ -396,8 +396,8 @@ void LnnDumpLocalBasicInfo(void)
     Anonymize(localBtMac, &anonyBtMac);
     Anonymize(localP2PMac, &anonyP2pMac);
     LNN_LOGI(LNN_HEART_BEAT,
-        "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=%{public}s, brMac=%{public}s, "
-        "p2pMac=%{public}s, onlineNodeNum=%{public}d",
+        "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=..%{public}s, brMac=::%{public}s, "
+        "p2pMac=::%{public}s, onlineNodeNum=%{public}d",
         devTypeStr, localInfo.deviceTypeId, localInfo.deviceName, anonyIp, anonyBtMac, anonyP2pMac, onlineNodeNum);
     AnonymizeFree(anonyIp);
     AnonymizeFree(anonyBtMac);
@@ -537,4 +537,40 @@ void LnnDumpOnlineDeviceInfo(void)
         LnnDumpOnlinePrintInfo(info + i);
     }
     SoftBusFree(info);
+}
+
+int32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
+{
+    time_t currTime = time(NULL);
+    if (currTime == 0) {
+        LNN_LOGI(LNN_HEART_BEAT, "seed is 0, just ignore");
+    }
+    srand(currTime);
+    int32_t random = rand() % (randMax - randMin);
+    return randMin + random;
+}
+
+static int32_t GetOnlineInfoNum(int32_t *nums)
+{
+    int32_t infoNum = 0;
+    NodeBasicInfo *netInfo = NULL;
+    if (LnnGetAllOnlineNodeInfo(&netInfo, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get all online node info fail.");
+        return SOFTBUS_ERR;
+    }
+    if (netInfo == NULL || infoNum == 0) {
+        LNN_LOGI(LNN_BUILDER, "online device num is 0, not need to send network info");
+        return SOFTBUS_ERR;
+    }
+    *nums = infoNum;
+    LNN_LOGI(LNN_HEART_BEAT, "online nums=%{public}d", infoNum);
+    SoftBusFree(netInfo);
+    return SOFTBUS_OK;
+}
+
+bool LnnIsMultiDeviceOnline(void)
+{
+    int32_t onlineNum = 0;
+
+    return GetOnlineInfoNum(&onlineNum) == SOFTBUS_OK && onlineNum >= HB_MULTI_DEVICE_THRESHOLD;
 }

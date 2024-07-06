@@ -1051,7 +1051,7 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
         TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
+    TRANS_LOGD(TRANS_CTRL, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
     return SOFTBUS_OK;
 }
 
@@ -1190,7 +1190,7 @@ static void FillProxyHandshakeExtra(
     extra->peerChannelId = chan->peerId;
     extra->socketName = socketName;
     extra->authId = chan->authHandle.authId;
-    extra->connectionId = chan->connId;
+    extra->connectionId = (int32_t)chan->connId;
     extra->channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY;
     extra->linkType = chan->type;
 
@@ -1374,8 +1374,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         return;
     }
 
-    TRANS_LOGI(TRANS_CTRL, "recv reset myChannelId=%{public}d, peerChanelId=%{public}d", msg->msgHead.myId,
-        msg->msgHead.peerId);
+    TRANS_LOGI(TRANS_CTRL, "recv reset myChannelId=%{public}d, peerChanelId=%{public}d, cipher=%{public}d",
+        msg->msgHead.myId, msg->msgHead.peerId, msg->msgHead.cipher);
     if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity), msg->dateLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset identity fail");
         SoftBusFree(info);
@@ -1760,7 +1760,6 @@ void TransProxyTimerProc(void)
         return;
     }
     if (g_proxyChannelList->cnt <= 0) {
-        TRANS_LOGW(TRANS_INIT, "g_proxyChannelList count invalid");
         (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
         return;
     }

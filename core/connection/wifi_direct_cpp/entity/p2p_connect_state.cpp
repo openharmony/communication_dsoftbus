@@ -41,6 +41,7 @@ void P2pConnectState::Enter(const std::shared_ptr<P2pOperation> &operation)
     }
     operation_->timerId_ = timer_.Register(
         [this]() {
+            CONN_LOGE(CONN_WIFI_DIRECT, "timeout");
             P2pOperationResult result {};
             result.errorCode_ = SOFTBUS_TIMOUT;
             operation_->promise_.set_value(result);
@@ -57,23 +58,27 @@ void P2pConnectState::Exit()
 
 int P2pConnectState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "push to pending queue");
     P2pEntity::GetInstance().PushOperation(operation);
     return SOFTBUS_OK;
 }
 
 int P2pConnectState::Connect(const std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "push to pending queue");
     P2pEntity::GetInstance().PushOperation(operation);
     return SOFTBUS_OK;
 }
 
 int P2pConnectState::DestroyGroup(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pConnectState::RemoveLink(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
@@ -84,8 +89,8 @@ void P2pConnectState::OnP2pStateChangeEvent(P2pState state)
     if (state == P2P_STATE_STARTED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "state is P2P_STATE_STARTED");
     } else {
-        timer_.Unregister(operation_->timerId_);
         if (operation_ != nullptr) {
+            timer_.Unregister(operation_->timerId_);
             result.errorCode_ = SOFTBUS_CONN_P2P_CONNECT_STATE_WIFI_STATE_NOT_STARTED;
             operation_->promise_.set_value(result);
         }
@@ -116,11 +121,15 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
 {
     P2pAdapter::WifiDirectP2pGroupInfo ignore {};
     auto ret = P2pAdapter::GetGroupInfo(ignore);
-
+    if (operation_ == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
+        return;
+    }
     timer_.Unregister(operation_->timerId_);
     P2pOperationResult result;
     if (ret != SOFTBUS_OK || info.connectState == P2P_DISCONNECTED) {
         result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
+        CONN_LOGE(CONN_WIFI_DIRECT, "connect call event failed, error=%d", result.errorCode_);
     } else {
         auto connectOp = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
         result.errorCode_ = SOFTBUS_OK;

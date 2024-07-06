@@ -312,8 +312,9 @@ P2pOperationResult P2pEntity::DestroyGroup(const P2pDestroyGroupParam &param)
 
 void P2pEntity::ChangeState(P2pEntityState *state, const std::shared_ptr<P2pOperation> &operation)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    std::lock_guard lock(operationLock_);
     state_->Exit();
+    CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s ==> %{public}s", state_->GetName().c_str(), state->GetName().c_str());
     state_ = state;
     state_->Enter(operation);
 }

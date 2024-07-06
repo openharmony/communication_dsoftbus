@@ -23,7 +23,7 @@ namespace OHOS::SoftBus {
 class P2pUnavailableState : public P2pEntityState {
 public:
     static P2pUnavailableState *Instance();
-
+    std::string GetName() override { return "P2pUnavailableState"; }
     void Enter(const std::shared_ptr<P2pOperation> &operation) override;
     void Exit() override;
 

@@ -36,7 +36,8 @@
 #include "trans_session_service.h"
 #include "trans_spec_object.h"
 #include "lnn_lane_interface.h"
-#include <unistd.h>
+
+#define SOFTBUS_IPC_THREAD_NUM 32
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -95,21 +96,17 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     if (abilityDeath == nullptr) {
         COMM_LOGE(COMM_SVC, "DeathRecipient object is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
     }
-    int32_t callingPid = pid;
-    int32_t selfPid = (int32_t)getpid();
     bool ret = object->AddDeathRecipient(abilityDeath);
-    if (callingPid == selfPid) {
-        COMM_LOGI(COMM_SVC, "this is spe pid");
-    } else if (!ret) {
+    if (!ret) {
         COMM_LOGE(COMM_SVC, "AddDeathRecipient failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
     }
     if (SoftbusClientInfoManager::GetInstance().SoftbusAddService(clientPkgName,
         object, abilityDeath, pid) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus add client service failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ADD_CLIENT_SERVICE_FAILED;
     }
     COMM_LOGI(COMM_SVC, "softbus register service success. clientPkgName=%{public}s", clientPkgName);
     return SOFTBUS_OK;
@@ -173,7 +170,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             break;
         default:
             COMM_LOGE(COMM_SVC, "connect type error");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_INVALID_CONNECT_TYPE;
     }
     return TransOpenAuthChannel(sessionName, &connOpt, "");
 }
@@ -330,7 +327,7 @@ int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {
         COMM_LOGE(COMM_SVC, "hidumper fd is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     std::vector<std::string> argsStr;
     for (auto item : args) {
@@ -354,6 +351,7 @@ void SoftBusServer::OnStart()
     if (!Publish(this)) {
         COMM_LOGE(COMM_SVC, "SoftBusServer publish failed!");
     }
+    IPCSkeleton::SetMaxWorkThreadNum(SOFTBUS_IPC_THREAD_NUM);
 }
 
 void SoftBusServer::OnStop() {}

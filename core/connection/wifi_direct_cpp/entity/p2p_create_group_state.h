@@ -23,7 +23,7 @@ namespace OHOS::SoftBus {
 class P2pCreateGroupState : public P2pEntityState {
 public:
     static P2pCreateGroupState *Instance();
-
+    std::string GetName() override { return "P2pCreateGroupState"; }
     void Enter(const std::shared_ptr<P2pOperation> &operation) override;
     void Exit() override;
 

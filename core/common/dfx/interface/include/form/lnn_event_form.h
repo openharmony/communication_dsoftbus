@@ -93,6 +93,7 @@ typedef struct {
     int32_t onlineNum;          // ONLINE_NUM
     int32_t peerDeviceAbility;  // PEER_DEV_ABILITY
     int32_t onlineType;         // ONLINE_TYPE
+    int32_t osType;             // OS_TYPE
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC
@@ -114,6 +115,7 @@ typedef struct {
     int32_t lnnType;                                          // LNN_TYPE
     int32_t onlineNum;                                        // ONLINE_NUM
     int32_t onlineType;                                       // ONLINE_TYPE
+    int32_t osType;                                           // OS_TYPE
     char peerBleMac[BT_MAC_LEN];                              // PEER_BLE_MAC
     char peerUdid[UDID_BUF_LEN];                              // PEER_UDID
     char peerNetworkId[NETWORK_ID_BUF_LEN];                   // PEER_NET_ID
@@ -121,6 +123,11 @@ typedef struct {
     char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1];       // LOCAL_UDID_HASH
     char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1];        // PEER_UDID_HASH
 } LnnReportEventExtra;
+
+typedef struct {
+    DeviceType type;
+    int32_t osType;
+} LnnDfxDeviceInfoReport;
 
 typedef enum {
     BLE_REPORT_EVENT_INIT = 1,

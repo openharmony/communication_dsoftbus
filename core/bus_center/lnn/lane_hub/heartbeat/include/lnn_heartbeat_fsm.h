@@ -80,7 +80,9 @@ typedef struct {
     LnnHeartbeatStrategyType strategyType;
     bool isRelay;
     bool isSyncData;
-    bool isNeedUpdataData;
+    bool isNeedRestart;
+    bool hasScanRsp;
+    bool isFirstBegin;
 } LnnProcessSendOnceMsgPara;
 
 int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm);

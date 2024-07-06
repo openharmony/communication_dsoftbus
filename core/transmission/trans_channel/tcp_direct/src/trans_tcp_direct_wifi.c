@@ -56,9 +56,9 @@ static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, Sessio
         SoftBusFree(newConn);
         return SOFTBUS_TRANS_ADD_SESSION_CONN_FAILED;
     }
-    if (AddTrigger(module, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(module, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenTcpDirectChannel add trigger fail");
-        TransDelSessionConnById(newConn->channelId);
+        TransDelSessionConnById(newchannelId);
         TransSrvDelDataBufNode(newchannelId);
         return SOFTBUS_TRANS_ADD_TRIGGER_FAILED;
     }

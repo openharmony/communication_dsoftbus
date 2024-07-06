@@ -459,15 +459,11 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
         return SOFTBUS_MALLOC_ERR;
     }
     recommendLinkList->linkTypeNum = 0;
-    if (SelectExpectLaneByParameter(recommendLinkList) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "SelectExpectLaneByParameter succ, laneReqId=%{public}u", laneReqId);
-    } else {
-        int32_t ret = SelectExpectLanesByQos((const char *)allocInfo->networkId, &selectParam, recommendLinkList);
-        if (ret != SOFTBUS_OK) {
-            SoftBusFree(recommendLinkList);
-            LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneReqId=%{public}u", laneReqId);
-            return ret;
-        }
+    int32_t ret = SelectExpectLanesByQos((const char *)allocInfo->networkId, &selectParam, recommendLinkList);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(recommendLinkList);
+        LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneReqId=%{public}u", laneReqId);
+        return ret;
     }
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
@@ -478,7 +474,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
         LNN_LOGI(LNN_LANE, "expect linklist nums=%{public}u, priority=%{public}u, link=%{public}u",
             recommendLinkList->linkTypeNum, i, recommendLinkList->linkType[i]);
     }
-    int32_t ret = StartTriggerLink(laneReqId, allocInfo, listener, recommendLinkList);
+    ret = StartTriggerLink(laneReqId, allocInfo, listener, recommendLinkList);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "trigger link fail, laneReqId=%{public}u", laneReqId);
@@ -808,6 +804,24 @@ static int32_t Free(uint32_t laneReqId)
     LNN_LOGI(LNN_LANE, "no find lane need free, laneReqId=%{public}u", laneReqId);
     FreeLaneReqId(laneReqId);
     return SOFTBUS_LANE_NOT_FOUND;
+}
+
+static int32_t QosLimit(uint32_t laneReqId, uint32_t expectBw, uint32_t *actualBw)
+{
+    if (laneReqId == INVALID_LANE_REQ_ID || actualBw == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    TransReqInfo reqInfo;
+    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    int32_t ret = GetTransReqInfoByLaneReqId(laneReqId, &reqInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lane reqInfo fail");
+        return ret;
+    }
+    *actualBw = expectBw;
+    LNN_LOGI(LNN_LANE, "qos limit lane succ, laneReqId=%{public}u, minBW=%{public}u, actualBw=%{public}u",
+        laneReqId, reqInfo.allocInfo.qosRequire.minBW, *actualBw);
+    return SOFTBUS_OK;
 }
 
 static void UpdateReqInfoWithLaneReqId(uint32_t laneReqId, uint64_t laneId)
@@ -1510,6 +1524,7 @@ static LaneInterface g_transLaneObject = {
     .allocTargetLane = AllocTargetLane,
     .cancelLane = CancelLane,
     .freeLane = Free,
+    .qosLimit = QosLimit,
 };
 
 LaneInterface *TransLaneGetInstance(void)

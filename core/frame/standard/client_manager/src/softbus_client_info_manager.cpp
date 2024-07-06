@@ -52,6 +52,33 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
     return SOFTBUS_OK;
 }
 
+int32_t SoftbusClientInfoManager::SoftbusAddServiceInner(const std::string &pkgName, ISessionListener *listener,
+    int32_t pid)
+{
+    if (pkgName.empty() || listener == nullptr) {
+        COMM_LOGE(COMM_SVC, "package name or listener is nullptr\n");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    COMM_LOGI(COMM_SVC, "add SoftbusAddServiceInner, pid=%{public}d, pkgname=%{public}s", pid, pkgName.c_str());
+    std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
+    innerObjectMap_.emplace(pkgName, *listener);
+
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusClientInfoManager::SoftbusRemoveServiceInner(const std::string &pkgName)
+{
+    if (pkgName.empty()) {
+        COMM_LOGE(COMM_SVC, "package name is nullptr\n");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
+    innerObjectMap_.erase(pkgName);
+    COMM_LOGI(COMM_SVC, "SoftbusRemoveServiceInner, pkgname=%{public}s", pkgName.c_str());
+
+    return SOFTBUS_OK;
+}
+
 int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName,
     int32_t* pid)
 {
@@ -72,6 +99,12 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
     }
     COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%{public}d, pkgname=%{public}s", (*pid), pkgName.c_str());
     return SOFTBUS_OK;
+}
+
+ISessionListener SoftbusClientInfoManager::GetSoftbusInnerObject(const std::string &pkgName)
+{
+    std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
+    return innerObjectMap_[pkgName];
 }
 
 sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::string &pkgName)
