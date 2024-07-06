@@ -51,7 +51,7 @@ static int32_t g_port = 6000;
 static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-static IServerChannelCallBack g_channelCallBack;
+static IServerChannelCallBack g_testChannelCallBack;
 class TransTcpDirectP2pTest : public testing::Test {
 public:
     TransTcpDirectP2pTest()
@@ -97,47 +97,47 @@ SessionConn *TestSetSessionConn()
     return conn;
 }
 
-static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
+static int32_t TestTransServerOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel)
 {
     TRANS_LOGE(TRANS_QOS, "TransServerOnChannelOpened");
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnChannelClosed(
+static int32_t TestTransServerOnChannelClosed(
     const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t messageType)
 {
     TRANS_LOGE(TRANS_QOS, "TransServerOnChannelClosed");
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
+static int32_t TestTransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
     int32_t channelType, int32_t errCode)
 {
     TRANS_LOGE(TRANS_QOS, "TransServerOnChannelOpenFailed");
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
+static int32_t TestTransServerOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
     TransReceiveData *receiveData)
 {
     TRANS_LOGE(TRANS_QOS, "TransServerOnChannelOpenFailed");
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnQosEvent(const char *pkgName, const QosParam *param)
+static int32_t TestTransServerOnQosEvent(const char *pkgName, const QosParam *param)
 {
     TRANS_LOGE(TRANS_QOS, "TransServerOnChannelOpenFailed");
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
+static int32_t TestTransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
 {
     TRANS_LOGE(TRANS_QOS, "TransGetPkgNameBySessionName");
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
+static int32_t TestTransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
 {
     TRANS_LOGE(TRANS_QOS, "TransGetUidAndPid");
     return SOFTBUS_OK;
@@ -145,14 +145,14 @@ static int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t 
 
 IServerChannelCallBack *TestTransServerGetChannelCb(void)
 {
-    g_channelCallBack.OnChannelOpened = TransServerOnChannelOpened;
-    g_channelCallBack.OnChannelClosed = TransServerOnChannelClosed;
-    g_channelCallBack.OnChannelOpenFailed = TransServerOnChannelOpenFailed;
-    g_channelCallBack.OnDataReceived = TransServerOnMsgReceived;
-    g_channelCallBack.OnQosEvent = TransServerOnQosEvent;
-    g_channelCallBack.GetPkgNameBySessionName = TransGetPkgNameBySessionName;
-    g_channelCallBack.GetUidAndPidBySessionName = TransGetUidAndPid;
-    return &g_channelCallBack;
+    g_testChannelCallBack.OnChannelOpened = TestTransServerOnChannelOpened;
+    g_testChannelCallBack.OnChannelClosed = TestTransServerOnChannelClosed;
+    g_testChannelCallBack.OnChannelOpenFailed = TestTransServerOnChannelOpenFailed;
+    g_testChannelCallBack.OnDataReceived = TestTransServerOnMsgReceived;
+    g_testChannelCallBack.OnQosEvent = TestTransServerOnQosEvent;
+    g_testChannelCallBack.GetPkgNameBySessionName = TestTransGetPkgNameBySessionName;
+    g_testChannelCallBack.GetUidAndPidBySessionName = TestTransGetUidAndPid;
+    return &g_testChannelCallBack;
 }
 
 string TestGetMsgPack()
