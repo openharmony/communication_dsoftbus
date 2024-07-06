@@ -43,6 +43,8 @@
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 
+static bool g_isRestore = false;
+
 int32_t LnnInitNetLedger(void)
 {
     if (LnnInitHuksInterface() != SOFTBUS_OK) {
@@ -115,9 +117,13 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     return false;
 }
 
-static void RestoreLocalDeviceInfo(void)
+void RestoreLocalDeviceInfo(void)
 {
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
+    if (g_isRestore) {
+        LNN_LOGI(LNN_LEDGER, "aready init");
+        return;
+    }
     if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
         LNN_LOGI(LNN_LEDGER, "get local device info fail");
         const NodeInfo *temp = LnnGetLocalNodeInfo();
@@ -127,6 +133,7 @@ static void RestoreLocalDeviceInfo(void)
             LNN_LOGI(LNN_LEDGER, "save local device info success");
         }
     } else {
+        g_isRestore = true;
         NodeInfo info;
         (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         (void)LnnGetLocalDevInfo(&info);
@@ -160,7 +167,6 @@ static void RestoreLocalDeviceInfo(void)
     }
     LoadBleBroadcastKey();
     LnnLoadLocalBroadcastCipherKey();
-    LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
 }
 
 static void LnnSetLocalFeature(void)

@@ -18,8 +18,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "bus_center_event.h"
 #include "bus_center_decision_center.h"
+#include "bus_center_event.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_coap_discovery_impl.h"
 #include "lnn_decision_center.h"
@@ -28,9 +28,10 @@
 #include "lnn_lane_hub.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_interface.h"
-#include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
+#include "lnn_network_manager.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_xcollie.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -200,6 +201,10 @@ static int32_t BusCenterServerInitFirstStep(void)
     if (LnnInitMetaNode() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init meta node fail");
         return SOFTBUS_ERR;
+    }
+    if (IsActiveOsAccountUnlocked()) {
+        LNN_LOGI(LNN_INIT, "user unlocked try load local deviceinfo");
+        RestoreLocalDeviceInfo();
     }
     return SOFTBUS_OK;
 }
