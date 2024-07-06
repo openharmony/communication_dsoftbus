@@ -145,11 +145,6 @@ static void AddSyncPtkListener(SyncPtkListener listener)
     (void)listener;
 }
 
-static bool SupportHmlTwo(void)
-{
-    return false;
-}
-
 static bool IsWifiP2pEnabled(void)
 {
     return false;
@@ -197,7 +192,6 @@ static struct WifiDirectManager g_manager = {
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
     .getRemoteUuidByIp = GetRemoteUuidByIp,
 
-    .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
 

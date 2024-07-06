@@ -1477,9 +1477,8 @@ static bool IsSupportWifiDirect(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
-    return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
+    return IsSupportHmlTwo(local, remote);
 }
-
 static bool CheckHasBrConnection(const char *networkId)
 {
     ConnectOption connOpt;
@@ -1563,8 +1562,7 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t l
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     wifiDirectInfo.requestId = GetWifiDirectManager()->getRequestId();
     wifiDirectInfo.pid = request->pid;
-    wifiDirectInfo.connectType = GetWifiDirectManager()->supportHmlTwo() ?
-        WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+    wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
     wifiDirectInfo.reuseOnly = true;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_LANE, "strcpy fail");
