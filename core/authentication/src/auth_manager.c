@@ -1150,43 +1150,6 @@ static void HandleDeviceIdData(
     }
 }
 
-static void HandleRecvDeviceId(const void *para)
-{
-    RecvDeviceIdData *recvData = (RecvDeviceIdData *)para;
-    if (recvData == NULL) {
-        AUTH_LOGE(AUTH_FSM, "recvData is null");
-        SoftBusFree(recvData->data);
-        return;
-    }
-    HandleDeviceIdData(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
-    SoftBusFree(recvData->data);
-}
-
-static void NotifyRecvDeviceId(
-    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
-{
-    uint8_t *postData = (uint8_t *)SoftBusCalloc(head->len);
-    if (postData == NULL) {
-        AUTH_LOGE(AUTH_FSM, "malloc postData fail");
-        return;
-    }
-    if (memcpy_s(postData, head->len, data, head->len) != EOK) {
-        AUTH_LOGE(AUTH_FSM, "memcpy postData fail");
-        SoftBusFree(postData);
-        return;
-    }
-
-    RecvDeviceIdData recvData = {
-        .connId = connId,
-        .connInfo = *connInfo,
-        .fromServer = fromServer,
-        .head = *head,
-        .len = head->len,
-        .data = postData,
-    };
-    (void)PostAuthEvent(EVENT_RECV_AUTH_DATA, HandleRecvDeviceId, &recvData, sizeof(RecvDeviceIdData), 0);
-}
-
 static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)
 {
     int32_t ret = AuthSessionProcessAuthData(head->seq, data, head->len);
@@ -1441,7 +1404,7 @@ static void OnDataReceived(
         head->dataType, head->module, head->seq, head->flag, head->len, CONN_DATA(connId), GetAuthSideStr(fromServer));
     switch (head->dataType) {
         case DATA_TYPE_DEVICE_ID:
-            NotifyRecvDeviceId(connId, connInfo, fromServer, head, data);
+            HandleDeviceIdData(connId, connInfo, fromServer, head, data);
             break;
         case DATA_TYPE_AUTH:
             HandleAuthData(connInfo, head, data);
@@ -1464,8 +1427,10 @@ static void OnDataReceived(
     SoftbusHitraceStop();
 }
 
-static void HandleDisconnectedEvent(uint64_t connId)
+static void HandleDisconnectedEvent(const void *para)
 {
+    AUTH_CHECK_AND_RETURN_LOGE(para != NULL, AUTH_FSM, "para is null");
+    uint64_t connId = *((uint64_t *)para);
     uint32_t num = 0;
     uint64_t dupConnId = connId;
     int64_t authIds[2]; /* 2: client and server may use same connection. */
@@ -1496,7 +1461,7 @@ static void HandleDisconnectedEvent(uint64_t connId)
 static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
 {
     (void)connInfo;
-    HandleDisconnectedEvent(connId);
+    (void)PostAuthEvent(EVENT_AUTH_DISCONNECT, HandleDisconnectedEvent, &connId, sizeof(connId), 0);
 }
 
 uint32_t AuthGenRequestId(void)
