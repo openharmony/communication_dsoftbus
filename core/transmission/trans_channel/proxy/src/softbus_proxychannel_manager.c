@@ -1709,6 +1709,9 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 
 static void TransProxyTimerItemProc(const ListNode *proxyProcList)
 {
+    if (IsListEmpty(proxyProcList)) {
+        return;
+    }
     TRANS_LOGI(TRANS_CTRL, "enter.");
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
