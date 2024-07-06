@@ -106,28 +106,27 @@ static void DelHmlListenerByMoudle(ListenerModule type)
 {
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
-    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock fail");
-        return;
-    }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (item->moudleType == type) {
             ListDelete(&item->node);
             SoftBusFree(item);
             g_hmlListenerList->cnt--;
-            (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
             return;
         }
     }
-    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
 }
 
 void StopHmlListener(ListenerModule module)
 {
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock fail");
+        return;
+    }
     if (StopBaseListener(module) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "StopHmlListener stop listener fail. module=%{public}d", module);
     }
     DelHmlListenerByMoudle(module);
+    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
 }
 
 void StopP2pSessionListener()
@@ -174,6 +173,9 @@ static void ClearP2pSessionConn(void)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED && item->appInfo.routeType == WIFI_P2P) {
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL,
+                "clear sessionConn pkgName=%{public}s, pid=%{public}d, status=%{public}u, channelId=%{public}d",
+                item->appInfo.myData.pkgName, item->appInfo.myData.pid, item->status, item->channelId);
             sessionList->cnt--;
             ListAdd(&tempSessionConnList, &item->node);
         }

@@ -20,6 +20,7 @@
 #include "lnn_lane_interface.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
+#include "softbus_trans_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,8 +43,8 @@ void TransLaneMgrDeinit(void);
 
 void TransSocketLaneMgrDeinit(void);
 
-int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo,
-    uint32_t laneHandle, bool isQosLane, AppInfoData *myData);
+int32_t TransLaneMgrAddLane(
+    const TransInfo *transInfo, const LaneConnInfo *connInfo, uint32_t laneHandle, bool isQosLane, AppInfoData *myData);
 
 int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType);
 

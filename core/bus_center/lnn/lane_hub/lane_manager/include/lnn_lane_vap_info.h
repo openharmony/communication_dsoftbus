@@ -49,6 +49,10 @@ int32_t LnnGetLocalVapInfo(LnnVapType type, LnnVapAttr *vapAttr);
 int32_t LnnAddRemoteVapInfo(const char *udid, LnnVapType type, const LnnVapAttr *vapAttr);
 int32_t LnnDeleteRemoteVapInfo(const char *udid);
 int32_t LnnGetRemoteVapInfo(const char *udid, LnnVapType type, LnnVapAttr *vapAttr);
+int32_t LnnGetLocalPreferChannel(void);
+int32_t LnnGetLocalChannelCode(void);
+int32_t LnnAddRemoteChannelCode(const char *udid, int32_t channelCode);
+int32_t LnnGetRecommendChannel(const char *udid, int32_t *preferChannel);
 
 #ifdef __cplusplus
 }

@@ -62,7 +62,7 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, localNetifName, sizeof(localNetifName));
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local network name from LNN failed, ret=%{public}d", ret);
-        goto EXIT;
+        return ret;
     }
     if (strcpy_s(settings->localNetworkName, sizeof(settings->localNetworkName), localNetifName) != EOK) {
         DISC_LOGE(DISC_COAP, "copy disc response settings network name failed");

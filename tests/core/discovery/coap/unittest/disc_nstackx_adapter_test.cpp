@@ -89,7 +89,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterInit001, TestSize.Level1)
 {
     DiscNstackxDeinit();
     int32_t ret = DiscNstackxInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     // repeat init
     ret = DiscNstackxInit();
@@ -105,7 +105,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterInit001, TestSize.Level1)
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCb001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = DiscCoapRegisterCb(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -126,7 +126,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCb001, TestSize.Level1)
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapa001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     uint32_t capaBitmap[] = {128};
     uint32_t bitmapCount = 1;
@@ -153,7 +153,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapa001, TestSize.Level1)
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterSetFilter001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     uint32_t capaBitmap[] = {128};
     uint32_t bitmapCount = 1;
@@ -177,12 +177,36 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterSetFilter001, TestSize.Level
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     PublishOption option = {
         .freq = LOW,
     };
     ret = DiscCoapRegisterServiceData(&option, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TestDiscCoapAdapterRegCapaData001
+ * @tc.desc: Test DiscCoapRegisterCapabilityData should return SOFTBUS_OK when DiscNstackxInit has started
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapaData001, TestSize.Level1)
+{
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    const unsigned char capabilityData[] = "test";
+    uint32_t dataLen = 4;
+    uint32_t capability = 1;
+
+    ret = DiscCoapRegisterCapabilityData(nullptr, dataLen, capability);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DiscCoapRegisterCapabilityData(capabilityData, 0, capability);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = DiscCoapRegisterCapabilityData(capabilityData, dataLen, capability);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -196,7 +220,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     DiscCoapOption testCoapOption = {
         .freq = LOW,
@@ -250,6 +274,24 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
+    testOption.freq = MID;
+    ret = DiscCoapStartDiscovery(&testOption);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    ret = DiscCoapStopDiscovery();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    testOption.freq = HIGH;
+    ret = DiscCoapStartDiscovery(&testOption);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    ret = DiscCoapStopDiscovery();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    testOption.freq = SUPER_HIGH;
+    ret = DiscCoapStartDiscovery(&testOption);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    ret = DiscCoapStopDiscovery();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
     testOption.freq = LOW - 1;
     ret = DiscCoapStartDiscovery(&testOption);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -273,7 +315,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterUpdate001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     DiscCoapOption testCoapOption = {
         .freq = LOW,
@@ -303,7 +345,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterUpdate001, TestSize.Level1)
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterFound001, TestSize.Level1)
 {
     int32_t ret = DiscNstackxInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapRegisterCb(&g_discInnerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -518,5 +560,35 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegisterCb001, TestSize.Leve
 
     ret = DiscCoapRegisterCb(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TestDiscCoapSendRsp001
+ * @tc.desc: Test DiscCoapSendRsp should return SOFTBUS_OK when given valid,
+ *           should return SOFTBUS_INVALID_PARAM when given nullptr DeviceInfo
+ *           should return SOFTBUS_LOCK_ERR when localledger not init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapSendRsp001, TestSize.Level1)
+{
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    DeviceInfo testDiscDevInfo {
+        .devId = "test",
+    };
+    uint8_t bType = 0;
+
+    ret = DiscCoapSendRsp(nullptr, bType);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    ret = LnnInitLocalLedger();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DiscCoapSendRsp(&testDiscDevInfo, bType);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

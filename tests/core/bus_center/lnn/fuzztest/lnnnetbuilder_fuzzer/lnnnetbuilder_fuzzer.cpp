@@ -58,7 +58,9 @@ void LnnNotifyDiscoveryDeviceFuzzTest(const uint8_t* data, size_t size)
         COMM_LOGE(COMM_TEST, "memcpy_s ConnectionAddr is failed!");
         return;
     }
-    LnnNotifyDiscoveryDevice(&addr, isNeedConnect);
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    LnnNotifyDiscoveryDevice(&addr, &infoReport, isNeedConnect);
 }
 
 /* Fuzzer entry point */

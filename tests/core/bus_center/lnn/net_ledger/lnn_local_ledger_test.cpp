@@ -26,8 +26,6 @@
 #include "lnn_log.h"
 #include "lnn_node_info.h"
 #include "lnn_local_ledger_deps_mock.h"
-#include "lnn_parameter_utils.h"
-#include "lnn_parameter_utils_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_common.h"
@@ -105,8 +103,6 @@ static void LocalLedgerKeyTestPackaged(void)
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
@@ -122,8 +118,6 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
 {
     NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
@@ -163,8 +157,6 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
@@ -183,8 +175,6 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
@@ -204,8 +194,6 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
@@ -226,8 +214,6 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
@@ -285,8 +271,6 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
     uint32_t len = 0;
 
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
@@ -334,8 +318,6 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
     char *infoMinsize = infoTmp;
     uint32_t len = 0;
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
@@ -380,8 +362,6 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    NiceMock<TransParameterUtilsDepsInterfaceMock> transMock;
-    EXPECT_CALL(transMock, SelectExpectLaneByParameter).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));

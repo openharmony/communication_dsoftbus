@@ -36,6 +36,7 @@ void P2pCreateGroupState::Enter(const std::shared_ptr<P2pOperation> &operation)
     operation_ = operation;
     operation_->timerId_ = timer_.Register(
         [this]() {
+            CONN_LOGE(CONN_WIFI_DIRECT, "timeout");
             P2pOperationResult result {};
             P2pEntity::GetInstance().currentFrequency_ = 0;
             result.errorCode_ = SOFTBUS_TIMOUT;
@@ -53,22 +54,26 @@ void P2pCreateGroupState::Exit()
 
 int P2pCreateGroupState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "push to pending queue");
     P2pEntity::GetInstance().PushOperation(operation);
     return SOFTBUS_OK;
 }
 
 int P2pCreateGroupState::Connect(const std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pCreateGroupState::DestroyGroup(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
 int P2pCreateGroupState::RemoveLink(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "not support");
     return SOFTBUS_CONN_NOT_SUPPORT_FAILED;
 }
 
@@ -79,8 +84,8 @@ void P2pCreateGroupState::OnP2pStateChangeEvent(P2pState state)
     if (state == P2P_STATE_STARTED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "state is P2P_STATE_STARTED");
     } else {
-        timer_.Unregister(operation_->timerId_);
         if (operation_ != nullptr) {
+            timer_.Unregister(operation_->timerId_);
             result.errorCode_ = SOFTBUS_CONN_P2P_CONNECT_STATE_WIFI_STATE_NOT_STARTED;
             operation_->promise_.set_value(result);
         }
@@ -91,10 +96,15 @@ void P2pCreateGroupState::OnP2pStateChangeEvent(P2pState state)
 void P2pCreateGroupState::OnP2pConnectionChangeEvent(
     const WifiP2pLinkedInfo &info, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo)
 {
+    if (operation_ == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
+        return;
+    }
     timer_.Unregister(operation_->timerId_);
     P2pOperationResult result;
     if (info.connectState == P2P_DISCONNECTED) {
         result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
+        CONN_LOGE(CONN_WIFI_DIRECT, "create group call event failed, error=%d", result.errorCode_);
     } else {
         P2pEntity::GetInstance().currentFrequency_ = groupInfo->frequency;
         result.errorCode_ = SOFTBUS_OK;

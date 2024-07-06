@@ -166,11 +166,11 @@ int32_t ConnBleDequeueBlock(void **msg)
         int32_t ret = SoftBusCondWait(&g_sendCond, &g_bleQueueLock, &waitTime);
         if (ret != SOFTBUS_OK) {
             if (ret == SOFTBUS_TIMOUT) {
-                CONN_LOGW(CONN_BLE, "BleSendCondWait 600s time out");
+                CONN_LOGD(CONN_BLE, "BleSendCondWait 600s time out");
                 status = SOFTBUS_TIMOUT;
                 break;
             }
-            CONN_LOGE(CONN_BLE, "BleSendCondWait fail");
+            CONN_LOGD(CONN_BLE, "BleSendCondWait fail");
             status = SOFTBUS_CONN_COND_WAIT_FAIL;
             break;
         }

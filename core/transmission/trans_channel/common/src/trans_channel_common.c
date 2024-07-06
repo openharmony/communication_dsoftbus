@@ -157,7 +157,7 @@ static ChannelType TransGetChannelType(const SessionParam *param, const int32_t 
     return CHANNEL_TYPE_TCP_DIRECT;
 }
 
-void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transInfo, LaneConnInfo *connInfo)
+void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transInfo, const LaneConnInfo *connInfo)
 {
     if (appInfo == NULL || param == NULL || transInfo == NULL || connInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invalid param");
@@ -209,6 +209,7 @@ void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVe
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(id, type, &nodeInfo) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "GetRemoteNodeInfo failed IdCategory type=%{public}d", type);
         return;
     }
     if (strncpy_s(deviceVersion, len, nodeInfo.deviceInfo.deviceVersion,
@@ -372,7 +373,7 @@ static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
     bool isQosLane = false;
     int32_t ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId, &laneHandle, &isQosLane, &isAsync);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, TRANS_CTRL, ret, "get socket channel lane info failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "get socket channel lane info failed, ret=%{public}d", ret);
     TRANS_LOGI(TRANS_CTRL, "wait lane state, sessionId=%{public}d, laneHandle=%{public}u", sessionId, laneHandle);
     if (isQosLane && laneHandle != INVALID_LANE_REQ_ID) {
         TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -404,12 +405,12 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
         CoreSessionState state = CORE_SESSION_STATE_INIT;
         ret = TransGetSocketChannelStateBySession(sessionName, channelId, &state);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
-            ret == SOFTBUS_OK, TRANS_CTRL, ret, "get socket channel info failed, ret=%{public}d", ret);
+            ret == SOFTBUS_OK, ret, TRANS_CTRL, "get socket channel info failed, ret=%{public}d", ret);
         (void)TransSetSocketChannelStateBySession(sessionName, channelId, CORE_SESSION_STATE_CANCELLING);
         if (state == CORE_SESSION_STATE_WAIT_LANE) {
             ret = CancelWaitLaneState(sessionName, channelId);
             TRANS_CHECK_AND_RETURN_RET_LOGE(
-                ret == SOFTBUS_OK, TRANS_CTRL, ret, "cancel wait lane failed, ret=%{public}d", ret);
+                ret == SOFTBUS_OK, ret, TRANS_CTRL, "cancel wait lane failed, ret=%{public}d", ret);
         }
     } else {
         (void)TransSetSocketChannelStateByChannel(channelId, channelType, CORE_SESSION_STATE_CANCELLING);
@@ -421,6 +422,7 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
             case CHANNEL_TYPE_TCP_DIRECT:
                 (void)TransLaneMgrDelLane(channelId, channelType);
                 (void)TransDelTcpChannelInfoByChannelId(channelId);
+                TransDelSessionConnById(channelId); // socket Fd will be shutdown when recv peer reply
                 ret = SOFTBUS_OK;
                 break;
             case CHANNEL_TYPE_UDP:
