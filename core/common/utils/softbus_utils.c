@@ -51,11 +51,12 @@
 #define MAX_ID_LEN 65
 #define MAX_IP_LEN 48
 #define MAX_MAC_LEN 46
+#define MAX_HANDLE_TIMES 3600
 
 #define ONE_BYTE_SIZE 8
 
 static void *g_timerId = NULL;
-static bool g_timerOpen = false;
+static int32_t g_handleTimes = 0;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 static bool g_signalingMsgSwitch = false;
 
@@ -113,17 +114,17 @@ static void HandleTimeoutFun(void)
             g_timerFunList[i]();
         }
     }
-    if (!g_timerOpen) {
+    ++g_handleTimes;
+    if (g_handleTimes >= MAX_HANDLE_TIMES && g_timerId != NULL) {
         (void)SoftBusDeleteTimer(g_timerId);
-        g_timerId = NULL;
-        return;
-    }
-    (void)SoftBusDeleteTimer(g_timerId);
-    g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_ONCE);
-    if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "start timer failed.");
-        (void)SoftBusDeleteTimer(g_timerId);
-        g_timerId = NULL;
+        COMM_LOGI(COMM_UTILS, "update new timer");
+        g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_PERIOD);
+        if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_UTILS, "start timer failed.");
+            (void)SoftBusDeleteTimer(g_timerId);
+            g_timerId = NULL;
+        }
+        g_handleTimes = 0;
     }
 }
 
@@ -133,22 +134,22 @@ int32_t SoftBusTimerInit(void)
         return SOFTBUS_OK;
     }
     SetTimerFunc(HandleTimeoutFun);
-    g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_ONCE);
+    g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_PERIOD);
     if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "start timer failed.");
         (void)SoftBusDeleteTimer(g_timerId);
         g_timerId = NULL;
         return SOFTBUS_ERR;
     }
-    g_timerOpen = true;
-    COMM_LOGI(COMM_UTILS, "softbus timer start");
     return SOFTBUS_OK;
 }
 
 void SoftBusTimerDeInit(void)
 {
-    COMM_LOGI(COMM_UTILS, "softbus timer stop");
-    g_timerOpen = false;
+    if (g_timerId != NULL) {
+        (void)SoftBusDeleteTimer(g_timerId);
+        g_timerId = NULL;
+    }
 }
 
 int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char * inBuf,
