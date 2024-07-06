@@ -192,6 +192,7 @@ static void NotifyDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
     }
 }
 
+
 static void NotifyDataReceived(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
