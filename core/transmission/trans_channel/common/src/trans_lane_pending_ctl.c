@@ -1279,34 +1279,21 @@ int32_t TransAsyncGetLaneInfo(
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_OK;
-    if (!(param->isQosLane)) {
-        LaneRequestOption requestOption;
-        (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
-        ret = GetRequestOptionBySessionParam(param, &requestOption);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "get request option failed. laneHandle=%{public}u, ret=%{public}d", *laneHandle, ret);
-            return ret;
-        }
-        ret = TransAsyncGetLaneInfoByOption(param, &requestOption, laneHandle, callingTokenId, timeStart);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "get lane info by option failed, ret=%{public}d", ret);
-            return ret;
-        }
-    } else {
-        LaneAllocInfo allocInfo;
-        (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
-        ret = GetAllocInfoBySessionParam(param, &allocInfo);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "get alloc Info failed. laneHandle=%{public}u, ret=%{public}d", *laneHandle, ret);
-            return ret;
-        }
-        ret = TransAsyncGetLaneInfoByQos(param, &allocInfo, laneHandle, callingTokenId, timeStart);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "get lane info by allocInfo failed, ret=%{public}d", ret);
-            *laneHandle = INVALID_LANE_REQ_ID; // qos lane failed no need free lane again
-            return ret;
-        }
+
+    LaneAllocInfo allocInfo;
+    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ret = GetAllocInfoBySessionParam(param, &allocInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get alloc Info failed. laneHandle=%{public}u, ret=%{public}d", *laneHandle, ret);
+        return ret;
     }
+    ret = TransAsyncGetLaneInfoByQos(param, &allocInfo, laneHandle, callingTokenId, timeStart);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get lane info by allocInfo failed, ret=%{public}d", ret);
+        *laneHandle = INVALID_LANE_REQ_ID; // qos lane failed no need free lane again
+        return ret;
+    }
+
     return SOFTBUS_OK;
 }
 
