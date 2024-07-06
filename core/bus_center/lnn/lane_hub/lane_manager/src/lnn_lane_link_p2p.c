@@ -1781,6 +1781,9 @@ static int32_t GetRequest(P2pLinkReqList *p2pLinkReqInfo, LinkRequest *request)
     request->p2pOnly = p2pLinkReqInfo->p2pInfo.p2pOnly;
     request->linkType = p2pLinkReqInfo->laneRequestInfo.linkType;
     request->pid = p2pLinkReqInfo->laneRequestInfo.pid;
+    request->bandWidth = p2pLinkReqInfo->p2pInfo.bandWidth;
+    request->triggerLinkTime = p2pLinkReqInfo->p2pInfo.triggerLinkTime;
+    request->availableLinkTime = p2pLinkReqInfo->p2pInfo.availableLinkTime;
     return SOFTBUS_OK;
 }
 
@@ -2023,10 +2026,11 @@ void LnnCancelWifiDirect(uint32_t laneReqId)
     struct WifiDirectConnectInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     bool isNodeExist = false;
+    uint32_t invalidP2pReqId = INVALID_P2P_REQUEST_ID;
     P2pLinkReqList *item = NULL;
     P2pLinkReqList *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkList, P2pLinkReqList, node) {
-        if (item->laneRequestInfo.laneReqId == laneReqId && item->p2pInfo.p2pRequestId != INVALID_P2P_REQUEST_ID) {
+        if (item->laneRequestInfo.laneReqId == laneReqId && item->p2pInfo.p2pRequestId != invalidP2pReqId) {
             wifiDirectInfo.requestId = item->p2pInfo.p2pRequestId;
             wifiDirectInfo.pid = item->laneRequestInfo.pid;
             isNodeExist = true;
