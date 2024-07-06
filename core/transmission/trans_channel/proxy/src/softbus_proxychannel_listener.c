@@ -252,7 +252,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
         TransEventExtra extra = {
             .calleePkg = NULL,
-            .peerNetworkId = appInfo->peerNetWorkId,
+            .peerNetworkId = (appInfo->appType == APP_TYPE_AUTH) ? appInfo->peerData.deviceId : appInfo->peerNetWorkId,
             .linkType = appInfo->connectType,
             .channelId = channelId,
             .costTime = timediff,
