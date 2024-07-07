@@ -98,9 +98,9 @@ SoftBusBand SoftBusGetLinkBand(void)
     return GetWifiAdpterInterface()->SoftBusGetLinkBand();
 }
 
-void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
+int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
 {
-    GetWifiAdpterInterface()->LnnDisconnectP2p(networkId, laneReqId);
+    return GetWifiAdpterInterface()->LnnDisconnectP2p(networkId, laneReqId);
 }
 
 void LnnDestroyP2p(void)
