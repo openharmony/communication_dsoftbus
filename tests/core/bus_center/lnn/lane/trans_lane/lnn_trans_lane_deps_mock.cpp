@@ -77,9 +77,9 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     return GetTransLaneIf()->BuildLink(reqInfo, reqId, cb);
 }
 
-void DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type)
+int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type)
 {
-    GetTransLaneIf()->DestroyLink(networkId, laneReqId, type);
+    return GetTransLaneIf()->DestroyLink(networkId, laneReqId, type);
 }
 
 uint32_t GenerateLaneProfileId(const LaneGenerateParam *param)

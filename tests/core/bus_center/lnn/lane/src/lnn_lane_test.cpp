@@ -69,11 +69,15 @@ static SoftBusMutex g_lock = {0};
 
 static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info);
 static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode);
+static void onLaneFreeSuccess(uint32_t laneHandle);
+static void onLaneFreeFail(uint32_t laneHandle, int32_t errCode);
 
 static int32_t g_errCode = 0;
 static LaneAllocListener g_listener = {
     .onLaneAllocSuccess = OnLaneAllocSuccess,
     .onLaneAllocFail = OnLaneAllocFail,
+    .onLaneFreeSuccess = onLaneFreeSuccess,
+    .onLaneFreeFail = onLaneFreeFail,
 };
 
 static NodeInfo g_NodeInfo = {
@@ -169,6 +173,16 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode)
     CondSignal();
 }
 
+static void onLaneFreeSuccess(uint32_t laneHandle)
+{
+    GTEST_LOG_(INFO) << "free lane success, laneReqId=" << laneHandle;
+}
+
+static void onLaneFreeFail(uint32_t laneHandle, int32_t errCode)
+{
+    GTEST_LOG_(INFO) << "free lane failed, laneReqId=" << laneHandle << ", errCode=" << errCode;
+}
+
 static void OnLaneLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType)
 {
     (void)reqId;
@@ -240,26 +254,36 @@ static void OnLaneAllocFailNoExcept(uint32_t laneHandle, int32_t errCode)
 static LaneAllocListener g_listenerCbForHml = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForHml,
     .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneFreeSuccess = onLaneFreeSuccess,
+    .onLaneFreeFail = onLaneFreeFail,
 };
 
 static LaneAllocListener g_listenerCbForP2p = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
     .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneFreeSuccess = onLaneFreeSuccess,
+    .onLaneFreeFail = onLaneFreeFail,
 };
 
 static LaneAllocListener g_listenerCbForBr = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForBr,
     .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneFreeSuccess = onLaneFreeSuccess,
+    .onLaneFreeFail = onLaneFreeFail,
 };
 
 static LaneAllocListener g_listenerCbForWlan5g = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForWlan5g,
     .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneFreeSuccess = onLaneFreeSuccess,
+    .onLaneFreeFail = onLaneFreeFail,
 };
 
 static LaneAllocListener g_listenerCbForBle = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForBle,
     .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneFreeSuccess = onLaneFreeSuccess,
+    .onLaneFreeFail = onLaneFreeFail,
 };
 
 static int32_t AddLaneResourceForAllocTest(LaneLinkType linkType)
@@ -1427,7 +1451,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     };
     int32_t ret;
     LnnWifiAdpterInterfaceMock wifiMock;
-    EXPECT_CALL(wifiMock, LnnDisconnectP2p).WillRepeatedly(Return());
+    EXPECT_CALL(wifiMock, LnnDisconnectP2p).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(wifiMock, LnnConnectP2p)
         .WillOnce(Return(SOFTBUS_LANE_BUILD_LINK_FAIL))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -1459,11 +1483,14 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     ret = BuildLink(nullptr, 0, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    DestroyLink(NODE_NETWORK_ID, 0, LANE_BLE);
+    ret = DestroyLink(NODE_NETWORK_ID, 0, LANE_BLE);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     
     EXPECT_CALL(wifiMock, LnnDestroyP2p).WillRepeatedly(Return());
-    DestroyLink(NODE_NETWORK_ID, 0, LANE_P2P);
-    DestroyLink(nullptr, 0, LANE_P2P);
+    ret = DestroyLink(NODE_NETWORK_ID, 0, LANE_P2P);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = DestroyLink(nullptr, 0, LANE_P2P);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
