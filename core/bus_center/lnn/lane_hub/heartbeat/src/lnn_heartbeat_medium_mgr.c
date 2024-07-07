@@ -762,6 +762,23 @@ static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
     SoftBusFree(info);
 }
 
+static bool IsSupportCloudSync(DeviceInfo *device)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    uint64_t localFeature = 0;
+    if (LnnRetrieveDeviceInfo(device->devId, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync beacause retrive info fail");
+        return false;
+    }
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync beacause get local feature fail");
+        return false;
+    }
+    return IsFeatureSupport(localFeature, BIT_CLOUD_SYNC_DEVICE_INFO) &&
+        IsFeatureSupport(info.feature, BIT_CLOUD_SYNC_DEVICE_INFO);
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -806,6 +823,9 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     bool isConnect = IsNeedConnectOnLine(device, hbResp);
     if (isConnect && !device->isOnline) {
+        if (IsSupportCloudSync(device)) {
+            return SOFTBUS_NETWORK_PEER_NODE_CONNECT;
+        }
         LNN_LOGD(LNN_HEART_BEAT, "ignore lnn request, not support connect");
         return SOFTBUS_NETWORK_NOT_CONNECTABLE;
     }
