@@ -374,7 +374,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest03, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest04, TestSize.Level1)
 {
     int ret = RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = RemoveSessionServer(g_pkgName, g_sessionName);

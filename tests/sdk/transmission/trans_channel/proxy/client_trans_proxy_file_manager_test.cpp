@@ -39,6 +39,7 @@
 #define TEST_SEQ 1020
 #define TEST_SEQ_SECOND 2
 #define TEST_HEADER_LENGTH 24
+#define TEST_HEADER_LENGTH_MIN 13
 #define TEST_FILE_PATH "/data/file.txt"
 #define TEST_DATA_LENGTH 6
 #define TEST_FILE_SIZE 1000
@@ -292,11 +293,11 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
     FileFrame fileFrame;
     fileFrame.frameLength = PROXY_BR_MAX_PACKET_SIZE + 1;
     ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 
     fileFrame.frameType = TRANS_SESSION_FILE_FIRST_FRAME;
     ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     ret = ClientTransProxyDelChannelInfo(1);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -750,12 +751,14 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataFrameTest0
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    info.osType = OH_TYPE;
     ret = UnpackFileDataFrame(&info, &fileFrame, &fileDataLen);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
     fileFrame.magic = 0;
+    fileFrame.frameLength = TEST_HEADER_LENGTH_MIN;
     ret = UnpackFileDataFrame(&info, &fileFrame, &fileDataLen);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 }
 
 /**
@@ -990,18 +993,19 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUnFileTransStartInfoTe
     };
     FileRecipientInfo info;
     info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    info.osType = OH_TYPE;
     SingleFileInfo singleFileInfo;
     ret = UnpackFileTransStartInfo(&fileFrame, &info, &singleFileInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     fileFrame.frameLength = TEST_HEADER_LENGTH;
     ret = UnpackFileTransStartInfo(&fileFrame, &info, &singleFileInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     uint32_t data = FILE_MAGIC_NUMBER;
     fileFrame.data = (uint8_t *)&data;
     ret = UnpackFileTransStartInfo(&fileFrame, &info, &singleFileInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     info.crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     fileFrame.frameLength = 0;
