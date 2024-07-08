@@ -2302,14 +2302,7 @@ int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
         return SOFTBUS_STRCPY_ERR;
     }
     LinkUnlock();
-    if (linkType == LANE_HML_RAW) {
-        int32_t errCode = DisconnectP2pWithoutAuthConn(pid, mac, linkId);
-        if (errCode != SOFTBUS_OK) {
-            DelP2pLinkedByLinkId(linkId);
-            return errCode;
-        }
-    }
-    if (OpenAuthToDisconnP2p(networkId, linkId) != SOFTBUS_OK) {
+    if (linkType == LANE_HML_RAW || OpenAuthToDisconnP2p(networkId, linkId) != SOFTBUS_OK) {
         int32_t errCode = DisconnectP2pWithoutAuthConn(pid, mac, linkId);
         if (errCode != SOFTBUS_OK) {
             DelP2pLinkedByLinkId(linkId);
