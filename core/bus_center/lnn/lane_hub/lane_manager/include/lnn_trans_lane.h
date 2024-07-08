@@ -40,6 +40,8 @@ typedef struct {
     bool isWithQos;
     bool isCanceled;
     bool isNotified;
+    bool notifyFree;
+    bool hasNotifiedFree;
     ExtraReqInfo extraInfo;
 } TransReqInfo;
 
@@ -52,6 +54,7 @@ int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const 
 void RemoveDelayDestroyMessage(uint64_t laneId);
 void DelLogicAndLaneRelationship(uint64_t laneId);
 int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId);
+void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode);
 
 #ifdef __cplusplus
 }

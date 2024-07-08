@@ -35,6 +35,7 @@ typedef struct {
     int32_t (*allocTargetLane)(uint32_t laneHandle, const LaneAllocInfoExt *allocInfo,
         const LaneAllocListener *listener);
     int32_t (*cancelLane)(uint32_t laneHandle);
+    int32_t (*qosLimit)(uint32_t laneHandle, uint32_t expectBw, uint32_t *actualBw);
     int32_t (*freeLane)(uint32_t laneHandle);
 } LaneInterface;
 

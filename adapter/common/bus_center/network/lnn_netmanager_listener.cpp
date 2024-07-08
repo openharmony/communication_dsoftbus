@@ -78,6 +78,9 @@ int32_t LnnNetManagerListener::OnInterfaceChanged(const std::string &ifName, boo
 
 int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &ifName, bool isUp)
 {
+    if (strstr(ifName.c_str(), "eth") == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, isUp=%{public}s", ifName.c_str(), isUp ? "true" : "false");
     uint32_t netCapability = 0;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability);

@@ -798,7 +798,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
     
     if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        TRANS_LOGW(TRANS_CTRL, "peer dataconfig is null.");
+        TRANS_LOGD(TRANS_CTRL, "peer dataconfig is null.");
     }
 
     int32_t ret = SOFTBUS_TRANS_UNPACK_HANDSHAKE_MSG_FAILED;

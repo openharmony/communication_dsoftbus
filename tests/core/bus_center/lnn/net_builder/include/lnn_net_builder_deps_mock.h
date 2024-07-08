@@ -162,8 +162,8 @@ public:
     virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type);
     virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request);
-    virtual int SoftBusGetBtState(void);
-    virtual int SoftBusGetBrState(void);
+    virtual int32_t SoftBusGetBtState(void);
+    virtual int32_t SoftBusGetBrState(void);
     virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type);
     virtual int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type);
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
@@ -188,6 +188,7 @@ public:
         const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
     virtual bool IsSupportLpFeature(void);
     virtual bool LnnSubcribeKvStoreService(void);
+    virtual void LnnNotifyLocalNetworkIdChanged(void);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -290,8 +291,8 @@ public:
     MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
     MOCK_METHOD2(GetAuthRequest, int32_t (uint32_t, AuthRequest *));
-    MOCK_METHOD0(SoftBusGetBtState, int ());
-    MOCK_METHOD0(SoftBusGetBrState, int ());
+    MOCK_METHOD0(SoftBusGetBtState, int32_t ());
+    MOCK_METHOD0(SoftBusGetBrState, int32_t ());
     MOCK_METHOD2(LnnSetNetCapability, int32_t (uint32_t *, NetCapability));
     MOCK_METHOD2(LnnClearNetCapability, int32_t (uint32_t *, NetCapability));
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));
@@ -318,6 +319,7 @@ public:
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool (const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t (const char *uuid));
     MOCK_METHOD0(IsSupportLpFeature, bool ());
+    MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void ());
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };
 } // namespace OHOS

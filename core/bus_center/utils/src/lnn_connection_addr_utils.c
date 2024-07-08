@@ -257,13 +257,52 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
     return false;
 }
 
+bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr)
+{
+    if (addr == NULL) {
+        LNN_LOGE(LNN_STATE, "connection addr get invalid param");
+        return true;
+    }
+    switch (addr->type) {
+        case CONNECTION_ADDR_WLAN:
+        /* fall-through */
+        case CONNECTION_ADDR_ETH:
+            if (strnlen(addr->info.ip.ip, IP_STR_MAX_LEN) == 0 ||
+                strnlen(addr->info.ip.ip, IP_STR_MAX_LEN) == IP_STR_MAX_LEN) {
+                LNN_LOGE(LNN_STATE, "get invalid ip info");
+                return true;
+            }
+            break;
+        case CONNECTION_ADDR_BR:
+            if (strnlen(addr->info.br.brMac, BT_MAC_LEN) == 0 ||
+                strnlen(addr->info.br.brMac, BT_MAC_LEN) == BT_MAC_LEN) {
+                LNN_LOGE(LNN_STATE, "get invalid brMac info");
+                return true;
+            }
+            break;
+        case CONNECTION_ADDR_BLE:
+            if (strnlen(addr->info.ble.bleMac, BT_MAC_LEN) == 0 ||
+                strnlen(addr->info.ble.bleMac, BT_MAC_LEN) == BT_MAC_LEN) {
+                LNN_LOGE(LNN_STATE, "get invalid bleMac info");
+                return true;
+            }
+            break;
+        case CONNECTION_ADDR_SESSION:
+            break;
+        default:
+            LNN_LOGW(LNN_STATE, "invalid connection addr type");
+            return true;
+    }
+    return false;
+}
+
 const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
 {
     int32_t ret = 0;
     char *anonyIp = NULL;
     char *anonyMac = NULL;
 
-    if (addr == NULL) {
+    if (LnnIsConnectionAddrInvalid(addr)) {
         LNN_LOGW(LNN_STATE, "print connection addr get invalid param");
         return "Addr=";
     }

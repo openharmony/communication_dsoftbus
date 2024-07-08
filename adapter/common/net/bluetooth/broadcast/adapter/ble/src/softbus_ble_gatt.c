@@ -871,6 +871,9 @@ static void BcAdapterBtStateChanged(int32_t listenerId, int32_t state)
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_advLock) == SOFTBUS_OK, DISC_BLE_ADAPTER, "lock failed");
     for (uint8_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
         AdvChannel *advChannel = &g_advChannel[channelId];
+        if (advChannel->advId < 0) {
+            continue;
+        }
         advChannel->isAdvertising = false;
         (void)BleStopAdv(advChannel->advId);
         advChannel->advId = -1;
@@ -914,6 +917,12 @@ void SoftbusBleAdapterInit(void)
     int32_t ret = SoftBusAddBtStateListener(&g_softbusBcAdapterBtStateListener);
     DISC_CHECK_AND_RETURN_LOGE(ret >= 0, DISC_BLE_ADAPTER, "add bt state listener failed.");
     g_adapterBtStateListenerId = ret;
+    for (uint8_t channelId = 0; channelId < GATT_ADV_MAX_NUM; channelId++) {
+        g_advChannel[channelId].advId = -1;
+    }
+    for (uint8_t channelId = 0; channelId < GATT_SCAN_MAX_NUM; channelId++) {
+        g_scanChannel[channelId].scannerId = -1;
+    }
 }
 
 void SoftbusBleAdapterDeInit(void)

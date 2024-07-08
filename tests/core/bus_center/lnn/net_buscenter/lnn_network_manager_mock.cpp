@@ -80,9 +80,10 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 {
     return GetNetworkManagerInterface()->LnnGetOnlineStateById(id, type);
 }
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+    bool isNeedConnect)
 {
-    return GetNetworkManagerInterface()->LnnNotifyDiscoveryDevice(addr, isNeedConnect);
+    return GetNetworkManagerInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
 {

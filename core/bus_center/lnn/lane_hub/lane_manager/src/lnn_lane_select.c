@@ -24,7 +24,6 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_link.h"
 #include "lnn_log.h"
-#include "lnn_parameter_utils.h"
 #include "lnn_select_rule.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
@@ -410,55 +409,6 @@ static int32_t SelectMeshLinks(const char *networkId, LaneLinkType *resList, uin
         return GetErrCodeOfLink(networkId, optionalLink[0]);
     }
     return SOFTBUS_OK;
-}
-
-static int32_t AddRecommendLinkType(LanePreferredLinkList *setRecommendLinkList,
-    LaneLinkType linkType, int32_t *linkNum)
-{
-    if ((*linkNum) < 0 || (*linkNum) >= LANE_LINK_TYPE_BUTT) {
-        LNN_LOGE(LNN_LANE, "enum out of bounds");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    setRecommendLinkList->linkType[(*linkNum)++] = linkType;
-    setRecommendLinkList->linkTypeNum = *linkNum;
-    return SOFTBUS_OK;
-}
-
-int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
-{
-    if (setRecommendLinkList == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int linkNum = 0;
-    if (IsLinkEnabled(LANE_HML)) {
-        AddRecommendLinkType(setRecommendLinkList, LANE_HML, &linkNum);
-        LNN_LOGI(LNN_LANE, "hml_only = on");
-        return SOFTBUS_OK;
-    } else if (IsLinkEnabled(LANE_P2P)) {
-        AddRecommendLinkType(setRecommendLinkList, LANE_P2P, &linkNum);
-        LNN_LOGI(LNN_LANE, "p2p_only = on");
-        return SOFTBUS_OK;
-    } else if (IsLinkEnabled(LANE_BR)) {
-        AddRecommendLinkType(setRecommendLinkList, LANE_BR, &linkNum);
-        LNN_LOGI(LNN_LANE, "br_only = on");
-        return SOFTBUS_OK;
-    } else if (IsLinkEnabled(LANE_WLAN_5G) || IsLinkEnabled(LANE_WLAN_2P4G)) {
-        AddRecommendLinkType(setRecommendLinkList, LANE_WLAN_5G, &linkNum);
-        AddRecommendLinkType(setRecommendLinkList, LANE_WLAN_2P4G, &linkNum);
-        LNN_LOGI(LNN_LANE, "wlan_only = on");
-        return SOFTBUS_OK;
-    } else if (IsLinkEnabled(LANE_COC_DIRECT)) {
-        AddRecommendLinkType(setRecommendLinkList, LANE_COC_DIRECT, &linkNum);
-        LNN_LOGI(LNN_LANE, "coc_only = on");
-        return SOFTBUS_OK;
-    } else if (IsLinkEnabled(LANE_BLE_DIRECT)) {
-        AddRecommendLinkType(setRecommendLinkList, LANE_BLE_DIRECT, &linkNum);
-        LNN_LOGI(LNN_LANE, "ble_only = on");
-        return SOFTBUS_OK;
-    } else {
-        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
-    }
 }
 
 static int32_t SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
