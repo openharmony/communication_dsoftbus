@@ -535,8 +535,7 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info)
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
             DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
-            SoftBusFree(option->capabilityData);
-            option->capabilityData = NULL;
+            FreeDiscInfo(infoNode, PUBLISH_SERVICE);
             return NULL;
         }
     }
@@ -580,8 +579,7 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
             DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
-            SoftBusFree(option->capabilityData);
-            option->capabilityData = NULL;
+            FreeDiscInfo(infoNode, SUBSCRIBE_SERVICE);
             return NULL;
         }
     }
