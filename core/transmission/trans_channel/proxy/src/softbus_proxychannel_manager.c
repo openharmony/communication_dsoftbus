@@ -1051,7 +1051,7 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
         TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
+    TRANS_LOGD(TRANS_CTRL, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
     return SOFTBUS_OK;
 }
 
@@ -1374,8 +1374,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         return;
     }
 
-    TRANS_LOGI(TRANS_CTRL, "recv reset myChannelId=%{public}d, peerChanelId=%{public}d", msg->msgHead.myId,
-        msg->msgHead.peerId);
+    TRANS_LOGI(TRANS_CTRL, "recv reset myChannelId=%{public}d, peerChanelId=%{public}d, cipher=%{public}d",
+        msg->msgHead.myId, msg->msgHead.peerId, msg->msgHead.cipher);
     if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity), msg->dateLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset identity fail");
         SoftBusFree(info);
@@ -1709,6 +1709,9 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 
 static void TransProxyTimerItemProc(const ListNode *proxyProcList)
 {
+    if (IsListEmpty(proxyProcList)) {
+        return;
+    }
     TRANS_LOGI(TRANS_CTRL, "enter.");
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -1760,7 +1763,6 @@ void TransProxyTimerProc(void)
         return;
     }
     if (g_proxyChannelList->cnt <= 0) {
-        TRANS_LOGW(TRANS_INIT, "g_proxyChannelList count invalid");
         (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
         return;
     }

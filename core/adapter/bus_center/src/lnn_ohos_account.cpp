@@ -18,6 +18,7 @@
 
 #include "auth_manager.h"
 #include "bus_center_manager.h"
+#include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
@@ -108,12 +109,15 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
     }
     ClearAuthLimitMap();
     ClearLnnBleReportExtraMap();
-    ClearWinPcRestrictMap();
+    ClearPcRestrictMap();
     LNN_LOGI(LNN_STATE,
         "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
+    if (UpdateRecoveryDeviceInfoFromDb() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "update db recovery fail");
+    }
     if (isNeedUpdateHeartbeat) {
         LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
     }
@@ -133,6 +137,9 @@ void LnnOnOhosAccountLogout(void)
         "accountHash changed. accountHash=[%{public}02X, %{public}02X]", accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
+    if (UpdateRecoveryDeviceInfoFromDb() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "update db recovery fail");
+    }
     LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
 }
 

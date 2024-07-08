@@ -142,7 +142,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, Test
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
     ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_TCP_DIRECT, data, TEST_DATA_LENGTH);
-    EXPECT_EQ(SOFTBUS_TDC_GET_INFO_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_GET_INFO_FAILED, ret);
 
     ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_BUTT, data, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);

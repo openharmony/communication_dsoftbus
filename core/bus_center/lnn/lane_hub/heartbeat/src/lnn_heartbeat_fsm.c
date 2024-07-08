@@ -1167,8 +1167,9 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     custData->wakeupFlag = wakeupFlag;
     custData->isRelay = msgPara->isRelay;
     custData->isSyncData = msgPara->isSyncData;
-    custData->isNeedUpdataData = msgPara->isNeedUpdataData;
-    custData->isFirstBegin = delayMillis == 0 ? true : false;
+    custData->isNeedRestart = msgPara->isNeedRestart;
+    custData->hasScanRsp = msgPara->hasScanRsp;
+    custData->isFirstBegin = msgPara->isFirstBegin;
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN, (void *)custData, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post send begin msg to hbFsm fail");
         SoftBusFree(custData);

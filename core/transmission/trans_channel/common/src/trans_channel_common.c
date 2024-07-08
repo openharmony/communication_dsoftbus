@@ -157,7 +157,7 @@ static ChannelType TransGetChannelType(const SessionParam *param, const int32_t 
     return CHANNEL_TYPE_TCP_DIRECT;
 }
 
-void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transInfo, LaneConnInfo *connInfo)
+void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transInfo, const LaneConnInfo *connInfo)
 {
     if (appInfo == NULL || param == NULL || transInfo == NULL || connInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invalid param");
@@ -543,9 +543,7 @@ void TransFreeLane(uint32_t laneHandle, bool isQosLane)
     TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d", laneHandle, isQosLane);
     if (laneHandle != INVALID_LANE_REQ_ID) {
         if (isQosLane) {
-            TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
-            TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");
-            GetLaneManager()->lnnFreeLane(laneHandle);
+            TransFreeLaneByLaneHandle(laneHandle, false);
             return;
         }
         LnnFreeLane(laneHandle);

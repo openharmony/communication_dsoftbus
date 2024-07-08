@@ -414,6 +414,9 @@ static void SetLnnConnNodeInfo(
         IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT)) {
         DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
     }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), SetLpKeepAliveState, NULL, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call online process fail");
+    }
     NotifyJoinResult(connFsm, networkId, retCode);
     ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
     connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
@@ -622,12 +625,12 @@ static void DfxAddBleReportExtra(
     }
     if (extra->errcode == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP &&
         (strncmp(extra->peerDeviceType, PC_DEV_TYPE, strlen(PC_DEV_TYPE)) == 0)) {
-        LnnBleWinPcRestrictMapInit();
+        LnnBlePcRestrictMapInit();
         uint32_t count = 0;
-        if (GetNodeFromWinPcRestrictMap(extra->peerUdidHash, &count) == SOFTBUS_OK) {
-            UpdateNodeFromWinPcRestrictMap(extra->peerUdidHash);
+        if (GetNodeFromPcRestrictMap(extra->peerUdidHash, &count) == SOFTBUS_OK) {
+            UpdateNodeFromPcRestrictMap(extra->peerUdidHash);
         } else {
-            AddNodeToWinPcRestrictMap(extra->peerUdidHash);
+            AddNodeToPcRestrictMap(extra->peerUdidHash);
         }
     }
     if (connInfo->nodeInfo == NULL) {
@@ -736,13 +739,13 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     DfxReportOnlineEvent(connInfo, reason, extra);
 }
 
-static void DeleteWinPcRestrictNode(int32_t retCode, NodeInfo *nodeInfo)
+static void DeletePcRestrictNode(int32_t retCode, NodeInfo *nodeInfo)
 {
     char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     uint32_t count = 0;
     if (retCode == SOFTBUS_OK && GetPeerUdidHash(nodeInfo, peerUdidHash) == SOFTBUS_OK) {
-        if (GetNodeFromWinPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
-            DeleteNodeFromWinPcRestrictMap(peerUdidHash);
+        if (GetNodeFromPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
+            DeleteNodeFromPcRestrictMap(peerUdidHash);
         }
     }
 }
@@ -786,7 +789,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         DfxRecordLnnAddOnlineNodeEnd(connInfo, infoNum, lnnType, retCode);
         SoftBusFree(info);
     }
-    DeleteWinPcRestrictNode(retCode, connInfo->nodeInfo);
+    DeletePcRestrictNode(retCode, connInfo->nodeInfo);
     if (connInfo->nodeInfo != NULL) {
         SoftBusFree(connInfo->nodeInfo);
         connInfo->nodeInfo = NULL;

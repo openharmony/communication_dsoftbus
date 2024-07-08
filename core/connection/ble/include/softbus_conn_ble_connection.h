@@ -123,6 +123,9 @@ typedef struct {
     // NOTICE: fields below are inner ones for helping connect progress, they are invalid after connection established
     int32_t retrySearchServiceCnt;
     SoftBusList *connectStatus;
+
+    // ble Quick connection fails due to scan failures
+    bool underlayerFastConnectFailedScanFailure;
 } ConnBleConnection;
 
 typedef struct {

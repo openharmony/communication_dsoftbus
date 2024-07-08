@@ -291,7 +291,7 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         (info != NULL && fileFrame != NULL && file != NULL), SOFTBUS_INVALID_PARAM, TRANS_FILE, "invalid param");
     uint8_t *fileNameData = NULL;
     uint64_t fileNameLen = 0;
-    if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
+    if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT && info->osType == OH_TYPE) {
         if (fileFrame->frameLength < FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t)) {
             TRANS_LOGE(TRANS_FILE, "frameLength invalid");
             return SOFTBUS_INVALID_PARAM;
@@ -1154,7 +1154,7 @@ static int32_t UpdateFileReceivePath(int32_t sessionId, FileListener *fileListen
     return SOFTBUS_OK;
 }
 
-static FileRecipientInfo *CreateNewRecipient(int32_t sessionId, int32_t channelId)
+static FileRecipientInfo *CreateNewRecipient(int32_t sessionId, int32_t channelId, int32_t osType)
 {
     FileRecipientInfo *info = NULL;
     LIST_FOR_EACH_ENTRY(info, &g_recvRecipientInfoList, FileRecipientInfo, node) {
@@ -1181,6 +1181,7 @@ static FileRecipientInfo *CreateNewRecipient(int32_t sessionId, int32_t channelI
     }
     info->channelId = channelId;
     info->sessionId = sessionId;
+    info->osType = osType;
     if (TransGetFileListener(sessionName, &(info->fileListener)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "get file listener failed");
         SoftBusFree(info);
@@ -1238,7 +1239,7 @@ static int32_t GetFileInfoByStartFrame(const FileFrame *fileFrame, const FileRec
     return SOFTBUS_OK;
 }
 
-static FileRecipientInfo *GetRecipientInCreateFileRef(int32_t sessionId, int32_t channelId)
+static FileRecipientInfo *GetRecipientInCreateFileRef(int32_t sessionId, int32_t channelId, int32_t osType)
 {
     if (SoftBusMutexLock(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "mutex lock fail");
@@ -1246,7 +1247,7 @@ static FileRecipientInfo *GetRecipientInCreateFileRef(int32_t sessionId, int32_t
     }
     FileRecipientInfo *recipient = GetRecipientNoLock(sessionId);
     if (recipient == NULL) {
-        recipient = CreateNewRecipient(sessionId, channelId);
+        recipient = CreateNewRecipient(sessionId, channelId, osType);
         if (recipient == NULL) {
             TRANS_LOGE(TRANS_FILE, "create file recipient fail. sessionId=%{public}d", sessionId);
             (void)SoftBusMutexUnlock(&g_recvFileInfoLock.lock);
@@ -1324,9 +1325,9 @@ static void HandleFileTransferCompletion(FileRecipientInfo *recipient, int32_t s
     }
 }
 
-static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const FileFrame *fileFrame)
+static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const FileFrame *fileFrame, int32_t osType)
 {
-    FileRecipientInfo *recipient = GetRecipientInCreateFileRef(sessionId, channelId);
+    FileRecipientInfo *recipient = GetRecipientInCreateFileRef(sessionId, channelId, osType);
     if (recipient == NULL) {
         TRANS_LOGE(TRANS_FILE, "GetRecipientInCreateFileRef fail. sessionId=%{public}d", sessionId);
         return SOFTBUS_NO_INIT;
@@ -1485,13 +1486,14 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessOneFrame(const FileFrame *fileFrame, uint32_t dataLen, int32_t crc, SingleFileInfo *fileInfo)
+static int32_t ProcessOneFrame(
+    const FileFrame *fileFrame, uint32_t dataLen, int32_t crc, SingleFileInfo *fileInfo, int32_t osType)
 {
     if (fileInfo->fileStatus == NODE_ERR) {
         TRANS_LOGE(TRANS_FILE, "fileStatus is error");
         return SOFTBUS_FILE_ERR;
     }
-    if (crc == APP_INFO_FILE_FEATURES_SUPPORT) {
+    if (crc == APP_INFO_FILE_FEATURES_SUPPORT && osType == OH_TYPE) {
         return ProcessOneFrameCRC(fileFrame, dataLen, fileInfo);
     } else {
         uint32_t frameDataLength = dataLen - FRAME_DATA_SEQ_OFFSET;
@@ -1574,7 +1576,7 @@ static int32_t WriteFrameToFile(int32_t sessionId, const FileFrame *fileFrame)
         TRANS_LOGE(TRANS_FILE, "unpack file data frame failed");
         goto EXIT_ERR;
     }
-    if (ProcessOneFrame(fileFrame, dataLen, recipient->crc, fileInfo) != SOFTBUS_OK) {
+    if (ProcessOneFrame(fileFrame, dataLen, recipient->crc, fileInfo, recipient->osType) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "write one frame error");
         goto EXIT_ERR;
     }
@@ -1849,8 +1851,15 @@ static int32_t ProcessFileAckResponse(int32_t sessionId, const FileFrame *frame)
     return SOFTBUS_NOT_FIND;
 }
 
-static int32_t CheckFrameLength(int32_t channelId, uint32_t frameLength)
+static int32_t CheckFrameLength(int32_t channelId, uint32_t frameLength, int32_t osType)
 {
+    if (osType != OH_TYPE) {
+        if (frameLength < sizeof(uint32_t)) {
+            TRANS_LOGE(TRANS_FILE, "invalid frameLength=%{public}u, channelId=%{public}d", frameLength, channelId);
+            return SOFTBUS_INVALID_PARAM;
+        }
+        return SOFTBUS_OK;
+    }
     int32_t linkType;
     int32_t ret = ClientTransProxyGetLinkTypeByChannelId(channelId, &linkType);
     if (ret != SOFTBUS_OK) {
@@ -1867,24 +1876,26 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
         TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret;
-    ret = CheckFrameLength(channelId, oneFrame->frameLength);
+    int32_t osType;
+    int32_t ret = ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
+    ret = CheckFrameLength(channelId, oneFrame->frameLength, osType);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "frameLength is invalid;");
+        TRANS_LOGE(TRANS_FILE, "frameLength is invalid sessionId=%{public}d, osType=%{public}d", sessionId, osType);
         return ret;
     }
     switch (oneFrame->frameType) {
         case TRANS_SESSION_FILE_FIRST_FRAME:
-            TRANS_LOGI(TRANS_FILE, "create file from frame start sessionId=%{public}d", sessionId);
-            ret = CreateFileFromFrame(sessionId, channelId, oneFrame);
-            TRANS_LOGI(TRANS_FILE, "create file from frame ret=%{public}d", ret);
+            ret = CreateFileFromFrame(sessionId, channelId, oneFrame, osType);
+            TRANS_LOGI(TRANS_FILE, "create file from frame ret=%{public}d, sessionId=%{public}d, osType=%{public}d",
+                ret, sessionId, osType);
             break;
         case TRANS_SESSION_FILE_ONGOINE_FRAME:
         case TRANS_SESSION_FILE_ONLYONE_FRAME:
         case TRANS_SESSION_FILE_LAST_FRAME:
             ret = WriteFrameToFile(sessionId, oneFrame);
             if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_FILE, "write frame fail ret=%{public}d", ret);
+                TRANS_LOGE(TRANS_FILE, "write frame fail ret=%{public}d, sessionId=%{public}d, osType=%{public}d",
+                    ret, sessionId, osType);
             }
             break;
         case TRANS_SESSION_FILE_ACK_REQUEST_SENT:

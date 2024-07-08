@@ -98,6 +98,22 @@ typedef struct TransReceiveData {
     int32_t dataType;
 } TransReceiveData;
 
+typedef enum {
+    PARA_ACTION = 1,
+    PARA_BUTT,
+} ParaType;
+
+typedef struct {
+    uint32_t actionId;
+} ActionAddr;
+
+typedef struct {
+    ParaType type;
+    union {
+        ActionAddr action;
+    };
+    bool enable160M;
+} LinkPara;
 #ifdef __cplusplus
 }
 #endif // __cplusplus

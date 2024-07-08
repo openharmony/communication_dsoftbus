@@ -27,7 +27,6 @@
 #include "lnn_cipherkey_manager.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_device_info_recovery.h"
-#include "lnn_parameter_utils.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
@@ -45,7 +44,6 @@
 #define VERSION_TYPE_LITE "LITE"
 #define VERSION_TYPE_DEFAULT ""
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
-#define SOFTBUS_BUSCENTER_DUMP_LINKPARAM "link_param"
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
 #define DEFAULT_SUPPORT_AUTHCAPACITY 0x7
@@ -2108,25 +2106,6 @@ int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusDumpBusCenterParameter(int fd)
-{
-    SOFTBUS_DPRINTF(fd, "-----LinkParam-----\n");
-    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_HML) ?
-        "hml parameter: on\n" : "hml parameter: off\n");
-    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_P2P) ?
-        "p2p parameter: on\n" : "p2p parameter: off\n");
-    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BR) ?
-        "br parameter: on\n" : "br parameter: off\n");
-    SOFTBUS_DPRINTF(fd, (IsLinkEnabled(LANE_WLAN_5G) ||
-        IsLinkEnabled(LANE_WLAN_2P4G)) ?
-        "wlan parameter: on\n" : "wlan parameter: off\n");
-    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_COC_DIRECT) ?
-        "coc parameter: on\n" : "coc parameter: off\n");
-    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BLE_DIRECT) ?
-        "ble parameter: on\n" : "ble parameter: off\n");
-    return SOFTBUS_OK;
-}
-
 static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
 {
     if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
@@ -2193,10 +2172,6 @@ int32_t LnnInitLocalLedger(void)
         (char *)SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO, &SoftBusDumpBusCenterLocalDeviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftBusRegBusCenterVarDump regist fail");
         return SOFTBUS_ERR;
-    }
-    if (SoftBusRegBusCenterVarDump(
-        (char *)SOFTBUS_BUSCENTER_DUMP_LINKPARAM, &SoftBusDumpBusCenterParameter) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftBusRegBusCenterVarDump regist fail");
     }
     if (LnnFirstGetUdid() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "first get udid fail, try again in one second");
