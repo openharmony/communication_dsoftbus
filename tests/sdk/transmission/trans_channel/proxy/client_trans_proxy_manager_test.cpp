@@ -290,7 +290,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyPackAndSendData(channelId,
         static_cast<const void *>(data), len, &info, pktType);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
 /**

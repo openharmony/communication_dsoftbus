@@ -85,7 +85,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = ClosePeerUdpChannel(TEST_CHANNELID);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
 }
 
 /**

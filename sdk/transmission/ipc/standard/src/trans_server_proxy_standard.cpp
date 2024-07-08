@@ -125,7 +125,7 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "send request failed! ret=%{public}d",
             ret);
-        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -165,7 +165,7 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "send request failed! ret=%{public}d",
             ret);
-        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -319,7 +319,7 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     int32_t ret = remote->SendRequest(SERVER_OPEN_SESSION, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "OpenSession send request failed! ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        return ret;
     }
     TransSerializer *transSerializer = (TransSerializer *)reply.ReadRawData(sizeof(TransSerializer));
     if (transSerializer == nullptr) {
@@ -405,7 +405,7 @@ int32_t TransServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelTy
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK,
             "ServerIpcNotifyAuthSuccess send request failed! ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -446,7 +446,7 @@ int32_t TransServerProxy::CloseChannel(const char *sessionName, int32_t channelI
     int32_t ret = remote->SendRequest(SERVER_CLOSE_CHANNEL, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "CloseChannel send request failed! ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -490,7 +490,7 @@ int32_t TransServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t
     int32_t ret = remote->SendRequest(SERVER_CLOSE_CHANNEL_STATISTICS, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics send request failed! ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -539,7 +539,7 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, co
     int32_t ret = remote->SendRequest(SERVER_SESSION_SENDMSG, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "SendMessage send request failed! ret=%{public}d", ret);
-        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {

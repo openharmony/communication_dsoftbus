@@ -413,7 +413,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest06, TestS
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = ProcessReceivedFileData(sessionId, TRANS_TEST_CHANNEL_ID, TRANS_TEST_AUTH_DATA,
                                   strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_FIRST_FRAME);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
@@ -442,7 +442,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest07, TestS
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_FIRST_FRAME);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ONGOINE_FRAME);
