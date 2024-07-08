@@ -589,18 +589,16 @@ static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink lin
     if (linkNum == 0) {
         return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
-    uint32_t i = 0;
-    for (i = 0; i < linkNum; i++) {
+    uint32_t resNum = 0;
+    for (uint32_t i = 0; i < linkNum; i++) {
         if (LaneCapCheck(networkId, optionalLink[i]) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "SpecifiedLink capcheck fail=%{public}d", optionalLink[i]);
+            LNN_LOGE(LNN_LANE, "SpecifiedLink capcheck fail, linkType=%{public}d", optionalLink[i]);
             continue;
         }
-        preferLink->linkType[0] = optionalLink[i];
+        preferLink->linkType[resNum] = optionalLink[i];
+        resNum++;
     }
-    if (i == 0) {
-        return GetErrCodeOfLink(networkId, optionalLink[0]);
-    }
-    preferLink->linkTypeNum = linkNum;
+    preferLink->linkTypeNum = resNum;
     return SOFTBUS_OK;
 }
 

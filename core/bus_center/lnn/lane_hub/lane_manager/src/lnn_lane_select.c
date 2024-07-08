@@ -165,7 +165,7 @@ static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
     LNN_LOGD(LNN_LANE, "priority=%{public}u, linkType=%{public}s", priority, GetLinkTypeStrng(preferredLink));
 }
 
-int32_t GetErrCodeOfLink(const char *networkId, LaneLinkType linkType)
+static int32_t GetErrCodeOfLink(const char *networkId, LaneLinkType linkType)
 {
     if ((linkType == LANE_WLAN_2P4G || linkType == LANE_WLAN_5G || linkType == LANE_P2P ||
         linkType == LANE_P2P_REUSE || linkType == LANE_HML) &&
