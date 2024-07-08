@@ -127,6 +127,7 @@
 #define NEW_CONN_CAP "NEW_CONN_CAP"
 #define EXTDATA "EXTDATA"
 #define STATE_VERSION "STATE_VERSION"
+#define STATE_VERSION_CHANGE_REASON "STATE_VERSION_CHANGE_REASON"
 #define BD_KEY "BD_KEY"
 #define IV "IV"
 #define SETTINGS_NICK_NAME "SETTINGS_NICK_NAME"
@@ -1140,6 +1141,7 @@ static void PackOsInfo(JsonObj *json, const NodeInfo *info)
 static void PackDeviceVersion(JsonObj *json, const NodeInfo *info)
 {
     (void)JSON_AddStringToObject(json, DEVICE_VERSION, info->deviceInfo.deviceVersion);
+    (void)JSON_AddInt32ToObject(json, STATE_VERSION_CHANGE_REASON, info->stateVersionReason);
 }
 
 static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
@@ -1489,6 +1491,7 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
     OptInt(json, BR_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_BR_BUFF_SIZE);
     OptInt64(json, FEATURE, (int64_t *)&info->feature, 0);
     OptInt64(json, CONN_SUB_FEATURE, (int64_t *)&info->connSubFeature, 0);
+    OptInt(json, STATE_VERSION_CHANGE_REASON, (int32_t *)&info->stateVersionReason, 0);
 }
 
 static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
@@ -1737,7 +1740,8 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
         !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
         !JSON_AddInt32ToObject(json, P2P_ROLE, info->p2pInfo.p2pRole) ||
         !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
-        !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight)) {
+        !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
+        !JSON_AddInt32ToObject(json, STATE_VERSION_CHANGE_REASON, info->stateVersionReason)) {
         AUTH_LOGE(AUTH_FSM, "add wifi info fail");
         return SOFTBUS_ERR;
     }
@@ -1769,6 +1773,7 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
     OptInt64(json, FEATURE, (int64_t *)&info->feature, 0);
+    OptInt(json, STATE_VERSION_CHANGE_REASON, (int32_t *)&info->stateVersionReason, 0);
     OptInt64(json, NEW_CONN_CAP, (int64_t *)&info->netCapacity, -1);
     if (info->netCapacity == (uint32_t)-1) {
         OptInt64(json, CONN_CAP, (int64_t *)&info->netCapacity, 0);
