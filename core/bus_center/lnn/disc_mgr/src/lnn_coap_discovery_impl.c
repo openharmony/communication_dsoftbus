@@ -39,7 +39,7 @@ static LnnDiscoveryImplCallback g_callback;
 static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions);
 
 static DiscInnerCallback g_discCb = {
-    .OnDeviceFound = DeviceFound,
+    .nDeviceFound = DeviceFound,
 };
 
 static int32_t LnnCheckDiscoveryDeviceInfo(const DeviceInfo *device)
@@ -114,8 +114,8 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
         LNN_LOGE(LNN_BUILDER, "get connect device info fail");
         return;
     }
-    if (g_callback.OnDeviceFound) {
-        g_callback.OnDeviceFound(&addr, &info);
+    if (g_callback.onDeviceFound) {
+        g_callback.onDeviceFound(&addr, &info);
     }
 }
 
@@ -171,6 +171,6 @@ int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)
         LNN_LOGE(LNN_BUILDER, "coap discovery callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    g_callback.OnDeviceFound = callback->OnDeviceFound;
+    g_callback.onDeviceFound = callback->OnDeviceFound;
     return SOFTBUS_OK;
 }
