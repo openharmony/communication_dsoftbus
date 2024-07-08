@@ -326,12 +326,15 @@ static void FreeDiscInfo(DiscInfo *info, const ServiceType type)
 {
     if ((type == PUBLISH_SERVICE) || (type == PUBLISH_INNER_SERVICE)) {
         SoftBusFree(info->option.publishOption.capabilityData);
+        info->option.publishOption.capabilityData = NULL;
     }
 
     if ((type == SUBSCRIBE_SERVICE) || (type == SUBSCRIBE_INNER_SERVICE)) {
         SoftBusFree(info->option.subscribeOption.capabilityData);
+        info->option.subscribeOption.capabilityData = NULL;
     }
     SoftBusFree(info);
+    info = NULL;
 }
 
 static bool IsInnerModule(const DiscInfo *infoNode)
