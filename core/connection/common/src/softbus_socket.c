@@ -444,6 +444,10 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
     ifName = strtok_s(NULL, ADDR_SPLIT_IPV6, &nextToken);
     if (ifName != NULL) {
         addrIn6->sin6ScopeId = SoftBusIfNameToIndex(ifName);
+        if (addrIn6->sin6ScopeId == 0) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "nameToIndex failed, errno=%{public}d, %{public}s", errno, strerror(errno));
+            return SOFTBUS_SOCKET_ADDR_ERR;
+        }
     }
     int32_t rc = SoftBusInetPtoN(SOFTBUS_AF_INET6, addr, &addrIn6->sin6Addr);
     if (rc != SOFTBUS_OK) {

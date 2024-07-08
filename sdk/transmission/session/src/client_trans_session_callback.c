@@ -472,7 +472,7 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
             }
             break;
         default:
-            TRANS_LOGE(TRANS_FILE, "revc unknown session type");
+            TRANS_LOGE(TRANS_FILE, "revc unknown session type = %{public}d", type);
             return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
 

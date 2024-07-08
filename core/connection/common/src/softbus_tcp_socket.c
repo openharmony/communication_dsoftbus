@@ -191,7 +191,7 @@ int32_t SetIpTos(int fd, uint32_t tos)
 static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
 {
     if (option == NULL) {
-        CONN_LOGE(CONN_COMMON, "null ptr!");
+        CONN_LOGE(CONN_COMMON, "invalid param!");
         return SOFTBUS_INVALID_PARAM;
     }
     if (option->type != CONNECT_TCP && option->type != CONNECT_P2P && option->type != CONNECT_HML) {
@@ -329,7 +329,7 @@ static int32_t GetTcpSockPort(int32_t fd)
     SoftBusSockAddr addr;
     int rc = SoftBusSocketGetLocalName(fd, &addr);
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "GetTcpSockPort. fd=%{public}d, rc=%{public}d", fd, rc);
+        CONN_LOGE(CONN_COMMON, "fd=%{public}d, rc=%{public}d", fd, rc);
         return rc;
     }
     if (addr.saFamily == SOFTBUS_AF_INET6) {
@@ -377,7 +377,7 @@ int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl,
 int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 {
     if (fd < 0) {
-        CONN_LOGE(CONN_COMMON, "ConnSetTcpUserTimeOut invalid param");
+        CONN_LOGE(CONN_COMMON, "invalid param");
         return SOFTBUS_ADAPTER_ERR;
     }
     if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_USER_TIMEOUT, &millSec, sizeof(millSec)) !=

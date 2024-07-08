@@ -68,7 +68,7 @@ extern "C" {
 
 #define MAX_SOCKET_ADDR_LEN 46
 
-#define MAX_SESSION_ID 16
+#define MAX_SESSION_ID 20
 #define MAX_SESSION_SERVER_NUMBER 32
 
 #define WAIT_SERVER_READY_INTERVAL 200
@@ -180,6 +180,7 @@ typedef struct {
     bool isFastData;
     uint32_t dataConfig;
     uint64_t laneId;
+    int32_t osType;
 } ChannelInfo;
 
 #ifdef __cplusplus

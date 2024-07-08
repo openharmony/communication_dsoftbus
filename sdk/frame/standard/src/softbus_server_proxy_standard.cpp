@@ -69,26 +69,26 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         COMM_LOGE(COMM_SDK, "remote is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
 
     sptr<IRemoteObject> clientStub = SoftBusServerProxyFrame::GetRemoteInstance();
     if (clientStub == nullptr) {
         COMM_LOGE(COMM_SDK, "client stub is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         COMM_LOGE(COMM_SDK, "SoftbusRegisterService write InterfaceToken failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
     if (!data.WriteRemoteObject(clientStub)) {
         COMM_LOGE(COMM_SDK, "SoftbusRegisterService write remote object failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_WRITEOBJECT_FAILED;
     }
     if (!data.WriteCString(clientPkgName)) {
         COMM_LOGE(COMM_SDK, "SoftbusRegisterService write clientPkgName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
 
     MessageParcel reply;
@@ -96,12 +96,12 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
     int32_t err = remote->SendRequest(MANAGE_REGISTER_SERVICE, data, reply, option);
     if (err != 0) {
         COMM_LOGE(COMM_SDK, "SoftbusRegisterService send request failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
         COMM_LOGE(COMM_SDK, "SoftbusRegisterService read serverRet failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
     return serverRet;
 }

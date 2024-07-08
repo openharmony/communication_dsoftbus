@@ -23,11 +23,11 @@ int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const Lane
     (void)callback;
     return SOFTBUS_P2P_NOT_SUPPORT;
 }
-void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
+int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
 {
     (void)networkId;
     (void)laneReqId;
-    return;
+    return SOFTBUS_P2P_NOT_SUPPORT;
 }
 void LnnDestroyP2p(void)
 {

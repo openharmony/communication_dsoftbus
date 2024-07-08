@@ -321,7 +321,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *uid = pos->uid;
             *pid = pos->pid;
-            TRANS_LOGI(TRANS_CTRL, "sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
+            TRANS_LOGD(TRANS_CTRL, "sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
                 tmpName, pos->uid, pos->pid);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             AnonymizeFree(tmpName);
@@ -397,9 +397,16 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
+    LinkDownInfo info = {
+        .uuid = uuid,
+        .udid = udid,
+        .peerIp = peerIp,
+        .networkId = networkId,
+        .routeType = type
+    };
 
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &sessionServerList, SessionServer, node) {
-        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, uuid, udid, peerIp, networkId, type);
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, &info);
     }
 
     if (routeType == WIFI_P2P) {

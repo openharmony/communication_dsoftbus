@@ -13,27 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef LNN_LINK_ENABLED_H
-#define LNN_LINK_ENABLED_H
-
-#include <gmock/gmock.h>
-
-#include "lnn_parameter_utils.h"
-
-namespace OHOS {
-class IsLinkEnabledDepsInterface {
-public:
-    IsLinkEnabledDepsInterface() {};
-    virtual ~IsLinkEnabledDepsInterface() {};
-
-    virtual bool IsLinkEnabled(LaneLinkType parameter) = 0;
-};
-
-class IsLinkEnabledDepsInterfaceMock : public IsLinkEnabledDepsInterface {
-public:
-    IsLinkEnabledDepsInterfaceMock();
-    ~IsLinkEnabledDepsInterfaceMock() override;
-    MOCK_METHOD1(IsLinkEnabled, bool (LaneLinkType));
-};
-} // namespace OHOS
-#endif // LNN_LINK_ENABLED_H
+#include "lnn_lane_power_control.h"
+#include "softbus_errcode.h"
+ 
+int32_t EnablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo)
+{
+    (void)wifiDirectInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+ 
+void DisablePowerControl(const WifiDirectLinkInfo *wifiDirectInfo)
+{
+    (void)wifiDirectInfo;
+}

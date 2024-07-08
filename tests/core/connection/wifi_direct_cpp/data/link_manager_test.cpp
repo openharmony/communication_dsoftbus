@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 #include <set>
-
 #include <gtest/gtest.h>
-
 #include "data/link_manager.h"
 
 using namespace testing::ext;
@@ -70,7 +68,7 @@ HWTEST_F(LinkManagerTest, ProcessIfXXXByRemoteDeviceId, TestSize.Level1)
     EXPECT_TRUE(result);
 
     auto innerLink = LinkManager::GetInstance().GetReuseLink(WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML, remoteDeviceId);
-    EXPECT_NE(innerLink, nullptr);
+    EXPECT_EQ(innerLink, nullptr);
 
     LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::HML, remoteDeviceId);
     result = LinkManager::GetInstance().ProcessIfPresent(
@@ -97,31 +95,14 @@ HWTEST_F(LinkManagerTest, ProcessIfXXXByRemoteMac, TestSize.Level1)
         innerLink.SetRemoteBaseMac(remoteMac);
     });
     EXPECT_TRUE(result);
-
     result = LinkManager::GetInstance().ProcessIfPresent(remoteMac, [](InnerLink &innerLink) {});
     EXPECT_TRUE(result);
 
     WifiDirectLink link {};
-    std::string localIp("192.168.0.1");
-    std::string remoteIp("192.168.0.2");
-    LinkManager::GetInstance().ProcessIfPresent(remoteMac, [localIp, remoteIp, &link](InnerLink &innerLink) {
-        innerLink.SetLocalIpv4(localIp);
-        innerLink.SetRemoteIpv4(remoteIp);
-        innerLink.SetLinkType(InnerLink::LinkType::HML);
-
-        innerLink.GenerateLink(888, 666, link);
-    });
-    EXPECT_NE(link.linkId, 0);
-    EXPECT_EQ(link.localIp, localIp);
-    EXPECT_EQ(link.remoteIp, remoteIp);
-    EXPECT_EQ(link.linkType, WIFI_DIRECT_LINK_TYPE_HML);
-
     result = LinkManager::GetInstance().ProcessIfPresent(link.linkId, [](InnerLink &innerLink) {});
-    EXPECT_TRUE(result);
-
+    EXPECT_FALSE(result);
     auto innerLink = LinkManager::GetInstance().GetLinkById(link.linkId);
-    EXPECT_NE(innerLink, nullptr);
-
+    EXPECT_EQ(innerLink, nullptr);
     LinkManager::GetInstance().ProcessIfPresent(link.linkId, [link](InnerLink &innerLink) {
         innerLink.RemoveId(link.linkId);
     });

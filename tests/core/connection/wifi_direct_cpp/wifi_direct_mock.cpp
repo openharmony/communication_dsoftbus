@@ -270,9 +270,10 @@ WifiErrorCode WifiDirectInterfaceMock::RegisterP2pStateChangedCallback(const P2p
 WifiErrorCode WifiDirectInterfaceMock::CreateGroupSuccessAction(const int frequency, FreqType type)
 {
     auto run = [] () {
-        CONN_LOGI(CONN_WIFI_DIRECT, "1");
         WifiP2pLinkedInfo info;
         info.connectState = P2P_CONNECTED;
+        P2pState state = P2P_STATE_STARTED;
+        stateCallback_(state);
         connectionCallback_(info);
     };
     std::thread thread(run);
@@ -283,7 +284,6 @@ WifiErrorCode WifiDirectInterfaceMock::CreateGroupSuccessAction(const int freque
 WifiErrorCode WifiDirectInterfaceMock::CreateGroupFailureAction(const int frequency, FreqType type)
 {
     auto run = [] () {
-        CONN_LOGI(CONN_WIFI_DIRECT, "2");
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         connectionCallback_(info);
@@ -299,7 +299,6 @@ WifiErrorCode WifiDirectInterfaceMock::CreateGroupTimeOutAction(const int freque
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         sleep(6);
-        connectionCallback_(info);
     };
     std::thread thread(run);
     thread.detach();
@@ -309,7 +308,8 @@ WifiErrorCode WifiDirectInterfaceMock::CreateGroupTimeOutAction(const int freque
 WifiErrorCode WifiDirectInterfaceMock::ConnectSuccessAction(const Hid2dConnectConfig *config)
 {
     auto run = [] () {
-        CONN_LOGI(CONN_WIFI_DIRECT, "4");
+        P2pState state = P2P_STATE_STARTED;
+        stateCallback_(state);
         WifiP2pLinkedInfo info;
         info.connectState = P2P_CONNECTED;
         connectionCallback_(info);
@@ -322,7 +322,6 @@ WifiErrorCode WifiDirectInterfaceMock::ConnectSuccessAction(const Hid2dConnectCo
 WifiErrorCode WifiDirectInterfaceMock::ConnectFailureAction(const Hid2dConnectConfig *config)
 {
     auto run = [] () {
-        CONN_LOGI(CONN_WIFI_DIRECT, "5");
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         connectionCallback_(info);
@@ -335,11 +334,9 @@ WifiErrorCode WifiDirectInterfaceMock::ConnectFailureAction(const Hid2dConnectCo
 WifiErrorCode WifiDirectInterfaceMock::ConnectTimeOutAction(const Hid2dConnectConfig *config)
 {
     auto run = [] () {
-        CONN_LOGI(CONN_WIFI_DIRECT, "6");
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         sleep(6);
-        connectionCallback_(info);
     };
     std::thread thread(run);
     thread.detach();
@@ -349,7 +346,8 @@ WifiErrorCode WifiDirectInterfaceMock::ConnectTimeOutAction(const Hid2dConnectCo
 WifiErrorCode WifiDirectInterfaceMock::DestroyGroupSuccessAction()
 {
     auto run = [] () {
-        CONN_LOGI(CONN_WIFI_DIRECT, "7");
+        P2pState state = P2P_STATE_STARTED;
+        stateCallback_(state);
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         connectionCallback_(info);
@@ -362,7 +360,6 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupSuccessAction()
 WifiErrorCode WifiDirectInterfaceMock::DestroyGroupFailureAction()
 {
     auto run = [] () {
-        CONN_LOGI(CONN_WIFI_DIRECT, "8");
         WifiP2pLinkedInfo info;
         info.connectState = P2P_CONNECTED;
         connectionCallback_(info);
@@ -375,11 +372,9 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupFailureAction()
 WifiErrorCode WifiDirectInterfaceMock::DestroyGroupTimeOutAction()
 {
     auto run = [] () {
-        CONN_LOGI(CONN_WIFI_DIRECT, "lwq 9");
         WifiP2pLinkedInfo info;
         info.connectState = P2P_CONNECTED;
         sleep(17);
-        connectionCallback_(info);
     };
     std::thread thread(run);
     thread.detach();

@@ -58,6 +58,8 @@ typedef struct {
     ListNode node;
     int32_t channelId;
     int32_t businessType;
+    int32_t connectType;
+    char myIp[IP_LEN];
 } TcpChannelInfo;
 
 uint64_t TransTdcGetNewSeqId(void);
@@ -108,6 +110,9 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel);
 int32_t TransAddTcpChannelInfo(TcpChannelInfo *info);
 
 int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId);
+
+int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+    int32_t *connectType);
 
 #ifdef __cplusplus
 #if __cplusplus

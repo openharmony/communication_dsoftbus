@@ -29,6 +29,7 @@ typedef struct {
     int32_t sequence;
     char sessionKey[SESSION_KEY_LENGTH];
     int32_t linkType;
+    int32_t osType;
 }ProxyChannelInfoDetail;
 
 typedef struct {
@@ -65,6 +66,8 @@ int32_t ClientTransProxyInit(const IClientSessionCallBack *cb);
 void ClientTransProxyDeinit(void);
 
 int32_t ClientTransProxyGetInfoByChannelId(int32_t channelId, ProxyChannelInfoDetail *info);
+
+int32_t ClientTransProxyGetOsTypeByChannelId(int32_t channelId, int32_t *osType);
 
 int32_t ClientTransProxyGetLinkTypeByChannelId(int32_t channelId, int32_t *linkType);
 

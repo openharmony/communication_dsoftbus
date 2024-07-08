@@ -32,8 +32,7 @@ void TryElectAsMasterState(const char *networkId, bool isOnline);
 bool IsSupportMasterNodeElect(SoftBusVersion version);
 int32_t TryElectMasterNodeOnline(const LnnConnectionFsm *connFsm);
 int32_t TryElectMasterNodeOffline(const LnnConnectionFsm *connFsm);
-int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const ConnectionAddr *addr,
-    const char* pkgName, bool isNeedConnect, bool needReportFailure);
+int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara *para, bool needReportFailure);
 void SetBeginJoinLnnTime(LnnConnectionFsm *connFsm);
 LnnConnectionFsm *FindConnectionFsmByConnFsmId(uint16_t connFsmId);
 void TryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm);

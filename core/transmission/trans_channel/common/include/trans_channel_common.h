@@ -33,7 +33,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
-    TransInfo *transInfo, LaneConnInfo *connInfo);
+    TransInfo *transInfo, const LaneConnInfo *connInfo);
 
 int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo);
 
