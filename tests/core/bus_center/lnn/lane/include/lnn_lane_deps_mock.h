@@ -103,6 +103,7 @@ public:
     virtual int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen) = 0;
     virtual void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle) = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -159,6 +160,7 @@ public:
     MOCK_METHOD5(LnnConvertDlId, int32_t (const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen));
     MOCK_METHOD3(AuthDeviceGetLatestIdByUuid, void (const char *uuid, AuthLinkType type, AuthHandle *authHandle));
+    MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *, int32_t *));
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
         int32_t localFeatureCap, int32_t remoteFeatureCap);
