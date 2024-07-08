@@ -100,6 +100,7 @@ public:
     virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
     virtual void LnnDumpLocalBasicInfo(void) = 0;
     virtual void LnnDumpOnlineDeviceInfo(void) = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -153,6 +154,7 @@ public:
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey key, uint32_t *info));
     MOCK_METHOD0(LnnDumpLocalBasicInfo, void (void));
     MOCK_METHOD0(LnnDumpOnlineDeviceInfo, void (void));
+    MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *, int32_t *));
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
         int32_t localFeatureCap, int32_t remoteFeatureCap);

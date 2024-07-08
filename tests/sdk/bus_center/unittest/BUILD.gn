@@ -63,6 +63,7 @@ if (dsoftbus_feature_lnn_heartbeat) {
   ]
   bus_center_sdk_test_inc += [
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",

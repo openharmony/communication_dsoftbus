@@ -364,7 +364,7 @@ static int32_t RleaseUdpResources(int32_t channelId)
     return ServerIpcReleaseResources(channelId);
 }
 
-static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason reason)
+static int32_t CloseUdpChannel(int32_t channelId, ShutdownReason reason)
 {
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -383,15 +383,27 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason 
     }
 
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "trans del udp channel failed. channelId=%{public}d", channelId);
+        TRANS_LOGW(TRANS_SDK, "trans del udp channel failed. channelId=%{public}d", channelId);
     }
 
-    if (isActive && (ClosePeerUdpChannel(channelId) != SOFTBUS_OK)) {
-        TRANS_LOGE(TRANS_SDK, "trans close peer udp channel failed. channelId=%{public}d", channelId);
-    }
-
-    if (!isActive && (RleaseUdpResources(channelId) != SOFTBUS_OK)) {
-        TRANS_LOGW(TRANS_SDK, "trans release udp resources failed. channelId=%{public}d", channelId);
+    switch (reason) {
+        case SHUTDOWN_REASON_PEER:
+            break;
+        case SHUTDOWN_REASON_SEND_FILE_ERR:
+        case SHUTDOWN_REASON_RECV_FILE_ERR:
+            if (RleaseUdpResources(channelId) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_SDK, "trans release udp resources failed. channelId=%{public}d", channelId);
+            }
+            break;
+        case SHUTDOWN_REASON_LOCAL:
+            if (ClosePeerUdpChannel(channelId) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_SDK, "trans close peer udp channel failed. channelId=%{public}d", channelId);
+            }
+            break;
+        default:
+            TRANS_LOGW(TRANS_SDK, "there's no reson to match. channelId=%{public}d, reason=%{public}d",
+                channelId, (int32_t)reason);
+            break;
     }
 
     int32_t ret = TransDeleteBusinnessChannel(&channel);
@@ -400,15 +412,17 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason 
         return ret;
     }
 
-    if (!isActive && (g_sessionCb != NULL) && (g_sessionCb->OnSessionClosed != NULL)) {
-        g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP, reason);
+    if (reason != SHUTDOWN_REASON_LOCAL) {
+        if (g_sessionCb != NULL && g_sessionCb->OnSessionClosed != NULL) {
+            g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP, reason);
+        }
     }
     return SOFTBUS_OK;
 }
 
 int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
 {
-    return CloseUdpChannel(channelId, false, reason);
+    return CloseUdpChannel(channelId, reason);
 }
 
 int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
@@ -427,7 +441,7 @@ int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tv
 
 int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason)
 {
-    int32_t ret = CloseUdpChannel(channelId, true, reason);
+    int32_t ret = CloseUdpChannel(channelId, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "close udp channel failed, ret=%{public}d", ret);
         return ret;
