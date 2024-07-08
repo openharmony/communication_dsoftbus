@@ -217,10 +217,7 @@ void SendElectMessageToAll(const char *skipNetworkId)
 int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure, bool isShort)
 {
     int32_t ret = SOFTBUS_OK;
-    if (para == NULL) {
-        LNN_LOGW(LNN_BUILDER, "addr is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGW(para != NULL, SOFTBUS_INVALID_PARAM, LNN_BUILDER, "para is NULL");
     DfxRecordLnnServerjoinStart(&para->addr, para->pkgName, needReportFailure);
     isShort = para->isNeedConnect ? false : true;
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&para->addr, isShort);
