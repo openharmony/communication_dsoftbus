@@ -340,7 +340,7 @@ void StopSocketListening(ListenerModule moduleId)
     }
 }
 
-static int32_t TransTcpCreateListener(ListenerModule module, int32_t fd, TriggerType trigger)
+static int32_t AuthTcpCreateListener(ListenerModule module, int32_t fd, TriggerType trigger)
 {
     if (!IsListenerNodeExist(module)) {
         SoftbusBaseListener listener = {
@@ -381,7 +381,7 @@ static int32_t SocketConnectInner(const char *localIp, const char *peerIp, int32
     }
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
-    if (TransTcpCreateListener(AUTH, fd, triggerMode) != SOFTBUS_OK) {
+    if (AuthTcpCreateListener(AUTH, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
