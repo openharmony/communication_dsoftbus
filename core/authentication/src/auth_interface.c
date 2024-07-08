@@ -704,9 +704,9 @@ bool IsAuthHasTrustedRelation(void)
 int32_t AuthInit(void)
 {
     AuthTransCallback callBack = {
-        .OnDataReceived = NotifyTransDataReceived,
-        .OnDisconnected = NotifyTransDisconnected,
-        .OnException = NotifyTransException,
+        .onDataReceived = NotifyTransDataReceived,
+        .onDisconnected = NotifyTransDisconnected,
+        .onException = NotifyTransException,
     };
     int32_t ret = AuthDeviceInit(&callBack);
     if (ret == SOFTBUS_ERR || ret == SOFTBUS_INVALID_PARAM) {
