@@ -352,6 +352,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_LANE_BUILD_LINK_FAIL)).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
     EXPECT_CALL(laneLinkMock, TransProxyPipelineGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
     std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
@@ -592,6 +593,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_006, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_BLE;
     uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
@@ -602,8 +604,9 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_006, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillOnce(Return(false)).WillOnce(Return(false))
         .WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -646,6 +649,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_007, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_BLE;
     uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
@@ -656,8 +660,9 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_007, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
@@ -699,6 +704,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_008, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_BLE;
     uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
@@ -709,8 +715,9 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_008, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
@@ -751,6 +758,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_009, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_BLE;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -762,6 +770,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_009, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
@@ -879,6 +889,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_002, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel(requestId, _, _, NotNull()))
         .WillRepeatedly(laneLinkMock.ActionOfChannelOpenFailed);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -939,6 +950,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_003, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel(requestId, _, _, NotNull()))
         .WillRepeatedly(laneLinkMock.ActionOfChannelOpened);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, TransProxyPipelineCloseChannelDelay).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
 
@@ -997,6 +1009,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_004, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel(requestId, _, _, NotNull()))
         .WillRepeatedly(laneLinkMock.ActionOfChannelOpenFailed);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -1035,6 +1048,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_005, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_BLE;
     uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
@@ -1045,8 +1059,9 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_005, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1088,6 +1103,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_BLE;
     uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
@@ -1098,8 +1114,9 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1142,6 +1159,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_BLE;
     uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
@@ -1152,8 +1170,9 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1161,6 +1180,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillOnce(linkMock.ActionOfConnOpenFailed)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
@@ -1394,8 +1414,166 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_004, TestSize.Level1)
     EXPECT_CALL(laneLinkMock, TransProxyPipelineGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(laneLinkMock, TransProxyPipelineOpenChannel).WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    ret = LnnConnectP2p(&request, laneReqId, &cb);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
+    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
+    LnnDestroyP2p();
+}
+
+/*
+* @tc.name: CheckHasBleConnection_001
+* @tc.desc: test CheckHasBleConnection: LnnGetLocalNumU32Info fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, CheckHasBleConnection_001, TestSize.Level1)
+{
+    LinkRequest request;
+    (void)memset_s(&request, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    EXPECT_EQ(EOK, ret);
+    request.linkType = LANE_HML;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
+
+    const LaneLinkCb cb = {
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
+    };
+
+    uint32_t laneReqId = 10;
+    int32_t value = 3;
+    uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t requestId = 1;
+
+    LaneDepsInterfaceMock linkMock;
+    LaneLinkDepsInterfaceMock laneLinkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
+    EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_OK));
+
+    ret = LnnConnectP2p(&request, laneReqId, &cb);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
+    LnnDestroyP2p();
+}
+
+/*
+* @tc.name: CheckHasBleConnection_002
+* @tc.desc: test CheckHasBleConnection: !(local & (1 << BIT_BLE))
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, CheckHasBleConnection_002, TestSize.Level1)
+{
+    LinkRequest request;
+    (void)memset_s(&request, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    EXPECT_EQ(EOK, ret);
+    request.linkType = LANE_HML;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
+
+    const LaneLinkCb cb = {
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
+    };
+
+    uint32_t laneReqId = 10;
+    int32_t value = 3;
+    uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_WIFI;
+    uint32_t requestId = 1;
+
+    LaneDepsInterfaceMock linkMock;
+    LaneLinkDepsInterfaceMock laneLinkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
+    EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_OK));
+
+    ret = LnnConnectP2p(&request, laneReqId, &cb);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
+    LnnDestroyP2p();
+}
+
+/*
+* @tc.name: CheckHasBleConnection_003
+* @tc.desc: test CheckHasBleConnection: select LANE_BLE_TRIGGER
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, CheckHasBleConnection_003, TestSize.Level1)
+{
+    LinkRequest request;
+    (void)memset_s(&request, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    EXPECT_EQ(EOK, ret);
+    request.linkType = LANE_HML;
+    request.pid = ASYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
+
+    const LaneLinkCb cb = {
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
+    };
+
+    uint32_t laneReqId = 10;
+    int32_t value = 3;
+    uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
+    uint32_t localBle = 1 << BIT_BLE;
+    uint32_t requestId = 1;
+
+    LaneDepsInterfaceMock linkMock;
+    LaneLinkDepsInterfaceMock laneLinkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(local), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(localBle), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
+    EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_OK));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
     std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay 500ms for looper completion.
@@ -1489,8 +1667,6 @@ HWTEST_F(LNNLaneLinkTest, GET_MAC_INFO_BY_LANE_ID_MOCK_TEST_002, TestSize.Level1
 {
     LaneDepsInterfaceMock laneMock;
     LaneLinkDepsInterfaceMock laneDepMock;
-    int32_t ret = InitLaneLink();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnMacInfo macInfo;
     LaneResource resource = {
         .laneId = USEABLE_LANE_ID,
@@ -1498,11 +1674,12 @@ HWTEST_F(LNNLaneLinkTest, GET_MAC_INFO_BY_LANE_ID_MOCK_TEST_002, TestSize.Level1
     };
     (void)strcpy_s(resource.link.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, USEABLE_IP);
     memset_s(&macInfo, sizeof(LnnMacInfo), 0, sizeof(LnnMacInfo));
+    EXPECT_CALL(laneDepMock, InitLaneLink).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillOnce(Return(NULL)).WillRepeatedly(Return(&manager));
     EXPECT_CALL(laneDepMock, FindLaneResourceByLaneId).WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(resource), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneDepMock, DelLaneResourceByLaneId).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = GetMacInfoByLaneId(USEABLE_LANE_ID, &macInfo);
+    int32_t ret = GetMacInfoByLaneId(USEABLE_LANE_ID, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
     ret = GetMacInfoByLaneId(USEABLE_LANE_ID, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);

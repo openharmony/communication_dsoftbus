@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,9 +87,11 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
 
 static int32_t StartVerifySession(SessionConn *conn)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
+    TRANS_LOGI(TRANS_CTRL, "verify enter. channelId=%{public}d, fd=%{public}d", conn->channelId, conn->appInfo.fd);
     if (SoftBusGenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Generate SessionKey failed");
+        TRANS_LOGE(TRANS_CTRL,
+            "Generate SessionKey failed channelId=%{public}d, fd=%{public}d",
+            conn->channelId, conn->appInfo.fd);
         return SOFTBUS_TRANS_TCP_GENERATE_SESSIONKEY_FAILED;
     }
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
@@ -97,7 +99,9 @@ static int32_t StartVerifySession(SessionConn *conn)
     uint32_t cipherFlag = FLAG_WIFI;
     bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.osType);
     if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer, isLegacyOs)) {
-        TRANS_LOGE(TRANS_CTRL, "get cipher flag failed");
+        TRANS_LOGE(TRANS_CTRL,
+            "get cipher flag failed channelId=%{public}d, fd=%{public}d",
+            conn->channelId, conn->appInfo.fd);
         return SOFTBUS_TRANS_GET_CIPHER_FAILED;
     }
     uint64_t seq = TransTdcGetNewSeqId();
@@ -106,7 +110,9 @@ static int32_t StartVerifySession(SessionConn *conn)
     }
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "Pack Request failed");
+        TRANS_LOGE(TRANS_CTRL,
+            "Pack Request failed channelId=%{public}d, fd=%{public}d",
+            conn->channelId, conn->appInfo.fd);
         return SOFTBUS_TRANS_PACK_REQUEST_FAILED;
     }
     TdcPacketHead packetHead = {
@@ -120,13 +126,14 @@ static int32_t StartVerifySession(SessionConn *conn)
         packetHead.flags |= FLAG_AUTH_META;
     }
     int32_t ret = TransTdcPostBytes(conn->channelId, &packetHead, bytes);
+    cJSON_free(bytes);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransTdc post bytes failed");
-        cJSON_free(bytes);
+        TRANS_LOGE(TRANS_CTRL,
+            "TransTdc post bytes failed channelId=%{public}d, fd=%{public}d, ret=%{public}d",
+            conn->channelId, conn->appInfo.fd, ret);
         return ret;
     }
-    cJSON_free(bytes);
-    TRANS_LOGI(TRANS_CTRL, "ok");
+    TRANS_LOGI(TRANS_CTRL, "verify ok. channelId=%{public}d, fd=%{public}d", conn->channelId, conn->appInfo.fd);
 
     return SOFTBUS_OK;
 }
@@ -187,7 +194,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         SoftBusFree(conn);
         return ret;
     }
-    ret = AddTrigger(conn->listenMod, fd, READ_TRIGGER);
+    ret = AddTrigger(module, fd, READ_TRIGGER);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add trigger failed, delete session conn.");
         TransDelSessionConnById(chanId);
@@ -281,10 +288,10 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
 static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
 {
     int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId, conn->authHandle.type);
-    TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%{public}d. ", ret);
     if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
         return SOFTBUS_OK;
     }
+    TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data Failed, ret=%{public}d.", ret);
     TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
     return ret;
 }

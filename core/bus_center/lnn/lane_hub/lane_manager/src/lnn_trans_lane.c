@@ -325,6 +325,8 @@ static TransReqInfo *CreateRequestNode(uint32_t laneReqId, const TransOption *op
     newNode->isWithQos = false;
     newNode->isCanceled = false;
     newNode->isNotified = false;
+    newNode->notifyFree = false;
+    newNode->hasNotifiedFree = false;
     newNode->laneReqId = laneReqId;
     ListInit(&newNode->node);
     return newNode;
@@ -371,6 +373,8 @@ static TransReqInfo *CreateReqNodeWithQos(uint32_t laneReqId, const LaneAllocInf
     newNode->isWithQos = true;
     newNode->isCanceled = false;
     newNode->isNotified = false;
+    newNode->notifyFree = false;
+    newNode->hasNotifiedFree = false;
     ListInit(&newNode->node);
     return newNode;
 }
@@ -459,15 +463,11 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
         return SOFTBUS_MALLOC_ERR;
     }
     recommendLinkList->linkTypeNum = 0;
-    if (SelectExpectLaneByParameter(recommendLinkList) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "SelectExpectLaneByParameter succ, laneReqId=%{public}u", laneReqId);
-    } else {
-        int32_t ret = SelectExpectLanesByQos((const char *)allocInfo->networkId, &selectParam, recommendLinkList);
-        if (ret != SOFTBUS_OK) {
-            SoftBusFree(recommendLinkList);
-            LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneReqId=%{public}u", laneReqId);
-            return ret;
-        }
+    int32_t ret = SelectExpectLanesByQos((const char *)allocInfo->networkId, &selectParam, recommendLinkList);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(recommendLinkList);
+        LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneReqId=%{public}u", laneReqId);
+        return ret;
     }
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
@@ -478,7 +478,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
         LNN_LOGI(LNN_LANE, "expect linklist nums=%{public}u, priority=%{public}u, link=%{public}u",
             recommendLinkList->linkTypeNum, i, recommendLinkList->linkType[i]);
     }
-    int32_t ret = StartTriggerLink(laneReqId, allocInfo, listener, recommendLinkList);
+    ret = StartTriggerLink(laneReqId, allocInfo, listener, recommendLinkList);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "trigger link fail, laneReqId=%{public}u", laneReqId);
@@ -710,6 +710,33 @@ static int32_t ParseLaneTypeByLaneReqId(uint32_t laneReqId, LaneType *laneType)
     return SOFTBUS_OK;
 }
 
+void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
+{
+    TransReqInfo reqInfo;
+    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "get trans req info fail, laneReqId=%{public}d", laneReqId);
+        return;
+    }
+    if (!reqInfo.notifyFree) {
+        LNN_LOGI(LNN_LANE, "free unused link no notify, laneReqId=%{public}u, errCode=%{public}d",
+            laneReqId, errCode);
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "notify free lane result, laneReqId=%{public}d, errCode=%{public}d",
+        laneReqId, errCode);
+    DelLaneResourceByLaneId(reqInfo.laneId, false);
+    if (reqInfo.isWithQos &&  !reqInfo.hasNotifiedFree && reqInfo.listener.onLaneFreeSuccess != NULL) {
+        if (errCode == SOFTBUS_OK) {
+            reqInfo.listener.onLaneFreeSuccess(laneReqId);
+        } else {
+            reqInfo.listener.onLaneFreeFail(laneReqId, errCode);
+        }
+    }
+    DeleteRequestNode(laneReqId);
+    FreeLaneReqId(laneReqId);
+}
+
 static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
 {
     LaneResource resourceItem;
@@ -719,11 +746,9 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
     }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(resourceItem.link.peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        LNN_LOGE(LNN_LANE, "get networkId fail");
     }
-    DestroyLink(networkId, laneReqId, resourceItem.link.type);
-    DelLaneResourceByLaneId(laneId, false);
-    return SOFTBUS_OK;
+    return DestroyLink(networkId, laneReqId, resourceItem.link.type);
 }
 
 static int32_t CancelLane(uint32_t laneReqId)
@@ -753,6 +778,29 @@ static int32_t CancelLane(uint32_t laneReqId)
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
+static int32_t CheckLinkConflict(const char* peerUdid, LaneLinkType linkType)
+{
+    if (linkType != LANE_HML) {
+        return SOFTBUS_OK;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get networkId by uuid fail");
+        return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
+    }
+    int32_t conflictErr = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_HML);
+    if (conflictErr != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "link=%{public}d conflict=%{public}d, cancel delay free lane", LANE_HML, conflictErr);
+        return conflictErr;
+    }
+    conflictErr = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_P2P);
+    if (conflictErr != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "link=%{public}d conflict=%{public}d, cancel delay free lane", LANE_P2P, conflictErr);
+        return conflictErr;
+    }
+    return SOFTBUS_OK;
+}
+
 static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDelayFree)
 {
     LaneResource resourceItem;
@@ -761,7 +809,8 @@ static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDel
         *isDelayFree = false;
         return;
     }
-    if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1) {
+    if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1 &&
+            CheckLinkConflict(resourceItem.link.peerUdid, resourceItem.link.type) == SOFTBUS_OK) {
         if (PostDelayDestroyMessage(laneReqId, laneId, DELAY_DESTROY_LANE_TIME) == SOFTBUS_OK) {
             *isDelayFree = true;
             return;
@@ -779,6 +828,7 @@ static int32_t FreeLink(uint32_t laneReqId, uint64_t laneId, LaneType type)
     LNN_LOGI(LNN_LANE, "free lane, laneReqId=%{public}u, laneId=%{public}" PRIu64 ", delayDestroy=%{public}s",
         laneReqId, laneId, isDelayDestroy ? "true" : "false");
     if (isDelayDestroy) {
+        PostDelayDestroyMessage(laneReqId, INVALID_LANE_ID, 0);
         return SOFTBUS_OK;
     }
     return FreeLaneLink(laneReqId, laneId);
@@ -795,12 +845,9 @@ static int32_t Free(uint32_t laneReqId)
     TransReqInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
         if (item->laneReqId == laneReqId) {
-            ListDelete(&item->node);
-            g_requestList->cnt--;
+            item->notifyFree = true;
             Unlock();
             FreeLink(laneReqId, item->laneId, type);
-            SoftBusFree(item);
-            FreeLaneReqId(laneReqId);
             return SOFTBUS_OK;
         }
     }
@@ -808,6 +855,24 @@ static int32_t Free(uint32_t laneReqId)
     LNN_LOGI(LNN_LANE, "no find lane need free, laneReqId=%{public}u", laneReqId);
     FreeLaneReqId(laneReqId);
     return SOFTBUS_LANE_NOT_FOUND;
+}
+
+static int32_t QosLimit(uint32_t laneReqId, uint32_t expectBw, uint32_t *actualBw)
+{
+    if (laneReqId == INVALID_LANE_REQ_ID || actualBw == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    TransReqInfo reqInfo;
+    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    int32_t ret = GetTransReqInfoByLaneReqId(laneReqId, &reqInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lane reqInfo fail");
+        return ret;
+    }
+    *actualBw = expectBw;
+    LNN_LOGI(LNN_LANE, "qos limit lane succ, laneReqId=%{public}u, minBW=%{public}u, actualBw=%{public}u",
+        laneReqId, reqInfo.allocInfo.qosRequire.minBW, *actualBw);
+    return SOFTBUS_OK;
 }
 
 static void UpdateReqInfoWithLaneReqId(uint32_t laneReqId, uint64_t laneId)
@@ -1342,12 +1407,64 @@ static void LaneStateChange(SoftBusMessage *msg)
     SoftBusFree(info);
 }
 
+static void UpdateFreeLaneStatus(uint32_t laneReqId)
+{
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return ;
+    }
+    TransReqInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneReqId == laneReqId) {
+            item->hasNotifiedFree = true;
+            Unlock();
+            return;
+        }
+    }
+    Unlock();
+    LNN_LOGE(LNN_LANE, "Update free lane status fail, laneReqId=%{public}d", laneReqId);
+    return;
+}
+
+static void handleAsyncNotifySucc(uint32_t laneReqId)
+{
+    LNN_LOGI(LNN_LANE, "handle notify free lane succ, laneReqId=%{public}u", laneReqId);
+    TransReqInfo reqInfo;
+    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get trans req info fail, laneReqId=%{public}d", laneReqId);
+        return;
+    }
+    LaneResource resourceItem;
+    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    if (FindLaneResourceByLaneId(reqInfo.laneId, &resourceItem) != SOFTBUS_OK) {
+        return;
+    }
+    if (resourceItem.link.type == LANE_HML) {
+        if (reqInfo.isWithQos && reqInfo.listener.onLaneFreeSuccess != NULL) {
+            reqInfo.listener.onLaneFreeSuccess(laneReqId);
+            UpdateFreeLaneStatus(laneReqId);
+        }
+    } else {
+        DelLaneResourceByLaneId(reqInfo.laneId, false);
+        if (reqInfo.isWithQos && reqInfo.listener.onLaneFreeSuccess != NULL) {
+            reqInfo.listener.onLaneFreeSuccess(laneReqId);
+        }
+        DeleteRequestNode(laneReqId);
+        FreeLaneReqId(laneReqId);
+    }
+}
+
 static void HandleDelayDestroyLink(SoftBusMessage *msg)
 {
     uint32_t laneReqId = (uint32_t)msg->arg1;
     uint64_t laneId = (uint64_t)msg->arg2;
     LNN_LOGI(LNN_LANE, "handle delay destroy message, laneReqId=%{public}u, laneId=%{public}" PRIu64 "",
         laneReqId, laneId);
+    if (laneId == INVALID_LANE_ID) {
+        handleAsyncNotifySucc(laneReqId);
+        return;
+    }
     FreeLaneLink(laneReqId, laneId);
 }
 
@@ -1510,6 +1627,7 @@ static LaneInterface g_transLaneObject = {
     .allocTargetLane = AllocTargetLane,
     .cancelLane = CancelLane,
     .freeLane = Free,
+    .qosLimit = QosLimit,
 };
 
 LaneInterface *TransLaneGetInstance(void)
@@ -1570,7 +1688,7 @@ void RemoveDetectTimeoutMessage(uint32_t detectId)
 
 int32_t PostDelayDestroyMessage(uint32_t laneReqId, uint64_t laneId, uint64_t delayMillis)
 {
-    LNN_LOGI(LNN_LANE, "post dely destroy message. laneReqId=%{public}u, laneId=%{public}" PRIu64 "",
+    LNN_LOGI(LNN_LANE, "post delay destroy message. laneReqId=%{public}u, laneId=%{public}" PRIu64 "",
         laneReqId, laneId);
     return LnnLanePostMsgToHandler(MSG_TYPE_DELAY_DESTROY_LINK, laneReqId, laneId, NULL, delayMillis);
 }

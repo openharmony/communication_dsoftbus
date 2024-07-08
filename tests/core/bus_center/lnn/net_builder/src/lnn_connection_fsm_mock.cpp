@@ -120,5 +120,10 @@ void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType a
 {
     return GetLnnConnInterface()->LnnStopOfflineTimingByHeartbeat(networkId, addrType);
 }
+
+void SetLpKeepAliveState(void *para)
+{
+    return GetLnnConnInterface()->SetLpKeepAliveState(para);
+}
 }
 } // namespace OHOS

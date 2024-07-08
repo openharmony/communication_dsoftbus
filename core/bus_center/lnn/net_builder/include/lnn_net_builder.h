@@ -197,12 +197,12 @@ void LnnDeleteLinkFinderInfo(const char *peerUdid);
 void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *networkId,
     const uint8_t *msg, uint32_t len);
 void OnLnnProcessNotTrustedMsgDelay(void *para);
-void LnnBleWinPcRestrictMapInit(void);
-void AddNodeToWinPcRestrictMap(const char *udidHash);
-void ClearWinPcRestrictMap(void);
-void DeleteNodeFromWinPcRestrictMap(const char *udidHash);
-int32_t GetNodeFromWinPcRestrictMap(const char *udidHash, uint32_t *count);
-int32_t UpdateNodeFromWinPcRestrictMap(const char *udidHash);
+void LnnBlePcRestrictMapInit(void);
+void AddNodeToPcRestrictMap(const char *udidHash);
+void ClearPcRestrictMap(void);
+void DeleteNodeFromPcRestrictMap(const char *udidHash);
+int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count);
+int32_t UpdateNodeFromPcRestrictMap(const char *udidHash);
 #ifdef __cplusplus
 }
 #endif

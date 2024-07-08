@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -330,11 +330,10 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenNewConnChannel001, TestSize.
 {
     int32_t channelId = -1;
     ConnectOption connInfo;
-    ProxyChannelInfo chan;
     ListenerModule moduleId = PROXY;
     int32_t ret = SOFTBUS_ERR;
     connInfo.type = CONNECT_TCP;
-    ret = TransProxyOpenNewConnChannel(moduleId, &chan, &connInfo, channelId);
+    ret = TransProxyOpenNewConnChannel(moduleId, &connInfo, channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -348,11 +347,10 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessagel001, TestSize.
 {
     int32_t channelId = -1;
     ConnectOption connInfo;
-    ProxyChannelInfo chan;
     ListenerModule moduleId = PROXY;
     int32_t ret = SOFTBUS_ERR;
     connInfo.type = CONNECT_TCP;
-    ret = TransProxyOpenNewConnChannel(moduleId, &chan, &connInfo, channelId);
+    ret = TransProxyOpenNewConnChannel(moduleId, &connInfo, channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

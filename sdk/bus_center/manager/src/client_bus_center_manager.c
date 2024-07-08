@@ -36,6 +36,7 @@ static SoftBusList *g_publishMsgList = NULL;
 static SoftBusList *g_discoveryMsgList = NULL;
 static bool g_isInited = false;
 static SoftBusMutex g_isInitedLock;
+static char g_regDataLevelChangePkgName[PKG_NAME_SIZE_MAX] = {0};
 
 typedef struct {
     ListNode node;
@@ -668,11 +669,30 @@ int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback)
 {
     LNN_LOGI(LNN_STATE, "RegDataLevelChangeCbInner enter");
     g_busCenterClient.dataLevelCb = *callback;
+    if (strcpy_s(g_regDataLevelChangePkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        LNN_LOGE(LNN_STATE, "copy pkgName fail");
+        return SOFTBUS_MEM_ERR;
+    }
     int32_t ret = ServerIpcRegDataLevelChangeCb(pkgName);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server RegDataLevelChangeCb failed, ret=%{public}d", ret);
     }
     return ret;
+}
+
+void RestartRegDataLevelChange(void)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    if (g_regDataLevelChangePkgName[0] == '\0') {
+        LNN_LOGI(LNN_STATE, "restart regDataLevelChange is not used");
+        return;
+    }
+    int32_t ret = ServerIpcRegDataLevelChangeCb(g_regDataLevelChangePkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server RegDataLevelChangeCb failed, ret=%{public}d", ret);
+        return;
+    }
+    LNN_LOGI(LNN_STATE, "Server RegDataLevelChangeCb succeed");
 }
 
 int32_t UnregDataLevelChangeCbInner(const char *pkgName)
@@ -1153,6 +1173,39 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
         if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
             (item->cb.events & EVENT_NODE_STATE_INFO_CHANGED) != 0) {
             item->cb.onNodeBasicInfoChanged((NodeBasicInfoType)type, basicInfo);
+        }
+    }
+    ClearNodeStateCbList(&dupList);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnOnLocalNetworkIdChanged(const char *pkgName)
+{
+    NodeStateCallbackItem *item = NULL;
+    ListNode dupList;
+
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "info or pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock local networkId cb list in notify");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&dupList);
+    DuplicateNodeStateCbList(&dupList);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "unlock local networkId cb list in notify");
+    }
+    LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
+        if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+            (item->cb.onLocalNetworkIdChanged) != NULL) {
+            item->cb.onLocalNetworkIdChanged();
         }
     }
     ClearNodeStateCbList(&dupList);

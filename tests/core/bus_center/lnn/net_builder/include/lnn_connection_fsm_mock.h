@@ -56,6 +56,7 @@ public:
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo) = 0;
     virtual void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual void SetLpKeepAliveState(void *para) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -80,6 +81,7 @@ public:
     MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
     MOCK_METHOD2(LnnNotifySingleOffLineEvent, void (const ConnectionAddr *, NodeBasicInfo *));
     MOCK_METHOD2(LnnStopOfflineTimingByHeartbeat, void (const char *, ConnectionAddrType));
+    MOCK_METHOD1(SetLpKeepAliveState, void (void *));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H

@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <csignal>
-
 #include <gtest/gtest.h>
-
 #include "data/inner_link.h"
 
 using namespace testing::ext;
@@ -46,7 +45,7 @@ HWTEST_F(InnerLinkTest, SetAndGetEnum, TestSize.Level1)
     info.SetState(InnerLink::LinkState::CONNECTING);
     EXPECT_EQ(info.GetState(), InnerLink::LinkState::CONNECTING);
 
-    EXPECT_EQ(info.GetListenerModule(), ListenerModule::UNUSE_BUTT);
+    EXPECT_EQ(info.GetListenerModule(), static_cast<ListenerModule>(UNUSE_BUTT));
     info.SetListenerModule(ListenerModule::LISTENER_MODULE_DYNAMIC_START);
     EXPECT_EQ(info.GetListenerModule(), ListenerModule::LISTENER_MODULE_DYNAMIC_START);
 }
@@ -108,7 +107,7 @@ HWTEST_F(InnerLinkTest, SetAndGetBool, TestSize.Level1)
     InnerLink info("");
     EXPECT_EQ(info.IsBeingUsedByLocal(), false);
     WifiDirectLink link {};
-    info.GenerateLink(6, 8, link);
+    info.GenerateLink(6, 8, link, false);
     EXPECT_EQ(info.IsBeingUsedByLocal(), true);
 
     EXPECT_EQ(info.IsBeingUsedByRemote(), false);
@@ -135,7 +134,7 @@ HWTEST_F(InnerLinkTest, SetAndGetInt, TestSize.Level1)
 
     EXPECT_EQ(info.GetReference(), 0);
     WifiDirectLink link {};
-    info.GenerateLink(1, 2, link);
+    info.GenerateLink(1, 2, link, false);
     EXPECT_EQ(info.GetReference(), 1);
     info.RemoveId(link.linkId);
     EXPECT_EQ(info.GetReference(), 0);
@@ -152,7 +151,7 @@ HWTEST_F(InnerLinkTest, SetAndGetGrocery, TestSize.Level1)
     InnerLink info("");
 
     WifiDirectLink link {};
-    info.GenerateLink(888, 666, link);
+    info.GenerateLink(888, 666, link, false);
     EXPECT_EQ(info.IsContainId(link.linkId), true) << "IsContainId done";
     info.RemoveId(link.linkId);
     EXPECT_EQ(info.IsContainId(link.linkId), false) << "IsContainId done";

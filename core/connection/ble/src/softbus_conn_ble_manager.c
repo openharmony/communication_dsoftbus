@@ -261,6 +261,7 @@ static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestC
     device->state = BLE_DEVICE_STATE_INIT;
     device->protocol = ctx->protocol;
     device->psm = ctx->psm;
+    device->retryCount = 0;
     uint64_t feature = 0;
     if (LnnGetConnSubFeatureByUdidHashStr(ctx->udid, &feature) != SOFTBUS_OK) {
         CONN_LOGD(CONN_BLE, "get connSubFeature failed");
@@ -682,12 +683,36 @@ static void BleClientConnected(uint32_t connectionId)
     ConnRemoveMsgFromLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
     CONN_LOGI(
         CONN_BLE, "ble client connect success, clientId=%{public}d, addr=%{public}s", connectionId, anomizeAddress);
-
+    connection->underlayerFastConnectFailedScanFailure = false;
     BleNotifyDeviceConnectResult(connectingDevice, connection, 0, false);
     FreeDevice(connectingDevice);
     g_bleManager.connecting = NULL;
     TransitionToState(BLE_MGR_STATE_AVAILABLE);
     ConnBleReturnConnection(&connection);
+}
+
+static int32_t BleTryReuseServerOrRetryConnect(ConnBleConnection *connection, ConnBleDevice *connectingDevice,
+    const char *anomizeAddress)
+{
+    ConnBleConnection *serverConnection =
+        ConnBleGetConnectionByAddr(connection->addr, CONN_SIDE_SERVER, connectingDevice->protocol);
+    if (serverConnection != NULL && BleReuseConnection(connectingDevice, serverConnection)) {
+        CONN_LOGI(CONN_BLE, "ble client connect failed, but there is a server connection connected, reuse it, "
+                "connId=%{public}u, addr=%{public}s", serverConnection->connectionId, anomizeAddress);
+        ConnBleReturnConnection(&serverConnection);
+        FreeDevice(connectingDevice);
+        return SOFTBUS_OK;
+    }
+
+    connectingDevice->retryCount += 1;
+    if (!connection->underlayerFastConnectFailedScanFailure
+        || connectingDevice->retryCount >= BLE_GATT_CONNECT_MAX_RETRY_COUNT) {
+        return SOFTBUS_CONN_BLE_FAST_CONNECT_FAILED_NOT_RETRY;
+    }
+    connectingDevice->state = BLE_DEVICE_STATE_WAIT_SCHEDULE;
+    ListNodeInsert(&g_bleManager.waitings, &connectingDevice->node);
+    CONN_LOGI(CONN_BLE, "ble client try to connect once, connId=%{public}u", connection->connectionId);
+    return SOFTBUS_OK;
 }
 
 // clientConnectFailed
@@ -708,32 +733,18 @@ static void BleClientConnectFailed(uint32_t connectionId, int32_t error)
 
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
-        CONN_LOGE(CONN_BLE,
-            "there is no connecting device, is it connected after timeout? "
-            " connId=%{public}u, addr=%{public}s, err=%{public}d",
-            connectionId, anomizeAddress, error);
+        CONN_LOGE(CONN_BLE, "there is no connecting device, is it connected after timeout? "
+            " connId=%{public}u, addr=%{public}s, err=%{public}d", connectionId, anomizeAddress, error);
         ConnBleRemoveConnection(connection);
         ConnBleReturnConnection(&connection);
         return;
     }
     ConnRemoveMsgFromLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
 
-    ConnBleConnection *serverConnection =
-        ConnBleGetConnectionByAddr(connection->addr, CONN_SIDE_SERVER, connectingDevice->protocol);
-    if (serverConnection != NULL) {
-        if (BleReuseConnection(connectingDevice, serverConnection)) {
-            CONN_LOGI(CONN_BLE,
-                "ble client connect failed, but there is a server connection connected, reuse it, "
-                "connId=%{public}u, addr=%{public}s",
-                serverConnection->connectionId, anomizeAddress);
-        } else {
-            BleNotifyDeviceConnectResult(connectingDevice, NULL, error, false);
-        }
-        ConnBleReturnConnection(&serverConnection);
-    } else {
+    if (BleTryReuseServerOrRetryConnect(connection, connectingDevice, anomizeAddress) != SOFTBUS_OK) {
         BleNotifyDeviceConnectResult(connectingDevice, NULL, error, false);
+        FreeDevice(connectingDevice);
     }
-    FreeDevice(connectingDevice);
     g_bleManager.connecting = NULL;
     ConnBleRemoveConnection(connection);
     ConnBleReturnConnection(&connection);

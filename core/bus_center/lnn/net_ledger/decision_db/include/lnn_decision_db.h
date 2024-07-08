@@ -27,6 +27,7 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid);
 int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid);
 int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
 bool LnnIsPotentialHomeGroup(const char *udid);
+int32_t UpdateRecoveryDeviceInfoFromDb(void);
 
 int32_t LnnInitDecisionDbDelay(void);
 int32_t EncryptStorageData(uint8_t *data, uint32_t len);

@@ -532,14 +532,67 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
     }
 }
 
+static bool IsSupportWifiDirect(const char *networkId)
+{
+    uint64_t localFeature = 0;
+    uint64_t remoteFeature = 0;
+    bool isFound = GetFeatureCap(networkId, &localFeature, &remoteFeature);
+    if (!isFound) {
+        LNN_LOGE(LNN_LANE, "getFeature fail");
+        return false;
+    }
+    if (((localFeature & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) ||
+        ((remoteFeature & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
+        LNN_LOGE(LNN_LANE, "local=%{public}" PRIu64 ", remote=%{public}" PRIu64, localFeature, remoteFeature);
+        return false;
+    }
+    return true;
+}
+
+static void FilterWifiDirectLink(const char *peerNetWorkId, uint32_t bandWidth,
+    LaneLinkType *linkList, uint32_t *linksNum)
+{
+    if (GetBwType(bandWidth) != LOW_BAND_WIDTH) {
+        return;
+    }
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(peerNetWorkId, &osType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote osType fail");
+        return;
+    }
+    if (osType == OH_OS_TYPE || IsSupportWifiDirect(peerNetWorkId)) {
+        LNN_LOGI(LNN_LANE, "valid wifiDirect, no need filter link");
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "low bandWidth and not support wifiDirect, filter wifiDirect link");
+    LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
+    uint32_t num = 0;
+    for (uint32_t i = 0; i < *linksNum; i++) {
+        if (linkList[i] != LANE_HML) {
+            tmpList[num++] = linkList[i];
+        }
+    }
+    uint32_t size = sizeof(LaneLinkType) * LANE_LINK_TYPE_BUTT;
+    (void)memset_s(linkList, size, -1, size);
+    *linksNum = num;
+    for (uint32_t i = 0; i < *linksNum; i++) {
+        linkList[i] = tmpList[i];
+    }
+}
+
 static void UpdateHmlPriority(const char *peerNetWorkId, const LaneSelectParam *request,
     LaneLinkType *linkList, uint32_t *linksNum)
 {
+    if (*linksNum > LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "link num exceed lisk list");
+        return;
+    }
     char peerUdid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(peerNetWorkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get udid error");
         return;
     }
+    FilterWifiDirectLink(peerNetWorkId, request->qosRequire.minBW, linkList, linksNum);
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (FindLaneResourceByLinkType(peerUdid, LANE_HML, &resourceItem) != SOFTBUS_OK ||
@@ -549,10 +602,6 @@ static void UpdateHmlPriority(const char *peerNetWorkId, const LaneSelectParam *
     }
     LNN_LOGI(LNN_LANE, "hml exist reuse laneId=%{public}" PRIu64 ", update priority", resourceItem.laneId);
     LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
-    if (*linksNum > LANE_LINK_TYPE_BUTT) {
-        LNN_LOGE(LNN_LANE, "link num exceed lisk list");
-        return;
-    }
     uint32_t num = 0;
     tmpList[num++] = LANE_HML;
     for (uint32_t i = 0; i < *linksNum; i++) {
@@ -593,23 +642,6 @@ static void DelHasAllocedLink(uint64_t allocedLaneId, LaneLinkType *linkList, ui
     for (uint32_t i = 0; i < *linksNum; i++) {
         linkList[i] = tmpList[i];
     }
-}
-
-static bool IsSupportWifiDirect(const char *networkId)
-{
-    uint64_t localFeature = 0;
-    uint64_t remoteFeature = 0;
-    bool isFound = GetFeatureCap(networkId, &localFeature, &remoteFeature);
-    if (!isFound) {
-        LNN_LOGE(LNN_LANE, "getFeature fail");
-        return false;
-    }
-    if (((localFeature & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) ||
-        ((remoteFeature & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
-        LNN_LOGE(LNN_LANE, "local=%{public}" PRIu64 ", remote=%{public}" PRIu64, localFeature, remoteFeature);
-        return false;
-    }
-    return true;
 }
 
 int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
