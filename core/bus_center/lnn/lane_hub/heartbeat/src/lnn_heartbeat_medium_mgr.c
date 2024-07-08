@@ -647,7 +647,7 @@ static int32_t SoftBusNetNodeResult(
     info.type = device->devType;
     info.bleConnectReason = connectReason;
     bool IsRestrict = false;
-    if (HbAddAsyncProcessCallbackDelay(device, &IsRestrict) != SOFTBUS_OK) {    
+    if (HbAddAsyncProcessCallbackDelay(device, &IsRestrict) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HbAddAsyncProcessCallbackDelay fail");
     }
     if (IsRestrict) {
