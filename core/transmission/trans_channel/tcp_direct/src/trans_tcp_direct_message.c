@@ -1256,7 +1256,7 @@ static int32_t TransRecvTdcSocketData(int32_t channelId, char *buffer, int32_t b
     int32_t ret = TransTdcGetDataBufInfoByChannelId(channelId, &fd, &len);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL, "get info failed, ret=%{public}d", ret);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(len >= bufferSize, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL,
+    TRANS_CHECK_AND_RETURN_RET_LOGE(len >= (size_t)bufferSize, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL,
         "freeBufferLen=%{public}d less than bufferSize=%{public}d. channelId=%{public}d", len, bufferSize, channelId);
     int32_t recvLen = ConnRecvSocketData(fd, buffer, bufferSize, 0);
     if (recvLen < 0) {
@@ -1296,7 +1296,7 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t ty
         SoftBusFree(headBuf);
         return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED;
     }
-    int32_t dataSize = pktHead->dataLen;
+    int32_t dataSize = (int32_t)pktHead->dataLen;
     SoftBusFree(headBuf);
 
     char *dataBuffer = (char *)SoftBusCalloc(dataSize);
