@@ -19,11 +19,23 @@
 #undef protected
 #undef private
 
+#include <future>
+#include <memory>
+
+#include <securec.h>
+
 #include <gtest/gtest.h>
 
 #include "kits/c/wifi_device.h"
 
+#include "command/command_factory.h"
+#include "data/interface_manager.h"
+#include "wifi_direct_scheduler.h"
+#include "wifi_direct_scheduler_factory.h"
+
+#include "entity/p2p_entity.h"
 #include "wifi_direct_mock.h"
+#include "wifi_direct_test_context.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -35,9 +47,177 @@ class P2pV1ProcessorTest : public testing::Test {
 public:
     static void SetUpTestCase() { }
     static void TearDownTestCase() { }
-    void SetUp() override { }
-    void TearDown() override { }
+    void SetUp() override
+    {
+        PrepareContext();
+    }
+    void TearDown() override
+    {
+        context_.Reset();
+    }
+
+protected:
+    void PrepareContext();
+    void InjectData(WifiDirectInterfaceMock &mock);
+    void InjectCommonMock(WifiDirectInterfaceMock &mock);
+    void InjectEntityMock(P2pEntity &mock);
+    void PrepareConnectParameter(WifiDirectConnectInfo &info, WifiDirectConnectCallback &callback);
+    void InjectChannel(WifiDirectInterfaceMock &mock);
+
+    WifiDirectTestContext<TestContextKey> context_;
 };
+
+void P2pV1ProcessorTest::PrepareContext()
+{
+    context_.Set(TestContextKey::LOCAL_NETWORK_ID, std::string("local_network_id_0123456789ABCDEFGH"));
+    context_.Set(TestContextKey::LOCAL_UUID, std::string("local_uuid_0123456789ABCDEFGH"));
+
+    context_.Set(TestContextKey::REMOTE_NETWORK_ID, std::string("remote_network_id_0123456789ABCDEFGH"));
+    context_.Set(TestContextKey::REMOTE_UUID, std::string("remote_uuid_0123456789ABCDEFGH"));
+    context_.Set(TestContextKey::REMOTE_MAC, std::string("11:22:33:44:55"));
+
+    // request param
+    context_.Set(TestContextKey::CONNECT_REQUEST_ID, uint32_t(111));
+    context_.Set(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(333));
+    context_.Set(TestContextKey::CONNECT_REUSE_ONLY, false);
+    context_.Set(TestContextKey::CONNECT_EXPECT_API_ROLE, WifiDirectApiRole(WIFI_DIRECT_API_ROLE_NONE));
+
+    // device state
+    context_.Set(TestContextKey::WIFI_P2P_STATE, P2pState(P2P_STATE_STARTED));
+    context_.Set(TestContextKey::WIFI_5G_CHANNEL_LIST,
+        std::pair<WifiErrorCode, std::vector<int>>(WIFI_SUCCESS, std::vector<int> { 36, 48, 149 }));
+    context_.Set(TestContextKey::WIFI_GET_SELF_CONFIG, WifiErrorCode(WIFI_SUCCESS));
+    context_.Set(TestContextKey::WIFI_WIDE_BAND_WIDTH_SUPPORT, true);
+    context_.Set(TestContextKey::WIFI_STA_FREQUENCY, int(2417));
+
+    context_.Set(TestContextKey::CHANNEL_SEND_MESSAGE, int(SOFTBUS_OK));
+}
+
+void P2pV1ProcessorTest::InjectData(WifiDirectInterfaceMock &mock)
+{
+    EXPECT_CALL(mock, GetP2pEnableStatus(_)).WillRepeatedly([this](P2pState *state) {
+        auto value = context_.Get(TestContextKey::WIFI_P2P_STATE, P2pState(P2P_STATE_NONE));
+        *state = value;
+        return WIFI_SUCCESS;
+    });
+    EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillRepeatedly([this](int *chanList, int len) {
+        auto value = context_.Get(TestContextKey::WIFI_5G_CHANNEL_LIST, std::pair<WifiErrorCode, std::vector<int>>());
+        for (size_t i = 0; i < len && i < value.second.size(); i++) {
+            chanList[i] = value.second[i];
+        }
+        return value.first;
+    });
+    EXPECT_CALL(mock, Hid2dGetSelfWifiCfgInfo(TYPE_OF_GET_SELF_CONFIG, _, _))
+        .WillRepeatedly(Return(context_.Get(TestContextKey::WIFI_GET_SELF_CONFIG, WifiErrorCode(WIFI_SUCCESS))));
+
+    EXPECT_CALL(mock, Hid2dIsWideBandwidthSupported())
+        .WillRepeatedly(Return(context_.Get(TestContextKey::WIFI_WIDE_BAND_WIDTH_SUPPORT, true)));
+
+    EXPECT_CALL(mock, GetLinkedInfo(_)).WillRepeatedly([this](WifiLinkedInfo *result) {
+        result->frequency = context_.Get(TestContextKey::WIFI_STA_FREQUENCY, int(0));
+        return WIFI_SUCCESS;
+    });
+
+    InterfaceManager::GetInstance().InitInterface(InterfaceInfo::InterfaceType::P2P);
+}
+
+void P2pV1ProcessorTest::InjectEntityMock(P2pEntity &mock)
+{
+    EXPECT_CALL(mock, CreateGroup(_)).WillRepeatedly([](const P2pCreateGroupParam &param) {
+        P2pOperationResult result {};
+        result.errorCode_ = SOFTBUS_OK;
+        return result;
+    });
+    EXPECT_CALL(mock, Connect(_)).WillRepeatedly([](const P2pConnectParam &param) {
+        P2pOperationResult result {};
+        result.errorCode_ = SOFTBUS_OK;
+        return result;
+    });
+    EXPECT_CALL(mock, DestroyGroup(_)).WillRepeatedly([](const P2pDestroyGroupParam &param) {
+        P2pOperationResult result {};
+        result.errorCode_ = SOFTBUS_OK;
+        return result;
+    });
+    EXPECT_CALL(mock, ReuseLink()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, Disconnect(_)).WillRepeatedly([](const P2pDestroyGroupParam &param) {
+        P2pOperationResult result {};
+        result.errorCode_ = SOFTBUS_OK;
+        return result;
+    });
+}
+
+void P2pV1ProcessorTest::InjectCommonMock(WifiDirectInterfaceMock &mock)
+{
+    auto networkId = context_.Get(TestContextKey::REMOTE_NETWORK_ID, std::string(""));
+    auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, _, _))
+        .WillRepeatedly([this](const std::string &networkId, InfoKey key, char *info, uint32_t len) {
+            auto id = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+            (void)strcpy_s(info, len, id.c_str());
+            return SOFTBUS_OK;
+        });
+    EXPECT_CALL(mock, LnnGetNetworkIdByUuid(deviceId, _, _))
+        .WillRepeatedly([this](const std::string &uuid, char *buf, uint32_t len) {
+            auto id = context_.Get(TestContextKey::REMOTE_NETWORK_ID, std::string(""));
+            (void)strcpy_s(buf, len, id.c_str());
+            return SOFTBUS_OK;
+        });
+    EXPECT_CALL(mock, LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, _))
+        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
+            *info = false;
+            return SOFTBUS_OK;
+        });
+    // 0x177C2 from LNN_SUPPORT_FEATURE softbus_feature_config.c, which not support BIT_WIFI_DIRECT_TLV_NEGOTIATION
+    EXPECT_CALL(mock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(0x177C2));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo(STRING_KEY_UUID, _, _))
+        .WillRepeatedly([this](InfoKey key, char *info, uint32_t len) {
+            auto id = context_.Get(TestContextKey::LOCAL_UUID, std::string(""));
+            (void)strcpy_s(info, len, id.c_str());
+            return SOFTBUS_OK;
+        });
+    EXPECT_CALL(mock, LnnGetLocalStrInfo(STRING_KEY_NETWORKID, _, _))
+        .WillRepeatedly([this](InfoKey key, char *info, uint32_t len) {
+            auto id = context_.Get(TestContextKey::LOCAL_NETWORK_ID, std::string(""));
+            (void)strcpy_s(info, len, id.c_str());
+            return SOFTBUS_OK;
+        });
+    EXPECT_CALL(
+        mock, ProxyNegotiateChannelGetRemoteDeviceId(context_.Get(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(0))))
+        .WillRepeatedly(Return(context_.Get(TestContextKey::REMOTE_UUID, std::string(""))));
+}
+
+void P2pV1ProcessorTest::PrepareConnectParameter(WifiDirectConnectInfo &info, WifiDirectConnectCallback &callback)
+{
+    info.requestId = context_.Get(TestContextKey::CONNECT_REQUEST_ID, uint32_t(0));
+    info.pid = 222;
+    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
+    info.negoChannel.type = NEGO_CHANNEL_COC;
+    info.negoChannel.handle.channelId = context_.Get(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(0));
+
+    info.reuseOnly = false;
+    info.expectApiRole = WIFI_DIRECT_API_ROLE_NONE;
+    info.isStrict = false;
+    (void)strcpy_s(info.remoteNetworkId, sizeof(info.remoteNetworkId),
+        context_.Get(TestContextKey::REMOTE_NETWORK_ID, std::string("")).c_str());
+
+    (void)strcpy_s(
+        info.remoteMac, sizeof(info.remoteMac), context_.Get(TestContextKey::REMOTE_MAC, std::string("")).c_str());
+    info.isNetworkDelegate = false;
+    info.bandWidth = 0;
+    info.ipAddrType = IpAddrType::IPV4;
+
+    WifiDirectInterfaceMock::InjectWifiDirectConnectCallbackMock(callback);
+}
+
+void P2pV1ProcessorTest::InjectChannel(WifiDirectInterfaceMock &mock)
+{
+    auto channelId = context_.Get(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(0));
+    auto uuid = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    EXPECT_CALL(mock, ProxyNegotiateChannelGetRemoteDeviceId(channelId)).WillRepeatedly(Return(uuid));
+
+    auto ret = context_.Get(TestContextKey::CHANNEL_SEND_MESSAGE, int(0));
+    EXPECT_CALL(mock, ProxyNegotiateChannelSendMessage(channelId, _)).WillRepeatedly(Return(ret));
+}
 
 /*
  * @tc.name: GetStateName
@@ -138,4 +318,39 @@ HWTEST_F(P2pV1ProcessorTest, ChooseFrequency, TestSize.Level1)
     EXPECT_EQ(value, ToSoftBusErrorCode(ERROR_WIFI_IFACE_INVALID));
 }
 
+/*
+ * @tc.name: CreateAsTimeout
+ * @tc.desc: whole process test, wait response timeout
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, CreateAsTimeout, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    InjectCommonMock(mock);
+    InjectData(mock);
+    P2pEntity entityMock;
+    InjectEntityMock(entityMock);
+    InjectChannel(mock);
+
+    WifiDirectConnectInfo info = { 0 };
+    WifiDirectConnectCallback callback { 0 };
+    PrepareConnectParameter(info, callback);
+    std::promise<int> result;
+    EXPECT_CALL(mock, OnConnectFailure(context_.Get(TestContextKey::CONNECT_REQUEST_ID, uint32_t(0)), _))
+        .Times(1)
+        .WillOnce<>([&result](uint32_t requestId, int32_t reason) {
+            result.set_value(reason);
+        });
+
+    WifiDirectScheduler &scheduler = WifiDirectSchedulerFactory::GetInstance().GetScheduler();
+    auto ret = scheduler.ConnectDevice(info, callback);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    auto future = result.get_future();
+    auto status = future.wait_for(std::chrono::milliseconds(P2pV1Processor::P2P_V1_WAITING_RESPONSE_TIME_MS + 1000));
+    ASSERT_EQ(status, std::future_status::ready);
+    auto value = future.get();
+    ASSERT_EQ(value, SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT);
+}
 } // namespace OHOS::SoftBus
