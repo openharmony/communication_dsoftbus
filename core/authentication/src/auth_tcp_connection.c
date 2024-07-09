@@ -28,6 +28,7 @@
 #include "softbus_def.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "trans_lane_manager.h"
 
 #define MAGIC_NUMBER  0xBABEFACE
 #define AUTH_PKT_HEAD_LEN 24
@@ -278,7 +279,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
-    if (module != AUTH && module != AUTH_P2P && !IsEnhanceP2pModuleId(module)) {
+    if (module != AUTH && module != AUTH_P2P &&  module != AUTH_RAW_P2P_CLIENT &&!IsEnhanceP2pModuleId(module)) {
         AUTH_LOGI(AUTH_CONN, "newip auth process");
         if (RouteBuildServerAuthManager(cfd, clientAddr) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "build auth manager fail.");
@@ -331,12 +332,73 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
     return port;
 }
 
-void StopSocketListening(void)
+void StopSocketListening(ListenerModule moduleId)
 {
-    AUTH_LOGI(AUTH_CONN, "stop socket listening.");
-    if (StopBaseListener(AUTH) != SOFTBUS_OK) {
+    AUTH_LOGI(AUTH_CONN, "stop socket listening. moduleId=%{public}d", moduleId);
+    if (StopBaseListener(moduleId) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "StopBaseListener fail.");
     }
+}
+
+static int32_t AuthTcpCreateListener(ListenerModule module, int32_t fd, TriggerType trigger)
+{
+    if (!IsListenerNodeExist(module)) {
+        SoftbusBaseListener listener = {
+            .onConnectEvent = OnConnectEvent,
+            .onDataEvent = OnDataEvent,
+        };
+        if (StartBaseClient(module, &listener) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "StartBaseClient fail.");
+        }
+    }
+    return AddTrigger(module, fd, trigger);
+}
+
+static int32_t SocketConnectInner(const char *localIp, const char *peerIp, int32_t port, ListenerModule module,
+    bool isBlockMode)
+{
+    if (localIp == NULL || peerIp == NULL) {
+        AUTH_LOGE(AUTH_CONN, "ip is invalid param.");
+        return AUTH_INVALID_FD;
+    }
+    ConnectOption option = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = port,
+            .moduleId = module,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+    if (strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), peerIp) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy remote ip fail.");
+        return AUTH_INVALID_FD;
+    }
+    int32_t ret = ConnOpenClientSocket(&option, localIp, !isBlockMode);
+    if (ret < 0) {
+        AUTH_LOGE(AUTH_CONN, "ConnOpenClientSocket fail, error=%{public}d", ret);
+        return ret;
+    }
+    int32_t fd = ret;
+    TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
+    if (AuthTcpCreateListener(AUTH, fd, triggerMode) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
+        (void)DelTrigger(AUTH, fd, triggerMode);
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    return fd;
+}
+
+int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *peerIp, int32_t port, bool isBlockMode)
+{
+    return SocketConnectInner(localIp, peerIp, port, AUTH_RAW_P2P_CLIENT, isBlockMode);
 }
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
@@ -493,7 +555,6 @@ int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
     int32_t serverPort = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &serverPort) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local auth port fail.");
-        return SOFTBUS_ERR;
     }
     *isServer = (serverPort != localPort);
     return SOFTBUS_OK;
@@ -565,6 +626,21 @@ void UnregAuthChannelListener(int32_t module)
     }
 }
 
+int32_t AuthOpenChannelWithAllIp(const char *localIp, const char *remoteIp, int32_t port)
+{
+    if (localIp == NULL || remoteIp == NULL || port <= 0) {
+        AUTH_LOGE(AUTH_CONN, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t fd = SocketConnectDeviceWithAllIp(localIp, remoteIp, port, true);
+    if (fd < 0) {
+        AUTH_LOGE(AUTH_CONN, "connect fail.");
+        return INVALID_CHANNEL_ID;
+    }
+    AUTH_LOGI(AUTH_CONN, "open auth channel succ, channelId=%{public}d.", fd);
+    return fd;
+}
+
 int32_t AuthOpenChannel(const char *ip, int32_t port)
 {
     if (ip == NULL || port <= 0) {
@@ -580,10 +656,10 @@ int32_t AuthOpenChannel(const char *ip, int32_t port)
     return fd;
 }
 
-void AuthCloseChannel(int32_t channelId)
+void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
-    AUTH_LOGI(AUTH_CONN, "close auth channel, id=%{public}d.", channelId);
-    SocketDisconnectDevice(AUTH, channelId);
+    AUTH_LOGI(AUTH_CONN, "close auth channel, moduleId=%{public}d, id=%{public}d.", moduleId, channelId);
+    SocketDisconnectDevice((ListenerModule)moduleId, channelId);
 }
 
 int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
