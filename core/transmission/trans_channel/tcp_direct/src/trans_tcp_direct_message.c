@@ -1257,11 +1257,11 @@ static int32_t TransRecvTdcSocketData(int32_t channelId, char *buffer, int32_t b
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL, "get info failed, ret=%{public}d", ret);
     TRANS_CHECK_AND_RETURN_RET_LOGE(len >= (size_t)bufferSize, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, TRANS_CTRL,
-        "freeBufferLen=%{public}d less than bufferSize=%{public}d. channelId=%{public}d", len, bufferSize, channelId);
+        "freeBufferLen=%{public}zu less than bufferSize=%{public}d. channelId=%{public}d", len, bufferSize, channelId);
     int32_t recvLen = ConnRecvSocketData(fd, buffer, bufferSize, 0);
     if (recvLen < 0) {
         TRANS_LOGE(TRANS_CTRL, " recv tcp data fail, channelId=%{public}d, retLen=%{public}d.", channelId, recvLen);
-        return SOFTBUS_DATA_NOT_ENOUGH;
+        return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
     } else if (recvLen == 0) {
         TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, retLen=0, channelId=%{public}d", channelId);
         return SOFTBUS_DATA_NOT_ENOUGH;

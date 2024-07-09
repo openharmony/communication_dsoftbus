@@ -389,5 +389,10 @@ void LnnDumpOnlineDeviceInfo(void)
 {
     GetLaneDepsInterface()->LnnDumpOnlineDeviceInfo();
 }
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetLaneDepsInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
 }
 } // namespace OHOS

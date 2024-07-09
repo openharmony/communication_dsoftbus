@@ -298,6 +298,10 @@ static void HbDelaySetNormalScanParam(void *para)
 {
     (void)para;
 
+    if (g_hbConditionState.screenState == SOFTBUS_SCREEN_OFF) {
+        LNN_LOGD(LNN_HEART_BEAT, "screen off, no need handle");
+        return;
+    }
     LnnHeartbeatMediumParam param = {
         .type = HEARTBEAT_TYPE_BLE_V1,
         .info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10,
@@ -314,6 +318,10 @@ static void HbDelaySetHighScanParam(void *para)
 {
     (void)para;
 
+    if (g_hbConditionState.screenState == SOFTBUS_SCREEN_OFF) {
+        LNN_LOGD(LNN_HEART_BEAT, "screen off, no need handle");
+        return;
+    }
     LnnHeartbeatMediumParam param = {
         .type = HEARTBEAT_TYPE_BLE_V1,
         .info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P25,
