@@ -1426,7 +1426,7 @@ static void UpdateFreeLaneStatus(uint32_t laneReqId)
     return;
 }
 
-static void handleAsyncNotifySucc(uint32_t laneReqId)
+static void HandleAsyncNotifySucc(uint32_t laneReqId)
 {
     LNN_LOGI(LNN_LANE, "handle notify free lane succ, laneReqId=%{public}u", laneReqId);
     TransReqInfo reqInfo;
@@ -1462,7 +1462,7 @@ static void HandleDelayDestroyLink(SoftBusMessage *msg)
     LNN_LOGI(LNN_LANE, "handle delay destroy message, laneReqId=%{public}u, laneId=%{public}" PRIu64 "",
         laneReqId, laneId);
     if (laneId == INVALID_LANE_ID) {
-        handleAsyncNotifySucc(laneReqId);
+        HandleAsyncNotifySucc(laneReqId);
         return;
     }
     FreeLaneLink(laneReqId, laneId);

@@ -81,12 +81,12 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode)
     (void)transObj->freeLane(laneHandle);
 }
 
-static void onLaneFreeSuccess(uint32_t laneHandle)
+static void OnLaneFreeSuccess(uint32_t laneHandle)
 {
     GTEST_LOG_(INFO) << "free lane success, laneReqId=" << laneHandle;
 }
 
-static void onLaneFreeFail(uint32_t laneHandle, int32_t errCode)
+static void OnLaneFreeFail(uint32_t laneHandle, int32_t errCode)
 {
     GTEST_LOG_(INFO) << "free lane failed, laneReqId=" << laneHandle << ", errCode=" << errCode;
 }
@@ -161,8 +161,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
     LaneAllocListener listenerCb = {
         .onLaneAllocSuccess = OnLaneAllocSuccess,
         .onLaneAllocFail = OnLaneAllocFail,
-        .onLaneFreeSuccess = onLaneFreeSuccess,
-        .onLaneFreeFail = onLaneFreeFail,
+        .onLaneFreeSuccess = OnLaneFreeSuccess,
+        .onLaneFreeFail = OnLaneFreeFail,
     };
     int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &listenerCb);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -192,8 +192,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_004, TestSize.Level1)
     LaneAllocListener listenerCb = {
         .onLaneAllocSuccess = OnLaneAllocSuccess,
         .onLaneAllocFail = OnLaneAllocFail,
-        .onLaneFreeSuccess = onLaneFreeSuccess,
-        .onLaneFreeFail = onLaneFreeFail,
+        .onLaneFreeSuccess = OnLaneFreeSuccess,
+        .onLaneFreeFail = OnLaneFreeFail,
     };
     LanePreferredLinkList recommendLinkList;
     (void)memset_s(&recommendLinkList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
@@ -230,8 +230,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_005, TestSize.Level1)
     LaneAllocListener listenerCb = {
         .onLaneAllocSuccess = OnLaneAllocSuccess,
         .onLaneAllocFail = OnLaneAllocFail,
-        .onLaneFreeSuccess = onLaneFreeSuccess,
-        .onLaneFreeFail = onLaneFreeFail,
+        .onLaneFreeSuccess = OnLaneFreeSuccess,
+        .onLaneFreeFail = OnLaneFreeFail,
     };
     LanePreferredLinkList recommendLinkList;
     (void)memset_s(&recommendLinkList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
@@ -268,8 +268,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_006, TestSize.Level1)
     LaneAllocListener listenerCb = {
         .onLaneAllocSuccess = OnLaneAllocSuccess,
         .onLaneAllocFail = OnLaneAllocFail,
-        .onLaneFreeSuccess = onLaneFreeSuccess,
-        .onLaneFreeFail = onLaneFreeFail,
+        .onLaneFreeSuccess = OnLaneFreeSuccess,
+        .onLaneFreeFail = OnLaneFreeFail,
     };
     LanePreferredLinkList recommendLinkList;
     (void)memset_s(&recommendLinkList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
