@@ -95,6 +95,7 @@ public:
     static void SerialFlowExit();
     static void ParallelFlowEnter();
     static void ParallelFlowExit();
+    static int32_t CalculateStringLength(char *str, int32_t size);
 
 private:
     static inline std::mutex serialParallelLock_;
