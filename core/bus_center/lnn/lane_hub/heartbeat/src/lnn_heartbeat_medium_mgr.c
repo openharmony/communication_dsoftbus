@@ -643,6 +643,8 @@ static int32_t SoftBusNetNodeResult(
     (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     if (hbResp != NULL) {
         info.osType = ((hbResp->capabiltiy & BLE_TRIGGER_HML) != 0) ? OH_OS_TYPE : HO_OS_TYPE;
+    } else {
+        info.osType = HO_OS_TYPE;
     }
     info.type = device->devType;
     info.bleConnectReason = connectReason;
