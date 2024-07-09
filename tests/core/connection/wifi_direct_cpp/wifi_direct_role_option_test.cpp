@@ -44,7 +44,7 @@ HWTEST_F(WifiDirectRoleOptionTest, TestWDConnectTypeNegoP2p, TestSize.Level1)
     bool isStrict = true;
 
     WifiDirectInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     WifiDirectRoleOption::GetInstance().GetExpectedRole(
         netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P, expectedRole, isStrict);
     EXPECT_EQ(isStrict, false);
@@ -53,7 +53,7 @@ HWTEST_F(WifiDirectRoleOptionTest, TestWDConnectTypeNegoP2p, TestSize.Level1)
     expectedRole = WIFI_DIRECT_API_ROLE_NONE;
     isStrict = true;
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     WifiDirectRoleOption::GetInstance().GetExpectedRole(
         netWorkId, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P, expectedRole, isStrict);
     EXPECT_EQ(isStrict, false);

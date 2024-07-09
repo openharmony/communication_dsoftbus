@@ -390,21 +390,21 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket001, TestSize.Level1)
     };
 
     int fd = tcp->OpenServerSocket(&info);
-    int ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    int ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int port = tcp->GetSockPort(fd);
     EXPECT_EQ(port, g_port);
     ConnCloseSocket(fd);
 
     fd = tcp->OpenServerSocket(nullptr);
-    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ConnCloseSocket(fd);
 
     info.socketOption.port = -1;
     fd = tcp->OpenServerSocket(&info);
-    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ConnCloseSocket(fd);
 };
 
@@ -430,18 +430,18 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket002, TestSize.Level1)
     };
 
     int fd = tcp->OpenClientSocket(nullptr, "127.0.0.1", false);
-    int ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int ret = (fd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ConnCloseSocket(fd);
     fd = tcp->OpenClientSocket(nullptr, nullptr, false);
-    ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = (fd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ConnCloseSocket(fd);
 
     option.socketOption.port = -1;
     fd = tcp->OpenClientSocket(&option, "127.0.0.1", false);
-    ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = (fd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ConnCloseSocket(fd);
 };
 
@@ -457,8 +457,8 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket003, TestSize.Level1)
     ASSERT_NE(tcp, nullptr);
     int invalidFd = 1;
     int port = tcp->GetSockPort(invalidFd);
-    int ret = (port <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 };
 
 /*
@@ -473,8 +473,8 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket004, TestSize.Level1)
     ASSERT_NE(tcp, nullptr);
 
     int clientFd = tcp->OpenClientSocket(nullptr, "127.5.0.1", false);
-    int ret = (clientFd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int ret = (clientFd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ssize_t bytes = ConnSendSocketData(clientFd, "Hello world", 11, 0);
     EXPECT_EQ(bytes, -1);
     ConnShutdownSocket(clientFd);
@@ -502,21 +502,21 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket006, TestSize.Level1)
     };
 
     int fd = tcp->OpenServerSocket(&info);
-    int ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    int ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int port = tcp->GetSockPort(fd);
     EXPECT_EQ(port, g_port);
     ConnCloseSocket(fd);
 
     fd = tcp->OpenServerSocket(nullptr);
-    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ConnCloseSocket(fd);
 
     info.socketOption.port = -1;
     fd = tcp->OpenServerSocket(&info);
-    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ConnCloseSocket(fd);
 };
 
