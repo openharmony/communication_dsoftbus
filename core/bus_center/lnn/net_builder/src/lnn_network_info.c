@@ -429,7 +429,7 @@ static bool IsSupportApCoexist(const char *coexistCap)
         bool p2pCap = false;
         for (int j = 0; j < cJSON_GetArraySize(subItems); j++) {
             cJSON *subItem = cJSON_GetArrayItem(subItems, j);
-            char interface[IF_NAME_LEN] = {0};
+            char interface[NET_IF_NAME_LEN] = {0};
             if (!GetJsonObjectStringItem(subItem, "IF", interface, sizeof(interface))) {
                 LNN_LOGE(LNN_BUILDER, "get interface failed");
                 continue;

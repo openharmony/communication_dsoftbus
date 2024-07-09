@@ -60,6 +60,7 @@ if (dsoftbus_feature_lnn_net) {
     auth_server_src += [
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_device_common_key.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_manager.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_ptk_proc.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_instance.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_key.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_manager.c",
@@ -79,6 +80,7 @@ if (dsoftbus_feature_lnn_net) {
       "$authentication_path/src/virtual/auth_device_common_key_virtual.c",
       "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
       "$authentication_path/src/virtual/customized_security_protocol_virtual.c",
+      "$authentication_path/src/virtual/auth_meta_ptk_proc_virtual.c",
     ]
   }
   if (dsoftbus_feature_ip_auth) {
@@ -92,6 +94,7 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/virtual/auth_interface_virtual.c",
     "$authentication_path/src/virtual/auth_tcp_connection_virtual.c",
     "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
+    "$authentication_path/src/virtual/auth_meta_ptk_proc_virtual.c",
   ]
 }
 auth_server_deps = [

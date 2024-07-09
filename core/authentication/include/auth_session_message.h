@@ -48,8 +48,8 @@ typedef struct {
 #define TIME "TIME"
 #define CODE_TCP_KEEPALIVE 3
 
-char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid,
-    const AuthSessionInfo *info);
+char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
+    const char *remoteUuid, const AuthSessionInfo *info);
 int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth,
     const AuthSessionInfo *info);
 
