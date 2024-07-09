@@ -557,6 +557,7 @@ static int32_t GetPeerUdidHash(NodeInfo *nodeInfo, char *peerUdidHash)
         LNN_LOGE(LNN_BUILDER, "convert bytes to string fail");
         return rc;
     }
+    return SOFTBUS_OK;
 }
 
 static int32_t GetDevTypeForDfx(char *localDeviceType, char *peerDeviceType, LnnConntionInfo *connInfo)
