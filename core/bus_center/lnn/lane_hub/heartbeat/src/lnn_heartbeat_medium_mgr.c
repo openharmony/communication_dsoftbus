@@ -53,6 +53,7 @@
 #define HB_RECV_INFO_SAVE_LEN (60 * 60 * HB_TIME_FACTOR)
 #define HB_REAUTH_TIME        (10 * HB_TIME_FACTOR)
 #define HB_DFX_DELAY_TIME     (7 * HB_TIME_FACTOR)
+#define PC_RESTRICT_TIME    3
 typedef struct {
     ListNode node;
     DeviceInfo *device;
@@ -576,7 +577,7 @@ static void HbProcessDfxMessage(void *para)
     SoftBusFree(para);
 }
 
-static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
+static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device, bool *IsRestrict)
 {
     if (device == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "invalid param");
@@ -597,6 +598,11 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
             LNN_LOGE(LNN_HEART_BEAT, "convert bytes to string fail");
             SoftBusFree(udidHash);
             return ret;
+        }
+        uint32_t count = 0;
+        if (GetNodeFromPcRestrictMap(udidHash, &count) == SOFTBUS_OK && count == PC_RESTRICT_TIME) {
+            LNN_LOGI(LNN_HEART_BEAT, "restrict pc");
+            *IsRestrict = true;
         }
         if (!IsExistLnnDfxNodeByUdidHash(udidHash, &bleExtra)) {
             ret = LnnAsyncCallbackDelayHelper(
@@ -640,8 +646,12 @@ static int32_t SoftBusNetNodeResult(
     }
     info.type = device->devType;
     info.bleConnectReason = connectReason;
-    if (HbAddAsyncProcessCallbackDelay(device) != SOFTBUS_OK) {
+    bool IsRestrict = false;
+    if (HbAddAsyncProcessCallbackDelay(device, &IsRestrict) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HbAddAsyncProcessCallbackDelay fail");
+    }
+    if (IsRestrict) {
+        return SOFTBUS_NETWORK_PC_RESTRICT;
     }
     if (LnnNotifyDiscoveryDevice(device->addr, &info, isConnect) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
