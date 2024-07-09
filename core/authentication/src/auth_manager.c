@@ -921,14 +921,10 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     AUTH_LOGE(AUTH_FSM, "SetAuthFailed: authSeq=%{public}" PRId64 ", requestId=%{public}u, reason=%{public}d", authSeq,
         info->requestId, reason);
     AuthManager *auth = NULL;
-    if (reason == SOFTBUS_AUTH_DEVICE_DISCONNECTED || reason == SOFTBUS_AUTH_TIMEOUT) {
-        if (info->isSavedSessionKey) {
-            int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
-            auth = GetAuthManagerByAuthId(authId);
-            AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
-        }
-    } else {
-        auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    if (info->isSavedSessionKey) {
+        int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
+        auth = GetAuthManagerByAuthId(authId);
+        AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
     }
     bool needDisconnect = true;
     if (auth != NULL && reason == SOFTBUS_AUTH_TIMEOUT && info->connInfo.type == AUTH_LINK_TYPE_WIFI
