@@ -52,20 +52,18 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/discovery",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/sdk/discovery/include",
-      "//commonlibrary/c_utils/base/include",
-      "//third_party/bounds_checking_function/include",
-      "unittest/common/",
       "$dsoftbus_root_path/sdk/discovery/manager/include",
       "$dsoftbus_root_path/tests/sdk/common/include",
+      "unittest/common/",
     ]
     deps = [
       "$dsoftbus_root_path/sdk:softbus_client",
       "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-      "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/googletest:gtest_main",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_static",
       "c_utils:utils",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -80,8 +78,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/discovery",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/sdk/discovery/include",
-      "//commonlibrary/c_utils/base/include",
-      "//third_party/bounds_checking_function/include",
       "unittest/common/",
       "$dsoftbus_root_path/sdk/discovery/manager/include",
       "$dsoftbus_root_path/tests/sdk/common/include",
@@ -89,11 +85,11 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/sdk:softbus_client",
       "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-      "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/googletest:gtest_main",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_static",
       "c_utils:utils",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
     if (support_bluetooth &&
@@ -122,11 +118,11 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/sdk:softbus_client",
       "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-      "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/googletest:gtest_main",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_static",
       "c_utils:utils",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
     if (support_bluetooth &&
