@@ -78,6 +78,16 @@ typedef enum {
     LNN_TYPE_OTHER_CONNECT_ONLINE = 301, // device online by other type connection
 } LnnType;
 
+typedef enum {
+    CONNECT_INITIAL_VALUE = 0,
+    BLE_FIRST_CONNECT = 1,
+    LOCAL_STATE_VERSION_CHANGED = 2,
+    PEER_STATE_VERSION_CHANGED = 4,
+    DEVICEKEY_NOT_EXISTED = 8,
+    UPDATE_REMOTE_DEVICE_INFO_FAILED = 16,
+    FIND_REMOTE_CIPHERKEY_FAILED = 32,
+} ConnectOnlineReason;
+
 typedef struct {
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
@@ -94,6 +104,7 @@ typedef struct {
     int32_t peerDeviceAbility;  // PEER_DEV_ABILITY
     int32_t onlineType;         // ONLINE_TYPE
     int32_t osType;             // OS_TYPE
+    uint32_t connOnlineReason;  // CONN_ONLINE_REASON
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC
@@ -102,6 +113,7 @@ typedef struct {
     const char *peerPort;       // PEER_PORT
     const char *peerUdid;       // PEER_UDID
     const char *peerNetworkId;  // PEER_NET_ID
+    const char *localDeviceType; // LOCAL_DEV_TYPE
     const char *peerDeviceType; // PEER_DEV_TYPE
     const char *localUdidHash;  // LOCAL_UDID_HASH
     const char *peerUdidHash;   // PEER_UDID_HASH
@@ -116,9 +128,11 @@ typedef struct {
     int32_t onlineNum;                                        // ONLINE_NUM
     int32_t onlineType;                                       // ONLINE_TYPE
     int32_t osType;                                           // OS_TYPE
+    uint32_t connOnlineReason;                                // CONN_ONLINE_REASON
     char peerBleMac[BT_MAC_LEN];                              // PEER_BLE_MAC
     char peerUdid[UDID_BUF_LEN];                              // PEER_UDID
     char peerNetworkId[NETWORK_ID_BUF_LEN];                   // PEER_NET_ID
+    char localDeviceType[DEVICE_TYPE_SIZE_LEN + 1];           // LOCAL_DEV_TYPE
     char peerDeviceType[DEVICE_TYPE_SIZE_LEN + 1];            // PEER_DEV_TYPE
     char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1];       // LOCAL_UDID_HASH
     char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1];        // PEER_UDID_HASH
@@ -127,6 +141,7 @@ typedef struct {
 typedef struct {
     DeviceType type;
     int32_t osType;
+    ConnectOnlineReason bleConnectReason;
 } LnnDfxDeviceInfoReport;
 
 typedef enum {
