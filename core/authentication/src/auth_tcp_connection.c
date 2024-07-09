@@ -33,6 +33,7 @@
 #define MAGIC_NUMBER  0xBABEFACE
 #define AUTH_PKT_HEAD_LEN 24
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
+#define TCP_KEEPALIVE_TOS_VAL 180
 
 typedef struct {
     int32_t keepaliveIdle;
@@ -274,6 +275,15 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
+    int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
+    if (module == AUTH) {
+        if (SoftBusSocketSetOpt(cfd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos)) !=
+            SOFTBUS_ADAPTER_OK) {
+            AUTH_LOGE(AUTH_CONN, "set option fail!");
+            ConnShutdownSocket(cfd);
+            return SOFTBUS_ERR;
+        }
+    }
     if (AddTrigger(module, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(cfd);
@@ -403,10 +413,7 @@ int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *peerIp, in
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
 {
-    if (ip == NULL) {
-        AUTH_LOGE(AUTH_CONN, "ip is invalid param.");
-        return AUTH_INVALID_FD;
-    }
+    CHECK_NULL_PTR_RETURN_VALUE(ip, AUTH_INVALID_FD);
     char localIp[MAX_ADDR_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local ip fail.");
@@ -440,6 +447,13 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
     if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
+        (void)DelTrigger(AUTH, fd, triggerMode);
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos)) != SOFTBUS_ADAPTER_OK) {
+        AUTH_LOGE(AUTH_CONN, "set option fail.");
         (void)DelTrigger(AUTH, fd, triggerMode);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
