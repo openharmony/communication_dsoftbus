@@ -95,6 +95,7 @@ typedef enum {
 
 typedef enum {
     SOFTBUS_SCREEN_LOCK,
+    SOFTBUS_USER_UNLOCK,
     SOFTBUS_SCREEN_UNLOCK,
     SOFTBUS_SCREEN_LOCK_UNKNOWN,
 } SoftBusScreenLockState;
