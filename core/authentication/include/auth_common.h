@@ -108,9 +108,9 @@ typedef struct {
 } SocketPktHead;
 
 typedef struct {
-    void (*OnDataReceived)(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len);
-    void (*OnDisconnected)(AuthHandle authHandle);
-    void (*OnException)(AuthHandle authHandle, int32_t error);
+    void (*onDataReceived)(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len);
+    void (*onDisconnected)(AuthHandle authHandle);
+    void (*onException)(AuthHandle authHandle, int32_t error);
 } AuthTransCallback;
 
 /* Auth handler */
@@ -122,7 +122,7 @@ typedef enum {
     EVENT_AUTH_META_TIMEOUT,
     EVENT_AUTH_DISCONNECT,
     EVENT_BLE_DISCONNECT_DELAY,
-    EVENT_RECV_AUTH_DATA,
+    EVENT_AUTH_META_SYNC_PTK_TIMEOUT,
 } EventType;
 typedef void(*EventHandler)(const void *obj);
 int32_t PostAuthEvent(EventType event, EventHandler handler,

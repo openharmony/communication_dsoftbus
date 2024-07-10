@@ -82,6 +82,8 @@ void TransLaneTest::SetUpTestCase(void)
     TransServerInit();
     int32_t ret = TransReqLanePendingInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransFreeLanePendingInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransSessionMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -93,6 +95,7 @@ void TransLaneTest::TearDownTestCase(void)
     BusCenterServerDeinit();
     TransServerDeinit();
     TransReqLanePendingDeinit();
+    TransFreeLanePendingDeinit();
 }
 
 SessionParam* GenerateCommParamTest()

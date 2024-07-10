@@ -26,6 +26,7 @@
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
+#include "auth_meta_manager.h"
 #include "auth_request.h"
 #include "auth_session_json.h"
 #include "bus_center_manager.h"
@@ -235,7 +236,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     DfxRecordLnnPostDeviceInfoStart(authSeq, info);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
-    char *msg = PackDeviceInfoMessage(info->connInfo.type, info->version, false, info->uuid, info);
+    char *msg = PackDeviceInfoMessage(&(info->connInfo), info->version, false, info->uuid, info);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack device info fail");
         return SOFTBUS_ERR;

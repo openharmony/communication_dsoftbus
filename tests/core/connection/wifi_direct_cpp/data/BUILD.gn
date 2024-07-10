@@ -288,6 +288,7 @@ ohos_unittest("InterfaceManagerTest") {
     "$wifi_direct_cpp_path/data/interface_manager.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",

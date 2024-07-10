@@ -40,6 +40,7 @@ public:
     virtual int32_t InitLaneLink(void) = 0;
     virtual int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide) = 0;
     virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
+    virtual void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -60,6 +61,7 @@ public:
     MOCK_METHOD0(InitLaneLink, int32_t (void));
     MOCK_METHOD3(AddLaneResourceToPool, int32_t (const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide));
     MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
+    MOCK_METHOD2(NotifyFreeLaneResult, void (uint32_t laneReqId, int32_t errCode));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);

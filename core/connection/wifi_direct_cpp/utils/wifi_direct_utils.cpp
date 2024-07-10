@@ -510,4 +510,14 @@ void WifiDirectUtils::ParallelFlowExit()
     CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
     serialParallelCv_.notify_all();
 }
+
+int32_t WifiDirectUtils::CalculateStringLength(char *str, int32_t size)
+{
+    for (auto i = size - 1; i >= 0; i--) {
+        if (str[i] != '\0') {
+            return i + 1;
+        }
+    }
+    return 0;
+}
 } // namespace OHOS::SoftBus
