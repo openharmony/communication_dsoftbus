@@ -15,6 +15,7 @@
 #include "softbus_adapter_ble_gatt_server.h"
 
 #include "securec.h"
+#include <stdatomic.h>
 
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gatt_server.h"
@@ -46,10 +47,10 @@ static void FindCallbackByMtuAndSetConnId(int32_t mtu, SoftBusGattsCallback *cal
 
 SoftBusGattsCallback *g_gattsCallback = NULL;
 static BtGattServerCallbacks g_bleGattsHalCallback = { 0 };
-static volatile int g_halServerId = -1;
-static volatile int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
+static _Atomic int g_halServerId = -1;
+static _Atomic int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 static SoftBusList *g_softBusGattsManager = NULL;
-bool g_isRegisterHalCallback = false;
+static _Atomic bool g_isRegisterHalCallback = false;
 
 static bool IsGattsManagerEmpty(void)
 {
@@ -74,7 +75,7 @@ int CheckGattsStatus(void)
             SoftBusSleepMs(WAIT_HAL_REG_TIME_MS);
             tryTimes--;
         } else {
-            g_halRegFlag = -1;
+            atomic_store_explicit(&g_halRegFlag, -1, memory_order_release);
             break;
         }
     }
@@ -294,9 +295,9 @@ static void BleRegisterServerCallback(int status, int serverId, BtUuid *appUuid)
 
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "BleRegisterServerCallback failed, status=%{public}d", status);
-        g_halRegFlag = -1;
+        atomic_store_explicit(&g_halRegFlag, -1, memory_order_release);
     } else {
-        g_halRegFlag = 1;
+        atomic_store_explicit(&g_halRegFlag, 1, memory_order_release);
         g_halServerId = serverId;
         CONN_LOGI(CONN_BLE, "g_halServerId:%{public}d)", g_halServerId);
     }
@@ -759,7 +760,7 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid 
     int32_t ret = CreateAndAddGattsManager(callback, serviceUuid, expectedMtu);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_BLE, "create and add gattsManager failed");
 
-    if (!g_isRegisterHalCallback) {
+    if (!atomic_load_explicit(&g_isRegisterHalCallback, memory_order_acquire)) {
         CONN_LOGE(CONN_BLE, "GattsRegisterHalCallback");
         ret = GattsRegisterHalCallback();
     }
@@ -768,16 +769,16 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid 
         CONN_LOGE(CONN_BLE, "GattsRegisterCallbacks failed:%{public}d", ret);
         return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
     }
-    g_isRegisterHalCallback = true;
+    atomic_store_explicit(&g_isRegisterHalCallback, true, memory_order_release);
     if (g_halRegFlag == -1) {
         BtUuid uuid;
         uuid.uuid = (char *)SOFTBUS_APP_UUID;
         uuid.uuidLen = sizeof(SOFTBUS_APP_UUID);
-        g_halRegFlag = 0;
+        atomic_store_explicit(&g_halRegFlag, 0, memory_order_release);
         CONN_LOGI(CONN_BLE, "BleGattsRegister");
         ret = BleGattsRegister(uuid);
         if (ret != SOFTBUS_OK) {
-            g_halRegFlag = -1;
+            atomic_store_explicit(&g_halRegFlag, -1, memory_order_release);
             RemoveGattsManager(serviceUuid);
             CONN_LOGE(CONN_BLE, "BleGattsRegister failed:%{public}d", ret);
             return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
@@ -798,8 +799,8 @@ void SoftBusUnRegisterGattsCallbacks(SoftBusBtUuid serviceUuid)
         CONN_LOGE(CONN_BLE, "BleGattsUnRegister error.");
         return;
     }
-    g_halServerId = -1;
-    g_halRegFlag = -1;
+    atomic_store_explicit(&g_halServerId, -1, memory_order_release);
+    atomic_store_explicit(&g_halRegFlag, -1, memory_order_release);
 }
 
 int InitSoftbusAdapterServer(void)
