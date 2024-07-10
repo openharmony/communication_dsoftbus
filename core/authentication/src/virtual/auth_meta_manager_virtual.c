@@ -171,3 +171,10 @@ void DelAuthMetaManagerByPid(const char *pkgName, int32_t pid)
     (void)pkgName;
     (void)pid;
 }
+
+int32_t AuthMetaGetConnIdByInfo(const AuthConnInfo *connInfo, uint32_t *connectionId)
+{
+    (void)connInfo;
+    (void)connectionId;
+    return SOFTBUS_OK;
+}

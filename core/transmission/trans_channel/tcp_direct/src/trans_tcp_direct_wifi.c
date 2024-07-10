@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,7 +162,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     if (fd < 0) {
         FreeFastTransData(&(newConn->appInfo));
         SoftBusFree(newConn);
-        TRANS_LOGE(TRANS_CTRL, "connect fail");
+        TRANS_LOGE(TRANS_CTRL, "connect failed. fd=%{public}d", fd);
         return fd;
     }
     newConn->appInfo.fd = fd;
@@ -172,6 +172,8 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return ret;
     }
     *channelId = newchannelId;
-    TRANS_LOGI(TRANS_CTRL, "ok: channelId=%{public}d", newchannelId);
+    TRANS_LOGI(TRANS_CTRL,
+        "ok: channelId=%{public}d, module=%{public}d, fd=%{public}d",
+        newchannelId, (int32_t)module, fd);
     return SOFTBUS_OK;
 }

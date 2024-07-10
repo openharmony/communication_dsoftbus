@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    void (*OnDeviceFound)(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport);
+    void (*onDeviceFound)(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport);
 } LnnDiscoveryImplCallback;
 
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);

@@ -32,29 +32,21 @@ ohos_unittest("DiscManagerTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/coap/interface",
-    "//commonlibrary/c_utils/base/include",
-    "unittest/common/",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
+    "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("DiscManagerMockTest") {
@@ -68,25 +60,27 @@ ohos_unittest("DiscManagerMockTest") {
   sources += test_utils_src
 
   include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$softbus_adapter_common/include",
     "$dsoftbus_core_path/common/include",
     "$dsoftbus_core_path/common/dfx/hisysevent_adapter/include",
     "$dsoftbus_core_path/common/dfx/hidumper_adapter/include",
-    "$softbus_adapter_common/include",
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/ipc/include",
     "$dsoftbus_core_path/discovery/manager/include",
     "$dsoftbus_core_path/discovery/ble/dispatcher/include",
     "$dsoftbus_core_path/discovery/coap/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
   include_dirs += test_utils_inc
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
+  ]
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest_main",
   ]
 }
 

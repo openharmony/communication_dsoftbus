@@ -82,7 +82,7 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 int32_t LnnUpdateNetworkId(const NodeInfo *newInfo);
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
 int32_t LnnAddMetaInfo(NodeInfo *info);
-int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type);
+int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type);
 int32_t UpdateGroupType(NodeInfo *info);
 int32_t LnnUpdateGroupType(const NodeInfo *info);
 int32_t LnnUpdateAccountInfo(const NodeInfo *info);
