@@ -120,8 +120,8 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
         LNN_LOGI(LNN_BUILDER, "restrict printer");
         return;
     }
-    if (g_callback.OnDeviceFound) {
-        g_callback.OnDeviceFound(&addr, &info);
+    if (g_callback.onDeviceFound) {
+        g_callback.onDeviceFound(&addr, &info);
     }
 }
 
@@ -177,6 +177,6 @@ int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)
         LNN_LOGE(LNN_BUILDER, "coap discovery callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    g_callback.OnDeviceFound = callback->OnDeviceFound;
+    g_callback.onDeviceFound = callback->onDeviceFound;
     return SOFTBUS_OK;
 }
