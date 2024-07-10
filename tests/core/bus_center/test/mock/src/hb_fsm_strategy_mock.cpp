@@ -175,7 +175,7 @@ bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
     return HeartBeatFSMStrategyInterfaceInstance()->IsFeatureSupport(feature, capaBit);
 }
 
-int32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
+uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->GenerateRandomNumForHb(randMin, randMax);
 }
