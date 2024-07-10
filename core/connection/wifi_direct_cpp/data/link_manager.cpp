@@ -204,10 +204,10 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
         auto it = links_.begin();
         while (it != links_.end()) {
             if (it->first.first == type) {
-                links.push_back(it->second);
-                it = links_.erase(it);
                 CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s",
                           WifiDirectAnonymizeDeviceId(it->second->GetRemoteDeviceId()).c_str());
+                links.push_back(it->second);
+                it = links_.erase(it);
             } else {
                 it++;
             }
