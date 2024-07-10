@@ -40,6 +40,8 @@ using namespace testing::ext;
 using namespace testing;
 using namespace std;
 
+#define BR_READ_FAILED (-1)
+#define BR_WRITE_FAILED (-2)
 namespace OHOS {
 extern "C" {
 void OnConnected(uint32_t connectionId, const ConnectionInfo *info)
@@ -84,7 +86,7 @@ int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t length)
     (void)clientFd;
     (void)buf;
     if (length <= 0) {
-        return SOFTBUS_ERR;
+        return BR_READ_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -94,7 +96,7 @@ int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t length)
     (void)clientFd;
     (void)buf;
     if (length <= 0) {
-        return SOFTBUS_ERR;
+        return BR_WRITE_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -204,7 +206,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest001, TestSize.Level1)
     NiceMock<ConnectionBrInterfaceMock>brMock;
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
-    EXPECT_CALL(brMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(brMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_NO_INIT));
     ConnectFuncInterface *ret = ConnInitBr(&callback);
     EXPECT_EQ(NULL, ret);
 
@@ -216,7 +218,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest001, TestSize.Level1)
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
     EXPECT_CALL(brMock, SoftbusGetConfig)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
-        .WillOnce(Return(SOFTBUS_ERR));
+        .WillOnce(Return(SOFTBUS_NO_INIT));
     ret = ConnInitBr(&callback);
     EXPECT_EQ(NULL, ret);
 }

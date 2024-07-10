@@ -90,7 +90,7 @@ extern "C" {
 int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
 {
     if (listener == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_transEventListener = *listener;
     return SOFTBUS_OK;
@@ -195,7 +195,7 @@ HWTEST_F(ConnectionBleManagerTest, TestTransListener001, TestSize.Level1)
     int32_t flag = 1;
     int32_t module = MODULE_CONNECTION;
     int64_t seq = 1000;
-    int32_t error = SOFTBUS_ERR;
+    int32_t error = SOFTBUS_INVALID_PARAM;
     g_transEventListener.onPostBytesFinished(connectionId, len, pid, flag, module, seq, error);
 
     const char *addr = "22:33:44:55:66:77";
@@ -242,7 +242,7 @@ HWTEST_F(ConnectionBleManagerTest, TestConflictGetConnection001, TestSize.Level1
     bool res = g_conflictListener.postBytes(underlayHandle, data, sizeof(uint8_t));
     EXPECT_EQ(true, res);
 
-    EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     res = g_conflictListener.postBytes(underlayHandle, data, sizeof(uint8_t));
     EXPECT_EQ(false, res);
 
@@ -288,9 +288,9 @@ HWTEST_F(ConnectionBleManagerTest, TestConflictDisconnect001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     EXPECT_CALL(bleMock, ConnBlePackCtlMessage).WillOnce(Return(10));
-    EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = g_conflictListener.reuseConnection(addr, udid, requestId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     EXPECT_CALL(bleMock, ConnGattClientDisconnect).WillRepeatedly(Return(SOFTBUS_OK));
     g_conflictListener.disconnect(1, true);
 
@@ -500,7 +500,8 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface004, TestSize.Level1)
     ret = g_bleInterface->StopLocalListening(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(bleMock, ConnGattServerStartService).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, ConnGattServerStartService)
+        .WillOnce(Return(SOFTBUS_CONN_BLE_UNDERLAY_SERVER_ADD_SERVICE_ERR));
     ret = g_bleInterface->StartLocalListening(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -699,7 +700,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnectDevice002, TestSize.Level1)
     };
     NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(bleMock, ConnGattClientConnect).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, ConnGattClientConnect).WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
     ret = g_bleInterface->ConnectDevice(&option, requestId, &result);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(bleMock, ConnGattClientConnect).WillRepeatedly(Return(SOFTBUS_OK));
@@ -874,9 +875,9 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest003, TestSize.Level1
     EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem)
         .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetdelta)
         .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc0);
-    EXPECT_CALL(bleMock, ConnBlePackCtlMessage).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, ConnBlePackCtlMessage).WillOnce(Return(SOFTBUS_CREATE_JSON_ERR));
     ret = ConnBleOnReferenceRequest(connection, &json);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
 
     EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem)
         .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetdelta)
