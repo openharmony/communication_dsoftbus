@@ -1115,7 +1115,6 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
     if (container->pkgName == NULL) {
         DISC_LOGE(DISC_CONTROL, "Container pkgName calloc failed");
         SoftBusFree(container);
-        container = NULL;
         return NULL;
     }
 
@@ -1124,7 +1123,6 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
         SoftBusFree(container->pkgName);
         container->pkgName = NULL;
         SoftBusFree(container);
-        container = NULL;
         return NULL;
     }
 
