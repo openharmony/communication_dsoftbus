@@ -2159,6 +2159,17 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
+static void GenerateStateVersion(void)
+{
+    uint8_t randNum = 0;
+    if (SoftBusGenerateRandomArray((unsigned char *)&randNum, sizeof(uint8_t)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate random num err.");
+    }
+    randNum = randNum % (MAX_STATE_VERSION + 1);
+    g_localNetLedger.localInfo.stateVersion = randNum;
+    LNN_LOGI(LNN_LEDGER, "init local stateVersion=%{public}d", g_localNetLedger.localInfo.stateVersion);
+}
+
 int32_t LnnInitLocalLedger(void)
 {
     NodeInfo *nodeInfo = NULL;
@@ -2200,6 +2211,7 @@ int32_t LnnInitLocalLedger(void)
     if (LnnGenBroadcastCipherInfo() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate cipher fail");
     }
+    GenerateStateVersion();
     g_localNetLedger.status = LL_INIT_SUCCESS;
     return SOFTBUS_OK;
 }
