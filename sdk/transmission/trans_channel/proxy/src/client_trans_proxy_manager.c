@@ -1003,7 +1003,10 @@ int32_t ClientTransProxyOnChannelBind(int32_t channelId, int32_t channelType)
         TRANS_LOGE(TRANS_SDK, "OnChannelBind is null, channelId=%{public}d.", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret = g_sessionCb.OnChannelBind(channelId, channelType);
+    int32_t ret = g_sessionCb.OnChannelBind(channelId, channelType);
+    if (ret == SOFTBUS_NOT_NEED_UPDATE) {
+        return SOFTBUS_OK;
+    }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "notify OnChannelBind openfail channelId=%{public}d.", channelId);
         return ret;

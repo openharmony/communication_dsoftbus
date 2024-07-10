@@ -38,7 +38,7 @@ int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode);
 int32_t ClientTransTdcOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type);
 int32_t ClientTransTdcOnChannelBind(int32_t channelId, int32_t channelType);
-
+int32_t ClientTransTdcIfChannelForSocket(const char *sessionName, bool *isSocket);
 #ifdef __cplusplus
 #if __cplusplus
 }
