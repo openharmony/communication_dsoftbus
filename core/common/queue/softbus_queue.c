@@ -111,7 +111,6 @@ LockFreeQueue* CreateQueue(uint32_t unitNum)
     if (ret != 0) {
         COMM_LOGE(COMM_UTILS, "QueueInit fail");
         SoftBusFree(queue);
-        queue = NULL;
         return NULL;
     }
     return queue;
