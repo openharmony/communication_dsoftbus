@@ -918,7 +918,7 @@ void UpdateLocalNetCapability(void)
     }
 
     bool isWifiActive = SoftBusIsWifiActive();
-    LNN_LOGI(LNN_INIT, "wifi state: %s", isWifiActive ? "true" : "false");
+    LNN_LOGI(LNN_INIT, "wifi state: %{public}s", isWifiActive ? "true" : "false");
     if (!isWifiActive) {
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
