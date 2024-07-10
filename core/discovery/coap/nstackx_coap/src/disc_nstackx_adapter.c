@@ -445,7 +445,7 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
 {
     DISC_CHECK_AND_RETURN_LOGE(status == LINK_STATUS_UP || status == LINK_STATUS_DOWN, DISC_COAP,
         "invlaid link status, status=%{public}d.", status);
-
+    
     if (status == LINK_STATUS_DOWN) {
         if (strcpy_s(g_localDeviceInfo->localIfInfo[0].networkIpAddr,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr), INVALID_IP_ADDR) != EOK) {
