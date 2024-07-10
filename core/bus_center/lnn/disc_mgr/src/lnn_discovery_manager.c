@@ -50,7 +50,7 @@ static DiscoveryImpl g_discoveryImpl[LNN_DISC_IMPL_TYPE_MAX] = {
 };
 
 static LnnDiscoveryImplCallback g_discoveryCallback = {
-    .OnDeviceFound = DeviceFound,
+    .onDeviceFound = DeviceFound,
 };
 
 static void ReportDeviceFoundResultEvt(void)

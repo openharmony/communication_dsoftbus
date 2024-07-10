@@ -47,11 +47,12 @@ OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
 OHOS::sptr<OHOS::IRemoteObject> g_oldServerProxy = nullptr;
 OHOS::sptr<OHOS::IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
 std::mutex g_mutex;
-uint32_t g_waitServerInterval = 2;
+constexpr uint32_t WAIT_SERVER_INTERVAL = 50;
 uint32_t g_getSystemAbilityId = 2;
 uint32_t g_printRequestFailedCount = 0;
 constexpr int32_t RANDOM_RANGE_MAX = 501; // range of random numbers is (0, 500ms)
 constexpr uint32_t PRINT_INTERVAL = 200;
+constexpr int32_t CYCLE_NUMBER_MAX = 100;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
@@ -197,11 +198,16 @@ void ClientDeathProcTask(void)
     ListInit(&sessionServerInfoList);
     ClientCleanAllSessionWhenServerDeath(&sessionServerInfoList);
 
-    while (true) {
+    int32_t cnt = 0;
+    for (cnt = 0; cnt < CYCLE_NUMBER_MAX; cnt++) {
         if (ServerProxyInit() == SOFTBUS_OK) {
             break;
         }
-        SoftBusSleepMs(g_waitServerInterval);
+        SoftBusSleepMs(WAIT_SERVER_INTERVAL);
+    }
+    if (cnt == CYCLE_NUMBER_MAX) {
+        COMM_LOGE(COMM_SDK, "server proxy init reached the maximum count=%{public}d", cnt);
+        return;
     }
     DiscServerProxyInit();
     TransServerProxyInit();

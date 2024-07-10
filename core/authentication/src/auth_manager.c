@@ -921,14 +921,10 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     AUTH_LOGE(AUTH_FSM, "SetAuthFailed: authSeq=%{public}" PRId64 ", requestId=%{public}u, reason=%{public}d", authSeq,
         info->requestId, reason);
     AuthManager *auth = NULL;
-    if (reason == SOFTBUS_AUTH_DEVICE_DISCONNECTED || reason == SOFTBUS_AUTH_TIMEOUT) {
-        if (info->isSavedSessionKey) {
-            int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
-            auth = GetAuthManagerByAuthId(authId);
-            AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
-        }
-    } else {
-        auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    if (info->isSavedSessionKey) {
+        int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
+        auth = GetAuthManagerByAuthId(authId);
+        AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
     }
     bool needDisconnect = true;
     if (auth != NULL && reason == SOFTBUS_AUTH_TIMEOUT && info->connInfo.type == AUTH_LINK_TYPE_WIFI
@@ -1319,8 +1315,8 @@ static void HandleConnectionData(
         AUTH_LOGE(AUTH_CONN, "device is offline, need wait");
         (void)SoftBusSleepMs(RECV_DATA_WAIT_TIME);
     }
-    if (g_transCallback.OnDataReceived != NULL) {
-        g_transCallback.OnDataReceived(authHandle, head, decData, decDataLen);
+    if (g_transCallback.onDataReceived != NULL) {
+        g_transCallback.onDataReceived(authHandle, head, decData, decDataLen);
     }
     SoftBusFree(decData);
 }
@@ -1362,9 +1358,9 @@ static void HandleDecryptFailData(
         ReleaseAuthLock();
         AUTH_LOGE(AUTH_CONN, "decrypt trans data fail.");
     }
-    if (g_transCallback.OnException != NULL) {
+    if (g_transCallback.onException != NULL) {
         AUTH_LOGE(AUTH_CONN, "notify exception");
-        g_transCallback.OnException(authHandle, SOFTBUS_AUTH_DECRYPT_ERR);
+        g_transCallback.onException(authHandle, SOFTBUS_AUTH_DECRYPT_ERR);
     }
 }
 
@@ -1441,8 +1437,8 @@ static void HandleDisconnectedEvent(const void *para)
             continue;
         }
         AuthHandle authHandle = { .authId = authIds[i], .type = GetConnType(connId) };
-        if (g_transCallback.OnDisconnected != NULL) {
-            g_transCallback.OnDisconnected(authHandle);
+        if (g_transCallback.onDisconnected != NULL) {
+            g_transCallback.onDisconnected(authHandle);
         }
         if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_P2P ||
             GetConnType(connId) == AUTH_LINK_TYPE_ENHANCED_P2P) {

@@ -77,7 +77,9 @@ typedef enum {
 #define TO_CONN_FSM(ptr) CONTAINER_OF(ptr, LnnConnectionFsm, fsm)
 
 #define CONN_CODE_SHIFT 16
-
+#define PC_DEV_TYPE "00C"
+#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
+    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
 typedef enum {
     FSM_MSG_TYPE_JOIN_LNN,
     FSM_MSG_TYPE_AUTH_DONE,
@@ -536,6 +538,28 @@ static int32_t GetUdidHashForDfx(char *localUdidHash, char *peerUdidHash, LnnCon
     return SOFTBUS_OK;
 }
 
+static int32_t GetPeerUdidHash(NodeInfo *nodeInfo, char *peerUdidHash)
+{
+    if (nodeInfo == NULL || peerUdidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t rc = SOFTBUS_OK;
+    uint8_t hash[UDID_HASH_LEN] = { 0 };
+    rc = SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), hash);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate udidhash fail");
+        return rc;
+    }
+    rc = ConvertBytesToHexString(peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert bytes to string fail");
+        return rc;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t GetDevTypeForDfx(char *localDeviceType, char *peerDeviceType, LnnConntionInfo *connInfo)
 {
     NodeInfo localInfo;
@@ -574,16 +598,9 @@ static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdi
         return SOFTBUS_STRCPY_ERR;
     }
     if (IsEmptyShortHashStr(peerUdidHash) || strlen(peerUdidHash) != HB_SHORT_UDID_HASH_HEX_LEN) {
-        uint8_t hash[UDID_HASH_LEN] = { 0 };
-        rc = SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
-            strlen(nodeInfo->deviceInfo.deviceUdid), hash);
+        rc = GetPeerUdidHash(nodeInfo, peerUdidHash);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "generate udidhash fail");
-            return rc;
-        }
-        rc = ConvertBytesToHexString(peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
-        if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "convert bytes to string fail");
+            LNN_LOGE(LNN_BUILDER, "get udidhash fail");
             return rc;
         }
     }
@@ -653,6 +670,16 @@ static void DfxAddBleReportExtra(
     if (strcpy_s(bleExtra->extra.peerDeviceType, DEVICE_TYPE_SIZE_LEN + 1, extra->peerDeviceType) != EOK) {
         LNN_LOGE(LNN_BUILDER, "strcpy_s peerDeviceType fail");
         return;
+    }
+    if (extra->errcode == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP &&
+        (strncmp(extra->peerDeviceType, PC_DEV_TYPE, strlen(PC_DEV_TYPE)) == 0)) {
+        LnnBlePcRestrictMapInit();
+        uint32_t count = 0;
+        if (GetNodeFromPcRestrictMap(extra->peerUdidHash, &count) == SOFTBUS_OK) {
+            UpdateNodeFromPcRestrictMap(extra->peerUdidHash);
+        } else {
+            AddNodeToPcRestrictMap(extra->peerUdidHash);
+        }
     }
     if (connInfo->nodeInfo == NULL) {
         bleExtra->status = BLE_REPORT_EVENT_FAIL;
@@ -793,6 +820,17 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     DfxReportOnlineEvent(connInfo, reason, extra);
 }
 
+static void DeletePcRestrictNode(int32_t retCode, NodeInfo *nodeInfo)
+{
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    uint32_t count = 0;
+    if (retCode == SOFTBUS_OK && GetPeerUdidHash(nodeInfo, peerUdidHash) == SOFTBUS_OK) {
+        if (GetNodeFromPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
+            DeleteNodeFromPcRestrictMap(peerUdidHash);
+        }
+    }
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -832,7 +870,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         DfxRecordLnnAddOnlineNodeEnd(connInfo, infoNum, lnnType, retCode);
         SoftBusFree(info);
     }
-
+    DeletePcRestrictNode(retCode, connInfo->nodeInfo);
     if (connInfo->nodeInfo != NULL) {
         SoftBusFree(connInfo->nodeInfo);
         connInfo->nodeInfo = NULL;
