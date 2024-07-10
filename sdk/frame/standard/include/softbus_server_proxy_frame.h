@@ -22,8 +22,6 @@ extern "C" {
 #endif
 
 typedef int32_t (*RestartEventCallback)(void);
-void RestartEventCallbackUnregister(void);
-int32_t RestartEventCallbackRegister(RestartEventCallback callback);
 void RestartMetaCallbackUnregister(void);
 int32_t RestartMetaCallbackRegister(RestartEventCallback callback);
 void ClientDeathProcTask(void);
