@@ -149,7 +149,7 @@ bool LnnIsSupportBurstFeature(const char *networkId);
 bool LnnIsLocalSupportBurstFeature(void);
 void LnnDumpLocalBasicInfo(void);
 void LnnDumpOnlineDeviceInfo(void);
-int32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax);
+uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax);
 bool LnnIsMultiDeviceOnline(void);
 
 #ifdef __cplusplus
