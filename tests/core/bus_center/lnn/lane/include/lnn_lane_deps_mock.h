@@ -101,6 +101,9 @@ public:
     virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
     virtual void LnnDumpLocalBasicInfo(void) = 0;
     virtual void LnnDumpOnlineDeviceInfo(void) = 0;
+    virtual int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+        char *dstIdBuf, uint32_t dstIdBufLen) = 0;
+    virtual void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle) = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual void DeleteNetworkResourceByLaneId(uint64_t laneId) = 0;
     virtual int SoftBusGetBtState() = 0;
@@ -158,6 +161,9 @@ public:
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey key, uint32_t *info));
     MOCK_METHOD0(LnnDumpLocalBasicInfo, void (void));
     MOCK_METHOD0(LnnDumpOnlineDeviceInfo, void (void));
+    MOCK_METHOD5(LnnConvertDlId, int32_t (const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+        char *dstIdBuf, uint32_t dstIdBufLen));
+    MOCK_METHOD3(AuthDeviceGetLatestIdByUuid, void (const char *uuid, AuthLinkType type, AuthHandle *authHandle));
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *, int32_t *));
     MOCK_METHOD1(DeleteNetworkResourceByLaneId, void (uint64_t laneId));
     MOCK_METHOD0(SoftBusGetBtState, int (void));

@@ -152,6 +152,7 @@ int InterfaceInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector
                 break;
             }
             case Serializable::ValueType::STRING: {
+                size = WifiDirectUtils::CalculateStringLength((char *)data, size);
                 Set(InterfaceInfoKey(key), std::string(reinterpret_cast<const char *>(data), size));
                 break;
             }

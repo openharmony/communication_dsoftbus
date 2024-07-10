@@ -88,6 +88,17 @@ static int32_t HmlInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     return SOFTBUS_OK;
 }
 
+static int32_t HmlRawInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    connInfo->type = LANE_HML_RAW;
+    if (memcpy_s(&connInfo->connInfo.rawWifiDirect, sizeof(RawWifiDirectConnInfo),
+        &linkInfo->linkInfo.rawWifiDirect, sizeof(RawWifiDirectConnInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy raw wifidirect fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t P2pReuseInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_P2P_REUSE;
@@ -167,6 +178,7 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC] = CocInfoProc,
     // CoC reuse gatt direct
     [LANE_COC_DIRECT] = BleDirectInfoProc,
+    [LANE_HML_RAW] = HmlRawInfoProc,
 };
 
 int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)

@@ -26,6 +26,9 @@ int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const Lane
 int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId);
 void LnnDestroyP2p(void);
 void LnnCancelWifiDirect(uint32_t laneReqId);
+int32_t CheckIsAuthSessionServer(const char *peerIp, bool *isServer);
+int32_t RemoveAuthSessionServer(const char *peerIp);
+void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId);
 
 #ifdef __cplusplus
 }

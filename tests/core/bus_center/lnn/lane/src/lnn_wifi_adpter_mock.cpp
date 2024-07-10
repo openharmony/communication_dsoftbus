@@ -123,6 +123,11 @@ void LnnCancelWifiDirect(uint32_t laneReqId)
     return GetWifiAdpterInterface()->LnnCancelWifiDirect(laneReqId);
 }
 
+void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId)
+{
+    return GetWifiAdpterInterface()->LnnDisconnectP2pWithoutLnn(laneReqId);
+}
+
 SoftBusWifiDetailState SoftBusGetWifiState(void)
 {
     return GetWifiAdpterInterface()->SoftBusGetWifiState();

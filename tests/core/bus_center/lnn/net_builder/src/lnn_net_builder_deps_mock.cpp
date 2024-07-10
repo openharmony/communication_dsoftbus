@@ -66,7 +66,7 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     return GetNetBuilderDepsInterface()->AuthGetDeviceUuid(authId, uuid, size);
 }
 
-int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
+int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type)
 {
     return GetNetBuilderDepsInterface()->LnnDeleteMetaInfo(udid, type);
 }
