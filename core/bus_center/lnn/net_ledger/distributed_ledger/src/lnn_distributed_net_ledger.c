@@ -1026,6 +1026,7 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
         }
         // update lnn discovery type
         info->discoveryType |= oldInfo->discoveryType;
+        info->AuthTypeValue = oldInfo->AuthTypeValue;
         info->heartbeatTimestamp = oldInfo->heartbeatTimestamp;
         MergeLnnInfo(oldInfo, info);
         UpdateProfile(info);

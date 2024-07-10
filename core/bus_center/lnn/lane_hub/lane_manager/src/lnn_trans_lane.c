@@ -858,7 +858,7 @@ static bool GetAuthType(const char *peerNetworkId)
         LNN_LOGE(LNN_LANE, "fail, ret=%{public}d", ret);
     }
     LNN_LOGD(LNN_LANE, "success, value=%{public}d", value);
-    return ((1 << ONLINE_METANODE) == value);
+    return ((1 << ONLINE_HICHAIN) == value);
 }
 
 static int32_t CheckLinkConflict(const char* peerUdid, LaneLinkType linkType)
@@ -899,9 +899,10 @@ static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDel
         *isDelayFree = false;
         return;
     }
-    bool isMeta = GetAuthType(networkId);
+    bool isHichain = GetAuthType(networkId);
+    LNN_LOGD(LNN_LANE, "isHichain=%{public}d", isHichain);
     if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1 &&
-        CheckLinkConflict(resourceItem.link.peerUdid, resourceItem.link.type) && !isMeta) {
+        CheckLinkConflict(resourceItem.link.peerUdid, resourceItem.link.type) && isHichain) {
         if (PostDelayDestroyMessage(laneReqId, laneId, DELAY_DESTROY_LANE_TIME) == SOFTBUS_OK) {
             *isDelayFree = true;
             return;
