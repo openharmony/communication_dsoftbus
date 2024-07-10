@@ -221,7 +221,6 @@ int32_t GetCommonOsVersion(char *value, uint32_t len)
         if (strcpy_s(value, len, osVersion) != EOK) {
             LNN_LOGE(LNN_STATE, "strcpy_s osVersion failed.");
             SoftBusFree(osVersion);
-            osVersion = NULL;
             return SOFTBUS_MEM_ERR;
         }
     } else {
@@ -230,7 +229,6 @@ int32_t GetCommonOsVersion(char *value, uint32_t len)
         return SOFTBUS_ERR;
     }
     SoftBusFree(osVersion);
-    osVersion = NULL;
     return SOFTBUS_OK;
 }
 
@@ -250,7 +248,6 @@ int32_t GetCommonDeviceVersion(char *value, uint32_t len)
         if (strcpy_s(value, len, deviceVersion) != EOK) {
             LNN_LOGE(LNN_STATE, "strcpy_s deviceVersion failed.");
             SoftBusFree(deviceVersion);
-            deviceVersion = NULL;
             return SOFTBUS_MEM_ERR;
         }
     } else {
@@ -259,7 +256,6 @@ int32_t GetCommonDeviceVersion(char *value, uint32_t len)
         return SOFTBUS_ERR;
     }
     SoftBusFree(deviceVersion);
-    deviceVersion = NULL;
     return SOFTBUS_OK;
 }
 
