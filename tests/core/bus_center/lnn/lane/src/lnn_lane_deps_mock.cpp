@@ -150,7 +150,7 @@ int32_t LaneDepsInterfaceMock::ActionOfConnOpened(const AuthConnInfo *info, uint
 {
     AuthHandle authHandle = {
         .authId = 0,
-        .type = AUTH_LINK_TYPE_P2P,
+        .type = (info == nullptr) ? AUTH_LINK_TYPE_P2P : info->type,
     };
     callback->onConnOpened(requestId, authHandle);
     return SOFTBUS_OK;
@@ -404,6 +404,21 @@ void LnnDumpOnlineDeviceInfo(void)
 int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     return GetLaneDepsInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
+
+void DeleteNetworkResourceByLaneId(uint64_t laneId)
+{
+    GetLaneDepsInterface()->DeleteNetworkResourceByLaneId(laneId);
+}
+
+int SoftBusGetBtState(void)
+{
+    return GetLaneDepsInterface()->SoftBusGetBtState();
+}
+
+int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    return GetLaneDepsInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
 }
 }
 } // namespace OHOS

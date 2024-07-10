@@ -67,6 +67,8 @@ public:
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);
     static int32_t ActionOfChannelOpened(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);
+    static int32_t ActionOfDetectSuccess(uint32_t laneReqId, const LaneLinkInfo *linkInfo,
+        const LaneLinkCb *callback);
 };
 } // namespace OHOS
 #endif // LNN_LANE_LINK_DEPS_MOCK_H

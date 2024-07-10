@@ -19,8 +19,9 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "softbus_wifi_api_adapter.h"
 #include "lnn_lane_link.h"
+#include "softbus_adapter_wlan_extend.h"
+#include "softbus_wifi_api_adapter.h"
 
 namespace OHOS {
 class LnnWifiAdpterInterface {
@@ -35,6 +36,12 @@ public:
     virtual int32_t UpdateP2pLinkedInfo(uint32_t laneReqId, uint64_t laneId) = 0;
     virtual void LnnCancelWifiDirect(uint32_t laneReqId) = 0;
     virtual void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId) = 0;
+    virtual SoftBusWifiDetailState SoftBusGetWifiState(void) = 0;
+    virtual int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb) = 0;
+    virtual int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb) = 0;
+    virtual int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb) = 0;
+    virtual int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num) = 0;
+    virtual int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num) = 0;
 };
 
 class LnnWifiAdpterInterfaceMock : public LnnWifiAdpterInterface {
@@ -49,6 +56,12 @@ public:
     MOCK_METHOD2(UpdateP2pLinkedInfo, int32_t (uint32_t laneReqId, uint64_t laneId));
     MOCK_METHOD1(LnnCancelWifiDirect, void (uint32_t laneReqId));
     MOCK_METHOD1(LnnDisconnectP2pWithoutLnn, void (uint32_t laneReqId));
+    MOCK_METHOD0(SoftBusGetWifiState, SoftBusWifiDetailState (void));
+    MOCK_METHOD1(SoftBusRegWlanChannelInfoCb, int32_t (WlanChannelInfoCb *cb));
+    MOCK_METHOD1(SoftBusRegisterWifiEvent, int32_t (ISoftBusScanResult *cb));
+    MOCK_METHOD1(SoftBusUnRegisterWifiEvent, int32_t (ISoftBusScanResult *cb));
+    MOCK_METHOD2(SoftBusRequestWlanChannelInfo, int32_t (int32_t *channelId, uint32_t num));
+    MOCK_METHOD2(SoftBusGetChannelListFor5G, int32_t (int32_t *channelList, int32_t num));
     void SetDefaultResult(void);
     static int32_t ActionOfLnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
     static int32_t ActionOfOnConnectP2pFail(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);

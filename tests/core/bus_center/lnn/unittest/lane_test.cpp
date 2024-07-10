@@ -192,12 +192,12 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void onLaneFreeSuccess(uint32_t laneHandle)
+static void OnLaneFreeSuccess(uint32_t laneHandle)
 {
     GTEST_LOG_(INFO) << "free lane success, laneReqId=" << laneHandle;
 }
 
-static void onLaneFreeFail(uint32_t laneHandle, int32_t errCode)
+static void OnLaneFreeFail(uint32_t laneHandle, int32_t errCode)
 {
     GTEST_LOG_(INFO) << "free lane failed, laneReqId=" << laneHandle << ", errCode=" << errCode;
 }
@@ -402,12 +402,14 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
     LaneAllocListener listener = {
         .onLaneAllocSuccess = OnLaneAllocSuccess,
         .onLaneAllocFail = OnLaneAllocFail,
-        .onLaneFreeSuccess = onLaneFreeSuccess,
-        .onLaneFreeFail = onLaneFreeFail,
+        .onLaneFreeSuccess = OnLaneFreeSuccess,
+        .onLaneFreeFail = OnLaneFreeFail,
     };
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
+    laneReqId = laneManager->lnnGetLaneHandle(LANE_TYPE_TRANS);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
     allocInfo.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
