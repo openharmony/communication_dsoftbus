@@ -87,7 +87,6 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "fill nstackx response settings failed");
         SoftBusFree(settings);
-        settings = NULL;
         return ret;
     }
 
@@ -97,7 +96,6 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
         DISC_LOGE(DISC_COAP, "disc send response failed, ret=%{public}d", ret);
     }
     SoftBusFree(settings);
-    settings = NULL;
     return ret;
 }
 
@@ -181,7 +179,6 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
     }
 
     SoftBusFree(discDeviceInfo);
-    discDeviceInfo = NULL;
 }
 
 static void OnNotificationReceived(const NSTACKX_NotificationConfig *notification)
@@ -284,7 +281,6 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
     }
     DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ. registerCapaData=%{public}s", registerCapaData);
     SoftBusFree(registerCapaData);
-    registerCapaData = NULL;
     return SOFTBUS_OK;
 }
 
@@ -359,18 +355,15 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "set discovery settings failed");
         FreeDiscSet(discSet);
-        discSet = NULL;
         return ret;
     }
     if (NSTACKX_StartDeviceDiscovery(discSet) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "start device discovery failed");
         FreeDiscSet(discSet);
-        discSet = NULL;
         return (option->mode == ACTIVE_PUBLISH) ? SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL :
             SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
     }
     FreeDiscSet(discSet);
-    discSet = NULL;
     return SOFTBUS_OK;
 }
 
