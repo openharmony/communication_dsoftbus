@@ -98,9 +98,9 @@ SoftBusBand SoftBusGetLinkBand(void)
     return GetWifiAdpterInterface()->SoftBusGetLinkBand();
 }
 
-void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
+int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
 {
-    GetWifiAdpterInterface()->LnnDisconnectP2p(networkId, laneReqId);
+    return GetWifiAdpterInterface()->LnnDisconnectP2p(networkId, laneReqId);
 }
 
 void LnnDestroyP2p(void)
@@ -117,9 +117,15 @@ int32_t UpdateP2pLinkedInfo(uint32_t laneReqId, uint64_t laneId)
 {
     return GetWifiAdpterInterface()->UpdateP2pLinkedInfo(laneReqId, laneId);
 }
+
 void LnnCancelWifiDirect(uint32_t laneReqId)
 {
     return GetWifiAdpterInterface()->LnnCancelWifiDirect(laneReqId);
+}
+
+void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId)
+{
+    return GetWifiAdpterInterface()->LnnDisconnectP2pWithoutLnn(laneReqId);
 }
 }
 }

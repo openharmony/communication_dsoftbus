@@ -168,6 +168,9 @@ int32_t TransChannelInit(void)
     ret = TransReqAuthPendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans auth request pending init failed.");
 
+    ret = TransFreeLanePendingInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans free lane pending init failed.");
+
     ReqLinkListener();
     ret = SoftBusMutexInit(&g_myIdLock, NULL);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "init lock failed.");
@@ -186,6 +189,7 @@ void TransChannelDeinit(void)
     TransAsyncReqLanePendingDeinit();
     TransNetworkStatisticsDeinit();
     TransReqAuthPendingDeinit();
+    TransFreeLanePendingDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 

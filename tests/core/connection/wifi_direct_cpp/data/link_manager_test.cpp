@@ -12,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <set>
+#define private   public
+#define protected public
+
 #include <gtest/gtest.h>
+#include <set>
 #include "data/link_manager.h"
 
 using namespace testing::ext;
@@ -108,6 +111,23 @@ HWTEST_F(LinkManagerTest, ProcessIfXXXByRemoteMac, TestSize.Level1)
     });
     innerLink = LinkManager::GetInstance().GetLinkById(link.linkId);
     EXPECT_EQ(innerLink, nullptr);
+}
+
+/*
+ * @tc.name: AllocateLinkIdTest
+ * @tc.desc: test method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, AllocateLinkIdTest, TestSize.Level1)
+{
+    LinkManager linkManager;
+    linkManager.currentLinkId_ = -1;
+    int newId = linkManager.AllocateLinkId();
+    EXPECT_EQ(newId, 0);
+    linkManager.currentLinkId_ = 1;
+    newId = linkManager.AllocateLinkId();
+    ASSERT_EQ(newId, 1);
 }
 
 } // namespace OHOS::SoftBus

@@ -40,6 +40,17 @@ typedef struct {
     int32_t (*setInfo)(const void *info);
 } LocalLedgerKey;
 
+typedef enum {
+    UPDATE_ACCOUNT_LONG = 1,
+    UPDATE_DEV_NAME = 2,
+    UPDATE_DEV_UNIFIED_NAME = 4,
+    UPDATE_DEV_UNIFIED_DEFAULT_NAME = 8,
+    UPDATE_DEV_NICK_NAME = 16,
+    UPDATE_NETWORKID = 32,
+    UPDATE_CONCURRENT_AUTH = 64,
+    UPDATE_CIPHERKEY = 128,
+} StateVersionChangeReason;
+
 int32_t LnnInitLocalLedger(void);
 int32_t LnnInitLocalLedgerDelay(void);
 void LnnDeinitLocalLedger(void);
@@ -48,7 +59,7 @@ const NodeInfo *LnnGetLocalNodeInfo(void);
 int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info);
 int32_t LnnUpdateLocalNetworkId(const void *id);
 int32_t LnnUpdateLocalNetworkIdTime(int64_t time);
-void LnnUpdateStateVersion(void);
+void LnnUpdateStateVersion(StateVersionChangeReason reason);
 
 #ifdef __cplusplus
 }

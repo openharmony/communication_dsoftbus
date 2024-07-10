@@ -106,5 +106,10 @@ int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
 {
     return GetLaneLinkDepsInterface()->DelLaneResourceByLaneId(laneId, isServerSide);
 }
+
+void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
+{
+    GetLaneLinkDepsInterface()->NotifyFreeLaneResult(laneReqId, errCode);
+}
 }
 } // namespace OHOS

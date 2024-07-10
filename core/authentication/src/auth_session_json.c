@@ -24,6 +24,7 @@
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
+#include "auth_meta_manager.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
@@ -126,6 +127,7 @@
 #define NEW_CONN_CAP "NEW_CONN_CAP"
 #define EXTDATA "EXTDATA"
 #define STATE_VERSION "STATE_VERSION"
+#define STATE_VERSION_CHANGE_REASON "STATE_VERSION_CHANGE_REASON"
 #define BD_KEY "BD_KEY"
 #define IV "IV"
 #define SETTINGS_NICK_NAME "SETTINGS_NICK_NAME"
@@ -1139,6 +1141,7 @@ static void PackOsInfo(JsonObj *json, const NodeInfo *info)
 static void PackDeviceVersion(JsonObj *json, const NodeInfo *info)
 {
     (void)JSON_AddStringToObject(json, DEVICE_VERSION, info->deviceInfo.deviceVersion);
+    (void)JSON_AddInt32ToObject(json, STATE_VERSION_CHANGE_REASON, info->stateVersionReason);
 }
 
 static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
@@ -1152,17 +1155,31 @@ static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddInt32ToObject(json, STA_FREQUENCY, LnnGetStaFrequency(info));
 }
 
-static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *remoteUuid)
+static void PackWifiDirectInfo(
+    const AuthConnInfo *connInfo, JsonObj *json, const NodeInfo *info, const char *remoteUuid, bool isMetaAuth)
 {
-    if (json == NULL || remoteUuid == NULL) {
+    if (json == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return;
     }
     unsigned char encodePtk[PTK_ENCODE_LEN] = {0};
     char localPtk[PTK_DEFAULT_LEN] = {0};
-    if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
-        return;
+    if (isMetaAuth || remoteUuid == NULL) {
+        uint32_t connId;
+        AuthMetaGetConnIdByInfo(connInfo, &connId);
+        if (LnnGetMetaPtk(connId, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "get meta ptk fail");
+            return;
+        }
+    } else {
+        if (remoteUuid == NULL) {
+            AUTH_LOGE(AUTH_FSM, "invalid uuid");
+            return;
+        }
+        if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
+            return;
+        }
     }
     LnnDumpRemotePtk(NULL, localPtk, "pack wifi direct info");
     size_t keyLen = 0;
@@ -1189,7 +1206,6 @@ static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *
         AUTH_LOGW(AUTH_FSM, "add static capability fail");
         return;
     }
-    return;
 }
 
 static int32_t FillBroadcastCipherKey(BroadcastCipherKey *broadcastKey, const NodeInfo *info)
@@ -1309,7 +1325,8 @@ static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
         !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
-        !JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info)));
+        !JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info)) ||
+        !JSON_AddBoolToObject(json, IS_SUPPORT_IPV6, true));
     if (isFalse) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
         return SOFTBUS_ERR;
@@ -1454,6 +1471,7 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
     (void)JSON_GetInt16FromOject(json, DATA_CHANGE_FLAG, (int16_t *)&info->dataChangeFlag);
     (void)JSON_GetBoolFromOject(json, IS_CHARGING, &info->batteryInfo.isCharging);
     (void)JSON_GetInt32FromOject(json, REMAIN_POWER, &info->batteryInfo.batteryLevel);
+    (void)JSON_GetBoolFromOject(json, IS_SUPPORT_IPV6, &info->isSupportIpv6);
     OptBool(json, IS_SCREENON, &info->isScreenOn, false);
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
@@ -1473,6 +1491,7 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
     OptInt(json, BR_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_BR_BUFF_SIZE);
     OptInt64(json, FEATURE, (int64_t *)&info->feature, 0);
     OptInt64(json, CONN_SUB_FEATURE, (int64_t *)&info->connSubFeature, 0);
+    OptInt(json, STATE_VERSION_CHANGE_REASON, (int32_t *)&info->stateVersionReason, 0);
 }
 
 static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
@@ -1721,7 +1740,8 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
         !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
         !JSON_AddInt32ToObject(json, P2P_ROLE, info->p2pInfo.p2pRole) ||
         !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
-        !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight)) {
+        !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
+        !JSON_AddInt32ToObject(json, STATE_VERSION_CHANGE_REASON, info->stateVersionReason)) {
         AUTH_LOGE(AUTH_FSM, "add wifi info fail");
         return SOFTBUS_ERR;
     }
@@ -1753,6 +1773,7 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
     OptInt64(json, FEATURE, (int64_t *)&info->feature, 0);
+    OptInt(json, STATE_VERSION_CHANGE_REASON, (int32_t *)&info->stateVersionReason, 0);
     OptInt64(json, NEW_CONN_CAP, (int64_t *)&info->netCapacity, -1);
     if (info->netCapacity == (uint32_t)-1) {
         OptInt64(json, CONN_CAP, (int64_t *)&info->netCapacity, 0);
@@ -1827,11 +1848,11 @@ static int32_t UnpackCertificateInfo(JsonObj *json, NodeInfo *nodeInfo, const Au
     return SOFTBUS_OK;
 }
 
-char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid,
-    const AuthSessionInfo *info)
+char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
+    const char *remoteUuid, const AuthSessionInfo *info)
 {
     // uuid and info is null in meta, no need check param
-    AUTH_LOGI(AUTH_FSM, "connType=%{public}d", linkType);
+    AUTH_LOGI(AUTH_FSM, "connType=%{public}d", connInfo->type);
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
     if (nodeInfo == NULL) {
         AUTH_LOGE(AUTH_FSM, "local info is null");
@@ -1843,7 +1864,7 @@ char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMet
         return NULL;
     }
     int32_t ret;
-    if (linkType == AUTH_LINK_TYPE_WIFI) {
+    if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
         ret = PackWiFi(json, nodeInfo, version, isMetaAuth);
     } else if (version == SOFTBUS_OLD_V1) {
         ret = PackDeviceInfoBtV1(json, nodeInfo, isMetaAuth);
@@ -1854,7 +1875,7 @@ char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMet
         JSON_Delete(json);
         return NULL;
     }
-    PackWifiDirectInfo(json, nodeInfo, remoteUuid);
+    PackWifiDirectInfo(connInfo, json, nodeInfo, remoteUuid, isMetaAuth);
 
     if (PackCertificateInfo(json, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "packCertificateInfo fail");

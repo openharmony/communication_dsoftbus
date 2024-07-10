@@ -261,6 +261,7 @@ int NegotiateMessage::Unmarshalling(WifiDirectProtocol &protocol, const std::vec
                 Set(NegotiateMessageKey(key), *(uint32_t *)(data));
                 break;
             case Serializable::ValueType::STRING:
+                size = WifiDirectUtils::CalculateStringLength((char *)data, size);
                 Set(NegotiateMessageKey(key), std::string(reinterpret_cast<const char *>(data), size));
                 break;
             case Serializable::ValueType::BYTE_ARRAY:

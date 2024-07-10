@@ -143,17 +143,18 @@ bool AuthStartVerifyFuzzTest(const uint8_t* data, size_t size)
 
 void AuthMetaStartVerifyFuzzTest(const uint8_t* data, size_t size)
 {
+    if (data == nullptr || size != sizeof(AuthKeyInfo)) {
+        COMM_LOGE(COMM_TEST, "data is NULL or size is invalid");
+        return;
+    }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
     uint32_t connectionId = GetData<uint32_t>();
     int32_t callingPid = GetData<int32_t>();
-    AuthKeyInfo authKeyInfo = {
-        .key = data,
-        .keyLen = GetData<uint32_t>(),
-    };
     uint32_t requestId = GetData<uint32_t>();
     AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
+    AuthKeyInfo authKeyInfo = *const_cast<AuthKeyInfo *>(reinterpret_cast<const AuthKeyInfo *>(data));
     AuthMetaStartVerify(connectionId, &authKeyInfo, requestId, callingPid, authVerifyCallback);
 }
 

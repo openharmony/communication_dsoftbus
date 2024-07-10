@@ -15,6 +15,7 @@
 
 #include "trans_client_proxy.h"
 
+#include <unistd.h>
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -52,6 +53,11 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     const ChannelInfo *channel, int32_t pid)
 {
+    if (pid == getpid()) {
+        ISessionListener object = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(pkgName);
+        object.OnSessionOpened(channel->channelId, SOFTBUS_OK);
+        return SOFTBUS_OK;
+    }
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
@@ -80,6 +86,11 @@ int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
     if (data == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelOpenFailed data is nullptr!");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (data->msgPid == getpid()) {
+        ISessionListener object = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName);
+        object.OnSessionOpened(data->msgChannelId, errCode);
+        return SOFTBUS_OK;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
@@ -111,6 +122,11 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
     if (data == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelClosed data is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+    if (data->msgPid == getpid()) {
+        ISessionListener object = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName);
+        object.OnSessionClosed(data->msgChannelId);
+        return SOFTBUS_OK;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
@@ -150,6 +166,11 @@ int32_t ClientIpcOnChannelMsgReceived(ChannelMsg *data, TransReceiveData *receiv
     if (data == nullptr || receiveData == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelMsgReceived data or receiveData is nullptr!");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (data->msgPid == getpid()) {
+        ISessionListener object = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName);
+        object.OnBytesReceived(data->msgChannelId, receiveData->data, receiveData->dataLen);
+        return SOFTBUS_OK;
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
