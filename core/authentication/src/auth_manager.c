@@ -1315,8 +1315,8 @@ static void HandleConnectionData(
         AUTH_LOGE(AUTH_CONN, "device is offline, need wait");
         (void)SoftBusSleepMs(RECV_DATA_WAIT_TIME);
     }
-    if (g_transCallback.OnDataReceived != NULL) {
-        g_transCallback.OnDataReceived(authHandle, head, decData, decDataLen);
+    if (g_transCallback.onDataReceived != NULL) {
+        g_transCallback.onDataReceived(authHandle, head, decData, decDataLen);
     }
     SoftBusFree(decData);
 }
@@ -1358,9 +1358,9 @@ static void HandleDecryptFailData(
         ReleaseAuthLock();
         AUTH_LOGE(AUTH_CONN, "decrypt trans data fail.");
     }
-    if (g_transCallback.OnException != NULL) {
+    if (g_transCallback.onException != NULL) {
         AUTH_LOGE(AUTH_CONN, "notify exception");
-        g_transCallback.OnException(authHandle, SOFTBUS_AUTH_DECRYPT_ERR);
+        g_transCallback.onException(authHandle, SOFTBUS_AUTH_DECRYPT_ERR);
     }
 }
 
@@ -1437,8 +1437,8 @@ static void HandleDisconnectedEvent(const void *para)
             continue;
         }
         AuthHandle authHandle = { .authId = authIds[i], .type = GetConnType(connId) };
-        if (g_transCallback.OnDisconnected != NULL) {
-            g_transCallback.OnDisconnected(authHandle);
+        if (g_transCallback.onDisconnected != NULL) {
+            g_transCallback.onDisconnected(authHandle);
         }
         if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_P2P ||
             GetConnType(connId) == AUTH_LINK_TYPE_ENHANCED_P2P) {
