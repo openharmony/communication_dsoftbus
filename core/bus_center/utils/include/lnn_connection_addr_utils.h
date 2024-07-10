@@ -37,6 +37,7 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
 
 /* To avoid concurrency issues, this interface can only be used in BusCenter looper process. */
 const char *LnnPrintConnectionAddr(const ConnectionAddr *addr);
+bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr);
 
 #ifdef __cplusplus
 }

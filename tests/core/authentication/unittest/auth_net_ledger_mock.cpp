@@ -190,6 +190,11 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
 {
     return GetNetLedgerInterface()->LnnDumpRemotePtk(oldPtk, newPtk, log);
 }
+
+bool LnnGetOnlineStateById(const char *id, IdCategory type)
+{
+    return GetNetLedgerInterface()->LnnGetOnlineStateById(id, type);
+}
 }
 
 

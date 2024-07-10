@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_file_utils.h"
@@ -32,15 +33,82 @@
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 
+typedef struct {
+    ListNode node;
+    TrustedDevInfoRecord infoRecord;
+} DeviceDbInfo;
+
+static ListNode g_deviceInfoList = { &g_deviceInfoList, &g_deviceInfoList };
+static SoftBusMutex g_deviceDbMutex;
+static SoftBusMutex g_dbMutex;
+
+static bool g_isDbListInit = false;
+
 #define LNN_DB_KEY_LEN 1024
 #define LNN_DB_KEY_AILAS "dsoftbus_decision_db_key_alias"
 
-static struct HksBlob g_keyAlias = {sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS};
+static struct HksBlob g_keyAlias = { sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS };
+
+static bool DeviceDbRecoveryInit(void)
+{
+    if (SoftBusMutexInit(&g_deviceDbMutex, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "g_deviceDbMutex init fail");
+        return false;
+    }
+    if (SoftBusMutexInit(&g_dbMutex, NULL) != SOFTBUS_OK) {
+        SoftBusMutexDestroy(&g_deviceDbMutex);
+        LNN_LOGE(LNN_LEDGER, "g_isDbMutexInit init fail");
+        return false;
+    }
+    g_isDbListInit = true;
+    return true;
+}
+
+static int32_t DeviceDbListLock(void)
+{
+    if (!g_isDbListInit) {
+        if (!DeviceDbRecoveryInit()) {
+            return SOFTBUS_ERR;
+        }
+    }
+    return SoftBusMutexLock(&g_deviceDbMutex);
+}
+
+static void DeviceDbListUnlock(void)
+{
+    if (!g_isDbListInit) {
+        (void)DeviceDbRecoveryInit();
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_deviceDbMutex);
+}
+
+static int32_t DbLock(void)
+{
+    if (!g_isDbListInit) {
+        if (!DeviceDbRecoveryInit()) {
+            LNN_LOGE(LNN_LEDGER, "g_isDbListInit init fail");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SoftBusMutexLock(&g_dbMutex);
+}
+
+static void DbUnlock(void)
+{
+    if (!g_isDbListInit) {
+        if (!DeviceDbRecoveryInit()) {
+            LNN_LOGE(LNN_LEDGER, "g_isDbListInit init fail");
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_dbMutex);
+}
 
 int32_t EncryptStorageData(uint8_t *dbKey, uint32_t len)
 {
-    struct HksBlob plainData = {0};
-    struct HksBlob encryptData = {0};
+    struct HksBlob plainData = { 0 };
+    struct HksBlob encryptData = { 0 };
 
     encryptData.data = (uint8_t *)SoftBusCalloc(len);
     if (encryptData.data == NULL) {
@@ -69,8 +137,8 @@ int32_t EncryptStorageData(uint8_t *dbKey, uint32_t len)
 
 int32_t DecryptStorageData(uint8_t *dbKey, uint32_t len)
 {
-    struct HksBlob encryptData = {0};
-    struct HksBlob decryptData = {0};
+    struct HksBlob encryptData = { 0 };
+    struct HksBlob decryptData = { 0 };
 
     decryptData.data = (uint8_t *)SoftBusCalloc(len);
     if (decryptData.data == NULL) {
@@ -231,9 +299,15 @@ static void InsertTrustedDevInfoRecord(void *param)
         SoftBusFree(udid);
         return;
     }
+    if (DbLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock fail");
+        SoftBusFree(udid);
+        return;
+    }
     if (OpenDatabase(&ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "open database failed");
         SoftBusFree(udid);
+        DbUnlock();
         return;
     }
     do {
@@ -251,9 +325,11 @@ static void InsertTrustedDevInfoRecord(void *param)
     } while (false);
     if (CloseDatabase(ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "close database failed");
+        DbUnlock();
         SoftBusFree(udid);
         return;
     }
+    DbUnlock();
     SoftBusFree(udid);
 }
 
@@ -272,9 +348,15 @@ static void RemoveTrustedDevInfoRecord(void *param)
         SoftBusFree(udid);
         return;
     }
+    if (DbLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock fail");
+        SoftBusFree(udid);
+        return;
+    }
     if (OpenDatabase(&ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "open database failed");
         SoftBusFree(udid);
+        DbUnlock();
         return;
     }
     do {
@@ -289,11 +371,60 @@ static void RemoveTrustedDevInfoRecord(void *param)
     if (CloseDatabase(ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "close database failed");
     }
+    DbUnlock();
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
     LNN_LOGI(LNN_LEDGER, "remove udid from trusted dev info table. udid=%{public}s", anonyUdid);
     AnonymizeFree(anonyUdid);
     SoftBusFree(udid);
+}
+
+static void DeleteDeviceFromList(TrustedDevInfoRecord *record)
+{
+    if (DeviceDbListLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock fail");
+        return;
+    }
+    DeviceDbInfo *item = NULL;
+    DeviceDbInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_deviceInfoList, DeviceDbInfo, node) {
+        if (strcmp(item->infoRecord.accountHexHash, record->accountHexHash) == 0 &&
+            strcmp(item->infoRecord.udid, record->udid) == 0) {
+            char *anonyUdid = NULL;
+            Anonymize(record->udid, &anonyUdid);
+            LNN_LOGI(LNN_LEDGER, "delete device db from list. udid=%{public}s", anonyUdid);
+            AnonymizeFree(anonyUdid);
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            break;
+        }
+    }
+    DeviceDbListUnlock();
+}
+
+static void InsertDeviceToList(TrustedDevInfoRecord *record)
+{
+    if (DeviceDbListLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock fail");
+        return;
+    }
+    DeviceDbInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
+        if (strcmp(item->infoRecord.accountHexHash, record->accountHexHash) == 0 &&
+            strcmp(item->infoRecord.udid, record->udid) == 0) {
+            DeviceDbListUnlock();
+            return;
+        }
+    }
+    DeviceDbInfo *info = (DeviceDbInfo *)SoftBusCalloc(sizeof(DeviceDbInfo));
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "malloc info fail");
+        DeviceDbListUnlock();
+        return;
+    }
+    info->infoRecord = *record;
+    ListNodeInsert(&g_deviceInfoList, &info->node);
+    DeviceDbListUnlock();
 }
 
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
@@ -304,6 +435,13 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    TrustedDevInfoRecord record;
+    int32_t ret = BuildTrustedDevInfoRecord(udid, &record);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "build insert trusted dev info record failed");
+        return ret;
+    }
+    InsertDeviceToList(&record);
     dupUdid = (char *)SoftBusMalloc(UDID_BUF_LEN);
     if (dupUdid == NULL) {
         LNN_LOGE(LNN_LEDGER, "malloc dupUdid failed");
@@ -331,6 +469,13 @@ int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    TrustedDevInfoRecord record;
+    int32_t ret = BuildTrustedDevInfoRecord(udid, &record);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "build delete trusted dev info record failed");
+        return ret;
+    }
+    DeleteDeviceFromList(&record);
     dupUdid = (char *)SoftBusMalloc(UDID_BUF_LEN);
     if (dupUdid == NULL) {
         LNN_LOGE(LNN_LEDGER, "malloc dupUdid failed");
@@ -350,8 +495,7 @@ int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
     return SOFTBUS_OK;
 }
 
-static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHash,
-    char **udidArray, uint32_t *num)
+static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHash, char **udidArray, uint32_t *num)
 {
     if (EncryptDecisionDb(ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "encrypt database failed");
@@ -381,25 +525,102 @@ static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHas
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+static int32_t GetLocalAccountHexHash(char *accountHexHash)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local account hash failed");
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    if (ConvertBytesToHexString(accountHexHash, SHA_256_HEX_HASH_LEN, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert accountHash failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetAllDevNums(char *accountHexHash, uint32_t *num)
+{
+    DeviceDbInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
+        if (strcmp(accountHexHash, item->infoRecord.accountHexHash) == 0) {
+            (*num)++;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+{
+    char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
+    if (udidArray == NULL || num == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetLocalAccountHexHash(accountHexHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local account hash failed");
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    if (DeviceDbListLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    int32_t ret = GetAllDevNums(accountHexHash, num);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get all dev num fail");
+        DeviceDbListUnlock();
+        return ret;
+    }
+    if (*num == 0) {
+        LNN_LOGW(LNN_LEDGER, "get none trusted dev info");
+        *udidArray = NULL;
+        DeviceDbListUnlock();
+        return SOFTBUS_OK;
+    }
+    *udidArray = (char *)SoftBusCalloc(*num * UDID_BUF_LEN);
+    if (*udidArray == NULL) {
+        LNN_LOGW(LNN_LEDGER, "malloc fail");
+        *num = 0;
+        DeviceDbListUnlock();
+        return SOFTBUS_MALLOC_ERR;
+    }
+    uint32_t cur = 0;
+    DeviceDbInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
+        if (cur >= *num) {
+            break;
+        }
+        if (strcmp(accountHexHash, item->infoRecord.accountHexHash) != 0) {
+            continue;
+        }
+        if (strcpy_s(*udidArray + cur * UDID_BUF_LEN, UDID_BUF_LEN, item->infoRecord.udid) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy udid fail.");
+            continue;
+        }
+        cur++;
+    }
+    DeviceDbListUnlock();
+    return SOFTBUS_OK;
+}
+
+static int32_t GetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+{
     char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
     DbContext *ctx = NULL;
 
     if (udidArray == NULL || num == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+    if (GetLocalAccountHexHash(accountHexHash) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local account hash failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
-    if (ConvertBytesToHexString(accountHexHash, SHA_256_HEX_HASH_LEN, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "convert accountHash failed");
-        return SOFTBUS_ERR;
+    if (DbLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
     if (OpenDatabase(&ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "open database failed");
+        DbUnlock();
         return SOFTBUS_ERR;
     }
     int32_t rc = GetTrustedDevInfoRecord(ctx, accountHexHash, udidArray, num);
@@ -408,12 +629,96 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     }
     if (CloseDatabase(ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "close database failed");
+        DbUnlock();
         SoftBusFree(*udidArray);
         *udidArray = NULL;
         *num = 0;
         return SOFTBUS_ERR;
     }
+    DbUnlock();
     return rc;
+}
+
+static int32_t RecoveryTrustedDevInfo(void)
+{
+    uint32_t num = 0;
+    char *udidArray = NULL;
+    char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
+    if (GetTrustedDevInfoFromDb(&udidArray, &num) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get trusted dev info fail");
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
+    }
+    LNN_LOGI(LNN_LEDGER, "get trusted relation num=%{public}u", num);
+    if (udidArray == NULL || num == 0) {
+        LNN_LOGE(LNN_LEDGER, "get none trusted dev info");
+        return SOFTBUS_OK;
+    }
+    if (GetLocalAccountHexHash(accountHexHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local account hash failed");
+        SoftBusFree(udidArray);
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    if (DeviceDbListLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "db lock fail");
+        SoftBusFree(udidArray);
+        return SOFTBUS_LOCK_ERR;
+    }
+    for (uint32_t i = 0; i < num; i++) {
+        char udidStr[UDID_BUF_LEN] = { 0 };
+        DeviceDbInfo *info = (DeviceDbInfo *)SoftBusCalloc(sizeof(DeviceDbInfo));
+        if (info == NULL) {
+            LNN_LOGE(LNN_BUILDER, "malloc info fail");
+            continue;
+        }
+        if (memcpy_s(udidStr, UDID_BUF_LEN, udidArray + i * UDID_BUF_LEN, UDID_BUF_LEN) != EOK ||
+            memcpy_s(info->infoRecord.udid, UDID_BUF_LEN, udidStr, UDID_BUF_LEN) != EOK ||
+            memcpy_s(info->infoRecord.accountHexHash, SHA_256_HEX_HASH_LEN, accountHexHash,
+                SHA_256_HEX_HASH_LEN) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "udid str cpy fail.");
+            DeviceDbListUnlock();
+            SoftBusFree(info);
+            SoftBusFree(udidArray);
+            return SOFTBUS_MEM_ERR;
+        }
+        ListNodeInsert(&g_deviceInfoList, &info->node);
+    }
+    DeviceDbListUnlock();
+    SoftBusFree(udidArray);
+    return SOFTBUS_OK;
+}
+
+static void ClearRecoveryDeviceList(void)
+{
+    if (DeviceDbListLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "db lock fail");
+        return;
+    }
+    DeviceDbInfo *item = NULL;
+    DeviceDbInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_deviceInfoList, DeviceDbInfo, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    DeviceDbListUnlock();
+}
+
+int32_t UpdateRecoveryDeviceInfoFromDb(void)
+{
+    if (!g_isDbListInit) {
+        return SOFTBUS_NETWORK_NOT_INIT;
+    }
+    ClearRecoveryDeviceList();
+    return RecoveryTrustedDevInfo();
+}
+
+static int32_t InitDbList(void)
+{
+    if (!DeviceDbRecoveryInit()) {
+        LNN_LOGE(LNN_LEDGER, "init fail");
+        return SOFTBUS_ERR;
+    }
+    ClearRecoveryDeviceList();
+    return RecoveryTrustedDevInfo();
 }
 
 static int32_t InitTrustedDevInfoTable(void)
@@ -448,6 +753,9 @@ static int32_t InitTrustedDevInfoTable(void)
     if (CloseDatabase(ctx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "close database failed");
         return SOFTBUS_ERR;
+    }
+    if (rc == SOFTBUS_OK) {
+        rc = InitDbList();
     }
     return rc;
 }

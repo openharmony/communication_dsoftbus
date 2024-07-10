@@ -1210,10 +1210,8 @@ static void FillProxyHandshakeExtra(
 static int32_t TransProxyProcessHandshake(ProxyChannelInfo *chan, const ProxyMessage *msg)
 {
     int32_t ret = OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER);
-    if (ret != SOFTBUS_OK) {
+    if ((ret != SOFTBUS_OK) && (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened fail channelId=%{public}d", chan->channelId);
-        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
-        TransProxyDelChanByChanId(chan->channelId);
         return ret;
     }
     if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
@@ -1224,16 +1222,12 @@ static int32_t TransProxyProcessHandshake(ProxyChannelInfo *chan, const ProxyMes
     if ((ret = TransProxyAckHandshake(msg->connId, chan, SOFTBUS_OK)) != SOFTBUS_OK) {
         TRANS_LOGE(
             TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, msg->connId);
-        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
         OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
-        TransProxyDelChanByChanId(chan->channelId);
         return ret;
     }
     if ((ret = OnProxyChannelBind(chan->channelId, &(chan->appInfo))) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnProxyChannelBind fail channelId=%{public}d, connId=%{public}u", chan->channelId,
             msg->connId);
-        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer, chan->deviceTypeIsWinpc);
-        TransProxyDelChanByChanId(chan->channelId);
         return ret;
     }
 
@@ -1268,6 +1262,14 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         goto EXIT_ERR;
     }
 
+    extra.result = EVENT_STAGE_RESULT_OK;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
+    ret = TransProxyProcessHandshake(chan, msg);
+    if (ret != SOFTBUS_OK) {
+        goto EXIT_ERR;
+    }
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+
     TransCreateConnByConnId(msg->connId, (bool)chan->isServer);
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
@@ -1276,14 +1278,6 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         goto EXIT_ERR;
     }
 
-    extra.result = EVENT_STAGE_RESULT_OK;
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
-
-    ret = TransProxyProcessHandshake(chan, msg);
-    if (ret != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     return;
 EXIT_ERR:
     extra.result = EVENT_STAGE_RESULT_FAILED;
@@ -1709,6 +1703,9 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 
 static void TransProxyTimerItemProc(const ListNode *proxyProcList)
 {
+    if (IsListEmpty(proxyProcList)) {
+        return;
+    }
     TRANS_LOGI(TRANS_CTRL, "enter.");
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;

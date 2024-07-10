@@ -34,6 +34,7 @@
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
+#define CAST_SESSION "CastPlusSessionName"
 static void ClientTransSessionTimerProc(void);
 
 static int32_t g_sessionIdNum = 0;
@@ -1114,6 +1115,10 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (strcmp(CAST_SESSION, serverNode->sessionName) == 0) {
+            TRANS_LOGD(TRANS_SDK, "cast plus sessionname is different");
+            continue;
+        }
         DestroyClientSessionByNetworkId(serverNode, networkId, routeType, &destroyList);
     }
     UnlockClientSessionServerList();

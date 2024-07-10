@@ -61,15 +61,6 @@ typedef struct {
     ModeCycle cycle;
 } DeviceMessageParse;
 
-typedef struct {
-    uint64_t connId;
-    AuthConnInfo connInfo;
-    bool fromServer;
-    AuthDataHead head;
-    uint32_t len;
-    uint8_t *data;
-} RecvDeviceIdData;
-
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect, bool isOldKey);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);

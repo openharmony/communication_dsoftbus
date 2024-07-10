@@ -42,7 +42,6 @@ ohos_unittest("DiscNstackxAdapterTest") {
     "../../../../../core/discovery/interface",
     "../../../../../core/discovery/manager/include",
     "../../../../../interfaces/kits/common",
-    "//third_party/cJSON",
   ]
 
   deps = [
@@ -50,20 +49,14 @@ ohos_unittest("DiscNstackxAdapterTest") {
     "../../../../../components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "../../../../../core/common:softbus_utils",
     "../../../../../core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("DiscCoapTest") {
@@ -87,27 +80,20 @@ ohos_unittest("DiscCoapTest") {
     "../../../../../core/discovery/interface",
     "../../../../../core/discovery/manager/include",
     "../../../../../interfaces/kits/common",
-    "//third_party/cJSON",
   ]
 
   deps = [
     "../../../../../components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "../../../../../core/common:softbus_utils",
     "../../../../../core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
 }
 
 group("unittest") {

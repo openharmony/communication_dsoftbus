@@ -726,7 +726,7 @@ int32_t RegisterBroadcaster(BaseServiceType srvType, int32_t *bcId, const Broadc
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_BC_MGR_REG_NO_AVAILABLE_BC_ID;
     }
-    DISC_LOGD(DISC_BROADCAST,
+    DISC_LOGI(DISC_BROADCAST,
         "srvType=%{public}s, bcId=%{public}d, adapterBcId=%{public}d", GetSrvType(srvType), managerId, adapterBcId);
 
     *bcId = managerId;
@@ -880,7 +880,7 @@ int32_t RegisterScanListener(BaseServiceType srvType, int32_t *listenerId, const
         SoftBusMutexUnlock(&g_scanLock);
         return SOFTBUS_BC_MGR_REG_NO_AVAILABLE_LISN_ID;
     }
-    DISC_LOGD(DISC_BROADCAST, "srvType=%{public}s, listenerId=%{public}d, adapterScanId=%{public}d",
+    DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, listenerId=%{public}d, adapterScanId=%{public}d",
               GetSrvType(srvType), managerId, adapterScanId);
     *listenerId = managerId;
     g_scanManager[managerId].srvType = srvType;

@@ -593,6 +593,14 @@ static bool IsValidTriggerType(TriggerType trigger)
     }
 }
 
+bool IsListenerNodeExist(ListenerModule module)
+{
+    SoftbusListenerNode *node = GetListenerNode(module);
+    bool exist = (node != NULL);
+    ReturnListenerNode(&node);
+    return exist;
+}
+
 int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(module >= 0 && module < UNUSE_BUTT, SOFTBUS_INVALID_PARAM, CONN_COMMON,

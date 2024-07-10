@@ -57,6 +57,7 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
 int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListener *listener);
 int32_t StopBaseListener(ListenerModule module);
 
+bool IsListenerNodeExist(ListenerModule module);
 int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger);
 int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger);
 

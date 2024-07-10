@@ -180,7 +180,7 @@ HWTEST_F(NetLedgerTest, LNN_ADD_META_INFO_Test_001, TestSize.Level1)
 HWTEST_F(NetLedgerTest, LNN_DELETE_META_INFO_Test_001, TestSize.Level1)
 {
     char udid[DEFAULT_SIZE] = "1234";
-    ConnectionAddrType type = CONNECTION_ADDR_WLAN;
+    AuthLinkType type = AUTH_LINK_TYPE_WIFI;
     EXPECT_TRUE(LnnDeleteMetaInfo(udid, type) != SOFTBUS_OK);
 }
 
@@ -218,18 +218,18 @@ HWTEST_F(NetLedgerTest, LNN_META_INFO_ADD_DEL_Test_001, TestSize.Level1)
     int32_t ret;
     NodeInfo info;
 
-    ret = LnnDeleteMetaInfo(NODE2_UDID, CONNECTION_ADDR_ETH);
+    ret = LnnDeleteMetaInfo(NODE2_UDID, AUTH_LINK_TYPE_WIFI);
     EXPECT_NE(ret, SOFTBUS_OK);
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     LnnSetDeviceUdid(&info, NODE1_UDID);
-    info.metaInfo.metaDiscType = CONNECTION_ADDR_ETH;
+    info.metaInfo.metaDiscType = AUTH_LINK_TYPE_WIFI;
     ret = LnnAddMetaInfo(&info);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = LnnDeleteMetaInfo(NODE1_UDID, CONNECTION_ADDR_MAX);
+    ret = LnnDeleteMetaInfo(NODE1_UDID, AUTH_LINK_TYPE_WIFI);
     EXPECT_NE(ret, SOFTBUS_OK);
-    ret = LnnDeleteMetaInfo(NODE1_UDID, CONNECTION_ADDR_BLE);
+    ret = LnnDeleteMetaInfo(NODE1_UDID, AUTH_LINK_TYPE_WIFI);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = LnnDeleteMetaInfo(NODE1_UDID, CONNECTION_ADDR_ETH);
+    ret = LnnDeleteMetaInfo(NODE1_UDID, AUTH_LINK_TYPE_WIFI);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

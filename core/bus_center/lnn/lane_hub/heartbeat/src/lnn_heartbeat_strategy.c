@@ -501,6 +501,7 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
         LNN_LOGD(LNN_HEART_BEAT, "HB send once but dont check status, hbType=%{public}d", registedHbType);
         return SOFTBUS_OK;
     }
+    registedHbType &= (~(HEARTBEAT_TYPE_BLE_V3));
     LnnCheckDevStatusMsgPara checkMsg = { .hbType = registedHbType, .hasNetworkId = false, .isWakeUp = wakeupFlag };
     LnnRemoveCheckDevStatusMsg(hbFsm, &checkMsg);
     if (LnnPostCheckDevStatusMsgToHbFsm(hbFsm, &checkMsg, HB_CHECK_DELAY_LEN) != SOFTBUS_OK) {
