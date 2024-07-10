@@ -533,7 +533,6 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info)
         if (option->capabilityData == NULL) {
             DISC_LOGE(DISC_CONTROL, "alloc capability data failed");
             SoftBusFree(infoNode);
-            infoNode = NULL;
             return NULL;
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
@@ -577,7 +576,6 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
         if (option->capabilityData == NULL) {
             DISC_LOGE(DISC_CONTROL, "alloc capability data failed");
             SoftBusFree(infoNode);
-            infoNode = NULL;
             return NULL;
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
