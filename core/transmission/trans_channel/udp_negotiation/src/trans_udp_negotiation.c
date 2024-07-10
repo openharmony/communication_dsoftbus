@@ -904,6 +904,10 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
         ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK) {
+        ret = AuthGetPreferConnInfo(peerUdid, &auth, true);
+        isMeta = true;
+    }
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get info fail: ret=%{public}d", ret);
         TransCloseUdpChannelByRequestId(requestId);
         return ret;
