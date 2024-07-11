@@ -184,3 +184,46 @@ ohos_unittest("BleTransTest") {
     "hilog:libhilog",
   ]
 }
+
+ohos_unittest("BleClientTest") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/tests/core/connection/ble/mock",
+  ]
+  sources = [
+    "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_client.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_connection.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_manager.c",
+    "./mock/connection_ble_client_mock.cpp",
+    "connection_ble_client_test.cpp",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
