@@ -758,7 +758,7 @@ static int32_t CheckJoinLnnRequest(
 static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
 {
     if (device == NULL || hbResp == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "param is nullptr");
+        LNN_LOGD(LNN_HEART_BEAT, "param is nullptr");
         return;
     }
     int32_t infoNum = 0;
@@ -790,7 +790,7 @@ static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
             continue;
         }
         if (strncmp(udidHash, device->devId, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
-            LNN_LOGI(LNN_HEART_BEAT, "hbResp preChannelCode=%{public}d", hbResp->preferChannel);
+            LNN_LOGD(LNN_HEART_BEAT, "hbResp preChannelCode=%{public}d", hbResp->preferChannel);
             (void)LnnAddRemoteChannelCode(nodeInfo.deviceInfo.deviceUdid, hbResp->preferChannel);
             SoftBusFree(info);
             return;
