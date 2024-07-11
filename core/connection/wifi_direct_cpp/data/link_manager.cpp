@@ -150,56 +150,74 @@ bool LinkManager::ProcessIfPresent(int linkId, const Handler &handler)
 void LinkManager::RemoveLink(InnerLink::LinkType type, const std::string &remoteDeviceId)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
-    std::lock_guard lock(lock_);
-    auto it = links_.find({ type, remoteDeviceId });
-    if (it != links_.end()) {
-        auto &link = it->second;
-        if (link->GetState() == InnerLink::LinkState::CONNECTED) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "find remoteDeviceId=%{public}s",
+    std::shared_ptr<InnerLink> link;
+    {
+        std::lock_guard lock(lock_);
+        auto it = links_.find({type, remoteDeviceId});
+        if (it == links_.end()) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "not find remoteDeviceId=%{public}s",
                       WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
-            GetWifiDirectManager()->notifyOffline(link->GetRemoteBaseMac().c_str(), link->GetRemoteIpv4().c_str(),
-                link->GetRemoteDeviceId().c_str(), link->GetLocalIpv4().c_str());
+            return;
         }
+        link = it->second;
         links_.erase(it);
-        return;
     }
-    CONN_LOGE(CONN_WIFI_DIRECT, "not find remoteDeviceId=%{public}s",
-              WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+
+    CONN_LOGI(CONN_WIFI_DIRECT, "find remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+    if (link != nullptr && link->GetState() == InnerLink::LinkState::CONNECTED) {
+        GetWifiDirectManager()->notifyOffline(link->GetRemoteBaseMac().c_str(), link->GetRemoteIpv4().c_str(),
+                                              link->GetRemoteDeviceId().c_str(), link->GetLocalIpv4().c_str());
+    }
 }
 
 void LinkManager::RemoveLink(const std::string &remoteMac)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
-    std::lock_guard lock(lock_);
-    for (const auto &[key, value] : links_) {
-        if (remoteMac == value->GetRemoteBaseMac() && value->GetState() == InnerLink::LinkState::CONNECTED) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "find remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
-            GetWifiDirectManager()->notifyOffline(value->GetRemoteBaseMac().c_str(), value->GetRemoteIpv4().c_str(),
-                                                  value->GetRemoteDeviceId().c_str(), value->GetLocalIpv4().c_str());
-            links_.erase(key);
-            return;
+    std::shared_ptr<InnerLink> link;
+    {
+        std::lock_guard lock(lock_);
+        for (const auto &[key, value] : links_) {
+            if (remoteMac == value->GetRemoteBaseMac()) {
+                CONN_LOGI(CONN_WIFI_DIRECT, "find remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
+                link = value;
+                links_.erase(key);
+                break;
+            }
         }
     }
-    CONN_LOGE(CONN_WIFI_DIRECT, "not find remoteMac=%{public}s",
-              WifiDirectAnonymizeMac(remoteMac).c_str());
+    if (link == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not find remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
+        return;
+    }
+    if (link->GetState() == InnerLink::LinkState::CONNECTED) {
+        GetWifiDirectManager()->notifyOffline(link->GetRemoteBaseMac().c_str(), link->GetRemoteIpv4().c_str(),
+                                              link->GetRemoteDeviceId().c_str(), link->GetLocalIpv4().c_str());
+    }
 }
 
 void LinkManager::RemoveLinks(InnerLink::LinkType type)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
-    std::lock_guard lock(lock_);
-    auto it = links_.begin();
-    while (it != links_.end()) {
-        if (it->first.first == type) {
-            if (it->second->GetState() == InnerLink::LinkState::CONNECTED) {
-                GetWifiDirectManager()->notifyOffline(it->second->GetRemoteBaseMac().c_str(),
-                    it->second->GetRemoteIpv4().c_str(), it->second->GetRemoteDeviceId().c_str(),
-                    it->second->GetLocalIpv4().c_str());
+    std::vector<std::shared_ptr<InnerLink>> links;
+    {
+        std::lock_guard lock(lock_);
+        auto it = links_.begin();
+        while (it != links_.end()) {
+            if (it->first.first == type) {
+                CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s",
+                          WifiDirectAnonymizeDeviceId(it->second->GetRemoteDeviceId()).c_str());
+                links.push_back(it->second);
+                it = links_.erase(it);
+            } else {
+                it++;
             }
+        }
+    }
 
-            it = links_.erase(it);
-        } else {
-            it++;
+    for (const auto &link : links) {
+        if (link->GetState() == InnerLink::LinkState::CONNECTED) {
+            GetWifiDirectManager()->notifyOffline(link->GetRemoteBaseMac().c_str(), link->GetRemoteIpv4().c_str(),
+                                                  link->GetRemoteDeviceId().c_str(), link->GetLocalIpv4().c_str());
         }
     }
 }

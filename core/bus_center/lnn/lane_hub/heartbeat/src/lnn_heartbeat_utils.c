@@ -539,14 +539,18 @@ void LnnDumpOnlineDeviceInfo(void)
     SoftBusFree(info);
 }
 
-int32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
+uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
 {
+    if (randMin >= randMax) {
+        return randMin - randMax;
+    }
+
     time_t currTime = time(NULL);
     if (currTime == 0) {
         LNN_LOGI(LNN_HEART_BEAT, "seed is 0, just ignore");
     }
     srand(currTime);
-    int32_t random = rand() % (randMax - randMin);
+    uint32_t random = rand() % (randMax - randMin);
     return randMin + random;
 }
 

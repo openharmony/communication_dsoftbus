@@ -223,6 +223,7 @@ static DiscDetailNode *GetDiscDetailByModuleName(char *moduleName)
 
 static int32_t AddDiscDetailNode(DiscDetailNode **discDetailNode, char *moduleName)
 {
+    COMM_CHECK_AND_RETURN_RET_LOGE(discDetailNode != NULL, SOFTBUS_INVALID_PARAM, COMM_EVENT, "invalid discDetailNode");
     DiscDetailNode *newNode = (DiscDetailNode *)SoftBusCalloc(sizeof(DiscDetailNode));
     COMM_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_ERR, COMM_EVENT, "malloc fail");
     if (strcpy_s(newNode->moduleName, MODULE_NAME_MAX_LEN, moduleName) != EOK) {
@@ -498,7 +499,7 @@ int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_
         if (ret != SOFTBUS_OK) {
             COMM_LOGE(COMM_EVENT, "add disc detail node fail");
             SoftBusMutexUnlock(&g_discDetailLock);
-            return SOFTBUS_ERR;
+            return ret;
         }
     }
 

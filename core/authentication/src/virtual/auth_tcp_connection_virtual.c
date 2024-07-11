@@ -40,9 +40,10 @@ int32_t AuthOpenChannel(const char *ip, int32_t port)
     return INVALID_CHANNEL_ID;
 }
 
-void AuthCloseChannel(int32_t channelId)
+void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
     (void)channelId;
+    (void)moduleId;
     return;
 }
 
@@ -104,7 +105,7 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-void StopSocketListening(void)
+void StopSocketListening(ListenerModule moduleId)
 {
     return;
 }

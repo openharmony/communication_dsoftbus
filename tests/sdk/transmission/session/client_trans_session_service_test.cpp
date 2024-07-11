@@ -170,11 +170,13 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
     sessionParam->sessionName = sessionName;
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(sessionParam);
         return SOFTBUS_ERR;
     }
 
     SessionInfo *session = TestGenerateSession(sessionParam);
     if (session == NULL) {
+        SoftBusFree(sessionParam);
         return SOFTBUS_ERR;
     }
 
@@ -182,12 +184,16 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
     session->isServer = isServer;
     ret = ClientAddNewSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(session);
+        SoftBusFree(sessionParam);
         return SOFTBUS_ERR;
     }
 
     int32_t sessionId = 0;
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId);
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(session);
+        SoftBusFree(sessionParam);
         return SOFTBUS_ERR;
     }
 

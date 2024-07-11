@@ -176,20 +176,30 @@ static const char *GetLinkType(LaneLinkType type)
     }
 }
 
-static void OnLaneRequestSuccess(uint32_t laneHandle, const LaneConnInfo *info)
+static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info)
 {
-    printf("LaneRequestSucc: laneReqId:0x%x, linkType:%s\n", laneHandle, GetLinkType(info->type));
+    printf("LaneAllocSucc: laneReqId:0x%x, linkType:%s\n", laneHandle, GetLinkType(info->type));
     const LnnLaneManager *laneManager = GetLaneManager();
     int32_t ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void OnLaneRequestFail(uint32_t laneHandle, int32_t errCode)
+static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode)
 {
-    printf("LaneRequestFail: laneReqId:0x%x, reason:%d\n", laneHandle, errCode);
+    printf("LaneAllocFail: laneReqId:0x%x, reason:%d\n", laneHandle, errCode);
     const LnnLaneManager *laneManager = GetLaneManager();
     int32_t ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+static void OnLaneFreeSuccess(uint32_t laneHandle)
+{
+    GTEST_LOG_(INFO) << "free lane success, laneReqId=" << laneHandle;
+}
+
+static void OnLaneFreeFail(uint32_t laneHandle, int32_t errCode)
+{
+    GTEST_LOG_(INFO) << "free lane failed, laneReqId=" << laneHandle << ", errCode=" << errCode;
 }
 
 /*
@@ -390,12 +400,16 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
     allocInfo.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
     allocInfo.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
     LaneAllocListener listener = {
-        .onLaneAllocSuccess = OnLaneRequestSuccess,
-        .onLaneAllocFail = OnLaneRequestFail,
+        .onLaneAllocSuccess = OnLaneAllocSuccess,
+        .onLaneAllocFail = OnLaneAllocFail,
+        .onLaneFreeSuccess = OnLaneFreeSuccess,
+        .onLaneFreeFail = OnLaneFreeFail,
     };
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
+    laneReqId = laneManager->lnnGetLaneHandle(LANE_TYPE_TRANS);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
     allocInfo.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);

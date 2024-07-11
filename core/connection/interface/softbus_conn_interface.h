@@ -48,6 +48,7 @@ typedef enum {
     MODULE_META_AUTH = 21,
     MODULE_P2P_NEGO = 22,
     MODULE_AUTH_SYNC_INFO = 23,
+    MODULE_PTK_VERIFY = 24,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
     MODULE_NIP_BR_CHANNEL = 201,
@@ -88,6 +89,8 @@ typedef enum {
     DIRECT_CHANNEL_SERVER_HML_END = DIRECT_CHANNEL_SERVER_HML_START + HML_INDEX,
     LANE,
     NETLINK,
+    AUTH_RAW_P2P_SERVER,
+    AUTH_RAW_P2P_CLIENT,
 
     LISTENER_MODULE_DYNAMIC_START,
     LISTENER_MODULE_DYNAMIC_END = LISTENER_MODULE_DYNAMIC_START + CONN_DYNAMIC_LISTENER_MODULE_COUNT,
@@ -242,7 +245,7 @@ uint32_t ConnGetHeadSize(void);
  * @brief The initialization of the connection server is mainly for the initialization of tcp, br, and ble.
  * This interface is only called once when the soft bus service is created.
  * @see {@link ConnServerDeinit}
- * @return <b>SOFTBUS_ERR</b> Repeated initialization or creation of watchlist failed.
+ * @return <b>SOFTBUS_CODE_ERR</b> Repeated initialization or creation of watchlist failed.
  * @return <b>SOFTBUS_OK</b> Successfully initialized connection server
  */
 int32_t ConnServerInit(void);
@@ -322,7 +325,7 @@ uint32_t ConnGetNewRequestId(ConnModule moduleId);
  * @param[in] result Indicates a pointer to the connection request. For details, see {@link ConnectResult}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if the info is null.
  * @return <b>SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT</b> if the type is null or invalid.
- * @return <b>SOFTBUS_ERR</b> if the connection device function of type is null.
+ * @return <b>SOFTBUS_CODE_ERR</b> if the connection device function of type is null.
  * @return <b>SOFTBUS_OK</b> if the connection to the device is successfully.
  */
 int32_t ConnConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
@@ -383,7 +386,7 @@ int32_t ConnStartLocalListening(const LocalListenerInfo *info);
  * @param[in] requestId Request ID.
  * @param[in] result Indicates a pointer to the connection request. For details, see {@link ConnectResult}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if the info is null.
- * @return <b>SOFTBUS_ERR</b> if the connection device function of type is null.
+ * @return <b>SOFTBUS_CODE_ERR</b> if the connection device function of type is null.
  * @return <b>SOFTBUS_OK</b> if the connection to the device is successfully.
  */
 int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);

@@ -109,6 +109,9 @@ static void DelHmlListenerByMoudle(ListenerModule type)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (item->moudleType == type) {
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL,
+                "del hmlListener port=%{public}d, listenerModule=%{public}d",
+                item->myPort, (int32_t)item->moudleType);
             SoftBusFree(item);
             g_hmlListenerList->cnt--;
             return;

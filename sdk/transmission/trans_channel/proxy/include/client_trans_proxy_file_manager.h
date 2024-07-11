@@ -125,6 +125,7 @@ typedef struct {
     ListNode node;
     int32_t sessionId;
     int32_t channelId;
+    int32_t osType;
     int32_t fileEncrypt;
     int32_t algorithm;
     int32_t crc;

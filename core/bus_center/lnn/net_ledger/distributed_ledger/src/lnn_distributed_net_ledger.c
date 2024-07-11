@@ -24,6 +24,7 @@
 
 #include "lnn_event.h"
 #include "anonymizer.h"
+#include "auth_common.h"
 #include "auth_deviceprofile.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
@@ -736,6 +737,11 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
             return SOFTBUS_MEM_ERR;
         }
+        if (strcpy_s(oldInfo->connectInfo.deviceIp, IP_LEN, info->connectInfo.deviceIp) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy ip fail!");
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_STRCPY_ERR;
+        }
         info->metaInfo.isMetaNode = true;
         info->metaInfo.metaDiscType = info->metaInfo.metaDiscType | temp.metaDiscType;
     }
@@ -749,10 +755,10 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
+int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type)
 {
     NodeInfo *info = NULL;
-    DiscoveryType discType = LnnConvAddrTypeToDiscType(type);
+    DiscoveryType discType = ConvertToDiscoveryType(type);
     if (discType == DISCOVERY_TYPE_COUNT) {
         LNN_LOGE(LNN_LEDGER, "DeleteMetaInfo type error fail!");
         return SOFTBUS_NETWORK_DELETE_INFO_ERR;
@@ -784,6 +790,14 @@ int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
 
 static void OnlinePreventBrConnection(const NodeInfo *info)
 {
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(info->networkId, &osType)) {
+        LNN_LOGE(LNN_BUILDER, "get remote osType fail");
+    }
+    if (osType != HO_OS_TYPE) {
+        LNN_LOGD(LNN_BUILDER, "not pend br connection");
+        return;
+    }
     const NodeInfo *localNodeInfo = LnnGetLocalNodeInfo();
     if (localNodeInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "get local node info fail");
@@ -795,7 +809,6 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "copy br mac fail");
         return;
     }
-
     bool preventFlag = false;
     do {
         LNN_LOGI(LNN_LEDGER, "check the ble start timestamp, local=%{public}" PRId64", peer=%{public}" PRId64"",
@@ -1013,6 +1026,7 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
         }
         // update lnn discovery type
         info->discoveryType |= oldInfo->discoveryType;
+        info->AuthTypeValue = oldInfo->AuthTypeValue;
         info->heartbeatTimestamp = oldInfo->heartbeatTimestamp;
         MergeLnnInfo(oldInfo, info);
         UpdateProfile(info);

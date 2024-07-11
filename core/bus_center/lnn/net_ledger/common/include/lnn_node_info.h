@@ -187,6 +187,8 @@ typedef struct {
     uint64_t bleDirectTimestamp;
     uint64_t onlinetTimestamp;
     uint64_t updateTimestamp;
+    bool isSupportIpv6;
+    uint32_t stateVersionReason;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
