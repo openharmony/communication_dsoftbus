@@ -1143,12 +1143,11 @@ static void CleanupPublishDiscovery(ListNode *ids, ServiceType type)
     LIST_FOR_EACH_ENTRY(it, ids, IdContainer, node) {
         if (type == PUBLISH_SERVICE) {
             ret = DiscUnPublishService(it->pkgName, it->id);
-            DISC_LOGE(DISC_CONTROL, "clean publish pkgName=%{public}s, id=%{public}d, ret=%{public}d",
+            DISC_LOGI(DISC_CONTROL, "clean publish pkgName=%{public}s, id=%{public}d, ret=%{public}d",
                 it->pkgName, it->id, ret);
-            return;
         } else if (type == SUBSCRIBE_SERVICE) {
             ret = DiscStopDiscovery(it->pkgName, it->id);
-            DISC_LOGE(DISC_CONTROL, "clean subscribe pkgName=%{public}s, id=%{public}d, ret=%{public}d",
+            DISC_LOGI(DISC_CONTROL, "clean subscribe pkgName=%{public}s, id=%{public}d, ret=%{public}d",
                 it->pkgName, it->id, ret);
         }
     }
