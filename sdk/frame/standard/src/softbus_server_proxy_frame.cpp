@@ -129,7 +129,9 @@ static int32_t ServerProxyInit(void)
         if (g_serverProxy == nullptr) {
             return SOFTBUS_IPC_ERR;
         }
-        if (g_oldServerProxy != nullptr && g_oldServerProxy == g_serverProxy) {
+
+        if (g_serverProxy == g_oldServerProxy) {
+            g_serverProxy = nullptr;
             COMM_LOGE(COMM_SDK, "g_serverProxy not update\n");
             return SOFTBUS_IPC_ERR;
         }
