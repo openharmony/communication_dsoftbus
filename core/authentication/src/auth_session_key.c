@@ -314,8 +314,8 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32
     latestKey->lastUseTime = GetCurrentTimeMs();
     latestKey->useTime[type] = latestKey->lastUseTime;
     *index = latestKey->index;
-    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, type=%{public}u, time=%{public}" PRIu64,
-        latestKey->index, latestKey->type, latestKey->lastUseTime);
+    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, authtype=%{public}d, keytype=%{public}u, "
+        "time=%{public}" PRIu64, latestKey->index, type, latestKey->type, latestKey->lastUseTime);
     return SOFTBUS_OK;
 }
 

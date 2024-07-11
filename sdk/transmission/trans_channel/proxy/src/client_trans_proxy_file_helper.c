@@ -216,7 +216,7 @@ int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame, uint3
         TRANS_LOGE(TRANS_FILE, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
+    if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT && info->osType == OH_TYPE) {
         if (fileFrame->frameLength <= FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + FRAME_CRC_LEN) {
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;

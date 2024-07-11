@@ -16,9 +16,10 @@
 #define ENTITY_FACTORY_H
 
 #include <functional>
+
 #include "data/inner_link.h"
-#include "wifi_direct_entity.h"
-#include "p2p_entity.h"
+#include "entity/p2p_entity.h"
+#include "entity/wifi_direct_entity.h"
 
 namespace OHOS::SoftBus {
 class EntityFactory {

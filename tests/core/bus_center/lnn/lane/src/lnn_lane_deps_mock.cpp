@@ -150,7 +150,7 @@ int32_t LaneDepsInterfaceMock::ActionOfConnOpened(const AuthConnInfo *info, uint
 {
     AuthHandle authHandle = {
         .authId = 0,
-        .type = AUTH_LINK_TYPE_P2P,
+        .type = (info == nullptr) ? AUTH_LINK_TYPE_P2P : info->type,
     };
     callback->onConnOpened(requestId, authHandle);
     return SOFTBUS_OK;
@@ -380,6 +380,17 @@ struct WifiDirectManager* GetWifiDirectManager(void)
     return GetLaneDepsInterface()->GetWifiDirectManager();
 }
 
+int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+    char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    return GetLaneDepsInterface()->LnnConvertDlId(srcId, srcIdType, dstIdType, dstIdBuf, dstIdBufLen);
+}
+
+void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle)
+{
+    GetLaneDepsInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
+}
+
 void LnnDumpLocalBasicInfo(void)
 {
     GetLaneDepsInterface()->LnnDumpLocalBasicInfo();
@@ -388,6 +399,26 @@ void LnnDumpLocalBasicInfo(void)
 void LnnDumpOnlineDeviceInfo(void)
 {
     GetLaneDepsInterface()->LnnDumpOnlineDeviceInfo();
+}
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetLaneDepsInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
+
+void DeleteNetworkResourceByLaneId(uint64_t laneId)
+{
+    GetLaneDepsInterface()->DeleteNetworkResourceByLaneId(laneId);
+}
+
+int SoftBusGetBtState(void)
+{
+    return GetLaneDepsInterface()->SoftBusGetBtState();
+}
+
+int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    return GetLaneDepsInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
 }
 }
 } // namespace OHOS

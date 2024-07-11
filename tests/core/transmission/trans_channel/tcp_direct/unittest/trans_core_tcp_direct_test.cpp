@@ -598,9 +598,6 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedBySessionConnTest0018, T
     (void)strcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName);
     (void)strcpy_s(conn->appInfo.myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName);
 
-    ret = TransTdcAddSessionConn(conn);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
     ret = NotifyChannelOpenFailedBySessionConn(conn, errCode);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
 
@@ -612,5 +609,73 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedBySessionConnTest0018, T
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransSessionMgrDeinit();
     SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: TcpChannelInfoTest001
+ * @tc.desc: test TcpChannelInfo with invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TcpChannelInfoTest001, TestSize.Level1)
+{
+    int32_t ret = TransAddTcpChannelInfo(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: CreateTcpChannelInfoListTest
+ * @tc.desc: test function of CreateTcpChannelInfoList.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, CreateTcpChannelInfoListTest, TestSize.Level1)
+{
+    // test g_tcpChannelInfoList is null
+    int32_t ret = CreateTcpChannelInfoList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    // test g_tcpChannelInfoList is not null
+    ret = CreateTcpChannelInfoList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TcpChannelInfoTest002
+ * @tc.desc: test TcpChannelInfo with valid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TcpChannelInfoTest002, TestSize.Level1)
+{
+    TcpChannelInfo *info = (TcpChannelInfo *)SoftBusCalloc(sizeof(TcpChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    info->channelId = 1;
+    info->businessType = BUSINESS_TYPE_BYTE;
+    int32_t ret = TransAddTcpChannelInfo(info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_FALSE(IsTdcRecoveryTransLimit());
+    ret = TransDelTcpChannelInfoByChannelId(info->channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(IsTdcRecoveryTransLimit());
+    int32_t invalidChannelId = 2;
+    ret = TransDelTcpChannelInfoByChannelId(invalidChannelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
+}
+
+/**
+ * @tc.name: CreateTcpChannelInfoTest
+ * @tc.desc: test CreateTcpChannelInfoTest.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, CreateTcpChannelInfoTest, TestSize.Level1)
+{
+    ChannelInfo channel;
+    channel.channelId = 1;
+    channel.businessType = BUSINESS_TYPE_BYTE;
+    TcpChannelInfo *info = CreateTcpChannelInfo(&channel);
+    ASSERT_TRUE(info != nullptr);
+    SoftBusFree(info);
 }
 }

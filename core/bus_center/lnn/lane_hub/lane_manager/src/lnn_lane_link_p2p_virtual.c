@@ -23,11 +23,11 @@ int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const Lane
     (void)callback;
     return SOFTBUS_P2P_NOT_SUPPORT;
 }
-void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
+int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
 {
     (void)networkId;
     (void)laneReqId;
-    return;
+    return SOFTBUS_P2P_NOT_SUPPORT;
 }
 void LnnDestroyP2p(void)
 {
@@ -35,6 +35,25 @@ void LnnDestroyP2p(void)
 }
 
 void LnnCancelWifiDirect(uint32_t laneReqId)
+{
+    (void)laneReqId;
+    return;
+}
+
+int32_t CheckIsAuthSessionServer(const char *peerIp, bool *isServer)
+{
+    (void)peerIp;
+    (void)isServer;
+    return SOFTBUS_P2P_NOT_SUPPORT;
+}
+
+int32_t RemoveAuthSessionServer(const char *peerIp)
+{
+    (void)peerIp;
+    return SOFTBUS_P2P_NOT_SUPPORT;
+}
+
+void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId)
 {
     (void)laneReqId;
     return;

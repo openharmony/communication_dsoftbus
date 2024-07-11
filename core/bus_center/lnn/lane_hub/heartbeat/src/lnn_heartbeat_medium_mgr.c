@@ -37,6 +37,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_lane_vap_info.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
@@ -52,6 +53,7 @@
 #define HB_RECV_INFO_SAVE_LEN (60 * 60 * HB_TIME_FACTOR)
 #define HB_REAUTH_TIME        (10 * HB_TIME_FACTOR)
 #define HB_DFX_DELAY_TIME     (7 * HB_TIME_FACTOR)
+#define PC_RESTRICT_TIME    3
 typedef struct {
     ListNode node;
     DeviceInfo *device;
@@ -118,6 +120,7 @@ static int32_t HbSaveRecvTimeToRemoveRepeat(
         storedInfo->lastRecvTime = recvTime;
         storedInfo->weight = weight != 0 ? weight : storedInfo->weight;
         storedInfo->masterWeight = masterWeight;
+        storedInfo->device->isOnline = device->isOnline;
         return SOFTBUS_OK;
     }
     int32_t ret = HbFirstSaveRecvTime(storedInfo, device, weight, masterWeight, recvTime);
@@ -132,6 +135,9 @@ static int32_t HbSaveRecvTimeToRemoveRepeat(
 
 static uint64_t HbGetRepeatThresholdByType(LnnHeartbeatType hbType)
 {
+    if (LnnIsMultiDeviceOnline()) {
+        return HB_REPEAD_RECV_THRESHOLD_MULTI_DEVICE;
+    }
     switch (hbType) {
         case HEARTBEAT_TYPE_BLE_V0:
             return HB_REPEAD_RECV_THRESHOLD;
@@ -152,6 +158,10 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGD(LNN_HEART_BEAT, "get nodeInfo fail");
+        return;
+    }
+    if (nodeInfo.deviceInfo.deviceTypeId == TYPE_PC_ID) {
+        LNN_LOGI(LNN_HEART_BEAT, "winpc no need update netCapacity");
         return;
     }
     uint32_t oldNetCapa = nodeInfo.netCapacity;
@@ -303,12 +313,19 @@ static LnnHeartbeatRecvInfo *HbGetStoredRecvInfo(const char *udidHash, Connectio
     return NULL;
 }
 
-static bool HbIsRepeatedRecvInfo(LnnHeartbeatType hbType, const LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
+static bool HbIsRepeatedRecvInfo(
+    LnnHeartbeatType hbType, const LnnHeartbeatRecvInfo *storedInfo, DeviceInfo *device, uint64_t nowTime)
 {
     if (storedInfo == NULL) {
         return false;
     }
-    return nowTime - storedInfo->lastRecvTime < HbGetRepeatThresholdByType(hbType);
+    if (nowTime - storedInfo->lastRecvTime >= HbGetRepeatThresholdByType(hbType)) {
+        return false;
+    }
+    if (!storedInfo->device->isOnline && device->isOnline) {
+        return false;
+    }
+    return true;
 }
 
 static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
@@ -377,6 +394,7 @@ static bool IsLocalSupportThreeState()
 
 static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *hbResp)
 {
+    uint32_t oldNetCapa = *deviceInfoNetCapacity;
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI);
     } else {
@@ -395,9 +413,29 @@ static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *
         (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
     }
     (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
+    LNN_LOGI(LNN_HEART_BEAT, "capability change:%{public}u->%{public}u", oldNetCapa, *deviceInfoNetCapacity);
 }
 
-static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
+static bool IsStateVersionChanged(
+    const HbRespData *hbResp, const NodeInfo *deviceInfo, int32_t *stateVersion, ConnectOnlineReason *connectReason)
+{
+    if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, stateVersion) == SOFTBUS_OK &&
+        *stateVersion != deviceInfo->localStateVersion) {
+        *connectReason = LOCAL_STATE_VERSION_CHANGED;
+        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because local stateVersion=%{public}d->%{public}d",
+            deviceInfo->localStateVersion, *stateVersion);
+        return true;
+    }
+    if ((int32_t)hbResp->stateVersion != deviceInfo->stateVersion) {
+        *connectReason = PEER_STATE_VERSION_CHANGED;
+        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because peer stateVersion=%{public}d->%{public}d",
+            deviceInfo->stateVersion, (int32_t)hbResp->stateVersion);
+        return true;
+    }
+    return false;
+}
+
+static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because resp data");
@@ -413,35 +451,32 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     }
     if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK ||
         strlen(deviceInfo.connectInfo.macAddr) == 0) {
-        LNN_LOGI(LNN_HEART_BEAT,
-            "don't support ble direct online because retrieve fail, stateVersion=%{public}d->%{public}d",
-            deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
+        *connectReason = BLE_FIRST_CONNECT;
+        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because retrieve fail, "
+            "stateVersion=%{public}d->%{public}d", deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
         return true;
     }
-    if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK &&
-        stateVersion != deviceInfo.localStateVersion) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because local stateVersion=%{public}d->%{public}d",
-            deviceInfo.localStateVersion, stateVersion);
-        return true;
-    }
-    if ((int32_t)hbResp->stateVersion != deviceInfo.stateVersion) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because peer stateVersion=%{public}d->%{public}d",
-            deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
+    if (IsStateVersionChanged(hbResp, &deviceInfo, &stateVersion, connectReason)) {
+        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because state version change");
         return true;
     }
     AuthDeviceKeyInfo keyInfo = { 0 };
     if ((!IsCloudSyncEnabled() || !IsFeatureSupport(deviceInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) &&
         AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
         AuthFindLatestNormalizeKey(device->devId, &keyInfo, true) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
+        *connectReason = DEVICEKEY_NOT_EXISTED;
+        LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
         return true;
     }
+    (void)memset_s(&keyInfo, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     SetDeviceNetCapability(&deviceInfo.netCapacity, hbResp);
     if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
+        *connectReason = UPDATE_REMOTE_DEVICE_INFO_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret=%{public}d", ret);
         return true;
     }
     if ((deviceInfo.deviceInfo.osType == OH_OS_TYPE) && (!IsCipherManagerFindKey(deviceInfo.deviceInfo.deviceUdid))) {
+        *connectReason = FIND_REMOTE_CIPHERKEY_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because broadcast key");
         return true;
     }
@@ -504,7 +539,9 @@ static void CopyBleReportExtra(const LnnBleReportExtra *bleExtra, LnnEventExtra 
     extra->localUdidHash = bleExtra->extra.localUdidHash;
     extra->peerUdidHash = bleExtra->extra.peerUdidHash;
     extra->osType = bleExtra->extra.osType;
+    extra->localDeviceType = bleExtra->extra.localDeviceType;
     extra->peerDeviceType = bleExtra->extra.peerDeviceType;
+    extra->connOnlineReason = bleExtra->extra.connOnlineReason;
     if (bleExtra->extra.peerNetworkId[0] != '\0') {
         extra->onlineType = bleExtra->extra.onlineType;
         extra->peerNetworkId = bleExtra->extra.peerNetworkId;
@@ -540,7 +577,7 @@ static void HbProcessDfxMessage(void *para)
     SoftBusFree(para);
 }
 
-static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
+static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device, bool *IsRestrict)
 {
     if (device == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "invalid param");
@@ -562,6 +599,11 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
             SoftBusFree(udidHash);
             return ret;
         }
+        uint32_t count = 0;
+        if (GetNodeFromPcRestrictMap(udidHash, &count) == SOFTBUS_OK && count == PC_RESTRICT_TIME) {
+            LNN_LOGI(LNN_HEART_BEAT, "restrict pc");
+            *IsRestrict = true;
+        }
         if (!IsExistLnnDfxNodeByUdidHash(udidHash, &bleExtra)) {
             ret = LnnAsyncCallbackDelayHelper(
                 GetLooper(LOOP_TYPE_DEFAULT), HbProcessDfxMessage, (void *)udidHash, HB_DFX_DELAY_TIME);
@@ -580,13 +622,15 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device)
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusNetNodeResult(DeviceInfo *device, HbRespData *hbResp, bool isConnect)
+static int32_t SoftBusNetNodeResult(
+    DeviceInfo *device, HbRespData *hbResp, bool isConnect, ConnectOnlineReason connectReason)
 {
     char *anonyUdid = NULL;
     Anonymize(device->devId, &anonyUdid);
     LNN_LOGI(LNN_HEART_BEAT,
-        "heartbeat(HB) find device, udidHash=%{public}s, ConnectionAddrType=%{public}02X, isConnect=%{public}d",
-        anonyUdid, device->addr[0].type, isConnect);
+        "heartbeat(HB) find device, udidHash=%{public}s, ConnectionAddrType=%{public}02X, isConnect=%{public}d, "
+        "connectReason=%{public}u",
+        anonyUdid, device->addr[0].type, isConnect, connectReason);
     AnonymizeFree(anonyUdid);
 
     if (isConnect) {
@@ -599,10 +643,17 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, HbRespData *hbResp, bool
     (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     if (hbResp != NULL) {
         info.osType = ((hbResp->capabiltiy & BLE_TRIGGER_HML) != 0) ? OH_OS_TYPE : HO_OS_TYPE;
+    } else {
+        info.osType = HO_OS_TYPE;
     }
     info.type = device->devType;
-    if (HbAddAsyncProcessCallbackDelay(device) != SOFTBUS_OK) {
+    info.bleConnectReason = connectReason;
+    bool IsRestrict = false;
+    if (HbAddAsyncProcessCallbackDelay(device, &IsRestrict) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HbAddAsyncProcessCallbackDelay fail");
+    }
+    if (IsRestrict) {
+        return SOFTBUS_NETWORK_PC_RESTRICT;
     }
     if (LnnNotifyDiscoveryDevice(device->addr, &info, isConnect) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
@@ -681,7 +732,7 @@ static void ProcessUdidAnonymize(char *devId)
 static int32_t CheckReceiveDeviceInfo(
     DeviceInfo *device, LnnHeartbeatType hbType, const LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
-    if (HbIsRepeatedRecvInfo(hbType, storedInfo, nowTime)) {
+    if (HbIsRepeatedRecvInfo(hbType, storedInfo, device, nowTime)) {
         LNN_LOGD(LNN_HEART_BEAT, "repeat receive info");
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
@@ -704,9 +755,71 @@ static int32_t CheckJoinLnnRequest(
     return SOFTBUS_OK;
 }
 
+static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
+{
+    if (device == NULL || hbResp == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "param is nullptr");
+        return;
+    }
+    int32_t infoNum = 0;
+    NodeBasicInfo *info = NULL;
+    char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    int32_t ret = LnnGetAllOnlineNodeInfo(&info, &infoNum);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get all online node info fail");
+        return;
+    }
+    if (info == NULL) {
+        LNN_LOGW(LNN_HEART_BEAT, "online info is null");
+        return;
+    }
+    if (infoNum == 0) {
+        LNN_LOGW(LNN_HEART_BEAT, "none online node");
+        SoftBusFree(info);
+        return;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    for (int32_t i = 0; i < infoNum; i++) {
+        if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+            LNN_LOGD(LNN_HEART_BEAT, "get nodeInfo fail");
+            continue;
+        }
+        if (LnnGenerateHexStringHash((const unsigned char *)nodeInfo.deviceInfo.deviceUdid, udidHash,
+            HB_SHORT_UDID_HASH_HEX_LEN) != SOFTBUS_OK) {
+            continue;
+        }
+        if (strncmp(udidHash, device->devId, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
+            LNN_LOGI(LNN_HEART_BEAT, "hbResp preChannelCode=%{public}d", hbResp->preferChannel);
+            (void)LnnAddRemoteChannelCode(nodeInfo.deviceInfo.deviceUdid, hbResp->preferChannel);
+            SoftBusFree(info);
+            return;
+        }
+    }
+    SoftBusFree(info);
+}
+
+static bool IsSupportCloudSync(DeviceInfo *device)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    uint64_t localFeature = 0;
+    if (LnnRetrieveDeviceInfo(device->devId, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync beacause retrive info fail");
+        return false;
+    }
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync beacause get local feature fail");
+        return false;
+    }
+    return IsFeatureSupport(localFeature, BIT_CLOUD_SYNC_DEVICE_INFO) &&
+        IsFeatureSupport(info.feature, BIT_CLOUD_SYNC_DEVICE_INFO);
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
+    ProcRespVapChange(device, hbResp);
     uint64_t nowTime = GetNowTime();
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
         return SOFTBUS_LOCK_ERR;
@@ -745,12 +858,16 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         return res;
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-    bool isConnect = IsNeedConnectOnLine(device, hbResp);
+    ConnectOnlineReason connectReason = CONNECT_INITIAL_VALUE;
+    bool isConnect = IsNeedConnectOnLine(device, hbResp, &connectReason);
     if (isConnect && !device->isOnline) {
+        if (IsSupportCloudSync(device)) {
+            return SOFTBUS_NETWORK_PEER_NODE_CONNECT;
+        }
         LNN_LOGD(LNN_HEART_BEAT, "ignore lnn request, not support connect");
         return SOFTBUS_NETWORK_NOT_CONNECTABLE;
     }
-    return SoftBusNetNodeResult(device, hbResp, isConnect);
+    return SoftBusNetNodeResult(device, hbResp, isConnect, connectReason);
 }
 
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,

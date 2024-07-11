@@ -860,8 +860,8 @@ HWTEST_F(TcpManagerTest, testTcpManager022, TestSize.Level1)
     ASSERT_NE(tcp, nullptr);
     int fd = -1;
     int port = tcp->GetSockPort(fd);
-    int ret = (port <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     LocalListenerInfo option = {
         .type = CONNECT_TCP,
@@ -874,7 +874,7 @@ HWTEST_F(TcpManagerTest, testTcpManager022, TestSize.Level1)
     };
 
     fd = tcp->OpenServerSocket(&option);
-    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
     port = tcp->GetSockPort(fd);
     EXPECT_EQ(port, CLIENTPORT);
@@ -1008,7 +1008,7 @@ HWTEST_F(TcpManagerTest, testTcpManager026, TestSize.Level1)
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
     int clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
-    int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    int ret = (clientfd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     int bytes = ConnSendSocketData(clientfd, nullptr, 10, 0);
@@ -1048,7 +1048,7 @@ HWTEST_F(TcpManagerTest, testTcpManager027, TestSize.Level1)
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
     int clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
-    int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    int ret = (clientfd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_TRUE(ConnGetSocketError(clientfd) != 0);
     ConnCloseSocket(clientfd);
@@ -1660,7 +1660,7 @@ HWTEST_F(TcpManagerTest, testTcpManager049, TestSize.Level1)
 
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_CONN_FAIL, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
@@ -1713,8 +1713,8 @@ HWTEST_F(TcpManagerTest, testTcpManager051, TestSize.Level1)
     ASSERT_NE(tcp, nullptr);
     int fd = -1;
     int port = tcp->GetSockPort(fd);
-    int ret = (port <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     LocalListenerInfo option = {
         .type = CONNECT_TCP,
@@ -1727,7 +1727,7 @@ HWTEST_F(TcpManagerTest, testTcpManager051, TestSize.Level1)
     };
 
     fd = tcp->OpenServerSocket(&option);
-    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
     port = tcp->GetSockPort(fd);
     EXPECT_EQ(port, CLIENTPORT);

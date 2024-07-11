@@ -1380,9 +1380,9 @@ HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
 {
     int32_t ret;
     AuthTransCallback callBack = {
-        .OnDataReceived = AuthOnDataReceivedTest,
-        .OnDisconnected = AuthOnDisconnectedTest,
-        .OnException = NULL,
+        .onDataReceived = AuthOnDataReceivedTest,
+        .onDisconnected = AuthOnDisconnectedTest,
+        .onException = NULL,
     };
     ret = AuthDeviceInit(&callBack);
     EXPECT_TRUE(ret == SOFTBUS_ERR);

@@ -47,11 +47,12 @@ OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
 OHOS::sptr<OHOS::IRemoteObject> g_oldServerProxy = nullptr;
 OHOS::sptr<OHOS::IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
 std::mutex g_mutex;
-uint32_t g_waitServerInterval = 2;
+constexpr uint32_t WAIT_SERVER_INTERVAL = 50;
 uint32_t g_getSystemAbilityId = 2;
 uint32_t g_printRequestFailedCount = 0;
-int32_t g_randomMax = 501; // range of random numbers is (0, 500ms)
-constexpr uint32_t g_printInterval = 200;
+constexpr int32_t RANDOM_RANGE_MAX = 501; // range of random numbers is (0, 500ms)
+constexpr uint32_t PRINT_INTERVAL = 200;
+constexpr int32_t CYCLE_NUMBER_MAX = 100;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
@@ -59,7 +60,7 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
 {
     srand(time(nullptr));
     int32_t randomNum = rand();
-    int32_t scaledNum = randomNum % g_randomMax;
+    int32_t scaledNum = randomNum % RANDOM_RANGE_MAX;
 
     // Prevent high-concurrency conflicts
     std::this_thread::sleep_for(std::chrono::milliseconds(scaledNum));
@@ -77,7 +78,7 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
     uint32_t clientNameNum = GetSoftBusClientNameList(clientName, SOFTBUS_PKGNAME_MAX_NUM);
     if (clientNameNum == 0) {
         COMM_LOGE(COMM_SDK, "get client name failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_GET_CLIENT_NAME_FAILED;
     }
     for (uint32_t i = 0; i < clientNameNum; i++) {
         while (serverProxyFrame->SoftbusRegisterService(clientName[i], nullptr) != SOFTBUS_OK) {
@@ -90,7 +91,7 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
         COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!\n");
         return ret;
     }
-    COMM_LOGI(COMM_SDK, "softbus server register service success!\n");
+    COMM_LOGD(COMM_SDK, "softbus server register service success!\n");
     return SOFTBUS_OK;
 }
 
@@ -112,7 +113,7 @@ static OHOS::sptr<OHOS::IRemoteObject> GetSystemAbility()
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        if ((++g_printRequestFailedCount) % g_printInterval == 0) {
+        if ((++g_printRequestFailedCount) % PRINT_INTERVAL == 0) {
             COMM_LOGD(COMM_EVENT, "Get GetSystemAbility failed!");
         }
         return nullptr;
@@ -126,22 +127,22 @@ static int32_t ServerProxyInit(void)
     if (g_serverProxy == nullptr) {
         g_serverProxy = GetSystemAbility();
         if (g_serverProxy == nullptr) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_IPC_ERR;
         }
         if (g_oldServerProxy != nullptr && g_oldServerProxy == g_serverProxy) {
             COMM_LOGE(COMM_SDK, "g_serverProxy not update\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_IPC_ERR;
         }
 
         g_clientDeath =
             OHOS::sptr<OHOS::IRemoteObject::DeathRecipient>(new (std::nothrow) OHOS::SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
             COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
         }
         if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
             COMM_LOGE(COMM_SDK, "AddDeathRecipient failed\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
         }
     }
     return SOFTBUS_OK;
@@ -154,7 +155,7 @@ static RestartEventCallback g_restartMetaCallback = nullptr;
 static void RestartEventNotify(void)
 {
     if (g_restartEventCallback == nullptr) {
-        COMM_LOGI(COMM_SDK, "Restart event notify is not used!\n");
+        COMM_LOGD(COMM_SDK, "Restart event notify is not used!\n");
         return;
     }
     if (g_restartEventCallback() != SOFTBUS_OK) {
@@ -162,13 +163,13 @@ static void RestartEventNotify(void)
         COMM_LOGE(COMM_SDK, "Restart event notify failed!\n");\
         return;
     }
-    COMM_LOGI(COMM_SDK, "Restart event notify success!\n");
+    COMM_LOGD(COMM_SDK, "Restart event notify success!\n");
 }
 
 static void RestartMetaNotify(void)
 {
     if (g_restartMetaCallback == nullptr) {
-        COMM_LOGI(COMM_SDK, "Restart meta notify is not used!\n");
+        COMM_LOGD(COMM_SDK, "Restart meta notify is not used!\n");
         return;
     }
     if (g_restartMetaCallback() != SOFTBUS_OK) {
@@ -176,7 +177,7 @@ static void RestartMetaNotify(void)
         COMM_LOGE(COMM_SDK, "Restart meta notify failed!\n");\
         return;
     }
-    COMM_LOGI(COMM_SDK, "Restart meta notify success!\n");
+    COMM_LOGD(COMM_SDK, "Restart meta notify success!\n");
 }
 
 void ClientDeathProcTask(void)
@@ -197,11 +198,16 @@ void ClientDeathProcTask(void)
     ListInit(&sessionServerInfoList);
     ClientCleanAllSessionWhenServerDeath(&sessionServerInfoList);
 
-    while (true) {
+    int32_t cnt = 0;
+    for (cnt = 0; cnt < CYCLE_NUMBER_MAX; cnt++) {
         if (ServerProxyInit() == SOFTBUS_OK) {
             break;
         }
-        SoftBusSleepMs(g_waitServerInterval);
+        SoftBusSleepMs(WAIT_SERVER_INTERVAL);
+    }
+    if (cnt == CYCLE_NUMBER_MAX) {
+        COMM_LOGE(COMM_SDK, "server proxy init reached the maximum count=%{public}d", cnt);
+        return;
     }
     DiscServerProxyInit();
     TransServerProxyInit();
@@ -212,6 +218,7 @@ void ClientDeathProcTask(void)
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
+    RestartRegDataLevelChange();
 }
 
 void RestartEventCallbackUnregister(void)
@@ -228,7 +235,7 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
 {
     if (callback == nullptr) {
         COMM_LOGE(COMM_SDK, "Restart event callback register param is invalid!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_restartEventCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
@@ -239,28 +246,18 @@ int32_t RestartMetaCallbackRegister(RestartEventCallback callback)
 {
     if (callback == nullptr) {
         COMM_LOGE(COMM_SDK, "Restart meta callback register param is invalid!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_restartMetaCallback = callback;
-    COMM_LOGI(COMM_SDK, "Restart meta callback register success!\n");
+    COMM_LOGD(COMM_SDK, "Restart meta callback register success!\n");
     return SOFTBUS_OK;
-}
-
-static bool g_deathRecipientFlag = true;
-void SetDeathRecipientFlag(bool flag)
-{
-    g_deathRecipientFlag = flag;
 }
 
 int32_t ClientStubInit(void)
 {
-    if (!g_deathRecipientFlag) {
-        g_serverProxy = g_serverProxy == nullptr ? GetSystemAbility() : g_serverProxy;
-        return SOFTBUS_OK;
-    }
     if (ServerProxyInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }
@@ -281,6 +278,6 @@ int ClientRegisterService(const char *pkgName)
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
     }
 
-    COMM_LOGI(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
+    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
     return SOFTBUS_OK;
 }

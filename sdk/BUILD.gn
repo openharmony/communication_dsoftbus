@@ -82,8 +82,10 @@ config("dsoftbus_sdk_interface") {
   }
 
   if (schema_enhanced) {
-    include_dirs +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport" ]
+    include_dirs += [
+      "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport",
+      "$dsoftbus_root_path/core/transmission/common/include",
+    ]
   }
 }
 

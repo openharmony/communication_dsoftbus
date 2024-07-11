@@ -98,7 +98,6 @@ SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
 int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
     uint32_t len, ProxyPacketType flags)
 {
-    int32_t seq = 0;
     ConnectType type = 0;
 
     if ((data == NULL) || (len == 0)) {
@@ -117,10 +116,9 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
     }
     (void)memset_s(chanInfo->appInfo.sessionKey, sizeof(chanInfo->appInfo.sessionKey), 0,
         sizeof(chanInfo->appInfo.sessionKey));
-    TRANS_LOGI(TRANS_MSG, "send msg len=%{public}d, seq=%{public}d, flags=%{public}d", len, seq, flags);
     int32_t ret = TransProxyTransDataSendMsg(chanInfo, data, len, flags);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "TransProxyTransDataSendMsg fail. ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_MSG, "send msg fail, len=%{public}u, flags=%{public}d, ret=%{public}d", len, flags, ret);
     }
 
     if (ConnGetTypeByConnectionId(chanInfo->connId, &type) != SOFTBUS_OK) {
@@ -226,14 +224,13 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t chann
         TRANS_LOGE(TRANS_MSG, "data or pkgname is null.");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_MSG,
-        "channelId=%{public}d recv normal msg input len=%{public}d, pid=%{public}d", channelId, len, pid);
     TransReceiveData receiveData;
     receiveData.data = (void *)data;
     receiveData.dataLen = len;
 
     int32_t ret = NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "notify receive msg received err");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_MSG, "msg receive err, channelId=%{public}d, len=%{public}u, pid=%{public}d", channelId, len, pid);
 
     return SOFTBUS_OK;
 }

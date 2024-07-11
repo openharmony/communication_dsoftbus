@@ -354,6 +354,7 @@ static void LnnHandlerGetDeviceName(DeviceNameType type, const char *name)
     } else {
         LNN_LOGW(LNN_BUILDER, "invalid type=%{public}d", type);
     }
+    LnnNotifyLocalNetworkIdChanged();
 }
 
 static void UpdataLocalFromSetting(void *p)
@@ -403,6 +404,7 @@ static void UpdataLocalFromSetting(void *p)
     }
     RegisterNameMonitor();
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
+    LnnNotifyLocalNetworkIdChanged();
     LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
         "unifiedDefaultName=%{public}s, nickName=%{public}s", deviceName, unifiedName, unifiedDefaultName, nickName);
 }
