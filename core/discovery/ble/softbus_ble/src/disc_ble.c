@@ -355,7 +355,7 @@ static int32_t GetScannerFilterType(void)
     } else if (conScanCapBit != 0 && nonScanCapBit == 0) {
         type = CON_FILTER_TYPE;
     } else if (conScanCapBit == 0 && nonScanCapBit != 0) {
-        type = CON_FILTER_TYPE;
+        type = NON_FILTER_TYPE;
     }
     return type;
 }
