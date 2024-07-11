@@ -15,7 +15,7 @@
 #ifndef COC_PROXY_NEGOTIATE_CHANNEL_H
 #define COC_PROXY_NEGOTIATE_CHANNEL_H
 
-#include "negotiate_channel.h"
+#include "channel/negotiate_channel.h"
 #include "wifi_direct_initiator.h"
 
 namespace OHOS::SoftBus {

@@ -367,7 +367,7 @@ HWTEST_F(WifiDirectManagerCppTest, IsNegotiateChannelNeededTest, TestSize.Level1
     char uuid[UUID_BUF_LEN] = "0123456789ABCDEF";
     WifiDirectInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetRemoteStrInfo(_, _, _, _))
-        .WillRepeatedly([&uuid](const char *netWorkId, InfoKey key, char *info, uint32_t len) {
+        .WillRepeatedly([&uuid](const std::string &netWorkId, InfoKey key, char *info, uint32_t len) {
             if (strcpy_s(info, UUID_BUF_LEN, uuid) != EOK) {
                 return SOFTBUS_STRCPY_ERR;
             }
