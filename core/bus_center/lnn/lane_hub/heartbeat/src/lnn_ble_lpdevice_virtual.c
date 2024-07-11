@@ -34,7 +34,12 @@ void UpdateLocalDeviceInfoToMlps(const NodeInfo *localInfo)
     (void)localInfo;
 }
 
-void UpdateRemoteDeviceInfoToMlps(void)
+void UpdateRemoteDeviceInfoToMlps(const NodeInfo *info)
+{
+    (void)info;
+}
+
+void UpdateRemoteDeviceInfoListToMlps(void)
 {
 }
 
