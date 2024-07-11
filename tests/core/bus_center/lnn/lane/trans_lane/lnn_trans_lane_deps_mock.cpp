@@ -145,6 +145,7 @@ uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkT
 int32_t LaneCapCheck(const char *networkId, LaneLinkType linkType)
 {
     return GetTransLaneIf()->LaneCapCheck(networkId, linkType);
+}
 
 int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, int32_t *laneNum)
 {
