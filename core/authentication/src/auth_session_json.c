@@ -1852,6 +1852,10 @@ char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version
     const char *remoteUuid, const AuthSessionInfo *info)
 {
     // uuid and info is null in meta, no need check param
+    if (connInfo == NULL) {
+        AUTH_LOGE(AUTH_FSM, "conninfo is null");
+        return NULL;
+    }
     AUTH_LOGI(AUTH_FSM, "connType=%{public}d", connInfo->type);
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
     if (nodeInfo == NULL) {
