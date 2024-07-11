@@ -42,6 +42,8 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
 int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
     LanePreferredLinkList *recommendList);
 
+int32_t LaneCapCheck(const char *networkId, LaneLinkType linkType);
+
 #ifdef __cplusplus
 }
 #endif
