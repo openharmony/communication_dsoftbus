@@ -197,6 +197,7 @@
         "TransUdpChannelSendStream";
         "ServerIpcDeactiveMetaNode";
         "LnnOnNodeBasicInfoChanged";
+        "LnnOnLocalNetworkIdChanged";
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
         "ReadSessionLinkType";
@@ -430,9 +431,9 @@
         "DiscRecoveryPublish";
         "DiscRecoverySubscribe";
         "DiscRecoveryPolicy";
+        "RestartRegDataLevelChange";
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
-        "SetDeathRecipientFlag";
         "LnnOnDataLevelChanged";
         "SoftBusFtInit";
         "SoftBusFtDestroyNonblock";

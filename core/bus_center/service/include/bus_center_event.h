@@ -53,6 +53,7 @@ typedef enum {
     LNN_EVENT_NODE_HB_REPEAT_CYCLE,
     LNN_EVENT_NETWORKID_CHANGED,
     LNN_EVENT_LP_EVENT_REPORT,
+    LNN_EVENT_LANE_VAP_CHANGE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -94,6 +95,7 @@ typedef enum {
 
 typedef enum {
     SOFTBUS_SCREEN_LOCK,
+    SOFTBUS_USER_UNLOCK,
     SOFTBUS_SCREEN_UNLOCK,
     SOFTBUS_SCREEN_LOCK_UNKNOWN,
 } SoftBusScreenLockState;
@@ -227,6 +229,11 @@ typedef struct {
     SoftBusLpEventType type;
 } LnnLpReportEvent;
 
+typedef struct {
+    LnnEventBasicInfo basic;
+    int32_t vapPreferChannel;
+} LnnLaneVapChangeEvent;
+
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 int32_t LnnInitBusCenterEvent(void);
@@ -241,6 +248,7 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
+void LnnNotifyLocalNetworkIdChanged(void);
 void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info);
 
 void LnnNotifyWlanStateChangeEvent(void *state);
@@ -275,6 +283,8 @@ void LnnNotifyLpReportEvent(SoftBusLpEventType type);
 void LnnNotifyHBRepeat(void);
 
 void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state);
+
+void LnnNotifyVapInfoChangeEvent(int32_t preferChannel);
 
 #ifdef __cplusplus
 }

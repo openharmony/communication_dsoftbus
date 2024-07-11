@@ -342,6 +342,12 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel)
     }
     tcpChannelInfo->channelId = channel->channelId;
     tcpChannelInfo->businessType = channel->businessType;
+    tcpChannelInfo->connectType = channel->connectType;
+    if (strcpy_s(tcpChannelInfo->myIp, IP_LEN, channel->myIp) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "failed to strcpy myIp, channelId=%{public}d", channel->channelId);
+        SoftBusFree(tcpChannelInfo);
+        return NULL;
+    }
     return tcpChannelInfo;
 }
 
@@ -365,6 +371,43 @@ int32_t TransAddTcpChannelInfo(TcpChannelInfo *info)
     (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
     TRANS_LOGI(TRANS_CTRL, "TcpChannelInfo add success, channelId=%{public}d.", info->channelId);
     return SOFTBUS_OK;
+}
+
+int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+    int32_t *connectType)
+{
+    if (localIp == NULL || maxIpLen < IP_LEN || connectType == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_tcpChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    TcpChannelInfo *item = NULL;
+    TcpChannelInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
+        if (item->channelId == channelId) {
+            if (strcpy_s(localIp, maxIpLen, item->myIp) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "failed to strcpy localIp. channelId=%{public}d", channelId);
+                (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+                return SOFTBUS_MEM_ERR;
+            }
+            *connectType = item->connectType;
+            (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+    TRANS_LOGE(TRANS_CTRL, "TcpChannelInfo not found. channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 
 int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)

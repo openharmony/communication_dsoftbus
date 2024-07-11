@@ -19,7 +19,7 @@
 #include "trans_log.h"
 #include "trans_type.h"
 
-int32_t SetExtSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize)
+int32_t SetExtSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize)
 {
     (void)socket;
     (void)level;

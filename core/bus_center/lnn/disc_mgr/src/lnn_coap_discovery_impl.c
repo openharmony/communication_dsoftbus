@@ -33,6 +33,7 @@
 
 #define LNN_SHORT_HASH_LEN 8
 #define LNN_SHORT_HASH_HEX_LEN 16
+#define TYPE_PRINTER 0x09
 
 static LnnDiscoveryImplCallback g_callback;
 
@@ -88,7 +89,8 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     char *anonyDevId = NULL;
     Anonymize(device->devId, &anonyDevId);
     // devId format is hex hash string here
-    LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s", device->devName, anonyDevId);
+    LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s, devType=%{public}03X",
+        device->devName, anonyDevId, device->devType);
     if (!AuthIsPotentialTrusted(device)) {
         LNN_LOGW(LNN_BUILDER, "discovery device is not potential trusted, devId=%{public}s, "
             "accountHash=%{public}02X%{public}02X", anonyDevId, device->accountHash[0], device->accountHash[1]);
@@ -113,8 +115,12 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     LnnDfxDeviceInfoReport info;
     (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     info.type = device->devType;
-    if (g_callback.OnDeviceFound) {
-        g_callback.OnDeviceFound(&addr, &info);
+    if ((uint32_t)info.type == TYPE_PRINTER) {
+        LNN_LOGI(LNN_BUILDER, "restrict printer");
+        return;
+    }
+    if (g_callback.onDeviceFound) {
+        g_callback.onDeviceFound(&addr, &info);
     }
 }
 
@@ -170,6 +176,6 @@ int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)
         LNN_LOGE(LNN_BUILDER, "coap discovery callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    g_callback.OnDeviceFound = callback->OnDeviceFound;
+    g_callback.onDeviceFound = callback->onDeviceFound;
     return SOFTBUS_OK;
 }

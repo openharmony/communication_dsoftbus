@@ -83,8 +83,8 @@ void P2pDestroyGroupState::OnP2pStateChangeEvent(P2pState state)
     if (state == P2P_STATE_STARTED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "state is P2P_STATE_STARTED");
     } else {
-        timer_.Unregister(operation_->timerId_);
         if (operation_ != nullptr) {
+            timer_.Unregister(operation_->timerId_);
             result.errorCode_ = SOFTBUS_CONN_P2P_CONNECT_STATE_WIFI_STATE_NOT_STARTED;
             operation_->promise_.set_value(result);
         }
@@ -96,6 +96,10 @@ void P2pDestroyGroupState::OnP2pConnectionChangeEvent(
     const WifiP2pLinkedInfo &info, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    if (operation_ == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
+        return;
+    }
     timer_.Unregister(operation_->timerId_);
     P2pOperationResult result;
     if (groupInfo == nullptr) {

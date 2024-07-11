@@ -50,6 +50,7 @@
 #define FLAG_ACTIVE                        0
 #define AUTH_COUNT                         2
 #define DELAY_REG_DP_TIME                  10000
+#define RECV_DATA_WAIT_TIME                100
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
@@ -523,17 +524,21 @@ int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOu
     /* Check auth valid period */
     uint64_t currentTime = GetCurrentTimeMs();
     for (uint32_t i = 0; i < num; i++) {
-        if (auth[i] != NULL && !auth[i]->hasAuthPassed[connInfo->type]) {
+        if (auth[i] == NULL) {
+            continue;
+        }
+        if (!auth[i]->hasAuthPassed[connInfo->type]) {
             AUTH_LOGI(AUTH_CONN, "auth manager has not auth pass. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
+            continue;
         }
-        if (auth[i] != NULL &&
-            CheckSessionKeyListExistType(&auth[i]->sessionKeyList, connInfo->type) &&
+        if (CheckSessionKeyListExistType(&auth[i]->sessionKeyList, connInfo->type) &&
             GetLatestAvailableSessionKeyTime(&auth[i]->sessionKeyList, connInfo->type) == 0) {
             AUTH_LOGI(AUTH_CONN, "auth manager has not available key. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
+            continue;
         }
-        if (auth[i] != NULL && (currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD) && judgeTimeOut) {
+        if ((currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD) && judgeTimeOut) {
             AUTH_LOGI(AUTH_CONN, "auth manager timeout. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
         }
@@ -546,7 +551,7 @@ int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOu
         if (auth[i] == NULL) {
             continue;
         }
-        if (auth[i] != NULL && auth[i]->lastVerifyTime > maxVerifyTime) {
+        if (auth[i]->lastVerifyTime > maxVerifyTime) {
             authId = auth[i]->authId;
         }
     }
@@ -916,14 +921,10 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     AUTH_LOGE(AUTH_FSM, "SetAuthFailed: authSeq=%{public}" PRId64 ", requestId=%{public}u, reason=%{public}d", authSeq,
         info->requestId, reason);
     AuthManager *auth = NULL;
-    if (reason == SOFTBUS_AUTH_DEVICE_DISCONNECTED || reason == SOFTBUS_AUTH_TIMEOUT) {
-        if (info->isSavedSessionKey) {
-            int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
-            auth = GetAuthManagerByAuthId(authId);
-            AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
-        }
-    } else {
-        auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    if (info->isSavedSessionKey) {
+        int64_t authId = GetAuthIdByConnId(info->connId, info->isServer);
+        auth = GetAuthManagerByAuthId(authId);
+        AUTH_LOGE(AUTH_FSM, "already save sessionkey, get auth mgr. authSeq=%{public}" PRId64, authSeq);
     }
     bool needDisconnect = true;
     if (auth != NULL && reason == SOFTBUS_AUTH_TIMEOUT && info->connInfo.type == AUTH_LINK_TYPE_WIFI
@@ -1276,6 +1277,7 @@ static void HandleConnectionData(
     if (!RequireAuthLock()) {
         return;
     }
+    char udid[UDID_BUF_LEN] = { 0 };
     AuthManager *auth = FindAuthManagerByConnInfo(connInfo, !fromServer);
     if (auth == NULL) {
         PrintAuthConnInfo(connInfo);
@@ -1303,9 +1305,18 @@ static void HandleConnectionData(
     auth->lastActiveTime = GetCurrentTimeMs();
     auth->connId[type] = connId;
     AuthHandle authHandle = { .authId = authId, .type = GetConnType(connId) };
+    int32_t ret = SOFTBUS_OK;
+    if (strcpy_s(udid, UDID_BUF_LEN, auth->udid) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy udid fail");
+        ret = SOFTBUS_MEM_ERR;
+    }
     ReleaseAuthLock();
-    if (g_transCallback.OnDataReceived != NULL) {
-        g_transCallback.OnDataReceived(authHandle, head, decData, decDataLen);
+    if (ret == SOFTBUS_OK && !LnnGetOnlineStateById(udid, CATEGORY_UDID)) {
+        AUTH_LOGE(AUTH_CONN, "device is offline, need wait");
+        (void)SoftBusSleepMs(RECV_DATA_WAIT_TIME);
+    }
+    if (g_transCallback.onDataReceived != NULL) {
+        g_transCallback.onDataReceived(authHandle, head, decData, decDataLen);
     }
     SoftBusFree(decData);
 }
@@ -1347,9 +1358,9 @@ static void HandleDecryptFailData(
         ReleaseAuthLock();
         AUTH_LOGE(AUTH_CONN, "decrypt trans data fail.");
     }
-    if (g_transCallback.OnException != NULL) {
+    if (g_transCallback.onException != NULL) {
         AUTH_LOGE(AUTH_CONN, "notify exception");
-        g_transCallback.OnException(authHandle, SOFTBUS_AUTH_DECRYPT_ERR);
+        g_transCallback.onException(authHandle, SOFTBUS_AUTH_DECRYPT_ERR);
     }
 }
 
@@ -1426,8 +1437,8 @@ static void HandleDisconnectedEvent(const void *para)
             continue;
         }
         AuthHandle authHandle = { .authId = authIds[i], .type = GetConnType(connId) };
-        if (g_transCallback.OnDisconnected != NULL) {
-            g_transCallback.OnDisconnected(authHandle);
+        if (g_transCallback.onDisconnected != NULL) {
+            g_transCallback.onDisconnected(authHandle);
         }
         if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_P2P ||
             GetConnType(connId) == AUTH_LINK_TYPE_ENHANCED_P2P) {

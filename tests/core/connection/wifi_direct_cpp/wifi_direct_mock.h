@@ -22,11 +22,14 @@
 #include "lnn_p2p_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "softbus_proxychannel_pipeline.h"
+#include "wifi_direct_types.h"
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_hid2d.h"
 #include "kits/c/wifi_p2p.h"
 #include <atomic>
 #include <gmock/gmock.h>
+
+#include "data/negotiate_message.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectInterface {
@@ -47,9 +50,9 @@ public:
     virtual uint64_t LnnGetFeatureCapabilty() = 0;
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
 
-    virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len) = 0;
-    virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
-    virtual int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info) = 0;
+    virtual int32_t LnnGetRemoteStrInfo(const std::string &networkId, InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnGetNetworkIdByUuid(const std::string &uuid, char *buf, uint32_t len) = 0;
+    virtual int32_t LnnGetRemoteBoolInfo(const std::string &networkId, InfoKey key, bool *info) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId) = 0;
@@ -89,6 +92,13 @@ public:
     virtual int32_t TransProxyPipelineGetUuidByChannelId(int32_t channelId, char *uuid, uint32_t uuidLen) = 0;
     virtual int32_t TransProxyPipelineSendMessage(
         int32_t channelId, const uint8_t *data, uint32_t dataLen, TransProxyPipelineMsgType type) = 0;
+
+    // connect result callback mock stub
+    virtual void OnConnectSuccess(uint32_t requestId, const struct WifiDirectLink *link) = 0;
+    virtual void OnConnectFailure(uint32_t requestId, int32_t reason) = 0;
+    // proxy negotiate channel mock stub
+    virtual int ProxyNegotiateChannelSendMessage(int32_t channelId, const NegotiateMessage &msg) const = 0;
+    virtual std::string ProxyNegotiateChannelGetRemoteDeviceId(int32_t channelId) const = 0;
 };
 
 class WifiDirectInterfaceMock : public WifiDirectInterface {
@@ -109,9 +119,10 @@ public:
     MOCK_METHOD(WifiErrorCode, Hid2dGetChannelListFor5G, (int *chanList, int len), (override));
     MOCK_METHOD(WifiErrorCode, GetP2pEnableStatus, (P2pState* state), (override));
     MOCK_METHOD(int32_t, LnnGetLocalStrInfo, (InfoKey, char*, uint32_t), (override));
-    MOCK_METHOD(int32_t, LnnGetRemoteStrInfo, (const char*, InfoKey, char*, uint32_t), (override));
-    MOCK_METHOD(int32_t, LnnGetNetworkIdByUuid, (const char *, char *, uint32_t), (override));
-    MOCK_METHOD(int32_t, LnnGetRemoteBoolInfo, (const char *, InfoKey, bool*), (override));
+    MOCK_METHOD(int32_t, LnnGetRemoteStrInfo, (const std::string &networkId, InfoKey key, char *info, uint32_t len),
+        (override));
+    MOCK_METHOD(int32_t, LnnGetNetworkIdByUuid, (const std::string &, char *, uint32_t), (override));
+    MOCK_METHOD(int32_t, LnnGetRemoteBoolInfo, (const std::string &, InfoKey, bool *), (override));
     MOCK_METHOD(bool, LnnGetOnlineStateById, (const char *, IdCategory), (override));
     MOCK_METHOD(void, AuthCloseConn, (AuthHandle), (override));
     MOCK_METHOD(void, AuthStopListeningForWifiDirect, (AuthLinkType, ListenerModule), (override));
@@ -153,6 +164,15 @@ public:
     MOCK_METHOD(int32_t, TransProxyPipelineGetUuidByChannelId, (int32_t, char *, uint32_t), (override));
     MOCK_METHOD(int32_t, TransProxyPipelineSendMessage,
         (int32_t, const uint8_t *, uint32_t, TransProxyPipelineMsgType), (override));
+
+    MOCK_METHOD(void, OnConnectSuccess, (uint32_t requestId, const struct WifiDirectLink *link), (override));
+    MOCK_METHOD(void, OnConnectFailure, (uint32_t requestId, int32_t reason), (override));
+
+    MOCK_METHOD(
+        int, ProxyNegotiateChannelSendMessage, (int32_t channelId, const NegotiateMessage &msg), (const override));
+    MOCK_METHOD(std::string, ProxyNegotiateChannelGetRemoteDeviceId, (int32_t channelId), (const override));
+
+    static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
 
     static WifiErrorCode RegisterP2pStateChangedCallback(const P2pStateChangedCallback callback);
     static WifiErrorCode RegisterP2pConnectionChangedCallback(const P2pConnectionChangedCallback callback);

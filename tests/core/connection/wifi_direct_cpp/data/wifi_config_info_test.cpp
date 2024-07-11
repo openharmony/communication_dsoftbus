@@ -92,6 +92,9 @@ HWTEST_F(WifiConfigInfoTest, GetInterfaceInfoTest, TestSize.Level1)
 
     ret = wifiCfg.GetInterfaceInfo("chba0");
     EXPECT_EQ(ret.GetName(), "chba0");
+
+    wifiCfg.SetDeviceId("test");
+    EXPECT_EQ(wifiCfg.GetDeviceId(), "test");
 }
 
 } // namespace OHOS::SoftBus

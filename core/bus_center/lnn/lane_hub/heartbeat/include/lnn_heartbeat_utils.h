@@ -32,29 +32,33 @@ extern "C" {
 #define HB_SHORT_ACCOUNT_HASH_LEN  2
 #define HB_FSM_NAME_LEN            32
 
-#define HB_TIME_FACTOR                  (1000LL)
-#define HB_START_DELAY_LEN              (10 * HB_TIME_FACTOR)
-#define HB_CLOUD_SYNC_DELAY_LEN         (15 * HB_TIME_FACTOR)
-#define HB_SEND_ONCE_LEN                (10 * HB_TIME_FACTOR)
-#define HB_SEND_RELAY_LEN               (2 * HB_TIME_FACTOR)
-#define HB_CHECK_DELAY_LEN              HB_SEND_ONCE_LEN
-#define HB_CHECK_OFFLINE_TOLERANCE_LEN  HB_SEND_ONCE_LEN
-#define HB_NOTIFY_DEV_LOST_DELAY_LEN    (2 * HB_TIME_FACTOR + 2 * HB_SEND_ONCE_LEN)
-#define HB_NOTIFY_MASTER_NODE_DELAY_LEN (2 * HB_TIME_FACTOR + HB_SEND_ONCE_LEN)
-#define HB_REPEAD_RECV_THRESHOLD        (1 * HB_TIME_FACTOR)
-#define HB_REPEAD_JOIN_LNN_THRESHOLD    (2 * HB_TIME_FACTOR)
-#define HB_OFFLINE_TIME                 (5 * 60 * HB_TIME_FACTOR + 2 * HB_SEND_ONCE_LEN)
-#define HB_SCREEN_ON_COAP_TIME          (3 * HB_TIME_FACTOR)
-#define HB_RESTART_LEN                  (3 * HB_TIME_FACTOR)
-#define HB_PERIOD_DUMP_LOCAL_INFO_LEN   (5 * 60 * HB_TIME_FACTOR)
-#define HB_OFFLINE_PERIOD               2
+#define HB_TIME_FACTOR                        (1000LL)
+#define HB_START_DELAY_LEN                    (10 * HB_TIME_FACTOR)
+#define HB_CLOUD_SYNC_DELAY_LEN               (13 * HB_TIME_FACTOR)
+#define HB_SEND_ONCE_LEN                      (10 * HB_TIME_FACTOR)
+#define HB_SEND_RELAY_LEN                     (1 * HB_TIME_FACTOR)
+#define HB_CHECK_DELAY_LEN                    HB_SEND_ONCE_LEN
+#define HB_CHECK_OFFLINE_TOLERANCE_LEN        HB_SEND_ONCE_LEN
+#define HB_NOTIFY_DEV_LOST_DELAY_LEN          (2 * HB_TIME_FACTOR + 2 * HB_SEND_ONCE_LEN)
+#define HB_NOTIFY_MASTER_NODE_DELAY_LEN       (2 * HB_TIME_FACTOR + HB_SEND_ONCE_LEN)
+#define HB_REPEAD_RECV_THRESHOLD              (1 * HB_TIME_FACTOR)
+#define HB_REPEAD_JOIN_LNN_THRESHOLD          (2 * HB_TIME_FACTOR)
+#define HB_REPEAD_RECV_THRESHOLD_MULTI_DEVICE (3 * HB_TIME_FACTOR)
+#define HB_OFFLINE_TIME                       (5 * 60 * HB_TIME_FACTOR + 2 * HB_SEND_ONCE_LEN)
+#define HB_SCREEN_ON_COAP_TIME                (3 * HB_TIME_FACTOR)
+#define HB_RESTART_LEN                        (3 * HB_TIME_FACTOR)
+#define HB_PERIOD_DUMP_LOCAL_INFO_LEN         (5 * 60 * HB_TIME_FACTOR)
+#define HB_SEND_RELAY_LEN_ONCE                (3 * HB_TIME_FACTOR)
+#define HB_OFFLINE_PERIOD                     2
 
 #define HB_SEND_EACH_SEPARATELY_LEN (2 * HB_TIME_FACTOR) // Split and send a single heartbeat
 #define HB_SEND_SEPARATELY_CNT      (HB_SEND_ONCE_LEN / HB_SEND_EACH_SEPARATELY_LEN)
 
-#define HB_MAX_TYPE_COUNT 6
+#define HB_MAX_TYPE_COUNT         6
+#define HB_MULTI_DEVICE_THRESHOLD 8
 
 // heartbeat type
+typedef uint32_t LnnHeartbeatType;
 #define HEARTBEAT_TYPE_MIN       (0x1L)
 #define HEARTBEAT_TYPE_UDP       HEARTBEAT_TYPE_MIN
 #define HEARTBEAT_TYPE_BLE_V0    (0x1L << 1)
@@ -82,7 +86,13 @@ extern "C" {
 
 #define CHECK_TRUSTED_RELATION_TIME 5000
 
-typedef uint32_t LnnHeartbeatType;
+#define HB_ADV_RANDOM_TIME_50  50
+#define HB_ADV_RANDOM_TIME_100 100
+#define HB_ADV_RANDOM_TIME_200 200
+#define HB_ADV_RANDOM_TIME_300 300
+#define HB_ADV_RANDOM_TIME_500 500
+#define HB_ADV_RANDOM_TIME_600 600
+#define HB_ADV_RANDOM_TIME_1000 1000
 
 typedef enum {
     STRATEGY_HB_SEND_SINGLE = 0,
@@ -105,9 +115,11 @@ typedef enum {
 typedef struct {
     uint8_t capabiltiy;
     int16_t stateVersion;
+    uint16_t staticLength;
     uint16_t staticLevel;
     uint16_t switchLength;
     uint32_t switchLevel;
+    int32_t preferChannel;
 } HbRespData;
 
 #define STATE_VERSION_INVALID (-1)
@@ -137,6 +149,8 @@ bool LnnIsSupportBurstFeature(const char *networkId);
 bool LnnIsLocalSupportBurstFeature(void);
 void LnnDumpLocalBasicInfo(void);
 void LnnDumpOnlineDeviceInfo(void);
+uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax);
+bool LnnIsMultiDeviceOnline(void);
 
 #ifdef __cplusplus
 }

@@ -109,6 +109,7 @@ int LinkInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint
                 Set(LinkInfoKey(key), *(int *)(data));
                 break;
             case Serializable::ValueType::STRING:
+                size = WifiDirectUtils::CalculateStringLength((char *)data, size);
                 Set(LinkInfoKey(key), std::string(reinterpret_cast<const char *>(data), size));
                 break;
             case Serializable::ValueType::IPV4_INFO: {

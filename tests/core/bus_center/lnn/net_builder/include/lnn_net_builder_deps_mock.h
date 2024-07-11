@@ -60,7 +60,7 @@ public:
     virtual ~NetBuilderDepsInterface() {};
     virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
-    virtual int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type) = 0;
+    virtual int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type) = 0;
     virtual int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId) = 0;
     virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
         int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
@@ -188,6 +188,7 @@ public:
         const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
     virtual bool IsSupportLpFeature(void);
     virtual bool LnnSubcribeKvStoreService(void);
+    virtual void LnnNotifyLocalNetworkIdChanged(void);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -195,7 +196,7 @@ public:
     ~NetBuilderDepsInterfaceMock() override;
     MOCK_METHOD2(LnnGetSettingDeviceName, int32_t (char *, uint32_t));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char*, uint16_t));
-    MOCK_METHOD2(LnnDeleteMetaInfo, int32_t (const char *, ConnectionAddrType));
+    MOCK_METHOD2(LnnDeleteMetaInfo, int32_t (const char *, AuthLinkType));
     MOCK_METHOD3(TransGetConnByChanId, int32_t (int32_t, int32_t, int32_t *));
     MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const AuthKeyInfo *, uint32_t, int32_t,
         const AuthVerifyCallback *));
@@ -318,6 +319,7 @@ public:
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool (const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t (const char *uuid));
     MOCK_METHOD0(IsSupportLpFeature, bool ());
+    MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void ());
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };
 } // namespace OHOS

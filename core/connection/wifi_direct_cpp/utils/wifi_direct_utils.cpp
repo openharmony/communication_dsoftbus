@@ -25,6 +25,7 @@
 #include "syspara/parameters.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_defines.h"
+#include "lnn_lane_vap_info.h"
 #include <algorithm>
 #include <arpa/inet.h>
 #include <endian.h>
@@ -132,6 +133,18 @@ int WifiDirectUtils::FrequencyToChannel(int frequency)
     } else {
         return CHANNEL_INVALID;
     }
+}
+
+int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
+{
+    char udid[UDID_BUF_LEN] {};
+    int ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get udid failed, ret = %{public}d", ret);
+    int channelIdLnn = 0;
+    ret = LnnGetRecommendChannel(udid, &channelIdLnn);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn failed, ret = %{public}d", ret);
+    return channelIdLnn;
 }
 
 std::string WifiDirectUtils::NetworkIdToUuid(const std::string &networkId)
@@ -503,5 +516,15 @@ void WifiDirectUtils::ParallelFlowExit()
     parallelCount_--;
     CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
     serialParallelCv_.notify_all();
+}
+
+int32_t WifiDirectUtils::CalculateStringLength(char *str, int32_t size)
+{
+    for (auto i = size - 1; i >= 0; i--) {
+        if (str[i] != '\0') {
+            return i + 1;
+        }
+    }
+    return 0;
 }
 } // namespace OHOS::SoftBus

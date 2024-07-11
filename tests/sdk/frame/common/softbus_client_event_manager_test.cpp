@@ -109,17 +109,17 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback001, TestSize.Level
 
     int res = -1;
     int ret = RegisterEventCallback((enum SoftBusEvent)res, *cb, data.get() + FRAME_HEADER_LEN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     res = 4;
     ret = RegisterEventCallback((enum SoftBusEvent)res, *cb, data.get() + FRAME_HEADER_LEN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     res = 1;
     ret = RegisterEventCallback(EVENT_SERVER_DEATH, NULL, data.get() + FRAME_HEADER_LEN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
 
     ret = RegisterEventCallback((enum SoftBusEvent)res, *cb, data.get() + FRAME_HEADER_LEN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     unsigned int argLen = 2;
     CLIENT_NotifyObserver((enum SoftBusEvent)res, data.get() + FRAME_HEADER_LEN, argLen);
@@ -155,7 +155,7 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback002, TestSize.Level
 
     EventClientDeinit();
     int ret = RegisterEventCallback(event, cb, data.get() + FRAME_HEADER_LEN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = EventClientInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
