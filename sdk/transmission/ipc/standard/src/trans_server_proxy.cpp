@@ -16,7 +16,9 @@
 #include "trans_server_proxy.h"
 #include "trans_server_proxy_standard.h"
 
+#include <malloc.h>
 #include <mutex>
+
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -102,6 +104,7 @@ static sptr<TransServerProxy> RetryGetProxy()
 
 int32_t TransServerProxyInit(void)
 {
+    mallopt(M_DELAYED_FREE, M_DELAYED_FREE_ENABLE);
     if (GetProxy() == nullptr) {
         TRANS_LOGE(TRANS_SDK, "Failed to initialize the server proxy!");
         return SOFTBUS_NO_INIT;

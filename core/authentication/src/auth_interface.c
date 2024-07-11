@@ -66,6 +66,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_AUTH_SYNC_INFO,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_PTK_VERIFY,
+        .listener = { NULL, NULL },
     }
 };
 
@@ -704,9 +708,9 @@ bool IsAuthHasTrustedRelation(void)
 int32_t AuthInit(void)
 {
     AuthTransCallback callBack = {
-        .OnDataReceived = NotifyTransDataReceived,
-        .OnDisconnected = NotifyTransDisconnected,
-        .OnException = NotifyTransException,
+        .onDataReceived = NotifyTransDataReceived,
+        .onDisconnected = NotifyTransDisconnected,
+        .onException = NotifyTransException,
     };
     int32_t ret = AuthDeviceInit(&callBack);
     if (ret == SOFTBUS_ERR || ret == SOFTBUS_INVALID_PARAM) {

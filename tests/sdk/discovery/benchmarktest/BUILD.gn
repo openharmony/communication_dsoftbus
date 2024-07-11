@@ -24,8 +24,6 @@ ohos_benchmarktest("DiscoveryTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/discovery/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/sdk/discovery/manager/include",
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",
     "//base/security/access_token/interfaces/innerkits/nativetoken/include",
@@ -36,10 +34,12 @@ ohos_benchmarktest("DiscoveryTest") {
     "//base/security/access_token/interfaces/innerkits/accesstoken:libaccesstoken_sdk",
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+    "googletest:gtest_main",
+  ]
 }
 group("benchmarktest") {
   testonly = true

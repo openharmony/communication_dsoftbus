@@ -42,6 +42,7 @@ typedef enum {
     LANE_COC,
     LANE_COC_DIRECT,
     LANE_HML,
+    LANE_HML_RAW,
     LANE_LINK_TYPE_BUTT,
 } LaneLinkType;
 
@@ -109,6 +110,14 @@ typedef struct {
 } WlanConnInfo;
 
 typedef struct {
+    uint16_t protocol;
+    char localIp[IP_LEN];
+    char peerIp[IP_LEN];
+    int32_t port;
+    bool isReuse;
+} RawWifiDirectConnInfo;
+
+typedef struct {
     uint64_t laneId;
     LaneLinkType type;
     union {
@@ -117,12 +126,15 @@ typedef struct {
         P2pConnInfo p2p;
         WlanConnInfo wlan;
         BleDirectConnInfo bleDirect;
+        RawWifiDirectConnInfo rawWifiDirect;
     } connInfo;
 } LaneConnInfo;
 
 typedef struct {
     void (*onLaneAllocSuccess)(uint32_t laneHandle, const LaneConnInfo *info);
     void (*onLaneAllocFail)(uint32_t laneHandle, int32_t errCode);
+    void (*onLaneFreeSuccess)(uint32_t laneHandle);
+    void (*onLaneFreeFail)(uint32_t laneHandle, int32_t errCode);
 } LaneAllocListener;
 
 typedef struct {
@@ -183,6 +195,8 @@ typedef struct {
     int32_t psm;
     uint32_t expectedBw;
     LanePreferredLinkList expectedLink;
+    uint32_t actionAddr;
+    bool isSupportIpv6;
 } TransOption;
 
 typedef struct {
@@ -199,10 +213,20 @@ typedef struct {
 } LaneStatusListener;
 
 typedef struct {
+    LaneType type;
+    LaneTransType transType;
+    QosInfo qosRequire;
+    uint32_t actionAddr;
+    uint8_t udidHash[UDID_HASH_LEN];
+} RawLaneAllocInfo;
+
+typedef struct {
     char peerBleMac[MAX_MAC_LEN];
     bool networkDelegate;
     bool isSpecifiedLink;
     LaneSpecifiedLink linkType;
+    uint32_t actionAddr;
+    bool isSupportIpv6;
 } AllocExtendInfo;
 
 typedef struct {
@@ -218,6 +242,8 @@ typedef struct {
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LaneTransType transType;
+    bool isSupportIpv6;
+    uint32_t actionAddr;
 } LaneAllocCommInfo;
 
 typedef struct {
@@ -230,6 +256,8 @@ typedef struct {
     int32_t (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
     uint32_t (*lnnGetLaneHandle)(LaneType type);
     int32_t (*lnnAllocLane)(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
+    int32_t (*lnnAllocRawLane)(uint32_t laneHandle, const RawLaneAllocInfo *request,
+        const LaneAllocListener *listener);
     int32_t (*lnnReAllocLane)(uint32_t laneHandle, uint64_t laneId, const LaneAllocInfo *allocInfo,
         const LaneAllocListener *listener);
     int32_t (*lnnAllocTargetLane)(uint32_t laneHandle, const LaneAllocInfoExt *allocInfo,

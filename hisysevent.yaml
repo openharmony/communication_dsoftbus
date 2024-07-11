@@ -138,6 +138,8 @@ BUSCENTER_BEHAVIOR:
   ONLINE_NUM: { type: INT32, desc: current online device num }
   PEER_DEV_ABILITY: { type: INT32, desc: peer device ability }
   ONLINE_TYPE: { type: INT32, desc: online type }
+  OS_TYPE: { type: INT32, desc: os type }
+  CONN_ONLINE_REASON: { type: UINT32, desc: connect online reason }
   PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
@@ -146,6 +148,7 @@ BUSCENTER_BEHAVIOR:
   PEER_PORT: { type: STRING, desc: peer device port }
   PEER_UDID: { type: STRING, desc: peer device udid }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
+  LOCAL_DEV_TYPE: { type: STRING, desc: local device type }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
   LOCAL_UDID_HASH: { type: STRING, desc: local device udid hash}
   PEER_UDID_HASH: { type: STRING, desc: peer device udid hash}
