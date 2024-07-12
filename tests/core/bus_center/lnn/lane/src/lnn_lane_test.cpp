@@ -306,10 +306,7 @@ static LaneAllocListener g_listenerCbForBle = {
 
 static int32_t AddLaneResourceForAllocTest(LaneLinkType linkType)
 {
-    LaneLinkInfo linkInfo;
-    if (memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
+    LaneLinkInfo linkInfo = {};
     linkInfo.type = linkType;
     if (strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)) != EOK) {
         return SOFTBUS_STRCPY_ERR;
@@ -367,8 +364,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_ERRTEST_001, TestSize.Level1)
     EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_CONN_FAIL));
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
 
-    LaneAllocInfo allocInfo;
-    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
+    LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
@@ -406,8 +402,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_001, TestSize.Level1)
     EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM1>(wlanInfo), Return(SOFTBUS_OK)));
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, 0, 0, 0, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForWlan5g);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -436,8 +431,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_002, TestSize.Level1)
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     ASSERT_EQ(strncpy_s(allocInfo.extendInfo.peerBleMac, MAX_MAC_LEN,
         PEER_MAC, strlen(PEER_MAC)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_BYTE, 0, 0, 0, &allocInfo);
@@ -470,8 +464,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_003, TestSize.Level1)
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_FILE, 0, 0, 0, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -502,8 +495,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_004, TestSize.Level1)
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_RAW_STREAM, 0, 0, 0, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -532,8 +524,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_005, TestSize.Level1)
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_RAW_STREAM, MESH_MAGIC_NUMBER, 0, 0, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForBr);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -564,8 +555,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_006, TestSize.Level1)
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     allocInfo.qosRequire.rttLevel = LANE_RTT_LEVEL_LOW;
     CreateAllocInfoForAllocTest(LANE_T_RAW_STREAM, DEFAULT_QOSINFO_MIN_BW, 0, 0, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
@@ -598,8 +588,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_007, TestSize.Level1)
     EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
         .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForHml);
@@ -637,8 +626,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_008, TestSize.Level1)
     EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM1>(wlanInfo), Return(SOFTBUS_OK)));
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + MID_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForWlan5g);
@@ -677,8 +665,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_009, TestSize.Level1)
     EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM1>(wlanInfo), Return(SOFTBUS_OK)));
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     CreateAllocInfoForAllocTest(LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + LOW_BW, DEFAULT_QOSINFO_MAX_LATENCY,
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForWlan5g);
@@ -709,8 +696,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_010, TestSize.Level1)
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     ASSERT_EQ(strncpy_s(allocInfo.extendInfo.peerBleMac, MAX_MAC_LEN,
         PEER_MAC, strlen(PEER_MAC)), EOK);
     CreateAllocInfoForAllocTest(LANE_T_MSG, LOW_BW - DEFAULT_QOSINFO_MIN_BW, DEFAULT_QOSINFO_MAX_LATENCY,
@@ -739,8 +725,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_011, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(false));
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     int32_t ret = laneManager->lnnAllocLane(laneReqId, nullptr, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -1107,13 +1092,10 @@ HWTEST_F(LNNLaneMockTest, LANE_FREE_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_INFO_001, TestSize.Level1)
 {
-    LaneLinkInfo info;
-    (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    LaneLinkInfo info = {};
     info.type = LANE_BR;
-    LaneConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
-    LaneProfile profile;
-    (void)memset_s(&profile, sizeof(LaneProfile), 0, sizeof(LaneProfile));
+    LaneConnInfo connInfo = {};
+    LaneProfile profile = {};
     int32_t ret = LaneInfoProcess(&info, &connInfo, &profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -1126,13 +1108,10 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_INFO_002, TestSize.Level1)
 {
-    LaneLinkInfo info;
-    (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    LaneLinkInfo info = {};
     info.type = LANE_BLE;
-    LaneConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
-    LaneProfile profile;
-    (void)memset_s(&profile, sizeof(LaneProfile), 0, sizeof(LaneProfile));
+    LaneConnInfo connInfo = {};
+    LaneProfile profile = {};
     int32_t ret = LaneInfoProcess(&info, &connInfo, &profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -1145,13 +1124,10 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_002, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_INFO_003, TestSize.Level1)
 {
-    LaneLinkInfo info;
-    (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    LaneLinkInfo info = {};
     info.type = LANE_P2P;
     LaneConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
-    LaneProfile profile;
-    (void)memset_s(&profile, sizeof(LaneProfile), 0, sizeof(LaneProfile));
+    LaneProfile profile = {};
     int32_t ret = LaneInfoProcess(&info, &connInfo, &profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -1164,8 +1140,7 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_INFO_004, TestSize.Level1)
 {
-    LaneLinkInfo info;
-    (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    LaneLinkInfo info = {};
     info.type = LANE_LINK_TYPE_BUTT;
     LaneConnInfo *connInfo = nullptr;
     LaneProfile *profile = nullptr;
@@ -1190,12 +1165,9 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_004, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_INFO_005, TestSize.Level1)
 {
-    LaneLinkInfo info;
-    LaneConnInfo connInfo;
-    LaneProfile profile;
-    (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    (void)memset_s(&connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
-    (void)memset_s(&profile, sizeof(LaneProfile), 0, sizeof(LaneProfile));
+    LaneLinkInfo info = {};
+    LaneConnInfo connInfo = {};
+    LaneProfile profile = {};
 
     info.type = LANE_WLAN_2P4G;
     int32_t ret = LaneInfoProcess(&info, &connInfo, &profile);
@@ -1244,8 +1216,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
     int32_t ret = BindLaneIdToProfile(laneId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    LaneProfile profile;
-    (void)memset_s(&profile, sizeof(LaneProfile), 0, sizeof(LaneProfile));
+    LaneProfile profile = {};
     ret = BindLaneIdToProfile(laneId, &profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -1255,8 +1226,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
     ret = BindLaneIdToProfile(laneId, &profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    LaneGenerateParam param;
-    (void)memset_s(&param, sizeof(LaneGenerateParam), 0, sizeof(LaneGenerateParam));
+    LaneGenerateParam param = {};
     param.linkType = LANE_P2P;
     param.transType = LANE_T_FILE;
     param.priority = LANE_PRI_LOW;
@@ -1292,8 +1262,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList *linkList = nullptr;
     uint32_t listNum = 0;
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    LaneSelectParam selectParam = {};
     selectParam.transType = LANE_T_FILE;
     selectParam.expectedBw = 0;
     selectParam.list.linkTypeNum = 2;
@@ -1337,8 +1306,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList *linkList = nullptr;
     uint32_t listNum = 0;
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    LaneSelectParam selectParam = {};
     selectParam.transType = LANE_T_FILE;
     selectParam.expectedBw = 0;
     selectParam.list.linkTypeNum = DEFAULT_SELECT_NUM;
@@ -1373,15 +1341,10 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
-    LanePreferredLinkList linkList;
+    LanePreferredLinkList linkList = {};
     uint32_t listNum = 0;
-    LaneSelectParam selectParam;
-    NodeInfo node;
-
-    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
-    (void)memset_s(&linkList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
-    (void)memset_s(&node, sizeof(node), 0, sizeof(node));
+    LaneSelectParam selectParam = {};
+    NodeInfo node = {};
 
     selectParam.transType = LANE_T_FILE;
     selectParam.expectedBw = 0;
@@ -1398,6 +1361,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(mock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(mock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
@@ -1425,8 +1389,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_004, TestSize.Level1)
 {
-    LaneSelectParam request;
-    (void)memset_s(&request, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    LaneSelectParam request = {};
     request.transType = LANE_T_FILE;
     request.list.linkTypeNum = 0;
     request.list.linkType[(request.list.linkTypeNum)++] = LANE_BR;
@@ -1434,8 +1397,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_004, TestSize.Level1)
     request.list.linkType[(request.list.linkTypeNum)++] = LANE_P2P;
     request.list.linkType[(request.list.linkTypeNum)++] = LANE_HML;
 
-    LanePreferredLinkList recommendList;
-    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    LanePreferredLinkList recommendList = {};
     uint32_t listNum = 0;
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
@@ -1461,16 +1423,14 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_004, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_005, TestSize.Level1)
 {
-    LaneSelectParam request;
-    (void)memset_s(&request, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    LaneSelectParam request = {};
     request.transType = LANE_T_FILE;
     request.list.linkTypeNum = 0;
     request.list.linkType[(request.list.linkTypeNum)++] = LANE_BR;
     request.list.linkType[(request.list.linkTypeNum)++] = LANE_BLE;
     request.list.linkType[(request.list.linkTypeNum)++] = LANE_P2P;
 
-    LanePreferredLinkList recommendList;
-    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    LanePreferredLinkList recommendList = {};
     uint32_t listNum = 0;
 
     NiceMock<LaneDepsInterfaceMock> linkMock;
@@ -1496,8 +1456,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_005, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
 {
-    LinkRequest reqInfo;
-    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LinkRequest reqInfo = {};
     reqInfo.linkType = LANE_P2P;
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1556,8 +1515,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
-    LinkRequest reqInfo;
-    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LinkRequest reqInfo = {};
     reqInfo.linkType = LANE_P2P;
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1586,8 +1544,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
-    LinkRequest reqInfo;
-    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LinkRequest reqInfo = {};
     reqInfo.linkType = LANE_P2P;
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1626,10 +1583,9 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
-    LinkRequest reqInfo;
+    LinkRequest reqInfo = {};
     int32_t ret;
     const char *udid = "testuuid";
-    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
         .onLaneLinkFail = OnLaneLinkFail,
@@ -1659,7 +1615,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_005, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
-    LinkRequest reqInfo;
+    LinkRequest reqInfo = {};
     int32_t ret;
     const char *udid = "testuuid";
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
@@ -1668,7 +1624,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_005, TestSize.Level1)
         .onLaneLinkFail = OnLaneLinkFail,
     };
 
-    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     reqInfo.linkType = LANE_BLE;
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     if (connection == nullptr) {
@@ -1768,11 +1723,10 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_007, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_008, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
-    LinkRequest reqInfo;
+    LinkRequest reqInfo = {};
     int32_t ret;
     const char *udid = "testuuid";
     const char *bleMac = "127.1.1.1";
-    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
         .onLaneLinkFail = OnLaneLinkFail,
@@ -1844,11 +1798,10 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_009, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
-    LinkRequest reqInfo;
+    LinkRequest reqInfo = {};
     int32_t ret;
     const char *udid = "testuuid";
     const char *bleMac = "127.1.1.1";
-    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
         .onLaneLinkFail = OnLaneLinkFail,
@@ -1902,8 +1855,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList linkList;
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    LaneSelectParam selectParam = {};
     selectParam.transType = LANE_T_FILE;
     selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
     selectParam.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
@@ -1951,8 +1903,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList linkList;
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    LaneSelectParam selectParam = {};
     selectParam.transType = LANE_T_FILE;
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, nullptr, &linkList);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -1989,8 +1940,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_003, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList linkList;
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    LaneSelectParam selectParam = {};
     selectParam.transType = LANE_T_FILE;
 
 
@@ -2012,8 +1962,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_FLOAD_EXPLORE_001, TestSize.Level1)
 {
-    LaneResource resourceItem;
-    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    LaneResource resourceItem = {};
     resourceItem.clientRef = DEFAULT_LANE_RESOURCE_LANE_REF;
     int32_t ret = LaneDetectFload(&resourceItem);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -2028,8 +1977,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FLOAD_EXPLORE_001, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LANE_DECISION_MODELS_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
-    LaneSelectParam selectParam;
-    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    LaneSelectParam selectParam = {};
     LanePreferredLinkList linkList;
     selectParam.transType = LANE_T_FILE;
     selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
@@ -2280,8 +2228,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    LaneDetectInfo requestItem;
-    (void)memset_s(&requestItem, sizeof(LaneDetectInfo), 0, sizeof(LaneDetectInfo));
+    LaneDetectInfo requestItem = {};
     if (GetLaneDetectInfoByWlanFd(SOFTBUS_OK, &requestItem) != SOFTBUS_OK) {
         return;
     }
@@ -2535,10 +2482,8 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_AUTH_LANE_TEST_001, TestSize.Level1)
 {
     const char *networkId = "testnetworkid123";
     NiceMock<LaneDepsInterfaceMock> mock;
-    LanePreferredLinkList recommendList;
-    LanePreferredLinkList request;
-    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    (void)memset_s(&request, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    LanePreferredLinkList recommendList = {};
+    LanePreferredLinkList request = {};
 
     request.linkTypeNum = 4;
     request.linkType[0] = LANE_P2P;
@@ -2590,8 +2535,7 @@ HWTEST_F(LNNLaneMockTest, LNN_AUTH_ALLOC_TEST_001, TestSize.Level1)
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
 
-    LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    LaneAllocInfo allocInfo = {};
     allocInfo.type = laneType;
     (void)strncpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN,
         NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
@@ -2609,8 +2553,7 @@ HWTEST_F(LNNLaneMockTest, LNN_AUTH_ALLOC_TEST_001, TestSize.Level1)
     ret = laneManager->lnnAllocLane(INVALID_LANE_REQ_ID, &allocInfo, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    AuthLinkTypeList mockList;
-    (void)memset_s(&mockList, sizeof(AuthLinkTypeList), 0, sizeof(AuthLinkTypeList));
+    AuthLinkTypeList mockList = {};
     mockList.linkType[0] = AUTH_LINK_TYPE_WIFI;
     mockList.linkTypeNum = 1;
     EXPECT_CALL(mock, GetAuthLinkTypeList)
