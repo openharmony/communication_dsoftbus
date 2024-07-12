@@ -289,7 +289,6 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
             }
             break;
         default:
-            AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", info1->type);
             return false;
     }
     return false;
