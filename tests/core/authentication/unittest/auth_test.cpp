@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -339,6 +339,30 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONNID_Test_001, TestSize.L
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthSessionProcessCloseAckByConnId(connId, isServer, data, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: AUTH_SESSION_PROCESS_CANCEL_AUTH_BY_CONNID_Test_001
+ * @tc.desc: auth session process cancel auth by connId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CANCEL_AUTH_BY_CONNID_Test_001, TestSize.Level1)
+{
+    uint64_t connId = 0;
+    bool isServer = true;
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
+    uint32_t len = TEST_DATA_LEN;
+    int32_t ret;
+
+    ret = AuthSessionProcessCancelAuthByConnId(connId, isServer, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_FSM_FAIL);
+    ret = AuthSessionProcessCancelAuthByConnId(connId, isServer, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_FSM_FAIL);
+    ret = AuthSessionProcessCancelAuthByConnId(connId, !isServer, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_FSM_FAIL);
+    ret = AuthSessionProcessCancelAuthByConnId(connId, !isServer, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_FSM_FAIL);
 }
 
 /*

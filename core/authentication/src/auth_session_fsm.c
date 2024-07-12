@@ -1568,6 +1568,24 @@ int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_CLOSE_ACK, connId, isServer, data, len);
 }
 
+int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len)
+{
+    if (!RequireAuthLock()) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthFsm *authFsm = GetAuthFsmByConnId(connId, isConnectServer, true);
+    if (authFsm == NULL) {
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_GET_FSM_FAIL;
+    }
+    if (LnnFsmPostMessage(&authFsm->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "post message to auth fsm by connId fail");
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_SEND_FAIL;
+    }
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
+}
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
 {
     if (udid == NULL || udid[0] == '\0') {
