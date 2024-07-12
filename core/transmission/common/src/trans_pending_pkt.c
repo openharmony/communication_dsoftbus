@@ -222,16 +222,19 @@ void DelPendingPacketbyChannelId(int32_t channelId, int32_t seqNum, int32_t type
     (void)SoftBusMutexUnlock(&pendingList->lock);
 }
 
-
 int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
 {
     int32_t ret = IsPendingListTypeLegal(type);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "type=%{public}d illegal", type);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "type illegal. type=%{public}d", type);
+        return ret;
+    }
 
     SoftBusList *pendingList = g_pendingList[type];
-    TRANS_CHECK_AND_RETURN_RET_LOGE(pendingList != NULL, SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, TRANS_SVC,
-        "type=%{public}d pending list not init", type);
-
+    if (pendingList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "pending type list not init. type=%{public}d", type);
+        return SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND;
+    }
     SoftBusSysTime outTime;
     FormalizeTimeFormat(&outTime, type);
 
