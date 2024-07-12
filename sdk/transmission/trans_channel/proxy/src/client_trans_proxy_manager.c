@@ -990,8 +990,14 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
         return ret;
     }
 
+    ret = AddPendingPacket(channelId, info.sequence, PENDING_TYPE_PROXY);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "add pending packet failed, channelId=%{public}d.", channelId);
+        return ret;
+    }
     ret = TransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
     if (ret != SOFTBUS_OK) {
+        DelPendingPacketbyChannelId(channelId, info.sequence, PENDING_TYPE_PROXY);
         return ret;
     }
     return ProcPendingPacket(channelId, info.sequence, PENDING_TYPE_PROXY);
