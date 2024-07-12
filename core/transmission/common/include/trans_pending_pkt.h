@@ -39,6 +39,8 @@ void PendingDeinit(int32_t type);
 int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type);
 int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type);
 int32_t DelPendingPacket(int32_t channelId, int32_t type);
+int32_t AddPendingPacket(int32_t channelId, int32_t seqNum, int32_t type);
+void DelPendingPacketbyChannelId(int32_t channelId, int32_t seqNum, int32_t type);
 
 #ifdef __cplusplus
 #if __cplusplus
