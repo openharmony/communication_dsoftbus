@@ -831,6 +831,22 @@ static void ReportAuthRequestFailed(uint32_t requestId, int32_t reason)
     }
 }
 
+static void PostCancelAuthMessage(int64_t authSeq, const AuthSessionInfo *info)
+{
+    AUTH_LOGI(AUTH_FSM, "post cancel auth msg, authSeq=%{public}" PRId64, authSeq);
+    const char *msg = "";
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_CANCEL_AUTH,
+        .module = MODULE_AUTH_CANCEL,
+        .seq = authSeq,
+        .flag = 0,
+        .len = strlen(msg) + 1,
+    };
+    if (PostAuthData(info->connId, !info->isConnectServer, &head, (uint8_t *)msg) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "post cancel auth fail");
+    }
+}
+
 void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "info is null");
@@ -856,6 +872,9 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     }
     AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     ReleaseAuthLock();
+    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
+        PostCancelAuthMessage(authSeq, info);
+    }
     if (!info->isConnectServer) {
         ReportAuthRequestPassed(info->requestId, authHandle, NULL);
         AUTH_LOGI(AUTH_FSM, "notify auth passed, disconnect connId=%{public}" PRIu64, info->connId);
@@ -1283,7 +1302,7 @@ static void HandleConnectionData(
         PrintAuthConnInfo(connInfo);
         AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
         ReleaseAuthLock();
-        if (connInfo->type == AUTH_LINK_TYPE_P2P) {
+        if (connInfo->type == AUTH_LINK_TYPE_P2P || connInfo->type == AUTH_LINK_TYPE_WIFI) {
             return;
         }
         (void)PostDecryptFailAuthData(connId, fromServer, head, data);
@@ -1364,6 +1383,16 @@ static void HandleDecryptFailData(
     }
 }
 
+static void HandleCancelAuthData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    int32_t ret = AuthSessionProcessCancelAuthByConnId(connId, !fromServer, data, head->len);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "perform auth session cancel auth fail. seq=%{public}" PRId64 ", ret=%{public}d",
+            head->seq, ret);
+    }
+}
+
 static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, bool *fromServer)
 {
     if (connInfo->type != AUTH_LINK_TYPE_WIFI) {
@@ -1416,6 +1445,9 @@ static void OnDataReceived(
             break;
         case DATA_TYPE_DECRYPT_FAIL:
             HandleDecryptFailData(connId, connInfo, fromServer, head, data);
+            break;
+        case DATA_TYPE_CANCEL_AUTH:
+            HandleCancelAuthData(connId, connInfo, fromServer, head, data);
             break;
         default:
             break;
