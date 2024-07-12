@@ -330,6 +330,40 @@ static void HandleConnConnectResult(const void *para)
     DelConnRequest(item);
 }
 
+static void AsyncCallDeviceIdReceived(void *para)
+{
+    RepeatDeviceIdData *recvData = (RepeatDeviceIdData *)para;
+    if (recvData == NULL) {
+        return;
+    }
+    NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
+    SoftBusFree(para);
+}
+
+static void HandleDataReceivedProcess(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    RepeatDeviceIdData *request = (RepeatDeviceIdData *)SoftBusCalloc(sizeof(RepeatDeviceIdData) + head->len);
+    if (request == NULL) {
+        AUTH_LOGE(AUTH_CONN, "malloc RepeatDeviceIdData fail");
+        return;
+    }
+    request->len = head->len;
+    if (data != NULL && head->len > 0 && memcpy_s(request->data, head->len, data, head->len) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy data fail");
+        SoftBusFree(request);
+        return;
+    }
+    request->connId = connId;
+    request->connInfo = *connInfo;
+    request->fromServer = fromServer;
+    request->head = *head;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), AsyncCallDeviceIdReceived, request, 0) !=
+        SOFTBUS_OK) {
+        SoftBusFree(request);
+    }
+}
+
 /* WiFi Connection */
 static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
 {
@@ -376,7 +410,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
         AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
         return;
     }
-    NotifyDataReceived(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
+    HandleDataReceivedProcess(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
 }
 
 static int32_t InitWiFiConn(void)
@@ -437,19 +471,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         AUTH_LOGE(AUTH_CONN, "empty body");
         return;
     }
-    NotifyDataReceived(GenConnId(connInfo.type, connectionId), &connInfo, fromServer, &head, body);
-}
-
-static void AsyncCallDeviceIdReceived(void *para)
-{
-    RepeatDeviceIdData *recvData = (RepeatDeviceIdData *)para;
-    if (recvData == NULL) {
-        return;
-    }
-    AUTH_LOGI(AUTH_CONN, "Delay handle connectionId=%{public}" PRIu64 ", len=%{public}d, from=%{public}s",
-        recvData->connId, recvData->len, GetAuthSideStr(recvData->fromServer));
-    NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
-    SoftBusFree(para);
+    HandleDataReceivedProcess(GenConnId(connInfo.type, connectionId), &connInfo, fromServer, &head, body);
 }
 
 void HandleRepeatDeviceIdDataDelay(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
