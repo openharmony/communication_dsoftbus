@@ -525,6 +525,7 @@
         "TransOnUdpChannelBind";
         "TransOnChannelBind";
         "ResourceConflictCheck";
+        "ClientTransTdcIfChannelForSocket";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

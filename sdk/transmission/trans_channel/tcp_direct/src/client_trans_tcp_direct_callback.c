@@ -16,12 +16,14 @@
 #include "client_trans_tcp_direct_callback.h"
 
 #include <stddef.h>
+#include <securec.h>
 
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "trans_log.h"
+#include "client_trans_tcp_direct_listener.h"
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -64,5 +66,32 @@ int32_t ClientTransTdcOnChannelBind(int32_t channelId, int32_t channelType)
         TRANS_LOGW(TRANS_SDK, "OnChannelBind is null channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
-    return g_sessionCb.OnChannelBind(channelId, channelType);
+
+    int32_t ret = g_sessionCb.OnChannelBind(channelId, channelType);
+    if (ret == SOFTBUS_NOT_NEED_UPDATE) {
+        return SOFTBUS_OK;
+    }
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+
+    TcpDirectChannelInfo info;
+    (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
+    TcpDirectChannelInfo *res = TransTdcGetInfoById(channelId, &info);
+    if (res == NULL) {
+        TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channelId);
+        return SOFTBUS_NOT_FIND;
+    }
+
+    ret = TransTdcCreateListener(info.detail.fd);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "TransTdcCreateListener failed, channelId=%{public}d", channelId);
+        g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, SHUTDOWN_REASON_LOCAL);
+    }
+    return ret;
+}
+
+int32_t ClientTransTdcIfChannelForSocket(const char *sessionName, bool *isSocket)
+{
+    return g_sessionCb.IfChannelForSocket(sessionName, isSocket);
 }

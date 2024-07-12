@@ -351,7 +351,11 @@ int32_t TransOnUdpChannelBind(int32_t channelId, int32_t channelType)
         return SOFTBUS_NO_INIT;
     }
 
-    return g_sessionCb->OnChannelBind(channelId, CHANNEL_TYPE_UDP);
+    int32_t ret = g_sessionCb->OnChannelBind(channelId, CHANNEL_TYPE_UDP);
+    if (ret == SOFTBUS_NOT_NEED_UPDATE) {
+        ret = SOFTBUS_OK;
+    }
+    return ret;
 }
 
 static int32_t ClosePeerUdpChannel(int32_t channelId)
