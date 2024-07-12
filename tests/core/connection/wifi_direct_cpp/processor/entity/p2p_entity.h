@@ -70,7 +70,7 @@ public:
     MOCK_METHOD(int32_t, ReuseLink, (), (override));
     MOCK_METHOD(P2pOperationResult, Disconnect, (const P2pDestroyGroupParam &param), (override));
     MOCK_METHOD(void, DisconnectLink, (const std::string &remoteMac), (override));
-
+    MOCK_METHOD(void, DestoryGroupIfNeeded, (), (override));
 private:
     static inline std::atomic<P2pEntity *> mock = nullptr;
 };
