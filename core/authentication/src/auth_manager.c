@@ -1445,6 +1445,7 @@ static void OnDataReceived(
             break;
         case DATA_TYPE_DECRYPT_FAIL:
             HandleDecryptFailData(connId, connInfo, fromServer, head, data);
+            break;
         case DATA_TYPE_CANCEL_AUTH:
             HandleCancelAuthData(connId, connInfo, fromServer, head, data);
             break;
