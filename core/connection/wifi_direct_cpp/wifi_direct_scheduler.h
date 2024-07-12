@@ -102,11 +102,19 @@ public:
     }
 
     template<typename Command>
-    void QueueCommand(Command &command)
+    void QueueCommandFront(Command &command)
     {
         std::lock_guard commandLock(commandLock_);
-        CONN_LOGI(CONN_WIFI_DIRECT, "push data to list");
+        CONN_LOGI(CONN_WIFI_DIRECT, "push data to list front");
         commandList_.push_front(std::make_shared<Command>(command));
+    }
+
+    template<typename Command>
+    void QueueCommandBack(Command &command)
+    {
+        std::lock_guard commandLock(commandLock_);
+        CONN_LOGI(CONN_WIFI_DIRECT, "push data to list back");
+        commandList_.push_back(std::make_shared<Command>(command));
     }
 
     template<typename Command>
