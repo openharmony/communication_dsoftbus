@@ -1586,6 +1586,7 @@ int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServ
     ReleaseAuthLock();
     return SOFTBUS_OK;
 }
+
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
 {
     if (udid == NULL || udid[0] == '\0') {
