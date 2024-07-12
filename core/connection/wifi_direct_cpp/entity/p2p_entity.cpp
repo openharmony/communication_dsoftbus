@@ -444,7 +444,6 @@ static void UpdateInterfaceInfo(
     } else {
         CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s", WifiDirectAnonymizeIp(ip).c_str());
     }
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get ip failed, error=%d", ret);
 
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [localMac, dynamicMac, ip, groupInfo, groupConfig](InterfaceInfo &interface) {
