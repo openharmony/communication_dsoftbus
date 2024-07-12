@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include <arpa/inet.h>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
 #include "net_conn_client.h"
 #include "softbus_error_code.h"
+#include "softbus_socket.h"
 #include "wifi_direct_ip_manager.h"
 
 using namespace testing::ext;
