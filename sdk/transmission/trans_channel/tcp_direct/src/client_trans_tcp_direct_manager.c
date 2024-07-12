@@ -211,6 +211,42 @@ static void TransTdcDelChannelInfo(int32_t channelId)
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 }
 
+static int32_t ClientTransTdcHandleListener(const char *sessionName, const ChannelInfo *channel)
+{
+    bool isSocket = false;
+    int32_t ret = ClientTransTdcIfChannelForSocket(sessionName, &isSocket);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get channel socket fail, channelId=%{public}d", channel->channelId);
+        return ret;
+    }
+
+    if (channel->isServer && isSocket) {
+        TRANS_LOGI(TRANS_SDK, "no need listen here, channelId=%{public}d", channel->channelId);
+        return SOFTBUS_OK;
+    }
+    ret = TransTdcCreateListener(channel->fd);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "create listener fail, channelId=%{public}d", channel->channelId);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientTransSetTcpOption(int32_t fd)
+{
+    int32_t ret = ConnSetTcpKeepalive(fd, HEART_TIME, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_COUNT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepalive failed, fd=%{public}d.", fd);
+        return ret;
+    }
+    ret = ConnSetTcpUserTimeOut(fd, USER_TIME_OUT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ConnSetTcpUserTimeOut failed, fd=%{public}d.", fd);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(sessionName != NULL && channel != NULL,
@@ -228,19 +264,9 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         SoftBusFree(item);
         return ret;
     }
-    ret = TransTdcCreateListener(channel->fd);
+
+    ret = ClientTransSetTcpOption(channel->fd);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "trans tdc create listener failed. fd=%{public}d", channel->fd);
-        goto EXIT_ERR;
-    }
-    ret = ConnSetTcpKeepalive(channel->fd, HEART_TIME, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_COUNT);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepalive failed, fd=%{public}d.", channel->fd);
-        goto EXIT_ERR;
-    }
-    ret = ConnSetTcpUserTimeOut(channel->fd, USER_TIME_OUT);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ConnSetTcpUserTimeOut failed, fd=%{public}d.", channel->fd);
         goto EXIT_ERR;
     }
     ret = SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
@@ -259,6 +285,15 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         TRANS_LOGE(TRANS_SDK, "notify on session opened err.");
         return ret;
     }
+
+    ret = ClientTransTdcHandleListener(sessionName, channel);
+    if (ret != SOFTBUS_OK) {
+        ClientTransTdcOnSessionClosed(channel->channelId, SHUTDOWN_REASON_LOCAL);
+        TransDelDataBufNode(channel->channelId);
+        TransTdcDelChannelInfo(channel->channelId);
+        return ret;
+    }
+
     return SOFTBUS_OK;
 EXIT_ERR:
     TransDelDataBufNode(channel->channelId);
