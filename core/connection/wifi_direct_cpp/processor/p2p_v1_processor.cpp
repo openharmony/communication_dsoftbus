@@ -442,6 +442,10 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::sha
             ret = ProcessConnectResponseAtWaitAuthHandShake(command);
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
             break;
+        case LegacyCommandType::CMD_REUSE_REQ:
+            ret = ProcessReuseRequest(command);
+            CleanupIfNeed(ret, command->GetRemoteDeviceId());
+            break;
         default:
             (void)ProcessNegotiateCommandCommon(command);
             break;
