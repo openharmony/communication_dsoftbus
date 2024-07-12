@@ -28,6 +28,7 @@
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
+#include "lnn_lane_link_conflict.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
@@ -634,6 +635,10 @@ int32_t InitLane(void)
         LNN_LOGE(LNN_LANE, "[InitLane]laneDelayInit fail");
         return SOFTBUS_NO_INIT;
     }
+    if (InitLaneLinkConflict() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "[InitLane]InitLaneLinkConflict fail");
+        return SOFTBUS_NO_INIT;
+    }
     int32_t ret = LnnInitVapInfo();
     if (ret != SOFTBUS_OK) {
         /* optional case, ignore result */
@@ -665,6 +670,7 @@ void DeinitLane(void)
     DeinitLaneLink();
     LnnDeinitScore();
     LnnDeinitVapInfo();
+    DeinitLaneLinkConflict();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->deinit();
     }
