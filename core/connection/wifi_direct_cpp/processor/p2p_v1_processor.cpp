@@ -128,7 +128,7 @@ void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
     if (nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_CONN_V1_REQ) {
         return;
     }
-    WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommand(*nc);
+    WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommandFront(*nc);
 }
 
 void P2pV1Processor::SwitchState(ProcessorState state, int timeoutInMillis)
