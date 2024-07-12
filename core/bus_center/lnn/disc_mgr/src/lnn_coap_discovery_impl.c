@@ -57,13 +57,11 @@ static int32_t LnnCheckDiscoveryDeviceInfo(const DeviceInfo *device)
     return SOFTBUS_OK;
 }
 
-static int32_t GetConnectDeviceInfo(const DeviceInfo *device, ConnectionAddr *addr, LnnDfxDeviceInfoReport *info)
+static int32_t GetConnectDeviceInfo(const DeviceInfo *device, ConnectionAddr *addr)
 {
     addr->type = device->addr[0].type;
-    info->type = device->devType;
-    if (strncpy_s(addr->info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip, strlen(device->addr[0].info.ip.ip)) !=
-        0) {
-        LNN_LOGE(LNN_BUILDER, "strncpy ip failed");
+    if (strcpy_s(addr->info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy ip failed");
         return SOFTBUS_STRCPY_ERR;
     }
     if (strcpy_s((char *)addr->info.ip.udidHash, UDID_HASH_LEN, device->devId) != EOK) {
@@ -71,7 +69,7 @@ static int32_t GetConnectDeviceInfo(const DeviceInfo *device, ConnectionAddr *ad
         return SOFTBUS_STRCPY_ERR;
     }
     addr->info.ip.port = device->addr[0].info.ip.port;
-    if (memcpy_s(addr->peerUid, MAX_ACCOUNT_HASH_LEN, device->accountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
+    if (memcpy_s(addr->peerUid, MAX_ACCOUNT_HASH_LEN, device->accountHash, MAX_ACCOUNT_HASH_LEN) != EOK) {
         LNN_LOGE(LNN_BUILDER, "memcpy_s peer uid failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -110,12 +108,13 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
         LNN_LOGE(LNN_BUILDER, "get invalid device para");
         return;
     }
-    LnnDfxDeviceInfoReport info;
-    (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
-    if (GetConnectDeviceInfo(device, &addr, &info) != SOFTBUS_OK) {
+    if (GetConnectDeviceInfo(device, &addr) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get connect device info fail");
         return;
     }
+    LnnDfxDeviceInfoReport info;
+    (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    info.type = device->devType;
     if ((uint32_t)info.type == TYPE_PRINTER) {
         LNN_LOGI(LNN_BUILDER, "restrict printer");
         return;
