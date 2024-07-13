@@ -462,9 +462,17 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
     if (data == NULL) {
         return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL;
     }
-    int32_t seq = *(int32_t *)data;
-    TRANS_LOGI(TRANS_SDK, "ClientTransProxyProcSendMsgAck. channelId=%{public}d, seq=%{public}d", channelId, seq);
-    return SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
+    int32_t seq = *(uint32_t*)data;
+    int32_t hostSeq = (int32_t)SoftBusNtoHl(*(uint32_t*)data);
+    TRANS_LOGI(TRANS_SDK, "channelId = %d, seq=%{public}d, seq=%{public}d", channelId, seq, hostSeq);
+    int32_t ret = SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
+    if (ret != SOFTBUS_OK) {
+        ret = SetPendingPacket(channelId, hostSeq, PENDING_TYPE_PROXY);
+        if (ret == SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "set pending packet success");
+        }
+    }
+    return ret;
 }
 
 static int32_t ClientTransProxyNotifySession(
@@ -994,6 +1002,7 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
     if (ret != SOFTBUS_OK) {
         return ret;
     }
+    TRANS_LOGI(TRANS_SDK, "send msg: channelId=%{public}d, sequence=%{public}d", channelId, info.sequence);
     return ProcPendingPacket(channelId, info.sequence, PENDING_TYPE_PROXY);
 }
 
