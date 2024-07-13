@@ -39,7 +39,8 @@ typedef struct {
 int32_t LnnRegisterBleLpDeviceMediumMgr(void);
 void SendDeviceStateToMlps(void *para);
 void UpdateLocalDeviceInfoToMlps(const NodeInfo *localInfo);
-void UpdateRemoteDeviceInfoToMlps(void);
+void UpdateRemoteDeviceInfoToMlps(const NodeInfo *info);
+void UpdateRemoteDeviceInfoListToMlps(void);
 int32_t GetBurstAdvId(void);
 int32_t SendDeviceInfoToSHByType(LpFeatureType type);
 int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type);
