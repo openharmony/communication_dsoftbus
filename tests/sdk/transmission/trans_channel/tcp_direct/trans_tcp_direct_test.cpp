@@ -565,7 +565,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetPendingPacketTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     len = ACK_SIZE;
     channelId = INVALID_VALUE;
     ret = TransTdcSetPendingPacket(channelId, data, len);

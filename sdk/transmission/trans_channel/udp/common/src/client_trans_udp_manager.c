@@ -445,8 +445,14 @@ int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tv
 
 int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason)
 {
-    int32_t ret = CloseUdpChannel(channelId, reason);
+    int32_t ret = AddPendingPacket(channelId, 0, PENDING_TYPE_UDP);
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "add pending packet failed, channelId=%{public}d.", channelId);
+        return ret;
+    }
+    ret = CloseUdpChannel(channelId, reason);
+    if (ret != SOFTBUS_OK) {
+        DelPendingPacketbyChannelId(channelId, 0, PENDING_TYPE_UDP);
         TRANS_LOGE(TRANS_SDK, "close udp channel failed, ret=%{public}d", ret);
         return ret;
     }

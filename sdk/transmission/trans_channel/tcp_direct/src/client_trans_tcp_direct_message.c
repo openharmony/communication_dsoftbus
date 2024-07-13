@@ -247,10 +247,16 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
     if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
-    int32_t ret = TransTdcProcessPostData(&channel, data, len, FLAG_MESSAGE);
     int32_t sequence = channel.detail.sequence;
+    int32_t ret = AddPendingPacket(channelId, sequence, PENDING_TYPE_DIRECT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "add pending packet failed, channelId=%{public}d.", channelId);
+        return ret;
+    }
+    ret = TransTdcProcessPostData(&channel, data, len, FLAG_MESSAGE);
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (ret != SOFTBUS_OK) {
+        DelPendingPacketbyChannelId(channelId, sequence, PENDING_TYPE_DIRECT);
         TRANS_LOGE(TRANS_SDK, "tdc send message failed, ret=%{public}d.", ret);
         return ret;
     }
