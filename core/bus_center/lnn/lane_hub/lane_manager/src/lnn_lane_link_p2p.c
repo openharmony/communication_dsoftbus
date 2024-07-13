@@ -947,7 +947,7 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
     if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get p2p link req fail, type=%{public}d, requestId=%{public}u",
             ASYNC_RESULT_P2P, p2pRequestId);
-        return;
+        goto FAIL;
     }
     AuthHandle authHandle;
     (void)memset_s(&authHandle, sizeof(AuthHandle), 0, sizeof(AuthHandle));
@@ -1695,6 +1695,10 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
 
 static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
+    if (request == NULL || callback == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid null request or callback");
+        return SOFTBUS_INVALID_PARAM;
+    }
     TransReqInfo reqInfo;
     (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
     if (GetTransReqInfoByLaneReqId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
@@ -1728,7 +1732,7 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
     errCode = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb);
     if (errCode != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "action trigger connect device err");
-        NotifyLinkFail(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, errCode);
+        DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, wifiDirectInfo.requestId);
         return errCode;
     }
     return SOFTBUS_OK;
@@ -2249,7 +2253,7 @@ void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "lane link p2p not init, disconn request ignore");
         return;
     }
-    char mac[MAX_MAC_LEN];
+    char mac[MAX_MAC_LEN] = {0};
     int32_t linkId = -1;
     int32_t pid = -1;
     if (LinkLock() != 0) {
@@ -2288,7 +2292,7 @@ int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "lane link p2p not init, disconn request ignore");
         return SOFTBUS_INVALID_PARAM;
     }
-    char mac[MAX_MAC_LEN];
+    char mac[MAX_MAC_LEN] = {0};
     int32_t linkId = -1;
     int32_t pid = -1;
     LaneLinkType linkType = LANE_LINK_TYPE_BUTT;
