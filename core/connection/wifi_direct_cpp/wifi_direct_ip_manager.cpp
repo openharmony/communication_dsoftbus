@@ -52,7 +52,7 @@ std::string WifiDirectIpManager::ApplyIpv6(const std::string &mac)
     }
     array.insert(array.begin() + INSERT_POS, { INSERT_BYTE_0, INSERT_BYTE_1 });
     char ip[IP_STR_MAX_LEN] {};
-    auto ret = sprintf_s(ip, sizeof(ip), "fe80::%x%02x:%x%02x:%x%02x:%x%02x%%chba0",
+    auto ret = sprintf_s(ip, sizeof(ip), "fe80::%02x%02x:%02x%02x:%02x%02x:%02x%02x%%chba0",
                          array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7]);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret > 0, "", CONN_WIFI_DIRECT, "format failed");
 
