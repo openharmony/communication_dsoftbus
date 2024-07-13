@@ -141,24 +141,27 @@ static void OnAuthDisconnected(AuthHandle authHandle)
     AuthNegotiateChannel disconnectChannel(authHandle);
     InnerLink::LinkType type = InnerLink::LinkType::INVALID_TYPE;
     std::string remoteDeviceId;
-    LinkManager::GetInstance().ForEach([&disconnectChannel, &type, &remoteDeviceId] (const InnerLink &innerLink) {
-        auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(innerLink.GetNegotiateChannel());
-        if (channel != nullptr && disconnectChannel == *channel) {
-            CONN_LOGD(CONN_WIFI_DIRECT, "disconnect type=%{public}d, remoteUuid=%{public}s, remoteMac=%{public}s",
-                      static_cast<int>(type), WifiDirectAnonymizeDeviceId(innerLink.GetRemoteDeviceId()).c_str(),
-                      WifiDirectAnonymizeMac(innerLink.GetRemoteBaseMac()).c_str());
-            type = innerLink.GetLinkType();
-            remoteDeviceId= innerLink.GetRemoteDeviceId();
-            auto &entity = EntityFactory::GetInstance().GetEntity(innerLink.GetLinkType());
-            entity.DisconnectLink(innerLink.GetRemoteBaseMac());
+    std::string remoteMac;
+    LinkManager::GetInstance().ForEach(
+        [&disconnectChannel, &type, &remoteDeviceId, &remoteMac] (const InnerLink &innerLink) {
+            auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(innerLink.GetNegotiateChannel());
+            if (channel != nullptr && disconnectChannel == *channel) {
+                type = innerLink.GetLinkType();
+                remoteDeviceId= innerLink.GetRemoteDeviceId();
+                remoteMac = innerLink.GetRemoteBaseMac();
+                return true;
+            }
+            return false;
+        });
 
-            return true;
-        }
-        return false;
-    });
-
+    CONN_LOGI(CONN_WIFI_DIRECT, "disconnect type=%{public}d, remoteUuid=%{public}s, remoteMac=%{public}s",
+        static_cast<int>(type), WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(),
+        WifiDirectAnonymizeMac(remoteMac).c_str());
     if (type != InnerLink::LinkType::INVALID_TYPE) {
         LinkManager::GetInstance().RemoveLink(type, remoteDeviceId);
+        auto &entity = EntityFactory::GetInstance().GetEntity(type);
+        entity.DisconnectLink(remoteMac);
+        entity.DestoryGroupIfNeeded();
     }
 }
 
