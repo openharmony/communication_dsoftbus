@@ -195,7 +195,6 @@ static void LnnSubscribeWifiService(void *para)
         if (SoftBusGetLinkedInfo(&info) == SOFTBUS_OK) {
             UpdateLocalWifiConnCapability(info.connState);
         }
-
     } else {
         LNN_LOGE(LNN_BUILDER, "subscribe wifiservice event fail");
         retry++;
