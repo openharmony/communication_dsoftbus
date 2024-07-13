@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 #include "bus_center_event.h"
-
+#include "softbus_wifi_api_adapter.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,6 +53,10 @@ void LnnDeinitProductMonitorImpl(void);
 void LnnDeinitDriverMonitorImpl(void);
 
 void LnnDeInitNetlinkMonitorImpl(void);
+
+void UpdateLocalWifiActiveCapability(bool isWifiActive);
+
+void UpdateLocalWifiConnCapability(SoftBusWifiConnState isWifiActive);
 
 #ifdef __cplusplus
 }

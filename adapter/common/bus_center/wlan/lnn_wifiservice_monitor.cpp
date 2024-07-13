@@ -259,3 +259,43 @@ int32_t LnnInitWifiServiceMonitorImpl(void)
     }
     return ret;
 }
+
+void UpdateLocalWifiActiveCapability(bool isWifiActive)
+{
+    SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
+    if (notifyState == NULL) {
+        LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
+        return;
+    }
+    if (!isWifiActive) {
+        *notifyState = SOFTBUS_WIFI_DISABLED;
+    } else {
+        *notifyState = SOFTBUS_WIFI_ENABLED;
+    }
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWlanStateChangeEvent,
+        (void *)notifyState);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async notify wifi state err, ret=%{public}d", ret);
+        SoftBusFree(notifyState);
+    }
+}
+
+void UpdateLocalWifiConnCapability(SoftBusWifiConnState connState)
+{
+    SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
+    if (notifyState == NULL) {
+        LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
+        return;
+    }
+    if (connState == SOFTBUS_API_WIFI_DISCONNECTED) {
+        *notifyState = SOFTBUS_WIFI_DISABLED;
+    } else {
+        *notifyState = SOFTBUS_WIFI_ENABLED;
+    }
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWlanStateChangeEvent,
+        (void *)notifyState);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async notify wifi state err, ret=%{public}d", ret);
+        SoftBusFree(notifyState);
+    }
+}
