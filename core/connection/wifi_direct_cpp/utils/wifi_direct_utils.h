@@ -96,6 +96,7 @@ public:
     static void ParallelFlowEnter();
     static void ParallelFlowExit();
     static int32_t CalculateStringLength(char *str, int32_t size);
+    static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
 
 private:
     static inline std::mutex serialParallelLock_;

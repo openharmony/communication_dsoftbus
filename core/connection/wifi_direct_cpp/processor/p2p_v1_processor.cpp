@@ -1529,14 +1529,16 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
 
     std::string localMac;
     std::string localIp;
+    auto myRole = LinkInfo::LinkMode::NONE;
     auto ret = InterfaceManager::GetInstance().UpdateInterface(
-        InterfaceInfo::P2P, [groupConfig, &localMac, &localIp](InterfaceInfo &interface) {
+        InterfaceInfo::P2P, [groupConfig, &myRole, &localMac, &localIp](InterfaceInfo &interface) {
             interface.SetP2pGroupConfig(groupConfig);
             int32_t reuseCount = interface.GetReuseCount();
             interface.SetReuseCount(reuseCount + 1);
             CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%{public}d", interface.GetReuseCount());
             localMac = interface.GetBaseMac();
             localIp = interface.GetIpString().ToIpString();
+            myRole = interface.GetRole();
             return SOFTBUS_OK;
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(
@@ -1553,6 +1555,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(
         success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
+    WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectUtils::ToWifiDirectRole(myRole), localMac, msg.GetLegacyP2pGoMac());
     ret = StartAuthListening(localIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "start auth listen failed, error=%{public}d", ret);
