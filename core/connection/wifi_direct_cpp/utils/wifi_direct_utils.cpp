@@ -527,4 +527,27 @@ int32_t WifiDirectUtils::CalculateStringLength(char *str, int32_t size)
     }
     return 0;
 }
+
+void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "role=%{public}d, localMac=%{public}s, goMac=%{public}s",
+        role, WifiDirectAnonymizeMac(localMac).c_str(), WifiDirectAnonymizeMac(goMac).c_str());
+    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, role);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn p2p role failed");
+    }
+
+    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, localMac.c_str());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn my mac failed");
+    }
+
+    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, goMac.c_str());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn go mac failed");
+    }
+
+    LnnSyncP2pInfo();
+}
+
 } // namespace OHOS::SoftBus
