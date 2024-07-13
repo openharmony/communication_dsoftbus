@@ -288,9 +288,9 @@ void UpdateLocalWifiConnCapability(SoftBusWifiConnState connState)
         return;
     }
     if (connState == SOFTBUS_API_WIFI_DISCONNECTED) {
-        *notifyState = SOFTBUS_WIFI_DISABLED;
+        *notifyState = SOFTBUS_WIFI_DISCONNECTED;
     } else {
-        *notifyState = SOFTBUS_WIFI_ENABLED;
+        *notifyState = SOFTBUS_WIFI_CONNECTED;
     }
     int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWlanStateChangeEvent,
         (void *)notifyState);
