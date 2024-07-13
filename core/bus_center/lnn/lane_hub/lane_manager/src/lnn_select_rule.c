@@ -30,6 +30,7 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "lnn_event_monitor.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
@@ -195,10 +196,17 @@ static int32_t P2pCapCheck(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
+    if ((local & (1 << BIT_WIFI_P2P)) == 0) ) {
+        if (!SoftBusIsWifiActive()) {
+            LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
+            return SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP;
+        } else {
+            UpdateLocalWifiActiveCapability(true);
+        }
+    }
+    if ((remote & (1 << BIT_WIFI_P2P)) == 0) {
         LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
-        return ((local & (1 << BIT_WIFI_P2P)) == 0) ?
-            SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP : SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP;
+        return SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP;
     }
     return SOFTBUS_OK;
 }
