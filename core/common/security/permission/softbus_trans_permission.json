@@ -468,5 +468,18 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.boosterd.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "boosterd",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
