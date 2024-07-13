@@ -57,7 +57,7 @@ void LnnDeInitNetlinkMonitorImpl(void);
 
 void UpdateLocalWifiActiveCapability(bool isWifiActive);
 
-void UpdateLocalWifiConnCapability(SoftBusWifiConnState isWifiActive);
+void UpdateLocalWifiConnCapability(SoftBusWifiConnState connState);
 
 #ifdef __cplusplus
 }
