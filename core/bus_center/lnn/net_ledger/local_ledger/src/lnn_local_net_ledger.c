@@ -1315,8 +1315,15 @@ static int32_t UpdateLocalBtMac(const void *mac)
         return SOFTBUS_OK;
     }
     LnnSetBtMac(&g_localNetLedger.localInfo, (char *)mac);
-    if (LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update Bt mac to localdevinfo store fail");
+    NodeInfo localNodeInfo;
+    (void)memset_s(&localNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetLocalDevInfo(&localNodeInfo) == SOFTBUS_OK) {
+        LnnSetBtMac(&localNodeInfo, (char *)mac);
+        if (LnnSaveLocalDeviceInfo(&localNodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "update Bt mac to localdevinfo store fail");
+        }
+    } else {
+        LNN_LOGE(LNN_LEDGER, "get local device info fail");
     }
     if (g_localNetLedger.localInfo.accountId == 0) {
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
