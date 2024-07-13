@@ -114,6 +114,8 @@ static std::map<NegotiateMessageType, std::string> g_messageNameMap = {
     { NegotiateMessageType::CMD_RENEGOTIATE_RESP,        "CMD_RENEGOTIATE_RESP"        },
     { NegotiateMessageType::CMD_AUTH_HAND_SHAKE,         "CMD_AUTH_HAND_SHAKE"         },
     { NegotiateMessageType::CMD_AUTH_HAND_SHAKE_RSP,     "CMD_AUTH_HAND_SHAKE_RSP"     },
+    { NegotiateMessageType::CMD_DETECT_LINK_REQ,         "CMD_DETECT_LINK_REQ"         },
+    { NegotiateMessageType::CMD_DETECT_LINK_RSP,         "CMD_DETECT_LINK_RSP"         },
     { NegotiateMessageType::CMD_V3_REQ,                  "CMD_V3_REQ"                  },
     { NegotiateMessageType::CMD_V3_RSP,                  "CMD_V3_RSP"                  },
 };
