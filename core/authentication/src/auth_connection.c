@@ -192,7 +192,6 @@ static void NotifyDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
     }
 }
 
-
 static void NotifyDataReceived(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -745,7 +744,7 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
     };
     if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
         AUTH_LOGE(AUTH_CONN, "strcpy_s ip fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     switch (type) {
         case AUTH_LINK_TYPE_WIFI: {

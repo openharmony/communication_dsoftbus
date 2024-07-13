@@ -129,7 +129,7 @@ int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, 
 int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide);
 int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide);
 int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource);
-int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, char *peerUdid);
+int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const char *peerUdid);
 uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
 int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt);

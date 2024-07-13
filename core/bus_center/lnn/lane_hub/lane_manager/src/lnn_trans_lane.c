@@ -676,7 +676,7 @@ static int32_t ReallocLaneByQos(uint32_t laneReqId, uint64_t laneId, const LaneA
 
 static int32_t AllocRawLane(uint32_t laneHandle, const RawLaneAllocInfo *allocInfo, const LaneAllocListener *listener)
 {
-    if ((allocInfo == NULL) || (allocInfo->type != LANE_TYPE_TRANS)) {
+    if ((allocInfo == NULL) || (allocInfo->type != LANE_TYPE_TRANS) || (listener == NULL)) {
         LNN_LOGE(LNN_LANE, "allocLane param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -868,6 +868,7 @@ static bool GetAuthType(const char *peerNetworkId)
     int32_t ret = LnnGetRemoteNumInfo(peerNetworkId, NUM_KEY_META_NODE, &value);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "fail, ret=%{public}d", ret);
+        return false;
     }
     LNN_LOGD(LNN_LANE, "success, value=%{public}d", value);
     return ((1 << ONLINE_HICHAIN) == value);

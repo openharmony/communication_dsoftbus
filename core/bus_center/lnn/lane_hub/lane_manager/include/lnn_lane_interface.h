@@ -276,6 +276,7 @@ uint32_t ApplyLaneReqId(LaneType type);
 int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener);
 int32_t LnnFreeLane(uint32_t laneReqId);
 int32_t GetMacInfoByLaneId(uint64_t laneId, LnnMacInfo *macInfo);
+
 #ifdef __cplusplus
 }
 #endif
