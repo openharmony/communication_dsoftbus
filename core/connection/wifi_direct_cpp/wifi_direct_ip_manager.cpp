@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 #include "wifi_direct_ip_manager.h"
+#include <arpa/inet.h>
+#include <thread>
 #include "securec.h"
 #include "conn_log.h"
 #include "net_conn_client.h"
 #include "softbus_error_code.h"
+#include "softbus_socket.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 
@@ -35,7 +38,7 @@ static constexpr char HML_IP_SINK_SUFFIX[] = ".1";
 void WifiDirectIpManager::Init()
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-    ClearAllIpv4();
+    std::thread(WifiDirectIpManager::ClearAllIpv4).detach();
 }
 
 std::string WifiDirectIpManager::ApplyIpv6(const std::string &mac)
@@ -48,11 +51,27 @@ std::string WifiDirectIpManager::ApplyIpv6(const std::string &mac)
         array[0] &= ~U_L_BIT;
     }
     array.insert(array.begin() + INSERT_POS, { INSERT_BYTE_0, INSERT_BYTE_1 });
-    char result[IP_STR_MAX_LEN] {};
-    auto ret = sprintf_s(result, sizeof(result), "fe80::%x%02x:%x%02x:%x%02x:%x%02x%%chba0",
+    char ip[IP_STR_MAX_LEN] {};
+    auto ret = sprintf_s(ip, sizeof(ip), "fe80::%x%02x:%x%02x:%x%02x:%x%02x%%chba0",
                          array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7]);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret > 0, "", CONN_WIFI_DIRECT, "format failed");
-    return result;
+
+    SoftBusSockAddrIn6 addrIn6 {};
+    if (Ipv6AddrToAddrIn(&addrIn6, ip, 0) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "to addrIn6 failed");
+        return "";
+    }
+    char result[IP_STR_MAX_LEN] {};
+    if (Ipv6AddrInToAddr(&addrIn6, result, sizeof(result)) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "to ip string failed");
+        return "";
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "scopeId=%{public}u", addrIn6.sin6ScopeId);
+    std::string finalResult = result;
+    if (addrIn6.sin6ScopeId == 0) {
+        finalResult += "%chba0";
+    }
+    return finalResult;
 }
 
 int32_t WifiDirectIpManager::ApplyIpv4(

@@ -16,7 +16,9 @@
 #include "wifi_direct_mock.h"
 #include <thread>
 #include "conn_log.h"
+#include "softbus_adapter_socket.h"
 // implement dependencies and redirect request to mock object here
+extern "C" {
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGetDeviceUuid(authId, uuid, size);
@@ -245,6 +247,17 @@ WifiErrorCode RegisterP2pStateChangedCallback(const P2pStateChangedCallback call
 WifiErrorCode RegisterP2pConnectionChangedCallback(const P2pConnectionChangedCallback callback)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::RegisterP2pConnectionChangedCallback(callback);
+}
+
+int32_t Ipv6AddrInToAddr(SoftBusSockAddrIn6 *addrIn6, char *addr, int32_t addrLen)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t port)
+{
+    return SOFTBUS_OK;
+}
 }
 
 namespace OHOS::SoftBus {
