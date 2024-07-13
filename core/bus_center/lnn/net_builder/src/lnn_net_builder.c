@@ -894,11 +894,12 @@ int32_t LnnUpdateNodeAddr(const char *addr)
 
 void UpdateLocalNetCapability(void)
 {
-    uint32_t netCapability = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+    uint32_t oldNetCap = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldNetCap) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get cap from local ledger fail");
         return;
     }
+    uint32_t netCapability = oldNetCap;
     int btState = SoftBusGetBtState();
     if (btState == BLE_ENABLE) {
         LNN_LOGI(LNN_INIT, "ble state is on");
@@ -945,6 +946,7 @@ void UpdateLocalNetCapability(void)
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "set cap to local ledger fail");
     }
+    LNN_LOGI(LNN_INIT, "update local cap:%{public}u->%{public}u", oldNetCap, netCapability);
 }
 
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
