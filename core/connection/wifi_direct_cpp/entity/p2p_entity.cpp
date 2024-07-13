@@ -113,6 +113,8 @@ P2pEntity::P2pEntity() : timer_("P2pEntity")
 
 void P2pEntity::DisconnectLink(const std::string &remoteMac) { }
 
+void P2pEntity::DestoryGroupIfNeeded() { };
+
 P2pOperationResult P2pEntity::CreateGroup(const P2pCreateGroupParam &param)
 {
     std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> operation;
