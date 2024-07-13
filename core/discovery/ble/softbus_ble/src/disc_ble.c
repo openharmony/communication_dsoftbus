@@ -894,12 +894,14 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
         }
     }
     (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
+#ifdef DISC_COMMUNITY
     if (info->range > 0) {
         int8_t power = 0;
         if (SoftBusGetBlePower(&power) == SOFTBUS_OK) {
             (void)AssembleTLV(broadcastData, TLV_TYPE_RANGE_POWER, (const void *)&power, RANGE_POWER_TYPE_LEN);
         }
     }
+#endif /* DISC_COMMUNITY */
     if (info->custData[0] != 0) {
         AssembleCustData(info, broadcastData);
     }
