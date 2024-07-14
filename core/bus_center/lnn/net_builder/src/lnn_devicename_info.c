@@ -71,12 +71,13 @@ static int32_t LnnSyncDeviceName(const char *networkId)
 
 static int32_t LnnSyncDeviceNickName(const char *networkId)
 {
+    int64_t accountId = 0;
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "get local nodeInfo fail");
         return SOFTBUS_ERR;
     }
-    int64_t accountId = GetCurrentAccount();
+    (void)GetCurrentAccount(&accountId);
     JsonObj *json = JSON_CreateObject();
     if (json == NULL) {
         return SOFTBUS_ERR;
