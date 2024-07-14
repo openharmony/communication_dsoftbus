@@ -368,24 +368,27 @@ static int32_t RleaseUdpResources(int32_t channelId)
     return ServerIpcReleaseResources(channelId);
 }
 
-static int32_t CloseUdpChannel(int32_t channelId, ShutdownReason reason)
+static void NotifyCb(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
 {
-    UdpChannel channel;
-    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
-    TRANS_LOGI(TRANS_SDK, "close udp channelId=%{public}d.", channelId);
-    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed.", channelId);
-        return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
-    }
-    if (channel.businessType == BUSINESS_TYPE_FILE) {
-        TRANS_LOGD(TRANS_SDK, "close udp channel get file list start");
-        int32_t ret = NSTACKX_DFileSessionGetFileList(channel.dfileId);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "close udp channel to get file list failed. channelId=%{public}d, ret=%{public}d",
-                channelId, ret);
+    if (channel != NULL && (!channel->isEnable) && g_sessionCb != NULL && g_sessionCb->OnSessionOpenFailed != NULL) {
+        SessionState sessionState = SESSION_STATE_INIT;
+        if (ClientGetSessionStateByChannelId(channelId, CHANNEL_TYPE_UDP, &sessionState) == SOFTBUS_OK &&
+            (sessionState == SESSION_STATE_OPENED || sessionState == SESSION_STATE_CALLBACK_FINISHED)) {
+            if (ClosePeerUdpChannel(channelId) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_SDK, "trans close peer udp channel failed. channelId=%{public}d", channelId);
+            }
         }
+        g_sessionCb->OnSessionOpenFailed(channelId, CHANNEL_TYPE_UDP, SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT);
+        return;
     }
+    if (g_sessionCb != NULL && g_sessionCb->OnSessionClosed != NULL) {
+        g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP, reason);
+        return;
+    }
+}
 
+static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
+{
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SDK, "trans del udp channel failed. channelId=%{public}d", channelId);
     }
@@ -410,18 +413,39 @@ static int32_t CloseUdpChannel(int32_t channelId, ShutdownReason reason)
             break;
     }
 
-    int32_t ret = TransDeleteBusinnessChannel(&channel);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "CloseUdpChannel del business channel failed. channelId=%{public}d", channelId);
-        return ret;
+    if (channel != NULL) {
+        int32_t ret = TransDeleteBusinnessChannel(channel);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "del business channel failed. channelId=%{public}d", channelId);
+            return ret;
+        }
     }
 
     if (reason != SHUTDOWN_REASON_LOCAL) {
-        if (g_sessionCb != NULL && g_sessionCb->OnSessionClosed != NULL) {
-            g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP, reason);
-        }
+        NotifyCb(channel, channelId, reason);
     }
     return SOFTBUS_OK;
+}
+
+static int32_t CloseUdpChannel(int32_t channelId, ShutdownReason reason)
+{
+    UdpChannel channel;
+    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    TRANS_LOGI(TRANS_SDK, "close udp channelId=%{public}d, reason=%{public}d", channelId, reason);
+    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed.", channelId);
+        CloseUdpChannelProc(NULL, channelId, reason);
+        return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
+    }
+    if (channel.businessType == BUSINESS_TYPE_FILE) {
+        TRANS_LOGD(TRANS_SDK, "close udp channel get file list start");
+        int32_t ret = NSTACKX_DFileSessionGetFileList(channel.dfileId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "close udp channel to get file list failed. channelId=%{public}d, ret=%{public}d",
+                channelId, ret);
+        }
+    }
+    return CloseUdpChannelProc(&channel, channelId, reason);
 }
 
 int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason)

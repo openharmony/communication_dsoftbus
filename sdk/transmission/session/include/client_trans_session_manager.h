@@ -141,10 +141,12 @@ typedef struct {
     int32_t sessionId;
     int32_t channelId;
     ChannelType channelType;
+    bool isAsync;
     void (*OnSessionClosed)(int sessionId);
     void (*OnShutdown)(int32_t socket, ShutdownReason reason);
     char sessionName[SESSION_NAME_SIZE_MAX];
     char pkgName[PKG_NAME_SIZE_MAX];
+    SocketLifecycleData lifecycle;
 } DestroySessionInfo;
 
 int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
@@ -173,6 +175,8 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
 int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *businessType);
 
 int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *data);
+
+int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType, SessionState *sessionState);
 
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId);
 
