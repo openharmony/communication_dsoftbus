@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len);
-int64_t GetCurrentAccount(void);
+int32_t GetCurrentAccount(int64_t *account);
 int32_t GetActiveOsAccountIds(void);
 bool IsActiveOsAccountUnlocked(void);
 
