@@ -204,6 +204,7 @@ void UpdateLocalWifiConnCapability(void)
     (void)memset_s(&info, sizeof(SoftBusWifiLinkedInfo), 0, sizeof(SoftBusWifiLinkedInfo));
     if (SoftBusGetLinkedInfo(&info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get link info failed");
+        SoftBusFree(notifyState);
         return;
     }
     if (info.connState == SOFTBUS_API_WIFI_DISCONNECTED) {
