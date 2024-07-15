@@ -1249,10 +1249,14 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         if (info->capabilityData[pos] == NULL) {
             info->capabilityData[pos] = (uint8_t *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN);
             if (info->capabilityData[pos] == NULL) {
+                DISC_LOGE(DISC_BLE, "malloc failed");
+                SoftBusFree(info->capabilityData[pos]);
+                info->capabilityData[pos] = NULL;
                 return SOFTBUS_MALLOC_ERR;
             }
         }
         if (memcpy_s(info->capabilityData[pos], MAX_CAPABILITYDATA_LEN, custData, custDataLen) != EOK) {
+            DISC_LOGE(DISC_BLE, "memcpy failed");
             SoftBusFree(info->capabilityData[pos]);
             info->capabilityData[pos] = NULL;
             return SOFTBUS_MEM_ERR;
