@@ -30,12 +30,12 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "lnn_event_monitor_impl.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
+#include "softbus_wifi_api_adapter.h"
 #include "trans_event.h"
 
 
