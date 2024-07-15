@@ -166,7 +166,10 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
                 nstackxDeviceInfo->deviceName);
             continue;
         }
-        (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+        if (memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo)) != EOK) {
+            DISC_LOGE(DISC_COAP, "disc Device Info memset failed");
+            continue;
+        }
         ret = ParseDiscDevInfo(nstackxDeviceInfo, discDeviceInfo);
         if (ret != SOFTBUS_OK) {
             DISC_LOGW(DISC_COAP, "parse discovery device info failed.");
@@ -407,7 +410,10 @@ static int32_t SetLocalDeviceInfo(void)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(g_localDeviceInfo != NULL, SOFTBUS_DISCOVER_COAP_NOT_INIT, DISC_COAP,
         "disc coap not init");
-    (void)memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo));
+    if (memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo) != EOK)) {
+        DISC_LOGE(DISC_COAP, "local Device Info memset failed");
+        return SOFTBUS_MEM_ERR;
+    }
 
     char *deviceIdStr = GetDeviceId();
     DISC_CHECK_AND_RETURN_RET_LOGE(deviceIdStr != NULL, SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL, DISC_COAP,
