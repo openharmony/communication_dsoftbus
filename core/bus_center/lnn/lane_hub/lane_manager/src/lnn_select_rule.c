@@ -37,8 +37,6 @@
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
 #include "trans_event.h"
-#include "lnn_net_capability.h"
-
 
 #define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
 #define LNN_ONLINETIME_OUT     10000 /*BLE connection reuse time*/
@@ -202,7 +200,7 @@ static int32_t P2pCapCheck(const char *networkId)
             return SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP;
         } else {
             (void)LnnSetNetCapability(&local, BIT_WIFI_P2P);
-            (void)LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, local);
+            (void)LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, local)
         }
     }
     if ((remote & (1 << BIT_WIFI_P2P)) == 0) {
