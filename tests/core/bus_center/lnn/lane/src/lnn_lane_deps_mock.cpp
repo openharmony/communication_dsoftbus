@@ -243,11 +243,6 @@ int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
     return GetLaneDepsInterface()->LnnSetNetCapability(capability, type);
 }
 
-bool SoftBusIsWifiActive(void)
-{
-    return GetLaneDepsInterface()->SoftBusIsWifiActive();
-}
-
 int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info)
 {
     return GetLaneDepsInterface()->LnnGetRemoteNumU32Info(netWorkId, key, info);
