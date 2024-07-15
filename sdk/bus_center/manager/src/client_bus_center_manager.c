@@ -1212,6 +1212,39 @@ int32_t LnnOnLocalNetworkIdChanged(const char *pkgName)
     return SOFTBUS_OK;
 }
 
+int32_t LnnOnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+{
+    NodeStateCallbackItem *item = NULL;
+    ListNode dupList;
+
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock local cb list in notify");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&dupList);
+    DuplicateNodeStateCbList(&dupList);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "unlock local cb list in notify");
+    }
+    LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
+        if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+            (item->cb.onNodeDeviceNotTrusted) != NULL) {
+            item->cb.onNodeDeviceNotTrusted(msg);
+        }
+    }
+    ClearNodeStateCbList(&dupList);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode)
 {
     TimeSyncCallbackItem *item = NULL;

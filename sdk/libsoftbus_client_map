@@ -198,6 +198,7 @@
         "ServerIpcDeactiveMetaNode";
         "LnnOnNodeBasicInfoChanged";
         "LnnOnLocalNetworkIdChanged";
+        "LnnOnNodeDeviceNotTrusted";
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
         "ReadSessionLinkType";
