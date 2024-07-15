@@ -325,7 +325,7 @@ int32_t main(int32_t argc, char *argv[])
 
     if (RegNodeDeviceStateCb(g_testModuleName, &g_nodeStateCallback) != SOFTBUS_OK) {
         LOG2_ERR("RegNodeDeviceStateCb error!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL;
     }
 
     LOG2_INFO("\n$$$$$$$$$ Start transmission.........");

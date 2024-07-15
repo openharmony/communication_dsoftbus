@@ -156,7 +156,7 @@ static int32_t TestGenerateChannInfo(ChannelInfo *channel)
         SoftBusFree(sessionName);
         SoftBusFree(deviceId);
         SoftBusFree(groupId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     channel->peerSessionName = sessionName;
@@ -357,7 +357,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest04, TestS
     channel->isServer = true;
     ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BYTES);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_ERR);
+    ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_NO_INIT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -620,7 +620,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest12, TestS
     ASSERT_TRUE(session != NULL);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_ERR);
+    ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_NO_INIT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);

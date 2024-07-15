@@ -162,7 +162,7 @@ int32_t TMessenger::StartListen(const std::string &pkgName, const std::string &m
     int32_t socket = Socket(info);
     if (socket <= 0) {
         LOGE("failed to create socket, ret=%d", socket);
-        return SOFTBUS_ERR;
+        return socket;
     }
     LOGI("create listen socket=%d", socket);
 
@@ -329,7 +329,7 @@ int32_t TMessenger::Send(const Message &msg)
     std::string data = msg.Encode();
     if (data.empty()) {
         LOGE("the data is empty");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     int32_t ret = SendMessage(socket_, data.c_str(), data.size());

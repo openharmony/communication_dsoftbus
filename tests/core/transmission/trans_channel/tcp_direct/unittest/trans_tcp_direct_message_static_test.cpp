@@ -718,7 +718,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, IsMetaSessionTest001, TestSize.Level1)
 
 /**
  * @tc.name: TransTdcGetDataBufInfoByChannelId001
- * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -741,7 +741,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcGetDataBufInfoByChannelIdTest0
 
 /**
  * @tc.name: TransTdcUpdateDataBufWInfo0014
- * @tc.desc: Should return SOFTBUS_ERR when dataList is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT when dataList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
