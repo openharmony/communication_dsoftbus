@@ -36,7 +36,6 @@
 #include "softbus_hisysevt_bus_center.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
-#include "softbus_wifi_api_adapter.h"
 #include "trans_event.h"
 
 
@@ -201,7 +200,8 @@ static int32_t P2pCapCheck(const char *networkId)
             LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
             return SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP;
         } else {
-            UpdateLocalWifiActiveCapability(true);
+            (void)LnnSetNetCapability(*local, BIT_WIFI_P2P);
+            (void)LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, local);
         }
     }
     if ((remote & (1 << BIT_WIFI_P2P)) == 0) {
