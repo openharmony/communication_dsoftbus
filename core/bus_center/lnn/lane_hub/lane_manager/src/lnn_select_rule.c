@@ -196,7 +196,7 @@ static int32_t P2pCapCheck(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    if ((local & (1 << BIT_WIFI_P2P)) == 0) ) {
+    if ((local & (1 << BIT_WIFI_P2P)) == 0) {
         if (!SoftBusIsWifiActive()) {
             LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
             return SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP;
