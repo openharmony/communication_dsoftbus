@@ -28,6 +28,7 @@
 
 #include "kits/c/wifi_device.h"
 
+#include "channel/proxy_negotiate_channel.h"
 #include "command/command_factory.h"
 #include "data/interface_manager.h"
 #include "wifi_direct_scheduler.h"
@@ -89,6 +90,9 @@ void P2pV1ProcessorTest::PrepareContext()
     context_.Set(TestContextKey::WIFI_GET_SELF_CONFIG, WifiErrorCode(WIFI_SUCCESS));
     context_.Set(TestContextKey::WIFI_WIDE_BAND_WIDTH_SUPPORT, true);
     context_.Set(TestContextKey::WIFI_STA_FREQUENCY, int(2417));
+    context_.Set(TestContextKey::WIFI_RECOMMEND_FREQUENCY, int(2417));
+    context_.Set(TestContextKey::WIFI_REQUEST_GC_IP,
+        std::pair<WifiErrorCode, std::vector<int>>(WIFI_SUCCESS, std::vector<int> { 192, 168, 1, 1 }));
 
     context_.Set(TestContextKey::CHANNEL_SEND_MESSAGE, int(SOFTBUS_OK));
 }
@@ -117,6 +121,19 @@ void P2pV1ProcessorTest::InjectData(WifiDirectInterfaceMock &mock)
         result->frequency = context_.Get(TestContextKey::WIFI_STA_FREQUENCY, int(0));
         return WIFI_SUCCESS;
     });
+    EXPECT_CALL(mock, Hid2dGetRecommendChannel(_, _))
+        .WillRepeatedly([this](const RecommendChannelRequest *request, RecommendChannelResponse *response) {
+            response->centerFreq = context_.Get(TestContextKey::WIFI_RECOMMEND_FREQUENCY, int(0));
+            return WIFI_SUCCESS;
+        });
+    EXPECT_CALL(mock, Hid2dRequestGcIp(_, _))
+        .WillRepeatedly([this](const unsigned char gcMac[MAC_LEN], unsigned int ipAddr[IPV4_ARRAY_LEN]) {
+            auto value = context_.Get(TestContextKey::WIFI_REQUEST_GC_IP, std::pair<WifiErrorCode, std::vector<int>>());
+            for (size_t i = 0; i < IPV4_ARRAY_LEN && i < value.second.size(); i++) {
+                ipAddr[i] = value.second[i];
+            }
+            return value.first;
+        });
 
     InterfaceManager::GetInstance().InitInterface(InterfaceInfo::InterfaceType::P2P);
 }
@@ -144,6 +161,7 @@ void P2pV1ProcessorTest::InjectEntityMock(P2pEntity &mock)
         result.errorCode_ = SOFTBUS_OK;
         return result;
     });
+    EXPECT_CALL(mock, NotifyNewClientJoining(_)).WillRepeatedly([](const std::string &remoteMac) {});
 }
 
 void P2pV1ProcessorTest::InjectCommonMock(WifiDirectInterfaceMock &mock)
@@ -217,6 +235,8 @@ void P2pV1ProcessorTest::InjectChannel(WifiDirectInterfaceMock &mock)
 
     auto ret = context_.Get(TestContextKey::CHANNEL_SEND_MESSAGE, int(0));
     EXPECT_CALL(mock, ProxyNegotiateChannelSendMessage(channelId, _)).WillRepeatedly(Return(ret));
+
+    EXPECT_CALL(mock, AuthStartListeningForWifiDirect(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
 }
 
 /*
@@ -352,5 +372,69 @@ HWTEST_F(P2pV1ProcessorTest, CreateAsTimeout, TestSize.Level1)
     ASSERT_EQ(status, std::future_status::ready);
     auto value = future.get();
     ASSERT_EQ(value, SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT);
+}
+
+/*
+ * @tc.name: CreateWhenNoneAsGo
+ * @tc.desc: whole process test,
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, CreateWhenNoneAsGo, TestSize.Level1)
+{
+    context_.Set(TestContextKey::REMOTE_MAC, std::string("a6:3b:0e:78:29:dd"));
+    context_.Set(TestContextKey::WIFI_STA_FREQUENCY, int(5180));
+    context_.Set(TestContextKey::WIFI_RECOMMEND_FREQUENCY, int(5180));
+    context_.Set(TestContextKey::WIFI_REQUEST_GC_IP,
+        std::pair<WifiErrorCode, std::vector<int>>(WIFI_SUCCESS, std::vector<int> { 192, 168, 49, 3 }));
+
+    WifiDirectInterfaceMock mock;
+    InjectCommonMock(mock);
+    InjectData(mock);
+    P2pEntity entityMock;
+    InjectEntityMock(entityMock);
+    InjectChannel(mock);
+
+    auto channelId = context_.Get(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(0));
+    EXPECT_CALL(mock, ProxyNegotiateChannelSendMessage(channelId, _))
+        .WillOnce([](int32_t channelId, const NegotiateMessage &msg) {
+            std::string message =
+                R"({"KEY_COMMAND_TYPE":9,"KEY_CONTENT_TYPE":2,"KEY_GC_CHANNEL_LIST":"36##40##44##48##149##153##157##161##165","KEY_GC_MAC":"a6:3b:0e:78:29:dd","KEY_GO_MAC":"42:dc:a5:f3:4c:14","KEY_IP":"","KEY_MAC":"a6:3b:0e:78:29:dd","KEY_SELF_WIFI_CONFIG":"","KEY_STATION_FREQUENCY":5180,"KEY_VERSION":2,"KEY_WIDE_BAND_SUPPORTED":false})";
+            CoCProxyNegotiateChannel::InjectReceiveData(channelId, message);
+            return SOFTBUS_OK;
+        })
+        .WillOnce([](int32_t channelId, const NegotiateMessage &msg) {
+            std::string message =
+                R"({"KEY_COMMAND_TYPE":9,"KEY_CONTENT_TYPE":3,"KEY_IP":"192.168.49.3","KEY_MAC":"a6:3b:0e:78:29:dd","KEY_RESULT":0,"KEY_VERSION":2})";
+            CoCProxyNegotiateChannel::InjectReceiveData(channelId, message);
+            return SOFTBUS_OK;
+        })
+        .WillRepeatedly(Return(context_.Get(TestContextKey::CHANNEL_SEND_MESSAGE, int(0))));
+
+    EXPECT_CALL(entityMock, NotifyNewClientJoining(_)).WillRepeatedly([this](const std::string &remoteMac) {
+        auto remoteDeviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+        ClientJoinEvent event { SOFTBUS_OK, remoteDeviceId, remoteMac };
+        WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
+    });
+
+    WifiDirectConnectInfo info = { 0 };
+    WifiDirectConnectCallback callback { 0 };
+    PrepareConnectParameter(info, callback);
+    std::promise<bool> result;
+    EXPECT_CALL(mock, OnConnectSuccess(context_.Get(TestContextKey::CONNECT_REQUEST_ID, uint32_t(0)), _))
+        .Times(1)
+        .WillOnce<>([&result](uint32_t requestId, const struct WifiDirectLink *link) {
+            result.set_value(true);
+        });
+
+    WifiDirectScheduler &scheduler = WifiDirectSchedulerFactory::GetInstance().GetScheduler();
+    auto ret = scheduler.ConnectDevice(info, callback);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    auto future = result.get_future();
+    auto status = future.wait_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(status, std::future_status::ready);
+    auto value = future.get();
+    ASSERT_TRUE(value);
 }
 } // namespace OHOS::SoftBus
