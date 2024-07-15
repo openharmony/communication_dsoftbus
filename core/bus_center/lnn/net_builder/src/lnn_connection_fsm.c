@@ -1068,15 +1068,12 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     int32_t rc;
     AuthConnInfo authConn;
     LnnConntionInfo *connInfo = &connFsm->connInfo;
-
     if (CheckDeadFlag(connFsm, true)) {
         NotifyJoinResult(connFsm, NULL, SOFTBUS_NETWORK_CONN_FSM_DEAD);
         return SOFTBUS_ERR;
     }
-    if (connInfo->authHandle.authId > 0) {
-        LNN_LOGI(LNN_BUILDER, "[id=%{public}u]join LNN is ongoing, waiting...", connFsm->id);
-        return SOFTBUS_OK;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGW(connInfo->authHandle.authId <= 0, SOFTBUS_OK, LNN_BUILDER,
+        "[id=%{public}u]join LNN is ongoing, waiting...", connFsm->id);
     LNN_LOGI(LNN_BUILDER, "begin join request, [id=%{public}u], peer%{public}s, isNeedConnect=%{public}d", connFsm->id,
         LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
@@ -1091,7 +1088,10 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
         ret = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1,
             (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
-        LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", udidHash);
+        char *anonyUdidHash = NULL;
+        Anonymize(udidHash, &anonyUdidHash);
+        LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", anonyUdidHash);
+        AnonymizeFree(anonyUdidHash);
         if (ret == EOK) {
             if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
                 AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo,
