@@ -18,7 +18,6 @@
 
 #include <stdint.h>
 #include "bus_center_event.h"
-#include "softbus_wifi_api_adapter.h"
 
 #ifdef __cplusplus
 extern "C" {
