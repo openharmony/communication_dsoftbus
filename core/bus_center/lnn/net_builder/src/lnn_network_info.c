@@ -360,11 +360,9 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     bool needSync = false;
     uint32_t netCapability = oldNetCap;
     GetNetworkCapability(wifiState, &netCapability, &needSync);
-    if (netCapability != oldNetCap) {
-        LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{publc}u->%{publc}u, needSync=%{public}d",
-            wifiState, oldNetCap, netCapability, needSync);
-        WifiStateProcess(netCapability, needSync);
-    }
+    LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{publc}u->%{publc}u, needSync=%{public}d",
+        wifiState, oldNetCap, netCapability, needSync);
+    WifiStateProcess(netCapability, needSync);
 }
 
 static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
