@@ -13,6 +13,7 @@
 
 import("../../../../dsoftbus.gni")
 import("../../../common/dfx/dsoftbus_dfx.gni")
+import("../../adapter/common/net/wifi/net_wifi.gni")
 
 core_lane_hub_path = "$dsoftbus_root_path/core/bus_center/lnn/lane_hub"
 
