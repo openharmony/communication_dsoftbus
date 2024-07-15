@@ -55,10 +55,6 @@ void LnnDeinitDriverMonitorImpl(void);
 
 void LnnDeInitNetlinkMonitorImpl(void);
 
-void UpdateLocalWifiActiveCapability(bool isWifiActive);
-
-void UpdateLocalWifiConnCapability(SoftBusWifiConnState connState);
-
 #ifdef __cplusplus
 }
 #endif
