@@ -30,6 +30,7 @@
 #include "softbus_errcode.h"
 #include "kits/c/wifi_p2p.h"
 #include "wifi_ap_msg.h"
+#include "softbus_wifi_api_adapter.h"
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
@@ -171,6 +172,54 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
 } // namespace EventFwk
 } // namespace OHOS
 
+void UpdateLocalWifiActiveCapability(void)
+{
+    SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
+    if (notifyState == NULL) {
+        LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
+        return;
+    }
+    bool isWifiActive = SoftBusIsWifiActive();
+    if (!isWifiActive) {
+        *notifyState = SOFTBUS_WIFI_DISABLED;
+    } else {
+        *notifyState = SOFTBUS_WIFI_ENABLED;
+    }
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWlanStateChangeEvent,
+        (void *)notifyState);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async notify wifi state err, ret=%{public}d", ret);
+        SoftBusFree(notifyState);
+    }
+}
+
+void UpdateLocalWifiConnCapability(void)
+{
+    SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
+    if (notifyState == NULL) {
+        LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
+        return;
+    }
+    SoftBusWifiLinkedInfo info;
+    (void)memset_s(&info, sizeof(SoftBusWifiLinkedInfo), 0, sizeof(SoftBusWifiLinkedInfo));
+    if (SoftBusGetLinkedInfo(&info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get link info failed");
+        SoftBusFree(notifyState);
+        return;
+    }
+    if (info.connState == SOFTBUS_API_WIFI_DISCONNECTED) {
+        *notifyState = SOFTBUS_WIFI_DISCONNECTED;
+    } else {
+        *notifyState = SOFTBUS_WIFI_CONNECTED;
+    }
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWlanStateChangeEvent,
+        (void *)notifyState);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async notify wifi state err, ret=%{public}d", ret);
+        SoftBusFree(notifyState);
+    }
+}
+
 static void LnnSubscribeWifiService(void *para)
 {
     (void)para;
@@ -188,6 +237,8 @@ static void LnnSubscribeWifiService(void *para)
         subscriberPtr->SubscribeWifiPowerStateEvent() == SOFTBUS_OK &&
         subscriberPtr->SubscribeAPConnStateEvent() == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "subscribe wifiservice conn and power state success");
+        UpdateLocalWifiActiveCapability();
+        UpdateLocalWifiConnCapability();
     } else {
         LNN_LOGE(LNN_BUILDER, "subscribe wifiservice event fail");
         retry++;

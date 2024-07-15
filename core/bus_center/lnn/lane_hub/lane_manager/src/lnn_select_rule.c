@@ -38,7 +38,6 @@
 #include "softbus_wifi_api_adapter.h"
 #include "trans_event.h"
 
-
 #define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
 #define LNN_ONLINETIME_OUT     10000 /*BLE connection reuse time*/
 
@@ -195,10 +194,18 @@ static int32_t P2pCapCheck(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
+    if ((local & (1 << BIT_WIFI_P2P)) == 0) {
+        if (!SoftBusIsWifiActive()) {
+            LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
+            return SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP;
+        } else {
+            (void)LnnSetNetCapability(&local, BIT_WIFI_P2P);
+            (void)LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, local);
+        }
+    }
+    if ((remote & (1 << BIT_WIFI_P2P)) == 0) {
         LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
-        return ((local & (1 << BIT_WIFI_P2P)) == 0) ?
-            SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP : SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP;
+        return SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP;
     }
     return SOFTBUS_OK;
 }
