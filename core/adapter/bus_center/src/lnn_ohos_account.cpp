@@ -68,6 +68,7 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 
 int32_t LnnInitOhosAccount(void)
 {
+    int64_t accountId = 0;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
 
     if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
@@ -77,8 +78,9 @@ int32_t LnnInitOhosAccount(void)
             return SOFTBUS_ERR;
         }
     }
-    int64_t accountId = GetCurrentAccount();
-    (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
+    if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
+        (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
+    }
     LNN_LOGI(LNN_STATE, "init accountHash. accountHash[0]=%{public}02X, accountHash[1]=%{public}02X",
         accountHash[0], accountHash[1]);
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
@@ -86,10 +88,13 @@ int32_t LnnInitOhosAccount(void)
 
 void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
 {
+    int64_t accountId = 0;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
 
-    (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, GetCurrentAccount());
+    if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
+        (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
+    }
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "OnAccountChanged get local account hash fail");
         return;
