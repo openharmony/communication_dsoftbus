@@ -199,7 +199,7 @@ static int32_t TestAuthSessionSendData(const char *testData, int32_t count, char
         waitCnt++;
         if (waitCnt > count) {
             printf("wait OpenAuthSession success timeout!\n");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TIMOUT;
         }
         sleep(TICK_TIME);
     }
@@ -212,12 +212,12 @@ static int32_t TestAuthSessionSendData(const char *testData, int32_t count, char
         if (size <= SEND_DATA_SIZE_64K) {
             if (ret != SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL && ret != SOFTBUS_OK) {
                 printf("******* TestSendBytesData %d failed *******\n", size);
-                return SOFTBUS_ERR;
+                return ret;
             }
         } else {
             if (ret == SOFTBUS_OK) {
                 printf("******* TestSendBytesData %d failed *******\n", size);
-                return SOFTBUS_ERR;
+                return SOFTBUS_AUTH_SEND_FAIL;
             }
         }
         sleep(TICK_TIME);
@@ -225,12 +225,12 @@ static int32_t TestAuthSessionSendData(const char *testData, int32_t count, char
         if (size <= SEND_DATA_SIZE_4K) {
             if (ret != SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL && ret != SOFTBUS_OK) {
                 printf("******* TestSendMessageData %d failed *******\n", size);
-                return SOFTBUS_ERR;
+                return ret;
             }
         } else {
             if (ret == SOFTBUS_OK) {
                 printf("******* TestSendMessageData %d failed *******\n", size);
-                return SOFTBUS_ERR;
+                return SOFTBUS_AUTH_SEND_FAIL;
             }
         }
         sendCnt++;
