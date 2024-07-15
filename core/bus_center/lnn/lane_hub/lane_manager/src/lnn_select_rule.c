@@ -37,6 +37,7 @@
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
 #include "trans_event.h"
+#include "lnn_net_capability.h"
 
 #define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
 #define LNN_ONLINETIME_OUT     10000 /*BLE connection reuse time*/
