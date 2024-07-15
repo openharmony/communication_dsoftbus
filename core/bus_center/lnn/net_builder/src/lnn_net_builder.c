@@ -910,7 +910,7 @@ void UpdateLocalNetCapability(void)
     }
 
     int brState = SoftBusGetBrState();
-    if (brState == BR_ENABLE) 
+    if (brState == BR_ENABLE) {
         (void)LnnSetNetCapability(&netCapability, BIT_BR);
     } else if (brState == BR_DISABLE) {
         (void)LnnClearNetCapability(&netCapability, BIT_BR);
