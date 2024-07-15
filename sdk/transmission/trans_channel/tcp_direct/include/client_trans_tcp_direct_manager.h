@@ -28,7 +28,7 @@ typedef struct {
     int32_t fd;
     int32_t channelType;
     int32_t businessType;
-    bool aliveState;
+    bool needStopListener;
     int apiVersion;
     int32_t sequence;
     SeqVerifyInfo verifyInfo;
@@ -58,6 +58,7 @@ void TransTdcManagerDeinit(void);
 int32_t TransTdcGetSessionKey(int32_t channelId, char *key, unsigned int len);
 int32_t TransTdcGetHandle(int32_t channelId, int *handle);
 int32_t TransDisableSessionListener(int32_t channelId);
+int32_t TransTdcSetListenerStateById(int32_t channelId, bool needStopListener);
 
 #ifdef __cplusplus
 }
