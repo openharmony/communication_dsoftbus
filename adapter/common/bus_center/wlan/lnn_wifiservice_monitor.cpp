@@ -172,7 +172,7 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
 } // namespace EventFwk
 } // namespace OHOS
 
-void UpdateLocalWifiActiveCapability()
+void UpdateLocalWifiActiveCapability(void)
 {
     SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
     if (notifyState == NULL) {
@@ -193,7 +193,7 @@ void UpdateLocalWifiActiveCapability()
     }
 }
 
-void UpdateLocalWifiConnCapability()
+void UpdateLocalWifiConnCapability(void)
 {
     SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
     if (notifyState == NULL) {
