@@ -30,6 +30,7 @@
 #include "softbus_errcode.h"
 #include "kits/c/wifi_p2p.h"
 #include "wifi_ap_msg.h"
+#include "softbus_wifi_api_adapter.h"
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
