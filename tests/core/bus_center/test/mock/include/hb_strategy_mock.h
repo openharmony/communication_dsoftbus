@@ -17,6 +17,7 @@
 #define HEARTBEAT_STRATEGY_H
 
 #include "auth_manager.h"
+#include "auth_hichain_adapter.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_heartbeat_strategy.h"
@@ -56,6 +57,15 @@ public:
     virtual bool IsNeedAuthLimit(const char *udidHash) = 0;
     virtual bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExtra) = 0;
     virtual int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo) = 0;
+    virtual bool IsSameAccountGroupDevice(const char *deviceId) = 0;
+    virtual uint32_t AuthGenRequestId(void) = 0;
+    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+        const AuthVerifyCallback *verifyCallback, AuthVerifyModule module, bool isFastAuth) = 0;
+    virtual void AddNodeToLnnBleReportExtraMap(const char *udidHash, const LnnBleReportExtra *bleExtra) = 0;
+    virtual int32_t GetNodeFromLnnBleReportExtraMap(const char *udidHash, LnnBleReportExtra *bleExtra) = 0;
+    virtual void DeleteNodeFromLnnBleReportExtraMap(const char *udidHash) = 0;
+    virtual int32_t LnnUpdateRemoteDeviceInfo(const NodeInfo *deviceInfo) = 0;
+    virtual int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
 public:
@@ -84,6 +94,15 @@ public:
     MOCK_METHOD1(IsNeedAuthLimit, bool(const char *));
     MOCK_METHOD2(IsExistLnnDfxNodeByUdidHash, bool(const char *, LnnBleReportExtra *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *, NodeInfo *));
+    MOCK_METHOD1(IsSameAccountGroupDevice, bool (const char *));
+    MOCK_METHOD0(AuthGenRequestId, uint32_t (void));
+    MOCK_METHOD5(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *,
+        AuthVerifyModule, bool));
+    MOCK_METHOD2(AddNodeToLnnBleReportExtraMap, void (const char *, const LnnBleReportExtra *));
+    MOCK_METHOD2(GetNodeFromLnnBleReportExtraMap, int32_t (const char *, LnnBleReportExtra *));
+    MOCK_METHOD1(DeleteNodeFromLnnBleReportExtraMap, void (const char *));
+    MOCK_METHOD1(LnnUpdateRemoteDeviceInfo, int32_t (const NodeInfo *));
+    MOCK_METHOD2(GetNodeFromPcRestrictMap, int32_t (const char *, uint32_t *));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_STRATEGY_H
