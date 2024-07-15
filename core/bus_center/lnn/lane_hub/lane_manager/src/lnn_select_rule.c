@@ -200,7 +200,7 @@ static int32_t P2pCapCheck(const char *networkId)
             LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
             return SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP;
         } else {
-            (void)LnnSetNetCapability(*local, BIT_WIFI_P2P);
+            (void)LnnSetNetCapability(&local, BIT_WIFI_P2P);
             (void)LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, local);
         }
     }
