@@ -68,6 +68,7 @@ public:
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax) = 0;
 };
+
 class HeartBeatFSMStrategyInterfaceMock : public HeartBeatFSMStrategyInterface {
 public:
     HeartBeatFSMStrategyInterfaceMock();
@@ -108,3 +109,4 @@ public:
 };
 } // namespace OHOS
 #endif // HEARTBEAT_FSM_STRATEGY_H
+

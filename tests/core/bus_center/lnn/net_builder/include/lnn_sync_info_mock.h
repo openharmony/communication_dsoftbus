@@ -39,3 +39,4 @@ public:
 };
 } // namespace OHOS
 #endif // LNN_SYNC_INFO_MOCK_H
+
