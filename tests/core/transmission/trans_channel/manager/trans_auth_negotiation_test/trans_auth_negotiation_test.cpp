@@ -83,7 +83,7 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest001, TestSize.Level1)
  */
 HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest002, TestSize.Level1)
 {
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_INVALID_PARAM;
     int32_t ret = TransUpdateAuthInfo(TRANS_TEST_INVALID_AUTH_REQUEST_ID, errCode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransUpdateAuthInfo(TRANS_TEST_AUTH_REQUEST_ID, errCode);
@@ -105,7 +105,7 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest002, TestSize.Level1)
 HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest003, TestSize.Level1)
 {
     bool isFinished = false;
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_INVALID_PARAM;
     int32_t cnt = 0;
     int32_t ret = TransCheckAuthNegoStatusByReqId(TRANS_TEST_AUTH_REQUEST_ID, &isFinished, &errCode, &cnt);
     EXPECT_EQ(SOFTBUS_TRANS_AUTH_REQUEST_NOT_FOUND, ret);

@@ -158,19 +158,19 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Lev
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSize.Level0)
 {
     int channelId = 1;
-    int ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_AUTH, SOFTBUS_ERR);
+    int ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_AUTH, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_PROXY, SOFTBUS_ERR);
+    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_PROXY, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_TCP_DIRECT, SOFTBUS_ERR);
+    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_TCP_DIRECT, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_UDP, SOFTBUS_ERR);
+    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_UDP, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_BUTT, SOFTBUS_ERR);
+    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_BUTT, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
 
@@ -267,7 +267,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelBindTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransOnChannelBind(channelId, CHANNEL_TYPE_TCP_DIRECT);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     ret = TransOnChannelBind(channelId, CHANNEL_TYPE_PROXY);
     EXPECT_EQ(SOFTBUS_OK, ret);

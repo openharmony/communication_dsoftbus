@@ -43,6 +43,7 @@ enum TEST_WAY {
 const int CONN_SINGLE_WAIT_TIMEOUT = 5;
 const int CONN_SLEEP_TIME = 1;
 const int CLOSE_DELAY_TIME = 500;
+const int INPUT_ERR = (-1);
 
 const int SEND_DATA_SIZE_1K = 1024;
 const int SEND_DATA_SIZE_4K = 4 * 1024;
@@ -67,22 +68,22 @@ int32_t TestSendBytesData(int32_t sessionId, const char *data)
     int32_t ret = SendBytes(sessionId, data, SEND_DATA_SIZE_1K);
     if (ret != SOFTBUS_OK) {
         printf("SendBytes 1K err.\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     ret = SendBytes(sessionId, data, SEND_DATA_SIZE_4K);
     if (ret != SOFTBUS_OK) {
         printf("SendBytes 4K err.\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     ret = SendBytes(sessionId, data, SEND_DATA_SIZE_40K);
     if (ret != SOFTBUS_OK) {
         printf("SendBytes 40000 err.\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     ret = SendBytes(sessionId, data, SEND_DATA_SIZE_40K + 1);
     if (ret == SOFTBUS_OK) {
         printf("SendBytes 40001 err.\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -92,17 +93,17 @@ int32_t TestSendMessageData(int32_t sessionId, const char *data)
     int32_t ret = SendMessage(sessionId, data, SEND_DATA_SIZE_1K);
     if (ret != SOFTBUS_OK) {
         printf("SendMessage 1K err.\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     ret = SendMessage(sessionId, data, SEND_DATA_SIZE_4K);
     if (ret != SOFTBUS_OK) {
         printf("SendMessage 4K err.\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     ret = SendMessage(sessionId, data, SEND_DATA_SIZE_4K + 1);
     if (ret == SOFTBUS_OK) {
         printf("SendMessage 4K + 1 err.\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -174,7 +175,7 @@ int32_t TestCreateSessionServer(void)
     int32_t ret = CreateSessionServer(g_testModuleName, g_testSessionName, &g_sessionlistener);
     if (ret != SOFTBUS_SERVER_NAME_REPEATED && ret != SOFTBUS_OK) { // -986: SOFTBUS_SERVER_NAME_REPEATED
         printf("CreateSessionServer ret: %d \n", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
     printf("CreateSessionServer ret: %d \n", ret);
     return SOFTBUS_OK;
@@ -185,13 +186,13 @@ int32_t TestOpenAuthSession(const ConnectionAddr *addrInfo, bool two)
     g_sessionId = OpenAuthSession(g_testSessionName, addrInfo, 1, NULL);
     if (g_sessionId < 0) {
         printf("OpenAuthSession ret[%d]", g_sessionId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_SESSION_ID;
     }
     if (two) {
         g_sessionIdTwo = OpenAuthSession(g_testSessionName, addrInfo, 1, NULL);
         if (g_sessionIdTwo < 0) {
             printf("OpenAuthSession ret[%d]", g_sessionIdTwo);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_SESSION_ID;
         }
     }
     int32_t timeout = 0;
@@ -199,7 +200,7 @@ int32_t TestOpenAuthSession(const ConnectionAddr *addrInfo, bool two)
         timeout++;
         if (timeout > CONN_SINGLE_WAIT_TIMEOUT) {
             printf("wait [%ds] timeout!!\n", CONN_SINGLE_WAIT_TIMEOUT);
-            return SOFTBUS_ERR;
+            return SOFTBUS_TIMOUT;
         }
         sleep(CONN_SLEEP_TIME);
     }
@@ -275,7 +276,7 @@ int32_t AuthSessionTest::TestWaitOpenSession(int32_t count)
         }
         sleep(CONN_SLEEP_TIME);
     }
-    return (g_openCount < count) ? SOFTBUS_ERR : SOFTBUS_OK;
+    return (g_openCount < count) ? SOFTBUS_TIMOUT : SOFTBUS_OK;
 }
 
 /*
@@ -297,7 +298,7 @@ HWTEST_F(AuthSessionTest, testPassiveOpenAuthSession001, TestSize.Level1)
     printf("input the test count: \n");
     if (scanf_s("%d", &count, sizeof(count)) < 0) {
         printf("input error!\n");
-        EXPECT_EQ(SOFTBUS_OK, SOFTBUS_ERR);
+        EXPECT_EQ(SOFTBUS_OK, INPUT_ERR);
         return;
     }
     getchar();
@@ -327,7 +328,7 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession001, TestSize.Level1)
     printf("input macaddr: \n");
     if (scanf_s("%s", g_addrInfo[0].info.br.brMac, BT_MAC_LEN) < 0) {
         printf("input error!\n");
-        EXPECT_EQ(SOFTBUS_OK, SOFTBUS_ERR);
+        EXPECT_EQ(SOFTBUS_OK, INPUT_ERR);
         return;
     }
     printf("brMac: %s\n", g_addrInfo[0].info.br.brMac);
@@ -336,13 +337,13 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession001, TestSize.Level1)
     printf("input the test count: \n");
     if (scanf_s("%d", &count, sizeof(count)) < 0) {
         printf("input error!\n");
-        EXPECT_EQ(SOFTBUS_OK, SOFTBUS_ERR);
+        EXPECT_EQ(SOFTBUS_OK, INPUT_ERR);
         return;
     }
     char *testData = (char *)SoftBusCalloc(SEND_DATA_SIZE_40K + 1);
     if (testData == nullptr) {
         printf("SoftBusCalloc error!\n");
-        EXPECT_EQ(SOFTBUS_OK, SOFTBUS_ERR);
+        EXPECT_EQ(SOFTBUS_OK, INPUT_ERR);
         return;
     }
     if (memcpy_s(testData, SEND_DATA_SIZE_40K + 1, g_testData, strlen(g_testData)) != EOK) {
@@ -380,7 +381,7 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession002, TestSize.Level1)
     char *testData = (char *)SoftBusCalloc(SEND_DATA_SIZE_1K);
     if (testData == nullptr) {
         printf("SoftBusCalloc error!\n");
-        EXPECT_EQ(SOFTBUS_OK, SOFTBUS_ERR);
+        EXPECT_EQ(SOFTBUS_OK, INPUT_ERR);
         return;
     }
     if (memcpy_s(testData, SEND_DATA_SIZE_1K, g_testData, strlen(g_testData)) != EOK) {

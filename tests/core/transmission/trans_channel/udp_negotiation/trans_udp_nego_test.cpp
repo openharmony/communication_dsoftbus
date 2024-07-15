@@ -283,14 +283,14 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     char* data = TestGetMsgInfo();
     ASSERT_TRUE(data != nullptr);
     cJSON *msg = cJSON_Parse(data);
+    //will free in TransOnExchangeUdpInfoReply line 300
     UdpChannelInfo *newChannel = CreateUdpChannelPackTest();
     ASSERT_TRUE(newChannel != nullptr);
-    std::cout << "Create newChannel ok" << std::endl;
     int64_t authId = AUTH_INVALID_ID;
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = InitQos();
-    ASSERT_TRUE(ret == SOFTBUS_OK || ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
 
     TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
@@ -299,7 +299,6 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
 
     TransOnExchangeUdpInfoReply(authId, newChannel->seq, msg);
 
-    (void)TransDelUdpChannel(newChannel->info.myData.channelId);
     cJSON_Delete(msg);
 }
 
@@ -552,7 +551,7 @@ HWTEST_F(TransUdpNegoTest, UdpOpenAuthConn001, TestSize.Level1)
     uint32_t requestId = 1;
     bool isMeta = false;
     int32_t ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta, 0);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 
     isMeta = true;
     ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta, 0);

@@ -100,7 +100,7 @@ int32_t WaitDeviceOnline(const char *pkgName)
     if (!networkIdSet_.empty()) {
         return SOFTBUS_OK;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_TIMOUT;
 }
 
 int OnSessionOpened(int sessionId, int result)
@@ -240,7 +240,7 @@ void AuthSessionTest::SetUpTestCase(void)
     ASSERT_NE(testEntryArgs_, nullptr);
 
     networkIdSet_.clear();
-    ret = SOFTBUS_ERR;
+    ret = SOFTBUS_TIMOUT;
     if (testEntryArgs_->testSide_ == PASSIVE_OPENSESSION_WAY) {
         ret = WaitDeviceOnline(FILE_TEST_PKG_NAME.c_str());
         ASSERT_EQ(ret, SOFTBUS_OK);

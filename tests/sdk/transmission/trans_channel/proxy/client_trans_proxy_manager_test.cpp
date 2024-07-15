@@ -104,23 +104,37 @@ static IClientSessionCallBack g_clientSessionCb = {
 
 int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
-    return SOFTBUS_ERR;
+    (void)sessionName;
+    (void)channel;
+    (void)flag;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 int32_t OnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
-    return SOFTBUS_ERR;
+    (void)channelId;
+    (void)channelType;
+    (void)reason;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 int32_t OnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
-    return SOFTBUS_ERR;
+    (void)channelId;
+    (void)channelType;
+    (void)errCode;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 int32_t OnBytesReceived(int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, SessionPktType type)
 {
-    return SOFTBUS_ERR;
+    (void)channelId;
+    (void)channelType;
+    (void)data;
+    (void)len;
+    (void)type;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 static IClientSessionCallBack g_sessionCb = {
@@ -253,7 +267,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Le
 /**
  * @tc.name: ClientTransProxyGetInfoByChannelIdTest
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given channelInfo is null.
- * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -272,7 +286,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, Te
 /**
  * @tc.name: TransProxyPackAndSendDataTest
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given channelInfo or data is null.
- * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED when given invalid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */

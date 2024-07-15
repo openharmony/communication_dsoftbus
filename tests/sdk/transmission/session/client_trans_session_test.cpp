@@ -139,7 +139,7 @@ static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvL
 static int OnSessionOpenedErr(int sessionId, int result)
 {
     TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
@@ -240,32 +240,32 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
     if (sessionParam == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     TestGenerateCommParam(sessionParam);
     sessionParam->sessionName = sessionName;
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
     if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     SessionInfo *session = TestGenerateSession(sessionParam);
     if (session == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     session->channelType = (ChannelType)channelType;
     session->isServer = isServer;
     ret = ClientAddNewSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     int32_t sessionId = 0;
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId);
     if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     SoftBusFree(sessionParam);
@@ -394,7 +394,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level1)
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));

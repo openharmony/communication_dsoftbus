@@ -159,7 +159,7 @@ void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus 
 HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest001, TestSize.Level1)
 {
     int32_t channelId = -1;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_MEM_ERR;
 
     for (uint32_t flags = TRANS_SESSION_BYTES; flags <= TRANS_SESSION_FILE_ACK_RESPONSE_SENT; ++flags) {
         ret = TransProxyPostSessionData(channelId, NULL, 0, (SessionPktType)flags);
@@ -181,7 +181,6 @@ HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest001, TestSize.Level
 HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_VALID_CHANNELIDA;
-    int32_t ret = SOFTBUS_ERR;
     TestAddProxyChannel(channelId, APP_TYPE_AUTH, PROXY_CHANNEL_STATUS_COMPLETED);
 
     const char *data = "test data";
@@ -191,11 +190,11 @@ HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest002, TestSize.Level
     EXPECT_CALL(connMock, ConnGetHeadSize)
         .WillRepeatedly(Return(TEST_CONN_HEAD_SIZE));
     EXPECT_CALL(connMock, ConnPostBytes)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERROR))
         .WillOnce(Return(SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
-    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
+    int32_t ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -225,7 +224,7 @@ HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest003, TestSize.Level
     EXPECT_CALL(connMock, ConnPostBytes)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(commMock, SoftBusEncryptDataWithSeq)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillOnce(DoAll(SetArgPointee<4>(0), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -334,7 +333,7 @@ HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest002, TestSize.Level1
     /* test decrypt fail */
     TransCommInterfaceMock commMock;
     EXPECT_CALL(commMock, SoftBusDecryptDataWithSeq)
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_MEM_ERR));
     ret = TransOnNormalMsgReceived(pkgName, 0, TEST_VALID_CHANNELIDA, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 }

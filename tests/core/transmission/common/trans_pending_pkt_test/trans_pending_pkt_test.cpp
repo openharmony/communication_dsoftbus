@@ -195,7 +195,7 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket002, TestSize.Level1)
     ret = PendingInit(type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
 /**
@@ -251,7 +251,7 @@ HWTEST_F(TransPendingPktTest, DelPendingPacket002, TestSize.Level1)
     int ret = PendingInit(type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     ret = DelPendingPacket(channelId, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

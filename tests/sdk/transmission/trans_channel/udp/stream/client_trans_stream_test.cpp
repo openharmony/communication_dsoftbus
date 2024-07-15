@@ -210,7 +210,7 @@ HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level0)
 
 /**
  * @tc.name: TransOnstreamChannelOpened001
- * @tc.desc: Should return SOFTBUS_ERR when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_NO_INIT when given invalid parameters.
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given nullptr parameters.
  * @tc.desc: OnRippleStats error.
  * @tc.type: FUNC
