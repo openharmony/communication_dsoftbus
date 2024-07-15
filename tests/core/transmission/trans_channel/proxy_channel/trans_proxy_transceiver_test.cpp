@@ -86,16 +86,16 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest001, TestSize.L
     TransConnInterfaceMock connMock;
     TransCommInterfaceMock commMock;
     EXPECT_CALL(commMock, GenerateRandomStr)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, AuthGetLatestIdByUuid)
         .WillOnce(Return(AUTH_INVALID_ID))
         .WillRepeatedly(Return(1));
     EXPECT_CALL(commMock, SoftBusGenerateRandomArray)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnConnectDevice)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnGetNewRequestId)
         .WillOnce(Return(1))
@@ -141,7 +141,8 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize.L
     bleInfo.type = CONNECT_BLE;
     TransCommInterfaceMock commMock;
     TransConnInterfaceMock connMock;
-    EXPECT_CALL(connMock, ConnGetConnectionInfo(_, _)).WillOnce(DoAll(SetArgPointee<1>(tcpInfo), Return(SOFTBUS_ERR)))
+    EXPECT_CALL(connMock, ConnGetConnectionInfo(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(tcpInfo), Return(SOFTBUS_MEM_ERR)))
         .WillOnce(DoAll(SetArgPointee<1>(tcpInfo), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<1>(brInfo), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<1>(bleInfo), Return(SOFTBUS_OK)));
@@ -158,10 +159,9 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize.L
     AppInfo appInfo;
     appInfo.appType = APP_TYPE_AUTH;
     int32_t channelId = -1;
-    int32_t ret = SOFTBUS_ERR;
     ConnectOption connInfo;
     connInfo.type = CONNECT_TCP;
-    ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
+    int32_t ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     connInfo.type = CONNECT_BR;
     ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
@@ -255,7 +255,7 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyTransSendMsgTest001, TestSize.Leve
 {
     TransConnInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnPostBytes)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
     uint32_t connectionId = 1;

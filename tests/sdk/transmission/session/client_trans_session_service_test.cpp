@@ -163,7 +163,7 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
     if (sessionParam == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     TestGenerateCommParam(sessionParam);
@@ -171,13 +171,13 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(sessionParam);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     SessionInfo *session = TestGenerateSession(sessionParam);
     if (session == NULL) {
         SoftBusFree(sessionParam);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     session->channelType = (ChannelType)channelType;
@@ -186,7 +186,7 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
         SoftBusFree(sessionParam);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     int32_t sessionId = 0;
@@ -194,7 +194,7 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
         SoftBusFree(sessionParam);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     SoftBusFree(sessionParam);

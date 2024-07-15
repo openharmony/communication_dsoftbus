@@ -131,7 +131,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest002, 
 {
     int32_t channelId = 1;
     int32_t ret = StartVtpStreamChannelClient(channelId, &g_clientParam1, &g_callback);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = CloseVtpStreamChannel(channelId, g_pkgName);
     EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
 }
@@ -186,21 +186,21 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level
     };
     const StreamFrameInfo frameInfo = {};
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     g_serverParam1.type = INVALID;
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
     EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     g_serverParam1.type = COMMON_VIDEO_STREAM;
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
@@ -227,13 +227,13 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest003, TestSize.Level
     g_serverParam1.type = COMMON_VIDEO_STREAM;
 
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ret = SendVtpStream(channelId, &streamData1, NULL, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ret = SendVtpStream(channelId, &streamData2, &streamData2, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);

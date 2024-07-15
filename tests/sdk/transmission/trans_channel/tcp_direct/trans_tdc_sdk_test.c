@@ -223,7 +223,7 @@ static int DataSend(int size, int type)
     }
     if (memset_s(g_contcx, size, "h", size) != EOK) {
         free(g_contcx);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     Wait();
     TEST_ASSERT_TRUE(g_testCount == 1);
@@ -392,7 +392,7 @@ void TransFuncTest006(void)
 int main(void)
 {
     if (scanf_s("%s", g_networkId, NETWORKIDSIZE) < 0) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_TEST, "g_networkId=%{public}s", g_networkId);
     for (int i = 0; i < LOOP_COUNT; i++) {

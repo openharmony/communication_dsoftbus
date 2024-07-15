@@ -186,7 +186,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest004, TestSize.Level1)
 
 /**
  * @tc.name: OpenTcpDirectChannelTest005
- * @tc.desc: Should return SOFTBUS_ERR  when CreateNewSessinConn return valid paramter.
+ * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED  when CreateNewSessinConn return valid paramter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -214,7 +214,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest005, TestSize.Level1)
 
 /**
  * @tc.name: OpenTcpDirectChannelTest006
- * @tc.desc: OpenTcpDirectChannel, ConnOpenClientSocket func return err.
+ * @tc.desc: OpenTcpDirectChannel, ConnOpenClientSocket func return SOFTBUS_NO_INIT.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -231,9 +231,9 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest006, TestSize.Level1)
     connInfo->type = CONNECT_P2P_REUSE;
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
-    EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_NO_INIT));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(connInfo);
@@ -241,7 +241,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest006, TestSize.Level1)
 
 /**
  * @tc.name: OpenTcpDirectChannelTest007
- * @tc.desc: OpenTcpDirectChannel, ConnOpenClientSocket func return SOFTBUS_TRANS_ADD_TRIGGER_FAILED.
+ * @tc.desc: OpenTcpDirectChannel, AddTrigger func return SOFTBUS_NO_INIT.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -259,7 +259,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest007, TestSize.Level1)
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
     EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillRepeatedly(Return(NORMAL_FD));
-    EXPECT_CALL(TcpWifiMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(TcpWifiMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
     EXPECT_EQ(SOFTBUS_TRANS_ADD_TRIGGER_FAILED, ret);
 
@@ -270,7 +270,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest007, TestSize.Level1)
 
 /**
  * @tc.name: OpenTcpDirectChannelTest008
- * @tc.desc: OpenTcpDirectChannel, AddTcpConnAndSessionInfo func return SOFTBUS_MALLOC_ERR.
+ * @tc.desc: OpenTcpDirectChannel, TransSrvAddDataBufNode func return SOFTBUS_NO_INIT.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -288,7 +288,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest008, TestSize.Level1)
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
     EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillRepeatedly(Return(NORMAL_FD));
-    EXPECT_CALL(TcpWifiMock, TransSrvAddDataBufNode).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(TcpWifiMock, TransSrvAddDataBufNode).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
     EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
 
@@ -298,7 +298,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest008, TestSize.Level1)
 
 /**
  * @tc.name: OpenTcpDirectChannelTest009
- * @tc.desc: OpenTcpDirectChannel, ConnOpenClientSocket func return SOFTBUS_TRANS_ADD_SESSION_CONN_FAILED.
+ * @tc.desc: OpenTcpDirectChannel, TransTdcAddSessionConn func return SOFTBUS_NO_INIT.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -316,7 +316,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest009, TestSize.Level1)
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
     EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillRepeatedly(Return(NORMAL_FD));
-    EXPECT_CALL(TcpWifiMock, TransTdcAddSessionConn).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(TcpWifiMock, TransTdcAddSessionConn).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
     EXPECT_EQ(SOFTBUS_TRANS_ADD_SESSION_CONN_FAILED, ret);
 
