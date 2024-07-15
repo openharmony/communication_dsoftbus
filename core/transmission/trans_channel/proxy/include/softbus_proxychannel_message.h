@@ -159,8 +159,8 @@ typedef struct {
     int shouldAck;
 } SessionHead;
 
-int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int* errCode, int32_t len);
-int32_t TransProxyUnPackRestErrMsg(const char *msg, int* errCode, int32_t len);
+int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int32_t *errCode, int32_t len);
+int32_t TransProxyUnPackRestErrMsg(const char *msg, int32_t *errCode, int32_t len);
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
     int32_t len, uint16_t *fastDataSize);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
