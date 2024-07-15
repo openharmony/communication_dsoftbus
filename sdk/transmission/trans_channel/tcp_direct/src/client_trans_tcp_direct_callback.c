@@ -87,8 +87,22 @@ int32_t ClientTransTdcOnChannelBind(int32_t channelId, int32_t channelType)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "TransTdcCreateListener failed, channelId=%{public}d", channelId);
         g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, SHUTDOWN_REASON_LOCAL);
+        return ret;
     }
-    return ret;
+
+    (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
+    res = TransTdcGetInfoById(channelId, &info);
+    if (res == NULL) {
+        g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, SHUTDOWN_REASON_LOCAL);
+        TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channelId);
+        return SOFTBUS_NOT_FIND;
+    }
+
+    if (info.detail.needStopListener) {
+        (void)TransTdcStopRead(info.detail.fd);
+        TRANS_LOGI(TRANS_SDK, "listener has been disabled, stop read now, channelId=%{public}d", channelId);
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t ClientTransTdcIfChannelForSocket(const char *sessionName, bool *isSocket)
