@@ -1626,6 +1626,7 @@ void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode)
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
     SoftBusFree(channelInfo);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyOpenProxyChannelSuccess(int32_t channelId)
