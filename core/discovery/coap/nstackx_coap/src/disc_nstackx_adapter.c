@@ -159,7 +159,11 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
     int32_t ret;
     for (uint32_t i = 0; i < deviceCount; i++) {
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
-        DISC_CHECK_AND_RETURN_LOGE(nstackxDeviceInfo, DISC_COAP, "device count from nstackx is invalid");
+        if (nstackxDeviceInfo == NULL) {
+            DISC_LOGE(DISC_COAP, "device count from nstackx is invalid");
+            SoftBusFree(discDeviceInfo);
+            return;
+        }
 
         if ((nstackxDeviceInfo->update & 0x1) == 0) {
             DISC_LOGI(DISC_COAP, "duplicate device do not need report. deviceName=%{public}s",
