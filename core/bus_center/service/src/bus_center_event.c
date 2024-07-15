@@ -378,6 +378,15 @@ void LnnNotifyLocalNetworkIdChanged(void)
     (void)PostNotifyMessageDelay(NOTIFY_LOCAL_NETWORKID_UPDATE, 0);
 }
 
+void LnnNotifyDeviceNotTrusted(const char *msg)
+{
+    if (msg == NULL) {
+        LNN_LOGE(LNN_EVENT, "msg is null");
+        return;
+    }
+    (void)LnnIpcNotifyDeviceNotTrusted(msg);
+}
+
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     if (addr == NULL) {
