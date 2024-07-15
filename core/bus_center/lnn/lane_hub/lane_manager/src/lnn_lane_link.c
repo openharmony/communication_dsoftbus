@@ -321,7 +321,7 @@ static void DetectEnableWifiDirectApply(void)
     int32_t activeHml = 0;
     int32_t passiveHml = 0;
     int32_t rawHml = 0;
-    int32_t clientHml = 0;
+    uint32_t clientHml = 0;
     bool isDisableLowPower = false;
     WifiDirectLinkInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
