@@ -157,5 +157,10 @@ int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
 {
     return GetWifiAdpterInterface()->SoftBusGetChannelListFor5G(channelList, num);
 }
+
+bool SoftBusIsWifiActive(void)
+{
+    return GetWifiAdpterInterface()->SoftBusIsWifiActive();
+}
 }
 }

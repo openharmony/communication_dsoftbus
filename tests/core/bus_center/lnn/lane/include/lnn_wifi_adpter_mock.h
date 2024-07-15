@@ -42,6 +42,7 @@ public:
     virtual int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb) = 0;
     virtual int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num) = 0;
     virtual int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num) = 0;
+    virtual bool SoftBusIsWifiActive(void) = 0;
 };
 
 class LnnWifiAdpterInterfaceMock : public LnnWifiAdpterInterface {
@@ -62,6 +63,7 @@ public:
     MOCK_METHOD1(SoftBusUnRegisterWifiEvent, int32_t (ISoftBusScanResult *cb));
     MOCK_METHOD2(SoftBusRequestWlanChannelInfo, int32_t (int32_t *channelId, uint32_t num));
     MOCK_METHOD2(SoftBusGetChannelListFor5G, int32_t (int32_t *channelList, int32_t num));
+    MOCK_METHOD0(SoftBusIsWifiActive, bool ());
     void SetDefaultResult(void);
     static int32_t ActionOfLnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
     static int32_t ActionOfOnConnectP2pFail(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);

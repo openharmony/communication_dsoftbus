@@ -233,6 +233,16 @@ int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
     return GetLaneDepsInterface()->LnnGetLocalNumU32Info(key, info);
 }
 
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
+{
+    return GetLaneDepsInterface()->LnnSetLocalNumU32Info(key, info);
+}
+
+int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetLaneDepsInterface()->LnnSetNetCapability(capability, type);
+}
+
 int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info)
 {
     return GetLaneDepsInterface()->LnnGetRemoteNumU32Info(netWorkId, key, info);

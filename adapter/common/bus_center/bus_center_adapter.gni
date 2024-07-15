@@ -44,6 +44,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
+        "$adapter_bus_center_path/network/lnn_netmanager_listener_virtual.cpp",
       ]
     }
   } else if (ohos_kernel_type == "linux") {
@@ -58,6 +59,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
+        "$adapter_bus_center_path/network/lnn_netmanager_listener_virtual.cpp",
       ]
     }
   } else if (ohos_kernel_type == "liteos_a") {
@@ -78,6 +80,7 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
+        "$adapter_bus_center_path/network/lnn_netmanager_listener_virtual.cpp",
       ]
       bus_center_adapter_inc += [
         "//drivers/hdf_core/framework/core/shared/include",

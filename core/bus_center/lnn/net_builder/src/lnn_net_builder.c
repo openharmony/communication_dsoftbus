@@ -894,11 +894,12 @@ int32_t LnnUpdateNodeAddr(const char *addr)
 
 void UpdateLocalNetCapability(void)
 {
-    uint32_t netCapability = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+    uint32_t oldNetCap = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldNetCap) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get cap from local ledger fail");
         return;
     }
+    uint32_t netCapability = oldNetCap;
     int btState = SoftBusGetBtState();
     if (btState == BLE_ENABLE) {
         LNN_LOGI(LNN_INIT, "ble state is on");
@@ -910,15 +911,12 @@ void UpdateLocalNetCapability(void)
 
     int brState = SoftBusGetBrState();
     if (brState == BR_ENABLE) {
-        LNN_LOGI(LNN_INIT, "br state is on");
         (void)LnnSetNetCapability(&netCapability, BIT_BR);
     } else if (brState == BR_DISABLE) {
-        LNN_LOGI(LNN_INIT, "br state is off");
         (void)LnnClearNetCapability(&netCapability, BIT_BR);
     }
 
     bool isWifiActive = SoftBusIsWifiActive();
-    LNN_LOGI(LNN_INIT, "wifi state: %{public}s", isWifiActive ? "true" : "false");
     if (!isWifiActive) {
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
@@ -945,6 +943,8 @@ void UpdateLocalNetCapability(void)
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "set cap to local ledger fail");
     }
+    LNN_LOGI(LNN_INIT, "local capability change:%{public}u->%{public}u, brState=%{public}d, isWifiActive=%{public}d,",
+        oldNetCap, netCapability, brState, isWifiActive);
 }
 
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)

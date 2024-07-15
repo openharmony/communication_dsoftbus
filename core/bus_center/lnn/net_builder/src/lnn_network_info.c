@@ -120,7 +120,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_BUILDER, "capability=%{public}d, networkId=%{public}s", capability, anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "recv capability change=%{public}d, networkId=%{public}s", capability, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     // update ledger
     NodeInfo info;
@@ -183,8 +183,11 @@ static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *
                 ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
             }
         }
+        char *anonyNetworkId = NULL;
+        Anonymize(netInfo.networkId, &anonyNetworkId);
         LNN_LOGE(LNN_BUILDER,
-            "sync cap info ret=%{public}d, deviceName=%{public}s.", ret, netInfo.deviceName);
+            "sync cap info ret=%{public}d, peerNetworkId=%{public}s, type=%{public}u.", ret, anonyNetworkId, type);
+        AnonymizeFree(anonyNetworkId);
     } else if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
         LnnSendP2pSyncInfoMsg(netInfo.networkId, netCapability);
     }
@@ -225,7 +228,6 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
 
 static void WifiStateProcess(uint32_t netCapability, bool isSend)
 {
-    LNN_LOGI(LNN_BUILDER, "wifi state change. netCapability=%{public}u, isSend=%{public}d", netCapability, isSend);
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
         return;
     }
@@ -350,14 +352,16 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
-    uint32_t netCapability = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+    uint32_t oldNetCap = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldNetCap) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "wifi state handler get capability fail from local.");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "WifiStateEventHandler WifiState=%{public}d", wifiState);
     bool needSync = false;
+    uint32_t netCapability = oldNetCap;
     GetNetworkCapability(wifiState, &netCapability, &needSync);
+    LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{publc}u->%{publc}u, needSync=%{public}d",
+        wifiState, oldNetCap, netCapability, needSync);
     WifiStateProcess(netCapability, needSync);
 }
 
