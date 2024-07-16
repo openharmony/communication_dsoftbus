@@ -105,9 +105,12 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
 
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        (void)TransAddTcpChannel(channel);
+    }
     ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
-    if (ret == SOFTBUS_OK && channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        TransAddTcpChannel(channel);
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT && ret != SOFTBUS_OK) {
+        (void)TransDelTcpChannelInfoByChannelId(channel->channelId);
     }
     if (!IsTdcRecoveryTransLimit() || !IsUdpRecoveryTransLimit()) {
         (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
