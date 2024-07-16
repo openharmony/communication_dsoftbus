@@ -344,10 +344,7 @@ static void BleAdvUpdateCallback(int channel, int status)
 static int32_t GetScannerFilterType(void)
 {
     int32_t type = 0;
-    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return SOFTBUS_LOCK_ERR;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     uint32_t conScanCapBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
     uint32_t nonScanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
@@ -2027,7 +2024,6 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 static bool CheckLockInit(SoftBusMutex *lock)
 {
     if (SoftBusMutexLock(lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_INIT, "lock failed.");
         return false;
     }
     SoftBusMutexUnlock(lock);
