@@ -1512,21 +1512,8 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
     return StartAuthListening(localIp);
 }
 
-int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel)
+int P2pV1Processor::UpdateWhenConnectSuccess(std::string groupConfig, const NegotiateMessage &msg)
 {
-    auto goPort = msg.GetLegacyP2pGoPort();
-    auto groupConfig = msg.GetLegacyP2pGroupConfig();
-    auto gcIp = msg.GetLegacyP2pGcIp();
-    CONN_LOGI(CONN_WIFI_DIRECT, "goPort=%{public}d, gcIp=%{public}s", goPort, WifiDirectAnonymizeIp(gcIp).c_str());
-
-    P2pAdapter::ConnectParam params {};
-    params.isNeedDhcp = IsNeedDhcp(gcIp, groupConfig);
-    params.groupConfig = groupConfig;
-    params.gcIp = gcIp;
-    auto result = P2pEntity::GetInstance().Connect(params);
-    CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
-        "connect group failed, error=%{public}d", result.errorCode_);
-
     std::string localMac;
     std::string localIp;
     auto myRole = LinkInfo::LinkMode::NONE;
@@ -1559,6 +1546,29 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     ret = StartAuthListening(localIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "start auth listen failed, error=%{public}d", ret);
+    return SOFTBUS_OK;
+}
+
+int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel)
+{
+    auto goPort = msg.GetLegacyP2pGoPort();
+    auto groupConfig = msg.GetLegacyP2pGroupConfig();
+    auto gcIp = msg.GetLegacyP2pGcIp();
+    CONN_LOGI(CONN_WIFI_DIRECT, "goPort=%{public}d, gcIp=%{public}s", goPort, WifiDirectAnonymizeIp(gcIp).c_str());
+
+    P2pAdapter::ConnectParam params {};
+    params.isNeedDhcp = IsNeedDhcp(gcIp, groupConfig);
+    params.groupConfig = groupConfig;
+    params.gcIp = gcIp;
+    auto result = P2pEntity::GetInstance().Connect(params);
+    if (result.errorCode_ != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", result.errorCode_);
+        P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { P2P_IF_NAME });
+        return result.errorCode_;
+    }
+    auto ret = UpdateWhenConnectSuccess(groupConfig, msg);
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "update date failed, error=%{public}d", ret);
     ret = OpenAuthConnection(msg, channel);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "open auth connection failed, error=%{public}d", ret);
