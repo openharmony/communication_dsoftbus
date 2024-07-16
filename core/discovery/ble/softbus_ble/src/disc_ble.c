@@ -2030,7 +2030,7 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 static bool CheckLockInit(SoftBusMutex *lock)
 {
     if (SoftBusMutexLock(lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed.");
+        DISC_LOGE(DISC_INIT, "lock failed.");
         return false;
     }
     SoftBusMutexUnlock(lock);
