@@ -33,6 +33,7 @@ void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const ConnectInfo &c
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_OK,
             .requestId = static_cast<int32_t>(wifiDirectConnectInfo.requestId),
+            .frequency = wifiDirectConnectInfo.dfxInfo.frequency,
         };
         ReportConnEventExtra(extra, connectInfo);
     } else {
@@ -41,6 +42,7 @@ void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const ConnectInfo &c
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = reason,
             .requestId = static_cast<int32_t>(wifiDirectConnectInfo.requestId),
+            .frequency = wifiDirectConnectInfo.dfxInfo.frequency,
         };
         ReportConnEventExtra(extra, connectInfo);
     }
