@@ -718,9 +718,9 @@ static int32_t CopyAllDevIdWithoutLock(LaneLinkType type, uint8_t resourceNum, c
     return SOFTBUS_OK;
 }
 
-int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, char *peerUdid)
+int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const char *peerUdid)
 {
-    if (oldLaneId == INVALID_LANE_ID || newLaneId == INVALID_LANE_ID) {
+    if (oldLaneId == INVALID_LANE_ID || newLaneId == INVALID_LANE_ID || peerUdid == NULL) {
         LNN_LOGE(LNN_LANE, "get invalid laneId");
         return SOFTBUS_INVALID_PARAM;
     }
