@@ -154,6 +154,7 @@ struct WifiDirectDfxInfo {
     int reuse;
     int costTime;
     uint16_t challengeCode;
+    int32_t frequency;
 };
 
 struct WifiDirectConnectInfo {
