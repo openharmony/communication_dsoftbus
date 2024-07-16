@@ -117,6 +117,8 @@ private:
     int ProcessConnectResponseWithGcInfoAsNone(std::shared_ptr<NegotiateCommand> &command);
     int ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<NegotiateCommand> &command);
 
+    int UpdateWhenConnectSuccess(std::string groupConfig, const NegotiateMessage &msg);
+
     int CreateGroup(const NegotiateMessage &msg);
     int ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel);
     static bool IsNeedDhcp(const std::string &gcIp, const std::string &groupConfig);

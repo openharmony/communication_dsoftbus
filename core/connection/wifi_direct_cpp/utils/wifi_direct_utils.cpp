@@ -518,7 +518,7 @@ void WifiDirectUtils::ParallelFlowExit()
     serialParallelCv_.notify_all();
 }
 
-int32_t WifiDirectUtils::CalculateStringLength(char *str, int32_t size)
+int32_t WifiDirectUtils::CalculateStringLength(const char *str, int32_t size)
 {
     for (auto i = size - 1; i >= 0; i--) {
         if (str[i] != '\0') {
