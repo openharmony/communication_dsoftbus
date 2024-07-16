@@ -41,6 +41,7 @@ public:
     virtual void RemoveDelayDestroyMessage(uint64_t laneId) = 0;
     virtual int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide) = 0;
     virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
+    virtual void DetectDisableWifiDirectApply(void) = 0;
 };
 
 class LaneListenerDepsInterfaceMock : public LaneListenerDepsInterface {
@@ -62,6 +63,7 @@ public:
     MOCK_METHOD0(GetLaneManager, LnnLaneManager* (void));
     MOCK_METHOD3(AddLaneResourceToPool, int32_t (const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide));
     MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
+    MOCK_METHOD0(DetectDisableWifiDirectApply, void (void));
 };
 } // namespace OHOS
 #endif // LNN_LANE_LISTENER_DEPS_MOCK_H
