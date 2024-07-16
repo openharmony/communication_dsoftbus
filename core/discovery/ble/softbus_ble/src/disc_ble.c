@@ -538,10 +538,7 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
         DISC_LOGE(DISC_BLE, "GetDeviceInfoFromDisAdvData failed, ret=%{public}d", ret);
         return;
     }
-    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return;
-    }
+    (void)SoftBusMutexLock(&g_bleInfoLock);
     uint32_t subscribeCap = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
     if (subscribeCap & (uint32_t)(foundInfo->capabilityBitmap[0] == 0x0)) {
