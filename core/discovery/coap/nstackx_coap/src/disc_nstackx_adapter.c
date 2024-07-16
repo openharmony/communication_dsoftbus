@@ -166,10 +166,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
                 nstackxDeviceInfo->deviceName);
             continue;
         }
-        if (memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo)) != EOK) {
-            DISC_LOGE(DISC_COAP, "disc Device Info memset failed");
-            continue;
-        }
+        (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
         ret = ParseDiscDevInfo(nstackxDeviceInfo, discDeviceInfo);
         if (ret != SOFTBUS_OK) {
             DISC_LOGW(DISC_COAP, "parse discovery device info failed.");
@@ -200,7 +197,7 @@ static NSTACKX_Parameter g_nstackxCallBack = {
 int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(discCoapCb != NULL && g_discCoapInnerCb != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid param");
+        DISC_COAP, "discCoapCb is null");
     if (memcpy_s(g_discCoapInnerCb, sizeof(DiscInnerCallback), discCoapCb, sizeof(DiscInnerCallback)) != EOK) {
         DISC_LOGE(DISC_COAP, "memcpy_s failed.");
         return SOFTBUS_MEM_ERR;
@@ -344,7 +341,7 @@ static void FreeDiscSet(NSTACKX_DiscoverySettings *discSet)
 
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option=NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is null");
     DISC_CHECK_AND_RETURN_RET_LOGE(option->mode >= ACTIVE_PUBLISH && option->mode <= ACTIVE_DISCOVERY,
         SOFTBUS_INVALID_PARAM, DISC_COAP, "option->mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
@@ -410,10 +407,8 @@ static int32_t SetLocalDeviceInfo(void)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(g_localDeviceInfo != NULL, SOFTBUS_DISCOVER_COAP_NOT_INIT, DISC_COAP,
         "disc coap not init");
-    if (memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo) != EOK)) {
-        DISC_LOGE(DISC_COAP, "local Device Info memset failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    int32_t res = memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo));
+    DISC_CHECK_AND_RETURN_RET_LOGE(res == EOK, SOFTBUS_MEM_ERR, DISC_COAP, "lock failed");
 
     char *deviceIdStr = GetDeviceId();
     DISC_CHECK_AND_RETURN_RET_LOGE(deviceIdStr != NULL, SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL, DISC_COAP,
