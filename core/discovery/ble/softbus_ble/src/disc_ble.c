@@ -344,7 +344,10 @@ static void BleAdvUpdateCallback(int channel, int status)
 static int32_t GetScannerFilterType(void)
 {
     int32_t type = 0;
-    (void)SoftBusMutexLock(&g_bleInfoLock);
+    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     uint32_t conScanCapBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
     uint32_t nonScanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
@@ -535,7 +538,10 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
         DISC_LOGE(DISC_BLE, "GetDeviceInfoFromDisAdvData failed, ret=%{public}d", ret);
         return;
     }
-    (void)SoftBusMutexLock(&g_bleInfoLock);
+    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "lock failed");
+        return;
+    }
     uint32_t subscribeCap = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
     if (subscribeCap & (uint32_t)(foundInfo->capabilityBitmap[0] == 0x0)) {
@@ -1317,7 +1323,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
         regOption.subscribeOption = (SubscribeOption *)option;
     }
     uint8_t index = publishFlags | activeFlags;
-    if (SoftBusMutexLock(&g_bleInfoLock) != 0) {
+    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2024,6 +2030,7 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 static bool CheckLockInit(SoftBusMutex *lock)
 {
     if (SoftBusMutexLock(lock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "lock failed.");
         return false;
     }
     SoftBusMutexUnlock(lock);
