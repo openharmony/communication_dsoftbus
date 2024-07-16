@@ -1475,6 +1475,9 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
     param.frequency = finalFrequency;
     param.isWideBandSupported = isLocalWideBandSupported && isRemoteWideBandSupported;
     auto result = P2pEntity::GetInstance().CreateGroup(param);
+    if (connectCommand_ != nullptr) {
+        connectCommand_->GetConnectInfo().info_.dfxInfo.frequency = param.frequency;
+    }
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
         "create group failed, error=%{public}d", result.errorCode_);
 
