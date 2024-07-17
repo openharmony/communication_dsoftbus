@@ -114,7 +114,7 @@ int32_t TransAddTcpChannelInfo(TcpChannelInfo *info);
 
 int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId);
 
-void TransTdcDeathChannelInfoCallback(const char *pkgName, int32_t pid);
+void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid);
 
 int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
     int32_t *connectType);
