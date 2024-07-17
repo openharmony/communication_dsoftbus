@@ -213,39 +213,6 @@ void TransTcpDirectDeinit(void)
     (void)RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, NULL);
 }
 
-void TransTdcDeathCallback(const char *pkgName, int32_t pid)
-{
-    if (pkgName == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
-        return;
-    }
-    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%{public}s, pid=%{public}d", pkgName, pid);
-    SessionConn *item = NULL;
-    SessionConn *nextItem = NULL;
-    if (GetSessionConnLock() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get session conn lock failed");
-        return;
-    }
-    SoftBusList *sessionList = GetSessionConnList();
-    if (sessionList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "get session conn list failed");
-        ReleaseSessionConnLock();
-        return;
-    }
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
-        if ((strcmp(item->appInfo.myData.pkgName, pkgName) == 0) && (item->appInfo.myData.pid == pid)) {
-            ListDelete(&item->node);
-            TRANS_LOGI(TRANS_CTRL, "delete pkgName=%{public}s, pid=%{public}d", pkgName, pid);
-            sessionList->cnt--;
-            DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
-            ConnShutdownSocket(item->appInfo.fd);
-            SoftBusFree(item);
-            continue;
-        }
-    }
-    ReleaseSessionConnLock();
-}
-
 static int32_t TransUpdateAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
 {
     appInfo->peerData.port = connInfo->socketOption.port;
