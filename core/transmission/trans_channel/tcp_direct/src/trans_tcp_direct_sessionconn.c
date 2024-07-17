@@ -450,7 +450,7 @@ void TransTdcDeathChannelInfoCallback(const char *pkgName, int32_t pid)
     TcpChannelInfo *item = NULL;
     TcpChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
-        if ((stcmp(item->pkgName, pkgName) == 0) && (item->pid == pid)) {
+        if ((strcmp(item->pkgName, pkgName) == 0) && (item->pid == pid)) {
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
             SoftBusFree(item);
