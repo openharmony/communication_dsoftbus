@@ -1242,8 +1242,9 @@ static void FillProxyHandshakeExtra(
 static int32_t TransProxyProcessHandshake(ProxyChannelInfo *chan, const ProxyMessage *msg)
 {
     int32_t ret = OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER);
-    if ((ret != SOFTBUS_OK) && (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened fail channelId=%{public}d", chan->channelId);
+        (void)TransProxyAckHandshake(msg->connId, chan, ret);
         return ret;
     }
     if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
@@ -1759,10 +1760,13 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             isServer = removeNode->isServer;
             disChanInfo = (ProxyChannelInfo *)SoftBusMalloc(sizeof(ProxyChannelInfo));
             if (disChanInfo == NULL) {
+                SoftBusFree(removeNode);
                 TRANS_LOGE(TRANS_SVC, "SoftBusMalloc failed");
                 return;
             }
             if (memcpy_s(disChanInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo)) != EOK) {
+                SoftBusFree(removeNode);
+                SoftBusFree(disChanInfo);
                 TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
                 return;
             }
