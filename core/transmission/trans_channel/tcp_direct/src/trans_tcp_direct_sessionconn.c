@@ -437,7 +437,7 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
     return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 
-void TransTdcDeathChannelInfoCallback(const char *pkgName, int32_t pid)
+void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
 {
     if (g_tcpChannelInfoList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
