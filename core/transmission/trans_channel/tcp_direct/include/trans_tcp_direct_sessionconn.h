@@ -61,7 +61,7 @@ typedef struct {
     int32_t businessType;
     int32_t connectType;
     char myIp[IP_LEN];
-    char pkgName[PKG_NAME_SIEZ_MAX];
+    char pkgName[PKG_NAME_SIZE_MAX];
     int32_t pid;
 } TcpChannelInfo;
 
