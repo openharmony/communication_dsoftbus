@@ -121,5 +121,10 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
 {
     return GetCommonInterface()->LnnRequestLeaveSpecific(networkId, addrType);
 }
+
+int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+{
+    return GetCommonInterface()->SoftBusGetBtMacAddr(mac);
+}
 }
 } // namespace OHOS
