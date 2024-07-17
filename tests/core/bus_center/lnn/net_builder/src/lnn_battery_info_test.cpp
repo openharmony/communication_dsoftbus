@@ -104,3 +104,4 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
+
