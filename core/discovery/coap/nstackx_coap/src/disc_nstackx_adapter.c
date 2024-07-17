@@ -408,7 +408,7 @@ static int32_t SetLocalDeviceInfo(void)
     DISC_CHECK_AND_RETURN_RET_LOGE(g_localDeviceInfo != NULL, SOFTBUS_DISCOVER_COAP_NOT_INIT, DISC_COAP,
         "disc coap not init");
     int32_t res = memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo));
-    DISC_CHECK_AND_RETURN_RET_LOGE(res == EOK, SOFTBUS_MEM_ERR, DISC_COAP, "lock failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(res == EOK, SOFTBUS_MEM_ERR, DISC_COAP, "memset_s local Device Info failed");
 
     char *deviceIdStr = GetDeviceId();
     DISC_CHECK_AND_RETURN_RET_LOGE(deviceIdStr != NULL, SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL, DISC_COAP,
