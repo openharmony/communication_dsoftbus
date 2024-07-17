@@ -21,6 +21,7 @@
 #include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
