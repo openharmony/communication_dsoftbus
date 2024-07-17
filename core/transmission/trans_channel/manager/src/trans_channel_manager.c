@@ -619,6 +619,7 @@ void TransChannelDeathCallback(const char *pkgName, int32_t pid)
 {
     TransProxyDeathCallback(pkgName, pid);
     TransTdcDeathCallback(pkgName, pid);
+    TransTdcDeathChannelInfoCallback(pkgName, pid);
     TransLaneMgrDeathCallback(pkgName, pid);
     TransUdpDeathCallback(pkgName, pid);
 }
