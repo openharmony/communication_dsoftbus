@@ -811,10 +811,13 @@ static void DispatchFdEvent(
 {
     if (listener->onDataEvent != NULL) {
         listener->onDataEvent(module, event, fd);
+        CONN_LOGI(CONN_COMMON,
+            "wakeupTrace=%{public}d, module=%{public}d, fd=%{public}d, event=%{public}d",
+            wakeupTrace, module, fd, event);
     } else {
         CONN_LOGE(CONN_COMMON,
-            "new event coming, but event listener not registered, to avoid repeat wakeup "
-            "select(LEVEL MODE), close it, wakeupTrace=%{public}d, module=%{public}d, fd=%{public}d, event=%{public}d",
+            "listener not registered, to avoid repeat wakeup, close it,"
+            "wakeupTrace=%{public}d, module=%{public}d, fd=%{public}d, event=%{public}d",
             wakeupTrace, module, fd, event);
         ConnCloseSocket(fd);
     }
