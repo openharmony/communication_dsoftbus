@@ -60,6 +60,14 @@ bool P2pAdapter::IsWifiEnable()
 
 bool P2pAdapter::IsWifiConnected()
 {
+    WifiLinkedInfo linkedInfo;
+    int32_t ret = GetLinkedInfo(&linkedInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, false, CONN_WIFI_DIRECT, "get wifi linked info failed");
+    if (linkedInfo.connState == WIFI_CONNECTED) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "wifi is connected");
+        return true;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "wifi not connected");
     return false;
 }
 
