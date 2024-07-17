@@ -344,7 +344,8 @@ static void BleAdvUpdateCallback(int channel, int status)
 static int32_t GetScannerFilterType(void)
 {
     int32_t type = 0;
-    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
     uint32_t conScanCapBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
     uint32_t nonScanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
