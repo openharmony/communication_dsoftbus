@@ -17,6 +17,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "securec.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
@@ -112,7 +113,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        (void)TransAddTcpChannel(channel, pakName, pid);
+        (void)TransAddTcpChannel(channel, pkgName, pid);
     }
     ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT && ret != SOFTBUS_OK) {
