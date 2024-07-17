@@ -725,8 +725,16 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
         CONN_LOGE(CONN_BR, "no connecting device, connId=%{public}u, addr=%{public}s, error=%{public}d", connectionId,
             anomizeAddress, error);
+        ConnBrDevice *it = NULL;
+        LIST_FOR_EACH_ENTRY(it, &g_brManager.waitings, ConnBrDevice, node) {
+            if (StrCmpIgnoreCase(it->addr, connection->addr) == 0) {
+                it->state = BR_DEVICE_STATE_WAIT_SCHEDULE;
+                break;
+            }
+        }
         ConnBrRemoveConnection(connection);
         ConnBrReturnConnection(&connection);
+        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_NEXT_CMD, 0, 0, NULL, 0);
         return;
     }
 
