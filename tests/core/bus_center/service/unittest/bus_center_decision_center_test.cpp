@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-
 #include "bus_center_decision_center.h"
 #include "message_handler.h"
 #include "softbus_conn_interface.h"
@@ -41,15 +40,19 @@ protected:
     void SetUp();
     void TearDown();
 };
+
 void BusCenterDecisionTest::SetUpTestCase(void)
 {
 }
+
 void BusCenterDecisionTest::TearDownTestCase(void)
 {
 }
+
 void BusCenterDecisionTest::SetUp(void)
 {
 }
+
 void BusCenterDecisionTest::TearDown(void)
 {
 }

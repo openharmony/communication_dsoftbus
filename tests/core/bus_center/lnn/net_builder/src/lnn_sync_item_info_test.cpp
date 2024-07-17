@@ -74,17 +74,15 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_SEND_TRANS_REQ_TEST_001, TestSize.Level1)
     BssTransInfo *transInfo = nullptr;
     transInfo = reinterpret_cast<BssTransInfo *>(SoftBusMalloc(sizeof(BssTransInfo)));
     EXPECT_TRUE(transInfo != nullptr);
-    memset_s(transInfo, sizeof(BssTransInfo), 0, sizeof(BssTransInfo));
+    (void)memset_s(transInfo, sizeof(BssTransInfo), 0, sizeof(BssTransInfo));
 
     (void)strcpy_s(transInfo->ssid, WIFI_SSID_LEN, TEST_VALID_PEER_NETWORKID1);
     (void)strcpy_s((char *)transInfo->targetBssid, WIFI_MAC_LEN, TEST_VALID_PEER_NETWORKID2);
 
     int32_t ret = LnnSendTransReq(nullptr, transInfo);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-
     ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-
     ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, transInfo);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
@@ -154,3 +152,4 @@ HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS
+
