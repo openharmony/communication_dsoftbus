@@ -34,6 +34,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -184,6 +185,8 @@
 #define BLE_MAC_REFRESH_SWITCH "BLE_MAC_REFRESH_SWITCH"
 #define BLE_CONNECTION_CLOSE_DELAY (10 * 1000L)
 #define BLE_MAC_AUTO_REFRESH_SWITCH 1
+
+#define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"
 
 static void OptString(const JsonObj *json, const char * const key,
     char *target, uint32_t targetLen, const char *defaultValue)
@@ -1848,6 +1851,45 @@ static int32_t UnpackCertificateInfo(JsonObj *json, NodeInfo *nodeInfo, const Au
     return SOFTBUS_OK;
 }
 
+static void UpdateLocalNetBrMac(void)
+{
+    NodeInfo info;
+    if (memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memset_s fail");
+        return;
+    }
+    if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local node info fail");
+        return;
+    }
+    const char *brMacTemp = LnnGetBtMac(&info);
+    int32_t lenBrMac = strlen(brMacTemp);
+    if ((lenBrMac == 0 || (strncmp(brMacTemp, INVALID_BR_MAC_ADDR, BT_MAC_LEN) == 0)) &&
+        SoftBusGetBtState() == BLE_ENABLE) {
+        char brMac[BT_MAC_LEN] = {0};
+        SoftBusBtAddr mac = {0};
+        int32_t ret = 0;
+        ret = SoftBusGetBtMacAddr(&mac);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "get bt mac addr fail, do not update local brmac");
+            return;
+        }
+        ret = ConvertBtMacToStr(brMac, BT_MAC_LEN, mac.addr, sizeof(mac.addr));
+        if (ret != SOFTBUS_OK || strlen(brMac) == 0) {
+            AUTH_LOGE(AUTH_FSM, "convert bt mac to str fail, do not update local brmac");
+            return;
+        }
+        if (LnnSetLocalStrInfo(STRING_KEY_BT_MAC, brMac) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "set local brmac fail, do not update local brmac");
+            return;
+        }
+        char *anonyMac = NULL;
+        Anonymize(brMac, &anonyMac);
+        AUTH_LOGI(AUTH_FSM, "update local brmac=%{public}s", anonyMac);
+        AnonymizeFree(anonyMac);
+    }
+}
+
 char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
     const char *remoteUuid, const AuthSessionInfo *info)
 {
@@ -1857,6 +1899,7 @@ char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version
         return NULL;
     }
     AUTH_LOGI(AUTH_FSM, "connType=%{public}d", connInfo->type);
+    UpdateLocalNetBrMac();
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
     if (nodeInfo == NULL) {
         AUTH_LOGE(AUTH_FSM, "local info is null");
