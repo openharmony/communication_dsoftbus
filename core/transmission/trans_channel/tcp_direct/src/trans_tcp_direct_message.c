@@ -943,12 +943,16 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     errCode = HandleDataBusReply(conn, channelId, &extra, flags, seq);
     if (errCode != SOFTBUS_OK) {
         (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+        (void)TransDelTcpChannelInfoByChannelId(channelId);
         ReleaseSessionConn(conn);
         return errCode;
     }
 
     errCode = NotifyChannelBind(channelId);
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    if (errCode != SOFTBUS_OK) {
+        (void)TransDelTcpChannelInfoByChannelId(channelId);
+    }
     ReleaseSessionConn(conn);
     return errCode;
 }
