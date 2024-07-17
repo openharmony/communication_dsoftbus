@@ -460,7 +460,6 @@ int32_t TransTdcDeathCallback(const char *pkgName, int32_t pid)
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
-    TRANS_LOGE(TRANS_CTRL, "TcpChannelInfo not found. channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 
