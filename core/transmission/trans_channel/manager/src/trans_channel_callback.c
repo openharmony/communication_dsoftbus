@@ -35,12 +35,18 @@
 
 static IServerChannelCallBack g_channelCallBack;
 
-static int32_t TransAddTcpChannel(const ChannelInfo *channel)
+static int32_t TransAddTcpChannel(const ChannelInfo *channel, const char *pkgName, int32_t pid)
 {
     TcpChannelInfo *info = CreateTcpChannelInfo(channel);
     if (info == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create new TcpChannelInfo failed.");
         return SOFTBUS_MEM_ERR;
+    }
+    info->pid = pid;
+    if (strcpy_s(info->pkgName, sizeof(info->pkgName), pkgName) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy pkgName failed.");
+        SoftBusFree(info);
+        return SOFTBUS_STRCPY_ERR;
     }
     int32_t ret = TransAddTcpChannelInfo(info);
     if (ret != SOFTBUS_OK) {
@@ -106,7 +112,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        (void)TransAddTcpChannel(channel);
+        (void)TransAddTcpChannel(channel, pakName, pid);
     }
     ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT && ret != SOFTBUS_OK) {

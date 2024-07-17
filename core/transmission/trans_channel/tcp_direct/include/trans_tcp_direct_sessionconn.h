@@ -60,6 +60,8 @@ typedef struct {
     int32_t businessType;
     int32_t connectType;
     char myIp[IP_LEN];
+    char pkgName[PKG_NAME_SIEZ_MAX];
+    int32_t pid;
 } TcpChannelInfo;
 
 uint64_t TransTdcGetNewSeqId(void);
@@ -110,6 +112,8 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel);
 int32_t TransAddTcpChannelInfo(TcpChannelInfo *info);
 
 int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId);
+
+int32_t TransTdcDeathCallback(const char *pkgName, int32_t pid);
 
 int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
     int32_t *connectType);
