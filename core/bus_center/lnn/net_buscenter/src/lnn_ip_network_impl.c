@@ -39,6 +39,7 @@
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
+#include "conn_coap.h"
 
 #define IP_DEFAULT_PORT 0
 #define LNN_LOOPBACK_IP "127.0.0.1"
@@ -393,6 +394,9 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
     if (OpenIpLink() != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "open ip link failed");
     }
+    if (ConnCoapStartServerListen() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "start coap conn server failed");
+    }
     if (!LnnIsAutoNetWorkingEnabled()) {
         LNN_LOGI(LNN_BUILDER, "auto network disable");
         return SOFTBUS_OK;
@@ -414,6 +418,7 @@ static int32_t DisableIpSubnet(LnnPhysicalSubnet *subnet)
         CloseIpLink();
         LnnStopPublish();
         LnnStopDiscovery();
+        ConnCoapStopServerListen();
         DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
         LeaveOldIpNetwork(subnet->ifName);
         ReleaseMainPort(subnet->ifName);
@@ -426,6 +431,7 @@ static int32_t ChangeIpSubnetAddress(LnnPhysicalSubnet *subnet)
     CloseIpLink();
     LnnStopPublish();
     LnnStopDiscovery();
+    ConnCoapStopServerListen();
     DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     LeaveOldIpNetwork(subnet->ifName);
     return SOFTBUS_OK;
