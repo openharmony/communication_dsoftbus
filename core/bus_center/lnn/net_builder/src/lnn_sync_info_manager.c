@@ -248,17 +248,105 @@ static void CloseUnusedChannel(void *para)
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
 }
 
-static void ResetOpenChannelInfo(int32_t channelId, unsigned char isServer, SyncChannelInfo *info)
+static void DestroySyncInfoMsgList(ListNode *list)
+{
+    SyncInfoMsg *item = NULL;
+    SyncInfoMsg *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, list, SyncInfoMsg, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+}
+
+static SyncInfoMsg *DumpMsgExcludeListNode(const SyncInfoMsg *msg)
+{
+    if (msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return NULL;
+    }
+    SyncInfoMsg *newMsg = (SyncInfoMsg *)SoftBusCalloc(sizeof(SyncInfoMsg) + msg->dataLen);
+    if (newMsg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "malloc err");
+        return NULL;
+    }
+    newMsg->complete = msg->complete;
+    newMsg->dataLen = msg->dataLen;
+    if (memcpy_s(newMsg->data, newMsg->dataLen, msg->data, msg->dataLen) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "memcpy err");
+        SoftBusFree(newMsg);
+        return NULL;
+    }
+    return newMsg;
+}
+
+static int32_t DumpSyncInfoMsgList(const ListNode *srcList, ListNode *dstList)
+{
+    if (srcList == NULL || dstList ==NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SyncInfoMsg *item = NULL;
+    SyncInfoMsg *newItem = NULL;
+    LIST_FOR_EACH_ENTRY(item, srcList, SyncInfoMsg, node) {
+        newItem = DumpMsgExcludeListNode(item);
+        if (newItem == NULL) {
+            LNN_LOGE(LNN_BUILDER, "dump msg node fail");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        LNN_LOGD(LNN_BUILDER, "add node");
+        ListInit(&newItem->node);
+        ListNodeInsert(dstList, &newItem->node);
+    }
+    return SOFTBUS_OK;
+}
+
+static SyncChannelInfo *DumpSyncChannelInfo(SyncChannelInfo *info)
+{
+    SyncChannelInfo *newInfo = (SyncChannelInfo *)SoftBusCalloc(sizeof(SyncChannelInfo));
+    if (newInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "malloc err");
+        return NULL;
+    }
+    ListInit(&newInfo->node);
+    ListInit(&newInfo->syncMsgList);
+    if (strcpy_s(newInfo->networkId, NETWORK_ID_BUF_LEN, info->networkId) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "copy network id fail");
+        SoftBusFree(newInfo);
+        return NULL;
+    }
+    newInfo->clientChannelId = info->clientChannelId;
+    newInfo->serverChannelId = info->serverChannelId;
+    newInfo->accessTime = info->accessTime;
+    newInfo->isClientOpened = info->isClientOpened;
+
+    if (DumpSyncInfoMsgList(&info->syncMsgList, &newInfo->syncMsgList) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "dump sync info msg list fail");
+        DestroySyncInfoMsgList(&newInfo->syncMsgList);
+        SoftBusFree(newInfo);
+        return NULL;
+    }
+    return newInfo;
+}
+
+static void SendSyncInfoMsgFromList(SyncChannelInfo *info)
 {
     SyncInfoMsg *msg = NULL;
     SyncInfoMsg *msgNext = NULL;
 
+    LIST_FOR_EACH_ENTRY_SAFE(msg, msgNext, &info->syncMsgList, SyncInfoMsg, node) {
+        SendSyncInfoMsg(info, msg);
+    }
+}
+
+static void ResetOpenChannelInfo(int32_t channelId, unsigned char isServer,
+    SyncChannelInfo *info, int32_t *oldChannelId)
+{
     SoftBusGetTime(&info->accessTime);
     if (isServer) {
         if (info->serverChannelId != channelId && info->serverChannelId != INVALID_CHANNEL_ID) {
             LNN_LOGD(LNN_BUILDER, "reset sync info server channel. serverChannelId=%{public}d, channelId=%{public}d",
                 info->serverChannelId, channelId);
-            (void)TransCloseNetWorkingChannel(info->serverChannelId);
+            *oldChannelId = info->serverChannelId;
         }
         info->serverChannelId = channelId;
     } else {
@@ -266,13 +354,30 @@ static void ResetOpenChannelInfo(int32_t channelId, unsigned char isServer, Sync
         if (info->clientChannelId != channelId && info->clientChannelId != INVALID_CHANNEL_ID) {
             LNN_LOGD(LNN_BUILDER, "reset sync info client channel. clientChannelId=%{public}d, channelId=%{public}d",
                 info->clientChannelId, channelId);
-            (void)TransCloseNetWorkingChannel(info->clientChannelId);
+            *oldChannelId = info->clientChannelId;
         }
         info->clientChannelId = channelId;
-        LIST_FOR_EACH_ENTRY_SAFE(msg, msgNext, &info->syncMsgList, SyncInfoMsg, node) {
-            SendSyncInfoMsg(info, msg);
-        }
     }
+}
+
+static int32_t AddChannelInfoNode(const char *networkId, int32_t channelId, unsigned char isServer)
+{
+    if (!isServer) {
+        LNN_LOGI(LNN_BUILDER, "unexpected client channel opened");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SyncChannelInfo *info = CreateSyncChannelInfo(networkId);
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "creat sync channel info fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (IsListEmpty(&g_syncInfoManager.channelInfoList)) {
+        (void)LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
+            CloseUnusedChannel, NULL, UNUSED_CHANNEL_CLOSED_DELAY);
+    }
+    info->serverChannelId = channelId;
+    ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
+    return SOFTBUS_OK;
 }
 
 static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned char isServer)
@@ -296,26 +401,30 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
     AnonymizeFree(anonyNetworkId);
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL) {
-        if (!isServer) {
-            LNN_LOGI(LNN_BUILDER, "unexpected client channel opened");
-            (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
-            return SOFTBUS_INVALID_PARAM;
+        int32_t ret = AddChannelInfoNode((char *)networkId, channelId, isServer);
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return ret;
+    }
+    int32_t oldChannelId = INVALID_CHANNEL_ID;
+    ResetOpenChannelInfo(channelId, isServer, info, &oldChannelId);
+    SyncChannelInfo *newInfo = NULL;
+    if (!isServer) {
+        newInfo = DumpSyncChannelInfo(info);
+        if (newInfo == NULL) {
+            LNN_LOGE(LNN_BUILDER, "client dump sync channel info fail");
         }
-        info = CreateSyncChannelInfo(networkId);
-        if (info == NULL) {
-            (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
-            return SOFTBUS_MALLOC_ERR;
-        }
-        if (IsListEmpty(&g_syncInfoManager.channelInfoList)) {
-            (void)LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
-                CloseUnusedChannel, NULL, UNUSED_CHANNEL_CLOSED_DELAY);
-        }
-        info->serverChannelId = channelId;
-        ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
-    } else {
-        ResetOpenChannelInfo(channelId, isServer, info);
+        DestroySyncInfoMsgList(&info->syncMsgList);
     }
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+    if (oldChannelId != INVALID_CHANNEL_ID) {
+        (void)TransCloseNetWorkingChannel(oldChannelId);
+    }
+    if (newInfo != NULL) {
+        if (!IsListEmpty(&newInfo->syncMsgList)) {
+            SendSyncInfoMsgFromList(newInfo);
+        }
+        SoftBusFree(newInfo);
+    }
     return SOFTBUS_OK;
 }
 
