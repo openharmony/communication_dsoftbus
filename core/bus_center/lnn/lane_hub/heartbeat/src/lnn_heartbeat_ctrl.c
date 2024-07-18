@@ -458,8 +458,8 @@ static void HbChangeMediumParamByState(SoftBusScreenState state)
             param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
             break;
         case SOFTBUS_SCREEN_OFF:
-            param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
-            param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
+            param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
+            param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
             break;
         default:
             LNN_LOGD(LNN_HEART_BEAT, "ctrl reset ble scan medium param get invalid state");
