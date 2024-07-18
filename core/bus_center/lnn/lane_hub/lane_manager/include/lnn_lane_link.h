@@ -133,6 +133,7 @@ int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const c
 uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
 int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt);
+int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type);
 
 #ifdef __cplusplus
 }
