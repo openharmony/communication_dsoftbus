@@ -1012,6 +1012,7 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/connection/coap/include",
   ]
 
   deps = [
