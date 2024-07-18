@@ -506,8 +506,8 @@ int32_t ConnBleTransConfigPostLimit(const LimitConfiguration *configuration)
     } else {
         ret = g_flowController->enable(g_flowController, configuration->windowInMillis, configuration->quotaInBytes);
     }
-    CONN_LOGI(CONN_BR, "config br post limit, active=%d, windows=%{public}d millis, quota=%{public}d bytes, result=%d",
-        configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
+    CONN_LOGI(CONN_BR, "config ble post limit, active=%{public}d, windows=%{public}d millis, quota=%{public}d bytes, "
+        "result=%{public}d", configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
     return ret;
 }
 
