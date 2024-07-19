@@ -37,8 +37,7 @@ int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *chanInfo, const unsigned ch
     int payLoadLen, ProxyPacketType flag);
 
 
-int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
-    TransReceiveData *receiveData)
+int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, TransReceiveData *receiveData)
 {
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_MSG, "param invalid");
@@ -95,11 +94,9 @@ SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
     }
 }
 
-int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
+static int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
     uint32_t len, ProxyPacketType flags)
 {
-    ConnectType type = 0;
-
     if ((data == NULL) || (len == 0)) {
         TRANS_LOGE(TRANS_MSG, "invalid para");
         return SOFTBUS_INVALID_PARAM;
@@ -119,10 +116,6 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
     int32_t ret = TransProxyTransDataSendMsg(chanInfo, data, len, flags);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "send msg fail, len=%{public}u, flags=%{public}d, ret=%{public}d", len, flags, ret);
-    }
-
-    if (ConnGetTypeByConnectionId(chanInfo->connId, &type) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "obtain link type failed!");
     }
 
     SoftBusFree(chanInfo);
@@ -179,7 +172,7 @@ static int32_t TransProxyTransNormalMsg(const ProxyChannelInfo *info, const char
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
-    int bufLen = 0;
+    int32_t bufLen = 0;
     char *buf = TransProxyPackAppNormalMsg(&msgHead, payLoad, payLoadLen, &bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_MSG, "proxy pack msg error");
@@ -214,11 +207,10 @@ int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, const unsigned char *
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
-    return TransProxyTransNormalMsg(info, (const char*)payLoad, payLoadLen, flag);
+    return TransProxyTransNormalMsg(info, (const char *)payLoad, payLoadLen, flag);
 }
 
-int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
-    const char *data, uint32_t len)
+int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len)
 {
     if (data == NULL || pkgName == NULL) {
         TRANS_LOGE(TRANS_MSG, "data or pkgname is null.");
