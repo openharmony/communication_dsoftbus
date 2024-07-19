@@ -483,6 +483,21 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid)
     return SOFTBUS_ERR;
 }
 
+int32_t GetIsExchangeUdidByNetworkId(const char *networkId, bool *isExchangeUdid)
+{
+    if (networkId == NULL || isExchangeUdid == NULL) {
+        AUTH_LOGW(AUTH_CONN, "param err");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *info = LnnRetrieveDeviceInfoByNetworkId(networkId);
+    if (info != NULL) {
+        *isExchangeUdid = info->isAuthExchangeUdid;
+        return SOFTBUS_OK;
+    }
+    AUTH_LOGE(AUTH_CONN, "deviceInfo not found");
+    return SOFTBUS_ERR;
+}
+
 bool CheckAuthConnInfoType(const AuthConnInfo *connInfo)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, false, AUTH_FSM, "connInfo is null");

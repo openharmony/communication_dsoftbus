@@ -113,3 +113,14 @@ int32_t LnnUnPackCloudSyncDeviceInfo(cJSON *json, NodeInfo *cloudSyncInfo)
     (void)cloudSyncInfo;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+void LnnUpdateAuthExchangeUdid(void)
+{
+    return;
+}
+
+void LnnClearAuthExchangeUdid(const char *networkId)
+{
+    (void)networkId;
+    return;
+}

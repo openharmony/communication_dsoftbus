@@ -216,7 +216,7 @@ HWTEST_F(AuthSessionMessageTest, VerifySessionInfoIdType_TEST_001, TestSize.Leve
     info.idType = EXCHANGE_NETWORKID;
     EXPECT_TRUE(VerifySessionInfoIdType(&info, obj,
         const_cast<char *>(NETWORK_ID_TEST), const_cast<char *>(UDID)));
-    info.idType = EXCHANHE_UDID;
+    info.idType = EXCHANGE_UDID;
     EXPECT_TRUE(VerifySessionInfoIdType(&info, obj,
         const_cast<char *>(NETWORK_ID_TEST), const_cast<char *>(UDID)));
     JSON_Delete(obj);
@@ -233,7 +233,7 @@ HWTEST_F(AuthSessionMessageTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.version = SOFTBUS_OLD_V1;
-    info.idType = EXCHANHE_UDID;
+    info.idType = EXCHANGE_UDID;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = true;
     EXPECT_TRUE(PackDeviceIdJson(&info) == nullptr);
@@ -295,12 +295,12 @@ HWTEST_F(AuthSessionMessageTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Le
     EXPECT_TRUE(obj1 != nullptr);
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
-    info.idType = EXCHANHE_UDID;
+    info.idType = EXCHANGE_UDID;
     JSON_AddInt32ToObject(obj1, SOFTBUS_VERSION_TAG, 123);
     EXPECT_TRUE(SetExchangeIdTypeAndValue(nullptr, &info) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, &info) == SOFTBUS_OK);
-    JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANHE_UDID);
+    JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANGE_UDID);
     EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, &info) == SOFTBUS_OK);
     JSON_Delete(obj1);
     JsonObj *obj2 = JSON_CreateObject();
@@ -346,7 +346,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
     JSON_AddStringToObject(obj1, DEVICE_ID_TAG, "654321");
     JSON_AddInt32ToObject(obj1, DATA_BUF_SIZE_TAG, PACKET_SIZE);
     JSON_AddInt32ToObject(obj1, SOFTBUS_VERSION_TAG, 123);
-    JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANHE_UDID);
+    JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANGE_UDID);
     JSON_AddStringToObject(obj1, SUPPORT_INFO_COMPRESS, TRUE_STRING_TAG);
     char *msg1 = JSON_PrintUnformatted(obj1);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
