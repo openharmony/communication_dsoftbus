@@ -1178,6 +1178,10 @@ static void LaneTriggerLink(SoftBusMessage *msg)
 static void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo)
 {
     LNN_LOGI(LNN_LANE, "free unused link, laneReqId=%{public}u", laneReqId);
+    if (linkInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "linkInfo is null, laneReqId=%{public}u", laneReqId);
+        return;
+    }
     if (linkInfo->type == LANE_P2P || linkInfo->type == LANE_HML) {
         char networkId[NETWORK_ID_BUF_LEN] = {0};
         if (LnnGetNetworkIdByUdid(linkInfo->peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
