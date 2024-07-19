@@ -463,7 +463,7 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
         return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL;
     }
     int32_t seq = *(int32_t *)data;
-    int32_t hostSeq = (int32_t)SoftBusNtoHl(*(int32_t *)data);
+    int32_t hostSeq = (int32_t)SoftBusNtoHl(*(uint32_t *)data);
     TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, dataHeadSeq=%{public}d, seq=%{public}d, hostSeq=%{public}d",
         channelId, dataHeadSeq, seq, hostSeq);
     int32_t ret = SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
