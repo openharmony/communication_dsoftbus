@@ -792,10 +792,10 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
 {
     int32_t osType = 0;
     if (LnnGetOsTypeByNetworkId(info->networkId, &osType)) {
-        LNN_LOGE(LNN_BUILDER, "get remote osType fail");
+        LNN_LOGE(LNN_LEDGER, "get remote osType fail");
     }
     if (osType != HO_OS_TYPE) {
-        LNN_LOGD(LNN_BUILDER, "not pend br connection");
+        LNN_LOGD(LNN_LEDGER, "not pend br connection");
         return;
     }
     const NodeInfo *localNodeInfo = LnnGetLocalNodeInfo();
