@@ -86,6 +86,7 @@ int32_t LnnSetLocalUnifiedName(const char *unifiedName);
 int32_t LnnSetLocalStateVersionReason(void);
 bool LnnIsMasterNode(void);
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
+int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp);
 
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName);
 int32_t LnnServerLeave(const char *networkId, const char *pkgName);

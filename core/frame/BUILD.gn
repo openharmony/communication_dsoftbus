@@ -47,6 +47,7 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_server_frame") {
       defines += AUTH_SERVER_DEFINES
+      defines += DISC_SERVER_DEFINES
       defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
@@ -94,8 +95,15 @@ if (defined(ohos_lite)) {
       external_deps += auth_server_ex_deps
       if (defined(global_parts_info) &&
           defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
-        include_dirs += [ "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar" ]
-        sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp" ]
+        include_dirs += [
+          "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
+          "$dsoftbus_root_path/core/common/dfx/statistics/include",
+        ]
+        sources += [
+          "$dsoftbus_root_path/core/common/dfx/statistics/instant/bt_statistic.cpp",
+          "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
+          "$dsoftbus_root_path/core/common/dfx/statistics/instant/wifi_statistic.cpp",
+        ]
         external_deps +=
             [ "hiview_xcommradar_plugin:communication_radar_client" ]
       } else {
@@ -117,6 +125,7 @@ if (defined(ohos_lite)) {
   } else {
     shared_library("softbus_server_frame") {
       defines += AUTH_SERVER_DEFINES
+      defines += DISC_SERVER_DEFINES
       defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
@@ -165,8 +174,15 @@ if (defined(ohos_lite)) {
       external_deps += auth_server_ex_deps
       if (defined(global_parts_info) &&
           defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
-        include_dirs += [ "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar" ]
-        sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp" ]
+        include_dirs += [
+          "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
+          "$dsoftbus_root_path/core/common/dfx/statistics/include",
+        ]
+        sources += [
+          "$dsoftbus_root_path/core/common/dfx/statistics/instant/bt_statistic.cpp",
+          "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
+          "$dsoftbus_root_path/core/common/dfx/statistics/instant/wifi_statistic.cpp",
+        ]
         external_deps +=
             [ "hiview_xcommradar_plugin:communication_radar_client" ]
       } else {
@@ -221,6 +237,7 @@ if (defined(ohos_lite)) {
     branch_protector_ret = "pac_ret"
 
     defines += AUTH_SERVER_DEFINES
+    defines += DISC_SERVER_DEFINES
     defines += [ "__STDC_FORMAT_MACROS" ]
     include_dirs = dsoftbus_server_common_inc
     include_dirs += [
@@ -304,8 +321,15 @@ if (defined(ohos_lite)) {
     }
     if (defined(global_parts_info) &&
         defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
-      include_dirs += [ "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar" ]
-      sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp" ]
+      include_dirs += [
+        "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
+        "$dsoftbus_root_path/core/common/dfx/statistics/include",
+      ]
+      sources += [
+        "$dsoftbus_root_path/core/common/dfx/statistics/instant/bt_statistic.cpp",
+        "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics.cpp",
+        "$dsoftbus_root_path/core/common/dfx/statistics/instant/wifi_statistic.cpp",
+      ]
       external_deps += [ "hiview_xcommradar_plugin:communication_radar_client" ]
     } else {
       sources += [ "$dsoftbus_root_path/core/common/dfx/statistics/instant/instant_statistics_virtual.cpp" ]

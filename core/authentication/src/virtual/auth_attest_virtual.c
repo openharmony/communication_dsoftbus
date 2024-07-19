@@ -64,3 +64,8 @@ void FreeSoftbusChain(SoftbusCertChain *softbusCertChain)
 {
     (void)softbusCertChain;
 }
+
+bool IsCertAvailable(void)
+{
+    return true;
+}

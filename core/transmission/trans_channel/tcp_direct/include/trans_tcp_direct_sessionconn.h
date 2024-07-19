@@ -63,6 +63,13 @@ typedef struct {
     char myIp[IP_LEN];
     char pkgName[PKG_NAME_SIZE_MAX];
     int32_t pid;
+    bool isServer;
+    int32_t channelType;
+    char peerSessionName[SESSION_NAME_SIZE_MAX];
+    char peerDeviceId[DEVICE_ID_SIZE_MAX];
+    char peerIp[IP_LEN];
+    int64_t timeStart;
+    int32_t linkType;
 } TcpChannelInfo;
 
 uint64_t TransTdcGetNewSeqId(void);
@@ -71,9 +78,15 @@ int32_t CreatSessionConnList(void);
 
 SoftBusList *GetSessionConnList(void);
 
+SoftBusList *GetTcpChannelInfoList(void);
+
 int32_t GetSessionConnLock(void);
 
+int32_t GetTcpChannelInfoLock(void);
+
 void ReleaseSessionConnLock(void);
+
+void ReleaseTcpChannelInfoLock(void);
 
 SessionConn *GetSessionConnByRequestId(uint32_t requestId);
 

@@ -344,7 +344,8 @@ static void BleAdvUpdateCallback(int channel, int status)
 static int32_t GetScannerFilterType(void)
 {
     int32_t type = 0;
-    (void)SoftBusMutexLock(&g_bleInfoLock);
+    DISC_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
     uint32_t conScanCapBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
     uint32_t nonScanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
@@ -894,12 +895,14 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
         }
     }
     (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
+#ifdef DISC_COMMUNITY
     if (info->range > 0) {
         int8_t power = 0;
         if (SoftBusGetBlePower(&power) == SOFTBUS_OK) {
             (void)AssembleTLV(broadcastData, TLV_TYPE_RANGE_POWER, (const void *)&power, RANGE_POWER_TYPE_LEN);
         }
     }
+#endif /* DISC_COMMUNITY */
     if (info->custData[0] != 0) {
         AssembleCustData(info, broadcastData);
     }
@@ -1317,7 +1320,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
         regOption.subscribeOption = (SubscribeOption *)option;
     }
     uint8_t index = publishFlags | activeFlags;
-    if (SoftBusMutexLock(&g_bleInfoLock) != 0) {
+    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }

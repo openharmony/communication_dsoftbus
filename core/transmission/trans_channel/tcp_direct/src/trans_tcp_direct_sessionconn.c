@@ -68,6 +68,11 @@ SoftBusList *GetSessionConnList(void)
     return g_sessionConnList;
 }
 
+SoftBusList *GetTcpChannelInfoList(void)
+{
+    return g_tcpChannelInfoList;
+}
+
 int32_t GetSessionConnLock(void)
 {
     if (g_sessionConnList == NULL) {
@@ -79,12 +84,28 @@ int32_t GetSessionConnLock(void)
     return SOFTBUS_OK;
 }
 
+int32_t GetTcpChannelInfoLock(void)
+{
+    if (g_tcpChannelInfoList == NULL) {
+        return SOFTBUS_NO_INIT;
+    }
+    return SoftBusMutexLock(&g_tcpChannelInfoList->lock);
+}
+
 void ReleaseSessionConnLock(void)
 {
     if (g_sessionConnList == NULL) {
         return;
     }
     (void)SoftBusMutexUnlock(&g_sessionConnList->lock);
+}
+
+void ReleaseTcpChannelInfoLock(void)
+{
+    if (g_tcpChannelInfoList == NULL) {
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
 }
 
 SessionConn *GetSessionConnByRequestId(uint32_t requestId)
@@ -336,6 +357,9 @@ int32_t CreateTcpChannelInfoList(void)
 
 TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel)
 {
+    if (channel == NULL) {
+        return NULL;
+    }
     TcpChannelInfo *tcpChannelInfo = (TcpChannelInfo *)SoftBusCalloc(sizeof(TcpChannelInfo));
     if (tcpChannelInfo == NULL) {
         return NULL;
@@ -348,6 +372,25 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel)
         SoftBusFree(tcpChannelInfo);
         return NULL;
     }
+    tcpChannelInfo->isServer = channel->isServer;
+    tcpChannelInfo->channelType = channel->channelType;
+    if (strcpy_s(tcpChannelInfo->peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "failed to strcpy peerSessionName, channelId=%{public}d", channel->channelId);
+        SoftBusFree(tcpChannelInfo);
+        return NULL;
+    }
+    if (strcpy_s(tcpChannelInfo->peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "failed to strcpy peerDeviceId, channelId=%{public}d", channel->channelId);
+        SoftBusFree(tcpChannelInfo);
+        return NULL;
+    }
+    if (strcpy_s(tcpChannelInfo->peerIp, IP_LEN, channel->peerIp) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "failed to strcpy peerDeviceId, channelId=%{public}d", channel->channelId);
+        SoftBusFree(tcpChannelInfo);
+        return NULL;
+    }
+    tcpChannelInfo->timeStart = channel->timeStart;
+    tcpChannelInfo->linkType = channel->linkType;
     return tcpChannelInfo;
 }
 
