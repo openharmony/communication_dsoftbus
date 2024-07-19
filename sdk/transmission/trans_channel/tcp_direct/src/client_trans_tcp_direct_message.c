@@ -428,8 +428,8 @@ static int32_t TransTdcProcessData(int32_t channelId)
     int32_t seqNum = pktHead->seq;
     uint32_t flag = pktHead->flags;
     uint32_t dataLen = pktHead->dataLen;
-    TRANS_LOGI(TRANS_SDK, "data received, channelId=%{public}d, dataLen=%{public}u, size=%{public}d",
-        channelId, dataLen, node->size);
+    TRANS_LOGI(TRANS_SDK, "data received, channelId=%{public}d, dataLen=%{public}u, size=%{public}d, seq=%{public}d",
+        channelId, dataLen, node->size, seqNum);
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
         TRANS_LOGE(TRANS_SDK, "malloc fail, channelId=%{public}d, dataLen=%{public}u", channelId, dataLen);
