@@ -439,6 +439,8 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
 
 void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
 {
+    TRANS_LOGE(TRANS_CTRL, "pkgName=%{public}s pid=%{public}d died, clean all resource",
+        pkgName, pid);
     if (g_tcpChannelInfoList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
         return;
