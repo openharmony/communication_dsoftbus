@@ -454,7 +454,7 @@ static void ClientTransProxySendSessionAck(int32_t channelId, int32_t seq)
     }
 }
 
-static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *data, int32_t len)
+static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *data, int32_t len, int32_t dataHeadSeq)
 {
     if (len != PROXY_ACK_SIZE) {
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
@@ -464,7 +464,8 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
     }
     int32_t seq = *(int32_t *)data;
     int32_t hostSeq = (int32_t)SoftBusNtoHl(*(int32_t *)data);
-    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, seq=%{public}d, hostSeq=%{public}d", channelId, seq, hostSeq);
+    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, dataHeadSeq=%{public}d, seq=%{public}d, hostSeq=%{public}d",
+        channelId, dataHeadSeq, seq, hostSeq);
     int32_t ret = SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
     if (ret != SOFTBUS_OK) {
         ret = SetPendingPacket(channelId, hostSeq, PENDING_TYPE_PROXY);
@@ -483,8 +484,7 @@ static int32_t ClientTransProxyNotifySession(
             ClientTransProxySendSessionAck(channelId, seq);
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         case TRANS_SESSION_ACK:
-            TRANS_LOGI(TRANS_SDK, "Send Message Ack Seq=%{public}d", seq);
-            return (int32_t)(ClientTransProxyProcSendMsgAck(channelId, data, len));
+            return (int32_t)(ClientTransProxyProcSendMsgAck(channelId, data, len, seq));
         case TRANS_SESSION_BYTES:
         case TRANS_SESSION_FILE_FIRST_FRAME:
         case TRANS_SESSION_FILE_ONGOINE_FRAME:
