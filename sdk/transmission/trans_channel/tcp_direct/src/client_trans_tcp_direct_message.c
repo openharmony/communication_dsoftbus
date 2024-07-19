@@ -445,7 +445,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
         return SOFTBUS_DECRYPT_ERR;
     }
     uint64_t endTime = SoftBusGetSysTimeMs();
-    TRANS_LOGD(TRANS_SDK,
+    TRANS_LOGI(TRANS_SDK,
         "data received, channelId=%{public}d, dataLen=%{public}u, STime=%{public}" PRIu64 ", ETime=%{public}" PRIu64,
         channelId, dataLen, startTime, endTime);
     char *end = node->data + DC_DATA_HEAD_SIZE + dataLen;
