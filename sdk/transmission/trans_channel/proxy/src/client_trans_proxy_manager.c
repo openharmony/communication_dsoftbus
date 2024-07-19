@@ -462,8 +462,8 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
     if (data == NULL) {
         return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL;
     }
-    int32_t seq = *(uint32_t*)data;
-    int32_t hostSeq = (int32_t)SoftBusNtoHl(*(uint32_t*)data);
+    int32_t seq = *(int32_t *)data;
+    int32_t hostSeq = (int32_t)SoftBusNtoHl(*(int32_t *)data);
     TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, seq=%{public}d, hostSeq=%{public}d", channelId, seq, hostSeq);
     int32_t ret = SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
     if (ret != SOFTBUS_OK) {
@@ -483,6 +483,7 @@ static int32_t ClientTransProxyNotifySession(
             ClientTransProxySendSessionAck(channelId, seq);
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         case TRANS_SESSION_ACK:
+            TRANS_LOGI(TRANS_SDK, "Send Message Ack Seq=%{public}d", seq);
             return (int32_t)(ClientTransProxyProcSendMsgAck(channelId, data, len));
         case TRANS_SESSION_BYTES:
         case TRANS_SESSION_FILE_FIRST_FRAME:
