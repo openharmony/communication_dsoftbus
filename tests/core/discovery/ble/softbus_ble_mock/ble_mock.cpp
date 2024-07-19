@@ -451,6 +451,24 @@ void BleMock::InjectActiveNonPacket()
     }
 }
 
+void BleMock::InjectPassiveNonPacketOfCust()
+{
+    if (scanListener && scanListener->OnReportScanDataCallback) {
+        constexpr uint32_t advLen = sizeof(passivePublishAdvDataOfCust);
+        constexpr uint32_t rspLen = sizeof(passivePublishRspDataOfCust);
+        BroadcastReportInfo reportInfo = {};
+        reportInfo.packet.bcData.id = SERVICE_UUID;
+        reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
+        reportInfo.packet.rspData.id = MANU_COMPANY_ID;
+        reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
+        reportInfo.packet.bcData.payload = &passivePublishAdvDataOfCust[0];
+        reportInfo.packet.bcData.payloadLen = advLen;
+        reportInfo.packet.rspData.payload = &passivePublishRspDataOfCust[0];
+        reportInfo.packet.rspData.payloadLen = rspLen;
+        scanListener->OnReportScanDataCallback(SCAN_LISTENER_ID, &reportInfo);
+    }
+}
+
 void BleMock::InjectActiveConPacket()
 {
     if (scanListener && scanListener->OnReportScanDataCallback) {
