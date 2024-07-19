@@ -22,3 +22,12 @@ group("unittest") {
         [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/broadcast:unittest" ]
   }
 }
+
+group("fuzztest") {
+  testonly = true
+  deps = []
+  if (dsoftbus_feature_ex_kits) {
+    deps +=
+        [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/broadcast:fuzztest" ]
+  }
+}
