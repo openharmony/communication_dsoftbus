@@ -390,7 +390,7 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
     }
     char *dataInfo = (char *)data.ReadRawData(len);
     if (dataInfo == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read dataInfo failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner read dataInfo failed!");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
     }
     int32_t type;
