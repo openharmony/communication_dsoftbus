@@ -88,6 +88,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .firstTokenType = 1,
         .trafficStats = "localpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .osType = 10,
+        .deviceState = 1,
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
