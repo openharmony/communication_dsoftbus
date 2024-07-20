@@ -47,6 +47,7 @@ int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type);
 int32_t SwtichHeartbeatReportChannel(bool isToAP);
 bool IsSupportLpFeature(void);
 void SetLpKeepAliveState(void *para);
+void AsyncSetBleBroadcastTimeStamp(const char *networkId);
 
 #ifdef __cplusplus
 }
