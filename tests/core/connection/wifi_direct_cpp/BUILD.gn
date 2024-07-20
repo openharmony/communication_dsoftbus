@@ -232,5 +232,6 @@ group("unittest") {
     "data:unittest",
     "entity:unittest",
     "processor:unittest",
+    "utils:unittest",
   ]
 }
