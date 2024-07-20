@@ -480,6 +480,32 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
     return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 
+void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
+{
+    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s pid=%{public}d died, clean all resource", pkgName, pid);
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
+        return;
+    }
+    if (SoftBusMutexLock(&g_tcpChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed.");
+        return;
+    }
+    TcpChannelInfo *item = NULL;
+    TcpChannelInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
+        if ((strcmp(item->pkgName, pkgName) == 0) && (item->pid == pid)) {
+            ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
+            SoftBusFree(item);
+            g_tcpChannelInfoList->cnt--;
+            (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
+    TRANS_LOGD(TRANS_CTRL, "ok");
+}
+
 void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLen)
 {
     if (sessionKey == NULL || keyLen <= 0) {
