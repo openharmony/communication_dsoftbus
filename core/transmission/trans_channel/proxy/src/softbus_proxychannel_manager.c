@@ -119,11 +119,8 @@ static bool ResetChanIsEqual(int8_t status, ProxyChannelInfo *a, ProxyChannelInf
 
 int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *appType)
 {
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "fail to lock mutex!");
-        return SOFTBUS_LOCK_ERR;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "fail to lock mutex!");
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if ((item->myId == myId) && (strcmp(item->identity, identity) == 0)) {
@@ -138,16 +135,10 @@ int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *ap
 
 static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
 {
-    if (g_proxyChannelList == NULL || info == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList or item is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && info != NULL), SOFTBUS_INVALID_PARAM, TRANS_CTRL,
+        "g_proxyChannelList or item is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if ((item->myId == info->myId) && (strncmp(item->identity, info->identity, sizeof(item->identity)) == 0)) {
@@ -177,15 +168,10 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
 
 int32_t TransRefreshProxyTimesNative(int32_t channelId)
 {
-    if (g_proxyChannelList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList or item is null");
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
@@ -201,16 +187,11 @@ int32_t TransRefreshProxyTimesNative(int32_t channelId)
 
 static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
 {
-    TRANS_LOGD(TRANS_CTRL, "enter.");
-    if ((chan == NULL) || (g_proxyChannelList == NULL)) {
-        TRANS_LOGE(TRANS_CTRL, "trans proxy add channel param nullptr!");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && chan != NULL), SOFTBUS_INVALID_PARAM, TRANS_CTRL,
+        "trans proxy add channel param nullptr!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
     ListAdd(&(g_proxyChannelList->list), &(chan->node));
     g_proxyChannelList->cnt++;
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
@@ -219,15 +200,10 @@ static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
 
 int32_t TransProxySpecialUpdateChanInfo(ProxyChannelInfo *channelInfo)
 {
-    if (g_proxyChannelList == NULL || channelInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList or channelInfo is NULL!");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && channelInfo != NULL), SOFTBUS_INVALID_PARAM,
+        TRANS_CTRL, "g_proxyChannelList or channelInfo is NULL!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -258,22 +234,13 @@ int32_t TransProxySpecialUpdateChanInfo(ProxyChannelInfo *channelInfo)
 
 int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
 {
-    if (chan == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && chan != NULL), SOFTBUS_INVALID_PARAM, TRANS_CTRL,
+        "trans proxy get channel param nullptr!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
-
-    if (g_proxyChannelList == NULL || chan == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "trans proxy get channel param nullptr!");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == chanId) {
@@ -294,14 +261,10 @@ int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
 int32_t TransProxyGetChanByReqId(int32_t reqId, ProxyChannelInfo *chan)
 {
     ProxyChannelInfo *item = NULL;
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->reqId == reqId && item->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
@@ -318,14 +281,10 @@ void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if ((item->reqId == reqId) &&
@@ -348,14 +307,10 @@ void TransProxyDelChanByChanId(int32_t chanlId)
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == chanlId) {
@@ -379,14 +334,10 @@ void TransProxyDelChanByChanId(int32_t chanlId)
 void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
 {
     ProxyChannelInfo *item = NULL;
-    if (g_proxyChannelList == NULL) {
-        return;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
     bool isUsing = false;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
@@ -425,9 +376,8 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
-    if (proxyChannelList == NULL || IsListEmpty(proxyChannelList)) {
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE((g_proxyChannelList != NULL && !IsListEmpty(proxyChannelList)), TRANS_CTRL,
+        "g_proxyChannelList is null or empty");
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyChannelList, ProxyChannelInfo, node) {
@@ -451,14 +401,10 @@ void TransProxyDelByConnId(uint32_t connId)
     ProxyChannelInfo *nextNode = NULL;
     ListNode proxyChannelList;
 
-    if (g_proxyChannelList == NULL) {
-        return;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
     ListInit(&proxyChannelList);
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
@@ -479,14 +425,10 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (removeNode->channelId == channelId) {
@@ -514,14 +456,10 @@ static int32_t TransProxyResetChan(ProxyChannelInfo *chanInfo)
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (ResetChanIsEqual(removeNode->status, removeNode, chanInfo)) {
@@ -551,14 +489,10 @@ static int32_t TransProxyGetRecvMsgChanInfo(int16_t myId, int16_t peerId, ProxyC
 {
     ProxyChannelInfo *item = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if ((item->myId == myId) && (item->peerId == peerId)) {
@@ -582,14 +516,10 @@ static int32_t TransProxyKeepAliveChan(ProxyChannelInfo *chanInfo)
 {
     ProxyChannelInfo *item = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (ChanIsEqual(item, chanInfo)) {
@@ -614,14 +544,10 @@ int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanIn
 {
     ProxyChannelInfo *item = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
@@ -646,14 +572,10 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
     ProxyChannelInfo *item = NULL;
     int32_t seq = 0;
 
-    if (g_proxyChannelList == NULL) {
-        return seq;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return seq;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, seq, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, seq, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
@@ -669,20 +591,13 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
 
 int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
 {
-    if (authHandle == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        authHandle != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "authHandle is null");
     ProxyChannelInfo *item = NULL;
-    if (g_proxyChannelList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList is null");
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
             *authHandle = item->authHandle;
@@ -696,22 +611,13 @@ int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
 
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
 {
-    if (sessionKey == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (g_proxyChannelList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "proxy channel list not init");
-        return SOFTBUS_NO_INIT;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        sessionKey != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "sessionKey is null");
     ProxyChannelInfo *item = NULL;
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
             if (item->status == PROXY_CHANNEL_STATUS_COMPLETED) {
@@ -735,12 +641,8 @@ int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uin
 static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode)
 {
     TRANS_LOGW(TRANS_CTRL, "TransProxyProcessErrMsg errCode=%{public}d", errCode);
-
-    if (TransProxyGetChanByChanId(info->myId, info) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransProxyGetChanByChanId fail");
-        return;
-    }
-
+    TRANS_CHECK_AND_RETURN_LOGE(
+        TransProxyGetChanByChanId(info->myId, info) == SOFTBUS_OK, TRANS_CTRL, "TransProxyGetChanByChanId fail");
     if ((info->appInfo.appType == APP_TYPE_NORMAL) || (info->appInfo.appType == APP_TYPE_AUTH)) {
         TransProxyDelChanByChanId(info->channelId);
         (void)TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
@@ -751,14 +653,10 @@ static int32_t TransProxyGetAppInfo(int16_t myId, AppInfo *appInfo)
 {
     ProxyChannelInfo *item = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->myId == myId) {
@@ -1790,14 +1688,10 @@ void TransProxyTimerProc(void)
     ProxyChannelInfo *nextNode = NULL;
     ListNode proxyProcList;
 
-    if (g_proxyChannelList == NULL) {
-        TRANS_LOGD(TRANS_INIT, "g_proxyChannelList is null or empty");
-        return;
-    }
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "lock mutex fail");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
     if (g_proxyChannelList->cnt <= 0) {
         (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
         return;
@@ -1956,15 +1850,10 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
 int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen)
 {
-    if (pkgName == NULL || sessionName == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE((pkgName != NULL && sessionName != NULL), SOFTBUS_INVALID_PARAM, TRANS_CTRL,
+        "invalid param");
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (chan == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc err");
-        return SOFTBUS_MALLOC_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc err");
     int32_t ret = TransProxyGetChanByChanId(chanId, chan);
     (void)memset_s(chan->appInfo.sessionKey, sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
@@ -1989,16 +1878,12 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
 
 static void TransProxyManagerDeinitInner(void)
 {
-    if (g_proxyChannelList == NULL) {
-        TRANS_LOGW(TRANS_INIT, "g_proxyChannelList is null");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_proxyChannelList != NULL, TRANS_INIT, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_INIT, "lock mutex fail!");
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "lock mutex fail!");
-        return;
-    }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         ReleaseProxyChannelId(item->channelId);
         ListDelete(&(item->node));
@@ -2022,10 +1907,8 @@ void TransProxyManagerDeinit(void)
 static void TransProxyDestroyChannelList(const ListNode *destroyList)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
-    if ((destroyList == NULL) || IsListEmpty(destroyList)) {
-        return;
-    }
-
+    TRANS_CHECK_AND_RETURN_LOGE(
+        (destroyList != NULL && !IsListEmpty(destroyList)), TRANS_INIT, "destroyList is null");
     ProxyChannelInfo *destroyNode = NULL;
     ProxyChannelInfo *nextDestroyNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, nextDestroyNode, destroyList, ProxyChannelInfo, node) {
@@ -2044,10 +1927,8 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
 
 void TransProxyDeathCallback(const char *pkgName, int32_t pid)
 {
-    if ((pkgName == NULL) || (g_proxyChannelList == NULL)) {
-        TRANS_LOGE(TRANS_CTRL, "pkgName or proxy channel list is null.");
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(
+        (pkgName != NULL && g_proxyChannelList != NULL), TRANS_CTRL, "pkgName or proxy channel list is null.");
     TRANS_LOGW(TRANS_CTRL, "TransProxyDeathCallback: pkgName=%{public}s, pid=%{public}d", pkgName, pid);
     ListNode destroyList;
     ListInit(&destroyList);
@@ -2073,21 +1954,16 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
 
 int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo *appInfo)
 {
-    if (appInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL,
+        "invalid param");
+
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == chanId) {
@@ -2107,18 +1983,16 @@ int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo *appInfo)
 
 int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
 {
-    if (connId == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(connId != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL,
+        "invalid param");
+
     ProxyChannelInfo *item = NULL;
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
+
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
             if (item->status == PROXY_CHANNEL_STATUS_COMPLETED ||
@@ -2139,10 +2013,8 @@ int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
 
 int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt)
 {
-    if (connOpt == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(connOpt != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL,
+        "invalid param");
 
     int32_t connId = -1;
     int32_t ret = TransProxyGetConnIdByChanId(channelId, &connId);
@@ -2164,15 +2036,10 @@ int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    if (g_proxyChannelList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "trans proxy get channel param nullptr.");
-        return SOFTBUS_NO_INIT;
-    }
-
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail.");
-        return SOFTBUS_LOCK_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
