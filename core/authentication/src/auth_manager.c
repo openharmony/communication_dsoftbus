@@ -882,6 +882,16 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     }
 }
 
+static void NotifyAuthResult(AuthHandle authHandle, const AuthSessionInfo *info)
+{
+    if (info->isConnectServer) {
+        AuthNotifyDeviceVerifyPassed(authHandle, &info->nodeInfo);
+    } else {
+        ReportAuthRequestPassed(info->requestId, authHandle, &info->nodeInfo);
+        UpdateAuthDevicePriority(info->connId);
+    }
+}
+
 void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "info is null");
@@ -920,17 +930,17 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
             AUTH_LOGE(AUTH_FSM, "copy p2pMac fail, authSeq=%{public}" PRId64, authSeq);
         }
     }
+    AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     ReleaseAuthLock();
     if (!LnnSetDlPtk(info->nodeInfo.networkId, info->nodeInfo.remotePtk)) {
         AUTH_LOGE(AUTH_FSM, "set remote ptk error, index=%{public}d", TO_INT32(index));
     }
-    AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
-    if (info->isConnectServer) {
-        AuthNotifyDeviceVerifyPassed(authHandle, &info->nodeInfo);
-    } else {
-        ReportAuthRequestPassed(info->requestId, authHandle, &info->nodeInfo);
-        UpdateAuthDevicePriority(info->connId);
+    bool isExchangeUdid = true;
+    if (GetIsExchangeUdidByNetworkId(info->nodeInfo.networkId, &isExchangeUdid) == SOFTBUS_OK && isExchangeUdid) {
+        AUTH_LOGI(AUTH_FSM, "clear isExchangeUdid");
+        LnnClearAuthExchangeUdid(info->nodeInfo.networkId);
     }
+    NotifyAuthResult(authHandle, info);
 }
 
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason)
@@ -1136,7 +1146,7 @@ static void HandleDeviceIdData(
             }
             return;
         }
-        if (fsm != NULL && fsm->info.idType == EXCHANHE_UDID && fsm->info.localState == AUTH_STATE_COMPATIBLE) {
+        if (fsm != NULL && fsm->info.idType == EXCHANGE_UDID && fsm->info.localState == AUTH_STATE_COMPATIBLE) {
             AUTH_LOGE(AUTH_FSM, "the same connId fsm not support, ignore auth seq=%{public}" PRId64, head->seq);
             ReleaseAuthLock();
             HandleRepeatDeviceIdDataDelay(connId, connInfo, fromServer, head, data);

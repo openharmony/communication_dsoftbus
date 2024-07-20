@@ -46,7 +46,7 @@ typedef enum {
 } AuthFsmStateIndex;
 
 typedef enum {
-    EXCHANHE_UDID = 0,
+    EXCHANGE_UDID = 0,
     EXCHANGE_NETWORKID,
     EXCHANGE_FAIL,
     EXCHANGE_TYPE_MAX

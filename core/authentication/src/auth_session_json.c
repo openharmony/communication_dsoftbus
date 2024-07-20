@@ -930,20 +930,25 @@ static void SetCompressFlag(const char *compressCapa, bool *sessionSupportFlag)
 static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType, char *anonyUdid)
 {
     char peerUdid[UDID_BUF_LEN] = {0};
-
+    bool isExchangeUdid = true;
     if (idType == EXCHANGE_NETWORKID) {
         if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", anonyUdid);
             info->idType = EXCHANGE_FAIL;
             (void)memset_s(info->udid, sizeof(info->udid), 0, sizeof(info->udid));
         } else {
+            if (GetIsExchangeUdidByNetworkId(info->udid, &isExchangeUdid) == SOFTBUS_OK && isExchangeUdid) {
+                AUTH_LOGE(AUTH_FSM, "need exchange udid, peer udid=%{public}s", anonyUdid);
+                info->idType = EXCHANGE_UDID;
+            } else {
+                AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%{public}s", anonyUdid);
+                info->idType = EXCHANGE_NETWORKID;
+            }
             if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
                 info->idType = EXCHANGE_FAIL;
                 return SOFTBUS_MEM_ERR;
             }
-            AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%{public}s", anonyUdid);
-            info->idType = EXCHANGE_NETWORKID;
         }
     }
     AUTH_LOGI(AUTH_FSM, "idType verify and get info succ.");
@@ -960,15 +965,15 @@ static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
     int32_t idType = -1;
     if (!JSON_GetInt32FromOject(obj, EXCHANGE_ID_TYPE, &idType)) {
         AUTH_LOGI(AUTH_FSM, "parse idType failed, ignore");
-        info->idType = EXCHANHE_UDID;
+        info->idType = EXCHANGE_UDID;
         return SOFTBUS_OK;
     }
     char *anonyUdid = NULL;
     Anonymize(info->udid, &anonyUdid);
     AUTH_LOGI(AUTH_FSM,
         "oldIdType=%{public}d, exchangeIdType=%{public}d, deviceId=%{public}s", info->idType, idType, anonyUdid);
-    if (idType == EXCHANHE_UDID) {
-        info->idType = EXCHANHE_UDID;
+    if (idType == EXCHANGE_UDID) {
+        info->idType = EXCHANGE_UDID;
         AnonymizeFree(anonyUdid);
         return SOFTBUS_OK;
     }

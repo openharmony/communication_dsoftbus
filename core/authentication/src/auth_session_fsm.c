@@ -256,7 +256,7 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.connId = connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V2;
-    authFsm->info.idType = EXCHANHE_UDID;
+    authFsm->info.idType = EXCHANGE_UDID;
     if (FillSessionInfoModule(requestId, &authFsm->info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "fill module fail");
         return NULL;
@@ -784,7 +784,7 @@ static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
     AuthSessionInfo *info = &authFsm->info;
     if (info->idType == EXCHANGE_FAIL) {
         AUTH_LOGE(AUTH_FSM, "fsm switch to reauth due to not find networkId");
-        info->idType = EXCHANHE_UDID;
+        info->idType = EXCHANGE_UDID;
         LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
         return SOFTBUS_ERR;
     }
