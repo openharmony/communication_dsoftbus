@@ -22,6 +22,8 @@ extern "C" {
 #endif
 
 typedef int32_t (*RestartEventCallback)(void);
+void RestartAuthParaCallbackUnregister(void);
+int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback);
 void ClientDeathProcTask(void);
 
 #ifdef __cplusplus

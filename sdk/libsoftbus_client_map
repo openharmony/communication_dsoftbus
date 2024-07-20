@@ -106,6 +106,7 @@
         "BusCenterClientInit";
         "GetSoftBusClientNameList";
         "StartVtpStreamChannelServer";
+        "ClientGetSessionStateByChannelId";
         "ClientGetSessionIdByChannelId";
         "ClientTransTdcSetCallBack";
         "TransOnFileChannelOpened";
@@ -525,6 +526,7 @@
         "ClientTransTdcOnChannelBind";
         "TransOnUdpChannelBind";
         "TransOnChannelBind";
+        "OpenAuthSessionWithPara";
         "ResourceConflictCheck";
         "ClientTransTdcIfChannelForSocket";
         extern "C++" {

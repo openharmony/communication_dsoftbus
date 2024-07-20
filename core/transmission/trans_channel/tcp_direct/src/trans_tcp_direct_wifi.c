@@ -30,8 +30,6 @@
 #include "wifi_direct_manager.h"
 
 #define ID_OFFSET (1)
-#define HML_IP_PREFIX "172.30."
-#define NETWORK_ID_LEN 7
 
 static void FreeFastTransData(AppInfo *appInfo)
 {
@@ -82,7 +80,7 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
             return module;
         }
 
-        if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+        if (IsHmlIpAddr(myIp)) {
             module = GetModuleByHmlIp(myIp);
         } else {
             module = DIRECT_CHANNEL_SERVER_P2P;

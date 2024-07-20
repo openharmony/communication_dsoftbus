@@ -27,6 +27,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+    ListNode node;
+    int32_t errCode;
+    uint32_t laneReqId;
+    int32_t channelId;
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    LinkPara linkPara;
+    LaneConnInfo connInfo;
+    bool bSucc;
+    bool isFinished;
+} TransAuthWithParaNode;
+
 int32_t TransReqLanePendingInit(void);
 void TransReqLanePendingDeinit(void);
 int32_t TransAsyncReqLanePendingInit(void);
@@ -44,6 +56,15 @@ bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
 int32_t TransCancelLaneItemCondByLaneHandle(uint32_t laneHandle, bool bSucc, bool isAsync, int32_t errCode);
 int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync);
 int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync);
+int32_t TransAuthWithParaReqLanePendingInit(void);
+void TransAuthWithParaReqLanePendingDeinit(void);
+int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessionName,
+    const LinkPara *linkPara, int32_t channelId);
+int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId);
+int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWithParaNode *paraNode);
+int32_t TransUpdateAuthWithParaLaneConnInfo(uint32_t laneHandle, bool bSucc, const LaneConnInfo *connInfo,
+    int32_t errCode);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

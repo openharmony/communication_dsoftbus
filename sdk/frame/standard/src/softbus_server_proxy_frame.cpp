@@ -88,10 +88,10 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
     }
     int32_t ret = ReCreateSessionServerToServer(sessionServerInfoList);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!\n");
+        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!");
         return ret;
     }
-    COMM_LOGD(COMM_SDK, "softbus server register service success!\n");
+    COMM_LOGD(COMM_SDK, "softbus server register service success!");
     return SOFTBUS_OK;
 }
 
@@ -132,22 +132,38 @@ static int32_t ServerProxyInit(void)
 
         if (g_serverProxy == g_oldServerProxy) {
             g_serverProxy = nullptr;
-            COMM_LOGE(COMM_SDK, "g_serverProxy not update\n");
+            COMM_LOGE(COMM_SDK, "g_serverProxy not update");
             return SOFTBUS_IPC_ERR;
         }
 
         g_clientDeath =
             OHOS::sptr<OHOS::IRemoteObject::DeathRecipient>(new (std::nothrow) OHOS::SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
-            COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr\n");
+            COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr");
             return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
         }
         if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
-            COMM_LOGE(COMM_SDK, "AddDeathRecipient failed\n");
+            COMM_LOGE(COMM_SDK, "AddDeathRecipient failed");
             return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
         }
     }
     return SOFTBUS_OK;
+}
+
+static RestartEventCallback g_restartAuthParaCallback = nullptr;
+
+static void RestartAuthParaNotify(void)
+{
+    if (g_restartAuthParaCallback == nullptr) {
+        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used!");
+        return;
+    }
+    if (g_restartAuthParaCallback() != SOFTBUS_OK) {
+        RestartAuthParaCallbackUnregister();
+        COMM_LOGE(COMM_SDK, "Restart AuthPara notify failed!");
+        return;
+    }
+    COMM_LOGI(COMM_SDK, "Restart AuthPara notify success!");
 }
 
 void ClientDeathProcTask(void)
@@ -187,12 +203,30 @@ void ClientDeathProcTask(void)
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
     RestartRegDataLevelChange();
+    RestartAuthParaNotify();
 }
+
+int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
+{
+    if (callback == nullptr) {
+        COMM_LOGE(COMM_SDK, "Restart OpenAuthSessionWithPara callback register param is invalid!");
+        return SOFTBUS_ERR;
+    }
+    g_restartAuthParaCallback = callback;
+    COMM_LOGI(COMM_SDK, "Restart event callback register success!");
+    return SOFTBUS_OK;
+}
+
+void RestartAuthParaCallbackUnregister(void)
+{
+    g_restartAuthParaCallback = nullptr;
+}
+
 
 int32_t ClientStubInit(void)
 {
     if (ServerProxyInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
+        COMM_LOGE(COMM_SDK, "ServerProxyInit failed");
         return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
@@ -214,6 +248,6 @@ int ClientRegisterService(const char *pkgName)
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
     }
 
-    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
+    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s", pkgName);
     return SOFTBUS_OK;
 }
