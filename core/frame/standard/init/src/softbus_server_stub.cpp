@@ -653,6 +653,7 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.groupId = data.ReadCString();
     param.isAsync = data.ReadBool();
     param.sessionId = data.ReadInt32();
+    param.actionId = data.ReadUint32();
 }
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
@@ -726,10 +727,10 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
         goto EXIT;
     }
     retReply = OpenAuthSession(sessionName, addrInfo);
-    COMM_LOGI(COMM_SVC, "OpenAuthSession retReply=%{public}d", retReply);
+    COMM_LOGI(COMM_SVC, "OpenAuthSession channelId=%{public}d", retReply);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed!");
+        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed! retReply=%{public}d", retReply);
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;

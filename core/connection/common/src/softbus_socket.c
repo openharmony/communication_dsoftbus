@@ -25,6 +25,8 @@
 #include "softbus_errcode.h"
 #include "softbus_tcp_socket.h"
 
+#define HML_IPV4_ADDR_PREFIX "172.30."
+
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE   0x200000 // 2M
 #define RECV_BUF_SIZE   0x100000 // 1M
@@ -427,7 +429,7 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(addrIn6 != NULL && ip != NULL, SOFTBUS_INVALID_PARAM,
         CONN_COMMON, "invalid param!");
-    (void)memset_s(addrIn6, sizeof(addrIn6), 0, sizeof(addrIn6));
+    (void)memset_s(addrIn6, sizeof(*addrIn6), 0, sizeof(*addrIn6));
     addrIn6->sin6Family = SOFTBUS_AF_INET6;
     char *addr = NULL;
     char *ifName = NULL;
@@ -458,11 +460,21 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
     return SOFTBUS_OK;
 }
 
+bool IsHmlIpAddr(const char *ip)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(ip != NULL, false, CONN_COMMON, "invalid param!");
+    if (GetDomainByAddr(ip) == SOFTBUS_AF_INET6) {
+        return true;
+    }
+
+    return strncmp(ip, HML_IPV4_ADDR_PREFIX, strlen(HML_IPV4_ADDR_PREFIX)) == 0;
+}
+
 int32_t Ipv4AddrToAddrIn(SoftBusSockAddrIn *addrIn, const char *ip, uint16_t port)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(addrIn != NULL && ip != NULL, SOFTBUS_INVALID_PARAM,
         CONN_COMMON, "invalid param!");
-    (void)memset_s(addrIn, sizeof(addrIn), 0, sizeof(addrIn));
+    (void)memset_s(addrIn, sizeof(*addrIn), 0, sizeof(*addrIn));
     addrIn->sinFamily = SOFTBUS_AF_INET;
     int32_t rc = SoftBusInetPtoN(SOFTBUS_AF_INET, ip, &addrIn->sinAddr);
     if (rc != SOFTBUS_OK) {

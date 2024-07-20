@@ -167,6 +167,9 @@ int32_t TransChannelInit(void)
 
     ret = TransReqAuthPendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans auth request pending init failed.");
+    ret = TransAuthWithParaReqLanePendingInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_INIT, "trans auth with para req lane pending init failed.");
 
     ret = TransFreeLanePendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans free lane pending init failed.");
@@ -190,6 +193,7 @@ void TransChannelDeinit(void)
     TransNetworkStatisticsDeinit();
     TransReqAuthPendingDeinit();
     TransFreeLanePendingDeinit();
+    TransAuthWithParaReqLanePendingDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
@@ -211,6 +215,15 @@ static bool IsLaneModuleError(int32_t errcode)
     return false;
 }
 
+static void TransFreeLaneInner(uint32_t laneHandle, bool isQosLane)
+{
+    if (isQosLane) {
+        GetLaneManager()->lnnFreeLane(laneHandle);
+    } else {
+        LnnFreeLane(laneHandle);
+    }
+}
+
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     if (param == NULL || transInfo == NULL) {
@@ -219,8 +232,9 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     char *tmpName = NULL;
     Anonymize(param->sessionName, &tmpName);
-    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel, sessionName=%{public}s, sessionId=%{public}d",
-        tmpName, param->sessionId);
+    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel, sessionName=%{public}s, socket=%{public}d, actionId=%{public}d, "
+                           "isQosLane=%{public}d, isAsync=%{public}d",
+        tmpName, param->sessionId, param->actionId, param->isQosLane, param->isAsync);
     AnonymizeFree(tmpName);
     int32_t ret = INVALID_CHANNEL_ID;
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
@@ -272,7 +286,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
-        "sessionName=%{public}s, sessionId=%{public}d, laneHandle=%{public}u, linkType=%{public}u.",
+        "sessionName=%{public}s, socket=%{public}d, laneHandle=%{public}u, linkType=%{public}u.",
         tmpName, param->sessionId, laneHandle, connInfo.type);
     AnonymizeFree(tmpName);
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
@@ -312,8 +326,9 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     TransFreeAppInfo(appInfo);
     TRANS_LOGI(TRANS_CTRL,
-        "server TransOpenChannel ok: channelId=%{public}d, channelType=%{public}d, laneHandle=%{public}u",
-        transInfo->channelId, transInfo->channelType, laneHandle);
+        "server TransOpenChannel ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d, "
+        "laneHandle=%{public}u",
+        param->sessionId, transInfo->channelId, transInfo->channelType, laneHandle);
     return SOFTBUS_OK;
 EXIT_ERR:
     extra.linkType = IsLaneModuleError(ret) ? extra.linkType : CONNECT_HML;
@@ -327,7 +342,7 @@ EXIT_ERR:
         TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
     }
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
-    TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
+    TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, socket=%{public}d, ret=%{public}d", param->sessionId, ret);
     return ret;
 EXIT_CANCEL:
     TransBuildTransOpenChannelCancelEvent(&extra, transInfo, appInfo->timeStart, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
@@ -335,7 +350,7 @@ EXIT_CANCEL:
     TransFreeAppInfo(appInfo);
     TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
-    TRANS_LOGE(TRANS_SVC, "server open channel cancel");
+    TRANS_LOGE(TRANS_SVC, "server open channel cancel, socket=%{public}d", param->sessionId);
     return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
 }
 
@@ -383,9 +398,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     TRANS_LOGD(TRANS_CTRL, "ok");
     return appInfo;
 EXIT_ERR:
-    if (appInfo != NULL) {
-        SoftBusFree(appInfo);
-    }
+    SoftBusFree(appInfo);
     return NULL;
 }
 
