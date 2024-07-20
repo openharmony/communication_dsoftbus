@@ -408,13 +408,6 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     ret = TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
 
-    int32_t uid = 0;
-    int32_t pid = 0;
-    if (TransTdcGetUidAndPid(conn.appInfo.myData.sessionName, &uid, &pid) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get uid and pid fail.");
-        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
-        return SOFTBUS_TRANS_GET_PID_FAILED;
-    }
     if (conn.appInfo.fastTransDataSize > 0) {
         info.isFastData = true;
     }

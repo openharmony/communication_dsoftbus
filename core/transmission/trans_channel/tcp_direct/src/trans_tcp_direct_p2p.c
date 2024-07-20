@@ -390,10 +390,19 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     channelId = conn->channelId;
     conn->authHandle = authHandle;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
+    char myDataAddr[IP_LEN] = {0};
+    char peerDataAddr[IP_LEN] = {0};
+    if (strcpy_s(myDataAddr, sizeof(myDataAddr), conn->appInfo.myData.addr) != EOK ||
+        strcpy_s(peerDataAddr, sizeof(peerDataAddr), conn->appInfo.peerData.addr) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "strcpy failed.");
+        ReleaseSessionConnLock();
+        goto EXIT_ERR;
+    }
+    int myDataPort = conn->appInfo.myData.port;
+    int64_t reqNum = conn->req;
     ReleaseSessionConnLock();
 
-    if (VerifyP2p(authHandle, conn->appInfo.myData.addr, conn->appInfo.peerData.addr,
-        conn->appInfo.myData.port, conn->req) != SOFTBUS_OK) {
+    if (VerifyP2p(authHandle, myDataAddr, peerDataAddr, myDataPort, reqNum) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "verify p2p fail");
         goto EXIT_ERR;
     }

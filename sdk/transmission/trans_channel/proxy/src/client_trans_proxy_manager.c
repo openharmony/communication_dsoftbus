@@ -557,21 +557,24 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
     }
     ClientUnPackPacketHead(&head);
     if ((uint32_t)head.magicNumber != MAGIC_NUMBER) {
-        TRANS_LOGE(TRANS_SDK, "invalid magicNumber=%{public}x", head.magicNumber);
+        TRANS_LOGE(TRANS_SDK, "invalid magicNumber=%{public}x, channelId=%{public}d, len=%{public}d",
+            head.magicNumber, channelId, len);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     if (head.dataLen <= 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid dataLen=%{public}d", head.dataLen);
+        TRANS_LOGE(TRANS_SDK, "invalid dataLen=%{public}d, channelId=%{public}d, len=%{public}d",
+            head.dataLen, channelId, len);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
     TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%{public}d, inputLen=%{public}d", head.dataLen, len);
     if (head.dataLen + sizeof(PacketHead) != len) {
-        TRANS_LOGE(TRANS_SDK, "dataLen error");
+        TRANS_LOGE(TRANS_SDK, "dataLen error, channelId=%{public}d, len=%{public}d, dataLen=%{public}d",
+            channelId, len, head.dataLen);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
     int32_t ret = ClientTransProxyProcessSessionData(channelId, &head, data + sizeof(PacketHead));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "process data err");
+        TRANS_LOGE(TRANS_SDK, "process data err, channelId=%{public}d, len=%{public}d", channelId, len);
         return ret;
     }
     return SOFTBUS_OK;
