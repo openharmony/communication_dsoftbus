@@ -260,9 +260,6 @@ static void RemoveLinkFromManager(const std::string &remoteDeviceId, int linkId,
                 return;
             }
             refCnt = link.GetReference();
-            if (refCnt <= 1) {
-                link.SetState(InnerLink::LinkState::DISCONNECTING);
-            }
             link.RemoveId(linkId);
             remoteMac = link.GetRemoteBaseMac();
         });
@@ -1774,7 +1771,14 @@ int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount already 0, do not call entity disconnect");
         return SOFTBUS_OK;
     }
-
+    if (reuseCount <= 1) {
+        LinkManager::GetInstance().ProcessIfPresent(
+            InnerLink::LinkType::P2P, remoteDeviceId, [](InnerLink &link) {
+                if (link.GetReference() < 1) {
+                    link.SetState(InnerLink::LinkState::DISCONNECTING);
+                }
+        });
+    }
     P2pAdapter::DestroyGroupParam param { P2P_IF_NAME };
     auto result = P2pEntity::GetInstance().Disconnect(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
