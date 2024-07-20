@@ -23,10 +23,13 @@
 enum class TestContextKey {
     LOCAL_NETWORK_ID,
     LOCAL_UUID,
+    LOCAL_MAC,
+    LOCAL_IPV4,
 
     REMOTE_NETWORK_ID,
     REMOTE_UUID,
     REMOTE_MAC,
+    REMOTE_IPV4,
 
     CONNECT_REQUEST_ID,
     CONNECT_NEGO_CHANNEL_ID,
@@ -42,6 +45,9 @@ enum class TestContextKey {
     WIFI_REQUEST_GC_IP,
 
     CHANNEL_SEND_MESSAGE,
+
+    SWITCH_INJECT_REMOTE_INNER_LINK,
+    SWITCH_INJECT_LOCAL_INNER_LINK,
 };
 
 namespace OHOS::SoftBus {
