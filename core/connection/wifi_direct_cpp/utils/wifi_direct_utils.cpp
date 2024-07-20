@@ -520,7 +520,7 @@ void WifiDirectUtils::ParallelFlowExit()
 
 uint32_t WifiDirectUtils::CalculateStringLength(const char *str, uint32_t size)
 {
-    for (auto i = size - 1; i >= 0; i--) {
+    for (int i = size - 1; i >= 0; i--) {
         if (str[i] != '\0') {
             return i + 1;
         }
