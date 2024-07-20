@@ -14,6 +14,7 @@
  */
 
 #include "connection_ble_client_mock.h"
+#include "softbus_adapter_mem.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,6 +29,68 @@ ConnectionBleClientInterfaceMock::ConnectionBleClientInterfaceMock()
 ConnectionBleClientInterfaceMock::~ConnectionBleClientInterfaceMock()
 {
     g_connectionBleClientInterface = nullptr;
+}
+
+uint8_t *ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnConnModule(uint32_t connectionId,
+    uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
+{
+    ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->flag = 0;
+    head->module = MODULE_CONNECTION;
+    int64_t seq = 10;
+    head->seq = seq;
+    *outLen = sizeof((*head));
+    return  reinterpret_cast<uint8_t *>(head);
+}
+
+uint8_t *ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnConnModule1(uint32_t connectionId,
+    uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
+{
+    ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->magic = 1;
+    head->flag = 1;
+    head->module = MODULE_CONNECTION;
+    int64_t seq = 10;
+    head->seq = seq;
+    *outLen = sizeof((*head));
+    return  reinterpret_cast<uint8_t *>(head);
+}
+
+uint8_t *ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnOldNearby(uint32_t connectionId,
+    uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
+{
+    ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->flag = 0;
+    head->module = MODULE_OLD_NEARBY;
+    int64_t seq = 10;
+    head->seq = seq;
+    *outLen = sizeof((*head));
+    return  reinterpret_cast<uint8_t *>(head);
+}
+
+uint8_t *ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnDefult(uint32_t connectionId,
+    uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
+{
+    ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->flag = 0;
+    head->module = MODULE_AUTH_CHANNEL;
+    int64_t seq = 10;
+    head->seq = seq;
+    *outLen = sizeof((*head));
+    return  reinterpret_cast<uint8_t *>(head);
+}
+
+uint8_t *ConnectionBleClientInterfaceMock::ActionOfConnGattTransRecv(uint32_t connectionId,
+    uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
+{
+    ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->flag = 0;
+    head->module = MODULE_AUTH_CHANNEL;
+    int64_t seq = 10;
+    head->seq = seq;
+    uint32_t len = 4;
+    *outLen = len;
+    return  reinterpret_cast<uint8_t *>(head);
 }
 
 static ConnectionBleClientInterface *GetConnectionBleClientInterface()
@@ -92,6 +155,23 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
 int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusBleGattPriority priority)
 {
     return GetConnectionBleClientInterface()->SoftbusGattcSetPriority(clientId, addr, priority);
+}
+
+int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+{
+    return GetConnectionBleClientInterface()->LnnGetLocalStrInfo(key, info, len);
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetConnectionBleClientInterface()->LnnGetLocalNumInfo(key, info);
+}
+
+int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t len,
+    int32_t pid, int32_t flag, int32_t module, int64_t seq, PostBytesFinishAction postBytesFinishAction)
+{
+    return GetConnectionBleClientInterface()->ConnBlePostBytesInner(connectionId,
+        data, len, pid, flag, module, seq, postBytesFinishAction);
 }
 }
 }
