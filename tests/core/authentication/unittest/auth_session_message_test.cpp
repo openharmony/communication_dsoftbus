@@ -721,5 +721,69 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusFree(info);
 }
+
+/*
+ * @tc.name: IS_EMPTY_SHORT_HASH_STR_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Level1)
+{
+    char udidHash[SHA_256_HEX_HASH_LEN];
+    const char *udidHash1 = "123456";
+    const char *udidHash2 = "0000000000000000000000000000000000000000000000000000000000000000";
+    (void)memset_s(udidHash, sizeof(udidHash), 0, sizeof(udidHash));
+    EXPECT_TRUE(strcpy_s(udidHash, sizeof(udidHash), "") == EOK);
+    bool ret = IsEmptyShortHashStr(udidHash);
+    EXPECT_EQ(ret, true);
+
+    (void)memset_s(udidHash, sizeof(udidHash), 0, sizeof(udidHash));
+    EXPECT_TRUE(strcpy_s(udidHash, sizeof(udidHash), udidHash1) == EOK);
+    ret = IsEmptyShortHashStr(udidHash);
+    EXPECT_EQ(ret, false);
+
+    (void)memset_s(udidHash, sizeof(udidHash), 0, sizeof(udidHash));
+    EXPECT_TRUE(strcpy_s(udidHash, sizeof(udidHash), udidHash2) == EOK);
+    ret = IsEmptyShortHashStr(udidHash);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: GET_LOCAL_UDISHASH_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, GET_LOCAL_UDISHASH_TEST_001, TestSize.Level1)
+{
+    int32_t ret = GetLocalUdidHash(nullptr, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_AUTH_STATE_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, UPDATE_LOCAL_AUTH_STATE_TEST_001, TestSize.Level1)
+{
+    uint64_t authSeq = 512;
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    int32_t ret = UpdateLocalAuthState(authSeq, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.isServer = false;
+    info.peerState = AUTH_STATE_COMPATIBLE;
+    ret = UpdateLocalAuthState(authSeq, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.peerState = AUTH_STATE_ACK;
+    ret = UpdateLocalAuthState(authSeq, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS
 
