@@ -1784,11 +1784,14 @@ if (!defined(ohos_lite) && enhanced_test) {
   ohos_unittest("LNNDbMockTest") {
     module_out_path = module_output_path
     sources = [
+      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
+      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp",
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl.c",
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_fsm.c",
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_strategy.c",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c",
       "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_virtual.c",
       "net_ledger/lnn_decision_db_deps_mock.cpp",
       "net_ledger/lnn_decision_db_test.cpp",
     ]
@@ -1830,13 +1833,14 @@ if (!defined(ohos_lite) && enhanced_test) {
       "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
       "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/interface",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
+      "$dsoftbus_root_path/core/connection/ble/include",
     ]
     include_dirs += bus_center_decision_center_inc
 
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "$dsoftbus_root_path/core/frame:softbus_server",
       "//third_party/googletest:gmock",
       "//third_party/googletest:gtest_main",
     ]
