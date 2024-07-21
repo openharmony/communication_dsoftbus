@@ -48,22 +48,19 @@ using ::testing::Invoke;
 namespace OHOS::SoftBus {
 class P2pV1ProcessorTest : public testing::Test {
 public:
-    static OHOS::NetManagerStandard::MockNetConnClient netClientMocker_;
-    static void SetUpTestCase() {
-        EXPECT_CALL(netClientMocker_, RemoveNetworkRoute).WillRepeatedly(Return(0));
-        EXPECT_CALL(netClientMocker_, DelInterfaceAddress).WillRepeatedly(Return(0));
-        EXPECT_CALL(netClientMocker_, DelStaticArp).WillRepeatedly(Return(0));
-        EXPECT_CALL(netClientMocker_, RemoveNetworkRoute).WillRepeatedly(Return(0));
-        EXPECT_CALL(netClientMocker_, DelInterfaceAddress).WillRepeatedly(Return(0));
-        EXPECT_CALL(netClientMocker_, DelStaticArp).WillRepeatedly(Return(0));
-        // do not care about result, so define mocker global and allow leak check
-        Mock::AllowLeak(&netClientMocker_);
-    }
-
+    static void SetUpTestCase() { }
     static void TearDownTestCase() { }
     void SetUp() override
     {
         PrepareContext();
+
+        // do not care about result
+        EXPECT_CALL(netClientMocker_, RemoveNetworkRoute).WillRepeatedly(Return(0));
+        EXPECT_CALL(netClientMocker_, DelInterfaceAddress).WillRepeatedly(Return(0));
+        EXPECT_CALL(netClientMocker_, DelStaticArp).WillRepeatedly(Return(0));
+        EXPECT_CALL(netClientMocker_, RemoveNetworkRoute).WillRepeatedly(Return(0));
+        EXPECT_CALL(netClientMocker_, DelInterfaceAddress).WillRepeatedly(Return(0));
+        EXPECT_CALL(netClientMocker_, DelStaticArp).WillRepeatedly(Return(0));
     }
     void TearDown() override
     {
@@ -79,9 +76,8 @@ protected:
     void InjectChannel(WifiDirectInterfaceMock &mock);
 
     WifiDirectTestContext<TestContextKey> context_;
+    OHOS::NetManagerStandard::MockNetConnClient netClientMocker_;
 };
-
-OHOS::NetManagerStandard::MockNetConnClient P2pV1ProcessorTest::netClientMocker_;
 
 void P2pV1ProcessorTest::PrepareContext()
 {

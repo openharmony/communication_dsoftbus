@@ -17,38 +17,61 @@
 int32_t OHOS::NetManagerStandard::NetConnClient::AddStaticArp(
     const std::string &ipAddr, const std::string &macAddr, const std::string &ifName)
 {
-    return OHOS::NetManagerStandard::MockNetConnClient::GetMock()->AddStaticArp(ipAddr, macAddr, ifName);
+    auto mock = OHOS::NetManagerStandard::MockNetConnClient::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->AddStaticArp(ipAddr, macAddr, ifName);
 }
 
 int32_t OHOS::NetManagerStandard::NetConnClient::DelStaticArp(
     const std::string &ipAddr, const std::string &macAddr, const std::string &ifName)
 {
-    return OHOS::NetManagerStandard::MockNetConnClient::GetMock()->DelStaticArp(ipAddr, macAddr, ifName);
+    auto mock = OHOS::NetManagerStandard::MockNetConnClient::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->DelStaticArp(ipAddr, macAddr, ifName);
 }
 
 int32_t OHOS::NetManagerStandard::NetConnClient::AddNetworkRoute(
     int32_t netId, const std::string &ifName, const std::string &destination, const std::string &nextHop)
 {
-    return OHOS::NetManagerStandard::MockNetConnClient::GetMock()->AddNetworkRoute(netId, ifName, destination, nextHop);
+    auto mock = OHOS::NetManagerStandard::MockNetConnClient::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->AddNetworkRoute(netId, ifName, destination, nextHop);
 }
 
 int32_t OHOS::NetManagerStandard::NetConnClient::RemoveNetworkRoute(
     int32_t netId, const std::string &ifName, const std::string &destination, const std::string &nextHop)
 {
-    return OHOS::NetManagerStandard::MockNetConnClient::GetMock()->RemoveNetworkRoute(
-        netId, ifName, destination, nextHop);
+    auto mock = OHOS::NetManagerStandard::MockNetConnClient::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->RemoveNetworkRoute(netId, ifName, destination, nextHop);
 }
 
 int32_t OHOS::NetManagerStandard::NetConnClient::AddInterfaceAddress(
     const std::string &ifName, const std::string &ipAddr, int32_t prefixLength)
 {
-    return OHOS::NetManagerStandard::MockNetConnClient::GetMock()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
+    auto mock = OHOS::NetManagerStandard::MockNetConnClient::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->AddInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
 int32_t OHOS::NetManagerStandard::NetConnClient::DelInterfaceAddress(
     const std::string &ifName, const std::string &ipAddr, int32_t prefixLength)
 {
-    return OHOS::NetManagerStandard::MockNetConnClient::GetMock()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
+    auto mock = OHOS::NetManagerStandard::MockNetConnClient::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
 namespace OHOS::NetManagerStandard {
