@@ -65,6 +65,11 @@ public:
         const AuthConnCallback *callback, bool isMeta) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
+    virtual int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len) = 0;
+    virtual int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, uint32_t len) = 0;
+    virtual int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len) = 0;
+
     // Defines dependencies short-reach interface here
     virtual WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info) = 0;
     virtual WifiErrorCode Hid2dGetRecommendChannel(const RecommendChannelRequest *request,
@@ -134,6 +139,10 @@ public:
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo*, uint32_t, const AuthConnCallback*, bool));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
+    MOCK_METHOD3(LnnGetLocalPtkByUuid, int32_t (const char *uuid, char *localPtk, uint32_t len));
+    MOCK_METHOD3(LnnGetLocalDefaultPtkByUuid, int32_t (const char *uuid, char *localPtk, uint32_t len));
+    MOCK_METHOD4(LnnGetRemoteByteInfo, int32_t (const char *networkId, InfoKey key, uint8_t *info, uint32_t len));
+    MOCK_METHOD3(LnnGetRemoteDefaultPtkByUuid, int32_t (const char *uuid, char *remotePtk, uint32_t len));
 
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
     MOCK_METHOD2(LnnSetLocalNumInfo, int32_t (InfoKey, int32_t));
