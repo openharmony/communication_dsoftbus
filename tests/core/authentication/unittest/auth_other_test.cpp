@@ -45,6 +45,7 @@ constexpr uint32_t TEST_DATA_LEN = 30;
 constexpr uint32_t BLE_CONNID = 196609;
 constexpr uint32_t BR_CONNID = 65570;
 constexpr uint32_t WIFI_CONNID = 131073;
+constexpr uint32_t MSG_LEN = 50;
 
 class AuthOtherTest : public testing::Test {
 public:
@@ -883,7 +884,7 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     authFsm->authSeq = 512;
     const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
     ASSERT_TRUE(data != nullptr);
-    MessagePara *para = NewMessagePara(data, 1024);
+    MessagePara *para = NewMessagePara(data, MSG_LEN);
     HandleMsgRecvDeviceInfo(authFsm, para);
     authSessionInfo.isServer= true;
     HandleMsgRecvDeviceInfo(authFsm, para);
@@ -905,7 +906,7 @@ HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
     uint32_t len = 0;
     int32_t ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    len = 1024;
+    len = MSG_LEN;
     ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
