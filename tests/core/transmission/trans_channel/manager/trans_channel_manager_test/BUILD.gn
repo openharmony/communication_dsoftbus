@@ -71,6 +71,7 @@ ohos_unittest("TransChannelManagerTest") {
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/core/discovery/event_manager/include",
     "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
   ]
 
   deps = [
