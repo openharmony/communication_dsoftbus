@@ -583,7 +583,7 @@ EXIT_ERR:
     if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL && ret != SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT) {
         CallbackOpenChannelFailed(param, appInfo, ret);
     }
-    TransFreeLane(laneHandle, param->isQosLane);
+    TransFreeLane(laneHandle, param->isQosLane, true);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
     return;
@@ -618,7 +618,7 @@ static int32_t CheckSocketChannelState(uint32_t laneHandle, const SessionParam *
     TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
     if (state == CORE_SESSION_STATE_CANCELLING) {
         TRANS_LOGI(TRANS_SVC, "cancel state laneHandle=%{public}u", laneHandle);
-        TransFreeLane(laneHandle, param->isQosLane);
+        TransFreeLane(laneHandle, param->isQosLane, false);
         BuildTransEventExtra(extra, param, laneHandle, transType, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_SELECT_LANE, *extra);
         (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
@@ -642,7 +642,7 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
         TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
         (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
         (void)TransDelLaneReqFromPendingList(laneHandle, true);
-        TransFreeLane(laneHandle, param.isQosLane);
+        TransFreeLane(laneHandle, param.isQosLane, true);
         return;
     }
     LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(&param);
@@ -658,14 +658,14 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
         TRANS_LOGE(TRANS_SVC, "malloc appInfo failed");
         (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
         (void)TransDelLaneReqFromPendingList(laneHandle, true);
-        TransFreeLane(laneHandle, param.isQosLane);
+        TransFreeLane(laneHandle, param.isQosLane, true);
         return;
     }
     ret = CreateAppInfoByParam(laneHandle, &param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "CreateAppInfoByParam failed");
         TransFreeAppInfo(appInfo);
-        TransFreeLane(laneHandle, param.isQosLane);
+        TransFreeLane(laneHandle, param.isQosLane, true);
         return;
     }
     appInfo->callingTokenId = callingTokenId;
@@ -1126,7 +1126,7 @@ static int32_t TransAddLaneAllocToPendingAndWaiting(uint32_t laneHandle, const L
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "add laneHandle to pending failed. laneHandle=%{public}u, ret=%{public}d",
             laneHandle, ret);
-        TransFreeLane(laneHandle, true);
+        TransFreeLane(laneHandle, true, true);
         return ret;
     }
     LaneAllocListener allocListener;
@@ -1163,7 +1163,7 @@ static void CancelLaneOnWaitLaneState(uint32_t laneHandle, bool isQosLane)
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(
                 TRANS_SVC, "Cancel lane failed, free lane. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
-            TransFreeLane(laneHandle, isQosLane);
+            TransFreeLane(laneHandle, isQosLane, false);
         }
     }
 }
@@ -1333,7 +1333,7 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(
             TRANS_SVC, "add laneHandle=%{public}u to async pending list failed, ret=%{public}d", *laneHandle, ret);
-        TransFreeLane(*laneHandle, true);
+        TransFreeLane(*laneHandle, true, true);
         return ret;
     }
     LaneAllocListener allocListener;
