@@ -379,7 +379,7 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     SessionConn *conn = NULL;
     char myDataAddr[IP_LEN] = {0};
     char peerDataAddr[IP_LEN] = {0};
-    int myDataPort = 0;
+    int32_t myDataPort = 0;
     int64_t reqNum = 0;
     if (GetSessionConnLock() != SOFTBUS_OK) {
         goto EXIT_ERR;
