@@ -53,12 +53,12 @@ int ConstructVtpStreamOpenParam(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, 
 {
     int port = 0;
     if (sscanf_s(argv[FIRST_ARGV], "%d", &port) <= 0) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     int port2 = 0;
     if (sscanf_s(argv[SECOND_ARGV], "%d", &port2) <= 0) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     p1->pkgName = PKGNAME;
@@ -83,18 +83,18 @@ int ConstructVtpStreamOpenParam(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, 
 int SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStreamListener *callback)
 {
     if (p1 == NULL || p2 == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     int ret = StartVtpStreamChannelClient(CHANNELID, p1, callback);
-    if (ret == SOFTBUS_ERR) {
-        return SOFTBUS_ERR;
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     printf("[client]:StartChannelClient ret:%d\n", ret);
 
     ret = StartVtpStreamChannelClient(CHANNELID2, p2, callback);
-    if (ret == SOFTBUS_ERR) {
-        return SOFTBUS_ERR;
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     printf("[client]:StartChannelClient ret:%d\n", ret);
 
@@ -130,18 +130,18 @@ int main(int argc, char *argv[])
 {
     if (argc != TWO_CLIENT_ARGC) {
         printf("[client]:Please input server sorcket to connect\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     VtpStreamOpenParam p1;
     VtpStreamOpenParam p2;
     int ret = ConstructVtpStreamOpenParam(&p1, &p2, argv);
     if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     ret = SendVtpStreamTest(&p1, &p2, &g_callback);
     if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     return SOFTBUS_OK;

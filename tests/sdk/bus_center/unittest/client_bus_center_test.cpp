@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ void ClientBusMangerTest::TearDown()
 }
 
 /*
-* @tc.name: IS_SAME_CONNECTION_ADDR
+* @tc.name: IS_SAME_CONNECTION_ADDR_Test_001
 * @tc.desc: PreLink lane test
 * @tc.type: FUNC
 * @tc.require: AR000FN5VC
@@ -65,12 +65,66 @@ HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
         .info.session.sessionId = 2,
     };
     int32_t ret = IsSameConnectionAddr(&addr1, &addr2);
-    EXPECT_TRUE(ret == false);
-    const ConnectionAddr addr3 = {
+    EXPECT_EQ(ret, false);
+}
+
+/*
+* @tc.name: IS_SAME_CONNECTION_ADDR_Test_002
+* @tc.desc: PreLink lane test
+* @tc.type: FUNC
+* @tc.require: AR000FN5VC
+*/
+HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_002, TestSize.Level1)
+{
+    const ConnectionAddr addr1 = {
         .type = CONNECTION_ADDR_SESSION,
         .info.session.sessionId = 1,
     };
-    ret = IsSameConnectionAddr(&addr3, &addr2);
-    EXPECT_TRUE(ret == false);
+    const ConnectionAddr addr2 = {
+        .type = CONNECTION_ADDR_SESSION,
+        .info.session.sessionId = 2,
+    };
+    int32_t ret = IsSameConnectionAddr(&addr1, &addr2);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+* @tc.name: IS_SAME_CONNECTION_ADDR_Test_003
+* @tc.desc: PreLink lane test
+* @tc.type: FUNC
+* @tc.require: AR000FN5VC
+*/
+HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_003, TestSize.Level1)
+{
+    const ConnectionAddr addr1 = {
+        .type = CONNECTION_ADDR_BR,
+        .info.br.brMac = 1,
+    };
+    const ConnectionAddr addr2 = {
+        .type = CONNECTION_ADDR_BR,
+        .info.br.brMac = 2,
+    };
+    int32_t ret = IsSameConnectionAddr(&addr1, &addr2);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+* @tc.name: IS_SAME_CONNECTION_ADDR_Test_004
+* @tc.desc: PreLink lane test
+* @tc.type: FUNC
+* @tc.require: AR000FN5VC
+*/
+HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_004, TestSize.Level1)
+{
+    const ConnectionAddr addr1 = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = 1,
+    };
+    const ConnectionAddr addr2 = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = 2,
+    };
+    int32_t ret = IsSameConnectionAddr(&addr1, &addr2);
+    EXPECT_EQ(ret, false);
 }
 }

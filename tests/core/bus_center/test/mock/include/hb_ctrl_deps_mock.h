@@ -31,8 +31,8 @@ public:
 
     virtual void LnnNotifyNetworkStateChanged(SoftBusNetworkState state) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
-    virtual int SoftBusGetBtState(void) = 0;
-    virtual int SoftBusGetBrState(void) = 0;
+    virtual int32_t SoftBusGetBtState(void) = 0;
+    virtual int32_t SoftBusGetBrState(void) = 0;
     virtual void RestartCoapDiscovery(void) = 0;
     virtual ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type) = 0;
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
@@ -47,8 +47,8 @@ public:
 
     MOCK_METHOD1(LnnNotifyNetworkStateChanged, void (SoftBusNetworkState));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
-    MOCK_METHOD0(SoftBusGetBtState, int (void));
-    MOCK_METHOD0(SoftBusGetBrState, int (void));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
+    MOCK_METHOD0(SoftBusGetBrState, int32_t (void));
     MOCK_METHOD0(RestartCoapDiscovery, void (void));
     MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType (LnnHeartbeatType));
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool (void));

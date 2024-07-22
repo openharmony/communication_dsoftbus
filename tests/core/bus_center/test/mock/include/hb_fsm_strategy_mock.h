@@ -65,8 +65,10 @@ public:
     virtual int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType) = 0;
     virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
-    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit);
+    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
+    virtual uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax) = 0;
 };
+
 class HeartBeatFSMStrategyInterfaceMock : public HeartBeatFSMStrategyInterface {
 public:
     HeartBeatFSMStrategyInterfaceMock();
@@ -103,6 +105,8 @@ public:
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
     MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
+    MOCK_METHOD2(GenerateRandomNumForHb, uint32_t (uint32_t, uint32_t));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_FSM_STRATEGY_H
+

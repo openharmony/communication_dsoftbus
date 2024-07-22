@@ -192,7 +192,6 @@ static void NotifyDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
     }
 }
 
-
 static void NotifyDataReceived(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -266,6 +265,7 @@ static void HandleConnConnectTimeout(const void *para)
     ConnRequest *item = FindConnRequestByRequestId(requestId);
     if (item != NULL) {
         SocketDisconnectDevice(AUTH, item->fd);
+        SocketDisconnectDevice(AUTH_RAW_P2P_SERVER, item->fd);
         DelConnRequest(item);
     }
     NotifyClientConnected(requestId, 0, SOFTBUS_AUTH_CONN_TIMEOUT, NULL);
@@ -329,6 +329,40 @@ static void HandleConnConnectResult(const void *para)
     DelConnRequest(item);
 }
 
+static void AsyncCallDeviceIdReceived(void *para)
+{
+    RepeatDeviceIdData *recvData = (RepeatDeviceIdData *)para;
+    if (recvData == NULL) {
+        return;
+    }
+    NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
+    SoftBusFree(para);
+}
+
+static void HandleDataReceivedProcess(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    RepeatDeviceIdData *request = (RepeatDeviceIdData *)SoftBusCalloc(sizeof(RepeatDeviceIdData) + head->len);
+    if (request == NULL) {
+        AUTH_LOGE(AUTH_CONN, "malloc RepeatDeviceIdData fail");
+        return;
+    }
+    request->len = head->len;
+    if (data != NULL && head->len > 0 && memcpy_s(request->data, head->len, data, head->len) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy data fail");
+        SoftBusFree(request);
+        return;
+    }
+    request->connId = connId;
+    request->connInfo = *connInfo;
+    request->fromServer = fromServer;
+    request->head = *head;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), AsyncCallDeviceIdReceived, request, 0) !=
+        SOFTBUS_OK) {
+        SoftBusFree(request);
+    }
+}
+
 /* WiFi Connection */
 static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
 {
@@ -365,7 +399,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
     CHECK_NULL_PTR_RETURN_VOID(head);
     CHECK_NULL_PTR_RETURN_VOID(data);
 
-    if (module != AUTH && module != AUTH_P2P && !IsEnhanceP2pModuleId(module)) {
+    if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_SERVER && !IsEnhanceP2pModuleId(module)) {
         return;
     }
     bool fromServer = false;
@@ -375,7 +409,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
         AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
         return;
     }
-    NotifyDataReceived(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
+    HandleDataReceivedProcess(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
 }
 
 static int32_t InitWiFiConn(void)
@@ -436,19 +470,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         AUTH_LOGE(AUTH_CONN, "empty body");
         return;
     }
-    NotifyDataReceived(GenConnId(connInfo.type, connectionId), &connInfo, fromServer, &head, body);
-}
-
-static void AsyncCallDeviceIdReceived(void *para)
-{
-    RepeatDeviceIdData *recvData = (RepeatDeviceIdData *)para;
-    if (recvData == NULL) {
-        return;
-    }
-    AUTH_LOGI(AUTH_CONN, "Delay handle connectionId=%{public}" PRIu64 ", len=%{public}d, from=%{public}s",
-        recvData->connId, recvData->len, GetAuthSideStr(recvData->fromServer));
-    NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
-    SoftBusFree(para);
+    HandleDataReceivedProcess(GenConnId(connInfo.type, connectionId), &connInfo, fromServer, &head, body);
 }
 
 void HandleRepeatDeviceIdDataDelay(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
@@ -647,6 +669,10 @@ void DisconnectAuthDevice(uint64_t *connId)
     }
     AUTH_LOGI(AUTH_CONN, "connType=%{public}d, connectionId=%{public}u", GetConnType(*connId), GetConnId(*connId));
     switch (GetConnType(*connId)) {
+        case AUTH_LINK_TYPE_RAW_ENHANCED_P2P:
+            SocketDisconnectDevice(AUTH_RAW_P2P_SERVER, GetFd(*connId));
+            UpdateFd(connId, AUTH_INVALID_FD);
+            break;
         case AUTH_LINK_TYPE_WIFI:
             SocketDisconnectDevice(AUTH, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
@@ -729,23 +755,28 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
         return SOFTBUS_INVALID_PARAM;
     }
     AUTH_LOGI(AUTH_CONN, "start auth listening, linkType=%{public}d, port=%{public}d", type, port);
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = port,
+            .moduleId = AUTH,
+            .protocol = LNN_PROTOCOL_IP,
+        },
+    };
+    if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "strcpy_s ip fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
     switch (type) {
         case AUTH_LINK_TYPE_WIFI: {
-            LocalListenerInfo info = {
-                .type = CONNECT_TCP,
-                .socketOption = {
-                    .addr = "",
-                    .port = port,
-                    .moduleId = AUTH,
-                    .protocol = LNN_PROTOCOL_IP,
-                },
-            };
-
-            if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
-                AUTH_LOGE(AUTH_CONN, "strcpy_s ip fail");
-                return SOFTBUS_MEM_ERR;
-            }
+            info.socketOption.moduleId = AUTH;
             return StartSocketListening(AUTH, &info);
+        }
+        case AUTH_LINK_TYPE_RAW_ENHANCED_P2P: {
+            info.socketOption.moduleId = AUTH_RAW_P2P_SERVER;
+            info.socketOption.port = 0;
+            return StartSocketListening(AUTH_RAW_P2P_SERVER, &info);
         }
         default:
             AUTH_LOGE(AUTH_CONN, "unsupport linkType=%{public}d", type);
@@ -759,7 +790,10 @@ void AuthStopListening(AuthLinkType type)
     AUTH_LOGI(AUTH_CONN, "stop auth listening, linkType=%{public}d", type);
     switch (type) {
         case AUTH_LINK_TYPE_WIFI:
-            StopSocketListening();
+            StopSocketListening(AUTH);
+            break;
+        case AUTH_LINK_TYPE_RAW_ENHANCED_P2P:
+            StopSocketListening(AUTH_RAW_P2P_SERVER);
             break;
         default:
             AUTH_LOGE(AUTH_CONN, "unsupport linkType=%{public}d", type);
@@ -796,7 +830,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
             GetWifiDirectManager()->freeListenerModuleId(local.socketOption.moduleId);
         }
         AUTH_LOGE(AUTH_CONN, "start local listening failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PORT;
     }
     AUTH_LOGI(AUTH_CONN, "moduleId=%{public}u, port=%{public}d", local.socketOption.moduleId, realPort);
     *moduleId = local.socketOption.moduleId;

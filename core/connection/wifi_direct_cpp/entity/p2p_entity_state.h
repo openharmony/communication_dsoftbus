@@ -33,7 +33,7 @@ public:
 
     virtual void Enter(const std::shared_ptr<P2pOperation> &operation) = 0;
     virtual void Exit() = 0;
-
+    virtual std::string GetName() = 0;
     virtual int CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation) = 0;
     virtual int Connect(const std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> &operation) = 0;
     virtual int DestroyGroup(const std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> &operation) = 0;

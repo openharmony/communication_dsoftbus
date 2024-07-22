@@ -260,16 +260,17 @@ static void NetLockStateEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "wifi user background state change evt handler get invalid param");
         return;
     }
-    if (g_isUnLock) {
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
+    SoftBusScreenLockState lockState = (SoftBusScreenLockState)event->status;
+    if (lockState != SOFTBUS_USER_UNLOCK && g_isUnLock) {
         LNN_LOGI(LNN_BUILDER, "ignore wifi SOFTBUS_SCREEN_UNLOCK");
         return;
     }
-    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
-    SoftBusUserState userState = (SoftBusUserState)event->status;
-    switch (userState) {
+    switch (lockState) {
+        case SOFTBUS_USER_UNLOCK:
         case SOFTBUS_SCREEN_UNLOCK:
             g_isUnLock = true;
-            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_SCREEN_UNLOCK");
+            LNN_LOGI(LNN_BUILDER, "wifi handle %{public}d", lockState);
             RestartCoapDiscovery();
             break;
         case SOFTBUS_SCREEN_LOCK:
@@ -481,8 +482,10 @@ static void RestoreBrNetworkDevices(void)
 {
     DeviceNightMode *item = NULL;
     DeviceNightMode *next = NULL;
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_nightOnCache, DeviceNightMode, node) {
-        if (LnnNotifyDiscoveryDevice(&(item->addrs), true) != SOFTBUS_OK) {
+        if (LnnNotifyDiscoveryDevice(&(item->addrs), &infoReport, true) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "notify device found failed\n");
         }
         ListDelete(&item->node);

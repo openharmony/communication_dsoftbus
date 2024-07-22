@@ -26,13 +26,11 @@ ohos_distributedtest("DistriStreamTest") {
     "$dsoftbus_root_path/tests/sdk/common/include",
     "//test/testfwk/developer_test/aw/cxx/distributed",
   ]
-  deps = [
-    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/googletest:gtest",
-  ]
+  deps = [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "dsoftbus:softbus_client",
+    "googletest:gtest",
     "hilog:libhilog",
   ]
 }
@@ -46,13 +44,11 @@ ohos_distributedtest("DistriStreamTestAgent") {
     "//test/testfwk/developer_test/aw/cxx/distributed",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/googletest:gtest",
-  ]
+  deps = [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "dsoftbus:softbus_client",
+    "googletest:gtest",
     "hilog:libhilog",
   ]
 }

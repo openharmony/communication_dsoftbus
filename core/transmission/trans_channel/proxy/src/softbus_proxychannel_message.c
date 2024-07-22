@@ -564,12 +564,17 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     return buf;
 }
 
-int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode, int32_t len)
+int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int32_t *errCode, int32_t len)
 {
-    cJSON *root = cJSON_ParseWithLength(msg, len);
-    if ((root == NULL) || (errCode == NULL)) {
-        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
+    if (errCode == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param errCode.");
         return SOFTBUS_INVALID_PARAM;
+    }
+
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
+        return SOFTBUS_CREATE_JSON_ERR;
     }
 
     if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode)) {
@@ -582,12 +587,17 @@ int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode, int32_t l
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyUnPackRestErrMsg(const char *msg, int *errCode, int32_t len)
+int32_t TransProxyUnPackRestErrMsg(const char *msg, int32_t *errCode, int32_t len)
 {
-    cJSON *root = cJSON_ParseWithLength(msg, len);
-    if ((root == NULL) || (errCode == NULL)) {
-        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
+    if (errCode == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param errCode.");
         return SOFTBUS_INVALID_PARAM;
+    }
+
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
+        return SOFTBUS_CREATE_JSON_ERR;
     }
 
     if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode) && !GetJsonObjectInt32Item(root, "ERROR_CODE", errCode)) {
@@ -798,7 +808,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
     
     if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        TRANS_LOGW(TRANS_CTRL, "peer dataconfig is null.");
+        TRANS_LOGD(TRANS_CTRL, "peer dataconfig is null.");
     }
 
     int32_t ret = SOFTBUS_TRANS_UNPACK_HANDSHAKE_MSG_FAILED;

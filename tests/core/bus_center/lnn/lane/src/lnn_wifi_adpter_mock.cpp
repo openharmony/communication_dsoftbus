@@ -98,9 +98,9 @@ SoftBusBand SoftBusGetLinkBand(void)
     return GetWifiAdpterInterface()->SoftBusGetLinkBand();
 }
 
-void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
+int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
 {
-    GetWifiAdpterInterface()->LnnDisconnectP2p(networkId, laneReqId);
+    return GetWifiAdpterInterface()->LnnDisconnectP2p(networkId, laneReqId);
 }
 
 void LnnDestroyP2p(void)
@@ -117,9 +117,50 @@ int32_t UpdateP2pLinkedInfo(uint32_t laneReqId, uint64_t laneId)
 {
     return GetWifiAdpterInterface()->UpdateP2pLinkedInfo(laneReqId, laneId);
 }
+
 void LnnCancelWifiDirect(uint32_t laneReqId)
 {
     return GetWifiAdpterInterface()->LnnCancelWifiDirect(laneReqId);
+}
+
+void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId)
+{
+    return GetWifiAdpterInterface()->LnnDisconnectP2pWithoutLnn(laneReqId);
+}
+
+SoftBusWifiDetailState SoftBusGetWifiState(void)
+{
+    return GetWifiAdpterInterface()->SoftBusGetWifiState();
+}
+
+int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb)
+{
+    return GetWifiAdpterInterface()->SoftBusRegWlanChannelInfoCb(cb);
+}
+
+int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
+{
+    return GetWifiAdpterInterface()->SoftBusRegisterWifiEvent(cb);
+}
+
+int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
+{
+    return GetWifiAdpterInterface()->SoftBusUnRegisterWifiEvent(cb);
+}
+
+int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
+{
+    return GetWifiAdpterInterface()->SoftBusRequestWlanChannelInfo(channelId, num);
+}
+
+int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
+{
+    return GetWifiAdpterInterface()->SoftBusGetChannelListFor5G(channelList, num);
+}
+
+bool SoftBusIsWifiActive(void)
+{
+    return GetWifiAdpterInterface()->SoftBusIsWifiActive();
 }
 }
 }

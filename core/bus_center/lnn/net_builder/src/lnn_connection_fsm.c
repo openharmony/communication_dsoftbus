@@ -51,6 +51,9 @@
 
 #define DATA_SIZE 32
 #define DISCOVERY_TYPE_MASK 0x7FFF
+#define REASON_OVERFLOW_MAX 255
+#define PEER_DEVICE_STATE_VERSION_CHANGE 8
+#define BLE_CONNECT_ONLINE_REASON 16
 
 typedef enum {
     STATE_AUTH_INDEX = 0,
@@ -74,7 +77,9 @@ typedef enum {
 #define TO_CONN_FSM(ptr) CONTAINER_OF(ptr, LnnConnectionFsm, fsm)
 
 #define CONN_CODE_SHIFT 16
-
+#define PC_DEV_TYPE "00C"
+#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
+    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
 typedef enum {
     FSM_MSG_TYPE_JOIN_LNN,
     FSM_MSG_TYPE_AUTH_DONE,
@@ -87,6 +92,16 @@ typedef enum {
     FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT,
     FSM_MSG_TYPE_INITIATE_ONLINE,
 } StateMessageType;
+
+typedef struct {
+    char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1];
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1];
+    char localDeviceType[DEVICE_TYPE_SIZE_LEN + 1];
+    char peerDeviceType[DEVICE_TYPE_SIZE_LEN + 1];
+    char netWorkId[NETWORK_ID_BUF_LEN];
+    char udidData[UDID_BUF_LEN];
+    char bleMacAddr[MAC_LEN];
+} LnnDfxReportConnectInfo;
 
 static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
@@ -412,6 +427,9 @@ static void SetLnnConnNodeInfo(
         IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT)) {
         DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
     }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), SetLpKeepAliveState, NULL, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call online process fail");
+    }
     NotifyJoinResult(connFsm, networkId, retCode);
     ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
     connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
@@ -520,6 +538,58 @@ static int32_t GetUdidHashForDfx(char *localUdidHash, char *peerUdidHash, LnnCon
     return SOFTBUS_OK;
 }
 
+static int32_t GetPeerUdidHash(NodeInfo *nodeInfo, char *peerUdidHash)
+{
+    if (nodeInfo == NULL || peerUdidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t rc = SOFTBUS_OK;
+    uint8_t hash[UDID_HASH_LEN] = { 0 };
+    rc = SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), hash);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate udidhash fail");
+        return rc;
+    }
+    rc = ConvertBytesToHexString(peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert bytes to string fail");
+        return rc;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetDevTypeForDfx(char *localDeviceType, char *peerDeviceType, LnnConntionInfo *connInfo)
+{
+    NodeInfo localInfo;
+    (void)memset_s(&localInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetLocalNodeInfoSafe(&localInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local device info fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if (snprintf_s(localDeviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%03X",
+        localInfo.deviceInfo.deviceTypeId) < 0) {
+        LNN_LOGE(LNN_BUILDER, "snprintf_s localDeviceType fail");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    if (connInfo->nodeInfo == NULL) {
+        if (snprintf_s(peerDeviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%03X",
+            (uint16_t)connInfo->infoReport.type) < 0) {
+            LNN_LOGE(LNN_BUILDER, "snprintf_s peerDeviceType by infoReport fail");
+            return SOFTBUS_SPRINTF_ERR;
+        }
+    } else {
+        if (snprintf_s(peerDeviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%03X",
+            connInfo->nodeInfo->deviceInfo.deviceTypeId) < 0) {
+            LNN_LOGE(LNN_BUILDER, "snprintf_s peerDeviceType fail");
+            return SOFTBUS_SPRINTF_ERR;
+        }
+    }
+    LNN_LOGI(LNN_BUILDER, "localDeviceType=%{public}s, peerDeviceType=%{public}s", localDeviceType, peerDeviceType);
+    return SOFTBUS_OK;
+}
+
 static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdidHash)
 {
     int32_t rc = SOFTBUS_OK;
@@ -528,16 +598,9 @@ static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdi
         return SOFTBUS_STRCPY_ERR;
     }
     if (IsEmptyShortHashStr(peerUdidHash) || strlen(peerUdidHash) != HB_SHORT_UDID_HASH_HEX_LEN) {
-        uint8_t hash[UDID_HASH_LEN] = { 0 };
-        rc = SoftBusGenerateStrHash((uint8_t *)nodeInfo->deviceInfo.deviceUdid,
-            strlen(nodeInfo->deviceInfo.deviceUdid), hash);
+        rc = GetPeerUdidHash(nodeInfo, peerUdidHash);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "generate udidhash fail");
-            return rc;
-        }
-        rc = ConvertBytesToHexString(peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, hash, HB_SHORT_UDID_HASH_LEN);
-        if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "convert bytes to string fail");
+            LNN_LOGE(LNN_BUILDER, "get udidhash fail");
             return rc;
         }
     }
@@ -576,10 +639,6 @@ static int32_t FillDeviceBleReportExtra(const LnnEventExtra *extra, LnnBleReport
         LNN_LOGE(LNN_BUILDER, "strcpy_s peerBleMac fail");
         return SOFTBUS_STRCPY_ERR;
     }
-    if (strcpy_s(bleExtra->extra.peerDeviceType, DEVICE_TYPE_SIZE_LEN + 1, extra->peerDeviceType) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "strcpy_s peerDeviceType fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
     return SOFTBUS_OK;
 }
 
@@ -594,6 +653,8 @@ static void DfxAddBleReportExtra(
     bleExtra->extra.errcode = extra->errcode;
     bleExtra->extra.lnnType = extra->lnnType;
     bleExtra->extra.result = extra->result;
+    bleExtra->extra.osType = extra->osType;
+    bleExtra->extra.connOnlineReason = extra->connOnlineReason;
     if (strcpy_s(bleExtra->extra.localUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, extra->localUdidHash) != EOK) {
         LNN_LOGE(LNN_BUILDER, "strcpy_s localUdidHash fail");
         return;
@@ -601,6 +662,24 @@ static void DfxAddBleReportExtra(
     if (strcpy_s(bleExtra->extra.peerUdidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1, extra->peerUdidHash) != EOK) {
         LNN_LOGE(LNN_BUILDER, "strcpy_s peerUdidHash fail");
         return;
+    }
+    if (strcpy_s(bleExtra->extra.localDeviceType, DEVICE_TYPE_SIZE_LEN + 1, extra->localDeviceType) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s localDeviceType fail");
+        return;
+    }
+    if (strcpy_s(bleExtra->extra.peerDeviceType, DEVICE_TYPE_SIZE_LEN + 1, extra->peerDeviceType) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s peerDeviceType fail");
+        return;
+    }
+    if (extra->errcode == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP &&
+        (strncmp(extra->peerDeviceType, PC_DEV_TYPE, strlen(PC_DEV_TYPE)) == 0)) {
+        LnnBlePcRestrictMapInit();
+        uint32_t count = 0;
+        if (GetNodeFromPcRestrictMap(extra->peerUdidHash, &count) == SOFTBUS_OK) {
+            UpdateNodeFromPcRestrictMap(extra->peerUdidHash);
+        } else {
+            AddNodeToPcRestrictMap(extra->peerUdidHash);
+        }
     }
     if (connInfo->nodeInfo == NULL) {
         bleExtra->status = BLE_REPORT_EVENT_FAIL;
@@ -621,6 +700,8 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
         LNN_LOGE(LNN_BUILDER, "connInfo is NULL");
         return;
     }
+    int32_t osType = connInfo->infoReport.osType;
+    LNN_LOGI(LNN_BUILDER, "osType=%{public}d, extra.osType=%{public}d", osType, extra.osType);
     if (connInfo->addr.type == CONNECTION_ADDR_BLE) {
         LnnBleReportExtra bleExtra;
         (void)memset_s(&bleExtra, sizeof(LnnBleReportExtra), 0, sizeof(LnnBleReportExtra));
@@ -629,14 +710,65 @@ static void DfxReportOnlineEvent(LnnConntionInfo *connInfo, int32_t reason, LnnE
                 LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
                 bleExtra.status = BLE_REPORT_EVENT_SUCCESS;
                 AddNodeToLnnBleReportExtraMap(extra.peerUdidHash, &bleExtra);
-                return;
             } else {
+                extra.osType = osType;
                 DfxAddBleReportExtra(connInfo, &extra, &bleExtra);
-                return;
             }
         }
+        return;
     }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+}
+
+static int32_t GetPeerConnInfo(const LnnConntionInfo *connInfo, char *netWorkId, char *bleMacAddr)
+{
+    if (strcpy_s(netWorkId, NETWORK_ID_BUF_LEN, connInfo->nodeInfo->networkId) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s netWorkId fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(bleMacAddr, MAC_LEN, connInfo->nodeInfo->connectInfo.bleMacAddr) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s bleMacAddr fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void GetConnectOnlineReason(LnnConntionInfo *connInfo, uint32_t *connOnlineReason, int32_t reason)
+{
+    uint8_t connectReason = 0;
+    uint8_t localReason = 0;
+    uint8_t peerReason = 0;
+
+    NodeInfo localInfo;
+    (void)memset_s(&localInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetLocalNodeInfoSafe(&localInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local device info fail");
+        return;
+    }
+    if ((uint32_t)connInfo->infoReport.bleConnectReason > REASON_OVERFLOW_MAX ||
+        localInfo.stateVersionReason > REASON_OVERFLOW_MAX ||
+        (connInfo->nodeInfo != NULL && connInfo->nodeInfo->stateVersionReason > REASON_OVERFLOW_MAX)) {
+        LNN_LOGE(LNN_BUILDER, "reason convert will overflow");
+        return;
+    }
+    connectReason = (uint8_t)connInfo->infoReport.bleConnectReason;
+    localReason = (uint8_t)localInfo.stateVersionReason;
+    if (connInfo->nodeInfo == NULL) {
+        peerReason = 0;
+    } else {
+        peerReason = (uint8_t)connInfo->nodeInfo->stateVersionReason;
+    }
+    if (reason == SOFTBUS_OK && localInfo.stateVersionReason != 0) {
+        if (LnnSetLocalStateVersionReason() != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "set local stateVersionReason fail");
+        }
+    }
+    
+    *connOnlineReason =
+        ((connectReason << BLE_CONNECT_ONLINE_REASON) | (peerReason << PEER_DEVICE_STATE_VERSION_CHANGE) | localReason);
+    LNN_LOGI(LNN_BUILDER,
+        "connOnlineReason=%{public}u, connectReason=%{public}hhu, peerReason=%{public}hhu, localReason=%{public}hhu",
+        *connOnlineReason, connectReason, peerReason, localReason);
 }
 
 static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onlineNum, int32_t lnnType, int32_t reason)
@@ -647,46 +779,56 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     extra.errcode = reason;
     extra.lnnType = lnnType;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    char localUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
-    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
-    if (GetUdidHashForDfx(localUdidHash, peerUdidHash, connInfo) != SOFTBUS_OK) {
+    LnnDfxReportConnectInfo dfxConnectInfo = {};
+    uint32_t connOnlineReason = 0;
+    if (GetUdidHashForDfx(dfxConnectInfo.localUdidHash, dfxConnectInfo.peerUdidHash, connInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get udidhash fail");
         return;
     }
-    extra.localUdidHash = localUdidHash;
-    extra.peerUdidHash = peerUdidHash;
+    if (GetDevTypeForDfx(dfxConnectInfo.localDeviceType, dfxConnectInfo.peerDeviceType, connInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get device type fail");
+        return;
+    }
+    if (connInfo->addr.type == CONNECTION_ADDR_BLE) {
+        (void)GetConnectOnlineReason(connInfo, &connOnlineReason, reason);
+    }
+    extra.localUdidHash = dfxConnectInfo.localUdidHash;
+    extra.peerUdidHash = dfxConnectInfo.peerUdidHash;
+    extra.localDeviceType = dfxConnectInfo.localDeviceType;
+    extra.peerDeviceType = dfxConnectInfo.peerDeviceType;
+    extra.connOnlineReason = connOnlineReason;
     if (connInfo->nodeInfo == NULL) {
         DfxReportOnlineEvent(connInfo, reason, extra);
         return;
     }
     SetOnlineType(reason, connInfo->nodeInfo, extra);
-    char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (strcpy_s(netWorkId, NETWORK_ID_BUF_LEN, connInfo->nodeInfo->networkId) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "strcpy_s netWorkId fail");
-        return;
-    }
-    char udidData[UDID_BUF_LEN] = { 0 };
-    if (GetPeerUdidInfo(connInfo->nodeInfo, udidData, peerUdidHash) != SOFTBUS_OK) {
+    if (GetPeerUdidInfo(connInfo->nodeInfo, dfxConnectInfo.udidData, dfxConnectInfo.peerUdidHash) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get peer udid fail");
         return;
     }
-    char bleMacAddr[MAC_LEN] = { 0 };
-    if (strcpy_s(bleMacAddr, MAC_LEN, connInfo->nodeInfo->connectInfo.bleMacAddr) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "strcpy_s bleMacAddr fail");
+    if (GetPeerConnInfo(connInfo, dfxConnectInfo.netWorkId, dfxConnectInfo.bleMacAddr) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get peer connInfo fail");
         return;
     }
-    char deviceType[DEVICE_TYPE_SIZE_LEN + 1] = { 0 };
-    if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%X",
-        connInfo->nodeInfo->deviceInfo.deviceTypeId) < 0) {
-        LNN_LOGE(LNN_BUILDER, "snprintf_s deviceType fail");
-        return;
+    if (connInfo->addr.type == CONNECTION_ADDR_BLE) {
+        extra.osType = connInfo->nodeInfo->deviceInfo.osType;
     }
-    extra.peerNetworkId = netWorkId;
-    extra.peerUdid = udidData;
-    extra.peerUdidHash = peerUdidHash;
-    extra.peerBleMac = bleMacAddr;
-    extra.peerDeviceType = deviceType;
+    extra.peerNetworkId = dfxConnectInfo.netWorkId;
+    extra.peerUdid = dfxConnectInfo.udidData;
+    extra.peerUdidHash = dfxConnectInfo.peerUdidHash;
+    extra.peerBleMac = dfxConnectInfo.bleMacAddr;
     DfxReportOnlineEvent(connInfo, reason, extra);
+}
+
+static void DeletePcRestrictNode(int32_t retCode, NodeInfo *nodeInfo)
+{
+    char peerUdidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    uint32_t count = 0;
+    if (retCode == SOFTBUS_OK && GetPeerUdidHash(nodeInfo, peerUdidHash) == SOFTBUS_OK) {
+        if (GetNodeFromPcRestrictMap(peerUdidHash, &count) == SOFTBUS_OK) {
+            DeleteNodeFromPcRestrictMap(peerUdidHash);
+        }
+    }
 }
 
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
@@ -728,7 +870,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         DfxRecordLnnAddOnlineNodeEnd(connInfo, infoNum, lnnType, retCode);
         SoftBusFree(info);
     }
-
+    DeletePcRestrictNode(retCode, connInfo->nodeInfo);
     if (connInfo->nodeInfo != NULL) {
         SoftBusFree(connInfo->nodeInfo);
         connInfo->nodeInfo = NULL;
@@ -926,15 +1068,12 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     int32_t rc;
     AuthConnInfo authConn;
     LnnConntionInfo *connInfo = &connFsm->connInfo;
-
     if (CheckDeadFlag(connFsm, true)) {
         NotifyJoinResult(connFsm, NULL, SOFTBUS_NETWORK_CONN_FSM_DEAD);
         return SOFTBUS_ERR;
     }
-    if (connInfo->authHandle.authId > 0) {
-        LNN_LOGI(LNN_BUILDER, "[id=%{public}u]join LNN is ongoing, waiting...", connFsm->id);
-        return SOFTBUS_OK;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGW(connInfo->authHandle.authId <= 0, SOFTBUS_OK, LNN_BUILDER,
+        "[id=%{public}u]join LNN is ongoing, waiting...", connFsm->id);
     LNN_LOGI(LNN_BUILDER, "begin join request, [id=%{public}u], peer%{public}s, isNeedConnect=%{public}d", connFsm->id,
         LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
@@ -949,7 +1088,10 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
         ret = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1,
             (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
-        LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", udidHash);
+        char *anonyUdidHash = NULL;
+        Anonymize(udidHash, &anonyUdidHash);
+        LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", anonyUdidHash);
+        AnonymizeFree(anonyUdidHash);
         if (ret == EOK) {
             if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
                 AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo,
@@ -1165,8 +1307,8 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
     (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
     int32_t ret = LnnGetRemoteNodeInfoById(nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo);
-    if (ret != SOFTBUS_OK || !LnnIsNodeOnline(&oldNodeInfo)) {
-        LNN_LOGW(LNN_BUILDER, "device is not online, ret=%{public}d", ret);
+    if (ret != SOFTBUS_OK || !LnnIsNodeOnline(nodeInfo)) {
+        LNN_LOGW(LNN_BUILDER, "device is node online");
         return false;
     }
     if (IsBasicNodeInfoChanged(&oldNodeInfo, nodeInfo, false)) {

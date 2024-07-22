@@ -118,7 +118,7 @@ int32_t TestTransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
  */
 HWTEST_F(SoftBusMessageOpenChannelTest, PackError001, TestSize.Level1)
 {
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_INVALID_PARAM;
     char *msg = PackError(errCode, NULL);
     EXPECT_EQ(NULL, msg);
 

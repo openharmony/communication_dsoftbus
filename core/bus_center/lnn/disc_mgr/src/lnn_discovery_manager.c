@@ -24,7 +24,7 @@
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
 
-static void DeviceFound(const ConnectionAddr *addr);
+static void DeviceFound(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport);
 
 typedef enum {
     LNN_DISC_IMPL_TYPE_COAP,
@@ -50,7 +50,7 @@ static DiscoveryImpl g_discoveryImpl[LNN_DISC_IMPL_TYPE_MAX] = {
 };
 
 static LnnDiscoveryImplCallback g_discoveryCallback = {
-    .OnDeviceFound = DeviceFound,
+    .onDeviceFound = DeviceFound,
 };
 
 static void ReportDeviceFoundResultEvt(void)
@@ -61,14 +61,14 @@ static void ReportDeviceFoundResultEvt(void)
     }
 }
 
-static void DeviceFound(const ConnectionAddr *addr)
+static void DeviceFound(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport)
 {
     if (addr == NULL) {
         LNN_LOGE(LNN_BUILDER, "device addr is null\n");
         return;
     }
     ReportDeviceFoundResultEvt();
-    if (LnnNotifyDiscoveryDevice(addr, true) != SOFTBUS_OK) {
+    if (LnnNotifyDiscoveryDevice(addr, infoReport, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "notify device found failed\n");
     }
 }

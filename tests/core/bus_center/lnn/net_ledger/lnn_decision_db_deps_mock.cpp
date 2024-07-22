@@ -156,5 +156,40 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen,
 {
     return GetDecisionDbDepsInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
+
+void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
+{
+    return GetDecisionDbDepsInterface()->LnnNotifyNetworkStateChanged(state);
+}
+
+TrustedReturnType AuthHasTrustedRelation(void)
+{
+    return GetDecisionDbDepsInterface()->AuthHasTrustedRelation();
+}
+
+bool IsEnableSoftBusHeartbeat(void)
+{
+    return GetDecisionDbDepsInterface()->IsEnableSoftBusHeartbeat();
+}
+
+void LnnNotifyHBRepeat(void)
+{
+    return GetDecisionDbDepsInterface()->LnnNotifyHBRepeat();
+}
+
+void LnnHbClearRecvList(void)
+{
+    return GetDecisionDbDepsInterface()->LnnHbClearRecvList();
+}
+
+int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
+{
+    return GetDecisionDbDepsInterface()->LnnConvertHbTypeToId();
+}
+
+bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)
+{
+    return GetDecisionDbDepsInterface()->LnnVisitHbTypeSet(callback, typeSet, data);
+}
 } // extern "C"
 } // namespace OHOS

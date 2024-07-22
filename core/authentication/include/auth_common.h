@@ -49,6 +49,8 @@ typedef enum {
     DATA_TYPE_DECRYPT_FAIL = 0xFFFF0007,
     /* data type for info ack */
     DATA_TYPE_META_DEVICE_INFO_ACK = 0xFFFF0008,
+    /* data type for cancel auth */
+    DATA_TYPE_CANCEL_AUTH = 0xFFFF0009,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0
@@ -108,8 +110,9 @@ typedef struct {
 } SocketPktHead;
 
 typedef struct {
-    void (*OnDataReceived)(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len);
-    void (*OnDisconnected)(AuthHandle authHandle);
+    void (*onDataReceived)(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len);
+    void (*onDisconnected)(AuthHandle authHandle);
+    void (*onException)(AuthHandle authHandle, int32_t error);
 } AuthTransCallback;
 
 /* Auth handler */
@@ -121,6 +124,7 @@ typedef enum {
     EVENT_AUTH_META_TIMEOUT,
     EVENT_AUTH_DISCONNECT,
     EVENT_BLE_DISCONNECT_DELAY,
+    EVENT_AUTH_META_SYNC_PTK_TIMEOUT,
 } EventType;
 typedef void(*EventHandler)(const void *obj);
 int32_t PostAuthEvent(EventType event, EventHandler handler,
@@ -144,6 +148,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
 int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option);
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo);
 int32_t GetPeerUdidByNetworkId(const char *networkId, char *udidHash);
+int32_t GetIsExchangeUdidByNetworkId(const char *networkId, bool *isExchangeUdid);
 DiscoveryType ConvertToDiscoveryType(AuthLinkType type);
 AuthLinkType ConvertToAuthLinkType(DiscoveryType type);
 bool CheckAuthConnInfoType(const AuthConnInfo *connInfo);

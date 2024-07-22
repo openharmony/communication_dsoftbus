@@ -409,7 +409,6 @@ int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)
     }
 
     if (!GetJsonObjectInt32Item(msg, ERR_CODE, errCode)) {
-        TRANS_LOGW(TRANS_CTRL, "unpack reply faild");
         return SOFTBUS_PARSE_JSON_ERR;
     }
 

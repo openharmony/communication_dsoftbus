@@ -49,6 +49,8 @@ typedef struct {
     LaneTransType transType;
     char peerBleMac[MAX_MAC_LEN];
     int32_t psm;
+    bool isSupportIpv6;
+    uint32_t actionAddr;
 } LinkRequest;
 
 typedef struct {
@@ -91,6 +93,7 @@ typedef struct {
         BrLinkInfo br;
         BleLinkInfo ble;
         BleDirectInfo bleDirect;
+        RawWifiDirectConnInfo rawWifiDirect;
     } linkInfo;
 } LaneLinkInfo;
 
@@ -112,7 +115,7 @@ typedef struct {
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
-void DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type);
+int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type);
 
 void LaneDeleteP2pAddress(const char *networkId, bool isDestroy);
 void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port);
@@ -122,11 +125,14 @@ void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
 
 int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resource);
 int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource);
+int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, int32_t *laneNum);
 int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide);
 int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide);
 int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource);
+int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const char *peerUdid);
 uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
 int32_t ClearLaneResourceByLaneId(uint64_t laneId);
+int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt);
 
 #ifdef __cplusplus
 }

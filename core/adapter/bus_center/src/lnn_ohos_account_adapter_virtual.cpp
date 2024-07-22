@@ -25,8 +25,9 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     return SOFTBUS_OK;
 }
 
-int64_t GetCurrentAccount(void)
+int32_t GetCurrentAccount(int64_t *account)
 {
+    (void)account;
     return SOFTBUS_OK;
 }
 

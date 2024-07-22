@@ -22,9 +22,9 @@
 #include "channel/proxy_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "processor_selector_factory.h"
-#include "utils/duration_statistic.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
+#include "utils/wifi_direct_dfx.h"
 
 namespace OHOS::SoftBus {
 ConnectCommand::ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback)
@@ -72,18 +72,19 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
         "requestId=%{public}u, linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
-        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d",
+        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d, remoteDeviceId=%{public}s",
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
-        WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType, link.isReuse,
-        link.bandWidth, link.channelId);
-    DfxRecord(true, OK);
+        WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType, link.isReuse, link.bandWidth,
+        link.channelId, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+    WifiDirectDfx::GetInstance().DfxRecord(true, SOFTBUS_OK, info_);
     callback_.onConnectSuccess(info_.info_.requestId, &link);
 }
 
 void ConnectCommand::OnFailure(int reason) const
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
-    DfxRecord(false, reason);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d, remoteDeviceId=%{public}s",
+        info_.info_.requestId, reason, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+    WifiDirectDfx::GetInstance().DfxRecord(false, reason, info_);
     callback_.onConnectFailure(info_.info_.requestId, reason);
 }
 
@@ -113,67 +114,6 @@ bool ConnectCommand::IsSameCommand(const WifiDirectConnectInfo &info) const
     return (info.requestId == info_.info_.requestId) && (info.pid == info_.info_.pid);
 }
 
-void ConnectCommand::DfxRecord(bool isSuccess, int reason) const
-{
-    if (isSuccess) {
-        DurationStatistic::GetInstance().Record(info_.info_.requestId, TotalEnd);
-        DurationStatistic::GetInstance().End(info_.info_.requestId);
-        DurationStatistic::GetInstance().Clear(info_.info_.requestId);
-
-        ConnEventExtra extra = {
-            .result = EVENT_STAGE_RESULT_OK,
-            .requestId = static_cast<int32_t>(info_.info_.requestId),
-        };
-        FillConnEventExtra(extra);
-        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
-    } else {
-        DurationStatistic::GetInstance().Clear(info_.info_.requestId);
-        ConnEventExtra extra = {
-            .result = EVENT_STAGE_RESULT_FAILED,
-            .errcode = reason,
-            .requestId = static_cast<int32_t>(info_.info_.requestId),
-        };
-        FillConnEventExtra(extra);
-        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
-    }
-}
-
-void ConnectCommand::FillConnEventExtra(ConnEventExtra &extra) const
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "FillConnEventExtra enter");
-    extra.peerIp = nullptr;
-    extra.peerBleMac = nullptr;
-    extra.peerBrMac = nullptr;
-    extra.peerWifiMac = nullptr;
-    extra.peerPort = nullptr;
-    extra.peerNetworkId = nullptr;
-    extra.localNetworkId = nullptr;
-    extra.calleePkg = nullptr;
-    extra.callerPkg = nullptr;
-    extra.lnnType = nullptr;
-    extra.challengeCode = nullptr;
-
-    enum StatisticLinkType type = info_.info_.linkType;
-    if (type == STATISTIC_P2P) {
-        extra.linkType = CONNECT_P2P;
-    } else if (type == STATISTIC_HML) {
-        extra.linkType = CONNECT_HML;
-    } else {
-        extra.linkType = CONNECT_TRIGGER_HML;
-    }
-
-    extra.bootLinkType = info_.info_.bootLinkType;
-    extra.isRenegotiate = info_.info_.renegotiate;
-    extra.isReuse = info_.info_.reuse;
-    DurationStatistic instance = DurationStatistic::GetInstance();
-    std::map<DurationStatisticEvent, uint64_t> map = instance.stateTimeMap[info_.info_.requestId];
-    uint64_t startTime = map[TotalStart];
-    uint64_t endTime = map[TotalEnd];
-    if (startTime != 0 && endTime != 0) {
-        extra.costTime = int32_t(endTime - startTime);
-        extra.negotiateTime = int32_t(endTime - startTime);
-    }
-}
 
 bool ConnectCommand::IsValid()
 {

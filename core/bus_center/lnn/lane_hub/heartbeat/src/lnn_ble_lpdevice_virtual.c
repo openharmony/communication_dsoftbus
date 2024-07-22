@@ -34,7 +34,12 @@ void UpdateLocalDeviceInfoToMlps(const NodeInfo *localInfo)
     (void)localInfo;
 }
 
-void UpdateRemoteDeviceInfoToMlps(void)
+void UpdateRemoteDeviceInfoToMlps(const NodeInfo *info)
+{
+    (void)info;
+}
+
+void UpdateRemoteDeviceInfoListToMlps(void)
 {
 }
 
@@ -65,4 +70,14 @@ int32_t SwtichHeartbeatReportChannel(bool isToAP)
 bool IsSupportLpFeature(void)
 {
     return false;
+}
+
+void SetLpKeepAliveState(void *para)
+{
+    (void)para;
+}
+
+void AsyncSetBleBroadcastTimeStamp(const char *networkId)
+{
+    (void)networkId;
 }

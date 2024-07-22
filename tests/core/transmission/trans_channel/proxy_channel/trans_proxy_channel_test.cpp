@@ -238,17 +238,17 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
 
-    int32_t ret = TransProxyAckHandshake(0, NULL, SOFTBUS_ERR);
+    int32_t ret = TransProxyAckHandshake(0, NULL, SOFTBUS_NO_INIT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransProxyAckHandshake(0, &info, SOFTBUS_ERR);
+    ret = TransProxyAckHandshake(0, &info, SOFTBUS_NO_INIT);
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_OK);
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 
     info.appInfo.appType = APP_TYPE_NORMAL;
-    ret = TransProxyAckHandshake(0, &info, SOFTBUS_ERR);
+    ret = TransProxyAckHandshake(0, &info, SOFTBUS_NO_INIT);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 
     TestDelTestProxyChannel();
@@ -450,16 +450,16 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessErrMsgTest001, TestSize.Level1)
     TestAddTestProxyChannel();
 
     info.channelId = -1;
-    TransProxyProcessErrMsg(&info, SOFTBUS_ERR);
+    TransProxyProcessErrMsg(&info, SOFTBUS_NO_INIT);
 
     info.channelId = m_testProxyChannelId;
-    TransProxyProcessErrMsg(&info, SOFTBUS_ERR);
+    TransProxyProcessErrMsg(&info, SOFTBUS_NO_INIT);
 
     info.appInfo.appType = APP_TYPE_NORMAL;
-    TransProxyProcessErrMsg(&info, SOFTBUS_ERR);
+    TransProxyProcessErrMsg(&info, SOFTBUS_NO_INIT);
 
     info.appInfo.appType = APP_TYPE_NOT_CARE;
-    TransProxyProcessErrMsg(&info, SOFTBUS_ERR);
+    TransProxyProcessErrMsg(&info, SOFTBUS_NO_INIT);
 
     TransProxyManagerDeinitInner();
 }

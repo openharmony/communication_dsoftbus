@@ -31,12 +31,12 @@ if (!defined(ohos_lite)) {
   bt_test_deps = [
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   bt_test_external_deps = [
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 

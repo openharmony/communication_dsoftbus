@@ -42,7 +42,6 @@ ohos_unittest("TransServerTcpDirectTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/src",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/authentication/include",
@@ -56,11 +55,8 @@ ohos_unittest("TransServerTcpDirectTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -83,18 +79,22 @@ ohos_unittest("TransServerTcpDirectTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
+      "hilog_lite:hilog_lite",
     ]
   }
 }
@@ -119,7 +119,6 @@ ohos_unittest("TransCoreTcpDirectTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/authentication/include",
@@ -133,11 +132,8 @@ ohos_unittest("TransCoreTcpDirectTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -157,18 +153,22 @@ ohos_unittest("TransCoreTcpDirectTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
+      "hilog_lite:hilog_lite",
     ]
   }
 }
@@ -200,7 +200,6 @@ ohos_unittest("TransTcpDirectMessageTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/src",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/authentication/include",
@@ -217,8 +216,6 @@ ohos_unittest("TransTcpDirectMessageTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_qos/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -237,20 +234,14 @@ ohos_unittest("TransTcpDirectMessageTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransTcpDirectMessageAppendTest") {
@@ -281,10 +272,6 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/common/security/permission/include",
-
-    "//base/security/device_auth/interfaces/inner_api",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
@@ -295,17 +282,13 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransTcpDirectP2pTest") {
@@ -329,7 +312,6 @@ ohos_unittest("TransTcpDirectP2pTest") {
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/authentication/include",
@@ -345,8 +327,6 @@ ohos_unittest("TransTcpDirectP2pTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -364,20 +344,14 @@ ohos_unittest("TransTcpDirectP2pTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransTcpDirectMessageStaticTest") {
@@ -407,7 +381,6 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/src",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/authentication/include",
@@ -424,8 +397,6 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_qos/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -446,11 +417,12 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "hilog:libhilog",
   ]
 }
@@ -468,7 +440,6 @@ ohos_unittest("TransTcpDirectCallbackTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/interface",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/authentication/include",
@@ -478,59 +449,6 @@ ohos_unittest("TransTcpDirectCallbackTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-
-    "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
-  ]
-
-  deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
-}
-
-ohos_unittest("TransTcpDirectJsonTest") {
-  module_out_path = module_output_path
-  sources = [ "unittest/trans_tcp_direct_json_test.cpp" ]
-
-  include_dirs = [
-    "$softbus_adapter_common/include",
-    "$dsoftbus_root_path/core/common/include",
-
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$dsoftbus_root_path/core/transmission/interface",
-    "//commonlibrary/c_utils/base/include",
-    "unittest/common/",
-
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/common/message_handler/include",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -547,7 +465,51 @@ ohos_unittest("TransTcpDirectJsonTest") {
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("TransTcpDirectJsonTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/trans_tcp_direct_json_test.cpp" ]
+
+  include_dirs = [
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/common/include",
+
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/transmission/interface",
+    "unittest/common/",
+
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "hilog:libhilog",
   ]
 }
@@ -573,15 +535,12 @@ ohos_unittest("TransTcpDirectWifiTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/src",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/tcp_direct/unittest/mock",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "//base/security/device_auth/interfaces/inner_api",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -599,13 +558,13 @@ ohos_unittest("TransTcpDirectWifiTest") {
     "unittest/trans_tcp_direct_wifi_test.cpp",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 }
@@ -623,7 +582,6 @@ ohos_unittest("TransTcpDirectListenerTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/authentication/interface",
@@ -631,7 +589,6 @@ ohos_unittest("TransTcpDirectListenerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
     "$dsoftbus_root_path/interfaces/kits",
@@ -643,20 +600,13 @@ ohos_unittest("TransTcpDirectListenerTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 group("unittest") {

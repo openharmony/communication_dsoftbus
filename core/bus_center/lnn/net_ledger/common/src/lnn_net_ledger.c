@@ -43,6 +43,8 @@
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 
+static bool g_isRestore = false;
+
 int32_t LnnInitNetLedger(void)
 {
     if (LnnInitHuksInterface() != SOFTBUS_OK) {
@@ -115,9 +117,55 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     return false;
 }
 
-static void RestoreLocalDeviceInfo(void)
+static void LnnSetLocalFeature(void)
+{
+    if (IsSupportLpFeature()) {
+        uint64_t feature = 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
+        if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set feature fail");
+        }
+    } else {
+        LNN_LOGE(LNN_LEDGER, "not support mlps");
+    }
+}
+
+static void ProcessLocalDeviceInfo(void)
+{
+    g_isRestore = true;
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)LnnGetLocalDevInfo(&info);
+    char *anonyNetworkId = NULL;
+    Anonymize(info.networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%{public}s", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
+    if (IsBleDirectlyOnlineFactorChange(&info)) {
+        info.stateVersion++;
+        LnnSaveLocalDeviceInfo(&info);
+    }
+    LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
+    if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set state version fail");
+    }
+    if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set networkId fail");
+    }
+    LnnNotifyNetworkIdChangeEvent(info.networkId);
+    LnnNotifyLocalNetworkIdChanged();
+    if (info.networkIdTimestamp != 0) {
+        LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
+        LNN_LOGD(LNN_LEDGER, "update networkIdTimestamp=%" PRId64, info.networkIdTimestamp);
+    }
+}
+
+void RestoreLocalDeviceInfo(void)
 {
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
+    LnnSetLocalFeature();
+    if (g_isRestore) {
+        LNN_LOGI(LNN_LEDGER, "aready init");
+        return;
+    }
     if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
         LNN_LOGI(LNN_LEDGER, "get local device info fail");
         const NodeInfo *temp = LnnGetLocalNodeInfo();
@@ -127,29 +175,7 @@ static void RestoreLocalDeviceInfo(void)
             LNN_LOGI(LNN_LEDGER, "save local device info success");
         }
     } else {
-        NodeInfo info;
-        (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-        (void)LnnGetLocalDevInfo(&info);
-        char *anonyNetworkId = NULL;
-        Anonymize(info.networkId, &anonyNetworkId);
-        LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%{public}s", anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
-        if (IsBleDirectlyOnlineFactorChange(&info)) {
-            info.stateVersion++;
-            LnnSaveLocalDeviceInfo(&info);
-        }
-        LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
-        if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set state version fail");
-        }
-        if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set networkId fail");
-        }
-        LnnNotifyNetworkIdChangeEvent(info.networkId);
-        if (info.networkIdTimestamp != 0) {
-            LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
-            LNN_LOGD(LNN_LEDGER, "update networkIdTimestamp=%" PRId64, info.networkIdTimestamp);
-        }
+        ProcessLocalDeviceInfo();
     }
     AuthLoadDeviceKey();
     LnnLoadPtkInfo();
@@ -159,22 +185,10 @@ static void RestoreLocalDeviceInfo(void)
     }
     LoadBleBroadcastKey();
     LnnLoadLocalBroadcastCipherKey();
-    LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
-}
-
-static void LnnSetLocalFeature(void)
-{
-    if (IsSupportLpFeature()) {
-        uint64_t feature = 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
-        if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set feature fail");
-        }
-    }
 }
 
 int32_t LnnInitNetLedgerDelay(void)
 {
-    LnnSetLocalFeature();
     LnnLoadLocalDeviceAccountIdInfo();
     RestoreLocalDeviceInfo();
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {

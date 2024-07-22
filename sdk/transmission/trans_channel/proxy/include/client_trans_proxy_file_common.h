@@ -32,6 +32,7 @@
 #define FRAME_NUM_1 1
 #define FRAME_NUM_2 2
 
+#define OH_TYPE 10
 #define PATH_SEPARATOR '/'
 
 #ifdef __cplusplus

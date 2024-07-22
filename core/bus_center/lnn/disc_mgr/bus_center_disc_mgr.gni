@@ -26,5 +26,6 @@ if (dsoftbus_feature_lnn_net) {
 bus_center_disc_mgr_inc = [
   "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+  "$dsoftbus_root_path/core/common/dfx/interface/include/form",
 ]
 bus_center_disc_mgr_deps = []

@@ -83,6 +83,10 @@ static Map g_lnnDfxReportMap;
 static SoftBusMutex g_lnnDfxReportMutex;
 static bool g_lnnDfxReportIsInit = false;
 
+static Map g_lnnDfxPcMap;
+static SoftBusMutex g_lnnDfxPcMutex;
+static bool g_lnnDfxPcIsInit = false;
+
 void __attribute__((weak)) SfcSyncNodeAddrHandle(const char *networkId, int32_t code)
 {
     (void)networkId;
@@ -217,10 +221,7 @@ void SendElectMessageToAll(const char *skipNetworkId)
 int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure, bool isShort)
 {
     int32_t ret = SOFTBUS_OK;
-    if (para == NULL) {
-        LNN_LOGW(LNN_BUILDER, "addr is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGW(para != NULL, SOFTBUS_INVALID_PARAM, LNN_BUILDER, "para is NULL");
     DfxRecordLnnServerjoinStart(&para->addr, para->pkgName, needReportFailure);
     isShort = para->isNeedConnect ? false : true;
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&para->addr, isShort);
@@ -230,11 +231,12 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
             SoftBusFree((void *)para);
             return SOFTBUS_OK;
         }
-        ret = PostJoinRequestToConnFsm(connFsm, &para->addr, para->pkgName, para->isNeedConnect, needReportFailure);
+        ret = PostJoinRequestToConnFsm(connFsm, para, needReportFailure);
         SoftBusFree((void *)para);
         return ret;
     }
     connFsm->connInfo.flag |= (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
+    connFsm->connInfo.infoReport = para->infoReport;
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
         if (connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN || connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH) {
             char uuid[UUID_BUF_LEN] = {0};
@@ -629,12 +631,7 @@ void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle authHandle
     para->requestId = requestId;
     para->retCode = retCode;
     if (retCode == SOFTBUS_OK) {
-        para->nodeInfo = DupNodeInfo(info);
-        if (para->nodeInfo == NULL) {
-            LNN_LOGE(LNN_BUILDER, "dup NodeInfo fail");
-            SoftBusFree(para);
-            return;
-        }
+        para->nodeInfo = (info == NULL) ? NULL : DupNodeInfo(info);
         para->authHandle = authHandle;
     }
     if (PostBuildMessageToHandler(MSG_TYPE_VERIFY_RESULT, para) != SOFTBUS_OK) {
@@ -650,10 +647,6 @@ void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle authHandle
 static void OnVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
     LNN_LOGI(LNN_BUILDER, "verify passed. requestId=%{public}u, authId=%{public}" PRId64, requestId, authHandle.authId);
-    if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "post verify result message failed");
-        return;
-    }
     if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
         LNN_LOGE(LNN_BUILDER, "authHandle type error");
         return;
@@ -695,11 +688,12 @@ static ConnectionAddr *CreateConnectionAddrMsgPara(const ConnectionAddr *addr)
     return para;
 }
 
-static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const char *pkgName, bool isNeedConnect)
+static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+    const char *pkgName, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
 
-    if (addr == NULL || pkgName == NULL) {
+    if (addr == NULL || infoReport == NULL || pkgName == NULL) {
         LNN_LOGE(LNN_BUILDER, "create join lnn msg para is null");
         return NULL;
     }
@@ -715,6 +709,7 @@ static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const ch
     }
     para->isNeedConnect = isNeedConnect;
     para->addr = *addr;
+    para->infoReport = *infoReport;
     return para;
 }
 
@@ -896,11 +891,12 @@ int32_t LnnUpdateNodeAddr(const char *addr)
 
 void UpdateLocalNetCapability(void)
 {
-    uint32_t netCapability = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+    uint32_t oldNetCap = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldNetCap) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get cap from local ledger fail");
         return;
     }
+    uint32_t netCapability = oldNetCap;
     int btState = SoftBusGetBtState();
     if (btState == BLE_ENABLE) {
         LNN_LOGI(LNN_INIT, "ble state is on");
@@ -912,15 +908,12 @@ void UpdateLocalNetCapability(void)
 
     int brState = SoftBusGetBrState();
     if (brState == BR_ENABLE) {
-        LNN_LOGI(LNN_INIT, "br state is on");
         (void)LnnSetNetCapability(&netCapability, BIT_BR);
     } else if (brState == BR_DISABLE) {
-        LNN_LOGI(LNN_INIT, "br state is off");
         (void)LnnClearNetCapability(&netCapability, BIT_BR);
     }
 
     bool isWifiActive = SoftBusIsWifiActive();
-    LNN_LOGI(LNN_INIT, "wifi state: %s", isWifiActive ? "true" : "false");
     if (!isWifiActive) {
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
@@ -947,6 +940,8 @@ void UpdateLocalNetCapability(void)
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "set cap to local ledger fail");
     }
+    LNN_LOGI(LNN_INIT, "local capability change:%{public}u->%{public}u, brState=%{public}d, isWifiActive=%{public}d,",
+        oldNetCap, netCapability, brState, isWifiActive);
 }
 
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
@@ -958,7 +953,9 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;
     }
-    para = CreateJoinLnnMsgPara(addr, pkgName, true);
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    para = CreateJoinLnnMsgPara(addr, &infoReport, pkgName, true);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "prepare join lnn message fail");
         return SOFTBUS_MALLOC_ERR;
@@ -994,17 +991,25 @@ int32_t LnnServerLeave(const char *networkId, const char *pkgName)
     return SOFTBUS_OK;
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
-
+    if (LnnIsConnectionAddrInvalid(addr)) {
+        LNN_LOGE(LNN_BUILDER, "invalid connection addr");
+        return SOFTBUS_INVALID_PARAM;
+    }
     LNN_LOGI(LNN_BUILDER, "notify discovery device enter! peer%{public}s, isNeedConnect=%{public}d",
         addr != NULL ? LnnPrintConnectionAddr(addr) : "", isNeedConnect);
     if (g_netBuilder.isInit == false) {
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;
     }
-    para = CreateJoinLnnMsgPara(addr, DEFAULT_PKG_NAME, isNeedConnect);
+    if (infoReport == NULL) {
+        LNN_LOGE(LNN_BUILDER, "infoReport is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    para = CreateJoinLnnMsgPara(addr, infoReport, DEFAULT_PKG_NAME, isNeedConnect);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc discovery device message fail");
         return SOFTBUS_MALLOC_ERR;
@@ -1399,6 +1404,125 @@ void ClearLnnBleReportExtraMap(void)
         return;
     }
     LnnMapDelete(&g_lnnDfxReportMap);
-    LNN_LOGI(LNN_BUILDER, "ClearLnnBleReportExtraMap success");
+    LNN_LOGI(LNN_BUILDER, "ClearLnnBleReportExtraMap succ");
     (void)SoftBusMutexUnlock(&g_lnnDfxReportMutex);
+}
+
+void LnnBlePcRestrictMapInit(void)
+{
+    if (g_lnnDfxPcIsInit) {
+        return;
+    }
+    if (SoftBusMutexInit(&g_lnnDfxPcMutex, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "mutex init fail");
+        return;
+    }
+    LnnMapInit(&g_lnnDfxPcMap);
+    g_lnnDfxPcIsInit = true;
+    LNN_LOGI(LNN_BUILDER, "map init succ");
+    return;
+}
+
+void AddNodeToPcRestrictMap(const char *udidHash)
+{
+    if (!g_lnnDfxPcIsInit || udidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    uint32_t count = 1;
+    if (LnnMapSet(&g_lnnDfxPcMap, udidHash, &count, sizeof(uint32_t)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "LnnMapSet fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+    char *anonyUdid = NULL;
+    Anonymize(udidHash, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "add %{public}s to map succ", anonyUdid);
+    AnonymizeFree(anonyUdid);
+}
+
+void ClearPcRestrictMap(void)
+{
+    if (!g_lnnDfxPcIsInit) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    LnnMapDelete(&g_lnnDfxPcMap);
+    LNN_LOGI(LNN_BUILDER, "Clear Map succ");
+    (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+}
+
+void DeleteNodeFromPcRestrictMap(const char *udidHash)
+{
+    if (!g_lnnDfxPcIsInit || udidHash == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return;
+    }
+    int32_t ret = LnnMapErase(&g_lnnDfxPcMap, udidHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "delete item fail, ret=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+    char *anonyUdid = NULL;
+    Anonymize(udidHash, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "delete %{public}s from map succ", anonyUdid);
+    AnonymizeFree(anonyUdid);
+}
+
+int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count)
+{
+    if (!g_lnnDfxPcIsInit || udidHash == NULL || count == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t *tempCount = (uint32_t *)LnnMapGet(&g_lnnDfxPcMap, udidHash);
+    if (tempCount == NULL) {
+        LNN_LOGE(LNN_BUILDER, "LnnMapGet fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+        return SOFTBUS_NOT_FIND;
+    }
+    *count = *tempCount;
+    (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+    return SOFTBUS_OK;
+}
+
+int32_t UpdateNodeFromPcRestrictMap(const char *udidHash)
+{
+    if (!g_lnnDfxPcIsInit || udidHash == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_lnnDfxPcMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "SoftBusMutexLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t *tempCount = (uint32_t *)LnnMapGet(&g_lnnDfxPcMap, udidHash);
+    if (tempCount == NULL) {
+        LNN_LOGE(LNN_BUILDER, "LnnMapGet fail");
+        (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+        return SOFTBUS_NOT_FIND;
+    }
+    *tempCount = ++(*tempCount);
+    (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
+    char *anonyUdid = NULL;
+    Anonymize(udidHash, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "update %{public}s succ count=%{public}u", anonyUdid, *tempCount);
+    AnonymizeFree(anonyUdid);
+    return SOFTBUS_OK;
 }

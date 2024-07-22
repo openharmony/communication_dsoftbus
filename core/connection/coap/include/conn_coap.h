@@ -13,32 +13,20 @@
  * limitations under the License.
  */
 
-#include "lnn_link_enabled_mock.h"
+#ifndef CONN_COAP_H
+#define CONN_COAP_H
 
-using namespace testing::ext;
-using namespace testing;
+#include <stdint.h>
 
-namespace OHOS {
-void *g_isLinkEnabledIf;
-IsLinkEnabledDepsInterfaceMock::IsLinkEnabledDepsInterfaceMock()
-{
-    g_isLinkEnabledIf = reinterpret_cast<void *>(this);
-}
-
-IsLinkEnabledDepsInterfaceMock::~IsLinkEnabledDepsInterfaceMock()
-{
-    g_isLinkEnabledIf = nullptr;
-}
-
-static IsLinkEnabledDepsInterface *IsLinkEnabledIf()
-{
-    return reinterpret_cast<IsLinkEnabledDepsInterface *>(g_isLinkEnabledIf);
-}
-
+#ifdef __cplusplus
 extern "C" {
-bool IsLinkEnabled(LaneLinkType parameter)
-{
-    return IsLinkEnabledIf()->IsLinkEnabled(parameter);
+#endif
+
+int32_t ConnCoapStartServerListen(void);
+void ConnCoapStopServerListen(void);
+
+#ifdef __cplusplus
 }
-}
-} // namespace OHOS
+#endif
+
+#endif // CONN_COAP_H

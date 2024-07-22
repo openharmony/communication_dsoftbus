@@ -396,10 +396,185 @@ void LnnDumpLocalBasicInfo(void)
     Anonymize(localBtMac, &anonyBtMac);
     Anonymize(localP2PMac, &anonyP2pMac);
     LNN_LOGI(LNN_HEART_BEAT,
-        "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=%{public}s, brMac=%{public}s, "
-        "p2pMac=%{public}s, onlineNodeNum=%{public}d",
+        "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=..%{public}s, brMac=::%{public}s, "
+        "p2pMac=::%{public}s, onlineNodeNum=%{public}d",
         devTypeStr, localInfo.deviceTypeId, localInfo.deviceName, anonyIp, anonyBtMac, anonyP2pMac, onlineNodeNum);
     AnonymizeFree(anonyIp);
     AnonymizeFree(anonyBtMac);
     AnonymizeFree(anonyP2pMac);
+}
+
+static int32_t LnnDumpPrintUdid(const char *networkId)
+{
+    char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get udid failed");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    char *tmpUdid = NULL;
+    Anonymize(udid, &tmpUdid);
+    LNN_LOGI(LNN_HEART_BEAT, "Udid=%{public}s", tmpUdid);
+    AnonymizeFree(tmpUdid);
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnDumpPrintUuid(const char *networkId)
+{
+    char uuid[UUID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get uuid failed");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    char *tmpUuid = NULL;
+    Anonymize(uuid, &tmpUuid);
+    LNN_LOGI(LNN_HEART_BEAT, "Uuid=%{public}s", tmpUuid);
+    AnonymizeFree(tmpUuid);
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnDumpPrintMac(const char *networkId)
+{
+    char brMac[BT_MAC_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, brMac, BT_MAC_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get brMac failed");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    char *tmpBrMac = NULL;
+    Anonymize(brMac, &tmpBrMac);
+    LNN_LOGI(LNN_HEART_BEAT, "BrMac=%{public}s", tmpBrMac);
+    AnonymizeFree(tmpBrMac);
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnDumpPrintIp(const char *networkId)
+{
+    char ipAddr[IP_STR_MAX_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_WLAN_IP, ipAddr, IP_STR_MAX_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get ipAddr failed");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    char *tmpIpAddr = NULL;
+    Anonymize(ipAddr, &tmpIpAddr);
+    LNN_LOGI(LNN_HEART_BEAT, "IpAddr=%{public}s", tmpIpAddr);
+    AnonymizeFree(tmpIpAddr);
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnDumpPrintNetCapacity(const char *networkId)
+{
+    uint32_t netCapacity = 0;
+    if (LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, &netCapacity) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get netCapacity failed");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "NetCapacity=%{public}u", netCapacity);
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnDumpPrintNetType(const char *networkId)
+{
+    int32_t netType = 0;
+    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, &netType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get netType fail");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "NetType=%{public}d", netType);
+    return SOFTBUS_OK;
+}
+
+static void LnnDumpOnlinePrintInfo(NodeBasicInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "param is null");
+        return;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "DeviceName=%{public}s", nodeInfo->deviceName);
+    char *tmpNetWorkId = NULL;
+    Anonymize(nodeInfo->networkId, &tmpNetWorkId);
+    LNN_LOGI(LNN_HEART_BEAT, "NetworkId=%{public}s", tmpNetWorkId);
+    AnonymizeFree(tmpNetWorkId);
+    if (LnnDumpPrintUdid(nodeInfo->networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintUdid failed");
+        return;
+    }
+    if (LnnDumpPrintUuid(nodeInfo->networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintUuid failed");
+        return;
+    }
+    if (LnnDumpPrintMac(nodeInfo->networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintMac failed");
+        return;
+    }
+    if (LnnDumpPrintIp(nodeInfo->networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintMac failed");
+        return;
+    }
+    if (LnnDumpPrintNetCapacity(nodeInfo->networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintNetCapacity failed");
+        return;
+    }
+    if (LnnDumpPrintNetType(nodeInfo->networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintNetType failed");
+        return;
+    }
+}
+
+void LnnDumpOnlineDeviceInfo(void)
+{
+    NodeBasicInfo *info = NULL;
+    int32_t infoNum = 0;
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "Lnn get online node fail");
+        return;
+    }
+    if (info == NULL || infoNum == 0) {
+        LNN_LOGE(LNN_HEART_BEAT, "online count is zero");
+        return;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "online device num=%{public}d", infoNum);
+    for (int32_t i = 0; i < infoNum; i++) {
+        LNN_LOGI(LNN_HEART_BEAT, "[NO.%{public}d]", i + 1);
+        LnnDumpOnlinePrintInfo(info + i);
+    }
+    SoftBusFree(info);
+}
+
+uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
+{
+    if (randMin >= randMax) {
+        return randMin - randMax;
+    }
+
+    time_t currTime = time(NULL);
+    if (currTime == 0) {
+        LNN_LOGI(LNN_HEART_BEAT, "seed is 0, just ignore");
+    }
+    srand(currTime);
+    uint32_t random = (uint32_t)rand() % (randMax - randMin);
+    return randMin + random;
+}
+
+static int32_t GetOnlineInfoNum(int32_t *nums)
+{
+    int32_t infoNum = 0;
+    NodeBasicInfo *netInfo = NULL;
+    if (LnnGetAllOnlineNodeInfo(&netInfo, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get all online node info fail.");
+        return SOFTBUS_ERR;
+    }
+    if (netInfo == NULL || infoNum == 0) {
+        LNN_LOGI(LNN_BUILDER, "online device num is 0, not need to send network info");
+        return SOFTBUS_ERR;
+    }
+    *nums = infoNum;
+    LNN_LOGI(LNN_HEART_BEAT, "online nums=%{public}d", infoNum);
+    SoftBusFree(netInfo);
+    return SOFTBUS_OK;
+}
+
+bool LnnIsMultiDeviceOnline(void)
+{
+    int32_t onlineNum = 0;
+
+    return GetOnlineInfoNum(&onlineNum) == SOFTBUS_OK && onlineNum >= HB_MULTI_DEVICE_THRESHOLD;
 }

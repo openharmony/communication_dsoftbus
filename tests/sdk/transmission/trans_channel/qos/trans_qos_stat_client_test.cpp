@@ -142,7 +142,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level0)
     CloseSession(sessionId);
     sleep(1);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -190,7 +190,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
     sleep(1);
     EXPECT_LE(g_timeDiff[sessionId], 100);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -243,7 +243,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
     }
     sleep(1);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -304,7 +304,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
     CloseSession(sessionId);
     sleep(1);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -365,6 +365,6 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
     CloseSession(sessionId);
     sleep(1);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 } // namespace OHOS

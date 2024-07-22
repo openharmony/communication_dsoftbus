@@ -17,7 +17,9 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "securec.h"
 #include "softbus_adapter_hitrace.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -33,6 +35,27 @@
 #include "trans_udp_channel_manager.h"
 
 static IServerChannelCallBack g_channelCallBack;
+
+static int32_t TransAddTcpChannel(const ChannelInfo *channel, const char *pkgName, int32_t pid)
+{
+    TcpChannelInfo *info = CreateTcpChannelInfo(channel);
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create new TcpChannelInfo failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    info->pid = pid;
+    if (strcpy_s(info->pkgName, sizeof(info->pkgName), pkgName) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy pkgName failed.");
+        SoftBusFree(info);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    int32_t ret = TransAddTcpChannelInfo(info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "TransAddTcpChannelInfo failed.");
+        SoftBusFree(info);
+    }
+    return ret;
+}
 
 static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel)
@@ -76,7 +99,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
             TRANS_LOGW(TRANS_CTRL, "Cancel bind name=%{public}s, channelId=%{public}d", tmpName, channel->channelId);
             AnonymizeFree(tmpName);
             extra.result = EVENT_STAGE_RESULT_CANCELED;
-            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
             return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
         }
         TransSetSocketChannelStateByChannel(
@@ -89,8 +112,16 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
 
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        (void)TransAddTcpChannel(channel, pkgName, pid);
+    }
     ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
-    (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT && ret != SOFTBUS_OK) {
+        (void)TransDelTcpChannelInfoByChannelId(channel->channelId);
+    }
+    if (!IsTdcRecoveryTransLimit() || !IsUdpRecoveryTransLimit()) {
+        (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    }
     return ret;
 }
 
@@ -228,10 +259,9 @@ IServerChannelCallBack *TransServerGetChannelCb(void)
     return &g_channelCallBack;
 }
 
-int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const char *uuid,
-    const char *udid, const char *peerIp, const char *networkId, int32_t routeType)
+int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const LinkDownInfo *info)
 {
-    if (pkgName == NULL || networkId == NULL) {
+    if (pkgName == NULL || info == NULL || info->networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGD(TRANS_CTRL, "pkgName=%{public}s", pkgName);
@@ -239,10 +269,10 @@ int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const cha
     ChannelMsg data = {
         .msgPid = pid,
         .msgPkgName = pkgName,
-        .msgUuid = uuid,
-        .msgUdid = udid
+        .msgUuid = info->uuid,
+        .msgUdid = info->udid
     };
-    if (ClientIpcOnChannelLinkDown(&data, networkId, peerIp, routeType) != SOFTBUS_OK) {
+    if (ClientIpcOnChannelLinkDown(&data, info->networkId, info->peerIp, info->routeType) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel link down fail");
         return SOFTBUS_IPC_ERR;
     }

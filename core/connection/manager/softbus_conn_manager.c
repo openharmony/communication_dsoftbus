@@ -16,6 +16,7 @@
 #include "softbus_conn_manager.h"
 
 #include <securec.h>
+#include <stdatomic.h>
 
 #include "common_list.h"
 #include "conn_event.h"
@@ -36,7 +37,7 @@
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
-static bool g_isInited = false;
+static _Atomic bool g_isInited = false;
 static SoftBusList *g_connTimeList = NULL;
 #define SEC_TIME 1000LL
 
@@ -55,18 +56,18 @@ typedef struct TagConnTimeNode {
 static int32_t AddConnTimeNode(const ConnectionInfo *info, ConnTimeNode *timeNode)
 {
     if (g_connTimeList == NULL) {
-        CONN_LOGE(CONN_COMMON, "g_connTimeList is null");
+        CONN_LOGE(CONN_COMMON, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     SoftBusSysTime now = { 0 };
     SoftBusGetTime(&now);
     timeNode->startTime = (uint32_t)now.sec * SEC_TIME + (uint32_t)now.usec / SEC_TIME;
     if (memcpy_s(&(timeNode->info), sizeof(ConnectionInfo), info, sizeof(ConnectionInfo)) != EOK) {
-        CONN_LOGE(CONN_COMMON, "AddConnTimeNode:memcpy timenode failed");
+        CONN_LOGE(CONN_COMMON, "memcpy timenode failed");
         return SOFTBUS_MEM_ERR;
     }
     if (SoftBusMutexLock(&g_connTimeList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "AddConnTimeNode:lock mutex failed");
+        CONN_LOGE(CONN_COMMON, "lock mutex failed");
         return SOFTBUS_LOCK_ERR;
     }
     ListAdd(&(g_connTimeList->list), &(timeNode->node));
@@ -105,7 +106,7 @@ static ConnTimeNode *GetConnTimeNode(const ConnectionInfo *info)
 {
     ConnTimeNode *listNode = NULL;
     if (SoftBusMutexLock(&g_connTimeList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "GetConnTimeNode lock mutex failed");
+        CONN_LOGE(CONN_COMMON, "lock mutex failed");
         return NULL;
     }
     LIST_FOR_EACH_ENTRY(listNode, &g_connTimeList->list, ConnTimeNode, node) {
@@ -126,7 +127,7 @@ static void FreeConnTimeNode(ConnTimeNode *timeNode)
     ConnTimeNode *removeNode = NULL;
     ConnTimeNode *next = NULL;
     if (g_connTimeList == NULL) {
-        CONN_LOGE(CONN_COMMON, "connTimeList is null");
+        CONN_LOGE(CONN_COMMON, "invalid param");
         return;
     }
 
@@ -328,8 +329,8 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
     CONN_CHECK_AND_RETURN_LOGW(data != NULL, CONN_COMMON,
         "dispatch data failed: data is null, connectionId=%{public}u, module=%{public}d", connectionId, moduleId);
     CONN_CHECK_AND_RETURN_LOGW(len > (int32_t)sizeof(ConnPktHead), CONN_COMMON,
-        "dispatch data failed: data length less than connection header size, "
-        "connectionId=%{public}u, module=%{public}d, dataLen=%{public}d",
+        "dispatch data failed: dataLen=%{public}d less than connection header size, "
+        "connectionId=%{public}u, module=%{public}d",
         connectionId, moduleId, len);
 
     ConnListenerNode listener = { 0 };
@@ -347,12 +348,12 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
 static void ReportConnectTime(const ConnectionInfo *info)
 {
     if (info == NULL) {
-        CONN_LOGW(CONN_COMMON, "ReportConnectTime:info is null");
+        CONN_LOGW(CONN_COMMON, "info is null");
         return;
     }
     ConnTimeNode *timeNode = GetConnTimeNode(info);
     if (timeNode == NULL) {
-        CONN_LOGE(CONN_COMMON, "ReportConnectTime:get timeNode failed");
+        CONN_LOGE(CONN_COMMON, "get timeNode failed");
     } else {
         FreeConnTimeNode(timeNode);
     }
@@ -365,13 +366,13 @@ static void RecordStartTime(const ConnectOption *info)
     switch (info->type) {
         case CONNECT_BR:
             if (memcpy_s(&conInfo.brInfo.brMac, BT_MAC_LEN, info->brOption.brMac, BT_MAC_LEN) != EOK) {
-                CONN_LOGE(CONN_COMMON, "RecordStartTime:brMac memcpy failed");
+                CONN_LOGE(CONN_COMMON, "brMac memcpy failed");
                 return;
             }
             break;
         case CONNECT_BLE:
             if (memcpy_s(&conInfo.bleInfo.bleMac, BT_MAC_LEN, info->bleOption.bleMac, BT_MAC_LEN) != EOK) {
-                CONN_LOGE(CONN_COMMON, "RecordStartTime:bleMac memcpy failed");
+                CONN_LOGE(CONN_COMMON, "bleMac memcpy failed");
                 return;
             }
             conInfo.bleInfo.protocol = info->bleOption.protocol;
@@ -380,12 +381,12 @@ static void RecordStartTime(const ConnectOption *info)
         case CONNECT_TCP:
             if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr, MAX_SOCKET_ADDR_LEN) !=
                 EOK) {
-                CONN_LOGE(CONN_COMMON, "RecordStartTime:addr memcpy failed");
+                CONN_LOGE(CONN_COMMON, "addr memcpy failed");
                 return;
             }
             break;
         default:
-            CONN_LOGW(CONN_COMMON, "RecordStartTime:do nothing");
+            CONN_LOGW(CONN_COMMON, "do nothing");
             break;
     }
     ConnTimeNode *timeNode = GetConnTimeNode(&conInfo);
@@ -665,7 +666,7 @@ ConnectCallback g_connManagerCb = { 0 };
 
 static int32_t ConnSocketsAndBaseListenerInit(void)
 {
-    if (g_isInited) {
+    if (atomic_load_explicit(&g_isInited, memory_order_acquire)) {
         return SOFTBUS_CONN_INTERNAL_ERR;
     }
 
@@ -686,7 +687,7 @@ static int32_t ConnSocketsAndBaseListenerInit(void)
 int32_t ConnServerInit(void)
 {
     int32_t ret = ConnSocketsAndBaseListenerInit();
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "ConnSocketsAndBaseListenerInit init failed.");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "connsockets and baselistener init failed.");
     g_connManagerCb.OnConnected = ConnManagerConnected;
     g_connManagerCb.OnReusedConnected = ConnManagerReusedConnected;
     g_connManagerCb.OnDisconnected = ConnManagerDisconnected;
@@ -725,14 +726,14 @@ int32_t ConnServerInit(void)
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_ReqLock, NULL) == SOFTBUS_OK,
         SOFTBUS_CONN_INTERNAL_ERR, CONN_COMMON, "g_ReqLock init lock failed.");
 
-    g_isInited = true;
+    atomic_store_explicit(&g_isInited, true, memory_order_release);
     CONN_LOGI(CONN_COMMON, "connect manager init success.");
     return SOFTBUS_OK;
 }
 
 void ConnServerDeinit(void)
 {
-    if (!g_isInited) {
+    if (!atomic_load_explicit(&g_isInited, memory_order_acquire)) {
         return;
     }
 
@@ -750,7 +751,7 @@ void ConnServerDeinit(void)
     DeinitBaseListener();
     SoftBusMutexDestroy(&g_ReqLock);
 
-    g_isInited = false;
+    atomic_store_explicit(&g_isInited, false, memory_order_release);
 }
 
 bool CheckActiveConnection(const ConnectOption *info, bool needOccupy)

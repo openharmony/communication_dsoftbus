@@ -174,7 +174,7 @@ HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = transServerProxy.CreateSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -193,7 +193,7 @@ HWTEST_F(TransIpcStandardTest, RemoveSessionServerTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = transServerProxy.RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -240,7 +240,7 @@ HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level0)
     sessionAttribute.linkTypeNum= 1;
     param->attr = &sessionAttribute;
     ret = transServerProxy.OpenSession(param, info);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
     SoftBusFree(param);
     SoftBusFree(info);
 }
@@ -283,11 +283,11 @@ HWTEST_F(TransIpcStandardTest, NotifyAuthSuccessTest001, TestSize.Level0)
     int32_t channelId = 0;
     int32_t channelType = CHANNEL_TYPE_AUTH;
     int32_t ret = transServerProxy.NotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.NotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -302,7 +302,7 @@ HWTEST_F(TransIpcStandardTest, CloseChannelTest001, TestSize.Level0)
     int32_t channelId = -1;
     int32_t channelType = CHANNEL_TYPE_AUTH;
     int32_t ret = transServerProxy.CloseChannel(nullptr, channelId, channelType);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
@@ -453,7 +453,7 @@ HWTEST_F(TransIpcStandardTest, TransServerProxyInitTest001, TestSize.Level0)
 HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Level0)
 {
     int32_t ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -465,7 +465,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     TransClientDeinit();
 }
@@ -479,7 +479,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Lev
 HWTEST_F(TransIpcStandardTest, ServerIpcRemoveSessionServerTest001, TestSize.Level0)
 {
     int32_t ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -491,7 +491,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRemoveSessionServerTest001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     TransClientDeinit();
 }
@@ -549,7 +549,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenSessionTest001, TestSize.Level0)
     sessionAttribute.linkTypeNum = 1;
     param->attr = &sessionAttribute;
     ret = ServerIpcOpenSession(param, info);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
     (void)ClientDeleteSession(sessionId);
 
     TransClientDeinit();
@@ -602,7 +602,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcNotifyAuthSuccessTest001, TestSize.Level
     int32_t channelId = 0;
     int32_t channelType = CHANNEL_TYPE_AUTH;
     ret = ServerIpcNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
     TransClientDeinit();
 }
 
@@ -617,7 +617,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
     int32_t ret = ServerIpcCloseChannel(nullptr, channelId, chanType);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -626,7 +626,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ServerIpcCloseChannel(nullptr, channelId, chanType);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     TransClientDeinit();
 }

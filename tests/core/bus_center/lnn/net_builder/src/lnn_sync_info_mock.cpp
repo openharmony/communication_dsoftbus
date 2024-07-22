@@ -43,3 +43,4 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
 }
 }
 }
+

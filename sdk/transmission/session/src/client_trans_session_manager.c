@@ -16,6 +16,7 @@
 #include "client_trans_session_manager.h"
 
 #include <securec.h>
+#include <unistd.h>
 
 #include "anonymizer.h"
 #include "client_bus_center_manager.h"
@@ -34,6 +35,7 @@
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
+#define CAST_SESSION "CastPlusSessionName"
 static void ClientTransSessionTimerProc(void);
 
 static int32_t g_sessionIdNum = 0;
@@ -1114,6 +1116,10 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (strcmp(CAST_SESSION, serverNode->sessionName) == 0) {
+            TRANS_LOGD(TRANS_SDK, "cast plus sessionname is different");
+            continue;
+        }
         DestroyClientSessionByNetworkId(serverNode, networkId, routeType, &destroyList);
     }
     UnlockClientSessionServerList();
@@ -2038,6 +2044,30 @@ int32_t ClientWaitSyncBind(int32_t socket)
     return sessionNode->lifecycle.bindErrCode;
 }
 
+static void TransWaitForBindReturn(int32_t socket)
+{
+#define RETRY_GET_BIND_RESULT_TIMES 3
+#define RETRY_WAIT_TIME             5000 // 5ms
+
+    SocketLifecycleData lifecycle;
+    (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
+    int32_t ret;
+
+    for (int32_t retryTimes = 0; retryTimes < RETRY_GET_BIND_RESULT_TIMES; ++retryTimes) {
+        ret = GetSocketLifecycleAndSessionNameBySessionId(socket, NULL, &lifecycle);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "Get session lifecycle failed, ret=%{public}d", ret);
+            return;
+        }
+
+        if (lifecycle.maxWaitTime == 0) {
+            return;
+        }
+        TRANS_LOGW(TRANS_SDK, "wait for bind return, socket=%{public}d, retryTimes=%{public}d", socket, retryTimes);
+        usleep(RETRY_WAIT_TIME);
+    }
+}
+
 int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode)
 {
     if (socket <= 0) {
@@ -2075,6 +2105,7 @@ int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode)
 
     UnlockClientSessionServerList();
     TRANS_LOGI(TRANS_SDK, "socket=%{public}d signal success", socket);
+    TransWaitForBindReturn(socket);
     return SOFTBUS_OK;
 }
 

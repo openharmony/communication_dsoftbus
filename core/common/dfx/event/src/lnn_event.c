@@ -74,6 +74,7 @@ void LnnEventExtraInit(LnnEventExtra *extra)
     extra->peerPort = NULL;
     extra->peerUdid = NULL;
     extra->peerNetworkId = NULL;
+    extra->localDeviceType = NULL;
     extra->peerDeviceType = NULL;
     extra->localUdidHash = NULL;
     extra->peerUdidHash = NULL;

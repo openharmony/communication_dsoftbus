@@ -267,10 +267,6 @@ HWTEST_F(TransTcpDirectP2pTest, OnChannelOpenFailTest001, TestSize.Level1)
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
     OnChannelOpenFail(channelId, errCode);
-    int32_t ret = AuthInit();
-    ASSERT_EQ(ret, SOFTBUS_ERR);
-
-    AuthDeinit();
 }
 
 /**
@@ -422,7 +418,7 @@ HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
 {
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret;
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_NO_INIT;
     int64_t seq = 1;
     bool isAuthLink = true;
     bool notAuthLink = false;

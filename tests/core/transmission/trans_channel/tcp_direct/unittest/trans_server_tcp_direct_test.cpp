@@ -173,7 +173,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
         strcpy_s(info->uuid, sizeof(info->uuid), g_uuid) != EOK ||
         strcpy_s(info->connInfo.info.ipInfo.ip, sizeof(info->connInfo.info.ipInfo.ip), TEST_SOCKET_ADDR) != EOK) {
         SoftBusFree(info);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     SessionKey *sessionKey = (SessionKey*)SoftBusCalloc(sizeof(SessionKey));
@@ -215,7 +215,7 @@ static int32_t TestAddSessionConn(bool isServerSide)
     int32_t ret = TransTdcAddSessionConn(session);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     return SOFTBUS_OK;
@@ -660,7 +660,7 @@ HWTEST_F(TransServerTcpDirectTest, TransOpenDirectChannel001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, UnpackReplyErrCode001, TestSize.Level1)
 {
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_MEM_ERR;
     int32_t ret = UnpackReplyErrCode(NULL, &errCode);
     EXPECT_NE(SOFTBUS_OK, ret);
 
@@ -674,7 +674,7 @@ HWTEST_F(TransServerTcpDirectTest, UnpackReplyErrCode001, TestSize.Level1)
     cJSON_Delete(msg);
 
     std::string errDesc = TEST_JSON;
-    str = PackError(SOFTBUS_ERR, errDesc.c_str());
+    str = PackError(errCode, errDesc.c_str());
     cJSON *json = cJSON_Parse(str.c_str());
     ret = UnpackReplyErrCode(json, &errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);

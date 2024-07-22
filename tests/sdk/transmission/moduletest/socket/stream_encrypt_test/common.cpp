@@ -108,7 +108,7 @@ static int CheckRemoteDeviceIsNull(bool isSetNetId)
         return SOFTBUS_OK;
     } else {
         LOGI("[check]get nodeInfo is null");
-        return SOFTBUS_ERR;
+        return ret;
     }
 }
 

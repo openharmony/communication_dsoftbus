@@ -31,7 +31,11 @@ constexpr int64_t AUTH_SEQ = 1;
 constexpr int64_t AUTH_SEQ_1 = 2;
 constexpr int64_t AUTH_SEQ_2 = 3;
 constexpr int64_t AUTH_SEQ_3 = 4;
+constexpr int64_t AUTH_SEQ_4 = 5;
+constexpr int64_t AUTH_SEQ_5 = 6;
 constexpr uint64_t CONN_ID_1 = 11;
+constexpr uint64_t CONN_ID_2 = 12;
+constexpr uint64_t CONN_ID_3 = 13;
 constexpr int32_t PORT = 1;
 constexpr int32_t PORT_1 = 2;
 constexpr int32_t GROUP_TYPE = 100;
@@ -221,6 +225,74 @@ HWTEST_F(AuthManagerTest, GET_AUTH_MANAGER_BY_CONN_INFO_TEST_001, TestSize.Level
 }
 
 /*
+ * @tc.name: AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001
+ * @tc.desc: AuthDirectOnlineCreateAuthManager test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
+    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, DEVICE_ID_HASH,
+        DEVICE_ID_HASH_LEN) == EOK);
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_INVALID_ID);
+
+    AuthSessionInfo info;
+    info.isSupportFastAuth = true;
+    info.version = SOFTBUS_OLD_V2;
+    SetAuthSessionInfo(&info, CONN_ID_2, false, AUTH_LINK_TYPE_BLE);
+    bool isNewCreated;
+    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_4, &info, &isNewCreated, AUTH_SEQ_4) != nullptr);
+    EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_4, &info) == SOFTBUS_OK);
+    AuthManager *auth = GetDeviceAuthManager(AUTH_SEQ_4, &info, &isNewCreated, AUTH_SEQ_4);
+    auth->hasAuthPassed[AUTH_LINK_TYPE_BLE] = true;
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_SEQ_4);
+    AuthHandle authHandle = {.authId = AUTH_SEQ_4, .type = AUTH_LINK_TYPE_BLE};
+    RemoveAuthManagerByAuthId(authHandle);
+}
+
+/*
+ * @tc.name: AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_002
+ * @tc.desc: AuthDirectOnlineCreateAuthManager test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_002, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
+    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, DEVICE_ID_HASH,
+        DEVICE_ID_HASH_LEN) == EOK);
+    AuthSessionInfo info;
+    info.isSupportFastAuth = true;
+    info.version = SOFTBUS_OLD_V2;
+    SetAuthSessionInfo(&info, CONN_ID_3, false, AUTH_LINK_TYPE_BLE);
+    bool isNewCreated;
+    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_5, &info, &isNewCreated, AUTH_SEQ_5) != nullptr);
+    EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_5, &info) == SOFTBUS_OK);
+    AuthManager *auth = GetDeviceAuthManager(AUTH_SEQ_5, &info, &isNewCreated, AUTH_SEQ_5);
+    auth->hasAuthPassed[AUTH_LINK_TYPE_BLE] = true;
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_SEQ_5);
+    auth->hasAuthPassed[AUTH_LINK_TYPE_BLE] = false;
+    auth->lastActiveTime = MAX_AUTH_VALID_PERIOD - GetCurrentTimeMs() - 1000;
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_INVALID_ID);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    EXPECT_EQ(AddSessionKey(&auth->sessionKeyList, AUTH_SEQ_5, &sessionKey, AUTH_LINK_TYPE_BLE, false), SOFTBUS_OK);
+    EXPECT_EQ(SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ_5), SOFTBUS_OK);
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_INVALID_ID);
+    auth->hasAuthPassed[AUTH_LINK_TYPE_BLE] = true;
+    auth->lastActiveTime = MAX_AUTH_VALID_PERIOD - GetCurrentTimeMs() + 1000;
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_SEQ_5);
+    AuthHandle authHandle = {.authId = AUTH_SEQ_5, .type = AUTH_LINK_TYPE_BLE};
+    RemoveAuthManagerByAuthId(authHandle);
+}
+
+/*
  * @tc.name: GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001
  * @tc.desc: GetActiveAuthIdByConnInfo test
  * @tc.type: FUNC
@@ -245,12 +317,17 @@ HWTEST_F(AuthManagerTest, GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001, TestSize.Lev
     sessionKey.len = KEY_VALUE_LEN;
     EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, false, false) == SOFTBUS_OK);
     SetAuthSessionInfo(&info, CONN_ID_1, true, AUTH_LINK_TYPE_WIFI);
+    AuthManager *auth = GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated, AUTH_SEQ_1);
+    auth->hasAuthPassed[AUTH_LINK_TYPE_WIFI] = true;
+    auth->lastActiveTime = MAX_AUTH_VALID_PERIOD - GetCurrentTimeMs() + 1000;
     EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated, AUTH_SEQ_1) != nullptr);
-    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) != AUTH_SEQ_1);
+    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_SEQ_1);
     SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_WIFI);
     info.isSupportFastAuth = false;
     info.version = SOFTBUS_OLD_V2;
     EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, true, false) == SOFTBUS_OK);
+    AuthHandle authHandle = {.authId = AUTH_SEQ_1, .type = AUTH_LINK_TYPE_WIFI};
+    RemoveAuthManagerByAuthId(authHandle);
 }
 
 /*
@@ -654,35 +731,6 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSi
     EXPECT_TRUE(ret1 == SOFTBUS_INVALID_PARAM);
     int32_t ret2 = AuthGetLatestAuthSeqListByType(UDID_TEST, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
     EXPECT_TRUE(ret2 == SOFTBUS_OK);
-}
-
-/*
- * @tc.name: AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001
- * @tc.desc: AuthDirectOnlineCreateAuthManager test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001, TestSize.Level1)
-{
-    AuthConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    connInfo.type = AUTH_LINK_TYPE_BLE;
-    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
-    ASSERT_TRUE(memcpy_s(connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, DEVICE_ID_HASH,
-        DEVICE_ID_HASH_LEN) == EOK);
-    EXPECT_TRUE(GetActiveAuthIdByConnInfo(&connInfo, false) == AUTH_INVALID_ID);
-
-    AuthSessionInfo info;
-    SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_WIFI);
-    info.isSupportFastAuth = true;
-    info.version = SOFTBUS_OLD_V2;
-
-    EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, nullptr) != SOFTBUS_OK);
-    EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, &info) != SOFTBUS_OK);
-    SetAuthSessionInfo(&info, CONN_ID_1, false, AUTH_LINK_TYPE_BLE);
-    bool isNewCreated;
-    EXPECT_TRUE(GetDeviceAuthManager(AUTH_SEQ_1, &info, &isNewCreated, AUTH_SEQ_1) != nullptr);
-    EXPECT_TRUE(AuthDirectOnlineCreateAuthManager(AUTH_SEQ_1, &info) == SOFTBUS_OK);
 }
 } // namespace OHOS
 

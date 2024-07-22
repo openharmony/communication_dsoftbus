@@ -134,6 +134,7 @@ typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
     bool isNeedConnect;
     ConnectionAddr addr;
+    LnnDfxDeviceInfoReport infoReport;
 } JoinLnnMsgPara;
 
 typedef struct {
@@ -145,7 +146,8 @@ int32_t LnnInitNetBuilder(void);
 int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect);
+int32_t LnnNotifyDiscoveryDevice(
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen);
 int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType);
@@ -195,7 +197,12 @@ void LnnDeleteLinkFinderInfo(const char *peerUdid);
 void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *networkId,
     const uint8_t *msg, uint32_t len);
 void OnLnnProcessNotTrustedMsgDelay(void *para);
-
+void LnnBlePcRestrictMapInit(void);
+void AddNodeToPcRestrictMap(const char *udidHash);
+void ClearPcRestrictMap(void);
+void DeleteNodeFromPcRestrictMap(const char *udidHash);
+int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count);
+int32_t UpdateNodeFromPcRestrictMap(const char *udidHash);
 #ifdef __cplusplus
 }
 #endif

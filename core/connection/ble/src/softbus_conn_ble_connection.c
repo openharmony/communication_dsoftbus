@@ -27,6 +27,7 @@
 #include "softbus_datahead_transform.h"
 #include "softbus_json_utils.h"
 #include "ble_protocol_interface_factory.h"
+#include "softbus_utils.h"
 
 // basic info json key definition
 #define BASIC_INFO_KEY_DEVID   "devid"
@@ -136,6 +137,14 @@ ConnBleConnection *ConnBleCreateConnection(
     connection->connectionRc = 0;
     connection->objectRc = 1;
     connection->retrySearchServiceCnt = 0;
+    connection->underlayerFastConnectFailedScanFailure = false;
+    SoftBusList *list = CreateSoftBusList();
+    if (list == NULL) {
+        CONN_LOGE(CONN_BLE, "create softbus list failed");
+        SoftBusFree(connection);
+        return NULL;
+    }
+    connection->connectStatus = list;
     return connection;
 }
 
@@ -149,6 +158,14 @@ void ConnBleFreeConnection(ConnBleConnection *connection)
         SoftBusFree(it->data);
         SoftBusFree(it);
     }
+
+    BleUnderlayerStatus *item = NULL;
+    BleUnderlayerStatus *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &connection->connectStatus->list, BleUnderlayerStatus, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    DestroySoftBusList(connection->connectStatus);
     SoftBusFree(connection);
 }
 
@@ -731,6 +748,29 @@ void BleOnClientConnected(uint32_t connectionId)
 
 void BleOnClientFailed(uint32_t connectionId, int32_t error)
 {
+    ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "connection not exist, connId=%{public}u", connectionId);
+    if (connection->protocol == BLE_GATT) {
+        g_connectionListener.onConnectFailed(connectionId, error);
+        ConnBleReturnConnection(&connection);
+        return;
+    }
+
+    int32_t status = SoftBusMutexLock(&connection->connectStatus->lock);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "lock failed, connId=%{public}u", connectionId);
+        ConnBleReturnConnection(&connection);
+        return;
+    }
+    BleUnderlayerStatus *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &connection->connectStatus->list, BleUnderlayerStatus, node) {
+        // to find the last error
+        if (it->result != 0) {
+            error = it->result;
+        }
+    }
+    (void)SoftBusMutexUnlock(&connection->connectStatus->lock);
+    ConnBleReturnConnection(&connection);
     g_connectionListener.onConnectFailed(connectionId, error);
 }
 

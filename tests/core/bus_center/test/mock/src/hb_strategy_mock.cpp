@@ -47,9 +47,10 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
     return HeartBeatStrategyInterface()->LnnStopOfflineTimingStrategy(networkId, addrType);
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+    bool isNeedConnect)
 {
-    return HeartBeatStrategyInterface()->LnnNotifyDiscoveryDevice(addr, isNeedConnect);
+    return HeartBeatStrategyInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
 
 int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight)
@@ -151,6 +152,42 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
 bool IsSameAccountGroupDevice(void)
 {
     return HeartBeatStrategyInterface()->IsSameAccountGroupDevice();
+}
+
+uint32_t AuthGenRequestId(void)
+{
+    return HeartBeatStrategyInterface()->AuthGenRequestId();
+}
+
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *verifyCallback,
+    AuthVerifyModule module, bool isFastAuth)
+{
+    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, verifyCallback, module, isFastAuth);
+}
+
+void AddNodeToLnnBleReportExtraMap(const char *udidHash, const LnnBleReportExtra *bleExtra)
+{
+    return HeartBeatStrategyInterface()->AddNodeToLnnBleReportExtraMap(udidHash, bleExtra);
+}
+
+int32_t GetNodeFromLnnBleReportExtraMap(const char *udidHash, LnnBleReportExtra *bleExtra)
+{
+    return HeartBeatStrategyInterface()->GetNodeFromLnnBleReportExtraMap(udidHash, bleExtra);
+}
+
+void DeleteNodeFromLnnBleReportExtraMap(const char *udidHash)
+{
+    return HeartBeatStrategyInterface()->DeleteNodeFromLnnBleReportExtraMap(udidHash);
+}
+
+int32_t LnnUpdateRemoteDeviceInfo(const NodeInfo *deviceInfo)
+{
+    return HeartBeatStrategyInterface()->LnnUpdateRemoteDeviceInfo(deviceInfo);
+}
+
+int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count)
+{
+    return HeartBeatStrategyInterface()->GetNodeFromPcRestrictMap(udidHash, count);
 }
 }
 } // namespace OHOS

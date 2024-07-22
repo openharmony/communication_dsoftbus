@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include <arpa/inet.h>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
 #include "net_conn_client.h"
 #include "softbus_error_code.h"
+#include "softbus_socket.h"
 #include "wifi_direct_ip_manager.h"
 
 using namespace testing::ext;
@@ -41,9 +43,13 @@ public:
  */
 HWTEST_F(WifiDirectIpManagerTest, ApplyIpv6, TestSize.Level1)
 {
-    std::string mac;
+    std::string mac("10:dc:b6:90:84:82");
+    std::string mac2("FF:dc:b6:90:84:82");
     std::string ipv6 = WifiDirectIpManager::GetInstance().ApplyIpv6(mac);
-    EXPECT_EQ(ipv6.empty(), true);
+    EXPECT_EQ(ipv6.empty(), false);
+
+    ipv6 = WifiDirectIpManager::GetInstance().ApplyIpv6(mac2);
+    EXPECT_EQ(ipv6.empty(), false);
 }
 
 /*
@@ -124,13 +130,18 @@ HWTEST_F(WifiDirectIpManagerTest, ConfigAndReleaseIpv4, TestSize.Level1)
     ret = ipManager.ConfigIpv4(interface, local, remote, remoteMac);
     EXPECT_EQ(ret, -1);
 
-    EXPECT_CALL(client, DelStaticArp).WillOnce(Return(-1));
+    EXPECT_CALL(client, DelStaticArp).WillOnce(Return(0));
     EXPECT_CALL(client, RemoveNetworkRoute).WillOnce(Return(0));
     EXPECT_CALL(client, DelInterfaceAddress).WillOnce(Return(-1));
     ipManager.ReleaseIpv4(interface, local, remote, remoteMac);
 
     EXPECT_CALL(client, DelStaticArp).WillOnce(Return(0));
     EXPECT_CALL(client, RemoveNetworkRoute).WillOnce(Return(0));
+    EXPECT_CALL(client, DelInterfaceAddress).WillOnce(Return(0));
+    ipManager.ReleaseIpv4(interface, local, remote, remoteMac);
+
+    EXPECT_CALL(client, DelStaticArp).WillOnce(Return(0));
+    EXPECT_CALL(client, RemoveNetworkRoute).WillOnce(Return(-1));
     EXPECT_CALL(client, DelInterfaceAddress).WillOnce(Return(0));
     ipManager.ReleaseIpv4(interface, local, remote, remoteMac);
 }
@@ -224,10 +235,27 @@ HWTEST_F(WifiDirectIpManagerTest, AddAndDeleteInterfaceAddress, TestSize.Level1)
 
     ipString = "1234";
     ret = ipManager.AddInterfaceAddress(interface, ipString, prefixLength);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_FIND_DOT_FAIL);
 
     ret = ipManager.DeleteInterfaceAddress(interface, ipString, prefixLength);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_FIND_DOT_FAIL);
+}
+
+/*
+ * @tc.name: ConfigIpv6
+ * @tc.desc: check ConfigIpv6 method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectIpManagerTest, ConfigIpv6, TestSize.Level1)
+{
+    NetManagerStandard::MockNetConnClient client;
+    std::string ipString = "192.168.1.255";
+    std::string interface = "p2p0";
+
+    EXPECT_CALL(client, AddInterfaceAddress(_, _, _)).WillOnce(Return(0));
+    auto ret = WifiDirectIpManager::GetInstance().ConfigIpv6(interface, ipString);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 } // namespace OHOS::SoftBus
