@@ -384,7 +384,7 @@ static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(
                 TRANS_CTRL, "Cancel lane failed, free lane. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
-            TransFreeLane(laneHandle, isQosLane);
+            TransFreeLane(laneHandle, isQosLane, isAsync);
         }
     }
     if (!isAsync && laneHandle != INVALID_LANE_REQ_ID) {
@@ -416,18 +416,18 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
         (void)TransSetSocketChannelStateByChannel(channelId, channelType, CORE_SESSION_STATE_CANCELLING);
         switch (channelType) {
             case CHANNEL_TYPE_PROXY:
-                (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = TransProxyCloseProxyChannel(channelId);
                 break;
             case CHANNEL_TYPE_TCP_DIRECT:
-                (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 (void)TransDelTcpChannelInfoByChannelId(channelId);
                 TransDelSessionConnById(channelId); // socket Fd will be shutdown when recv peer reply
                 ret = SOFTBUS_OK;
                 break;
             case CHANNEL_TYPE_UDP:
                 (void)NotifyQosChannelClosed(channelId, channelType);
-                (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = TransCloseUdpChannel(channelId);
                 break;
             case CHANNEL_TYPE_AUTH:
@@ -538,16 +538,18 @@ void TransFreeAppInfo(AppInfo *appInfo)
     SoftBusFree(appInfo);
 }
 
-void TransFreeLane(uint32_t laneHandle, bool isQosLane)
+void TransFreeLane(uint32_t laneHandle, bool isQosLane, bool isAsync)
 {
-    TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d", laneHandle, isQosLane);
-    if (laneHandle != INVALID_LANE_REQ_ID) {
-        if (isQosLane) {
-            TransFreeLaneByLaneHandle(laneHandle, false);
-            return;
-        }
-        LnnFreeLane(laneHandle);
+    TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d, isAsync=%{public}d",
+        laneHandle, isQosLane, isAsync);
+    if (laneHandle == INVALID_LANE_REQ_ID) {
+        return;
     }
+    if (isQosLane) {
+        TransFreeLaneByLaneHandle(laneHandle, isAsync);
+        return;
+    }
+    LnnFreeLane(laneHandle);
 }
 
 void TransReportBadKeyEvent(int32_t errCode, uint32_t connectionId, int64_t seq, int32_t len)
