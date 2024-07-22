@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,7 +185,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
     int32_t channelType = 22;
     TRANS_LOGI(TRANS_TEST, "TransLaneMgrDelLane001 start");
     TransLaneMgrDeinit();
-    int32_t ret = TransLaneMgrDelLane(channelId, channelType);
+    int32_t ret = TransLaneMgrDelLane(channelId, channelType, true);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransLaneMgrInit();
@@ -193,7 +193,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
     TransLaneMgrDeinit();
     channelId = -1;
     channelType = 9999999;
-    ret = TransLaneMgrDelLane(channelId, channelType);
+    ret = TransLaneMgrDelLane(channelId, channelType, true);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     TRANS_LOGI(TRANS_TEST, "TransLaneMgrDelLane001 end");
 }

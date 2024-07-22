@@ -161,7 +161,7 @@ void TransLaneMgrDeinit(void)
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, nextLaneItem, &g_channelLaneList->list, TransLaneInfo, node) {
         ListDelete(&(laneItem->node));
         if (laneItem->isQosLane) {
-            TransFreeLaneByLaneHandle(laneItem->laneHandle, false);
+            TransFreeLaneByLaneHandle(laneItem->laneHandle, true);
         } else {
             LnnFreeLane(laneItem->laneHandle);
         }
@@ -243,7 +243,7 @@ int32_t TransLaneMgrAddLane(
     return SOFTBUS_OK;
 }
 
-int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
+int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType, bool isAsync)
 {
     if (g_channelLaneList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
@@ -262,7 +262,7 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
                 laneItem->channelId, laneItem->channelType);
             g_channelLaneList->cnt--;
             if (laneItem->isQosLane) {
-                TransFreeLaneByLaneHandle(laneItem->laneHandle, false);
+                TransFreeLaneByLaneHandle(laneItem->laneHandle, isAsync);
             } else {
                 LnnFreeLane(laneItem->laneHandle);
             }
@@ -272,8 +272,7 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane not found. channelId=%{public}d, channelType=%{public}d",
-        channelId, channelType);
+    TRANS_LOGW(TRANS_SVC, "No lane to be is found. channelId=%{public}d.", channelId);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
@@ -298,7 +297,7 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
             TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
                 pkgName, laneItem->channelId, laneItem->channelType);
             if (laneItem->isQosLane) {
-                TransFreeLaneByLaneHandle(laneItem->laneHandle, false);
+                TransFreeLaneByLaneHandle(laneItem->laneHandle, true);
             } else {
                 LnnFreeLane(laneItem->laneHandle);
             }
