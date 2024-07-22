@@ -33,7 +33,6 @@ int32_t AuthWaitingRequestCallback(int64_t authId);
 int32_t AuthNotifyResultByUuid(const char *uuid, int32_t reason, int64_t *authId);
 int32_t UpdateAuthSyncPtkInfoStatus(int64_t authId);
 int64_t GetAuthIdFromAuthSyncPtkInfo(const char *uuid);
-
 int32_t AuthMetaInitPtkProc(void);
 void AuthMetaDeinitPtkProc(void);
 
