@@ -106,28 +106,30 @@ static void DelHmlListenerByMoudle(ListenerModule type)
 {
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
-    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock fail");
-        return;
-    }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (item->moudleType == type) {
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL,
+                "del hmlListener port=%{public}d, listenerModule=%{public}d",
+                item->myPort, (int32_t)item->moudleType);
             SoftBusFree(item);
             g_hmlListenerList->cnt--;
-            (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
             return;
         }
     }
-    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
 }
 
 void StopHmlListener(ListenerModule module)
 {
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock fail");
+        return;
+    }
     if (StopBaseListener(module) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "StopHmlListener stop listener fail. module=%{public}d", module);
     }
     DelHmlListenerByMoudle(module);
+    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
 }
 
 void StopP2pSessionListener()
@@ -174,6 +176,9 @@ static void ClearP2pSessionConn(void)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED && item->appInfo.routeType == WIFI_P2P) {
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL,
+                "clear sessionConn pkgName=%{public}s, pid=%{public}d, status=%{public}u, channelId=%{public}d",
+                item->appInfo.myData.pkgName, item->appInfo.myData.pid, item->status, item->channelId);
             sessionList->cnt--;
             ListAdd(&tempSessionConnList, &item->node);
         }
@@ -372,7 +377,10 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     }
     int32_t channelId = INVALID_CHANNEL_ID;
     SessionConn *conn = NULL;
-
+    char myDataAddr[IP_LEN] = {0};
+    char peerDataAddr[IP_LEN] = {0};
+    int32_t myDataPort = 0;
+    int64_t reqNum = 0;
     if (GetSessionConnLock() != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -385,10 +393,17 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     channelId = conn->channelId;
     conn->authHandle = authHandle;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
+    if (strcpy_s(myDataAddr, sizeof(myDataAddr), conn->appInfo.myData.addr) != EOK ||
+        strcpy_s(peerDataAddr, sizeof(peerDataAddr), conn->appInfo.peerData.addr) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "strcpy failed.");
+        ReleaseSessionConnLock();
+        goto EXIT_ERR;
+    }
+    myDataPort = conn->appInfo.myData.port;
+    reqNum = conn->req;
     ReleaseSessionConnLock();
 
-    if (VerifyP2p(authHandle, conn->appInfo.myData.addr, conn->appInfo.peerData.addr,
-        conn->appInfo.myData.port, conn->req) != SOFTBUS_OK) {
+    if (VerifyP2p(authHandle, myDataAddr, peerDataAddr, myDataPort, reqNum) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "verify p2p fail");
         goto EXIT_ERR;
     }
@@ -765,7 +780,7 @@ static void OnAuthDataRecv(AuthHandle authHandle, const AuthTransData *data)
 static void OnAuthChannelClose(AuthHandle authHandle)
 {
     int32_t num = 0;
-    int32_t *channelIds = GetChannelIdsByAuthIdAndStatus(&num, authHandle.authId, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
+    int32_t *channelIds = GetChannelIdsByAuthIdAndStatus(&num, &authHandle, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
     if (channelIds == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Fail to get channel ids with auth id %{public}" PRId64, authHandle.authId);
         return;
@@ -984,6 +999,7 @@ int32_t P2pDirectChannelInit(void)
     AuthTransListener p2pTransCb = {
         .onDataReceived = OnAuthDataRecv,
         .onDisconnected = OnAuthChannelClose,
+        .onException = NULL,
     };
 
     ret = RegAuthTransListener(MODULE_P2P_LISTEN, &p2pTransCb);

@@ -112,16 +112,12 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
     GearMode mode;
     int32_t ret = LnnShiftLNNGear(nullptr, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
     ret = LnnShiftLNNGear(PKGNAME, nullptr, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -145,10 +141,8 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSi
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_NOT_IMPLEMENT);
     ret = LnnShiftLNNGearWithoutPkgName(nullptr, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_NOT_IMPLEMENT);
-
     ret = LnnShiftLNNGearWithoutPkgName(CALLERID, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
     EXPECT_TRUE(ret == SOFTBUS_ERR || ret == SOFTBUS_NOT_IMPLEMENT);
-
     ret = LnnShiftLNNGearWithoutPkgName(CALLERID, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
     EXPECT_TRUE(ret == SOFTBUS_ERR || ret == SOFTBUS_NOT_IMPLEMENT);
 }
@@ -181,3 +175,4 @@ HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
+

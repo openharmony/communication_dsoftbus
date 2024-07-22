@@ -219,7 +219,7 @@ static int32_t ParseDeviceJsonData(const cJSON *data, DeviceInfo *dev)
 
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_HICOM_VERSION);
     if (!cJSON_IsString(item) || !strlen(item->valuestring)) {
-        DFINDER_LOGW(TAG, "Can't find hicom version");
+        DFINDER_LOGD(TAG, "Can't find hicom version");
         return NSTACKX_EOK;
     }
     if (strcpy_s(dev->version, sizeof(dev->version), item->valuestring) != EOK) {
@@ -312,19 +312,19 @@ static void ParseExtendServiceDataJsonData(const cJSON *data, DeviceInfo *dev)
     cJSON *item = NULL;
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_EXTEND_SERVICE_DATA);
     if (item == NULL) {
-        DFINDER_LOGE(TAG, "Cannot get service data");
+        DFINDER_LOGD(TAG, "Cannot get service data");
         return;
     }
     if (!cJSON_IsString(item)) {
-        DFINDER_LOGE(TAG, "Cannot find extendServiceData");
+        DFINDER_LOGD(TAG, "Cannot find extendServiceData");
         return;
     }
     if (item->valuestring == NULL) {
-        DFINDER_LOGE(TAG, "item->valuestring is null");
+        DFINDER_LOGD(TAG, "item->valuestring is null");
         return;
     }
     if (strcpy_s(dev->extendServiceData, sizeof(dev->extendServiceData), item->valuestring)) {
-        DFINDER_LOGE(TAG, "parse device extendServiceData error");
+        DFINDER_LOGD(TAG, "parse device extendServiceData error");
         return;
     }
 }

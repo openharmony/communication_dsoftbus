@@ -326,6 +326,10 @@ int32_t ConnBrPostBytes(
         FreeSendNode(node);
         return status;
     }
+    CONN_LOGI(CONN_BR,
+        "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
+        "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
+        connectionId, pid, len, flag, module, seq);
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBrSendLPInfo.lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, CONN_BR, "lock fail!");
     g_startBrSendLPInfo.messagePosted = true;
@@ -338,13 +342,10 @@ int32_t ConnBrPostBytes(
         }
         g_startBrSendLPInfo.sendTaskRunning = true;
         SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
-        CONN_LOGI(CONN_BR, "start br send task succ");
+        CONN_LOGD(CONN_BR, "start br send task succ");
+        return SOFTBUS_OK;
     }
     SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
-    CONN_LOGI(CONN_BR,
-        "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
-        "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
-        connectionId, pid, len, flag, module, seq);
     return SOFTBUS_OK;
 }
 
@@ -436,22 +437,25 @@ void *SendHandlerLoop(void *arg)
     while (true) {
         int32_t status = ConnBrDequeueBlock((void **)(&sendNode));
         if (status == SOFTBUS_TIMOUT && sendNode == NULL) {
-            CONN_LOGW(CONN_BR, "br dequeue time out err=%{public}d,", status);
-            status = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
-            CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_BR, "lock fail!");
+            CONN_LOGD(CONN_BR, "br dequeue time out err=%{public}d", status);
+            CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBrSendLPInfo.lock) == SOFTBUS_OK,
+                NULL, CONN_BR, "lock fail!");
             if (g_startBrSendLPInfo.messagePosted) {
+                CONN_LOGE(CONN_BR, "message posted not quit");
                 g_startBrSendLPInfo.messagePosted = false;
                 SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
                 continue;
             }
             g_startBrSendLPInfo.sendTaskRunning = false;
             SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
+            CONN_LOGE(CONN_BR, "quit send loop");
             break;
         }
-        status = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
-        if (status != SOFTBUS_OK) {
+        int32_t ret = SoftBusMutexLock(&g_startBrSendLPInfo.lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "lock fail!");
             FreeSendNode(sendNode);
+            sendNode = NULL;
             return NULL;
         }
         g_startBrSendLPInfo.messagePosted = false;
@@ -467,6 +471,7 @@ void *SendHandlerLoop(void *arg)
             g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
                 sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR);
             FreeSendNode(sendNode);
+            sendNode = NULL;
             continue;
         }
 
@@ -477,17 +482,19 @@ void *SendHandlerLoop(void *arg)
                 sendNode->module, sendNode->seq, SOFTBUS_LOCK_ERR);
             ConnBrReturnConnection(&connection);
             FreeSendNode(sendNode);
+            sendNode = NULL;
             continue;
         }
 
-        int32_t sockerHandle = connection->socketHandle;
-        if (sockerHandle == INVALID_SOCKET_HANDLE) {
+        int32_t socketHandle = connection->socketHandle;
+        if (socketHandle == INVALID_SOCKET_HANDLE) {
             CONN_LOGE(CONN_BR, "br send data failed: invalid socket, connectionId=%{public}u", sendNode->connectionId);
             (void)SoftBusMutexUnlock(&connection->lock);
             ConnBrReturnConnection(&connection);
             g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
                 sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_INVALID_SOCKET);
             FreeSendNode(sendNode);
+            sendNode = NULL;
             continue;
         }
 
@@ -505,9 +512,10 @@ void *SendHandlerLoop(void *arg)
         if (window > 1 && sequence % window == window - 1 && waitSequence != 0) {
             WaitAck(connection);
         }
-        status = BrTransSend(connection->connectionId, sockerHandle, connection->mtu, sendNode->data, sendNode->len);
+        status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, sendNode->data, sendNode->len);
         ConnBrReturnConnection(&connection);
-        CONN_LOGI(CONN_BR, "br send data, connId=%{public}u, status=%{public}d", sendNode->connectionId, status);
+        CONN_LOGD(CONN_BR, "br send data, connId=%{public}u, status=%{public}d, socketHandle=%{public}d",
+            sendNode->connectionId, status, socketHandle);
         g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
             sendNode->module, sendNode->seq, status);
         FreeSendNode(sendNode);
@@ -528,8 +536,8 @@ int32_t ConnBrTransConfigPostLimit(const LimitConfiguration *configuration)
     } else {
         ret = g_flowController->enable(g_flowController, configuration->windowInMillis, configuration->quotaInBytes);
     }
-    CONN_LOGI(CONN_BR, "config br post limit, active=%d, windows=%{public}d millis, quota=%{public}d bytes, result=%d",
-        configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
+    CONN_LOGI(CONN_BR, "config br postlimit, active=%{public}d, windows=%{public}d millis, quota=%{public}d bytes, "
+        "result=%{public}d", configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
     return ret;
 }
 

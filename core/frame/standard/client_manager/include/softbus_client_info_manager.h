@@ -23,6 +23,7 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "session.h"
 
 namespace OHOS {
 typedef std::pair<int32_t, std::pair<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>>> ClientObjPair;
@@ -32,6 +33,9 @@ public:
     int32_t SoftbusAddService(const std::string &pkgName, const sptr<IRemoteObject> &object,
         const sptr<IRemoteObject::DeathRecipient> &abilityDeath, int32_t pid);
     int32_t SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName, int32_t* pid);
+    int32_t SoftbusAddServiceInner(const std::string &pkgName, ISessionListener *listener, int32_t pid);
+    int32_t SoftbusRemoveServiceInner(const std::string &pkgName);
+    ISessionListener GetSoftbusInnerObject(const std::string &pkgName);
     sptr<IRemoteObject> GetSoftbusClientProxy(const std::string &pkgName);
     sptr<IRemoteObject> GetSoftbusClientProxy(const std::string &pkgName, int32_t pid);
     void GetSoftbusClientProxyMap(std::multimap<std::string, sptr<IRemoteObject>> &softbusClientMap);
@@ -42,6 +46,7 @@ private:
     SoftbusClientInfoManager() = default;
     std::recursive_mutex clientObjectMapLock_;
     std::unordered_multimap<std::string, ClientObjPair> clientObjectMap_;
+    std::map<std::string, ISessionListener> innerObjectMap_;
     DISALLOW_COPY_AND_MOVE(SoftbusClientInfoManager);
 };
 } // namespace OHOS

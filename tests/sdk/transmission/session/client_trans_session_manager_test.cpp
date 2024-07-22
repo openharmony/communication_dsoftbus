@@ -139,6 +139,7 @@ static SessionInfo *GenerateSession(const SessionParam *param)
     session->fileEncrypt = TRANS_TEST_FILE_ENCRYPT;
     session->crc = TRANS_TEST_CRC;
     session->isAsync = param->isAsync;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
     return session;
 }
 

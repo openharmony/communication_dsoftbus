@@ -1061,7 +1061,6 @@ typedef struct {
 
 static void RegisterCapabilityInner(void *argument)
 {
-    DFINDER_LOGI(TAG, "Register Capability Inner");
     CapabilityProcessData *capabilityData = argument;
 
     (void)SetLocalDeviceCapability(capabilityData->capabilityBitmapNum, capabilityData->capabilityBitmap);
@@ -1120,7 +1119,7 @@ static int32_t NSTACKX_CapabilityHandle(uint32_t capabilityBitmapNum, uint32_t c
 
 int32_t NSTACKX_RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
-    DFINDER_LOGI(TAG, "Register Capability");
+    DFINDER_LOGD(TAG, "begin to call NSTACKX_RegisterCapability");
     return NSTACKX_CapabilityHandle(capabilityBitmapNum, capabilityBitmap, RegisterCapabilityInner);
 }
 
@@ -1221,7 +1220,6 @@ int32_t NSTACKX_ScreenStatusChange(bool isScreenOn)
 
 static void RegisterServiceDataInner(void *argument)
 {
-    DFINDER_LOGI(TAG, "Register Service Data Inner");
     char *serviceData = argument;
     if (SetLocalDeviceServiceData(serviceData) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "RegisterServiceData failed");
@@ -1233,7 +1231,7 @@ int32_t NSTACKX_RegisterServiceData(const char *serviceData)
 {
     Coverity_Tainted_Set((void *)serviceData);
 
-    DFINDER_LOGI(TAG, "Register Service Data");
+    DFINDER_LOGD(TAG, "begin to call NSTACKX_RegisterServiceData");
     char *serviceDataTmp = NULL;
 
     if (serviceData == NULL) {

@@ -59,8 +59,9 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         screenState = SOFTBUS_SCREEN_OFF;
     } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         screenState = SOFTBUS_SCREEN_ON;
-    } else if (action == CommonEventSupport::COMMON_EVENT_USER_UNLOCKED ||
-        action == CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
+    } else if (action == CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
+        LnnNotifyScreenLockStateChangeEvent(SOFTBUS_USER_UNLOCK);
+    } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
         LnnNotifyScreenLockStateChangeEvent(SOFTBUS_SCREEN_UNLOCK);
     }
     if (screenState != SOFTBUS_SCREEN_UNKNOWN) {
@@ -139,9 +140,9 @@ static void LnnSubscribeCommonEvent(void *para)
 int32_t LnnInitCommonEventMonitorImpl(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeCommonEvent, NULL, DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackHelper(looper, LnnSubscribeCommonEvent, NULL);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
+        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackHelper fail");
     }
     return ret;
 }

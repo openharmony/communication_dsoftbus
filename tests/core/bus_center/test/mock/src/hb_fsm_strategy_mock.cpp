@@ -21,6 +21,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 void *g_hbFSMStrategyInterface;
+
 HeartBeatFSMStrategyInterfaceMock::HeartBeatFSMStrategyInterfaceMock()
 {
     g_hbFSMStrategyInterface = reinterpret_cast<void *>(this);
@@ -174,5 +175,11 @@ bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->IsFeatureSupport(feature, capaBit);
 }
+
+uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->GenerateRandomNumForHb(randMin, randMax);
+}
 }
 } // namespace OHOS
+

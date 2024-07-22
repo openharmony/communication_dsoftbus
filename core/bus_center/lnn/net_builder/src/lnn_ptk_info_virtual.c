@@ -57,9 +57,52 @@ int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
     return SOFTBUS_OK;
 }
 
+int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
+{
+    (void)uuid;
+    (void)localPtk;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len)
+{
+    (void)uuid;
+    (void)remotePtk;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
 int32_t LnnSyncPtk(char *networkId)
 {
     (void)networkId;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGenerateMetaPtk(uint32_t connId)
+{
+    (void)connId;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetMetaPtk(uint32_t connId, char *metaPtk, uint32_t len)
+{
+    (void)connId;
+    (void)metaPtk;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnDeleteMetaPtk(uint32_t connectionId)
+{
+    (void)connectionId;
+    return SOFTBUS_OK;
+}
+
+int32_t UpdatePtkByAuth(char *networkId, AuthHandle authHandle)
+{
+    (void)networkId;
+    (void)authHandle;
     return SOFTBUS_OK;
 }
 

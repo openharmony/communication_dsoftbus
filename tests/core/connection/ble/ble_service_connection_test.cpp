@@ -35,6 +35,7 @@
 #include "softbus_conn_ble_client.h"
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_ble_connection.h"
+#include "softbus_utils.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -197,13 +198,13 @@ HWTEST_F(ServiceConnectionTest, ClientConnection001, TestSize.Level1)
     ret = ConnGattClientConnect(NULL);
     EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
 
-    EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = ConnGattClientConnect(&connection);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     connection.fastestConnectEnable = true;
     EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(bleMock, SoftbusGattcConnect).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, SoftbusGattcConnect).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = ConnGattClientConnect(&connection);
     EXPECT_EQ(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR, ret);
 
@@ -242,7 +243,7 @@ HWTEST_F(ServiceConnectionTest, ClientConnection002, TestSize.Level1)
     connection.underlayerHandle = 1;
     connection.connectionId = 1;
     SoftBusMutexInit(&connection.lock, nullptr);
-    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = ConnGattClientDisconnect(&connection, grace, refreshGatt);
     EXPECT_EQ(SOFTBUS_GATTC_INTERFACE_FAILED, ret);
 
@@ -371,5 +372,124 @@ HWTEST_F(ServiceConnectionTest, ConnGattClientDisconnect002, TestSize.Level1)
     EXPECT_CALL(bleMock, BleGattcUnRegister).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ConnGattClientDisconnect(connection, true, false);
     EXPECT_EQ(SOFTBUS_GATTC_INTERFACE_FAILED, ret);
+}
+
+/*
+* @tc.name: ConnGattClientSend
+* @tc.desc: Test ConnGattClientSend.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ServiceConnectionTest, ConnGattClientSend, TestSize.Level1)
+{
+    ConnBleConnection bleConnection = {{0}};
+
+    int32_t ret = SoftBusMutexInit(&bleConnection.lock, NULL);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    bleConnection.connectionId = 10;
+    bleConnection.underlayerHandle = 0;
+    uint8_t data[] = "testdata";
+    uint32_t dataLen = sizeof(data);
+    ret = ConnGattClientSend(&bleConnection, data, dataLen, MODULE_BLE_NET);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    
+    ret = ConnGattClientSend(&bleConnection, data, dataLen, MODULE_BLE_CONN);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: ServiceStopCallback 001
+* @tc.desc: Test ServiceStopCallback.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ServiceConnectionTest, ServiceStopCallback001, TestSize.Level1)
+{
+    g_callback->ServiceStopCallback(SOFTBUS_INVALID_PARAM, 1);
+    SoftBusSleepMs(500);
+    g_callback->ServiceStopCallback(SOFTBUS_OK, 2);
+    SoftBusSleepMs(500);
+
+    SoftBusBtUuid uuid = {
+        .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
+    };
+    uuid.uuid = (char *)SoftBusCalloc(uuid.uuidLen+1);
+    int32_t ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
+    EXPECT_EQ(EOK, ret);
+    g_callback->ServiceAddCallback(SOFTBUS_OK, &uuid, 10);
+    SoftBusSleepMs(500);
+
+    ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
+    EXPECT_EQ(EOK, ret);
+    g_callback->ServiceAddCallback(SOFTBUS_OK, &uuid, 10);
+    SoftBusSleepMs(500);
+
+    ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_SERVICE_UUID);
+    EXPECT_EQ(EOK, ret);
+    g_callback->ServiceAddCallback(SOFTBUS_INVALID_PARAM, &uuid, 10);
+    SoftBusSleepMs(500);
+
+    ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_SERVICE_UUID);
+    EXPECT_EQ(EOK, ret);
+    g_callback->ServiceAddCallback(SOFTBUS_OK, &uuid, 10);
+
+    g_callback->ServiceAddCallback(SOFTBUS_OK, &uuid, 1);
+
+    g_callback->ServiceStopCallback(SOFTBUS_OK, 3);
+
+    g_callback->ServiceDeleteCallback(SOFTBUS_INVALID_PARAM, 1);
+    g_callback->ServiceDeleteCallback(SOFTBUS_OK, 1);
+    const char *bleAddr = "12:22:33:44:55:66";
+
+    SoftBusBtAddr addr = {
+        .addr = {0x12, 0x22, 0x33, 0x44, 0x55, 0x66},
+    };
+    ConnBleConnection *connection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_SERVER, 1, false);
+    EXPECT_NE(nullptr, connection);
+    g_callback->ConnectServerCallback(connection->underlayerHandle, &addr);
+    SoftBusSleepMs(500);
+}
+
+/*
+* @tc.name: ServiceStopCallback 001
+* @tc.desc: Test ServiceStopCallback.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ServiceConnectionTest, ServiceDeleteCallback, TestSize.Level1)
+{
+    SoftBusBtAddr addr = {
+        .addr = {0x13, 0x23, 0x33, 0x43, 0x53, 0x63},
+    };
+    g_callback->DisconnectServerCallback(20, &addr);
+
+    const char *bleAddr = "13:23:33:43:53:63";
+    ConnBleConnection *connection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_SERVER, 11, false);
+    EXPECT_NE(nullptr, connection);
+    int32_t ret = ConnBleSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    g_callback->DisconnectServerCallback(connection->underlayerHandle, &addr);
+    SoftBusGattReadRequest readCbPara = {
+        .connId = 1,
+        .transId = 1,
+    };
+    g_callback->RequestReadCallback(readCbPara);
+    g_callback->ResponseConfirmationCallback(SOFTBUS_OK, 1);
+    g_callback->NotifySentCallback(1, SOFTBUS_OK);
+    g_callback->MtuChangeCallback(4, 5);
+
+    const char *bleMac = "15:25:35:45:55:65";
+    ConnBleConnection *bleConnection = ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_SERVER, 20, false);
+    EXPECT_NE(nullptr, bleConnection);
+    ret = ConnBleSaveConnection(bleConnection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    g_callback->MtuChangeCallback(bleConnection->underlayerHandle, 5);
+    SoftBusSleepMs(500);
 }
 }

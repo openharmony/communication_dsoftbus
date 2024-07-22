@@ -26,6 +26,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
+#include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
 #include "bus_center_manager.h"
@@ -98,6 +99,17 @@ public:
     virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
     virtual int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info) = 0;
     virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
+    virtual int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info) = 0;
+    virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type) = 0;
+    virtual void LnnDumpLocalBasicInfo(void) = 0;
+    virtual void LnnDumpOnlineDeviceInfo(void) = 0;
+    virtual int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+        char *dstIdBuf, uint32_t dstIdBufLen) = 0;
+    virtual void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle) = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
+    virtual void DeleteNetworkResourceByLaneId(uint64_t laneId) = 0;
+    virtual int SoftBusGetBtState() = 0;
+    virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -149,6 +161,17 @@ public:
     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
     MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *networkId, InfoKey key, uint32_t *info));
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey key, uint32_t *info));
+    MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t (InfoKey key, uint32_t info));
+    MOCK_METHOD2(LnnSetNetCapability, int32_t (uint32_t *capability, NetCapability type));
+    MOCK_METHOD0(LnnDumpLocalBasicInfo, void (void));
+    MOCK_METHOD0(LnnDumpOnlineDeviceInfo, void (void));
+    MOCK_METHOD5(LnnConvertDlId, int32_t (const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+        char *dstIdBuf, uint32_t dstIdBufLen));
+    MOCK_METHOD3(AuthDeviceGetLatestIdByUuid, void (const char *uuid, AuthLinkType type, AuthHandle *authHandle));
+    MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *, int32_t *));
+    MOCK_METHOD1(DeleteNetworkResourceByLaneId, void (uint64_t laneId));
+    MOCK_METHOD0(SoftBusGetBtState, int (void));
+    MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **info, int32_t *infoNum));
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
         int32_t localFeatureCap, int32_t remoteFeatureCap);

@@ -163,32 +163,38 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
 {
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
     if (sessionParam == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     TestGenerateCommParam(sessionParam);
     sessionParam->sessionName = sessionName;
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
     if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        SoftBusFree(sessionParam);
+        return ret;
     }
 
     SessionInfo *session = TestGenerateSession(sessionParam);
     if (session == NULL) {
-        return SOFTBUS_ERR;
+        SoftBusFree(sessionParam);
+        return SOFTBUS_MALLOC_ERR;
     }
 
     session->channelType = (ChannelType)channelType;
     session->isServer = isServer;
     ret = ClientAddNewSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        SoftBusFree(session);
+        SoftBusFree(sessionParam);
+        return ret;
     }
 
     int32_t sessionId = 0;
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId);
     if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        SoftBusFree(session);
+        SoftBusFree(sessionParam);
+        return ret;
     }
 
     SoftBusFree(sessionParam);
@@ -331,7 +337,7 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest03, TestSiz
     ret = ClientDeleteSession(sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(sessionParam);

@@ -69,6 +69,8 @@ static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
         if (udpChannel->info.fastTransData != NULL) {
             SoftBusFree((void *)udpChannel->info.fastTransData);
         }
+        (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
+            sizeof(udpChannel->info.sessionKey));
         SoftBusFree(udpChannel);
     }
 }
@@ -142,6 +144,8 @@ void TransUdpChannelMgrDeinit(void)
         if (udpChannel->info.fastTransData != NULL) {
             SoftBusFree((void *)udpChannel->info.fastTransData);
         }
+        (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
+            sizeof(udpChannel->info.sessionKey));
         SoftBusFree(udpChannel);
     }
     (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
@@ -208,6 +212,8 @@ int32_t TransDelUdpChannel(int32_t channelId)
             if (udpChannelNode->info.fastTransData != NULL) {
                 SoftBusFree((void *)(udpChannelNode->info.fastTransData));
             }
+            (void)memset_s(udpChannelNode->info.sessionKey, sizeof(udpChannelNode->info.sessionKey), 0,
+                sizeof(udpChannelNode->info.sessionKey));
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -231,6 +237,8 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
         if (udpChannel->info.fastTransData != NULL) {
             SoftBusFree((void *)(udpChannel->info.fastTransData));
         }
+        (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
+            sizeof(udpChannel->info.sessionKey));
         SoftBusFree(udpChannel);
     }
 }
@@ -567,7 +575,7 @@ static int32_t ModifyUdpChannelTos(uint8_t tos)
         return SOFTBUS_LOCK_ERR;
     }
     UdpChannelInfo *udpChannelNode = NULL;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_OK;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.businessType == BUSINESS_TYPE_FILE && udpChannelNode->info.isClient &&
             udpChannelNode->tos != tos) {
@@ -636,4 +644,40 @@ bool IsUdpRecoveryTransLimit(void)
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     return true;
+}
+
+int32_t TransUdpGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
+    int32_t *connectType)
+{
+    if (localIp == NULL || maxIpLen < IP_LEN || connectType == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "udp channel manager not initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->info.myData.channelId == channelId) {
+            if (strcpy_s(localIp, maxIpLen, udpChannelNode->info.myData.addr) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "failed to strcpy localIp, channelId=%{public}d", channelId);
+                (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+                return SOFTBUS_MEM_ERR;
+            }
+            *connectType = udpChannelNode->info.connectType;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "not found locapIp and connectType by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
 }

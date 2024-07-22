@@ -175,6 +175,7 @@ typedef struct {
 typedef struct {
     void (*onDataReceived)(AuthHandle authHandle, const AuthTransData *data);
     void (*onDisconnected)(AuthHandle authHandle);
+    void (*onException)(AuthHandle authHandle, int32_t error);
 } AuthTransListener;
 int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener);
 void UnregAuthTransListener(int32_t module);

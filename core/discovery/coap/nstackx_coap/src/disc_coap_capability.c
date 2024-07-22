@@ -30,6 +30,15 @@ int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData,
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap)
+{
+    (void)option;
+    (void)outData;
+    (void)outDataLen;
+    (void)allCap;
+    return SOFTBUS_OK;
+}
+
 void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet)
 {
     (void)allCap;

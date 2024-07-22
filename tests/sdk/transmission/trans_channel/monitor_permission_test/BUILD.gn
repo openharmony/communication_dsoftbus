@@ -31,7 +31,6 @@ ohos_unittest("CheckPermissionTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [

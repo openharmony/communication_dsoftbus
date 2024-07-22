@@ -197,6 +197,7 @@
         "TransUdpChannelSendStream";
         "ServerIpcDeactiveMetaNode";
         "LnnOnNodeBasicInfoChanged";
+        "LnnOnLocalNetworkIdChanged";
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
         "ReadSessionLinkType";
@@ -363,6 +364,13 @@
         "ClientTransOnScanResultCallback";
         "ClientAddEventListener";
         "ClientDeleteEventListener";
+        "SendLinkEvent";
+        "StopLinkEvent";
+        "RegisterLinkEventListener";
+        "UnregisterLinkEventListener";
+        "ClientTransOnLinkEventCallback";
+        "ClientAddLinkEventListener";
+        "ClientDeleteLinkEventListener";
         "TransProxyPackAndSendData";
         "ClientTransProxyGetInfoByChannelId";
         "ClientTransProxyGetLinkTypeByChannelId";
@@ -423,9 +431,9 @@
         "DiscRecoveryPublish";
         "DiscRecoverySubscribe";
         "DiscRecoveryPolicy";
+        "RestartRegDataLevelChange";
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
-        "SetDeathRecipientFlag";
         "LnnOnDataLevelChanged";
         "SoftBusFtInit";
         "SoftBusFtDestroyNonblock";
@@ -517,6 +525,7 @@
         "TransOnUdpChannelBind";
         "TransOnChannelBind";
         "ResourceConflictCheck";
+        "ClientTransTdcIfChannelForSocket";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

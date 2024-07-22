@@ -31,6 +31,7 @@ declare_args() {
   softbus_os_account = true
   dsoftbus_feature_lnn_cloud_sync = true
   softbus_lnn_lp_feature = true
+  dsoftbus_build_eng = false
 }
 
 if (defined(global_parts_info) &&
@@ -79,6 +80,13 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
   import(
       "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")
+
+  if (build_variant == "root") {
+    defines += [ "BUILD_VARIANT_ENG" ]
+    dsoftbus_build_eng = true
+  } else {
+    dsoftbus_build_eng = false
+  }
 }
 
 if (defined(global_parts_info) &&

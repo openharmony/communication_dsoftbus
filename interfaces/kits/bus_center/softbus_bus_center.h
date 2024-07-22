@@ -453,6 +453,13 @@ typedef struct {
      */
     void (*onNodeBasicInfoChanged)(NodeBasicInfoType type, NodeBasicInfo *info);
     /**
+    * @brief Called when the local networkId of a device changes.
+    *
+    * @since 1.0
+    * @version 1.0
+    */
+    void (*onLocalNetworkIdChanged)(void);
+    /**
      * @brief Called when the running status of a device changes.
      *
      * @param type Indicates the device type. For details, see {@link NodeStatusType}.

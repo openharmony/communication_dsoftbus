@@ -26,11 +26,11 @@
 #include "lnn_node_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "bus_center_manager.h"
-
 
 static uint64_t GetCurrentTime(void)
 {
@@ -991,18 +991,40 @@ bool LnnSetDlPtk(const char *networkId, const char *remotePtk)
     }
     node = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (node == NULL) {
+        SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         LNN_LOGE(LNN_LEDGER, "get node info fail");
-        goto EXIT;
+        return false;
     }
+    LnnDumpRemotePtk(node->remotePtk, remotePtk, "set remote ptk");
     if (LnnSetPtk(node, remotePtk) != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         LNN_LOGE(LNN_LEDGER, "set ptk fail");
-        goto EXIT;
+        return false;
+    }
+    char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (LnnGenerateHexStringHash(
+        (const unsigned char *)node->deviceInfo.deviceUdid, udidHash, SHORT_UDID_HASH_HEX_LEN) != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        LNN_LOGE(LNN_LEDGER, "Generate UDID HexStringHash fail");
+        return false;
     }
     SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    NodeInfo cacheInfo;
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfo(udidHash, &cacheInfo) != SOFTBUS_OK) {
+        LNN_LOGD(LNN_LEDGER, "no this device info in deviceCacheInfoMap, ignore update");
+        return true;
+    }
+    if (memcmp(cacheInfo.remotePtk, remotePtk, PTK_DEFAULT_LEN) == 0) {
+        LNN_LOGD(LNN_LEDGER, "ptk is same, ignore update");
+        return true;
+    }
+    if (memcpy_s(cacheInfo.remotePtk, PTK_DEFAULT_LEN, remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
+        return true;
+    }
+    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
     return true;
-EXIT:
-    SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-    return false;
 }
 
 int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len)
@@ -1209,10 +1231,7 @@ int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, 
 {
     uint32_t i;
     int32_t ret;
-    if (!IsValidString(networkId, ID_MAX_LEN)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (info == NULL) {
+    if (!IsValidString(networkId, ID_MAX_LEN) || info == NULL) {
         LNN_LOGE(LNN_LEDGER, "para error.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1690,7 +1709,6 @@ int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp)
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }
-
 
 bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
 {

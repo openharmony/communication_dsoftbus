@@ -31,12 +31,12 @@ ohos_unittest("DiscCoapParserTest") {
   deps = [
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/cJSON:cjson",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 }

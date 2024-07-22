@@ -46,7 +46,7 @@ typedef enum {
 } AuthFsmStateIndex;
 
 typedef enum {
-    EXCHANHE_UDID = 0,
+    EXCHANGE_UDID = 0,
     EXCHANGE_NETWORKID,
     EXCHANGE_FAIL,
     EXCHANGE_TYPE_MAX
@@ -94,6 +94,7 @@ typedef struct {
     SessionKey *normalizedKey;
     int64_t normalizedIndex;
     bool isOldKey;
+    bool isSavedSessionKey;
     AuthStartState localState;
     AuthStartState peerState;
 } AuthSessionInfo;
@@ -130,6 +131,7 @@ int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint
 int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
+int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
 int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
 int32_t AuthNotifyRequestVerify(int64_t authSeq);

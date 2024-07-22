@@ -295,12 +295,6 @@ static int32_t ProcessVerifyResult(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (msgPara->retCode == SOFTBUS_OK && msgPara->nodeInfo == NULL) {
-        LNN_LOGE(LNN_BUILDER, "msgPara node Info is null");
-        SoftBusFree((void *)msgPara);
-        return SOFTBUS_INVALID_PARAM;
-    }
-
     do {
         connFsm = FindConnectionFsmByRequestId(msgPara->requestId);
         if (connFsm == NULL || connFsm->isDead) {
@@ -308,15 +302,21 @@ static int32_t ProcessVerifyResult(const void *para)
             rc = SOFTBUS_NETWORK_NOT_FOUND;
             break;
         }
-        LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm auth done, type=%{public}d, authId=%{public}"
+        LNN_LOGI(LNN_BUILDER, "[id=%{public}u] connection fsm auth done, type=%{public}d, authId=%{public}"
             PRId64 ", retCode=%{public}d", connFsm->id, msgPara->authHandle.type,
             msgPara->authHandle.authId, msgPara->retCode);
         if (msgPara->retCode == SOFTBUS_OK) {
+            if (msgPara->nodeInfo == NULL) {
+                LNN_LOGE(LNN_BUILDER, "msgPara node Info is null, stop fsm [id=%{public}u]", connFsm->id);
+                StopConnectionFsm(connFsm);
+                rc = SOFTBUS_ERR;
+                break;
+            }
             connFsm->connInfo.authHandle = msgPara->authHandle;
             connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
         }
         if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "send auth result to connection failed. fsmId=%{public}u", connFsm->id);
+            LNN_LOGE(LNN_BUILDER, "send auth result to connection failed. [id=%{public}u]", connFsm->id);
             connFsm->connInfo.nodeInfo = NULL;
             rc = SOFTBUS_ERR;
             break;

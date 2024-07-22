@@ -63,7 +63,8 @@ typedef struct {
     bool isRelay;
     bool isSyncData;
     bool isFirstBegin;
-    bool isNeedUpdataData;
+    bool isNeedRestart;
+    bool hasScanRsp;
 } LnnHeartbeatSendBeginData;
 
 typedef struct {

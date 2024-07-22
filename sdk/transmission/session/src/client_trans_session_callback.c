@@ -16,6 +16,7 @@
 #include "client_trans_session_callback.h"
 
 #include <securec.h>
+#include <unistd.h>
 
 #include "anonymizer.h"
 #include "client_trans_proxy_manager.h"
@@ -472,7 +473,7 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
             }
             break;
         default:
-            TRANS_LOGE(TRANS_FILE, "revc unknown session type");
+            TRANS_LOGE(TRANS_FILE, "revc unknown session type = %{public}d", type);
             return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
 
@@ -544,12 +545,12 @@ int32_t ClientTransOnChannelBind(int32_t channelId, int32_t channelType)
 
     if (!sessionCallback.isSocketListener) {
         TRANS_LOGW(TRANS_SDK, "QoS recv session callback channelId=%{public}d", channelId);
-        return SOFTBUS_OK;
+        return SOFTBUS_NOT_NEED_UPDATE;
     }
 
     if (!isServer) {
         TRANS_LOGW(TRANS_SDK, "only server need OnChannelBind channelId=%{public}d", channelId);
-        return SOFTBUS_OK;
+        return SOFTBUS_NOT_NEED_UPDATE;
     }
 
     ISocketListener *listener = &sessionCallback.socketServer;
@@ -559,6 +560,28 @@ int32_t ClientTransOnChannelBind(int32_t channelId, int32_t channelType)
         return ret;
     }
     TRANS_LOGI(TRANS_SDK, "ok, channelId=%{public}d", channelId);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientTransIfChannelForSocket(const char *sessionName, bool *isSocket)
+{
+    if (sessionName == NULL || isSocket == NULL) {
+        TRANS_LOGE(TRANS_SDK, "sessionName or isSocket is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = ClientGetSessionCallbackAdapterByName(sessionName, &sessionCallback);
+    if (ret != SOFTBUS_OK) {
+        char *tmpName = NULL;
+        Anonymize(sessionName, &tmpName);
+        TRANS_LOGE(TRANS_SDK, "get session callback failed, sessionName=%{public}s", tmpName);
+        AnonymizeFree(tmpName);
+        return ret;
+    }
+
+    *isSocket = sessionCallback.isSocketListener;
     return SOFTBUS_OK;
 }
 
@@ -575,5 +598,6 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnRawStreamEncryptDefOptGet = ClientRawStreamEncryptDefOptGet;
     g_sessionCb.OnRawStreamEncryptOptGet = ClientRawStreamEncryptOptGet;
     g_sessionCb.OnChannelBind = ClientTransOnChannelBind;
+    g_sessionCb.IfChannelForSocket = ClientTransIfChannelForSocket;
     return &g_sessionCb;
 }

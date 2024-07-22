@@ -42,6 +42,7 @@ extern "C" {
 #define CHANNEL_LIST_STR_LEN  256
 
 #define SESSION_KEY_STR_LEN 65
+#define PTK_STR_LEN 65
 
 #define BROADCAST_IV_LEN 16
 #define BROADCAST_IV_STR_LEN 33
@@ -186,6 +187,9 @@ typedef struct {
     uint64_t bleDirectTimestamp;
     uint64_t onlinetTimestamp;
     uint64_t updateTimestamp;
+    bool isAuthExchangeUdid;
+    bool isSupportIpv6;
+    uint32_t stateVersionReason;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
@@ -239,6 +243,7 @@ int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
 int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
+void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log);
 int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
 const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 #ifdef __cplusplus

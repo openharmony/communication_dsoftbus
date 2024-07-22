@@ -326,12 +326,15 @@ static void FreeDiscInfo(DiscInfo *info, const ServiceType type)
 {
     if ((type == PUBLISH_SERVICE) || (type == PUBLISH_INNER_SERVICE)) {
         SoftBusFree(info->option.publishOption.capabilityData);
+        info->option.publishOption.capabilityData = NULL;
     }
 
     if ((type == SUBSCRIBE_SERVICE) || (type == SUBSCRIBE_INNER_SERVICE)) {
         SoftBusFree(info->option.subscribeOption.capabilityData);
+        info->option.subscribeOption.capabilityData = NULL;
     }
     SoftBusFree(info);
+    info = NULL;
 }
 
 static bool IsInnerModule(const DiscInfo *infoNode)
@@ -534,6 +537,7 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info)
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
             DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            FreeDiscInfo(infoNode, PUBLISH_SERVICE);
             return NULL;
         }
     }
@@ -576,6 +580,7 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
             DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            FreeDiscInfo(infoNode, SUBSCRIBE_SERVICE);
             return NULL;
         }
     }
@@ -1116,6 +1121,7 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
     if (strcpy_s(container->pkgName, nameLen, pkgName) != EOK) {
         DISC_LOGE(DISC_CONTROL, "strcpy_s failed");
         SoftBusFree(container->pkgName);
+        container->pkgName = NULL;
         SoftBusFree(container);
         return NULL;
     }
@@ -1137,12 +1143,11 @@ static void CleanupPublishDiscovery(ListNode *ids, ServiceType type)
     LIST_FOR_EACH_ENTRY(it, ids, IdContainer, node) {
         if (type == PUBLISH_SERVICE) {
             ret = DiscUnPublishService(it->pkgName, it->id);
-            DISC_LOGE(DISC_CONTROL, "clean publish pkgName=%{public}s, id=%{public}d, ret=%{public}d",
+            DISC_LOGI(DISC_CONTROL, "clean publish pkgName=%{public}s, id=%{public}d, ret=%{public}d",
                 it->pkgName, it->id, ret);
-            return;
         } else if (type == SUBSCRIBE_SERVICE) {
             ret = DiscStopDiscovery(it->pkgName, it->id);
-            DISC_LOGE(DISC_CONTROL, "clean subscribe pkgName=%{public}s, id=%{public}d, ret=%{public}d",
+            DISC_LOGI(DISC_CONTROL, "clean subscribe pkgName=%{public}s, id=%{public}d, ret=%{public}d",
                 it->pkgName, it->id, ret);
         }
     }

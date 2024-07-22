@@ -21,6 +21,7 @@
 
 #include "bus_center_event.h"
 #include "disc_interface.h"
+#include "form/lnn_event_form.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_network_manager.h"
@@ -46,7 +47,8 @@ public:
     virtual void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat) = 0;
     virtual void LnnOnOhosAccountLogout(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
-    virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect) = 0;
+    virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+        bool isNeedConnect) = 0;
     virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis) = 0;
@@ -71,7 +73,7 @@ public:
     MOCK_METHOD1(LnnUpdateOhosAccount, void (bool));
     MOCK_METHOD0(LnnOnOhosAccountLogout, void (void));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
-    MOCK_METHOD2(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, bool));
+    MOCK_METHOD3(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool));
     MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t (const bool *, uint32_t));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));

@@ -195,7 +195,7 @@ int32_t TestGetUidAndPidFail(const char *sessionName, int32_t *uid, int32_t *pid
     (void)sessionName;
     (void)uid;
     (void)pid;
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 void TestCallbackSuccess(void)
@@ -222,7 +222,7 @@ void TestCallbackFail(void)
  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeErrMsgTest001, TestSize.Level1)
 {
-    char* msg = TransProxyPackHandshakeErrMsg(SOFTBUS_ERR);
+    char* msg = TransProxyPackHandshakeErrMsg(SOFTBUS_INVALID_PARAM);
     ASSERT_TRUE(NULL != msg);
 
     int32_t ret = TransProxyUnPackHandshakeErrMsg(msg, NULL, sizeof(msg));
@@ -278,7 +278,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest002, TestS
 {
     ProxyChannelInfo chan;
     ProxyChannelInfo outChannel;
-    int32_t ret = SOFTBUS_ERR;
     uint16_t fastDataSize = FAST_TRANS_DATASIZE;
 
     chan.appInfo.appType = APP_TYPE_NORMAL;
@@ -286,7 +285,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest002, TestS
     char *msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(NULL != msg);
 
-    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg), &fastDataSize);
+    int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg), &fastDataSize);
     EXPECT_NE(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
@@ -299,7 +298,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest002, TestS
  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     ProxyChannelInfo info;
     ProxyChannelInfo outChannel;
 
@@ -310,7 +308,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeMsgTest001, TestSize
     ASSERT_TRUE(NULL != msg);
 
     TestCallbackFail();
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
+    int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
 
     TestCallbackSuccess();
@@ -438,7 +436,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
 {
     ProxyMessageHead msg;
     ProxyDataInfo dataInfo;
-    int32_t ret = SOFTBUS_ERR;
 
     dataInfo.inData = (uint8_t *)"12345";
     dataInfo.inLen = strlen((const char*)dataInfo.inData);
@@ -446,7 +443,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
+    int32_t ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.cipher |= ENCRYPTED;
@@ -469,14 +466,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
 {
     ProxyMessage msg;
-    int32_t ret = SOFTBUS_ERR;
     int32_t len = sizeof(ProxyMessage);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
     ASSERT_TRUE(NULL != buf);
 
     /* test invalid len */
-    ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     /* test invalid head version */
@@ -517,7 +513,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
 {
     ProxyMessage msg, outMsg;
-    int32_t ret = SOFTBUS_ERR;
     int32_t len = sizeof(ProxyMessage);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
@@ -529,7 +524,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
     /* test normal message encrypte */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
@@ -547,7 +542,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize.Level1)
 {
     ProxyMessage msg, outMsg;
-    int32_t ret = SOFTBUS_ERR;
     int32_t len = sizeof(ProxyMessage);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
@@ -566,7 +560,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize
     brInfo.type = CONNECT_BR;
 
     /* test get auth connection info or type err */
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test auth connection type is invalid */
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
@@ -642,12 +636,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest001, TestSize.Le
   */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     int32_t retCode = -1;
     uint32_t connId = -1;
     ProxyChannelInfo channelInfo;
     /* test channelInfo is null */
-    ret = TransProxyAckHandshake(connId, NULL, retCode);
+    int32_t ret = TransProxyAckHandshake(connId, NULL, retCode);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     /* test payLoad is NULL */
@@ -656,7 +649,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest001, TestSize
     ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test retCode not SOFTBUS_OK and pack message fail */
-    retCode = SOFTBUS_ERR;
+    retCode = SOFTBUS_INVALID_PARAM;
     ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test pack message success and send fail */
@@ -708,10 +701,9 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyKeepAliveTest001, TestSize.Le
   */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyResetPeerTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     ProxyChannelInfo chanInfo;
 
-    ret = TransProxyResetPeer(NULL);
+    int32_t ret = TransProxyResetPeer(NULL);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     /* test apptype is inner, and pack message fail */
@@ -893,11 +885,10 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyEncryptFastDataTest001, TestS
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, TestSize.Level1)
 {
     ProxyMessage msg;
-    int32_t ret = SOFTBUS_ERR;
     int32_t len = sizeof(ProxyMessage);
     char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
     ASSERT_TRUE(NULL != buf);
-    ret = TransProxyParseMessageHead(buf, len, &msg);
+    int32_t ret = TransProxyParseMessageHead(buf, len, &msg);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     char *bufHead = (char *)SoftBusCalloc(sizeof(ProxyMessage)+2);
@@ -1067,7 +1058,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest00
 /**
   * @tc.name: GetBrMacFromConnInfoTest001
   * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid len or null mac.
-  * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+  * @tc.desc: Should return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT when given invalid parameter.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -1113,7 +1104,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackPlaintextMessageTest001, TestSize.L
 
 /**
   * @tc.name: PackHandshakeMsgForFastDataTest001
-  * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+  * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given invalid parameter.
   * @tc.type: FUNC
   * @tc.require:
   */

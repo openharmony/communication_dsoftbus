@@ -163,7 +163,7 @@ int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer)
     LIST_FOR_EACH_ENTRY(item, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (item->connId == connId && item->isServerSide == isServer) {
             item->ref++;
-            TRANS_LOGI(TRANS_CTRL, "add connId=%{public}u, proexyConnRef=%{public}d.", connId, item->ref);
+            TRANS_LOGI(TRANS_CTRL, "add connId=%{public}u, proxyConnRef=%{public}d.", connId, item->ref);
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_OK;
         }
@@ -707,8 +707,7 @@ static int32_t TransProxyConnectDevice(const ConnectOption *connInfo, uint32_t r
     }
 }
 
-static int32_t TransProxyOpenNewConnChannel(
-    ListenerModule moduleId, ProxyChannelInfo *chan, const ConnectOption *connInfo, int32_t channelId)
+static int32_t TransProxyOpenNewConnChannel(ListenerModule moduleId, const ConnectOption *connInfo, int32_t channelId)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(channelId + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
@@ -735,7 +734,7 @@ static int32_t TransProxyOpenNewConnChannel(
     connChan->ref = 0;
     connChan->isServerSide = false;
 
-    TRANS_LOGI(TRANS_CTRL, "Connect dev requestId=%{public}u", requestId);
+    TRANS_LOGI(TRANS_CTRL, "Connect dev, channelId=%{public}d, requestId=%{public}u", channelId, requestId);
     connChan->connInfo = (*connInfo);
     if (connInfo->type == CONNECT_TCP) {
         connChan->connInfo.socketOption.moduleId = moduleId;
@@ -799,10 +798,10 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     if (TransGetConn(connInfo, &conn, false) == SOFTBUS_OK) {
         ret = TransProxyConnExistProc(&conn, chan, chanNewId);
         if (ret == SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED) {
-            ret = TransProxyOpenNewConnChannel(PROXY, chan, connInfo, chanNewId);
+            ret = TransProxyOpenNewConnChannel(PROXY, connInfo, chanNewId);
         }
     } else {
-        ret = TransProxyOpenNewConnChannel(PROXY, chan, connInfo, chanNewId);
+        ret = TransProxyOpenNewConnChannel(PROXY, connInfo, chanNewId);
         if ((ret == SOFTBUS_TRANS_PROXY_CONN_REPEAT) && (TransGetConn(connInfo, &conn, false) == SOFTBUS_OK)) {
             ret = TransProxyConnExistProc(&conn, chan, chanNewId);
         }

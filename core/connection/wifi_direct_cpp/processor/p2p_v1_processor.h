@@ -117,6 +117,8 @@ private:
     int ProcessConnectResponseWithGcInfoAsNone(std::shared_ptr<NegotiateCommand> &command);
     int ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<NegotiateCommand> &command);
 
+    int UpdateWhenConnectSuccess(std::string groupConfig, const NegotiateMessage &msg);
+
     int CreateGroup(const NegotiateMessage &msg);
     int ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel);
     static bool IsNeedDhcp(const std::string &gcIp, const std::string &groupConfig);
@@ -138,6 +140,7 @@ private:
     int GetFinalRoleAsGc(WifiDirectRole peerRole, WifiDirectRole expectedRole, const std::string &localGoMac,
         const std::string &remoteGoMac);
     int GetFinalRoleAsNone(WifiDirectRole peerRole, WifiDirectRole expectedRole);
+    int GenerateSinkLink(WifiDirectSinkLink &sinkLink);
 
     void CleanupIfNeed(int32_t ret, const std::string &remoteDeviceId);
     void Exclusive(const std::string &remoteDeviceId);
@@ -155,6 +158,8 @@ private:
 
     std::shared_ptr<ConnectCommand> connectCommand_;
     std::string clientJoiningMac_;
+
+    bool active_;
 
     Utils::Timer timer_;
     uint32_t timerId_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,10 +120,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize
     AppInfo appInfo;
     appInfo.appType = APP_TYPE_AUTH;
     int32_t channelId = -1;
-    int32_t ret = SOFTBUS_ERR;
     ConnectOption connInfo;
     connInfo.type = CONNECT_TCP;
-    ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
+    int32_t ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
     connInfo.type = CONNECT_BR;
     ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
@@ -291,8 +290,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnExistProc001, TestSize.Level
     conn.connInfo.type = CONNECT_BR;
     conn.state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
     chan.isServer = false;
-    int32_t ret = SOFTBUS_ERR;
-    ret = TransProxyConnExistProc(&conn, &chan, chanNewId);
+    int32_t ret = TransProxyConnExistProc(&conn, &chan, chanNewId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     conn.state = PROXY_CHANNEL_STATUS_HANDSHAKEING;
@@ -311,30 +309,11 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnectDevice001, TestSize.Level
     ConnectOption connInfo;
     connInfo.type = CONNECT_BLE_DIRECT;
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
-    int32_t ret = SOFTBUS_ERR;
-    ret = TransProxyConnectDevice(&connInfo, reqId);
+    int32_t ret = TransProxyConnectDevice(&connInfo, reqId);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     connInfo.type = CONNECT_TYPE_MAX;
     ret = TransProxyConnectDevice(&connInfo, reqId);
-    EXPECT_NE(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: TransProxyOpenNewConnChannel001
- * @tc.desc: test TransProxyOpenNewConnChannel.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenNewConnChannel001, TestSize.Level1)
-{
-    int32_t channelId = -1;
-    ConnectOption connInfo;
-    ProxyChannelInfo chan;
-    ListenerModule moduleId = PROXY;
-    int32_t ret = SOFTBUS_ERR;
-    connInfo.type = CONNECT_TCP;
-    ret = TransProxyOpenNewConnChannel(moduleId, &chan, &connInfo, channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -348,11 +327,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessagel001, TestSize.
 {
     int32_t channelId = -1;
     ConnectOption connInfo;
-    ProxyChannelInfo chan;
     ListenerModule moduleId = PROXY;
-    int32_t ret = SOFTBUS_ERR;
     connInfo.type = CONNECT_TCP;
-    ret = TransProxyOpenNewConnChannel(moduleId, &chan, &connInfo, channelId);
+    int32_t ret = TransProxyOpenNewConnChannel(moduleId, &connInfo, channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

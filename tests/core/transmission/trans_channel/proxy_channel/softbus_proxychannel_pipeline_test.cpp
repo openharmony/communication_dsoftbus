@@ -272,7 +272,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineGenRequestIdTest001,
 /**
   * @tc.name: TransProxyPipelineSendMessageTest001
   * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid data or msgType.
-  * @tc.desc: Should return SOFTBUS_ERR when given invalid parameters.
+  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID when given invalid parameters.
   * @tc.type: FUNC
   * @tc.require:
   */

@@ -96,6 +96,18 @@ struct WifiDirectLink {
     int channelId;
 };
 
+struct WifiDirectSinkLink {
+    char remoteUuid[UUID_BUF_LEN];
+    int channelId;
+    enum WifiDirectBandWidth bandWidth;
+    enum WifiDirectLinkType linkType;
+
+    char localIp[IP_STR_MAX_LEN];
+    char remoteIp[IP_STR_MAX_LEN];
+
+    char remoteMac[MAC_ADDR_STR_LEN];
+};
+
 enum WifiDirectNegoChannelType {
     NEGO_CHANNEL_NULL = 0,
     NEGO_CHANNEL_AUTH = 1,
@@ -135,6 +147,16 @@ enum StatisticBootLinkType {
     STATISTIC_BOOT_LINK_TYPE_NUM = 6,
 };
 
+struct WifiDirectDfxInfo {
+    enum StatisticLinkType linkType;
+    enum StatisticBootLinkType bootLinkType;
+    int renegotiate;
+    int reuse;
+    int costTime;
+    uint16_t challengeCode;
+    int32_t frequency;
+};
+
 struct WifiDirectConnectInfo {
     uint32_t requestId;
     int32_t pid;
@@ -149,11 +171,7 @@ struct WifiDirectConnectInfo {
     int32_t bandWidth;
     enum IpAddrType ipAddrType;
 
-    enum StatisticLinkType linkType;
-    enum StatisticBootLinkType bootLinkType;
-    int renegotiate;
-    int reuse;
-    int costTime;
+    struct WifiDirectDfxInfo dfxInfo;
     uint64_t timeoutInMs;
 };
 

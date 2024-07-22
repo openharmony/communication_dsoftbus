@@ -66,6 +66,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_AUTH_SYNC_INFO,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_PTK_VERIFY,
+        .listener = { NULL, NULL },
     }
 };
 
@@ -80,6 +84,7 @@ int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
         if (g_moduleListener[i].module == module) {
             g_moduleListener[i].listener.onDataReceived = listener->onDataReceived;
             g_moduleListener[i].listener.onDisconnected = listener->onDisconnected;
+            g_moduleListener[i].listener.onException = listener->onException;
             return SOFTBUS_OK;
         }
     }
@@ -133,6 +138,15 @@ static void NotifyTransDisconnected(AuthHandle authHandle)
     for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].listener.onDisconnected != NULL) {
             g_moduleListener[i].listener.onDisconnected(authHandle);
+        }
+    }
+}
+
+static void NotifyTransException(AuthHandle authHandle, int32_t error)
+{
+    for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
+        if (g_moduleListener[i].listener.onException != NULL) {
+            g_moduleListener[i].listener.onException(authHandle, error);
         }
     }
 }
@@ -694,8 +708,9 @@ bool IsAuthHasTrustedRelation(void)
 int32_t AuthInit(void)
 {
     AuthTransCallback callBack = {
-        .OnDataReceived = NotifyTransDataReceived,
-        .OnDisconnected = NotifyTransDisconnected,
+        .onDataReceived = NotifyTransDataReceived,
+        .onDisconnected = NotifyTransDisconnected,
+        .onException = NotifyTransException,
     };
     int32_t ret = AuthDeviceInit(&callBack);
     if (ret == SOFTBUS_ERR || ret == SOFTBUS_INVALID_PARAM) {

@@ -19,11 +19,13 @@
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_node_info.h"
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "syspara/parameters.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_defines.h"
+#include "lnn_lane_vap_info.h"
 #include <algorithm>
 #include <arpa/inet.h>
 #include <endian.h>
@@ -133,6 +135,18 @@ int WifiDirectUtils::FrequencyToChannel(int frequency)
     }
 }
 
+int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
+{
+    char udid[UDID_BUF_LEN] {};
+    int ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get udid failed, ret = %{public}d", ret);
+    int channelIdLnn = 0;
+    ret = LnnGetRecommendChannel(udid, &channelIdLnn);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn failed, ret = %{public}d", ret);
+    return channelIdLnn;
+}
+
 std::string WifiDirectUtils::NetworkIdToUuid(const std::string &networkId)
 {
     char uuid[UUID_BUF_LEN] {};
@@ -172,6 +186,9 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
     auto ret = LnnGetLocalPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    if (ret == SOFTBUS_NOT_FIND) {
+        ret = LnnGetLocalDefaultPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get local ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
     return result;
@@ -181,7 +198,12 @@ std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetw
 {
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
+    uint8_t zeroPtkBytes[PTK_DEFAULT_LEN] {};
+    auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
     int32_t ret = LnnGetRemoteByteInfo(remoteNetworkId.c_str(), BYTE_KEY_REMOTE_PTK, ptkBytes, sizeof(ptkBytes));
+    if (ret == SOFTBUS_OK && memcmp(ptkBytes, zeroPtkBytes, PTK_DEFAULT_LEN) == 0) {
+        ret = LnnGetRemoteDefaultPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get remote ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
     return result;
@@ -325,13 +347,6 @@ bool WifiDirectUtils::SupportHml()
 {
     bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml", true);
     CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml=%{public}d", support);
-    return support;
-}
-
-bool WifiDirectUtils::SupportHmlTwo()
-{
-    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", true);
-    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%{public}d", support);
     return support;
 }
 
@@ -495,4 +510,37 @@ void WifiDirectUtils::ParallelFlowExit()
     CONN_LOGI(CONN_WIFI_DIRECT, "serialCount=%{public}d, parallelCount=%{public}d", serialCount_, parallelCount_);
     serialParallelCv_.notify_all();
 }
+
+uint32_t WifiDirectUtils::CalculateStringLength(const char *str, uint32_t size)
+{
+    for (int32_t i = static_cast<int32_t>(size - 1); i >= 0; i--) {
+        if (str[i] != '\0') {
+            return static_cast<uint32_t>(i + 1);
+        }
+    }
+    return 0;
+}
+
+void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "role=%{public}d, localMac=%{public}s, goMac=%{public}s",
+        role, WifiDirectAnonymizeMac(localMac).c_str(), WifiDirectAnonymizeMac(goMac).c_str());
+    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, role);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn p2p role failed");
+    }
+
+    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, localMac.c_str());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn my mac failed");
+    }
+
+    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, goMac.c_str());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn go mac failed");
+    }
+
+    LnnSyncP2pInfo();
+}
+
 } // namespace OHOS::SoftBus

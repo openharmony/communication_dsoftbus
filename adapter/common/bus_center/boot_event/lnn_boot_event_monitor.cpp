@@ -30,6 +30,7 @@
 static void ProcessBootEvent(void *para)
 {
     (void)para;
+    LNN_LOGI(LNN_EVENT, "start process account ready event");
     LnnUpdateOhosAccount(true);
     if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
         LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");

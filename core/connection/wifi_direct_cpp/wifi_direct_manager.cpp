@@ -29,9 +29,9 @@
 #include "utils/duration_statistic.h"
 #include "conn_event.h"
 #include "wifi_direct_role_option.h"
+#include "command/processor_selector_factory.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
-static std::recursive_mutex g_listenerLock;
 static std::list<WifiDirectStatusListener> g_listeners;
 static std::recursive_mutex g_listenerModuleIdLock;
 static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
@@ -43,24 +43,29 @@ static uint32_t GetRequestId(void)
     return g_requestId++;
 }
 
-static void SetElementType(struct WifiDirectConnectInfo *info)
+static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExtra *extra)
 {
+    extra->requestId = static_cast<int32_t>(info->requestId);
+    extra->linkType = info->connectType;
+    extra->expectRole = static_cast<int32_t>(info->expectApiRole);
+    extra->peerIp = info->remoteMac;
+
     if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
-        info->linkType = STATISTIC_P2P;
+        info->dfxInfo.linkType = STATISTIC_P2P;
     } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
-        info->linkType = STATISTIC_HML;
+        info->dfxInfo.linkType = STATISTIC_HML;
     } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
-        info->linkType = STATISTIC_TRIGGER_HML;
-        info->bootLinkType = STATISTIC_NONE;
+        info->dfxInfo.linkType = STATISTIC_TRIGGER_HML;
+        info->dfxInfo.bootLinkType = STATISTIC_NONE;
     } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
-        info->linkType = STATISTIC_TRIGGER_HML;
+        info->dfxInfo.linkType = STATISTIC_TRIGGER_HML;
     }
 
     WifiDirectNegoChannelType type = info->negoChannel.type;
     if (type == NEGO_CHANNEL_AUTH) {
-        info->bootLinkType = STATISTIC_WLAN;
+        info->dfxInfo.bootLinkType = STATISTIC_WLAN;
     } else if (type == NEGO_CHANNEL_COC) {
-        info->bootLinkType = STATISTIC_COC;
+        info->dfxInfo.bootLinkType = STATISTIC_COC;
     }
 }
 
@@ -118,17 +123,15 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
     OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
 
-    ConnEventExtra extra = { .requestId = static_cast<int32_t>(info->requestId),
-        .linkType = info->connectType,
-        .expectRole = static_cast<int32_t>(info->expectApiRole),
-        .peerIp = info->remoteMac };
+    ConnEventExtra extra;
+    SetElementTypeExtra(info, &extra);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
-    SetElementType(info);
 
     int32_t ret = OHOS::SoftBus::WifiDirectRoleOption::GetInstance().GetExpectedRole(
         info->remoteNetworkId, info->connectType, info->expectApiRole, info->isStrict);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
     ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
+
     extra.errcode = ret;
     extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
@@ -150,14 +153,17 @@ static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct Wi
 
 static void RegisterStatusListener(struct WifiDirectStatusListener *listener)
 {
-    std::lock_guard lock(g_listenerLock);
     g_listeners.push_back(*listener);
 }
 
 static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectLinkType connectType)
 {
-    CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
-    return SOFTBUS_OK;
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        remoteNetworkId != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "remote networkid is null");
+    auto selector = OHOS::SoftBus::ProcessorSelectorFactory::GetInstance().NewSelector();
+    auto processor = (*selector)(remoteNetworkId, connectType);
+    return processor->PrejudgeAvailability(connectType);
 }
 
 static void RefreshRelationShip(const char *remoteUuid, const char *remoteMac)
@@ -354,7 +360,6 @@ static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char
               OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeDeviceId(remoteUuid).c_str());
-    std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDeviceOnLine != nullptr) {
             listener.onDeviceOnLine(remoteMac, remoteIp, remoteUuid, isSource);
@@ -369,7 +374,6 @@ static void NotifyOffline(const char *remoteMac, const char *remoteIp, const cha
               OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeDeviceId(remoteUuid).c_str(),
               OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str());
-    std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDeviceOffLine != nullptr) {
             listener.onDeviceOffLine(remoteMac, remoteIp, remoteUuid, localIp);
@@ -380,7 +384,6 @@ static void NotifyOffline(const char *remoteMac, const char *remoteIp, const cha
 static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
-    std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onLocalRoleChange != nullptr) {
             listener.onLocalRoleChange(oldRole, newRole);
@@ -388,26 +391,27 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
     }
 }
 
-static void NotifyConnectedForSink(
-    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type, int channelId)
+static void NotifyConnectedForSink(const struct WifiDirectSinkLink *link)
 {
-    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
-    std::lock_guard lock(g_listenerLock);
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "remoteUuid=%{public}s, localIp=%{public}s, remoteIp=%{public}s remoteMac=%{public}s bandWidth=%{public}d",
+        OHOS::SoftBus::WifiDirectAnonymizeDeviceId(link->remoteUuid).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeIp(link->localIp).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeIp(link->remoteIp).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeMac(link->remoteMac).c_str(), link->bandWidth);
     for (auto listener : g_listeners) {
         if (listener.onConnectedForSink != nullptr) {
-            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type, channelId);
+            listener.onConnectedForSink(link);
         }
     }
 }
 
-static void NotifyDisconnectedForSink(
-    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+static void NotifyDisconnectedForSink(const struct WifiDirectSinkLink *link)
 {
-    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
-    std::lock_guard lock(g_listenerLock);
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     for (auto listener : g_listeners) {
         if (listener.onDisconnectedForSink != nullptr) {
-            listener.onDisconnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+            listener.onDisconnectedForSink(link);
         }
     }
 }
@@ -430,11 +434,6 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "no need negotiate channel");
     return false;
-}
-
-static bool SupportHmlTwo(void)
-{
-    return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
 }
 
 static bool IsWifiP2pEnabled(void)
@@ -492,7 +491,6 @@ static struct WifiDirectManager g_manager = {
     .getRemoteUuidByIp = GetRemoteUuidByIp,
     .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 
-    .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
 

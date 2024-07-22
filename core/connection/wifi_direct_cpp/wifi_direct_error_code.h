@@ -16,7 +16,11 @@
 #ifndef WIFI_DIRECT_ERROR_CODE_H
 #define WIFI_DIRECT_ERROR_CODE_H
 
+#ifdef __cplusplus
+#include <cstdlib>
+#else
 #include <stdlib.h>
+#endif
 #include "softbus_error_code.h"
 
 #ifdef __cplusplus

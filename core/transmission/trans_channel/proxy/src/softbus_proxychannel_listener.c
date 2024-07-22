@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,40 +50,46 @@ static int32_t NotifyNormalChannelOpenFailed(const char *pkgName, int32_t pid, i
     return ret;
 }
 
+static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool isServer, ChannelInfo *info)
+{
+    info->channelId = channelId;
+    info->channelType = CHANNEL_TYPE_PROXY;
+    info->isServer = isServer;
+    info->isEnabled = true;
+    info->isEncrypt = appInfo->appType != APP_TYPE_AUTH;
+    info->groupId = (char *)appInfo->groupId;
+    info->peerSessionName = (char *)appInfo->peerData.sessionName;
+    info->peerPid = appInfo->peerData.pid;
+    info->peerUid = appInfo->peerData.uid;
+    info->sessionKey = (char *)appInfo->sessionKey;
+    info->keyLen = SESSION_KEY_LENGTH;
+    info->fileEncrypt = appInfo->encrypt;
+    info->algorithm = appInfo->algorithm;
+    info->crc = appInfo->crc;
+    info->routeType = appInfo->routeType;
+    info->businessType = (int32_t)(appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType);
+    info->autoCloseTime = appInfo->autoCloseTime;
+    info->myHandleId = appInfo->myHandleId;
+    info->peerHandleId = appInfo->peerHandleId;
+    info->linkType = appInfo->linkType;
+    info->dataConfig = appInfo->myData.dataConfig;
+    if (appInfo->appType == APP_TYPE_AUTH) {
+        info->reqId = (char *)appInfo->reqId;
+    }
+    info->timeStart = appInfo->timeStart;
+    info->linkType = appInfo->linkType;
+    info->connectType = appInfo->connectType;
+    info->osType = appInfo->osType;
+    TransGetLaneIdByChannelId(channelId, &info->laneId);
+}
+
 static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appInfo, bool isServer)
 {
     ChannelInfo info = {0};
-    info.channelId = channelId;
-    info.channelType = CHANNEL_TYPE_PROXY;
-    info.isServer = isServer;
-    info.isEnabled = true;
-    info.isEncrypt = appInfo->appType != APP_TYPE_AUTH;
-    info.groupId = (char*)appInfo->groupId;
-    info.peerSessionName = (char*)appInfo->peerData.sessionName;
-    info.peerPid = appInfo->peerData.pid;
-    info.peerUid = appInfo->peerData.uid;
-    char buf[NETWORK_ID_BUF_LEN] = {0};
-    info.sessionKey = (char*)appInfo->sessionKey;
-    info.keyLen = SESSION_KEY_LENGTH;
-    info.fileEncrypt = appInfo->encrypt;
-    info.algorithm = appInfo->algorithm;
-    info.crc = appInfo->crc;
-    info.routeType = appInfo->routeType;
-    info.businessType = (int32_t)(appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType);
-    info.autoCloseTime = appInfo->autoCloseTime;
-    info.myHandleId = appInfo->myHandleId;
-    info.peerHandleId = appInfo->peerHandleId;
-    info.linkType = appInfo->linkType;
-    info.dataConfig = appInfo->myData.dataConfig;
-    if (appInfo->appType == APP_TYPE_AUTH) {
-        info.reqId = (char*)appInfo->reqId;
-    }
-    info.timeStart = appInfo->timeStart;
-    info.linkType = appInfo->linkType;
-    info.connectType = appInfo->connectType;
-    TransGetLaneIdByChannelId(channelId, &info.laneId);
-
     int32_t ret = SOFTBUS_ERR;
+    char buf[NETWORK_ID_BUF_LEN] = {0};
+
+    GetProxyChannelInfo(channelId, appInfo, isServer, &info);
     if (appInfo->appType != APP_TYPE_AUTH) {
         ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
         if (ret != SOFTBUS_OK) {
@@ -94,6 +100,9 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
             return ret;
         }
         info.peerDeviceId = buf;
+        if (LnnGetOsTypeByNetworkId(buf, &(info.osType)) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get remote osType fail, channelId=%{public}d", channelId);
+        }
     } else {
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
@@ -188,7 +197,8 @@ static int32_t TransProxyGetChannelIsServer(int32_t channelId, int8_t *isServer)
     return SOFTBUS_OK;
 }
 
-static int32_t SelectAppType(const AppInfo *appInfo, AppType appType, int32_t channelId, int32_t errCode)
+static int32_t TransProxyNotifyOpenFailedByType(
+    const AppInfo *appInfo, AppType appType, int32_t channelId, int32_t errCode)
 {
     switch (appType) {
         case APP_TYPE_NORMAL:
@@ -242,7 +252,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
         TransEventExtra extra = {
             .calleePkg = NULL,
-            .peerNetworkId = appInfo->peerData.deviceId,
+            .peerNetworkId = (appInfo->appType == APP_TYPE_AUTH) ? appInfo->peerData.deviceId : appInfo->peerNetWorkId,
             .linkType = appInfo->connectType,
             .channelId = channelId,
             .costTime = timediff,
@@ -272,10 +282,13 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
     }
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+    char *tmpName = NULL;
+    Anonymize(appInfo->myData.sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
         "proxy channel openfailed:sessionName=%{public}s, channelId=%{public}d, appType=%{public}d, errCode=%{public}d",
-        appInfo->myData.sessionName, channelId, appInfo->appType, errCode);
-    return SelectAppType(appInfo, appInfo->appType, channelId, errCode);
+        tmpName, channelId, appInfo->appType, errCode);
+    AnonymizeFree(tmpName);
+    return TransProxyNotifyOpenFailedByType(appInfo, appInfo->appType, channelId, errCode);
 }
 
 int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
@@ -441,7 +454,9 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
         return SOFTBUS_MALLOC_ERR;
     }
 
-    if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
+    int32_t ret = TransProxyGetSendMsgChanInfo(channelId, info);
+    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
@@ -459,7 +474,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
-    int32_t ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
+    ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
     SoftBusFree(info);
     return ret;
 }

@@ -184,12 +184,11 @@ HWTEST_F(TransProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
   */
 HWTEST_F(TransProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     int32_t channelId = -1;
     AppInfo appInfo;
     unsigned char isServer = '0';
     /* test app info is null */
-    ret = OnProxyChannelOpened(channelId, NULL, isServer);
+    int32_t ret = OnProxyChannelOpened(channelId, NULL, isServer);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -198,7 +197,7 @@ HWTEST_F(TransProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, TestS
     /* test app type is normal and get network id fail */
     appInfo.appType = APP_TYPE_NORMAL;
     TransAuthInterfaceMock authMock;
-    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
@@ -217,12 +216,11 @@ HWTEST_F(TransProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, TestS
   */
 HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelOpenFailedTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     int32_t channelId = -1;
     AppInfo appInfo;
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_MEM_ERR;
     /* test app info is null */
-    ret = OnProxyChannelOpenFailed(channelId, NULL, errCode);
+    int32_t ret = OnProxyChannelOpenFailed(channelId, NULL, errCode);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -251,7 +249,7 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Level
     /* test app type is inner */
     appInfo.appType = APP_TYPE_INNER;
     ret = OnProxyChannelClosed(channelId, &appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
 
 /**
@@ -262,14 +260,13 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Level
   */
 HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     int32_t channelId = -1;
     AppInfo appInfo;
     const char *data = "test data";
     uint32_t len = strlen(data) + 1;
 
     /* test invalid param */
-    ret = OnProxyChannelMsgReceived(channelId, NULL, data, len);
+    int32_t ret = OnProxyChannelMsgReceived(channelId, NULL, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = OnProxyChannelMsgReceived(channelId, &appInfo, NULL, len);
     EXPECT_NE(SOFTBUS_OK, ret);
