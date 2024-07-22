@@ -34,10 +34,10 @@ public:
     virtual int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
                                        const IServerDiscInnerCallback *cb) = 0;
     virtual int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId) = 0;
-    virtual int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason) = 0;
-    virtual int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId) = 0;
-    virtual int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason) = 0;
-    virtual int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId) = 0;
+    virtual int32_t ClientIpcOnPublishFail(const char *pkgName, int32_t publishId, int32_t reason) = 0;
+    virtual int32_t ClientIpcOnPublishSuccess(const char *pkgName, int32_t publishId) = 0;
+    virtual int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int32_t subscribeId, int32_t failReason) = 0;
+    virtual int32_t ClientIpcDiscoverySuccess(const char *pkgName, int32_t subscribeId) = 0;
     virtual int32_t SoftbusReportDiscFault(SoftBusDiscMedium medium, int32_t errCode) = 0;
     virtual int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device,
                                            const InnerDeviceInfoAddtions *additions) = 0;
@@ -57,10 +57,10 @@ public:
     MOCK_METHOD(int32_t, DiscStartDiscovery,
                (const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb), (override));
     MOCK_METHOD(int32_t, DiscStopDiscovery, (const char *packageName, int32_t subscribeId), (override));
-    MOCK_METHOD(int32_t, ClientIpcOnPublishFail, (const char *pkgName, int publishId, int reason), (override));
-    MOCK_METHOD(int32_t, ClientIpcOnPublishSuccess, (const char *pkgName, int publishId), (override));
-    MOCK_METHOD(int32_t, ClientIpcOnDiscoverFailed, (const char *pkgName, int subscribeId, int failReason), (override));
-    MOCK_METHOD(int32_t, ClientIpcDiscoverySuccess, (const char *pkgName, int subscribeId), (override));
+    MOCK_METHOD(int32_t, ClientIpcOnPublishFail, (const char *pkgName, int32_t publishId, int32_t reason), (override));
+    MOCK_METHOD(int32_t, ClientIpcOnPublishSuccess, (const char *pkgName, int32_t publishId), (override));
+    MOCK_METHOD(int32_t, ClientIpcOnDiscoverFailed, (const char *pkgName, int32_t subscribeId, int32_t failReason), (override));
+    MOCK_METHOD(int32_t, ClientIpcDiscoverySuccess, (const char *pkgName, int32_t subscribeId), (override));
     MOCK_METHOD(int32_t, SoftbusReportDiscFault, (SoftBusDiscMedium medium, int32_t errCode), (override));
     MOCK_METHOD(int32_t, ClientIpcOnDeviceFound,
                (const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions), (override));
