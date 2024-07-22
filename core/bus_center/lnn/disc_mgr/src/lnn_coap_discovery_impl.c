@@ -97,11 +97,12 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
         AnonymizeFree(anonyDevId);
         return;
     }
-    if (!AuthHasSameAccountGroup(device)) {
-        LNN_LOGE(LNN_BUILDER, "device has not same account group relation with local device, devId=%{public}s",
-            anonyDevId);
-        AnonymizeFree(anonyDevId);
-        return;
+    if (IsSameAccountDevice(device)) {
+        if (!AuthHasSameAccountGroup()) {
+            LNN_LOGE(LNN_BUILDER, "device has not same account group relation, devId=%{public}s", anonyDevId);
+            AnonymizeFree(anonyDevId);
+            return;
+        }
     }
     AnonymizeFree(anonyDevId);
     if (LnnCheckDiscoveryDeviceInfo(device) != SOFTBUS_OK) {

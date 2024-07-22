@@ -57,7 +57,7 @@ public:
     virtual bool IsNeedAuthLimit(const char *udidHash) = 0;
     virtual bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExtra) = 0;
     virtual int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo) = 0;
-    virtual bool IsSameAccountGroupDevice(const char *deviceId) = 0;
+    virtual bool IsSameAccountGroupDevice(void) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
         const AuthVerifyCallback *verifyCallback, AuthVerifyModule module, bool isFastAuth) = 0;
@@ -94,7 +94,7 @@ public:
     MOCK_METHOD1(IsNeedAuthLimit, bool(const char *));
     MOCK_METHOD2(IsExistLnnDfxNodeByUdidHash, bool(const char *, LnnBleReportExtra *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *, NodeInfo *));
-    MOCK_METHOD1(IsSameAccountGroupDevice, bool (const char *));
+    MOCK_METHOD0(IsSameAccountGroupDevice, bool (void));
     MOCK_METHOD0(AuthGenRequestId, uint32_t (void));
     MOCK_METHOD5(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *,
         AuthVerifyModule, bool));
