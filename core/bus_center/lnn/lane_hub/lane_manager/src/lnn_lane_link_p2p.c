@@ -354,6 +354,25 @@ static void OnWifiDirectDisconnectFailure(uint32_t requestId, int32_t reason)
     RecycleLinkedListResource(requestId);
 }
 
+static int32_t UpdateP2pLinkedReqByLinkId(int32_t linkId, uint32_t requestId)
+{
+    if (LinkLock() != 0) {
+        LNN_LOGE(LNN_LANE, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    P2pLinkedList *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, g_p2pLinkedList, P2pLinkedList, node) {
+        if (item->p2pModuleLinkId == linkId) {
+            item->p2pLinkDownReqId = requestId;
+            LinkUnlock();
+            return SOFTBUS_OK;
+        }
+    }
+    LinkUnlock();
+    LNN_LOGE(LNN_LANE, "P2pLinkedReq item not found, linkId=%{public}d", linkId);
+    return SOFTBUS_LANE_NOT_FOUND;
+}
+
 static int32_t DisconnectP2pWithoutAuthConn(int32_t pid, const char *mac, int32_t linkId)
 {
     struct WifiDirectDisconnectInfo info;
@@ -361,12 +380,17 @@ static int32_t DisconnectP2pWithoutAuthConn(int32_t pid, const char *mac, int32_
     info.requestId = GetWifiDirectManager()->getRequestId();
     info.pid = pid;
     info.linkId = linkId;
+    int32_t errCode = UpdateP2pLinkedReqByLinkId(linkId, info.requestId);
+    if (errCode != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "updata p2pLinkedReq by linkId fail");
+        return errCode;
+    }
     struct WifiDirectDisconnectCallback callback = {
         .onDisconnectSuccess = OnWifiDirectDisconnectSuccess,
         .onDisconnectFailure = OnWifiDirectDisconnectFailure,
     };
     LNN_LOGI(LNN_LANE, "disconnect wifiDirect, p2pRequestId=%{public}u, linkId=%{public}d", info.requestId, linkId);
-    int32_t errCode = GetWifiDirectManager()->disconnectDevice(&info, &callback);
+    errCode = GetWifiDirectManager()->disconnectDevice(&info, &callback);
     if (errCode != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "disconnect p2p device err");
         return errCode;
