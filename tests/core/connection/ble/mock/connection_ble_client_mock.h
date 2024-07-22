@@ -22,6 +22,8 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_conn_ble_trans.h"
 #include "softbus_adapter_ble_gatt_client.h"
+#include "bus_center_info_key.h"
+
 
 namespace OHOS {
 class ConnectionBleClientInterface {
@@ -42,6 +44,11 @@ public:
     virtual int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData) = 0;
     virtual int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr,
         SoftbusBleGattPriority priority) = 0;
+    virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual int32_t ConnBlePostBytesInner(
+    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq,
+    PostBytesFinishAction postBytesFinishAction) = 0;
 };
 
 class ConnectionBleClientInterfaceMock : public ConnectionBleClientInterface {
@@ -62,6 +69,21 @@ public:
     MOCK_METHOD(int32_t, SoftbusGattcWriteCharacteristic, (int32_t, SoftBusGattcData *));
     MOCK_METHOD(int32_t, SoftbusGattcSetPriority, (int32_t, SoftBusBtAddr *,
         SoftbusBleGattPriority));
+    MOCK_METHOD(int32_t, LnnGetLocalStrInfo, (InfoKey, char *, uint32_t));
+    MOCK_METHOD(int32_t, LnnGetLocalNumInfo, (InfoKey, int32_t *));
+    MOCK_METHOD(int32_t, ConnBlePostBytesInner, (uint32_t connectionId, uint8_t *data,
+        uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, PostBytesFinishAction));
+
+    static uint8_t *ConnGattTransRecvReturnConnModule(
+        uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen);
+    static uint8_t *ConnGattTransRecvReturnConnModule1(
+        uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen);
+    static uint8_t *ConnGattTransRecvReturnOldNearby(
+        uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen);
+    static uint8_t *ConnGattTransRecvReturnDefult(
+        uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen);
+    static uint8_t *ActionOfConnGattTransRecv(
+        uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen);
 };
 } // namespace OHOS
 #endif // CONNECTION_BLE_CLIENT_MOCK_H
