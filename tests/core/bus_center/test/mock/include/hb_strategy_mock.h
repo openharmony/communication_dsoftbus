@@ -94,7 +94,7 @@ public:
     MOCK_METHOD1(IsNeedAuthLimit, bool(const char *));
     MOCK_METHOD2(IsExistLnnDfxNodeByUdidHash, bool(const char *, LnnBleReportExtra *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *, NodeInfo *));
-    MOCK_METHOD1(IsSameAccountGroupDevice, bool (void));
+    MOCK_METHOD0(IsSameAccountGroupDevice, bool (void));
     MOCK_METHOD0(AuthGenRequestId, uint32_t (void));
     MOCK_METHOD5(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *,
         AuthVerifyModule, bool));
