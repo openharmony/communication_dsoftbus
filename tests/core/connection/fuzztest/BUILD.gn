@@ -13,5 +13,11 @@
 
 group("fuzztest") {
   testonly = true
-  deps = [ "softbusnegotiatemessage_fuzzer:SoftBusNegotiateMessageFuzzTest" ]
+  if (dsoftbus_feature_conn_p2p == true &&
+      softbus_communication_wifi_feature == true) {
+    deps = [
+      "softbusnegotiatemessage_fuzzer:SoftBusNegotiateMessageFuzzTest",
+      "wifidirectprotocol_fuzzer:WifiDirectProtocolFuzzTest",
+    ]
+  }
 }
