@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ public:
     virtual bool Send(std::unique_ptr<IStream>) = 0;
 
     virtual bool SetOption(int type, const StreamAttr &value) = 0;
+    virtual int32_t SetMultiLayer(const void *para) = 0;
     virtual StreamAttr GetOption(int type) const = 0;
 
     virtual void SetStreamRecvListener(std::shared_ptr<IStreamManagerListener> recvListener) = 0;
