@@ -143,6 +143,25 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
     return adaptor->GetStreamManager()->Send(std::move(stream)) ? SOFTBUS_OK : SOFTBUS_TRANS_MAKE_STREAM_FAILED;
 }
 
+int32_t SetVtpStreamMultiLayerOpt(int32_t channelId, const void *optValue)
+{
+    if (optValue == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "invalid argument optValue");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::shared_ptr<StreamAdaptor> adaptor = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(g_mutex);
+        auto it = g_adaptorMap.find(channelId);
+        if (it == g_adaptorMap.end()) {
+            TRANS_LOGE(TRANS_STREAM, "channelId %{public}u adaptor not existed!", channelId);
+            return SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED;
+        }
+        adaptor = it->second;
+    }
+    return adaptor->GetStreamManager()->SetMultiLayer(optValue);
+}
+
 int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam *param, const IStreamListener *callback)
 {
     if (channelId < 0 || param == nullptr || param->pkgName == nullptr || callback == nullptr) {
