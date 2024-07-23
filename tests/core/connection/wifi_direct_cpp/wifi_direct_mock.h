@@ -65,6 +65,8 @@ public:
         const AuthConnCallback *callback, bool isMeta) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
+    virtual int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen, size_t *olen,
+        const unsigned char *src, size_t slen) = 0;
     virtual int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len) = 0;
     virtual int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, uint32_t len) = 0;
@@ -139,6 +141,8 @@ public:
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo*, uint32_t, const AuthConnCallback*, bool));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
+    MOCK_METHOD(int32_t, SoftBusBase64Encode, (unsigned char *, size_t, size_t *,
+        const unsigned char *, size_t), (override));
     MOCK_METHOD3(LnnGetLocalPtkByUuid, int32_t (const char *uuid, char *localPtk, uint32_t len));
     MOCK_METHOD3(LnnGetLocalDefaultPtkByUuid, int32_t (const char *uuid, char *localPtk, uint32_t len));
     MOCK_METHOD4(LnnGetRemoteByteInfo, int32_t (const char *networkId, InfoKey key, uint8_t *info, uint32_t len));
