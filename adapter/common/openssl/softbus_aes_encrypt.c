@@ -75,7 +75,7 @@ int32_t SoftBusGenerateHmacHash(
     if (outBufLen != SHA256_MAC_LEN) {
         COMM_LOGE(COMM_ADAPTER, "outBufLen is invalid length for hash.");
         (void)memset_s(tempOutputData, sizeof(tempOutputData), 0, sizeof(tempOutputData));
-        return SOFTBUS_ERR;
+        return SOFTBUS_HMAC_ERR;
     }
     if (memcpy_s(hash, hashLen, tempOutputData, outBufLen) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "hash result memcpy_s failed.");
@@ -168,7 +168,7 @@ static int32_t GenerateIvAndSessionKey(const EncryptKey *randomKey, EncryptKey *
         (void)memset_s(cipherKey->iv, cipherKey->ivLen, 0, cipherKey->ivLen);
         SoftBusFree(cipherKey->key);
         SoftBusFree(cipherKey->iv);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GENERATE_KEY_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -190,7 +190,7 @@ int32_t SoftBusAesCfbRootEncrypt(const AesInputData *inData, const EncryptKey *r
     if (GenerateIvAndSessionKey(randomKey, rootKey, &cipherKey) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "GenerateIvAndSessionKey failed!");
         SoftBusFree(encryptData.data);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GENERATE_KEY_FAIL;
     }
     if (OpensslAesCfbEncrypt(&cipherKey, inData, encMode, &encryptData) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "OpensslAesCfb encrypt or decrypt by root key failed.");
@@ -283,12 +283,12 @@ static int32_t GcmOpensslEvpInit(EVP_CIPHER_CTX **ctx, uint32_t keyLen, int32_t 
     EVP_CIPHER *cipher = GetSslGcmAlgorithmByKeyLen(keyLen);
     if (cipher == NULL) {
         COMM_LOGE(COMM_ADAPTER, "GetSslGcmAlgorithmByKeyLen failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *ctx = EVP_CIPHER_CTX_new();
     if (*ctx == NULL) {
         COMM_LOGE(COMM_ADAPTER, "EVP_CIPHER_CTX_new failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     EVP_CIPHER_CTX_set_padding(*ctx, OPENSSL_EVP_PADDING_FUNC_CLOSE);
     if (encMode == ENCRYPT_MODE) {
@@ -310,7 +310,7 @@ static int32_t GcmOpensslEvpInit(EVP_CIPHER_CTX **ctx, uint32_t keyLen, int32_t 
         COMM_LOGE(COMM_ADAPTER, "EVP_CIPHER_CTX_ctrl failed.");
         EVP_CIPHER_CTX_free(*ctx);
         *ctx = NULL;
-        return SOFTBUS_ERR;
+        return SOFTBUS_GCM_SET_IV_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -325,7 +325,7 @@ static int32_t OpensslAesGcmEncrypt(
     }
     EVP_CIPHER_CTX *ctx = NULL;
     int32_t ret = GcmOpensslEvpInit(&ctx, cipherKey->keyLen, ENCRYPT_MODE);
-    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_ADAPTER, "GcmOpensslEvpInit failed.");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ENCRYPT_ERR, COMM_ADAPTER, "GcmOpensslEvpInit failed.");
     if (EVP_EncryptInit_ex(ctx, NULL, NULL, cipherKey->key, cipherKey->iv) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptInit_ex failed.");
         goto EXIT;
@@ -379,7 +379,7 @@ static int32_t OpensslAesGcmDecrypt(
     EVP_CIPHER_CTX *ctx = NULL;
     if (GcmOpensslEvpInit(&ctx, cipherKey->keyLen, DECRYPT_MODE) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "GcmOpensslEvpInit failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     if (EVP_DecryptInit_ex(ctx, NULL, NULL, cipherKey->key, cipherKey->iv) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptInit_ex failed.");
