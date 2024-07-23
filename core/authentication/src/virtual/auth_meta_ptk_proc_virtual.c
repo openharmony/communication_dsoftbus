@@ -57,5 +57,5 @@ int32_t AuthMetaInitPtkProc(void)
 
 void AuthMetaDeinitPtkProc(void)
 {
-    return;
 }
+
