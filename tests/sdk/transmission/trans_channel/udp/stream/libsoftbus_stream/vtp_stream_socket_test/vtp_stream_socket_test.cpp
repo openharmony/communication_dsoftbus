@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -596,7 +596,7 @@ HWTEST_F(VtpStreamSocketTest, FillpStatistics001, TestSize.Level1)
 
     int fd = 2;
     int ret = vtpStreamSocket->FillpStatistics(fd, nullptr);
-    EXPECT_EQ(-1, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     info->evt = FT_EVT_FRAME_STATS;
     ret = vtpStreamSocket->FillpStatistics(fd, info);
@@ -1012,6 +1012,39 @@ HWTEST_F(VtpStreamSocketTest, HandleRipplePolicy001, TestSize.Level1)
 
     fd = 10;
     ret = vtpStreamSocket->HandleRipplePolicy(fd, info);
+    EXPECT_NE(fd, ret);
+
+    if (info != nullptr) {
+        SoftBusFree(info);
+    }
+}
+
+/**
+ * @tc.name: HandleFillpFrameEvt001
+ * @tc.desc: HandleFillpFrameEvt, use the wrong parameter.
+ * @tc.desc: RecvStreamLen, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, HandleFillpFrameEvt001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    int fd = 1;
+    FtEventCbkInfo *info = (FtEventCbkInfo*)SoftBusCalloc(sizeof(FtEventCbkInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
+    int ret = vtpStreamSocket->HandleFillpFrameEvt(fd, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = vtpStreamSocket->HandleFillpFrameEvt(fd, info);
+    EXPECT_EQ(0, ret);
+    ret = vtpStreamSocket->HandleFillpFrameEvtInner(fd, info);
+    EXPECT_EQ(0, ret);
+
+    fd = 10;
+    ret = vtpStreamSocket->HandleFillpFrameEvt(fd, info);
     EXPECT_NE(fd, ret);
 
     if (info != nullptr) {

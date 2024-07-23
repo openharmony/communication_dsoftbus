@@ -261,6 +261,33 @@ typedef enum {
     OPT_LEVEL_SOFTBUS, /**< @reserved Softbus level option. */
     OPT_LEVEL_BUTT,
 } OptLevel;
+
+/**
+ * @brief Enumerate frame event status.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef enum {
+    FRAME_UNSEND,
+    FRAME_SENDING,
+    FRAME_RETRING,
+    FRAME_RECEIVED,
+    FRAME_DROPPED,
+    FRAME_UNMANAGED,
+} FrameEvtStatus;
+
+typedef struct {
+    int32_t seq;
+    int32_t level;
+    int32_t subSeqNum;
+    FrameEvtStatus status;
+    uint32_t interval; /**< frame sending interval */
+    uint32_t queueUsage; /**< send queue percentage of use */
+    uint32_t cachedFrameCnt; /**< frame count in VTP */
+} FrameEvtCbInfo;
+
+typedef int (*OnFrameEvt)(int fd, const FrameEvtCbInfo *info);
 #ifdef __cplusplus
 }
 #endif
