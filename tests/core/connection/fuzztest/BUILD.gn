@@ -11,6 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
+import("../../../../dsoftbus.gni")
+
 group("fuzztest") {
   testonly = true
   if (dsoftbus_feature_conn_p2p == true &&

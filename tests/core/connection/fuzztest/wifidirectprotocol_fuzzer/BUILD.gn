@@ -19,13 +19,13 @@ import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
-dsoftbus_root_path = "../../../../.."
-
 ohos_fuzztest("WifiDirectProtocolFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/fuzztest/wifidirectprotocol_fuzzer"
 
   include_dirs = [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp" ]
+
+  sources = [ "protocol_fuzzer.cpp" ]
 
   cflags = [
     "-g",
@@ -33,10 +33,6 @@ ohos_fuzztest("WifiDirectProtocolFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-
-  if (dsoftbus_feature_conn_br) {
-    sources = [ "protocol_fuzzer.cpp" ]
-  }
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
