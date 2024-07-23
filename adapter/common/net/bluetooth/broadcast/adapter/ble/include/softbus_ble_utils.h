@@ -36,13 +36,15 @@ int32_t BtStatusToSoftBus(BtStatus btStatus);
 void SoftbusAdvParamToBt(const SoftbusBroadcastParam *src, BleAdvParams *dst);
 void BtScanResultToSoftbus(const BtScanResultData *src, SoftBusBcScanResult *dst);
 void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFilter *filter, uint8_t filterSize);
-void SoftbusSetManufactureData(BleScanNativeFilter *nativeFilter, uint8_t filterSize);
+void SoftbusSetManufactureFilter(BleScanNativeFilter *nativeFilter, uint8_t filterSize);
 void FreeBtFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize);
 void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize);
 int GetBtScanMode(uint16_t scanInterval, uint16_t scanWindow);
 uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen);
 uint8_t *AssembleRspData(const SoftbusBroadcastPayload *data, uint16_t *dataLen);
 int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst);
+
+void DumpSoftbusAdapterData(const char *description, uint8_t *data, uint16_t len);
 
 #ifdef __cplusplus
 }
