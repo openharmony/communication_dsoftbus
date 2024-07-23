@@ -175,7 +175,6 @@ if (defined(ohos_lite)) {
     ]
     external_deps = [
       "bounds_checking_function:libsec_shared",
-      "mbedtls:mbedtls_shared",
       "openssl:libcrypto_shared",
     ]
     if (is_standard_system) {
