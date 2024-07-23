@@ -20,6 +20,7 @@
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "disc_share_ble.h"
+#include "disc_touch_ble.h"
 #include "disc_virtual_link_ble.h"
 #include "softbus_errcode.h"
 
@@ -237,6 +238,15 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     g_dispatchers[g_dispatcherSize++] = vlinkInterface;
     DfxRecordBleInitEnd(EVENT_STAGE_VLINK_BLE_INIT, SOFTBUS_OK);
 
+    DiscoveryBleDispatcherInterface *touchInterface = DiscTouchBleInit(discInnerCb);
+    if (vlinkInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
+        DISC_LOGE(DISC_INIT, "DiscTouchBleInit err");
+        return NULL;
+    }
+    g_dispatchers[g_dispatcherSize++] = touchInterface;
+    DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_OK);
+
     DfxRecordBleInitEnd(EVENT_STAGE_INIT, SOFTBUS_OK);
     return &g_discBleFrameFuncInterface;
 }
@@ -260,4 +270,5 @@ void DiscBleDeinit(void)
     DiscSoftBusBleDeinit();
     DiscShareBleDeinit();
     DiscApproachBleDeinit();
+    DiscTouchBleDeinit();
 }
