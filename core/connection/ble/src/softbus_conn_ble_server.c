@@ -1185,6 +1185,30 @@ static int BleCompareGattServerLooperEventFunc(const SoftBusMessage *msg, void *
     return COMPARE_SUCCESS;
 }
 
+static bool BleIsConcernedAttrHandle(int32_t srvcHandle, int32_t attrHandle)
+{
+    int32_t rc = SoftBusMutexLock(&g_serverState.lock);
+    if (rc != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "try to lock failed, attrHandle=%{public}d", attrHandle);
+        return false;
+    }
+    if (g_serverState.serviceHandle != srvcHandle) {
+        (void)SoftBusMutexUnlock(&g_serverState.lock);
+        CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, srvcHandle=%{public}d", srvcHandle);
+        return false;
+    }
+    if (attrHandle == g_serverState.connCharacteristicHandle ||
+        attrHandle == g_serverState.connDescriptorHandle ||
+        attrHandle == g_serverState.netCharacteristicHandle ||
+        attrHandle == g_serverState.netDescriptorHandle) {
+        (void)SoftBusMutexUnlock(&g_serverState.lock);
+        return true;
+    }
+    CONN_LOGW(CONN_BLE, "ignore handle=%{public}d", attrHandle);
+    (void)SoftBusMutexUnlock(&g_serverState.lock);
+    return false;
+}
+
 static int32_t BleRegisterGattServerCallback(void)
 {
     static SoftBusGattsCallback bleGattsCallback = {
@@ -1201,12 +1225,13 @@ static int32_t BleRegisterGattServerCallback(void)
         .ResponseConfirmationCallback = BleResponseConfirmationCallback,
         .NotifySentCallback = BleNotifySentCallback,
         .MtuChangeCallback = BleMtuChangeCallback,
+        .IsConcernedAttrHandle = BleIsConcernedAttrHandle,
     };
     SoftBusBtUuid serviceUuid = {
         .uuid = SOFTBUS_SERVICE_UUID,
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
-    return SoftBusRegisterGattsCallbacks(&bleGattsCallback, serviceUuid, DEFAULT_MTU_SIZE);
+    return SoftBusRegisterGattsCallbacks(&bleGattsCallback, serviceUuid);
 }
 
 int32_t ConnGattInitServerModule(SoftBusLooper *looper, const ConnBleServerEventListener *listener)
