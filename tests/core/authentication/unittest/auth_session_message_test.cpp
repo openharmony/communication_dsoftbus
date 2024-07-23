@@ -21,6 +21,7 @@
 #include "auth_session_json.c"
 #include "auth_session_message.h"
 #include "auth_session_message.c"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
 #include "softbus_errcode.h"
 
@@ -784,6 +785,163 @@ HWTEST_F(AuthSessionMessageTest, UPDATE_LOCAL_AUTH_STATE_TEST_001, TestSize.Leve
     info.peerState = AUTH_STATE_ACK;
     ret = UpdateLocalAuthState(authSeq, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: PACK_FAST_AUTH_VALUE_TEST_002
+ * @tc.desc: PackFastAuthValue test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_002, TestSize.Level1)
+{
+    JsonObj *obj = JSON_CreateObject();
+    EXPECT_TRUE(obj != nullptr);
+    AuthDeviceKeyInfo deviceCommKey;
+    (void)memset_s(&deviceCommKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+    EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(deviceCommKey.deviceKey, SESSION_KEY_LENGTH));
+    deviceCommKey.keyLen = SESSION_KEY_LENGTH;
+    deviceCommKey.keyIndex = 12345;
+    EXPECT_TRUE(PackFastAuthValue(obj, &deviceCommKey) == SOFTBUS_OK);
+    JSON_Delete(obj);
+}
+
+/*
+ * @tc.name: GET_UDID_SHORT_HASH_TEST_001
+ * @tc.desc: GetUdidShortHash test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, GET_UDID_SHORT_HASH_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info = { .connInfo.type = AUTH_LINK_TYPE_BR, .isServer = true, };
+    uint32_t bufLen = UDID_SHORT_HASH_HEX_STR;
+    char udidHash[SHORT_UDID_HASH_HEX_LEN + 1];
+    EXPECT_EQ(false, GetUdidShortHash(nullptr, nullptr, bufLen));
+    EXPECT_EQ(false, GetUdidShortHash(&info, nullptr, bufLen));
+    EXPECT_EQ(false, GetUdidShortHash(&info, udidHash, bufLen));
+    bufLen++;
+    EXPECT_EQ(false, GetUdidShortHash(&info, udidHash, bufLen));
+    info.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_EQ(true, GetUdidShortHash(&info, udidHash, bufLen));
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+    EXPECT_EQ(true, GetUdidShortHash(&info, udidHash, bufLen));
+    info.connInfo.type = AUTH_LINK_TYPE_P2P;
+    EXPECT_EQ(false, GetUdidShortHash(&info, udidHash, bufLen));
+    info.isServer = false;
+    EXPECT_EQ(false, GetUdidShortHash(&info, udidHash, bufLen));
+    ASSERT_TRUE(memcpy_s(info.udid, UDID_BUF_LEN, UDID, strlen(UDID)) == EOK);
+    EXPECT_EQ(true, GetUdidShortHash(&info, udidHash, bufLen));
+}
+
+/*
+ * @tc.name: PACK_NORMALIZED_KEY_VALUE_TEST_001
+ * @tc.desc: PackNormalizedKeyValue test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
+{
+    SessionKey sessionKey = { .len = SESSION_KEY_LENGTH, };
+    EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(sessionKey.value, SESSION_KEY_LENGTH));
+    JsonObj *obj = JSON_CreateObject();
+    EXPECT_TRUE(obj != nullptr);
+    AuthSessionInfo info = {
+        .isNeedFastAuth = false,
+        .isServer = false,
+        .normalizedType = NORMALIZED_KEY_ERROR,
+        .localState = AUTH_STATE_WAIT,
+        .connInfo.type = AUTH_LINK_TYPE_WIFI,
+        .normalizedKey = nullptr,
+        };
+    PackNormalizedKey(obj, &info);
+    info.isNeedFastAuth = true;
+    PackNormalizedKey(obj, &info);
+    info.isServer = true;
+    PackNormalizedKey(obj, &info);
+    info.normalizedType = NORMALIZED_NOT_SUPPORT;
+    info.localState = AUTH_STATE_START;
+    PackNormalizedKey(obj, &info);
+    info.normalizedKey = &sessionKey;
+    PackNormalizedKey(obj, &info);
+    ASSERT_TRUE(memcpy_s(info.connInfo.info.ipInfo.deviceIdHash, UUID_BUF_LEN,
+        UUID_TEST, strlen(UUID_TEST)) == EOK);
+    PackNormalizedKey(obj, &info);
+    EXPECT_EQ(SOFTBUS_OK, PackNormalizedKeyValue(obj, &sessionKey));
+    JSON_Delete(obj);
+}
+
+/*
+ * @tc.name: PARSE_NORMALIZED_KEY_VALUE_TEST_001
+ * @tc.desc: ParseNormalizedKeyValue test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
+{
+    const char *encNormalizedKey = "encnormalizedkeytest";
+    SessionKey sessionKey = { .len = SESSION_KEY_LENGTH, };
+    EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(sessionKey.value, SESSION_KEY_LENGTH));
+    AuthSessionInfo info;
+    EXPECT_EQ(SOFTBUS_ERR, ParseNormalizedKeyValue(&info, encNormalizedKey, &sessionKey));
+    ASSERT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
+    AuthDeviceKeyInfo deviceKey;
+    EXPECT_EQ(SOFTBUS_ERR, ParseNormalizeData(&info, const_cast<char *>(encNormalizedKey), &deviceKey));
+}
+
+/*
+ * @tc.name: PACK_DEVICE_JSON_INFO_TEST_001
+ * @tc.desc: PackDeviceJsonInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
+{
+    JsonObj *obj = JSON_CreateObject();
+    EXPECT_TRUE(obj != nullptr);
+    SessionKey sessionKey;
+    AuthSessionInfo info = {
+        .connInfo.type = AUTH_LINK_TYPE_WIFI,
+        .isConnectServer = false,
+        .localState = AUTH_STATE_START,
+        .isServer = false,
+        .normalizedKey = &sessionKey,
+    };
+    EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));
+    const char *encNormalizedKey = "encnormalizedkeytest";
+    EXPECT_EQ(true, JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey));
+    UnpackNormalizedKey(obj, &info, NORMALIZED_NOT_SUPPORT);
+    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT);
+    info.isServer = true;
+    info.normalizedKey = nullptr;
+    ASSERT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
+    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT);
+    info.isConnectServer = true;
+    EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+    EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));
+    JSON_Delete(obj);
+}
+
+/*
+ * @tc.name: PACK_DEVICE_INFO_MESSAGE_TEST_001
+ * @tc.desc: PackDeviceInfoMessage test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
+{
+    JsonObj *obj = JSON_CreateObject();
+    EXPECT_TRUE(obj != nullptr);
+    NodeInfo info;
+    const char *staticCap = "staticCapTest";
+    const char *encodePtk = "encodePtkTest";
+    EXPECT_EQ(true, JSON_AddInt32ToObject(obj, STATIC_CAP_LENGTH, DATA_TEST_LEN));
+    EXPECT_EQ(true, JSON_AddStringToObject(obj, STATIC_CAP, staticCap));
+    EXPECT_EQ(true, JSON_AddStringToObject(obj, PTK, encodePtk));
+    UnpackWifiDirectInfo(obj, &info);
+    EXPECT_EQ(nullptr, PackDeviceInfoMessage(nullptr, SOFTBUS_NEW_V1, false, nullptr, nullptr));
+    JSON_Delete(obj);
 }
 } // namespace OHOS
 

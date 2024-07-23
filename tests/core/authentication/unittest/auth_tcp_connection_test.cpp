@@ -247,4 +247,57 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_001, TestSize.Level1)
     ret = SocketGetConnInfo(fd, &connInfo, &isServer);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
+
+/*
+ * @tc.name: SOCKET_CONNECT_INNER_TEST_001
+ * @tc.desc: SocketConnectInner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_INNER_TEST_001, TestSize.Level1)
+{
+    const char *localIp = "192.168.11.22";
+    const char *peerIp = "192.168.11.33";
+    int32_t ret = SocketConnectInner(nullptr, peerIp, 37025, AUTH, true);
+    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    ret = SocketConnectInner(localIp, nullptr, 37025, AUTH, true);
+    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    ret = SocketConnectInner(localIp, peerIp, 37025, AUTH, true);
+    EXPECT_TRUE(ret == SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
+}
+
+/*
+ * @tc.name: NIP_SOCKET_CONNECT_DEVICE_TEST_001
+ * @tc.desc: NipSocketConnectDevice test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, NIP_SOCKET_CONNECT_DEVICE_TEST_001, TestSize.Level1)
+{
+    const char *addr = "192.168.11.44";
+    int32_t ret = NipSocketConnectDevice(AUTH, addr, 37025, true);
+    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    ret = NipSocketConnectDevice(AUTH, nullptr, 37025, true);
+    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+}
+
+/*
+ * @tc.name: AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_001
+ * @tc.desc: AuthOpenChannelWithAllIp test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_001, TestSize.Level1)
+{
+    const char *localIp = "192.168.11.22";
+    const char *remoteIp = "192.168.11.33";
+    int32_t ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 37025);
+    EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
+    ret = AuthOpenChannelWithAllIp(nullptr, remoteIp, 37025);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthOpenChannelWithAllIp(localIp, nullptr, 37025);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 0);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS
