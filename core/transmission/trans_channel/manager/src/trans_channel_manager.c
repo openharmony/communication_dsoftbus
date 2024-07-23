@@ -244,7 +244,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     TransSetFirstTokenInfo(appInfo, &extra);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    if (param->isAsync) {
+    if (param->isQosLane) {
         uint32_t callingTokenId = TransACLGetCallingTokenID();
         ret = TransAsyncGetLaneInfo(param, &laneHandle, callingTokenId, appInfo->timeStart);
         if (ret != SOFTBUS_OK) {

@@ -355,15 +355,13 @@ static void BuildTransEventExtra(
 
 static void CallbackOpenChannelFailed(const SessionParam *param, const AppInfo *appInfo, int32_t errCode)
 {
-    if (param->isAsync) {
-        ChannelMsg data = {
-            .msgChannelId = param->sessionId,
-            .msgChannelType = CHANNEL_TYPE_UNDEFINED,
-            .msgPkgName = appInfo->myData.pkgName,
-            .msgPid = appInfo->myData.pid,
-        };
-        (void)ClientIpcOnChannelOpenFailed(&data, errCode);
-    }
+    ChannelMsg data = {
+        .msgChannelId = param->sessionId,
+        .msgChannelType = CHANNEL_TYPE_UNDEFINED,
+        .msgPkgName = appInfo->myData.pkgName,
+        .msgPid = appInfo->myData.pid,
+    };
+    (void)ClientIpcOnChannelOpenFailed(&data, errCode);
 }
 
 static int32_t CopyAsyncReqItemSessionParamIds(const SessionParam *source, SessionParam *target)

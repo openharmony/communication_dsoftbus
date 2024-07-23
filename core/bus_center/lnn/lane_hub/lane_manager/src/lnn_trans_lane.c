@@ -1009,11 +1009,6 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
         LNN_LOGE(LNN_LANE, "get lane reqInfo fail");
         return;
     }
-    if (reqInfo.isWithQos && reqInfo.isCanceled) {
-        LNN_LOGI(LNN_LANE, "lane has canceled not need notify succ, laneReqId=%{public}u", laneReqId);
-        (void)Free(laneReqId);
-        return;
-    }
     LaneProfile profile;
     LaneConnInfo connInfo;
     (void)memset_s(&profile, sizeof(LaneProfile), 0, sizeof(LaneProfile));
@@ -1024,6 +1019,12 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
     LNN_LOGI(LNN_LANE, "Notify laneAlloc succ, laneReqId=%{public}u, linkType=%{public}d, "
         "laneId=%{public}" PRIu64 "", laneReqId, info->type, laneId);
     if (reqInfo.isWithQos) {
+        if (reqInfo.isCanceled) {
+            LNN_LOGE(LNN_LANE, "lane has canceled only notify fail, laneReqId=%{public}u", laneReqId);
+            reqInfo.listener.onLaneAllocFail(laneReqId, SOFTBUS_LANE_SUCC_AFTER_CANCELED);
+            (void)Free(laneReqId);
+            return;
+        }
         connInfo.laneId = laneId;
         reqInfo.listener.onLaneAllocSuccess(laneReqId, &connInfo);
     } else {
@@ -1042,10 +1043,7 @@ static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
         return;
     }
     if (reqInfo.isWithQos && reqInfo.isCanceled) {
-        LNN_LOGI(LNN_LANE, "lane has canceled not need notify fail, laneReqId=%{public}u", laneReqId);
-        DeleteRequestNode(laneReqId);
-        FreeLaneReqId(laneReqId);
-        return;
+        LNN_LOGE(LNN_LANE, "lane has canceled only notify fail, laneReqId=%{public}u", laneReqId);
     }
     LNN_LOGE(LNN_LANE, "Notify laneAlloc fail, laneReqId=%{public}u, reason=%{public}d", laneReqId, reason);
     if (reqInfo.isWithQos) {
