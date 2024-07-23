@@ -223,7 +223,6 @@ if (defined(ohos_lite)) {
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
-      "mbedtls:mbedtls_shared",
     ]
     if (is_standard_system) {
       external_deps += [ "c_utils:utils" ]
