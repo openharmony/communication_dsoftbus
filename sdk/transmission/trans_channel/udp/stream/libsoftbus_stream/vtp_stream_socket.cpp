@@ -418,7 +418,7 @@ void VtpStreamSocket::FillpAppStatistics()
 
 bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
-    int fd = CreateAndBindSocket(local);
+    int fd = CreateAndBindSocket(local, false);
     if (fd == -1) {
         TRANS_LOGE(TRANS_STREAM, "CreateAndBindSocket failed, errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
@@ -467,7 +467,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, in
 bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     TRANS_LOGD(TRANS_STREAM, "enter.");
-    listenFd_ = CreateAndBindSocket(local);
+    listenFd_ = CreateAndBindSocket(local, true);
     if (listenFd_ == -1) {
         TRANS_LOGE(TRANS_STREAM, "create listenFd failed, errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
@@ -741,7 +741,7 @@ void VtpStreamSocket::DestroyVtpInstance(const std::string &pkgName)
     TRANS_LOGD(TRANS_STREAM, "ok");
 }
 
-int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
+int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
 {
     localIpPort_ = local;
     vtpInstance_->UpdateSocketStreamCount(true);
@@ -754,6 +754,10 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     if (sockFd == -1) {
         TRANS_LOGE(TRANS_STREAM, "FtSocket failed, errno=%{public}d", FtGetErrno());
         return -1;
+    }
+    if (!isServer) {
+        TRANS_LOGI(TRANS_STREAM, "FtSocket set client, errno=%{public}d", FtGetErrno());
+        streamFd_ = sockFd;
     }
     SetDefaultConfig(sockFd);
 
