@@ -251,35 +251,28 @@ static void SetWifiDirectLinkInfo(P2pLinkInfo *p2pInfo, WifiDirectLinkInfo *wifi
     }
 }
 
-static void HandleDetectWifiDirectApply(PowerControlInfo *powerInfo,  WifiDirectLinkInfo *wifiDirectInfo)
+static void SetLanePowerStatus(bool status)
 {
-    bool isEnable = false;
-    bool isDisable = false;
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return;
     }
-    if (powerInfo->isDisableLowPower) {
-        isDisable = true;
-        g_enabledLowPower = false;
-    } else if ((powerInfo->activeHml == 1) && (powerInfo->passiveHml == 0) && (powerInfo->rawHml == 0)
-        && (!g_enabledLowPower)) {
-        isEnable = true;
-        g_enabledLowPower = true;
-    }
+    g_enabledLowPower = status;
     LaneUnlock();
-    if (isDisable) {
+}
+
+static void HandleDetectWifiDirectApply(PowerControlInfo *powerInfo,  WifiDirectLinkInfo *wifiDirectInfo)
+{
+    if (powerInfo->isDisableLowPower) {
         DisablePowerControl(wifiDirectInfo);
-    } else if (isEnable) {
+        SetLanePowerStatus(false);
+    } else if ((powerInfo->activeHml == 1) && (powerInfo->passiveHml == 0) && (powerInfo->rawHml == 0)
+         && (!g_enabledLowPower)) {
         int32_t ret = EnablePowerControl(wifiDirectInfo);
+        SetLanePowerStatus(true);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "enable fail, ret=%{public}d", ret);
-            if (LaneLock() != SOFTBUS_OK) {
-                LNN_LOGE(LNN_LANE, "lane lock fail");
-                return;
-            }
-            g_enabledLowPower = false;
-            LaneUnlock();
+            SetLanePowerStatus(false);
         }
     }
 }
