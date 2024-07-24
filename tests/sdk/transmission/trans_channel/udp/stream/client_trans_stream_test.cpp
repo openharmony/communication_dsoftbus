@@ -220,9 +220,8 @@ HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
 {
     int ret = TransClientInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ChannelInfo *channel = (ChannelInfo*)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *channel = (ChannelInfo*)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channel != nullptr);
-    (void)memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
 
     int32_t streamPort = 2;
     ret = TransOnstreamChannelOpened(NULL, &streamPort);
