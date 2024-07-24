@@ -1816,8 +1816,10 @@ static void RemoveRecvMessage(uint64_t key)
         return;
     }
 
-    g_discBleHandler.looper->RemoveMessageCustom(g_discBleHandler.looper, &g_discBleHandler, MessageRemovePredicate,
-                                                 (void *)key);
+    if (g_discBleHandler.looper && g_discBleHandler.looper->RemoveMessageCustom) {
+        g_discBleHandler.looper->RemoveMessageCustom(g_discBleHandler.looper, &g_discBleHandler,
+            MessageRemovePredicate, (void *)key);
+    }
     if (msg->needBrMac) {
         g_recvMessageInfo.numNeedBrMac--;
     }
@@ -1833,6 +1835,10 @@ static void ClearRecvMessage(void)
     while (!IsListEmpty(head)) {
         RecvMessage *msg = LIST_ENTRY(head->next, RecvMessage, node);
         ListDelete(&msg->node);
+        if (g_discBleHandler.looper && g_discBleHandler.looper->RemoveMessageCustom) {
+            g_discBleHandler.looper->RemoveMessageCustom(g_discBleHandler.looper, &g_discBleHandler,
+                MessageRemovePredicate, (void *)msg->key);
+        }
         SoftBusFree(msg);
     }
 }
