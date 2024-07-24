@@ -13,12 +13,8 @@
  * limitations under the License.
  */
 
-#include <cstddef>
-#include <cstdint>
-#include <securec.h>
-
-#include "softbus_proxychannel_manager.h"
 #include "softbusproxychannelmanager_fuzzer.h"
+#include "softbus_proxychannel_manager.h"
 
 namespace OHOS {
 class TestEnv {
@@ -67,13 +63,13 @@ static void FillAppInfoPart(const uint8_t *data, size_t size, AppInfo *appInfo)
 
 static void FillAppInfo(const uint8_t *data, size_t size, AppInfo *appInfo)
 {
-    appInfo->routeType = (RouteType)*(reinterpret_cast<const int32_t *>(data));
-    appInfo->businessType = (BusinessType)*(reinterpret_cast<const int32_t *>(data));
-    appInfo->streamType = (StreamType)*(reinterpret_cast<const int32_t *>(data));
-    appInfo->udpConnType = (UdpConnType)*(reinterpret_cast<const int32_t *>(data));
-    appInfo->udpChannelOptType = (UdpChannelOptType)*(reinterpret_cast<const int32_t *>(data));
+    appInfo->routeType = static_cast<RouteType>(*(reinterpret_cast<const int32_t *>(data)));
+    appInfo->businessType = static_cast<BusinessType>(*(reinterpret_cast<const int32_t *>(data)));
+    appInfo->streamType = static_cast<StreamType>(*(reinterpret_cast<const int32_t *>(data)));
+    appInfo->udpConnType = static_cast<UdpConnType>(*(reinterpret_cast<const int32_t *>(data)));
+    appInfo->udpChannelOptType = static_cast<UdpChannelOptType>(*(reinterpret_cast<const int32_t *>(data)));
     appInfo->fd = *(reinterpret_cast<const int32_t *>(data));
-    appInfo->appType = (AppType)*(reinterpret_cast<const int32_t *>(data));
+    appInfo->appType = static_cast<AppType>(*(reinterpret_cast<const int32_t *>(data)));
     appInfo->myData = *(reinterpret_cast<const AppInfoData *>(data));
     appInfo->peerData = *(reinterpret_cast<const AppInfoData *>(data));
     appInfo->protocol = *(reinterpret_cast<const int32_t *>(data));
@@ -85,7 +81,7 @@ static void FillAppInfo(const uint8_t *data, size_t size, AppInfo *appInfo)
 
 static void FillConnectOption(const uint8_t *data, size_t size, ConnectOption *connInfo)
 {
-    connInfo->type = (ConnectType)*(reinterpret_cast<const int32_t *>(data));
+    connInfo->type = static_cast<ConnectType>(*(reinterpret_cast<const int32_t *>(data)));
 }
 
 void TransProxyGetNewChanSeqTest(const uint8_t *data, size_t size)
