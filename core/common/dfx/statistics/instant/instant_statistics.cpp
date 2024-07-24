@@ -29,10 +29,13 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
+#include "trans_channel_common.h"
 #include "trans_event.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "wifi_statistic.h"
+#include "bt_statistic.h"
 
 using namespace OHOS::SoftBus;
 
@@ -231,6 +234,41 @@ static bool InstIsMatchSessionConn(const InstantRemoteInfo *rInfo, const Session
     }
 }
 
+static std::string GetUdidByTcpChannelInfo(const TcpChannelInfo *conn)
+{
+    if (conn->channelType == CHANNEL_TYPE_TCP_DIRECT || conn->channelType == CHANNEL_TYPE_PROXY ||
+        conn->channelType == CHANNEL_TYPE_UDP) {
+        char peerUdid[DEVICE_ID_SIZE_MAX] = { 0 };
+        GetRemoteUdidWithNetworkId(conn->peerDeviceId, peerUdid, sizeof(peerUdid));
+        return std::string(peerUdid);
+    } else if (conn->channelType == CHANNEL_TYPE_AUTH) {
+        return std::string(conn->peerDeviceId);
+    }
+    return "";
+}
+
+static bool InstIsMatchTcpChannel(const InstantRemoteInfo *rInfo, const TcpChannelInfo *conn)
+{
+    if (rInfo == nullptr || conn == nullptr) {
+        COMM_LOGE(COMM_DFX, "invalid param");
+        return false;
+    }
+    if (InstantIsParaMatch(rInfo->uuid, GetUdidByTcpChannelInfo(conn))) {
+        return true;
+    }
+    int32_t type = InstGetIpFromLinkTypeOrConnectType(rInfo, conn->linkType, conn->connectType);
+    switch (type) {
+        case HML_IP:
+            return InstantIsParaMatch(rInfo->hmlIp, conn->peerIp);
+        case P2P_IP:
+            return InstantIsParaMatch(rInfo->p2pIp, conn->peerIp);
+        case WLAN_IP:
+            return InstantIsParaMatch(rInfo->wlanIp, conn->peerIp);
+        default:
+            return false;
+    }
+}
+
 static void InstSetIpForRemoteInfo(InstantRemoteInfo *remoteInfo, const AppInfo *appInfo)
 {
     if (remoteInfo == NULL || appInfo == NULL) {
@@ -290,6 +328,35 @@ static void UpdateRemoteInfoBySessionConn(InstantRemoteInfo *remoteInfo, const S
     }
 }
 
+static void UpdateRemoteInfoByTcpChannelInfo(InstantRemoteInfo *remoteInfo, const TcpChannelInfo *conn)
+{
+    if (remoteInfo == nullptr) {
+        COMM_LOGE(COMM_DFX, "param remote info is null");
+        return;
+    }
+    if (conn == nullptr) {
+        COMM_LOGE(COMM_DFX, "param conn is null");
+        return;
+    }
+    int32_t type = InstGetIpFromLinkTypeOrConnectType(remoteInfo, conn->linkType, conn->connectType);
+    switch (type) {
+        case HML_IP:
+            remoteInfo->hmlIp = std::string(conn->peerIp);
+            break;
+        case P2P_IP:
+            remoteInfo->p2pIp = std::string(conn->peerIp);
+            break;
+        case WLAN_IP:
+            remoteInfo->wlanIp = std::string(conn->peerIp);
+            break;
+        default:
+            break;
+    }
+    if (remoteInfo->udid.empty()) {
+        remoteInfo->udid = GetUdidByTcpChannelInfo(conn);
+    }
+}
+
 static InstantChannelInfo *InstCreateAndAddChannelInfo(InstantRemoteInfo *remoteInfo)
 {
     if (remoteInfo == NULL) {
@@ -330,6 +397,25 @@ static void InstAddSessionConnToRemoteInfo(InstantRemoteInfo *remoteInfo, Sessio
     UpdateRemoteInfoBySessionConn(remoteInfo, conn);
 }
 
+static void InstAddTcpChannelInfoToRemoteInfo(InstantRemoteInfo *remoteInfo, TcpChannelInfo *conn)
+{
+    if (remoteInfo == nullptr || conn == nullptr) {
+        COMM_LOGE(COMM_DFX, "invalid param");
+        return;
+    }
+    InstantChannelInfo *channelInfo = InstCreateAndAddChannelInfo(remoteInfo);
+    if (channelInfo == nullptr) {
+        return;
+    }
+    channelInfo->serverSide = conn->isServer;
+    channelInfo->laneLinkType = conn->linkType;
+    channelInfo->connectType = conn->connectType;
+    channelInfo->startTime = GetSoftbusRecordTimeMillis() - conn->timeStart;
+    channelInfo->channelType = CHANNEL_TYPE_TCP_DIRECT;
+    channelInfo->socketName = conn->peerSessionName;
+    UpdateRemoteInfoByTcpChannelInfo(remoteInfo, conn);
+}
+
 static void InstUpdateRemoteInfoBySessionConn(SoftBusList *remoteChannelInfoList)
 {
     SessionConn *item = NULL;
@@ -354,6 +440,32 @@ static void InstUpdateRemoteInfoBySessionConn(SoftBusList *remoteChannelInfoList
         InstAddSessionConnToRemoteInfo(rInfo, item);
     }
     ReleaseSessionConnLock();
+}
+
+static void InstUpdateRemoteInfoByTcpChannel(SoftBusList *remoteChannelInfoList)
+{
+    TcpChannelInfo *item = NULL;
+    SoftBusList *tcpChannelInfoList = GetTcpChannelInfoList();
+    if (tcpChannelInfoList == NULL || GetTcpChannelInfoLock() != SOFTBUS_OK) {
+        return;
+    }
+    LIST_FOR_EACH_ENTRY(item, &tcpChannelInfoList->list, TcpChannelInfo, node) {
+        InstantRemoteInfo *rInfo = NULL;
+        bool matched = false;
+        LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
+            if (InstIsMatchTcpChannel(rInfo, item)) {
+                matched = true;
+                InstAddTcpChannelInfoToRemoteInfo(rInfo, item);
+                break;
+            }
+        }
+        rInfo = InstCreateAndAddRemoteInfo(remoteChannelInfoList, matched);
+        if (rInfo == NULL) {
+            continue;
+        }
+        InstAddTcpChannelInfoToRemoteInfo(rInfo, item);
+    }
+    ReleaseTcpChannelInfoLock();
 }
 
 static bool InstIsMatchUdpChannel(const InstantRemoteInfo *rInfo, const UdpChannelInfo *info)
@@ -781,6 +893,7 @@ static void InstGetRemoteInfo(cJSON *json)
     }
     InstAddRemoteInfoByLinkManager(remoteChannelInfoList);
     InstUpdateRemoteInfoBySessionConn(remoteChannelInfoList);
+    InstUpdateRemoteInfoByTcpChannel(remoteChannelInfoList);
     InstUpdateRemoteInfoByUdpChannel(remoteChannelInfoList);
     InstUpdateRemoteInfoByProxyChannel(remoteChannelInfoList);
     InstUpdateByAuthChannelList(remoteChannelInfoList);
@@ -799,6 +912,14 @@ static int32_t InstGetAllInfo(int32_t radarId, int32_t errorCode)
     if (remoteDevicesJson != NULL) {
         InstGetRemoteInfo(remoteDevicesJson);
     }
+
+    cJSON *wifiJson = cJSON_CreateObject();
+    Communication::Softbus::WifiStatistic::GetInstance().GetWifiStatisticInfo(wifiJson);
+    (void)cJSON_AddItemToObject(json, "WifiInfo", wifiJson);
+
+    cJSON *btJson = cJSON_CreateObject();
+    Communication::Softbus::BtStatistic::GetInstance().GetBtStatisticInfo(btJson);
+    (void)cJSON_AddItemToObject(json, "BtInfo", btJson);
 
     char *info = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);

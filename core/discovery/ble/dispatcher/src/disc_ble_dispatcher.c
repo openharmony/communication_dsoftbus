@@ -44,7 +44,7 @@ static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
 static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE,
@@ -67,7 +67,7 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
         case UNPUBLISH_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->Unpublish(option) : interface->StopScan(option);
         default:
-            DISC_LOGW(DISC_BLE,
+            DISC_LOGE(DISC_BLE,
                 "dispatch publish action failed: unsupport type. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL;
@@ -77,7 +77,7 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
 static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE, "dispatch subcribe action failed: no implement support capability. capability=%{public}u",
@@ -99,7 +99,7 @@ static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, Discove
         case STOPDISCOVERY_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->StopAdvertise(option) : interface->Unsubscribe(option);
         default:
-            DISC_LOGW(DISC_BLE, "dispatch subcribe action failed: unsupport. type=%{public}d, capability=%{public}u",
+            DISC_LOGE(DISC_BLE, "dispatch subcribe action failed: unsupport. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL;
     }
@@ -196,7 +196,7 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
     if (discInnerCb == NULL) {
         DfxRecordBleInitEnd(EVENT_STAGE_INIT, SOFTBUS_INVALID_PARAM);
-        DISC_LOGW(DISC_INIT, "discInnerCb err");
+        DISC_LOGE(DISC_INIT, "discInnerCb err");
         return NULL;
     }
     DISC_LOGI(DISC_INIT, "DiscBleFrameInit");

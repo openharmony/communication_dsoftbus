@@ -109,7 +109,7 @@ int32_t AuthDevice(int64_t authReqId, const char *authParams, const DeviceAuthCa
         }
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         if (ret != HC_ERR_INVALID_PARAMS) {
-            AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed, err=%{public}d, authErrCode=%{public}u", ret,
+            AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed, err=%{public}d, authErrCode=%{public}d", ret,
                 authErrCode);
             return authErrCode;
         }
@@ -289,9 +289,8 @@ uint32_t HichainGetJoinedGroups(int32_t groupType)
     return groupCnt;
 }
 
-bool IsSameAccountGroupDevice(const char *deviceId)
+bool IsSameAccountGroupDevice(void)
 {
-    (void)deviceId;
     uint32_t groupNum = 0;
     char *returnGroupVec = NULL;
 

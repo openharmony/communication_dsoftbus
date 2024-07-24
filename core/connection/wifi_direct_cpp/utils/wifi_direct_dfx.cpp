@@ -90,7 +90,7 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
     uint64_t endTime = stateMapElement[TotalEnd];
     if (startTime != 0 && endTime != 0) {
         extra.costTime = int32_t(endTime - startTime);
-        extra.negotiateTime = int32_t(endTime - startTime);
+        extra.negotiateTime = endTime - startTime > 0 ? endTime - startTime : 0;
     }
     auto dfxInfo = wifiDirectConnectInfo.dfxInfo;
     extra.bootLinkType = dfxInfo.bootLinkType;

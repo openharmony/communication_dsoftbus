@@ -354,6 +354,25 @@ static void OnWifiDirectDisconnectFailure(uint32_t requestId, int32_t reason)
     RecycleLinkedListResource(requestId);
 }
 
+static int32_t UpdateP2pLinkedReqByLinkId(int32_t linkId, uint32_t requestId)
+{
+    if (LinkLock() != 0) {
+        LNN_LOGE(LNN_LANE, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    P2pLinkedList *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, g_p2pLinkedList, P2pLinkedList, node) {
+        if (item->p2pModuleLinkId == linkId) {
+            item->p2pLinkDownReqId = requestId;
+            LinkUnlock();
+            return SOFTBUS_OK;
+        }
+    }
+    LinkUnlock();
+    LNN_LOGE(LNN_LANE, "P2pLinkedReq item not found, linkId=%{public}d", linkId);
+    return SOFTBUS_LANE_NOT_FOUND;
+}
+
 static int32_t DisconnectP2pWithoutAuthConn(int32_t pid, const char *mac, int32_t linkId)
 {
     struct WifiDirectDisconnectInfo info;
@@ -361,12 +380,17 @@ static int32_t DisconnectP2pWithoutAuthConn(int32_t pid, const char *mac, int32_
     info.requestId = GetWifiDirectManager()->getRequestId();
     info.pid = pid;
     info.linkId = linkId;
+    int32_t errCode = UpdateP2pLinkedReqByLinkId(linkId, info.requestId);
+    if (errCode != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "updata p2pLinkedReq by linkId fail");
+        return errCode;
+    }
     struct WifiDirectDisconnectCallback callback = {
         .onDisconnectSuccess = OnWifiDirectDisconnectSuccess,
         .onDisconnectFailure = OnWifiDirectDisconnectFailure,
     };
     LNN_LOGI(LNN_LANE, "disconnect wifiDirect, p2pRequestId=%{public}u, linkId=%{public}d", info.requestId, linkId);
-    int32_t errCode = GetWifiDirectManager()->disconnectDevice(&info, &callback);
+    errCode = GetWifiDirectManager()->disconnectDevice(&info, &callback);
     if (errCode != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "disconnect p2p device err");
         return errCode;
@@ -1724,9 +1748,8 @@ static bool IsSupportWifiDirect(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
-    return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
+    return IsSupportHmlTwo(local, remote);
 }
-
 static bool CheckHasBrConnection(const char *networkId)
 {
     ConnectOption connOpt;
@@ -1815,8 +1838,7 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t l
         wifiDirectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
         wifiDirectInfo.negoChannel.handle.actionAddr = request->actionAddr;
     } else {
-        wifiDirectInfo.connectType = GetWifiDirectManager()->supportHmlTwo() ?
-            WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
     }
     wifiDirectInfo.reuseOnly = true;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {

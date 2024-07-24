@@ -550,7 +550,7 @@ uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
         LNN_LOGI(LNN_HEART_BEAT, "seed is 0, just ignore");
     }
     srand(currTime);
-    uint32_t random = rand() % (randMax - randMin);
+    uint32_t random = (uint32_t)rand() % (randMax - randMin);
     return randMin + random;
 }
 

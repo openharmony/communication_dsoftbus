@@ -280,11 +280,12 @@ void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFil
     }
 }
 
-void SoftbusSetManufactureData(BleScanNativeFilter *nativeFilter, uint8_t filterSize)
+void SoftbusSetManufactureFilter(BleScanNativeFilter *nativeFilter, uint8_t filterSize)
 {
     while (filterSize-- > 0) {
         uint8_t *manufactureData = (uint8_t *)SoftBusCalloc(MANUFACTURE_DATA_LEN);
         if (manufactureData == NULL) {
+            DISC_LOGW(DISC_BLE_ADAPTER, "malloc manufacture data failed");
             return;
         }
         manufactureData[0] = MANUFACTURE_DATA_UUID_LOW & BC_BYTE_MASK;
@@ -292,6 +293,7 @@ void SoftbusSetManufactureData(BleScanNativeFilter *nativeFilter, uint8_t filter
         uint8_t *manufactureMask = (uint8_t *)SoftBusCalloc(MANUFACTURE_DATA_LEN);
         if (manufactureMask == NULL) {
             SoftBusFree(manufactureData);
+            DISC_LOGW(DISC_BLE_ADAPTER, "malloc manufacture mask failed");
             return;
         }
         manufactureMask[0] = BC_BYTE_MASK;
@@ -490,4 +492,20 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
         index += len;
     }
     return SOFTBUS_OK;
+}
+
+void DumpSoftbusAdapterData(const char *description, uint8_t *data, uint16_t len)
+{
+    DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BLE_ADAPTER, "data is null!");
+    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BLE_ADAPTER, "len is 0!");
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is null!");
+
+    int32_t hexLen = HEXIFY_LEN(len);
+    char *softbusData = (char *)SoftBusCalloc(sizeof(char) * hexLen);
+    DISC_CHECK_AND_RETURN_LOGE(softbusData != NULL, DISC_BLE_ADAPTER, "malloc failed!");
+
+    (void)ConvertBytesToHexString(softbusData, hexLen, data, len);
+    DISC_LOGI(DISC_BLE_ADAPTER, "description=%{public}s, softbusData=%{public}s", description, softbusData);
+
+    SoftBusFree(softbusData);
 }

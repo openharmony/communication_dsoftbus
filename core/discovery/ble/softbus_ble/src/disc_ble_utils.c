@@ -208,7 +208,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
         return SOFTBUS_OK;
     }
     DISC_CHECK_AND_RETURN_RET_LOGE(multiByteStrLen <= WIDE_STR_MAX_LEN, SOFTBUS_INVALID_PARAM, DISC_BLE,
-        "multi byte str too long: %zu", multiByteStrLen);
+        "multi byte str too long: %{public}zu", multiByteStrLen);
 
     char *localeBefore = NULL;
     int32_t ret = SetLocale(&localeBefore);
@@ -420,13 +420,13 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
 
 int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
         "device is null");
     BroadcastReportInfo *reportInfo = (BroadcastReportInfo *)data;
-    DISC_CHECK_AND_RETURN_RET_LOGW(reportInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "reportInfo=NULL is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(dataLen == sizeof(BroadcastReportInfo), SOFTBUS_INVALID_PARAM, DISC_BLE,
+    DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "reportInfo=NULL is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOGE(dataLen == sizeof(BroadcastReportInfo), SOFTBUS_INVALID_PARAM, DISC_BLE,
         "bcData.payload=NULL is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(
+    DISC_CHECK_AND_RETURN_RET_LOGE(
         reportInfo->packet.bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "payload=NULL is invalid");
     uint16_t bcLen = reportInfo->packet.bcData.payloadLen;
     uint16_t rspLen = reportInfo->packet.rspData.payloadLen;

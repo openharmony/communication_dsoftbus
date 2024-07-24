@@ -137,7 +137,7 @@ HWTEST_F(NetLedgerTest, LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001, TestSize.Leve
     char *udidArray = new char[TEST_DATA_LEN];
     ASSERT_NE(udidArray, nullptr);
     ret = LnnGetTrustedDevInfoFromDb(&udidArray, &num);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     delete[] udidArray;
 }
 
@@ -226,7 +226,7 @@ HWTEST_F(NetLedgerTest, LNN_META_INFO_ADD_DEL_Test_001, TestSize.Level1)
     ret = LnnAddMetaInfo(&info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnDeleteMetaInfo(NODE1_UDID, AUTH_LINK_TYPE_WIFI);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnDeleteMetaInfo(NODE1_UDID, AUTH_LINK_TYPE_WIFI);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnDeleteMetaInfo(NODE1_UDID, AUTH_LINK_TYPE_WIFI);

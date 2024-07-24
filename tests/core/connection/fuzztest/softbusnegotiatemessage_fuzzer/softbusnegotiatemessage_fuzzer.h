@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,9 @@
  * limitations under the License.
  */
 
-#include "disc_ble.h"
-#include "stddef.h"
+#ifndef SOFTBUSNEGOTIATEMESSAGE_FUZZER_H
+#define SOFTBUSNEGOTIATEMESSAGE_FUZZER_H
 
-DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
-{
-    (void)callback;
-    return NULL;
-}
+#define FUZZ_PROJECT_NAME "softbusnegotiatemessage_fuzzer"
 
-void DiscSoftBusBleDeinit(void)
-{
-    return;
-}
+#endif
