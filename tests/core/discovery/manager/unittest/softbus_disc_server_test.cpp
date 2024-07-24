@@ -170,7 +170,7 @@ HWTEST_F(DiscManagerServerTest, DiscoveryErroCodeProcessTest, TestSize.Level1)
     EXPECT_EQ(DiscIpcStartDiscovery(packageName, &subscribeInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock,
                 DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM));
-    EXPECT_EQ(DiscIpcStartDiscovery(packageName, &subscribeInfo), DISCOVERY_FAIL_REASON_NOT_SUPPORT_MEDIUM);
+    EXPECT_EQ(DiscIpcStartDiscovery(packageName, &subscribeInfo), SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM);
     DISC_LOGI(DISC_TEST, "DiscoveryErroCodeProcessTest end");
 }
 
