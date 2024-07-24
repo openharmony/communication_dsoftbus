@@ -268,7 +268,7 @@ static void FreeSendNode(SendQueueNode *node)
 
 static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
-#define BLE_SEND_PACKET_DELAY_MILLIS 10
+#define BLE_SEND_PACKET_DELAY_MILLIS 20
     const uint8_t *waitSendData = data;
     uint32_t waitSendLen = dataLen;
     uint32_t offset = 0;
@@ -306,10 +306,8 @@ static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *d
         waitSendData += amount;
         waitSendLen -= amount;
         offset += amount;
-        if (waitSendLen > 0) {
-            // Temporarily add delay to avoid packet loss
-            SoftBusSleepMs(BLE_SEND_PACKET_DELAY_MILLIS);
-        }
+        // Temporarily add delay to avoid packet loss
+        SoftBusSleepMs(BLE_SEND_PACKET_DELAY_MILLIS);
     }
     return SOFTBUS_OK;
 }
@@ -569,7 +567,6 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
 
 static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
-    #define BLE_SEND_PACKET_DELAY_MILLIS 10
     uint32_t sentLen = 0;
     while (dataLen > sentLen) {
         uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)dataLen);
