@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/features.gni")
-import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../../../dsoftbus.gni")
 

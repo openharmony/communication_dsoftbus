@@ -11,9 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/features.gni")
-import("//build/ohos.gni")
-import("//build/test.gni")
 import("../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../dsoftbus.gni")
 import("../../../../sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
@@ -39,7 +36,7 @@ trans_sdk_test_common_inc = [
 ]
 trans_sdk_test_common_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
-  "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
+  "$dsoftbus_root_path/sdk:softbus_client",
   "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
 ]
 
@@ -73,9 +70,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
   ]
 
-  trans_sdk_proxy_test_deps = [
-    "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
-  ]
+  trans_sdk_proxy_test_deps = [ "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static" ]
 
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("TransSdkStreamTest") {
