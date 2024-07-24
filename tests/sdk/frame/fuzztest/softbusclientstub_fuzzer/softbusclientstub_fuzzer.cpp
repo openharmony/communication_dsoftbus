@@ -29,6 +29,29 @@ namespace OHOS {
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 
+class TestEnv {
+public:
+    TestEnv()
+    {
+        isInited_ = false;
+        ClientTransChannelInit();
+        isInited_ = true;
+    }
+
+    ~TestEnv()
+    {
+        isInited_ = false;
+        ClientTransChannelDeinit();
+    }
+
+    bool IsInited(void)
+    {
+        return isInited_;
+    }
+private:
+    volatile bool isInited_;
+};
+
 enum SoftBusFuncId {
     CLIENT_ON_CHANNEL_OPENED = 256,
     CLIENT_ON_CHANNEL_OPENFAILED,
@@ -618,7 +641,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    ClientTransChannelInit();
+    static OHOS::TestEnv env;
+    if (!env.IsInited()) {
+        return 0;
+    }
     OHOS::OnChannelOpenedInnerTest(dataWithEndCharacter, size);
     OHOS::OnChannelOpenFailedInnerTest(data, size);
     OHOS::OnChannelLinkDownInnerTest(dataWithEndCharacter, size);
@@ -644,7 +670,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::OnClientTransLimitChangeInnerTest(data, size);
     OHOS::SetChannelInfoInnerTest(dataWithEndCharacter, size);
     OHOS::OnChannelBindInnerTest(data, size);
-    ClientTransChannelDeinit();
 
     SoftBusFree(dataWithEndCharacter);
     return 0;
