@@ -29,11 +29,12 @@
 #include "softbus_def.h"
 #include "wifi_direct_manager.h"
 
-#define AUTH_CONN_DATA_HEAD_SIZE           24
-#define AUTH_CONN_CONNECT_TIMEOUT_MS       11000
-#define AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY 1000
-#define AUTH_CONN_MAX_RETRY_TIMES          1
-#define AUTH_CONN_RETRY_DELAY_MILLIS       3000
+#define AUTH_CONN_DATA_HEAD_SIZE             24
+#define AUTH_ENHANCE_P2P_CONNECT_TIMEOUT_MS  4500
+#define AUTH_CONN_CONNECT_TIMEOUT_MS         11000
+#define AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY   1000
+#define AUTH_CONN_MAX_RETRY_TIMES            1
+#define AUTH_CONN_RETRY_DELAY_MILLIS         3000
 
 typedef struct {
     uint32_t requestId;
@@ -271,10 +272,15 @@ static void HandleConnConnectTimeout(const void *para)
     NotifyClientConnected(requestId, 0, SOFTBUS_AUTH_CONN_TIMEOUT, NULL);
 }
 
-static void PostConnConnectTimeout(uint32_t requestId)
+static void PostConnConnectTimeout(uint32_t requestId, AuthLinkType type)
 {
-    PostAuthEvent(
-        EVENT_CONNECT_TIMEOUT, HandleConnConnectTimeout, &requestId, sizeof(requestId), AUTH_CONN_CONNECT_TIMEOUT_MS);
+    if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        PostAuthEvent(EVENT_CONNECT_TIMEOUT, HandleConnConnectTimeout, &requestId, sizeof(requestId),
+            AUTH_ENHANCE_P2P_CONNECT_TIMEOUT_MS);
+    } else {
+        PostAuthEvent(EVENT_CONNECT_TIMEOUT, HandleConnConnectTimeout, &requestId, sizeof(requestId),
+            AUTH_CONN_CONNECT_TIMEOUT_MS);
+    }
 }
 
 static int32_t RemoveFunc(const void *obj, void *param)
@@ -610,7 +616,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     AUTH_LOGI(AUTH_CONN, "requestId=%{public}u, connType=%{public}d, sideType=%{public}d", requestId,
         connInfo->type, sideType);
-    PostConnConnectTimeout(requestId);
+    PostConnConnectTimeout(requestId, connInfo->type);
     int32_t ret = 0;
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI: {
