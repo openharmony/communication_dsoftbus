@@ -82,14 +82,18 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     char *tmpMac = NULL;
     Anonymize(peerMac, &tmpMac);
-    AnonymizeFree(tmpMac);
     int32_t ret = LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_CTRL, "LnnGetNetworkIdByBtMac fail, peerMac=%{public}s", tmpMac);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail, peerMac=%{public}s", tmpMac);
+        AnonymizeFree(tmpMac);
+        return ret;
+    }
     ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, len);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
-    return SOFTBUS_OK;
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
+    }
+    AnonymizeFree(tmpMac);
+    return ret;
 }
 
 static int32_t GetRemoteBtMacByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *brMac, int32_t len)
