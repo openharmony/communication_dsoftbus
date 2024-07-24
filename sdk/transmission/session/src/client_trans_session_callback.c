@@ -341,9 +341,9 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     if (channelType == CHANNEL_TYPE_UNDEFINED) {
+        sessionId = channelId;
         (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
         // only client async bind failed call
-        sessionId = channelId;
         bool tmpIsServer = false;
         ClientGetSessionCallbackAdapterById(sessionId, &sessionCallback, &tmpIsServer);
         (void)TransOnBindFailed(sessionId, &sessionCallback.socketClient, errCode);
