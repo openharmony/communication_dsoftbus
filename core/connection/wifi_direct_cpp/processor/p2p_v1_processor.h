@@ -40,10 +40,17 @@ public:
 private:
     static constexpr int P2P_VERSION = 2;
 
+#ifdef P2P_V1_WAITING_TIMEOUT_MS_OVERWRITE
+    static constexpr int P2P_V1_WAITING_RESPONSE_TIME_MS = P2P_V1_WAITING_TIMEOUT_MS_OVERWRITE;
+    static constexpr int P2P_V1_WAITING_REQUEST_TIME_MS = P2P_V1_WAITING_TIMEOUT_MS_OVERWRITE;
+    static constexpr int P2P_V1_WAITING_AUTH_TIME_MS = P2P_V1_WAITING_TIMEOUT_MS_OVERWRITE;
+    static constexpr int P2P_V1_WAITING_REUSE_RESPONSE_TIME_MS = P2P_V1_WAITING_TIMEOUT_MS_OVERWRITE;
+#else
     static constexpr int P2P_V1_WAITING_RESPONSE_TIME_MS = 10000;
     static constexpr int P2P_V1_WAITING_REQUEST_TIME_MS = 10000;
     static constexpr int P2P_V1_WAITING_AUTH_TIME_MS = 10000;
     static constexpr int P2P_V1_WAITING_REUSE_RESPONSE_TIME_MS = 2000;
+#endif
     static constexpr int DISCONNECT_WAIT_POST_REQUEST_MS = 450;
     static constexpr int TIMER_TIME = 200;
 

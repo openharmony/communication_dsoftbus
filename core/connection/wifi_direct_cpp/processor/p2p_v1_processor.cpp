@@ -1437,10 +1437,9 @@ int P2pV1Processor::ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<Ne
     if (connectCommand_ != nullptr) {
         auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
         auto pid = connectCommand_->GetConnectInfo().info_.pid;
-        bool alreadyAuthHandShake = false;
         WifiDirectLink dlink {};
         auto success = LinkManager::GetInstance().ProcessIfPresent(
-            remoteMac, [msg, requestId, pid, &dlink, &alreadyAuthHandShake](InnerLink &link) {
+            remoteMac, [msg, requestId, pid, &dlink](InnerLink &link) {
                 link.SetState(InnerLink::LinkState::CONNECTED);
                 link.GenerateLink(requestId, pid, dlink, true);
                 dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
