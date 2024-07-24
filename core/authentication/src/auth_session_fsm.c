@@ -633,6 +633,27 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
     SoftbusHitraceStop();
 }
 
+static void SaveLastAuthSeq(const unsigned char *udidHash, int64_t authSeq)
+{
+    AUTH_LOGI(AUTH_FSM, "save auth seq.authSeq=%{public}" PRId64, authSeq);
+    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    if (ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1,
+        udidHash, SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert udidhash to hexstr fail.");
+        return;
+    }
+    NodeInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "no this device info.");
+        return;
+    }
+    deviceInfo.lastAuthSeq = authSeq;
+    if (LnnSaveRemoteDeviceInfo(&deviceInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "save device info fail.");
+    }
+}
+
 static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
 {
     if (authFsm->info.normalizedKey == NULL) {
@@ -653,6 +674,9 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
     }
     AuthUpdateNormalizeKeyIndex(udidShortHash, authFsm->info.normalizedIndex, authFsm->info.connInfo.type,
         authFsm->info.normalizedKey, authFsm->info.isServer);
+    if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) {
+        SaveLastAuthSeq(hash, authFsm->authSeq);
+    }
     ret = AuthSessionSaveSessionKey(authFsm->authSeq, authFsm->info.normalizedKey->value,
         authFsm->info.normalizedKey->len);
     if (ret != SOFTBUS_OK) {
