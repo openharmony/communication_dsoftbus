@@ -56,7 +56,6 @@
 #define TYPE_BUF_LEN 2
 #define LANE_ID_BUF_LEN (UDID_BUF_LEN + UDID_BUF_LEN + TYPE_BUF_LEN)
 #define LANE_ID_HASH_LEN 32
-#define POWER_CONTROL_CLIENT 3
 
 static bool g_enabledLowPower = false;
 
@@ -357,7 +356,7 @@ static void DetectEnableWifiDirectApply(void)
             powerInfo.rawHml++;
         }
     }
-    if (powerInfo.activeHml >= POWER_CONTROL_CLIENT) {
+    if (powerInfo.activeHml > 1) {
         powerInfo.isDisableLowPower = true;
     }
     if (((powerInfo.activeHml == 0) || (powerInfo.passiveHml > 0) || (powerInfo.rawHml > 0)) && g_enabledLowPower) {
