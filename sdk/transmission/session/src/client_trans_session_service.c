@@ -462,7 +462,7 @@ void NotifyAuthSuccess(int sessionId)
 static int32_t CheckSessionIsOpened(int32_t sessionId, bool isCancelCheck)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
-#define SESSION_STATUS_CANCEL_CHECK_MAX_NUM 10
+#define SESSION_STATUS_CANCEL_CHECK_MAX_NUM 5
 #define SESSION_CHECK_PERIOD 200000
     int32_t checkMaxNum = isCancelCheck ? SESSION_STATUS_CANCEL_CHECK_MAX_NUM : SESSION_STATUS_CHECK_MAX_NUM;
     int32_t i = 0;
