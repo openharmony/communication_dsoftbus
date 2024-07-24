@@ -148,5 +148,46 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
 {
     return HeartBeatStrategyInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
 }
+
+bool IsSameAccountGroupDevice(void)
+{
+    return HeartBeatStrategyInterface()->IsSameAccountGroupDevice();
+}
+
+uint32_t AuthGenRequestId(void)
+{
+    return HeartBeatStrategyInterface()->AuthGenRequestId();
+}
+
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *verifyCallback,
+    AuthVerifyModule module, bool isFastAuth)
+{
+    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, verifyCallback, module, isFastAuth);
+}
+
+void AddNodeToLnnBleReportExtraMap(const char *udidHash, const LnnBleReportExtra *bleExtra)
+{
+    return HeartBeatStrategyInterface()->AddNodeToLnnBleReportExtraMap(udidHash, bleExtra);
+}
+
+int32_t GetNodeFromLnnBleReportExtraMap(const char *udidHash, LnnBleReportExtra *bleExtra)
+{
+    return HeartBeatStrategyInterface()->GetNodeFromLnnBleReportExtraMap(udidHash, bleExtra);
+}
+
+void DeleteNodeFromLnnBleReportExtraMap(const char *udidHash)
+{
+    return HeartBeatStrategyInterface()->DeleteNodeFromLnnBleReportExtraMap(udidHash);
+}
+
+int32_t LnnUpdateRemoteDeviceInfo(const NodeInfo *deviceInfo)
+{
+    return HeartBeatStrategyInterface()->LnnUpdateRemoteDeviceInfo(deviceInfo);
+}
+
+int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count)
+{
+    return HeartBeatStrategyInterface()->GetNodeFromPcRestrictMap(udidHash, count);
+}
 }
 } // namespace OHOS

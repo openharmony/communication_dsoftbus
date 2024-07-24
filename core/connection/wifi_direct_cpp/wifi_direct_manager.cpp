@@ -436,11 +436,6 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
-static bool SupportHmlTwo(void)
-{
-    return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
-}
-
 static bool IsWifiP2pEnabled(void)
 {
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
@@ -496,7 +491,6 @@ static struct WifiDirectManager g_manager = {
     .getRemoteUuidByIp = GetRemoteUuidByIp,
     .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 
-    .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
 

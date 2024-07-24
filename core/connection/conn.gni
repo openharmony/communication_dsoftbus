@@ -20,8 +20,7 @@ import("../../dsoftbus.gni")
 import("../../core/connection/tcp/conn_tcp.gni")
 conn_manager_src = ble_connection_src + br_connection_src + tcp_connection_src
 conn_manager_inc = ble_connection_inc + br_connection_inc + tcp_connection_inc
-conn_manager_external_deps =
-    ble_connection_external_deps + br_connection_external_deps
+conn_manager_external_deps = ble_connection_external_deps
 conn_manager_common_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
 
 conn_manager_src += [
@@ -33,6 +32,7 @@ conn_manager_inc += [
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+  "$dsoftbus_root_path/core/connection/coap/include",
 ]
 if (dsoftbus_feature_ex_kits == true) {
   import(
@@ -51,5 +51,8 @@ if (dsoftbus_feature_ex_kits == true) {
   conn_manager_common_deps += legacy_connection_common_deps
   conn_manager_external_deps += legacy_connection_external_deps
 } else {
-  conn_manager_src += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c" ]
+  conn_manager_src += [
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c",
+    "$dsoftbus_root_path/core/connection/coap/src/conn_coap_manager_virtual.c",
+  ]
 }

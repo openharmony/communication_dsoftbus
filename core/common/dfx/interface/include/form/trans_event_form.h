@@ -87,7 +87,8 @@ typedef struct {
     uint32_t firstTokenId;     // FIRST_TOKEN_ID
     int32_t  firstTokenType;   // FIRST_TOKEN_TYPE
     const char *trafficStats;  // TRAFFIC_STATS
-    int32_t  osType;            // OS_TYPE
+    int32_t  osType;           // OS_TYPE
+    int32_t  deviceState;      // DEVICE_STATE
 } TransEventExtra;
 
 typedef enum {

@@ -130,4 +130,65 @@ HWTEST_F(LinkManagerTest, AllocateLinkIdTest, TestSize.Level1)
     ASSERT_EQ(newId, 1);
 }
 
+/*
+ * @tc.name: GetAllLinksBasicInfo
+ * @tc.desc: test GetAllLinksBasicInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, GetAllLinksBasicInfo, TestSize.Level1)
+{
+    LinkManager linkManager;
+    std::string remoteDeviceId("C86C******58BC");
+    int result = LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceId, [remoteDeviceId](InnerLink &innerLink) {
+            innerLink.SetRemoteDeviceId(remoteDeviceId);
+        });
+    std::vector<InnerLinkBasicInfo> infos;
+    linkManager.GetAllLinksBasicInfo(infos);
+    EXPECT_NE(result, false);
+}
+
+/*
+ * @tc.name: GetReuseLink
+ * @tc.desc: test GetReuseLink
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, GetReuseLink, TestSize.Level1)
+{
+    LinkManager linkManager;
+    std::string remoteMac("127.0.0.93");
+    auto reuseResult = linkManager.GetReuseLink(remoteMac);
+    EXPECT_EQ(reuseResult, nullptr);
+
+    int result = LinkManager::GetInstance().ProcessIfAbsent(remoteMac, [remoteMac](InnerLink &innerLink) {
+        innerLink.SetRemoteBaseMac(remoteMac);
+    });
+    EXPECT_NE(result, false);
+    reuseResult = linkManager.GetReuseLink(remoteMac);
+    EXPECT_EQ(reuseResult, nullptr);
+}
+
+/*
+ * @tc.name: RefreshRelationShip
+ * @tc.desc: test RefreshRelationShip
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, RefreshRelationShip, TestSize.Level1)
+{
+    LinkManager linkManager;
+    std::string remoteDeviceId("C86C******58BC");
+    std::string remoteMac("127.0.0.93");
+    linkManager.RefreshRelationShip(remoteDeviceId, remoteMac);
+
+    int result = LinkManager::GetInstance().ProcessIfAbsent(remoteMac, [remoteMac](InnerLink &innerLink) {
+        innerLink.SetLinkType(InnerLink::LinkType::HML);
+        innerLink.SetRemoteBaseMac(remoteMac);
+    });
+    linkManager.RefreshRelationShip(remoteDeviceId, remoteMac);
+    linkManager.Dump();
+    EXPECT_NE(result, false);
+}
 } // namespace OHOS::SoftBus

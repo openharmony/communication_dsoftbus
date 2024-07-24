@@ -216,7 +216,7 @@ HWTEST_F(AuthSessionMessageTest, VerifySessionInfoIdType_TEST_001, TestSize.Leve
     info.idType = EXCHANGE_NETWORKID;
     EXPECT_TRUE(VerifySessionInfoIdType(&info, obj,
         const_cast<char *>(NETWORK_ID_TEST), const_cast<char *>(UDID)));
-    info.idType = EXCHANHE_UDID;
+    info.idType = EXCHANGE_UDID;
     EXPECT_TRUE(VerifySessionInfoIdType(&info, obj,
         const_cast<char *>(NETWORK_ID_TEST), const_cast<char *>(UDID)));
     JSON_Delete(obj);
@@ -233,7 +233,7 @@ HWTEST_F(AuthSessionMessageTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.version = SOFTBUS_OLD_V1;
-    info.idType = EXCHANHE_UDID;
+    info.idType = EXCHANGE_UDID;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = true;
     EXPECT_TRUE(PackDeviceIdJson(&info) == nullptr);
@@ -295,12 +295,12 @@ HWTEST_F(AuthSessionMessageTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Le
     EXPECT_TRUE(obj1 != nullptr);
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
-    info.idType = EXCHANHE_UDID;
+    info.idType = EXCHANGE_UDID;
     JSON_AddInt32ToObject(obj1, SOFTBUS_VERSION_TAG, 123);
     EXPECT_TRUE(SetExchangeIdTypeAndValue(nullptr, &info) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, &info) == SOFTBUS_OK);
-    JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANHE_UDID);
+    JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANGE_UDID);
     EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, &info) == SOFTBUS_OK);
     JSON_Delete(obj1);
     JsonObj *obj2 = JSON_CreateObject();
@@ -346,7 +346,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
     JSON_AddStringToObject(obj1, DEVICE_ID_TAG, "654321");
     JSON_AddInt32ToObject(obj1, DATA_BUF_SIZE_TAG, PACKET_SIZE);
     JSON_AddInt32ToObject(obj1, SOFTBUS_VERSION_TAG, 123);
-    JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANHE_UDID);
+    JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANGE_UDID);
     JSON_AddStringToObject(obj1, SUPPORT_INFO_COMPRESS, TRUE_STRING_TAG);
     char *msg1 = JSON_PrintUnformatted(obj1);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
@@ -720,6 +720,70 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
     int32_t ret = PostDeviceIdV1(authSeq, info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusFree(info);
+}
+
+/*
+ * @tc.name: IS_EMPTY_SHORT_HASH_STR_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Level1)
+{
+    char udidHash[SHA_256_HEX_HASH_LEN];
+    const char *udidHash1 = "123456";
+    const char *udidHash2 = "0000000000000000000000000000000000000000000000000000000000000000";
+    (void)memset_s(udidHash, sizeof(udidHash), 0, sizeof(udidHash));
+    EXPECT_TRUE(strcpy_s(udidHash, sizeof(udidHash), "") == EOK);
+    bool ret = IsEmptyShortHashStr(udidHash);
+    EXPECT_EQ(ret, true);
+
+    (void)memset_s(udidHash, sizeof(udidHash), 0, sizeof(udidHash));
+    EXPECT_TRUE(strcpy_s(udidHash, sizeof(udidHash), udidHash1) == EOK);
+    ret = IsEmptyShortHashStr(udidHash);
+    EXPECT_EQ(ret, false);
+
+    (void)memset_s(udidHash, sizeof(udidHash), 0, sizeof(udidHash));
+    EXPECT_TRUE(strcpy_s(udidHash, sizeof(udidHash), udidHash2) == EOK);
+    ret = IsEmptyShortHashStr(udidHash);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: GET_LOCAL_UDISHASH_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, GET_LOCAL_UDISHASH_TEST_001, TestSize.Level1)
+{
+    int32_t ret = GetLocalUdidHash(nullptr, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_AUTH_STATE_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, UPDATE_LOCAL_AUTH_STATE_TEST_001, TestSize.Level1)
+{
+    uint64_t authSeq = 512;
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    int32_t ret = UpdateLocalAuthState(authSeq, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.isServer = false;
+    info.peerState = AUTH_STATE_COMPATIBLE;
+    ret = UpdateLocalAuthState(authSeq, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.peerState = AUTH_STATE_ACK;
+    ret = UpdateLocalAuthState(authSeq, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
 

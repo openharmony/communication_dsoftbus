@@ -65,7 +65,7 @@ int32_t TransCommonGetLocalConfig(int32_t channelType, int32_t businessType, uin
 
 void TransFreeAppInfo(AppInfo *appInfo);
 
-void TransFreeLane(uint32_t laneHandle, bool isQosLane);
+void TransFreeLane(uint32_t laneHandle, bool isQosLane, bool isAsync);
 
 bool IsPeerDeviceLegacyOs(int32_t osType);
 

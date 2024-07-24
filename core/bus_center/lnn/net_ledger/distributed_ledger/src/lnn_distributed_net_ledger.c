@@ -792,10 +792,10 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
 {
     int32_t osType = 0;
     if (LnnGetOsTypeByNetworkId(info->networkId, &osType)) {
-        LNN_LOGE(LNN_BUILDER, "get remote osType fail");
+        LNN_LOGE(LNN_LEDGER, "get remote osType fail");
     }
     if (osType != HO_OS_TYPE) {
-        LNN_LOGD(LNN_BUILDER, "not pend br connection");
+        LNN_LOGD(LNN_LEDGER, "not pend br connection");
         return;
     }
     const NodeInfo *localNodeInfo = LnnGetLocalNodeInfo();
@@ -1404,12 +1404,6 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     if (strcpy_s(oldInfo->deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, newInfo->deviceInfo.deviceVersion) !=
         EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s deviceVersion to distributed ledger fail");
-    }
-    if (strcpy_s(oldInfo->networkId, NETWORK_ID_BUF_LEN, newInfo->networkId) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s networkId to distributed ledger fail");
-    }
-    if (strcpy_s(oldInfo->uuid, UUID_BUF_LEN, newInfo->uuid) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s uuid to distributed ledger fail");
     }
     oldInfo->deviceInfo.deviceTypeId = newInfo->deviceInfo.deviceTypeId;
     oldInfo->isBleP2p = newInfo->isBleP2p;

@@ -341,6 +341,9 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
         return SOFTBUS_OK;
     }
     if (GetJsonObjectStringItem(obj, "BLE_MAC", addrInfo->info.ble.bleMac, BT_MAC_LEN)) {
+        if (GetJsonObjectStringItem(obj, "deviceId", (char *)addrInfo->info.ble.udidHash, UDID_HASH_LEN)) {
+            TRANS_LOGI(TRANS_SDK, "get deviceid fail");
+        }
         cJSON_Delete(obj);
         addrInfo->type = CONNECTION_ADDR_BLE;
         return SOFTBUS_OK;

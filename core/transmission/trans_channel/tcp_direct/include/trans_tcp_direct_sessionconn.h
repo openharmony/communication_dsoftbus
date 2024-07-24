@@ -21,6 +21,7 @@
 #include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -60,6 +61,15 @@ typedef struct {
     int32_t businessType;
     int32_t connectType;
     char myIp[IP_LEN];
+    char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
+    bool isServer;
+    int32_t channelType;
+    char peerSessionName[SESSION_NAME_SIZE_MAX];
+    char peerDeviceId[DEVICE_ID_SIZE_MAX];
+    char peerIp[IP_LEN];
+    int64_t timeStart;
+    int32_t linkType;
 } TcpChannelInfo;
 
 uint64_t TransTdcGetNewSeqId(void);
@@ -68,9 +78,15 @@ int32_t CreatSessionConnList(void);
 
 SoftBusList *GetSessionConnList(void);
 
+SoftBusList *GetTcpChannelInfoList(void);
+
 int32_t GetSessionConnLock(void);
 
+int32_t GetTcpChannelInfoLock(void);
+
 void ReleaseSessionConnLock(void);
+
+void ReleaseTcpChannelInfoLock(void);
 
 SessionConn *GetSessionConnByRequestId(uint32_t requestId);
 
@@ -110,6 +126,8 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel);
 int32_t TransAddTcpChannelInfo(TcpChannelInfo *info);
 
 int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId);
+
+void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid);
 
 int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, uint32_t maxIpLen,
     int32_t *connectType);

@@ -486,8 +486,8 @@ void *SendHandlerLoop(void *arg)
             continue;
         }
 
-        int32_t sockerHandle = connection->socketHandle;
-        if (sockerHandle == INVALID_SOCKET_HANDLE) {
+        int32_t socketHandle = connection->socketHandle;
+        if (socketHandle == INVALID_SOCKET_HANDLE) {
             CONN_LOGE(CONN_BR, "br send data failed: invalid socket, connectionId=%{public}u", sendNode->connectionId);
             (void)SoftBusMutexUnlock(&connection->lock);
             ConnBrReturnConnection(&connection);
@@ -512,9 +512,10 @@ void *SendHandlerLoop(void *arg)
         if (window > 1 && sequence % window == window - 1 && waitSequence != 0) {
             WaitAck(connection);
         }
-        status = BrTransSend(connection->connectionId, sockerHandle, connection->mtu, sendNode->data, sendNode->len);
+        status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, sendNode->data, sendNode->len);
         ConnBrReturnConnection(&connection);
-        CONN_LOGD(CONN_BR, "br send data, connId=%{public}u, status=%{public}d", sendNode->connectionId, status);
+        CONN_LOGD(CONN_BR, "br send data, connId=%{public}u, status=%{public}d, socketHandle=%{public}d",
+            sendNode->connectionId, status, socketHandle);
         g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
             sendNode->module, sendNode->seq, status);
         FreeSendNode(sendNode);
@@ -535,8 +536,8 @@ int32_t ConnBrTransConfigPostLimit(const LimitConfiguration *configuration)
     } else {
         ret = g_flowController->enable(g_flowController, configuration->windowInMillis, configuration->quotaInBytes);
     }
-    CONN_LOGI(CONN_BR, "config br post limit, active=%d, windows=%{public}d millis, quota=%{public}d bytes, result=%d",
-        configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
+    CONN_LOGI(CONN_BR, "config br postlimit, active=%{public}d, windows=%{public}d millis, quota=%{public}d bytes, "
+        "result=%{public}d", configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
     return ret;
 }
 

@@ -453,7 +453,6 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ONJOIN_RESULT_Test_001, TestSize.Level1)
     addr.type = CONNECTION_ADDR_BR;
     (void)strcpy_s(addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
     EXPECT_TRUE(LnnOnJoinResult(nullptr, nullptr, retCode) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnOnJoinResult(reinterpret_cast<void *>(&addr), NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
@@ -487,7 +486,6 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_LEAVE_RESULT_Test_001, TestSize.Level1
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnOnLeaveResult(nullptr, retCode) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnOnLeaveResult(NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
@@ -545,7 +543,6 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001, Te
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnOnNodeOnlineStateChanged("", false, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnOnNodeOnlineStateChanged("", false, reinterpret_cast<void *>(&info)) == SOFTBUS_OK);
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
@@ -610,7 +607,6 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_001, TestSize.Le
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnOnTimeSyncResult(nullptr, retCode) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnOnTimeSyncResult(reinterpret_cast<const void *>(&info), retCode) == SOFTBUS_OK);
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);

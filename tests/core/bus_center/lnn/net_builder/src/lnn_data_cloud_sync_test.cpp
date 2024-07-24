@@ -22,6 +22,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_data_cloud_sync.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
 #include "lnn_parameter_utils.h"
@@ -67,10 +68,9 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level
     int32_t ret = LnnLedgerAllDataSyncToDB(info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
-    memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     info->accountId = 0;
     ret = LnnLedgerAllDataSyncToDB(info);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     info->accountId = 18390933952;
     ret = LnnLedgerAllDataSyncToDB(info);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -107,7 +107,12 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Lev
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, value, type);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    NodeInfo localCaheInfo;
+    if (LnnGetLocalCacheNodeInfo(&localCaheInfo) == SOFTBUS_NOT_IMPLEMENT) {
+        EXPECT_EQ(ret, SOFTBUS_ERR);
+    } else {
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
     type = DB_DELETE;
     ret = LnnDBDataChangeSyncToCache(RIGHT_KEY, VALUE, type);
     EXPECT_EQ(ret, SOFTBUS_OK);

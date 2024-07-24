@@ -74,7 +74,6 @@ public:
     static int CompareIgnoreCase(const std::string &left, const std::string &right);
 
     static bool SupportHml();
-    static bool SupportHmlTwo();
     static int32_t GetInterfaceIpString(const std::string &interface, std::string &ip);
     static bool IsInChannelList(int32_t channel, const std::vector<int> &channelArray);
     static int32_t IpStringToIntArray(const char *addrString, uint32_t *addrArray, size_t addrArraySize);
@@ -95,7 +94,7 @@ public:
     static void SerialFlowExit();
     static void ParallelFlowEnter();
     static void ParallelFlowExit();
-    static int32_t CalculateStringLength(const char *str, int32_t size);
+    static uint32_t CalculateStringLength(const char *str, uint32_t size);
     static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
 
 private:

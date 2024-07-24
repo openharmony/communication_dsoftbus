@@ -321,6 +321,13 @@ HWTEST_F(NegotiateMessageTest, MarshallingAndUnmarshallingOfJson, TestSize.Level
     msg1.SetLegacyP2pContentType(LegacyContentType::GC_INFO);
     msg1.SetLegacyP2pRole(WifiDirectRole::WIFI_DIRECT_ROLE_HML);
     msg1.SetLegacyP2pGroupConfig("OHOS-1234\n00:01:02:03:04:05\n00001111\n5180");
+    std::vector<uint8_t> vec = {65, 66, 67, 68, 69};
+    msg1.SetWifiConfigInfo(vec);
+    InterfaceInfo interfaceInfo;
+    interfaceInfo.SetBandWidth(10);
+    std::vector<InterfaceInfo> interfaceInfoArray;
+    interfaceInfoArray.push_back(interfaceInfo);
+    msg1.SetInterfaceInfoArray(interfaceInfoArray);
 
     auto protocol1 = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::JSON);
     std::vector<uint8_t> output;
@@ -349,7 +356,10 @@ HWTEST_F(NegotiateMessageTest, MarshallingAndUnmarshallingOfJson, TestSize.Level
 HWTEST_F(NegotiateMessageTest, SetAndGetMsg, TestSize.Level1)
 {
     NegotiateMessage msg;
+    NegotiateMessage msg1(NegotiateMessageType::CMD_CONN_V2_REQ_1);
+    NegotiateMessage msg2(LegacyCommandType::CMD_DISCONNECT_V1_REQ);
     EXPECT_EQ(msg.GetMessageType(), NegotiateMessageType::CMD_INVALID);
+    msg.SetMessageType(LegacyCommandType::CMD_DISCONNECT_V1_REQ);
     msg.SetMessageType(NegotiateMessageType::CMD_V3_REQ);
     EXPECT_EQ(msg.GetMessageType(), NegotiateMessageType::CMD_V3_REQ);
 
@@ -374,5 +384,21 @@ HWTEST_F(NegotiateMessageTest, SetAndGetMsg, TestSize.Level1)
     EXPECT_EQ(msg.GetLegacyInterfaceName(), "");
     msg.SetLegacyInterfaceName("test");
     EXPECT_EQ(msg.GetLegacyInterfaceName(), "test");
+}
+
+/*
+ * @tc.name: MessageTypeToString
+ * @tc.desc: check MessageTypeToString
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NegotiateMessageTest, MessageTypeToString, TestSize.Level1)
+{
+    NegotiateMessage msg;
+
+    msg.SetLegacyP2pCommandType(LegacyCommandType::CMD_INVALID);
+    auto str = msg.MessageTypeToString();
+    msg.SetMessageType(NegotiateMessageType::CMD_INVALID);
+    EXPECT_EQ(str, "CMD_INVALID");
 }
 } // namespace OHOS::SoftBus

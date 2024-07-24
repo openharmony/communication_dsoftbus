@@ -133,7 +133,11 @@ HWTEST_F(HeartBeatMediumTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
     uint64_t recvTime1 = TEST_RECVTIME_FIRST;
     int32_t ret = HbFirstSaveRecvTime(&storedInfo1, &device1, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = HbSaveRecvTimeToRemoveRepeat(&storedInfo1, &device1, weight, masterWeight, recvTime1);
+    DeviceInfo device11;
+    (void)memset_s(&device11, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    device11.isOnline = false;
+    storedInfo1.device = &device11;
+    ret = HbSaveRecvTimeToRemoveRepeat(&storedInfo1, &device11, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     DeviceInfo device2;
     LnnHeartbeatRecvInfo storedInfo2;
@@ -141,6 +145,7 @@ HWTEST_F(HeartBeatMediumTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
     (void)memset_s(&storedInfo2, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     (void)strcpy_s(device2.devId, DISC_MAX_DEVICE_ID_LEN, TEST_DEVID);
     device2.addr->type = CONNECTION_ADDR_WLAN;
+    storedInfo2.device = &device11;
     uint64_t recvTime2 = TEST_RECVTIME_LAST;
     ret = HbSaveRecvTimeToRemoveRepeat(&storedInfo2, &device2, weight, masterWeight, recvTime2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -159,6 +164,8 @@ HWTEST_F(HeartBeatMediumTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
 {
     DeviceInfo device;
     LnnHeartbeatRecvInfo storedInfo;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&storedInfo, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     (void)strcpy_s(device.devId, sizeof(TEST_DEVID), TEST_DEVID);
@@ -168,6 +175,10 @@ HWTEST_F(HeartBeatMediumTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
     uint64_t recvTime1 = TEST_RECVTIME_FIRST;
     int32_t ret1 = HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
+    DeviceInfo device11;
+    (void)memset_s(&device11, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    device11.isOnline = false;
+    storedInfo.device = &device11;
     bool ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, &device, TEST_RECVTIME_FIRST);
     EXPECT_TRUE(ret2);
     ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, &device, TEST_RECVTIME_LAST);
@@ -283,10 +294,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
-    NodeInfo nodeInfo = {
-        .discoveryType = TEST_DISC_TYPE,
-        .deviceInfo.deviceUdid = TEST_UDID_HASH,
-    };
+    NodeInfo nodeInfo = { .discoveryType = TEST_DISC_TYPE, .deviceInfo.deviceUdid = TEST_UDID_HASH, };
     HbRespData hbResp = { .capabiltiy = TEST_CAPABILTIY, .stateVersion = TEST_STATEVERSION };
     ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     ON_CALL(ledgerMock, LnnGetNodeInfoById).WillByDefault(Return(&nodeInfo));
@@ -298,10 +306,9 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     (void)strcpy_s(device.devId, DISC_MAX_DEVICE_ID_LEN, udidHash);
     device.addr->type = CONNECTION_ADDR_BR;
     device.devType = SMART_PHONE;
-    LnnHeartbeatWeight mediumWeight;
-    (void)memset_s(&mediumWeight, sizeof(LnnHeartbeatWeight), 0, sizeof(LnnHeartbeatWeight));
-    mediumWeight.weight = TEST_WEIGHT;
-    mediumWeight.localMasterWeight = TEST_WEIGHT2;
+    LnnHeartbeatWeight mediumWeight = { .weight = TEST_WEIGHT, .localMasterWeight = TEST_WEIGHT2 };
+    DeviceInfo device11 = { .isOnline = false, };
+    storedInfo.device = &device11;
     int32_t ret1 = HbFirstSaveRecvTime(&storedInfo, &device,
         mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
@@ -410,6 +417,10 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbMgrRecvList_TEST01, TestSize.Level1)
     int32_t weight = TEST_WEIGHT;
     int32_t masterWeight = TEST_WEIGHT2;
     uint64_t recvTime1 = TEST_RECVTIME_FIRST;
+    DeviceInfo device11;
+    (void)memset_s(&device11, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    device11.isOnline = false;
+    storedInfo.device = &device11;
     int32_t ret = HbFirstSaveRecvTime(&storedInfo, &device1, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     DeviceInfo device2;
@@ -721,7 +732,10 @@ HWTEST_F(HeartBeatMediumTest, HbIsRepeatedReAuthRequest_TEST01, TestSize.Level1)
 {
     LnnHeartbeatRecvInfo storedInfo;
     uint64_t nowTime = TEST_RECVTIME_LAST;
-
+    DeviceInfo device11;
+    (void)memset_s(&device11, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    device11.isOnline = false;
+    storedInfo.device = &device11;
     bool ret = HbIsRepeatedReAuthRequest(&storedInfo, nowTime);
     EXPECT_TRUE(ret);
 
