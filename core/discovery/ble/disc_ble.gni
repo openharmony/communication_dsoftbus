@@ -57,6 +57,8 @@ if (dsoftbus_feature_disc_ble && disc_enhanced) {
   ble_discovery_src += vlink_sources
   ble_discovery_inc += vlink_include_dirs
   ble_discovery_deps += vlink_deps
+} else {
+  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c" ]
 }
 
 if (disc_enhanced) {
@@ -72,6 +74,5 @@ if (disc_enhanced) {
   ble_discovery_src += [
     "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c",
     "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
-    "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c",
   ]
 }
