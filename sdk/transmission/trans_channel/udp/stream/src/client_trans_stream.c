@@ -214,15 +214,6 @@ int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamD
     return SendVtpStream(channelId, data, ext, param);
 }
 
-int32_t TransSetStreamMultiLayer(int32_t channelId, const void *optValue)
-{
-    if (channelId < 0) {
-        TRANS_LOGE(TRANS_STREAM, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return SetVtpStreamMultiLayerOpt(channelId, optValue);
-}
-
 int32_t TransCloseStreamChannel(int32_t channelId)
 {
     TRANS_LOGI(TRANS_STREAM, "close stream channel. channelId=%{public}d", channelId);
