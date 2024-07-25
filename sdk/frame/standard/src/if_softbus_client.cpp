@@ -130,6 +130,12 @@ int32_t ISoftBusClient::OnLocalNetworkIdChanged(const char *pkgName)
     return SOFTBUS_OK;
 }
 
+int32_t ISoftBusClient::OnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+{
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
 int32_t ISoftBusClient::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");

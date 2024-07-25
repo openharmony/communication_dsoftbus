@@ -70,6 +70,7 @@ enum SoftBusFuncId {
     CLIENT_ON_JOIN_METANODE_RESULT,
     CLIENT_ON_LEAVE_RESULT,
     CLIENT_ON_LEAVE_METANODE_RESULT,
+    CLIENT_ON_NODE_DEVICE_NOT_TRUST,
     CLIENT_ON_NODE_ONLINE_STATE_CHANGED,
     CLIENT_ON_NODE_BASIC_INFO_CHANGED,
     CLIENT_ON_LOCAL_NETWORK_ID_CHANGED,
@@ -379,6 +380,22 @@ bool OnLeaveMetaNodeResultInnerTest(const uint8_t* data, size_t size)
         return false;
     }
     softBusClientStub->OnRemoteRequest(CLIENT_ON_LEAVE_METANODE_RESULT, datas, reply, option);
+    return true;
+}
+
+bool OnNodeDeviceNotTrustedInnerTest(const uint8_t* data, size_t size)
+{
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteBuffer(data, size);
+    datas.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_NODE_DEVICE_NOT_TRUST, datas, reply, option);
     return true;
 }
 
