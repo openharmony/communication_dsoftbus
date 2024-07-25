@@ -155,6 +155,11 @@ static int GetStationFrequency(void)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+static bool IsHmlConnected()
+{
+    return false;
+}
+
 static void RegisterEnhanceManager(struct WifiDirectEnhanceManager *manager)
 {
     (void)manager;
@@ -194,6 +199,7 @@ static struct WifiDirectManager g_manager = {
 
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
+    .isHmlConnected = IsHmlConnected,
 
     .init = Init,
     .notifyOnline = NotifyOnline,
