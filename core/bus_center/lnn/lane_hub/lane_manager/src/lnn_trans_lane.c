@@ -614,6 +614,9 @@ static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink lin
         preferLink->linkType[resNum] = optionalLink[i];
         resNum++;
     }
+    if (resNum == 0) {
+        return GetErrCodeOfLink(networkId, optionalLink[0]);
+    }
     preferLink->linkTypeNum = resNum;
     return SOFTBUS_OK;
 }
