@@ -2159,7 +2159,7 @@ static int32_t LnnP2pInit(void)
         return SOFTBUS_MALLOC_ERR;
     }
     if (SoftBusMutexInit(&g_AuthTagLock, NULL) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "mutex init fail");
+        (void)SoftBusMutexDestroy(&g_p2pLinkMutex);
         SoftBusFree(g_p2pLinkList);
         SoftBusFree(g_p2pLinkedList);
         SoftBusFree(g_guideInfoList);
