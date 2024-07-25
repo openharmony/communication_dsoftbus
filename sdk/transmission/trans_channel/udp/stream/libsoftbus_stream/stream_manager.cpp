@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,17 +136,6 @@ bool StreamManager::SetOption(int type, const StreamAttr &value)
         return true;
     }
     return false;
-}
-
-int32_t StreamManager::SetMultiLayer(const void *para)
-{
-    auto it = socketMap_.find(curProtocol_);
-    if (it != socketMap_.end()) {
-        auto streamSocket = it->second;
-        return streamSocket->SetMultiLayer(para);
-    }
-    TRANS_LOGE(TRANS_STREAM, "do not found curProtocol=%{public}d", curProtocol_);
-    return SOFTBUS_TRANS_SESSION_SET_CHANNEL_FAILED;
 }
 
 StreamAttr StreamManager::GetOption(int type) const
