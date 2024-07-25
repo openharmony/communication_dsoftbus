@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,7 +89,6 @@ public:
     bool Send(std::unique_ptr<IStream> data) override;
 
     bool SetOption(int type, const StreamAttr &value) override;
-    int32_t SetMultiLayer(const void *para) override;
     StreamAttr GetOption(int type) const override;
 
     void SetStreamRecvListener(std::shared_ptr<IStreamManagerListener> recvListener) override;
