@@ -190,6 +190,7 @@ typedef struct {
     bool isAuthExchangeUdid;
     bool isSupportIpv6;
     uint32_t stateVersionReason;
+    int64_t lastAuthSeq;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
