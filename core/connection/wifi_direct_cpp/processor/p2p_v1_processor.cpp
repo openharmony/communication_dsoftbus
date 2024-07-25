@@ -164,6 +164,9 @@ void P2pV1Processor::AvailableState()
         })
         .Handle<std::shared_ptr<NegotiateCommand>>([this](std::shared_ptr<NegotiateCommand> &command) {
             ProcessNegotiateCommandAtAvailableState(command);
+        })
+        .Handle<std::shared_ptr<ForceDisconnectCommand>>([this](std::shared_ptr<ForceDisconnectCommand> &command) {
+            ProcessForceDisconnectCommand(command);
         });
 }
 
@@ -320,6 +323,37 @@ void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand>
     Terminate();
 }
 
+void P2pV1Processor::ProcessForceDisconnectCommand(std::shared_ptr<ForceDisconnectCommand> &command)
+{
+    Exclusive(command->GetRemoteDeviceId());
+    canAcceptNegotiateData_ = false;
+    auto info = command->GetDisconnectInfo();
+    auto requestId = info.info_.requestId;
+    CONN_LOGI(CONN_WIFI_DIRECT, "force disconnect device, requestId=%{public}d commandId=%{public}d", requestId,
+        command->GetId());
+
+    auto innerLink = LinkManager::GetInstance().GetReuseLink(info.info_.linkType, info.info_.remoteUuid);
+    if (innerLink == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "link is already not exist");
+        command->OnSuccess();
+        Terminate();
+    }
+
+    auto ret = SendForceDisconnectRequest(*command->GetNegotiateChannel());
+    CONN_LOGE(CONN_WIFI_DIRECT, "send force disconnect request, ret=%{public}d", ret);
+    if (ret == SOFTBUS_OK) {
+        CONN_LOGI(
+            CONN_WIFI_DIRECT, "wait for p2p auth to send data, sleep%{public}dms", DISCONNECT_WAIT_POST_REQUEST_MS);
+        SoftBusSleepMs(DISCONNECT_WAIT_POST_REQUEST_MS);
+    }
+
+    LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, remoteDeviceId_);
+    DestroyGroup();
+
+    command->OnSuccess();
+    Terminate();
+}
+
 void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<NegotiateCommand> &command)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
@@ -344,6 +378,12 @@ void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<Neg
             terminate = true;
             canAcceptNegotiateData_ = false;
             ret = ProcessDisconnectRequest(command);
+            break;
+        case LegacyCommandType::CMD_FORCE_DISCONNECT_V1_REQ:
+            reply = false;
+            terminate = true;
+            canAcceptNegotiateData_ = false;
+            ret = ProcessForceDisconnectRequest(command);
             break;
         default:
             reply = false;
@@ -995,6 +1035,20 @@ int P2pV1Processor::SendDisconnectRequest(const NegotiateChannel &channel)
     return channel.SendMessage(request);
 }
 
+int P2pV1Processor::SendForceDisconnectRequest(const NegotiateChannel &channel)
+{
+    NegotiateMessage request;
+    request.SetLegacyP2pCommandType(LegacyCommandType::CMD_FORCE_DISCONNECT_V1_REQ);
+    auto ret =
+        InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&request](const InterfaceInfo &interface) {
+            request.SetLegacyP2pMac(interface.GetBaseMac());
+            return SOFTBUS_OK;
+        });
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "build request failed, error=%{public}d", ret);
+    return channel.SendMessage(request);
+}
+
 int P2pV1Processor::ProcessNoAvailableInterface(std::shared_ptr<NegotiateCommand> &command, LinkInfo::LinkMode myRole)
 {
     auto msg = command->GetNegotiateMessage();
@@ -1157,6 +1211,15 @@ int P2pV1Processor::ProcessDisconnectRequest(std::shared_ptr<NegotiateCommand> &
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "remove link failed, error=%{public}d", ret);
     return SOFTBUS_OK;
+}
+
+int P2pV1Processor::ProcessForceDisconnectRequest(std::shared_ptr<NegotiateCommand> &command)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "process force disconnect request, remoteUuid=%{public}s",
+        WifiDirectAnonymizeDeviceId(command->GetRemoteDeviceId()).c_str());
+    LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, command->GetRemoteDeviceId());
+
+    return DestroyGroup();
 }
 
 int P2pV1Processor::ProcessGetInterfaceInfoRequest(std::shared_ptr<NegotiateCommand> &command)
@@ -1633,10 +1696,11 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
 
 int P2pV1Processor::DestroyGroup()
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "start to destroy group");
     P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
     auto result = P2pEntity::GetInstance().DestroyGroup(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
-        "copy interface failed, error=%{public}d", result.errorCode_);
+        "destroy group failed, error=%{public}d", result.errorCode_);
     return SOFTBUS_OK;
 }
 
