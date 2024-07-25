@@ -162,6 +162,11 @@ int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteDefaultPtkByUuid(uuid, remotePtk, len);
 }
 
+int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->SoftBusBase64Encode(dst, dlen, olen, src, slen);
+}
+
 WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetLinkedInfo(info);
