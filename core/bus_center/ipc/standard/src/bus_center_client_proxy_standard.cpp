@@ -368,6 +368,39 @@ int32_t BusCenterClientProxy::OnLocalNetworkIdChanged(const char *pkgName)
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterClientProxy::OnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (pkgName == nullptr|| msg == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteCString(msg)) {
+        LNN_LOGE(LNN_EVENT, "write msg failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    if (remote->SendRequest(CLIENT_ON_NODE_DEVICE_NOT_TRUST, data, reply, option) != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     sptr<IRemoteObject> remote = Remote();
