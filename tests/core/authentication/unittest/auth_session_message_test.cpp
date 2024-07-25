@@ -437,15 +437,15 @@ HWTEST_F(AuthSessionMessageTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ASSERT_TRUE(memcpy_s(info.staticCapability, STATIC_CAP_LEN, STATIC_CAPABILITY, CAPABILITY_LEN) == EOK);
-    UnpackWifiDirectInfo(json, &info);
+    UnpackWifiDirectInfo(json, &info, false);
     JSON_AddInt32ToObject(json, STATIC_CAP_LENGTH, 10);
-    UnpackWifiDirectInfo(json, &info);
+    UnpackWifiDirectInfo(json, &info, false);
     JSON_AddStringToObject(json, STATIC_CAP, "staticCap");
-    UnpackWifiDirectInfo(json, &info);
+    UnpackWifiDirectInfo(json, &info, false);
     JSON_AddStringToObject(json, PTK, "encodePtk");
-    UnpackWifiDirectInfo(json, &info);
+    UnpackWifiDirectInfo(json, &info, false);
     ASSERT_TRUE(memcpy_s(info.remotePtk, PTK_DEFAULT_LEN, REMOTE_PTK, strlen(REMOTE_PTK)) == EOK);
-    UnpackWifiDirectInfo(json, &info);
+    UnpackWifiDirectInfo(json, &info, false);
     UnpackCommon(json, &info, SOFTBUS_OLD_V1, true);
     JSON_AddStringToObject(json, DEVICE_TYPE, "TV");
     JSON_AddStringToObject(json, DEVICE_UUID, "123456");
@@ -939,7 +939,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1
     EXPECT_EQ(true, JSON_AddInt32ToObject(obj, STATIC_CAP_LENGTH, DATA_TEST_LEN));
     EXPECT_EQ(true, JSON_AddStringToObject(obj, STATIC_CAP, staticCap));
     EXPECT_EQ(true, JSON_AddStringToObject(obj, PTK, encodePtk));
-    UnpackWifiDirectInfo(obj, &info);
+    UnpackWifiDirectInfo(obj, &info, false);
     EXPECT_EQ(nullptr, PackDeviceInfoMessage(nullptr, SOFTBUS_NEW_V1, false, nullptr, nullptr));
     JSON_Delete(obj);
 }

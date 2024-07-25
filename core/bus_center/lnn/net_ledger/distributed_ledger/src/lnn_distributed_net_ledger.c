@@ -726,21 +726,26 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL && strcmp(oldInfo->networkId, info->networkId) == 0) {
-        MetaInfo temp = info->metaInfo;
         LNN_LOGI(LNN_LEDGER, "old capa=%{public}u new capa=%{public}u", oldInfo->netCapacity, info->netCapacity);
         oldInfo->connectInfo.sessionPort = info->connectInfo.sessionPort;
         oldInfo->connectInfo.authPort = info->connectInfo.authPort;
         oldInfo->connectInfo.proxyPort = info->connectInfo.proxyPort;
         oldInfo->netCapacity = info->netCapacity;
-        if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "LnnAddMetaInfo copy fail!");
-            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-            return SOFTBUS_MEM_ERR;
-        }
         if (strcpy_s(oldInfo->connectInfo.deviceIp, IP_LEN, info->connectInfo.deviceIp) != EOK) {
             LNN_LOGE(LNN_LEDGER, "strcpy ip fail!");
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
             return SOFTBUS_STRCPY_ERR;
+        }
+        if (strcpy_s(oldInfo->uuid, UUID_BUF_LEN, info->uuid) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy uuid fail!");
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_STRCPY_ERR;
+        }
+        MetaInfo temp = info->metaInfo;
+        if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "LnnAddMetaInfo copy fail!");
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_MEM_ERR;
         }
         info->metaInfo.isMetaNode = true;
         info->metaInfo.metaDiscType = info->metaInfo.metaDiscType | temp.metaDiscType;
@@ -779,6 +784,7 @@ int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type)
         info->metaInfo.isMetaNode = false;
     }
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
+    (void)memset_s(info->remoteMetaPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);
