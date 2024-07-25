@@ -452,6 +452,19 @@ static void RegisterEnhanceManager(WifiDirectEnhanceManager *manager)
     g_enhanceManager = *manager;
 }
 
+static bool IsHmlConnected()
+{
+    bool ret = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
+        if (innerLink.GetLinkType() == OHOS::SoftBus::InnerLink::LinkType::HML) {
+            ret = true;
+            return true;
+        }
+        return false;
+    });
+    return ret;
+}
+
 static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
 {
     if (g_syncPtkListener == nullptr) {
@@ -493,6 +506,7 @@ static struct WifiDirectManager g_manager = {
 
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
+    .isHmlConnected = IsHmlConnected,
 
     .init = Init,
     .notifyOnline = NotifyOnline,
