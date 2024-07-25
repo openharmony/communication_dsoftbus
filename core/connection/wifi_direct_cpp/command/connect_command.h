@@ -22,6 +22,11 @@
 #include "conn_event.h"
 
 namespace OHOS::SoftBus {
+enum class ConnectCommandRetryReason {
+    RETRY_FOR_NOTHING = 0,
+    RETRY_FOR_PASSIVE_SWITCH_CHANNEL,
+};
+
 struct ConnectInfo {
     WifiDirectConnectInfo info_;
     std::shared_ptr<NegotiateChannel> channel_;
@@ -44,7 +49,8 @@ public:
     virtual void PreferNegotiateChannel();
     void SetRetried(bool retried) { hasRetried_ = retried; }
     bool HasRetried() const { return hasRetried_; }
-
+    void SetRetryReason(ConnectCommandRetryReason reason) { retryReason_ = reason; }
+    ConnectCommandRetryReason GetReTryReason() const { return retryReason_; }
     void OnSuccess(const WifiDirectLink &link) const;
     void OnFailure(int reason) const;
     bool IsSameCommand(const WifiDirectConnectInfo &info) const;
@@ -55,7 +61,7 @@ protected:
     WifiDirectConnectCallback callback_;
     mutable std::string remoteDeviceId_;
     bool hasRetried_ = false;
-
+    ConnectCommandRetryReason retryReason_ = ConnectCommandRetryReason::RETRY_FOR_NOTHING;
 private:
     static constexpr uint64_t ABANDON_CONNECT_COMMAND_PERIOD = 500;
 };
