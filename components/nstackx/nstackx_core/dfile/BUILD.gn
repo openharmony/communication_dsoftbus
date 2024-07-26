@@ -136,6 +136,7 @@ if (defined(ohos_lite)) {
 
     cflags = [
       "-Wall",
+      "-DSSL_AND_CRYPTO_INCLUDED",
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DDFILE_ENABLE_HIDUMP",
       "-DENABLE_USER_LOG",
@@ -174,7 +175,6 @@ if (defined(ohos_lite)) {
     ]
     external_deps = [
       "bounds_checking_function:libsec_shared",
-      "mbedtls:mbedtls_shared",
       "openssl:libcrypto_shared",
     ]
     if (is_standard_system) {
