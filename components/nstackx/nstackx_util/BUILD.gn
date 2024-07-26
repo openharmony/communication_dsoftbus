@@ -207,6 +207,7 @@ if (defined(ohos_lite)) {
       "core/nstackx_getopt.c",
       "core/nstackx_log.c",
       "core/nstackx_socket.c",
+      "core/nstackx_mbedtls.c",
       "core/nstackx_timer.c",
       "core/nstackx_util.c",
       "platform/unix/sys_dev.c",
@@ -221,6 +222,7 @@ if (defined(ohos_lite)) {
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
+      "mbedtls:mbedtls_shared",
     ]
     if (is_standard_system) {
       external_deps += [ "c_utils:utils" ]
