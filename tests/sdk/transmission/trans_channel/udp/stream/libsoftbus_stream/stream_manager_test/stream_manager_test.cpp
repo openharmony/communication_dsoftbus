@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -183,21 +183,5 @@ HWTEST_F(StreamManagerTest, SetOption001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::IStreamManagerListener> recvListener;
     streamSocketListener->SetStreamRecvListener(recvListener);
     streamSocketListener->SetStreamRecvListener(nullptr);
-}
-
-/**
- * @tc.name: SetMultiLayer001
- * @tc.desc: SetMultiLayer, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(StreamManagerTest, SetMultiLayer001, TestSize.Level1)
-{
-    std::shared_ptr<Communication::SoftBus::IStreamManagerListener> streamListener;
-    auto streamSocketListener = std::make_shared<Communication::SoftBus::StreamManager>(streamListener);
-
-    int para = 0;
-    int32_t ret = streamSocketListener->SetMultiLayer((void *)&para);
-    EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // OHOS

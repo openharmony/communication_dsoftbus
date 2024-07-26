@@ -90,8 +90,6 @@ int32_t ClientEmitFileEvent(int32_t channelId);
 int32_t TransLimitChange(int32_t channelId, uint8_t tos);
 
 int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId);
-
-int32_t TransUdpChannelSetStreamMultiLayer(int32_t channelId, const void *optValue);
 #ifdef __cplusplus
 }
 #endif
