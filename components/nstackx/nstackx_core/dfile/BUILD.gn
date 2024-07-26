@@ -136,7 +136,6 @@ if (defined(ohos_lite)) {
 
     cflags = [
       "-Wall",
-      "-DMBEDTLS_INCLUDED",
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DDFILE_ENABLE_HIDUMP",
       "-DENABLE_USER_LOG",
