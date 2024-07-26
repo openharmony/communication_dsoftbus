@@ -157,14 +157,29 @@ cJSON* cJSON_Parse(const char *value)
     return GetTransTcpDirectMessageInterface()->cJSON_Parse(value);
 }
 
-static struct WifiDirectManager g_manager = {
-    .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
-    .getRemoteUuidByIp = GetRemoteUuidByIp,
-};
-
-struct WifiDirectManager* GetWifiDirectManager(void)
+int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
 {
-    return &g_manager;
+    return GetTransTcpDirectMessageInterface()->SoftBusGenerateSessionKey(key, len);
+}
+
+int32_t AuthGetServerSide(int64_t authId, bool *isServer)
+{
+    return GetTransTcpDirectMessageInterface()->AuthGetServerSide(authId, isServer);
+}
+
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
+{
+    return GetTransTcpDirectMessageInterface()->AuthGetConnInfo(authHandle, connInfo);
+}
+
+char *PackRequest(const AppInfo *appInfo)
+{
+    return GetTransTcpDirectMessageInterface()->PackRequest(appInfo);
+}
+
+int32_t TransTdcAddSessionConn(SessionConn *conn)
+{
+    return GetTransTcpDirectMessageInterface()->TransTdcAddSessionConn(conn);
 }
 }
 }
