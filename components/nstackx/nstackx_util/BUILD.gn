@@ -185,6 +185,7 @@ if (defined(ohos_lite)) {
 
     cflags += [
       "-DNSTACKX_WITH_HMOS_LINUX",
+      "-DSSL_AND_CRYPTO_INCLUDED",
       "-DENABLE_USER_LOG",
     ]
     if (defined(board_toolchain_type)) {
@@ -206,7 +207,7 @@ if (defined(ohos_lite)) {
       "core/nstackx_event.c",
       "core/nstackx_getopt.c",
       "core/nstackx_log.c",
-      "core/nstackx_mbedtls.c",
+      "core/nstackx_openssl.c",
       "core/nstackx_socket.c",
       "core/nstackx_timer.c",
       "core/nstackx_util.c",
@@ -222,7 +223,6 @@ if (defined(ohos_lite)) {
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
-      "mbedtls:mbedtls_shared",
     ]
     if (is_standard_system) {
       external_deps += [ "c_utils:utils" ]
