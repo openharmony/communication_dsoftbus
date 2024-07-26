@@ -477,21 +477,6 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
     return TransSendStream(channelId, data, ext, param);
 }
 
-int32_t TransUdpChannelSetStreamMultiLayer(int32_t channelId, const void *optValue)
-{
-    UdpChannel channel;
-    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
-    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_STREAM, "get channel by channelId=%{public}d failed.", channelId);
-        return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
-    }
-    if (!channel.isEnable) {
-        TRANS_LOGE(TRANS_STREAM, "udp channel is not enable.");
-        return SOFTBUS_TRANS_UDP_CHANNEL_DISABLE;
-    }
-    return TransSetStreamMultiLayer(channelId, optValue);
-}
-
 static void OnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
 {
     if ((g_sessionCb == NULL) || (g_sessionCb->OnSessionClosed == NULL)) {
