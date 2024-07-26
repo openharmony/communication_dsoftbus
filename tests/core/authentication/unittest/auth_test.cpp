@@ -2167,4 +2167,17 @@ HWTEST_F(AuthTest, GET_TCP_KEEPALIVE_OPTION_BY_CYCLE_Test_001, TestSize.Level1)
     ret = GetTcpKeepaliveOptionByCycle(DEFAULT_FREQ_CYCLE, &tcpKeepaliveOption);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: IS_ENHANCE_P2P_MODULE_ID_Test_001
+ * @tc.desc: IsEnhanceP2pModuleId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
+{
+    EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_ENHANCED_P2P_START), true);
+    EXPECT_EQ(IsEnhanceP2pModuleId(DIRECT_CHANNEL_SERVER_P2P), false);
+    EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_P2P), false);
+}
 } // namespace OHOS
