@@ -34,6 +34,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+#define TEST_CHANNEL_ID 1027
 #define EOK 0
 #define INVALID_VALUE (-1)
 #define AUTH_TRANS_DATA_LEN 32
@@ -620,5 +621,20 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
     int32_t seq = NOAMAL_SEQ;
     ret = AddP2pOrHmlTrigger(fd, myAddr, seq);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/**
+ * @tc.name: TransProxyGetAuthIdTest001
+ * @tc.desc: TransProxyGetAuthId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdTest001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransProxyGetAuthId(conn);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
+    SoftBusFree(conn);
 }
 }
