@@ -737,6 +737,8 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
     }
     sessionNode->channelId = transInfo->channelId;
     sessionNode->channelType = (ChannelType)transInfo->channelType;
+    TRANS_LOGI(TRANS_SDK, "Client set channel by sessionId success, sessionId=%{public}d, channelId=%{public}d, "
+        "channelType=%{public}d", sessionId, sessionNode->channelId, sessionNode->channelType);
 
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
