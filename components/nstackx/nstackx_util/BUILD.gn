@@ -184,7 +184,6 @@ if (defined(ohos_lite)) {
     branch_protector_ret = "pac_ret"
 
     cflags += [
-      "-DMBEDTLS_INCLUDED",
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DENABLE_USER_LOG",
     ]
@@ -207,7 +206,6 @@ if (defined(ohos_lite)) {
       "core/nstackx_event.c",
       "core/nstackx_getopt.c",
       "core/nstackx_log.c",
-      "core/nstackx_mbedtls.c",
       "core/nstackx_socket.c",
       "core/nstackx_timer.c",
       "core/nstackx_util.c",
