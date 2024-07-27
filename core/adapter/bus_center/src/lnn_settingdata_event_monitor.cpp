@@ -177,12 +177,18 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
     }
 
     int32_t ret = OHOS::BusCenter::GetUserDefinedDeviceName(dataShareHelper, deviceName, len);
-    if (ret = SOFTBUS_NO_INIT || ret = SOFTBUS_OK) {
-        LNN_LOGI(LNN_STATE, "get user defined deviceName end");
+    if (ret = SOFTBUS_NO_INIT) {
+        LNN_LOGI(LNN_STATE, "account not ready, try again");
+        dataShareHelper->Release();
+        return ret;
+    }
+    if (ret = SOFTBUS_OK) {
+        LNN_LOGI(LNN_STATE, "get user defined deviceName=%{public}s", deviceName);
         dataShareHelper->Release();
         return ret;
     }
     ret = OHOS::BusCenter::GetDefaultDeviceName(dataShareHelper, deviceName, len);
+    LNN_LOGI(LNN_STATE, "get default deviceName=%{public}s, ret=%{public}d", deviceName, ret);
     dataShareHelper->Release();
     return ret;
 }
