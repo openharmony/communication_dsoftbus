@@ -115,7 +115,8 @@ bool P2pV1Processor::CanAcceptNegotiateDataAtState(WifiDirectCommand &command)
     if (nc == nullptr) {
         return false;
     }
-    return nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_INVALID;
+    return nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_INVALID &&
+        nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_DISCONNECT_V1_REQ;
 }
 
 void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
