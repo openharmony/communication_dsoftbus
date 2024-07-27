@@ -350,13 +350,6 @@ bool WifiDirectUtils::SupportHml()
     return support;
 }
 
-bool WifiDirectUtils::SupportHmlTwo()
-{
-    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", true);
-    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%{public}d", support);
-    return support;
-}
-
 int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std::string &ip)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s", interface.c_str());
@@ -520,9 +513,9 @@ void WifiDirectUtils::ParallelFlowExit()
 
 uint32_t WifiDirectUtils::CalculateStringLength(const char *str, uint32_t size)
 {
-    for (int i = size - 1; i >= 0; i--) {
+    for (int32_t i = static_cast<int32_t>(size - 1); i >= 0; i--) {
         if (str[i] != '\0') {
-            return i + 1;
+            return static_cast<uint32_t>(i + 1);
         }
     }
     return 0;

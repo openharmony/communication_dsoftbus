@@ -53,5 +53,10 @@ group("fuzztest") {
     "ble/fuzztest/bleconnection_fuzzer:BleConnectionFuzzTest",
     "br/fuzztest/brconnection_fuzzer:BrConnectionFuzzTest",
     "common/fuzztest/connectioncommon_fuzzer:ConnectionCommonFuzzTest",
+    "fuzztest:fuzztest",
   ]
+  if (dsoftbus_feature_ex_kits == true) {
+    deps +=
+        [ "dsoftbus_root_path/dsoftbus_enhance/test/core/connection:fuzztest" ]
+  }
 }

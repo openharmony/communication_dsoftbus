@@ -132,7 +132,7 @@ static int32_t TransServerOnChannelClosed(
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
+    if (TransLaneMgrDelLane(channelId, channelType, true) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);
@@ -162,7 +162,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
     if (pkgName == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
+    if (TransLaneMgrDelLane(channelId, channelType, true) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);

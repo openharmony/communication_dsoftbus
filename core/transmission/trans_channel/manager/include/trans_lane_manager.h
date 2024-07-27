@@ -46,7 +46,7 @@ void TransSocketLaneMgrDeinit(void);
 int32_t TransLaneMgrAddLane(
     const TransInfo *transInfo, const LaneConnInfo *connInfo, uint32_t laneHandle, bool isQosLane, AppInfoData *myData);
 
-int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType);
+int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType, bool isAsync);
 
 void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid);
 

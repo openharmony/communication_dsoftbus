@@ -229,8 +229,10 @@ group("unittest") {
     ":WifiDirectIpManagerTest",
     ":WifiDirectManagerCppTest",
     ":WifiDirectRoleOptionTest",
+    "adapter:unittest",
     "data:unittest",
     "entity:unittest",
     "processor:unittest",
+    "utils:unittest",
   ]
 }

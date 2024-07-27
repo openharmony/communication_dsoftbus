@@ -95,6 +95,21 @@ int32_t ClinetOnLocalNetworkIdChanged()
     return SOFTBUS_OK;
 }
 
+int32_t ClinetNotifyDeviceNotTrusted(const char *msg)
+{
+    std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
+    SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
+    for (auto proxy : proxyMap) {
+        const char *dmPkgName = "ohos.distributedhardware.devicemanager";
+        if (strcmp(dmPkgName, proxy.first.c_str()) != 0) {
+            continue;
+        }
+        sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        clientProxy->OnNodeDeviceNotTrusted(proxy.first.c_str(), msg);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
     uint32_t infoTypeLen, int32_t retCode)
 {

@@ -90,7 +90,7 @@ protected:
     static constexpr int DEFAULT_UDP_BUFFER_RCV_SIZE = 1024 * 1024;
     static constexpr int STREAM_BUFFER_THRESHOLD = 5;
 
-    virtual int CreateAndBindSocket(IpAndPort &local) = 0;
+    virtual int CreateAndBindSocket(IpAndPort &local, bool isServer) = 0;
     virtual bool Accept() = 0;
 
     virtual int EpollTimeout(int fd, int timeout) = 0;

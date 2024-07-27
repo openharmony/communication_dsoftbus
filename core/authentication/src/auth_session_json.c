@@ -1230,6 +1230,21 @@ static int32_t FillBroadcastCipherKey(BroadcastCipherKey *broadcastKey, const No
     return SOFTBUS_OK;
 }
 
+static void DumpRpaCipherKey(char *cipherKey, char *cipherIv, const char *peerIrk, const char *log)
+{
+    char *anonyIrk = NULL;
+    char *anonyCipherKey = NULL;
+    char *anonyCipherIv = NULL;
+    Anonymize(cipherKey, &anonyCipherKey);
+    Anonymize(cipherIv, &anonyCipherIv);
+    Anonymize(peerIrk, &anonyIrk);
+    AUTH_LOGI(AUTH_FSM, "log=%{public}s, cipherKey=%{public}s, cipherIv=%{public}s, peerIrk=%{public}s", log,
+        anonyCipherKey, anonyCipherIv, anonyIrk);
+    AnonymizeFree(anonyCipherKey);
+    AnonymizeFree(anonyCipherIv);
+    AnonymizeFree(anonyIrk);
+}
+
 static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
 {
     char cipherKey[SESSION_KEY_STR_LEN] = {0};
@@ -1274,7 +1289,7 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
         (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         return SOFTBUS_ERR;
     }
-    AUTH_LOGI(AUTH_FSM, "update broadcast cipher key success!");
+    DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return SOFTBUS_OK;
 }
@@ -1314,7 +1329,7 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
             AUTH_LOGE(AUTH_FSM, "convert publicAddress to bytes fail.");
             break;
         }
-        AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
+        DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "unpack broadcast cipher key");
     } while (0);
     (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
     (void)memset_s(cipherIv, BROADCAST_IV_STR_LEN, 0, BROADCAST_IV_STR_LEN);

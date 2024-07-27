@@ -221,6 +221,7 @@ TRANSPORT_BEHAVIOR:
   PEER_DEV_VER: { type: STRING, desc: peer device build version }
   LOCAL_UDID: { type: STRING, desc: local udid }
   OS_TYPE: { type: INT32, desc: os type }
+  DEVICE_STATE: { type: INT32, desc: device state }
   FIRST_TOKEN_NAME: { type: STRING, desc: first token name }
   FIRST_TOKEN_ID: { type: UINT32, desc: first token id }
   FIRST_TOKEN_TYPE: { type: INT32, desc: first token type }

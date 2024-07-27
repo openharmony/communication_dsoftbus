@@ -45,23 +45,18 @@ static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
 
-    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
-        return nullptr;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN), nullptr, TRANS_SDK, "write samgr interface token failed");
 
     data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
-    if (samgr == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "Get samgr failed!");
-        return nullptr;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(samgr != nullptr, nullptr, TRANS_SDK, "Get samgr failed");
+
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
-    if (err != 0) {
-        TRANS_LOGE(TRANS_SDK, "Get GetSystemAbility failed!");
-        return nullptr;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(err == 0, nullptr, TRANS_SDK, "Get samgr failed");
+
     return reply.ReadRemoteObject();
 }
 
@@ -73,16 +68,11 @@ static sptr<TransServerProxy> GetProxy()
     }
 
     sptr<IRemoteObject> object = GetSystemAbility();
-    if (object == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "Get remote softbus object failed!");
-        return nullptr;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(object != nullptr, nullptr, TRANS_SDK, "Get remote softbus object failed");
 
     g_serverProxy = new (std::nothrow) TransServerProxy(object);
-    if (g_serverProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "Create trans server proxy failed!");
-        return nullptr;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_serverProxy != nullptr, nullptr, TRANS_SDK, "Create trans server proxy failed");
+
     return g_serverProxy;
 }
 
@@ -105,10 +95,8 @@ static sptr<TransServerProxy> RetryGetProxy()
 int32_t TransServerProxyInit(void)
 {
     mallopt(M_DELAYED_FREE, M_DELAYED_FREE_ENABLE);
-    if (GetProxy() == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "Failed to initialize the server proxy!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        GetProxy() != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "Failed to initialize the server proxy");
 
     TRANS_LOGI(TRANS_SDK, "Init success");
     return SOFTBUS_OK;
@@ -124,24 +112,23 @@ void TransServerProxyDeInit(void)
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
     sptr<TransServerProxy> proxy = RetryGetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if ((pkgName == nullptr) || (sessionName == nullptr)) {
         TRANS_LOGE(TRANS_SDK, "pkgName or sessionName is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
+
     return proxy->CreateSessionServer(pkgName, sessionName);
 }
 
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if ((pkgName == nullptr) || (sessionName == nullptr)) {
         TRANS_LOGE(TRANS_SDK, "pkgName or sessionName is nullptr!");
         return SOFTBUS_INVALID_PARAM;
@@ -152,34 +139,34 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 {
     sptr<TransServerProxy> proxy = RetryGetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if ((param->sessionName == nullptr) || (param->peerSessionName == nullptr) ||
         (param->peerDeviceId == nullptr) || (param->groupId == nullptr) || (param->attr == nullptr)) {
         TRANS_LOGE(TRANS_SDK, "parameter is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
+
     int ret = proxy->OpenSession(param, info);
     if (ret < SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "OpenSession failed! ret=%{public}d.", ret);
-        return ret;
     }
+
     return ret;
 }
 
 int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
 {
     sptr<TransServerProxy> proxy = RetryGetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if ((sessionName == nullptr) || (addrInfo == nullptr)) {
         TRANS_LOGE(TRANS_SDK, "parameter is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
+
     int channelId = proxy->OpenAuthSession(sessionName, addrInfo);
     if (channelId < SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "OpenAuthSession failed!");
@@ -191,52 +178,50 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
 int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     return proxy->NotifyAuthSuccess(channelId, channelType);
 }
 
 int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if (channelId < SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "invalid channel Id!");
         return SOFTBUS_INVALID_PARAM;
     }
+
     return proxy->CloseChannel(sessionName, channelId, channelType);
 }
 
 int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if (channelId < 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid channel Id!");
+        TRANS_LOGE(TRANS_SDK, "invalid channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (laneId < 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid lane Id!");
+    if (laneId == 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid laneId!");
         return SOFTBUS_INVALID_PARAM;
     }
+
     return proxy->CloseChannelWithStatistics(channelId, laneId, dataInfo, len);
 }
 
 int32_t ServerIpcReleaseResources(int32_t channelId)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if ((channelId < MIN_CHANNEL_ID) || (channelId > MAX_CHANNEL_ID)) {
         TRANS_LOGE(TRANS_SDK, "channelId=%{public}d is invalid.", channelId);
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
@@ -246,78 +231,72 @@ int32_t ServerIpcReleaseResources(int32_t channelId)
 
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
-    if (g_serverProxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_serverProxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     return g_serverProxy->SendMessage(channelId, channelType, data, len, msgType);
 }
 
 int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     return proxy->QosReport(channelId, chanType, appType, quality);
 }
 
 int32_t ServerIpcStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     return proxy->StreamStats(channelId, channelType, data);
 }
 
 int32_t ServerIpcRippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     return proxy->RippleStats(channelId, channelType, data);
 }
 
 int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if (sessionName == nullptr) {
         TRANS_LOGE(TRANS_SDK, "sessionName is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
+
     return proxy->GrantPermission(uid, pid, sessionName);
 }
 
 int32_t ServerIpcRemovePermission(const char *sessionName)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+
     if (sessionName == nullptr) {
         TRANS_LOGE(TRANS_SDK, "sessionName is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
+
     return proxy->RemovePermission(sessionName);
 }
 
 int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
 {
     sptr<TransServerProxy> proxy = GetProxy();
-    if (proxy == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
 
     if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount > QOS_TYPE_BUTT) {
         TRANS_LOGE(TRANS_SDK, "invalid param");

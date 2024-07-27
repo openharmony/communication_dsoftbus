@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
+import("./p2pv1_unittest.gni")
 
 wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 wifi_direct_unit_path =
@@ -21,83 +22,12 @@ ut_out_path = "dsoftbus/connection/wifi_direct_cpp/processor"
 
 ohos_unittest("P2pv1ProcessorTest") {
   module_out_path = ut_out_path
-  include_dirs = [
-    ".",
 
-    "//third_party/cJSON",
-    "//third_party/json/include",
-    "//third_party/googletest/googletest/include",
-    "//third_party/googletest/googletest/src",
-    "//third_party/bounds_checking_function/include",
+  include_dirs = processorv1_ut_include_dirs
 
-    "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$wifi_direct_path",
-    "$wifi_direct_unit_path",
-  ]
-  sources = [
-    "$wifi_direct_path/adapter/p2p_adapter.cpp",
-    "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
-    "$wifi_direct_path/channel/dummy_negotiate_channel.cpp",
+  sources = processorv1_ut_sources
 
-    # proxy_negotiate_channel is mocked
-    "$wifi_direct_path/command/command_factory.cpp",
-    "$wifi_direct_path/command/connect_command.cpp",
-    "$wifi_direct_path/command/disconnect_command.cpp",
-    "$wifi_direct_path/command/negotiate_command.cpp",
-    "$wifi_direct_path/command/processor_selector_factory.cpp",
-    "$wifi_direct_path/command/simple_processor_selector.cpp",
-    "$wifi_direct_path/data/inner_link.cpp",
-    "$wifi_direct_path/data/interface_info.cpp",
-    "$wifi_direct_path/data/interface_manager.cpp",
-    "$wifi_direct_path/data/ipv4_info.cpp",
-    "$wifi_direct_path/data/link_info.cpp",
-    "$wifi_direct_path/data/link_manager.cpp",
-    "$wifi_direct_path/data/negotiate_message.cpp",
-    "$wifi_direct_path/data/wifi_config_info.cpp",
-
-    # entity is mocked by p2p_entity.h in current directory
-    "$wifi_direct_path/event/wifi_direct_event_dispatcher.cpp",
-    "$wifi_direct_path/processor/p2p_v1_processor.cpp",
-    "$wifi_direct_path/protocol/json_protocol.cpp",
-    "$wifi_direct_path/protocol/tlv_protocol.cpp",
-    "$wifi_direct_path/utils/duration_statistic.cpp",
-    "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
-    "$wifi_direct_path/utils/wifi_direct_dfx.cpp",
-    "$wifi_direct_path/utils/wifi_direct_trace.cpp",
-    "$wifi_direct_path/utils/wifi_direct_utils.cpp",
-    "$wifi_direct_path/wifi_direct_executor.cpp",
-    "$wifi_direct_path/wifi_direct_initiator.cpp",
-    "$wifi_direct_path/wifi_direct_ip_manager.cpp",
-    "$wifi_direct_path/wifi_direct_manager.cpp",
-    "$wifi_direct_path/wifi_direct_role_option.cpp",
-    "$wifi_direct_path/wifi_direct_scheduler.cpp",
-    "$wifi_direct_unit_path/net_conn_client.cpp",
-    "$wifi_direct_unit_path/wifi_direct_mock.cpp",
-    "channel/proxy_negotiate_channel.h",
-    "p2p_v1_processor_test.cpp",
-  ]
+  defines += processorv1_ut_defines
 
   remove_configs = [
     "//build/config/compiler:no_rtti",

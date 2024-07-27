@@ -21,7 +21,7 @@ import("../../../../../dsoftbus.gni")
 
 dsoftbus_root_path = "../../../../.."
 
-ohos_fuzztest("TransProxyonMessagereceivedFuzzTest") {
+ohos_fuzztest("TransProxyOnMessageReceivedFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/core/transmission/fuzztest/transproxyonmessagereceived_fuzzer"
 
@@ -64,7 +64,7 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    ":TransProxyonMessagereceivedFuzzTest",
+    ":TransProxyOnMessageReceivedFuzzTest",
   ]
 }
 ###############################################################################

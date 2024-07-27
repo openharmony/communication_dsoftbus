@@ -106,7 +106,7 @@ private:
     bool ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer, int32_t &dataLength,
         std::unique_ptr<char[]> &extBuffer, int32_t &extLen, StreamFrameInfo &info);
     void InsertElementToFuncMap(int type, ValueType valueType, MySetFunc set, MyGetFunc get);
-    int CreateAndBindSocket(IpAndPort &local) override;
+    int CreateAndBindSocket(IpAndPort &local, bool isServer) override;
     bool Accept() override;
 
     int EpollTimeout(int fd, int timeout) override;

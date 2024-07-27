@@ -96,7 +96,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnNotifyDiscoveryDevice(nullptr, &infoReport, false);
-    EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
