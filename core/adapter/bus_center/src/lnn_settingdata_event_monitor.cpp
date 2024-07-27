@@ -76,7 +76,7 @@ std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelperInstance(void)
     return DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI, SETTINGS_DATA_EXT_URI);
 }
 
-static int32_t GetDeviceNameFromDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper, 
+static int32_t GetDeviceNameFromDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper,
     std::shared_ptr<Uri> &uri, const char *key, char *deviceName, uint32_t len)
 {
     int32_t numRows = 0;
@@ -154,8 +154,7 @@ static void RegisterNameMonitorHelper(void)
         return;
     }
     std::string accountIdStr = std::to_string(osAccountId);
-    uri = std::make_shared<Uri>(SETTINGS_DATA_SECURE_URI + accountIdStr + "?Proxy=true&key=" +
-        USER_DEFINED_STRING);
+    uri = std::make_shared<Uri>(SETTINGS_DATA_SECURE_URI + accountIdStr + "?Proxy=true&key=" + USER_DEFINED_STRING);
     dataShareHelper->RegisterObserver(*uri, settingDataObserver);
 
     dataShareHelper->Release();
