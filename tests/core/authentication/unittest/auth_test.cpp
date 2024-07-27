@@ -522,6 +522,12 @@ HWTEST_F(AuthTest, PROCESS_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
 
     int32_t ret = ProcessDeviceInfoMessage(authSeq, &info, data, len);
     EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
+    info.normalizedType = NORMALIZED_SUPPORT;
+    ret = ProcessDeviceInfoMessage(authSeq, &info, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
+    info.normalizedType = NORMALIZED_KEY_ERROR;
+    ret = ProcessDeviceInfoMessage(authSeq, &info, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
 }
 
 /*

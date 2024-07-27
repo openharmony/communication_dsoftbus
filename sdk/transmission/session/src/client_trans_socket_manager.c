@@ -103,6 +103,13 @@ NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *ses
     destroyNode->sessionId = sessionNode->sessionId;
     destroyNode->channelId = sessionNode->channelId;
     destroyNode->channelType = sessionNode->channelType;
+    destroyNode->isAsync = sessionNode->isAsync;
+    if (memcpy_s(&(destroyNode->lifecycle), sizeof(SocketLifecycleData), &(sessionNode->lifecycle),
+            sizeof(SocketLifecycleData)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy_s lifecycle fail.");
+        SoftBusFree(destroyNode);
+        return NULL;
+    }
     if (memcpy_s(destroyNode->sessionName, SESSION_NAME_SIZE_MAX, server->sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy_s sessionName fail.");
         SoftBusFree(destroyNode);
@@ -136,6 +143,9 @@ NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, Shutdo
         int32_t id = destroyNode->sessionId;
         (void)ClientDeleteRecvFileList(id);
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
+        if ((!destroyNode->isAsync) && destroyNode->lifecycle.sessionState == SESSION_STATE_CANCELLING) {
+            (void)SoftBusCondSignal(&(destroyNode->lifecycle.callbackCond));
+        }
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
         } else if (destroyNode->OnShutdown != NULL) {
@@ -653,6 +663,12 @@ void ClientCleanUpWaitTimeoutSocket(int32_t waitOutSocket[], uint32_t waitOutNum
     SessionListenerAdapter callback = { 0 };
     for (uint32_t i = 0; i < waitOutNum; ++i) {
         TRANS_LOGI(TRANS_SDK, "time out shutdown socket=%{public}d", waitOutSocket[i]);
+        SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+        int32_t ret = ClientGetChannelBySessionId(waitOutSocket[i], NULL, NULL, &enableStatus);
+        if (ret != SOFTBUS_OK || enableStatus == ENABLE_STATUS_SUCCESS) {
+            TRANS_LOGI(TRANS_SDK, "socket has enabled, need not shutdown, socket=%{public}d", waitOutSocket[i]);
+            continue;
+        }
         ClientGetSessionCallbackAdapterById(waitOutSocket[i], &callback, &tmpIsServer);
         if (callback.socketClient.OnError != NULL) {
             (void)callback.socketClient.OnError(waitOutSocket[i], SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT);

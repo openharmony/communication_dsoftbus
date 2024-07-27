@@ -35,6 +35,7 @@ constexpr int32_t DEVICE_ID_HASH_LEN = 9;
 constexpr uint32_t REQUEST_ID = 1000;
 constexpr uint32_t REQUEST_ID_1 = 1001;
 constexpr int32_t TMP_DATA_LEN = 10;
+constexpr char UDID_HASH[UDID_HASH_LEN] = "9ada389cd0898797";
 constexpr char UDID_TEST[UDID_BUF_LEN] = "123456789udidtest";
 constexpr char INVALID_UDID_TEST[UDID_BUF_LEN] = "nullptr";
 constexpr char BR_MAC[BT_MAC_LEN] = "00:15:5d:de:d4:23";
@@ -89,6 +90,8 @@ HWTEST_F(AuthSessionFsmTest, TRANSLATE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
     EXPECT_TRUE(authFsm == nullptr);
     authFsm = TranslateToAuthFsm(&authFsm->fsm, FSM_MSG_RECV_DEVICE_ID, nullptr);
     EXPECT_TRUE(authFsm == nullptr);
+    authFsm = TranslateToAuthFsm(&authFsm->fsm, FSM_MSG_UNKNOWN, nullptr);
+    EXPECT_TRUE(authFsm == nullptr);
     AuthFsmDeinitCallback(nullptr);
 }
 
@@ -113,7 +116,13 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
     connInfo.type = AUTH_LINK_TYPE_BR;
     AddUdidInfo(REQUEST_ID, true, &connInfo);
     AddUdidInfo(REQUEST_ID, false, &connInfo);
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    AddUdidInfo(REQUEST_ID, false, &connInfo);
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    AddUdidInfo(REQUEST_ID, false, &connInfo);
     connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
+    AddUdidInfo(REQUEST_ID, false, &connInfo);
+    connInfo.type = AUTH_LINK_TYPE_MAX;
     AddUdidInfo(REQUEST_ID, false, &connInfo);
     AuthFsm authFsm;
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
@@ -128,6 +137,10 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_BLE;
     CompleteAuthSession(&authFsm, SOFTBUS_OK);
     authFsm.info.isSupportFastAuth = true;
+    CompleteAuthSession(&authFsm, SOFTBUS_OK);
+    authFsm.info.normalizedType = NORMALIZED_KEY_ERROR;
+    authFsm.info.isConnectServer = true;
+    authFsm.info.peerState = AUTH_STATE_ACK;
     CompleteAuthSession(&authFsm, SOFTBUS_OK);
 }
 
@@ -277,14 +290,192 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_CLOSE_ACK_TEST_001, TestSize.Level1)
     ret = HandleCloseAckMessage(&authFsm, &info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
-    EXPECT_CALL(bleMock, SoftBusGetBrState()).WillRepeatedly(Return(BR_DISABLE));
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+    info.nodeInfo.feature = 0;
     ret = HandleCloseAckMessage(&authFsm, &info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     info.nodeInfo.feature = 0x1F7CA;
-    EXPECT_CALL(bleMock, SoftBusGetBrState()).WillRepeatedly(Return(BR_DISABLE));
     ret = HandleCloseAckMessage(&authFsm, &info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: IS_NEED_EXCHANGE_NETWORKID_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, IS_NEED_EXCHANGE_NETWORKID_TEST_001, TestSize.Level1)
+{
+    uint32_t feature = 0;
+    bool ret = IsNeedExchangeNetworkId(feature, BIT_SUPPORT_EXCHANGE_NETWORKID);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: ADD_CONCURRENT_AUTH_REQUEST_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, ADD_CONCURRENT_AUTH_REQUEST_TEST_001, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    uint32_t ret = AddConcurrentAuthRequest(&authFsm);
+    EXPECT_TRUE(ret == 0);
+
+    EXPECT_TRUE(strcpy_s(authFsm.info.udidHash, SHA_256_HEX_HASH_LEN, UDID_HASH) == EOK);
+    ret = AddConcurrentAuthRequest(&authFsm);
+    EXPECT_TRUE(ret != 0);
+    StopAuthFsm(&authFsm);
+    SyncNegotiationEnter(nullptr);
+}
+
+/*
+ * @tc.name: RECOVERY_NORMALIZED_DEVICE_KEY_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, RECOVERY_NORMALIZED_DEVICE_KEY_TEST_001, TestSize.Level1)
+{
+    AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
+    ASSERT_TRUE(authFsm != nullptr);
+    (void)memset_s(authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    authFsm->info.normalizedKey = nullptr;
+    int32_t ret = RecoveryNormalizedDeviceKey(authFsm);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    authFsm->info.normalizedKey = (SessionKey *)SoftBusMalloc(sizeof(SessionKey));
+    if (authFsm->info.normalizedKey == nullptr) {
+        SoftBusFree(authFsm);
+    }
+    ret = RecoveryNormalizedDeviceKey(authFsm);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    EXPECT_TRUE(strcpy_s(authFsm->info.udidHash, SHA_256_HEX_HASH_LEN, UDID_HASH) == EOK);
+    ret = RecoveryNormalizedDeviceKey(authFsm);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(authFsm->info.normalizedKey);
+    SoftBusFree(authFsm);
+}
+
+/*
+ * @tc.name: TRY_RECOVERY_KEY_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, TRY_RECOVERY_KEY_TEST_001, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    authFsm.info.normalizedType = NORMALIZED_SUPPORT;
+    int32_t ret = TryRecoveryKey(&authFsm);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_SYNC_DEVID_FAIL);
+
+    authFsm.info.normalizedType = NORMALIZED_NOT_SUPPORT;
+    authFsm.info.isSupportFastAuth = true;
+    ret = TryRecoveryKey(&authFsm);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_SYNC_DEVID_FAIL);
+
+    authFsm.info.isSupportFastAuth = false;
+    ret = TryRecoveryKey(&authFsm);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: PROCESS_CLIENT_AUTH_STATE_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, PROCESS_CLIENT_AUTH_STATE_TEST_001, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    authFsm.info.idType = EXCHANGE_FAIL;
+    int32_t ret = ProcessClientAuthState(&authFsm);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    authFsm.info.idType = EXCHANGE_TYPE_MAX;
+    ret = ProcessClientAuthState(&authFsm);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    DeviceAuthStateEnter(nullptr);
+    FsmStateMachine fsm;
+    (void)memset_s(&fsm, sizeof(FsmStateMachine), 0, sizeof(FsmStateMachine));
+    DeviceAuthStateEnter(&fsm);
+}
+
+/*
+ * @tc.name: DEVICE_AUTH_STATE_PROCESS_TEST_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    authFsm.isDead = false;
+    int32_t msgType = FSM_MSG_RECV_DEVICE_ID;
+    MessagePara *para1 = NewMessagePara(TMP_IN_DATA, TMP_DATA_LEN);
+    ASSERT_TRUE(para1 != nullptr);
+    bool ret = DeviceAuthStateProcess(&authFsm.fsm, msgType, para1);
+    EXPECT_TRUE(ret == true);
+
+    MessagePara *para2 = NewMessagePara(TMP_IN_DATA, TMP_DATA_LEN);
+    ASSERT_TRUE(para2 != nullptr);
+    msgType = FSM_MSG_RECV_AUTH_DATA;
+    ret = DeviceAuthStateProcess(&authFsm.fsm, msgType, para2);
+    EXPECT_TRUE(ret == false);
+
+    MessagePara *para3 = NewMessagePara(TMP_IN_DATA, TMP_DATA_LEN);
+    ASSERT_TRUE(para3 != nullptr);
+    msgType = FSM_MSG_SAVE_SESSION_KEY;
+    ret = DeviceAuthStateProcess(&authFsm.fsm, msgType, para3);
+    EXPECT_TRUE(ret == false);
+
+    MessagePara *para4 = NewMessagePara(TMP_IN_DATA, TMP_DATA_LEN);
+    ASSERT_TRUE(para4 != nullptr);
+    msgType = FSM_MSG_AUTH_ERROR;
+    ret = DeviceAuthStateProcess(&authFsm.fsm, msgType, para4);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: DEVICE_AUTH_STATE_PROCESS_TEST_002
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    authFsm.isDead = false;
+    int32_t msgType = FSM_MSG_AUTH_FINISH;
+    MessagePara *para1 = NewMessagePara(TMP_IN_DATA, TMP_DATA_LEN);
+    ASSERT_TRUE(para1 != nullptr);
+    bool ret = DeviceAuthStateProcess(&authFsm.fsm, msgType, para1);
+    EXPECT_TRUE(ret == true);
+
+    MessagePara *para2 = NewMessagePara(TMP_IN_DATA, TMP_DATA_LEN);
+    ASSERT_TRUE(para2 != nullptr);
+    msgType = FSM_MSG_UNKNOWN;
+    ret = DeviceAuthStateProcess(&authFsm.fsm, msgType, para2);
+    EXPECT_TRUE(ret == true);
+
+    MessagePara *para3 = NewMessagePara(TMP_IN_DATA, TMP_DATA_LEN);
+    ASSERT_TRUE(para3 != nullptr);
+    msgType = FSM_MSG_RECV_DEVICE_INFO;
+    ret = DeviceAuthStateProcess(&authFsm.fsm, msgType, para3);
+    EXPECT_TRUE(ret == true);
+    authFsm.info.isNodeInfoReceived = true;
+    HandleMsgRecvCloseAck(&authFsm, para1);
 }
 } // namespace OHOS
 

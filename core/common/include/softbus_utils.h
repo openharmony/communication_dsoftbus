@@ -31,6 +31,7 @@ extern "C" {
 #define DEC_MAX_NUM 10
 #define HEX_MAX_BIT_NUM 4
 #define MAX_QUERY_LEN 64
+#define INT64_TO_STR_MAX_LEN 21
 
 #define TIMER_TIMEOUT 1000 // 1s
 #define BT_MAC_NO_COLON_LEN 13
@@ -90,6 +91,7 @@ int32_t ConvertBtMacToU64(const char *strMac, uint32_t strMacLen, uint64_t *u64M
 
 int32_t ConvertU64MacToStr(uint64_t u64Mac, char *strMac, uint32_t strMacLen);
 
+bool Int64ToString(int64_t src, char *buf, uint32_t bufLen);
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2);
 
 int32_t StringToUpperCase(const char *str, char *buf, int32_t size);

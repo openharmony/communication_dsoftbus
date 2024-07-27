@@ -195,7 +195,6 @@ int32_t P2pAdapter::GetStationFrequencyWithFilter()
 {
     int32_t frequency = P2pAdapter::GetStationFrequency();
     CONN_CHECK_AND_RETURN_RET_LOGW(frequency > 0, FREQUENCY_INVALID, CONN_WIFI_DIRECT, "invalid frequency");
-
     if (WifiDirectUtils::Is5GBand(frequency)) {
         std::vector<int> channelArray;
         auto ret = P2pAdapter::GetChannel5GListIntArray(channelArray);
@@ -359,10 +358,6 @@ int32_t P2pAdapter::GetGroupConfig(std::string &groupConfigString)
 int32_t P2pAdapter::GetIpAddress(std::string &ipString)
 {
     auto groupInfo = std::make_shared<WifiP2pGroupInfo>();
-    if (groupInfo == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "alloc failed");
-        return SOFTBUS_MALLOC_ERR;
-    }
     int32_t ret = GetCurrentGroup(groupInfo.get());
     if (ret != WIFI_SUCCESS) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ToSoftBusErrorCode(ret));

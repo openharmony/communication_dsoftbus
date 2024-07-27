@@ -76,3 +76,8 @@ void SetLpKeepAliveState(void *para)
 {
     (void)para;
 }
+
+void AsyncSetBleBroadcastTimeStamp(const char *networkId)
+{
+    (void)networkId;
+}

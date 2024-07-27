@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_common.h"
+#include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
 #include "lnn_trans_lane.h"
@@ -407,6 +408,7 @@ static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp
         LNN_LOGE(LNN_STATE, "get lane state notify info fail");
         return;
     }
+    DetectDisableWifiDirectApply();
     if (PostLaneStateChangeMessage(LANE_STATE_LINKDOWN, laneLinkInfo.peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post laneState linkdown msg fail");
     }

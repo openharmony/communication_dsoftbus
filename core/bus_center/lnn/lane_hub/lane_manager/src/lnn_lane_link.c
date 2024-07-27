@@ -56,7 +56,6 @@
 #define TYPE_BUF_LEN 2
 #define LANE_ID_BUF_LEN (UDID_BUF_LEN + UDID_BUF_LEN + TYPE_BUF_LEN)
 #define LANE_ID_HASH_LEN 32
-#define POWER_CONTROL_CLIENT 3
 
 static bool g_enabledLowPower = false;
 
@@ -240,10 +239,10 @@ static int32_t GetRemoteMacAddrByLocalIp(const char *localIp, char *macAddr, uin
     return SOFTBUS_OK;
 }
 
-static void SetWifiDirectLinkInfo(P2pLinkInfo *p2pInfo, WifiDirectLinkInfo *wifiDirectInfo)
+static void SetWifiDirectLinkInfo(P2pLinkInfo *p2pInfo, WifiDirectLinkInfo *wifiDirectInfo, uint32_t bandWidth)
 {
     wifiDirectInfo->linkType = LANE_HML;
-    wifiDirectInfo->bandWidth = LANE_BW_160M;
+    wifiDirectInfo->bandWidth = bandWidth;
     int32_t ret = GetRemoteMacAddrByLocalIp(p2pInfo->connInfo.localIp,
         wifiDirectInfo->wifiDirectMac, LNN_MAC_LEN);
     if (ret != SOFTBUS_OK) {
@@ -252,33 +251,36 @@ static void SetWifiDirectLinkInfo(P2pLinkInfo *p2pInfo, WifiDirectLinkInfo *wifi
     }
 }
 
-static void HandleDetectWifiDirectApply(bool isDisableLowPower,  WifiDirectLinkInfo *wifiDirectInfo,
-    int32_t activeHml, int32_t passiveHml, int32_t rawHml)
+static void SetLanePowerStatus(bool status)
 {
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return;
     }
-    if (isDisableLowPower) {
-        DisablePowerControl(wifiDirectInfo);
-        g_enabledLowPower = false;
-    } else if ((activeHml == 1) && (passiveHml == 0) && (rawHml == 0) && (!g_enabledLowPower)) {
-        int32_t ret = EnablePowerControl(wifiDirectInfo);
-        g_enabledLowPower = true;
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "enable fail, ret=%{public}d", ret);
-            g_enabledLowPower = false;
-        }
-    }
+    g_enabledLowPower = status;
     LaneUnlock();
 }
 
-static void DetectDisableWifiDirectApply(void)
+static void HandleDetectWifiDirectApply(PowerControlInfo *powerInfo,  WifiDirectLinkInfo *wifiDirectInfo)
 {
-    int32_t activeHml = 0;
-    int32_t passiveHml = 0;
-    int32_t rawHml = 0;
-    bool isDisableLowPower = false;
+    if (powerInfo->isDisableLowPower) {
+        DisablePowerControl(wifiDirectInfo);
+        SetLanePowerStatus(false);
+    } else if ((powerInfo->activeHml == 1) && (powerInfo->passiveHml == 0) && (powerInfo->rawHml == 0)
+         && (!g_enabledLowPower)) {
+        int32_t ret = EnablePowerControl(wifiDirectInfo);
+        SetLanePowerStatus(true);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "enable fail, ret=%{public}d", ret);
+            SetLanePowerStatus(false);
+        }
+    }
+}
+
+void DetectDisableWifiDirectApply(void)
+{
+    PowerControlInfo powerInfo;
+    (void)memset_s(&powerInfo, sizeof(powerInfo), 0, sizeof(powerInfo));
     WifiDirectLinkInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     if (LaneLock() != SOFTBUS_OK) {
@@ -288,41 +290,39 @@ static void DetectDisableWifiDirectApply(void)
     LaneResource *item = NULL;
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
-        LNN_LOGI(LNN_LANE, "link.type=%{public}d, link.linkInfo.p2p.bw=%{public}d",
-            item->link.type, item->link.linkInfo.p2p.bw);
+        LNN_LOGI(LNN_LANE, "link.type=%{public}d, link.bw=%{public}d", item->link.type, item->link.linkInfo.p2p.bw);
         if (item->link.type == LANE_HML) {
             if (item->clientRef > 0) {
-                activeHml++;
+                powerInfo.activeHml++;
             }
             if (item->isServerSide) {
-                passiveHml++;
-                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo);
+                powerInfo.passiveHml++;
+                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
             }
-            if (item->link.linkInfo.p2p.bw == LANE_BW_160M) {
-                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo);
+            if (item->link.linkInfo.p2p.bw == LANE_BW_160M || item->link.linkInfo.p2p.bw == LANE_BW_80P80M) {
+                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
             }
         }
-        if (activeHml == 1) {
-            isDisableLowPower = true;
-            break;
-        }
-        if (((activeHml == 0) || (passiveHml > 0) || (rawHml > 0)) && g_enabledLowPower) {
-            isDisableLowPower = true;
-            break;
+        if (item->link.type == LANE_HML_RAW) {
+            powerInfo.rawHml++;
         }
     }
+    if (powerInfo.activeHml == 1) {
+        powerInfo.isDisableLowPower = true;
+    }
+    if (((powerInfo.activeHml == 0) || (powerInfo.passiveHml > 0) || (powerInfo.rawHml > 0)) && g_enabledLowPower) {
+        powerInfo.isDisableLowPower = true;
+    }
     LaneUnlock();
-    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d", activeHml, passiveHml, rawHml);
-    HandleDetectWifiDirectApply(isDisableLowPower, &wifiDirectInfo, activeHml, passiveHml, rawHml);
+    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d",
+        powerInfo.activeHml, powerInfo.passiveHml, powerInfo.rawHml);
+    HandleDetectWifiDirectApply(&powerInfo, &wifiDirectInfo);
 }
 
 static void DetectEnableWifiDirectApply(void)
 {
-    int32_t activeHml = 0;
-    int32_t passiveHml = 0;
-    int32_t rawHml = 0;
-    uint32_t clientHml = 0;
-    bool isDisableLowPower = false;
+    PowerControlInfo powerInfo;
+    (void)memset_s(&powerInfo, sizeof(powerInfo), 0, sizeof(powerInfo));
     WifiDirectLinkInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     if (LaneLock() != SOFTBUS_OK) {
@@ -332,35 +332,33 @@ static void DetectEnableWifiDirectApply(void)
     LaneResource *item = NULL;
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
-        LNN_LOGI(LNN_LANE, "link.type=%{public}d, link.linkInfo.p2p.bw=%{public}d",
-            item->link.type, item->link.linkInfo.p2p.bw);
+        LNN_LOGI(LNN_LANE, "link.type=%{public}d, link.bw=%{public}d", item->link.type, item->link.linkInfo.p2p.bw);
         if (item->link.type == LANE_HML) {
             if (item->clientRef > 0) {
-                activeHml++;
-            }
-            if (item->clientRef > 0) {
-                clientHml = item->clientRef;
+                powerInfo.activeHml = item->clientRef;
             }
             if (item->isServerSide) {
-                passiveHml++;
-                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo);
+                powerInfo.passiveHml++;
+                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
             }
-            if (item->link.linkInfo.p2p.bw == LANE_BW_160M) {
-                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo);
+            if (item->link.linkInfo.p2p.bw == LANE_BW_160M || item->link.linkInfo.p2p.bw == LANE_BW_80P80M) {
+                SetWifiDirectLinkInfo(&item->link.linkInfo.p2p, &wifiDirectInfo, item->link.linkInfo.p2p.bw);
             }
         }
-        if (clientHml >= POWER_CONTROL_CLIENT) {
-            isDisableLowPower = true;
-            break;
-        }
-        if (((activeHml == 0) || (passiveHml > 0) || (rawHml > 0)) && g_enabledLowPower) {
-            isDisableLowPower = true;
-            break;
+        if (item->link.type == LANE_HML_RAW) {
+            powerInfo.rawHml++;
         }
     }
+    if (powerInfo.activeHml > 1) {
+        powerInfo.isDisableLowPower = true;
+    }
+    if (((powerInfo.activeHml == 0) || (powerInfo.passiveHml > 0) || (powerInfo.rawHml > 0)) && g_enabledLowPower) {
+        powerInfo.isDisableLowPower = true;
+    }
     LaneUnlock();
-    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d", activeHml, passiveHml, rawHml);
-    HandleDetectWifiDirectApply(isDisableLowPower, &wifiDirectInfo, activeHml, passiveHml, rawHml);
+    LNN_LOGI(LNN_LANE, "activeHml=%{public}d, passiveHml=%{public}d, rawHml=%{public}d",
+        powerInfo.activeHml, powerInfo.passiveHml, powerInfo.rawHml);
+    HandleDetectWifiDirectApply(&powerInfo, &wifiDirectInfo);
 }
 
 static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide)
@@ -800,6 +798,36 @@ int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *de
     }
     LaneUnlock();
     return ret;
+}
+
+int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type)
+{
+    if (peerNetworkId == NULL || type >= LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        char *anonyPeerNetworkId = NULL;
+        Anonymize(peerNetworkId, &anonyPeerNetworkId);
+        LNN_LOGI(LNN_LANE, "get peerUdid fail, peerNetworkId=%{public}s", anonyPeerNetworkId);
+        AnonymizeFree(anonyPeerNetworkId);
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        if (strcmp(peerUdid, item->link.peerUdid) != 0 && type == item->link.type) {
+            LaneUnlock();
+            return SOFTBUS_OK;
+        }
+    }
+    LaneUnlock();
+    return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
 static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
