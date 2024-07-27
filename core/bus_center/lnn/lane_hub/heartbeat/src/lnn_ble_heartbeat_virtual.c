@@ -100,3 +100,5 @@ void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
 }
 
 void LnnBleHbUnregDataLevelChangeCb(void) { }
+
+void LnnAdjustScanPolicy(void) { }
