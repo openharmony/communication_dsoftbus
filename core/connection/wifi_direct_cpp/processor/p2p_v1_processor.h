@@ -160,6 +160,7 @@ private:
     std::string clientJoiningMac_;
 
     bool active_;
+    bool hasRun_ = false;
 
     Utils::Timer timer_;
     uint32_t timerId_;

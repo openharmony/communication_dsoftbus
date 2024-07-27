@@ -44,6 +44,7 @@ template<> InfoContainer<LinkInfoKey>::KeyTypeTable InfoContainer<LinkInfoKey>::
     { LinkInfoKey::LOCAL_IPV6, Serializable::ValueType::STRING },
     { LinkInfoKey::REMOTE_IPV6, Serializable::ValueType::STRING },
     { LinkInfoKey::CUSTOM_PORT, Serializable::ValueType::INT },
+    { LinkInfoKey::IPADDR_TYPE, Serializable::ValueType::INT },
 };
 
 LinkInfo::LinkInfo(const std::string &localInterface, const std::string &remoteInterface, LinkMode localMode,
@@ -366,5 +367,16 @@ void LinkInfo::SetCustomPort(int value)
 int LinkInfo::GetCustomPort()
 {
     return Get(LinkInfoKey::CUSTOM_PORT, 0);
+}
+
+void LinkInfo::SetIpAddrType(enum IpAddrType value)
+{
+    Set(LinkInfoKey::IPADDR_TYPE, static_cast<int>(value));
+}
+
+enum IpAddrType LinkInfo::GetIpAddrType()
+{
+    auto ret = Get(LinkInfoKey::IPADDR_TYPE, 0);
+    return static_cast<enum IpAddrType>(ret);
 }
 }
