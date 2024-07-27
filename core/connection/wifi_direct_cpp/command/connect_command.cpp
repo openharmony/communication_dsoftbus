@@ -17,6 +17,7 @@
 #include <cstring>
 
 #include "conn_log.h"
+
 #include "channel/auth_negotiate_channel.h"
 #include "channel/dummy_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
@@ -68,6 +69,16 @@ WifiDirectConnectCallback ConnectCommand::GetConnectCallback() const
     return callback_;
 }
 
+void ConnectCommand::SetSuccessCallback(const SuccessCallback &callback)
+{
+    successCallback_ = callback;
+}
+
+void ConnectCommand::SetFailureCallback(const FailureCallback &callback)
+{
+    failureCallback_ = callback;
+}
+
 void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
@@ -76,16 +87,28 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
         WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType, link.isReuse, link.bandWidth,
         link.channelId, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+    if (successCallback_ != nullptr) {
+        successCallback_(link);
+        return;
+    }
     WifiDirectDfx::GetInstance().DfxRecord(true, SOFTBUS_OK, info_);
-    callback_.onConnectSuccess(info_.info_.requestId, &link);
+    if (callback_.onConnectSuccess != nullptr) {
+        callback_.onConnectSuccess(info_.info_.requestId, &link);
+    }
 }
 
-void ConnectCommand::OnFailure(int reason) const
+void ConnectCommand::OnFailure(int32_t reason) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d, remoteDeviceId=%{public}s",
         info_.info_.requestId, reason, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+    if (failureCallback_ != nullptr) {
+        failureCallback_(reason);
+        return;
+    }
     WifiDirectDfx::GetInstance().DfxRecord(false, reason, info_);
-    callback_.onConnectFailure(info_.info_.requestId, reason);
+    if (callback_.onConnectFailure != nullptr) {
+        callback_.onConnectFailure(info_.info_.requestId, reason);
+    }
 }
 
 void ConnectCommand::PreferNegotiateChannel()
