@@ -151,6 +151,13 @@ public:
 
     virtual bool ProcessNextCommand(WifiDirectExecutor *executor, std::shared_ptr<WifiDirectProcessor> &processor);
 
+    bool CheckExecutorRunning(const std::string &remoteDeviceId)
+    {
+        std::lock_guard executorLock(executorLock_);
+        auto iterator = executors_.find(remoteDeviceId);
+        return iterator != executors_.end();
+    }
+
 protected:
     int ScheduleActiveCommand(const std::shared_ptr<WifiDirectCommand> &command,
                               std::shared_ptr<WifiDirectExecutor> &executor);
