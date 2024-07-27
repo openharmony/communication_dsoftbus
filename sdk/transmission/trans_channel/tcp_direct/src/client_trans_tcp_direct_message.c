@@ -177,10 +177,7 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
 {
     uint32_t outLen = 0;
     char *buf = TransTdcPackData(channel, data, len, flags, &outLen);
-    if (buf == NULL) {
-        TRANS_LOGE(TRANS_SDK, "failed to pack bytes.");
-        return SOFTBUS_ENCRYPT_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(buf != NULL, SOFTBUS_ENCRYPT_ERR, TRANS_SDK, "failed to pack bytes.");
     if (outLen != len + OVERHEAD_LEN) {
         TRANS_LOGE(TRANS_SDK, "pack bytes len error, outLen=%{public}d", outLen);
         SoftBusFree(buf);
@@ -201,12 +198,26 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
         SoftBusFree(buf);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
+    TcpDirectChannelInfo info;
+    (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
+    if (TransTdcGetInfoById(channel->channelId, &info) == NULL) {
+        TRANS_LOGE(TRANS_SDK, "get channel fd lock fail. channelId=%{public}d", channel->channelId);
+        SoftBusFree(buf);
+        return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
+    }
+    if (SoftBusMutexLock(&(info.detail.fdLock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "failed to lock fd. channelId=%{public}d", channel->channelId);
+        SoftBusFree(buf);
+        return SOFTBUS_LOCK_ERR;
+    }
     ssize_t ret = ConnSendSocketData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
     if (ret != (ssize_t)outLen + DC_DATA_HEAD_SIZE) {
         TRANS_LOGE(TRANS_SDK, "failed to send tcp data. ret=%{public}zd", ret);
         SoftBusFree(buf);
+        (void)SoftBusMutexUnlock(&(info.detail.fdLock));
         return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
+    (void)SoftBusMutexUnlock(&(info.detail.fdLock));
     SoftBusFree(buf);
     buf = NULL;
     return SOFTBUS_OK;
