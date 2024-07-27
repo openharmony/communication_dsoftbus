@@ -366,12 +366,10 @@ static void UpdataLocalFromSetting(void *p)
     char unifiedName[DEVICE_NAME_BUF_LEN] = {0};
     char unifiedDefaultName[DEVICE_NAME_BUF_LEN] = {0};
     char nickName[DEVICE_NAME_BUF_LEN] = {0};
-    LNN_LOGD(LNN_BUILDER, "UpdateLocalFromSetting enter");
     if (LnnGetSettingDeviceName(deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "UpdataLocalFromSetting fail");
         g_tryGetDevnameNums++;
+        LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums=%{public}d", g_tryGetDevnameNums);
         if (g_tryGetDevnameNums < MAX_TRY) {
-            LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums=%{public}d", g_tryGetDevnameNums);
             SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
             if (looper == NULL) {
                 LNN_LOGE(LNN_BUILDER, "looper is null");
@@ -382,7 +380,6 @@ static void UpdataLocalFromSetting(void *p)
                 LNN_LOGE(LNN_BUILDER, "init UpdataLocalFromSetting fail");
             }
         }
-        g_isDevnameInited = false;
         return;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName) != SOFTBUS_OK) {
