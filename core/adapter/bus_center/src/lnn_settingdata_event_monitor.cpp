@@ -151,7 +151,7 @@ static void RegisterNameMonitorHelper(void)
 
     int32_t osAccountId = GetActiveOsAccountIds();
     if (osAccountId == SOFTBUS_ERR) {
-        return SOFTBUS_NO_INIT;
+        return;
     }
     std::string accountIdStr = std::to_string(osAccountId);
     uri = std::make_shared<Uri>(SETTINGS_DATA_SECURE_URI + accountIdStr + "?Proxy=true&key=" +
@@ -177,7 +177,7 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
     }
 
     int32_t ret = OHOS::BusCenter::GetUserDefinedDeviceName(dataShareHelper, deviceName, len);
-    if (ret = SOFTBUS_NO_INIT) {
+    if (ret == SOFTBUS_NO_INIT) {
         LNN_LOGI(LNN_STATE, "account not ready, try again");
         dataShareHelper->Release();
         return ret;
@@ -185,7 +185,7 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
     if (ret = SOFTBUS_OK) {
         LNN_LOGI(LNN_STATE, "get user defined deviceName=%{public}s", deviceName);
         dataShareHelper->Release();
-        return ret;
+        return SOFTBUS_OK;
     }
     ret = OHOS::BusCenter::GetDefaultDeviceName(dataShareHelper, deviceName, len);
     LNN_LOGI(LNN_STATE, "get default deviceName=%{public}s, ret=%{public}d", deviceName, ret);
