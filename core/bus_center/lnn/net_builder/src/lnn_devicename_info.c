@@ -47,6 +47,7 @@
 #define KEY_ACCOUNT "KEY_ACCOUNT"
 
 static int32_t g_tryGetDevnameNums = 0;
+static bool g_isDevnameInited = false;
 
 static int32_t LnnSyncDeviceName(const char *networkId)
 {
@@ -381,6 +382,7 @@ static void UpdataLocalFromSetting(void *p)
                 LNN_LOGE(LNN_BUILDER, "init UpdataLocalFromSetting fail");
             }
         }
+        g_isDevnameInited = false;
         return;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName) != SOFTBUS_OK) {
@@ -404,20 +406,25 @@ static void UpdataLocalFromSetting(void *p)
         }
     }
     RegisterNameMonitor();
+    g_isDevnameInited = true;
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
     LnnNotifyLocalNetworkIdChanged();
     LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
         "unifiedDefaultName=%{public}s, nickName=%{public}s", deviceName, unifiedName, unifiedDefaultName, nickName);
 }
 
-static void UpdateDeviceNameFromSetting(void)
+static void RegisterDeviceNameHandle(void)
 {
     LnnInitGetDeviceName(LnnHandlerGetDeviceName);
 }
 
 void UpdateDeviceName(void *p)
 {
-    UpdateDeviceNameFromSetting();
+    if (g_isDevnameInited) {
+        LNN_LOGI(LNN_BUILDER, "device name already inited");
+        return;
+    }
+    RegisterDeviceNameHandle();
     UpdataLocalFromSetting(p);
 }
 
