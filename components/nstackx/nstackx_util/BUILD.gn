@@ -223,10 +223,12 @@ if (defined(ohos_lite)) {
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
-      "openssl:libcrypto_shared",
     ]
     if (is_standard_system) {
-      external_deps += [ "c_utils:utils" ]
+      external_deps += [
+        "c_utils:utils",
+        "openssl:libcrypto_shared",
+      ]
     }
     public_configs = [ ":nstackx_util_header" ]
     innerapi_tags = [ "platformsdk_indirect" ]
