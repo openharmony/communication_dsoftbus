@@ -1671,6 +1671,27 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
     return TryGetBrConnInfo(uuid, connInfo);
 }
 
+int32_t AuthDeviceGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo)
+{
+    if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetAuthConnInfoByUuid(uuid, type, connInfo) != SOFTBUS_OK) {
+        if (type == AUTH_LINK_TYPE_BR) {
+            return TryGetBrConnInfo(uuid, connInfo);
+        }
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    if (type == AUTH_LINK_TYPE_BLE) {
+        if (!CheckActiveAuthConnection(connInfo)) {
+            AUTH_LOGI(AUTH_CONN, "auth ble connection not active");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
