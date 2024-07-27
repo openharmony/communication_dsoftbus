@@ -50,6 +50,12 @@ int32_t AuthNotifyResultByUuid(const char *uuid, int32_t reason, int64_t *authId
     return SOFTBUS_OK;
 }
 
+int32_t UpdateAuthSyncPtkInfoStatus(int64_t authId)
+{
+    (void)authId;
+    return SOFTBUS_OK;
+}
+
 int32_t AuthMetaInitPtkProc(void)
 {
     return SOFTBUS_OK;
