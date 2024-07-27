@@ -713,13 +713,13 @@ static int32_t SendSingleFile(const SendListenerInfo *sendInfo, const char *sour
         TRANS_LOGE(TRANS_FILE, "sourfile or dstfile is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_FILE, "channelId=%{public}d, srcFile=%{public}s, dstFile=%{public}s",
-        sendInfo->channelId, sourceFile, destFile);
+    TRANS_LOGI(TRANS_FILE, "channelId=%{public}d, srcFile=%{private}s, dstFile=%{public}s", sendInfo->channelId,
+        sourceFile, destFile);
 
     int32_t ret = FileToFrameAndSendFile((SendListenerInfo *)sendInfo, sourceFile, destFile);
     ClearSendInfo((SendListenerInfo *)sendInfo);
     TRANS_LOGI(
-        TRANS_FILE, "channelId=%{public}d, srcFile=%{public}s, ret=%{public}d", sendInfo->channelId, sourceFile, ret);
+        TRANS_FILE, "channelId=%{public}d, srcFile=%{private}s, ret=%{public}d", sendInfo->channelId, sourceFile, ret);
     return ret;
 }
 
@@ -1208,7 +1208,7 @@ static int32_t GetFileInfoByStartFrame(const FileFrame *fileFrame, const FileRec
     }
     const char *rootDir = info->fileListener.rootDir;
     if (strstr(rootDir, "..") != NULL) {
-        TRANS_LOGE(TRANS_FILE, "rootDir is not canonical form. rootDir=%{public}s", rootDir);
+        TRANS_LOGE(TRANS_FILE, "rootDir is not canonical form. rootDir=%{private}s", rootDir);
         return SOFTBUS_FILE_ERR;
     }
     int32_t ret = UnpackFileTransStartInfo((FileFrame *)fileFrame, info, file);
@@ -1218,10 +1218,10 @@ static int32_t GetFileInfoByStartFrame(const FileFrame *fileFrame, const FileRec
     }
     char *filePath = file->filePath;
     if (!CheckDestFilePathValid(filePath)) {
-        TRANS_LOGE(TRANS_FILE, "recv filePath form is wrong. filePath=%{public}s", filePath);
+        TRANS_LOGE(TRANS_FILE, "recv filePath form is wrong. filePath=%{private}s", filePath);
         return SOFTBUS_FILE_ERR;
     }
-    TRANS_LOGI(TRANS_FILE, "dst filePath=%{public}s, rootDir=%{public}s", filePath, rootDir);
+    TRANS_LOGI(TRANS_FILE, "dst filePath=%{private}s, rootDir=%{private}s", filePath, rootDir);
     char *fullRecvPath = GetFullRecvPath(filePath, rootDir);
     if (!IsPathValid(fullRecvPath)) {
         TRANS_LOGE(TRANS_FILE, "destFilePath is invalid");
@@ -1342,7 +1342,7 @@ static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const F
         TRANS_LOGE(TRANS_FILE, "get file info by start frame fail");
         goto EXIT_ERR;
     }
-    TRANS_LOGI(TRANS_FILE, "null filePath. filePath=%{public}s, seq=%{public}u", file->filePath, file->seq);
+    TRANS_LOGI(TRANS_FILE, "null filePath. filePath=%{private}s, seq=%{public}u", file->filePath, file->seq);
     if (PutToRecvFileList(recipient, file) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "put to recv files failed. sessionId=%{public}u", recipient->sessionId);
         goto EXIT_ERR;
