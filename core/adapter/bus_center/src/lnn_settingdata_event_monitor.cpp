@@ -116,7 +116,7 @@ static int32_t GetDeviceNameFromDataShareHelper(std::shared_ptr<DataShare::DataS
     return SOFTBUS_OK;
 }
 
-static int32_t GetDefaultDeviceName(std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper, 
+static int32_t GetDefaultDeviceName(std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper,
     char *deviceName, uint32_t len)
 {
     std::shared_ptr<Uri> uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI + "&key=" + PREDICATES_STRING);
@@ -124,7 +124,7 @@ static int32_t GetDefaultDeviceName(std::shared_ptr<DataShare::DataShareHelper> 
     return GetDeviceNameFromDataShareHelper(dataShareHelper, uri, PREDICATES_STRING, deviceName, len);
 }
 
-static int32_t GetUserDefinedDeviceName(std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper, 
+static int32_t GetUserDefinedDeviceName(std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper,
     char *deviceName, uint32_t len)
 {
     int32_t osAccountId = GetActiveOsAccountIds();
