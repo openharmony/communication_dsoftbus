@@ -34,6 +34,7 @@ typedef struct {
     SeqVerifyInfo verifyInfo;
     char sessionKey[SESSION_KEY_LENGTH];
     char myIp[IP_LEN];
+    SoftBusMutex fdLock;
     SoftBusList *pendingPacketsList;
 } TcpDirectChannelDetail;
 
