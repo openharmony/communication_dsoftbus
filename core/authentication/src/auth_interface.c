@@ -307,6 +307,14 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return AuthDeviceGetPreferConnInfo(uuid, connInfo);
 }
 
+int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta)
+{
+    if (isMeta) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return AuthDeviceGetConnInfoByType(uuid, type, connInfo);
+}
+
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {
