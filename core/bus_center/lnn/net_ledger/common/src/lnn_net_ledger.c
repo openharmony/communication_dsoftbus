@@ -199,6 +199,11 @@ int32_t LnnInitNetLedgerDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitEventMoniterDelay(void)
+{
     if (LnnInitCommonEventMonitorImpl() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init LnnInitCommonEventMonitorImpl fail");
         return SOFTBUS_ERR;
@@ -207,7 +212,6 @@ int32_t LnnInitNetLedgerDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init LnnInitDeviceNameMonitorImpl fail");
         return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
 }
 
 void LnnDeinitNetLedger(void)
