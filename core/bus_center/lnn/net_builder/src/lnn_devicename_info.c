@@ -380,6 +380,7 @@ static void UpdataLocalFromSetting(void *p)
                 LNN_LOGE(LNN_BUILDER, "init UpdataLocalFromSetting fail");
             }
         }
+        g_isDevnameInited = false;
         return;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName) != SOFTBUS_OK) {
