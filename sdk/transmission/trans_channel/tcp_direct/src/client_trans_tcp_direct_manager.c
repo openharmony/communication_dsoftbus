@@ -150,6 +150,7 @@ void TransTdcCloseChannel(int32_t channelId)
         if (item->channelId == channelId) {
             TransTdcReleaseFd(item->detail.fd);
             ListDelete(&item->node);
+            SoftBusMutexDestroy(&(item->detail.fdLock));
             SoftBusFree(item);
             item = NULL;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
@@ -177,6 +178,11 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
     item->channelId = channel->channelId;
     item->detail.fd = channel->fd;
     item->detail.channelType = channel->channelType;
+    if (SoftBusMutexInit(&(item->detail.fdLock), NULL) != SOFTBUS_OK) {
+        SoftBusFree(item);
+        TRANS_LOGE(TRANS_SDK, "init fd lock failed");
+        return NULL;
+    }
     if (memcpy_s(item->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
         SoftBusFree(item);
         TRANS_LOGE(TRANS_SDK, "sessionKey copy failed");
@@ -226,6 +232,7 @@ static void TransTdcDelChannelInfo(int32_t channelId)
         if (item->channelId == channelId) {
             TransTdcReleaseFd(item->detail.fd);
             ListDelete(&item->node);
+            SoftBusMutexDestroy(&(item->detail.fdLock));
             SoftBusFree(item);
             item = NULL;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
