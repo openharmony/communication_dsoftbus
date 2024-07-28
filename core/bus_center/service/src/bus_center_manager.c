@@ -60,6 +60,7 @@ typedef int32_t (*LnnInitDelayImpl)(void);
 
 typedef enum {
     INIT_LOCAL_LEDGER_DELAY_TYPE = 0,
+    INIT_EVENT_MONITER_DELAY_TYPE,
     INIT_NETWORK_MANAGER_DELAY_TYPE,
     INIT_NETBUILDER_DELAY_TYPE,
     INIT_LANEHUB_DELAY_TYPE,
@@ -89,6 +90,10 @@ static LnnLocalConfigInit g_lnnLocalConfigInit = {
     .initDelayImpl = {
         [INIT_LOCAL_LEDGER_DELAY_TYPE] = {
             .implInit = LnnInitNetLedgerDelay,
+            .isInit = false,
+        },
+        [INIT_EVENT_MONITER_DELAY_TYPE] = {
+            .implInit = LnnInitEventMoniterDelay,
             .isInit = false,
         },
         [INIT_NETWORK_MANAGER_DELAY_TYPE] = {
