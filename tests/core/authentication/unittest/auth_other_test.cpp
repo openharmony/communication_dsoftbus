@@ -46,6 +46,7 @@ constexpr uint32_t BLE_CONNID = 196609;
 constexpr uint32_t BR_CONNID = 65570;
 constexpr uint32_t WIFI_CONNID = 131073;
 constexpr uint32_t MSG_LEN = 50;
+constexpr char NETWORK_ID[] = "testnetworkid123";
 
 class AuthOtherTest : public testing::Test {
 public:
@@ -1262,5 +1263,80 @@ HWTEST_F(AuthOtherTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
     AuthDeviceKeyInfo keyInfo;
     EXPECT_TRUE(FillAuthSessionInfo(&info, &nodeInfo, &keyInfo, true) == SOFTBUS_OK);
     EXPECT_TRUE(FillAuthSessionInfo(&info, &nodeInfo, &keyInfo, false) == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001
+ * @tc.desc: DelAuthReqInfoByAuthHandle test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001, TestSize.Level1)
+{
+    InitAuthReqInfo();
+    AuthConnCallback authConnCb = {
+        .onConnOpened = OnConnOpenedTest,
+        .onConnOpenFailed = OnConnOpenFailedTest,
+    };
+    EXPECT_EQ(AddAuthReqNode(NETWORK_ID, 1, 1, &authConnCb), SOFTBUS_OK);
+    EXPECT_EQ(AddAuthReqNode(NETWORK_ID, 2, 2, &authConnCb), SOFTBUS_OK);
+    EXPECT_EQ(AddAuthReqNode(NETWORK_ID, 3, 3, &authConnCb), SOFTBUS_OK);
+    OnAuthConnOpenedFail(1, -1);
+    OnAuthConnOpenedFail(4, -1);
+    AuthHandle authHandle = { .authId = 2, .type = 1, };
+    AuthFreeLane(&authHandle);
+    EXPECT_EQ(DelAuthReqInfoByAuthHandle(&authHandle), SOFTBUS_OK);
+    authHandle.type = 0;
+    AuthFreeLane(&authHandle);
+    EXPECT_EQ(DelAuthReqInfoByAuthHandle(&authHandle), SOFTBUS_OK);
+    authHandle.authId = 1;
+    AuthFreeLane(&authHandle);
+    EXPECT_EQ(DelAuthReqInfoByAuthHandle(&authHandle), SOFTBUS_OK);
+    authHandle.authId = 2;
+    AuthFreeLane(&authHandle);
+    EXPECT_EQ(DelAuthReqInfoByAuthHandle(&authHandle), SOFTBUS_OK);
+    DeInitAuthReqInfo();
+}
+
+/*
+ * @tc.name: IS_ENHANCE_P2P_MODULE_ID_Test_001
+ * @tc.desc: IsEnhanceP2pModuleId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
+{
+    EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_ENHANCED_P2P_START), true);
+    EXPECT_EQ(IsEnhanceP2pModuleId(DIRECT_CHANNEL_SERVER_P2P), false);
+    EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_P2P), false);
+}
+
+/*
+ * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001
+ * @tc.desc: AuthStartListeningForWifiDirect test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.Level1)
+{
+    AsyncCallDeviceIdReceived(nullptr);
+    AuthStopListeningForWifiDirect(AUTH_LINK_TYPE_P2P, AUTH_ENHANCED_P2P_START);
+    AuthDataHead head;
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
+    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    OnWiFiDataReceived(PROXY, 0, &head, data);
+    OnWiFiDataReceived(AUTH, 0, &head, data);
+    OnWiFiDataReceived(AUTH_P2P, 0, &head, data);
+    OnWiFiDataReceived(AUTH_RAW_P2P_SERVER, 0, &head, data);
+    OnWiFiDataReceived(AUTH_ENHANCED_P2P_START, 0, &head, data);
+    const char *ip = "192.138.33.33";
+    ListenerModule moduleId;
+    (void)memset_s(&moduleId, sizeof(ListenerModule), 0, sizeof(ListenerModule));
+    EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId),
+        SOFTBUS_INVALID_PORT);
+    EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId),
+        SOFTBUS_INVALID_PORT);
+    EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_WIFI, ip, 37025, &moduleId),
+        SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
