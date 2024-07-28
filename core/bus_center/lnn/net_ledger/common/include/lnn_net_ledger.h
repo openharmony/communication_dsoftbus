@@ -24,6 +24,7 @@ extern "C" {
 
 int32_t LnnInitNetLedger(void);
 int32_t LnnInitNetLedgerDelay(void);
+int32_t LnnInitEventMoniterDelay(void);
 void RestoreLocalDeviceInfo(void);
 void LnnDeinitNetLedger(void);
 
