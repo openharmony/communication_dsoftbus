@@ -74,7 +74,6 @@ if (defined(ohos_lite)) {
       deps = [
         "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
         "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
-        "//third_party/openssl/ohos_lite:openssl_shared",
       ]
       external_deps = [
         "bounds_checking_function:libsec_shared",
@@ -112,7 +111,6 @@ if (defined(ohos_lite)) {
       deps = [
         "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
         "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
-        "//third_party/openssl/ohos_lite:openssl_shared",
       ]
       external_deps = [
         "bounds_checking_function:libsec_shared",
@@ -136,7 +134,6 @@ if (defined(ohos_lite)) {
 
     cflags = [
       "-Wall",
-      "-DSSL_AND_CRYPTO_INCLUDED",
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DDFILE_ENABLE_HIDUMP",
       "-DENABLE_USER_LOG",
@@ -173,10 +170,7 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
     ]
-    external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "openssl:libcrypto_shared",
-    ]
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
     if (is_standard_system) {
       external_deps += [ "c_utils:utils" ]
     }
