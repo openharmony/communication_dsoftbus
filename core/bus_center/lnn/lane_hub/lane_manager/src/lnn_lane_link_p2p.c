@@ -1557,12 +1557,51 @@ static void GuideChannelDetect(uint32_t authRequestId, AuthHandle authHandle)
     AuthChannelDetectSucc(laneReqId, authRequestId, authHandle);
 }
 
+static int32_t GetPreferAuthByType(const char *networkId, AuthLinkType type, AuthConnInfo *connInfo, bool isMetaAuth)
+{
+    char uuid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get peer uuid fail");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    return AuthGetConnInfoByType(uuid, type, connInfo, isMetaAuth);
+}
+
+static int32_t GetCurrentGuideType(uint32_t laneReqId, LaneLinkType linkType, WdGuideType *guideType)
+{
+    WdGuideInfo guideInfo = {0};
+    if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get guide channel info fail.");
+        return SOFTBUS_LANE_NOT_FOUND;
+    }
+    *guideType = guideInfo.guideList[guideInfo.guideIdx];
+    return SOFTBUS_OK;
+}
+
+static int32_t GetAuthConnInfo(const LinkRequest *request, uint32_t laneReqId, AuthConnInfo *connInfo, bool isMetaAuth)
+{
+    WdGuideType guideType = LANE_CHANNEL_BUTT;
+    int32_t ret = GetCurrentGuideType(laneReqId, request->linkType, &guideType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get current guide channel info fail");
+        return ret;
+    }
+    if (!isMetaAuth && (guideType == LANE_NEW_AUTH_TRIGGER || guideType == LANE_ACTIVE_BR_NEGO ||
+        guideType == LANE_NEW_AUTH_NEGO)) {
+        LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
+        ret = GetPreferAuthByType(request->peerNetworkId, AUTH_LINK_TYPE_BR, connInfo, isMetaAuth);
+    } else {
+        ret = GetPreferAuth(request->peerNetworkId, connInfo, isMetaAuth);
+    }
+    return ret;
+}
+
 static int32_t OpenAuthToConnP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
 {
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     bool isMetaAuth = GetAuthType(request->peerNetworkId);
-    int32_t ret = GetPreferAuth(request->peerNetworkId, &connInfo, isMetaAuth);
+    int32_t ret = GetAuthConnInfo(request, laneReqId, &connInfo, isMetaAuth);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "no auth conn exist");
         return ret;
@@ -1590,7 +1629,7 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneRe
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     bool isMetaAuth = GetAuthType(request->peerNetworkId);
-    int32_t ret = GetPreferAuth(request->peerNetworkId, &connInfo, isMetaAuth);
+    int32_t ret = GetAuthConnInfo(request, laneReqId, &connInfo, isMetaAuth);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "no auth conn exist");
         return ret;
