@@ -405,9 +405,7 @@ static void ClearRecvFileList(FileListTask *fileList)
         free(blockFrame);
         blockFrame = NULL;
     }
-#ifndef MBEDTLS_INCLUDED
     ClearCryptCtx(fileList->cryptPara.ctx);
-#endif
     (void)memset_s(fileList, sizeof(FileListTask), 0, sizeof(FileListTask));
     free(fileList);
 }
