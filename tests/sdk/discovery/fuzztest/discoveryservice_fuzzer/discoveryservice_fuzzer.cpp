@@ -19,6 +19,10 @@
 #include <string>
 #include "discovery_service.h"
 
+#define MID_THRESHOLD (UINT8_MAX / FREQ_BUTT * 2)
+#define HIGH_THRESHOLD (UINT8_MAX / FREQ_BUTT * 3)
+#define SUPER_HIGH_THRESHOLD (UINT8_MAX / FREQ_BUTT * 4)
+
 namespace OHOS {
 static std::string TEST_PACKAGE_NAME = "TestPackageName";
 
@@ -69,13 +73,16 @@ static ExchangeFreq GenerateFreq(uint8_t data)
     if (data < UINT8_MAX / FREQ_BUTT) {
         return LOW;
     }
-    if (data < UINT8_MAX / FREQ_BUTT * 2) {
+    if (data < MID_THRESHOLD) {
         return MID;
     }
-    if (data < UINT8_MAX / FREQ_BUTT * 3) {
+    if (data < HIGH_THRESHOLD) {
         return HIGH;
     }
-    return SUPER_HIGH;
+    if (data < SUPER_HIGH_THRESHOLD) {
+        return SUPER_HIGH;
+    }
+    return EXTREME_HIGH;
 }
 
 static PublishInfo *GeneratePublishInfo(const uint8_t *data, size_t size)
