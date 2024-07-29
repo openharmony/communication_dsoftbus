@@ -257,6 +257,16 @@ void InnerLink::SetPtk(bool value)
     Set(InnerLinKey::HAS_PTK, value);
 }
 
+int32_t InnerLink::GetCustomPort() const
+{
+    return Get(InnerLinKey::CUSTOM_PORT, 0);
+}
+
+void InnerLink::SetCustomPort(int32_t value)
+{
+    Set(InnerLinKey::CUSTOM_PORT, value);
+}
+
 void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4)
 {
     link.linkId = LinkManager::GetInstance().AllocateLinkId();
@@ -289,6 +299,7 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, 
         CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy failed, link id=%{public}d", link.linkId);
         // fall-through
     }
+    link.remotePort = GetCustomPort();
 }
 
 void InnerLink::AddId(int linkId, uint32_t requestId, int pid)
@@ -353,6 +364,7 @@ void InnerLink::Dump() const
     object["LOCAL_PORT"] = GetLocalPort();
     object["LISTENER_MODULE_ID"] = GetListenerModule();
     object["NEGOTIATION_CHANNEL"] = channel_ != nullptr;
+    object["CUSTOM_PORT"] = GetCustomPort();
 
     auto linkIdArrayObject = nlohmann::json::array();
     for (const auto &[key, value] : linkIds_) {

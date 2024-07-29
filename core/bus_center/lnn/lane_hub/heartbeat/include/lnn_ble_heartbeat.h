@@ -30,7 +30,7 @@ int32_t LnnSendBroadcastInfoToLp(void);
 
 void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnBleHbUnregDataLevelChangeCb(void);
-
+void LnnAdjustScanPolicy(void);
 #ifdef __cplusplus
 }
 #endif

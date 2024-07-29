@@ -156,15 +156,5 @@ cJSON* cJSON_Parse(const char *value)
 {
     return GetTransTcpDirectMessageInterface()->cJSON_Parse(value);
 }
-
-static struct WifiDirectManager g_manager = {
-    .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
-    .getRemoteUuidByIp = GetRemoteUuidByIp,
-};
-
-struct WifiDirectManager* GetWifiDirectManager(void)
-{
-    return &g_manager;
-}
 }
 }
