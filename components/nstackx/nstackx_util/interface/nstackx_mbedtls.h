@@ -54,6 +54,8 @@ typedef struct {
     int cipherType;
 } CryptPara;
 
+typedef void MBEDTLS_CTX;
+
 NSTACKX_EXPORT uint32_t AesGcmEncrypt(const uint8_t *inBuff, uint32_t inLen, CryptPara *cryptPara,
     uint8_t *outBuff, uint32_t outLen);
 NSTACKX_EXPORT uint32_t AesGcmDecrypt(uint8_t *inBuff, uint32_t inLen, CryptPara *cryptPara,
@@ -61,6 +63,9 @@ NSTACKX_EXPORT uint32_t AesGcmDecrypt(uint8_t *inBuff, uint32_t inLen, CryptPara
 NSTACKX_EXPORT int32_t GetRandBytes(uint8_t *buf, uint32_t len);
 NSTACKX_EXPORT uint8_t IsCryptoIncluded(void);
 NSTACKX_EXPORT uint8_t QueryCipherSupportByName(char *name);
+NSTACKX_EXPORT MBEDTLS_CTX ClearCryptCtx(MBEDTLS_CTX *ctx);
+NSTACKX_EXPORT MBEDTLS_CTX *CreateCryptCtx(void);
+
 #endif
 
 #ifdef __cplusplus
