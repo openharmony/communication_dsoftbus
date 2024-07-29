@@ -61,6 +61,7 @@
 #define DEFAULT_DISC_FREQ_MID ((5 << 16) | 24)
 #define DEFAULT_DISC_FREQ_HIGH ((5 << 16) | 36)
 #define DEFAULT_DISC_FREQ_SUPER_HIGH ((10 << 16) | 48)
+#define DEFAULT_DISC_FREQ_EXTREME_HIGH ((10 << 16) | 48)
 #define DEFAULT_DISC_COAP_MAX_DEVICE_NUM 20
 
 #ifdef SOFTBUS_LINUX
@@ -179,6 +180,7 @@ static DiscConfigItem g_discConfig = {
         DEFAULT_DISC_FREQ_MID,
         DEFAULT_DISC_FREQ_HIGH,
         DEFAULT_DISC_FREQ_SUPER_HIGH,
+        DEFAULT_DISC_FREQ_EXTREME_HIGH,
     },
     .discCoapMaxDeviceNum = DEFAULT_DISC_COAP_MAX_DEVICE_NUM
 };
