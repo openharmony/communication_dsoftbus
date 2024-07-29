@@ -283,6 +283,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     appInfo->connectType = connOpt.type;
     extra.linkType = connOpt.type;
+    extra.deviceState = TransGetDeviceState(param->peerDeviceId);
     FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     TRANS_LOGI(TRANS_CTRL, "laneHandle=%{public}u, channelType=%{public}u", laneHandle, transInfo->channelType);
