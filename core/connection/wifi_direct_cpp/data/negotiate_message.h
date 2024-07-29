@@ -80,6 +80,8 @@ enum class NegotiateMessageType {
 
     CMD_V3_REQ = 100,
     CMD_V3_RSP = 101,
+    CMD_V3_CUSTOM_PORT_REQ = 102,
+    CMD_V3_CUSTOM_PORT_RSP = 103,
 };
 
 enum class NegotiateMessageKey {

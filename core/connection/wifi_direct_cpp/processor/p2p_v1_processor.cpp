@@ -94,12 +94,15 @@ P2pV1Processor::~P2pV1Processor()
     StopTimer();
     timer_.Shutdown();
     RemoveExclusive();
-    WifiDirectUtils::SerialFlowExit();
+    if (hasRun_) {
+        WifiDirectUtils::SerialFlowExit();
+    }
 }
 
 [[noreturn]] void P2pV1Processor::Run()
 {
     WifiDirectUtils::SerialFlowEnter();
+    hasRun_ = true;
     for (;;) {
         (this->*state_)();
     }

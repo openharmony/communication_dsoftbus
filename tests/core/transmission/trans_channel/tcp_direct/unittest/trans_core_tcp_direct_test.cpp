@@ -60,7 +60,6 @@ void TransCoreTcpDirectTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    TransChannelInit();
 }
 
 void TransCoreTcpDirectTest::TearDownTestCase(void)
@@ -70,7 +69,6 @@ void TransCoreTcpDirectTest::TearDownTestCase(void)
     AuthDeinit();
     TransServerDeinit();
     DiscEventManagerDeinit();
-    TransChannelDeinit();
 }
 
 SessionServer *TestSetPack()
