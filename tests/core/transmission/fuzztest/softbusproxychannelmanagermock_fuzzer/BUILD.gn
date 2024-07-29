@@ -16,32 +16,16 @@ import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
+import("../../trans_channel/proxy_channel/proxy_channel_unittest.gni")
 
 ##############################fuzztest##########################################
 
-ohos_fuzztest("SoftBusProxyChannelManagerFuzzTest") {
+ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
-  fuzz_config_file = "$dsoftbus_test_path/core/transmission/fuzztest/softbusproxychannelmanager_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/transmission/fuzztest/softbusproxychannelmanagermock_fuzzer"
 
-  include_dirs = [
-    "$dsoftbus_core_path/authentication/interface",
-
-    "$dsoftbus_core_path/bus_center/interface",
-    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
-
-    "$dsoftbus_core_path/common/include",
-
-    "$dsoftbus_core_path/connection/interface",
-
-    "$dsoftbus_core_path/transmission/common/include",
-    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
-    "$dsoftbus_core_path/transmission/trans_channel/proxy/include",
-    "$dsoftbus_core_path/transmission/trans_channel/qos/interface",
-
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/common",
-  ]
+  include_dirs = softbus_proxy_channel_manager_ut_include_dirs
 
   cflags = [
     "-g",
@@ -50,17 +34,21 @@ ohos_fuzztest("SoftBusProxyChannelManagerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "softbusproxychannelmanager_fuzzer.cpp" ]
+  sources = [ "softbusproxychannelmanagermock_fuzzer.cpp" ]
+  sources += softbus_proxy_channel_manager_ut_sources
 
   deps = [
-    "$dsoftbus_core_path/common:softbus_utils",
-    "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/googletest:gmock_rtti",
+    "//third_party/googletest:gtest_rtti",
   ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 
@@ -68,6 +56,6 @@ group("fuzztest") {
   testonly = true
   deps = [
     # deps file
-    ":SoftBusProxyChannelManagerFuzzTest",
+    ":SoftBusProxyChannelManagerMockFuzzTest",
   ]
 }
