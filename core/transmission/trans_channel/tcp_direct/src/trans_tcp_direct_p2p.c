@@ -933,12 +933,14 @@ static int32_t BuildSessionConn(const AppInfo *appInfo, SessionConn **conn)
     if (memcpy_s(&((*conn)->appInfo), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy appInfo fail");
         SoftBusFree(*conn);
+        *conn = NULL;
         return SOFTBUS_MEM_ERR;
     }
     ret = CopyAppInfoFastTransData(*conn, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
         SoftBusFree(*conn);
+        *conn = NULL;
         return ret;
     }
     return SOFTBUS_OK;

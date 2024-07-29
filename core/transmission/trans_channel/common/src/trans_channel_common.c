@@ -429,7 +429,7 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
                 break;
             case CHANNEL_TYPE_AUTH:
                 ret = TransCloseAuthChannel(channelId);
-                (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 break;
             default:
                 TRANS_LOGE(TRANS_CTRL, "Unknow channel type, type=%{public}d", channelType);
