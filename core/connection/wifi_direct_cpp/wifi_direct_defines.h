@@ -19,8 +19,6 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-#define IF_NAME_LEN 16
-#define IP_MASK_MAX 32
 #define MAC_ADDR_STR_LEN 32
 #define MAC_ADDR_ARRAY_SIZE 6
 #define GROUP_CONFIG_STR_LEN 256
