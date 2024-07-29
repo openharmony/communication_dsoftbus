@@ -173,6 +173,8 @@ if (defined(ohos_lite)) {
     external_deps = [ "bounds_checking_function:libsec_shared" ]
     if (is_standard_system) {
       external_deps += [ "c_utils:utils" ]
+    } else {
+      cflags += [ "-DMBEDTLS_INCLUDED" ]
     }
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
