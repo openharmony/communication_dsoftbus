@@ -1054,13 +1054,11 @@ int32_t SetCryptPara(FileListTask *fileList, const uint8_t key[], uint32_t keyLe
         return NSTACKX_EFAILED;
     }
     fileList->cryptPara.aadLen = aadLen;
-#ifndef MBEDTLS_INCLUDED
     fileList->cryptPara.ctx = CreateCryptCtx();
     if (fileList->cryptPara.ctx == NULL) {
         DFILE_LOGE(TAG, "failed to create crypt ctx");
         return NSTACKX_EFAILED;
     }
-#endif
     DFILE_LOGI(TAG, "set encrypt/decrypt type is %d", fileList->cryptPara.cipherType);
     return NSTACKX_EOK;
 }
