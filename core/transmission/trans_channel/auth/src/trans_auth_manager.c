@@ -532,7 +532,6 @@ static void ChannelReplyErrProc(TransEventExtra *extra, int32_t errorCode, AuthC
     FillExtraByAuthChannelErrorEnd(extra, info, errorCode);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, *extra);
     TransAuthCloseChannel(authId, info->appInfo.linkType, info->isClient);
-    (void)TransLaneMgrDelLane(info->appInfo.myData.channelId, CHANNEL_TYPE_AUTH);
     DelAuthChannelInfoByChanId((int32_t)(info->appInfo.myData.channelId));
     (void)NotifyOpenAuthChannelFailed((const char *)(info->appInfo.myData.pkgName),
         (int32_t)(info->appInfo.myData.pid), (int32_t)(info->appInfo.myData.channelId), errorCode);
@@ -871,7 +870,7 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isCl
         return NULL;
     }
     info->appInfo.myData.channelId = GenerateChannelId(true);
-    if (info->appInfo.myData.channelId < 0) {
+    if (info->appInfo.myData.channelId < INVALID_CHANNEL_ID) {
         TRANS_LOGE(TRANS_SVC, "channelId is invalid");
         goto EXIT_ERR;
     }

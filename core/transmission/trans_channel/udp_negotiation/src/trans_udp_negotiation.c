@@ -51,11 +51,6 @@
 #define ID_OFFSET (1)
 #define MAX_ERRDESC_LEN 128
 
-typedef struct {
-    AuthHandle authHandle;
-    AuthTransData authTransData;
-} TransUdpCbData;
-
 static int64_t g_seq = 0;
 static uint64_t g_channelIdFlagBitsMap = 0;
 static IServerChannelCallBack *g_channelCb = NULL;
@@ -1108,46 +1103,6 @@ int32_t TransCloseUdpChannel(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-static void *UdpModuleCbProc(void *args)
-{
-    TransUdpCbData *udpCbData = args;
-    cJSON *json = cJSON_ParseWithLength((char *)udpCbData->authTransData.data, udpCbData->authTransData.len);
-    if (json == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "cjson parse failed!");
-        SoftBusFree((void *)udpCbData->authTransData.data);
-        SoftBusFree(udpCbData);
-        return NULL;
-    }
-    TransOnExchangeUdpInfo(udpCbData->authHandle, udpCbData->authTransData.flag, udpCbData->authTransData.seq, json);
-    cJSON_Delete(json);
-
-    if (udpCbData->authTransData.flag) {
-        AuthCloseConn(udpCbData->authHandle);
-    }
-    SoftBusFree((void *)udpCbData->authTransData.data);
-    SoftBusFree(udpCbData);
-    return NULL;
-}
-
-static TransUdpCbData *CreateTransUdpCbData(AuthHandle *authHandle, const AuthTransData *data)
-{
-    TransUdpCbData *udpCbData = SoftBusCalloc(sizeof(AuthHandle));
-    uint8_t *tmpData = SoftBusCalloc(data->len);
-    udpCbData->authHandle.authId = authHandle->authId;
-    udpCbData->authHandle.type = authHandle->type;
-    udpCbData->authTransData.seq = data->seq;
-    udpCbData->authTransData.flag = data->flag;
-    udpCbData->authTransData.module = data->module;
-    udpCbData->authTransData.len = data->len;
-    int32_t ret = memcpy_s(tmpData, data->len, data->data, data->len);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "copy data failed, ret=%{public}d", ret);
-        return NULL;
-    }
-    udpCbData->authTransData.data = tmpData;
-    return udpCbData;
-}
-
 static void UdpModuleCb(AuthHandle authHandle, const AuthTransData *data)
 {
     if (data == NULL || data->data == NULL || data->len < 1) {
@@ -1161,21 +1116,16 @@ static void UdpModuleCb(AuthHandle authHandle, const AuthTransData *data)
     TRANS_LOGI(TRANS_CTRL,
         "udp module callback enter: module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u.",
         data->module, data->seq, data->len);
-
-    SoftBusThreadAttr threadAttr;
-    SoftBusThread tid;
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "thread attr init failed, ret=%{public}d", ret);
+    cJSON *json = cJSON_ParseWithLength((char *)data->data, data->len);
+    if (json == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "cjson parse failed!");
         return;
     }
-    threadAttr.detachState = SOFTBUS_THREAD_DETACH;
-    TransUdpCbData *args = CreateTransUdpCbData(&authHandle, data);
-    ret = SoftBusThreadCreate(&tid, &threadAttr, UdpModuleCbProc, args);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "udp module cb failed, ret=%{public}d", ret);
-        SoftBusFree((void *)args->authTransData.data);
-        SoftBusFree(args);
+    TransOnExchangeUdpInfo(authHandle, data->flag, data->seq, json);
+    cJSON_Delete(json);
+
+    if (data->flag) {
+        AuthCloseConn(authHandle);
     }
 }
 

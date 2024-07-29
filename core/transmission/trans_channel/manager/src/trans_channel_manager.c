@@ -215,15 +215,6 @@ static bool IsLaneModuleError(int32_t errcode)
     return false;
 }
 
-static void TransFreeLaneInner(uint32_t laneHandle, bool isQosLane)
-{
-    if (isQosLane) {
-        GetLaneManager()->lnnFreeLane(laneHandle);
-    } else {
-        LnnFreeLane(laneHandle);
-    }
-}
-
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     if (param == NULL || transInfo == NULL) {

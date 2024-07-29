@@ -106,7 +106,6 @@
         "BusCenterClientInit";
         "GetSoftBusClientNameList";
         "StartVtpStreamChannelServer";
-        "ClientGetSessionStateByChannelId";
         "ClientGetSessionIdByChannelId";
         "ClientTransTdcSetCallBack";
         "TransOnFileChannelOpened";
