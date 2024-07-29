@@ -273,6 +273,7 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/common/security/permission/include",
     "unittest/common/",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
   ]
 
   deps = [
