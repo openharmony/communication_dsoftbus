@@ -660,6 +660,7 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
     TRANS_LOGI(TRANS_CTRL, "receive request udp negotiation info.");
     AppInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+    info.myData.channelId = INVALID_CHANNEL_ID;
     char *errDesc = NULL;
 
     TransEventExtra extra;
