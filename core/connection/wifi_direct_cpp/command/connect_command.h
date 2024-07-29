@@ -16,6 +16,7 @@
 #define WIFI_DIRECT_CONNECT_COMMAND_H
 
 #include "wifi_direct_command.h"
+#include <functional>
 #include "wifi_direct_types.h"
 #include "channel/negotiate_channel.h"
 #include "data/wifi_config_info.h"
@@ -35,6 +36,9 @@ struct ConnectInfo {
 
 class ConnectCommand : public WifiDirectCommand {
 public:
+    using SuccessCallback = std::function<void(const WifiDirectLink &link)>;
+    using FailureCallback = std::function<void(int32_t reason)>;
+
     ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback);
 
     std::string GetRemoteDeviceId() const override;
@@ -46,19 +50,23 @@ public:
 
     ConnectInfo& GetConnectInfo();
     WifiDirectConnectCallback GetConnectCallback() const;
+    void SetSuccessCallback(const SuccessCallback &callback);
+    void SetFailureCallback(const FailureCallback &callback);
     virtual void PreferNegotiateChannel();
     void SetRetried(bool retried) { hasRetried_ = retried; }
     bool HasRetried() const { return hasRetried_; }
     void SetRetryReason(ConnectCommandRetryReason reason) { retryReason_ = reason; }
     ConnectCommandRetryReason GetReTryReason() const { return retryReason_; }
     void OnSuccess(const WifiDirectLink &link) const;
-    void OnFailure(int reason) const;
+    void OnFailure(int32_t reason) const;
     bool IsSameCommand(const WifiDirectConnectInfo &info) const;
     bool IsValid();
 
 protected:
     ConnectInfo info_;
     WifiDirectConnectCallback callback_;
+    SuccessCallback successCallback_;
+    FailureCallback failureCallback_;
     mutable std::string remoteDeviceId_;
     bool hasRetried_ = false;
     ConnectCommandRetryReason retryReason_ = ConnectCommandRetryReason::RETRY_FOR_NOTHING;

@@ -19,7 +19,7 @@ namespace OHOS::SoftBus {
 class WifiDirectEntity {
 public:
     virtual void DisconnectLink(const std::string &remoteMac) = 0;
-    virtual void DestoryGroupIfNeeded() = 0;
+    virtual void DestroyGroupIfNeeded() = 0;
 };
 }
 #endif

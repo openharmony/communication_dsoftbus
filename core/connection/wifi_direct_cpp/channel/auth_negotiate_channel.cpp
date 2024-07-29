@@ -144,9 +144,7 @@ NegotiateMessage AuthNegotiateChannel::SendMessageAndWaitResponse(const Negotiat
     CONN_LOGI(CONN_WIFI_DIRECT, "send detect link request success");
     {
         std::lock_guard lock(channelLock_);
-        if (promise_ == nullptr) {
-            promise_ = std::make_shared<std::promise<NegotiateMessage>>();
-        }
+        promise_ = std::make_shared<std::promise<NegotiateMessage>>();
         if (authIdToChannelMap_.empty()) {
             CONN_LOGI(CONN_WIFI_DIRECT, "setup timer");
             timer_.Setup();
@@ -157,9 +155,7 @@ NegotiateMessage AuthNegotiateChannel::SendMessageAndWaitResponse(const Negotiat
         authIdToChannelMap_[handle_.authId] = shared_from_this();
     }
 
-    auto response = promise_->get_future().get();
-    promise_ = nullptr;
-    return response;
+    return promise_->get_future().get();
 }
 
 void AuthNegotiateChannel::ProcessDetectLinkRequest(const std::shared_ptr<AuthNegotiateChannel> &channel)
@@ -203,8 +199,10 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     input.insert(input.end(), data->data, data->data + data->len);
     NegotiateMessage msg;
     msg.Unmarshalling(*protocol, input);
-    if (remoteDeviceId.empty()) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "use remote mac as device id");
+    bool sameAccount = msg.GetExtraData().empty() || msg.GetExtraData().front();
+    CONN_LOGI(CONN_WIFI_DIRECT, "sameAccount=%{public}d", sameAccount);
+    if (!WifiDirectUtils::IsDeviceOnline(WifiDirectUtils::UuidToNetworkId(remoteDeviceId)) || !sameAccount) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
         remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
     }
 
@@ -248,7 +246,7 @@ static void OnAuthDisconnected(AuthHandle authHandle)
         LinkManager::GetInstance().RemoveLink(type, remoteDeviceId);
         auto &entity = EntityFactory::GetInstance().GetEntity(type);
         entity.DisconnectLink(remoteMac);
-        entity.DestoryGroupIfNeeded();
+        entity.DestroyGroupIfNeeded();
     }
 }
 
