@@ -44,6 +44,8 @@ typedef enum {
 #define CHACHA20_KEY_LENGTH 32
 #define CHACHA20_POLY1305_NAME "MBEDTLS_POLY1305_C"
 
+typedef void MBEDTLS_CTX;
+
 typedef struct {
     uint8_t key[AES_256_KEY_LENGTH];
     uint32_t keylen;
@@ -52,9 +54,8 @@ typedef struct {
     uint8_t aad[GCM_MAX_AAD_LENGTH];
     uint32_t aadLen;
     int cipherType;
+    MBEDTLS_CTX *ctx;
 } CryptPara;
-
-typedef void MBEDTLS_CTX;
 
 NSTACKX_EXPORT uint32_t AesGcmEncrypt(const uint8_t *inBuff, uint32_t inLen, CryptPara *cryptPara,
     uint8_t *outBuff, uint32_t outLen);
