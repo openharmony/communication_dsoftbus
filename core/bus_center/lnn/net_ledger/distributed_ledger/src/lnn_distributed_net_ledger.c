@@ -726,21 +726,26 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL && strcmp(oldInfo->networkId, info->networkId) == 0) {
-        MetaInfo temp = info->metaInfo;
         LNN_LOGI(LNN_LEDGER, "old capa=%{public}u new capa=%{public}u", oldInfo->netCapacity, info->netCapacity);
         oldInfo->connectInfo.sessionPort = info->connectInfo.sessionPort;
         oldInfo->connectInfo.authPort = info->connectInfo.authPort;
         oldInfo->connectInfo.proxyPort = info->connectInfo.proxyPort;
         oldInfo->netCapacity = info->netCapacity;
-        if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "LnnAddMetaInfo copy fail!");
-            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-            return SOFTBUS_MEM_ERR;
-        }
         if (strcpy_s(oldInfo->connectInfo.deviceIp, IP_LEN, info->connectInfo.deviceIp) != EOK) {
             LNN_LOGE(LNN_LEDGER, "strcpy ip fail!");
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
             return SOFTBUS_STRCPY_ERR;
+        }
+        if (strcpy_s(oldInfo->uuid, UUID_BUF_LEN, info->uuid) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy uuid fail!");
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_STRCPY_ERR;
+        }
+        MetaInfo temp = info->metaInfo;
+        if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "LnnAddMetaInfo copy fail!");
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_MEM_ERR;
         }
         info->metaInfo.isMetaNode = true;
         info->metaInfo.metaDiscType = info->metaInfo.metaDiscType | temp.metaDiscType;
@@ -779,6 +784,7 @@ int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type)
         info->metaInfo.isMetaNode = false;
     }
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
+    (void)memset_s(info->remoteMetaPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);
@@ -1076,6 +1082,32 @@ static void TryUpdateDeviceSecurityLevel(NodeInfo *info)
     }
 }
 
+static void ReversionLastAuthSeq(NodeInfo *info)
+{
+    NodeInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    if (SoftBusGenerateStrHash((const unsigned char *)info->deviceInfo.deviceUdid,
+        strlen(info->deviceInfo.deviceUdid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate udidhash fail");
+        return;
+    }
+    if (ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1, udidHash,
+        SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert udidhash to hexstr fail");
+        return;
+    }
+    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get deviceInfo by udidhash fail");
+        return;
+    }
+    if (info->lastAuthSeq == 0 && deviceInfo.lastAuthSeq != 0) {
+        info->lastAuthSeq = deviceInfo.lastAuthSeq;
+        LNN_LOGI(LNN_LEDGER, "reversion lastAuthSeq:0->%{public}" PRId64, info->lastAuthSeq);
+    }
+}
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     if (info == NULL) {
@@ -1083,7 +1115,6 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     }
     // judge map
     info->onlinetTimestamp = (uint64_t)LnnUpTimeMs();
-
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
         AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR, info->authSeqNum);
@@ -1102,6 +1133,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     UpdateNewNodeAccountHash(info);
     TryUpdateDeviceSecurityLevel(info);
+    ReversionLastAuthSeq(info);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);

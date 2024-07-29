@@ -44,6 +44,8 @@ int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
 
 int32_t LaneCapCheck(const char *networkId, LaneLinkType linkType);
 
+int32_t GetErrCodeOfLink(const char *networkId, LaneLinkType linkType);
+
 #ifdef __cplusplus
 }
 #endif

@@ -346,6 +346,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest13, TestSize.Level1)
     TransSessionMgrDeinit();
     TransOnLinkDown(g_networkid, NULL, NULL, NULL, WIFI_P2P);
 }
+
 /**
  * @tc.name: TransSessionManagerTest14
  * @tc.desc: Transmission session manager onLink down with wrong parameters.

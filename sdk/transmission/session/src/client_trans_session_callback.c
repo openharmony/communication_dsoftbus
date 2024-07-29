@@ -142,6 +142,16 @@ NO_SANITIZE("cfi")
 static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socketCallback, int32_t errCode)
 {
     (void)ClientHandleBindWaitTimer(sessionId, 0, TIMER_ACTION_STOP);
+    bool isAsync = true;
+    int32_t ret = ClientGetSessionIsAsyncBySessionId(sessionId, &isAsync);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get is async type failed, sessionId=%{public}d, ret=%{public}d", sessionId, ret);
+        return ret;
+    }
+    if (!isAsync) {
+        (void)ClientSignalSyncBind(sessionId, errCode);
+        return SOFTBUS_OK;
+    }
     if (socketCallback == NULL || socketCallback->OnError == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid OnBind callback function");
         return SOFTBUS_INVALID_PARAM;
@@ -149,7 +159,7 @@ static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socke
 
     SocketLifecycleData lifecycle;
     (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
-    int32_t ret = GetSocketLifecycleAndSessionNameBySessionId(sessionId, NULL, &lifecycle);
+    ret = GetSocketLifecycleAndSessionNameBySessionId(sessionId, NULL, &lifecycle);
     (void)SetSessionStateBySessionId(sessionId, SESSION_STATE_INIT, 0);
     if (ret == SOFTBUS_OK && lifecycle.sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGW(TRANS_SDK, "socket is cancelling, no need call back, socket=%{public}d, bindErrCode=%{public}d",
@@ -341,9 +351,9 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     if (channelType == CHANNEL_TYPE_UNDEFINED) {
+        sessionId = channelId;
         (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
         // only client async bind failed call
-        sessionId = channelId;
         bool tmpIsServer = false;
         ClientGetSessionCallbackAdapterById(sessionId, &sessionCallback, &tmpIsServer);
         (void)TransOnBindFailed(sessionId, &sessionCallback.socketClient, errCode);

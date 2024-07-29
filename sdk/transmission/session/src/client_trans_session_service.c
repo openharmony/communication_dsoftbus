@@ -462,7 +462,7 @@ void NotifyAuthSuccess(int sessionId)
 static int32_t CheckSessionIsOpened(int32_t sessionId, bool isCancelCheck)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
-#define SESSION_STATUS_CANCEL_CHECK_MAX_NUM 10
+#define SESSION_STATUS_CANCEL_CHECK_MAX_NUM 5
 #define SESSION_CHECK_PERIOD 200000
     int32_t checkMaxNum = isCancelCheck ? SESSION_STATUS_CANCEL_CHECK_MAX_NUM : SESSION_STATUS_CHECK_MAX_NUM;
     int32_t i = 0;
@@ -1097,13 +1097,9 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "open session failed, ret=%{public}d", ret);
 
     if (!isAsync) {
-        ret = ClientSetChannelBySessionId(socket, &transInfo);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(
-            ret == SOFTBUS_OK, ret, TRANS_SDK, "set channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
         ret = CheckSessionCancelState(socket);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
             ret == SOFTBUS_OK, ret, TRANS_SDK, "check session cancel state failed, ret=%{public}d", ret);
-        SetSessionStateBySessionId(socket, SESSION_STATE_OPENED, 0);
         ret = ClientWaitSyncBind(socket);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
             ret == SOFTBUS_OK, ret, TRANS_SDK, "ClientWaitSyncBind err, ret=%{public}d", ret);
@@ -1111,6 +1107,7 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
     if (!isAsync) {
+        (void)ClientGetChannelBySessionId(socket, &(transInfo.channelId), &(transInfo.channelType), NULL);
         TRANS_LOGI(TRANS_SDK, "Bind ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d", socket,
             transInfo.channelId, transInfo.channelType);
     } else {
@@ -1175,6 +1172,10 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         int32_t ret = ServerIpcCloseChannel(sessioName, socket, CHANNEL_TYPE_UNDEFINED);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "Call sa delete socket failed: ret=%{public}d", ret);
+        }
+        ret = ClientSignalSyncBind(socket, 0);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "sync signal bind failed, ret=%{public}d, socket=%{public}d", ret, socket);
         }
     } else if (lifecycle.sessionState == SESSION_STATE_OPENED ||
         lifecycle.sessionState == SESSION_STATE_CALLBACK_FINISHED) {

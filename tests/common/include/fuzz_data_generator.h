@@ -45,7 +45,7 @@ private:
 };
 
 template <typename T>
-bool GenerateFromList(T &value, const std::vector<T> &candidateValues)
+inline bool GenerateFromList(T &value, const std::vector<T> &candidateValues)
 {
     if (candidateValues.empty()) {
         return false;
@@ -58,67 +58,67 @@ bool GenerateFromList(T &value, const std::vector<T> &candidateValues)
     return true;
 }
 
-bool GenerateBool(bool &value)
+inline bool GenerateBool(bool &value)
 {
     return DataGenerator::GetInstance().ReadBool(value);
 }
 
-bool GenerateInt8(int8_t &value)
+inline bool GenerateInt8(int8_t &value)
 {
     return DataGenerator::GetInstance().ReadInt8(value);
 }
 
-bool GenerateInt16(int16_t &value)
+inline bool GenerateInt16(int16_t &value)
 {
     return DataGenerator::GetInstance().ReadInt16(value);
 }
 
-bool GenerateInt32(int32_t &value)
+inline bool GenerateInt32(int32_t &value)
 {
     return DataGenerator::GetInstance().ReadInt32(value);
 }
 
-bool GenerateInt64(int64_t &value)
+inline bool GenerateInt64(int64_t &value)
 {
     return DataGenerator::GetInstance().ReadInt64(value);
 }
 
-bool GenerateUint8(uint8_t &value)
+inline bool GenerateUint8(uint8_t &value)
 {
     return DataGenerator::GetInstance().ReadUint8(value);
 }
 
-bool GenerateUint16(uint16_t &value)
+inline bool GenerateUint16(uint16_t &value)
 {
     return DataGenerator::GetInstance().ReadUint16(value);
 }
 
-bool GenerateUint32(uint32_t &value)
+inline bool GenerateUint32(uint32_t &value)
 {
     return DataGenerator::GetInstance().ReadUint32(value);
 }
 
-bool GenerateUint64(uint64_t &value)
+inline bool GenerateUint64(uint64_t &value)
 {
     return DataGenerator::GetInstance().ReadUint64(value);
 }
 
-bool GenerateFloat(float &value)
+inline bool GenerateFloat(float &value)
 {
     return DataGenerator::GetInstance().ReadFloat(value);
 }
 
-bool GenerateDouble(double &value)
+inline bool GenerateDouble(double &value)
 {
     return DataGenerator::GetInstance().ReadDouble(value);
 }
 
-bool GenerateString(std::string &value)
+inline bool GenerateString(std::string &value)
 {
     return DataGenerator::GetInstance().ReadString(value);
 }
 
-bool GeneratePayload(std::vector<uint8_t> &payload, const std::vector<uint8_t> &prefix = {})
+inline bool GeneratePayload(std::vector<uint8_t> &payload, const std::vector<uint8_t> &prefix = {})
 {
     uint8_t len = 0;
     if (!DataGenerator::GetInstance().ReadUint8(len)) {

@@ -230,7 +230,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeErrMsgTest001, TestS
 
     int32_t errCode = SOFTBUS_OK;
     ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
     cJSON_free(msg);
 }
 

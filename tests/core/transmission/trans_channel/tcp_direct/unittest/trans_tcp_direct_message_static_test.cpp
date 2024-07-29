@@ -65,7 +65,6 @@ void TransTcpDirectMessageStaticTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    TransChannelInit();
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTdcSetCallBack(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -78,7 +77,6 @@ void TransTcpDirectMessageStaticTest::TearDownTestCase(void)
     AuthDeinit();
     TransServerDeinit();
     DiscEventManagerDeinit();
-    TransChannelDeinit();
 }
 
 SessionConn *TestSetSessionConn()
@@ -128,7 +126,7 @@ AppInfo *TestSetAppInfo()
 HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, TestSize.Level1)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (conn == NULL) {
+    if (conn == nullptr) {
         return;
     }
 
@@ -180,7 +178,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtData0003, TestSize.Le
 {
     int32_t ret;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (conn == NULL) {
+    if (conn == nullptr) {
         return;
     }
 

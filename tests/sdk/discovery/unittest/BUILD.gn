@@ -134,10 +134,34 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("DiscSdkManagerTest") {
+    module_out_path = module_output_path
+    sources = [ "disc_sdk_manager_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "$dsoftbus_root_path/sdk/discovery/ipc/include",
+      "$dsoftbus_root_path/sdk/discovery/ipc/standard/include",
+      "$dsoftbus_root_path/sdk/discovery/manager/include",
+      "$dsoftbus_root_path/tests/sdk/common/include",
+    ]
+    deps = [
+      "$dsoftbus_root_path/sdk:softbus_client",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
+    external_deps = [
+      "c_utils:utils",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+
   group("unittest") {
     testonly = true
     deps = [
       ":DiscSdkAutoTest",
+      ":DiscSdkManagerTest",
       ":DiscSdkOnlyL2Test",
       ":DiscSdkTest",
     ]

@@ -30,6 +30,7 @@
 #include "i_stream_socket.h"
 #include "stream_common.h"
 #include "vtp_instance.h"
+#include "vtp_stream_opt.h"
 
 namespace Communication {
 namespace SoftBus {
@@ -65,6 +66,7 @@ public:
     bool Send(std::unique_ptr<IStream> stream) override;
 
     bool SetOption(int type, const StreamAttr &value) override;
+    int32_t SetMultiLayer(const void *para) override;
     StreamAttr GetOption(int type) const override;
 
     bool SetStreamListener(std::shared_ptr<IStreamSocketListener> receiver) override;
@@ -106,7 +108,7 @@ private:
     bool ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer, int32_t &dataLength,
         std::unique_ptr<char[]> &extBuffer, int32_t &extLen, StreamFrameInfo &info);
     void InsertElementToFuncMap(int type, ValueType valueType, MySetFunc set, MyGetFunc get);
-    int CreateAndBindSocket(IpAndPort &local) override;
+    int CreateAndBindSocket(IpAndPort &local, bool isServer) override;
     bool Accept() override;
 
     int EpollTimeout(int fd, int timeout) override;
@@ -184,6 +186,10 @@ private:
 
     static int HandleRipplePolicy(int fd, const FtEventCbkInfo *info);
 
+    static int HandleFillpFrameEvt(int fd, const FtEventCbkInfo *info);
+
+    int HandleFillpFrameEvtInner(int fd, const FtEventCbkInfo *info);
+
     static int FillpStatistics(int fd, const FtEventCbkInfo *info);
 
     void FillpAppStatistics();
@@ -206,6 +212,7 @@ private:
     int scene_ = UNKNOWN_SCENE;
     int streamHdrSize_ = 0;
     bool isDestroyed_ = false;
+    OnFrameEvt onStreamEvtCb_;
 };
 } // namespace SoftBus
 } // namespace Communication
