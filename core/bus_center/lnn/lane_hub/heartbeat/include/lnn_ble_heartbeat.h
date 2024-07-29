@@ -29,7 +29,7 @@ int32_t HbGenerateBitPosition(int32_t min, int32_t max, int64_t seed, int32_t *r
 
 void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnBleHbUnregDataLevelChangeCb(void);
-
+void LnnAdjustScanPolicy(void);
 #ifdef __cplusplus
 }
 #endif
