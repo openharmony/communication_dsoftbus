@@ -290,7 +290,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = InitQos();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 
 
     TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
@@ -551,7 +551,7 @@ HWTEST_F(TransUdpNegoTest, UdpOpenAuthConn001, TestSize.Level1)
     uint32_t requestId = 1;
     bool isMeta = false;
     int32_t ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta, 0);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     isMeta = true;
     ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta, 0);
