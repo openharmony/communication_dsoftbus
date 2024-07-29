@@ -172,8 +172,7 @@ static bool CheckCollaborationSessionName(const char *sessionName)
     return false;
 }
 
-static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, const char *data, uint32_t len,
-    int32_t flags)
+static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char *data, uint32_t len, int32_t flags)
 {
     uint32_t outLen = 0;
     char *buf = TransTdcPackData(channel, data, len, flags, &outLen);
@@ -198,14 +197,7 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
         SoftBusFree(buf);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
-    TcpDirectChannelInfo info;
-    (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    if (TransTdcGetInfoById(channel->channelId, &info) == NULL) {
-        TRANS_LOGE(TRANS_SDK, "get channel fd lock fail. channelId=%{public}d", channel->channelId);
-        SoftBusFree(buf);
-        return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
-    }
-    if (SoftBusMutexLock(&(info.detail.fdLock)) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&(channel->detail.fdLock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "failed to lock fd. channelId=%{public}d", channel->channelId);
         SoftBusFree(buf);
         return SOFTBUS_LOCK_ERR;
@@ -214,10 +206,10 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
     if (ret != (ssize_t)outLen + DC_DATA_HEAD_SIZE) {
         TRANS_LOGE(TRANS_SDK, "failed to send tcp data. ret=%{public}zd", ret);
         SoftBusFree(buf);
-        (void)SoftBusMutexUnlock(&(info.detail.fdLock));
+        (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
         return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
-    (void)SoftBusMutexUnlock(&(info.detail.fdLock));
+    (void)SoftBusMutexUnlock(&(channel->detail.fdLock));
     SoftBusFree(buf);
     buf = NULL;
     return SOFTBUS_OK;
@@ -274,7 +266,7 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
     return ProcPendingPacket(channelId, sequence, PENDING_TYPE_DIRECT);
 }
 
-static int32_t TransTdcSendAck(const TcpDirectChannelInfo *channel, int32_t seq)
+static int32_t TransTdcSendAck(TcpDirectChannelInfo *channel, int32_t seq)
 {
     if (channel == NULL) {
         TRANS_LOGE(TRANS_SDK, "channel is null.");
@@ -400,8 +392,8 @@ static ClientDataBuf *TransGetDataBufNodeById(int32_t channelId)
     return NULL;
 }
 
-static int32_t TransTdcProcessDataByFlag(uint32_t flag, int32_t seqNum, const TcpDirectChannelInfo *channel,
-    const char *plain, uint32_t plainLen)
+static int32_t TransTdcProcessDataByFlag(
+    uint32_t flag, int32_t seqNum, TcpDirectChannelInfo *channel, const char *plain, uint32_t plainLen)
 {
     switch (flag) {
         case FLAG_BYTES:
