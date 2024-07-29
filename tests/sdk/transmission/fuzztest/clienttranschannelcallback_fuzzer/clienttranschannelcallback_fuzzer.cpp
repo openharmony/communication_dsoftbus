@@ -33,6 +33,35 @@
 #include "softbus_utils.h"
 
 namespace OHOS {
+class TestEnv {
+public:
+    TestEnv()
+    {
+        isInited_ = false;
+        IClientSessionCallBack *cb = GetClientSessionCb();
+        TransTdcManagerInit(cb);
+        ClientTransAuthInit(cb);
+        ClientTransProxyInit(cb);
+        ClientTransUdpMgrInit(cb);
+        isInited_ = true;
+    }
+
+    ~TestEnv()
+    {
+        isInited_ = false;
+        TransTdcManagerDeinit();
+        ClientTransUdpMgrDeinit();
+        ClientTransProxyDeinit();
+    }
+
+    bool IsInited(void)
+    {
+        return isInited_;
+    }
+private:
+    volatile bool isInited_;
+};
+
 void ClientTransChannelCallbackTest(const uint8_t *data, size_t size)
 {
 #define TEST_DATA_LENGTH 1024
@@ -80,6 +109,10 @@ void ClientTransChannelCallbackTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
+    static OHOS::TestEnv env;
+    if (!env.IsInited()) {
+        return 0;
+    }
     OHOS::ClientTransChannelCallbackTest(data, size);
     return 0;
 }

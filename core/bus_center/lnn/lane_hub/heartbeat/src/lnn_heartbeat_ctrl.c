@@ -593,6 +593,10 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
                 LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
                     HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
             }
+            if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON &&
+                g_hbConditionState.accountState != SOFTBUS_ACCOUNT_LOG_IN) {
+                HbConditionChanged(false);
+            }
             break;
         case SOFTBUS_SCREEN_LOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_LOCK");

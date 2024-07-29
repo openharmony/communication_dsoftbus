@@ -29,6 +29,29 @@ namespace OHOS {
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 
+class TestEnv {
+public:
+    TestEnv()
+    {
+        isInited_ = false;
+        ClientTransChannelInit();
+        isInited_ = true;
+    }
+
+    ~TestEnv()
+    {
+        isInited_ = false;
+        ClientTransChannelDeinit();
+    }
+
+    bool IsInited(void)
+    {
+        return isInited_;
+    }
+private:
+    volatile bool isInited_;
+};
+
 enum SoftBusFuncId {
     CLIENT_ON_CHANNEL_OPENED = 256,
     CLIENT_ON_CHANNEL_OPENFAILED,
@@ -47,6 +70,7 @@ enum SoftBusFuncId {
     CLIENT_ON_JOIN_METANODE_RESULT,
     CLIENT_ON_LEAVE_RESULT,
     CLIENT_ON_LEAVE_METANODE_RESULT,
+    CLIENT_ON_NODE_DEVICE_NOT_TRUST,
     CLIENT_ON_NODE_ONLINE_STATE_CHANGED,
     CLIENT_ON_NODE_BASIC_INFO_CHANGED,
     CLIENT_ON_LOCAL_NETWORK_ID_CHANGED,
@@ -359,6 +383,22 @@ bool OnLeaveMetaNodeResultInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
+bool OnNodeDeviceNotTrustedInnerTest(const uint8_t* data, size_t size)
+{
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteBuffer(data, size);
+    datas.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_NODE_DEVICE_NOT_TRUST, datas, reply, option);
+    return true;
+}
+
 bool OnNodeOnlineStateChangedInnerTest(const uint8_t* data, size_t size)
 {
     constexpr uint32_t infoTypeLen = 10;
@@ -618,7 +658,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    ClientTransChannelInit();
+    static OHOS::TestEnv env;
+    if (!env.IsInited()) {
+        return 0;
+    }
     OHOS::OnChannelOpenedInnerTest(dataWithEndCharacter, size);
     OHOS::OnChannelOpenFailedInnerTest(data, size);
     OHOS::OnChannelLinkDownInnerTest(dataWithEndCharacter, size);
@@ -644,7 +687,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::OnClientTransLimitChangeInnerTest(data, size);
     OHOS::SetChannelInfoInnerTest(dataWithEndCharacter, size);
     OHOS::OnChannelBindInnerTest(data, size);
-    ClientTransChannelDeinit();
 
     SoftBusFree(dataWithEndCharacter);
     return 0;

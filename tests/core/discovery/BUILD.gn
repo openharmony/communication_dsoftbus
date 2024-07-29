@@ -45,6 +45,7 @@ group("unittest") {
     deps += [
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/connection:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/discovery:unittest",
+      "$dsoftbus_root_path/tests/core/broadcast:unittest",
     ]
   }
 }

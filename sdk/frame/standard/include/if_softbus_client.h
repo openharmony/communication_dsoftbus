@@ -69,6 +69,8 @@ public:
 
     virtual int32_t OnLocalNetworkIdChanged(const char *pkgName);
 
+    virtual int32_t OnNodeDeviceNotTrusted(const char *pkgName, const char *msg);
+
     virtual int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode);
 
     virtual void OnPublishLNNResult(int32_t publishId, int32_t reason);

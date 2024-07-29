@@ -28,8 +28,8 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
   "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/share_ble/include",
-  "$dsoftbus_root_path/core/discovery/ble/touch_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
+  "$dsoftbus_root_path/core/discovery/ble/touch_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/include",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
@@ -58,6 +58,8 @@ if (dsoftbus_feature_disc_ble && disc_enhanced) {
   ble_discovery_src += vlink_sources
   ble_discovery_inc += vlink_include_dirs
   ble_discovery_deps += vlink_deps
+} else {
+  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c" ]
 }
 
 if (disc_enhanced) {
@@ -68,14 +70,14 @@ if (disc_enhanced) {
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/touch_ble/touch_ble.gni")
 
-  ble_discovery_src += share_sources + approach_sources + vlink_sources + touch_sources
-  ble_discovery_inc += share_include_dirs + approach_include_dirs + vlink_include_dirs + touch_include_dirs
-  ble_discovery_deps += share_deps + approach_deps + vlink_deps + touch_deps
+  ble_discovery_src += share_sources + approach_sources + touch_sources
+  ble_discovery_inc +=
+      share_include_dirs + approach_include_dirs + touch_include_dirs
+  ble_discovery_deps += share_deps + approach_deps + touch_deps
 } else {
   ble_discovery_src += [
     "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c",
     "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
-    "$dsoftbus_root_path/core/discovery/ble/touch_ble/src/touch_ble_virtual.c",
-    "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c",
+    "$dsoftbus_root_path/core/discovery/ble/touch_ble/src/disc_touch_ble_virtual.c",
   ]
 }

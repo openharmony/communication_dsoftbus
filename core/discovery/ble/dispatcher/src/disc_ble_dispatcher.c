@@ -24,7 +24,7 @@
 #include "disc_virtual_link_ble.h"
 #include "softbus_errcode.h"
 
-#define DISPATCHER_SIZE 4
+#define DISPATCHER_SIZE 5
 
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;
@@ -45,7 +45,7 @@ static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
 static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE,
@@ -68,7 +68,7 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
         case UNPUBLISH_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->Unpublish(option) : interface->StopScan(option);
         default:
-            DISC_LOGW(DISC_BLE,
+            DISC_LOGE(DISC_BLE,
                 "dispatch publish action failed: unsupport type. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL;
@@ -78,7 +78,7 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
 static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE, "dispatch subcribe action failed: no implement support capability. capability=%{public}u",
@@ -100,7 +100,7 @@ static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, Discove
         case STOPDISCOVERY_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->StopAdvertise(option) : interface->Unsubscribe(option);
         default:
-            DISC_LOGW(DISC_BLE, "dispatch subcribe action failed: unsupport. type=%{public}d, capability=%{public}u",
+            DISC_LOGE(DISC_BLE, "dispatch subcribe action failed: unsupport. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL;
     }
@@ -193,11 +193,24 @@ static void DfxRecordBleInitEnd(int32_t stage, int32_t reason)
     }
 }
 
+static int32_t DiscBleInitExt(DiscInnerCallback *discInnerCb)
+{
+    DiscoveryBleDispatcherInterface *touchInterface = DiscTouchBleInit(discInnerCb);
+    if (touchInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
+        DISC_LOGE(DISC_INIT, "DiscTouchBleInit err");
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
+    g_dispatchers[g_dispatcherSize++] = touchInterface;
+    DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_OK);
+    return SOFTBUS_OK;
+}
+
 DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
     if (discInnerCb == NULL) {
         DfxRecordBleInitEnd(EVENT_STAGE_INIT, SOFTBUS_INVALID_PARAM);
-        DISC_LOGW(DISC_INIT, "discInnerCb err");
+        DISC_LOGE(DISC_INIT, "discInnerCb err");
         return NULL;
     }
     DISC_LOGI(DISC_INIT, "DiscBleFrameInit");
@@ -238,14 +251,8 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     g_dispatchers[g_dispatcherSize++] = vlinkInterface;
     DfxRecordBleInitEnd(EVENT_STAGE_VLINK_BLE_INIT, SOFTBUS_OK);
 
-    DiscoveryBleDispatcherInterface *touchInterface = DiscTouchBleInit(discInnerCb);
-    if (vlinkInterface == NULL) {
-        DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
-        DISC_LOGE(DISC_INIT, "DiscTouchBleInit err");
-        return NULL;
-    }
-    g_dispatchers[g_dispatcherSize++] = touchInterface;
-    DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_OK);
+    DISC_CHECK_AND_RETURN_RET_LOGE(DiscBleInitExt(discInnerCb) == SOFTBUS_OK,
+        NULL, DISC_INIT, "disc ble init ext failed");
 
     DfxRecordBleInitEnd(EVENT_STAGE_INIT, SOFTBUS_OK);
     return &g_discBleFrameFuncInterface;

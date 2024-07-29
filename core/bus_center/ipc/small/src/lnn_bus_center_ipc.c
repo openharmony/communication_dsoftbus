@@ -436,6 +436,12 @@ int32_t LnnIpcLocalNetworkIdChanged(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnIpcNotifyDeviceNotTrusted(const char *msg)
+{
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
 int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
     uint32_t infoTypeLen, int32_t retCode)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,6 +75,7 @@ public:
     virtual bool Send(std::unique_ptr<IStream> stream) = 0;
 
     virtual bool SetOption(int type, const StreamAttr &value) = 0;
+    virtual int32_t SetMultiLayer(const void *para) = 0;
     virtual StreamAttr GetOption(int type) const = 0;
 
     virtual bool SetStreamListener(std::shared_ptr<IStreamSocketListener> receiver) = 0;
@@ -90,7 +91,7 @@ protected:
     static constexpr int DEFAULT_UDP_BUFFER_RCV_SIZE = 1024 * 1024;
     static constexpr int STREAM_BUFFER_THRESHOLD = 5;
 
-    virtual int CreateAndBindSocket(IpAndPort &local) = 0;
+    virtual int CreateAndBindSocket(IpAndPort &local, bool isServer) = 0;
     virtual bool Accept() = 0;
 
     virtual int EpollTimeout(int fd, int timeout) = 0;

@@ -142,8 +142,6 @@ typedef struct {
     uint32_t discoveryType;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
-    int64_t authSeqNum;
-    int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
     BssTransInfo bssTransInfo;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     P2pInfo p2pInfo;
@@ -181,8 +179,11 @@ typedef struct {
     uint8_t staticCapability[STATIC_CAP_LEN];
     int32_t staticCapLen;
     char remotePtk[PTK_DEFAULT_LEN];
+    char remoteMetaPtk[PTK_DEFAULT_LEN];
     int32_t deviceSecurityLevel;
     uint8_t relation[CONNECTION_ADDR_MAX];
+    int64_t authSeqNum;
+    int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
     uint64_t heartbeatTimestamp;
     uint64_t bleDirectTimestamp;
     uint64_t onlinetTimestamp;
@@ -190,6 +191,7 @@ typedef struct {
     bool isAuthExchangeUdid;
     bool isSupportIpv6;
     uint32_t stateVersionReason;
+    int64_t lastAuthSeq;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
