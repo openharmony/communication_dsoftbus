@@ -1613,7 +1613,7 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
 
 int P2pV1Processor::DestroyGroup()
 {
-    P2pAdapter::DestroyGroupParam param { P2P_IF_NAME };
+    P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
     auto result = P2pEntity::GetInstance().DestroyGroup(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
         "copy interface failed, error=%{public}d", result.errorCode_);
@@ -1705,7 +1705,7 @@ int P2pV1Processor::StartAuthListening(const std::string &localIp)
     CONN_CHECK_AND_RETURN_RET_LOGW(pair.first > 0, pair.first, CONN_WIFI_DIRECT, "start listen failed");
     ret = InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [&pair](InterfaceInfo &interface) {
         interface.SetP2pListenPort(pair.first);
-        interface.SeP2ptListenModule(pair.second);
+        interface.SetP2ptListenModule(pair.second);
         return SOFTBUS_OK;
     });
     if (ret != SOFTBUS_OK) {

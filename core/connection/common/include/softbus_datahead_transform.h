@@ -37,4 +37,4 @@ void PackProxyMessageHead(ProxyMessageHead *msg);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif /* SOFTBUS_DATAHEAD_CONVER_H */
+#endif /* SOFTBUS_DATAHEAD_TRANSFORM_H */
