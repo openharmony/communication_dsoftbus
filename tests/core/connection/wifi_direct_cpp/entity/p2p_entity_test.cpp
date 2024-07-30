@@ -107,6 +107,8 @@ HWTEST_F(P2pEntityTest, CreateGroupTest003, TestSize.Level1)
         return SOFTBUS_OK;
     });
     std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> destroyGroupParam;
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     int result = P2pCreateGroupState::Instance()->RemoveLink(destroyGroupParam);
     EXPECT_EQ(result, SOFTBUS_CONN_NOT_SUPPORT_FAILED);
 
@@ -181,6 +183,8 @@ HWTEST_F(P2pEntityTest, ConnectTest003, TestSize.Level1)
         return SOFTBUS_OK;
     });
     std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> destroyGroupParam;
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     int result = P2pConnectState::Instance()->RemoveLink(destroyGroupParam);
     EXPECT_EQ(result, SOFTBUS_CONN_NOT_SUPPORT_FAILED);
 
@@ -286,6 +290,8 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest003, TestSize.Level1)
         return SOFTBUS_OK;
     });
     std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> destroyGroupParam;
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     int result = P2pDestroyGroupState::Instance()->RemoveLink(destroyGroupParam);
     EXPECT_EQ(result, SOFTBUS_CONN_NOT_SUPPORT_FAILED);
 
