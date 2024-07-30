@@ -407,7 +407,7 @@ int32_t WifiDirectUtils::IpStringToIntArray(const char *addrString, uint32_t *ad
 std::string WifiDirectUtils::ChannelListToString(const std::vector<int> &channels)
 {
     std::string stringChannels;
-    for (auto i = 0; i < channels.size(); i++) {
+    for (size_t i = 0; i < channels.size(); i++) {
         if (i != 0) {
             stringChannels += "##";
         }
