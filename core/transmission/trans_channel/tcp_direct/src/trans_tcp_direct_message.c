@@ -38,6 +38,7 @@
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "trans_channel_common.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
@@ -474,6 +475,7 @@ int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t er
         .peerDevVer = conn->appInfo.peerVersion,
         .result = EVENT_STAGE_RESULT_FAILED
     };
+    extra.deviceState = TransGetDeviceState(conn->appInfo.peerNetWorkId);
     int32_t sceneCommand = conn->serverSide ? EVENT_SCENE_OPEN_CHANNEL_SERVER : EVENT_SCENE_OPEN_CHANNEL;
     TRANS_EVENT(sceneCommand, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransAlarmExtra extraAlarm = {
