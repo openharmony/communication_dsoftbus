@@ -67,6 +67,10 @@ std::string DisconnectCommand::GetRemoteDeviceId() const
 std::shared_ptr<WifiDirectProcessor> DisconnectCommand::GetProcessor()
 {
     auto selector = ProcessorSelectorFactory::GetInstance().NewSelector();
+    if (selector == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "selector is null");
+        return nullptr;
+    }
     return (*selector)(info_.info_);
 }
 

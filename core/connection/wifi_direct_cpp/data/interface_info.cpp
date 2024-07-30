@@ -230,7 +230,7 @@ int InterfaceInfo::GetP2pListenPort() const
     return Get(InterfaceInfoKey::PORT, 0);
 }
 
-void InterfaceInfo::SeP2ptListenModule(const int &value)
+void InterfaceInfo::SetP2ptListenModule(const int &value)
 {
     Set(InterfaceInfoKey::LISTEN_MODULE, value);
 }
@@ -352,7 +352,7 @@ void InterfaceInfo::SetChannel5GList(const std::vector<int> &value)
     Set(InterfaceInfoKey::CHANNEL_5G_LIST, value);
 }
 
-std::vector<int> InterfaceInfo::GetChannel5GList()
+std::vector<int> InterfaceInfo::GetChannel5GList() const
 {
     std::vector<int> result;
     return Get(InterfaceInfoKey::CHANNEL_5G_LIST, result);
