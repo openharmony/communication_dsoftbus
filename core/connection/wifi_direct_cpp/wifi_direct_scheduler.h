@@ -161,6 +161,7 @@ public:
 protected:
     int ScheduleActiveCommand(const std::shared_ptr<WifiDirectCommand> &command,
                               std::shared_ptr<WifiDirectExecutor> &executor);
+    static void DumpNegotiateChannel(const WifiDirectNegotiateChannel &channel);
 
     static constexpr int MAX_EXECUTOR = 8;
     std::recursive_mutex executorLock_;

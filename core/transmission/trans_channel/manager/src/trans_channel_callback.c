@@ -90,6 +90,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         .localUdid = localUdid,
         .peerUdid = channel->isEncrypt ? peerUdid : channel->peerDeviceId
     };
+    extra.deviceState = TransGetDeviceState(channel->peerDeviceId);
     if (!channel->isServer) {
         CoreSessionState state = CORE_SESSION_STATE_INIT;
         TransGetSocketChannelStateByChannel(channel->channelId, channel->channelType, &state);

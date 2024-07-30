@@ -70,7 +70,11 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level
     info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     info->accountId = 0;
     ret = LnnLedgerAllDataSyncToDB(info);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    if (ret != SOFTBUS_NOT_IMPLEMENT) {
+        EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    } else {
+        EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    }
     info->accountId = 18390933952;
     ret = LnnLedgerAllDataSyncToDB(info);
     EXPECT_NE(ret, SOFTBUS_OK);

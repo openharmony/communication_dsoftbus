@@ -46,6 +46,7 @@ struct WifiDirectManager {
     int32_t (*disconnectDevice)(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback);
     void (*registerStatusListener)(struct WifiDirectStatusListener *listener);
     int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
+    bool (*isNoneLinkByType)(enum WifiDirectLinkType linkType);
 
     bool (*isNegotiateChannelNeeded)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
     void (*refreshRelationShip)(const char *remoteUuid, const char *remoteMac);

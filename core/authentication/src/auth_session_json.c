@@ -34,6 +34,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -184,6 +185,8 @@
 #define BLE_MAC_REFRESH_SWITCH "BLE_MAC_REFRESH_SWITCH"
 #define BLE_CONNECTION_CLOSE_DELAY (10 * 1000L)
 #define BLE_MAC_AUTO_REFRESH_SWITCH 1
+
+#define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"
 
 static void OptString(const JsonObj *json, const char * const key,
     char *target, uint32_t targetLen, const char *defaultValue)
@@ -1160,13 +1163,17 @@ static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddInt32ToObject(json, STA_FREQUENCY, LnnGetStaFrequency(info));
 }
 
+static void AuthPrintBase64Ptk(const char *ptk)
+{
+    char *anonyPtk = NULL;
+    Anonymize(ptk, &anonyPtk);
+    AUTH_LOGD(AUTH_FSM, "base Ptk=%{public}s", anonyPtk);
+    AnonymizeFree(anonyPtk);
+}
+
 static void PackWifiDirectInfo(
     const AuthConnInfo *connInfo, JsonObj *json, const NodeInfo *info, const char *remoteUuid, bool isMetaAuth)
 {
-    if (json == NULL) {
-        AUTH_LOGE(AUTH_FSM, "invalid param");
-        return;
-    }
     unsigned char encodePtk[PTK_ENCODE_LEN] = {0};
     char localPtk[PTK_DEFAULT_LEN] = {0};
     if (isMetaAuth || remoteUuid == NULL) {
@@ -1193,6 +1200,7 @@ static void PackWifiDirectInfo(
         AUTH_LOGE(AUTH_FSM, "encode ptk fail");
         return;
     }
+    AuthPrintBase64Ptk((const char *)encodePtk);
     if (!JSON_AddStringToObject(json, PTK, (char *)encodePtk)) {
         AUTH_LOGE(AUTH_FSM, "add ptk string to json fail");
         return;
@@ -1428,7 +1436,39 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     return SOFTBUS_OK;
 }
 
-static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info)
+static void UnpackMetaPtk(char *remoteMetaPtk, char *decodePtk)
+{
+    size_t len = 0;
+    if (SoftBusBase64Decode((unsigned char *)remoteMetaPtk, PTK_DEFAULT_LEN, &len,
+        (const unsigned char *)decodePtk, strlen((char *)decodePtk)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "decode remote meta ptk fail");
+        return;
+    }
+    LnnDumpRemotePtk(NULL, remoteMetaPtk, "unpack meta wifi direct info");
+    if (len != PTK_DEFAULT_LEN) {
+        AUTH_LOGE(AUTH_FSM, "decode data len error");
+        return;
+    }
+    return;
+}
+
+static void UnpackPtk(char *remotePtk, char *decodePtk)
+{
+    size_t len = 0;
+    if (SoftBusBase64Decode((unsigned char *)remotePtk, PTK_DEFAULT_LEN, &len,
+        (const unsigned char *)decodePtk, strlen((char *)decodePtk)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "decode remote ptk fail");
+        return;
+    }
+    LnnDumpRemotePtk(NULL, remotePtk, "unpack wifi direct info");
+    if (len != PTK_DEFAULT_LEN) {
+        AUTH_LOGE(AUTH_FSM, "decode data len error");
+        return;
+    }
+    return;
+}
+
+static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
 {
     char staticCap[STATIC_CAP_STR_LEN] = {0};
     if (!JSON_GetInt32FromOject(json, STATIC_CAP_LENGTH, &info->staticCapLen)) {
@@ -1445,20 +1485,15 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info)
         return;
     }
     char encodePtk[PTK_ENCODE_LEN] = {0};
-    size_t len = 0;
     if (!JSON_GetStringFromOject(json, PTK, encodePtk, PTK_ENCODE_LEN)) {
         AUTH_LOGE(AUTH_FSM, "get encode ptk fail");
         return;
     }
-    if (SoftBusBase64Decode((unsigned char *)info->remotePtk, PTK_DEFAULT_LEN,
-        &len, (const unsigned char *)encodePtk, strlen((char *)encodePtk)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "decode static cap fail");
-        return;
-    }
-    LnnDumpRemotePtk(NULL, info->remotePtk, "unpack wifi direct info");
-    if (len != PTK_DEFAULT_LEN) {
-        AUTH_LOGE(AUTH_FSM, "decode data len error");
-        return;
+    AuthPrintBase64Ptk((const char *)encodePtk);
+    if (isMetaAuth) {
+        UnpackMetaPtk(info->remoteMetaPtk, encodePtk);
+    } else {
+        UnpackPtk(info->remotePtk, encodePtk);
     }
 }
 
@@ -1868,6 +1903,45 @@ static int32_t UnpackCertificateInfo(JsonObj *json, NodeInfo *nodeInfo, const Au
     return SOFTBUS_OK;
 }
 
+static void UpdateLocalNetBrMac(void)
+{
+    NodeInfo info;
+    if (memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memset_s fail");
+        return;
+    }
+    if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local node info fail");
+        return;
+    }
+    const char *brMacTemp = LnnGetBtMac(&info);
+    int32_t lenBrMac = strlen(brMacTemp);
+    if ((lenBrMac == 0 || (strncmp(brMacTemp, INVALID_BR_MAC_ADDR, BT_MAC_LEN) == 0)) &&
+        SoftBusGetBtState() == BLE_ENABLE) {
+        char brMac[BT_MAC_LEN] = {0};
+        SoftBusBtAddr mac = {0};
+        int32_t ret = 0;
+        ret = SoftBusGetBtMacAddr(&mac);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "get bt mac addr fail, do not update local brmac");
+            return;
+        }
+        ret = ConvertBtMacToStr(brMac, BT_MAC_LEN, mac.addr, sizeof(mac.addr));
+        if (ret != SOFTBUS_OK || strlen(brMac) == 0) {
+            AUTH_LOGE(AUTH_FSM, "convert bt mac to str fail, do not update local brmac");
+            return;
+        }
+        if (LnnSetLocalStrInfo(STRING_KEY_BT_MAC, brMac) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "set local brmac fail, do not update local brmac");
+            return;
+        }
+        char *anonyMac = NULL;
+        Anonymize(brMac, &anonyMac);
+        AUTH_LOGI(AUTH_FSM, "update local brmac=%{public}s", anonyMac);
+        AnonymizeFree(anonyMac);
+    }
+}
+
 char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
     const char *remoteUuid, const AuthSessionInfo *info)
 {
@@ -1877,6 +1951,7 @@ char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version
         return NULL;
     }
     AUTH_LOGI(AUTH_FSM, "connType=%{public}d", connInfo->type);
+    UpdateLocalNetBrMac();
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
     if (nodeInfo == NULL) {
         AUTH_LOGE(AUTH_FSM, "local info is null");
@@ -1964,7 +2039,7 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
     } else {
         ret = UnpackBt(json, nodeInfo, devInfo->version, isMetaAuth);
     }
-    UnpackWifiDirectInfo(json, nodeInfo);
+    UnpackWifiDirectInfo(json, nodeInfo, isMetaAuth);
     if (UnpackCertificateInfo(json, nodeInfo, info) != SOFTBUS_OK) {
         JSON_Delete(json);
         return SOFTBUS_ERR;

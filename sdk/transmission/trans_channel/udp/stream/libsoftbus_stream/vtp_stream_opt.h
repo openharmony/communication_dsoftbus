@@ -12,29 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef WIFI_DIRECT_WORK_QUEUE_H
-#define WIFI_DIRECT_WORK_QUEUE_H
 
-#include <functional>
-#include "message_handler.h"
+#ifndef VTP_STREAM_OPT_H
+#define VTP_STREAM_OPT_H
 
-namespace OHOS::SoftBus {
-class WifiDirectWorkQueue {
-public:
-    using WorkFunction = std::function<void(void *data)>;
-    struct Work {
-        WorkFunction work;
-        void *data;
-    };
+#include <stdbool.h>
+#include "fillpinc.h"
+#include "trans_type.h"
 
-    WifiDirectWorkQueue();
-    ~WifiDirectWorkQueue();
+#ifdef __cplusplus
+extern "C" {
+#endif
+int32_t VtpSetSocketMultiLayer(int fd, OnFrameEvt *cb, const void *para);
 
-    void ScheduleDelayWork(const Work *work, uint64_t timeMs);
-    void RemoveWork(const Work *work);
+bool IsVtpFrameSentEvt(const FtEventCbkInfo *info);
 
-private:
-    SoftBusHandler handler_ {};
-};
+int HandleVtpFrameEvt(int fd, OnFrameEvt cb, const FtEventCbkInfo *info);
+#ifdef __cplusplus
 }
 #endif
+#endif // VTP_STREAM_OPT_H

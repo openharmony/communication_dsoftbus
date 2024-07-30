@@ -852,7 +852,7 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
     ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_DIRECT_ONLINE);
     ret = SoftBusNetNodeResult(&device, &hbResp, true, connectReason);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_OFFLINE);
 }
 
 /*
