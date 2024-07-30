@@ -195,6 +195,11 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 {
     return GetNetLedgerInterface()->LnnGetOnlineStateById(id, type);
 }
+
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
+{
+    return GetNetLedgerInterface()->LnnGetLocalNodeInfoSafe(info);
+}
 }
 
 

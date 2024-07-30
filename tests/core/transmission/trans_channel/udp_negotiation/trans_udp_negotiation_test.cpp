@@ -63,34 +63,6 @@ public:
     {}
 };
 
-static int OnSessionOpened(int sessionId, int result)
-{
-    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
-    return SOFTBUS_OK;
-}
-
-static void OnSessionClosed(int sessionId)
-{
-    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d", sessionId);
-}
-
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
-{
-    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%{public}d", sessionId);
-}
-
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
-{
-    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
-}
-
-static ISessionListener g_sessionlistener = {
-    .OnSessionOpened = OnSessionOpened,
-    .OnSessionClosed = OnSessionClosed,
-    .OnBytesReceived = OnBytesReceived,
-    .OnMessageReceived = OnMessageReceived,
-};
-
 void TransUdpNegotiationTest::SetUpTestCase(void)
 {
     SoftbusConfigInit();
@@ -100,7 +72,6 @@ void TransUdpNegotiationTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    TransChannelInit();
     SetAceessTokenPermission("dsoftbusTransTest");
 }
 
@@ -111,7 +82,6 @@ void TransUdpNegotiationTest::TearDownTestCase(void)
     AuthDeinit();
     TransServerDeinit();
     DiscEventManagerDeinit();
-    TransChannelDeinit();
 }
 
 /**
@@ -290,12 +260,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest07, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest08, TestSize.Level1)
 {
-    int res = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    EXPECT_EQ(res, SOFTBUS_OK);
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
+    int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                    g_sessionName);
     EXPECT_EQ(res, EOK);
     appInfo->myData.channelId = TEST_CHANNEL_ID;
@@ -332,12 +300,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest09, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest10, TestSize.Level1)
 {
-    int res = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    EXPECT_EQ(res, SOFTBUS_OK);
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
+    int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                    g_sessionName);
     EXPECT_EQ(res, EOK);
     int32_t ret = NotifyUdpQosEvent(appInfo, INVALID_EVENT_ID, 0, NULL);
@@ -386,6 +352,8 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest12, TestSize.Level1)
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransUdpDeathCallback(g_pkgName, INVALID_PID);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+    ret = TransUdpChannelMgrInit();
     EXPECT_EQ(ret,  SOFTBUS_OK);
 }
 }

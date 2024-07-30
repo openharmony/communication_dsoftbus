@@ -46,10 +46,9 @@ namespace OHOS {
 SoftBusGattsCallback *g_callback = nullptr;
 
 extern "C" {
-int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid serviceUuid, int32_t expectedMtu)
+int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid serviceUuid)
 {
     (void)serviceUuid;
-    (void)expectedMtu;
     g_callback = callback;
     return SOFTBUS_OK;
 }

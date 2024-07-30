@@ -128,7 +128,6 @@ void TransServerTcpDirectTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    TransChannelInit();
     CreatSessionConnList();
     ret = AuthCommonInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -147,7 +146,6 @@ void TransServerTcpDirectTest::TearDownTestCase(void)
     AuthDeinit();
     TransServerDeinit();
     DiscEventManagerDeinit();
-    TransChannelDeinit();
     AuthCommonDeinit();
     TransTcpDirectDeinit();
     LnnDeinitLocalLedger();

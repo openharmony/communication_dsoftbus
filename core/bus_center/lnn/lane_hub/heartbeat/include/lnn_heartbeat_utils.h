@@ -32,6 +32,7 @@ extern "C" {
 #define HB_SHORT_ACCOUNT_HASH_LEN  2
 #define HB_FSM_NAME_LEN            32
 
+#define HB_TIME_FACTOR_TWO_HUNDRED_MS         (200LL)
 #define HB_TIME_FACTOR                        (1000LL)
 #define HB_START_DELAY_LEN                    (10 * HB_TIME_FACTOR)
 #define HB_CLOUD_SYNC_DELAY_LEN               (13 * HB_TIME_FACTOR)

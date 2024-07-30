@@ -261,11 +261,11 @@ void TransRefreshProxyTimesNativeTest(const uint8_t *data, size_t size)
 
 void TransProxyDeathCallbackTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size < MAX_PACKAGE_NAME_LEN)) {
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
     char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(data));
-    int32_t pid = *(reinterpret_cast<const uint16_t *>(data));
+    int32_t pid = *(reinterpret_cast<const int32_t *>(data));
     TransProxyDeathCallback(pkgName, pid);
 }
 
@@ -322,7 +322,7 @@ void TransProxySpecialUpdateChanInfoTest(const uint8_t *data, size_t size)
 
 void TransProxySetAuthHandleByChanIdTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(AuthHandle))) {
+    if ((data == nullptr) || (size < sizeof(int64_t))) {
         return;
     }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));

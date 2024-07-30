@@ -118,6 +118,8 @@ static std::map<NegotiateMessageType, std::string> g_messageNameMap = {
     { NegotiateMessageType::CMD_DETECT_LINK_RSP,         "CMD_DETECT_LINK_RSP"         },
     { NegotiateMessageType::CMD_V3_REQ,                  "CMD_V3_REQ"                  },
     { NegotiateMessageType::CMD_V3_RSP,                  "CMD_V3_RSP"                  },
+    { NegotiateMessageType::CMD_V3_CUSTOM_PORT_REQ,      "CMD_V3_CUSTOM_PORT_REQ"      },
+    { NegotiateMessageType::CMD_V3_CUSTOM_PORT_RSP,      "CMD_V3_CUSTOM_PORT_RSP"      },
 };
 
 static std::map<LegacyCommandType, std::string> g_legacyMessageNameMap = {

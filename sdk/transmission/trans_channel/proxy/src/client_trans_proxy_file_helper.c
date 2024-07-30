@@ -401,7 +401,7 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
         TRANS_LOGE(TRANS_FILE, "get full abs file failed");
         goto EXIT_ERR;
     }
-    TRANS_LOGI(TRANS_FILE, "dirPath=%{public}s, absFullDir=%{public}s", dirPath, absFullDir);
+    TRANS_LOGI(TRANS_FILE, "dirPath=%{private}s, absFullDir=%{private}s", dirPath, absFullDir);
     fileNameLength = (int32_t)strlen(fileName);
     dirPathLength = (int32_t)strlen(absFullDir);
     if (pathSize < (fileNameLength + dirPathLength + 1)) {
@@ -409,12 +409,12 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
             dirPathLength, fileNameLength);
         goto EXIT_ERR;
     }
-    TRANS_LOGI(TRANS_FILE, "fileName=%{public}s, fileNameLen=%{public}d", fileName, fileNameLength);
+    TRANS_LOGI(TRANS_FILE, "fileName=%{private}s, fileNameLen=%{public}d", fileName, fileNameLength);
     if (sprintf_s(recvAbsPath, pathSize, "%s/%s", absFullDir, fileName) < 0) {
         TRANS_LOGE(TRANS_FILE, "sprintf_s filename error");
         goto EXIT_ERR;
     }
-    TRANS_LOGI(TRANS_FILE, "recvAbsPath=%{public}s", recvAbsPath);
+    TRANS_LOGI(TRANS_FILE, "recvAbsPath=%{private}s", recvAbsPath);
     SoftBusFree(absFullDir);
     SoftBusFree(dirPath);
     return SOFTBUS_OK;

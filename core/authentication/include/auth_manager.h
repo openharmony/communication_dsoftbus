@@ -86,6 +86,7 @@ void DelAuthManager(AuthManager *auth, int32_t type);
 void DelDupAuthManager(AuthManager *auth);
 void RemoveAuthManagerByAuthId(AuthHandle authHandle);
 int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
+int32_t AuthDeviceGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo);
 /*check whether AUTH device is exist or not*/

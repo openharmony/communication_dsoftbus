@@ -213,6 +213,35 @@ static void AddSyncPtkListener(SyncPtkListener listener)
     g_syncPtkListener = listener;
 }
 
+static OHOS::SoftBus::InnerLink::LinkType LinkTypeConver(enum WifiDirectLinkType linkType)
+{
+    switch (linkType) {
+        case WIFI_DIRECT_LINK_TYPE_HML:
+            return OHOS::SoftBus::InnerLink::LinkType::HML;
+        case WIFI_DIRECT_LINK_TYPE_P2P:
+            return OHOS::SoftBus::InnerLink::LinkType::P2P;
+        default:
+            return OHOS::SoftBus::InnerLink::LinkType::INVALID_TYPE;
+    }
+}
+
+static bool IsNoneLinkByType(enum WifiDirectLinkType linkType)
+{
+    bool result = true;
+    OHOS::SoftBus::InnerLink::LinkType innerLinkType = LinkTypeConver(linkType);
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
+        [&result, &innerLinkType] (OHOS::SoftBus::InnerLink &innerLink) {
+            if (innerLink.GetLinkType() == innerLinkType) {
+                CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s",
+                          OHOS::SoftBus::WifiDirectAnonymizeDeviceId(innerLink.GetRemoteDeviceId()).c_str());
+                result = false;
+                return true;
+            }
+            return false;
+        });
+    return result;
+}
+
 static bool IsDeviceOnline(const char *remoteMac)
 {
     bool isOnline = false;
@@ -490,6 +519,7 @@ static struct WifiDirectManager g_manager = {
     .disconnectDevice = DisconnectDevice,
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
+    .isNoneLinkByType = IsNoneLinkByType,
 
     .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
     .refreshRelationShip = RefreshRelationShip,

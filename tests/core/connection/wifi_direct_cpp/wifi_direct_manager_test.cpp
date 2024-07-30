@@ -146,8 +146,6 @@ HWTEST_F(WifiDirectManagerCppTest, IsDeviceOnlineTest, TestSize.Level1)
     });
     ret = IsDeviceOnline(remoteMac.c_str());
     EXPECT_EQ(ret, true);
-    WifiDirectInterfaceMock mock;
-    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     LinkManager::GetInstance().RemoveLink(remoteMac);
 }
 
@@ -177,8 +175,6 @@ HWTEST_F(WifiDirectManagerCppTest, GetLocalIpByUuidTest, TestSize.Level1)
 
     ret = GetLocalIpByUuid(uuid.c_str(), myIp, sizeof(myIp));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    WifiDirectInterfaceMock mock;
-    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 
@@ -220,8 +216,6 @@ HWTEST_F(WifiDirectManagerCppTest, GetLocalIpByRemoteIpOnceTest, TestSize.Level1
     });
     ret = GetLocalIpByRemoteIpOnce(remoteIpv6.c_str(), localIp, sizeof(localIp));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    WifiDirectInterfaceMock mock;
-    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 
@@ -245,8 +239,6 @@ HWTEST_F(WifiDirectManagerCppTest, GetLocalIpByRemoteIpTest, TestSize.Level1)
         link.SetRemoteIpv4(remoteIp);
     });
     ret = GetLocalIpByRemoteIp(remoteIp.c_str(), localIp, sizeof(localIp));
-    WifiDirectInterfaceMock mock;
-    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -278,8 +270,6 @@ HWTEST_F(WifiDirectManagerCppTest, GetRemoteUuidByIpTest, TestSize.Level1)
     });
     ret = GetRemoteUuidByIp(remoteIp.c_str(), localIp, sizeof(localIp));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    WifiDirectInterfaceMock mock;
-    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 
@@ -311,8 +301,6 @@ HWTEST_F(WifiDirectManagerCppTest, GetLocalAndRemoteMacByLocalIpTest, TestSize.L
     });
     ret = GetLocalAndRemoteMacByLocalIp(localIp.c_str(), localMac, macLen, remoteMac, macLen);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    WifiDirectInterfaceMock mock;
-    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 

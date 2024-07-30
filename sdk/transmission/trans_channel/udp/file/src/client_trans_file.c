@@ -435,7 +435,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
         char *absPath = realpath(rootDir, NULL);
         if (absPath == NULL) {
             TRANS_LOGE(TRANS_SDK,
-                "rootDir not exist, rootDir=%{public}s, errno=%{public}d.",
+                "rootDir not exist, rootDir=%{private}s, errno=%{public}d.",
                 (rootDir == NULL ? "null" : rootDir), errno);
             return SOFTBUS_FILE_ERR;
         }
@@ -450,7 +450,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
 
     if (NSTACKX_DFileSetStoragePath(fileSession, fileListener->rootDir) != SOFTBUS_OK) {
         NSTACKX_DFileClose(fileSession);
-        TRANS_LOGE(TRANS_SDK, "set storage path failed. rootDir=%{public}s", fileListener->rootDir);
+        TRANS_LOGE(TRANS_SDK, "set storage path failed. rootDir=%{private}s", fileListener->rootDir);
         return SOFTBUS_FILE_ERR;
     }
     return SOFTBUS_OK;

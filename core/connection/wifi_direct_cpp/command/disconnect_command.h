@@ -41,7 +41,7 @@ public:
     std::shared_ptr<NegotiateChannel> GetNegotiateChannel() const;
 
     void OnSuccess() const;
-    void OnFailure(int reason) const;
+    void OnFailure(int32_t reason) const;
 
 protected:
     DisconnectInfo info_;
