@@ -1093,6 +1093,7 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
     if (reason == SOFTBUS_LNN_PTK_NOT_MATCH) {
         LNN_LOGE(LNN_LANE, "connect device fail due to ptk not match, requestId=%{public}u, reason=%{public}d",
             p2pRequestId, reason);
+        reason = SOFTBUS_LANE_PTK_NOT_MATCH;
         P2pLinkReqList reqInfo;
         (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
         if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
