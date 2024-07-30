@@ -90,6 +90,8 @@ int32_t Ipv6AddrInToAddr(SoftBusSockAddrIn6 *addrIn6, char *addr, int32_t addrLe
 int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t port);
 int32_t Ipv4AddrToAddrIn(SoftBusSockAddrIn *addrIn, const char *ip, uint16_t port);
 
+bool IsHmlIpAddr(const char *ip);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -560,7 +560,7 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
     buffer->length -= packLen;
     if (buffer->length > 0) {
         CONN_LOGI(CONN_BLE, "coc socket read limited buffer: leftLength=%{public}d", buffer->length);
-    }  
+    }
     *outLen = (int32_t)packLen;
     return dataCopy;
 }
@@ -617,10 +617,9 @@ void *BleSendTask(void *arg)
         ConnBleConnection *connection = ConnBleGetConnectionById(sendNode->connectionId);
         if (connection == NULL) {
             CONN_LOGE(CONN_BLE,
-                "connection is not exist, connId=%{public}u, pid=%{public}d, "
-                "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
-                sendNode->connectionId, sendNode->pid, sendNode->dataLen, sendNode->flag,
-                sendNode->module, sendNode->seq);
+                "connection is not exist, connId=%{public}u, pid=%{public}d, Len=%{public}u, Flg=%{public}d, "
+                "Module=%{public}d, Seq=%{public}" PRId64 "", sendNode->connectionId, sendNode->pid,
+                sendNode->dataLen, sendNode->flag, sendNode->module, sendNode->seq);
             FreeSendNode(sendNode);
             sendNode = NULL;
             continue;
