@@ -61,6 +61,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
         .peerDevVer = node->appInfo.peerVersion,
         .result = EVENT_STAGE_RESULT_FAILED
     };
+    extra.deviceState = TransGetDeviceState(node->appInfo.peerNetWorkId);
     if (!node->serverSide) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     } else {
