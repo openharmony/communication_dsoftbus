@@ -40,6 +40,8 @@ constexpr char PEER_IP_HML[] = "127.30.0.1";
 constexpr char PEER_IP_P2P[] = "127.31.0.1";
 constexpr uint64_t LANE_ID_P2P = 0x1000000000000001;
 constexpr uint64_t LANE_ID_HML = 0x1000000000000002;
+constexpr int CHANNEL_ID = 10;
+constexpr char MAC_TEST[] = "testMac";
 
 class LNNLaneListenerTest : public testing::Test {
 public:
@@ -592,5 +594,66 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKDOWN_NOTIFY_002, TestSize.Level1)
 
     ret = DelLaneBusinessInfoItem(LANE_TYPE_CTRL, LANE_ID_HML);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: UPDATE_LANE_BUSINESS_INFO_ITEM_001
+* @tc.desc: UpdateLaneBusinessInfoItem
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneListenerTest, UPDATE_LANE_BUSINESS_INFO_ITEM_001, TestSize.Level1)
+{
+    LaneType type = LANE_TYPE_TRANS;
+    EXPECT_EQ(AddLaneBusinessInfoItem(type, LANE_ID_P2P), SOFTBUS_OK);
+    EXPECT_EQ(UpdateLaneBusinessInfoItem(LANE_ID_P2P, LANE_ID_HML), SOFTBUS_OK);
+    EXPECT_EQ(UpdateLaneBusinessInfoItem(INVALID_LANE_ID, LANE_ID_HML), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLaneBusinessInfoItem(LANE_ID_P2P, INVALID_LANE_ID), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLaneBusinessInfoItem(LANE_ID_HML, LANE_ID_P2P), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: CREATE_SINK_LINK_INFO_001
+* @tc.desc: CreateSinkLinkInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneListenerTest, CREATE_SINK_LINK_INFO_001, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)strncpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN);
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(nodeInfo), Return(SOFTBUS_OK)));
+    LaneListenerDepsInterfaceMock listenerMock;
+    EXPECT_CALL(listenerMock, DetectDisableWifiDirectApply).WillRepeatedly(Return());
+    WifiDirectSinkLink link = {
+        .linkType = WIFI_DIRECT_LINK_TYPE_HML,
+        .bandWidth = BAND_WIDTH_20M,
+        .channelId = CHANNEL_ID,
+    };
+    EXPECT_EQ(strcpy_s(link.localIp, IP_LEN, PEER_IP_HML), EOK);
+    EXPECT_EQ(strcpy_s(link.remoteIp, IP_LEN, PEER_IP_P2P), EOK);
+    EXPECT_EQ(strncpy_s(link.remoteUuid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN), EOK);
+    EXPECT_EQ(strncpy_s(link.remoteMac, MAC_ADDR_STR_LEN, MAC_TEST, MAC_ADDR_STR_LEN), EOK);
+    LnnOnWifiDirectDeviceOnline(nullptr, link.remoteIp, link.remoteUuid, true);
+    LnnOnWifiDirectDeviceOnline(link.remoteMac, nullptr, link.remoteUuid, true);
+    LnnOnWifiDirectDeviceOnline(link.remoteMac, link.remoteIp, nullptr, true);
+    LnnOnWifiDirectDeviceOnline(link.remoteMac, link.remoteIp, link.remoteUuid, true);
+    const char *localIp = "192.168.33.33";
+    LnnOnWifiDirectDeviceOffline(nullptr, link.remoteIp, link.remoteUuid, localIp);
+    LnnOnWifiDirectDeviceOffline(link.remoteMac, nullptr, link.remoteUuid, localIp);
+    LnnOnWifiDirectDeviceOffline(link.remoteMac, link.remoteIp, nullptr, localIp);
+    LnnOnWifiDirectDeviceOffline(link.remoteMac, link.remoteIp, link.remoteUuid, localIp);
+    LnnOnWifiDirectConnectedForSink(nullptr);
+    LnnOnWifiDirectConnectedForSink(&link);
+    LnnOnWifiDirectDisconnectedForSink(nullptr);
+    LnnOnWifiDirectDisconnectedForSink(&link);
+    LaneLinkInfo linkInfo;
+    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    EXPECT_EQ(CreateSinkLinkInfo(nullptr, &linkInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(CreateSinkLinkInfo(&link, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(CreateSinkLinkInfo(&link, &linkInfo), SOFTBUS_OK);
 }
 } // namespace OHOS
