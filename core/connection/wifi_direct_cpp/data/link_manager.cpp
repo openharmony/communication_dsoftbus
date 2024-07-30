@@ -16,6 +16,7 @@
 
 #include "conn_log.h"
 
+#include "lnn_ble_heartbeat.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_manager.h"
 
@@ -147,6 +148,21 @@ bool LinkManager::ProcessIfPresent(int linkId, const Handler &handler)
     return true;
 }
 
+void LinkManager::NotifyLnnAdjustScanPolicy(void)
+{
+    {
+        std::lock_guard lock(lock_);
+        for (const auto &[key, link] : links_) {
+            if (link->GetLinkType() == InnerLink::LinkType::HML) {
+                CONN_LOGD(CONN_WIFI_DIRECT, "have link no notify");
+                return;
+            }
+        }
+    }
+    LnnAdjustScanPolicy();
+    CONN_LOGI(CONN_WIFI_DIRECT, "notify lnn adjust scan policy");
+}
+
 void LinkManager::RemoveLink(InnerLink::LinkType type, const std::string &remoteDeviceId)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
@@ -161,6 +177,7 @@ void LinkManager::RemoveLink(InnerLink::LinkType type, const std::string &remote
         }
         link = it->second;
         links_.erase(it);
+        NotifyLnnAdjustScanPolicy();
     }
 
     CONN_LOGI(CONN_WIFI_DIRECT, "find remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
@@ -184,6 +201,7 @@ void LinkManager::RemoveLink(const std::string &remoteMac)
                 break;
             }
         }
+        NotifyLnnAdjustScanPolicy();
     }
     if (link == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "not find remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
@@ -212,6 +230,7 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
                 it++;
             }
         }
+        NotifyLnnAdjustScanPolicy();
     }
 
     for (const auto &link : links) {

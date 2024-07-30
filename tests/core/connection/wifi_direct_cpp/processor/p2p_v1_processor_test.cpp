@@ -158,7 +158,8 @@ void P2pV1ProcessorTest::InjectData(WifiDirectInterfaceMock &mock)
         });
 
     InterfaceManager::GetInstance().InitInterface(InterfaceInfo::InterfaceType::P2P);
-
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     auto injectLocal = context_.Get(TestContextKey::SWITCH_INJECT_LOCAL_INNER_LINK, false);
     auto injectRemote = context_.Get(TestContextKey::SWITCH_INJECT_REMOTE_INNER_LINK, false);

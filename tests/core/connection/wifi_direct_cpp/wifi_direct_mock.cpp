@@ -280,6 +280,11 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
 {
     return SOFTBUS_OK;
 }
+
+void LnnAdjustScanPolicy(void)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnAdjustScanPolicy();
+}
 }
 
 namespace OHOS::SoftBus {

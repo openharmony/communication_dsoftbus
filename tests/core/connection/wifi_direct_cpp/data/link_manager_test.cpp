@@ -73,6 +73,8 @@ HWTEST_F(LinkManagerTest, ProcessIfXXXByRemoteDeviceId, TestSize.Level1)
     auto innerLink = LinkManager::GetInstance().GetReuseLink(WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML, remoteDeviceId);
     EXPECT_EQ(innerLink, nullptr);
 
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAdjustScanPolicy).WillRepeatedly(Return());
     LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::HML, remoteDeviceId);
     result = LinkManager::GetInstance().ProcessIfPresent(
         InnerLink::LinkType::HML, remoteDeviceId, [](InnerLink &innerLink) {});

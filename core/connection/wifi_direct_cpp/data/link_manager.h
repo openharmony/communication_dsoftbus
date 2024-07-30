@@ -64,6 +64,7 @@ private:
     /* key = {LinkType, RemoteDeviceId} */
     std::map<std::pair<InnerLink::LinkType, std::string>, std::shared_ptr<InnerLink>> links_;
     std::atomic<int> currentLinkId_ = 0;
+    void NotifyLnnAdjustScanPolicy(void);
 };
 }
 #endif
