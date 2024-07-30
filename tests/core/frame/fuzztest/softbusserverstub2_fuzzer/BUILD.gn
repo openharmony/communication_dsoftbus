@@ -1,0 +1,67 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/test.gni")
+import("../../../../../dsoftbus.gni")
+
+##############################fuzztest##########################################
+
+dsoftbus_root_path = "../../../../.."
+
+ohos_fuzztest("SoftBusServerStub2FuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/core/frame/fuzztest/softbusserverstub2_fuzzer"
+
+  sources = [
+    "$dsoftbus_root_path/tests/common/src/accesstoken_kit.cpp",
+    "softbusserverstub2_fuzzer.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/standard/init/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/tests/common/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-fno-omit-frame-pointer",
+  ]
+}
+
+group("fuzztest") {
+  testonly = true
+  deps = [ ":SoftBusServerStub2FuzzTest" ]
+}
