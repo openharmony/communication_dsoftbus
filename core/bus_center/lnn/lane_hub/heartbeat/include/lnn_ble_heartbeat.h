@@ -26,10 +26,11 @@ extern "C" {
 int32_t LnnRegistBleHeartbeatMediumMgr(void);
 int32_t HbUpdateBleScanFilter(int32_t listenerId, LnnHeartbeatType type);
 int32_t HbGenerateBitPosition(int32_t min, int32_t max, int64_t seed, int32_t *randPos, int32_t num);
+int32_t LnnSendBroadcastInfoToLp(void);
 
 void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnBleHbUnregDataLevelChangeCb(void);
-
+void LnnAdjustScanPolicy(void);
 #ifdef __cplusplus
 }
 #endif

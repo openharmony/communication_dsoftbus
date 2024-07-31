@@ -61,9 +61,11 @@ int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type)
     return SOFTBUS_OK;
 }
 
-int32_t SwtichHeartbeatReportChannel(bool isToAP)
+int32_t SwtichHeartbeatReportChannel(bool isToAP, uint16_t scanInterval, uint16_t scanWindow)
 {
     (void)isToAP;
+    (void)scanInterval;
+    (void)scanWindow;
     return SOFTBUS_OK;
 }
 

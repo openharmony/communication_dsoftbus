@@ -59,7 +59,6 @@ public:
     void OnWaitDetectResponseTimeout();
 
     explicit AuthNegotiateChannel(const AuthHandle &handle);
-    AuthNegotiateChannel(const AuthNegotiateChannel &channel) = default;
     ~AuthNegotiateChannel() override;
 
     bool operator==(const AuthNegotiateChannel &other) const;
