@@ -157,7 +157,9 @@ int32_t ConnBrDequeueBlock(void **msg)
     ConnectionQueue *item = NULL;
     ConnectionQueue *next = NULL;
     SoftBusSysTime waitTime = {0};
-    waitTime.sec = BR_WAIT_TIME_SEC;
+    int32_t ret = SoftBusGetTime(&waitTime);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BR, "softbus get time failed");
+    waitTime.sec += BR_WAIT_TIME_SEC;
 
     CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "msg is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(
