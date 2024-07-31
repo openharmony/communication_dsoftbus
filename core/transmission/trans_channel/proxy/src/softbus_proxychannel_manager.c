@@ -1577,8 +1577,8 @@ void TransProxyOpenProxyChannelSuccess(int32_t channelId)
     (void)memset_s(&authConnInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     int32_t ret = GetAuthConnInfoByConnId(channelInfo->connId, &authConnInfo);
     if (ret != SOFTBUS_OK) {
-        SoftBusFree(channelInfo);
         TRANS_LOGE(TRANS_CTRL, "get authConnInfo by connId=%{public}u fail, ret=%{public}d", channelInfo->connId, ret);
+        SoftBusFree(channelInfo);
         return;
     }
 
