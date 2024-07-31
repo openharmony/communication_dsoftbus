@@ -20,6 +20,7 @@
 #include "ipv4_info.h"
 #include "serializable.h"
 #include "info_container.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 class NegotiateMessage;
@@ -48,6 +49,7 @@ enum class LinkInfoKey {
     LOCAL_IPV6 = 21,
     REMOTE_IPV6 = 22,
     CUSTOM_PORT = 23,
+    IPADDR_TYPE = 24,
 };
 
 class LinkInfo : public Serializable, public InfoContainer<LinkInfoKey> {
@@ -140,6 +142,9 @@ public:
 
     void SetCustomPort(int value);
     int GetCustomPort();
+
+    void SetIpAddrType(enum IpAddrType value);
+    enum IpAddrType GetIpAddrType();
 };
 }
 #endif

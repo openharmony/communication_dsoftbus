@@ -100,3 +100,10 @@ void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
 }
 
 void LnnBleHbUnregDataLevelChangeCb(void) { }
+
+int32_t LnnSendBroadcastInfoToLp(void)
+{
+    return SOFTBUS_OK;
+}
+
+void LnnAdjustScanPolicy(void) { }

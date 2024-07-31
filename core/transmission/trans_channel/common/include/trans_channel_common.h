@@ -75,6 +75,8 @@ void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len)
 
 void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVersion, uint32_t len);
 
+TransDeviceState TransGetDeviceState(const char *networkId);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -109,6 +109,7 @@ typedef struct {
     void (*ResponseConfirmationCallback)(int status, int handle);
     void (*NotifySentCallback)(int connId, int status);
     void (*MtuChangeCallback)(int connId, int mtu);
+    bool (*IsConcernedAttrHandle)(int srvcHandle, int attrHandle);
 } SoftBusGattsCallback;
 
 typedef struct {
@@ -130,20 +131,28 @@ typedef struct {
 } SoftBusGattsNotify;
 
 typedef struct {
-    int32_t connId;
     ListNode node;
+    int32_t connId;
+    SoftBusBtAddr btAddr;
+    int32_t mtu;
+    int32_t handle;  // the id of start server
+    bool notifyConnected;
 } ServerConnection;
 
 typedef struct {
     SoftBusGattsCallback callback;
     ListNode node;
     SoftBusBtUuid serviceUuid;
-    int32_t handle; // the id of start server
-    int32_t expectedMtu;
+    int32_t handle;  // the id of start server
+} ServerService;
+
+typedef struct {
+    ListNode services;
     ListNode connections; // as server connected
+    SoftBusMutex lock;
 } SoftBusGattsManager;
 
-int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid srvcUuid, int32_t expectedMtu);
+int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid srvcUuid);
 void SoftBusUnRegisterGattsCallbacks(SoftBusBtUuid srvcUuid);
 int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number);
 int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int properties, int permissions);

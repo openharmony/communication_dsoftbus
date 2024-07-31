@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "comm_log.h"
 #include "softbus_adapter_mem.h"
@@ -232,9 +233,10 @@ int32_t OpenDatabase(DbContext **ctx)
         COMM_LOGE(COMM_UTILS, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    mode_t mode = S_IRUSR | S_IWUSR;
     rc =
         sqlite3_open_v2(DATABASE_NAME, &sqlite, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX, NULL);
-    if (rc != SQLITE_OK || sqlite == NULL) {
+    if (rc != SQLITE_OK || sqlite == NULL || chmod(DATABASE_NAME, mode) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "sqlite3_open_v2 fail: errmsg=%{public}s", sqlite3_errmsg(sqlite));
         (void)sqlite3_close_v2(sqlite);
         return SOFTBUS_ERR;

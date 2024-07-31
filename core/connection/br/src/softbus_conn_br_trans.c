@@ -27,6 +27,7 @@
 #include "softbus_conn_manager.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_def.h"
+#include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 
 static SppSocketDriver *g_sppDriver = NULL;
@@ -568,6 +569,6 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
     status = SoftBusMutexInit(&g_startBrSendLPInfo.lock, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         status == SOFTBUS_OK, status, CONN_INIT,
-        "init bbr trans module failed: init send lp lock failed, err=%{public}d", status);
+        "init br trans module failed: init send lp lock failed, err=%{public}d", status);
     return SOFTBUS_OK;
 }
