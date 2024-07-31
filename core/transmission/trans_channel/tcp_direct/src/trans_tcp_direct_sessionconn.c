@@ -148,7 +148,7 @@ SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
     }
     conn->serverSide = isServerSid;
     conn->channelId = GenerateChannelId(true);
-    if (conn->channelId == INVALID_CHANNEL_ID) {
+    if (conn->channelId <= INVALID_CHANNEL_ID) {
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "generate tdc channel id failed.");
         return NULL;

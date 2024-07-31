@@ -24,8 +24,6 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_type_def.h"
 #include "softbus_utils.h"
 
 enum GattServerState {
@@ -413,9 +411,8 @@ static void BleCharacteristicAddMsgHandler(const CharacteristicAddMsgContext *ct
 
 static void BleDescriptorAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t srvcHandle, int32_t descriptorHandle)
 {
-    CONN_LOGI(CONN_BLE,
-        "gatt server callback, descriptor added, srvcHandle=%{public}u, descriptorHandle=%{public}d, status=%{public}d",
-        srvcHandle, descriptorHandle, status);
+    CONN_LOGI(CONN_BLE, "gatt server callback, descriptor added, srvcHandle=%{public}u, descriptorHandle=%{public}d, "
+        "status=%{public}d", srvcHandle, descriptorHandle, status);
     DescriptorAddMsgContext *ctx =
         (DescriptorAddMsgContext *)SoftBusCalloc(sizeof(DescriptorAddMsgContext) + uuid->uuidLen);
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BLE, "calloc descriptor add msg failed");
@@ -497,10 +494,10 @@ static int32_t BleNetDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
     };
     rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
-            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
-            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
-            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
-            SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
+        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
+        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
+        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
+        SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
     if (rc != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "underlayer add characteristic failed, err=%{public}d", rc);
         return SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_ERR;

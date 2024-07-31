@@ -29,7 +29,6 @@
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_utils.h"
-#include "softbus_wifi_api_adapter.h"
 #include "trans_channel_common.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
@@ -52,16 +51,6 @@
 #define SESSION_NAME_DSL "device.security.level"
 #define SESSION_NAME_DSL2_RE "com.*security.devicesec"
 #define MESH_MAGIC_NUMBER 0x5A5A5A5A
-
-typedef enum {
-    DEVICE_STATE_INVALID = 1,
-    DEVICE_STATE_LOCAL_BT_HALF_OFF,
-    DEVICE_STATE_REMOTE_BT_HALF_OFF,
-    DEVICE_STATE_LOCAL_WIFI_HALF_OFF,
-    DEVICE_STATE_REMOTE_WIFI_HALF_OFF,
-    DEVICE_STATE_NOT_CARE,
-    DEVICE_STATE_BUTT,
-} TransDeviceState;
 
 typedef struct {
     ListNode node;
@@ -290,55 +279,6 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneHandle)
     return SOFTBUS_OK;
 }
 
-static bool TransGetNetCapability(const char *networkId, uint32_t *local, uint32_t *remote)
-{
-    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
-    if (ret != SOFTBUS_OK || *local < 0) {
-        TRANS_LOGE(TRANS_SVC, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
-        return false;
-    }
-    ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
-    if (ret != SOFTBUS_OK || *remote < 0) {
-        TRANS_LOGE(TRANS_SVC, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
-        return false;
-    }
-    TRANS_LOGD(TRANS_SVC, "trans get net capability success, local=%{public}u, remote=%{public}u", *local, *remote);
-    return true;
-}
-
-static TransDeviceState TransGetDeviceState(const char *networkId, LaneLinkType linkType)
-{
-    if (linkType == LANE_WLAN_2P4G || linkType == LANE_WLAN_5G || linkType == LANE_BR) {
-        TRANS_LOGI(TRANS_SVC, "not depend on the tri-state, linkType=%{public}d", linkType);
-        return DEVICE_STATE_NOT_CARE;
-    }
-    if (networkId == NULL) {
-        TRANS_LOGE(TRANS_SVC, "networkId err.");
-        return DEVICE_STATE_INVALID;
-    }
-    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_SEMIACTIVATING ||
-        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_SEMIACTIVE) {
-        return DEVICE_STATE_LOCAL_WIFI_HALF_OFF;
-    }
-    uint32_t local = 0;
-    uint32_t remote = 0;
-    if (!TransGetNetCapability(networkId, &local, &remote)) {
-        TRANS_LOGE(TRANS_SVC, "get cap err.");
-        return DEVICE_STATE_INVALID;
-    }
-    if ((local & (1 << BIT_BLE)) && !(local & (1 << BIT_BR))) {
-        return DEVICE_STATE_LOCAL_BT_HALF_OFF;
-    }
-    if ((remote & (1 << BIT_BLE)) && !(remote & (1 << BIT_BR))) {
-        return DEVICE_STATE_REMOTE_BT_HALF_OFF;
-    }
-    if ((remote & (1 << BIT_WIFI_P2P)) && !(remote & (1 << BIT_WIFI)) &&
-        !(remote & (1 << BIT_WIFI_24G)) && !(remote & (1 << BIT_WIFI_5G))) {
-        return DEVICE_STATE_REMOTE_WIFI_HALF_OFF;
-    }
-    return DEVICE_STATE_BUTT;
-}
-
 static void BuildTransEventExtra(
     TransEventExtra *extra, const SessionParam *param, uint32_t laneHandle, LaneTransType transType, int32_t ret)
 {
@@ -348,7 +288,7 @@ static void BuildTransEventExtra(
     extra->laneId = (int32_t)laneHandle;
     extra->peerNetworkId = param->peerDeviceId;
     extra->laneTransType = transType;
-    extra->deviceState = TransGetDeviceState(param->peerDeviceId, (LaneLinkType)extra->linkType);
+    extra->deviceState = TransGetDeviceState(param->peerDeviceId);
     extra->errcode = ret;
     extra->result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     extra->result = (ret == SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) ? EVENT_STAGE_RESULT_CANCELED : extra->result;
@@ -616,6 +556,7 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
     extra->osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     appInfo->connectType = connOpt.type;
     extra->linkType = connOpt.type;
+    extra->deviceState = TransGetDeviceState(param->peerDeviceId);
     FillAppInfo(appInfo, param, &transInfo, connInnerInfo);
     TransOpenChannelSetModule(transInfo.channelType, &connOpt);
     TRANS_LOGI(TRANS_SVC, "laneHandle=%{public}u, channelType=%{public}u", laneHandle, transInfo.channelType);
@@ -783,6 +724,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     extra.localUdid = localUdid;
     extra.peerUdid = appInfo->peerUdid;
     extra.peerDevVer = appInfo->peerVersion;
+    extra.deviceState = TransGetDeviceState(param.peerDeviceId);
     TransBuildTransOpenChannelEndEvent(&extra, &transInfo, appInfo->timeStart, reason);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransFreeAppInfo(appInfo);

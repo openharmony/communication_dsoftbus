@@ -109,9 +109,10 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
         .len = static_cast<uint32_t>(output.size()),
         .data = output.data(),
     };
-    auto result = AuthPostTransData(handle_, &dataInfo);
+
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        result == SOFTBUS_OK, SOFTBUS_CONN_AUTH_POST_DATA_FAILED, CONN_WIFI_DIRECT, "post data failed");
+        AuthPostTransData(handle_, &dataInfo) == SOFTBUS_OK, SOFTBUS_CONN_AUTH_POST_DATA_FAILED,
+        CONN_WIFI_DIRECT, "post data failed");
     return SOFTBUS_OK;
 }
 
