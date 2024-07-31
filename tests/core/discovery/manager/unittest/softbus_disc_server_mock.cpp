@@ -49,5 +49,35 @@ int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
 {
     return DiscMock::GetDiscMockInterface()->DiscStopDiscovery(packageName, subscribeId);
 }
+
+int32_t ClientIpcOnPublishFail(const char *pkgName, int32_t publishId, int32_t reason)
+{
+    return DiscMock::GetDiscMockInterface()->ClientIpcOnPublishFail(pkgName, publishId, reason);
+}
+
+int32_t ClientIpcOnPublishSuccess(const char *pkgName, int32_t publishId)
+{
+    return DiscMock::GetDiscMockInterface()->ClientIpcOnPublishSuccess(pkgName, publishId);
+}
+
+int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int32_t subscribeId, int32_t failReason)
+{
+    return DiscMock::GetDiscMockInterface()->ClientIpcOnDiscoverFailed(pkgName, subscribeId, failReason);
+}
+
+int32_t ClientIpcDiscoverySuccess(const char *pkgName, int32_t subscribeId)
+{
+    return DiscMock::GetDiscMockInterface()->ClientIpcDiscoverySuccess(pkgName, subscribeId);
+}
+
+int32_t SoftbusReportDiscFault(SoftBusDiscMedium medium, int32_t errCode)
+{
+    return DiscMock::GetDiscMockInterface()->SoftbusReportDiscFault(medium, errCode);
+}
+
+int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
+{
+    return DiscMock::GetDiscMockInterface()->ClientIpcOnDeviceFound(pkgName, device, additions);
+}
 }
 } // namespace OHOS

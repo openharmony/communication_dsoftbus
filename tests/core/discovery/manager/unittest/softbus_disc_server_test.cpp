@@ -55,6 +55,9 @@ HWTEST_F(DiscManagerServerTest, DiscIpcPublishServiceTest, TestSize.Level1)
     EXPECT_EQ(DiscIpcPublishService(nullptr, &publishInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscIpcPublishService(packageName, nullptr), SOFTBUS_INVALID_PARAM);
     DiscMock discMock;
+    EXPECT_CALL(discMock, ClientIpcOnPublishFail).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, ClientIpcOnPublishSuccess).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, SoftbusReportDiscFault).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(DiscIpcPublishService(packageName, &publishInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_OK));
@@ -94,6 +97,10 @@ HWTEST_F(DiscManagerServerTest, DiscIpcStartDiscoveryTest, TestSize.Level1)
     DiscMock discMock;
     EXPECT_EQ(DiscIpcStartDiscovery(nullptr, &subscribeInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscIpcStartDiscovery(packageName, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(discMock, ClientIpcOnDiscoverFailed).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, ClientIpcDiscoverySuccess).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, SoftbusReportDiscFault).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, ClientIpcOnDeviceFound).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(DiscIpcStartDiscovery(packageName, &subscribeInfo), SOFTBUS_OK);
     EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
@@ -131,6 +138,9 @@ HWTEST_F(DiscManagerServerTest, PublishErroCodeProcessTest, TestSize.Level1)
     (void)memset_s(&publishInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     const char *packageName = "packageName";
     DiscMock discMock;
+    EXPECT_CALL(discMock, ClientIpcOnPublishFail).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, ClientIpcOnPublishSuccess).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, SoftbusReportDiscFault).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(DiscIpcPublishService(packageName, &publishInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock,
@@ -152,11 +162,15 @@ HWTEST_F(DiscManagerServerTest, DiscoveryErroCodeProcessTest, TestSize.Level1)
     (void)memset_s(&subscribeInfo, sizeof(subscribeInfo), 0, sizeof(subscribeInfo));
     const char *packageName = "packageName";
     DiscMock discMock;
+    EXPECT_CALL(discMock, ClientIpcOnDiscoverFailed).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, ClientIpcDiscoverySuccess).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, SoftbusReportDiscFault).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, ClientIpcOnDeviceFound).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(DiscIpcStartDiscovery(packageName, &subscribeInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock,
-                DiscStartDiscovery).WillRepeatedly(Return(DISCOVERY_FAIL_REASON_NOT_SUPPORT_MEDIUM));
-    EXPECT_EQ(DiscIpcStartDiscovery(packageName, &subscribeInfo), DISCOVERY_FAIL_REASON_NOT_SUPPORT_MEDIUM);
+                DiscStartDiscovery).WillRepeatedly(Return(SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM));
+    EXPECT_EQ(DiscIpcStartDiscovery(packageName, &subscribeInfo), SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM);
     DISC_LOGI(DISC_TEST, "DiscoveryErroCodeProcessTest end");
 }
 
@@ -183,6 +197,9 @@ HWTEST_F(DiscManagerServerTest, ConvertDiscTypeTest, TestSize.Level1)
     };
     const char *packageName = "packageName";
     DiscMock discMock;
+    EXPECT_CALL(discMock, ClientIpcOnPublishFail).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, ClientIpcOnPublishSuccess).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discMock, SoftbusReportDiscFault).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(DiscIpcPublishService(packageName, &deviceinfo1), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscIpcPublishService(packageName, &deviceinfo2), SOFTBUS_INVALID_PARAM);

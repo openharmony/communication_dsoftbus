@@ -329,9 +329,8 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
     CONN_CHECK_AND_RETURN_LOGW(data != NULL, CONN_COMMON,
         "dispatch data failed: data is null, connectionId=%{public}u, module=%{public}d", connectionId, moduleId);
     CONN_CHECK_AND_RETURN_LOGW(len > (int32_t)sizeof(ConnPktHead), CONN_COMMON,
-        "dispatch data failed: dataLen=%{public}d less than connection header size, "
-        "connectionId=%{public}u, module=%{public}d",
-        connectionId, moduleId, len);
+        "dispatch data failed: dataLen=%{public}d < connection header size, "
+        "connectionId=%{public}u, module=%{public}d", len, connectionId, moduleId);
 
     ConnListenerNode listener = { 0 };
     int32_t status = GetListenerByModuleId(moduleId, &listener);
@@ -687,7 +686,7 @@ static int32_t ConnSocketsAndBaseListenerInit(void)
 int32_t ConnServerInit(void)
 {
     int32_t ret = ConnSocketsAndBaseListenerInit();
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "connsockets and baselistener init failed.");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "init failed.");
     g_connManagerCb.OnConnected = ConnManagerConnected;
     g_connManagerCb.OnReusedConnected = ConnManagerReusedConnected;
     g_connManagerCb.OnDisconnected = ConnManagerDisconnected;

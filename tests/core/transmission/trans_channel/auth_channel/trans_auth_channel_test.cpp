@@ -80,6 +80,10 @@ public:
 
 void TransAuthChannelTest::SetUpTestCase(void)
 {
+    NiceMock<AuthChannelInterfaceMock> AuthChannelMock;
+    EXPECT_CALL(AuthChannelMock, LnnInitGetDeviceName).WillRepeatedly(
+        AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName);
+    EXPECT_CALL(AuthChannelMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     SoftbusConfigInit();
     LooperInit();
     ConnServerInit();

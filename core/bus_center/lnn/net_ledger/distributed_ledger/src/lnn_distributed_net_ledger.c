@@ -379,7 +379,8 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
             continue;
         }
         if (type == CATEGORY_NETWORK_ID) {
-            if (strcmp(info->networkId, id) == 0) {
+            if (strcmp(info->networkId, id) == 0 ||
+                (strlen(info->lastNetworkId) != 0 && strcmp(info->lastNetworkId, id) == 0)) {
                 LnnMapDeinitIterator(it);
                 return info;
             }
@@ -417,7 +418,8 @@ static NodeInfo *LnnGetNodeInfoByDeviceId(const char *id)
         if (info == NULL) {
             continue;
         }
-        if (strcmp(info->networkId, id) == 0) {
+        if (strcmp(info->networkId, id) == 0 ||
+            (strlen(info->lastNetworkId) != 0 && strcmp(info->lastNetworkId, id) == 0)) {
             LnnMapDeinitIterator(it);
             return info;
         }
@@ -616,6 +618,9 @@ static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
                 info->authChannelId[i][AUTH_AS_CLIENT_SIDE], info->authChannelId[i][AUTH_AS_SERVER_SIDE], i);
         }
     }
+    if (strcpy_s(info->lastNetworkId, NETWORK_ID_BUF_LEN, oldInfo->lastNetworkId) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "cpy lastNetworkId fail");
+    }
 }
 
 int32_t LnnUpdateNetworkId(const NodeInfo *newInfo)
@@ -636,10 +641,15 @@ int32_t LnnUpdateNetworkId(const NodeInfo *newInfo)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
+    if (strcpy_s(oldInfo->lastNetworkId, NETWORK_ID_BUF_LEN, oldInfo->networkId) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "old networkId cpy fail");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
     if (strcpy_s(oldInfo->networkId, NETWORK_ID_BUF_LEN, newInfo->networkId) != EOK) {
         LNN_LOGE(LNN_LEDGER, "networkId cpy fail");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        return SOFTBUS_OK;
+        return SOFTBUS_MEM_ERR;
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;

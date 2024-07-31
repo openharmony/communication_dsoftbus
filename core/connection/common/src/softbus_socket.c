@@ -474,3 +474,13 @@ int32_t Ipv4AddrToAddrIn(SoftBusSockAddrIn *addrIn, const char *ip, uint16_t por
     addrIn->sinPort = SoftBusHtoNs(port);
     return SOFTBUS_OK;
 }
+
+bool IsHmlIpAddr(const char *ip)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(ip != NULL, false, CONN_COMMON, "invalid param!");
+    if (GetDomainByAddr(ip) == SOFTBUS_AF_INET6) {
+        return true;
+    }
+
+    return strncmp(ip, HML_IPV4_ADDR_PREFIX, strlen(HML_IPV4_ADDR_PREFIX)) == 0;
+}

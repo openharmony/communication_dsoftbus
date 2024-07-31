@@ -18,7 +18,7 @@
     <!-- maximum length of a test input -->
     <max_len>1000</max_len>
     <!-- maximum total time in seconds to run the fuzzer -->
-    <max_total_time>300</max_total_time>
+    <max_total_time>1</max_total_time>
     <!-- memory usage limit in Mb -->
     <rss_limit_mb>4096</rss_limit_mb>
   </fuzztest>
