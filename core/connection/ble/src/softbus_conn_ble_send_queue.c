@@ -137,7 +137,9 @@ int32_t ConnBleDequeueBlock(void **msg)
     ConnectionQueue *item = NULL;
     ConnectionQueue *next = NULL;
     SoftBusSysTime waitTime = {0};
-    waitTime.sec = BLE_WAIT_TIME_SEC;
+    int32_t ret = SoftBusGetTime(&waitTime);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BLE, "softbus get time failed");
+    waitTime.sec += BLE_WAIT_TIME_SEC;
 
     CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "msg is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(
