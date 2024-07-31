@@ -409,7 +409,7 @@ bool SendMessageFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr || data == nullptr || size < sizeof(int32_t) * SIZE_NUM_THREE +
-        INPUT_NAME_SIZE_MAX + sizeof(uint32_t)) {
+        INPUT_NAME_SIZE_MAX + INPUT_NAME_SIZE_MAX + sizeof(uint32_t)) {
         return false;
     }
     uint32_t offset = 0;
@@ -449,8 +449,7 @@ bool SendMessageFuzzTest(const uint8_t *data, size_t size)
 bool QosReportFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || data == nullptr || size < sizeof(int32_t) * SIZE_NUM_THREE +
-        sizeof(uint32_t)) {
+    if (object == nullptr || data == nullptr || size < sizeof(int32_t) * SIZE_NUM_FOUR) {
         return false;
     }
     uint32_t offset = 0;
@@ -479,7 +478,7 @@ bool GrantPermissionFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr || data == nullptr || size < sizeof(int32_t) + sizeof(int32_t) +
-        INPUT_NAME_SIZE_MAX + sizeof(int32_t)) {
+        INPUT_NAME_SIZE_MAX + INPUT_NAME_SIZE_MAX + sizeof(int32_t)) {
         return false;
     }
     uint32_t offset = 0;
@@ -1003,8 +1002,7 @@ bool PublishLNNFuzzTest(const uint8_t *data, size_t size)
 bool StopPublishLNNFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || data == nullptr || size < (INPUT_NAME_SIZE_MAX * SIZE_NUM_THREE) +
-        (sizeof(int32_t) * SIZE_NUM_FIVE)) {
+    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + sizeof(int32_t)) {
         return false;
     }
     uint32_t offset = 0;
@@ -1277,7 +1275,7 @@ bool RippleStatsFuzzTest(const uint8_t *data, size_t size)
 bool SoftbusRegisterServiceFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || data == nullptr || size < sizeof(int32_t) + sizeof(int32_t) + sizeof(IRemoteObject)) {
+    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + sizeof(IRemoteObject)) {
         return false;
     }
     uint32_t offset = 0;
@@ -1310,10 +1308,8 @@ bool SoftbusRegisterServiceFuzzTest(const uint8_t *data, size_t size)
 bool CheckOpenSessionPermissionFuzzTest(const uint8_t *data, size_t size)
 {
 #define SESSION_NAME_SIZE_MAX 256
-#define DEVICE_ID_SIZE_TEST_MAX 50
-#define GROUP_ID_SIZE_TEST_MAX 50
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || data == nullptr || size < DEVICE_ID_SIZE_TEST_MAX + GROUP_ID_SIZE_TEST_MAX) {
+    if (object == nullptr || data == nullptr || size < DEVICE_ID_SIZE_MAX + GROUP_ID_SIZE_MAX) {
         return false;
     }
     SetAceessTokenPermission("SoftBusServerStubTest");
