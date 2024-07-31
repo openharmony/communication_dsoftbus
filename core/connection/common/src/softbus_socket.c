@@ -460,16 +460,6 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
     return SOFTBUS_OK;
 }
 
-bool IsHmlIpAddr(const char *ip)
-{
-    CONN_CHECK_AND_RETURN_RET_LOGE(ip != NULL, false, CONN_COMMON, "invalid param!");
-    if (GetDomainByAddr(ip) == SOFTBUS_AF_INET6) {
-        return true;
-    }
-
-    return strncmp(ip, HML_IPV4_ADDR_PREFIX, strlen(HML_IPV4_ADDR_PREFIX)) == 0;
-}
-
 int32_t Ipv4AddrToAddrIn(SoftBusSockAddrIn *addrIn, const char *ip, uint16_t port)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(addrIn != NULL && ip != NULL, SOFTBUS_INVALID_PARAM,
