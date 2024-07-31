@@ -569,11 +569,12 @@ static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *da
 {
     uint32_t sentLen = 0;
     while (dataLen > sentLen) {
-        uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)dataLen);
-        int32_t status = ConnBleSend(connection, data, amount, module);
+        uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)(dataLen - sentLen));
+        int32_t status = ConnBleSend(connection, data + sentLen, amount, module);
         CONN_LOGI(CONN_BLE,
-            "coc send packet: connId=%{public}u, module=%{public}d, total=%{public}u, status=%{public}d",
-            connection->connectionId, module, dataLen, status);
+            "coc send packet: connId=%{public}u, module=%{public}d, total=%{public}u, "
+            "amount=%{public}u, sentLen=%{public}u, status=%{public}d",
+            connection->connectionId, module, dataLen, amount, sentLen, status);
         sentLen += amount;
     }
     return SOFTBUS_OK;
