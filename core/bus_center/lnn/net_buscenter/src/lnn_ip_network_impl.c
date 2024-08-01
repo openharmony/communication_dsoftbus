@@ -114,9 +114,6 @@ static void RetryGetAvailableIpAddr(void *para)
 static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
 {
     static int32_t retryTime = GET_IP_RETRY_TIMES;
-    if (!LnnIsLinkReady(ifName)) {
-        LNN_LOGE(LNN_BUILDER, "link not ready. ifName=%{public}s", ifName);
-    }
     if (strcmp(ifName, WLAN_IFNAME) != 0) {
         retryTime = 0;
     }

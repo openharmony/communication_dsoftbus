@@ -94,12 +94,15 @@ P2pV1Processor::~P2pV1Processor()
     StopTimer();
     timer_.Shutdown();
     RemoveExclusive();
-    WifiDirectUtils::SerialFlowExit();
+    if (hasRun_) {
+        WifiDirectUtils::SerialFlowExit();
+    }
 }
 
 [[noreturn]] void P2pV1Processor::Run()
 {
     WifiDirectUtils::SerialFlowEnter();
+    hasRun_ = true;
     for (;;) {
         (this->*state_)();
     }
@@ -115,7 +118,8 @@ bool P2pV1Processor::CanAcceptNegotiateDataAtState(WifiDirectCommand &command)
     if (nc == nullptr) {
         return false;
     }
-    return nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_INVALID;
+    return nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_INVALID &&
+        nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_DISCONNECT_V1_REQ;
 }
 
 void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)

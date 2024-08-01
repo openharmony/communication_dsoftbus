@@ -950,7 +950,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest004, TestSiz
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_NOT_FIND));
     EXPECT_CALL(TcpMessageMock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, GetRemoteUuidByIp).WillOnce(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(TcpMessageMock, GetRemoteUuidByIp).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     (void)GetAuthIdByChannelInfo(channelId, seq, cipherFlag, &authHandle);
     EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);

@@ -1513,6 +1513,27 @@ int32_t LnnGetDLBleDirectTimestamp(const char *networkId, uint64_t *timestamp)
     return SOFTBUS_OK;
 }
 
+int32_t LnnGetDLUpdateTimestamp(const char *udid, uint64_t *timestamp)
+{
+    if (udid == NULL || timestamp == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(udid, CATEGORY_UDID);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_NOT_FIND;
+    }
+    *timestamp = nodeInfo->updateTimestamp;
+    (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    return SOFTBUS_OK;
+}
+
 int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
 {
     if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {

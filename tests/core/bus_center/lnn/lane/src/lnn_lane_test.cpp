@@ -265,7 +265,7 @@ static void OnLaneAllocSuccessForBle(uint32_t laneHandle, const LaneConnInfo *in
 static void OnLaneAllocFailNoExcept(uint32_t laneHandle, int32_t errCode)
 {
     GTEST_LOG_(INFO) << "alloc lane failed, laneReqId=" << laneHandle;
-    EXPECT_EQ(errCode, SOFTBUS_OK);
+    EXPECT_EQ(errCode, SOFTBUS_LANE_SUCC_AFTER_CANCELED);
     CondSignal();
 }
 

@@ -16,6 +16,7 @@ group("fuzztest") {
   deps = [
     "softbusproxychannellistener_fuzzer:fuzztest",
     "softbusproxychannelmanager_fuzzer:fuzztest",
+    "softbusproxychannelmanagermock_fuzzer:fuzztest",
     "softbusproxychannelnetwork_fuzzer:fuzztest",
     "transproxyonmessagereceived_fuzzer:fuzztest",
   ]

@@ -777,7 +777,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     int32_t ret = SOFTBUS_ERR;
     ProxyConnInfo conn;
     int32_t chanNewId = GenerateChannelId(false);
-    if (chanNewId == INVALID_CHANNEL_ID) {
+    if (chanNewId <= INVALID_CHANNEL_ID) {
         TRANS_LOGE(TRANS_CTRL, "proxy channelId is invalid");
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
     }

@@ -108,10 +108,13 @@ void ServerIpcOpenAuthSessionTest(const uint8_t *data, size_t size)
     }
 
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(data));
-    ConnectionAddr *connectionAddr = const_cast<ConnectionAddr *>(reinterpret_cast<const ConnectionAddr *>(data));
-
-    (void)ServerIpcOpenAuthSession(sessionName, connectionAddr);
-    (void)ServerIpcOpenAuthSession(nullptr, connectionAddr);
+    ConnectionAddr connectionAddr;
+    connectionAddr.type = CONNECTION_ADDR_SESSION;
+    connectionAddr.info.session.sessionId = *(reinterpret_cast<const int32_t *>(data));
+    connectionAddr.info.session.channelId = *(reinterpret_cast<const int32_t *>(data));
+    connectionAddr.info.session.type = *(reinterpret_cast<const int32_t *>(data));
+    (void)ServerIpcOpenAuthSession(sessionName, &connectionAddr);
+    (void)ServerIpcOpenAuthSession(nullptr, &connectionAddr);
     (void)ServerIpcOpenAuthSession(sessionName, nullptr);
     (void)ServerIpcOpenAuthSession(nullptr, nullptr);
 }
@@ -135,6 +138,9 @@ void ServerIpcCloseChannelTest(const uint8_t *data, size_t size)
 
 void ServerIpcCloseChannelWithStatisticsTest(const uint8_t *data, size_t size)
 {
+    if (size < sizeof(uint64_t)) {
+        return;
+    }
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     uint64_t laneId = *(reinterpret_cast<const uint64_t *>(data));
 
@@ -171,18 +177,20 @@ void ServerIpcStreamStatsTest(const uint8_t *data, size_t size)
 {
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
-    StreamSendStats *streamSendStats = const_cast<StreamSendStats *>(reinterpret_cast<const StreamSendStats *>(data));
-
-    (void)ServerIpcStreamStats(channelId, channelType, streamSendStats);
+    StreamSendStats streamSendStats;
+    streamSendStats.costTimeStatsCnt[FRAME_COST_LT10MS] = *(reinterpret_cast<const uint32_t *>(data));
+    streamSendStats.sendBitRateStatsCnt[FRAME_BIT_RATE_LT3M] = *(reinterpret_cast<const uint32_t *>(data));
+    (void)ServerIpcStreamStats(channelId, channelType, &streamSendStats);
 }
 
 void ServerIpcRippleStatsTest(const uint8_t *data, size_t size)
 {
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
-    TrafficStats *trafficStats = const_cast<TrafficStats *>(reinterpret_cast<const TrafficStats *>(data));
-
-    (void)ServerIpcRippleStats(channelId, channelType, trafficStats);
+    TrafficStats trafficStats;
+    trafficStats.stats[0] = 't';
+    trafficStats.stats[1] = 'e';
+    (void)ServerIpcRippleStats(channelId, channelType, &trafficStats);
 }
 
 void ServerIpcGrantPermissionTest(const uint8_t *data, size_t size)

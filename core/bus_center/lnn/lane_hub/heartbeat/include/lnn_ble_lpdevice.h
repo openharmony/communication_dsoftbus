@@ -44,7 +44,7 @@ void UpdateRemoteDeviceInfoListToMlps(void);
 int32_t GetBurstAdvId(void);
 int32_t SendDeviceInfoToSHByType(LpFeatureType type);
 int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type);
-int32_t SwtichHeartbeatReportChannel(bool isToAP);
+int32_t SwtichHeartbeatReportChannel(bool isToAP, uint16_t scanInterval, uint16_t scanWindow);
 bool IsSupportLpFeature(void);
 void SetLpKeepAliveState(void *para);
 void AsyncSetBleBroadcastTimeStamp(const char *networkId);

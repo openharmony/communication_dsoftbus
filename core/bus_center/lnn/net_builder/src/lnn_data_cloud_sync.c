@@ -783,6 +783,48 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     AnonymizeFree(anonyDeviceVersion);
 }
 
+static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo)
+{
+    if (cacheInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo localCacheInfo = { 0 };
+    int32_t ret = LnnGetLocalCacheNodeInfo(&localCacheInfo);
+    if (ret != SOFTBUS_OK || cacheInfo->accountId != localCacheInfo.accountId) {
+        char accountId[INT64_TO_STR_MAX_LEN] = {0};
+        char localAccountId[INT64_TO_STR_MAX_LEN] = {0};
+        if (!Int64ToString(cacheInfo->accountId, accountId, INT64_TO_STR_MAX_LEN)) {
+            LNN_LOGE(LNN_BUILDER, "accountId to str fail");
+        }
+        if (!Int64ToString(localCacheInfo.accountId, localAccountId, INT64_TO_STR_MAX_LEN)) {
+            LNN_LOGE(LNN_BUILDER, "local accountId to str fail");
+        }
+        char *anonyAccountId = NULL;
+        char *anonyLocalAccountId = NULL;
+        Anonymize(accountId, &anonyAccountId);
+        Anonymize(localAccountId, &anonyLocalAccountId);
+        LNN_LOGE(LNN_BUILDER, "don't set, ret=%{public}d, accountId=%{public}s, local accountId=%{public}s",
+            ret, AnonymizeWrapper(anonyAccountId), AnonymizeWrapper(anonyLocalAccountId));
+        AnonymizeFree(anonyAccountId);
+        AnonymizeFree(anonyLocalAccountId);
+        return ret;
+    }
+    cacheInfo->localStateVersion = localCacheInfo.stateVersion;
+    (void)LnnSaveRemoteDeviceInfo(cacheInfo);
+    char *anonyUdid = NULL;
+    Anonymize(cacheInfo->deviceInfo.deviceUdid, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER,
+        "success. udid=%{public}s, stateVersion=%{public}d, localStateVersion=%{public}d, updateTimestamp=%{public}"
+        "" PRIu64, anonyUdid, cacheInfo->stateVersion, cacheInfo->localStateVersion, cacheInfo->updateTimestamp);
+    AnonymizeFree(anonyUdid);
+    if (LnnUpdateDistributedNodeInfo(cacheInfo, cacheInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "fail:Cache info sync to Ledger fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
 {
     if (key == NULL || value == NULL) {
@@ -813,21 +855,8 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
             cacheInfo.updateTimestamp)) {
         return SOFTBUS_ERR;
     }
-    NodeInfo localCacheInfo = { 0 };
-    int32_t ret = LnnGetLocalCacheNodeInfo(&localCacheInfo);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    cacheInfo.localStateVersion = localCacheInfo.stateVersion;
-    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
-    char *anonyUdid = NULL;
-    Anonymize(cacheInfo.deviceInfo.deviceUdid, &anonyUdid);
-    LNN_LOGI(LNN_BUILDER,
-        "success. udid=%{public}s, stateVersion=%{public}d, localStateVersion=%{public}d, updateTimestamp=%{public}"
-        "" PRIu64, anonyUdid, cacheInfo.stateVersion, cacheInfo.localStateVersion, cacheInfo.updateTimestamp);
-    AnonymizeFree(anonyUdid);
-    if (LnnUpdateDistributedNodeInfo(&cacheInfo, cacheInfo.deviceInfo.deviceUdid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "fail:Cache info sync to Ledger fail");
+    if (LnnSaveAndUpdateDistributedNode(&cacheInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "save and update distribute node info fail");
         (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         return SOFTBUS_ERR;
     }

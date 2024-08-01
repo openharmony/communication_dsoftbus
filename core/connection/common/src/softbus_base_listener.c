@@ -198,9 +198,15 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
         SoftBusFree(node);
         return NULL;
     }
+    node->listener.onConnectEvent = NULL;
+    node->listener.onDataEvent = NULL;
+
+    node->socketIf = NULL;
+
     ListInit(&node->info.waitEventFds);
     node->info.waitEventFdsLen = 0;
     node->info.modeType = UNSET_MODE;
+    (void)memset_s(&node->info.listenerInfo, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     node->info.listenFd = -1;
     node->info.listenPort = -1;
     // set root object reference count 1
@@ -634,7 +640,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
         if (node->info.waitEventFdsLen > MAX_LISTEN_EVENTS) {
             CONN_LOGE(CONN_COMMON, "can not trigger more, fd=%{public}d > MAX_LISTEN_EVENTS=%{public}d, "
                 "module=%{public}d, trigger=%{public}d, waitEventFdsLen=%{public}d",
-                MAX_LISTEN_EVENTS, module, fd, trigger, node->info.waitEventFdsLen);
+                fd, MAX_LISTEN_EVENTS, module, trigger, node->info.waitEventFdsLen);
             status = SOFTBUS_CONN_FAIL;
             break;
         }
@@ -912,11 +918,11 @@ static int32_t CopyWaitEventFdsUnsafe(const SoftbusListenerNode *node, FdNode **
     if (expand) {
         CONN_LOGE(CONN_COMMON, "listener node 'waitEventFdsLen' field is unexpected, "
             "actualWaitEventFdsLen=%{public}u > waitEventFdsLen=%{public}u, module=%{public}d",
-            node->module, node->info.waitEventFdsLen, i);
+            i, node->info.waitEventFdsLen, node->module);
     } else if (i != fdArrayLen) {
         CONN_LOGE(CONN_COMMON, "listener node 'waitEventFdsLen' field is unexpected, "
             "actualWaitEventFdsLen=%{public}u < waitEventFdsLen=%{public}u, module=%{public}d",
-            node->module, node->info.waitEventFdsLen, i);
+            i, node->info.waitEventFdsLen, node->module);
     }
 
     *outArrayLen = i;

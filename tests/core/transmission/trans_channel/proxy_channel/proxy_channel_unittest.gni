@@ -1,0 +1,69 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../../../../dsoftbus.gni")
+import("../../common/mock/mock.gni")
+
+softbus_proxy_channel_manager_ut_sources = [ "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel/softbus_proxychannel_manager_test.cpp" ]
+
+softbus_proxy_channel_manager_ut_include_dirs = [
+  "unittest/common/",
+
+  "$softbus_adapter_common/include",
+
+  "$dsoftbus_core_path/adapter/bus_center/include",
+  "$dsoftbus_core_path/adapter/transmission/include",
+  "$dsoftbus_core_path/authentication/include",
+  "$dsoftbus_core_path/authentication/interface",
+
+  "$dsoftbus_core_path/bus_center/interface",
+  "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
+  "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
+  "$dsoftbus_core_path/bus_center/lnn/net_buscenter/include",
+  "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+  "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
+  "$dsoftbus_core_path/bus_center/lnn/net_ledger/local_ledger/include",
+  "$dsoftbus_core_path/bus_center/lnn/net_ledger/sync_ledger/include",
+  "$dsoftbus_core_path/bus_center/service/include",
+  "$dsoftbus_core_path/bus_center/utils/include",
+
+  "$dsoftbus_core_path/common/include",
+  "$dsoftbus_core_path/common/message_handler/include",
+  "$dsoftbus_core_path/common/security/permission/include",
+  "$dsoftbus_core_path/connection/interface",
+  "$dsoftbus_core_path/connection/p2p/common/include",
+  "$dsoftbus_core_path/connection/p2p/interface",
+
+  "$dsoftbus_core_path/discovery/interface",
+  "$dsoftbus_core_path/discovery/manager/include",
+
+  "$dsoftbus_core_path/transmission/common/include",
+  "$dsoftbus_core_path/transmission/interface",
+  "$dsoftbus_core_path/transmission/pending_packet/include",
+  "$dsoftbus_core_path/transmission/session/include",
+  "$dsoftbus_core_path/transmission/trans_channel/common/include",
+  "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
+  "$dsoftbus_core_path/transmission/trans_channel/proxy/include",
+  "$dsoftbus_core_path/transmission/trans_channel/proxy/src",
+  "$dsoftbus_core_path/transmission/trans_channel/manager/include",
+
+  "$dsoftbus_root_path/interfaces/kits",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
+  "$dsoftbus_root_path/interfaces/kits/common",
+  "$dsoftbus_root_path/interfaces/kits/transport",
+  "$dsoftbus_root_path/third_party/dfinder/include",
+
+  "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel",
+
+  "$trans_comm_mock_path/include",
+]

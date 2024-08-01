@@ -69,7 +69,6 @@ void SoftBusNegotiateMessageUnmarshallingFuzzTest(const uint8_t *data, size_t si
     msg1.SetInterfaceInfoArray(interfaceArray);
     SoftBus::LinkInfo linkInfo1;
     linkInfo1.SetCenter20M(GetData<int>());
-    linkInfo1.SetLocalBaseMac(GetData<std::string>());
     msg1.SetLinkInfo(linkInfo1);
 
     auto protocol1 = SoftBus::WifiDirectProtocolFactory::CreateProtocol(SoftBus::ProtocolType::TLV);

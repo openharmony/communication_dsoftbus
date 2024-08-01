@@ -25,6 +25,18 @@ static pthread_mutex_t g_randomLock = PTHREAD_MUTEX_INITIALIZER;
 static mbedtls_entropy_context g_mbedtlsEntropy;
 static mbedtls_ctr_drbg_context g_mbedtlsCtrDrbg;
 
+MBEDTLS_CTX *CreateCryptCtx(void)
+{
+    LOGI(TAG, "mbedtls CreateCryptCtx");
+    return &g_mbedtlsCtrDrbg;
+}
+
+void ClearCryptCtx(MBEDTLS_CTX *ctx)
+{
+    (void)ctx;
+    return;
+}
+
 static int32_t MbedtlsGetRandomSeed(void)
 {
     static int inited = 0;
