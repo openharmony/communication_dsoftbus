@@ -106,6 +106,7 @@ static std::map<NegotiateMessageType, std::string> g_messageNameMap = {
     { NegotiateMessageType::CMD_CONN_V2_RESP_3,          "CMD_CONN_V2_RESP_3"          },
     { NegotiateMessageType::CMD_DISCONNECT_V2_REQ,       "CMD_DISCONNECT_V2_REQ"       },
     { NegotiateMessageType::CMD_DISCONNECT_V2_RESP,      "CMD_DISCONNECT_V2_RESP"      },
+    { NegotiateMessageType::CMD_FORCE_DISCONNECT_REQ,    "CMD_FORCE_DISCONNECT_REQ"    },
     { NegotiateMessageType::CMD_CLIENT_JOIN_FAIL_NOTIFY, "CMD_CLIENT_JOIN_FAIL_NOTIFY" },
     { NegotiateMessageType::CMD_TRIGGER_REQ,             "CMD_TRIGGER_REQ"             },
     { NegotiateMessageType::CMD_TRIGGER_RESP,            "CMD_TRIGGER_RESP"            },
@@ -133,6 +134,7 @@ static std::map<LegacyCommandType, std::string> g_legacyMessageNameMap = {
     { LegacyCommandType::CMD_REUSE_RESP,                 "CMD_REUSE_RESP"                 },
     { LegacyCommandType::CMD_PC_GET_INTERFACE_INFO_REQ,  "CMD_PC_GET_INTERFACE_INFO_REQ"  },
     { LegacyCommandType::CMD_PC_GET_INTERFACE_INFO_RESP, "CMD_PC_GET_INTERFACE_INFO_RESP" },
+    { LegacyCommandType::CMD_FORCE_DISCONNECT_V1_REQ,    "CMD_FORCE_DISCONNECT_V1_REQ"    },
 };
 
 NegotiateMessage::NegotiateMessage() { }
