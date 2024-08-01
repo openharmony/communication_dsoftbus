@@ -46,6 +46,11 @@ ohos_executable("softbus_test") {
   subsystem_name = "communication"
 }
 
+group("unittest") {
+  testonly = true
+  deps = [ "unittest:unittest" ]
+}
+
 group("fuzztest") {
   testonly = true
   deps = [ "fuzztest:fuzztest" ]
