@@ -230,7 +230,7 @@ int InterfaceInfo::GetP2pListenPort() const
     return Get(InterfaceInfoKey::PORT, 0);
 }
 
-void InterfaceInfo::SetP2ptListenModule(const int &value)
+void InterfaceInfo::SetP2pListenModule(const int &value)
 {
     Set(InterfaceInfoKey::LISTEN_MODULE, value);
 }
