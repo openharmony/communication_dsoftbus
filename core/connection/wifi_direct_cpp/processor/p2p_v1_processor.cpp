@@ -1566,7 +1566,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     auto result = P2pEntity::GetInstance().Connect(params);
     if (result.errorCode_ != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", result.errorCode_);
-        P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { P2P_IF_NAME });
+        P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { IF_NAME_P2P0 });
         return result.errorCode_;
     }
     auto ret = UpdateWhenConnectSuccess(groupConfig, msg);
@@ -1725,7 +1725,7 @@ int P2pV1Processor::StartAuthListening(const std::string &localIp)
     CONN_CHECK_AND_RETURN_RET_LOGW(pair.first > 0, pair.first, CONN_WIFI_DIRECT, "start listen failed");
     ret = InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [&pair](InterfaceInfo &interface) {
         interface.SetP2pListenPort(pair.first);
-        interface.SetP2ptListenModule(pair.second);
+        interface.SetP2pListenModule(pair.second);
         return SOFTBUS_OK;
     });
     if (ret != SOFTBUS_OK) {
