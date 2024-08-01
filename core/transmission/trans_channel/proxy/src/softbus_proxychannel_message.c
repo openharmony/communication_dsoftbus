@@ -82,14 +82,18 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     char *tmpMac = NULL;
     Anonymize(peerMac, &tmpMac);
-    AnonymizeFree(tmpMac);
     int32_t ret = LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_CTRL, "LnnGetNetworkIdByBtMac fail, peerMac=%{public}s", tmpMac);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail, peerMac=%{public}s", tmpMac);
+        AnonymizeFree(tmpMac);
+        return ret;
+    }
     ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, len);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
-    return SOFTBUS_OK;
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
+    }
+    AnonymizeFree(tmpMac);
+    return ret;
 }
 
 static int32_t GetRemoteBtMacByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *brMac, int32_t len)
@@ -564,12 +568,17 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     return buf;
 }
 
-int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode, int32_t len)
+int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int32_t *errCode, int32_t len)
 {
-    cJSON *root = cJSON_ParseWithLength(msg, len);
-    if ((root == NULL) || (errCode == NULL)) {
-        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
+    if (errCode == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param errCode.");
         return SOFTBUS_INVALID_PARAM;
+    }
+
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
+        return SOFTBUS_CREATE_JSON_ERR;
     }
 
     if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode)) {
@@ -582,12 +591,17 @@ int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode, int32_t l
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyUnPackRestErrMsg(const char *msg, int *errCode, int32_t len)
+int32_t TransProxyUnPackRestErrMsg(const char *msg, int32_t *errCode, int32_t len)
 {
-    cJSON *root = cJSON_ParseWithLength(msg, len);
-    if ((root == NULL) || (errCode == NULL)) {
-        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
+    if (errCode == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param errCode.");
         return SOFTBUS_INVALID_PARAM;
+    }
+
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
+        return SOFTBUS_CREATE_JSON_ERR;
     }
 
     if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode) && !GetJsonObjectInt32Item(root, "ERROR_CODE", errCode)) {

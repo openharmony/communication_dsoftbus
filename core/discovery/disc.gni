@@ -16,6 +16,7 @@ import("../../core/discovery/coap/disc_coap.gni")
 import("../../core/discovery/event_manager/disc_event_manager.gni")
 import("../../dsoftbus.gni")
 
+DISC_SERVER_DEFINES = []
 disc_server_src = ble_discovery_src + disc_coap_src + disc_event_manager_src
 disc_server_inc = ble_discovery_inc + disc_coap_inc + disc_event_manager_inc
 disc_server_deps = ble_discovery_deps + disc_coap_deps + disc_event_manager_deps
@@ -31,6 +32,9 @@ disc_server_inc += [
   "$dsoftbus_root_path/core/discovery/interface",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
+if (!dsoftbus_feature_ex_kits) {
+  DISC_SERVER_DEFINES += [ "DISC_COMMUNITY" ]
+}
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     disc_server_src +=

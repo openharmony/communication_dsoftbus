@@ -436,11 +436,6 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
-static bool SupportHmlTwo(void)
-{
-    return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
-}
-
 static bool IsWifiP2pEnabled(void)
 {
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
@@ -455,6 +450,19 @@ static void RegisterEnhanceManager(WifiDirectEnhanceManager *manager)
 {
     CONN_CHECK_AND_RETURN_LOGE(manager != nullptr, CONN_WIFI_DIRECT, "manager is null");
     g_enhanceManager = *manager;
+}
+
+static bool IsHmlConnected()
+{
+    bool ret = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
+        if (innerLink.GetLinkType() == OHOS::SoftBus::InnerLink::LinkType::HML) {
+            ret = true;
+            return true;
+        }
+        return false;
+    });
+    return ret;
 }
 
 static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
@@ -496,9 +504,9 @@ static struct WifiDirectManager g_manager = {
     .getRemoteUuidByIp = GetRemoteUuidByIp,
     .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 
-    .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
+    .isHmlConnected = IsHmlConnected,
 
     .init = Init,
     .notifyOnline = NotifyOnline,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -342,6 +342,30 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONNID_Test_001, TestSize.L
 }
 
 /*
+ * @tc.name: AUTH_SESSION_PROCESS_CANCEL_AUTH_BY_CONNID_Test_001
+ * @tc.desc: auth session process cancel auth by connId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CANCEL_AUTH_BY_CONNID_Test_001, TestSize.Level1)
+{
+    uint64_t connId = 0;
+    bool isServer = true;
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
+    uint32_t len = TEST_DATA_LEN;
+    int32_t ret;
+
+    ret = AuthSessionProcessCancelAuthByConnId(connId, isServer, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_FSM_FAIL);
+    ret = AuthSessionProcessCancelAuthByConnId(connId, isServer, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_FSM_FAIL);
+    ret = AuthSessionProcessCancelAuthByConnId(connId, !isServer, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_FSM_FAIL);
+    ret = AuthSessionProcessCancelAuthByConnId(connId, !isServer, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_FSM_FAIL);
+}
+
+/*
  * @tc.name: AUTH_SESSION_HANDLE_DEVICE_NOT_TRUSTED_Test_001
  * @tc.desc: auth session handle device not trusted test
  * @tc.type: FUNC
@@ -497,6 +521,12 @@ HWTEST_F(AuthTest, PROCESS_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
     uint32_t len = TEST_DATA_LEN;
 
     int32_t ret = ProcessDeviceInfoMessage(authSeq, &info, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
+    info.normalizedType = NORMALIZED_SUPPORT;
+    ret = ProcessDeviceInfoMessage(authSeq, &info, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
+    info.normalizedType = NORMALIZED_KEY_ERROR;
+    ret = ProcessDeviceInfoMessage(authSeq, &info, data, len);
     EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
 }
 
@@ -2136,5 +2166,18 @@ HWTEST_F(AuthTest, GET_TCP_KEEPALIVE_OPTION_BY_CYCLE_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = GetTcpKeepaliveOptionByCycle(DEFAULT_FREQ_CYCLE, &tcpKeepaliveOption);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: IS_ENHANCE_P2P_MODULE_ID_Test_001
+ * @tc.desc: IsEnhanceP2pModuleId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
+{
+    EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_ENHANCED_P2P_START), true);
+    EXPECT_EQ(IsEnhanceP2pModuleId(DIRECT_CHANNEL_SERVER_P2P), false);
+    EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_P2P), false);
 }
 } // namespace OHOS

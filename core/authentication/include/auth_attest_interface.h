@@ -53,6 +53,7 @@ int32_t GenerateCertificate(SoftbusCertChain *softbusCertChain, const AuthSessio
 int32_t VerifyCertificate(SoftbusCertChain *softbusCertChain, const NodeInfo *nodeInfo, const AuthSessionInfo *info);
 int32_t InitSoftbusChain(SoftbusCertChain *softbusCertChain);
 void FreeSoftbusChain(SoftbusCertChain *softbusCertChain);
+bool IsCertAvailable(void);
 
 #ifdef __cplusplus
 #if __cplusplus

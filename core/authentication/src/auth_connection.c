@@ -29,11 +29,12 @@
 #include "softbus_def.h"
 #include "wifi_direct_manager.h"
 
-#define AUTH_CONN_DATA_HEAD_SIZE           24
-#define AUTH_CONN_CONNECT_TIMEOUT_MS       11000
-#define AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY 1000
-#define AUTH_CONN_MAX_RETRY_TIMES          1
-#define AUTH_CONN_RETRY_DELAY_MILLIS       3000
+#define AUTH_CONN_DATA_HEAD_SIZE             24
+#define AUTH_ENHANCE_P2P_CONNECT_TIMEOUT_MS  4500
+#define AUTH_CONN_CONNECT_TIMEOUT_MS         11000
+#define AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY   1000
+#define AUTH_CONN_MAX_RETRY_TIMES            1
+#define AUTH_CONN_RETRY_DELAY_MILLIS         3000
 
 typedef struct {
     uint32_t requestId;
@@ -192,7 +193,6 @@ static void NotifyDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
     }
 }
 
-
 static void NotifyDataReceived(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -272,10 +272,15 @@ static void HandleConnConnectTimeout(const void *para)
     NotifyClientConnected(requestId, 0, SOFTBUS_AUTH_CONN_TIMEOUT, NULL);
 }
 
-static void PostConnConnectTimeout(uint32_t requestId)
+static void PostConnConnectTimeout(uint32_t requestId, AuthLinkType type)
 {
-    PostAuthEvent(
-        EVENT_CONNECT_TIMEOUT, HandleConnConnectTimeout, &requestId, sizeof(requestId), AUTH_CONN_CONNECT_TIMEOUT_MS);
+    if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        PostAuthEvent(EVENT_CONNECT_TIMEOUT, HandleConnConnectTimeout, &requestId, sizeof(requestId),
+            AUTH_ENHANCE_P2P_CONNECT_TIMEOUT_MS);
+    } else {
+        PostAuthEvent(EVENT_CONNECT_TIMEOUT, HandleConnConnectTimeout, &requestId, sizeof(requestId),
+            AUTH_CONN_CONNECT_TIMEOUT_MS);
+    }
 }
 
 static int32_t RemoveFunc(const void *obj, void *param)
@@ -330,6 +335,40 @@ static void HandleConnConnectResult(const void *para)
     DelConnRequest(item);
 }
 
+static void AsyncCallDeviceIdReceived(void *para)
+{
+    RepeatDeviceIdData *recvData = (RepeatDeviceIdData *)para;
+    if (recvData == NULL) {
+        return;
+    }
+    NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
+    SoftBusFree(para);
+}
+
+static void HandleDataReceivedProcess(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    RepeatDeviceIdData *request = (RepeatDeviceIdData *)SoftBusCalloc(sizeof(RepeatDeviceIdData) + head->len);
+    if (request == NULL) {
+        AUTH_LOGE(AUTH_CONN, "malloc RepeatDeviceIdData fail");
+        return;
+    }
+    request->len = head->len;
+    if (data != NULL && head->len > 0 && memcpy_s(request->data, head->len, data, head->len) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy data fail");
+        SoftBusFree(request);
+        return;
+    }
+    request->connId = connId;
+    request->connInfo = *connInfo;
+    request->fromServer = fromServer;
+    request->head = *head;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), AsyncCallDeviceIdReceived, request, 0) !=
+        SOFTBUS_OK) {
+        SoftBusFree(request);
+    }
+}
+
 /* WiFi Connection */
 static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
 {
@@ -376,7 +415,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
         AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
         return;
     }
-    NotifyDataReceived(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
+    HandleDataReceivedProcess(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
 }
 
 static int32_t InitWiFiConn(void)
@@ -437,19 +476,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         AUTH_LOGE(AUTH_CONN, "empty body");
         return;
     }
-    NotifyDataReceived(GenConnId(connInfo.type, connectionId), &connInfo, fromServer, &head, body);
-}
-
-static void AsyncCallDeviceIdReceived(void *para)
-{
-    RepeatDeviceIdData *recvData = (RepeatDeviceIdData *)para;
-    if (recvData == NULL) {
-        return;
-    }
-    AUTH_LOGI(AUTH_CONN, "Delay handle connectionId=%{public}" PRIu64 ", len=%{public}d, from=%{public}s",
-        recvData->connId, recvData->len, GetAuthSideStr(recvData->fromServer));
-    NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
-    SoftBusFree(para);
+    HandleDataReceivedProcess(GenConnId(connInfo.type, connectionId), &connInfo, fromServer, &head, body);
 }
 
 void HandleRepeatDeviceIdDataDelay(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
@@ -589,7 +616,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     AUTH_LOGI(AUTH_CONN, "requestId=%{public}u, connType=%{public}d, sideType=%{public}d", requestId,
         connInfo->type, sideType);
-    PostConnConnectTimeout(requestId);
+    PostConnConnectTimeout(requestId, connInfo->type);
     int32_t ret = 0;
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI: {
@@ -745,7 +772,7 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
     };
     if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
         AUTH_LOGE(AUTH_CONN, "strcpy_s ip fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     switch (type) {
         case AUTH_LINK_TYPE_WIFI: {

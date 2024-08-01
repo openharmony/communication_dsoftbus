@@ -285,7 +285,6 @@ HWTEST_F(TransProxyManagerTest, TransProxyOpenProxyChannelTest002, TestSize.Leve
     AppInfo appInfo;
     int32_t channelId = -1;
     ConnectOption connInfo;
-    int32_t ret = SOFTBUS_ERR;
 
     TransConnInterfaceMock connMock;
     TransCommInterfaceMock commMock;
@@ -297,7 +296,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyOpenProxyChannelTest002, TestSize.Leve
         .WillOnce(Return(1));
 
     appInfo.appType = APP_TYPE_AUTH;
-    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
+    int32_t ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
     ASSERT_EQ(SOFTBUS_OK, ret);
     m_testProxyConningChannel = channelId;
     printf("new channel1 id:%d.\n", channelId);
@@ -313,7 +312,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyCreateChanInfoTest001, TestSize.Level1
 {
     TransCommInterfaceMock commMock;
     EXPECT_CALL(commMock, GenerateRandomStr)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(commMock, SoftBusGenerateRandomArray)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -426,11 +425,11 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetAuthIdTest001, TestSize.Level1)
     AuthHandle authHandle = { 0 };
     int32_t channelId = -1;
     int32_t ret = TransProxyGetAuthId(channelId, &authHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channelId = m_testProxyAuthChannelId;
     ret = TransProxyGetAuthId(channelId, &authHandle);
-    EXPECT_NE(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -612,7 +611,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyChanProcessByReqIdTest001, TestSize.Le
 HWTEST_F(TransProxyManagerTest, TransProxyOpenProxyChannelFailTest001, TestSize.Level1)
 {
     AppInfo appInfo;
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_MEM_ERR;
 
     appInfo.appType = APP_TYPE_AUTH;
     g_testProxyChannelOpenFailFlag = false;
@@ -681,7 +680,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest002, TestSize.Lev
 
     g_testProxyChannelOpenSuccessFlag = false;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK;
-    msg.data = TransProxyPackHandshakeErrMsg(SOFTBUS_ERR);
+    msg.data = TransProxyPackHandshakeErrMsg(SOFTBUS_MEM_ERR);
     ASSERT_TRUE(NULL != msg.data);
     msg.dateLen = strlen(msg.data) + 1;
 

@@ -58,6 +58,16 @@ typedef enum {
     EVENT_STAGE_TRANS_COMMON_ONE = 1,
 } TransEventCommonStage;
 
+typedef enum {
+    DEVICE_STATE_INVALID = 1,
+    DEVICE_STATE_LOCAL_BT_HALF_OFF,
+    DEVICE_STATE_REMOTE_BT_HALF_OFF,
+    DEVICE_STATE_LOCAL_WIFI_HALF_OFF,
+    DEVICE_STATE_REMOTE_WIFI_HALF_OFF,
+    DEVICE_STATE_NOT_CARE,
+    DEVICE_STATE_BUTT,
+} TransDeviceState;
+
 typedef struct {
     int32_t result;            // STAGE_RES
     int32_t errcode;           // ERROR_CODE
@@ -87,7 +97,8 @@ typedef struct {
     uint32_t firstTokenId;     // FIRST_TOKEN_ID
     int32_t  firstTokenType;   // FIRST_TOKEN_TYPE
     const char *trafficStats;  // TRAFFIC_STATS
-    int32_t  osType;            // OS_TYPE
+    int32_t  osType;           // OS_TYPE
+    int32_t  deviceState;      // DEVICE_STATE
 } TransEventExtra;
 
 typedef enum {

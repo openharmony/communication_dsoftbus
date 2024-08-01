@@ -94,12 +94,15 @@ P2pV1Processor::~P2pV1Processor()
     StopTimer();
     timer_.Shutdown();
     RemoveExclusive();
-    WifiDirectUtils::SerialFlowExit();
+    if (hasRun_) {
+        WifiDirectUtils::SerialFlowExit();
+    }
 }
 
 [[noreturn]] void P2pV1Processor::Run()
 {
     WifiDirectUtils::SerialFlowEnter();
+    hasRun_ = true;
     for (;;) {
         (this->*state_)();
     }
@@ -115,7 +118,8 @@ bool P2pV1Processor::CanAcceptNegotiateDataAtState(WifiDirectCommand &command)
     if (nc == nullptr) {
         return false;
     }
-    return nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_INVALID;
+    return nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_INVALID &&
+        nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_DISCONNECT_V1_REQ;
 }
 
 void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
@@ -128,7 +132,7 @@ void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
     if (nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_CONN_V1_REQ) {
         return;
     }
-    WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommand(*nc);
+    WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommandFront(*nc);
 }
 
 void P2pV1Processor::SwitchState(ProcessorState state, int timeoutInMillis)
@@ -260,9 +264,6 @@ static void RemoveLinkFromManager(const std::string &remoteDeviceId, int linkId,
                 return;
             }
             refCnt = link.GetReference();
-            if (refCnt <= 1) {
-                link.SetState(InnerLink::LinkState::DISCONNECTING);
-            }
             link.RemoveId(linkId);
             remoteMac = link.GetRemoteBaseMac();
         });
@@ -440,6 +441,10 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::sha
             break;
         case LegacyCommandType::CMD_CONN_V1_RESP:
             ret = ProcessConnectResponseAtWaitAuthHandShake(command);
+            CleanupIfNeed(ret, command->GetRemoteDeviceId());
+            break;
+        case LegacyCommandType::CMD_REUSE_REQ:
+            ret = ProcessReuseRequest(command);
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
             break;
         default:
@@ -1436,10 +1441,9 @@ int P2pV1Processor::ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<Ne
     if (connectCommand_ != nullptr) {
         auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
         auto pid = connectCommand_->GetConnectInfo().info_.pid;
-        bool alreadyAuthHandShake = false;
         WifiDirectLink dlink {};
         auto success = LinkManager::GetInstance().ProcessIfPresent(
-            remoteMac, [msg, requestId, pid, &dlink, &alreadyAuthHandShake](InnerLink &link) {
+            remoteMac, [msg, requestId, pid, &dlink](InnerLink &link) {
                 link.SetState(InnerLink::LinkState::CONNECTED);
                 link.GenerateLink(requestId, pid, dlink, true);
                 dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
@@ -1471,6 +1475,9 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
     param.frequency = finalFrequency;
     param.isWideBandSupported = isLocalWideBandSupported && isRemoteWideBandSupported;
     auto result = P2pEntity::GetInstance().CreateGroup(param);
+    if (connectCommand_ != nullptr) {
+        connectCommand_->GetConnectInfo().info_.dfxInfo.frequency = param.frequency;
+    }
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
         "create group failed, error=%{public}d", result.errorCode_);
 
@@ -1508,31 +1515,20 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
     return StartAuthListening(localIp);
 }
 
-int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel)
+int P2pV1Processor::UpdateWhenConnectSuccess(std::string groupConfig, const NegotiateMessage &msg)
 {
-    auto goPort = msg.GetLegacyP2pGoPort();
-    auto groupConfig = msg.GetLegacyP2pGroupConfig();
-    auto gcIp = msg.GetLegacyP2pGcIp();
-    CONN_LOGI(CONN_WIFI_DIRECT, "goPort=%{public}d, gcIp=%{public}s", goPort, WifiDirectAnonymizeIp(gcIp).c_str());
-
-    P2pAdapter::ConnectParam params {};
-    params.isNeedDhcp = IsNeedDhcp(gcIp, groupConfig);
-    params.groupConfig = groupConfig;
-    params.gcIp = gcIp;
-    auto result = P2pEntity::GetInstance().Connect(params);
-    CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
-        "connect group failed, error=%{public}d", result.errorCode_);
-
     std::string localMac;
     std::string localIp;
+    auto myRole = LinkInfo::LinkMode::NONE;
     auto ret = InterfaceManager::GetInstance().UpdateInterface(
-        InterfaceInfo::P2P, [groupConfig, &localMac, &localIp](InterfaceInfo &interface) {
+        InterfaceInfo::P2P, [groupConfig, &myRole, &localMac, &localIp](InterfaceInfo &interface) {
             interface.SetP2pGroupConfig(groupConfig);
             int32_t reuseCount = interface.GetReuseCount();
             interface.SetReuseCount(reuseCount + 1);
             CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%{public}d", interface.GetReuseCount());
             localMac = interface.GetBaseMac();
             localIp = interface.GetIpString().ToIpString();
+            myRole = interface.GetRole();
             return SOFTBUS_OK;
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(
@@ -1549,9 +1545,33 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(
         success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
+    WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectUtils::ToWifiDirectRole(myRole), localMac, msg.GetLegacyP2pGoMac());
     ret = StartAuthListening(localIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "start auth listen failed, error=%{public}d", ret);
+    return SOFTBUS_OK;
+}
+
+int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel)
+{
+    auto goPort = msg.GetLegacyP2pGoPort();
+    auto groupConfig = msg.GetLegacyP2pGroupConfig();
+    auto gcIp = msg.GetLegacyP2pGcIp();
+    CONN_LOGI(CONN_WIFI_DIRECT, "goPort=%{public}d, gcIp=%{public}s", goPort, WifiDirectAnonymizeIp(gcIp).c_str());
+
+    P2pAdapter::ConnectParam params {};
+    params.isNeedDhcp = IsNeedDhcp(gcIp, groupConfig);
+    params.groupConfig = groupConfig;
+    params.gcIp = gcIp;
+    auto result = P2pEntity::GetInstance().Connect(params);
+    if (result.errorCode_ != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", result.errorCode_);
+        P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { P2P_IF_NAME });
+        return result.errorCode_;
+    }
+    auto ret = UpdateWhenConnectSuccess(groupConfig, msg);
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "update date failed, error=%{public}d", ret);
     ret = OpenAuthConnection(msg, channel);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "open auth connection failed, error=%{public}d", ret);
@@ -1754,7 +1774,14 @@ int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount already 0, do not call entity disconnect");
         return SOFTBUS_OK;
     }
-
+    if (reuseCount <= 1) {
+        LinkManager::GetInstance().ProcessIfPresent(
+            InnerLink::LinkType::P2P, remoteDeviceId, [](InnerLink &link) {
+                if (link.GetReference() < 1) {
+                    link.SetState(InnerLink::LinkState::DISCONNECTING);
+                }
+        });
+    }
     P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
     auto result = P2pEntity::GetInstance().Disconnect(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,

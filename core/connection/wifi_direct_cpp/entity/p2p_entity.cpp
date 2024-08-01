@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <future>
 
-#include "bus_center_manager.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 
@@ -30,33 +29,6 @@
 
 namespace OHOS::SoftBus {
 using InterfaceType = InterfaceInfo::InterfaceType;
-
-void SyncLnnInfoForP2p(
-    const WifiP2pLinkedInfo &info, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo)
-{
-    (void)info;
-    CONN_CHECK_AND_RETURN_LOGE(groupInfo != nullptr, CONN_WIFI_DIRECT, "groupInfo is null");
-    enum WifiDirectRole myRole = groupInfo->isGroupOwner ? WIFI_DIRECT_ROLE_GO : WIFI_DIRECT_ROLE_GC;
-    CONN_LOGI(CONN_WIFI_DIRECT, "myRole=%{public}d", myRole);
-    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, myRole);
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn p2p role failed");
-    }
-
-    auto localMac = P2pAdapter::GetMacAddress();
-    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, localMac.c_str());
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn my mac failed");
-    }
-
-    auto goMac = groupInfo->isGroupOwner ? "" : groupInfo->groupOwner.address;
-    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, goMac.c_str());
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn go mac failed");
-    }
-
-    LnnSyncP2pInfo();
-}
 
 static void P2pStateChangeCallback(P2pState state)
 {
@@ -112,6 +84,8 @@ P2pEntity::P2pEntity() : timer_("P2pEntity")
 }
 
 void P2pEntity::DisconnectLink(const std::string &remoteMac) { }
+
+void P2pEntity::DestroyGroupIfNeeded() { };
 
 P2pOperationResult P2pEntity::CreateGroup(const P2pCreateGroupParam &param)
 {
@@ -377,6 +351,7 @@ void P2pEntity::OnP2pStateChangeEvent(P2pState state)
 {
     std::lock_guard lock(operationLock_);
     UpdateInterfaceManagerWhenStateChanged(state);
+    WifiDirectUtils::SyncLnnInfoForP2p(WIFI_DIRECT_ROLE_NONE, P2pAdapter::GetMacAddress(), "");
     state_->OnP2pStateChangeEvent(state);
 }
 
@@ -393,7 +368,6 @@ void P2pEntity::OnP2pConnectionChangeEvent(
     state_->PreprocessP2pConnectionChangeEvent(info, groupInfo);
     UpdateInterfaceManager(info, groupInfo);
     UpdateLinkManager(info, groupInfo);
-    SyncLnnInfoForP2p(info, groupInfo);
     state_->OnP2pConnectionChangeEvent(info, groupInfo);
 }
 
@@ -444,7 +418,6 @@ static void UpdateInterfaceInfo(
     } else {
         CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s", WifiDirectAnonymizeIp(ip).c_str());
     }
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get ip failed, error=%d", ret);
 
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [localMac, dynamicMac, ip, groupInfo, groupConfig](InterfaceInfo &interface) {

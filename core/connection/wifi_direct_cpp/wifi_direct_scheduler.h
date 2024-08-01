@@ -102,11 +102,19 @@ public:
     }
 
     template<typename Command>
-    void QueueCommand(Command &command)
+    void QueueCommandFront(Command &command)
     {
         std::lock_guard commandLock(commandLock_);
-        CONN_LOGI(CONN_WIFI_DIRECT, "push data to list");
+        CONN_LOGI(CONN_WIFI_DIRECT, "push data to list front");
         commandList_.push_front(std::make_shared<Command>(command));
+    }
+
+    template<typename Command>
+    void QueueCommandBack(Command &command)
+    {
+        std::lock_guard commandLock(commandLock_);
+        CONN_LOGI(CONN_WIFI_DIRECT, "push data to list back");
+        commandList_.push_back(std::make_shared<Command>(command));
     }
 
     template<typename Command>
@@ -143,9 +151,17 @@ public:
 
     virtual bool ProcessNextCommand(WifiDirectExecutor *executor, std::shared_ptr<WifiDirectProcessor> &processor);
 
+    bool CheckExecutorRunning(const std::string &remoteDeviceId)
+    {
+        std::lock_guard executorLock(executorLock_);
+        auto iterator = executors_.find(remoteDeviceId);
+        return iterator != executors_.end();
+    }
+
 protected:
     int ScheduleActiveCommand(const std::shared_ptr<WifiDirectCommand> &command,
                               std::shared_ptr<WifiDirectExecutor> &executor);
+    static void DumpNegotiateChannel(const WifiDirectNegotiateChannel &channel);
 
     static constexpr int MAX_EXECUTOR = 8;
     std::recursive_mutex executorLock_;

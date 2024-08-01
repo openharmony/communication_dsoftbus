@@ -122,37 +122,10 @@
         }
       ],
       "test": [
-        "//foundation/communication/dsoftbus/tests/adapter:fuzztest",
-        "//foundation/communication/dsoftbus/tests/adapter:unittest",
-        "//foundation/communication/dsoftbus/tests/core/adapter:fuzztest",
-        "//foundation/communication/dsoftbus/tests/core/adapter:unittest",
-        "//foundation/communication/dsoftbus/tests/core/authentication:fuzztest",
-        "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
-        "//foundation/communication/dsoftbus/tests/core/broadcast:unittest",
-        "//foundation/communication/dsoftbus/tests/core/bus_center:unittest",
-        "//foundation/communication/dsoftbus/tests/core/bus_center:fuzztest",
-        "//foundation/communication/dsoftbus/tests/core/common:fuzztest",
-        "//foundation/communication/dsoftbus/tests/core/common:unittest",
-        "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
-        "//foundation/communication/dsoftbus/tests/core/connection:unittest",
-        "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
-        "//foundation/communication/dsoftbus/tests/core/discovery:fuzztest",
-        "//foundation/communication/dsoftbus/tests/core/frame:fuzztest",
-        "//foundation/communication/dsoftbus/tests/core/transmission:unittest",
-        "//foundation/communication/dsoftbus/tests/core/transmission:fuzztest",
-        "//foundation/communication/dsoftbus/tests/sdk/bus_center:fuzztest",
-        "//foundation/communication/dsoftbus/tests/sdk/bus_center:unittest",
-        "//foundation/communication/dsoftbus/tests/sdk/discovery:fuzztest",
-        "//foundation/communication/dsoftbus/tests/sdk/discovery:unittest",
-        "//foundation/communication/dsoftbus/tests/sdk/transmission:fuzztest",
-        "//foundation/communication/dsoftbus/tests/sdk/transmission:unittest",
-        "//foundation/communication/dsoftbus/tests/sdk/bus_center:benchmarktest",
-        "//foundation/communication/dsoftbus/tests/sdk/discovery:benchmarktest",
-        "//foundation/communication/dsoftbus/tests/sdk/transmission:benchmarktest",
-        "//foundation/communication/dsoftbus/tests/sdk/transmission:integration_test",
-        "//foundation/communication/dsoftbus/tests/sdk/frame/common:unittest",
-        "//foundation/communication/dsoftbus/tests/sdk/frame/standard:unittest",
-        "//foundation/communication/dsoftbus/tests/sdk/frame:fuzztest"
+        "//foundation/communication/dsoftbus/tests:benchmarktest",
+        "//foundation/communication/dsoftbus/tests:fuzztest",
+        "//foundation/communication/dsoftbus/tests:integration_test",
+        "//foundation/communication/dsoftbus/tests:unittest"
       ]
     }
   }

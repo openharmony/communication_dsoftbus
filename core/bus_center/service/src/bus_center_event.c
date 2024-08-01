@@ -24,6 +24,7 @@
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_cipherkey_manager.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_id.h"
@@ -132,6 +133,7 @@ static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnNotifyNetworkIdChangeEvent(networkId);
     LnnNotifyLocalNetworkIdChanged();
+    LnnUpdateAuthExchangeUdid();
     LNN_LOGD(LNN_EVENT, "offline exceted 5min, process networkId update event");
 }
 
@@ -376,6 +378,15 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
 void LnnNotifyLocalNetworkIdChanged(void)
 {
     (void)PostNotifyMessageDelay(NOTIFY_LOCAL_NETWORKID_UPDATE, 0);
+}
+
+void LnnNotifyDeviceNotTrusted(const char *msg)
+{
+    if (msg == NULL) {
+        LNN_LOGE(LNN_EVENT, "msg is null");
+        return;
+    }
+    (void)LnnIpcNotifyDeviceNotTrusted(msg);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)

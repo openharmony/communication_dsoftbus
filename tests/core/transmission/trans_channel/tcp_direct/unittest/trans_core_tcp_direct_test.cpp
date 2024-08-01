@@ -31,6 +31,7 @@ namespace OHOS {
 
 #define PID 2024
 #define UID 4000
+#define MAX_IP_LEN 16
 
 static const char *g_pkgName = "dms";
 static const char *g_sessionName = "com.test.trans.auth.demo";
@@ -59,7 +60,6 @@ void TransCoreTcpDirectTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    TransChannelInit();
 }
 
 void TransCoreTcpDirectTest::TearDownTestCase(void)
@@ -69,7 +69,6 @@ void TransCoreTcpDirectTest::TearDownTestCase(void)
     AuthDeinit();
     TransServerDeinit();
     DiscEventManagerDeinit();
-    TransChannelDeinit();
 }
 
 SessionServer *TestSetPack()
@@ -674,6 +673,9 @@ HWTEST_F(TransCoreTcpDirectTest, CreateTcpChannelInfoTest, TestSize.Level1)
     ChannelInfo channel;
     channel.channelId = 1;
     channel.businessType = BUSINESS_TYPE_BYTE;
+    char ip[MAX_IP_LEN] = { 0 };
+    strcpy_s(ip, MAX_IP_LEN, g_ip);
+    channel.myIp = ip;
     TcpChannelInfo *info = CreateTcpChannelInfo(&channel);
     ASSERT_TRUE(info != nullptr);
     SoftBusFree(info);

@@ -215,7 +215,7 @@ static int32_t EncryptByPublicKey(const uint8_t *src, uint32_t srcLen, const RSA
     if ((BN_num_bits(modNum) > OPENSSL_RSA_MAX_MODULUS_BITS) || (BN_ucmp(modNum, exp) <= 0) ||
         ((BN_num_bits(modNum) > OPENSSL_RSA_SMALL_MODULUS_BITS) && (BN_num_bits(exp) > OPENSSL_RSA_MAX_PUBEXP_BITS))) {
         COMM_LOGE(COMM_UTILS, "invalid param rsa.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     do {
         ctx = GetRsaBigNum(modNum, &base, &result, &buf, &bufNum);

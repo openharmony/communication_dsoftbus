@@ -38,6 +38,7 @@
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "trans_channel_common.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
@@ -474,6 +475,7 @@ int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t er
         .peerDevVer = conn->appInfo.peerVersion,
         .result = EVENT_STAGE_RESULT_FAILED
     };
+    extra.deviceState = TransGetDeviceState(conn->appInfo.peerNetWorkId);
     int32_t sceneCommand = conn->serverSide ? EVENT_SCENE_OPEN_CHANNEL_SERVER : EVENT_SCENE_OPEN_CHANNEL;
     TRANS_EVENT(sceneCommand, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransAlarmExtra extraAlarm = {
@@ -943,12 +945,16 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     errCode = HandleDataBusReply(conn, channelId, &extra, flags, seq);
     if (errCode != SOFTBUS_OK) {
         (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+        (void)TransDelTcpChannelInfoByChannelId(channelId);
         ReleaseSessionConn(conn);
         return errCode;
     }
 
     errCode = NotifyChannelBind(channelId);
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    if (errCode != SOFTBUS_OK) {
+        (void)TransDelTcpChannelInfoByChannelId(channelId);
+    }
     ReleaseSessionConn(conn);
     return errCode;
 }

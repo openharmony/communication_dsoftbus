@@ -350,13 +350,6 @@ bool WifiDirectUtils::SupportHml()
     return support;
 }
 
-bool WifiDirectUtils::SupportHmlTwo()
-{
-    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", true);
-    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%{public}d", support);
-    return support;
-}
-
 int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std::string &ip)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s", interface.c_str());
@@ -414,7 +407,7 @@ int32_t WifiDirectUtils::IpStringToIntArray(const char *addrString, uint32_t *ad
 std::string WifiDirectUtils::ChannelListToString(const std::vector<int> &channels)
 {
     std::string stringChannels;
-    for (auto i = 0; i < channels.size(); i++) {
+    for (size_t i = 0; i < channels.size(); i++) {
         if (i != 0) {
             stringChannels += "##";
         }
@@ -518,13 +511,47 @@ void WifiDirectUtils::ParallelFlowExit()
     serialParallelCv_.notify_all();
 }
 
-int32_t WifiDirectUtils::CalculateStringLength(char *str, int32_t size)
+uint32_t WifiDirectUtils::CalculateStringLength(const char *str, uint32_t size)
 {
-    for (auto i = size - 1; i >= 0; i--) {
+    for (int32_t i = static_cast<int32_t>(size - 1); i >= 0; i--) {
         if (str[i] != '\0') {
-            return i + 1;
+            return static_cast<uint32_t>(i + 1);
         }
     }
     return 0;
 }
+
+void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "role=%{public}d, localMac=%{public}s, goMac=%{public}s",
+        role, WifiDirectAnonymizeMac(localMac).c_str(), WifiDirectAnonymizeMac(goMac).c_str());
+    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, role);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn p2p role failed");
+    }
+
+    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, localMac.c_str());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn my mac failed");
+    }
+
+    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, goMac.c_str());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "set lnn go mac failed");
+    }
+
+    LnnSyncP2pInfo();
+}
+
+int32_t WifiDirectUtils::GetOsType(const std::string &remoteNetworkId)
+{
+    int32_t osType = OH_OS_TYPE;
+    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
+        return osType;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "get os type success, osType=%{public}d", osType);
+    return osType;
+}
+
 } // namespace OHOS::SoftBus

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,20 +11,82 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
 
-lite_component("softbus_test") {
-  if (ohos_kernel_type == "liteos_m") {
-    features = []
-  } else {
-    features = []
-    if (ohos_build_type == "debug") {
-      features += [
-        "sdk/discovery/unittest:DiscSdkTest",
-        "adapter/unittest:AdapterTest",
-        "sdk/transmission/trans_channel:TransSdkStreamTest",
-        "sdk/bus_center/unittest:BusCenterSdkRefreshSmall",
+  lite_component("softbus_test") {
+    if (ohos_kernel_type == "liteos_m") {
+      features = []
+    } else {
+      features = []
+      if (ohos_build_type == "debug") {
+        features += [
+          "adapter/unittest:AdapterTest",
+          "sdk/bus_center/unittest:BusCenterSdkRefreshSmall",
+          "sdk/discovery/unittest:DiscSdkTest",
+          "sdk/transmission/trans_channel:TransSdkStreamTest",
+        ]
+      }
+    }
+  }
+} else {
+  import("//build/test.gni")
+  import("../dsoftbus.gni")
+
+  group("unittest") {
+    testonly = true
+    deps = []
+    if (!use_libfuzzer) {
+      deps += [
+        "adapter:unittest",
+        "core/adapter:unittest",
+        "core/authentication:unittest",
+        "core/broadcast:unittest",
+        "core/bus_center:unittest",
+        "core/common:unittest",
+        "core/connection:unittest",
+        "core/discovery:unittest",
+        "core/transmission:unittest",
+        "sdk/bus_center:unittest",
+        "sdk/discovery:unittest",
+        "sdk/frame/common:unittest",
+        "sdk/frame/standard:unittest",
+        "sdk/transmission:unittest",
       ]
     }
+  }
+
+  group("fuzztest") {
+    testonly = true
+    deps = [
+      "adapter:fuzztest",
+      "core/adapter:fuzztest",
+      "core/authentication:fuzztest",
+      "core/broadcast:fuzztest",
+      "core/bus_center:fuzztest",
+      "core/common:fuzztest",
+      "core/connection:fuzztest",
+      "core/discovery:fuzztest",
+      "core/frame:fuzztest",
+      "core/transmission:fuzztest",
+      "sdk/bus_center:fuzztest",
+      "sdk/discovery:fuzztest",
+      "sdk/frame:fuzztest",
+      "sdk/transmission:fuzztest",
+    ]
+  }
+
+  group("benchmarktest") {
+    testonly = true
+    deps = [
+      "sdk/bus_center:benchmarktest",
+      "sdk/discovery:benchmarktest",
+      "sdk/transmission:benchmarktest",
+    ]
+  }
+
+  group("integration_test") {
+    testonly = true
+    deps = [ "sdk/transmission:integration_test" ]
   }
 }

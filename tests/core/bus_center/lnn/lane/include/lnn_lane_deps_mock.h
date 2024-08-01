@@ -62,6 +62,7 @@ public:
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
@@ -99,6 +100,8 @@ public:
     virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
     virtual int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info) = 0;
     virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
+    virtual int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info) = 0;
+    virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type) = 0;
     virtual void LnnDumpLocalBasicInfo(void) = 0;
     virtual void LnnDumpOnlineDeviceInfo(void) = 0;
     virtual int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
@@ -122,6 +125,7 @@ public:
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char*, uint32_t));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char*, InfoKey, char*, uint32_t));
     MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char*, AuthConnInfo*, bool));
+    MOCK_METHOD4(AuthGetConnInfoByType, int32_t (const char*, AuthLinkType, AuthConnInfo *, bool));
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo*, uint32_t, const AuthConnCallback*, bool));
@@ -159,6 +163,8 @@ public:
     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
     MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *networkId, InfoKey key, uint32_t *info));
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey key, uint32_t *info));
+    MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t (InfoKey key, uint32_t info));
+    MOCK_METHOD2(LnnSetNetCapability, int32_t (uint32_t *capability, NetCapability type));
     MOCK_METHOD0(LnnDumpLocalBasicInfo, void (void));
     MOCK_METHOD0(LnnDumpOnlineDeviceInfo, void (void));
     MOCK_METHOD5(LnnConvertDlId, int32_t (const char *srcId, IdCategory srcIdType, IdCategory dstIdType,

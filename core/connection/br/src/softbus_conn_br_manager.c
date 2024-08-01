@@ -152,7 +152,8 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
         .linkType = CONNECT_BR,
         .costTime = costTime,
         .isReuse = statistics->reuse ? 1 : 0,
-        .result = EVENT_STAGE_RESULT_OK };
+        .result = EVENT_STAGE_RESULT_OK
+    };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
@@ -725,8 +726,16 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
         CONN_LOGE(CONN_BR, "no connecting device, connId=%{public}u, addr=%{public}s, error=%{public}d", connectionId,
             anomizeAddress, error);
+        ConnBrDevice *it = NULL;
+        LIST_FOR_EACH_ENTRY(it, &g_brManager.waitings, ConnBrDevice, node) {
+            if (StrCmpIgnoreCase(it->addr, connection->addr) == 0) {
+                it->state = BR_DEVICE_STATE_WAIT_SCHEDULE;
+                break;
+            }
+        }
         ConnBrRemoveConnection(connection);
         ConnBrReturnConnection(&connection);
+        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_NEXT_CMD, 0, 0, NULL, 0);
         return;
     }
 
@@ -1171,7 +1180,6 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
     if (msg->what != MSG_DATA_RECEIVED) {
         CONN_LOGI(CONN_BR, "recvMsg=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
     }
-
     size_t commandSize = sizeof(g_commands) / sizeof(g_commands[0]);
     for (size_t i = 0; i < commandSize; i++) {
         if (g_commands[i].cmd == msg->what) {

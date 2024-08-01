@@ -34,7 +34,12 @@ void UpdateLocalDeviceInfoToMlps(const NodeInfo *localInfo)
     (void)localInfo;
 }
 
-void UpdateRemoteDeviceInfoToMlps(void)
+void UpdateRemoteDeviceInfoToMlps(const NodeInfo *info)
+{
+    (void)info;
+}
+
+void UpdateRemoteDeviceInfoListToMlps(void)
 {
 }
 
@@ -56,9 +61,11 @@ int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, LpServerType type)
     return SOFTBUS_OK;
 }
 
-int32_t SwtichHeartbeatReportChannel(bool isToAP)
+int32_t SwtichHeartbeatReportChannel(bool isToAP, uint16_t scanInterval, uint16_t scanWindow)
 {
     (void)isToAP;
+    (void)scanInterval;
+    (void)scanWindow;
     return SOFTBUS_OK;
 }
 
@@ -70,4 +77,9 @@ bool IsSupportLpFeature(void)
 void SetLpKeepAliveState(void *para)
 {
     (void)para;
+}
+
+void AsyncSetBleBroadcastTimeStamp(const char *networkId)
+{
+    (void)networkId;
 }

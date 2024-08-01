@@ -34,11 +34,9 @@
 #define MSG_HEAD_LENGTH (28 + 16 + 16)
 
 int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *chanInfo, const unsigned char *payLoad,
-    int payLoadLen, ProxyPacketType flag);
+    int32_t payLoadLen, ProxyPacketType flag);
 
-
-int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
-    TransReceiveData *receiveData)
+int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, TransReceiveData *receiveData)
 {
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_MSG, "param invalid");
@@ -95,13 +93,11 @@ SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
     }
 }
 
-int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
+static int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
     uint32_t len, ProxyPacketType flags)
 {
-    ConnectType type = 0;
-
-    if ((data == NULL) || (len == 0)) {
-        TRANS_LOGE(TRANS_MSG, "invalid para");
+    if (data == NULL || len == 0) {
+        TRANS_LOGE(TRANS_MSG, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     ProxyChannelInfo *chanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -121,16 +117,11 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
         TRANS_LOGE(TRANS_MSG, "send msg fail, len=%{public}u, flags=%{public}d, ret=%{public}d", len, flags, ret);
     }
 
-    if (ConnGetTypeByConnectionId(chanInfo->connId, &type) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "obtain link type failed!");
-    }
-
     SoftBusFree(chanInfo);
     return ret;
 }
 
-int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len,
-    SessionPktType flags)
+int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len, SessionPktType flags)
 {
     ProxyPacketType type = SessionTypeToPacketType(flags);
     return TransProxyPostPacketData(channelId, data, len, type);
@@ -139,13 +130,11 @@ int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, 
 static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char *payLoad,
     int32_t datalen, int32_t *outlen)
 {
-    char *buf = NULL;
-    uint32_t dstLen;
     ProxyMessageHead proxyMessageHead;
     uint32_t connHeadLen = ConnGetHeadSize();
     uint32_t bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + (uint32_t)datalen;
 
-    buf = (char*)SoftBusCalloc(bufLen);
+    char *buf = (char *)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_MSG, "buf calloc failed");
         return NULL;
@@ -161,7 +150,7 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char 
         SoftBusFree(buf);
         return NULL;
     }
-    dstLen = bufLen - connHeadLen - sizeof(ProxyMessageHead);
+    uint32_t dstLen = bufLen - connHeadLen - sizeof(ProxyMessageHead);
     if (memcpy_s(buf + connHeadLen + sizeof(ProxyMessageHead), dstLen, payLoad, datalen) != EOK) {
         TRANS_LOGE(TRANS_MSG, "memcpy_s buf failed.");
         SoftBusFree(buf);
@@ -172,14 +161,14 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char 
     return buf;
 }
 
-static int32_t TransProxyTransNormalMsg(const ProxyChannelInfo *info, const char *payLoad, int payLoadLen,
+static int32_t TransProxyTransNormalMsg(const ProxyChannelInfo *info, const char *payLoad, int32_t payLoadLen,
     ProxyPacketType flag)
 {
-    ProxyMessageHead msgHead = {0};
+    ProxyMessageHead msgHead = { 0 };
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
-    int bufLen = 0;
+    int32_t bufLen = 0;
     char *buf = TransProxyPackAppNormalMsg(&msgHead, payLoad, payLoadLen, &bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_MSG, "proxy pack msg error");
@@ -188,7 +177,7 @@ static int32_t TransProxyTransNormalMsg(const ProxyChannelInfo *info, const char
     int32_t ret = TransProxyTransSendMsg(info->connId, (uint8_t *)buf, (uint32_t)bufLen,
         ProxyTypeToConnPri(flag), info->appInfo.myData.pid);
     if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
-        TRANS_LOGE(TRANS_MSG, "proxy send queue full!!");
+        TRANS_LOGE(TRANS_MSG, "proxy send queue full.");
         return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
     }
     if (ret != SOFTBUS_OK) {
@@ -199,7 +188,7 @@ static int32_t TransProxyTransNormalMsg(const ProxyChannelInfo *info, const char
 }
 
 int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, const unsigned char *payLoad,
-    int payLoadLen, ProxyPacketType flag)
+    int32_t payLoadLen, ProxyPacketType flag)
 {
     if (info == NULL || payLoad == NULL) {
         TRANS_LOGE(TRANS_MSG, "param invalid");
@@ -214,11 +203,10 @@ int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, const unsigned char *
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
-    return TransProxyTransNormalMsg(info, (const char*)payLoad, payLoadLen, flag);
+    return TransProxyTransNormalMsg(info, (const char *)payLoad, payLoadLen, flag);
 }
 
-int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
-    const char *data, uint32_t len)
+int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len)
 {
     if (data == NULL || pkgName == NULL) {
         TRANS_LOGE(TRANS_MSG, "data or pkgname is null.");

@@ -16,6 +16,7 @@
 #include "softbus_conn_manager.h"
 
 #include <securec.h>
+#include <stdatomic.h>
 
 #include "common_list.h"
 #include "conn_event.h"
@@ -36,7 +37,7 @@
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
-static bool g_isInited = false;
+static _Atomic bool g_isInited = false;
 static SoftBusList *g_connTimeList = NULL;
 #define SEC_TIME 1000LL
 
@@ -328,9 +329,8 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
     CONN_CHECK_AND_RETURN_LOGW(data != NULL, CONN_COMMON,
         "dispatch data failed: data is null, connectionId=%{public}u, module=%{public}d", connectionId, moduleId);
     CONN_CHECK_AND_RETURN_LOGW(len > (int32_t)sizeof(ConnPktHead), CONN_COMMON,
-        "dispatch data failed: dataLen=%{public}d less than connection header size, "
-        "connectionId=%{public}u, module=%{public}d",
-        connectionId, moduleId, len);
+        "dispatch data failed: dataLen=%{public}d < connection header size, "
+        "connectionId=%{public}u, module=%{public}d", len, connectionId, moduleId);
 
     ConnListenerNode listener = { 0 };
     int32_t status = GetListenerByModuleId(moduleId, &listener);
@@ -665,7 +665,7 @@ ConnectCallback g_connManagerCb = { 0 };
 
 static int32_t ConnSocketsAndBaseListenerInit(void)
 {
-    if (g_isInited) {
+    if (atomic_load_explicit(&g_isInited, memory_order_acquire)) {
         return SOFTBUS_CONN_INTERNAL_ERR;
     }
 
@@ -686,7 +686,7 @@ static int32_t ConnSocketsAndBaseListenerInit(void)
 int32_t ConnServerInit(void)
 {
     int32_t ret = ConnSocketsAndBaseListenerInit();
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "connsockets and baselistener init failed.");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "init failed.");
     g_connManagerCb.OnConnected = ConnManagerConnected;
     g_connManagerCb.OnReusedConnected = ConnManagerReusedConnected;
     g_connManagerCb.OnDisconnected = ConnManagerDisconnected;
@@ -725,14 +725,14 @@ int32_t ConnServerInit(void)
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_ReqLock, NULL) == SOFTBUS_OK,
         SOFTBUS_CONN_INTERNAL_ERR, CONN_COMMON, "g_ReqLock init lock failed.");
 
-    g_isInited = true;
+    atomic_store_explicit(&g_isInited, true, memory_order_release);
     CONN_LOGI(CONN_COMMON, "connect manager init success.");
     return SOFTBUS_OK;
 }
 
 void ConnServerDeinit(void)
 {
-    if (!g_isInited) {
+    if (!atomic_load_explicit(&g_isInited, memory_order_acquire)) {
         return;
     }
 
@@ -750,7 +750,7 @@ void ConnServerDeinit(void)
     DeinitBaseListener();
     SoftBusMutexDestroy(&g_ReqLock);
 
-    g_isInited = false;
+    atomic_store_explicit(&g_isInited, false, memory_order_release);
 }
 
 bool CheckActiveConnection(const ConnectOption *info, bool needOccupy)

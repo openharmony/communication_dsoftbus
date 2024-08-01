@@ -65,7 +65,7 @@ int32_t TransCommonGetLocalConfig(int32_t channelType, int32_t businessType, uin
 
 void TransFreeAppInfo(AppInfo *appInfo);
 
-void TransFreeLane(uint32_t laneHandle, bool isQosLane);
+void TransFreeLane(uint32_t laneHandle, bool isQosLane, bool isAsync);
 
 bool IsPeerDeviceLegacyOs(int32_t osType);
 
@@ -74,6 +74,8 @@ void GetOsTypeByNetworkId(const char *networkId, int32_t *osType);
 void GetRemoteUdidWithNetworkId(const char *networkId, char *info, uint32_t len);
 
 void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVersion, uint32_t len);
+
+TransDeviceState TransGetDeviceState(const char *networkId);
 
 #ifdef __cplusplus
 }

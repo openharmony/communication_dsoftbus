@@ -217,19 +217,19 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelTest001, Test
 
     connInfo.type = CONNECT_BLE_DIRECT;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     connInfo.type = CONNECT_BLE;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     connInfo.type = CONNECT_BR;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     connInfo.type = CONNECT_TCP;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 }
 
 /**
@@ -381,11 +381,10 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoByChanIdTest001, Te
   */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoByChanIdTest002, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     int32_t chanId = TEST_MESSAGE_CHANNEL_VALID_ID;
     AppInfo* appInfo = NULL;
 
-    ret = TransProxyGetAppInfoByChanId(chanId, appInfo);
+    int32_t ret = TransProxyGetAppInfoByChanId(chanId, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     chanId = TEST_MESSAGE_CHANNEL_ID;
@@ -419,11 +418,10 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnIdByChanIdTest001, Tes
   */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnIdByChanIdTest002, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     int32_t channelId = TEST_MESSAGE_CHANNEL_ID;
     int32_t* connId = NULL;
 
-    ret = TransProxyGetConnIdByChanId(channelId, connId);
+    int32_t ret = TransProxyGetConnIdByChanId(channelId, connId);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -469,11 +467,10 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest001,
   */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest002, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     int32_t channelId = TEST_MESSAGE_CHANNEL_VALID_ID;
     ConnectOption* connOpt = NULL;
 
-    ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
+    int32_t ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     connOpt = (ConnectOption *)SoftBusMalloc(sizeof(ConnectOption));
@@ -562,7 +559,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, Tes
 
     g_testProxyChannelOpenSuccessFlag = false;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK;
-    msg.data = TransProxyPackHandshakeErrMsg(SOFTBUS_ERR);
+    msg.data = TransProxyPackHandshakeErrMsg(SOFTBUS_INVALID_PARAM);
     ASSERT_TRUE(NULL != msg.data);
     msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
 
@@ -706,7 +703,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseProxyChannelTest001, Tes
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseProxyChannelTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_MESSAGE_CHANNEL_VALID_ID;
-    int32_t ret = SOFTBUS_ERR;
 
     TransProxyOpenProxyChannelSuccess(channelId);
 
@@ -725,7 +721,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseProxyChannelTest002, Tes
 
     TransProxyProcessResetMsg(msg);
 
-    ret = TransProxyCloseProxyChannel(channelId);
+    int32_t ret = TransProxyCloseProxyChannel(channelId);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 
     channelId = TEST_MESSAGE_CHANNEL_ID;
@@ -1139,7 +1135,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
 
 /**
  * @tc.name: TransProxyGetAppInfoTypeTest001
- * @tc.desc: Should return SOFTBUS_ERR when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE when given invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1154,7 +1150,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest001, TestSi
 
 /**
  * @tc.name: TransProxySpecialUpdateChanInfoTest001
- * @tc.desc: Should return SOFTBUS_ERR when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1180,7 +1176,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest001,
 
 /**
  * @tc.name: TransProxyGetChanByChanIdTest001
- * @tc.desc: Should return SOFTBUS_ERR when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null channelInfo.
  * @tc.type: FUNC
  * @tc.require:
@@ -1198,7 +1194,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByChanIdTest001, TestS
 
 /**
  * @tc.name: TransProxyProcessDataConfigTest001
- * @tc.desc: Should return SOFTBUS_ERR when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo.
  * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
@@ -1221,7 +1217,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessDataConfigTest001, Tes
 
 /**
  * @tc.name: TransProxyFillDataConfigTest001
- * @tc.desc: Should return SOFTBUS_ERR when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo.
  * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
@@ -1251,11 +1247,10 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest001, TestSi
  */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySetAuthHandleByChanId001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_ERR;
     int32_t channelId = TEST_MESSAGE_CHANNEL_ID;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
 
-    ret = TransProxySetAuthHandleByChanId(channelId, authHandle);
+    int32_t ret = TransProxySetAuthHandleByChanId(channelId, authHandle);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 } // namespace OHOS

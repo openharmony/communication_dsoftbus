@@ -21,6 +21,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 void *g_hbFSMStrategyInterface;
+
 HeartBeatFSMStrategyInterfaceMock::HeartBeatFSMStrategyInterfaceMock()
 {
     g_hbFSMStrategyInterface = reinterpret_cast<void *>(this);
@@ -181,3 +182,4 @@ uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
 }
 }
 } // namespace OHOS
+

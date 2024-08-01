@@ -307,6 +307,14 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return AuthDeviceGetPreferConnInfo(uuid, connInfo);
 }
 
+int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta)
+{
+    if (isMeta) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return AuthDeviceGetConnInfoByType(uuid, type, connInfo);
+}
+
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {
@@ -657,32 +665,32 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
     return false;
 }
 
-bool AuthHasSameAccountGroup(const DeviceInfo *device)
+bool IsSameAccountDevice(const DeviceInfo *device)
 {
     if (device == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "device is null");
+        AUTH_LOGE(AUTH_HICHAIN, "invalid param");
         return false;
     }
-    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
-    DeviceInfo defaultInfo;
-    (void)memset_s(&defaultInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-    bool isSameAccountGroup = false;
 
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "get local accountHash fail");
         return false;
     }
     if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
-        isSameAccountGroup = true;
         AUTH_LOGI(AUTH_HICHAIN, "account is same, continue check same account group relation.");
+        return true;
     }
-    if (isSameAccountGroup) {
-        if (!IsSameAccountGroupDevice(device->devId)) {
-            AUTH_LOGE(AUTH_HICHAIN, "device has not same account group relation, stop verify progress");
-            return false;
-        }
+    return false;
+}
+
+bool AuthHasSameAccountGroup(void)
+{
+    if (IsSameAccountGroupDevice()) {
+        AUTH_LOGI(AUTH_HICHAIN, "device has same account group relation, continue verify progress");
+        return true;
     }
-    return true;
+    return false;
 }
 
 TrustedReturnType AuthHasTrustedRelation(void)

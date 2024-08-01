@@ -197,6 +197,11 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return GetLaneDepsInterface()->AuthGetPreferConnInfo(uuid, connInfo, isMeta);
 }
 
+int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta)
+{
+    return GetLaneDepsInterface()->AuthGetConnInfoByType(uuid, type, connInfo, isMeta);
+}
+
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     return GetLaneDepsInterface()->AuthGetP2pConnInfo(uuid, connInfo, isMeta);
@@ -231,6 +236,16 @@ int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
 int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
 {
     return GetLaneDepsInterface()->LnnGetLocalNumU32Info(key, info);
+}
+
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
+{
+    return GetLaneDepsInterface()->LnnSetLocalNumU32Info(key, info);
+}
+
+int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetLaneDepsInterface()->LnnSetNetCapability(capability, type);
 }
 
 int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info)

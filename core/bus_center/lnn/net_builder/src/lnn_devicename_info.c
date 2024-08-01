@@ -47,6 +47,7 @@
 #define KEY_ACCOUNT "KEY_ACCOUNT"
 
 static int32_t g_tryGetDevnameNums = 0;
+static bool g_isDevnameInited = false;
 
 static int32_t LnnSyncDeviceName(const char *networkId)
 {
@@ -71,12 +72,13 @@ static int32_t LnnSyncDeviceName(const char *networkId)
 
 static int32_t LnnSyncDeviceNickName(const char *networkId)
 {
+    int64_t accountId = 0;
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "get local nodeInfo fail");
         return SOFTBUS_ERR;
     }
-    int64_t accountId = GetCurrentAccount();
+    (void)GetCurrentAccount(&accountId);
     JsonObj *json = JSON_CreateObject();
     if (json == NULL) {
         return SOFTBUS_ERR;
@@ -364,12 +366,10 @@ static void UpdataLocalFromSetting(void *p)
     char unifiedName[DEVICE_NAME_BUF_LEN] = {0};
     char unifiedDefaultName[DEVICE_NAME_BUF_LEN] = {0};
     char nickName[DEVICE_NAME_BUF_LEN] = {0};
-    LNN_LOGD(LNN_BUILDER, "UpdateLocalFromSetting enter");
     if (LnnGetSettingDeviceName(deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "UpdataLocalFromSetting fail");
         g_tryGetDevnameNums++;
+        LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums=%{public}d", g_tryGetDevnameNums);
         if (g_tryGetDevnameNums < MAX_TRY) {
-            LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums=%{public}d", g_tryGetDevnameNums);
             SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
             if (looper == NULL) {
                 LNN_LOGE(LNN_BUILDER, "looper is null");
@@ -403,20 +403,25 @@ static void UpdataLocalFromSetting(void *p)
         }
     }
     RegisterNameMonitor();
+    g_isDevnameInited = true;
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
     LnnNotifyLocalNetworkIdChanged();
     LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
         "unifiedDefaultName=%{public}s, nickName=%{public}s", deviceName, unifiedName, unifiedDefaultName, nickName);
 }
 
-static void UpdateDeviceNameFromSetting(void)
+static void RegisterDeviceNameHandle(void)
 {
     LnnInitGetDeviceName(LnnHandlerGetDeviceName);
 }
 
 void UpdateDeviceName(void *p)
 {
-    UpdateDeviceNameFromSetting();
+    if (g_isDevnameInited) {
+        LNN_LOGI(LNN_BUILDER, "device name already inited");
+        return;
+    }
+    RegisterDeviceNameHandle();
     UpdataLocalFromSetting(p);
 }
 

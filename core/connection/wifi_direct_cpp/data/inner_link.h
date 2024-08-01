@@ -49,6 +49,7 @@ enum class InnerLinKey {
     LOCAL_IPV6 = 19,
     REMOTE_IPV6 = 20,
     HAS_PTK = 21,
+    CUSTOM_PORT = 22,
 };
 
 struct LinkIdStruct {
@@ -136,6 +137,9 @@ public:
 
     bool HasPtk() const;
     void SetPtk(bool value);
+
+    int32_t GetCustomPort() const;
+    void SetCustomPort(int32_t value);
 
     void GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4);
     void RemoveId(int linkId);

@@ -51,6 +51,7 @@ public:
     virtual int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo) = 0;
     virtual uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType) = 0;
     virtual int32_t LaneCapCheck(const char *networkId, LaneLinkType linkType) = 0;
+    virtual int32_t GetErrCodeOfLink(const char *networkId, LaneLinkType linkType) = 0;
     virtual int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, int32_t *laneNum) = 0;
 };
 
@@ -76,6 +77,7 @@ public:
     MOCK_METHOD2(LaneLinkdownNotify, int32_t (const char *peerUdid, const LaneLinkInfo *laneLinkInfo));
     MOCK_METHOD3(GenerateLaneId, uint64_t (const char *localUdid, const char *remoteUdid, LaneLinkType linkType));
     MOCK_METHOD2(LaneCapCheck, int32_t (const char *networkId, LaneLinkType linkType));
+    MOCK_METHOD2(GetErrCodeOfLink, int32_t (const char *networkId, LaneLinkType linkType));
     MOCK_METHOD3(CheckLaneResourceNumByLinkType, int32_t (const char *peerUdid, LaneLinkType type, int32_t *laneNum));
 
     static int32_t ActionOfLaneLinkSuccess(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);

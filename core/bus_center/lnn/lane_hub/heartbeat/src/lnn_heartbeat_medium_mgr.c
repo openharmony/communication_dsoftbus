@@ -38,6 +38,7 @@
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_lane_vap_info.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
@@ -49,6 +50,8 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+
+#define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"
 
 #define HB_RECV_INFO_SAVE_LEN (60 * 60 * HB_TIME_FACTOR)
 #define HB_REAUTH_TIME        (10 * HB_TIME_FACTOR)
@@ -435,6 +438,19 @@ static bool IsStateVersionChanged(
     return false;
 }
 
+static bool IsInvalidBrmac(const char *macAddr)
+{
+    if (strlen(macAddr) == 0) {
+        LNN_LOGE(LNN_HEART_BEAT, "macAddr is null");
+        return true;
+    }
+    if (strcmp(macAddr, INVALID_BR_MAC_ADDR) == 0) {
+        LNN_LOGE(LNN_HEART_BEAT, "macAddr is invalid");
+        return true;
+    }
+    return false;
+}
+
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
@@ -450,7 +466,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         return true;
     }
     if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK ||
-        strlen(deviceInfo.connectInfo.macAddr) == 0) {
+        IsInvalidBrmac(deviceInfo.connectInfo.macAddr)) {
         *connectReason = BLE_FIRST_CONNECT;
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because retrieve fail, "
             "stateVersion=%{public}d->%{public}d", deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
@@ -633,8 +649,12 @@ static int32_t SoftBusNetNodeResult(
         anonyUdid, device->addr[0].type, isConnect, connectReason);
     AnonymizeFree(anonyUdid);
 
+    bool flag = false;
     if (isConnect) {
-        if (!AuthHasSameAccountGroup(device)) {
+        flag = IsSameAccountDevice(device);
+    }
+    if (flag) {
+        if (!AuthHasSameAccountGroup()) {
             LNN_LOGE(LNN_HEART_BEAT, "device has not same account group relation with local device");
             return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
         }
@@ -758,7 +778,7 @@ static int32_t CheckJoinLnnRequest(
 static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
 {
     if (device == NULL || hbResp == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "param is nullptr");
+        LNN_LOGD(LNN_HEART_BEAT, "param is nullptr");
         return;
     }
     int32_t infoNum = 0;
@@ -790,7 +810,7 @@ static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
             continue;
         }
         if (strncmp(udidHash, device->devId, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
-            LNN_LOGI(LNN_HEART_BEAT, "hbResp preChannelCode=%{public}d", hbResp->preferChannel);
+            LNN_LOGD(LNN_HEART_BEAT, "hbResp preChannelCode=%{public}d", hbResp->preferChannel);
             (void)LnnAddRemoteChannelCode(nodeInfo.deviceInfo.deviceUdid, hbResp->preferChannel);
             SoftBusFree(info);
             return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,15 @@
 
 #include "softbushidumper_fuzzer.h"
 
-#include <cstddef>
-#include <cstdint>
 #include <securec.h>
+
+#include "comm_log.h"
+#include "fuzz_data_generator.h"
+#include "message_handler.h"
 #include "softbus_error_code.h"
 #include "softbus_hidumper.h"
+#include "softbus_hidumper_bc_mgr.h"
+#include "softbus_hidumper_broadcast.h"
 #include "softbus_hidumper_buscenter.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_disc.h"
@@ -27,176 +31,88 @@
 #include "softbus_hidumper_nstack.h"
 #include "softbus_hidumper_trans.h"
 
-namespace OHOS {
-static constexpr int TEST_ARGV_STRING_MAX_LEN = 255;
-static constexpr int TEST_PKG_NAME_MAX_LEN = 65;
-static constexpr int TEST_SESSION_NAME_MAX_LEN = 256;
-static constexpr int TEST_DUMP_VAR_MAX_LEN = 32;
-static constexpr int MAX_ARGV_NUM = 3;
-int32_t SoftBusVarDumpCbFunc(int fd)
+namespace {
+const char *DUMP_CMD = "test";
+
+std::vector<const char *> CMD_ALARM = {"alert", "-l", DUMP_CMD};
+std::vector<const char *> CMD_BCMGR = {"broadcastMgr", "-l", DUMP_CMD};
+std::vector<const char *> CMD_BROADCAST = {"broadcast", "-l", DUMP_CMD};
+std::vector<const char *> CMD_BUSCENTER = {"buscenter", "-l", DUMP_CMD};
+std::vector<const char *> CMD_CONN = {"conn", "-l", DUMP_CMD};
+std::vector<const char *> CMD_DISC = {"disc", "-l", DUMP_CMD};
+std::vector<const char *> CMD_NSTACK_DSTREAM = {"dstream", "-l", DUMP_CMD};
+std::vector<const char *> CMD_NSTACK_DFILE = {"dfile", "-l", DUMP_CMD};
+std::vector<const char *> CMD_NSTACK_DFINDER = {"dfinder", "-l", DUMP_CMD};
+std::vector<const char *> CMD_NSTACK_DMSG = {"dmsg", "-l", DUMP_CMD};
+std::vector<const char *> CMD_STATS = {"stats", "-l", DUMP_CMD};
+std::vector<const char *> CMD_TRANS = {"trans", "-l", DUMP_CMD};
+
+const std::vector<std::vector<const char *>> DUMP_CMD_LIST = {CMD_ALARM, CMD_BCMGR, CMD_BROADCAST, CMD_BUSCENTER,
+    CMD_CONN, CMD_DISC, CMD_NSTACK_DSTREAM, CMD_NSTACK_DFILE, CMD_NSTACK_DFINDER, CMD_NSTACK_DMSG, CMD_STATS,
+    CMD_TRANS};
+
+void DoDump(void)
 {
-    (void)fd;
-    return 0;
+    std::vector<const char *> dumpCmd;
+    if (!GenerateFromList(dumpCmd, DUMP_CMD_LIST) || dumpCmd.empty()) {
+        return;
+    }
+
+    SoftBusDumpDispatch(1, dumpCmd.size(), const_cast<const char **>(&dumpCmd[0]));
 }
 
-int32_t TransSessionShowInfoFunc(int fd)
+static int32_t SoftBusVarDumpCallback(int32_t fd)
 {
     (void)fd;
     return SOFTBUS_OK;
 }
 
-void SoftBusHiDumperFuzzTest(const uint8_t* data, size_t size)
-{
-    char tmpArgvString[TEST_ARGV_STRING_MAX_LEN] = {0};
-    if (memcpy_s(tmpArgvString, sizeof(tmpArgvString) - 1, data, size) != EOK) {
-        return;
-    }
-    const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
-        tmpData[i] = tmpArgvString;
-    }
-    int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
-    SoftBusDumpDispatch(tmpValue, tmpValue, tmpData);
-}
+class TestEnv {
+public:
+    TestEnv()
+    {
+        isInited_ = false;
+        int32_t ret = LooperInit();
+        COMM_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, COMM_TEST, "init looper failed");
+        ret = SoftBusHiDumperInit();
+        COMM_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, COMM_TEST, "init hidumper failed");
 
-void SoftBusHiDumperBusCenterFuzzTest(const uint8_t* data, size_t size)
-{
-    char tmpDumpVar[TEST_DUMP_VAR_MAX_LEN] = {0};
-    if (memcpy_s(tmpDumpVar, sizeof(tmpDumpVar) - 1, data, size) != EOK) {
-        return;
-    }
-    int32_t ret = SoftBusRegBusCenterVarDump(tmpDumpVar, &SoftBusVarDumpCbFunc);
-    if (ret != SOFTBUS_OK) {
-        return;
+        SoftBusRegBcMgrVarDump(DUMP_CMD, &SoftBusVarDumpCallback);
+        SoftBusRegBroadcastVarDump(DUMP_CMD, &SoftBusVarDumpCallback);
+        SoftBusRegBusCenterVarDump(const_cast<char *>(DUMP_CMD), &SoftBusVarDumpCallback);
+        SoftBusRegConnVarDump(DUMP_CMD, &SoftBusVarDumpCallback);
+        SoftBusRegDiscVarDump(const_cast<char *>(DUMP_CMD), &SoftBusVarDumpCallback);
+        SoftBusRegTransVarDump(DUMP_CMD, &SoftBusVarDumpCallback);
+        SoftBusRegConnVarDump(DUMP_CMD, &SoftBusVarDumpCallback);
+        isInited_ = true;
     }
 
-    char tmpArgvString[TEST_ARGV_STRING_MAX_LEN] = {0};
-    if (memcpy_s(tmpArgvString, sizeof(tmpArgvString) - 1, data, size) != EOK) {
-        return;
-    }
-    const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
-        tmpData[i] = tmpArgvString;
-    }
-    int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
-    SoftBusDumpDispatch(tmpValue, tmpValue, tmpData);
-}
-
-void SoftBusHiDumperConnFuzzTest(const uint8_t* data, size_t size)
-{
-    char tmpDumpVar[TEST_DUMP_VAR_MAX_LEN] = {0};
-    if (memcpy_s(tmpDumpVar, sizeof(tmpDumpVar) - 1, data, size) != EOK) {
-        return;
-    }
-    int32_t ret = SoftBusRegConnVarDump(tmpDumpVar, &SoftBusVarDumpCbFunc);
-    if (ret != SOFTBUS_OK) {
-        return;
+    ~TestEnv()
+    {
+        isInited_ = false;
+        LooperDeinit();
+        SoftBusHiDumperDeinit();
     }
 
-    char tmpArgvString[TEST_ARGV_STRING_MAX_LEN] = {0};
-    if (memcpy_s(tmpArgvString, sizeof(tmpArgvString) - 1, data, size) != EOK) {
-        return;
-    }
-    const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
-        tmpData[i] = tmpArgvString;
-    }
-    int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
-    SoftBusDumpDispatch(tmpValue, tmpValue, tmpData);
-}
-
-void SoftBusHiDumperDiscFuzzTest(const uint8_t* data, size_t size)
-{
-    char tmpDumpVar[TEST_DUMP_VAR_MAX_LEN] = {0};
-    if (memcpy_s(tmpDumpVar, sizeof(tmpDumpVar) - 1, data, size) != EOK) {
-        return;
-    }
-    int32_t ret = SoftBusRegDiscVarDump(tmpDumpVar, &SoftBusVarDumpCbFunc);
-    if (ret != SOFTBUS_OK) {
-        return;
+    bool IsInited(void)
+    {
+        return isInited_;
     }
 
-    char tmpArgvString[TEST_ARGV_STRING_MAX_LEN] = {0};
-    if (memcpy_s(tmpArgvString, sizeof(tmpArgvString) - 1, data, size) != EOK) {
-        return;
-    }
-    const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
-        tmpData[i] = tmpArgvString;
-    }
-    int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
-    SoftBusDumpDispatch(tmpValue, tmpValue, tmpData);
-}
+private:
+    volatile bool isInited_;
+};
+} // anonymous namespace
 
-void SoftBusHiDumperInterfaceFuzzTest(const uint8_t* data, size_t size)
-{
-    char tmpArgvString[TEST_ARGV_STRING_MAX_LEN] = {0};
-    if (memcpy_s(tmpArgvString, sizeof(tmpArgvString) - 1, data, size) != EOK) {
-        return;
-    }
-    const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
-        tmpData[i] = tmpArgvString;
-    }
-    int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
-    SoftBusDumpProcess(tmpValue, tmpValue, tmpData);
-}
-
-void SoftBusHiDumperNstackFuzzTest(const uint8_t* data, size_t size)
-{
-    (void)data;
-    (void)size;
-    SoftBusNStackHiDumperInit();
-}
-
-void SoftBusHiDumperTransFuzzTest(const uint8_t* data, size_t size)
-{
-    char tmpDumpVar[SOFTBUS_DUMP_VAR_NAME_LEN] = {0};
-    if (memcpy_s(tmpDumpVar, sizeof(tmpDumpVar) - 1, data, size) != EOK) {
-        return;
-    }
-    SoftBusRegTransVarDump(tmpDumpVar, TransSessionShowInfoFunc);
-    SoftBusTransDumpHandlerInit();
-    int32_t tmpValue = *(reinterpret_cast<const int *>(data));
-    char tmpPkgName[TEST_PKG_NAME_MAX_LEN] = {0};
-    if (memcpy_s(tmpPkgName, sizeof(tmpPkgName) - 1, data, size) != EOK) {
-        return;
-    }
-    char tmpSessionName[TEST_SESSION_NAME_MAX_LEN] = {0};
-    if (memcpy_s(tmpSessionName, sizeof(tmpSessionName) - 1, data, size) != EOK) {
-        return;
-    }
-    SoftBusTransDumpRegisterSession(tmpValue, tmpPkgName, tmpSessionName, tmpValue, tmpValue);
-
-    if (size < sizeof(AppInfo)) {
-        return;
-    }
-    AppInfo testAppInfo;
-    if (memcpy_s(&testAppInfo, sizeof(AppInfo), data, sizeof(AppInfo)) != EOK) {
-        return;
-    }
-    TransDumpLaneLinkType laneLinkType = *(reinterpret_cast<const TransDumpLaneLinkType *>(data));
-    SoftBusTransDumpRunningSession(tmpValue, laneLinkType, &testAppInfo);
-}
-} // namespace OHOS
-
-/* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
+    static TestEnv env;
+    if (!env.IsInited()) {
         return 0;
     }
-    int32_t ret = SoftBusHiDumperInit();
-    if (ret != SOFTBUS_OK) {
-        return 0;
-    }
-    OHOS::SoftBusHiDumperFuzzTest(data, size);
-    OHOS::SoftBusHiDumperBusCenterFuzzTest(data, size);
-    OHOS::SoftBusHiDumperConnFuzzTest(data, size);
-    OHOS::SoftBusHiDumperDiscFuzzTest(data, size);
-    OHOS::SoftBusHiDumperInterfaceFuzzTest(data, size);
-    OHOS::SoftBusHiDumperNstackFuzzTest(data, size);
-    OHOS::SoftBusHiDumperTransFuzzTest(data, size);
-    SoftBusHiDumperModuleDeInit();
+
+    DataGenerator::Write(data, size);
+    DoDump();
+    DataGenerator::Clear();
     return 0;
 }

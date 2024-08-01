@@ -426,10 +426,10 @@ static void DelAllConnInfo(ListenerModule moduleId)
     TcpConnInfoNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->info.socketInfo.moduleId == (int32_t)moduleId) {
+            g_tcpConnCallback->OnDisconnected(item->connectionId, &item->info);
             (void)DelTrigger(moduleId, item->info.socketInfo.fd, RW_TRIGGER);
             ListDelete(&item->node);
             ConnShutdownSocket(item->info.socketInfo.fd);
-            g_tcpConnCallback->OnDisconnected(item->connectionId, &item->info);
             SoftBusFree(item);
             g_tcpConnInfoList->cnt--;
         }

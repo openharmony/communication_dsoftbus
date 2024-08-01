@@ -52,6 +52,7 @@ ohos_unittest("TransLaneTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
   ]
 
   deps = [

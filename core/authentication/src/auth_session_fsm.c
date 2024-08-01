@@ -256,7 +256,7 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.connId = connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V2;
-    authFsm->info.idType = EXCHANHE_UDID;
+    authFsm->info.idType = EXCHANGE_UDID;
     if (FillSessionInfoModule(requestId, &authFsm->info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "fill module fail");
         return NULL;
@@ -633,6 +633,27 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
     SoftbusHitraceStop();
 }
 
+static void SaveLastAuthSeq(const unsigned char *udidHash, int64_t authSeq)
+{
+    AUTH_LOGI(AUTH_FSM, "save auth seq.authSeq=%{public}" PRId64, authSeq);
+    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    if (ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1,
+        udidHash, SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert udidhash to hexstr fail.");
+        return;
+    }
+    NodeInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "no this device info.");
+        return;
+    }
+    deviceInfo.lastAuthSeq = authSeq;
+    if (LnnSaveRemoteDeviceInfo(&deviceInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "save device info fail.");
+    }
+}
+
 static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
 {
     if (authFsm->info.normalizedKey == NULL) {
@@ -653,6 +674,9 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
     }
     AuthUpdateNormalizeKeyIndex(udidShortHash, authFsm->info.normalizedIndex, authFsm->info.connInfo.type,
         authFsm->info.normalizedKey, authFsm->info.isServer);
+    if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) {
+        SaveLastAuthSeq(hash, authFsm->authSeq);
+    }
     ret = AuthSessionSaveSessionKey(authFsm->authSeq, authFsm->info.normalizedKey->value,
         authFsm->info.normalizedKey->len);
     if (ret != SOFTBUS_OK) {
@@ -784,7 +808,7 @@ static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
     AuthSessionInfo *info = &authFsm->info;
     if (info->idType == EXCHANGE_FAIL) {
         AUTH_LOGE(AUTH_FSM, "fsm switch to reauth due to not find networkId");
-        info->idType = EXCHANHE_UDID;
+        info->idType = EXCHANGE_UDID;
         LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
         return SOFTBUS_ERR;
     }
@@ -1566,6 +1590,25 @@ int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const
         return SOFTBUS_INVALID_PARAM;
     }
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_CLOSE_ACK, connId, isServer, data, len);
+}
+
+int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len)
+{
+    if (!RequireAuthLock()) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthFsm *authFsm = GetAuthFsmByConnId(connId, isConnectServer, true);
+    if (authFsm == NULL) {
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_GET_FSM_FAIL;
+    }
+    if (LnnFsmPostMessage(&authFsm->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "post message to auth fsm by connId fail");
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_SEND_FAIL;
+    }
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
 }
 
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
