@@ -83,7 +83,28 @@ P2pEntity::P2pEntity() : timer_("P2pEntity")
     state_ = P2pAvailableState::Instance();
 }
 
-void P2pEntity::DisconnectLink(const std::string &remoteMac) { }
+void P2pEntity::DisconnectLink(const std::string &remoteMac)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    P2pAdapter::WifiDirectP2pGroupInfo groupInfo {};
+    auto ret = P2pAdapter::GetGroupInfo(groupInfo);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group info failed");
+    bool isNeedRemove = true;
+    if (groupInfo.isGroupOwner) {
+        if (groupInfo.clientDevices.size() > 1) {
+            isNeedRemove = false;
+        }
+        if ((groupInfo.clientDevices.size() == 1 && remoteMac == groupInfo.clientDevices[0].address) ||
+            groupInfo.clientDevices.size() == 0) {
+            isNeedRemove = true;
+        }
+    }
+    if (isNeedRemove) {
+        P2pAdapter::DestroyGroupParam params;
+        params.interface = IF_NAME_P2P0;
+        DestroyGroup(params);
+    }
+}
 
 void P2pEntity::DestroyGroupIfNeeded() { };
 
