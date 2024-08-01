@@ -35,6 +35,11 @@ std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(const W
     return std::make_shared<P2pV1Processor>(remoteDeviceId);
 }
 
+std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(const WifiDirectForceDisconnectInfo &info)
+{
+    return std::make_shared<P2pV1Processor>(info.remoteUuid);
+}
+
 std::shared_ptr<WifiDirectProcessor> SimpleProcessorSelector::operator()(NegotiateMessage &msg)
 {
     return std::make_shared<P2pV1Processor>(msg.GetRemoteDeviceId());
