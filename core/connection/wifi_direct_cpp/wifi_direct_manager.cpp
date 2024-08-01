@@ -242,6 +242,15 @@ static bool IsNoneLinkByType(enum WifiDirectLinkType linkType)
     return result;
 }
 
+static void StopCustomListening(void)
+{
+    if (g_enhanceManager.stopCustomListening == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
+        return;
+    }
+    return g_enhanceManager.stopCustomListening();
+}
+
 static bool IsDeviceOnline(const char *remoteMac)
 {
     bool isOnline = false;
@@ -527,6 +536,8 @@ static struct WifiDirectManager g_manager = {
     .savePTK = SavePtk,
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
+
+    .stopCustomListening = StopCustomListening,
 
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
