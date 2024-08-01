@@ -100,7 +100,7 @@ void P2pEntity::DisconnectLink(const std::string &remoteMac)
         }
     }
     if (isNeedRemove) {
-        P2pAdapter::P2pDestroyGroupParam params;
+        P2pDestroyGroupParam params;
         params.interface = P2P_IF_NAME;
         DestroyGroup(params);
     }
