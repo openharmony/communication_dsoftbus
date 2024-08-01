@@ -415,6 +415,7 @@ static void SetLnnConnNodeInfo(
     (void)LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
     uint8_t relation[CONNECTION_ADDR_MAX] = { 0 };
     report = LnnAddOnlineNode(connInfo->nodeInfo);
+    LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
     if (LnnInsertLinkFinderInfo(networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "insert rpa info fail.");
     }
@@ -434,7 +435,6 @@ static void SetLnnConnNodeInfo(
     ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
     connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
     LnnNotifyNodeStateChanged(&connInfo->addr);
-    LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
     LnnGetLnnRelation(networkId, CATEGORY_NETWORK_ID, relation, CONNECTION_ADDR_MAX);
     LnnNotifyLnnRelationChanged(
         connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, relation[connInfo->addr.type], true);
