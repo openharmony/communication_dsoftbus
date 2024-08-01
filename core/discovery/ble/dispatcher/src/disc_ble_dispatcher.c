@@ -260,4 +260,5 @@ void DiscBleDeinit(void)
     DiscSoftBusBleDeinit();
     DiscShareBleDeinit();
     DiscApproachBleDeinit();
+    DiscVLinkBleDeinit();
 }
