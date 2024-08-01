@@ -46,6 +46,7 @@ if (defined(ohos_lite)) {
         "core/common:unittest",
         "core/connection:unittest",
         "core/discovery:unittest",
+        "core/frame:unittest",
         "core/transmission:unittest",
         "sdk/bus_center:unittest",
         "sdk/discovery:unittest",
