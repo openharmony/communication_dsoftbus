@@ -90,7 +90,7 @@ public:
     int GetP2pListenPort() const;
 
     // P2P links share the same listen module, so define module in interface info
-    void SetP2ptListenModule(const int &value);
+    void SetP2pListenModule(const int &value);
     int GetP2pListenModule() const;
 
     void SetP2pGroupConfig(const std::string &groupConfig);
