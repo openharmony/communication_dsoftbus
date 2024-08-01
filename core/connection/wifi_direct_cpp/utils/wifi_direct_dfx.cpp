@@ -84,7 +84,8 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
     }
 
     extra.peerNetworkId = wifiDirectConnectInfo.remoteNetworkId;
-    extra.localNetworkId = WifiDirectUtils::GetLocalNetworkId().c_str();
+    auto localNetworkId = WifiDirectUtils::GetLocalNetworkId();
+    extra.localNetworkId = localNetworkId.c_str();
     auto stateMapElement = DurationStatistic::GetInstance().GetStateTimeMapElement(requestId);
     uint64_t startTime = stateMapElement[TotalStart];
     uint64_t endTime = stateMapElement[TotalEnd];

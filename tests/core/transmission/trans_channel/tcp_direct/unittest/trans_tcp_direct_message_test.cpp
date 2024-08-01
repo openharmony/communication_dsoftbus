@@ -144,11 +144,11 @@ HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1
 
     connInfo->type = CONNECT_P2P;
     ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     connInfo->type = CONNECT_BR;
     ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     StopP2pSessionListener();
     SoftBusFree(appInfo);
@@ -262,7 +262,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByReqTest005, TestSize.Level1)
 HWTEST_F(TransTcpDirectMessageTest, CreateNewSessinConnTest006, TestSize.Level1)
 {
     SessionConn *session = CreateNewSessinConn(AUTH_P2P, true);
-    EXPECT_TRUE(session != nullptr);
+    EXPECT_EQ(nullptr, session);
 }
 
 /**

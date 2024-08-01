@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 
 import("../../../../../../dsoftbus.gni")
 libsoftbus_stream_sdk_path = "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream"
+vtp_stream_opt_ext_path = "$dsoftbus_root_path/dsoftbus_enhance/sdk/transmission/trans_channel/udp/stream/src"
 
 dstream_native_source_path = rebase_path("$dsoftbus_root_path")
 dstream_dep_file = "components/nstackx_enhanced/fillp/BUILD.gn"
@@ -23,7 +24,10 @@ enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                        ],
                        "value")
 
-libsoftbus_stream_inc = [ "$libsoftbus_stream_sdk_path/include" ]
+libsoftbus_stream_inc = [
+  "$libsoftbus_stream_sdk_path/include",
+  "$libsoftbus_stream_sdk_path",
+]
 
 if (enhanced) {
   libsoftbus_stream_inc += [
@@ -45,6 +49,12 @@ libsoftbus_stream_src = [
   "$libsoftbus_stream_sdk_path/vtp_instance.cpp",
   "$libsoftbus_stream_sdk_path/vtp_stream_socket.cpp",
 ]
+
+if (enhanced) {
+  libsoftbus_stream_src += [ "$vtp_stream_opt_ext_path/vtp_stream_opt_ext.c" ]
+} else {
+  libsoftbus_stream_src += [ "$libsoftbus_stream_sdk_path/vtp_stream_opt.c" ]
+}
 
 libsoftbus_stream_ext_deps = []
 if (defined(ohos_lite)) {

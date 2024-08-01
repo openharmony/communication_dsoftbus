@@ -152,7 +152,8 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
         .linkType = CONNECT_BR,
         .costTime = costTime,
         .isReuse = statistics->reuse ? 1 : 0,
-        .result = EVENT_STAGE_RESULT_OK };
+        .result = EVENT_STAGE_RESULT_OK
+    };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
@@ -1179,7 +1180,6 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
     if (msg->what != MSG_DATA_RECEIVED) {
         CONN_LOGI(CONN_BR, "recvMsg=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
     }
-
     size_t commandSize = sizeof(g_commands) / sizeof(g_commands[0]);
     for (size_t i = 0; i < commandSize; i++) {
         if (g_commands[i].cmd == msg->what) {

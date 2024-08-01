@@ -67,7 +67,6 @@ void TransTcpDirectMessageStaticTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    TransChannelInit();
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTdcSetCallBack(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -80,7 +79,6 @@ void TransTcpDirectMessageStaticTest::TearDownTestCase(void)
     AuthDeinit();
     TransServerDeinit();
     DiscEventManagerDeinit();
-    TransChannelDeinit();
 }
 
 SessionConn *TestSetSessionConn()

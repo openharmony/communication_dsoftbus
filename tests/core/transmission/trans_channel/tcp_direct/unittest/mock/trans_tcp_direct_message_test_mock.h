@@ -19,7 +19,6 @@
 #include <gmock/gmock.h>
 
 #include "auth_interface.h"
-#include "bus_center_manager.h"
 #include "softbus_feature_config.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"

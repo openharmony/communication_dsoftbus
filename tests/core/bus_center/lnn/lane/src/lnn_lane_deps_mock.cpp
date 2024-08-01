@@ -197,6 +197,11 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return GetLaneDepsInterface()->AuthGetPreferConnInfo(uuid, connInfo, isMeta);
 }
 
+int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta)
+{
+    return GetLaneDepsInterface()->AuthGetConnInfoByType(uuid, type, connInfo, isMeta);
+}
+
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     return GetLaneDepsInterface()->AuthGetP2pConnInfo(uuid, connInfo, isMeta);

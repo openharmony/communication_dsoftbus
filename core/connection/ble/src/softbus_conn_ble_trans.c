@@ -560,7 +560,7 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
     buffer->length -= packLen;
     if (buffer->length > 0) {
         CONN_LOGI(CONN_BLE, "coc socket read limited buffer: leftLength=%{public}d", buffer->length);
-    }  
+    }
     *outLen = (int32_t)packLen;
     return dataCopy;
 }
@@ -569,11 +569,12 @@ static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *da
 {
     uint32_t sentLen = 0;
     while (dataLen > sentLen) {
-        uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)dataLen);
-        int32_t status = ConnBleSend(connection, data, amount, module);
+        uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)(dataLen - sentLen));
+        int32_t status = ConnBleSend(connection, data + sentLen, amount, module);
         CONN_LOGI(CONN_BLE,
-            "coc send packet: connId=%{public}u, module=%{public}d, total=%{public}u, status=%{public}d",
-            connection->connectionId, module, dataLen, status);
+            "coc send packet: connId=%{public}u, module=%{public}d, total=%{public}u, "
+            "amount=%{public}u, sentLen=%{public}u, status=%{public}d",
+            connection->connectionId, module, dataLen, amount, sentLen, status);
         sentLen += amount;
     }
     return SOFTBUS_OK;
@@ -617,10 +618,9 @@ void *BleSendTask(void *arg)
         ConnBleConnection *connection = ConnBleGetConnectionById(sendNode->connectionId);
         if (connection == NULL) {
             CONN_LOGE(CONN_BLE,
-                "connection is not exist, connId=%{public}u, pid=%{public}d, "
-                "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
-                sendNode->connectionId, sendNode->pid, sendNode->dataLen, sendNode->flag,
-                sendNode->module, sendNode->seq);
+                "connection is not exist, connId=%{public}u, pid=%{public}d, Len=%{public}u, Flg=%{public}d, "
+                "Module=%{public}d, Seq=%{public}" PRId64 "", sendNode->connectionId, sendNode->pid,
+                sendNode->dataLen, sendNode->flag, sendNode->module, sendNode->seq);
             FreeSendNode(sendNode);
             sendNode = NULL;
             continue;
