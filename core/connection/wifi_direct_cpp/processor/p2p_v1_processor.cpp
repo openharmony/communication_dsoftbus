@@ -1756,7 +1756,7 @@ int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
         return SOFTBUS_OK;
     }
 
-    P2pAdapter::DestroyGroupParam param { P2P_IF_NAME };
+    P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
     auto result = P2pEntity::GetInstance().Disconnect(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
         "entity disconnect failed, error=%{public}d", result.errorCode_);
