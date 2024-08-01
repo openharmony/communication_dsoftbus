@@ -389,7 +389,7 @@ static void ResetInterfaceInfo(const std::string &localMac)
             interface.SetPsk("");
             interface.SetCenter20M(0);
             interface.SetIpString(Ipv4Info());
-            interface.SeP2ptListenModule(-1);
+            interface.SetP2pListenModule(-1);
             interface.SetBaseMac(localMac);
             return SOFTBUS_OK;
         });

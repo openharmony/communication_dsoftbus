@@ -78,11 +78,11 @@ void InterfaceManager::InitInterface(InterfaceInfo::InterfaceType type)
     std::string name;
     int32_t capability = 0;
     if (type == InterfaceInfo::InterfaceType::P2P) {
-        name = P2P_IF_NAME;
+        name = IF_NAME_P2P0;
         capability = static_cast<int32_t>(LinkInfo::LinkMode::GO) | static_cast<uint32_t>(LinkInfo::LinkMode::GC);
     }
     if (type == InterfaceInfo::InterfaceType::HML) {
-        name = HML_IF_NAME;
+        name = IF_NAME_HML;
         capability = static_cast<int32_t>(LinkInfo::LinkMode::HML);
     }
     interfaces_[type].SetRole(LinkInfo::LinkMode::NONE);
