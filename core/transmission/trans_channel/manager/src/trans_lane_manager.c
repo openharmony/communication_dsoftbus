@@ -255,25 +255,35 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType, bool isAsync
     }
     TransLaneInfo *laneItem = NULL;
     TransLaneInfo *next = NULL;
+    int32_t ret = SOFTBUS_TRANS_NODE_NOT_FOUND;
+    uint32_t laneHandle = 0;
+    bool isQos = false;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
             ListDelete(&(laneItem->node));
             TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d, channelType = %{public}d",
                 laneItem->channelId, laneItem->channelType);
             g_channelLaneList->cnt--;
+            laneHandle = laneItem->laneHandle;
             if (laneItem->isQosLane) {
-                TransFreeLaneByLaneHandle(laneItem->laneHandle, isAsync);
-            } else {
-                LnnFreeLane(laneItem->laneHandle);
+                isQos = true;
             }
             SoftBusFree(laneItem);
-            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-            return SOFTBUS_OK;
+            ret = SOFTBUS_OK;
+            break;
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-    TRANS_LOGW(TRANS_SVC, "No lane to be is found. channelId=%{public}d.", channelId);
-    return SOFTBUS_TRANS_NODE_NOT_FOUND;
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_SVC, "No lane to be is found. channelId=%{public}d.", channelId);
+        return ret;
+    }
+    if (isQos) {
+        TransFreeLaneByLaneHandle(laneHandle, isAsync);
+    } else {
+        LnnFreeLane(laneHandle);
+    }
+    return ret;
 }
 
 void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
