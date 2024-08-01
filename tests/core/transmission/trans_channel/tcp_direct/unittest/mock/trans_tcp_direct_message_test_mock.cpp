@@ -156,5 +156,30 @@ cJSON* cJSON_Parse(const char *value)
 {
     return GetTransTcpDirectMessageInterface()->cJSON_Parse(value);
 }
+
+int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
+{
+    return GetTransTcpDirectMessageInterface()->SoftBusGenerateSessionKey(key, len);
+}
+
+int32_t AuthGetServerSide(int64_t authId, bool *isServer)
+{
+    return GetTransTcpDirectMessageInterface()->AuthGetServerSide(authId, isServer);
+}
+
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
+{
+    return GetTransTcpDirectMessageInterface()->AuthGetConnInfo(authHandle, connInfo);
+}
+
+char *PackRequest(const AppInfo *appInfo)
+{
+    return GetTransTcpDirectMessageInterface()->PackRequest(appInfo);
+}
+
+int32_t TransTdcAddSessionConn(SessionConn *conn)
+{
+    return GetTransTcpDirectMessageInterface()->TransTdcAddSessionConn(conn);
+}
 }
 }
