@@ -90,5 +90,10 @@ int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
 {
     return GetLaneListenerDepsInterface()->DelLaneResourceByLaneId(laneId, isServerSide);
 }
+
+void DetectDisableWifiDirectApply(void)
+{
+    GetLaneListenerDepsInterface()->DetectDisableWifiDirectApply();
+}
 }
 } // namespace OHOS

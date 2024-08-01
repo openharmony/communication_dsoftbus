@@ -255,7 +255,7 @@ HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
 }
 
 /**
@@ -565,7 +565,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetPendingPacketTest001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     len = ACK_SIZE;
     channelId = INVALID_VALUE;
     ret = TransTdcSetPendingPacket(channelId, data, len);

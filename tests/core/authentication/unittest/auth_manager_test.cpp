@@ -38,6 +38,7 @@ constexpr uint64_t CONN_ID_2 = 12;
 constexpr uint64_t CONN_ID_3 = 13;
 constexpr int32_t PORT = 1;
 constexpr int32_t PORT_1 = 2;
+constexpr int32_t KEY_INDEX = 1;
 constexpr int32_t GROUP_TYPE = 100;
 constexpr int32_t DEVICE_ID_HASH_LEN = 9;
 constexpr int32_t KEY_VALUE_LEN = 13;
@@ -132,8 +133,10 @@ HWTEST_F(AuthManagerTest, NEW_AND_FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     ASSERT_TRUE(memcpy_s(connInfo.info.ipInfo.ip, IP_LEN, IP_TEST, strlen(IP_TEST)) == EOK);
     EXPECT_TRUE(FindAuthManagerByConnInfo(&connInfo, false) != nullptr);
+    AuthNotifyAuthPassed(AUTH_SEQ, &info);
     ASSERT_TRUE(memcpy_s(connInfo.info.ipInfo.ip, IP_LEN, INVALID_IP_TEST, strlen(INVALID_IP_TEST)) == EOK);
     EXPECT_TRUE(FindAuthManagerByConnInfo(&connInfo, false) == nullptr);
+    AuthNotifyAuthPassed(AUTH_SEQ, &info);
     RemoveAuthManagerByConnInfo(&connInfo, false);
     PrintAuthConnInfo(&connInfo);
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -192,6 +195,8 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     EXPECT_TRUE(UpdateAuthManagerByAuthId(AUTH_SEQ, MyUpdateFuncReturnOk, auth, AUTH_LINK_TYPE_WIFI) == SOFTBUS_OK);
     AuthConnInfo connInfo;
     EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo), SOFTBUS_OK);
+    AuthHandle authHandle = { .authId = AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI, };
+    AuthHandleLeaveLNN(authHandle);
 }
 
 /*
@@ -732,5 +737,180 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSi
     int32_t ret2 = AuthGetLatestAuthSeqListByType(UDID_TEST, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
     EXPECT_TRUE(ret2 == SOFTBUS_OK);
 }
-} // namespace OHOS
 
+/*
+ * @tc.name: PROCESS_SESSION_KEY_TEST_001
+ * @tc.desc: ProcessSessionKey test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, PROCESS_SESSION_KEY_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_BLE);
+    info.normalizedType = NORMALIZED_SUPPORT;
+    AuthManager *auth = NewAuthManager(AUTH_SEQ, &info);
+    EXPECT_TRUE(auth != nullptr);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    AuthManager *auth1 = GetExistAuthManager(AUTH_SEQ, &info);
+    EXPECT_TRUE(auth1 != nullptr);
+    info.connInfo.type = AUTH_LINK_TYPE_MAX;
+    int32_t keyIndex = KEY_INDEX;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+    auth->hasAuthPassed[AUTH_LINK_TYPE_BLE] = true;
+    int32_t ret = ProcessEmptySessionKey(&info, keyIndex, false, &sessionKey);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = AuthProcessEmptySessionKey(&info, keyIndex);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    info.module = AUTH_MODULE_TRANS;
+    ret = AuthProcessEmptySessionKey(&info, keyIndex);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    AuthManager *auth2 = FindAuthManagerByUdid(info.udid, info.connInfo.type, info.isServer);
+    EXPECT_TRUE(auth2 != nullptr);
+}
+
+/*
+ * @tc.name: GENERATE_UDID_HASH_TEST_001
+ * @tc.desc: GenerateUdidHash test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, GENERATE_UDID_HASH_TEST_001, TestSize.Level1)
+{
+    NodeInfo info;
+    AuthHandle authHandle = { .authId = AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI, };
+    ReportAuthRequestPassed(REQUEST_ID_1, authHandle, &info);
+    ReportAuthRequestPassed(REQUEST_ID_1 + 1, authHandle, &info);
+    AuthSessionInfo sessionInfo;
+    PostCancelAuthMessage(AUTH_SEQ, &sessionInfo);
+    AuthNotifyAuthPassed(AUTH_SEQ, &sessionInfo);
+    AuthConnInfo connInfo;
+    AuthDataHead head;
+    HandleDecryptFailData(CONN_ID_1, &connInfo, true, &head, nullptr);
+    HandleCancelAuthData(CONN_ID_1, &connInfo, true, &head, nullptr);
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    bool fromServer = true;
+    CorrectFromServer(CONN_ID_1, &connInfo, &fromServer);
+    uint8_t hash[SHA_256_HASH_LEN];
+    int32_t ret = GenerateUdidHash(UDID_TEST, hash);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: GET_ALL_HML_OR_P2P_AUTH_HANDLE_NUM_TEST_001
+ * @tc.desc: GetAllHmlOrP2pAuthHandleNum test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, GET_ALL_HML_OR_P2P_AUTH_HANDLE_NUM_TEST_001, TestSize.Level1)
+{
+    AuthHandle authHandle1 = { .authId = AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI, };
+    AuthDeviceGetLatestIdByUuid(UDID_TEST, AUTH_LINK_TYPE_BLE, &authHandle1);
+    AuthDeviceGetLatestIdByUuid(UDID_TEST, AUTH_LINK_TYPE_BR, &authHandle1);
+    uint32_t ret = GetAllHmlOrP2pAuthHandleNum();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = GetHmlOrP2pAuthHandle(nullptr, nullptr);
+    EXPECT_TRUE(ret == 3868524547);
+    AuthHandle *authHandle = &authHandle1;
+    ret = GetHmlOrP2pAuthHandle(&authHandle, nullptr);
+    EXPECT_TRUE(ret == 3868524547);
+    int32_t num = 0;
+    ret = GetHmlOrP2pAuthHandle(&authHandle, &num);
+    EXPECT_TRUE(ret == 3868983317);
+}
+
+/*
+ * @tc.name: AUTH_DEVICE_GET_AUTH_HANDLE_BY_INDEX_TEST_001
+ * @tc.desc: AuthDeviceGetAuthHandleByIndex test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Level1)
+{
+    AuthHandle authHandle;
+    int32_t ret = AuthDeviceGetAuthHandleByIndex(UDID_TEST, false, KEY_INDEX, &authHandle);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = AuthDeviceGetAuthHandleByIndex(UDID_TEST, false, KEY_INDEX, &authHandle);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = AuthDeviceGetAuthHandleByIndex(UDID_TEST, false, KEY_INDEX, &authHandle);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: AUTH_MAP_INIT_TEST_001
+ * @tc.desc: AuthMapInit test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_MAP_INIT_TEST_001, TestSize.Level1)
+{
+    uint64_t currentTime = 123456;
+    InsertToAuthLimitMap(UDID_TEST, currentTime);
+    AuthDeleteLimitMap(nullptr);
+    ClearAuthLimitMap();
+    int32_t res = GetNodeFromAuthLimitMap(UDID_TEST, &currentTime);
+    EXPECT_TRUE(res == SOFTBUS_OK);
+    bool ret = AuthMapInit();
+    EXPECT_TRUE(ret == true);
+    InsertToAuthLimitMap(UDID_TEST, currentTime);
+    currentTime = 0;
+    InsertToAuthLimitMap(UUID_TEST, currentTime);
+    res = GetNodeFromAuthLimitMap(UDID_TEST, &currentTime);
+    EXPECT_TRUE(res == SOFTBUS_OK);
+    res = GetNodeFromAuthLimitMap(INVALID_UDID_TEST, &currentTime);
+    EXPECT_TRUE(res == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: IS_NEED_AUTH_LIMIT_TEST_001
+ * @tc.desc: IsNeedAuthLimit test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, IS_NEED_AUTH_LIMIT_TEST_001, TestSize.Level1)
+{
+    bool ret = IsNeedAuthLimit(nullptr);
+    EXPECT_TRUE(ret == false);
+    ret = IsNeedAuthLimit(INVALID_UDID_TEST);
+    EXPECT_TRUE(ret == false);
+    ret = IsNeedAuthLimit(UUID_TEST);
+    EXPECT_TRUE(ret == false);
+    ret = IsNeedAuthLimit(UDID_TEST);
+    EXPECT_TRUE(ret == false);
+    AuthDeleteLimitMap(nullptr);
+    AuthDeleteLimitMap(INVALID_UDID_TEST);
+    AuthDeleteLimitMap(UUID_TEST);
+    AuthDeleteLimitMap(UDID_TEST);
+    ClearAuthLimitMap();
+}
+
+/*
+ * @tc.name: AUTH_DEVICE_ENCRYPT_TEST_002
+ * @tc.desc: AuthDeviceEncrypt test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_002, TestSize.Level1)
+{
+    AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_AUTH_HICHAIN_GROUP_NOT_EXIST);
+    AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_AUTH_HICHAIN_LOCAL_IDENTITY_NOT_EXIST);
+    AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP);
+    AuthAddNodeToLimitMap(UDID_TEST, SOFTBUS_ERR);
+    AuthDeviceNotTrust(nullptr);
+    const char *peerUdid = "";
+    AuthDeviceNotTrust(peerUdid);
+    AuthDeviceNotTrust(UDID_TEST);
+    AuthSessionInfo info;
+    SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
+    AuthManager *auth = NewAuthManager(AUTH_SEQ, &info);
+    EXPECT_TRUE(auth != nullptr);
+    AuthHandle authHandle = { .authId = AUTH_SEQ_5, .type = AUTH_LINK_TYPE_WIFI, };
+    uint8_t outData[LENTH] = {0};
+    uint32_t outLen = LENTH + TMP_DATA_LEN + 32;
+    EXPECT_TRUE(AuthDeviceEncrypt(&authHandle, TMP_IN_DATA,
+        TMP_DATA_LEN, outData, &outLen) == SOFTBUS_AUTH_NOT_FOUND);
+    authHandle.authId = AUTH_SEQ;
+    EXPECT_TRUE(AuthDeviceEncrypt(&authHandle, TMP_IN_DATA,
+        TMP_DATA_LEN, outData, &outLen) == SOFTBUS_ENCRYPT_ERR);
+}
+} // namespace OHOS

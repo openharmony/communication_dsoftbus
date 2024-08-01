@@ -57,7 +57,7 @@ public:
 
     static void Init();
     void DisconnectLink(const std::string &remoteMac) override;
-
+    void DestroyGroupIfNeeded() override;
     P2pOperationResult CreateGroup(const P2pCreateGroupParam &param);
     P2pOperationResult Connect(const P2pConnectParam &param);
     P2pOperationResult DestroyGroup(const P2pDestroyGroupParam &param);

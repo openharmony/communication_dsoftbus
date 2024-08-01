@@ -14,9 +14,11 @@
  */
 
 #include "wifi_direct_mock.h"
-#include <thread>
 #include "conn_log.h"
+#include "softbus_adapter_socket.h"
+#include <thread>
 // implement dependencies and redirect request to mock object here
+extern "C" {
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGetDeviceUuid(authId, uuid, size);
@@ -37,7 +39,7 @@ WifiErrorCode Hid2dGetChannelListFor5G(int *chanList, int len)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dGetChannelListFor5G(chanList, len);
 }
 
-WifiErrorCode GetP2pEnableStatus(P2pState* state)
+WifiErrorCode GetP2pEnableStatus(P2pState *state)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetP2pEnableStatus(state);
 }
@@ -89,8 +91,7 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetOnlineStateById(id, type);
 }
 
-int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip,
-    int32_t port, ListenerModule *moduleId)
+int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32_t port, ListenerModule *moduleId)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthStartListeningForWifiDirect(type, ip, port, moduleId);
 }
@@ -126,8 +127,7 @@ uint32_t AuthGenRequestId(void)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGenRequestId();
 }
 
-int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
-    const AuthConnCallback *callback, bool isMeta)
+int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthOpenConn(info, requestId, callback, isMeta);
 }
@@ -142,6 +142,31 @@ int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteNumInfo(netWorkId, key, info);
 }
 
+int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalPtkByUuid(uuid, localPtk, len);
+}
+
+int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalDefaultPtkByUuid(uuid, localPtk, len);
+}
+
+int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, uint32_t len)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteByteInfo(networkId, key, info, len);
+}
+
+int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteDefaultPtkByUuid(uuid, remotePtk, len);
+}
+
+int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->SoftBusBase64Encode(dst, dlen, olen, src, slen);
+}
+
 WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetLinkedInfo(info);
@@ -152,7 +177,7 @@ WifiErrorCode Hid2dGetRecommendChannel(const RecommendChannelRequest *request, R
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dGetRecommendChannel(request, response);
 }
 
-WifiErrorCode Hid2dGetSelfWifiCfgInfo(SelfCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES], int* getDatValidLen)
+WifiErrorCode Hid2dGetSelfWifiCfgInfo(SelfCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES], int *getDatValidLen)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dGetSelfWifiCfgInfo(cfgType, cfgData, getDatValidLen);
 }
@@ -164,11 +189,11 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen, const
 
 WifiErrorCode Hid2dSetPeerWifiCfgInfo(PeerCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES], int setDataValidLen)
 {
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dSetPeerWifiCfgInfo(cfgType,
-        cfgData, setDataValidLen);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dSetPeerWifiCfgInfo(
+        cfgType, cfgData, setDataValidLen);
 }
 
-WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo* groupInfo)
+WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo *groupInfo)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetCurrentGroup(groupInfo);
 }
@@ -213,16 +238,15 @@ WifiErrorCode Hid2dRemoveGcGroup(const char gcIfName[IF_NAME_LEN])
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dRemoveGcGroup(gcIfName);
 }
 
-int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type,
-    const ITransProxyPipelineListener *listener)
+int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const ITransProxyPipelineListener *listener)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineRegisterListener(type, listener);
 }
 
 int32_t TransProxyPipelineGetUuidByChannelId(int32_t channelId, char *uuid, uint32_t uuidLen)
 {
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineGetUuidByChannelId(channelId,
-        uuid, uuidLen);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineGetUuidByChannelId(
+        channelId, uuid, uuidLen);
 }
 
 int32_t TransProxyPipelineSendMessage(
@@ -245,6 +269,17 @@ WifiErrorCode RegisterP2pStateChangedCallback(const P2pStateChangedCallback call
 WifiErrorCode RegisterP2pConnectionChangedCallback(const P2pConnectionChangedCallback callback)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::RegisterP2pConnectionChangedCallback(callback);
+}
+
+int32_t Ipv6AddrInToAddr(SoftBusSockAddrIn6 *addrIn6, char *addr, int32_t addrLen)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t port)
+{
+    return SOFTBUS_OK;
+}
 }
 
 namespace OHOS::SoftBus {
@@ -288,7 +323,7 @@ WifiErrorCode WifiDirectInterfaceMock::RegisterP2pStateChangedCallback(const P2p
 
 WifiErrorCode WifiDirectInterfaceMock::CreateGroupSuccessAction(const int frequency, FreqType type)
 {
-    auto run = [] () {
+    auto run = []() {
         WifiP2pLinkedInfo info;
         info.connectState = P2P_CONNECTED;
         P2pState state = P2P_STATE_STARTED;
@@ -302,7 +337,7 @@ WifiErrorCode WifiDirectInterfaceMock::CreateGroupSuccessAction(const int freque
 
 WifiErrorCode WifiDirectInterfaceMock::CreateGroupFailureAction(const int frequency, FreqType type)
 {
-    auto run = [] () {
+    auto run = []() {
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         connectionCallback_(info);
@@ -314,7 +349,7 @@ WifiErrorCode WifiDirectInterfaceMock::CreateGroupFailureAction(const int freque
 
 WifiErrorCode WifiDirectInterfaceMock::CreateGroupTimeOutAction(const int frequency, FreqType type)
 {
-    auto run = [] () {
+    auto run = []() {
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         sleep(6);
@@ -326,7 +361,7 @@ WifiErrorCode WifiDirectInterfaceMock::CreateGroupTimeOutAction(const int freque
 
 WifiErrorCode WifiDirectInterfaceMock::ConnectSuccessAction(const Hid2dConnectConfig *config)
 {
-    auto run = [] () {
+    auto run = []() {
         P2pState state = P2P_STATE_STARTED;
         stateCallback_(state);
         WifiP2pLinkedInfo info;
@@ -340,7 +375,7 @@ WifiErrorCode WifiDirectInterfaceMock::ConnectSuccessAction(const Hid2dConnectCo
 
 WifiErrorCode WifiDirectInterfaceMock::ConnectFailureAction(const Hid2dConnectConfig *config)
 {
-    auto run = [] () {
+    auto run = []() {
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         connectionCallback_(info);
@@ -352,7 +387,7 @@ WifiErrorCode WifiDirectInterfaceMock::ConnectFailureAction(const Hid2dConnectCo
 
 WifiErrorCode WifiDirectInterfaceMock::ConnectTimeOutAction(const Hid2dConnectConfig *config)
 {
-    auto run = [] () {
+    auto run = []() {
         WifiP2pLinkedInfo info;
         info.connectState = P2P_DISCONNECTED;
         sleep(6);
@@ -364,7 +399,7 @@ WifiErrorCode WifiDirectInterfaceMock::ConnectTimeOutAction(const Hid2dConnectCo
 
 WifiErrorCode WifiDirectInterfaceMock::DestroyGroupSuccessAction()
 {
-    auto run = [] () {
+    auto run = []() {
         P2pState state = P2P_STATE_STARTED;
         stateCallback_(state);
         WifiP2pLinkedInfo info;
@@ -378,7 +413,7 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupSuccessAction()
 
 WifiErrorCode WifiDirectInterfaceMock::DestroyGroupFailureAction()
 {
-    auto run = [] () {
+    auto run = []() {
         WifiP2pLinkedInfo info;
         info.connectState = P2P_CONNECTED;
         connectionCallback_(info);
@@ -390,7 +425,7 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupFailureAction()
 
 WifiErrorCode WifiDirectInterfaceMock::DestroyGroupTimeOutAction()
 {
-    auto run = [] () {
+    auto run = []() {
         WifiP2pLinkedInfo info;
         info.connectState = P2P_CONNECTED;
         sleep(17);
@@ -399,5 +434,5 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupTimeOutAction()
     thread.detach();
     return WIFI_SUCCESS;
 }
-}
+} // namespace OHOS::SoftBus
 // namespace OHOS::SoftBus

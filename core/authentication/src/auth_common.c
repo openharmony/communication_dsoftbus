@@ -289,7 +289,6 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
             }
             break;
         default:
-            AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", info1->type);
             return false;
     }
     return false;
@@ -481,6 +480,21 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid)
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_CONN, "info or deviceUdid is null");
+    return SOFTBUS_ERR;
+}
+
+int32_t GetIsExchangeUdidByNetworkId(const char *networkId, bool *isExchangeUdid)
+{
+    if (networkId == NULL || isExchangeUdid == NULL) {
+        AUTH_LOGW(AUTH_CONN, "param err");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *info = LnnRetrieveDeviceInfoByNetworkId(networkId);
+    if (info != NULL) {
+        *isExchangeUdid = info->isAuthExchangeUdid;
+        return SOFTBUS_OK;
+    }
+    AUTH_LOGE(AUTH_CONN, "deviceInfo not found");
     return SOFTBUS_ERR;
 }
 

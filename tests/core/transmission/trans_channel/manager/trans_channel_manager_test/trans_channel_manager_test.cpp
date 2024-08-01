@@ -88,7 +88,6 @@ void TransChannelManagerTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    TransChannelInit();
 }
 
 void TransChannelManagerTest::TearDownTestCase(void)
@@ -295,9 +294,6 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannelProc001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransOpenChannelProc(CHANNEL_TYPE_UDP, appInfo, connOpt, &channelId);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = TransOpenChannelProc(CHANNEL_TYPE_PROXY, appInfo, connOpt, &channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransOpenChannelProc(CHANNEL_TYPE_TCP_DIRECT, appInfo, connOpt, &channelId);

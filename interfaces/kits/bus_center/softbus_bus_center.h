@@ -460,6 +460,15 @@ typedef struct {
     */
     void (*onLocalNetworkIdChanged)(void);
     /**
+    * @brief Called when the device is not trusted.
+    *
+    * @param msg Indicates the pointer to untrusted device information.
+    *
+    * @since 1.0
+    * @version 1.0
+    */
+    void (*onNodeDeviceNotTrusted)(const char *msg);
+    /**
      * @brief Called when the running status of a device changes.
      *
      * @param type Indicates the device type. For details, see {@link NodeStatusType}.

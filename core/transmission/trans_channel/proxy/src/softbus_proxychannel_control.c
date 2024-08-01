@@ -162,8 +162,7 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
     char *payLoad = NULL;
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
-    TRANS_LOGI(TRANS_CTRL, "send handshake ack msg myChannelId=%{public}d, peerChannelId=%{public}d",
-        chan->myId, chan->peerId);
+
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     if (chan->appInfo.appType != APP_TYPE_AUTH) {
         msgHead.cipher = (msgHead.cipher | ENCRYPTED);
@@ -172,8 +171,13 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
     msgHead.peerId = chan->peerId;
 
     if (retCode != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_CTRL,
+            "send handshake error msg errCode=%{public}d, myChannelId=%{public}d, peerChannelId=%{public}d",
+            retCode, chan->myId, chan->peerId);
         payLoad = TransProxyPackHandshakeErrMsg(retCode);
     } else {
+        TRANS_LOGI(TRANS_CTRL, "send handshake ack msg myChannelId=%{public}d, peerChannelId=%{public}d",
+            chan->myId, chan->peerId);
         payLoad = TransProxyPackHandshakeAckMsg(chan);
     }
     if (payLoad == NULL) {

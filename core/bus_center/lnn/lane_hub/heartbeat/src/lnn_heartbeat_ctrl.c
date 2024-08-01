@@ -120,8 +120,8 @@ static bool IsHeartbeatEnable(void)
         "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
         "request=%{public}d",
         isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
-        g_hbConditionState.heartbeatEnable, !g_hbConditionState.isRequestDisable);
-    return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock &&
+        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable);
+    return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !g_hbConditionState.isRequestDisable &&
         (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd;
 }
 
@@ -458,8 +458,8 @@ static void HbChangeMediumParamByState(SoftBusScreenState state)
             param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
             break;
         case SOFTBUS_SCREEN_OFF:
-            param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
-            param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
+            param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
+            param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
             break;
         default:
             LNN_LOGD(LNN_HEART_BEAT, "ctrl reset ble scan medium param get invalid state");
@@ -592,6 +592,10 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
                     HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
                 LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
                     HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
+            }
+            if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON &&
+                g_hbConditionState.accountState != SOFTBUS_ACCOUNT_LOG_IN) {
+                HbConditionChanged(false);
             }
             break;
         case SOFTBUS_SCREEN_LOCK:

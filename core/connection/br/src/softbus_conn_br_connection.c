@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -530,7 +530,6 @@ static int32_t NotifyReferenceRequest(uint32_t connectionId, int32_t delta, int3
             ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_RETRY_NOTIFY_REFERENCE, connectionId, 0,
                 NULL, RETRY_NOTIFY_REFERENCE_DELAY_MILLIS);
         }
-
         if (connection->state == BR_CONNECTION_STATE_NEGOTIATION_CLOSING) {
             ConnRemoveMsgFromLooper(
                 &g_brConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT, connectionId, 0, NULL);
@@ -541,7 +540,6 @@ static int32_t NotifyReferenceRequest(uint32_t connectionId, int32_t delta, int3
         ConnBrReturnConnection(&connection);
         return SOFTBUS_OK;
     }
-
     if (localRc <= 0) {
         connection->state = BR_CONNECTION_STATE_CLOSING;
         (void)SoftBusMutexUnlock(&connection->lock);

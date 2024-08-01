@@ -373,18 +373,29 @@ void LnnDumpLocalBasicInfo(void)
     char *anonyUdidHash = NULL;
     char *anonyNetworkId = NULL;
     char *anonyP2pMac = NULL;
+    char *anonyUdid = NULL;
+    char *anonyUuid = NULL;
     char localIp[IP_LEN] = { 0 };
     char localP2PMac[MAC_LEN] = { 0 };
     char localBtMac[BT_MAC_LEN] = { 0 };
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    char localUuid[UUID_BUF_LEN] = { 0 };
     char udidShortHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     int32_t onlineNodeNum = 0;
     NodeBasicInfo localInfo = { 0 };
 
     (void)LnnGetLocalDeviceInfo(&localInfo);
+    (void)LnnGetLocalStrInfo(STRING_KEY_UUID, localUuid, UUID_BUF_LEN);
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
     Anonymize(udidShortHash, &anonyUdidHash);
+    Anonymize(localUuid, &anonyUuid);
+    Anonymize(localUdid, &anonyUdid);
     Anonymize(localInfo.networkId, &anonyNetworkId);
-    LNN_LOGW(LNN_HEART_BEAT, "local DeviceInfo udidShortHash=%{public}s, networkId=%{public}s", anonyUdidHash,
-        anonyNetworkId);
+    LNN_LOGW(LNN_HEART_BEAT,
+        "local DeviceInfo, uuid=%{public}s, udid=%{public}s, udidShortHash=%{public}s, networkId=%{public}s",
+        anonyUuid, anonyUdid, anonyUdidHash, anonyNetworkId);
+    AnonymizeFree(anonyUuid);
+    AnonymizeFree(anonyUdid);
     AnonymizeFree(anonyUdidHash);
     AnonymizeFree(anonyNetworkId);
     const char *devTypeStr = LnnConvertIdToDeviceType(localInfo.deviceTypeId);
@@ -550,7 +561,7 @@ uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
         LNN_LOGI(LNN_HEART_BEAT, "seed is 0, just ignore");
     }
     srand(currTime);
-    uint32_t random = rand() % (randMax - randMin);
+    uint32_t random = (uint32_t)rand() % (randMax - randMin);
     return randMin + random;
 }
 

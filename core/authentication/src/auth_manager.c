@@ -831,6 +831,22 @@ static void ReportAuthRequestFailed(uint32_t requestId, int32_t reason)
     }
 }
 
+static void PostCancelAuthMessage(int64_t authSeq, const AuthSessionInfo *info)
+{
+    AUTH_LOGI(AUTH_FSM, "post cancel auth msg, authSeq=%{public}" PRId64, authSeq);
+    const char *msg = "";
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_CANCEL_AUTH,
+        .module = MODULE_AUTH_CANCEL,
+        .seq = authSeq,
+        .flag = 0,
+        .len = strlen(msg) + 1,
+    };
+    if (PostAuthData(info->connId, !info->isConnectServer, &head, (uint8_t *)msg) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "post cancel auth fail");
+    }
+}
+
 void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "info is null");
@@ -856,10 +872,23 @@ void AuthNotifyAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     }
     AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     ReleaseAuthLock();
+    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
+        PostCancelAuthMessage(authSeq, info);
+    }
     if (!info->isConnectServer) {
         ReportAuthRequestPassed(info->requestId, authHandle, NULL);
         AUTH_LOGI(AUTH_FSM, "notify auth passed, disconnect connId=%{public}" PRIu64, info->connId);
         DisconnectAuthDevice((uint64_t *)&info->connId);
+    }
+}
+
+static void NotifyAuthResult(AuthHandle authHandle, const AuthSessionInfo *info)
+{
+    if (info->isConnectServer) {
+        AuthNotifyDeviceVerifyPassed(authHandle, &info->nodeInfo);
+    } else {
+        ReportAuthRequestPassed(info->requestId, authHandle, &info->nodeInfo);
+        UpdateAuthDevicePriority(info->connId);
     }
 }
 
@@ -901,17 +930,17 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
             AUTH_LOGE(AUTH_FSM, "copy p2pMac fail, authSeq=%{public}" PRId64, authSeq);
         }
     }
+    AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
     ReleaseAuthLock();
     if (!LnnSetDlPtk(info->nodeInfo.networkId, info->nodeInfo.remotePtk)) {
         AUTH_LOGE(AUTH_FSM, "set remote ptk error, index=%{public}d", TO_INT32(index));
     }
-    AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
-    if (info->isConnectServer) {
-        AuthNotifyDeviceVerifyPassed(authHandle, &info->nodeInfo);
-    } else {
-        ReportAuthRequestPassed(info->requestId, authHandle, &info->nodeInfo);
-        UpdateAuthDevicePriority(info->connId);
+    bool isExchangeUdid = true;
+    if (GetIsExchangeUdidByNetworkId(info->nodeInfo.networkId, &isExchangeUdid) == SOFTBUS_OK && isExchangeUdid) {
+        AUTH_LOGI(AUTH_FSM, "clear isExchangeUdid");
+        LnnClearAuthExchangeUdid(info->nodeInfo.networkId);
     }
+    NotifyAuthResult(authHandle, info);
 }
 
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason)
@@ -1117,7 +1146,7 @@ static void HandleDeviceIdData(
             }
             return;
         }
-        if (fsm != NULL && fsm->info.idType == EXCHANHE_UDID && fsm->info.localState == AUTH_STATE_COMPATIBLE) {
+        if (fsm != NULL && fsm->info.idType == EXCHANGE_UDID && fsm->info.localState == AUTH_STATE_COMPATIBLE) {
             AUTH_LOGE(AUTH_FSM, "the same connId fsm not support, ignore auth seq=%{public}" PRId64, head->seq);
             ReleaseAuthLock();
             HandleRepeatDeviceIdDataDelay(connId, connInfo, fromServer, head, data);
@@ -1283,7 +1312,7 @@ static void HandleConnectionData(
         PrintAuthConnInfo(connInfo);
         AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
         ReleaseAuthLock();
-        if (connInfo->type == AUTH_LINK_TYPE_P2P) {
+        if (connInfo->type == AUTH_LINK_TYPE_P2P || connInfo->type == AUTH_LINK_TYPE_WIFI) {
             return;
         }
         (void)PostDecryptFailAuthData(connId, fromServer, head, data);
@@ -1364,6 +1393,16 @@ static void HandleDecryptFailData(
     }
 }
 
+static void HandleCancelAuthData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    int32_t ret = AuthSessionProcessCancelAuthByConnId(connId, !fromServer, data, head->len);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "perform auth session cancel auth fail. seq=%{public}" PRId64 ", ret=%{public}d",
+            head->seq, ret);
+    }
+}
+
 static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, bool *fromServer)
 {
     if (connInfo->type != AUTH_LINK_TYPE_WIFI) {
@@ -1416,6 +1455,9 @@ static void OnDataReceived(
             break;
         case DATA_TYPE_DECRYPT_FAIL:
             HandleDecryptFailData(connId, connInfo, fromServer, head, data);
+            break;
+        case DATA_TYPE_CANCEL_AUTH:
+            HandleCancelAuthData(connId, connInfo, fromServer, head, data);
             break;
         default:
             break;
@@ -1627,6 +1669,27 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
     }
     AUTH_LOGI(AUTH_CONN, "no active auth, try br connection");
     return TryGetBrConnInfo(uuid, connInfo);
+}
+
+int32_t AuthDeviceGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo)
+{
+    if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetAuthConnInfoByUuid(uuid, type, connInfo) != SOFTBUS_OK) {
+        if (type == AUTH_LINK_TYPE_BR) {
+            return TryGetBrConnInfo(uuid, connInfo);
+        }
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    if (type == AUTH_LINK_TYPE_BLE) {
+        if (!CheckActiveAuthConnection(connInfo)) {
+            AUTH_LOGI(AUTH_CONN, "auth ble connection not active");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo)

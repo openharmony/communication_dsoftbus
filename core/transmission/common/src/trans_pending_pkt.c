@@ -128,7 +128,7 @@ static void FormalizeTimeFormat(SoftBusSysTime *outTime, int32_t type)
     }
 }
 
-int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
+int32_t AddPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
 {
     int32_t ret = IsPendingListTypeLegal(type);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "type=%{public}d illegal", type);
@@ -157,10 +157,85 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
     TRANS_LOGI(TRANS_SVC, "add channelId=%{public}d", item->channelId);
     pendingList->cnt++;
     (void)SoftBusMutexUnlock(&pendingList->lock);
+    return SOFTBUS_OK;
+}
+
+static PendingPktInfo *GetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
+{
+    int32_t ret = IsPendingListTypeLegal(type);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "type illegal. type=%{public}d", type);
+        return NULL;
+    }
+
+    SoftBusList *pendingList = g_pendingList[type];
+    if (pendingList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "pending type list not init. type=%{public}d", type);
+        return NULL;
+    }
+    if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "set pending lock failed.");
+        return NULL;
+    }
+    PendingPktInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
+        if (item->seq == seqNum && item->channelId == channelId) {
+            (void)SoftBusMutexUnlock(&pendingList->lock);
+            return item;
+        }
+    }
+    TRANS_LOGI(TRANS_SVC, "not found channelId=%{public}d", channelId);
+    (void)SoftBusMutexUnlock(&pendingList->lock);
+    return NULL;
+}
+
+void DelPendingPacketbyChannelId(int32_t channelId, int32_t seqNum, int32_t type)
+{
+    int32_t ret = IsPendingListTypeLegal(type);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "type illegal. type=%{public}d", type);
+        return;
+    }
+
+    SoftBusList *pendingList = g_pendingList[type];
+    if (pendingList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "pending type list not init. type=%{public}d", type);
+        return;
+    }
+    if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "set pending lock failed.");
+        return;
+    }
+    PendingPktInfo *item = NULL;
+    PendingPktInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &pendingList->list, PendingPktInfo, node) {
+        if (item->seq == seqNum && item->channelId == channelId) {
+            ListDelete(&item->node);
+            TRANS_LOGI(TRANS_SVC, "delete channelId=%{public}d", item->channelId);
+            pendingList->cnt--;
+            (void)SoftBusMutexUnlock(&pendingList->lock);
+            ReleasePendingItem(item);
+            return;
+        }
+    }
+    TRANS_LOGI(TRANS_SVC, "not found channelId=%{public}d", channelId);
+    (void)SoftBusMutexUnlock(&pendingList->lock);
+}
+
+int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
+{
+    int32_t ret = IsPendingListTypeLegal(type);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "type=%{public}d illegal", type);
+
+    SoftBusList *pendingList = g_pendingList[type];
+    TRANS_CHECK_AND_RETURN_RET_LOGE(pendingList != NULL, SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, TRANS_SVC,
+        "type=%{public}d pending list not init", type);
 
     SoftBusSysTime outTime;
     FormalizeTimeFormat(&outTime, type);
 
+    PendingPktInfo *item = GetPendingPacket(channelId, seqNum, type);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_NOT_FIND, TRANS_SVC, "pending item not found");
     ret = SoftBusMutexLock(&item->lock);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "pending item lock failed");
     while (item->status == PACKAGE_STATUS_PENDING && TimeBefore(&outTime)) {
@@ -189,11 +264,11 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
 
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
-        TRANS_LOGE(TRANS_INIT, "pending type list not inited. type=%{public}d", type);
+        TRANS_LOGE(TRANS_INIT, "pending type list not init. type=%{public}d", type);
         return SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND;
     }
     if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "set pendind lock failed.");
+        TRANS_LOGE(TRANS_SVC, "set pending lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
     PendingPktInfo *item = NULL;
@@ -201,11 +276,11 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
         if (item->seq == seqNum && item->channelId == channelId) {
             item->status = PACKAGE_STATUS_FINISHED;
             SoftBusCondSignal(&item->cond);
-            SoftBusMutexUnlock(&pendingList->lock);
+            (void)SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&pendingList->lock);
+    (void)SoftBusMutexUnlock(&pendingList->lock);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
@@ -219,11 +294,11 @@ int32_t DelPendingPacket(int32_t channelId, int32_t type)
 
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
-        TRANS_LOGE(TRANS_INIT, "pending type list not inited. type=%{public}d", type);
+        TRANS_LOGE(TRANS_INIT, "pending type list not init. type=%{public}d", type);
         return SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND;
     }
     if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "del pendind lock failed.");
+        TRANS_LOGE(TRANS_SVC, "del pending lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
     PendingPktInfo *item = NULL;
@@ -231,11 +306,11 @@ int32_t DelPendingPacket(int32_t channelId, int32_t type)
         if (item->channelId == channelId) {
             item->status = PACKAGE_STATUS_CANCELED;
             SoftBusCondSignal(&item->cond);
-            SoftBusMutexUnlock(&pendingList->lock);
+            (void)SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&pendingList->lock);
+    (void)SoftBusMutexUnlock(&pendingList->lock);
     return SOFTBUS_OK;
 }
 

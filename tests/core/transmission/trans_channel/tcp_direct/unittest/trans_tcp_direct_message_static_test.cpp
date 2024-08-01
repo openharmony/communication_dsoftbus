@@ -65,7 +65,6 @@ void TransTcpDirectMessageStaticTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    TransChannelInit();
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTdcSetCallBack(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -78,7 +77,6 @@ void TransTcpDirectMessageStaticTest::TearDownTestCase(void)
     AuthDeinit();
     TransServerDeinit();
     DiscEventManagerDeinit();
-    TransChannelDeinit();
 }
 
 SessionConn *TestSetSessionConn()
@@ -128,7 +126,7 @@ AppInfo *TestSetAppInfo()
 HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, TestSize.Level1)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (conn == NULL) {
+    if (conn == nullptr) {
         return;
     }
 
@@ -180,7 +178,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtData0003, TestSize.Le
 {
     int32_t ret;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (conn == NULL) {
+    if (conn == nullptr) {
         return;
     }
 
@@ -718,7 +716,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, IsMetaSessionTest001, TestSize.Level1)
 
 /**
  * @tc.name: TransTdcGetDataBufInfoByChannelId001
- * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -741,7 +739,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcGetDataBufInfoByChannelIdTest0
 
 /**
  * @tc.name: TransTdcUpdateDataBufWInfo0014
- * @tc.desc: Should return SOFTBUS_ERR when dataList is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT when dataList is null.
  * @tc.type: FUNC
  * @tc.require:
  */

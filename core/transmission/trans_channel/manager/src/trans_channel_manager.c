@@ -244,7 +244,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     TransSetFirstTokenInfo(appInfo, &extra);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    if (param->isAsync) {
+    if (param->isQosLane) {
         uint32_t callingTokenId = TransACLGetCallingTokenID();
         ret = TransAsyncGetLaneInfo(param, &laneHandle, callingTokenId, appInfo->timeStart);
         if (ret != SOFTBUS_OK) {
@@ -253,7 +253,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
                 tmpName, param->sessionId);
             AnonymizeFree(tmpName);
             if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
-                TransFreeLane(laneHandle, param->isQosLane);
+                TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
             }
             (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
         }
@@ -283,6 +283,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     appInfo->connectType = connOpt.type;
     extra.linkType = connOpt.type;
+    extra.deviceState = TransGetDeviceState(param->peerDeviceId);
     FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     TRANS_LOGI(TRANS_CTRL, "laneHandle=%{public}u, channelType=%{public}u", laneHandle, transInfo->channelType);
@@ -324,7 +325,7 @@ EXIT_ERR:
     TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
     TransFreeAppInfo(appInfo);
     if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
-        TransFreeLane(laneHandle, param->isQosLane);
+        TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
     }
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
@@ -333,7 +334,7 @@ EXIT_CANCEL:
     TransBuildTransOpenChannelCancelEvent(&extra, transInfo, appInfo->timeStart, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransFreeAppInfo(appInfo);
-    TransFreeLane(laneHandle, param->isQosLane);
+    TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server open channel cancel");
     return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
@@ -571,7 +572,7 @@ int32_t TransReleaseUdpResources(int32_t channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "release Udp channel resources: channelId=%{public}d", channelId);
     NotifyQosChannelClosed(channelId, CHANNEL_TYPE_UDP);
-    (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_UDP);
+    (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_UDP, false);
     (void)TransDelUdpChannel(channelId);
     return SOFTBUS_OK;
 }
@@ -619,6 +620,7 @@ void TransChannelDeathCallback(const char *pkgName, int32_t pid)
 {
     TransProxyDeathCallback(pkgName, pid);
     TransTdcDeathCallback(pkgName, pid);
+    TransTdcChannelInfoDeathCallback(pkgName, pid);
     TransLaneMgrDeathCallback(pkgName, pid);
     TransUdpDeathCallback(pkgName, pid);
 }

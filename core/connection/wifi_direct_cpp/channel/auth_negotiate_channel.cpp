@@ -15,6 +15,7 @@
 
 #include "auth_negotiate_channel.h"
 #include "securec.h"
+#include "common_timer_errors.h"
 
 #include "conn_log.h"
 #include "lnn_distributed_net_ledger.h"
@@ -30,8 +31,12 @@
 #include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
+static constexpr int TIMER_TIMEOUT = 50;
+static constexpr int WAIT_DETECT_RESPONSE_TIMEOUT_MS = 1000;
+Utils::Timer AuthNegotiateChannel::timer_("DetectLink", TIMER_TIMEOUT);
+
 AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
-    : handle_(handle), close_(false)
+    : handle_(handle), timerId_(Utils::TIMER_ERR_INVALID_VALUE), close_(false)
 {
     char remoteUuid[UUID_BUF_LEN] {};
     auto ret = AuthGetDeviceUuid(handle_.authId, remoteUuid, UUID_BUF_LEN);
@@ -104,10 +109,81 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
         .len = static_cast<uint32_t>(output.size()),
         .data = output.data(),
     };
-    auto result = AuthPostTransData(handle_, &dataInfo);
+
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        result == SOFTBUS_OK, SOFTBUS_CONN_AUTH_POST_DATA_FAILED, CONN_WIFI_DIRECT, "post data failed");
+        AuthPostTransData(handle_, &dataInfo) == SOFTBUS_OK, SOFTBUS_CONN_AUTH_POST_DATA_FAILED,
+        CONN_WIFI_DIRECT, "post data failed");
     return SOFTBUS_OK;
+}
+
+void AuthNegotiateChannel::OnWaitDetectResponseTimeout()
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "timeout");
+    {
+        std::lock_guard lock(channelLock_);
+        authIdToChannelMap_.erase(handle_.authId);
+        if (authIdToChannelMap_.empty()) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "shutdown timer");
+            timer_.Shutdown(true);
+        }
+    }
+
+    NegotiateMessage response(NegotiateMessageType::CMD_DETECT_LINK_RSP);
+    response.SetResultCode(SOFTBUS_TIMOUT);
+    promise_->set_value(response);
+}
+
+NegotiateMessage AuthNegotiateChannel::SendMessageAndWaitResponse(const NegotiateMessage &msg)
+{
+    auto ret = SendMessage(msg);
+    if (ret != SOFTBUS_OK) {
+        NegotiateMessage response(NegotiateMessageType::CMD_DETECT_LINK_RSP);
+        response.SetResultCode(ret);
+        return response;
+    }
+
+    CONN_LOGI(CONN_WIFI_DIRECT, "send detect link request success");
+    {
+        std::lock_guard lock(channelLock_);
+        promise_ = std::make_shared<std::promise<NegotiateMessage>>();
+        if (authIdToChannelMap_.empty()) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "setup timer");
+            timer_.Setup();
+        }
+        timerId_ = timer_.Register([this] () {
+            std::thread(&AuthNegotiateChannel::OnWaitDetectResponseTimeout, this).detach();
+        }, WAIT_DETECT_RESPONSE_TIMEOUT_MS, true);
+        authIdToChannelMap_[handle_.authId] = shared_from_this();
+    }
+
+    return promise_->get_future().get();
+}
+
+void AuthNegotiateChannel::ProcessDetectLinkRequest(const std::shared_ptr<AuthNegotiateChannel> &channel)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "send detect link response");
+    NegotiateMessage response(NegotiateMessageType::CMD_DETECT_LINK_RSP);
+    response.SetResultCode(SOFTBUS_OK);
+    channel->SendMessage(response);
+}
+
+void AuthNegotiateChannel::ProcessDetectLinkResponse(AuthHandle handle, const NegotiateMessage &response)
+{
+    std::lock_guard lock(channelLock_);
+    auto it = authIdToChannelMap_.find(handle.authId);
+    if (it == authIdToChannelMap_.end()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not find channel by authId=%{public}" PRId64, handle.authId);
+        return;
+    }
+
+    auto channel = it->second;
+    timer_.Unregister(channel->timerId_);
+    authIdToChannelMap_.erase(it);
+    if (authIdToChannelMap_.empty()) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "shutdown timer");
+        timer_.Shutdown(true);
+    }
+    channel->promise_->set_value(response);
 }
 
 static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
@@ -124,14 +200,24 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     input.insert(input.end(), data->data, data->data + data->len);
     NegotiateMessage msg;
     msg.Unmarshalling(*protocol, input);
-    if (remoteDeviceId.empty()) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "use remote mac as device id");
+    bool sameAccount = msg.GetExtraData().empty() || msg.GetExtraData().front();
+    CONN_LOGI(CONN_WIFI_DIRECT, "sameAccount=%{public}d", sameAccount);
+    if (!WifiDirectUtils::IsDeviceOnline(WifiDirectUtils::UuidToNetworkId(remoteDeviceId)) || !sameAccount) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
         remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
     }
-    msg.SetRemoteDeviceId(remoteDeviceId);
 
-    NegotiateCommand command(msg, channel);
     CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s", msg.MessageTypeToString().c_str());
+    if (msg.GetMessageType() == NegotiateMessageType::CMD_DETECT_LINK_REQ) {
+        std::thread(AuthNegotiateChannel::ProcessDetectLinkRequest, channel).detach();
+        return;
+    } else if (msg.GetMessageType() == NegotiateMessageType::CMD_DETECT_LINK_RSP) {
+        std::thread(AuthNegotiateChannel::ProcessDetectLinkResponse, handle, msg).detach();
+        return;
+    }
+
+    msg.SetRemoteDeviceId(remoteDeviceId);
+    NegotiateCommand command(msg, channel);
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessNegotiateData(remoteDeviceId, command);
 }
 
@@ -141,24 +227,27 @@ static void OnAuthDisconnected(AuthHandle authHandle)
     AuthNegotiateChannel disconnectChannel(authHandle);
     InnerLink::LinkType type = InnerLink::LinkType::INVALID_TYPE;
     std::string remoteDeviceId;
-    LinkManager::GetInstance().ForEach([&disconnectChannel, &type, &remoteDeviceId] (const InnerLink &innerLink) {
-        auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(innerLink.GetNegotiateChannel());
-        if (channel != nullptr && disconnectChannel == *channel) {
-            CONN_LOGD(CONN_WIFI_DIRECT, "disconnect type=%{public}d, remoteUuid=%{public}s, remoteMac=%{public}s",
-                      static_cast<int>(type), WifiDirectAnonymizeDeviceId(innerLink.GetRemoteDeviceId()).c_str(),
-                      WifiDirectAnonymizeMac(innerLink.GetRemoteBaseMac()).c_str());
-            type = innerLink.GetLinkType();
-            remoteDeviceId= innerLink.GetRemoteDeviceId();
-            auto &entity = EntityFactory::GetInstance().GetEntity(innerLink.GetLinkType());
-            entity.DisconnectLink(innerLink.GetRemoteBaseMac());
+    std::string remoteMac;
+    LinkManager::GetInstance().ForEach(
+        [&disconnectChannel, &type, &remoteDeviceId, &remoteMac] (const InnerLink &innerLink) {
+            auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(innerLink.GetNegotiateChannel());
+            if (channel != nullptr && disconnectChannel == *channel) {
+                type = innerLink.GetLinkType();
+                remoteDeviceId= innerLink.GetRemoteDeviceId();
+                remoteMac = innerLink.GetRemoteBaseMac();
+                return true;
+            }
+            return false;
+        });
 
-            return true;
-        }
-        return false;
-    });
-
+    CONN_LOGI(CONN_WIFI_DIRECT, "disconnect type=%{public}d, remoteUuid=%{public}s, remoteMac=%{public}s",
+        static_cast<int>(type), WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(),
+        WifiDirectAnonymizeMac(remoteMac).c_str());
     if (type != InnerLink::LinkType::INVALID_TYPE) {
         LinkManager::GetInstance().RemoveLink(type, remoteDeviceId);
+        auto &entity = EntityFactory::GetInstance().GetEntity(type);
+        entity.DisconnectLink(remoteMac);
+        entity.DestroyGroupIfNeeded();
     }
 }
 

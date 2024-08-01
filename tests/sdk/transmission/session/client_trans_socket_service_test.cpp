@@ -191,7 +191,7 @@ HWTEST_F(TransClientSocketServiceTest, DataType001, TestSize.Level1)
     for (int32_t type = DATA_TYPE_MESSAGE; type < DATA_TYPE_BUTT; type++) {
         info.dataType = static_cast<TransDataType>(type);
         int32_t socketId = Socket(info);
-        EXPECT_EQ(socketId, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+        EXPECT_EQ(socketId, SOFTBUS_ACCESS_TOKEN_DENIED);
     }
 }
 

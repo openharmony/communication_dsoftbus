@@ -337,7 +337,7 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
     return SOFTBUS_OK;
 }
 
-static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleConnection *connection, int32_t reason, 
+static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleConnection *connection, int32_t reason,
     bool isReuse)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
@@ -1661,7 +1661,6 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
         CONN_LOGI(CONN_BLE, "ble msg looper recv msg=%{public}d, curState=%{public}s",
             msg->what, g_bleManager.state->name());
     }
-
     size_t commandSize = sizeof(g_commands) / sizeof(g_commands[0]);
     for (size_t i = 0; i < commandSize; i++) {
         if (g_commands[i].cmd == msg->what) {
@@ -1913,8 +1912,8 @@ static void OnConnected(uint32_t connectionId)
 
 static void OnConnectFailed(uint32_t connectionId, int32_t error)
 {
-    CONN_LOGW(
-        CONN_BLE, "receive ble client connect failed notify, connId=%{public}u, err=%{public}d", connectionId, error);
+    CONN_LOGW(CONN_BLE,
+        "receive ble client connect failed notify, connId=%{public}u, err=%{public}d", connectionId, error);
     BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
     CONN_CHECK_AND_RETURN_LOGW(ctx != NULL, CONN_BLE, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;

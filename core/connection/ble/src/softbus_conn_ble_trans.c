@@ -268,7 +268,7 @@ static void FreeSendNode(SendQueueNode *node)
 
 static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
-#define BLE_SEND_PACKET_DELAY_MILLIS 10
+#define BLE_SEND_PACKET_DELAY_MILLIS 20
     const uint8_t *waitSendData = data;
     uint32_t waitSendLen = dataLen;
     uint32_t offset = 0;
@@ -306,10 +306,8 @@ static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *d
         waitSendData += amount;
         waitSendLen -= amount;
         offset += amount;
-        if (waitSendLen > 0) {
-            // Temporarily add delay to avoid packet loss
-            SoftBusSleepMs(BLE_SEND_PACKET_DELAY_MILLIS);
-        }
+        // Temporarily add delay to avoid packet loss
+        SoftBusSleepMs(BLE_SEND_PACKET_DELAY_MILLIS);
     }
     return SOFTBUS_OK;
 }
@@ -506,8 +504,8 @@ int32_t ConnBleTransConfigPostLimit(const LimitConfiguration *configuration)
     } else {
         ret = g_flowController->enable(g_flowController, configuration->windowInMillis, configuration->quotaInBytes);
     }
-    CONN_LOGI(CONN_BR, "config br post limit, active=%d, windows=%{public}d millis, quota=%{public}d bytes, result=%d",
-        configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
+    CONN_LOGI(CONN_BR, "config ble post limit, active=%{public}d, windows=%{public}d millis, quota=%{public}d bytes, "
+        "result=%{public}d", configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
     return ret;
 }
 
@@ -562,21 +560,21 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
     buffer->length -= packLen;
     if (buffer->length > 0) {
         CONN_LOGI(CONN_BLE, "coc socket read limited buffer: leftLength=%{public}d", buffer->length);
-    }  
+    }
     *outLen = (int32_t)packLen;
     return dataCopy;
 }
 
 static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
-    #define BLE_SEND_PACKET_DELAY_MILLIS 10
     uint32_t sentLen = 0;
     while (dataLen > sentLen) {
-        uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)dataLen);
-        int32_t status = ConnBleSend(connection, data, amount, module);
+        uint32_t amount = (uint32_t)g_flowController->apply(g_flowController, (int32_t)(dataLen - sentLen));
+        int32_t status = ConnBleSend(connection, data + sentLen, amount, module);
         CONN_LOGI(CONN_BLE,
-            "coc send packet: connId=%{public}u, module=%{public}d, total=%{public}u, status=%{public}d",
-            connection->connectionId, module, dataLen, status);
+            "coc send packet: connId=%{public}u, module=%{public}d, total=%{public}u, "
+            "amount=%{public}u, sentLen=%{public}u, status=%{public}d",
+            connection->connectionId, module, dataLen, amount, sentLen, status);
         sentLen += amount;
     }
     return SOFTBUS_OK;
@@ -620,10 +618,9 @@ void *BleSendTask(void *arg)
         ConnBleConnection *connection = ConnBleGetConnectionById(sendNode->connectionId);
         if (connection == NULL) {
             CONN_LOGE(CONN_BLE,
-                "connection is not exist, connId=%{public}u, pid=%{public}d, "
-                "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
-                sendNode->connectionId, sendNode->pid, sendNode->dataLen, sendNode->flag,
-                sendNode->module, sendNode->seq);
+                "connection is not exist, connId=%{public}u, pid=%{public}d, Len=%{public}u, Flg=%{public}d, "
+                "Module=%{public}d, Seq=%{public}" PRId64 "", sendNode->connectionId, sendNode->pid,
+                sendNode->dataLen, sendNode->flag, sendNode->module, sendNode->seq);
             FreeSendNode(sendNode);
             sendNode = NULL;
             continue;

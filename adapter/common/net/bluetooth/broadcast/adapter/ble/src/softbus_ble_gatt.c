@@ -476,6 +476,7 @@ static int32_t StartBleAdv(int32_t advId, int *btAdvId, const SoftbusBroadcastPa
             return SOFTBUS_BC_ADAPTER_ASSEMBLE_FAIL;
         }
     }
+    DumpSoftbusAdapterData("mgr pkg:", advRawData.advData, advRawData.advDataLen);
     int ret = BleStartAdvEx(btAdvId, advRawData, advParam);
     SoftBusFree(advRawData.advData);
     SoftBusFree(advRawData.rspData);
@@ -766,7 +767,7 @@ static bool SoftbusSetLpParam(LpServerType type,
         return false;
     }
     if (type == SOFTBUS_HEARTBEAT_TYPE) {
-        SoftbusSetManufactureData(lpParam.filter, scanParam->filterSize);
+        SoftbusSetManufactureFilter(lpParam.filter, scanParam->filterSize);
     }
     SoftbusFilterToBt(lpParam.filter, scanParam->filter, scanParam->filterSize);
     lpParam.filterSize = (unsigned int)scanParam->filterSize;

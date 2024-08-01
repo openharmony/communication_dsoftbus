@@ -491,6 +491,11 @@ int32_t LnnIpcLocalNetworkIdChanged(void)
     return ClinetOnLocalNetworkIdChanged();
 }
 
+int32_t LnnIpcNotifyDeviceNotTrusted(const char *msg)
+{
+    return ClinetNotifyDeviceNotTrusted(msg);
+}
+
 int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
     uint32_t infoTypeLen, int32_t retCode)
 {

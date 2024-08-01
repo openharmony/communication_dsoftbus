@@ -103,7 +103,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/frame:softbus_server",
-      "$dsoftbus_root_path/sdk:softbus_client",
+      "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
     ]
 
     native_source_path = rebase_path("$dsoftbus_root_path")

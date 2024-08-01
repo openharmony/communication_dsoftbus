@@ -39,6 +39,7 @@
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
+#include "conn_coap.h"
 
 #define IP_DEFAULT_PORT 0
 #define LNN_LOOPBACK_IP "127.0.0.1"
@@ -113,9 +114,6 @@ static void RetryGetAvailableIpAddr(void *para)
 static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
 {
     static int32_t retryTime = GET_IP_RETRY_TIMES;
-    if (!LnnIsLinkReady(ifName)) {
-        LNN_LOGE(LNN_BUILDER, "link not ready. ifName=%{public}s", ifName);
-    }
     if (strcmp(ifName, WLAN_IFNAME) != 0) {
         retryTime = 0;
     }
@@ -123,7 +121,7 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
         retryTime = GET_IP_RETRY_TIMES;
         return SOFTBUS_OK;
     }
-    LNN_LOGD(LNN_BUILDER, "get ip retry time=%{public}d", retryTime);
+    LNN_LOGI(LNN_BUILDER, "get ip retry time=%{public}d", retryTime);
     if (--retryTime > 0 && LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryGetAvailableIpAddr,
         NULL, GET_IP_INTERVAL_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnAsyncCallbackDelayHelper get available ip fail");
@@ -361,11 +359,13 @@ static int32_t RequestMainPort(const char *ifName, const char *address)
         LNN_LOGE(LNN_BUILDER, "loopback ip not allowed");
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_BUILDER, "get local ifName begin");
     char oldMainIf[NET_IF_NAME_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, oldMainIf, sizeof(oldMainIf)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local ifName error");
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_BUILDER, "get local ifName end");
     if (strcmp(oldMainIf, ifName) != 0 && strcmp(oldMainIf, LNN_LOOPBACK_IFNAME) != 0) {
         LNN_LOGE(LNN_BUILDER, "Only 1 local subnet is allowed");
         return SOFTBUS_ERR;
@@ -393,6 +393,9 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
     if (OpenIpLink() != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "open ip link failed");
     }
+    if (ConnCoapStartServerListen() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "start coap conn server failed");
+    }
     if (!LnnIsAutoNetWorkingEnabled()) {
         LNN_LOGI(LNN_BUILDER, "auto network disable");
         return SOFTBUS_OK;
@@ -414,6 +417,7 @@ static int32_t DisableIpSubnet(LnnPhysicalSubnet *subnet)
         CloseIpLink();
         LnnStopPublish();
         LnnStopDiscovery();
+        ConnCoapStopServerListen();
         DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
         LeaveOldIpNetwork(subnet->ifName);
         ReleaseMainPort(subnet->ifName);
@@ -426,6 +430,7 @@ static int32_t ChangeIpSubnetAddress(LnnPhysicalSubnet *subnet)
     CloseIpLink();
     LnnStopPublish();
     LnnStopDiscovery();
+    ConnCoapStopServerListen();
     DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     LeaveOldIpNetwork(subnet->ifName);
     return SOFTBUS_OK;
@@ -460,7 +465,7 @@ static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, IpSubnetManagerEven
         [IP_SUBNET_MANAGER_EVENT_IF_CHANGED] = {LNN_SUBNET_RESETTING, subnet->status}
     };
     subnet->status = transactMap[event][isAccepted ? IP_EVENT_RESULT_ACCEPTED : IP_EVENT_RESULT_REJECTED];
-    LNN_LOGD(LNN_BUILDER, "subnet state change. ifName=%{public}s, protocolId=%{public}u, status=%{public}d",
+    LNN_LOGI(LNN_BUILDER, "subnet state change. ifName=%{public}s, protocolId=%{public}u, status=%{public}d",
         subnet->ifName, subnet->protocol->id, subnet->status);
 }
 

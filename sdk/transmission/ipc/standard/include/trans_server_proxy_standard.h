@@ -27,9 +27,9 @@ public:
     virtual ~TransServerProxy() = default;
 
     int32_t StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo) override;
-    int32_t StopDiscovery(const char *pkgName, int subscribeId) override;
+    int32_t StopDiscovery(const char *pkgName, int32_t subscribeId) override;
     int32_t PublishService(const char *pkgName, const PublishInfo *pubInfo) override;
-    int32_t UnPublishService(const char *pkgName, int publishId) override;
+    int32_t UnPublishService(const char *pkgName, int32_t publishId) override;
     int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
 
     int32_t CreateSessionServer(const char *pkgName, const char *sessionName) override;
@@ -46,9 +46,9 @@ public:
 
     int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) override;
     int32_t LeaveLNN(const char *pkgName, const char *networkId) override;
-    int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum) override;
+    int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum) override;
     int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) override;
-    int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
+    int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
         uint32_t len) override;
     int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag) override;
     int32_t RegDataLevelChangeCb(const char *pkgName) override;
@@ -57,9 +57,9 @@ public:
     int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
         int32_t period) override;
     int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) override;
-    int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int quality) override;
+    int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality) override;
     int32_t StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *statsData) override;
-    int32_t GrantPermission(int uid, int pid, const char *sessionName) override;
+    int32_t GrantPermission(int32_t uid, int32_t pid, const char *sessionName) override;
     int32_t RemovePermission(const char *sessionName) override;
     int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *statsData) override;
     int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object) override;

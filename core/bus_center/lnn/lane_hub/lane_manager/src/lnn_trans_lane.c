@@ -614,6 +614,9 @@ static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink lin
         preferLink->linkType[resNum] = optionalLink[i];
         resNum++;
     }
+    if (resNum == 0) {
+        return GetErrCodeOfLink(networkId, optionalLink[0]);
+    }
     preferLink->linkTypeNum = resNum;
     return SOFTBUS_OK;
 }
@@ -676,7 +679,7 @@ static int32_t ReallocLaneByQos(uint32_t laneReqId, uint64_t laneId, const LaneA
 
 static int32_t AllocRawLane(uint32_t laneHandle, const RawLaneAllocInfo *allocInfo, const LaneAllocListener *listener)
 {
-    if ((allocInfo == NULL) || (allocInfo->type != LANE_TYPE_TRANS)) {
+    if ((allocInfo == NULL) || (allocInfo->type != LANE_TYPE_TRANS) || (listener == NULL)) {
         LNN_LOGE(LNN_LANE, "allocLane param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -868,6 +871,7 @@ static bool GetAuthType(const char *peerNetworkId)
     int32_t ret = LnnGetRemoteNumInfo(peerNetworkId, NUM_KEY_META_NODE, &value);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "fail, ret=%{public}d", ret);
+        return false;
     }
     LNN_LOGD(LNN_LANE, "success, value=%{public}d", value);
     return ((1 << ONLINE_HICHAIN) == value);
@@ -1008,11 +1012,6 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
         LNN_LOGE(LNN_LANE, "get lane reqInfo fail");
         return;
     }
-    if (reqInfo.isWithQos && reqInfo.isCanceled) {
-        LNN_LOGI(LNN_LANE, "lane has canceled not need notify succ, laneReqId=%{public}u", laneReqId);
-        (void)Free(laneReqId);
-        return;
-    }
     LaneProfile profile;
     LaneConnInfo connInfo;
     (void)memset_s(&profile, sizeof(LaneProfile), 0, sizeof(LaneProfile));
@@ -1023,6 +1022,12 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
     LNN_LOGI(LNN_LANE, "Notify laneAlloc succ, laneReqId=%{public}u, linkType=%{public}d, "
         "laneId=%{public}" PRIu64 "", laneReqId, info->type, laneId);
     if (reqInfo.isWithQos) {
+        if (reqInfo.isCanceled) {
+            LNN_LOGE(LNN_LANE, "lane has canceled only notify fail, laneReqId=%{public}u", laneReqId);
+            reqInfo.listener.onLaneAllocFail(laneReqId, SOFTBUS_LANE_SUCC_AFTER_CANCELED);
+            (void)Free(laneReqId);
+            return;
+        }
         connInfo.laneId = laneId;
         reqInfo.listener.onLaneAllocSuccess(laneReqId, &connInfo);
     } else {
@@ -1041,10 +1046,7 @@ static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
         return;
     }
     if (reqInfo.isWithQos && reqInfo.isCanceled) {
-        LNN_LOGI(LNN_LANE, "lane has canceled not need notify fail, laneReqId=%{public}u", laneReqId);
-        DeleteRequestNode(laneReqId);
-        FreeLaneReqId(laneReqId);
-        return;
+        LNN_LOGE(LNN_LANE, "lane has canceled only notify fail, laneReqId=%{public}u", laneReqId);
     }
     LNN_LOGE(LNN_LANE, "Notify laneAlloc fail, laneReqId=%{public}u, reason=%{public}d", laneReqId, reason);
     if (reqInfo.isWithQos) {
@@ -1177,6 +1179,10 @@ static void LaneTriggerLink(SoftBusMessage *msg)
 static void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo)
 {
     LNN_LOGI(LNN_LANE, "free unused link, laneReqId=%{public}u", laneReqId);
+    if (linkInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "linkInfo is null, laneReqId=%{public}u", laneReqId);
+        return;
+    }
     if (linkInfo->type == LANE_P2P || linkInfo->type == LANE_HML) {
         char networkId[NETWORK_ID_BUF_LEN] = {0};
         if (LnnGetNetworkIdByUdid(linkInfo->peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {

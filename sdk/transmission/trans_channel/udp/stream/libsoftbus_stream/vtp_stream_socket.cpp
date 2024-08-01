@@ -35,6 +35,7 @@
 #include "stream_common_data.h"
 #include "stream_depacketizer.h"
 #include "stream_packetizer.h"
+#include "vtp_stream_opt.h"
 
 namespace Communication {
 namespace SoftBus {
@@ -249,6 +250,33 @@ int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
     return SOFTBUS_OK;
 }
 
+int VtpStreamSocket::HandleFillpFrameEvt(int fd, const FtEventCbkInfo *info)
+{
+    if (info == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "fd is %{public}d, info is nullptr", fd);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
+    auto itListener = g_streamSocketMap.find(fd);
+    if (itListener != g_streamSocketMap.end()) {
+        return itListener->second->HandleFillpFrameEvtInner(fd, info);
+    } else {
+        TRANS_LOGE(TRANS_STREAM, "OnFillpFrameEvt for the fd is empty in the map. fd=%{public}d", fd);
+    }
+    return SOFTBUS_OK;
+}
+
+int VtpStreamSocket::HandleFillpFrameEvtInner(int fd, const FtEventCbkInfo *info)
+{
+    if (onStreamEvtCb_ != nullptr) {
+        TRANS_LOGD(TRANS_STREAM, "onStreamEvtCb_ enter");
+        return HandleVtpFrameEvt(fd, onStreamEvtCb_, info);
+    } else {
+        TRANS_LOGD(TRANS_STREAM, "onStreamEvtCb_ is nullptr");
+    }
+    return SOFTBUS_OK;
+}
+
 #ifdef FILLP_SUPPORT_BW_DET
 void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *metricList)
 {
@@ -284,9 +312,9 @@ void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *
 /* This function is used to prompt the metrics returned by FtApiRegEventCallbackFunc() function */
 int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
 {
-    if (info == nullptr || fd <= 0) {
+    if (info == nullptr || fd < 0) {
         TRANS_LOGE(TRANS_STREAM, "param invalid");
-        return -1;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (info->evt == FT_EVT_FRAME_STATS) {
         TRANS_LOGI(TRANS_STREAM, "recv fillp frame stats");
@@ -294,6 +322,9 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
     } else if (info->evt == FT_EVT_TRAFFIC_DATA) {
         TRANS_LOGI(TRANS_STREAM, "recv fillp traffic data");
         return HandleRipplePolicy(fd, info);
+    } else if (IsVtpFrameSentEvt(info)) {
+        TRANS_LOGI(TRANS_STREAM, "fd %{public}d recv fillp frame send evt", fd);
+        return HandleFillpFrameEvt(fd, info);
     }
 #ifdef FILLP_SUPPORT_BW_DET
     if (info->evt == FT_EVT_BW_DET || info->evt == FT_EVT_JITTER_DET) {
@@ -387,7 +418,7 @@ void VtpStreamSocket::FillpAppStatistics()
 
 bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
-    int fd = CreateAndBindSocket(local);
+    int fd = CreateAndBindSocket(local, false);
     if (fd == -1) {
         TRANS_LOGE(TRANS_STREAM, "CreateAndBindSocket failed, errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
@@ -436,7 +467,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, in
 bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     TRANS_LOGD(TRANS_STREAM, "enter.");
-    listenFd_ = CreateAndBindSocket(local);
+    listenFd_ = CreateAndBindSocket(local, true);
     if (listenFd_ == -1) {
         TRANS_LOGE(TRANS_STREAM, "create listenFd failed, errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
@@ -710,7 +741,7 @@ void VtpStreamSocket::DestroyVtpInstance(const std::string &pkgName)
     TRANS_LOGD(TRANS_STREAM, "ok");
 }
 
-int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
+int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
 {
     localIpPort_ = local;
     vtpInstance_->UpdateSocketStreamCount(true);
@@ -723,6 +754,10 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     if (sockFd == -1) {
         TRANS_LOGE(TRANS_STREAM, "FtSocket failed, errno=%{public}d", FtGetErrno());
         return -1;
+    }
+    if (!isServer) {
+        TRANS_LOGI(TRANS_STREAM, "FtSocket set client, errno=%{public}d", FtGetErrno());
+        streamFd_ = sockFd;
     }
     SetDefaultConfig(sockFd);
 
@@ -1553,6 +1588,12 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     }
 
     return outLen;
+}
+
+int32_t VtpStreamSocket::SetMultiLayer(const void *para)
+{
+    int fd = GetStreamSocketFd(FD).GetIntValue();
+    return VtpSetSocketMultiLayer(fd, &onStreamEvtCb_, para);
 }
 
 void VtpStreamSocket::CreateServerProcessThread()

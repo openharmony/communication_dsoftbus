@@ -16,6 +16,7 @@
 #include "client_trans_session_manager.h"
 
 #include <securec.h>
+#include <unistd.h>
 
 #include "anonymizer.h"
 #include "client_bus_center_manager.h"
@@ -736,6 +737,8 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
     }
     sessionNode->channelId = transInfo->channelId;
     sessionNode->channelType = (ChannelType)transInfo->channelType;
+    TRANS_LOGI(TRANS_SDK, "Client set channel by sessionId success, sessionId=%{public}d, channelId=%{public}d, "
+        "channelType=%{public}d", sessionId, sessionNode->channelId, sessionNode->channelType);
 
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
@@ -765,6 +768,41 @@ int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *d
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
             if (sessionNode->channelId == channelId && (int32_t)sessionNode->channelType == channelType) {
                 *data = (int32_t)sessionNode->isEncrypt;
+                UnlockClientSessionServerList();
+                return SOFTBUS_OK;
+            }
+        }
+    }
+
+    UnlockClientSessionServerList();
+    TRANS_LOGE(TRANS_SDK, "not found session by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+}
+
+int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType, SessionState *sessionState)
+{
+    if ((channelId < 0) || (sessionState == NULL)) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param, channelId=%{public}d, channelType=%{public}d", channelId, channelType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) {
+                *sessionState = sessionNode->lifecycle.sessionState;
                 UnlockClientSessionServerList();
                 return SOFTBUS_OK;
             }
@@ -2043,6 +2081,30 @@ int32_t ClientWaitSyncBind(int32_t socket)
     return sessionNode->lifecycle.bindErrCode;
 }
 
+static void TransWaitForBindReturn(int32_t socket)
+{
+#define RETRY_GET_BIND_RESULT_TIMES 3
+#define RETRY_WAIT_TIME             5000 // 5ms
+
+    SocketLifecycleData lifecycle;
+    (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
+    int32_t ret;
+
+    for (int32_t retryTimes = 0; retryTimes < RETRY_GET_BIND_RESULT_TIMES; ++retryTimes) {
+        ret = GetSocketLifecycleAndSessionNameBySessionId(socket, NULL, &lifecycle);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "Get session lifecycle failed, ret=%{public}d", ret);
+            return;
+        }
+
+        if (lifecycle.maxWaitTime == 0) {
+            return;
+        }
+        TRANS_LOGW(TRANS_SDK, "wait for bind return, socket=%{public}d, retryTimes=%{public}d", socket, retryTimes);
+        usleep(RETRY_WAIT_TIME);
+    }
+}
+
 int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode)
 {
     if (socket <= 0) {
@@ -2080,6 +2142,7 @@ int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode)
 
     UnlockClientSessionServerList();
     TRANS_LOGI(TRANS_SDK, "socket=%{public}d signal success", socket);
+    TransWaitForBindReturn(socket);
     return SOFTBUS_OK;
 }
 

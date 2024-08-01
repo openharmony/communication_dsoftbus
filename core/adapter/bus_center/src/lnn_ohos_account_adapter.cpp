@@ -15,6 +15,7 @@
 
 #include <vector>
 
+#include "anonymizer.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account_adapter.h"
 #include "ohos_account_kits.h"
@@ -44,7 +45,10 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     }
 
     *len = accountInfo.second.name_.length();
-    LNN_LOGI(LNN_STATE, "uid=%{public}s, len=%{public}d", accountInfo.second.name_.c_str(), *len);
+    char *anonyUid = nullptr;
+    Anonymize(accountInfo.second.name_.c_str(), &anonyUid);
+    LNN_LOGI(LNN_STATE, "uid=%{public}s, len=%{public}d", AnonymizeWrapper(anonyUid), *len);
+    AnonymizeFree(anonyUid);
 
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), *len) == 0) {
         LNN_LOGE(LNN_STATE, "not login account");
@@ -57,31 +61,38 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     return SOFTBUS_OK;
 }
 
-int64_t GetCurrentAccount(void)
+int32_t GetCurrentAccount(int64_t *account)
 {
+    if (account == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *account = 0;
     auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOhosAccountInfo();
     if (!accountInfo.first) {
         LNN_LOGE(LNN_STATE, "QueryOhosAccountInfo failed");
-        return 0;
+        return SOFTBUS_ERR;
     }
 
     if (accountInfo.second.name_.empty()) {
         LNN_LOGE(LNN_STATE, "accountInfo name_ is empty");
-        return 0;
+        return SOFTBUS_OK;
     }
-
-    LNN_LOGI(LNN_STATE, "name_=%{public}s", accountInfo.second.name_.c_str());
+    char *anonyUid = nullptr;
+    Anonymize(accountInfo.second.name_.c_str(), &anonyUid);
+    LNN_LOGI(LNN_STATE, "name_=%{public}s", AnonymizeWrapper(anonyUid));
+    AnonymizeFree(anonyUid);
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(),
         accountInfo.second.name_.length()) == 0) {
         LNN_LOGE(LNN_STATE, "not login account");
-        return 0;
+        return SOFTBUS_OK;
     }
-    int64_t account = strtoll(accountInfo.second.name_.c_str(), nullptr, ACCOUNT_STRTOLL_BASE);
-    if (account == 0) {
+    *account = strtoll(accountInfo.second.name_.c_str(), nullptr, ACCOUNT_STRTOLL_BASE);
+    if (*account == 0) {
         LNN_LOGE(LNN_STATE, "strtoll failed");
     }
 
-    return account;
+    return SOFTBUS_OK;
 }
 
 int32_t GetActiveOsAccountIds(void)

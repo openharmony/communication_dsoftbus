@@ -17,6 +17,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "securec.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
@@ -35,12 +36,18 @@
 
 static IServerChannelCallBack g_channelCallBack;
 
-static int32_t TransAddTcpChannel(const ChannelInfo *channel)
+static int32_t TransAddTcpChannel(const ChannelInfo *channel, const char *pkgName, int32_t pid)
 {
     TcpChannelInfo *info = CreateTcpChannelInfo(channel);
     if (info == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create new TcpChannelInfo failed.");
         return SOFTBUS_MEM_ERR;
+    }
+    info->pid = pid;
+    if (strcpy_s(info->pkgName, sizeof(info->pkgName), pkgName) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy pkgName failed.");
+        SoftBusFree(info);
+        return SOFTBUS_STRCPY_ERR;
     }
     int32_t ret = TransAddTcpChannelInfo(info);
     if (ret != SOFTBUS_OK) {
@@ -83,6 +90,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         .localUdid = localUdid,
         .peerUdid = channel->isEncrypt ? peerUdid : channel->peerDeviceId
     };
+    extra.deviceState = TransGetDeviceState(channel->peerDeviceId);
     if (!channel->isServer) {
         CoreSessionState state = CORE_SESSION_STATE_INIT;
         TransGetSocketChannelStateByChannel(channel->channelId, channel->channelType, &state);
@@ -105,9 +113,12 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
 
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        (void)TransAddTcpChannel(channel, pkgName, pid);
+    }
     ret = ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
-    if (ret == SOFTBUS_OK && channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        TransAddTcpChannel(channel);
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT && ret != SOFTBUS_OK) {
+        (void)TransDelTcpChannelInfoByChannelId(channel->channelId);
     }
     if (!IsTdcRecoveryTransLimit() || !IsUdpRecoveryTransLimit()) {
         (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
@@ -122,7 +133,7 @@ static int32_t TransServerOnChannelClosed(
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
+    if (TransLaneMgrDelLane(channelId, channelType, true) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);
@@ -152,7 +163,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
     if (pkgName == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
+    if (TransLaneMgrDelLane(channelId, channelType, true) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);

@@ -33,6 +33,7 @@ void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const ConnectInfo &c
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_OK,
             .requestId = static_cast<int32_t>(wifiDirectConnectInfo.requestId),
+            .frequency = wifiDirectConnectInfo.dfxInfo.frequency,
         };
         ReportConnEventExtra(extra, connectInfo);
     } else {
@@ -41,6 +42,7 @@ void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const ConnectInfo &c
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = reason,
             .requestId = static_cast<int32_t>(wifiDirectConnectInfo.requestId),
+            .frequency = wifiDirectConnectInfo.dfxInfo.frequency,
         };
         ReportConnEventExtra(extra, connectInfo);
     }
@@ -82,13 +84,14 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
     }
 
     extra.peerNetworkId = wifiDirectConnectInfo.remoteNetworkId;
-    extra.localNetworkId = WifiDirectUtils::GetLocalNetworkId().c_str();
+    auto localNetworkId = WifiDirectUtils::GetLocalNetworkId();
+    extra.localNetworkId = localNetworkId.c_str();
     auto stateMapElement = DurationStatistic::GetInstance().GetStateTimeMapElement(requestId);
     uint64_t startTime = stateMapElement[TotalStart];
     uint64_t endTime = stateMapElement[TotalEnd];
     if (startTime != 0 && endTime != 0) {
         extra.costTime = int32_t(endTime - startTime);
-        extra.negotiateTime = int32_t(endTime - startTime);
+        extra.negotiateTime = endTime - startTime > 0 ? endTime - startTime : 0;
     }
     auto dfxInfo = wifiDirectConnectInfo.dfxInfo;
     extra.bootLinkType = dfxInfo.bootLinkType;

@@ -25,6 +25,7 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_device_common_key_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_ble_heartbeat_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_utils.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_vap_info_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
@@ -79,7 +80,6 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
@@ -494,6 +494,7 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_ctrl_static_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_ctrl_static_mock.cpp",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/ble_mock.cpp",
   ]
 
@@ -540,6 +541,8 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/broadcast/common/include",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
   ]
 
   deps = [

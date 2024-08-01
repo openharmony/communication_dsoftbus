@@ -16,10 +16,12 @@
 #ifndef AUTH_NEGOTIATE_CHANNEL_H
 #define AUTH_NEGOTIATE_CHANNEL_H
 
+#include <future>
 #include <map>
 #include <mutex>
 #include <memory>
 
+#include "timer.h"
 #include "auth_interface.h"
 #include "softbus_common.h"
 
@@ -37,7 +39,7 @@ struct AuthExceptionEvent {
     AuthHandle handle_;
 };
 
-class AuthNegotiateChannel : public NegotiateChannel {
+class AuthNegotiateChannel : public NegotiateChannel, public std::enable_shared_from_this<AuthNegotiateChannel> {
 public:
     struct OpenParam {
         AuthLinkType type;
@@ -52,8 +54,11 @@ public:
     static void StopListening(AuthLinkType type, ListenerModule module);
     static int OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel);
 
+    static void ProcessDetectLinkRequest(const std::shared_ptr<AuthNegotiateChannel> &channel);
+    static void ProcessDetectLinkResponse(AuthHandle handle, const NegotiateMessage &response);
+    void OnWaitDetectResponseTimeout();
+
     explicit AuthNegotiateChannel(const AuthHandle &handle);
-    AuthNegotiateChannel(const AuthNegotiateChannel &channel) = default;
     ~AuthNegotiateChannel() override;
 
     bool operator==(const AuthNegotiateChannel &other) const;
@@ -61,6 +66,7 @@ public:
     void SetClose();
 
     int SendMessage(const NegotiateMessage &msg) const override;
+    NegotiateMessage SendMessageAndWaitResponse(const NegotiateMessage &msg);
     std::string GetRemoteDeviceId() const override;
 
 private:
@@ -78,7 +84,14 @@ private:
     static inline Initiator initiator_;
     static inline std::recursive_mutex lock_;
     static inline std::map<uint32_t, std::string> requestIdToDeviceIdMap_;
+
+    static inline std::recursive_mutex channelLock_;
+    static inline std::map<int64_t, std::shared_ptr<AuthNegotiateChannel>> authIdToChannelMap_;
+    static Utils::Timer timer_;
+
     AuthHandle handle_;
+    std::shared_ptr<std::promise<NegotiateMessage>> promise_;
+    uint32_t timerId_;
     bool close_;
 };
 } // namespace OHOS::SoftBus

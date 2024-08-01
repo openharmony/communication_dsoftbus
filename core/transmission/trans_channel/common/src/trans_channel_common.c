@@ -27,6 +27,7 @@
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_qos.h"
+#include "softbus_wifi_api_adapter.h"
 #include "trans_auth_manager.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
@@ -283,6 +284,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     AnonymizeFree(tmpId);
     appInfo->appType = APP_TYPE_NORMAL;
     appInfo->myData.apiVersion = API_V2;
+    appInfo->myData.channelId = INVALID_CHANNEL_ID;
     if (param->attr->dataType == TYPE_STREAM) {
         appInfo->businessType = BUSINESS_TYPE_STREAM;
         appInfo->streamType = (StreamType)param->attr->attr.streamAttr.streamType;
@@ -384,11 +386,8 @@ static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(
                 TRANS_CTRL, "Cancel lane failed, free lane. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
-            TransFreeLane(laneHandle, isQosLane);
+            TransFreeLane(laneHandle, isQosLane, isAsync);
         }
-    }
-    if (!isAsync && laneHandle != INVALID_LANE_REQ_ID) {
-        TransCancelLaneItemCondByLaneHandle(laneHandle, false, false, SOFTBUS_TRANS_REQUEST_LANE_TIMEOUT);
     }
     if (isAsync && laneHandle != INVALID_LANE_REQ_ID) {
         (void)TransDeleteLaneReqItemByLaneHandle(laneHandle, isAsync);
@@ -416,18 +415,18 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
         (void)TransSetSocketChannelStateByChannel(channelId, channelType, CORE_SESSION_STATE_CANCELLING);
         switch (channelType) {
             case CHANNEL_TYPE_PROXY:
-                (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = TransProxyCloseProxyChannel(channelId);
                 break;
             case CHANNEL_TYPE_TCP_DIRECT:
-                (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 (void)TransDelTcpChannelInfoByChannelId(channelId);
                 TransDelSessionConnById(channelId); // socket Fd will be shutdown when recv peer reply
                 ret = SOFTBUS_OK;
                 break;
             case CHANNEL_TYPE_UDP:
                 (void)NotifyQosChannelClosed(channelId, channelType);
-                (void)TransLaneMgrDelLane(channelId, channelType);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = TransCloseUdpChannel(channelId);
                 break;
             case CHANNEL_TYPE_AUTH:
@@ -538,16 +537,18 @@ void TransFreeAppInfo(AppInfo *appInfo)
     SoftBusFree(appInfo);
 }
 
-void TransFreeLane(uint32_t laneHandle, bool isQosLane)
+void TransFreeLane(uint32_t laneHandle, bool isQosLane, bool isAsync)
 {
-    TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d", laneHandle, isQosLane);
-    if (laneHandle != INVALID_LANE_REQ_ID) {
-        if (isQosLane) {
-            TransFreeLaneByLaneHandle(laneHandle, false);
-            return;
-        }
-        LnnFreeLane(laneHandle);
+    TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d, isAsync=%{public}d",
+        laneHandle, isQosLane, isAsync);
+    if (laneHandle == INVALID_LANE_REQ_ID) {
+        return;
     }
+    if (isQosLane) {
+        TransFreeLaneByLaneHandle(laneHandle, isAsync);
+        return;
+    }
+    LnnFreeLane(laneHandle);
 }
 
 void TransReportBadKeyEvent(int32_t errCode, uint32_t connectionId, int64_t seq, int32_t len)
@@ -576,4 +577,49 @@ bool IsPeerDeviceLegacyOs(int32_t osType)
 {
     // peer device legacyOs when osType is not OH_OS_TYPE
     return (osType == OH_OS_TYPE) ? false : true;
+}
+
+static bool TransGetNetCapability(const char *networkId, uint32_t *local, uint32_t *remote)
+{
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
+    if (ret != SOFTBUS_OK || *local < 0) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
+        return false;
+    }
+    ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
+    if (ret != SOFTBUS_OK || *remote < 0) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
+        return false;
+    }
+    TRANS_LOGD(TRANS_CTRL, "trans get net capability success, local=%{public}u, remote=%{public}u", *local, *remote);
+    return true;
+}
+
+TransDeviceState TransGetDeviceState(const char *networkId)
+{
+    if (networkId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "networkId err.");
+        return DEVICE_STATE_INVALID;
+    }
+    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_SEMIACTIVATING ||
+        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_SEMIACTIVE) {
+        return DEVICE_STATE_LOCAL_WIFI_HALF_OFF;
+    }
+    uint32_t local = 0;
+    uint32_t remote = 0;
+    if (!TransGetNetCapability(networkId, &local, &remote)) {
+        TRANS_LOGE(TRANS_CTRL, "get cap err.");
+        return DEVICE_STATE_INVALID;
+    }
+    if ((local & (1 << BIT_BLE)) && !(local & (1 << BIT_BR))) {
+        return DEVICE_STATE_LOCAL_BT_HALF_OFF;
+    }
+    if ((remote & (1 << BIT_BLE)) && !(remote & (1 << BIT_BR))) {
+        return DEVICE_STATE_REMOTE_BT_HALF_OFF;
+    }
+    if ((remote & (1 << BIT_WIFI_P2P)) && !(remote & (1 << BIT_WIFI)) &&
+        !(remote & (1 << BIT_WIFI_24G)) && !(remote & (1 << BIT_WIFI_5G))) {
+        return DEVICE_STATE_REMOTE_WIFI_HALF_OFF;
+    }
+    return DEVICE_STATE_NOT_CARE;
 }

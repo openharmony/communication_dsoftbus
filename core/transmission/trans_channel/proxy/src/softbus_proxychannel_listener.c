@@ -165,6 +165,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     };
     extra.osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     extra.peerUdid = appInfo->peerUdid;
+    extra.deviceState = TransGetDeviceState(appInfo->peerNetWorkId);
     if (!isServer) {
         extra.peerUdid = appInfo->appType == APP_TYPE_AUTH ? appInfo->peerData.deviceId : extra.peerUdid;
         if (extra.result == EVENT_STAGE_RESULT_FAILED) {
@@ -238,6 +239,21 @@ int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
     return ret;
 }
 
+static void TransNotifyAlarm(const AppInfo *appInfo, int32_t errCode)
+{
+    TransAlarmExtra extraAlarm = {
+        .conflictName = NULL,
+        .conflictedName = NULL,
+        .occupyedName = NULL,
+        .permissionName = NULL,
+        .linkType = appInfo->linkType,
+        .errcode = errCode,
+        .sessionName = appInfo->myData.sessionName,
+    };
+    TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
+    return;
+}
+
 int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     if (appInfo == NULL) {
@@ -264,22 +280,14 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
             .osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType,
             .result = EVENT_STAGE_RESULT_FAILED
         };
+        extra.deviceState = TransGetDeviceState(appInfo->peerNetWorkId);
         if (appInfo->appType == APP_TYPE_AUTH && strlen(appInfo->peerVersion) == 0) {
             TransGetRemoteDeviceVersion(extra.peerUdid, CATEGORY_UDID, (char *)(appInfo->peerVersion),
                 sizeof(appInfo->peerVersion));
         }
         extra.peerDevVer = appInfo->peerVersion;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
-        TransAlarmExtra extraAlarm = {
-            .conflictName = NULL,
-            .conflictedName = NULL,
-            .occupyedName = NULL,
-            .permissionName = NULL,
-            .linkType = appInfo->linkType,
-            .errcode = errCode,
-            .sessionName = appInfo->myData.sessionName,
-        };
-        TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
+        TransNotifyAlarm(appInfo, errCode);
     }
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     char *tmpName = NULL;

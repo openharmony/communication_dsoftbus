@@ -449,6 +449,18 @@ int32_t StringToLowerCase(const char *str, char *buf, int32_t size)
     return SOFTBUS_OK;
 }
 
+bool Int64ToString(int64_t src, char *buf, uint32_t bufLen)
+{
+    if (buf == NULL) {
+        return false;
+    }
+    if (sprintf_s(buf, bufLen, "%" PRId64"", src) < 0) {
+        COMM_LOGE(COMM_UTILS, "convert int64 to str fail");
+        return false;
+    }
+    return true;
+}
+
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
 {
     if (str1 == NULL || str2 == NULL) {
