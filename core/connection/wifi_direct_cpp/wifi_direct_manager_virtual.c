@@ -86,6 +86,12 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+static bool IsNoneLinkByType(enum WifiDirectLinkType linkType)
+{
+    (void)linkType;
+    return false;
+}
+
 static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource)
 {
     (void)remoteMac;
@@ -184,6 +190,7 @@ static struct WifiDirectManager g_manager = {
     .disconnectDevice = DisconnectDevice,
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
+    .isNoneLinkByType = IsNoneLinkByType,
 
     .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
     .refreshRelationShip = RefreshRelationShip,
