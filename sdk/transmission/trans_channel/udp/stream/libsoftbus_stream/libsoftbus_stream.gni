@@ -13,7 +13,6 @@
 
 import("../../../../../../dsoftbus.gni")
 libsoftbus_stream_sdk_path = "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream"
-vtp_stream_opt_ext_path = "$dsoftbus_root_path/dsoftbus_enhance/sdk/transmission/trans_channel/udp/stream/src"
 
 dstream_native_source_path = rebase_path("$dsoftbus_root_path")
 dstream_dep_file = "components/nstackx_enhanced/fillp/BUILD.gn"
@@ -50,12 +49,6 @@ libsoftbus_stream_src = [
   "$libsoftbus_stream_sdk_path/vtp_stream_socket.cpp",
 ]
 
-if (enhanced) {
-  libsoftbus_stream_src += [ "$vtp_stream_opt_ext_path/vtp_stream_opt_ext.c" ]
-} else {
-  libsoftbus_stream_src += [ "$libsoftbus_stream_sdk_path/vtp_stream_opt.c" ]
-}
-
 libsoftbus_stream_ext_deps = []
 if (defined(ohos_lite)) {
   libsoftbus_stream_inc += [
@@ -78,11 +71,15 @@ if (defined(ohos_lite)) {
     "openssl:libcrypto_shared",
   ]
   if (enhanced) {
-    libsoftbus_stream_src += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/src/softbus_fillp_inner_api.c" ]
+    libsoftbus_stream_src += [
+      "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/src/softbus_fillp_inner_api.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/sdk/transmission/trans_channel/udp/stream/src/vtp_stream_opt_ext.c",
+    ]
     libsoftbus_stream_deps =
         [ "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo" ]
     libsoftbus_stream_ext_deps += [ "bounds_checking_function:libsec_shared" ]
   } else {
+    libsoftbus_stream_src += [ "$libsoftbus_stream_sdk_path/vtp_stream_opt.c" ]
     libsoftbus_stream_deps =
         [ "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open" ]
     libsoftbus_stream_ext_deps += [ "bounds_checking_function:libsec_shared" ]
