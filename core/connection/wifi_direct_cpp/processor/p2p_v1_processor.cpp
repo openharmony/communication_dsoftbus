@@ -30,7 +30,6 @@
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_scheduler_factory.h"
 #include "wifi_direct_manager.h"
-#include "wifi_direct_defines.h"
 
 namespace OHOS::SoftBus {
 std::map<std::string, P2pV1Processor::ProcessorState> P2pV1Processor::stateNameMapping = {
