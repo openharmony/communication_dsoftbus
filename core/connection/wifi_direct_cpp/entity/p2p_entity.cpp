@@ -83,7 +83,7 @@ P2pEntity::P2pEntity() : timer_("P2pEntity")
     state_ = P2pAvailableState::Instance();
 }
 
-void P2pEntity::DisconnectLink(const std::string &remoteMac) 
+void P2pEntity::DisconnectLink(const std::string &remoteMac)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     P2pAdapter::WifiDirectP2pGroupInfo groupInfo {};
