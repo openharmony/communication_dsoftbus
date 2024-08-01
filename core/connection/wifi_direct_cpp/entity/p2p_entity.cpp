@@ -96,8 +96,6 @@ void P2pEntity::DisconnectLink(const std::string &remoteMac)
         }
         if ((groupInfo.clientDevices.size() == 1 && remoteMac == groupInfo.clientDevices[0].address) ||
             groupInfo.clientDevices.size() == 0) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "find remoteMac=%{public}s",
-                WifiDirectAnonymizeMac(groupInfo.clientDevices[0].address.c_str()));
             isNeedRemove = true;
         }
     }
