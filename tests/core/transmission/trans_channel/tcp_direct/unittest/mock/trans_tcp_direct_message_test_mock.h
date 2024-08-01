@@ -24,6 +24,7 @@
 #include "softbus_socket.h"
 #include "softbus_utils.h"
 #include "trans_tcp_direct_callback.h"
+#include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
 
@@ -59,6 +60,11 @@ public:
     virtual int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle) = 0;
     virtual int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
+    virtual int32_t SoftBusGenerateSessionKey(char *key, uint32_t len) = 0;
+    virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
+    virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo) = 0;
+    virtual char *PackRequest(const AppInfo *appInfo) = 0;
+    virtual int32_t TransTdcAddSessionConn(SessionConn *conn) = 0;
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -92,6 +98,11 @@ public:
     MOCK_METHOD2(SetAuthHandleByChanId, int32_t (int32_t channelId, AuthHandle *authHandle));
     MOCK_METHOD5(AuthDecrypt, int32_t (AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen));
+    MOCK_METHOD2(SoftBusGenerateSessionKey, int32_t (char *key, uint32_t len));
+    MOCK_METHOD2(AuthGetServerSide, int32_t (int64_t authId, bool *isServer));
+    MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle authHandle, AuthConnInfo *connInfo));
+    MOCK_METHOD1(PackRequest, char *(const AppInfo *appInfo));
+    MOCK_METHOD1(TransTdcAddSessionConn, int32_t (SessionConn *conn));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H
