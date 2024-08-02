@@ -313,7 +313,7 @@ void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *
 int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
 {
     if (info == nullptr || fd < 0) {
-        TRANS_LOGE(TRANS_STREAM, "param invalid");
+        TRANS_LOGE(TRANS_STREAM, "param invalid fd is %{public}d", fd);
         return SOFTBUS_INVALID_PARAM;
     }
     if (info->evt == FT_EVT_FRAME_STATS) {
