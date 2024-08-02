@@ -208,7 +208,7 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
     LIST_FOR_EACH_ENTRY_SAFE(
         serverNode, serverNodeNext, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         if (strcmp(serverNode->sessionName, sessionName) == 0 && IsListEmpty(&serverNode->sessionList) &&
-            (serverNode->sessionAddingCnt) == 0) {
+            serverNode->sessionAddingCnt == 0) {
             ListDelete(&(serverNode->node));
             SoftBusFree(serverNode);
             g_clientSessionServerList->cnt--;
