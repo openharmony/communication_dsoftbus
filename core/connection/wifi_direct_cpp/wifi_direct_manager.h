@@ -34,7 +34,7 @@ typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
 struct WifiDirectEnhanceManager {
     int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
     int32_t (*syncPTK)(const char *remoteDeviceId);
-    void (*stopCustomListening)();
+    void (*stopCustomListening)(void);
 };
 
 struct WifiDirectManager {
