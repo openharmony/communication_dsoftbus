@@ -265,8 +265,8 @@ static void HandleConnConnectTimeout(const void *para)
     AUTH_LOGE(AUTH_CONN, "connect timeout, requestId=%{public}u", requestId);
     ConnRequest *item = FindConnRequestByRequestId(requestId);
     if (item != NULL) {
-        SocketDisconnectDevice(AUTH, item->fd);
-        SocketDisconnectDevice(AUTH_RAW_P2P_SERVER, item->fd);
+        ListenerModule module = item->connInfo.type == AUTH_LINK_TYPE_RAW_ENHANCED_P2P ? AUTH_RAW_P2P_SERVER : AUTH;
+        SocketDisconnectDevice(module, item->fd);
         DelConnRequest(item);
     }
     NotifyClientConnected(requestId, 0, SOFTBUS_AUTH_CONN_TIMEOUT, NULL);
