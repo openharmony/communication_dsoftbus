@@ -321,9 +321,18 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
         TRANS_LOGW(TRANS_SDK, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
+
+    ClientProxyChannelInfo *info = ClientTransProxyCreateChannelInfo(channel);
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_SDK, "create channel info fail, channelId=%{public}d", channel->channelId);
+        return SOFTBUS_MEM_ERR;
+    }
+
+    int32_t ret = ClientTransProxyAddChannelInfo(info);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ClientTransProxyAddChannelInfo fail");
+        TRANS_LOGE(TRANS_SDK, "ClientTransProxyAddChannelInfo fail channelId=%{public}d", channel->channelId);
+        (void)memset_s(info->detail.sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        SoftBusFree(info);
         return ret;
     }
 
@@ -666,14 +675,33 @@ static int32_t ClientTransProxySliceProcessChkPkgIsValid(
     return SOFTBUS_OK;
 }
 
+static int32_t ClientGetActualDataLen(const SliceHead *head, uint32_t *actualDataLen)
+{
+    uint32_t maxDataLen =
+        (head->priority == PROXY_CHANNEL_PRORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
+    // The encrypted data length is longer than the actual data length
+    maxDataLen += SLICE_LEN;
+
+    if (head->sliceNum > (maxDataLen / SLICE_LEN)) {
+        TRANS_LOGE(TRANS_SDK, "invalid sliceNum=%{public}d", head->sliceNum);
+        return SOFTBUS_INVALID_DATA_HEAD;
+    }
+
+    *actualDataLen = head->sliceNum * SLICE_LEN;
+    return SOFTBUS_OK;
+}
+
 static int32_t ClientTransProxyFirstSliceProcess(
     SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len)
 {
     ClientTransProxyClearProcessor(processor);
 
-    uint32_t maxDataLen =
-        (head->priority == PROXY_CHANNEL_PRORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
-    uint32_t maxLen = maxDataLen + sizeof(PacketHead) + OVERHEAD_LEN;
+    uint32_t actualDataLen = 0;
+    int32_t ret = ClientGetActualDataLen(head, &actualDataLen);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    uint32_t maxLen = actualDataLen + sizeof(PacketHead) + OVERHEAD_LEN;
     processor->data = (char *)SoftBusCalloc(maxLen);
     if (processor->data == NULL) {
         TRANS_LOGE(TRANS_SDK, "malloc fail when proc first slice package");
