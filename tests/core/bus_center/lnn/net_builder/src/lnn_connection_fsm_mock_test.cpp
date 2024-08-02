@@ -28,7 +28,6 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
-
 constexpr char DEVICE_IP1[MAX_ADDR_LEN] = "127.0.0.1";
 constexpr char DEVICE_IP2[MAX_ADDR_LEN] = "127.0.0.2";
 constexpr uint16_t PORT1 = 1000;

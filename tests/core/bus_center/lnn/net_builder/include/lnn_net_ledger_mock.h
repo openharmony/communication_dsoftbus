@@ -98,6 +98,13 @@ public:
     virtual int32_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle) = 0;
     virtual int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime,
         DiscoveryType type) = 0;
+    virtual int32_t LnnSetDLUnifiedDeviceName(const char *udid, const char *name) = 0;
+    virtual int32_t LnnSetDLUnifiedDefaultDeviceName(const char *udid, const char *name) = 0;
+    virtual int32_t LnnSetDLDeviceNickNameByUdid(const char *udid, const char *name) = 0;
+    virtual int32_t LnnSetDLDeviceStateVersion(const char *udid, int32_t stateVersion) = 0;
+    virtual int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid) = 0;
+    virtual int32_t LnnSetDLDeviceBroadcastCipherKey(const char *udid, const void *cipherKey) = 0;
+    virtual int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -167,6 +174,13 @@ public:
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t (void));
     MOCK_METHOD3(AuthDeviceGetLatestIdByUuid, int32_t (const char *, AuthLinkType, AuthHandle *));
     MOCK_METHOD4(AuthGetLatestAuthSeqListByType, int32_t (const char *, int64_t *, uint64_t *, DiscoveryType));
+    MOCK_METHOD2(LnnSetDLUnifiedDeviceName, int32_t (const char *, const char *));
+    MOCK_METHOD2(LnnSetDLUnifiedDefaultDeviceName, int32_t (const char *, const char *));
+    MOCK_METHOD2(LnnSetDLDeviceNickNameByUdid, int32_t (const char *, const char *));
+    MOCK_METHOD2(LnnSetDLDeviceStateVersion, int32_t (const char *, int32_t));
+    MOCK_METHOD2(LnnUpdateDistributedNodeInfo, int32_t (NodeInfo *, const char *));
+    MOCK_METHOD2(LnnSetDLDeviceBroadcastCipherKey, int32_t (const char *, const void *));
+    MOCK_METHOD2(LnnSetDLDeviceBroadcastCipherIv, int32_t (const char *, const void *));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
