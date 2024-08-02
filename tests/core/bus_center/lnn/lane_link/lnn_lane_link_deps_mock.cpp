@@ -122,5 +122,36 @@ void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
 {
     GetLaneLinkDepsInterface()->NotifyFreeLaneResult(laneReqId, errCode);
 }
+
+LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode)
+{
+    return GetLaneLinkDepsInterface()->GetConflictTypeWithErrcode(conflictErrcode);
+}
+
+int32_t FindLinkConflictInfoByDevId(const char *peerDevId, LinkConflictType conflictType,
+    LinkConflictInfo *linkConflictInfo)
+{
+    return GetLaneLinkDepsInterface()->FindLinkConflictInfoByDevId(peerDevId, conflictType, linkConflictInfo);
+}
+
+void RemoveConflictInfoTimelinessMsg(const char *peerDevId, LinkConflictType conflictType)
+{
+    GetLaneLinkDepsInterface()->RemoveConflictInfoTimelinessMsg(peerDevId, conflictType);
+}
+
+int32_t DelLinkConflictInfo(const char *peerDevId, LinkConflictType conflictType)
+{
+    return GetLaneLinkDepsInterface()->DelLinkConflictInfo(peerDevId, conflictType);
+}
+
+int32_t ClearLaneResourceByLaneId(uint64_t laneId)
+{
+    return GetLaneLinkDepsInterface()->ClearLaneResourceByLaneId(laneId);
+}
+
+void RemoveDelayDestroyMessage(uint64_t laneId)
+{
+    GetLaneLinkDepsInterface()->RemoveDelayDestroyMessage(laneId);
+}
 }
 } // namespace OHOS
