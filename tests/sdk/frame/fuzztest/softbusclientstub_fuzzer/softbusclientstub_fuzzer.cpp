@@ -48,6 +48,7 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_;
 };
@@ -97,14 +98,9 @@ static void InitOnChannelOpenedInnerMsg(int32_t channelType, const uint8_t *data
 
     message.WriteCString(charParam);
     message.WriteInt32(int32Param);
-    message.WriteInt32(int32Param);
+    message.WriteInt32(channelType);
     message.WriteUint64(size);
     message.WriteInt32(int32Param);
-
-    if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        message.WriteFileDescriptor(int32Param);
-        message.WriteCString(charParam);
-    }
 
     message.WriteBool(boolParam);
     message.WriteBool(boolParam);
@@ -137,7 +133,11 @@ static void InitOnChannelOpenedInnerMsg(int32_t channelType, const uint8_t *data
     message.WriteInt32(int32Param);
 }
 
-bool OnChannelOpenedInnerTest(const uint8_t* data, size_t size)
+/*
+ * Due to FileDescriptor is invalid, CHANNEL_TYPE_TCP_DIRECT will read it and crash
+ * Do not add test case which channel type is CHANNEL_TYPE_TCP_DIRECT
+ */
+bool OnChannelOpenedInnerTest(const uint8_t *data, size_t size)
 {
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
@@ -148,10 +148,6 @@ bool OnChannelOpenedInnerTest(const uint8_t* data, size_t size)
     MessageOption option;
     MessageParcel dataNomal;
     InitOnChannelOpenedInnerMsg(CHANNEL_TYPE_UNDEFINED, data, size, dataNomal);
-
-    MessageParcel dataTdc;
-    InitOnChannelOpenedInnerMsg(CHANNEL_TYPE_TCP_DIRECT, data, size, dataTdc);
-    softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_OPENED, dataTdc, reply, option);
 
     MessageParcel dataUdp;
     InitOnChannelOpenedInnerMsg(CHANNEL_TYPE_UDP, data, size, dataUdp);
@@ -285,7 +281,7 @@ bool OnChannelQosEventInnerTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool OnDeviceFoundInnerTest(const uint8_t* data, size_t size)
+bool OnDeviceFoundInnerTest(const uint8_t *data, size_t size)
 {
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -301,11 +297,11 @@ bool OnDeviceFoundInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnJoinLNNResultInnerTest(const uint8_t* data, size_t size)
+bool OnJoinLNNResultInnerTest(const uint8_t *data, size_t size)
 {
     constexpr uint32_t addrTypeLen = 10;
     constexpr int32_t retCode = 2;
-    const char* test = "test";
+    const char *test = "test";
     constexpr size_t len = 4;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -324,11 +320,11 @@ bool OnJoinLNNResultInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnJoinMetaNodeResultInnerTest(const uint8_t* data, size_t size)
+bool OnJoinMetaNodeResultInnerTest(const uint8_t *data, size_t size)
 {
     constexpr uint32_t addrTypeLen = 12;
     constexpr int32_t retCode = 2;
-    const char* test = "test";
+    const char *test = "test";
     constexpr size_t len = 4;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -347,7 +343,7 @@ bool OnJoinMetaNodeResultInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnLeaveLNNResultInnerTest(const uint8_t* data, size_t size)
+bool OnLeaveLNNResultInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t intNum = 2;
     MessageParcel datas;
@@ -365,7 +361,7 @@ bool OnLeaveLNNResultInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnLeaveMetaNodeResultInnerTest(const uint8_t* data, size_t size)
+bool OnLeaveMetaNodeResultInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t intNum = 2;
     MessageParcel datas;
@@ -383,7 +379,7 @@ bool OnLeaveMetaNodeResultInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnNodeDeviceNotTrustedInnerTest(const uint8_t* data, size_t size)
+bool OnNodeDeviceNotTrustedInnerTest(const uint8_t *data, size_t size)
 {
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -399,11 +395,11 @@ bool OnNodeDeviceNotTrustedInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnNodeOnlineStateChangedInnerTest(const uint8_t* data, size_t size)
+bool OnNodeOnlineStateChangedInnerTest(const uint8_t *data, size_t size)
 {
     constexpr uint32_t infoTypeLen = 10;
     bool boolNum = true;
-    const char* test = "test";
+    const char *test = "test";
     constexpr size_t len = 4;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -422,11 +418,11 @@ bool OnNodeOnlineStateChangedInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnNodeBasicInfoChangedInnerTest(const uint8_t* data, size_t size)
+bool OnNodeBasicInfoChangedInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t type = 2;
     constexpr uint32_t infoTypeLen = 10;
-    const char* test = "test";
+    const char *test = "test";
     constexpr size_t len = 4;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -445,11 +441,11 @@ bool OnNodeBasicInfoChangedInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnTimeSyncResultInnerTest(const uint8_t* data, size_t size)
+bool OnTimeSyncResultInnerTest(const uint8_t *data, size_t size)
 {
     constexpr uint32_t infoTypeLen = 10;
-    int32_t retCode = *(reinterpret_cast<const char*>(data));
-    const char* test = "test";
+    int32_t retCode = *(reinterpret_cast<const char *>(data));
+    const char *test = "test";
     constexpr size_t len = 4;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -470,7 +466,7 @@ bool OnTimeSyncResultInnerTest(const uint8_t* data, size_t size)
 static bool OnClientEventByReasonAndCode(const uint8_t *data, size_t size, int32_t reason, uint32_t code)
 {
     (void)size;
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
+    int32_t intNum = *(reinterpret_cast<const int32_t *>(data));
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
     datas.WriteInt32(intNum);
@@ -486,22 +482,22 @@ static bool OnClientEventByReasonAndCode(const uint8_t *data, size_t size, int32
     return true;
 }
 
-bool OnPublishLNNResultInnerTest(const uint8_t* data, size_t size)
+bool OnPublishLNNResultInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t reason = 2;
     return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 
-bool OnRefreshLNNResultInnerTest(const uint8_t* data, size_t size)
+bool OnRefreshLNNResultInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t reason = 8;
     return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_REFRESH_LNN_RESULT);
 }
 
-bool OnRefreshDeviceFoundInnerTest(const uint8_t* data, size_t size)
+bool OnRefreshDeviceFoundInnerTest(const uint8_t *data, size_t size)
 {
-    uint32_t deviceLen = *(reinterpret_cast<const int32_t*>(data));
-    const char* test = "test";
+    uint32_t deviceLen = *(reinterpret_cast<const int32_t *>(data));
+    const char *test = "test";
     MessageParcel datas;
     constexpr size_t len = 4;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -518,7 +514,7 @@ bool OnRefreshDeviceFoundInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnClientPermissonChangeInnerTest(const uint8_t* data, size_t size)
+bool OnClientPermissonChangeInnerTest(const uint8_t *data, size_t size)
 {
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
@@ -539,25 +535,25 @@ bool OnClientPermissonChangeInnerTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool OnDiscoverFailedInnerTest(const uint8_t* data, size_t size)
+bool OnDiscoverFailedInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t reason = 2;
     return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 
-bool OnDiscoverySuccessInnerTest(const uint8_t* data, size_t size)
+bool OnDiscoverySuccessInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t reason = 2;
     return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 
-bool OnPublishSuccessInnerTest(const uint8_t* data, size_t size)
+bool OnPublishSuccessInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t reason = 2;
     return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
 }
 
-bool OnPublishFailInnerTest(const uint8_t* data, size_t size)
+bool OnPublishFailInnerTest(const uint8_t *data, size_t size)
 {
     constexpr int32_t reason = 2;
     return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
@@ -629,10 +625,10 @@ bool OnChannelBindInnerTest(const uint8_t *data, size_t size)
 
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     if (data == nullptr) {
