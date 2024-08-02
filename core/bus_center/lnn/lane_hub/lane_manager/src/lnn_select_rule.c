@@ -60,12 +60,12 @@ int32_t GetWlanLinkedFrequency(void)
 static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 {
     int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
-    if (ret != SOFTBUS_OK || *local < 0) {
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
-    if (ret != SOFTBUS_OK || *remote < 0) {
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
         return false;
     }
@@ -195,8 +195,8 @@ static int32_t P2pCapCheck(const char *networkId)
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if ((local & (1 << BIT_WIFI_P2P)) == 0) {
-        if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
-            SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+        SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+        if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
             LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
             return SOFTBUS_LANE_LOCAL_NO_WIFI_DIRECT_CAP;
         } else {
@@ -682,8 +682,8 @@ int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
 
 static int32_t GetErrCodeOfRequest(const char *networkId, const LaneSelectParam *request)
 {
-    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
-        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         return SOFTBUS_LANE_WIFI_OFF;
     }
     int32_t bandWidthType = GetBwType(request->qosRequire.minBW);
