@@ -74,6 +74,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/command/connect_command.cpp",
       "$wifi_direct_path/command/command_factory.cpp",
       "$wifi_direct_path/command/disconnect_command.cpp",
+      "$wifi_direct_path/command/force_disconnect_command.cpp",
       "$wifi_direct_path/command/negotiate_command.cpp",
       "$wifi_direct_path/command/processor_selector_factory.cpp",
       "$wifi_direct_path/command/simple_processor_selector.cpp",

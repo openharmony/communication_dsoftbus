@@ -41,6 +41,7 @@ public:
     int ConnectDevice(const std::shared_ptr<ConnectCommand> &command, bool markRetried = false);
     int CancelConnectDevice(const WifiDirectConnectInfo &info);
     int DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback);
+    int ForceDisconnectDevice(WifiDirectForceDisconnectInfo &info, WifiDirectDisconnectCallback &callback);
 
     template<typename Command>
     void ProcessNegotiateData(const std::string &remoteDeviceId, Command &command)
