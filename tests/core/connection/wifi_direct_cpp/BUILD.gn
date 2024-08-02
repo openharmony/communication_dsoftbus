@@ -157,6 +157,7 @@ ohos_unittest("WifiDirectManagerCppTest") {
     "$wifi_direct_cpp_path/command/command_factory.cpp",
     "$wifi_direct_cpp_path/command/connect_command.cpp",
     "$wifi_direct_cpp_path/command/disconnect_command.cpp",
+    "$wifi_direct_cpp_path/command/force_disconnect_command.cpp",
     "$wifi_direct_cpp_path/command/negotiate_command.cpp",
     "$wifi_direct_cpp_path/command/processor_selector_factory.cpp",
     "$wifi_direct_cpp_path/command/simple_processor_selector.cpp",

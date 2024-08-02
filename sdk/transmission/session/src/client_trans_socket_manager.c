@@ -34,7 +34,6 @@
 #include "trans_server_proxy.h"
 
 #define NETWORK_ID_LEN 7
-#define HML_IP_PREFIX "172.30."
 #define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)
 #define GET_CONN_TYPE(type) (((uint32_t)(type) >> 8) & 0xff)
 
@@ -85,6 +84,7 @@ SessionInfo *CreateNewSession(const SessionParam *param)
     session->isEncrypt = true;
     session->isAsync = false;
     session->lifecycle.sessionState = SESSION_STATE_INIT;
+    session->actionId = param->actionId;
     return session;
 }
 
@@ -239,6 +239,7 @@ SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
     }
     session->channelType = CHANNEL_TYPE_AUTH;
     session->isEncrypt = false;
+    session->actionId = INVALID_ACTION_ID;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
         SoftBusFree(session);
         return NULL;
@@ -281,7 +282,7 @@ static int32_t ClientTransGetUdpIp(int32_t channelId, char *myIp, int32_t ipLen)
 // determine connection type based on IP
 static bool ClientTransCheckHmlIp(const char *ip)
 {
-    if (strncmp(ip, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+    if (IsHmlIpAddr(ip)) {
         return true;
     }
 
@@ -314,6 +315,9 @@ static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType,
         if (ClientTransGetTdcIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
             return false;
         }
+    } else if (sessionNode->channelType == CHANNEL_TYPE_AUTH) {
+        TRANS_LOGD(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
+        return true;
     } else {
         TRANS_LOGW(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
         return false;
@@ -472,6 +476,7 @@ static void ClientInitSession(SessionInfo *session, const SessionParam *param)
     session->isEncrypt = true;
     session->isAsync = false;
     session->lifecycle.sessionState = SESSION_STATE_INIT;
+    session->actionId = param->actionId;
 }
 
 SessionInfo *CreateNewSocketSession(const SessionParam *param)
@@ -572,6 +577,7 @@ void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
     param->groupId = "reserved";
     param->attr = tmpAttr;
     param->isQosLane = true;
+    param->actionId = sessionNode->actionId;
 }
 
 void ClientConvertRetVal(int32_t socket, int32_t *retOut)

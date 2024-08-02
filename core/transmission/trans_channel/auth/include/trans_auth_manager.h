@@ -16,9 +16,10 @@
 #ifndef TRANS_AUTH_MANAGER_H
 #define TRANS_AUTH_MANAGER_H
 
+#include "lnn_lane_interface.h"
+#include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
-#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -43,6 +44,7 @@ int32_t TransAuthInit(IServerChannelCallBack *cb);
 void TransAuthDeinit(void);
 int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen);
+int32_t TransOpenAuthMsgChannelWithPara(const char *sessionName, const LaneConnInfo *connInfo, int32_t *channelId);
 int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt, int32_t *channelId,
     const char *reqId);
 int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connOpt);
@@ -51,6 +53,8 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len);
 int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo);
 int32_t TransAuthGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
 int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId);
+int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo, bool isClient);
+int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode);
 
 #ifdef __cplusplus
 #if __cplusplus

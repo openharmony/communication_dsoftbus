@@ -84,6 +84,26 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
     return ret;
 }
 
+int WifiDirectScheduler::ForceDisconnectDevice(
+    WifiDirectForceDisconnectInfo &info, WifiDirectDisconnectCallback &callback)
+{
+    auto command = CommandFactory::GetInstance().CreateForceDisconnectCommand(info, callback);
+    CONN_LOGI(CONN_WIFI_DIRECT,
+              "requestId=%{public}d pid=%{public}d networkId=%{public}s remoteUuid=%{public}s linktype=%{public}d",
+              info.requestId, info.pid,
+              WifiDirectAnonymizeDeviceId(WifiDirectUtils::UuidToNetworkId(command->GetRemoteDeviceId())).c_str(),
+              WifiDirectAnonymizeDeviceId(command->GetRemoteDeviceId()).c_str(), info.linkType);
+    std::shared_ptr<WifiDirectExecutor> executor;
+    auto ret = ScheduleActiveCommand(command, executor);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed, ret=%{public}d", ret);
+    if (executor != nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
+        executor->SendEvent(command);
+    }
+    return ret;
+}
+
 bool WifiDirectScheduler::ProcessNextCommand(WifiDirectExecutor *executor,
                                              std::shared_ptr<WifiDirectProcessor> &processor)
 {

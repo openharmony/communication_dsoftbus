@@ -381,7 +381,14 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
             continue;
         }
         ListAdd(&serverNode->sessionList, &session->node);
-        TRANS_LOGI(TRANS_SDK, "add sessionId=%{public}d", session->sessionId);
+        char *anonyDeviceId = NULL;
+        Anonymize(session->info.peerDeviceId, &anonyDeviceId);
+        TRANS_LOGI(TRANS_SDK,
+            "add, sessionId=%{public}d, channelId=%{public}d, channelType=%{public}d, routeType=%{public}d, "
+            "peerDeviceId=%{public}s",
+            session->sessionId, session->channelId, session->channelType, session->routeType,
+            AnonymizeWrapper(anonyDeviceId));
+        AnonymizeFree(anonyDeviceId);
         return SOFTBUS_OK;
     }
     DestroySessionId();
@@ -1535,6 +1542,9 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
     if (action == TIMER_ACTION_START) {
+        TRANS_LOGE(TRANS_SDK,
+            "socket=%{public}d, inputMaxWaitTime=%{public}u, maxWaitTime=%{public}u, enableStatus=%{public}d",
+            socket, maxWaitTime, sessionNode->lifecycle.maxWaitTime, sessionNode->enableStatus);
         bool binding = (sessionNode->lifecycle.maxWaitTime != 0);
         bool bindSuccess =
             (sessionNode->lifecycle.maxWaitTime == 0 && sessionNode->enableStatus == ENABLE_STATUS_SUCCESS);

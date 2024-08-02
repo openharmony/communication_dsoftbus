@@ -151,6 +151,17 @@ static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct Wi
     return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().DisconnectDevice(*info, *callback);
 }
 
+static int32_t ForceDisconnectDevice(
+    struct WifiDirectForceDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestid=%{public}d linktype=%{public}d remoteUuid=%{public}s", info->requestId,
+        info->linkType, OHOS::SoftBus::WifiDirectAnonymizeDeviceId(info->remoteUuid).c_str());
+    return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ForceDisconnectDevice(
+        *info, *callback);
+}
+
 static void RegisterStatusListener(struct WifiDirectStatusListener *listener)
 {
     g_listeners.push_back(*listener);
@@ -526,6 +537,7 @@ static struct WifiDirectManager g_manager = {
     .connectDevice = ConnectDevice,
     .cancelConnectDevice = CancelConnectDevice,
     .disconnectDevice = DisconnectDevice,
+    .forceDisconnectDevice = ForceDisconnectDevice,
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
     .isNoneLinkByType = IsNoneLinkByType,

@@ -525,6 +525,7 @@
         "ClientTransTdcOnChannelBind";
         "TransOnUdpChannelBind";
         "TransOnChannelBind";
+        "OpenAuthSessionWithPara";
         "ResourceConflictCheck";
         "ClientTransTdcIfChannelForSocket";
         extern "C++" {
