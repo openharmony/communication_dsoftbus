@@ -416,7 +416,6 @@ ClientSessionServer *GetNewSocketServer(SoftBusSecType type, const char *session
     if (strcpy_s(server->sessionName, sizeof(server->sessionName), sessionName) != EOK) {
         goto EXIT_ERR;
     }
-    /*when socket crement the count*/
     server->sessionAddingCnt++;
     server->isSrvEncryptedRawStream = false;
     ListInit(&server->node);

@@ -302,7 +302,6 @@ void SocketServerStateUpdate(const char *sessionName)
     LIST_FOR_EACH_ENTRY(item, &g_clientSessionServerList->list, ClientSessionServer, node) {
         if (strcmp(item->sessionName, sessionName) == 0) {
             if (item->sessionAddingCnt > 0) {
-                /*when socket end or socket error Decrement the count*/
                 item->sessionAddingCnt--;
             }
             UnlockClientSessionServerList();
