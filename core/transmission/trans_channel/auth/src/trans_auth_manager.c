@@ -371,7 +371,6 @@ static int32_t TransAuthFillDataConfig(AppInfo *appInfo)
 static bool IsRawAuthServerExist()
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetAuthChannelLock() == SOFTBUS_OK, 0, TRANS_SVC, "get authChannelLock failed.");
-    int32_t rawAuthNum = 0;
     AuthChannelInfo *info = NULL;
     LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
         if (info->appInfo.linkType == LANE_HML_RAW && !info->isClient) {
