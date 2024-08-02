@@ -271,7 +271,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReply0007, TestSize.
     AppInfo *appInfo = TestSetAppInfo();
 
     ret = OpenDataBusRequestReply(appInfo, channelId, seq, flags);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;

@@ -184,7 +184,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest002, TestSize.Lev
     packetHead.module = 10;
     connInfo.appInfo.fd = TEST_FD;
     int64_t authId = TEST_AUTHID;
-    int bufferLen = AuthGetEncryptSize(packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    int bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
         .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
@@ -296,7 +296,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest006, TestSize.Lev
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
     int32_t ret = TransTdcPostBytes(channelId, &packetHead, data);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
 }
 
 /**
@@ -1115,7 +1115,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest001, TestSize.Level1)
     packetHead.module = 10;
     connInfo.appInfo.fd = TEST_FD;
     int64_t authId = TEST_AUTHID;
-    int bufferLen = AuthGetEncryptSize(packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    int bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -1149,7 +1149,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest002, TestSize.Level1)
     packetHead.module = 10;
     connInfo.appInfo.fd = TEST_FD;
     int64_t authId = TEST_AUTHID;
-    int bufferLen = AuthGetEncryptSize(packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    int bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -1182,7 +1182,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest003, TestSize.Level1)
     packetHead.magicNumber = 10;
     packetHead.module = 10;
     connInfo.appInfo.fd = TEST_FD;
-    int bufferLen = AuthGetEncryptSize(packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    int64_t authId = TEST_AUTHID;
+    int bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
