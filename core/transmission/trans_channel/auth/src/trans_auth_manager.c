@@ -692,7 +692,7 @@ int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo,
  */
 static int32_t AddAuthChannelInfoInner(AuthChannelInfo *info)
 {
-    if (info == NULL || g_authChannelList == NULL) {
+    if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     AuthChannelInfo *item = NULL;
