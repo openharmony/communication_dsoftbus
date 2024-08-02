@@ -168,10 +168,10 @@ static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
 
 int32_t GetErrCodeOfLink(const char *networkId, LaneLinkType linkType)
 {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
     if ((linkType == LANE_WLAN_2P4G || linkType == LANE_WLAN_5G || linkType == LANE_P2P ||
         linkType == LANE_P2P_REUSE || linkType == LANE_HML) &&
-        (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
-        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING)) {
+        (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING)) {
         return SOFTBUS_LANE_WIFI_OFF;
     }
     if ((linkType == LANE_BR || linkType == LANE_BLE || linkType == LANE_BLE_DIRECT || linkType == LANE_BLE_REUSE) &&

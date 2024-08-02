@@ -209,8 +209,8 @@ static int32_t P2pLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "not support wifi direct");
         return SOFTBUS_P2P_NOT_SUPPORT;
     }
-    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
-        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         return SOFTBUS_WIFI_OFF;
     }
     uint32_t local;
@@ -223,7 +223,6 @@ static int32_t P2pLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
         return SOFTBUS_P2P_NOT_SUPPORT;
     }
-
     int32_t ret = pManager->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_P2P);
     if (ret == V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE) {
         return SOFTBUS_P2P_ROLE_CONFLICT;
@@ -238,28 +237,24 @@ static int32_t HmlLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "not support wifi direct");
         return SOFTBUS_HML_NOT_SUPPORT;
     }
-    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
-        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         return SOFTBUS_WIFI_OFF;
     }
-
     uint64_t feature = LnnGetFeatureCapabilty();
     if (!IsFeatureSupport(feature, BIT_WIFI_DIRECT_TLV_NEGOTIATION)) {
         LNN_LOGE(LNN_LANE, "local feature not supported");
         return SOFTBUS_HML_NOT_SUPPORT;
     }
-
     bool result = false;
     if (LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, &result) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote feature failed");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-
     if (!result) {
         LNN_LOGE(LNN_LANE, "remote feature not supported");
         return SOFTBUS_HML_NOT_SUPPORT;
     }
-
     int32_t ret = pManager->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_HML);
     if (ret == ERROR_LOCAL_THREE_VAP_CONFLICT) {
         return SOFTBUS_HML_THREE_VAP_CONFLIC;

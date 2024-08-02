@@ -584,12 +584,12 @@ bool IsPeerDeviceLegacyOs(int32_t osType)
 static bool TransGetNetCapability(const char *networkId, uint32_t *local, uint32_t *remote)
 {
     int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
-    if (ret != SOFTBUS_OK || *local < 0) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
-    if (ret != SOFTBUS_OK || *remote < 0) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
         return false;
     }
@@ -603,8 +603,8 @@ TransDeviceState TransGetDeviceState(const char *networkId)
         TRANS_LOGE(TRANS_CTRL, "networkId err.");
         return DEVICE_STATE_INVALID;
     }
-    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_SEMIACTIVATING ||
-        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_SEMIACTIVE) {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (wifiState == SOFTBUS_WIFI_STATE_SEMIACTIVATING || wifiState == SOFTBUS_WIFI_STATE_SEMIACTIVE) {
         return DEVICE_STATE_LOCAL_WIFI_HALF_OFF;
     }
     uint32_t local = 0;
