@@ -44,6 +44,7 @@ extern "C" {
 #define INVALID_ROUTE_TYPE (-1)
 #define INVALID_DATA_CONFIG (0)
 #define INVALID_SEQ_ID (0x7fffffff)
+#define INVALID_ACTION_ID 0
 
 #define PKG_NAME_SIZE_MAX 65
 #define SESSION_NAME_SIZE_MAX 256
