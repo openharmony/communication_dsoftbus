@@ -275,7 +275,12 @@ static bool SocketServerIsExistAndUpdate(const char *sessionName)
     ClientSessionServer *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_clientSessionServerList->list, ClientSessionServer, node) {
         if (strcmp(item->sessionName, sessionName) == 0) {
-            /*when socket crement the count*/
+            /*
+             * this field indicates that a process is using a SessionServer,
+             * but the process has not yet added the session node to the sessionList.
+             * Other processes cannot perceive this intermediate state, so this field is added to identify this state;
+             * This field is cleared after adding the session node to the session list in the process
+             */
             item->sessionAddingCnt++;
             return true;
         }
