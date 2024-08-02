@@ -285,8 +285,8 @@ static void LnnClearNetBandCapability(uint32_t *capability)
 
 static void LnnSetP2pNetCapability(uint32_t *capability)
 {
-    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
-        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
     } else {
         (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
