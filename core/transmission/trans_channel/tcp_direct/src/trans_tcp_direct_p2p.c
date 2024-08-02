@@ -593,7 +593,6 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     ret = PackAndSendVerifyP2pRsp(myIp, myPort, seq, isAuthLink, authHandle);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "fail to send VerifyP2pRsp.");
     LaneAddP2pAddressByIp(peerIp, peerPort);
-    TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
 }
 
@@ -954,9 +953,8 @@ static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn)
         } else {
             return StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
         }
-    } else {
-        return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
     }
+    return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
 }
 
 int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)

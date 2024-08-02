@@ -160,7 +160,7 @@ static int32_t CreateServerSocket(const char *ip, int32_t *fd, int32_t *port)
     }
     *fd = socketFd;
     *port = socketPort;
-    TRANS_LOGE(TRANS_FILE, "create socket success, fd=%{public}d, port=%{public}d", socketFd, socketPort);
+    TRANS_LOGI(TRANS_FILE, "create socket success, fd=%{public}d, port=%{public}d", socketFd, socketPort);
     return SOFTBUS_OK;
 }
 
