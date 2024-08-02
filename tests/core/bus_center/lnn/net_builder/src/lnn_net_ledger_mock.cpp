@@ -538,5 +538,45 @@ int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint6
 {
     return GetNetLedgerInterface()->AuthGetLatestAuthSeqListByType(udid, seqList, authVerifyTime, type);
 }
+
+int32_t LnnSetDLUnifiedDeviceName(const char *udid, const char *name)
+{
+    return GetNetLedgerInterface()->LnnSetDLUnifiedDeviceName(udid, name);
+}
+
+int32_t LnnSetDLUnifiedDefaultDeviceName(const char *udid, const char *name)
+{
+    return GetNetLedgerInterface()->LnnSetDLUnifiedDefaultDeviceName(udid, name);
+}
+
+int32_t LnnSetDLDeviceNickNameByUdid(const char *udid, const char *name)
+{
+    return GetNetLedgerInterface()->LnnSetDLDeviceNickNameByUdid(udid, name);
+}
+
+int32_t LnnSetDLDeviceStateVersion(const char *udid, int32_t stateVersion)
+{
+    return GetNetLedgerInterface()->LnnSetDLDeviceStateVersion(udid, stateVersion);
+}
+
+int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
+{
+    return GetNetLedgerInterface()->LnnUpdateDistributedNodeInfo(newInfo, udid);
+}
+
+int32_t LnnSetDLDeviceBroadcastCipherKey(const char *udid, const void *cipherKey)
+{
+    return GetNetLedgerInterface()->LnnSetDLDeviceBroadcastCipherKey(udid, cipherKey);
+}
+
+int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv)
+{
+    return GetNetLedgerInterface()->LnnSetDLDeviceBroadcastCipherIv(udid, cipherIv);
+}
+
+bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
+{
+    return GetNetLedgerInterface()->LnnSetDLDeviceInfoName(udid, name);
+}
 }
 }
