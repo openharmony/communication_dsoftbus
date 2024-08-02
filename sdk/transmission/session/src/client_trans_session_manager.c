@@ -207,7 +207,8 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY_SAFE(
         serverNode, serverNodeNext, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (strcmp(serverNode->sessionName, sessionName) == 0 && IsListEmpty(&serverNode->sessionList)) {
+        if (strcmp(serverNode->sessionName, sessionName) == 0 && IsListEmpty(&serverNode->sessionList) &&
+            (serverNode->sessionAddingCnt) == 0) {
             ListDelete(&(serverNode->node));
             SoftBusFree(serverNode);
             g_clientSessionServerList->cnt--;
@@ -266,6 +267,48 @@ static bool SessionServerIsExist(const char *sessionName)
         }
     }
     return false;
+}
+
+static bool SocketServerIsExistAndUpdate(const char *sessionName)
+{
+    /* need get lock before */
+    ClientSessionServer *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_clientSessionServerList->list, ClientSessionServer, node) {
+        if (strcmp(item->sessionName, sessionName) == 0) {
+            /*when socket crement the count*/
+            item->sessionAddingCnt++;
+            return true;
+        }
+    }
+    return false;
+}
+
+void SocketServerStateUpdate(const char *sessionName)
+{
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    ClientSessionServer *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_clientSessionServerList->list, ClientSessionServer, node) {
+        if (strcmp(item->sessionName, sessionName) == 0) {
+            if (item->sessionAddingCnt > 0) {
+                /*when socket end or socket error Decrement the count*/
+                item->sessionAddingCnt--;
+            }
+            UnlockClientSessionServerList();
+            return;
+        }
+    }
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found session server by sessionName=%{public}s", tmpName);
+    AnonymizeFree(tmpName);
+    UnlockClientSessionServerList();
 }
 
 static void ShowClientSessionServer(void)
@@ -1209,6 +1252,7 @@ void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList)
     SessionInfo *sessionNode = NULL;
     SessionInfo *nextSessionNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        serverNode->sessionAddingCnt = 0;
         SessionServerInfo * info = CreateSessionServerInfoNode(serverNode);
         if (info != NULL) {
             ListAdd(sessionServerInfoList, &info->node);
@@ -1248,7 +1292,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
-    if (SessionServerIsExist(sessionName)) {
+    if (SocketServerIsExistAndUpdate(sessionName)) {
         UnlockClientSessionServerList();
         return SOFTBUS_SERVER_NAME_REPEATED;
     }
