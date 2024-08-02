@@ -705,6 +705,10 @@ static void DfxRecordHeartBeatAuthStart(const AuthConnInfo *connInfo, const char
 
 static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
+    if (!device->isOnline) {
+        LNN_LOGW(LNN_HEART_BEAT, "ignore lnn request, not support connect");
+        return SOFTBUS_OK;
+    }
     if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
         LNN_LOGE(LNN_HEART_BEAT, "reauth request repeated");
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
