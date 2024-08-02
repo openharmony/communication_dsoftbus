@@ -596,7 +596,7 @@ HWTEST_F(VtpStreamSocketTest, FillpStatistics001, TestSize.Level1)
 
     int fd = 2;
     int ret = vtpStreamSocket->FillpStatistics(fd, nullptr);
-    EXPECT_EQ(-1, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     info->evt = FT_EVT_FRAME_STATS;
     ret = vtpStreamSocket->FillpStatistics(fd, info);
