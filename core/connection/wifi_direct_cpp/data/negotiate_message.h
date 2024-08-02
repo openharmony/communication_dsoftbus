@@ -38,6 +38,7 @@ enum class LegacyCommandType {
 
     CMD_PC_GET_INTERFACE_INFO_REQ = 30,
     CMD_PC_GET_INTERFACE_INFO_RESP = 31,
+    CMD_FORCE_DISCONNECT_V1_REQ = 32,
 };
 
 enum class LegacyContentType {
@@ -67,6 +68,7 @@ enum class NegotiateMessageType {
     CMD_DISCONNECT_V2_REQ = 27,
     CMD_DISCONNECT_V2_RESP = 28,
     CMD_CLIENT_JOIN_FAIL_NOTIFY = 29,
+    /* 30-49 is for LegacyCommandType*/
 
     CMD_TRIGGER_REQ = 50,
     CMD_TRIGGER_RESP = 51,
@@ -77,6 +79,7 @@ enum class NegotiateMessageType {
     CMD_AUTH_HAND_SHAKE_RSP = 56,
     CMD_DETECT_LINK_REQ = 57,
     CMD_DETECT_LINK_RSP = 58,
+    CMD_FORCE_DISCONNECT_REQ = 59,
 
     CMD_V3_REQ = 100,
     CMD_V3_RSP = 101,

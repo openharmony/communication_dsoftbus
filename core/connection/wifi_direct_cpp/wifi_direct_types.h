@@ -182,6 +182,14 @@ struct WifiDirectDisconnectInfo {
     struct WifiDirectNegotiateChannel negoChannel;
 };
 
+struct WifiDirectForceDisconnectInfo {
+    uint32_t requestId;
+    int32_t pid;
+    char remoteUuid[UUID_BUF_LEN];
+    enum WifiDirectLinkType linkType;
+    struct WifiDirectNegotiateChannel negoChannel;
+};
+
 struct WifiDirectConnectCallback {
     void (*onConnectSuccess)(uint32_t requestId, const struct WifiDirectLink *link);
     void (*onConnectFailure)(uint32_t requestId, int32_t reason);
