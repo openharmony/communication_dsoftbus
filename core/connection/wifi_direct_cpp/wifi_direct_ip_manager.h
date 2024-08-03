@@ -33,6 +33,12 @@ public:
     static WifiDirectIpManager& GetInstance()
     {
         static WifiDirectIpManager instance;
+        instance.Lock();
+        if (!hasClear_) {
+            ClearAllIpv4();
+            hasClear_ = true;
+        }
+        instance.Unlock();
         return instance;
     }
     static void Init();
@@ -85,6 +91,7 @@ private:
 
     std::recursive_mutex mutex_;
     static inline Initiator initiator_;
+    static inline bool hasClear_ = false;
 };
 } // namespace OHOS::SoftBus
 #endif /* WIFI_DIRECT_IP_MANAGER_H */
