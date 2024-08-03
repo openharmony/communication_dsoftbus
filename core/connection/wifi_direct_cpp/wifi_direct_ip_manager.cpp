@@ -38,7 +38,6 @@ static constexpr char HML_IP_SINK_SUFFIX[] = ".1";
 void WifiDirectIpManager::Init()
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-    std::thread(WifiDirectIpManager::ClearAllIpv4).detach();
 }
 
 std::string WifiDirectIpManager::ApplyIpv6(const std::string &mac)
