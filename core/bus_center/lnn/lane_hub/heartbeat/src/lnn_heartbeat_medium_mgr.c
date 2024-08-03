@@ -21,6 +21,7 @@
 #include "anonymizer.h"
 #include "auth_manager.h"
 #include "auth_device_common_key.h"
+#include "auth_deviceprofile.h"
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
@@ -675,11 +676,7 @@ static int32_t SoftBusNetNodeResult(
         anonyUdid, device->addr[0].type, isConnect, connectReason);
     AnonymizeFree(anonyUdid);
 
-    bool flag = false;
-    if (isConnect) {
-        flag = IsSameAccountDevice(device);
-    }
-    if (flag) {
+    if (IsSameAccountDevice(device) && !IsPotentialTrustedDeviceDp(device->devId)) {
         if (!AuthHasSameAccountGroup()) {
             LNN_LOGE(LNN_HEART_BEAT, "device has not same account group relation with local device");
             return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
