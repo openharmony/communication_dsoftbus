@@ -382,7 +382,7 @@ static int32_t StartServerListenUnsafe(SoftbusListenerNode *node, const LocalLis
         if (listenFd < 0) {
             CONN_LOGE(CONN_COMMON, "create server socket failed: module=%{public}d, listenFd=%{public}d",
                 module, listenFd);
-            status = SOFTBUS_TCP_SOCKET_ERR;
+            status = listenFd;
             break;
         }
         status = SoftBusSocketListen(listenFd, DEFAULT_BACKLOG);
@@ -489,7 +489,7 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
         if (listenPort <= 0) {
             CONN_LOGE(CONN_COMMON, "start server failed, module=%{public}d, listenPort=%{public}d",
                 module, listenPort);
-            status = SOFTBUS_CONN_FAIL;
+            status = listenPort;
             break;
         }
 

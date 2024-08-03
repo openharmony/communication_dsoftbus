@@ -836,7 +836,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
             GetWifiDirectManager()->freeListenerModuleId(local.socketOption.moduleId);
         }
         AUTH_LOGE(AUTH_CONN, "start local listening failed");
-        return SOFTBUS_INVALID_PORT;
+        return realPort;
     }
     AUTH_LOGI(AUTH_CONN, "moduleId=%{public}u, port=%{public}d", local.socketOption.moduleId, realPort);
     *moduleId = local.socketOption.moduleId;
