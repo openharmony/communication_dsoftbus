@@ -143,6 +143,18 @@ int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups2(int32_t osAccountId, con
 
     return HC_ERR_INVALID_PARAMS;
 }
+
+int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups3(int32_t osAccountId, const char *appId, int groupType,
+    char **returnGroupVec, uint32_t *groupNum)
+{
+    (void)osAccountId;
+    (void)appId;
+    (void)groupType;
+    (void)returnGroupVec;
+    *groupNum = 0;
+
+    return HC_SUCCESS;
+}
 int32_t LnnHichainInterfaceMock::ActionofunRegDataChangeListener(const char *appId)
 {
     (void)appId;
