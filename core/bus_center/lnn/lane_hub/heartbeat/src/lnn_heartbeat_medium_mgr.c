@@ -451,6 +451,29 @@ static bool IsInvalidBrmac(const char *macAddr)
     return false;
 }
 
+static bool IsUuidChange(const char *oldUuid, const uint8_t *newUuid, uint32_t len)
+{
+    uint8_t zeroUuid[UUID_BUF_LEN] = { 0 };
+    uint8_t uuidHash[SHA_256_HASH_LEN] = { 0 };
+
+    if (memcmp(zeroUuid, newUuid, len) == 0) {
+        LNN_LOGD(LNN_HEART_BEAT, "ignore zero uuid");
+        return false;
+    }
+    if (SoftBusGenerateStrHash((const unsigned char *)oldUuid, strlen(oldUuid), (unsigned char *)uuidHash) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "gen uuid hash err");
+        return false;
+    }
+    if (memcmp(uuidHash, newUuid, len) != 0) {
+        LNN_LOGE(LNN_HEART_BEAT,
+            "don't support ble direct online because uuid change %{public}02x%{public}02x->%{public}02x%{public}02x",
+            uuidHash[0], uuidHash[1], newUuid[0], newUuid[1]);
+        return true;
+    }
+    return false;
+}
+
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
@@ -494,6 +517,9 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
     if ((deviceInfo.deviceInfo.osType == OH_OS_TYPE) && (!IsCipherManagerFindKey(deviceInfo.deviceInfo.deviceUdid))) {
         *connectReason = FIND_REMOTE_CIPHERKEY_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because broadcast key");
+        return true;
+    }
+    if (IsUuidChange(deviceInfo.uuid, hbResp->shortUuid, HB_SHORT_UUID_LEN)) {
         return true;
     }
     LNN_LOGI(LNN_HEART_BEAT, "support ble direct online");
@@ -843,11 +869,9 @@ static bool IsSupportCloudSync(DeviceInfo *device)
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
-    ProcRespVapChange(device, hbResp);
     uint64_t nowTime = GetNowTime();
-    if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        return SOFTBUS_LOCK_ERR;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_hbRecvList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        LNN_HEART_BEAT, "try to lock failed");
     LnnHeartbeatRecvInfo *storedInfo = HbGetStoredRecvInfo(device->devId, device->addr[0].type, nowTime);
     int32_t res = CheckReceiveDeviceInfo(device, hbType, storedInfo, nowTime);
     if (res != SOFTBUS_OK) {
@@ -868,7 +892,8 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
-        if (!HbIsNeedReAuth(&nodeInfo, device->accountHash)) {
+        if (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
+            !IsUuidChange(nodeInfo.uuid, hbResp->shortUuid, HB_SHORT_UUID_LEN)) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
@@ -888,7 +913,6 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         if (IsSupportCloudSync(device)) {
             return SOFTBUS_NETWORK_PEER_NODE_CONNECT;
         }
-        LNN_LOGD(LNN_HEART_BEAT, "ignore lnn request, not support connect");
         return SOFTBUS_NETWORK_NOT_CONNECTABLE;
     }
     return SoftBusNetNodeResult(device, hbResp, isConnect, connectReason);
@@ -910,6 +934,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeig
         AnonymizeFree(anonyUdid);
         return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
     }
+    ProcRespVapChange(device, hbResp);
     return HbNotifyReceiveDevice(device, mediumWeight, hbType, isOnlineDirectly, hbResp);
 }
 
