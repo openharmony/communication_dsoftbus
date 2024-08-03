@@ -135,5 +135,20 @@ void SetLpKeepAliveState(void *para)
 {
     return GetLnnConnInterface()->SetLpKeepAliveState(para);
 }
+
+const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
+{
+    return GetLnnConnInterface()->LnnPrintConnectionAddr(addr);
+}
+
+bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
+{
+    return GetLnnConnInterface()->LnnConvertAddrToAuthConnInfo(addr, connInfo);
+}
+
+DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
+{
+    return GetLnnConnInterface()->LnnConvAddrTypeToDiscType(type);
+}
 }
 } // namespace OHOS
