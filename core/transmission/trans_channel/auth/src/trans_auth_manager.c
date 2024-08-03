@@ -583,12 +583,14 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "unpackReply failed");
         ChannelReplyErrProc(&extra, ret, &info, authId);
+        return;
     }
     extra.peerUdid = strlen(info.appInfo.peerUdid) != 0 ? info.appInfo.peerUdid : info.appInfo.peerData.deviceId;
     ret = TransAuthProcessDataConfig(&info.appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "ProcessDataConfig failed");
         ChannelReplyErrProc(&extra, ret, &info, authId);
+        return;
     }
     extra.result = EVENT_STAGE_RESULT_OK;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
