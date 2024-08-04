@@ -32,6 +32,8 @@ namespace OHOS {
 #define TEST_COUNT 2
 #define STREAM_DATA_LENGTH 10
 #define TEST_EVENT_ID 2
+#define TEST_ERRCODE 426442703
+#define TEST_CHANNELTYPE 2
 class ClientTransUdpManagerStaticTest : public testing::Test {
 public:
     ClientTransUdpManagerStaticTest() {}
@@ -45,6 +47,35 @@ public:
 void ClientTransUdpManagerStaticTest::SetUpTestCase(void) {}
 
 void ClientTransUdpManagerStaticTest::TearDownTestCase(void) {}
+
+/**
+ * @tc.name: TransOnUdpChannelBind
+ * @tc.desc: udp channel on bind test, use the invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelBindTest001, TestSize.Level0)
+{
+    int32_t ret = ClientTransUdpMgrInit(NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransOnUdpChannelBind(TEST_CHANNELID, TEST_CHANNELTYPE);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransSetdFileIdByChannelId(TEST_CHANNELID, TEST_COUNT);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
+ * @tc.name: TransSetUdpChannelEnableTest001
+ * @tc.desc: trans delete businness channel test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransSetUdpChannelEnableTest001, TestSize.Level0)
+{
+    int32_t ret = TransSetUdpChannelEnable(TEST_CHANNELID, false);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
 
 /**
  * @tc.name: ClientTransUdpManagerStaticTest001
@@ -83,6 +114,11 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     UdpChannel channel;
     ret = TransGetUdpChannel(TEST_CHANNELID, &channel);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    ret = ClientTransUdpMgrInit(cb);
+    ret = TransGetUdpChannel(TEST_CHANNELID, NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClosePeerUdpChannel(TEST_CHANNELID);
     EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
@@ -111,11 +147,8 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, Te
 
     StreamFrameInfo tmpf = {};
 
-    int32_t ret = ClientTransUdpMgrInit(NULL);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     IClientSessionCallBack *cb = GetClientSessionCb();
-    ret = ClientTransUdpMgrInit(cb);
+    int32_t ret = ClientTransUdpMgrInit(cb);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
     OnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
@@ -151,6 +184,9 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
 
     ret = ClientTransAddUdpChannel(&udpChannel);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST, ret);
+
+    ret = TransGetUdpChannel(TEST_CHANNELID, &udpChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     OnUdpChannelOpened(TEST_CHANNELID);
 
@@ -188,5 +224,50 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, Te
     channel.businessType = TEST_CHANNELID;
     ret = TransDeleteBusinnessChannel(&channel);
     EXPECT_EQ(SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH, ret);
+}
+
+/**
+ * @tc.name: TransSetdFileIdByChannelIdTest001
+ * @tc.desc: trans delete businness channel test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransSetdFileIdByChannelIdTest001, TestSize.Level0)
+{
+    int32_t ret = ClientTransChannelInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ret = TransSetdFileIdByChannelId(TEST_CHANNELID, TEST_COUNT);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
+
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    udpChannel.channelId = TEST_CHANNELID;
+    ret = ClientTransAddUdpChannel(&udpChannel);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST, ret);
+    ret = TransSetdFileIdByChannelId(TEST_CHANNELID, TEST_COUNT);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransOnUdpChannelOpenFailedTest002
+ * @tc.desc: trans on udp channel opened test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelOpenFailedTest001, TestSize.Level0)
+{
+    int32_t ret = ClientTransChannelInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+
+    udpChannel.isEnable = false;
+    ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    udpChannel.isEnable = true;
+    ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
