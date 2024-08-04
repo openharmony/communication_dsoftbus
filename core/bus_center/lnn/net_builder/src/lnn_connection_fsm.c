@@ -758,11 +758,6 @@ static void GetConnectOnlineReason(LnnConntionInfo *connInfo, uint32_t *connOnli
     } else {
         peerReason = (uint8_t)connInfo->nodeInfo->stateVersionReason;
     }
-    if (reason == SOFTBUS_OK && localInfo.stateVersionReason != 0) {
-        if (LnnSetLocalStateVersionReason() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "set local stateVersionReason fail");
-        }
-    }
     
     *connOnlineReason =
         ((connectReason << BLE_CONNECT_ONLINE_REASON) | (peerReason << PEER_DEVICE_STATE_VERSION_CHANGE) | localReason);
