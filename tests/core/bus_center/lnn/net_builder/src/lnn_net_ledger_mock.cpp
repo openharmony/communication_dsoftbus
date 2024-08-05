@@ -578,5 +578,10 @@ bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
 {
     return GetNetLedgerInterface()->LnnSetDLDeviceInfoName(udid, name);
 }
+
+int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info)
+{
+    return GetNetLedgerInterface()->LnnSetDLBssTransInfo(networkId, info);
+}
 }
 }
