@@ -151,10 +151,6 @@ static void AddSyncPtkListener(SyncPtkListener listener)
     (void)listener;
 }
 
-static void StopCustomListening(void)
-{
-}
-
 static bool IsWifiP2pEnabled(void)
 {
     return false;
@@ -202,8 +198,6 @@ static struct WifiDirectManager g_manager = {
     .savePTK = SavePtk,
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
-
-    .stopCustomListening = StopCustomListening,
 
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
