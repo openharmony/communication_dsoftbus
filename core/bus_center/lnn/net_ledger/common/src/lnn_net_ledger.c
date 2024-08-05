@@ -327,7 +327,7 @@ static int32_t LnnGetPrivateNodeKeyInfoLocal(const char *networkId, InfoKey key,
 {
     if (networkId == NULL || info == NULL) {
         LNN_LOGE(LNN_LEDGER, "params are null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     switch (key) {
         case BYTE_KEY_IRK:
@@ -340,7 +340,7 @@ static int32_t LnnGetPrivateNodeKeyInfoLocal(const char *networkId, InfoKey key,
             return LnnGetLocalByteInfo(BYTE_KEY_REMOTE_PTK, info, infoLen);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
     }
 }
 
@@ -361,7 +361,7 @@ static int32_t LnnGetPrivateNodeKeyInfoRemote(const char *networkId, InfoKey key
             return LnnGetRemoteByteInfo(networkId, BYTE_KEY_REMOTE_PTK, info, infoLen);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
     }
 }
 
@@ -375,7 +375,7 @@ static int32_t LnnGetPrivateNodeKeyInfo(const char *networkId, InfoKey key, uint
     char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local network id fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NOT_FIND;
     }
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
         isLocalNetworkId = true;
@@ -488,9 +488,9 @@ static int32_t SoftbusDumpPrintAccountId(int fd, NodeBasicInfo *nodeInfo)
     }
     char accountHash[SHA_256_HASH_LEN] = {0};
     if (LnnGetPrivateNodeKeyInfo(nodeInfo->networkId, BYTE_KEY_ACCOUNT_HASH,
-        (uint8_t *)&accountHash, SHA_256_HASH_LEN) != 0) {
+        (uint8_t *)&accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo account hash failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        return SOFTBUS_NOT_FIND;
     }
     char accountHashStr[SHA_256_HEX_HASH_LEN] = {0};
     if (ConvertBytesToHexString(accountHashStr, SHA_256_HEX_HASH_LEN,
@@ -516,9 +516,9 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     unsigned char udid[UDID_BUF_LEN] = {0};
     char newUdid[UDID_BUF_LEN] = {0};
 
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, udid, UDID_BUF_LEN) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo Udid failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        return SOFTBUS_NOT_FIND;
     }
     DataMasking((char *)udid, UDID_BUF_LEN, ID_DELIMITER, newUdid);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Udid", newUdid);
@@ -536,9 +536,9 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     unsigned char uuid[UUID_BUF_LEN] = {0};
     char newUuid[UUID_BUF_LEN] = {0};
 
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, uuid, UUID_BUF_LEN) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo Uuid failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        return SOFTBUS_NOT_FIND;
     }
     DataMasking((char *)uuid, UUID_BUF_LEN, ID_DELIMITER, newUuid);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Uuid", newUuid);
@@ -556,9 +556,9 @@ int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
     unsigned char brMac[BT_MAC_LEN] = {0};
     char newBrMac[BT_MAC_LEN] = {0};
 
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, brMac, BT_MAC_LEN) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, brMac, BT_MAC_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo brMac failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        return SOFTBUS_NOT_FIND;
     }
     DataMasking((char *)brMac, BT_MAC_LEN, MAC_DELIMITER, newBrMac);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BrMac", newBrMac);
@@ -576,9 +576,9 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     char ipAddr[IP_STR_MAX_LEN] = {0};
     char newIpAddr[IP_STR_MAX_LEN] = {0};
 
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)ipAddr, IP_STR_MAX_LEN) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)ipAddr, IP_STR_MAX_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo ipAddr failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        return SOFTBUS_NOT_FIND;
     }
     DataMasking((char *)ipAddr, IP_STR_MAX_LEN, IP_DELIMITER, newIpAddr);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IpAddr", newIpAddr);
@@ -594,9 +594,9 @@ int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_NETWORK_CAPABILITY;
     int32_t netCapacity = 0;
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netCapacity, sizeof(netCapacity)) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netCapacity, sizeof(netCapacity)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo netCapacity failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        return SOFTBUS_NOT_FIND;
     }
     SOFTBUS_DPRINTF(fd, "  %-15s->%d\n", "NetCapacity", netCapacity);
     return SOFTBUS_OK;
@@ -611,9 +611,9 @@ int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_NETWORK_TYPE;
     int32_t netType = 0;
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netType, sizeof(netType)) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netType, sizeof(netType)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo netType failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        return SOFTBUS_NOT_FIND;
     }
     SOFTBUS_DPRINTF(fd, "  %-15s->%d\n", "NetType", netType);
     return SOFTBUS_OK;
@@ -628,9 +628,9 @@ static int32_t SoftbusDumpPrintDeviceLevel(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_DEVICE_SECURITY_LEVEL;
     int32_t securityLevel = 0;
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&securityLevel, sizeof(securityLevel)) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&securityLevel, sizeof(securityLevel)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo securityLevel failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        return SOFTBUS_NOT_FIND;
     }
     SOFTBUS_DPRINTF(fd, "  %-15s->%d\n", "SecurityLevel", securityLevel);
     return SOFTBUS_OK;
@@ -644,9 +644,9 @@ static int32_t SoftbusDumpPrintIrk(int fd, NodeBasicInfo *nodeInfo)
     }
     uint8_t irk[LFINDER_IRK_LEN] = {0};
     if (LnnGetPrivateNodeKeyInfo(nodeInfo->networkId, BYTE_KEY_IRK,
-        (uint8_t *)&irk, LFINDER_IRK_LEN) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo irk failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        (uint8_t *)&irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetPrivateNodeKeyInfo irk failed");
+        return SOFTBUS_NOT_FIND;
     }
     char peerIrkStr[LFINDER_IRK_STR_LEN] = {0};
     if (ConvertBytesToHexString(peerIrkStr, LFINDER_IRK_STR_LEN, irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
@@ -668,9 +668,9 @@ static int32_t SoftbusDumpPrintBroadcastCipher(int fd, NodeBasicInfo *nodeInfo)
     }
     unsigned char broadcastCipher[SESSION_KEY_LENGTH] = {0};
     if (LnnGetPrivateNodeKeyInfo(nodeInfo->networkId, BYTE_KEY_BROADCAST_CIPHER_KEY,
-        (uint8_t *)&broadcastCipher, SESSION_KEY_LENGTH) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo broadcastCipher failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        (uint8_t *)&broadcastCipher, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetPrivateNodeKeyInfo broadcastCipher failed");
+        return SOFTBUS_NOT_FIND;
     }
     char broadcastCipherStr[SESSION_KEY_STR_LEN] = {0};
     if (ConvertBytesToHexString(broadcastCipherStr, SESSION_KEY_STR_LEN,
@@ -693,9 +693,9 @@ static int32_t SoftbusDumpPrintRemotePtk(int fd, NodeBasicInfo *nodeInfo)
     }
     char remotePtk[PTK_DEFAULT_LEN] = {0};
     if (LnnGetPrivateNodeKeyInfo(nodeInfo->networkId, BYTE_KEY_REMOTE_PTK,
-        (uint8_t *)&remotePtk, PTK_DEFAULT_LEN) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo ptk failed");
-        return SOFTBUS_NETWORK_NOT_FOUND;
+        (uint8_t *)&remotePtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetPrivateNodeKeyInfo ptk failed");
+        return SOFTBUS_NOT_FIND;
     }
     char remotePtkStr[PTK_STR_LEN] = {0};
     if (ConvertBytesToHexString(remotePtkStr, PTK_STR_LEN,
@@ -707,6 +707,35 @@ static int32_t SoftbusDumpPrintRemotePtk(int fd, NodeBasicInfo *nodeInfo)
     Anonymize(remotePtkStr, &anonyRemotePtk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "RemotePtk", anonyRemotePtk);
     AnonymizeFree(anonyRemotePtk);
+    return SOFTBUS_OK;
+}
+
+static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char peerUuid[UUID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(nodeInfo->networkId, STRING_KEY_UUID, peerUuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "gey peerUuid failed");
+        return SOFTBUS_NOT_FIND;
+    }
+    char localPtk[PTK_DEFAULT_LEN] = {0};
+    if (LnnGetLocalPtkByUuid(peerUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetLocalPtkByUuid failed");
+        return SOFTBUS_NOT_FIND;
+    }
+    char localPtkStr[PTK_STR_LEN] = {0};
+    if (ConvertBytesToHexString(localPtkStr, PTK_STR_LEN,
+        (unsigned char *)localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert localPtk to string fail.");
+        return SOFTBUS_BYTE_CONVERT_FAIL;
+    }
+    char *anonyLocalPtk = NULL;
+    Anonymize(localPtkStr, &anonyLocalPtk);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "LocalPtk", anonyLocalPtk);
+    AnonymizeFree(anonyLocalPtk);
     return SOFTBUS_OK;
 }
 
@@ -738,7 +767,6 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintDeviceLevel(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintDeviceLevel failed");
-        return;
     }
 }
 
@@ -755,7 +783,6 @@ static void SoftbusDumpDeviceAddr(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintIp(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintIp failed");
-        return;
     }
 }
 
@@ -777,6 +804,9 @@ static void SoftbusDumpDeviceCipher(int fd, NodeBasicInfo *nodeInfo)
     if (SoftbusDumpPrintRemotePtk(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintRemotePtk failed");
         return;
+    }
+    if (SoftbusDumpPrintLocalPtk(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintLocalPtk failed");
     }
 }
 
