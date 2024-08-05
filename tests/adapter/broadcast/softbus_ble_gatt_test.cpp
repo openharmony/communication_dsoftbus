@@ -109,22 +109,6 @@ static void StubAdvDataCallback(int advId, int status)
     SoftbusBleGattTest::advDataCtx.Update(advId, status);
 }
 
-// static int ActionSuccessBleStartAdvEx(int *advId, const StartAdvRawData rawData, BleAdvParams advParam)
-// {
-//     static int advIdGenerator = 0;
-//     *advId = advIdGenerator++;
-//     SoftbusBleGattTest::btInnerAdvId = *advId;
-//     return OHOS_BT_STATUS_SUCCESS;
-// }
-
-// static int ActionSuccessBleStopAdv(int advId)
-// {
-//     DISC_LOGI(DISC_TEST, "ActionSuccessBleStopAdv, advId=%{public}d", advId);
-//     MockBluetooth::btGattCallback->advDisableCb(advId, OHOS_BT_STATUS_SUCCESS);
-//     DISC_LOGI(DISC_TEST, "ActionSuccessBleStopAdv, advId=%{public}d", advId);
-//     return OHOS_BT_STATUS_SUCCESS;
-// }
-
 SoftbusBroadcastCallback *GetStubAdvCallback()
 {
     static SoftbusBroadcastCallback callback = {
@@ -147,18 +131,6 @@ static testing::AssertionResult PrepareScanListener(int *scannerId)
     }
     return testing::AssertionSuccess();
 }
-
-// static testing::AssertionResult PrepareAdvCallback(int *advId)
-// {
-//     auto ret = MockBluetooth::interface->RegisterBroadcaster(advId, GetStubAdvCallback());
-//     if (ret != SOFTBUS_OK) {
-//         return testing::AssertionFailure() << "RegisterBroadcaster failed";
-//     }
-//     if (MockBluetooth::btGattCallback == nullptr) {
-//         return testing::AssertionFailure() << "RegisterBroadcaster is not invoke";
-//     }
-//     return testing::AssertionSuccess();
-// }
 
 static SoftBusBcScanFilter *CreateScanFilter()
 {
