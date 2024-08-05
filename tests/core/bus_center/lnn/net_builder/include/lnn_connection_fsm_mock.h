@@ -24,6 +24,7 @@
 #include "bus_center_manager.h"
 #include "lnn_ble_lpdevice.h"
 #include "lnn_cipherkey_manager.h"
+#include "lnn_connection_addr_utils.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
@@ -59,6 +60,9 @@ public:
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual int32_t LnnSetLocalStateVersionReason(void) = 0;
     virtual void SetLpKeepAliveState(void *para) = 0;
+    virtual const char *LnnPrintConnectionAddr(const ConnectionAddr *addr) = 0;
+    virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo) = 0;
+    virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -86,6 +90,9 @@ public:
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));
     MOCK_METHOD0(LnnSetLocalStateVersionReason, int32_t (void));
     MOCK_METHOD1(SetLpKeepAliveState, void (void *));
+    MOCK_METHOD1(LnnPrintConnectionAddr, const char * (const ConnectionAddr *));
+    MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool (const ConnectionAddr *, AuthConnInfo *));
+    MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType (ConnectionAddrType));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H
