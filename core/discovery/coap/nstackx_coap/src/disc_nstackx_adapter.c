@@ -22,7 +22,7 @@
 #include <wchar.h>
 
 #include "nstackx.h"
-
+#include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "disc_coap_capability.h"
 #include "disc_coap_parser.h"
@@ -545,7 +545,10 @@ void DiscCoapUpdateDevName(void)
         return;
     }
     localDevName[truncateLen] = '\0';
-    DISC_LOGI(DISC_COAP, "register new local device name. localDevName=%{public}s", localDevName);
+    char *anonymizedName = NULL;
+    Anonymize(localDevName, &anonymizedName);
+    DISC_LOGI(DISC_COAP, "register new local device name. localDevName=%{public}s", AnonymizeWrapper(anonymizedName));
+    AnonymizeFree(anonymizedName);
     ret = NSTACKX_RegisterDeviceName(localDevName);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device name failed, ret=%{public}d.", ret);
 }
