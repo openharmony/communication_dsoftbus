@@ -2681,13 +2681,85 @@ HWTEST_F(LNNLaneMockTest, LANE_PPOCESS_VAP_INFO_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_PPOCESS_VAP_INFO_002
-* @tc.desc: ProcessVapInfo p2p
+* @tc.name: LNN_LANE_SELECT_02
+* @tc.desc: SelectLane
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_PPOCESS_VAP_INFO_003, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_01, TestSize.Level1)
 {
+    const char *networkId = "test";
+    LaneLinkType linkType = LANE_LINK_TYPE_BUTT;
+    int32_t ret = LaneCapCheck(networkId,linkType);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 
+/*
+* @tc.name: LNN_LANE_SELECT_02
+* @tc.desc: SelectLane
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_02, TestSize.Level1)
+{
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    NiceMock<LaneDepsInterfaceMock> mock;
+
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState)
+        .WillRepeatedly(Return(SOFTBUS_WIFI_STATE_INACTIV));
+    int32_t ret = GetErrCodeOfLink("networkId", LANE_WLAN_2P4G);
+    EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+
+    ret = GetErrCodeOfLink("networkId", LANE_P2P_REUSE);
+    EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+
+    ret = GetErrCodeOfLink("networkId", LANE_HML);
+    EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState)
+        .WillRepeatedly(Return(SOFTBUS_WIFI_STATE_DEACTIVATING));
+    ret = GetErrCodeOfLink("networkId", LANE_HML);
+    EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+
+    ret = GetErrCodeOfLink("networkId", LANE_P2P_REUSE);
+    EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+
+    EXPECT_CALL(mock, SoftBusGetBtState)
+        .WillRepeatedly(Return(0));
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BR), SOFTBUS_LANE_BT_OFF);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE), SOFTBUS_LANE_BT_OFF);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE_DIRECT), SOFTBUS_LANE_BT_OFF);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE_REUSE), SOFTBUS_LANE_BT_OFF);
+
+    EXPECT_CALL(mock, SoftBusGetBtState)
+        .WillRepeatedly(Return(1));
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BR), SOFTBUS_LANE_LOCAL_NO_BR_CAP);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE), SOFTBUS_LANE_LOCAL_NO_BLE_CAP);
+    EXPECT_EQ(GetErrCodeOfLink("networkId", LANE_BLE_DIRECT), SOFTBUS_LANE_LOCAL_NO_BLE_CAP);
+}
+
+/*
+* @tc.name: LNN_LANE_SELECT_RULE_01
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_01, TestSize.Level1)
+{
+    LaneLinkType linkList;
+    uint32_t listNum = 0;
+    LanePreferredLinkList recommendList;
+    int32_t ret = FinalDecideLinkType(nullptr, &linkList, listNum, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = FinalDecideLinkType(nullptr, nullptr, listNum, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = FinalDecideLinkType(nullptr, nullptr, listNum, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    listNum = LANE_LINK_TYPE_BUTT;
+    ret = FinalDecideLinkType("test", &linkList, listNum, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
