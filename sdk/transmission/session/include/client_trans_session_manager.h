@@ -111,6 +111,7 @@ typedef struct {
     ListNode sessionList;
     bool permissionState;
     bool isSrvEncryptedRawStream;
+    int32_t sessionAddingCnt;
 } ClientSessionServer;
 
 typedef enum {
@@ -275,6 +276,8 @@ int32_t ClientWaitSyncBind(int32_t socket);
 int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode);
 
 int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo);
+
+void SocketServerStateUpdate(const char *sessionName);
 #ifdef __cplusplus
 }
 #endif
