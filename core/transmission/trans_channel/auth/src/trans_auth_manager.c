@@ -60,7 +60,6 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info);
 static void DelAuthChannelInfoByChanId(int32_t channelId);
 static void DelAuthChannelInfoByAuthId(int32_t authId);
 static int32_t AddAuthChannelInfoInner(AuthChannelInfo *info);
-static void StopCustomListen();
 
 SoftBusList *GetAuthChannelListHead(void)
 {
@@ -299,7 +298,6 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
         SoftBusFree(item);
         g_authChannelList->cnt--;
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
-        StopCustomListen();
         return ret;
     }
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
@@ -368,30 +366,6 @@ static int32_t TransAuthFillDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static bool IsRawAuthServerExist()
-{
-    TRANS_CHECK_AND_RETURN_RET_LOGE(GetAuthChannelLock() == SOFTBUS_OK, 0, TRANS_SVC, "get authChannelLock failed.");
-    AuthChannelInfo *info = NULL;
-    LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
-        if (info->appInfo.linkType == LANE_HML_RAW && !info->isClient) {
-            ReleaseAuthChannelLock();
-            return true;
-        }
-    }
-    ReleaseAuthChannelLock();
-    return false;
-}
-
-static void StopCustomListen()
-{
-    if (!IsRawAuthServerExist()) {
-        struct WifiDirectManager *wdMgr = GetWifiDirectManager();
-        if (wdMgr != NULL && wdMgr->stopCustomListening != NULL) {
-            wdMgr->stopCustomListening();
-        }
-    }
-}
-
 static void TransAuthCloseChannel(int32_t authId, int32_t linkType, bool isClient)
 {
     TRANS_LOGI(TRANS_SVC, "authId=%{public}d, linkType=%{public}d, isClient=%{public}d", authId, linkType, isClient);
@@ -414,7 +388,6 @@ static void TransHandleErrorAndCloseChannel(TransEventExtra *extra, int32_t auth
     }
     DelAuthChannelInfoByAuthId(authId);
     TransAuthCloseChannel(authId, linkType, isClient);
-    StopCustomListen();
 }
 
 static void TransHandleAuthChannelSetupProcess(TransEventExtra *extra, int32_t authId, AppInfo *appInfo)
@@ -637,7 +610,6 @@ static void OnDisconnect(int32_t authId)
     }
     TRANS_LOGI(TRANS_SVC, "recv channel disconnect event. authId=%{public}d", authId);
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
-    StopCustomListen();
     (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
         (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);
 }
@@ -1147,7 +1119,6 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
         SoftBusFree(channel);
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
-        StopCustomListen();
         return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
