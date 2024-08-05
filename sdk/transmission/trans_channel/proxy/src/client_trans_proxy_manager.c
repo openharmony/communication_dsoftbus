@@ -813,7 +813,7 @@ static int32_t ClientTransProxySliceProc(int32_t channelId, const char *data, ui
 
     SliceHead headSlice = *(SliceHead *)data;
     ClientUnPackSliceHead(&headSlice);
-    if (ClientTransProxyCheckSliceHead(&headSlice)) {
+    if (ClientTransProxyCheckSliceHead(&headSlice) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "invalid slihead");
         return SOFTBUS_TRANS_PROXY_INVALID_SLICE_HEAD;
     }

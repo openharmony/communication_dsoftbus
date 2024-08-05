@@ -1712,7 +1712,6 @@ int32_t TransUpdateAuthWithParaLaneConnInfo(uint32_t laneHandle, bool bSucc, con
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-
 int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWithParaNode *paraNode)
 {
     if (paraNode == NULL) {

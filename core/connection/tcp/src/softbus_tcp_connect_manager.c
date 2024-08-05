@@ -364,9 +364,9 @@ static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
     }
     CONN_LOGI(CONN_COMMON, "notfiy connect ok. reqId=%{public}d", tcpInfo.requestId);
     DfxRecordTcpConnectSuccess(DEFAULT_PID, &tcpInfo, &tcpInfo.statistics);
-    tcpInfo.result.OnConnectSuccessed(tcpInfo.requestId, tcpInfo.connectionId, &tcpInfo.info);
     (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
     (void)AddTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, READ_TRIGGER);
+    tcpInfo.result.OnConnectSuccessed(tcpInfo.requestId, tcpInfo.connectionId, &tcpInfo.info);
     CONN_LOGI(CONN_COMMON, "notfiy finish");
     return SOFTBUS_OK;
 }

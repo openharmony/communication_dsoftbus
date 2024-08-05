@@ -261,7 +261,13 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         TRANS_LOGE(TRANS_BYTES, "Invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t bufferLen = AuthGetEncryptSize(packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    AuthHandle authHandle = { 0 };
+    if (GetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK ||
+        authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_BYTES, "get auth id fail, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
+    }
+    uint32_t bufferLen = AuthGetEncryptSize(authHandle.authId, packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = (char *)SoftBusCalloc(bufferLen);
     if (buffer == NULL) {
         TRANS_LOGE(TRANS_BYTES, "buffer malloc error.");

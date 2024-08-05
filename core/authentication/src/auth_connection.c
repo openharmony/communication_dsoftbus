@@ -265,8 +265,8 @@ static void HandleConnConnectTimeout(const void *para)
     AUTH_LOGE(AUTH_CONN, "connect timeout, requestId=%{public}u", requestId);
     ConnRequest *item = FindConnRequestByRequestId(requestId);
     if (item != NULL) {
-        SocketDisconnectDevice(AUTH, item->fd);
-        SocketDisconnectDevice(AUTH_RAW_P2P_SERVER, item->fd);
+        ListenerModule module = item->connInfo.type == AUTH_LINK_TYPE_RAW_ENHANCED_P2P ? AUTH_RAW_P2P_SERVER : AUTH;
+        SocketDisconnectDevice(module, item->fd);
         DelConnRequest(item);
     }
     NotifyClientConnected(requestId, 0, SOFTBUS_AUTH_CONN_TIMEOUT, NULL);
@@ -836,7 +836,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
             GetWifiDirectManager()->freeListenerModuleId(local.socketOption.moduleId);
         }
         AUTH_LOGE(AUTH_CONN, "start local listening failed");
-        return SOFTBUS_INVALID_PORT;
+        return realPort;
     }
     AUTH_LOGI(AUTH_CONN, "moduleId=%{public}u, port=%{public}d", local.socketOption.moduleId, realPort);
     *moduleId = local.socketOption.moduleId;

@@ -146,7 +146,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
 int32_t SetVtpStreamMultiLayerOpt(int32_t channelId, const void *optValue)
 {
     if (optValue == nullptr) {
-        TRANS_LOGE(TRANS_STREAM, "invalid argument optValue");
+        TRANS_LOGE(TRANS_STREAM, "invalid argument optValue channelId %{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
     std::shared_ptr<StreamAdaptor> adaptor = nullptr;
@@ -154,7 +154,7 @@ int32_t SetVtpStreamMultiLayerOpt(int32_t channelId, const void *optValue)
         std::lock_guard<std::mutex> lock(g_mutex);
         auto it = g_adaptorMap.find(channelId);
         if (it == g_adaptorMap.end()) {
-            TRANS_LOGE(TRANS_STREAM, "channelId %{public}u adaptor not existed!", channelId);
+            TRANS_LOGE(TRANS_STREAM, "channelId %{public}d adaptor not existed!", channelId);
             return SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED;
         }
         adaptor = it->second;

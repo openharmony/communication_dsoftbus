@@ -108,6 +108,7 @@ enum class NegotiateMessageKey {
     CHANNEL_5G_LIST = 17,
     CHANNEL_5G_SCORE = 18,
     CHALLENGE_CODE = 19,
+    NEW_PTK_FRAME = 20,
 
     /* old p2p */
     GC_CHANNEL_LIST = 200,
@@ -197,6 +198,9 @@ public:
 
     void SetChallengeCode(uint32_t value);
     uint32_t GetChallengeCode() const;
+
+    void SetNewPtkFrame(bool value);
+    bool GetNewPtkFrame() const;
 
     void SetLegacyP2pGcChannelList(const std::string &value);
     std::string GetLegacyP2pGcChannelList() const;

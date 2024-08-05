@@ -420,6 +420,7 @@ ClientSessionServer *GetNewSocketServer(SoftBusSecType type, const char *session
     if (strcpy_s(server->sessionName, sizeof(server->sessionName), sessionName) != EOK) {
         goto EXIT_ERR;
     }
+    server->sessionAddingCnt++;
     server->isSrvEncryptedRawStream = false;
     ListInit(&server->node);
     ListInit(&server->sessionList);

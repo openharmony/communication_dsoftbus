@@ -1698,4 +1698,22 @@ HWTEST_F(LNNLaneLinkTest, GET_MAC_INFO_BY_LANE_ID_MOCK_TEST_002, TestSize.Level1
     ret = DelLaneResourceByLaneId(USEABLE_LANE_ID, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+* @tc.name: CHECK_IS_AUTH_SESSION_SERVER_TEST_002
+* @tc.desc: CheckIsAuthSessionServer test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, CHECK_IS_AUTH_SESSION_SERVER_TEST_002, TestSize.Level1)
+{
+    const char *peerIp = "192.168.33.33";
+    bool isServer = true;
+    LnnDisconnectP2pWithoutLnn(0);
+    EXPECT_EQ(CheckIsAuthSessionServer(nullptr, &isServer), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(CheckIsAuthSessionServer(peerIp, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(CheckIsAuthSessionServer(peerIp, &isServer), SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(RemoveAuthSessionServer(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(RemoveAuthSessionServer(peerIp), SOFTBUS_LOCK_ERR);
+}
 } // namespace OHOS
