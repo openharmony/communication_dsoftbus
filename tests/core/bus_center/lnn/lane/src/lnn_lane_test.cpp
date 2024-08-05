@@ -2706,7 +2706,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_02, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
 
     EXPECT_CALL(wifiMock, SoftBusGetWifiState)
-        .WillRepeatedly(Return(SOFTBUS_WIFI_STATE_INACTIV));
+        .WillRepeatedly(Return(SOFTBUS_WIFI_STATE_INACTIVE));
     int32_t ret = GetErrCodeOfLink("networkId", LANE_WLAN_2P4G);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
 
