@@ -452,12 +452,16 @@ static bool IsInvalidBrmac(const char *macAddr)
     return false;
 }
 
-static bool IsUuidChange(const char *oldUuid, const uint8_t *newUuid, uint32_t len)
+static bool IsUuidChange(const char *oldUuid, const HbRespData *hbResp, uint32_t len)
 {
     uint8_t zeroUuid[UUID_BUF_LEN] = { 0 };
     uint8_t uuidHash[SHA_256_HASH_LEN] = { 0 };
 
-    if (memcmp(zeroUuid, newUuid, len) == 0) {
+    if (oldUuid == NULL || hbResp == NULL) {
+        LNN_LOGD(LNN_HEART_BEAT, "invalid param");
+        return false;
+    }
+    if (memcmp(zeroUuid, hbResp->shortUuid, len) == 0) {
         LNN_LOGD(LNN_HEART_BEAT, "ignore zero uuid");
         return false;
     }
@@ -466,10 +470,10 @@ static bool IsUuidChange(const char *oldUuid, const uint8_t *newUuid, uint32_t l
         LNN_LOGE(LNN_HEART_BEAT, "gen uuid hash err");
         return false;
     }
-    if (memcmp(uuidHash, newUuid, len) != 0) {
+    if (memcmp(uuidHash, hbResp->shortUuid, len) != 0) {
         LNN_LOGE(LNN_HEART_BEAT,
             "don't support ble direct online because uuid change %{public}02x%{public}02x->%{public}02x%{public}02x",
-            uuidHash[0], uuidHash[1], newUuid[0], newUuid[1]);
+            uuidHash[0], uuidHash[1], (hbResp->shortUuid)[0], (hbResp->shortUuid)[1]);
         return true;
     }
     return false;
@@ -520,7 +524,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because broadcast key");
         return true;
     }
-    if (IsUuidChange(deviceInfo.uuid, hbResp->shortUuid, HB_SHORT_UUID_LEN)) {
+    if (IsUuidChange(deviceInfo.uuid, hbResp, HB_SHORT_UUID_LEN)) {
         return true;
     }
     LNN_LOGI(LNN_HEART_BEAT, "support ble direct online");
@@ -890,7 +894,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         if (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
-            !IsUuidChange(nodeInfo.uuid, hbResp->shortUuid, HB_SHORT_UUID_LEN)) {
+            !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN)) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
