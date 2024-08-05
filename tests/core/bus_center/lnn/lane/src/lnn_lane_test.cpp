@@ -2679,4 +2679,15 @@ HWTEST_F(LNNLaneMockTest, LANE_PPOCESS_VAP_INFO_002, TestSize.Level1)
     ret = DelLaneResourceByLaneId(laneIdExt, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+* @tc.name: LANE_PPOCESS_VAP_INFO_002
+* @tc.desc: ProcessVapInfo p2p
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_PPOCESS_VAP_INFO_003, TestSize.Level1)
+{
+
+}
 } // namespace OHOS
