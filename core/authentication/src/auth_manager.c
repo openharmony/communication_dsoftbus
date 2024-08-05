@@ -1992,9 +1992,14 @@ int32_t AuthDeviceGetAuthHandleByIndex(const char *udid, bool isServer, int32_t 
     return SOFTBUS_OK;
 }
 
-uint32_t AuthGetEncryptSize(uint32_t inLen)
+uint32_t AuthGetEncryptSize(int64_t authId, uint32_t inLen)
 {
-    return inLen + ENCRYPT_OVER_HEAD_LEN;
+    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (auth != NULL) {
+        DelDupAuthManager(auth);
+        return inLen + ENCRYPT_OVER_HEAD_LEN;
+    }
+    return inLen + OVERHEAD_LEN;
 }
 
 uint32_t AuthGetDecryptSize(uint32_t inLen)

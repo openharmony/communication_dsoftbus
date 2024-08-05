@@ -46,6 +46,7 @@ constexpr uint8_t PEER_IRK[LFINDER_IRK_LEN] = "123456irktest";
 constexpr unsigned char PUBLIC_ADDRESS[LFINDER_MAC_ADDR_LEN] = "addr";
 constexpr uint8_t STATIC_CAPABILITY[STATIC_CAP_LEN] = "staticCapability";
 constexpr char REMOTE_PTK[PTK_DEFAULT_LEN] = "remotePtktest";
+constexpr int32_t TEST_DATA_LEN = 10;
 
 class AuthSessionMessageTest : public testing::Test {
 public:
@@ -942,6 +943,42 @@ HWTEST_F(AuthSessionMessageTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1
     UnpackWifiDirectInfo(obj, &info, false);
     EXPECT_EQ(nullptr, PackDeviceInfoMessage(nullptr, SOFTBUS_NEW_V1, false, nullptr, nullptr));
     JSON_Delete(obj);
+}
+
+/*
+ * @tc.name: GET_DUMP_SESSIONKEY_LIST_TEST_001
+ * @tc.desc: GetDumpSessionKeyList test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionMessageTest, GET_DUMP_SESSIONKEY_LIST_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    uint64_t connId = 1;
+    int64_t authSeq = 1;
+    SessionKeyList sessionKeyList;
+    info.connId = connId;
+    info.isServer = false;
+    info.isSupportFastAuth = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+    info.version = SOFTBUS_OLD_V1;
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    ASSERT_TRUE(memcpy_s(sessionKey.value, SESSION_KEY_LENGTH, KEY_TEST, PEER_IRK_LEN) == EOK);
+    sessionKey.len = PEER_IRK_LEN;
+    EXPECT_TRUE(AuthManagerSetSessionKey(authSeq, &info, &sessionKey, false, false) == SOFTBUS_OK);
+    GetDumpSessionKeyList(authSeq, &info, &sessionKeyList);
+
+    info.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    info.isSupportCompress = true;
+    uint8_t compressData[TEST_DATA_LEN] = {0};
+    uint32_t compressLen = TEST_DATA_LEN;
+    char data[TEST_DATA_LEN] = {0};
+    InDataInfo inDataInfo;
+    (void)memset_s(&inDataInfo, sizeof(InDataInfo), 0, sizeof(InDataInfo));
+    SetIndataInfo(&inDataInfo, nullptr, 0, data);
+    SetIndataInfo(&inDataInfo, nullptr, compressLen, data);
+    SetIndataInfo(&inDataInfo, compressData, 0, data);
 }
 } // namespace OHOS
 

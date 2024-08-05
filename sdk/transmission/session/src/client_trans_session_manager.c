@@ -207,7 +207,8 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY_SAFE(
         serverNode, serverNodeNext, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (strcmp(serverNode->sessionName, sessionName) == 0 && IsListEmpty(&serverNode->sessionList)) {
+        if (strcmp(serverNode->sessionName, sessionName) == 0 && IsListEmpty(&serverNode->sessionList) &&
+            serverNode->sessionAddingCnt == 0) {
             ListDelete(&(serverNode->node));
             SoftBusFree(serverNode);
             g_clientSessionServerList->cnt--;
@@ -266,6 +267,52 @@ static bool SessionServerIsExist(const char *sessionName)
         }
     }
     return false;
+}
+
+static bool SocketServerIsExistAndUpdate(const char *sessionName)
+{
+    /* need get lock before */
+    ClientSessionServer *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_clientSessionServerList->list, ClientSessionServer, node) {
+        if (strcmp(item->sessionName, sessionName) == 0) {
+            /*
+             * this field indicates that a process is using a SessionServer,
+             * but the process has not yet added the session node to the sessionList.
+             * Other processes cannot perceive this intermediate state, so this field is added to identify this state;
+             * This field is cleared after adding the session node to the session list in the process
+             */
+            item->sessionAddingCnt++;
+            return true;
+        }
+    }
+    return false;
+}
+
+void SocketServerStateUpdate(const char *sessionName)
+{
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    ClientSessionServer *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_clientSessionServerList->list, ClientSessionServer, node) {
+        if (strcmp(item->sessionName, sessionName) == 0) {
+            if (item->sessionAddingCnt > 0) {
+                item->sessionAddingCnt--;
+            }
+            UnlockClientSessionServerList();
+            return;
+        }
+    }
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found session server by sessionName=%{public}s", tmpName);
+    AnonymizeFree(tmpName);
+    UnlockClientSessionServerList();
 }
 
 static void ShowClientSessionServer(void)
@@ -386,7 +433,8 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
         TRANS_LOGI(TRANS_SDK,
             "add, sessionId=%{public}d, channelId=%{public}d, channelType=%{public}d, routeType=%{public}d, "
             "peerDeviceId=%{public}s",
-            session->sessionId, session->channelId, session->channelType, session->routeType, anonyDeviceId);
+            session->sessionId, session->channelId, session->channelType, session->routeType,
+            AnonymizeWrapper(anonyDeviceId));
         AnonymizeFree(anonyDeviceId);
         return SOFTBUS_OK;
     }
@@ -1215,6 +1263,7 @@ void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList)
     SessionInfo *sessionNode = NULL;
     SessionInfo *nextSessionNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        serverNode->sessionAddingCnt = 0;
         SessionServerInfo * info = CreateSessionServerInfoNode(serverNode);
         if (info != NULL) {
             ListAdd(sessionServerInfoList, &info->node);
@@ -1254,7 +1303,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return ret;
     }
-    if (SessionServerIsExist(sessionName)) {
+    if (SocketServerIsExistAndUpdate(sessionName)) {
         UnlockClientSessionServerList();
         return SOFTBUS_SERVER_NAME_REPEATED;
     }
@@ -1542,7 +1591,7 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
     }
     if (action == TIMER_ACTION_START) {
         TRANS_LOGE(TRANS_SDK,
-            "socket=%{public}d, inputMaxWaitTime=%{public}d, maxWaitTime=%{public}d, enableStatus=%{public}d",
+            "socket=%{public}d, inputMaxWaitTime=%{public}u, maxWaitTime=%{public}u, enableStatus=%{public}d",
             socket, maxWaitTime, sessionNode->lifecycle.maxWaitTime, sessionNode->enableStatus);
         bool binding = (sessionNode->lifecycle.maxWaitTime != 0);
         bool bindSuccess =

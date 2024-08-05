@@ -58,3 +58,23 @@ void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId)
     (void)laneReqId;
     return;
 }
+
+void NotifyLinkFailForForceDown(uint32_t requestId, int32_t reason)
+{
+    (void)requestId;
+    (void)reason;
+    return;
+}
+
+void RecycleP2pLinkedReqByLinkType(const char *peerNetworkId, LaneLinkType linkType)
+{
+    (void)peerNetworkId;
+    (void)linkType;
+    return;
+}
+
+int32_t WifiDirectReconnectDevice(uint32_t p2pRequestId)
+{
+    (void)p2pRequestId;
+    return SOFTBUS_P2P_NOT_SUPPORT;
+}

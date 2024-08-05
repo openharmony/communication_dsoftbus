@@ -15,6 +15,7 @@
 
 #include "disc_coap_capability.h"
 
+#include "anonymizer.h"
 #include "disc_log.h"
 #include "disc_nstackx_adapter.h"
 #include "softbus_errcode.h"
@@ -71,16 +72,22 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     InnerDeviceInfoAddtions additions = {
         .medium = COAP,
     };
+    char *anonymizedName = NULL;
+    Anonymize(devInfo->devName, &anonymizedName);
+
     if (nstackxInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||
         nstackxInfo->mode == PUBLISH_MODE_PROACTIVE) {
-        DISC_LOGI(DISC_COAP,
-            "DiscFound: devName=%{public}s, netIf=%{public}s", devInfo->devName, nstackxInfo->networkName);
+        DISC_LOGI(DISC_COAP, "DiscFound: devName=%{public}s, netIf=%{public}s",
+            AnonymizeWrapper(anonymizedName), nstackxInfo->networkName);
+        AnonymizeFree(anonymizedName);
         discCb->OnDeviceFound(devInfo, &additions);
         return SOFTBUS_OK;
     }
 
     uint8_t bType = nstackxInfo->businessType;
-    DISC_LOGI(DISC_COAP, "DiscRecv: broadcast devName=%{public}s, bType=%{public}u", devInfo->devName, bType);
+    DISC_LOGI(DISC_COAP, "DiscRecv: broadcast devName=%{public}s, bType=%{public}u",
+        AnonymizeWrapper(anonymizedName), bType);
+    AnonymizeFree(anonymizedName);
     if (bType != NSTACKX_BUSINESS_TYPE_NULL && DiscCoapSendRsp(devInfo, bType) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "send response failed");
         return SOFTBUS_DISCOVER_COAP_SEND_RSP_FAIL;

@@ -34,6 +34,7 @@ typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
 struct WifiDirectEnhanceManager {
     int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
     int32_t (*syncPTK)(const char *remoteDeviceId);
+    void (*stopCustomListening)(void);
 };
 
 struct WifiDirectManager {
@@ -56,6 +57,8 @@ struct WifiDirectManager {
     int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
     int32_t (*syncPTK)(const char *remoteDeviceId);
     void (*addSyncPtkListener)(SyncPtkListener listener);
+
+    void (*stopCustomListening)(void);
 
     bool (*isDeviceOnline)(const char *remoteMac);
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
