@@ -27,9 +27,6 @@
 extern "C" {
 #endif
 
-#define KERNEL_ERROR_MIN 0
-#define KERNEL_ERROR_MAX 10000
-
 enum WifiDirectErrorCode {
     /* Error code representing OK */
     OK = 0,
@@ -401,13 +398,6 @@ static inline int32_t ToSoftBusErrorCode(int32_t errorCode)
     return SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + abs(errorCode);
 }
 
-static inline int32_t KernelsErrorToSoftBusErrorCode(int32_t errorCode)
-{
-    if (errorCode >= KERNEL_ERROR_MIN && errorCode <= KERNEL_ERROR_MAX) {
-        return SOFTBUS_ERRNO(KERNELS_SUB_MODULE_CODE) + errorCode;
-    }
-    return errorCode;
-}
 #ifdef __cplusplus
 }
 #endif
