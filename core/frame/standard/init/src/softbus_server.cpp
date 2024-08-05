@@ -57,26 +57,6 @@ SoftBusServer::SoftBusServer(int32_t saId, bool runOnCreate) : SystemAbility(saI
 {
 }
 
-int32_t SoftBusServer::StartDiscovery(const char *pkgName, const SubscribeInfo *info)
-{
-    return DiscIpcStartDiscovery(pkgName, info);
-}
-
-int32_t SoftBusServer::StopDiscovery(const char *pkgName, int subscribeId)
-{
-    return DiscIpcStopDiscovery(pkgName, subscribeId);
-}
-
-int32_t SoftBusServer::PublishService(const char *pkgName, const PublishInfo *info)
-{
-    return DiscIpcPublishService(pkgName, (PublishInfo *)(info));
-}
-
-int32_t SoftBusServer::UnPublishService(const char *pkgName, int publishId)
-{
-    return DiscIpcUnPublishService(pkgName, publishId);
-}
-
 int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
 {
     if (clientPkgName == nullptr || object == nullptr) {
