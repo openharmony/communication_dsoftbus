@@ -1348,11 +1348,11 @@ static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const F
         goto EXIT_ERR;
     }
     HandleFileTransferCompletion(recipient, sessionId, file);
-    ReleaseRecipientRef(recipient);
     SoftBusFree(file);
     if (recipient->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         (void)SendFileTransResult(channelId, 0, SOFTBUS_OK, IS_RECV_RESULT);
     }
+    ReleaseRecipientRef(recipient);
     return SOFTBUS_OK;
 EXIT_ERR:
     SoftBusFree(file);

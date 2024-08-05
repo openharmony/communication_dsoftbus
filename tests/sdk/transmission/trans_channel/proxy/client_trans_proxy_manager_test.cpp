@@ -24,6 +24,7 @@
 #include "softbus_errcode.h"
 #include "softbus_access_token_test.h"
 #include "client_trans_proxy_file_manager.h"
+#include "client_trans_proxy_manager.c"
 #include "client_trans_tcp_direct_message.h"
 
 #define TEST_CHANNEL_ID (-10)
@@ -40,20 +41,6 @@
 
 using namespace std;
 using namespace testing::ext;
-
-typedef struct {
-    int32_t priority;
-    int32_t sliceNum;
-    int32_t sliceSeq;
-    int32_t reserved;
-} SliceHead;
-
-typedef struct {
-    int32_t magicNumber;
-    int32_t seq;
-    int32_t flags;
-    int32_t dataLen;
-} PacketHead;
 
 namespace OHOS {
 const char *g_proxyPkgName = "dms";
@@ -76,6 +63,8 @@ const char *g_proxyFileSet[] = {
     "/data/ss",
 };
 char g_sessionKey[32] = "1234567812345678123456781234567";
+#define DEFAULT_NEW_BYTES_LEN   (4 * 1024 * 1024)
+#define DEFAULT_NEW_MESSAGE_LEN (4 * 1024)
 
 int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
@@ -208,7 +197,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
 
     ChannelInfo channelInfo = {0};
     ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 }
 
 /**
@@ -296,6 +285,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, TestSize.Level0)
 {
+    g_proxyMaxByteBufSize = DEFAULT_NEW_BYTES_LEN;
+    g_proxyMaxMessageBufSize = DEFAULT_NEW_MESSAGE_LEN;
     int32_t channelId = 1;
 
     SliceHead sliceHead;
@@ -317,9 +308,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     ret = memcpy_s(buf, TEST_DATA_LENGTH_2, &sliceHead, sizeof(SliceHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
-    int32_t dataLen = sizeof(SliceHead) + sizeof(PacketHead);
+    sliceHead.priority = PROXY_CHANNEL_PRORITY_BYTES;
+    int32_t dataLen = sizeof(SliceHead) + sizeof(PacketHead) + 1;
     char buf2[dataLen];
     ret = memcpy_s(buf2, dataLen, &sliceHead, sizeof(SliceHead));
     EXPECT_EQ(EOK, ret);
@@ -327,7 +319,6 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf2, dataLen, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
 
     sliceHead.sliceSeq = SLICE_SEQ_MID;
     ret = memcpy_s(buf2, dataLen, &sliceHead, sizeof(SliceHead));
@@ -339,7 +330,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     ret = memcpy_s(buf2, dataLen, &sliceHead, sizeof(SliceHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf2, dataLen, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_EXCEED_LENGTH, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     ClientTransProxyCloseChannel(channelId);
 }
@@ -528,5 +519,41 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetLinkTypeByChannelIdTest
     int32_t linkType;
     ret = ClientTransProxyGetLinkTypeByChannelId(channelId, &linkType);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/**
+ * @tc.name: ClientGetActualDataLen
+ * @tc.desc: ClientGetActualDataLen test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientGetActualDataLenTest, TestSize.Level0)
+{
+    SliceHead head = {};
+    uint32_t actualDataLen = 0;
+    g_proxyMaxByteBufSize = DEFAULT_NEW_BYTES_LEN;
+    g_proxyMaxMessageBufSize = DEFAULT_NEW_MESSAGE_LEN;
+
+    // Test case 1: Valid sliceNum, priority message
+    head.sliceNum = 1;
+    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    EXPECT_EQ(SOFTBUS_OK, ClientGetActualDataLen(&head, &actualDataLen));
+    EXPECT_EQ(head.sliceNum * SLICE_LEN, actualDataLen);
+
+    // Test case 2: Valid sliceNum, priority bytes
+    head.sliceNum = 10;
+    head.priority = PROXY_CHANNEL_PRORITY_BYTES;
+    EXPECT_EQ(SOFTBUS_OK, ClientGetActualDataLen(&head, &actualDataLen));
+    EXPECT_EQ(head.sliceNum * SLICE_LEN, actualDataLen);
+
+    // Test case 3: Invalid sliceNum (exceeds MAX_MALLOC_SIZE / SLICE_LEN)
+    head.sliceNum = (MAX_MALLOC_SIZE / SLICE_LEN) + 1;
+    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ClientGetActualDataLen(&head, &actualDataLen));
+
+    // Test case 4: Invalid sliceNum (actualLen exceeds maxDataLen)
+    head.sliceNum = (g_proxyMaxMessageBufSize / SLICE_LEN) + 2;
+    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ClientGetActualDataLen(&head, &actualDataLen));
 }
 } // namespace OHOS
