@@ -25,7 +25,6 @@
 #include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
-#include "discovery_service.h"
 #include "lnn_device_info.h"
 #include "lnn_ohos_account.h"
 #include "message_handler.h"
