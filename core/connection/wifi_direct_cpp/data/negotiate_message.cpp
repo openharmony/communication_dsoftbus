@@ -530,6 +530,16 @@ uint32_t NegotiateMessage::GetChallengeCode() const
     return Get(NegotiateMessageKey::CHALLENGE_CODE, static_cast<uint32_t>(0));
 }
 
+void NegotiateMessage::SetNewPtkFrame(bool value)
+{
+    Set(NegotiateMessageKey::NEW_PTK_FRAME, value);
+}
+
+bool NegotiateMessage::GetNewPtkFrame() const
+{
+    return Get(NegotiateMessageKey::NEW_PTK_FRAME, false);
+}
+
 void NegotiateMessage::SetLegacyP2pGcChannelList(const std::string &value)
 {
     Set(NegotiateMessageKey::GC_CHANNEL_LIST, value);
