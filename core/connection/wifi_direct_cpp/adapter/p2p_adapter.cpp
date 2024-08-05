@@ -289,7 +289,7 @@ int32_t P2pAdapter::SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size)
 {
     (void)cfg;
     (void)size;
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_SET_PEER_WIFI_CONFIG_FAIL;
 }
 
 bool P2pAdapter::IsWideBandSupported()
