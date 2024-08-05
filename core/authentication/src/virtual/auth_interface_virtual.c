@@ -165,7 +165,7 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
     return AUTH_INVALID_ID;
 }
 
-uint32_t AuthGetEncryptSize(uint32_t inLen)
+uint32_t AuthGetEncryptSize(int64_t authId, uint32_t inLen)
 {
     return 0;
 }

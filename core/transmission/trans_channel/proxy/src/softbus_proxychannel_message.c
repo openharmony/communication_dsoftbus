@@ -322,7 +322,8 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle
         TRANS_LOGE(TRANS_CTRL, "invalid authId, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t size = ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN + AuthGetEncryptSize(dataInfo->inLen);
+    uint32_t size = ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN +
+        AuthGetEncryptSize(authHandle.authId, dataInfo->inLen);
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc enc buf fail, myChannelId=%{public}d", msg->myId);
