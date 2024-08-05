@@ -19,13 +19,15 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-
 #include "bus_center_event.h"
-#include "softbus_common.h"
-#include "softbus_bus_center.h"
-#include "lnn_settingdata_event_monitor.h"
-#include "softbus_wifi_api_adapter.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_deviceinfo_to_profile.h"
+#include "lnn_feature_capability.h"
+#include "lnn_heartbeat_strategy.h"
+#include "lnn_settingdata_event_monitor.h"
+#include "softbus_bus_center.h"
+#include "softbus_common.h"
+#include "softbus_wifi_api_adapter.h"
 
 namespace OHOS {
 class LnnServiceInterface {
@@ -58,6 +60,15 @@ public:
     virtual int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig) = 0;
     virtual int32_t SoftBusDisconnectDevice(void) = 0;
     virtual ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type) = 0;
+    virtual void UpdateProfile(const NodeInfo *info) = 0;
+    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
+    virtual int32_t LnnStartHbByTypeAndStrategy(
+        LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategy, bool isRelay) = 0;
+    virtual bool SoftBusIsWifiTripleMode(void) = 0;
+    virtual SoftBusBand SoftBusGetLinkBand(void) = 0;
+    virtual SoftBusWifiDetailState SoftBusGetWifiState(void) = 0;
+    virtual bool SoftBusHasWifiDirectCapability(void) = 0;
+    virtual char* SoftBusGetWifiInterfaceCoexistCap(void) = 0;
 };
 
 class LnnServicetInterfaceMock : public LnnServiceInterface {
@@ -87,6 +98,14 @@ public:
     MOCK_METHOD1(SoftBusConnectToDevice, int32_t (const SoftBusWifiDevConf *));
     MOCK_METHOD0(SoftBusDisconnectDevice, int32_t ());
     MOCK_METHOD1(LnnDiscTypeToConnAddrType, ConnectionAddrType (DiscoveryType));
+    MOCK_METHOD1(UpdateProfile, void (const NodeInfo *));
+    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
+    MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t (LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
+    MOCK_METHOD0(SoftBusIsWifiTripleMode, bool ());
+    MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand ());
+    MOCK_METHOD0(SoftBusGetWifiState, SoftBusWifiDetailState ());
+    MOCK_METHOD0(SoftBusHasWifiDirectCapability, bool ());
+    MOCK_METHOD0(SoftBusGetWifiInterfaceCoexistCap, char* ());
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
