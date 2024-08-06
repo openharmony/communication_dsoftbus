@@ -375,4 +375,9 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
     }
     return ret;
 }
+
+void AuthNegotiateChannel::StopCustomListening()
+{
+    AuthStopListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P);
+}
 } // namespace OHOS::SoftBus
