@@ -58,7 +58,6 @@ public:
     virtual void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo) = 0;
     virtual void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
-    virtual int32_t LnnSetLocalStateVersionReason(void) = 0;
     virtual void SetLpKeepAliveState(void *para) = 0;
     virtual const char *LnnPrintConnectionAddr(const ConnectionAddr *addr) = 0;
     virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo) = 0;
@@ -88,7 +87,6 @@ public:
     MOCK_METHOD2(LnnNotifySingleOffLineEvent, void (const ConnectionAddr *, NodeBasicInfo *));
     MOCK_METHOD2(LnnStopOfflineTimingByHeartbeat, void (const char *, ConnectionAddrType));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));
-    MOCK_METHOD0(LnnSetLocalStateVersionReason, int32_t (void));
     MOCK_METHOD1(SetLpKeepAliveState, void (void *));
     MOCK_METHOD1(LnnPrintConnectionAddr, const char * (const ConnectionAddr *));
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool (const ConnectionAddr *, AuthConnInfo *));
