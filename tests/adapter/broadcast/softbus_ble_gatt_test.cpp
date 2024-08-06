@@ -231,8 +231,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb002, TestSize.Level1)
 
 /**
  * @tc.name: TestSoftbusRegisterAdvCb003
- * @tc.desc: Test SoftbusRegisterAdvCb will return OHOS_BT_STATUS_FAIL when BleGattRegisterCallbacks 
- return OHOS_BT_STATUS_FAIL
+ * @tc.desc: Test SoftbusRegisterAdvCb will return OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
  * @tc.require: NONE
  */
@@ -253,8 +252,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb003, TestSize.Level1)
 
 /**
  * @tc.name: TestSoftbusRegisterAdvCb004
- * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_OK when BleGattRegisterCallbacks 
- return OHOS_BT_STATUS_SUCCESS
+ * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_OK when BleGattRegisterCallbacks
  * @tc.type: FUNC
  * @tc.require: NONE
  */
