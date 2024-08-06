@@ -78,7 +78,7 @@ static void BrManagerMsgHandler(SoftBusMessage *msg);
 static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args);
 static int32_t PendingDevice(ConnBrDevice *device, const char *anomizeAddress);
 static int32_t BrPendConnection(const ConnectOption *option, uint32_t time);
-static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress);
+static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress, uint32_t duration);
 static void UnpendConnection(const char *addr);
 
 static ConnBrManager g_brManager = { 0 };
@@ -697,12 +697,14 @@ static int32_t AuthenticationFailedAndRetry(ConnBrConnection *connection, ConnBr
             break;
         }
     }
+    uint32_t time = it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_RFCOM_DM ?
+        BR_CONNECTION_ACL_RETRY_CONNECT_COLLISION_MILLIS : BR_CONNECTION_ACL_CONNECT_COLLISION_MILLIS;
     if (collision && connection->retryCount < MAX_RETRY_COUNT) {
         CONN_LOGW(CONN_BR, "acl collision, wait for retry, id=%{public}u, addr=%{public}s, result=%{public}d",
             connection->connectionId, anomizeAddress, it->result);
         // NOTICE: assign connecting NULL first to prevent recursively pending in connecting
         g_brManager.connecting = NULL;
-        ProcessAclCollisionException(connectingDevice, anomizeAddress);
+        ProcessAclCollisionException(connectingDevice, anomizeAddress, time);
         return SOFTBUS_OK;
     }
     return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
@@ -1572,9 +1574,9 @@ static bool BrCheckActiveConnection(const ConnectOption *option, bool needOccupy
     return isActive;
 }
 
-static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress)
+static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress, uint32_t duration)
 {
-    CONN_LOGI(CONN_BR, "addr=%{public}s", anomizeAddress);
+    CONN_LOGI(CONN_BR, "addr=%{public}s, duration=%{public}u", anomizeAddress, duration);
     ConnectOption option;
     (void)memset_s(&option, sizeof(option), 0, sizeof(option));
     option.type = CONNECT_BR;
@@ -1582,7 +1584,7 @@ static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomi
         CONN_LOGE(CONN_BR, "copy br mac fail, addr=%{public}s", anomizeAddress);
         return;
     }
-    BrPendConnection(&option, BR_CONNECTION_ACL_CONNECT_COLLISION_MILLIS);
+    BrPendConnection(&option, duration);
     device->state = BR_DEVICE_STATE_PENDING;
     PendingDevice(device, anomizeAddress);
 }
