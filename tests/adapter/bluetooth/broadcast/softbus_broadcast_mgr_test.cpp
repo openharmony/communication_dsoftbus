@@ -1361,4 +1361,106 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest005, TestSize.Level
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastScannerTest005 end ----");
 }
 
+/*
+ * @tc.name: TestGetScanFilter
+ * @tc.desc: GetScanFilter All branches
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, TestGetScanFilter, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "TestGetScanFilter begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t listenerId = -1;
+    BcScanFilter *scanFilter = nullptr;
+    uint8_t filterNum = 0;
+
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetScanFilter(listenerId, &scanFilter, nullptr));
+
+    filterNum = 1;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetScanFilter(listenerId, nullptr, &filterNum));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, GetScanFilter(listenerId, &scanFilter, &filterNum));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, GetScanFilter(SCAN_NUM_MAX, &scanFilter, &filterNum));
+
+    listenerId = 0;
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, GetScanFilter(listenerId, &scanFilter, &filterNum));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "TestGetScanFilter end ----");
+}
+
+/*
+ * @tc.name: BroadcastSetAdvDeviceParam
+ * @tc.desc: BroadcastSetAdvDeviceParam All branches
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    LpBroadcastParam bcParam = {};
+    LpScanParam scanParam = {};
+    LpServerType type = SOFTBUS_UNKNOW_TYPE;
+
+    //ret != SOFTBUS_OK
+    int32_t listenerId = 1;
+    BcScanFilter *scanFilter = nullptr;
+    uint8_t filterNum = 0;
+    int32_t res = GetScanFilter(listenerId, &scanFilter, &filterNum);
+    EXPECT_EQ(res, SOFTBUS_BC_MGR_INVALID_LISN_ID);
+
+    bool ret = BroadcastSetAdvDeviceParam(type, &bcParam, &scanParam);
+    EXPECT_EQ(ret, false);
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam end ----");
+}
+
+/*
+ * @tc.name: BroadcastGetBroadcastHandle
+ * @tc.desc: BroadcastGetBroadcastHandle The parameters are normal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastGetBroadcastHandle, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastGetBroadcastHandle begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t bcId = -1;
+    int32_t Handle = 1;
+
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, BroadcastGetBroadcastHandle(bcId, &Handle));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastGetBroadcastHandle end ----");
+}
+
+/*
+ * @tc.name: BroadcastSetScanReportChannelToLpDevice
+ * @tc.desc: BroadcastSetScanReportChannelToLpDevice listenerId is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetScanReportChannelToLpDevice, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t listenerId = 1;
+    bool enable = true;
+
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, BroadcastSetScanReportChannelToLpDevice(listenerId, enable));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, BroadcastSetScanReportChannelToLpDevice(SCAN_NUM_MAX, false));
+
+    listenerId = 0;
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, BroadcastSetScanReportChannelToLpDevice(listenerId, enable));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice end ----");
+}
 } // namespace OHOS
