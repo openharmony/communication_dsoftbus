@@ -53,6 +53,7 @@ public:
     static std::pair<int, ListenerModule> StartListening(AuthLinkType type, const std::string &localIp, int port);
     static void StopListening(AuthLinkType type, ListenerModule module);
     static int OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel);
+    static void StopCustomListening();
 
     static void ProcessDetectLinkRequest(const std::shared_ptr<AuthNegotiateChannel> &channel);
     static void ProcessDetectLinkResponse(AuthHandle handle, const NegotiateMessage &response);
