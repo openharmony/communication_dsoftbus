@@ -87,6 +87,11 @@ static void DfxReportAdapterSocket(ConnEventScene scene, int32_t res, int32_t fd
     CONN_EVENT(scene, EVENT_STAGE_TCP_COMMON_ONE, extra);
 }
 
+static int32_t SockOptErrorToSoftBusError(int32_t errorCode)
+{
+    return SOFTBUS_ERRNO(KERNELS_SUB_MODULE_CODE) + abs(errorCode);
+}
+
 int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd)
 {
     if (socketFd == NULL) {
@@ -130,14 +135,14 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
     socklen_t errSize = sizeof(err);
     int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, &errSize);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "getsockopt fd=%{public}d, ret=%{public}d", socketFd, ret);
-        return ret;
+        COMM_LOGE(COMM_ADAPTER, "getsockopt fd=%{public}d, errno=%{public}d", socketFd, errno);
+        return SockOptErrorToSoftBusError(errno);
     }
     if (err != 0) {
         COMM_LOGD(COMM_ADAPTER, "getsockopt fd=%{public}d, err=%{public}d", socketFd, err);
-        return err;
+        return SockOptErrorToSoftBusError(err);
     }
-    return err;
+    return SOFTBUS_ADAPTER_OK;
 }
 
 int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr)
