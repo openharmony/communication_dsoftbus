@@ -156,6 +156,8 @@ enum SoftBusErrNo {
     SOFTBUS_BYTE_CONVERT_FAIL,
     SOFTBUS_GENERATE_KEY_FAIL,
     SOFTBUS_GCM_SET_IV_FAIL, // set ivlen fail for aes-gcm encrypt
+    SOFTBUS_LOCALE_ERR,
+    SOFTBUS_WIDECHAR_ERR,
 
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),

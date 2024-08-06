@@ -15,12 +15,17 @@
 
 #include "anonymizer.h"
 
+#include <locale.h>
 #include <securec.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <wchar.h>
 
 #include "comm_log.h"
 #include "softbus_error_code.h"
+
+#define DEVICE_NAME_MAX_LEN 128
+#define WIDE_CHAR_MAX_LEN 8
 
 typedef struct {
     bool (*Matcher)(const char *, uint32_t);
@@ -159,6 +164,11 @@ static bool MatchUdidStr(const char *str, uint32_t len)
     return true;
 }
 
+static bool MatchDeviceName(const char *str, uint32_t len)
+{
+    return len <= DEVICE_NAME_MAX_LEN;
+}
+
 static char *MallocStr(uint32_t len)
 {
     char *str = (char *)malloc(sizeof(char) * (len + 1));
@@ -231,6 +241,86 @@ static int32_t AnonymizeUdidStr(const char *str, uint32_t len, char **anonymized
     return SOFTBUS_OK;
 }
 
+static int32_t SetLocale(char **localeBefore)
+{
+    *localeBefore = setlocale(LC_CTYPE, NULL);
+    if (*localeBefore == NULL) {
+        COMM_LOGW(COMM_DFX, "get locale failed");
+    }
+
+    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
+    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_LOCALE_ERR;
+}
+
+static void RestoreLocale(const char *localeBefore)
+{
+    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
+        COMM_LOGW(COMM_DFX, "restore locale failed");
+    }
+}
+
+static int32_t AnonymizeMultiByteStr(const char *str, uint32_t len, uint32_t lenRatio, uint32_t posRatio,
+    char **anonymized)
+{
+    COMM_CHECK_AND_RETURN_RET_LOGE(lenRatio != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "lenRatio is 0");
+    COMM_CHECK_AND_RETURN_RET_LOGE(posRatio != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "posRatio is 0");
+
+    *anonymized = MallocStr(len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(*anonymized != NULL, SOFTBUS_MALLOC_ERR, COMM_DFX, "malloc failed");
+
+    wchar_t wideStr[DEVICE_NAME_MAX_LEN] = {0};
+    size_t wideCharNum = mbstowcs(wideStr, str, len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(wideCharNum > 0, SOFTBUS_WIDECHAR_ERR, COMM_DFX, "convert wide str failed");
+
+    uint32_t wideStrLen = (uint32_t)wideCharNum;
+    uint32_t anonymizedNum = (wideStrLen + lenRatio - 1) / lenRatio; // +ratio-1 for round up
+    uint32_t plainPrefixPos = wideStrLen / posRatio;
+    uint32_t plainSuffixPos = plainPrefixPos + anonymizedNum;
+
+    char multiByteChar[WIDE_CHAR_MAX_LEN] = {0};
+    uint32_t multiByteStrIndex = 0;
+    uint32_t wideStrIndex = 0;
+    errno_t ret = EOK;
+    for (; wideStrIndex < plainPrefixPos && multiByteStrIndex < len; ++wideStrIndex) {
+        int32_t multiByteCharLen = wctomb(multiByteChar, wideStr[wideStrIndex]);
+        COMM_CHECK_AND_RETURN_RET_LOGE(multiByteCharLen > 0, SOFTBUS_WIDECHAR_ERR, COMM_DFX, "convert prefix failed");
+        ret = memcpy_s(*anonymized + multiByteStrIndex, len - multiByteStrIndex, multiByteChar, multiByteCharLen);
+        COMM_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, COMM_DFX, "copy prefix failed");
+        multiByteStrIndex += (uint32_t)multiByteCharLen;
+    }
+
+    for (; wideStrIndex < plainSuffixPos && multiByteStrIndex < len; ++wideStrIndex) {
+        (*anonymized)[multiByteStrIndex++] = SYMBOL_ANONYMIZE;
+    }
+
+    for (; wideStrIndex < wideStrLen && multiByteStrIndex < len; ++wideStrIndex) {
+        int32_t multiByteCharLen = wctomb(multiByteChar, wideStr[wideStrIndex]);
+        COMM_CHECK_AND_RETURN_RET_LOGE(multiByteCharLen > 0, SOFTBUS_WIDECHAR_ERR, COMM_DFX, "convert suffix failed");
+        ret = memcpy_s(*anonymized + multiByteStrIndex, len - multiByteStrIndex, multiByteChar, multiByteCharLen);
+        COMM_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, COMM_DFX, "copy prefix failed");
+        multiByteStrIndex += (uint32_t)multiByteCharLen;
+    }
+
+    uint32_t endPos = multiByteStrIndex < len ? multiByteStrIndex : len;
+    (*anonymized)[endPos] = '\0';
+    return SOFTBUS_OK;
+}
+
+static int32_t AnonymizeDeviceName(const char *str, uint32_t len, char **anonymized)
+{
+    static const uint32_t ANONYMIZE_LEN_RATIO = 2; // anonymize half str
+    static const uint32_t ANONYMIZE_POS_RATIO = 4; // start from 1/4 pos
+
+    char *localeBefore = NULL;
+    int32_t ret = SetLocale(&localeBefore);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_DFX, "get locale failed");
+
+    ret = AnonymizeMultiByteStr(str, len, ANONYMIZE_LEN_RATIO, ANONYMIZE_POS_RATIO, anonymized);
+    RestoreLocale(localeBefore);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_DFX, "anonymize multi byte str failed");
+    return ret;
+}
+
 static int32_t AnonymizeHalfStr(const char *str, uint32_t len, char **anonymized)
 {
     uint32_t plainTextLen = len / 2;
@@ -267,6 +357,7 @@ static int32_t AnonymizeInner(const char *str, char **anonymized)
         { MatchIpAddr, AnonymizeIpAddr },
         { MatchMacAddr, AnonymizeMacAddr },
         { MatchUdidStr, AnonymizeUdidStr },
+        { MatchDeviceName, AnonymizeDeviceName },
     };
 
     uint32_t len = strlen(str);
@@ -280,6 +371,8 @@ static int32_t AnonymizeInner(const char *str, char **anonymized)
 
 void Anonymize(const char *plainStr, char **anonymizedStr)
 {
+    COMM_CHECK_AND_RETURN_LOGE(anonymizedStr != NULL, COMM_DFX, "anonymizedStr is null");
+
     if (AnonymizeInner(plainStr, anonymizedStr) == SOFTBUS_OK) {
         return;
     }
