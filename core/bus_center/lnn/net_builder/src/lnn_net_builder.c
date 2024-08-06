@@ -931,9 +931,8 @@ void UpdateLocalNetCapability(void)
             (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
         }
     }
-
-    if (SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_INACTIVE ||
-        SoftBusGetWifiState() == SOFTBUS_WIFI_STATE_DEACTIVATING) {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_P2P);
     }
 
