@@ -168,11 +168,11 @@ EXIT:
  */
 HWTEST_F(SoftbusBleGattTest, TestSoftbusGattInit001, TestSize.Level1)
 {
-   int32_t ret = MockBluetooth::interface->Init();
-   EXPECT_EQ(ret, SOFTBUS_OK);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-   ret = MockBluetooth::interface->Init();
-   EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -183,11 +183,11 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusGattInit001, TestSize.Level1)
  */
 HWTEST_F(SoftbusBleGattTest, TestSoftbusGattDeInit001, TestSize.Level1)
 {
-   int32_t ret = MockBluetooth::interface->DeInit();
-   EXPECT_EQ(ret, SOFTBUS_OK);
+    int32_t ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-   ret = MockBluetooth::interface->DeInit();
-   EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -231,7 +231,8 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb002, TestSize.Level1)
 
 /**
  * @tc.name: TestSoftbusRegisterAdvCb003
- * @tc.desc: Test SoftbusRegisterAdvCb will return OHOS_BT_STATUS_FAIL when BleGattRegisterCallbacks return OHOS_BT_STATUS_FAIL
+ * @tc.desc: Test SoftbusRegisterAdvCb will return OHOS_BT_STATUS_FAIL when BleGattRegisterCallbacks 
+ return OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
  * @tc.require: NONE
  */
@@ -252,7 +253,8 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb003, TestSize.Level1)
 
 /**
  * @tc.name: TestSoftbusRegisterAdvCb004
- * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_OK when BleGattRegisterCallbacks return OHOS_BT_STATUS_SUCCESS
+ * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_OK when BleGattRegisterCallbacks 
+ return OHOS_BT_STATUS_SUCCESS
  * @tc.type: FUNC
  * @tc.require: NONE
  */
@@ -279,7 +281,6 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb004, TestSize.Level1)
  */
 HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb001, TestSize.Level1)
 {
-
     int32_t ret = MockBluetooth::interface->UnRegisterBroadcaster(GATT_ADV_MAX_NUM);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -731,7 +732,6 @@ HWTEST_F(SoftbusBleGattTest, UnRegisterScanListener, TestSize.Level3)
     MockBluetooth mocker;
     int scannerId = -1;
     auto result = PrepareScanListener(&scannerId);
-    //ASSERT_TRUE(result);
 
     ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(-1), SOFTBUS_INVALID_PARAM);
     ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(GATT_SCAN_MAX_NUM), SOFTBUS_INVALID_PARAM);
@@ -749,7 +749,6 @@ HWTEST_F(SoftbusBleGattTest, ScanLifecycle, TestSize.Level3)
     MockBluetooth mocker;
     int scannerId = -1;
     auto result = PrepareScanListener(&scannerId);
-    //ASSERT_TRUE(result);
 
     auto filter = CreateScanFilter();
     ASSERT_NE(filter, nullptr);
@@ -782,7 +781,6 @@ HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
     MockBluetooth mocker;
     int scannerId = -1;
     auto result = PrepareScanListener(&scannerId);
-    //ASSERT_TRUE(result);
 
     auto filter = CreateScanFilter();
     ASSERT_NE(filter, nullptr);
