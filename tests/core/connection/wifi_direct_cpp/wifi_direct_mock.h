@@ -139,6 +139,7 @@ public:
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo*, uint32_t, const AuthConnCallback*, bool));
+    MOCK_METHOD(void, AuthStopListening, (AuthLinkType));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD(int32_t, SoftBusBase64Encode, (unsigned char *, size_t, size_t *,
