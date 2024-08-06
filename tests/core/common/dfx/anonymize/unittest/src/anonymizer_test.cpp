@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,7 +101,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest004, TestSize.Level0)
     const char *plainStr = "abc";
     char *anonymizedStr = nullptr;
     Anonymize(plainStr, &anonymizedStr);
-    EXPECT_STREQ("*c", anonymizedStr);
+    EXPECT_STREQ("**c", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
 
@@ -225,5 +225,99 @@ HWTEST_F(AnonymizerTest, AnonymizeTest011, TestSize.Level0)
 
     const char *ret = AnonymizeWrapper(anonymizedStr);
     EXPECT_STREQ(ret, anonymizedStr);
+}
+
+/**
+ * @tc.name: AnonymizeTest012
+ * @tc.desc: Test anonymize device name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizerTest, AnonymizeTest012, TestSize.Level0)
+{
+    char *anonymizedStr = nullptr;
+
+    Anonymize("1234", &anonymizedStr);
+    EXPECT_STREQ("1**4", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("一二三四", &anonymizedStr);
+    EXPECT_STREQ("一**四", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("12345678", &anonymizedStr);
+    EXPECT_STREQ("12****78", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("一二三四五六七八", &anonymizedStr);
+    EXPECT_STREQ("一二****七八", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("12三四", &anonymizedStr);
+    EXPECT_STREQ("1**四", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("一二34", &anonymizedStr);
+    EXPECT_STREQ("一**4", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("1二3四", &anonymizedStr);
+    EXPECT_STREQ("1**四", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("一2三4", &anonymizedStr);
+    EXPECT_STREQ("一**4", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+}
+
+/**
+ * @tc.name: AnonymizeTest013
+ * @tc.desc: Test anonymize device name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizerTest, AnonymizeTest013, TestSize.Level0)
+{
+    char *anonymizedStr = nullptr;
+
+    Anonymize("1", &anonymizedStr);
+    EXPECT_STREQ("*", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("12", &anonymizedStr);
+    EXPECT_STREQ("*2", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("123", &anonymizedStr);
+    EXPECT_STREQ("**3", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("1234", &anonymizedStr);
+    EXPECT_STREQ("1**4", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("12345", &anonymizedStr);
+    EXPECT_STREQ("1***5", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("123456", &anonymizedStr);
+    EXPECT_STREQ("1***56", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("1234567", &anonymizedStr);
+    EXPECT_STREQ("1****67", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("12345678", &anonymizedStr);
+    EXPECT_STREQ("12****78", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("123456789", &anonymizedStr);
+    EXPECT_STREQ("12*****89", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    Anonymize("1234567890", &anonymizedStr);
+    EXPECT_STREQ("12*****890", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
 }
 } // namespace OHOS
