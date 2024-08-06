@@ -66,7 +66,7 @@ static void UpdateStateVersionAndStore(StateVersionChangeReason reason)
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
         g_localNetLedger.localInfo.stateVersion = 1;
     }
-    g_localNetLedger.localInfo.stateVersionReason |= reason;
+    g_localNetLedger.localInfo.stateVersionReason = reason;
     LNN_LOGI(LNN_LEDGER,
         "reason=%{public}u changed, update local stateVersion=%{public}d, stateVersionReason=%{public}u", reason,
         g_localNetLedger.localInfo.stateVersion, g_localNetLedger.localInfo.stateVersionReason);
@@ -2011,24 +2011,6 @@ static int32_t LnnGenBroadcastCipherInfo(void)
     } while (0);
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return ret;
-}
-
-int32_t LnnSetLocalStateVersionReason(void)
-{
-    int32_t ret = SOFTBUS_OK;
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
-        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    g_localNetLedger.localInfo.stateVersionReason = 0;
-    SoftBusMutexUnlock(&g_localNetLedger.lock);
-    ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update local store fail");
-        return ret;
-    }
-    
-    return SOFTBUS_OK;
 }
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
