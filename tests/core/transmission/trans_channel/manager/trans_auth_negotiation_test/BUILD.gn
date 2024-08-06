@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022 - 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,10 +17,12 @@ import("../../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 dsoftbus_root_path = "../../../../../.."
 
-## UnitTest TransAuthNegotiateTest {{{
 ohos_unittest("TransAuthNegotiateTest") {
   module_out_path = module_output_path
-  sources = [ "trans_auth_negotiation_test.cpp" ]
+  sources = [
+    "../mock/trans_manager_mock.cpp",
+    "trans_auth_negotiation_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/authentication/interface",
@@ -30,6 +32,9 @@ ohos_unittest("TransAuthNegotiateTest") {
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/src",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "../mock",
   ]
 
   deps = [
@@ -40,6 +45,7 @@ ohos_unittest("TransAuthNegotiateTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
       "hilog:libhilog",
     ]
   } else {

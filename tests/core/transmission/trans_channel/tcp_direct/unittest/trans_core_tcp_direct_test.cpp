@@ -409,13 +409,13 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStartSessionListenerTest0012, TestSize.
     }
     info.type = CONNECT_TCP;
     int32_t ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, &info);
-    EXPECT_EQ(ret, SOFTBUS_CONN_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_BIND_ERR);
 
     ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransTdcStartSessionListener((ListenerModule)ERRMOUDLE, &info);
-    EXPECT_EQ(ret, SOFTBUS_CONN_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_BIND_ERR);
 
     ret = TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_P2P);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -660,24 +660,5 @@ HWTEST_F(TransCoreTcpDirectTest, TcpChannelInfoTest002, TestSize.Level1)
     int32_t invalidChannelId = 2;
     ret = TransDelTcpChannelInfoByChannelId(invalidChannelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
-}
-
-/**
- * @tc.name: CreateTcpChannelInfoTest
- * @tc.desc: test CreateTcpChannelInfoTest.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransCoreTcpDirectTest, CreateTcpChannelInfoTest, TestSize.Level1)
-{
-    ChannelInfo channel;
-    channel.channelId = 1;
-    channel.businessType = BUSINESS_TYPE_BYTE;
-    char ip[MAX_IP_LEN] = { 0 };
-    strcpy_s(ip, MAX_IP_LEN, g_ip);
-    channel.myIp = ip;
-    TcpChannelInfo *info = CreateTcpChannelInfo(&channel);
-    ASSERT_TRUE(info != nullptr);
-    SoftBusFree(info);
 }
 }

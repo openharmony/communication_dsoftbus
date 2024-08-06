@@ -18,11 +18,12 @@ module_output_path = "dsoftbus/transmission"
 dsoftbus_root_path = "../../../../../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
-ohos_unittest("TransChannelManagerTest") {
+## UnitTest TransChannelManagerTest {{{
+ohos_unittest("TransChannelManagerMockTest") {
   module_out_path = module_output_path
   sources = [
-    "../mock/trans_manager_mock.cpp",
-    "trans_channel_manager_test.cpp",
+    "trans_channel_manager_mock_test.cpp",
+    "trans_manager_test_mock.cpp",
   ]
 
   include_dirs = [
@@ -74,13 +75,12 @@ ohos_unittest("TransChannelManagerTest") {
     "$dsoftbus_root_path/core/discovery/event_manager/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
-    "../mock",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/googletest:gmock",
   ]
 
   if (is_standard_system) {
@@ -88,7 +88,6 @@ ohos_unittest("TransChannelManagerTest") {
       "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "googletest:gmock",
       "hilog:libhilog",
     ]
   } else {
@@ -104,9 +103,8 @@ ohos_unittest("TransChannelManagerTest") {
 
 group("unittest") {
   testonly = true
-  deps = []
-  deps += [
+  deps = [
     # deps file
-    ":TransChannelManagerTest",
+    ":TransChannelManagerMockTest",
   ]
 }
