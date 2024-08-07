@@ -14,6 +14,7 @@
 group("fuzztest") {
   testonly = true
   deps = [
+    "bind_fuzzer:fuzztest",
     "clientqosmanager_fuzzer:fuzztest",
     "clienttranschannelcallback_fuzzer:fuzztest",
     "clienttransfile_fuzzer:fuzztest",
@@ -29,10 +30,12 @@ group("fuzztest") {
     "clienttransudpstreaminterface_fuzzer:fuzztest",
     "closesession_fuzzer:fuzztest",
     "createsessionserver_fuzzer:fuzztest",
+    "evaluateqos_fuzzer:fuzztest",
     "getmysessionname_fuzzer:fuzztest",
     "getpeerdeviceid_fuzzer:fuzztest",
     "getpeersessionname_fuzzer:fuzztest",
     "getsessionside_fuzzer:fuzztest",
+    "listen_fuzzer:fuzztest",
     "openauthsession_fuzzer:fuzztest",
     "opensession_fuzzer:fuzztest",
     "qosreport_fuzzer:fuzztest",
@@ -47,6 +50,8 @@ group("fuzztest") {
     "sessionserviceimpl_fuzzer:fuzztest",
     "setfilereceivelistener_fuzzer:fuzztest",
     "setfilesendlistener_fuzzer:fuzztest",
+    "shutdown_fuzzer:fuzztest",
+    "socket_fuzzer:fuzztest",
     "softbussendmessage_fuzzer:fuzztest",
     "streamadaptor_fuzzer:fuzztest",
     "streamcommondata_fuzzer:fuzztest",
