@@ -66,7 +66,7 @@ static void UpdateStateVersionAndStore(StateVersionChangeReason reason)
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
         g_localNetLedger.localInfo.stateVersion = 1;
     }
-    g_localNetLedger.localInfo.stateVersionReason |= reason;
+    g_localNetLedger.localInfo.stateVersionReason = reason;
     LNN_LOGI(LNN_LEDGER,
         "reason=%{public}u changed, update local stateVersion=%{public}d, stateVersionReason=%{public}u", reason,
         g_localNetLedger.localInfo.stateVersion, g_localNetLedger.localInfo.stateVersionReason);
@@ -1184,16 +1184,23 @@ int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
 
 static int32_t UpdateLocalNetworkId(const void *id)
 {
+    if (ModifyId(g_localNetLedger.localInfo.lastNetworkId, NETWORK_ID_BUF_LEN,
+        g_localNetLedger.localInfo.networkId) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
     if (ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     char *anonyNetworkId = NULL;
+    char *anonyOldNetworkId = NULL;
     Anonymize(g_localNetLedger.localInfo.networkId, &anonyNetworkId);
+    Anonymize(g_localNetLedger.localInfo.lastNetworkId, &anonyOldNetworkId);
     g_localNetLedger.localInfo.networkIdTimestamp = (int64_t)SoftBusGetSysTimeMs();
-    LNN_LOGI(LNN_LEDGER, "networkId change, reset networkId=%{public}s, networkIdTimestamp=%{public}" PRId64,
-        anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
+    LNN_LOGI(LNN_LEDGER, "networkId change %{public}s -> %{public}s, networkIdTimestamp=%{public}" PRId64,
+        anonyOldNetworkId, anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore(UPDATE_NETWORKID);
     AnonymizeFree(anonyNetworkId);
+    AnonymizeFree(anonyOldNetworkId);
     if (g_localNetLedger.localInfo.accountId == 0) {
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return SOFTBUS_OK;
@@ -1473,6 +1480,11 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
+    }
+    if (ModifyId(g_localNetLedger.localInfo.lastNetworkId, NETWORK_ID_BUF_LEN,
+        g_localNetLedger.localInfo.networkId) != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return SOFTBUS_ERR;
     }
     if (ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id) != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_localNetLedger.lock);
@@ -1999,24 +2011,6 @@ static int32_t LnnGenBroadcastCipherInfo(void)
     } while (0);
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return ret;
-}
-
-int32_t LnnSetLocalStateVersionReason(void)
-{
-    int32_t ret = SOFTBUS_OK;
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
-        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    g_localNetLedger.localInfo.stateVersionReason = 0;
-    SoftBusMutexUnlock(&g_localNetLedger.lock);
-    ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update local store fail");
-        return ret;
-    }
-    
-    return SOFTBUS_OK;
 }
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)

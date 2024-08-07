@@ -16,23 +16,15 @@
 #include "softbus_server_stub.h"
 
 #include "access_control.h"
-#include "access_token.h"
 #include "accesstoken_kit.h"
 #include "anonymizer.h"
-#include "comm_log.h"
-#include "discovery_service.h"
 #include "ipc_skeleton.h"
-#include "ipc_types.h"
 #include "privacy_kit.h"
 #include "regex.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_bus_center.h"
-#include "softbus_conn_interface.h"
-#include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_permission.h"
-#include "softbus_server.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_channel_manager.h"
@@ -40,7 +32,6 @@
 #include "trans_session_manager.h"
 
 #ifdef SUPPORT_BUNDLENAME
-#include "bundle_mgr_interface.h"
 #include "bundle_mgr_proxy.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -653,6 +644,7 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.groupId = data.ReadCString();
     param.isAsync = data.ReadBool();
     param.sessionId = data.ReadInt32();
+    param.actionId = data.ReadUint32();
 }
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
@@ -726,10 +718,10 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
         goto EXIT;
     }
     retReply = OpenAuthSession(sessionName, addrInfo);
-    COMM_LOGI(COMM_SVC, "OpenAuthSession retReply=%{public}d", retReply);
+    COMM_LOGI(COMM_SVC, "OpenAuthSession channelId=%{public}d", retReply);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed!");
+        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed! retReply=%{public}d", retReply);
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;

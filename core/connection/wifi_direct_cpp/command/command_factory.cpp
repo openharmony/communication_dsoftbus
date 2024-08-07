@@ -39,6 +39,12 @@ std::shared_ptr<DisconnectCommand> CommandFactory::CreateDisconnectCommand(const
     return disconnectCreator_(info, callback);
 }
 
+std::shared_ptr<ForceDisconnectCommand> CommandFactory::CreateForceDisconnectCommand(
+    const WifiDirectForceDisconnectInfo &info, const WifiDirectDisconnectCallback &callback)
+{
+    return std::make_shared<ForceDisconnectCommand>(info, callback);
+}
+
 void CommandFactory::Register(const ConnectCreator &creator)
 {
     connectCreator_ = creator;

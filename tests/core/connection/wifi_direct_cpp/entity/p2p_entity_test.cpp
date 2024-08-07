@@ -20,6 +20,7 @@
 #include "softbus_error_code.h"
 #include "data/interface_info.h"
 #include "data/interface_manager.h"
+#include "data/link_manager.h"
 #include "entity/p2p_connect_state.h"
 #include "entity/p2p_entity.h"
 #include "wifi_direct_mock.h"
@@ -362,5 +363,102 @@ HWTEST_F(P2pEntityTest, DisconnectTest001, TestSize.Level1)
         result = P2pEntity::GetInstance().Disconnect(param);
         EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED);
     }
+}
+
+/*
+* @tc.name: NotifyNewClientJoining001
+* @tc.desc: notify new client joining
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pEntityTest, NotifyNewClientJoining001, TestSize.Level1)
+{
+    std::string remoteMac = "11:22:33:44:55:66";
+    std::string invaildMac = "11:22:33:44:55:dd";
+    P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
+    size_t count =P2pEntity::GetInstance().GetJoiningClientCount();
+    EXPECT_EQ(count, 1);
+    sleep(11);
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, "0123456789ABCDEF", [](InnerLink &link) {
+        link.SetRemoteBaseMac("11:22:33:44:55:66");
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
+    P2pEntity::GetInstance().CancelNewClientJoining(remoteMac);
+    P2pEntity::GetInstance().CancelNewClientJoining(invaildMac);
+
+    P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
+    P2pEntity::GetInstance().RemoveNewClientJoining(remoteMac);
+    P2pEntity::GetInstance().RemoveNewClientJoining(invaildMac);
+
+    P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
+    P2pEntity::GetInstance().ClearJoiningClient();
+    P2pEntity::GetInstance().ClearJoiningClient();
+    count =P2pEntity::GetInstance().GetJoiningClientCount();
+    EXPECT_EQ(count, 0);
+}
+
+/*
+* @tc.name: PushOperation001
+* @tc.desc: push operation
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pEntityTest, PushOperation001, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, AuthStopListeningForWifiDirect).WillRepeatedly(Return());
+    EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
+    P2pDestroyGroupParam param1;
+    auto destroyGroupOp =
+        std::make_shared<P2pOperationWrapper<P2pDestroyGroupParam>>(param1, P2pOperationType::DESTROY_GROUP);
+    InterfaceManager::GetInstance().UpdateInterface(
+            InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
+            info.SetRole(LinkInfo::LinkMode::GC);
+            return SOFTBUS_OK;
+        });
+    EXPECT_CALL(mock, Hid2dRemoveGcGroup).WillOnce(WifiDirectInterfaceMock::DestroyGroupFailureAction);
+    P2pEntity::GetInstance().PushOperation(destroyGroupOp);
+    P2pEntity::GetInstance().ExecuteNextOperation();
+    int ret = destroyGroupOp->promise_.get_future().get().errorCode_;
+    EXPECT_EQ(ret, SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED);
+
+
+    P2pCreateGroupParam param2;
+    auto createGroupOp =
+        std::make_shared<P2pOperationWrapper<P2pCreateGroupParam>>(param2, P2pOperationType::CREATE_GROUP);
+    P2pEntity::GetInstance().PushOperation(createGroupOp);
+    EXPECT_CALL(mock, Hid2dCreateGroup(_, _)).WillOnce(WifiDirectInterfaceMock::CreateGroupFailureAction);
+    P2pEntity::GetInstance().ExecuteNextOperation();
+    ret = createGroupOp->promise_.get_future().get().errorCode_;
+    EXPECT_EQ(ret, SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION);
+
+    P2pConnectParam param3{"123\n01:02:03:04:05:06\n555\n16\n1", false, false};
+    auto connectOp =
+        std::make_shared<P2pOperationWrapper<P2pConnectParam>>(param3, P2pOperationType::CONNECT);
+    P2pEntity::GetInstance().PushOperation(connectOp);
+    EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(WifiDirectInterfaceMock::ConnectFailureAction);
+    P2pEntity::GetInstance().ExecuteNextOperation();
+    ret = connectOp->promise_.get_future().get().errorCode_;
+    EXPECT_EQ(ret, SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION);
+}
+
+/*
+* @tc.name: HasPendingOperation001
+* @tc.desc: HasPendingOperation
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pEntityTest, HasPendingOperation001, TestSize.Level1)
+{
+    std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> operation;
+    P2pEntity::GetInstance().PushOperation(operation);
+
+    bool ret = P2pEntity::GetInstance().HasPendingOperation();
+    EXPECT_EQ(ret, true);
+
+    P2pEntity::GetInstance().ClearPendingOperation();
+    ret = P2pEntity::GetInstance().HasPendingOperation();
+    EXPECT_EQ(ret, false);
 }
 }

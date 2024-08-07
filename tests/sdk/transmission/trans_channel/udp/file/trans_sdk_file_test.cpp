@@ -686,13 +686,13 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
 HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
 {
     int port = 5683;
-    int ret = OpenTcpServer("127.0.0.1", port);
+    int ret = CreateServerSocketByIpv4("127.0.0.1", port);
     EXPECT_TRUE(ret);
 
-    ret = OpenTcpServer("280567565", port);
-    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
+    ret = CreateServerSocketByIpv4("280567565", port);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 
-    ret = OpenTcpServer("127.0.0.1", 0);
+    ret = CreateServerSocketByIpv4("127.0.0.1", 0);
     EXPECT_TRUE(ret);
 }
 

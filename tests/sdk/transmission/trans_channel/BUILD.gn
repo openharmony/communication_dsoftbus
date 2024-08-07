@@ -133,10 +133,17 @@ if (defined(ohos_lite)) {
 
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("ClientTransProxyManagerTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     module_out_path = module_output_path
     sources = [ "proxy/client_trans_proxy_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += trans_sdk_proxy_test_inc
+    include_dirs +=
+        [ "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src" ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
     if (is_standard_system) {

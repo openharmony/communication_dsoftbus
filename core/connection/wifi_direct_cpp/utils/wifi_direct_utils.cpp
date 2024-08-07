@@ -407,7 +407,7 @@ int32_t WifiDirectUtils::IpStringToIntArray(const char *addrString, uint32_t *ad
 std::string WifiDirectUtils::ChannelListToString(const std::vector<int> &channels)
 {
     std::string stringChannels;
-    for (auto i = 0; i < channels.size(); i++) {
+    for (size_t i = 0; i < channels.size(); i++) {
         if (i != 0) {
             stringChannels += "##";
         }
@@ -513,9 +513,9 @@ void WifiDirectUtils::ParallelFlowExit()
 
 uint32_t WifiDirectUtils::CalculateStringLength(const char *str, uint32_t size)
 {
-    for (int32_t i = static_cast<int32_t>(size - 1); i >= 0; i--) {
+    for (int32_t i = static_cast<int32_t>(size) - 1; i >= 0; i--) {
         if (str[i] != '\0') {
-            return static_cast<uint32_t>(i + 1);
+            return static_cast<uint32_t>(i) + 1;
         }
     }
     return 0;
@@ -541,6 +541,17 @@ void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &
     }
 
     LnnSyncP2pInfo();
+}
+
+int32_t WifiDirectUtils::GetOsType(const std::string &remoteNetworkId)
+{
+    int32_t osType = OH_OS_TYPE;
+    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
+        return osType;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "get os type success, osType=%{public}d", osType);
+    return osType;
 }
 
 } // namespace OHOS::SoftBus

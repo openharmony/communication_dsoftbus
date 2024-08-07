@@ -168,7 +168,10 @@ int32_t ConnBrSetBrPendingPacket(uint32_t id, int64_t seq, void *data)
     }
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
         if (item->seq == seq && item->id == id) {
-            SoftBusMutexLock(&item->lock);
+            if (SoftBusMutexLock(&item->lock) != SOFTBUS_OK) {
+                SoftBusMutexUnlock(&g_pendingLock);
+                return SOFTBUS_LOCK_ERR;
+            }
             item->finded = true;
             item->data = data;
             SoftBusCondSignal(&item->cond);

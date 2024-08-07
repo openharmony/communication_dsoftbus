@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "anonymizer.h"
 #include "broadcast_scheduler.h"
 #include "common_list.h"
 #include "disc_ble_constant.h"
@@ -158,6 +159,7 @@ static ScanSetting g_scanTable[FREQ_BUTT] = {
     {SOFTBUS_BC_SCAN_WINDOW_P2, SOFTBUS_BC_SCAN_INTERVAL_P2},
     {SOFTBUS_BC_SCAN_WINDOW_P10, SOFTBUS_BC_SCAN_INTERVAL_P10},
     {SOFTBUS_BC_SCAN_WINDOW_P25, SOFTBUS_BC_SCAN_INTERVAL_P25},
+    {SOFTBUS_BC_SCAN_WINDOW_P75, SOFTBUS_BC_SCAN_INTERVAL_P75},
     {SOFTBUS_BC_SCAN_WINDOW_P100, SOFTBUS_BC_SCAN_INTERVAL_P100}
 };
 
@@ -2120,7 +2122,10 @@ static int32_t BleAdvertiserDump(int fd)
         SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n",
             g_bleAdvertiser[i].deviceInfo.accountHash);
         SOFTBUS_DPRINTF(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
-        SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
+        char *anonymizedName = NULL;
+        Anonymize(g_bleAdvertiser[i].deviceInfo.devName, &anonymizedName);
+        SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", AnonymizeWrapper(anonymizedName));
+        AnonymizeFree(anonymizedName);
         SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
         SOFTBUS_DPRINTF(fd, "addr type                               : %u\n",
                 g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);

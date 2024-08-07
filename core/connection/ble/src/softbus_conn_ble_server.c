@@ -24,8 +24,6 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_type_def.h"
 #include "softbus_utils.h"
 
 enum GattServerState {
@@ -413,9 +411,8 @@ static void BleCharacteristicAddMsgHandler(const CharacteristicAddMsgContext *ct
 
 static void BleDescriptorAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t srvcHandle, int32_t descriptorHandle)
 {
-    CONN_LOGI(CONN_BLE,
-        "gatt server callback, descriptor added, srvcHandle=%{public}u, descriptorHandle=%{public}d, status=%{public}d",
-        srvcHandle, descriptorHandle, status);
+    CONN_LOGI(CONN_BLE, "gatt server callback, descriptor added, srvcHandle=%{public}u, descriptorHandle=%{public}d, "
+        "status=%{public}d", srvcHandle, descriptorHandle, status);
     DescriptorAddMsgContext *ctx =
         (DescriptorAddMsgContext *)SoftBusCalloc(sizeof(DescriptorAddMsgContext) + uuid->uuidLen);
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BLE, "calloc descriptor add msg failed");
@@ -497,10 +494,10 @@ static int32_t BleNetDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
     };
     rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
-            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
-            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
-            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
-            SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
+        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
+        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
+        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
+        SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
     if (rc != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "underlayer add characteristic failed, err=%{public}d", rc);
         return SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_ERR;
@@ -1185,6 +1182,30 @@ static int BleCompareGattServerLooperEventFunc(const SoftBusMessage *msg, void *
     return COMPARE_SUCCESS;
 }
 
+static bool BleIsConcernedAttrHandle(int32_t srvcHandle, int32_t attrHandle)
+{
+    int32_t rc = SoftBusMutexLock(&g_serverState.lock);
+    if (rc != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "try to lock failed, attrHandle=%{public}d", attrHandle);
+        return false;
+    }
+    if (g_serverState.serviceHandle != srvcHandle) {
+        (void)SoftBusMutexUnlock(&g_serverState.lock);
+        CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, srvcHandle=%{public}d", srvcHandle);
+        return false;
+    }
+    if (attrHandle == g_serverState.connCharacteristicHandle ||
+        attrHandle == g_serverState.connDescriptorHandle ||
+        attrHandle == g_serverState.netCharacteristicHandle ||
+        attrHandle == g_serverState.netDescriptorHandle) {
+        (void)SoftBusMutexUnlock(&g_serverState.lock);
+        return true;
+    }
+    CONN_LOGW(CONN_BLE, "ignore handle=%{public}d", attrHandle);
+    (void)SoftBusMutexUnlock(&g_serverState.lock);
+    return false;
+}
+
 static int32_t BleRegisterGattServerCallback(void)
 {
     static SoftBusGattsCallback bleGattsCallback = {
@@ -1201,12 +1222,13 @@ static int32_t BleRegisterGattServerCallback(void)
         .ResponseConfirmationCallback = BleResponseConfirmationCallback,
         .NotifySentCallback = BleNotifySentCallback,
         .MtuChangeCallback = BleMtuChangeCallback,
+        .IsConcernedAttrHandle = BleIsConcernedAttrHandle,
     };
     SoftBusBtUuid serviceUuid = {
         .uuid = SOFTBUS_SERVICE_UUID,
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
-    return SoftBusRegisterGattsCallbacks(&bleGattsCallback, serviceUuid, DEFAULT_MTU_SIZE);
+    return SoftBusRegisterGattsCallbacks(&bleGattsCallback, serviceUuid);
 }
 
 int32_t ConnGattInitServerModule(SoftBusLooper *looper, const ConnBleServerEventListener *listener)

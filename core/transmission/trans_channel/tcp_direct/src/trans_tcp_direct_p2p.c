@@ -39,8 +39,6 @@
 #include "wifi_direct_manager.h"
 
 #define ID_OFFSET (1)
-#define NETWORK_ID_LEN 7
-#define HML_IP_PREFIX "172.30."
 #define P2P_VERIFY_REQUEST 0
 #define P2P_VERIFY_REPLY 1
 
@@ -582,7 +580,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
             "get wifidirectmanager or localip fail", isAuthLink);
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
-    if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+    if (IsHmlIpAddr(myIp)) {
         ret = StartHmlListener(myIp, &myPort);
     } else {
         ret = StartP2pListener(myIp, &myPort);
@@ -601,7 +599,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
 static int32_t ConnectTcpDirectPeer(const char *addr, int port)
 {
     ConnectOption options;
-    if (strncmp(addr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+    if (IsHmlIpAddr(addr)) {
         options.type = CONNECT_HML;
     } else {
         options.type = CONNECT_P2P;
@@ -660,7 +658,7 @@ static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq)
 
 static int32_t AddP2pOrHmlTrigger(int32_t fd, const char *myAddr, int64_t seq)
 {
-    if (strncmp(myAddr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+    if (IsHmlIpAddr(myAddr)) {
         return AddHmlTrigger(fd, myAddr, seq);
     } else {
         int32_t ret = AddTrigger(DIRECT_CHANNEL_SERVER_P2P, fd, WRITE_TRIGGER);
@@ -741,7 +739,7 @@ EXIT_ERR:
 
 static void OnAuthMsgProc(AuthHandle authHandle, int32_t flags, int64_t seq, const cJSON *json)
 {
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_OK;
     if (flags == MSG_FLAG_REQUEST) {
         ret = OnVerifyP2pRequest(authHandle, seq, json, true);
     } else {
@@ -857,8 +855,9 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
         conn->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
         conn->requestId = requestId;
         if (type == CONNECT_P2P_REUSE) {
-            type = (strncmp(appInfo->myData.addr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) ? CONNECT_HML : CONNECT_P2P;
+            type = IsHmlIpAddr(appInfo->myData.addr) ? CONNECT_HML : CONNECT_P2P;
         }
+        TRANS_LOGD(TRANS_CTRL, "type=%{public}d", type);
         ret = OpenNewAuthConn(appInfo, conn, newChannelId, type);
     } else {
         ret = TransProxyReuseByChannelId(pipeLineChannelId);
@@ -921,40 +920,61 @@ static void FreeFastTransData(AppInfo *appInfo)
     }
 }
 
+static int32_t BuildSessionConn(const AppInfo *appInfo, SessionConn **conn)
+{
+    int32_t ret = SOFTBUS_TRANS_P2P_DIRECT_FAILED;
+    *conn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_P2P, false);
+    if (*conn == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create new sessin conn fail");
+        return SOFTBUS_MEM_ERR;
+    }
+
+    if (memcpy_s(&((*conn)->appInfo), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy appInfo fail");
+        SoftBusFree(*conn);
+        *conn = NULL;
+        return SOFTBUS_MEM_ERR;
+    }
+    ret = CopyAppInfoFastTransData(*conn, appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
+        SoftBusFree(*conn);
+        *conn = NULL;
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn)
+{
+    if (type == CONNECT_P2P) {
+        if (IsHmlIpAddr(conn->appInfo.myData.addr)) {
+            return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+        } else {
+            return StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+        }
+    }
+    return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+}
+
 int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL ||
-        (connInfo->type != CONNECT_P2P && connInfo->type != CONNECT_HML)) {
+        (connInfo->type != CONNECT_P2P && connInfo->type != CONNECT_HML && connInfo->type != CONNECT_P2P_REUSE)) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     SessionConn *conn = NULL;
-    int32_t ret = SOFTBUS_TRANS_P2P_DIRECT_FAILED;
-    conn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_P2P, false);
-    if (conn == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "create new sessin conn fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
-    TRANS_LOGI(TRANS_CTRL,
-        "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(conn->channelId + ID_OFFSET));
-    if (memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "copy appInfo fail");
-        SoftBusFree(conn);
-        return SOFTBUS_MEM_ERR;
-    }
-    ret = CopyAppInfoFastTransData(conn, appInfo);
+    int32_t ret = BuildSessionConn(appInfo, &conn);
     if (ret != SOFTBUS_OK) {
-        SoftBusFree(conn);
-        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
+        TRANS_LOGE(TRANS_CTRL, "build new sessin conn fail, ret=%{public}d", ret);
         return ret;
     }
-    if (connInfo->type == CONNECT_P2P) {
-        ret = StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
-    } else {
-        ret = StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + (uint64_t)ID_OFFSET));
+    TRANS_LOGI(TRANS_CTRL,
+        "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(conn->channelId + ID_OFFSET));
+    ret = StartTransP2pDirectListener(connInfo->type, conn);
     if (ret != SOFTBUS_OK) {
         FreeFastTransData(&(conn->appInfo));
         SoftBusFree(conn);

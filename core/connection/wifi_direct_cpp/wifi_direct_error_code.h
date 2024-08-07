@@ -397,6 +397,7 @@ static inline int32_t ToSoftBusErrorCode(int32_t errorCode)
 {
     return SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + abs(errorCode);
 }
+
 #ifdef __cplusplus
 }
 #endif

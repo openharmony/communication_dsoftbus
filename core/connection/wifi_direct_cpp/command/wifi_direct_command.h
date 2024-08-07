@@ -26,6 +26,7 @@ enum class CommandType {
     DISCONNECT_COMMAND,
     NEGOTIATE_COMMAND,
     BLE_TRIGGER_COMMAND,
+    FORCE_DISCONNECT_COMMAND,
 };
 
 class WifiDirectProcessor;

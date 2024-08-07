@@ -19,10 +19,9 @@
 #include "info_container.h"
 #include "ipv4_info.h"
 #include "link_info.h"
+#include "wifi_direct_defines.h"
 
 namespace OHOS::SoftBus {
-static constexpr char P2P_IF_NAME[] = "p2p0";
-static constexpr char HML_IF_NAME[] = "chba0";
 
 enum class InterfaceInfoKey {
     DYNAMIC_MAC = 0,
@@ -91,7 +90,7 @@ public:
     int GetP2pListenPort() const;
 
     // P2P links share the same listen module, so define module in interface info
-    void SeP2ptListenModule(const int &value);
+    void SetP2pListenModule(const int &value);
     int GetP2pListenModule() const;
 
     void SetP2pGroupConfig(const std::string &groupConfig);
@@ -125,7 +124,7 @@ public:
     int GetReuseCount() const;
 
     void SetChannel5GList(const std::vector<int> &value);
-    std::vector<int> GetChannel5GList();
+    std::vector<int> GetChannel5GList() const;
 
     void SetIsAvailable(bool value);
     bool IsAvailable() const;

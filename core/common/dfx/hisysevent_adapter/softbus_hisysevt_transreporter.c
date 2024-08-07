@@ -677,6 +677,7 @@ static int32_t SoftbusReportCalledAPIEvt(void)
     }
     if (g_calledApiInfoList == NULL) {
         COMM_LOGE(COMM_EVENT, "g_calledApiInfoList is null");
+        SoftbusFreeEvtReportMsg(msg);
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
@@ -718,6 +719,7 @@ static int32_t SoftbusReportCalledAPICntEvt(void)
     }
     if (g_calledApiCntlist == NULL) {
         COMM_LOGE(COMM_EVENT, "g_calledApiCntlist is null");
+        SoftbusFreeEvtReportMsg(msg);
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {

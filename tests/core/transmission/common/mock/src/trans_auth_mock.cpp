@@ -146,9 +146,9 @@ int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, 
     return GetTransAuthInterface()->AuthGetIdByP2pMac(p2pMac, type, isServer, isMeta);
 }
 
-uint32_t AuthGetEncryptSize(uint32_t inLen)
+uint32_t AuthGetEncryptSize(int64_t authId, uint32_t inLen)
 {
-    return GetTransAuthInterface()->AuthGetEncryptSize(inLen);
+    return GetTransAuthInterface()->AuthGetEncryptSize(authId, inLen);
 }
 
 uint32_t AuthGetDecryptSize(uint32_t inLen)

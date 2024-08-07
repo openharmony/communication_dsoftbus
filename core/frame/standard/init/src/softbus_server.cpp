@@ -16,18 +16,13 @@
 #include "softbus_server.h"
 
 #include "bus_center_ex_obj.h"
-#include "comm_log.h"
 #include "ipc_skeleton.h"
-#include "ipc_types.h"
 #include "lnn_bus_center_ipc.h"
 #include "securec.h"
 #include "string_ex.h"
 #include "softbus_client_info_manager.h"
-#include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
-#include "softbus_errcode.h"
 #include "softbus_hidumper_interface.h"
-#include "softbus_qos.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
 #include "softbus_utils.h"
@@ -147,6 +142,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             }
             connOpt.socketOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
             connOpt.socketOption.protocol = LNN_PROTOCOL_IP;
+            connOpt.socketOption.moduleId = AUTH;
             break;
         case CONNECT_BLE:
             if (memcpy_s(connOpt.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {

@@ -27,3 +27,23 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
     LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub GenerateBtMacHash");
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+void LnnDumpLocalBasicInfo(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat dump loacl basic info");
+}
+
+void LnnDumpOnlineDeviceInfo(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat dump online device info");
+}
+
+int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len)
+{
+    (void)str;
+    (void)hashStr;
+    (void)len;
+
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat generate hex string hash");
+    return SOFTBUS_NOT_IMPLEMENT;
+}

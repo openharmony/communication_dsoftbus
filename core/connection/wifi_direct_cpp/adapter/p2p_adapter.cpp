@@ -31,6 +31,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_error_code.h"
+#include "wifi_direct_defines.h"
 
 namespace OHOS::SoftBus {
 static constexpr char DEFAULT_NET_MASK[] = "255.255.255.0";
@@ -288,7 +289,7 @@ int32_t P2pAdapter::SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size)
 {
     (void)cfg;
     (void)size;
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_SET_PEER_WIFI_CONFIG_FAIL;
 }
 
 bool P2pAdapter::IsWideBandSupported()
@@ -374,10 +375,10 @@ int32_t P2pAdapter::GetIpAddress(std::string &ipString)
 
 std::string P2pAdapter::GetMacAddress()
 {
-    std::vector<uint8_t> macArray = WifiDirectUtils::GetInterfaceMacAddr("p2p0");
+    std::vector<uint8_t> macArray = WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_P2P0);
     std::string macString = WifiDirectUtils::MacArrayToString(macArray);
     if (macString.empty()) {
-        macArray = WifiDirectUtils::GetInterfaceMacAddr("wlan0");
+        macArray = WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_WLAN);
         macString = WifiDirectUtils::MacArrayToString(macArray);
         CONN_LOGI(CONN_WIFI_DIRECT, "wlan0");
         return macString;

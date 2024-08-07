@@ -524,9 +524,7 @@ void ClearSendFileList(FileManager *fileManager, FileListTask *fileList)
         DFILE_LOGE(TAG, "pthread mutex unlock error");
     }
     MutexListDestory(&fileList->sendRetranList);
-#ifndef MBEDTLS_INCLUDED
     ClearCryptCtx(fileList->cryptPara.ctx);
-#endif
     PthreadMutexDestroy(&fileList->newReadOutSet.lock);
     (void)memset_s(fileList, sizeof(FileListTask), 0, sizeof(FileListTask));
     free(fileList);

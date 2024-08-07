@@ -20,6 +20,7 @@
 
 #include "command/connect_command.h"
 #include "command/disconnect_command.h"
+#include "command/force_disconnect_command.h"
 #include "command/negotiate_command.h"
 #include "data/inner_link.h"
 #include "entity/p2p_entity.h"
@@ -61,6 +62,7 @@ private:
 
     void ProcessConnectCommand(std::shared_ptr<ConnectCommand> &command);
     void ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand> &command);
+    void ProcessForceDisconnectCommand(std::shared_ptr<ForceDisconnectCommand> &command);
 
     void ProcessNegotiateCommandAtAvailableState(std::shared_ptr<NegotiateCommand> &command);
     void ProcessNegotiateCommandAtWaitingReqResponseState(std::shared_ptr<NegotiateCommand> &command);
@@ -93,6 +95,7 @@ private:
     int ProcessReuseRequest(std::shared_ptr<NegotiateCommand> &command);
     int ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &command);
     int ProcessDisconnectRequest(std::shared_ptr<NegotiateCommand> &command);
+    int ProcessForceDisconnectRequest(std::shared_ptr<NegotiateCommand> &command);
 
     int ProcessGetInterfaceInfoRequest(std::shared_ptr<NegotiateCommand> &command);
 
@@ -105,6 +108,7 @@ private:
     static int SendReuseRequest(const NegotiateChannel &channel);
     static int SendReuseResponse(const NegotiateChannel &channel, int32_t result);
     static int SendDisconnectRequest(const NegotiateChannel &channel);
+    static int SendForceDisconnectRequest(const NegotiateChannel &channel);
     static int SendInterfaceInfoResponse(const NegotiateChannel &channel);
     static int SendNegotiateResult(const NegotiateChannel &channel, int32_t reason);
     static int SendHandShakeMessage(const NegotiateChannel &channel);
@@ -160,6 +164,7 @@ private:
     std::string clientJoiningMac_;
 
     bool active_;
+    bool hasRun_ = false;
 
     Utils::Timer timer_;
     uint32_t timerId_;

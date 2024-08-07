@@ -20,6 +20,7 @@
 #include <memory>
 #include "connect_command.h"
 #include "disconnect_command.h"
+#include "force_disconnect_command.h"
 
 namespace OHOS::SoftBus {
 class CommandFactory {
@@ -33,6 +34,8 @@ public:
     std::shared_ptr<ConnectCommand> CreateConnectCommand(const WifiDirectConnectInfo &info,
                                                          const WifiDirectConnectCallback &callback);
     std::shared_ptr<DisconnectCommand> CreateDisconnectCommand(const WifiDirectDisconnectInfo &info,
+                                                               const WifiDirectDisconnectCallback &callback);
+    std::shared_ptr<ForceDisconnectCommand> CreateForceDisconnectCommand(const WifiDirectForceDisconnectInfo &info,
                                                                const WifiDirectDisconnectCallback &callback);
     void Register(const ConnectCreator &creator);
     void Register(const DisconnectCreator &creator);

@@ -57,7 +57,7 @@ public:
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
     virtual int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta) = 0;
 
-    virtual uint32_t AuthGetEncryptSize(uint32_t inLen) = 0;
+    virtual uint32_t AuthGetEncryptSize(int64_t authId, uint32_t inLen) = 0;
     virtual uint32_t AuthGetDecryptSize(uint32_t inLen) = 0;
 
     virtual int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac) = 0;
@@ -120,7 +120,7 @@ public:
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
     MOCK_METHOD4(AuthGetIdByP2pMac, int64_t (const char *, AuthLinkType, bool, bool));
 
-    MOCK_METHOD1(AuthGetEncryptSize, uint32_t (uint32_t));
+    MOCK_METHOD1(AuthGetEncryptSize, uint32_t (int64_t authId, uint32_t inLen));
     MOCK_METHOD1(AuthGetDecryptSize, uint32_t (uint32_t));
 
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char *));

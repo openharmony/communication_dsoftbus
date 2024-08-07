@@ -166,7 +166,6 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnConnectEventTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransTcpDirectListenerTest, TdcOnDataEventTest001, TestSize.Level1)
 {
     int fd = NORMAL_FD;
@@ -175,5 +174,51 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnDataEventTest001, TestSize.Level1)
 
     int32_t ret = TdcOnDataEvent(module, events, fd);
     EXPECT_EQ(SOFTBUS_INVALID_FD, ret);
+}
+
+/**
+ * @tc.name: TransSetTcpDirectConnectType001
+ * @tc.desc: TransSetTcpDirectConnectType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectListenerTest, TransSetTcpDirectConnectType001, TestSize.Level1)
+{
+    ListenerModule module = DIRECT_CHANNEL_SERVER_HML_START;
+    int32_t connectType = 0; // test value
+    TransSetTcpDirectConnectType(&connectType, module);
+    EXPECT_EQ(connectType, CONNECT_HML);
+
+    module = DIRECT_CHANNEL_SERVER_P2P;
+    TransSetTcpDirectConnectType(&connectType, module);
+    EXPECT_EQ(connectType, CONNECT_P2P);
+
+    module = DIRECT_CHANNEL_SERVER_WIFI;
+    TransSetTcpDirectConnectType(&connectType, module);
+    EXPECT_EQ(connectType, CONNECT_TCP);
+}
+
+/**
+ * @tc.name: ProcessSocketInEvent001
+ * @tc.desc: ProcessSocketInEvent test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectListenerTest, ProcessSocketInEvent001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    int fd = 0; // test value
+    int32_t ret = ProcessSocketInEvent(conn, fd);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
+
+    conn->serverSide = true;
+    ret = ProcessSocketOutEvent(conn, fd);
+    EXPECT_EQ(ret, SOFTBUS_TCP_SOCKET_ERR);
+
+    conn->serverSide = false;
+    ret = ProcessSocketOutEvent(conn, fd);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_ADD_TRIGGER_FAILED);
+    SoftBusFree(conn);
 }
 }

@@ -26,9 +26,9 @@
 #include "wifi_direct_manager.h"
 #include "data_bus_native.h"
 #include "softbus_conn_interface.h"
+#include "softbus_socket.h"
 
 #define NETWORK_ID_LEN 7
-#define HML_IP_PREFIX "172.30."
 #define COMBINE_TYPE(routeType, connType) ((routeType) | ((uint8_t)(connType) << 8))
 
 static void ClearIpInfo(const char *peerUuid)
@@ -52,7 +52,7 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
     int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "LnnGetRemoteNodeInfoById failed");
 
-    if (strncmp(localIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+    if (IsHmlIpAddr(localIp)) {
         ListenerModule type = GetModuleByHmlIp(localIp);
         if (type != UNUSE_BUTT) {
             StopHmlListener(type);

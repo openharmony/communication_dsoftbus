@@ -220,7 +220,7 @@ int32_t AuthDeviceEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_
     uint32_t *outLen)
 {
     if (authHandle == NULL || inData == NULL || inLen == 0 || outData == NULL || outLen == NULL ||
-        *outLen < AuthGetEncryptSize(inLen)) {
+        *outLen < (inLen + ENCRYPT_OVER_HEAD_LEN)) {
         AUTH_LOGE(AUTH_KEY, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
