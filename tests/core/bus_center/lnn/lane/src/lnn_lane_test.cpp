@@ -2811,7 +2811,6 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_02, TestSize.Level1)
     linkList[0] = LANE_P2P;
     int32_t ret = FinalDecideLinkType("test", linkList, listNum, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_OK);
-
 }
 
 /*
@@ -2849,7 +2848,6 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_03, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(-1), Return(SOFTBUS_OK)));
     ret = FinalDecideLinkType("test", &linkList, listNum, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_OK);
-
 }
 
 /*
