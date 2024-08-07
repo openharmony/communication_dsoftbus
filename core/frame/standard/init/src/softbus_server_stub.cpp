@@ -45,8 +45,6 @@
         }                                                       \
     } while (false)                                             \
 
-using namespace OHOS::Security::AccessToken;
-
 namespace OHOS {
 constexpr int32_t JUDG_CNT = 1;
 
@@ -121,13 +119,13 @@ int32_t SoftBusServerStub::CheckPidByChannelId(pid_t callingPid, int32_t channel
 static int32_t CheckAndRecordAccessToken(const char *permission)
 {
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
-    int32_t ret = AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
+    int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
 
-    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenCaller);
-    int32_t successCnt = (int32_t)(ret == PERMISSION_GRANTED);
+    Security::AccessToken::ATokenTypeEnum type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenCaller);
+    int32_t successCnt = (int32_t)(ret == Security::AccessToken::PERMISSION_GRANTED);
     int32_t failCnt = JUDG_CNT - successCnt;
-    if (type == TOKEN_HAP) {
-        PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
+    if (type == Security::AccessToken::TOKEN_HAP) {
+        Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
     }
     return ret;
 }
@@ -255,7 +253,8 @@ int32_t SoftBusServerStub::OnRemoteRequest(
     auto itPerm = memberPermissionMap_.find(code);
     if (itPerm != memberPermissionMap_.end()) {
         const char *permission = itPerm->second;
-        if ((permission != nullptr) && (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
+        if ((permission != nullptr) &&
+            (CheckAndRecordAccessToken(permission) != Security::AccessToken::PERMISSION_GRANTED)) {
             SoftbusReportPermissionFaultEvt(code);
             COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
