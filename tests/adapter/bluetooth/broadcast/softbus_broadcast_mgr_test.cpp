@@ -1362,14 +1362,14 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest005, TestSize.Level
 }
 
 /*
- * @tc.name: TestGetScanFilter
- * @tc.desc: GetScanFilter All branches
+ * @tc.name: TestGetScanFilter001
+ * @tc.desc: GetScanFilter Error branching
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusBroadcastMgrTest, TestGetScanFilter, TestSize.Level1)
+HWTEST_F(SoftbusBroadcastMgrTest, TestGetScanFilter001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "TestGetScanFilter begin ----");
+    DISC_LOGI(DISC_TEST, "TestGetScanFilter001 begin ----");
     ManagerMock managerMock;
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
@@ -1387,48 +1387,18 @@ HWTEST_F(SoftbusBroadcastMgrTest, TestGetScanFilter, TestSize.Level1)
     listenerId = 0;
     EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, GetScanFilter(listenerId, &scanFilter, &filterNum));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
-    DISC_LOGI(DISC_TEST, "TestGetScanFilter end ----");
+    DISC_LOGI(DISC_TEST, "TestGetScanFilter001 end ----");
 }
 
 /*
- * @tc.name: BroadcastSetAdvDeviceParam
- * @tc.desc: BroadcastSetAdvDeviceParam All branches
+ * @tc.name: BroadcastGetBroadcastHandle001
+ * @tc.desc: BroadcastGetBroadcastHandle Proper branching
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam, TestSize.Level1)
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastGetBroadcastHandle001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam begin ----");
-    ManagerMock managerMock;
-
-    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
-    LpBroadcastParam bcParam = {};
-    LpScanParam scanParam = {};
-    LpServerType type = SOFTBUS_UNKNOW_TYPE;
-
-    //ret != SOFTBUS_OK
-    int32_t listenerId = 1;
-    BcScanFilter *scanFilter = nullptr;
-    uint8_t filterNum = 0;
-    int32_t res = GetScanFilter(listenerId, &scanFilter, &filterNum);
-    EXPECT_EQ(res, SOFTBUS_BC_MGR_INVALID_LISN_ID);
-
-    bool ret = BroadcastSetAdvDeviceParam(type, &bcParam, &scanParam);
-    EXPECT_EQ(ret, false);
-
-    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
-    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam end ----");
-}
-
-/*
- * @tc.name: BroadcastGetBroadcastHandle
- * @tc.desc: BroadcastGetBroadcastHandle The parameters are normal
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusBroadcastMgrTest, BroadcastGetBroadcastHandle, TestSize.Level1)
-{
-    DISC_LOGI(DISC_TEST, "BroadcastGetBroadcastHandle begin ----");
+    DISC_LOGI(DISC_TEST, "BroadcastGetBroadcastHandle001 begin ----");
     ManagerMock managerMock;
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
@@ -1436,19 +1406,25 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastGetBroadcastHandle, TestSize.Level1)
     int32_t Handle = 1;
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, BroadcastGetBroadcastHandle(bcId, &Handle));
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+    EXPECT_EQ(SOFTBUS_OK, BroadcastGetBroadcastHandle(bcId, &Handle));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
-    DISC_LOGI(DISC_TEST, "BroadcastGetBroadcastHandle end ----");
+    DISC_LOGI(DISC_TEST, "BroadcastGetBroadcastHandle001 end ----");
 }
 
 /*
- * @tc.name: BroadcastSetScanReportChannelToLpDevice
- * @tc.desc: BroadcastSetScanReportChannelToLpDevice listenerId is true
+ * @tc.name: BroadcastSetScanReportChannelToLpDevice001
+ * @tc.desc: BroadcastSetScanReportChannelToLpDevice Error branching
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetScanReportChannelToLpDevice, TestSize.Level1)
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetScanReportChannelToLpDevice001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice begin ----");
+    DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice001 begin ----");
     ManagerMock managerMock;
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
@@ -1460,7 +1436,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetScanReportChannelToLpDevice, TestS
 
     listenerId = 0;
     EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, BroadcastSetScanReportChannelToLpDevice(listenerId, enable));
+
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
-    DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice end ----");
+    DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice001 end ----");
 }
 } // namespace OHOS
