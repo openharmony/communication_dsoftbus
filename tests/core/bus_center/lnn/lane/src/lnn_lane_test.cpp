@@ -2717,7 +2717,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_01, TestSize.Level1)
 {
     const char *networkId = "test";
     LaneLinkType linkType = LANE_LINK_TYPE_BUTT;
-    int32_t ret = LaneCapCheck(networkId,linkType);
+    int32_t ret = LaneCapCheck(networkId, linkType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -3185,7 +3185,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_10, TestSize.Level1)
     EXPECT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.localIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
     EXPECT_EQ(strcpy_s(macInfo.localMac, MAX_MAC_LEN, LOCAL_MAC), EOK);
     EXPECT_EQ(strcpy_s(macInfo.remoteMac, MAX_MAC_LEN, PEER_MAC), EOK);
-    ret = AddLaneResourceToPool(&linkinfo, LANE_ID_BASE, false);
+    int32_t ret = AddLaneResourceToPool(&linkinfo, LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
