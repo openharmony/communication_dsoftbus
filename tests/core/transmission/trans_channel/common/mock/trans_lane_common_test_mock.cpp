@@ -41,11 +41,6 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetTransLaneCommonTestInterface()->SoftbusGetConfig(type, val, len);
 }
 
-struct WifiDirectManager *GetWifiDirectManager()
-{
-    return GetTransLaneCommonTestInterface()->GetWifiDirectManager();
-}
-
 int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     return GetTransLaneCommonTestInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
