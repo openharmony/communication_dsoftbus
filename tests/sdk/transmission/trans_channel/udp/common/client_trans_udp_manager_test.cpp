@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,8 @@ namespace OHOS {
 #define TEST_ERRCODE 0
 #define TEST_FILE_NAME "test.filename.01"
 #define STREAM_DATA_LENGTH 10
+#define TEST_ERR_CHANNELID (-1)
+#define FILE_PRIORITY_TEST 0x06
 
 class ClientTransUdpManagerTest : public testing::Test {
 public:
@@ -409,15 +411,48 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level
 }
 
 /**
- * @tc.name: ClientEmitFileEventTest
+ * @tc.name: ClientEmitFileEventTest001
  * @tc.desc: client emit file event test, use the invalid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest, TestSize.Level0)
+HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest001, TestSize.Level0)
 {
-    int32_t channelId = -1;
+    int32_t channelId = TEST_ERR_CHANNELID;
     int32_t ret = ClientEmitFileEvent(channelId);
     EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ClientEmitFileEventTest002
+ * @tc.desc: client emit file event test, use the invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest002, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNELID;
+    int32_t ret = ClientEmitFileEvent(channelId);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransLimitChangeTest
+ * @tc.desc: trans limit change test, use the invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest, TestSize.Level0)
+{
+    int32_t channelId = TEST_ERR_CHANNELID;
+    int32_t ret = TransLimitChange(channelId, FILE_PRIORITY_BK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+
+    channelId = TEST_CHANNELID;
+    ret = TransLimitChange(channelId, FILE_PRIORITY_BE);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+
+    ret = TransLimitChange(channelId, FILE_PRIORITY_TEST);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
