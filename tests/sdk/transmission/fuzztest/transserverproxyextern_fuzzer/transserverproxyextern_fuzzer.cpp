@@ -15,25 +15,40 @@
 
 #include "transserverproxyextern_fuzzer.h"
 
-#include <cstddef>
-#include <cstdint>
-
-#include "client_trans_auth_manager.h"
-#include "client_trans_channel_callback.h"
-#include "client_trans_proxy_manager.h"
-#include "client_trans_session_callback.h"
-#include "client_trans_session_manager.h"
-#include "client_trans_socket_manager.h"
-#include "client_trans_tcp_direct_manager.h"
-#include "client_trans_udp_manager.h"
+#include <chrono>
+#include <thread>
 #include "securec.h"
-#include "session.h"
+
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
 #include "trans_server_proxy.h"
 
+#define LOOP_SLEEP_MILLS 100
+
 namespace OHOS {
+class TransServerProxyExternTestEnv {
+public:
+    TransServerProxyExternTestEnv()
+    {
+        isInited_ = false;
+        (void)TransServerProxyInit();
+        isInited_ = true;
+    }
+
+    ~TransServerProxyExternTestEnv()
+    {
+        isInited_ = false;
+        TransServerProxyDeInit();
+    }
+
+    bool IsInited(void)
+    {
+        return isInited_;
+    }
+
+private:
+    volatile bool isInited_;
+};
+
 void TransServerProxyDeInitTest(const uint8_t *data, size_t size)
 {
     (void)data;
@@ -103,10 +118,6 @@ void ServerIpcOpenSessionTest(const uint8_t *data, size_t size)
 
 void ServerIpcOpenAuthSessionTest(const uint8_t *data, size_t size)
 {
-    if (size == 0) {
-        return;
-    }
-
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(data));
     ConnectionAddr connectionAddr;
     connectionAddr.type = CONNECTION_ADDR_SESSION;
@@ -141,6 +152,7 @@ void ServerIpcCloseChannelWithStatisticsTest(const uint8_t *data, size_t size)
     if (size < sizeof(uint64_t)) {
         return;
     }
+
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
     uint64_t laneId = *(reinterpret_cast<const uint64_t *>(data));
 
@@ -205,10 +217,6 @@ void ServerIpcGrantPermissionTest(const uint8_t *data, size_t size)
 
 void ServerIpcRemovePermissionTest(const uint8_t *data, size_t size)
 {
-    if (size == 0) {
-        return;
-    }
-
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(data));
 
     (void)ServerIpcRemovePermission(sessionName);
@@ -223,7 +231,7 @@ void ServerIpcEvaluateQosTest(const uint8_t *data, size_t size)
         .qos = *(reinterpret_cast<const QosType *>(data)),
         .value = *(reinterpret_cast<const int32_t *>(data)),
     };
-    uint32_t qosCount = sizeof(qosTv);
+    uint32_t qosCount = 1;
 
     (void)ServerIpcEvaluateQos(peerNetworkId, dataType, &qosTv, qosCount);
     (void)ServerIpcEvaluateQos(nullptr, dataType, &qosTv, qosCount);
@@ -234,6 +242,11 @@ void ServerIpcEvaluateQosTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
+        return 0;
+    }
+
+    static OHOS::TransServerProxyExternTestEnv env;
+    if (!env.IsInited()) {
         return 0;
     }
 
@@ -248,7 +261,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     /* Run your code on data */
-    TransServerProxyInit();
     OHOS::TransServerProxyDeInitTest(data, size);
     OHOS::ServerIpcCreateSessionServerTest(dataWithEndCharacter, size);
     OHOS::ServerIpcRemoveSessionServerTest(dataWithEndCharacter, size);
@@ -264,8 +276,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::ServerIpcGrantPermissionTest(dataWithEndCharacter, size);
     OHOS::ServerIpcRemovePermissionTest(dataWithEndCharacter, size);
     OHOS::ServerIpcEvaluateQosTest(dataWithEndCharacter, size);
-    TransServerProxyDeInit();
-
+    std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_SLEEP_MILLS));
     SoftBusFree(dataWithEndCharacter);
     return 0;
 }

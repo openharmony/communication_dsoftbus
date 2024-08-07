@@ -21,23 +21,17 @@ import("../../../../../dsoftbus.gni")
 ohos_fuzztest("TransServerProxyExternFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
-  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/transserverproxyextern_fuzzer"
+  fuzz_config_file = "$dsoftbus_test_path/sdk/transmission/fuzztest/transserverproxyextern_fuzzer"
 
   include_dirs = [
-    "../../../../../interfaces/kits/transport",
-    "../../../../../core/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../sdk/transmission/trans_channel/manager/include",
-    "../../../../../sdk/transmission/trans_channel/auth/include",
-    "../../../../../sdk/transmission/trans_channel/proxy/include",
-    "../../../../../sdk/transmission/session/include",
-    "../../../../../sdk/transmission/trans_channel/tcp_direct/include",
-    "../../../../../sdk/transmission/trans_channel/udp/common/include",
-    "../../../../../adapter/common/include",
-    "../../../../../sdk/transmission/trans_channel/udp/file/include",
-    "../../../../../core/transmission/common/include",
-    "../../../../../sdk/transmission/ipc/include",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "$dsoftbus_core_path/transmission/common/include",
+
+    "$dsoftbus_root_path/adapter/common/include",
+
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+
+    "$dsoftbus_sdk_path/transmission/ipc/include",
   ]
 
   cflags = [
@@ -49,23 +43,16 @@ ohos_fuzztest("TransServerProxyExternFuzzTest") {
 
   sources = [ "transserverproxyextern_fuzzer.cpp" ]
 
-  deps = [
-    "../../../frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
-  ]
+  deps = [ "$dsoftbus_test_path/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static" ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "ipc:ipc_core",
     "ipc:ipc_single",
   ]
 }
 
 group("fuzztest") {
   testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":TransServerProxyExternFuzzTest",
-  ]
+  deps = [ ":TransServerProxyExternFuzzTest" ]
 }
