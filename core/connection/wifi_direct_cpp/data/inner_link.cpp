@@ -46,6 +46,10 @@ InnerLink::~InnerLink()
         CONN_LOGI(CONN_WIFI_DIRECT, "stop auth listening");
         if (GetLinkType() == LinkType::HML) {
             AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_ENHANCED_P2P, listenerModuleId);
+            if (GetLocalCustomPort() > 0) {
+                CONN_LOGI(CONN_WIFI_DIRECT, "localCustomPort=%{public}d, stop custom listening", GetLocalCustomPort());
+                AuthNegotiateChannel::StopCustomListening();
+            }
         } else {
             AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_P2P, listenerModuleId);
         }
@@ -257,6 +261,36 @@ void InnerLink::SetPtk(bool value)
     Set(InnerLinKey::HAS_PTK, value);
 }
 
+int32_t InnerLink::GetLocalCustomPort() const
+{
+    return Get(InnerLinKey::LOCAL_CUSTOM_PORT, 0);
+}
+
+void InnerLink::SetLocalCustomPort(int32_t value)
+{
+    Set(InnerLinKey::LOCAL_CUSTOM_PORT, value);
+}
+
+int32_t InnerLink::GetRemoteCustomPort() const
+{
+    return Get(InnerLinKey::REMOTE_CUSTOM_PORT, 0);
+}
+
+void InnerLink::SetRemoteCustomPort(int32_t value)
+{
+    Set(InnerLinKey::REMOTE_CUSTOM_PORT, value);
+}
+
+bool InnerLink::GetNewPtkFrame() const
+{
+    return Get(InnerLinKey::NEW_PTK_FRAME, false);
+}
+
+void InnerLink::SetNewPtkFrame(bool value)
+{
+    Set(InnerLinKey::NEW_PTK_FRAME, value);
+}
+
 void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4)
 {
     link.linkId = LinkManager::GetInstance().AllocateLinkId();
@@ -289,6 +323,7 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, 
         CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy failed, link id=%{public}d", link.linkId);
         // fall-through
     }
+    link.remotePort = GetRemoteCustomPort();
 }
 
 void InnerLink::AddId(int linkId, uint32_t requestId, int pid)
@@ -353,6 +388,8 @@ void InnerLink::Dump() const
     object["LOCAL_PORT"] = GetLocalPort();
     object["LISTENER_MODULE_ID"] = GetListenerModule();
     object["NEGOTIATION_CHANNEL"] = channel_ != nullptr;
+    object["LOCAL_CUSTOM_PORT"] = GetLocalCustomPort();
+    object["REMOTE_CUSTOM_PORT"] = GetRemoteCustomPort();
 
     auto linkIdArrayObject = nlohmann::json::array();
     for (const auto &[key, value] : linkIds_) {

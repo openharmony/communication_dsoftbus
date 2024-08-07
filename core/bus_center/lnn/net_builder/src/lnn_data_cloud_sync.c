@@ -968,20 +968,24 @@ static void ProcessSyncToDB(void *para)
     }
     if (info->accountId == 0) {
         LNN_LOGI(LNN_BUILDER, "ledger accountid is null, all data no need sync to cloud");
-        goto EXIT;
+        SoftBusFree(info);
+        return;
     }
     char putKey[KEY_MAX_LEN] = { 0 };
     if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s", info->accountId, info->deviceInfo.deviceUdid) < 0) {
-        goto EXIT;
+        SoftBusFree(info);
+        return;
     }
     info->updateTimestamp = SoftBusGetSysTimeMs();
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        goto EXIT;
+        SoftBusFree(info);
+        return;
     }
     if (PackBroadcastCipherKeyInner(json, info) != SOFTBUS_OK) {
         cJSON_Delete(json);
-        goto EXIT;
+        SoftBusFree(info);
+        return;
     }
     char *putValue = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
@@ -991,15 +995,14 @@ static void ProcessSyncToDB(void *para)
     cJSON_free(putValue);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode=%{public}d", ret);
-        goto EXIT;
+        SoftBusFree(info);
+        return;
     }
     LNN_LOGI(LNN_BUILDER, "sync all data to db success. stateVersion=%{public}d", info->stateVersion);
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch cloud sync fail, errorcode=%{public}d", ret);
     }
-EXIT:
-    SoftBusFree(info);
 }
 
 int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)

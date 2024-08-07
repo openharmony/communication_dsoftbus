@@ -26,11 +26,12 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
                                        bool markRetried)
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
-              "requestId=%{public}d pid=%{public}d type=%{public}d networkId=%{public}s remoteUuid=%{public}s "
+              "requestId=%{public}d, pid=%{public}d, type=%{public}d, networkId=%{public}s, remoteUuid=%{public}s, "
               "expectRole=0x%{public}x, bw=%{public}d, ipaddrType=%{public}d",
               info.requestId, info.pid, info.connectType, WifiDirectAnonymizeDeviceId(info.remoteNetworkId).c_str(),
               WifiDirectAnonymizeDeviceId(WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId)).c_str(),
               info.expectApiRole, info.bandWidth, info.ipAddrType);
+    DumpNegotiateChannel(info.negoChannel);
 
     auto command = CommandFactory::GetInstance().CreateConnectCommand(info, callback);
     command->SetRetried(markRetried);
@@ -46,7 +47,7 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
 
 int WifiDirectScheduler::CancelConnectDevice(const WifiDirectConnectInfo &info)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d pid=%{public}d", info.requestId, info.pid);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, pid=%{public}d", info.requestId, info.pid);
 
     std::lock_guard commandLock(commandLock_);
     for (auto itc = commandList_.begin(); itc != commandList_.end(); itc++) {
@@ -68,7 +69,7 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
 {
     auto command = CommandFactory::GetInstance().CreateDisconnectCommand(info, callback);
     CONN_LOGI(CONN_WIFI_DIRECT,
-              "requestId=%{public}d pid=%{public}d linkId=%{public}d networkId=%{public}s remoteUuid=%{public}s",
+              "requestId=%{public}d, pid=%{public}d, linkId=%{public}d, networkId=%{public}s, remoteUuid=%{public}s",
               info.requestId, info.pid, info.linkId,
               WifiDirectAnonymizeDeviceId(WifiDirectUtils::UuidToNetworkId(command->GetRemoteDeviceId())).c_str(),
               WifiDirectAnonymizeDeviceId(command->GetRemoteDeviceId()).c_str());
@@ -76,6 +77,26 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
     std::shared_ptr<WifiDirectExecutor> executor;
     auto ret = ScheduleActiveCommand(command, executor);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
+    if (executor != nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
+        executor->SendEvent(command);
+    }
+    return ret;
+}
+
+int WifiDirectScheduler::ForceDisconnectDevice(
+    WifiDirectForceDisconnectInfo &info, WifiDirectDisconnectCallback &callback)
+{
+    auto command = CommandFactory::GetInstance().CreateForceDisconnectCommand(info, callback);
+    CONN_LOGI(CONN_WIFI_DIRECT,
+              "requestId=%{public}d pid=%{public}d networkId=%{public}s remoteUuid=%{public}s linktype=%{public}d",
+              info.requestId, info.pid,
+              WifiDirectAnonymizeDeviceId(WifiDirectUtils::UuidToNetworkId(command->GetRemoteDeviceId())).c_str(),
+              WifiDirectAnonymizeDeviceId(command->GetRemoteDeviceId()).c_str(), info.linkType);
+    std::shared_ptr<WifiDirectExecutor> executor;
+    auto ret = ScheduleActiveCommand(command, executor);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed, ret=%{public}d", ret);
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
@@ -163,5 +184,30 @@ int WifiDirectScheduler::ScheduleActiveCommand(const std::shared_ptr<WifiDirectC
 
     executors_.insert({ remoteDeviceId, executor });
     return SOFTBUS_OK;
+}
+
+void WifiDirectScheduler::DumpNegotiateChannel(const WifiDirectNegotiateChannel &channel)
+{
+    switch (channel.type) {
+        case NEGO_CHANNEL_NULL:
+            CONN_LOGI(CONN_WIFI_DIRECT, "NEGO_CHANNEL_NULL");
+            break;
+        case NEGO_CHANNEL_AUTH:
+            CONN_LOGI(CONN_WIFI_DIRECT, "NEGO_CHANNEL_AUTH, type=%{public}d, authId=%{public}" PRId64,
+                      channel.handle.authHandle.type, channel.handle.authHandle.authId);
+            break;
+        case NEGO_CHANNEL_COC:
+            CONN_LOGI(CONN_WIFI_DIRECT, "NEGO_CHANNEL_COC");
+            break;
+        case NEGO_CHANNEL_ACTION:
+            CONN_LOGI(CONN_WIFI_DIRECT, "NEGO_CHANNEL_ACTION, actionAddr=%{public}d",
+                      channel.handle.actionAddr);
+            break;
+        case NEGO_CHANNEL_SHARE:
+            CONN_LOGI(CONN_WIFI_DIRECT, "NEGO_CHANNEL_COC, channelId=%{public}d", channel.handle.channelId);
+            break;
+        default:
+            CONN_LOGW(CONN_WIFI_DIRECT, "not support type=%{public}d", channel.type);
+    }
 }
 }

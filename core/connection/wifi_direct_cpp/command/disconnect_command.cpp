@@ -67,6 +67,10 @@ std::string DisconnectCommand::GetRemoteDeviceId() const
 std::shared_ptr<WifiDirectProcessor> DisconnectCommand::GetProcessor()
 {
     auto selector = ProcessorSelectorFactory::GetInstance().NewSelector();
+    if (selector == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "selector is null");
+        return nullptr;
+    }
     return (*selector)(info_.info_);
 }
 
@@ -86,7 +90,7 @@ void DisconnectCommand::OnSuccess() const
     callback_.onDisconnectSuccess(info_.info_.requestId);
 }
 
-void DisconnectCommand::OnFailure(int reason) const
+void DisconnectCommand::OnFailure(int32_t reason) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
     callback_.onDisconnectFailure(info_.info_.requestId, reason);

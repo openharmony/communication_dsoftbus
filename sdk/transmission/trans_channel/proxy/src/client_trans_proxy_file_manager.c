@@ -1348,11 +1348,11 @@ static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const F
         goto EXIT_ERR;
     }
     HandleFileTransferCompletion(recipient, sessionId, file);
-    ReleaseRecipientRef(recipient);
     SoftBusFree(file);
     if (recipient->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         (void)SendFileTransResult(channelId, 0, SOFTBUS_OK, IS_RECV_RESULT);
     }
+    ReleaseRecipientRef(recipient);
     return SOFTBUS_OK;
 EXIT_ERR:
     SoftBusFree(file);
@@ -1403,7 +1403,7 @@ static int32_t ProcessFileFrameSequence(uint64_t *fileOffset, const FileFrame *f
     uint32_t bit = frame->seq % FILE_SEND_ACK_INTERVAL;
     bit = ((bit == 0) ? (FILE_SEND_ACK_INTERVAL - 1) : (bit - 1));
     if (frame->seq >= fileInfo->startSeq) {
-        int64_t seqDiff = (int32_t)(frame->seq - fileInfo->seq - 1);
+        int64_t seqDiff = (int32_t)((int32_t)frame->seq - (int32_t)fileInfo->seq - 1);
         if (seqDiff > INT32_MAX) {
             TRANS_LOGE(TRANS_FILE, "seqDiff overflow");
             return SOFTBUS_INVALID_NUM;
@@ -1426,7 +1426,8 @@ static int32_t ProcessFileFrameSequence(uint64_t *fileOffset, const FileFrame *f
         int32_t ret = WriteEmptyFrame(fileInfo, (int32_t)seqDiff);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "write frame failed");
 
-        if ((frame->seq >= fileInfo->preStartSeq + FILE_SEND_ACK_INTERVAL + WAIT_FRAME_ACK_TIMEOUT_COUNT - 1) ||
+        if ((frame->seq >=
+            fileInfo->preStartSeq + (uint32_t)FILE_SEND_ACK_INTERVAL + (uint32_t)WAIT_FRAME_ACK_TIMEOUT_COUNT - 1u) ||
             (frame->frameType == TRANS_SESSION_FILE_LAST_FRAME && frame->seq > FILE_SEND_ACK_INTERVAL)) {
             if ((fileInfo->preSeqResult & FILE_SEND_ACK_RESULT_SUCCESS) != FILE_SEND_ACK_RESULT_SUCCESS) {
                 TRANS_LOGE(TRANS_FILE, "recv file fail. frame loss");

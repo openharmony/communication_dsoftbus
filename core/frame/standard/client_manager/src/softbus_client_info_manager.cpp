@@ -13,13 +13,10 @@
  * limitations under the License.
  */
 
-#include <algorithm>
 
-#include "comm_log.h"
 #include "softbus_client_info_manager.h"
 #include "permission_status_change_cb.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
 #include "softbus_server.h"
 
 namespace OHOS {

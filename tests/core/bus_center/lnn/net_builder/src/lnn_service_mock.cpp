@@ -138,6 +138,67 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     return GetServiceInterface()->AuthGetDeviceUuid(authId, uuid, size);
 }
 
+int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num)
+{
+    return GetServiceInterface()->SoftBusGetWifiDeviceConfig(configList, num);
+}
+
+int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
+{
+    return GetServiceInterface()->SoftBusConnectToDevice(wifiConfig);
+}
+
+int32_t SoftBusDisconnectDevice(void)
+{
+    return GetServiceInterface()->SoftBusDisconnectDevice();
+}
+
+ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
+{
+    return GetServiceInterface()->LnnDiscTypeToConnAddrType(type);
+}
+
+void UpdateProfile(const NodeInfo *info)
+{
+    return GetServiceInterface()->UpdateProfile(info);
+}
+
+bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
+{
+    return GetServiceInterface()->IsFeatureSupport(feature, capaBit);
+}
+
+int32_t LnnStartHbByTypeAndStrategy(
+    LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategy, bool isRelay)
+{
+    return GetServiceInterface()->LnnStartHbByTypeAndStrategy(hbType, strategy, isRelay);
+}
+
+bool SoftBusIsWifiTripleMode(void)
+{
+    return GetServiceInterface()->SoftBusIsWifiTripleMode();
+}
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    return GetServiceInterface()->SoftBusGetLinkBand();
+}
+
+SoftBusWifiDetailState SoftBusGetWifiState(void)
+{
+    return GetServiceInterface()->SoftBusGetWifiState();
+}
+
+bool SoftBusHasWifiDirectCapability(void)
+{
+    return GetServiceInterface()->SoftBusHasWifiDirectCapability();
+}
+
+char* SoftBusGetWifiInterfaceCoexistCap(void)
+{
+    return GetServiceInterface()->SoftBusGetWifiInterfaceCoexistCap();
+}
+
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {

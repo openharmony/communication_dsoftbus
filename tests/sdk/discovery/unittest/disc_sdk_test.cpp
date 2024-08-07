@@ -232,7 +232,7 @@ HWTEST_F(DiscSdkTest, PublishLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.medium = COAP;
 
-    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
+    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.freq = (ExchangeFreq)(LOW - 1);
@@ -308,6 +308,12 @@ HWTEST_F(DiscSdkTest, PublishLNNTest005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_publishInfo.freq = EXTREME_HIGH;
+    ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -343,6 +349,12 @@ HWTEST_F(DiscSdkTest, PublishLNNTest006, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_publishInfo.freq = SUPER_HIGH;
+    ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
+    ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
+
+    g_publishInfo.freq = EXTREME_HIGH;
     ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
@@ -507,7 +519,7 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.medium = COAP;
 
-    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
+    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.freq = (ExchangeFreq)(LOW - 1);
@@ -583,6 +595,12 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_subscribeInfo.freq = EXTREME_HIGH;
+    ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -618,6 +636,12 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest006, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_subscribeInfo.freq = SUPER_HIGH;
+    ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
+    ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
+
+    g_subscribeInfo.freq = EXTREME_HIGH;
     ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
@@ -794,6 +818,11 @@ HWTEST_F(DiscSdkTest, StopPublishLNNTest004, TestSize.Level1)
     PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_publishInfo.freq = EXTREME_HIGH;
+    PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
+    ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -826,6 +855,11 @@ HWTEST_F(DiscSdkTest, StopPublishLNNTest005, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_publishInfo.freq = SUPER_HIGH;
+    PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
+    ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
+
+    g_publishInfo.freq = EXTREME_HIGH;
     PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
@@ -917,6 +951,11 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest004, TestSize.Level1)
     RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_subscribeInfo.freq = EXTREME_HIGH;
+    RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
+    ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -949,6 +988,11 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest005, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_subscribeInfo.freq = SUPER_HIGH;
+    RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
+    ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
+
+    g_subscribeInfo.freq = EXTREME_HIGH;
     RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));

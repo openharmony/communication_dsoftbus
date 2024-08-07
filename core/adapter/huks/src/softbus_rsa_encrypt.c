@@ -280,8 +280,8 @@ static int32_t DataToPublicKey(const uint8_t *bufKey, int32_t bufKeyLen, RSA **p
 int32_t SoftBusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
     uint32_t *encryptedDataLen)
 {
-    if (srcData == NULL || srcDataLen == 0 || publicKey == NULL || publicKey->key == NULL || publicKey->len == 0 ||
-        encryptedData == NULL || encryptedDataLen == NULL) {
+    if (srcData == NULL || srcDataLen == 0 || publicKey == NULL || publicKey->key == NULL ||
+        publicKey->len <= RSA_PUB_KEY_LEN_SUBTRACT_ENCRYPT_LEN || encryptedData == NULL || encryptedDataLen == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -290,7 +290,7 @@ int32_t SoftBusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey
         COMM_LOGE(COMM_UTILS, "DataToPublicKey failed.");
         return SOFTBUS_BIO_ERR;
     }
-    uint32_t cipherTextLen = SOFTBUS_RSA_ENCRYPT_LEN;
+    uint32_t cipherTextLen = publicKey->len - RSA_PUB_KEY_LEN_SUBTRACT_ENCRYPT_LEN;
     uint8_t *cipherText = (uint8_t *)SoftBusCalloc(cipherTextLen);
     if (cipherText == NULL) {
         COMM_LOGE(COMM_UTILS, "cipherText calloc failed.");

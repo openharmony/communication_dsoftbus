@@ -35,6 +35,8 @@
 #include "trans_session_service.h"
 #include "wifi_direct_manager.h"
 
+#define TEST_CHANNEL_ID 1027
+
 using namespace testing::ext;
 
 namespace OHOS {
@@ -135,6 +137,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, Te
     uint32_t cipherFlagBle = FLAG_BLE;
     uint32_t cipherFlagP2p = FLAG_P2P;
     uint32_t cipherFlagWifi = FLAG_WIFI;
+    uint32_t cipherFlagEnhance = FLAG_ENHANCE_P2P;;
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlagBr);
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_BR);
@@ -144,6 +147,9 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, Te
 
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlagP2p);
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_P2P);
+
+    linkType = SwitchCipherTypeToAuthLinkType(cipherFlagEnhance);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_ENHANCED_P2P);
 
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlagWifi);
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_WIFI);
@@ -271,7 +277,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReply0007, TestSize.
     AppInfo *appInfo = TestSetAppInfo();
 
     ret = OpenDataBusRequestReply(appInfo, channelId, seq, flags);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -765,4 +771,93 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0014, TestSi
     tmp = nullptr;
 }
 
+/**
+ * @tc.name: GetChannelInfoFromConn001
+ * @tc.desc: Test when channelId is valid then GetChannelInfoFromConn returns valid ChannelInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, GetChannelInfoFromConn001, TestSize.Level1)
+{
+    ChannelInfo info;
+    SessionConn conn;
+    int32_t channelId = 1;
+    conn.serverSide = true;
+    conn.appInfo.fd = 1;
+    (void)strcpy_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), "1");
+    conn.appInfo.myHandleId = 1;
+    conn.appInfo.peerHandleId = 1;
+    (void)strcpy_s(conn.appInfo.peerData.sessionName, sizeof(conn.appInfo.peerData.sessionName), "test");
+    (void)strcpy_s(conn.appInfo.groupId, sizeof(conn.appInfo.groupId), "1");
+    conn.appInfo.peerData.uid = 1;
+    conn.appInfo.peerData.pid = 1;
+    conn.appInfo.routeType = WIFI_STA;
+    conn.appInfo.businessType = BUSINESS_TYPE_MESSAGE;
+    conn.appInfo.autoCloseTime = 1;
+    (void)strcpy_s(conn.appInfo.peerData.addr, sizeof(conn.appInfo.peerData.addr), "127.0.0.1");
+    conn.appInfo.peerData.port = 1;
+    conn.appInfo.linkType = 1;
+    conn.appInfo.myData.dataConfig = 1;
+
+    GetChannelInfoFromConn(&info, &conn, channelId);
+    EXPECT_EQ(info.channelId, channelId);
+    EXPECT_EQ(info.channelType, CHANNEL_TYPE_TCP_DIRECT);
+    EXPECT_EQ(info.isServer, conn.serverSide);
+    EXPECT_EQ(info.isEnabled, true);
+    EXPECT_EQ(info.fd, conn.appInfo.fd);
+    EXPECT_EQ(info.sessionKey, conn.appInfo.sessionKey);
+    EXPECT_EQ(info.myHandleId, conn.appInfo.myHandleId);
+    EXPECT_EQ(info.peerHandleId, conn.appInfo.peerHandleId);
+    EXPECT_EQ(info.peerSessionName, conn.appInfo.peerData.sessionName);
+    EXPECT_EQ(info.groupId, conn.appInfo.groupId);
+    EXPECT_EQ(info.isEncrypt, true);
+    EXPECT_EQ(info.keyLen, SESSION_KEY_LENGTH);
+    EXPECT_EQ(info.peerUid, conn.appInfo.peerData.uid);
+    EXPECT_EQ(info.peerPid, conn.appInfo.peerData.pid);
+    EXPECT_EQ(info.routeType, conn.appInfo.routeType);
+    EXPECT_EQ(info.businessType, conn.appInfo.businessType);
+    EXPECT_EQ(info.autoCloseTime, conn.appInfo.autoCloseTime);
+    EXPECT_EQ(info.peerIp, conn.appInfo.peerData.addr);
+    EXPECT_EQ(info.peerPort, conn.appInfo.peerData.port);
+    EXPECT_EQ(info.linkType, conn.appInfo.linkType);
+    EXPECT_EQ(info.dataConfig, conn.appInfo.myData.dataConfig);
+}
+
+/**
+ * @tc.name: GetServerSideIpInfoTest001
+ * @tc.desc: GetServerSideIpInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, GetServerSideIpInfoTest001, TestSize.Level1)
+{
+    uint32_t len = 10; // test value
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    conn->appInfo.routeType = WIFI_P2P;
+    char myIp[IP_LEN] = { 0 };
+    int32_t ret = GetServerSideIpInfo(&conn->appInfo, myIp, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
+
+    ret = GetClientSideIpInfo(&conn->appInfo, myIp, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: ReleaseSessionConnTest001
+ * @tc.desc: ReleaseSessionConn test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, ReleaseSessionConnTest001, TestSize.Level1)
+{
+    SessionConn *chan = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(chan != nullptr);
+    ReleaseSessionConn(chan);
+
+    int32_t channelId = TEST_CHANNEL_ID;
+    int32_t ret = NotifyChannelBind(channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+}
 }

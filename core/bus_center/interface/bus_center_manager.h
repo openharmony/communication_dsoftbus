@@ -83,7 +83,6 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len);
 int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len);
 int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *connSubFeature);
 int32_t LnnSetLocalUnifiedName(const char *unifiedName);
-int32_t LnnSetLocalStateVersionReason(void);
 bool LnnIsMasterNode(void);
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
 

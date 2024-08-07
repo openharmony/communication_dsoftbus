@@ -182,6 +182,12 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
     EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = EXTREME_HIGH;
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -225,6 +231,12 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
 
     testInfo.freq = SUPER_HIGH;
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = EXTREME_HIGH;
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
@@ -360,6 +372,12 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
     EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = EXTREME_HIGH;
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -403,6 +421,12 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
 
     testInfo.freq = SUPER_HIGH;
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = EXTREME_HIGH;
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
@@ -451,7 +475,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
+    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -743,6 +767,11 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest018, TestSize.Level1)
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
+
+    testInfo.freq = EXTREME_HIGH;
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
 /**
@@ -783,6 +812,11 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest019, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 
     testInfo.freq = SUPER_HIGH;
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
+
+    testInfo.freq = EXTREME_HIGH;
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);

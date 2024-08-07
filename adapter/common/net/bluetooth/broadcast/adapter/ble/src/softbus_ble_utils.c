@@ -25,9 +25,8 @@
 #define UUID_LEN 2
 #define UUID_MASK_LEN 2
 #define ID_LEN 2
-#define MANUFACTURE_DATA_LEN 2
-#define MANUFACTURE_DATA_UUID_LOW 0x7D
-#define MANUFACTURE_DATA_UUID_HIGH  0x02
+#define MANUFACTURE_DATA_LEN 1
+#define MANUFACTURE_DATA_ID 0x027D
 
 int32_t BtStatusToSoftBus(BtStatus btStatus)
 {
@@ -288,20 +287,16 @@ void SoftbusSetManufactureFilter(BleScanNativeFilter *nativeFilter, uint8_t filt
             DISC_LOGW(DISC_BLE_ADAPTER, "malloc manufacture data failed");
             return;
         }
-        manufactureData[0] = MANUFACTURE_DATA_UUID_LOW & BC_BYTE_MASK;
-        manufactureData[1] = MANUFACTURE_DATA_UUID_HIGH & BC_BYTE_MASK;
         uint8_t *manufactureMask = (uint8_t *)SoftBusCalloc(MANUFACTURE_DATA_LEN);
         if (manufactureMask == NULL) {
             SoftBusFree(manufactureData);
             DISC_LOGW(DISC_BLE_ADAPTER, "malloc manufacture mask failed");
             return;
         }
-        manufactureMask[0] = BC_BYTE_MASK;
-        manufactureMask[1] = BC_BYTE_MASK;
         (nativeFilter + filterSize)->manufactureData = manufactureData;
         (nativeFilter + filterSize)->manufactureDataLength = MANUFACTURE_DATA_LEN;
         (nativeFilter + filterSize)->manufactureDataMask = manufactureMask;
-        (nativeFilter + filterSize)->manufactureId = filterSize + 1;
+        (nativeFilter + filterSize)->manufactureId = MANUFACTURE_DATA_ID;
     }
 }
 
@@ -355,6 +350,12 @@ int GetBtScanMode(uint16_t scanInterval, uint16_t scanWindow)
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P25 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P25) {
         return OHOS_BLE_SCAN_MODE_OP_P25_60_240;
+    }
+    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P50 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P50) {
+        return OHOS_BLE_SCAN_MODE_OP_P50_30_60;
+    }
+    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P75 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P75) {
+        return OHOS_BLE_SCAN_MODE_OP_P75_30_40;
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P100 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P100) {
         return OHOS_BLE_SCAN_MODE_OP_P100_1000_1000;

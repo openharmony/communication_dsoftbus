@@ -38,6 +38,7 @@ enum class LegacyCommandType {
 
     CMD_PC_GET_INTERFACE_INFO_REQ = 30,
     CMD_PC_GET_INTERFACE_INFO_RESP = 31,
+    CMD_FORCE_DISCONNECT_V1_REQ = 32,
 };
 
 enum class LegacyContentType {
@@ -67,6 +68,7 @@ enum class NegotiateMessageType {
     CMD_DISCONNECT_V2_REQ = 27,
     CMD_DISCONNECT_V2_RESP = 28,
     CMD_CLIENT_JOIN_FAIL_NOTIFY = 29,
+    /* 30-49 is for LegacyCommandType*/
 
     CMD_TRIGGER_REQ = 50,
     CMD_TRIGGER_RESP = 51,
@@ -77,9 +79,12 @@ enum class NegotiateMessageType {
     CMD_AUTH_HAND_SHAKE_RSP = 56,
     CMD_DETECT_LINK_REQ = 57,
     CMD_DETECT_LINK_RSP = 58,
+    CMD_FORCE_DISCONNECT_REQ = 59,
 
     CMD_V3_REQ = 100,
     CMD_V3_RSP = 101,
+    CMD_V3_CUSTOM_PORT_REQ = 102,
+    CMD_V3_CUSTOM_PORT_RSP = 103,
 };
 
 enum class NegotiateMessageKey {
@@ -103,6 +108,7 @@ enum class NegotiateMessageKey {
     CHANNEL_5G_LIST = 17,
     CHANNEL_5G_SCORE = 18,
     CHALLENGE_CODE = 19,
+    NEW_PTK_FRAME = 20,
 
     /* old p2p */
     GC_CHANNEL_LIST = 200,
@@ -192,6 +198,9 @@ public:
 
     void SetChallengeCode(uint32_t value);
     uint32_t GetChallengeCode() const;
+
+    void SetNewPtkFrame(bool value);
+    bool GetNewPtkFrame() const;
 
     void SetLegacyP2pGcChannelList(const std::string &value);
     std::string GetLegacyP2pGcChannelList() const;

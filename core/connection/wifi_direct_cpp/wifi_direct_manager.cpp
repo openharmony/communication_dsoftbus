@@ -151,6 +151,17 @@ static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct Wi
     return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().DisconnectDevice(*info, *callback);
 }
 
+static int32_t ForceDisconnectDevice(
+    struct WifiDirectForceDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestid=%{public}d linktype=%{public}d remoteUuid=%{public}s", info->requestId,
+        info->linkType, OHOS::SoftBus::WifiDirectAnonymizeDeviceId(info->remoteUuid).c_str());
+    return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ForceDisconnectDevice(
+        *info, *callback);
+}
+
 static void RegisterStatusListener(struct WifiDirectStatusListener *listener)
 {
     g_listeners.push_back(*listener);
@@ -211,6 +222,35 @@ static int32_t SyncPtk(const char *remoteDeviceId)
 static void AddSyncPtkListener(SyncPtkListener listener)
 {
     g_syncPtkListener = listener;
+}
+
+static OHOS::SoftBus::InnerLink::LinkType LinkTypeConver(enum WifiDirectLinkType linkType)
+{
+    switch (linkType) {
+        case WIFI_DIRECT_LINK_TYPE_HML:
+            return OHOS::SoftBus::InnerLink::LinkType::HML;
+        case WIFI_DIRECT_LINK_TYPE_P2P:
+            return OHOS::SoftBus::InnerLink::LinkType::P2P;
+        default:
+            return OHOS::SoftBus::InnerLink::LinkType::INVALID_TYPE;
+    }
+}
+
+static bool IsNoneLinkByType(enum WifiDirectLinkType linkType)
+{
+    bool result = true;
+    OHOS::SoftBus::InnerLink::LinkType innerLinkType = LinkTypeConver(linkType);
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
+        [&result, &innerLinkType] (OHOS::SoftBus::InnerLink &innerLink) {
+            if (innerLink.GetLinkType() == innerLinkType) {
+                CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s",
+                          OHOS::SoftBus::WifiDirectAnonymizeDeviceId(innerLink.GetRemoteDeviceId()).c_str());
+                result = false;
+                return true;
+            }
+            return false;
+        });
+    return result;
 }
 
 static bool IsDeviceOnline(const char *remoteMac)
@@ -488,8 +528,10 @@ static struct WifiDirectManager g_manager = {
     .connectDevice = ConnectDevice,
     .cancelConnectDevice = CancelConnectDevice,
     .disconnectDevice = DisconnectDevice,
+    .forceDisconnectDevice = ForceDisconnectDevice,
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
+    .isNoneLinkByType = IsNoneLinkByType,
 
     .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
     .refreshRelationShip = RefreshRelationShip,

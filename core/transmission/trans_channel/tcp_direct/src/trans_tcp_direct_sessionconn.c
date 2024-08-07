@@ -148,7 +148,7 @@ SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
     }
     conn->serverSide = isServerSid;
     conn->channelId = GenerateChannelId(true);
-    if (conn->channelId == INVALID_CHANNEL_ID) {
+    if (conn->channelId <= INVALID_CHANNEL_ID) {
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "generate tdc channel id failed.");
         return NULL;
@@ -449,7 +449,6 @@ int32_t TransTdcGetLocalIpAndConnectTypeById(int32_t channelId, char *localIp, u
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
-    TRANS_LOGE(TRANS_CTRL, "TcpChannelInfo not found. channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 

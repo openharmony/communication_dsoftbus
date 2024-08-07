@@ -36,6 +36,7 @@ int32_t GetRandBytes(uint8_t *buf, uint32_t len)
 
 EVP_CIPHER_CTX *CreateCryptCtx()
 {
+    LOGI(TAG, "openssl CreateCryptCtx");
     EVP_CIPHER_CTX *ctx = NULL;
     ctx = EVP_CIPHER_CTX_new();
     return ctx;

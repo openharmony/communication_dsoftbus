@@ -19,14 +19,14 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-#define IF_NAME_LEN 16
-#define IP_MASK_MAX 32
 #define MAC_ADDR_STR_LEN 32
 #define MAC_ADDR_ARRAY_SIZE 6
 #define GROUP_CONFIG_STR_LEN 256
 #define WIFI_CFG_INFO_MAX_LEN 512
 
 #define IP_NUM_MAX 32
+#define IF_NAME_HML "chba0"
+#define IF_NAME_P2P0 "p2p0"
 #define IF_NAME_WLAN "wlan0"
 #define IF_NAME_WLAN1 "wlan1"
 

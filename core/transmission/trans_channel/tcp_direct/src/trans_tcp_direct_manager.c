@@ -34,8 +34,6 @@
 #include "wifi_direct_manager.h"
 
 #define HANDSHAKE_TIMEOUT 19
-#define NETWORK_ID_LEN 7
-#define HML_IP_PREFIX "172.30."
 
 static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
 {
@@ -61,6 +59,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
         .peerDevVer = node->appInfo.peerVersion,
         .result = EVENT_STAGE_RESULT_FAILED
     };
+    extra.deviceState = TransGetDeviceState(node->appInfo.peerNetWorkId);
     if (!node->serverSide) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     } else {
@@ -301,7 +300,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
 
     ConnectType connType = connInfo->type;
     if (connType == CONNECT_P2P_REUSE) {
-        connType = (strncmp(appInfo->myData.addr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) ? CONNECT_HML : CONNECT_P2P;
+        connType = (IsHmlIpAddr(appInfo->myData.addr)) ? CONNECT_HML : CONNECT_P2P;
     }
     TransEventExtra extra = {
         .peerNetworkId = NULL,

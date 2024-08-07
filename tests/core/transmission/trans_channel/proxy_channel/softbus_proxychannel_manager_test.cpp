@@ -217,19 +217,19 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelTest001, Test
 
     connInfo.type = CONNECT_BLE_DIRECT;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     connInfo.type = CONNECT_BLE;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     connInfo.type = CONNECT_BR;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 
     connInfo.type = CONNECT_TCP;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 }
 
 /**

@@ -27,6 +27,7 @@
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_qos.h"
+#include "softbus_wifi_api_adapter.h"
 #include "trans_auth_manager.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
@@ -283,6 +284,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     AnonymizeFree(tmpId);
     appInfo->appType = APP_TYPE_NORMAL;
     appInfo->myData.apiVersion = API_V2;
+    appInfo->myData.channelId = INVALID_CHANNEL_ID;
     if (param->attr->dataType == TYPE_STREAM) {
         appInfo->businessType = BUSINESS_TYPE_STREAM;
         appInfo->streamType = (StreamType)param->attr->attr.streamAttr.streamType;
@@ -429,6 +431,7 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
                 break;
             case CHANNEL_TYPE_AUTH:
                 ret = TransCloseAuthChannel(channelId);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 break;
             default:
                 TRANS_LOGE(TRANS_CTRL, "Unknow channel type, type=%{public}d", channelType);
@@ -575,4 +578,49 @@ bool IsPeerDeviceLegacyOs(int32_t osType)
 {
     // peer device legacyOs when osType is not OH_OS_TYPE
     return (osType == OH_OS_TYPE) ? false : true;
+}
+
+static bool TransGetNetCapability(const char *networkId, uint32_t *local, uint32_t *remote)
+{
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
+        return false;
+    }
+    ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
+        return false;
+    }
+    TRANS_LOGD(TRANS_CTRL, "trans get net capability success, local=%{public}u, remote=%{public}u", *local, *remote);
+    return true;
+}
+
+TransDeviceState TransGetDeviceState(const char *networkId)
+{
+    if (networkId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "networkId err.");
+        return DEVICE_STATE_INVALID;
+    }
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (wifiState == SOFTBUS_WIFI_STATE_SEMIACTIVATING || wifiState == SOFTBUS_WIFI_STATE_SEMIACTIVE) {
+        return DEVICE_STATE_LOCAL_WIFI_HALF_OFF;
+    }
+    uint32_t local = 0;
+    uint32_t remote = 0;
+    if (!TransGetNetCapability(networkId, &local, &remote)) {
+        TRANS_LOGE(TRANS_CTRL, "get cap err.");
+        return DEVICE_STATE_INVALID;
+    }
+    if ((local & (1 << BIT_BLE)) && !(local & (1 << BIT_BR))) {
+        return DEVICE_STATE_LOCAL_BT_HALF_OFF;
+    }
+    if ((remote & (1 << BIT_BLE)) && !(remote & (1 << BIT_BR))) {
+        return DEVICE_STATE_REMOTE_BT_HALF_OFF;
+    }
+    if ((remote & (1 << BIT_WIFI_P2P)) && !(remote & (1 << BIT_WIFI)) &&
+        !(remote & (1 << BIT_WIFI_24G)) && !(remote & (1 << BIT_WIFI_5G))) {
+        return DEVICE_STATE_REMOTE_WIFI_HALF_OFF;
+    }
+    return DEVICE_STATE_NOT_CARE;
 }

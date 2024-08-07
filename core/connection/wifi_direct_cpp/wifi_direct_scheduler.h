@@ -41,6 +41,7 @@ public:
     int ConnectDevice(const std::shared_ptr<ConnectCommand> &command, bool markRetried = false);
     int CancelConnectDevice(const WifiDirectConnectInfo &info);
     int DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback);
+    int ForceDisconnectDevice(WifiDirectForceDisconnectInfo &info, WifiDirectDisconnectCallback &callback);
 
     template<typename Command>
     void ProcessNegotiateData(const std::string &remoteDeviceId, Command &command)
@@ -161,6 +162,7 @@ public:
 protected:
     int ScheduleActiveCommand(const std::shared_ptr<WifiDirectCommand> &command,
                               std::shared_ptr<WifiDirectExecutor> &executor);
+    static void DumpNegotiateChannel(const WifiDirectNegotiateChannel &channel);
 
     static constexpr int MAX_EXECUTOR = 8;
     std::recursive_mutex executorLock_;

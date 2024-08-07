@@ -177,7 +177,7 @@ void LinkManager::RemoveLink(const std::string &remoteMac)
     {
         std::lock_guard lock(lock_);
         for (const auto &[key, value] : links_) {
-            if (remoteMac == value->GetRemoteBaseMac()) {
+            if (!remoteMac.empty() && remoteMac == value->GetRemoteBaseMac()) {
                 CONN_LOGI(CONN_WIFI_DIRECT, "find remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
                 link = value;
                 links_.erase(key);
@@ -288,11 +288,12 @@ std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
 
 void LinkManager::RefreshRelationShip(const std::string &remoteDeviceId, const std::string &remoteMac)
 {
-    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s, remoteMac=%{public}s",
+              WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(), WifiDirectAnonymizeMac(remoteMac).c_str());
     std::lock_guard lock(lock_);
     auto it = links_.find({ InnerLink::LinkType::HML, remoteMac });
     if (it == links_.end()) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "not find %{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
+        CONN_LOGE(CONN_WIFI_DIRECT, "not find %{public}s as device id", WifiDirectAnonymizeMac(remoteMac).c_str());
         return;
     }
     auto link = it->second;

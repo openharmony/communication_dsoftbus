@@ -38,6 +38,7 @@
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "trans_channel_common.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
@@ -260,7 +261,13 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         TRANS_LOGE(TRANS_BYTES, "Invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t bufferLen = AuthGetEncryptSize(packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    AuthHandle authHandle = { 0 };
+    if (GetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK ||
+        authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_BYTES, "get auth id fail, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
+    }
+    uint32_t bufferLen = AuthGetEncryptSize(authHandle.authId, packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = (char *)SoftBusCalloc(bufferLen);
     if (buffer == NULL) {
         TRANS_LOGE(TRANS_BYTES, "buffer malloc error.");
@@ -474,6 +481,7 @@ int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t er
         .peerDevVer = conn->appInfo.peerVersion,
         .result = EVENT_STAGE_RESULT_FAILED
     };
+    extra.deviceState = TransGetDeviceState(conn->appInfo.peerNetWorkId);
     int32_t sceneCommand = conn->serverSide ? EVENT_SCENE_OPEN_CHANNEL_SERVER : EVENT_SCENE_OPEN_CHANNEL;
     TRANS_EVENT(sceneCommand, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransAlarmExtra extraAlarm = {
