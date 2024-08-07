@@ -114,7 +114,6 @@
               "bus_center/softbus_bus_center.h",
               "common/softbus_common.h",
               "common/softbus_error_code.h",
-              "discovery/discovery_service.h",
               "transport/session.h"
             ],
             "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
