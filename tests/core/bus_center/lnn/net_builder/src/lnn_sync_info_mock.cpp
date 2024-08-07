@@ -51,6 +51,10 @@ int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler hand
 {
     return GetSyncInterface()->LnnUnregSyncInfoHandler(type, handler);
 }
-}
-}
 
+int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
+{
+    return GetSyncInterface()->LnnSendP2pSyncInfoMsg(networkId, netCapability);
+}
+}
+} // namespace OHOS

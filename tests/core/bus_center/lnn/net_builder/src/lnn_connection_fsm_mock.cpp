@@ -106,10 +106,6 @@ int32_t LnnUpdateGroupType(const NodeInfo *info)
 {
     return GetLnnConnInterface()->LnnUpdateGroupType(info);
 }
-bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
-{
-    return GetLnnConnInterface()->IsFeatureSupport(feature, capaBit);
-}
 
 void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo)
 {

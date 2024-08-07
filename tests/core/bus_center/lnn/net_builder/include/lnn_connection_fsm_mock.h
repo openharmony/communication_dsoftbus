@@ -54,7 +54,6 @@ public:
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
     virtual int32_t LnnInsertLinkFinderInfo(const char *networkId) = 0;
     virtual int32_t LnnUpdateGroupType(const NodeInfo *info) = 0;
-    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo) = 0;
     virtual void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
@@ -83,7 +82,6 @@ public:
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t (InfoKey, const uint8_t *, uint32_t));
     MOCK_METHOD1(LnnInsertLinkFinderInfo, int32_t (const char *));
     MOCK_METHOD1(LnnUpdateGroupType, int32_t (const NodeInfo *));
-    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
     MOCK_METHOD2(LnnNotifySingleOffLineEvent, void (const ConnectionAddr *, NodeBasicInfo *));
     MOCK_METHOD2(LnnStopOfflineTimingByHeartbeat, void (const char *, ConnectionAddrType));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *));
