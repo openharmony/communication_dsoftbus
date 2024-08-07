@@ -55,6 +55,8 @@ int32_t BtStatusToSoftBus(BtStatus btStatus)
             return SOFTBUS_BC_STATUS_RMT_DEV_DOWN;
         case OHOS_BT_STATUS_AUTH_REJECTED:
             return SOFTBUS_BC_STATUS_AUTH_REJECTED;
+        case OHOS_BT_STATUS_DUPLICATED_ADDR:
+            return SOFTBUS_BC_STATUS_DUPLICATED_ADDR;
         default:
             return SOFTBUS_BC_STATUS_FAIL;
     }
