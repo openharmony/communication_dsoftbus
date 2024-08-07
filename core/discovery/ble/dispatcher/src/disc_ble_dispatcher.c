@@ -20,10 +20,11 @@
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "disc_share_ble.h"
+#include "disc_touch_ble.h"
 #include "disc_virtual_link_ble.h"
 #include "softbus_errcode.h"
 
-#define DISPATCHER_SIZE 4
+#define DISPATCHER_SIZE 5
 
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;
@@ -192,6 +193,19 @@ static void DfxRecordBleInitEnd(int32_t stage, int32_t reason)
     }
 }
 
+static int32_t DiscBleInitExt(DiscInnerCallback *discInnerCb)
+{
+    DiscoveryBleDispatcherInterface *touchInterface = DiscTouchBleInit(discInnerCb);
+    if (touchInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
+        DISC_LOGE(DISC_INIT, "DiscTouchBleInit err");
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
+    g_dispatchers[g_dispatcherSize++] = touchInterface;
+    DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_OK);
+    return SOFTBUS_OK;
+}
+
 DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
     if (discInnerCb == NULL) {
@@ -237,6 +251,9 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     g_dispatchers[g_dispatcherSize++] = vlinkInterface;
     DfxRecordBleInitEnd(EVENT_STAGE_VLINK_BLE_INIT, SOFTBUS_OK);
 
+    DISC_CHECK_AND_RETURN_RET_LOGE(DiscBleInitExt(discInnerCb) == SOFTBUS_OK,
+        NULL, DISC_INIT, "disc ble init ext failed");
+
     DfxRecordBleInitEnd(EVENT_STAGE_INIT, SOFTBUS_OK);
     return &g_discBleFrameFuncInterface;
 }
@@ -261,4 +278,5 @@ void DiscBleDeinit(void)
     DiscShareBleDeinit();
     DiscApproachBleDeinit();
     DiscVLinkBleDeinit();
+    DiscTouchBleDeinit();
 }
