@@ -47,6 +47,7 @@ using namespace testing;
 constexpr char NODE_NETWORK_ID[] = "111122223333abcdef";
 constexpr char PEER_IP_HML[] = "172.30.0.1";
 constexpr char PEER_MAC[] = "a1:b2:c3:d4:e5:f6";
+constexpr char LOCAL_MAC[] = "a2:b2:c3:d4:e5:f6";
 constexpr char PEER_UDID[] = "111122223333abcdef";
 constexpr char LOCAL_UDID[] = "444455556666abcdef";
 constexpr uint64_t LANE_ID_BASE = 1122334455667788;
@@ -269,6 +270,13 @@ static void OnLaneAllocFailNoExcept(uint32_t laneHandle, int32_t errCode)
     CondSignal();
 }
 
+static void OnLaneAllocFailNoExcept2(uint32_t laneHandle, int32_t errCode)
+{
+    GTEST_LOG_(INFO) << "alloc lane failed, laneReqId=" << laneHandle;
+    EXPECT_EQ(errCode, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    CondSignal();
+}
+
 static LaneAllocListener g_listenerCbForHml = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForHml,
     .onLaneAllocFail = OnLaneAllocFailNoExcept,
@@ -279,6 +287,13 @@ static LaneAllocListener g_listenerCbForHml = {
 static LaneAllocListener g_listenerCbForP2p = {
     .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
     .onLaneAllocFail = OnLaneAllocFailNoExcept,
+    .onLaneFreeSuccess = OnLaneFreeSuccess,
+    .onLaneFreeFail = OnLaneFreeFail,
+};
+
+static LaneAllocListener g_listenerCbForP2p2 = {
+    .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
+    .onLaneAllocFail = OnLaneAllocFailNoExcept2,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
 };
@@ -338,8 +353,20 @@ static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirect
     return SOFTBUS_OK;
 }
 
+static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp, char *localMac, size_t localMacSize,
+    char *remoteMac, size_t remoteMacSize)
+{
+    (void)localIp;
+    (void)localMac;
+    (void)localMacSize;
+    (void)remoteMac;
+    (void)remoteMacSize;
+    return SOFTBUS_OK;
+}
+
 static struct WifiDirectManager g_manager = {
     .prejudgeAvailability = PrejudgeAvailability,
+    .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 };
 /*
 * @tc.name: LANE_ALLOC_ErrTest_001
@@ -2681,7 +2708,7 @@ HWTEST_F(LNNLaneMockTest, LANE_PPOCESS_VAP_INFO_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_SELECT_02
+* @tc.name: LNN_LANE_SELECT_01
 * @tc.desc: SelectLane
 * @tc.type: FUNC
 * @tc.require:
@@ -2896,5 +2923,47 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_05, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(osType), Return(SOFTBUS_OK)));
     ret = DecideAvailableLane(NODE_NETWORK_ID, &request, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+}
+
+/*
+* @tc.name: LNN_LANE_01
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_01, TestSize.Level1)
+{
+    ILaneIdStateListener listener;
+    RegisterLaneIdListener(nullptr);
+
+    listener.OnLaneIdEnabled = nullptr;
+    listener.OnLaneIdDisabled = nullptr;
+    RegisterLaneIdListener(&listener);
+    UnregisterLaneIdListener(nullptr);
+}
+
+/*
+* @tc.name: LNN_LANE_02
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_02, TestSize.Level1)
+{
+    uint32_t laneReqId = 0;
+    FreeLaneReqId(laneReqId);
+    laneReqId = 0xfffffff;
+    FreeLaneReqId(laneReqId);
+}
+
+/*
+* @tc.name: LNN_LANE_03
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_03, TestSize.Level1)
+{
+    
 }
 } // namespace OHOS
