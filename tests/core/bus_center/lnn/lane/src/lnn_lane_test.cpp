@@ -3185,25 +3185,25 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_10, TestSize.Level1)
     EXPECT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.localIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
     EXPECT_EQ(strcpy_s(macInfo.localMac, MAX_MAC_LEN, LOCAL_MAC), EOK);
     EXPECT_EQ(strcpy_s(macInfo.remoteMac, MAX_MAC_LEN, PEER_MAC), EOK);
-    int32_t ret = AddLaneResourceToPool(&linkinfo, LANE_ID_BASE, false);
+    int32_t ret = AddLaneResourceToPool(&linkInfo, LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     linkInfo.type = LANE_P2P_REUSE;
-    ret = AddLaneResourceToPool(&linkinfo, LANE_ID_BASE, false);
+    ret = AddLaneResourceToPool(&linkInfo, LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     linkInfo.type = LANE_HML;
-    ret = AddLaneResourceToPool(&linkinfo, LANE_ID_BASE, false);
+    ret = AddLaneResourceToPool(&linkInfo, LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     linkInfo.type = LANE_ETH;
-    ret = AddLaneResourceToPool(&linkinfo, LANE_ID_BASE, false);
+    ret = AddLaneResourceToPool(&linkInfo, LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(laneDepMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
