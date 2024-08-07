@@ -368,7 +368,7 @@ static int32_t RleaseUdpResources(int32_t channelId)
     return ServerIpcReleaseResources(channelId);
 }
 
-static void NotifyCb(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
+static void NotifyCallback(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
 {
     if (channel != NULL && (!channel->isEnable) && g_sessionCb != NULL && g_sessionCb->OnSessionOpenFailed != NULL) {
         SessionState sessionState = SESSION_STATE_INIT;
@@ -422,7 +422,7 @@ static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, Shutd
     }
 
     if (reason != SHUTDOWN_REASON_LOCAL) {
-        NotifyCb(channel, channelId, reason);
+        NotifyCallback(channel, channelId, reason);
     }
     return SOFTBUS_OK;
 }
