@@ -31,10 +31,6 @@ public:
 
 private:
     int32_t GetNodeKeyInfoLen(int32_t key);
-    int32_t StartDiscoveryInner(MessageParcel &data, MessageParcel &reply);
-    int32_t StopDiscoveryInner(MessageParcel &data, MessageParcel &reply);
-    int32_t PublishServiceInner(MessageParcel &data, MessageParcel &reply);
-    int32_t UnpublishServiceInner(MessageParcel &data, MessageParcel &reply);
     int32_t SoftbusRegisterServiceInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t CreateSessionServerInner(MessageParcel &data, MessageParcel &reply);
