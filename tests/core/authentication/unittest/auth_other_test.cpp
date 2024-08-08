@@ -1099,7 +1099,7 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
     msgType = FSM_MSG_RECV_AUTH_DATA;
     ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
     EXPECT_TRUE(ret == false);
-    
+
     msgType = FSM_MSG_AUTH_FINISH;
     ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
     EXPECT_TRUE(ret == false);
@@ -1201,9 +1201,11 @@ HWTEST_F(AuthOtherTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, Test
     EXPECT_TRUE(AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetConnInfo(authHandle, &connInfo) == SOFTBUS_INVALID_PARAM);
     AuthFreeConn(nullptr);
+    AuthFreeConn(&authHandle);
     AuthConnCallback callback;
     EXPECT_TRUE(AuthAllocConn(nullptr, 1, &callback) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthAllocConn(networkId, 1, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthAllocConn(nullptr, 1, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetP2pConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
     EXPECT_TRUE(AuthGetHmlConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
     AuthGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI, true, nullptr);
