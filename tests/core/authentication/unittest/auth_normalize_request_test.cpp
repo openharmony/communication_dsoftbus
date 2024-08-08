@@ -66,9 +66,12 @@ HWTEST_F(AuthNormalizeRequestTest, NOTIFY_NORMALIZE_REQUEST_SUCCESS_TEST_001, Te
     request.authSeq = 2;
     ret = AddNormalizeRequest(&request);
     EXPECT_TRUE(ret != 0);
+    DelAuthNormalizeRequest(request.authSeq);
     request.authSeq = 3;
     ret = AddNormalizeRequest(&request);
     EXPECT_TRUE(ret != 0);
+    bool result = AuthIsRepeatedAuthRequest(request.authSeq);
+    EXPECT_TRUE(result == true);
     NotifyNormalizeRequestSuccess(authSeq, false);
     authSeq = 1;
     NotifyNormalizeRequestSuccess(authSeq, false);
