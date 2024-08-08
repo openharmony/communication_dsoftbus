@@ -456,6 +456,16 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
     return SOFTBUS_OK;
 }
 
+static void RenameHook(DFileRenamePara *renamePara)
+{
+    if (renamePara == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param renamePara.");
+        return;
+    }
+    (void)strcpy_s(renamePara->newFileName, NSTACKX_MAX_REMOTE_PATH_LEN, renamePara->initFileName);
+    TRANS_LOGD(TRANS_FILE, "default rename hook.");
+}
+
 int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
 {
     if (channel == NULL || filePort == NULL) {
@@ -490,6 +500,10 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
             NSTACKX_DFileClose(fileSession);
             *filePort = 0;
             return SOFTBUS_FILE_ERR;
+        }
+        if (NSTACKX_DFileSetRenameHook(fileSession, RenameHook) != NSTACKX_EOK) {
+            TRANS_LOGE(TRANS_FILE, "set rename hook failed, fileSession=%{public}d, channelId=%{public}d", fileSession,
+                channel->channelId);
         }
     } else {
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
