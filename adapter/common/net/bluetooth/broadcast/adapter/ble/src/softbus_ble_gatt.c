@@ -743,13 +743,13 @@ static bool SoftbusSetLpParam(LpServerType type,
     scanConfig.scanMode = GetBtScanMode(scanParam->scanParam.scanInterval, scanParam->scanParam.scanWindow);
     BtLpDeviceParam lpParam = {};
     lpParam.scanConfig = &scanConfig;
-    lpParam.rawData.advData = (unsigned char *)AssembleAdvData(&bcParam->advData,
-        (uint16_t *)&lpParam.rawData.advDataLen);
-    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, false, DISC_BLE_ADAPTER, "assemble advData failed");
     if (SetBtUuidByBroadCastType(type, &lpParam.uuid) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "set bt uuid failed, advHandle=%{public}d", bcParam->advHandle);
         return false;
     }
+    lpParam.rawData.advData = (unsigned char *)AssembleAdvData(&bcParam->advData,
+        (uint16_t *)&lpParam.rawData.advDataLen);
+    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, false, DISC_BLE_ADAPTER, "assemble advData failed");
     if (bcParam->advData.rspData.payloadLen > 0 && bcParam->advData.rspData.payload != NULL) {
         lpParam.rawData.rspData = (unsigned char *)AssembleRspData(&bcParam->advData.rspData,
             (uint16_t *)&lpParam.rawData.rspDataLen);
