@@ -558,12 +558,17 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
         CONN_LOGE(CONN_WIFI_DIRECT, "auth connect failed, error=%{public}d", event->reason_);
         Terminate();
     }
-    AuthNegotiateChannel channel(event->handle_);
-    auto ret = SendHandShakeMessage(channel);
+    auto channel = std::make_shared<AuthNegotiateChannel>(event->handle_);
+    channel->SetClose();
+    auto ret = SendHandShakeMessage(*channel);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "send hand shake message failed, error=%{public}d", ret);
         Terminate();
     }
+    LinkManager::GetInstance().ProcessIfPresent(InnerLink::LinkType::P2P, remoteDeviceId_, [&channel](InnerLink &link) {
+        link.SetNegotiateChannel(channel);
+    });
+
     CONN_LOGI(CONN_WIFI_DIRECT, "send hand shake message success");
     if (!active_) {
         WifiDirectSinkLink sinkLink {};
@@ -1235,7 +1240,10 @@ int P2pV1Processor::ProcessGetInterfaceInfoRequest(std::shared_ptr<NegotiateComm
 
 int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    auto channel = command->GetNegotiateChannel();
+    auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(command->GetNegotiateChannel());
+    if (channel != nullptr) {
+        channel->SetClose();
+    }
     auto remoteDeviceId = command->GetRemoteDeviceId();
 
     WifiDirectLink dlink {};
