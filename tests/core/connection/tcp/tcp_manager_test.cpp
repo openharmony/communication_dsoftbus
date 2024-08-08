@@ -250,14 +250,16 @@ HWTEST_F(TcpManagerTest, testTcpManager005, TestSize.Level1)
     info.type = CONNECT_BR;
     info.socketOption.port = port;
     info.socketOption.moduleId = PROXY;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
+    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ipv6);
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_CONN_FAIL, TcpStartListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
@@ -1653,6 +1655,7 @@ HWTEST_F(TcpManagerTest, testTcpManager049, TestSize.Level1)
     info.type = CONNECT_BR;
     info.socketOption.port = port;
     info.socketOption.moduleId = PROXY;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ipv6);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1660,7 +1663,7 @@ HWTEST_F(TcpManagerTest, testTcpManager049, TestSize.Level1)
 
     info.type = CONNECT_TCP;
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_CONN_FAIL, TcpStartListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
