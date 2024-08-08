@@ -28,6 +28,10 @@ public:
     SoftBusServer(int32_t saId, bool runOnCreate);
     ~SoftBusServer() = default;
 
+    int32_t StartDiscovery(const char *pkgName, const SubscribeInfo *info) override;
+    int32_t StopDiscovery(const char *pkgName, int subscribeId) override;
+    int32_t PublishService(const char *pkgName, const PublishInfo *info) override;
+    int32_t UnPublishService(const char *pkgName, int publishId) override;
     int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
 
     int32_t CreateSessionServer(const char *pkgName, const char *sessionName) override;

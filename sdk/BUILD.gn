@@ -14,15 +14,16 @@
 import("../core/common/dfx/dsoftbus_dfx.gni")
 import("../dsoftbus.gni")
 import("bus_center/bus_center_sdk.gni")
+import("discovery/disc_sdk.gni")
 import("frame/frame_sdk.gni")
 import("transmission/trans_sdk.gni")
 
 dsoftbus_root_path = ".."
 
-common_client_src = bus_center_sdk_src + softbus_client_frame_src +
-                    trans_session_manager_sdk_src
-common_client_inc = bus_center_sdk_inc + softbus_client_frame_inc +
-                    trans_session_manager_sdk_inc
+common_client_src = bus_center_sdk_src + disc_sdk_src +
+                    softbus_client_frame_src + trans_session_manager_sdk_src
+common_client_inc = bus_center_sdk_inc + disc_sdk_inc +
+                    softbus_client_frame_inc + trans_session_manager_sdk_inc
 common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
 common_client_ext_deps = []

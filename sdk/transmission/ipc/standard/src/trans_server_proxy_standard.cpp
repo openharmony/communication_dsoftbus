@@ -60,6 +60,34 @@ static sptr<IRemoteObject> GetSystemAbility()
     return reply.ReadRemoteObject();
 }
 
+int32_t TransServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
+{
+    (void)pkgName;
+    (void)subInfo;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::StopDiscovery(const char *pkgName, int32_t subscribeId)
+{
+    (void)pkgName;
+    (void)subscribeId;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::PublishService(const char *pkgName, const PublishInfo *pubInfo)
+{
+    (void)pkgName;
+    (void)pubInfo;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::UnPublishService(const char *pkgName, int32_t publishId)
+{
+    (void)pkgName;
+    (void)publishId;
+    return SOFTBUS_OK;
+}
+
 int32_t TransServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
 {
     (void)clientPkgName;

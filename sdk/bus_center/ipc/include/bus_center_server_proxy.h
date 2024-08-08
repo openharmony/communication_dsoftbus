@@ -58,4 +58,4 @@ int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const c
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif // BUS_CENTER_SERVER_PROXY_H
+#endif // !DISC_SERVER_PROXY_H

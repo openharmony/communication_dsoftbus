@@ -39,6 +39,11 @@ public:
 
 class SoftBusClientStubMock : public SoftBusClientStub {
 public:
+    void OnDeviceFound([[maybe_unused]] const DeviceInfo *device) override { }
+    void OnDiscoverFailed([[maybe_unused]] int subscribeId, [[maybe_unused]] int failReason) override { }
+    void OnDiscoverySuccess([[maybe_unused]] int subscribeId) override { }
+    void OnPublishSuccess([[maybe_unused]] int publishId) override { }
+    void OnPublishFail([[maybe_unused]] int publishId, [[maybe_unused]] int reason) override { }
     int32_t OnChannelOpenFailed([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType,
         [[maybe_unused]] int32_t errCode) override
     {
@@ -208,6 +213,87 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnClientPermissonChangeInnerTest, TestSize
     data.WriteInt32(0);
     data.WriteCString("OnClientPermissonChangeInnerTest");
     EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnDeviceFoundInnerTest
+ * @tc.desc: OnDeviceFoundInnerTest, ReadBuffer faild return SOFTBUS_ERR
+ * @tc.desc: OnDeviceFoundInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnDeviceFoundInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnDeviceFoundInner(data, reply), SOFTBUS_TRANS_PROXY_READBUFFER_FAILED);
+
+    DeviceInfo info;
+    data.WriteBuffer(&info, sizeof(DeviceInfo));
+    EXPECT_EQ(g_stub->OnDeviceFoundInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnDiscoverFailedInnerTest
+ * @tc.desc: OnDiscoverFailedInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnDiscoverFailedInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(0);
+    data.WriteInt32(99);
+    EXPECT_EQ(g_stub->OnDiscoverFailedInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnDiscoverySuccessInnerTest
+ * @tc.desc: OnDiscoverySuccessInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnDiscoverySuccessInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnDiscoverySuccessInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnPublishSuccessInnerTest
+ * @tc.desc: OnPublishSuccessInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnPublishSuccessInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnPublishSuccessInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnPublishFailInnerTest
+ * @tc.desc: OnPublishFailInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnPublishFailInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(0);
+    data.WriteInt32(99);
+    EXPECT_EQ(g_stub->OnPublishFailInner(data, reply), SOFTBUS_OK);
 }
 
 /**
