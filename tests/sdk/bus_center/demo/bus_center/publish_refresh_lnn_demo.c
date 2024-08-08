@@ -24,6 +24,7 @@
  */
 
 #include <stdint.h>
+#include "discovery_service.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 

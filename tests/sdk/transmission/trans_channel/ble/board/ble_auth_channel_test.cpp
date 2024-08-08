@@ -20,6 +20,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "discovery_service.h"
 #include "inner_session.h"
 #include "session.h"
 #include "softbus_utils.h"
@@ -110,6 +111,55 @@ static PublishInfo g_pInfo = {
     .dataLen = sizeof("capdata4")
 };
 
+static void TestDeviceFound(const DeviceInfo *device)
+{
+    if (ConvertBtMacToStr(g_addr.info.ble.bleMac, 18, (const uint8_t *)&(device->addr[0].info.ble.bleMac[0]), 6) != 0) {
+        return;
+    }
+    if (strcmp(g_addr1.info.ble.bleMac, g_addr.info.ble.bleMac) != 0) {
+        EXPECT_TRUE(g_testCount == TEST_BEGIN);
+        g_testCount++;
+        if (strcpy_s(g_addr1.info.ble.bleMac, BT_MAC_LEN, g_addr.info.ble.bleMac) != EOK) {
+            return;
+        }
+        printf("[client]TestDeviceFound\r\n");
+        printf("addr mac = %s\r\n", g_addr1.info.ble.bleMac);
+        printf("account = %s\r\n", device->hwAccountHash);
+        g_state = true;
+    }
+}
+
+static void TestDiscoverFailed(int subscribeId, DiscoveryFailReason failReason)
+{
+    printf("[test]TestDiscoverFailed\r\n");
+}
+
+static void TestDiscoverySuccess(int subscribeId)
+{
+    printf("[test]TestDiscoverySuccess\r\n");
+}
+
+static void TestPublishSuccess(int publishId)
+{
+    printf("[test]TestPublishSuccess\r\n");
+}
+
+static void TestPublishFail(int publishId, PublishFailReason reason)
+{
+    printf("[test]TestPublishFail\r\n");
+}
+
+static IDiscoveryCallback g_subscribeCb = {
+    .OnDeviceFound = TestDeviceFound,
+    .OnDiscoverFailed = TestDiscoverFailed,
+    .OnDiscoverySuccess = TestDiscoverySuccess
+};
+
+static IPublishCallback g_publishCb = {
+    .OnPublishSuccess = TestPublishSuccess,
+    .OnPublishFail = TestPublishFail
+};
+
 static int OnSessionOpened(int sessionId, int result)
 {
     printf("[test]session opened,sesison id = %d\r\n", sessionId);
@@ -164,6 +214,26 @@ static void Wait(void)
 static void Start(void)
 {
     g_state = true;
+}
+
+static int32_t TestPublishServer()
+{
+    printf("[test]TestPublishServer enter\r\n");
+    g_pInfo.mode = DISCOVER_MODE_ACTIVE;
+    int32_t ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    printf("[test]TestPublishServer end\r\n");
+    return ret;
+}
+
+static int32_t TestStartDiscovery()
+{
+    printf("[test]TestStartDiscovery enter\r\n");
+    g_sInfo.mode = DISCOVER_MODE_ACTIVE;
+    int32_t ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    printf("[test]TestStartDiscovery end\r\n");
+    return ret;
 }
 
 static int32_t TestCreateSessionServer()
@@ -228,6 +298,8 @@ HWTEST_F(BleAuthChannelTest, ProcessActive001, TestSize.Level0)
     }
     int32_t ret;
     g_testCount = TEST_BEGIN;
+    ret = TestStartDiscovery();
+    EXPECT_TRUE(ret == 0);
     Wait();
     ret = TestCreateSessionServer();
     EXPECT_TRUE(ret == 0);
@@ -267,6 +339,8 @@ HWTEST_F(BleAuthChannelTest, ProcessPassive001, TestSize.Level0)
         goto END;
     }
     int32_t ret;
+    ret = TestPublishServer();
+    EXPECT_TRUE(ret == 0);
     ret = TestCreateSessionServer();
     EXPECT_TRUE(ret == 0);
     for (int i = 0; i < g_testTimes; i++) {

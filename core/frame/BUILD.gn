@@ -144,6 +144,7 @@ if (defined(ohos_lite)) {
         "common/src/softbus_server_frame.c",
         "small/client_manager/src/softbus_client_info_manager.c",
         "small/init/src/bus_center_server_stub.c",
+        "small/init/src/disc_server_stub.c",
         "small/init/src/softbus_server_stub.c",
         "small/init/src/trans_server_stub.c",
       ]

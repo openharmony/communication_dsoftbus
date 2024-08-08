@@ -17,6 +17,7 @@
 
 #include <string.h>
 
+#include "discovery_service.h"
 #include "lnn_coap_discovery_impl.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
