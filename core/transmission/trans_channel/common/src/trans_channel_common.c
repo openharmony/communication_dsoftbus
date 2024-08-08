@@ -285,6 +285,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->appType = APP_TYPE_NORMAL;
     appInfo->myData.apiVersion = API_V2;
     appInfo->myData.channelId = INVALID_CHANNEL_ID;
+    appInfo->peerData.channelId = INVALID_CHANNEL_ID;
     if (param->attr->dataType == TYPE_STREAM) {
         appInfo->businessType = BUSINESS_TYPE_STREAM;
         appInfo->streamType = (StreamType)param->attr->attr.streamAttr.streamType;
