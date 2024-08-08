@@ -1066,7 +1066,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestError001, TestSize.L
     uint64_t seq = TEST_SEQ;
     uint32_t flags = 1;
     int32_t errCode = SOFTBUS_INVALID_PARAM;
-    char *errDesc = const_cast<char *>("Notify SDK Channel Opened Failed");
+    char *errDesc = const_cast<char *>(reinterpret_cast<const char *>("Notify SDK Channel Opened Failed"));
 
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -1720,7 +1720,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ReportTransEventExtra001, TestSize.Lev
     (void)memcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, IP, UDID_BUF_LEN);
     (void)memcpy_s(nodeInfo.masterUdid, UDID_BUF_LEN, IP, UDID_BUF_LEN);
     (void)memcpy_s(nodeInfo.deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, DEVICE_VERSION, DEVICE_VERSION_SIZE_MAX);
-    char *peerUuid = const_cast<char *>("test.uuid");
+    char *peerUuid = const_cast<char *>(reinterpret_cast<const char *>("test.uuid"));
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(1));
     EXPECT_CALL(TcpMessageMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
