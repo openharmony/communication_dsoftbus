@@ -1039,7 +1039,10 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
             TRANS_LOGE(TRANS_CTRL, "copy ip addr fail");
             return SOFTBUS_MEM_ERR;
         }
-        TRANS_LOGE(TRANS_CTRL, "get Local Ip fail");
+        char *tmpPeerIp = NULL;
+        Anonymize(appInfo.peerData.addr, &tmpPeerIp);
+        TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d get remote uuid by Ip=%{public}s failed", channelId, tmpPeerIp);
+        AnonymizeFree(tmpPeerIp);
         authHandle->type = connInfo.type;
         authHandle->authId = AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
         return SOFTBUS_OK;

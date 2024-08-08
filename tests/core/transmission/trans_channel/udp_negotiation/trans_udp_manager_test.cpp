@@ -726,16 +726,20 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest024, TestSize.Level1)
  */
 HWTEST_F(TransUdpManagerTest, TransUdpGetLocalIpAndConnectTypeById001, TestSize.Level1)
 {
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = -1;
     char localIp[IP_LEN] = { 0 };
     int32_t connectType = CONNECT_TYPE_MAX;
 
-    int32_t ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
+    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
     channelId = INT32_MAX;
     ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    TransUdpChannelMgrDeinit();
 }
 
 /**
@@ -763,7 +767,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetLocalIpAndConnectTypeById002, TestSize.
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**
@@ -782,6 +786,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetLocalIpAndConnectTypeById003, TestSize.
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, IP_LEN, &connectType);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 }
