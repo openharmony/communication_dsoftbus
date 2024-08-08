@@ -77,6 +77,7 @@ void TransTcpDirectMessageAppendTest::SetUpTestCase(void)
 {
     // list will free when go to TransSrvDataListDeinit
     SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
+    ASSERT_TRUE(list != nullptr);
     SoftBusMutexAttr mutexAttr;
     mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
     SoftBusMutexInit(&list->lock, &mutexAttr);
@@ -87,6 +88,7 @@ void TransTcpDirectMessageAppendTest::SetUpTestCase(void)
     EXPECT_EQ(SOFTBUS_OK, ret);
     // list will free when go to TransSrvDataListDeinit
     SoftBusList *SessionList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
+    ASSERT_TRUE(SessionList != nullptr);
     SoftBusMutexAttr testMutexAttr;
     testMutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
     SoftBusMutexInit(&SessionList->lock, &testMutexAttr);
