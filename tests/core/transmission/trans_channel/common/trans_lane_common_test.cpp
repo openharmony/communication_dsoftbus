@@ -23,7 +23,6 @@
 #include "trans_channel_common.c"
 #include "trans_channel_common.h"
 #include "trans_lane_common_test_mock.h"
-#include "trans_lane_pending_ctl.c"
 #include "trans_lane_pending_ctl.h"
 
 using namespace testing;
@@ -40,20 +39,20 @@ using namespace testing::ext;
 #define TEST_INVALID_SESSION_ID (-1)
 
 namespace OHOS {
-static constexpr char *TEST_IP = "192.168.1.111";
-static constexpr char *TEST_NEW_WORK_ID = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-static constexpr char *TEST_INFO = "test";
-static constexpr char *TEST_ID = "testId";
-static constexpr char *TEST_DEVICEVERSION = "testDevicersion";
-static constexpr char *TEST_FAST_TRANS_DATA = "testFastTransData";
-static constexpr char *TEST_SESSION_NAME = "ohos.distributedschedule.dms.test";
-static constexpr char *TEST_PEER_SESSION_NAME = "test.ohos.distributedschedule.dms.test";
-static constexpr char *TEST_INVALID_SESSION_NAME = "ohos.distributedschedule.dms.test.ohos.distributedschedule.\
-    dms.test.ohos.distributedschedule.dms.test.ohos.distributedschedule.dms.test.ohos.distributedschedule.dms.\
-    test.ohos.distributedschedule.dms.test.ohos.distributedschedule.dms.test.ohos.distributedschedule.dms.test";
-static constexpr char *TEST_DEVICE_ID = "ABCDEF00ABCDEF00ABCDEF00";
-static constexpr char *TEST_GROUP_ID = "TEST_GROUP_ID";
-static constexpr char *TEST_PKG_NAME = "testPkgName";
+const char *TEST_IP = "192.168.1.111";
+const char *TEST_NEW_WORK_ID = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
+const char *TEST_INFO = "test";
+const char *TEST_ID = "testId";
+const char *TEST_DEVICEVERSION = "testDevicersion";
+const char *TEST_FAST_TRANS_DATA = "testFastTransData";
+const char *TEST_SESSION_NAME = "ohos.distributedschedule.dms.test";
+const char *TEST_PEER_SESSION_NAME = "test.ohos.distributedschedule.dms.test";
+const char *TEST_INVALID_SESSION_NAME = "ohos.distributedschedule.dms.test.ohos.distributedschedule.\
+     dms.test.ohos.distributedschedule.dms.test.ohos.distributedschedule.dms.test.ohos.distributedschedule.dms.\
+     test.ohos.distributedschedule.dms.test.ohos.distributedschedule.dms.test.ohos.distributedschedule.dms.test";
+const char *TEST_DEVICE_ID = "ABCDEF00ABCDEF00ABCDEF00";
+const char *TEST_GROUP_ID = "TEST_GROUP_ID";
+const char *TEST_PKG_NAME = "testPkgName";
 
 class TransLaneCommonTest : public testing::Test {
 public:
@@ -98,7 +97,7 @@ static SessionParam *TestCreateSessionParam()
         return nullptr;
     }
 
-    attr->fastTransData = const_cast<uint8_t *>(TEST_FAST_TRANS_DATA);
+    attr->fastTransData = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_FAST_TRANS_DATA));
     attr->fastTransDataSize = TEST_LEN;
 
     SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
@@ -110,14 +109,6 @@ static SessionParam *TestCreateSessionParam()
     param->attr = attr;
 
     return param;
-}
-
-static int32_t GetLocalIpByRemoteIp(const char *remoteIp, char *localIp, int32_t localIpSize)
-{
-    (void)remoteIp;
-    (void)localIp;
-    (void)localIpSize;
-    return SOFTBUS_INVALID_PARAM;
 }
 
 /**
@@ -279,15 +270,10 @@ HWTEST_F(TransLaneCommonTest, FillAppInfo001, TestSize.Level1)
     FillAppInfo(&appInfo, &param, &transInfo, &connInfo);
     EXPECT_EQ(appInfo.linkType, connInfo.type);
 
-    WifiDirectManager mgr = {
-        .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
-    };
-    EXPECT_CALL(TransLaneCommonMock, GetWifiDirectManager).WillOnce(Return(nullptr));
     connInfo.type = LANE_P2P_REUSE;
     FillAppInfo(&appInfo, &param, &transInfo, &connInfo);
     EXPECT_EQ(appInfo.linkType, connInfo.type);
 
-    EXPECT_CALL(TransLaneCommonMock, GetWifiDirectManager).WillOnce(Return(&mgr));
     FillAppInfo(&appInfo, &param, &transInfo, &connInfo);
     EXPECT_EQ(appInfo.linkType, connInfo.type);
 }
@@ -395,7 +381,7 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     SessionAttribute testAttr;
-    testAttr.fastTransData = const_cast<uint8_t *>(TEST_FAST_TRANS_DATA);
+    testAttr.fastTransData = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_FAST_TRANS_DATA));
     testAttr.fastTransDataSize = -1;
     SessionParam testParam = {
         .attr = &testAttr,
@@ -476,7 +462,7 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(appInfo);
-    SoftBusFree(param->attr);
+    SoftBusFree(const_cast<SessionAttribute *>(param->attr));
     SoftBusFree(param);
 }
 
@@ -499,6 +485,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo001, TestSize.Level1)
         attr.dataType = TYPE_STREAM,
         attr.attr.streamAttr.streamType = 1,
     };
+    SoftBusFree(const_cast<SessionAttribute *>(param->attr));
     param->attr = &attr;
     NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
     EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
@@ -527,7 +514,6 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_BAD_KEY);
 
     SoftBusFree(appInfo);
-    SoftBusFree(param->attr);
     SoftBusFree(param);
 }
 
@@ -565,7 +551,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(appInfo);
-    SoftBusFree(param->attr);
+    SoftBusFree(const_cast<SessionAttribute *>(param->attr));
     SoftBusFree(param);
 }
 
@@ -578,10 +564,9 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo002, TestSize.Level1)
 HWTEST_F(TransLaneCommonTest, TransOpenChannelSetModule001, TestSize.Level1)
 {
     int32_t channelType = CHANNEL_TYPE_PROXY;
-    ConnectOption connOpt = {
-        .socketOption.protocol = LNN_PROTOCOL_VTP,
-        .type = CONNECT_BR,
-    };
+    ConnectOption connOpt;
+    connOpt.socketOption.protocol = LNN_PROTOCOL_VTP;
+    connOpt.type = CONNECT_BR;
     TransOpenChannelSetModule(channelType, &connOpt);
 
     connOpt.type = CONNECT_TCP;
@@ -718,6 +703,8 @@ HWTEST_F(TransLaneCommonTest, TransCommonCloseChannel001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransCommonCloseChannel(TEST_SESSION_NAME, channelId, channelType);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID);
+
+    TransSocketLaneMgrDeinit();
 }
 
 /**
@@ -866,7 +853,7 @@ HWTEST_F(TransLaneCommonTest, TransBuildTransAlarmEvent001, TestSize.Level1)
 {
     TransAlarmExtra extraAlarm;
     AppInfo *appInfo = TestCreateAppInfo();
-    EXPECT_EQ(appInfo, nullptr);
+    ASSERT_TRUE(appInfo != nullptr);
 
     (void)memcpy_s(appInfo->myData.sessionName, TEST_LEN, TEST_SESSION_NAME, TEST_LEN);
     (void)memset_s(&extraAlarm, sizeof(extraAlarm), 0, sizeof(extraAlarm));
@@ -882,5 +869,63 @@ HWTEST_F(TransLaneCommonTest, TransBuildTransAlarmEvent001, TestSize.Level1)
     EXPECT_EQ(extraAlarm.errcode, SOFTBUS_TRANS_BAD_KEY);
 
     SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: TransFreeAppInfo001
+ * @tc.desc: test TransFreeAppInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransFreeAppInfo001, TestSize.Level1)
+{
+    // will free in TransFreeAppInfo
+    AppInfo *appInfo = TestCreateAppInfo();
+    ASSERT_TRUE(appInfo != nullptr);
+    appInfo->fastTransData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    TransFreeAppInfo(nullptr);
+    TransFreeAppInfo(appInfo);
+}
+
+/*
+ * @tc.name: TransFreeLane001
+ * @tc.desc: test TransFreeLane
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransFreeLane001, TestSize.Level1)
+{
+    uint32_t laneHandle = TEST_LANE_ID;
+    bool isQosLane = true;
+    int32_t osType = HO_OS_TYPE;
+    bool ret = IsPeerDeviceLegacyOs(osType);
+    EXPECT_EQ(ret, true);
+    TransFreeLane(0, isQosLane, true);
+
+    isQosLane = false;
+    TransFreeLane(laneHandle, isQosLane, true);
+
+    TransFreeLane(0, isQosLane, false);
+
+    isQosLane = true;
+    TransFreeLane(laneHandle, isQosLane, false);
+}
+
+/**
+ * @tc.name: TransReportBadKeyEvent001
+ * @tc.desc: test TransReportBadKeyEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransReportBadKeyEvent001, TestSize.Level1)
+{
+    int32_t errCode = SOFTBUS_TRANS_BAD_KEY;
+    uint32_t connectionId = 1;
+    int64_t seq = 1;
+    int32_t len = TEST_LEN;
+    int32_t osType = OH_OS_TYPE;
+    bool ret = IsPeerDeviceLegacyOs(osType);
+    EXPECT_EQ(ret, false);
+    TransReportBadKeyEvent(errCode, connectionId, seq, len);
 }
 } // namespace OHOS
