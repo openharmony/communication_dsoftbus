@@ -376,6 +376,33 @@ int32_t TransClientProxy::SetChannelInfo(
     return serverRet;
 }
 
+void TransClientProxy::OnDeviceFound(const DeviceInfo *device)
+{
+    (void)device;
+}
+
+void TransClientProxy::OnDiscoverFailed(int subscribeId, int failReason)
+{
+    (void)subscribeId;
+    (void)failReason;
+}
+
+void TransClientProxy::OnDiscoverySuccess(int subscribeId)
+{
+    (void)subscribeId;
+}
+
+void TransClientProxy::OnPublishSuccess(int publishId)
+{
+    (void)publishId;
+}
+
+void TransClientProxy::OnPublishFail(int publishId, int reason)
+{
+    (void)publishId;
+    (void)reason;
+}
+
 int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
     (void)addr;

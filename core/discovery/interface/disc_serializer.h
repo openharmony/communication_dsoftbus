@@ -16,6 +16,8 @@
 #ifndef DISC_SERIALIZER_H
 #define DISC_SERIALIZER_H
 
+#include "discovery_service.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

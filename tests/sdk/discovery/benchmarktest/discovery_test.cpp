@@ -15,6 +15,7 @@
 
 #include <benchmark/benchmark.h>
 #include "accesstoken_kit.h"
+#include "discovery_service.h"
 #include "nativetoken_kit.h"
 #include "softbus_bus_center.h"
 #include "token_setproc.h"

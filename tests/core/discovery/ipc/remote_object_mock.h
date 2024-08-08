@@ -56,6 +56,17 @@ public:
     bool GetResult(uint32_t code, const DeviceInfo *deviceInfo = nullptr, int publishId = 0, int subscribeId = 0,
                    int reason = 0);
 
+    static int ActionOfSendRequestForOnDeviceFound(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                                   MessageOption &option);
+    static int ActionOfSendRequestForOnDiscoveryFailed(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                                       MessageOption &option);
+    static int ActionOfSendRequestForOnDiscoverySuccess(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                                        MessageOption &option);
+    static int ActionOfSendRequestForOnPublishSuccess(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                                      MessageOption &option);
+    static int ActionOfSendRequestForOnPublishFail(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                                   MessageOption &option);
+
 private:
     std::u16string descriptor_;
     uint32_t code_ {};

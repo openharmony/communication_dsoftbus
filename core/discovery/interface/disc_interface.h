@@ -16,7 +16,7 @@
 #ifndef DISC_MANAGER_INTERFACE_H
 #define DISC_MANAGER_INTERFACE_H
 
-#include "softbus_common.h"
+#include "discovery_service.h"
 #include "stdint.h"
 
 #ifdef __cplusplus

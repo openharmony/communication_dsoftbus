@@ -1,0 +1,51 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../dsoftbus.gni")
+
+disc_sdk_src =
+    [ "$dsoftbus_root_path/sdk/discovery/service/src/client_disc_service.c" ]
+disc_sdk_inc = [
+  "$dsoftbus_root_path/sdk/discovery/ipc/include",
+  "$dsoftbus_root_path/sdk/discovery/manager/include",
+  "$dsoftbus_root_path/sdk/discovery/service/include",
+]
+if (defined(ohos_lite)) {
+  disc_sdk_inc += [ "$dsoftbus_root_path/core/discovery/interface" ]
+  if (ohos_kernel_type == "liteos_m") {
+    import("../../core/discovery/disc.gni")
+    disc_sdk_src += [
+      "$dsoftbus_root_path/sdk/discovery/ipc/mini/disc_server_proxy.c",
+      "$dsoftbus_root_path/sdk/discovery/manager/src/client_disc_manager.c",
+    ]
+    disc_sdk_inc += disc_server_inc
+  } else {
+    disc_sdk_src += [
+      "$dsoftbus_root_path/sdk/discovery/ipc/small/disc_server_proxy.c",
+      "$dsoftbus_root_path/sdk/discovery/manager/src/client_disc_manager.c",
+    ]
+  }
+} else {
+  disc_sdk_inc += [
+    "$dsoftbus_root_path/sdk/discovery/ipc/$os_type/include",
+    "$dsoftbus_root_path/core/frame/$os_type/init/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+  ]
+  disc_sdk_src += [
+    "$dsoftbus_root_path/sdk/discovery/ipc/$os_type/src/disc_server_proxy.cpp",
+    "$dsoftbus_root_path/sdk/discovery/ipc/$os_type/src/disc_server_proxy_standard.cpp",
+    "$dsoftbus_root_path/sdk/discovery/manager/src/client_disc_manager.c",
+  ]
+}

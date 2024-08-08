@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include "bus_center_server_proxy.h"
+#include "discovery_service.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -79,6 +80,34 @@ int32_t BusCenterServerProxy::BusCenterServerProxyStandardInit(void)
 void BusCenterServerProxy::BusCenterServerProxyStandardDeInit(void)
 {
     g_remoteProxy.clear();
+}
+
+int32_t BusCenterServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
+{
+    (void)pkgName;
+    (void)subInfo;
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::StopDiscovery(const char *pkgName, int32_t subscribeId)
+{
+    (void)pkgName;
+    (void)subscribeId;
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::PublishService(const char *pkgName, const PublishInfo *pubInfo)
+{
+    (void)pkgName;
+    (void)pubInfo;
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::UnPublishService(const char *pkgName, int32_t publishId)
+{
+    (void)pkgName;
+    (void)publishId;
+    return SOFTBUS_OK;
 }
 
 int32_t BusCenterServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject>& object)

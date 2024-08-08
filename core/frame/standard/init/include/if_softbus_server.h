@@ -17,6 +17,7 @@
 #define INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 
 #include "data_level.h"
+#include "discovery_service.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
@@ -29,6 +30,10 @@ class ISoftBusServer : public IRemoteBroker {
 public:
     virtual ~ISoftBusServer() = default;
 
+    virtual int32_t StartDiscovery(const char *pkgName, const SubscribeInfo *info) = 0;
+    virtual int32_t StopDiscovery(const char *pkgName, int subscribeId) = 0;
+    virtual int32_t PublishService(const char *pkgName, const PublishInfo *info) = 0;
+    virtual int32_t UnPublishService(const char *pkgName, int publishId) = 0;
     virtual int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) = 0;
 
     virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName) = 0;
