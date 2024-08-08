@@ -108,5 +108,20 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     return GetTransLanePendingTestInterface()->LnnGetLocalStrInfo(key, info, len);
 }
+
+int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
+{
+    return GetTransLanePendingTestInterface()->TransGetPkgNameBySessionName(sessionName, pkgName, len);
+}
+
+int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len)
+{
+    return GetTransLanePendingTestInterface()->LnnGetRemoteStrInfo(networkId, key, info, len);
+}
+
+int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
+{
+    return GetTransLanePendingTestInterface()->LnnGetDLAuthCapacity(networkId, authCapacity);
+}
 }
 }
