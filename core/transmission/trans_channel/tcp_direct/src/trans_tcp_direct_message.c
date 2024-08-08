@@ -453,8 +453,10 @@ static int32_t NotifyChannelBind(int32_t channelId)
 
 static int32_t NotifyChannelClosed(const AppInfo *appInfo, int32_t channelId)
 {
-    AppInfoData myData = appInfo->myData;
-    int32_t ret = TransTdcOnChannelClosed(myData.pkgName, myData.pid, channelId);
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = TransTdcGetPkgName(appInfo->myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
+    ret = TransTdcOnChannelClosed(pkgName, appInfo->myData.pid, channelId);
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
