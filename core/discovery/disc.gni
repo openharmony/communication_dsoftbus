@@ -26,6 +26,8 @@ disc_server_src += [
   "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_server.c",
 ]
 disc_server_inc += [
+  "$dsoftbus_root_path/core/discovery/ipc/include",
+  "$dsoftbus_root_path/core/discovery/ipc/include",
   "$dsoftbus_root_path/core/discovery/manager/include",
   "$dsoftbus_root_path/core/discovery/interface",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
@@ -35,11 +37,22 @@ if (!dsoftbus_feature_ex_kits) {
 }
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
+    disc_server_src +=
+        [ "$dsoftbus_root_path/core/discovery/ipc/mini/disc_client_proxy.c" ]
+    disc_server_inc += [ "$dsoftbus_root_path/sdk/discovery/manager/include" ]
   } else {
+    disc_server_src +=
+        [ "$dsoftbus_root_path/core/discovery/ipc/small/disc_client_proxy.c" ]
     disc_server_deps += [
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
     ]
   }
 } else {
+  disc_server_src += [
+    "$dsoftbus_root_path/core/discovery/ipc/$os_type/src/disc_client_proxy.cpp",
+    "$dsoftbus_root_path/core/discovery/ipc/$os_type/src/disc_client_proxy_standard.cpp",
+  ]
+  disc_server_inc +=
+      [ "$dsoftbus_root_path/core/discovery/ipc/$os_type/include" ]
   disc_server_external_deps += [ "c_utils:utils" ]
 }

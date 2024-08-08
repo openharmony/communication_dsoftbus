@@ -53,6 +53,26 @@ int32_t BusCenterClientProxy::OnChannelQosEvent(int32_t channelId, int32_t chann
     return SOFTBUS_OK;
 }
 
+void BusCenterClientProxy::OnDeviceFound(const DeviceInfo *deviceInfo)
+{
+}
+
+void BusCenterClientProxy::OnDiscoverFailed(int subscribeId, int failReason)
+{
+}
+
+void BusCenterClientProxy::OnDiscoverySuccess(int subscribeId)
+{
+}
+
+void BusCenterClientProxy::OnPublishSuccess(int publishId)
+{
+}
+
+void BusCenterClientProxy::OnPublishFail(int publishId, int reason)
+{
+}
+
 int32_t BusCenterClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
     sptr<IRemoteObject> remote = Remote();

@@ -14,6 +14,7 @@
  */
 
 #include "client_info_manager_mock.h"
+#include "disc_client_proxy_standard.h"
 #include "remote_object_mock.h"
 
 namespace OHOS {

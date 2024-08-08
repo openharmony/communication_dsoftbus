@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "softbus_common.h"
+#include "discovery_service.h"
 
 #ifdef __cplusplus
 #if __cplusplus
