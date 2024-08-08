@@ -1391,6 +1391,35 @@ HWTEST_F(SoftbusBroadcastMgrTest, TestGetScanFilter001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: TestGetScanFilter002
+ * @tc.desc: GetScanFilter Proper branching
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, TestGetScanFilter002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "TestGetScanFilter002 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t listenerId = -1;
+    uint8_t filterNum = 1;
+    BcScanFilter *filter = GetBcScanFilter();
+    BcScanFilter *scanFilter = nullptr;
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_TRUE(listenerId >= 0);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, GetScanFilter(listenerId, &scanFilter, &filterNum));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "TestGetScanFilter002 end ----");
+}
+
+/*
  * @tc.name: BroadcastGetBroadcastHandle001
  * @tc.desc: BroadcastGetBroadcastHandle Proper branching
  * @tc.type: FUNC
@@ -1439,5 +1468,32 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetScanReportChannelToLpDevice001, Te
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
     DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice001 end ----");
+}
+
+/*
+ * @tc.name: BroadcastSetScanReportChannelToLpDevice002
+ * @tc.desc: BroadcastSetScanReportChannelToLpDevice CheckScanIdIsValid is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetScanReportChannelToLpDevice002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice002 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t listenerId = -1;
+    uint8_t filterNum = 1;
+    BcScanFilter *filter = GetBcScanFilter();
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_TRUE(listenerId >= 0);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, BroadcastSetScanReportChannelToLpDevice(listenerId, true));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetScanReportChannelToLpDevice002 end ----");
 }
 } // namespace OHOS
