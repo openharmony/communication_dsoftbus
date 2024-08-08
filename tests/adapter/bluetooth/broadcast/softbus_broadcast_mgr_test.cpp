@@ -1413,7 +1413,6 @@ HWTEST_F(SoftbusBroadcastMgrTest, TestGetScanFilter002, TestSize.Level1)
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
-    //EXPECT_EQ(SOFTBUS_OK, StartScan(listenerId, &scanParam));
     EXPECT_EQ(SOFTBUS_OK, GetScanFilter(listenerId, &scanFilter, &filterNum));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
