@@ -129,10 +129,13 @@ void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
     if (nc == nullptr) {
         return;
     }
-    if (nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_CONN_V1_REQ) {
-        return;
+    if (nc->GetNegotiateMessage().GetLegacyP2pCommandType() == LegacyCommandType::CMD_CONN_V1_REQ ||
+        nc->GetNegotiateMessage().GetLegacyP2pCommandType() == LegacyCommandType::CMD_DISCONNECT_V1_REQ ||
+        nc->GetNegotiateMessage().GetLegacyP2pCommandType() == LegacyCommandType::CMD_REUSE_REQ ||
+        nc->GetNegotiateMessage().GetLegacyP2pCommandType() == LegacyCommandType::CMD_FORCE_DISCONNECT_V1_REQ ||) {
+        WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommandFront(*nc);
     }
-    WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommandFront(*nc);
+    return;
 }
 
 void P2pV1Processor::SwitchState(ProcessorState state, int timeoutInMillis)
