@@ -30,7 +30,7 @@ extern "C" {
 #define SHORT_UDID_HASH_HEX_LEN 16
 typedef struct {
     InfoKey key;
-    int32_t (*getInfo)(const char *netWorkId, void *info, uint32_t len);
+    int32_t (*getInfo)(const char *netWorkId, bool checkOnline, void *info, uint32_t len);
 } DistributedLedgerKey;
 
 typedef enum {
