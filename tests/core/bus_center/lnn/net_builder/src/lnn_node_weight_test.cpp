@@ -18,6 +18,8 @@
 
 #include "lnn_node_weight.h"
 #include "lnn_net_ledger_mock.h"
+#include "lnn_node_weight.c"
+#include "lnn_service_mock.h"
 #include "softbus_errcode.h"
 
 namespace OHOS {
@@ -62,10 +64,11 @@ void LNNNodeWeightTest::TearDown()
 */
 HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 {
-    char *masterUdid = nullptr;
     int32_t ret = LnnCompareNodeWeight(WEIGHT, UDID1, WEIGHT2, UDID2);
     EXPECT_TRUE(ret == (WEIGHT - WEIGHT2));
-    ret = LnnCompareNodeWeight(WEIGHT, masterUdid, WEIGHT2, UDID2);
+    ret = LnnCompareNodeWeight(WEIGHT, nullptr, WEIGHT2, UDID2);
+    EXPECT_TRUE(ret == (WEIGHT - WEIGHT2));
+    ret = LnnCompareNodeWeight(WEIGHT, UDID1, WEIGHT2, nullptr);
     EXPECT_TRUE(ret == (WEIGHT - WEIGHT2));
     ret = LnnCompareNodeWeight(WEIGHT2, UDID1, WEIGHT3, UDID2);
     EXPECT_TRUE(ret < 0);
@@ -79,10 +82,18 @@ HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LNNNodeWeightTest, LNN_GET_LOCAL_WEIGHT_TEST_001, TestSize.Level1)
 {
-    NiceMock<LnnNetLedgertInterfaceMock>  netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo)
-    .WillOnce(Return(SOFTBUS_OK));
+    NiceMock<LnnServicetInterfaceMock> lnnServiceMock;
+    EXPECT_CALL(lnnServiceMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = LnnGetLocalWeight();
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    unsigned char randStr = 20;
+    EXPECT_CALL(lnnServiceMock, SoftBusGenerateRandomArray)
+        .WillRepeatedly(DoAll(SetArgPointee<0>(randStr), Return(SOFTBUS_OK)));
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR));
+    ret = LnnGetLocalWeight();
+    EXPECT_EQ(ret, 78);
+    ret = LnnGetLocalWeight();
+    EXPECT_EQ(ret, 78);
 }
 } // namespace OHOS

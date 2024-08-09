@@ -287,6 +287,8 @@ HWTEST_F(LNNDeviceNameInfoTest, IS_DEVICE_NEED_SYNC_NICK_NAME_TEST_001, TestSize
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_ERR));
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, IsFeatureSupport).WillRepeatedly(Return(false));
     bool ret = IsDeviceNeedSyncNickName(NETWORKID);
     EXPECT_FALSE(ret);
     ret = IsDeviceNeedSyncNickName(NETWORKID);

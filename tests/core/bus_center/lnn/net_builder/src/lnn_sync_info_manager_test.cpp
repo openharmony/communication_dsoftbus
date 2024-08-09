@@ -131,6 +131,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
     uint32_t netCapability = 0;
     int32_t ret = LnnSendP2pSyncInfoMsg(nullptr, netCapability);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
