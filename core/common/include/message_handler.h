@@ -79,7 +79,7 @@ SoftBusLooper *CreateNewLooper(const char *name);
 
 void DestroyLooper(SoftBusLooper *looper);
 
-void SetLooperDumpable(SoftBusLooper *loop, bool dumpable);
+void SetLooperDumpable(SoftBusLooper *looper, bool dumpable);
 
 #ifdef __cplusplus
 }
