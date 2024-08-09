@@ -14,7 +14,6 @@
  */
 
 #define private public
-#define SUPPORT_BUNDLENAME
 #define ENHANCED_FLAG
 
 #include "auth_interface.h"
@@ -398,52 +397,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest008, TestSize.Level1)
 
 /**
  * @tc.name: SoftbusServerStubTest009
- * @tc.desc: Verify the IsObjectstoreDbSessionName function.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest009, TestSize.Level1)
-{
-    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
-    bool ret = IsObjectstoreDbSessionName(g_mySessionName);
-    EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.name: SoftbusServerStubTest010
- * @tc.desc: Verify the GetBundleName function.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest010, TestSize.Level1)
-{
-    pid_t callingUid = 0;
-    std::string bundleName;
-    int32_t ret = GetBundleName(callingUid, bundleName);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
-}
-
-/**
- * @tc.name: SoftbusServerStubTest011
- * @tc.desc: Verify the CheckSessionName function.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest011, TestSize.Level1)
-{
-    char *sessionName = g_mySessionName;
-    pid_t callingUid = 0;
-    int32_t ret = CheckSessionName(sessionName, callingUid);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: SoftbusServerStubTest012
  * @tc.desc: Verify the Create and Remove SessionServerInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest012, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest009, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -481,12 +439,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest013
+ * @tc.name: SoftbusServerStubTest010
  * @tc.desc: Verify the ReadQosInfo function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest013, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest010, TestSize.Level1)
 {
     unsigned int qosCount = 0;
     bool boolNum = false;
@@ -531,12 +489,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest014
+ * @tc.name: SoftbusServerStubTest011
  * @tc.desc: Verify the OpenSessionInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest014, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest011, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -564,12 +522,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest015
+ * @tc.name: SoftbusServerStubTest012
  * @tc.desc: Verify the OpenAuthSessionInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest015, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest012, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -589,12 +547,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest016
+ * @tc.name: SoftbusServerStubTest013
  * @tc.desc: Verify the NotifyAuthSuccessInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest016, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest013, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -617,12 +575,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest017
+ * @tc.name: SoftbusServerStubTest014
  * @tc.desc: Verify the ReleaseResourcesInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest017, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest014, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -646,12 +604,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest018
+ * @tc.name: SoftbusServerStubTest015
  * @tc.desc: Verify the CloseChannelInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest018, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest015, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -702,12 +660,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest019
+ * @tc.name: SoftbusServerStubTest016
  * @tc.desc: Verify the CloseChannelWithStatisticsInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest019, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest016, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -745,12 +703,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest020
+ * @tc.name: SoftbusServerStubTest017
  * @tc.desc: Verify the SendMessageInner function part01.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest017, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -788,12 +746,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest021
+ * @tc.name: SoftbusServerStubTest018
  * @tc.desc: Verify the SendMessageInner function part02.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest018, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -828,12 +786,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest022
+ * @tc.name: SoftbusServerStubTest019
  * @tc.desc: Verify the EvaluateQosInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest022, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest019, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -884,12 +842,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest022, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest023
+ * @tc.name: SoftbusServerStubTest020
  * @tc.desc: Verify the Join and Leave LNNInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest023, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -931,12 +889,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest023, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest024
+ * @tc.name: SoftbusServerStubTest021
  * @tc.desc: Verify the GetAllOnlineNodeInfoInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest024, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -969,12 +927,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest024, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest025
+ * @tc.name: SoftbusServerStubTest022
  * @tc.desc: Verify the GetLocalDeviceInfoInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest025, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest022, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1013,12 +971,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest025, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest026
+ * @tc.name: SoftbusServerStubTest023
  * @tc.desc: Verify the GetNodeKeyInfoInner function part01.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest026, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest023, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1047,12 +1005,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest026, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest027
+ * @tc.name: SoftbusServerStubTest024
  * @tc.desc: Verify the GetNodeKeyInfoInner function part02.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest027, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest024, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1095,12 +1053,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest027, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest028
+ * @tc.name: SoftbusServerStubTest025
  * @tc.desc: Verify the SetNodeDataChangeFlagInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest028, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest025, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1129,12 +1087,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest029
+ * @tc.name: SoftbusServerStubTest026
  * @tc.desc: Verify the RegDataLevelChangeCbInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest029, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest026, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1151,12 +1109,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest030
+ * @tc.name: SoftbusServerStubTest027
  * @tc.desc: Verify the UnregDataLevelChangeCbInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest030, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest027, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1173,12 +1131,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest030, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest031
+ * @tc.name: SoftbusServerStubTest028
  * @tc.desc: Verify the SetDataLevelInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest031, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest028, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1195,12 +1153,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest032
+ * @tc.name: SoftbusServerStubTest029
  * @tc.desc: Verify the Start and Stop TimeSyncInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest032, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest029, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1242,12 +1200,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest032, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest033
+ * @tc.name: SoftbusServerStubTest030
  * @tc.desc: Verify the QosReportInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest033, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest030, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1285,12 +1243,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest033, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest034
+ * @tc.name: SoftbusServerStubTest031
  * @tc.desc: Verify the StreamStatsInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest034, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest031, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1320,12 +1278,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest034, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest035
+ * @tc.name: SoftbusServerStubTest032
  * @tc.desc: Verify the RippleStatsInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest035, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest032, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1355,12 +1313,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest035, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest036
+ * @tc.name: SoftbusServerStubTest033
  * @tc.desc: Verify the Grant and Remove Permission Inner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest036, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest033, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1401,12 +1359,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest036, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest037
+ * @tc.name: SoftbusServerStubTest034
  * @tc.desc: Verify the Publish and Stop Publish LNNInner function part01.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest037, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest034, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1451,12 +1409,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest037, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest038
+ * @tc.name: SoftbusServerStubTest035
  * @tc.desc: Verify the Publish and Stop Publish LNNInner function part02.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest038, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest035, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1503,12 +1461,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest038, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest039
+ * @tc.name: SoftbusServerStubTest036
  * @tc.desc: Verify the Publish and Stop Publish LNNInner function part03.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest039, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest036, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1557,12 +1515,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest039, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest040
+ * @tc.name: SoftbusServerStubTest037
  * @tc.desc: Verify the Refresh and Stop Refresh LNNInner function part01.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest037, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1611,12 +1569,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest041
+ * @tc.name: SoftbusServerStubTest038
  * @tc.desc: Verify the Refresh and Stop Refresh LNNInner function part02.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest041, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest038, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1667,12 +1625,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest041, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest042
+ * @tc.name: SoftbusServerStubTest039
  * @tc.desc: Verify the Refresh and Stop Refresh LNNInner function part03.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest042, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest039, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1723,12 +1681,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest042, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest043
+ * @tc.name: SoftbusServerStubTest040
  * @tc.desc: Verify the Active and DeActive MetaNode Inner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest043, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1770,12 +1728,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest043, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest044
+ * @tc.name: SoftbusServerStubTest041
  * @tc.desc: Verify the GetAllMetaNodeInfoInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest044, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest041, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1806,12 +1764,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest044, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest045
+ * @tc.name: SoftbusServerStubTest042
  * @tc.desc: Verify the ShiftLNNGearInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest045, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest042, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1848,12 +1806,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest045, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest046
+ * @tc.name: SoftbusServerStubTest043
  * @tc.desc: Verify the GetSoftbusSpecObjectInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest046, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest043, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
@@ -1865,12 +1823,12 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest046, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest047
+ * @tc.name: SoftbusServerStubTest044
  * @tc.desc: Verify the GetBusCenterExObjInner function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest047, TestSize.Level1)
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest044, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
