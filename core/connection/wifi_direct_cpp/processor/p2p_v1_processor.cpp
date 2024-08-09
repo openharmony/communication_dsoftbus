@@ -129,13 +129,18 @@ void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
     if (nc == nullptr) {
         return;
     }
-    if (nc->GetNegotiateMessage().GetLegacyP2pCommandType() == LegacyCommandType::CMD_CONN_V1_REQ ||
-        nc->GetNegotiateMessage().GetLegacyP2pCommandType() == LegacyCommandType::CMD_DISCONNECT_V1_REQ ||
-        nc->GetNegotiateMessage().GetLegacyP2pCommandType() == LegacyCommandType::CMD_REUSE_REQ ||
-        nc->GetNegotiateMessage().GetLegacyP2pCommandType() == LegacyCommandType::CMD_FORCE_DISCONNECT_V1_REQ) {
-        WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommandFront(*nc);
+    auto messageType = nc->GetNogetiateMessage().GetMessageType();
+    CONN_LOGI(CONN_WIFI_DIRECT, "messageType = %{public}d", messageType);
+    std::set<NegotiateMessageType> vaildMessageTypes = {
+        NegotiateMessageType::CMD_CONN_V1_REQ,
+        NegotiateMessageType::CMD_DISCONNECT_V1_REQ,
+        NegotiateMessageType::CMD_REUSE_REQ,
+        NegotiateMessageType::CMD_FORCE_DISCONNECT_V1_REQ,
+    };
+    if (vaildMessageTypes.find(messageType) == vaildMessageTypes.end()) {
+        return;
     }
-    return;
+    WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommandFront(*nc);
 }
 
 void P2pV1Processor::SwitchState(ProcessorState state, int timeoutInMillis)
