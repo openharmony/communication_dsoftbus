@@ -132,11 +132,14 @@ static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *de
         }
     }
 
-    char deviceType[DEVICE_TYPE_SIZE_MAX + 1] = { 0 };
+    char *deviceType = SoftBusMalloc(DEVICE_TYPE_SIZE_MAX + 1);
+    DISC_CHECK_AND_RETURN_LOGE(deviceType != NULL, DISC_CONTROL, "SoftBusMalloc failed");
     if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_MAX + 1, DEVICE_TYPE_SIZE_MAX, "%03X", device->devType) >= 0) {
         extra->peerDeviceType = deviceType;
     }
     DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DEVICE_FOUND, *extra);
+    SoftBusFree(deviceType);
+    extra->peerDeviceType = NULL;
 }
 
 static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
