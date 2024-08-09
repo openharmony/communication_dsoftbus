@@ -583,5 +583,15 @@ int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info)
 {
     return GetNetLedgerInterface()->LnnSetDLBssTransInfo(networkId, info);
 }
+
+int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info)
+{
+    return GetNetLedgerInterface()->LnnSetDLBatteryInfo(networkId, info);
+}
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetNetLedgerInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
 }
 }
+} // namespace OHOS

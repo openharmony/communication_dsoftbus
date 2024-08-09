@@ -20,11 +20,14 @@
 #include <mutex>
 
 #include "bus_center_event.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "message_handler.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_wifi_api_adapter.h"
@@ -69,6 +72,11 @@ public:
     virtual SoftBusWifiDetailState SoftBusGetWifiState(void) = 0;
     virtual bool SoftBusHasWifiDirectCapability(void) = 0;
     virtual char* SoftBusGetWifiInterfaceCoexistCap(void) = 0;
+    virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper,
+        LnnAsyncCallbackFunc callback, void *para);
+    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+        void *para, uint64_t delayMillis);
+    virtual int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len) = 0;
 };
 
 class LnnServicetInterfaceMock : public LnnServiceInterface {
@@ -106,6 +114,9 @@ public:
     MOCK_METHOD0(SoftBusGetWifiState, SoftBusWifiDetailState ());
     MOCK_METHOD0(SoftBusHasWifiDirectCapability, bool ());
     MOCK_METHOD0(SoftBusGetWifiInterfaceCoexistCap, char* ());
+    MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD2(SoftBusGenerateRandomArray, int32_t (unsigned char *, uint32_t));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
