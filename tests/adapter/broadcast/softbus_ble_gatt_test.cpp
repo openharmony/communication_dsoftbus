@@ -384,7 +384,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb002, TestSize.Level1)
 
 /**
  * @tc.name: TestSoftbusRegisterScanCb003
- * @tc.desc: Test SoftbusRegisterScanCb will return OHOS_BT_STATUS_FAIL when BleGattRegisterCallbacks return OHOS_BT_STATUS_FAIL
+ * @tc.desc: Test SoftbusRegisterScanCb will return OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
  * @tc.require: NONE
  */
