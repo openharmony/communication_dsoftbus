@@ -61,7 +61,6 @@ ohos_unittest("SoftbusServerStubTest") {
     external_deps = [
       "access_token:libaccesstoken_sdk",
       "access_token:libprivacy_sdk",
-      "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "googletest:gmock",
       "hilog:libhilog",
