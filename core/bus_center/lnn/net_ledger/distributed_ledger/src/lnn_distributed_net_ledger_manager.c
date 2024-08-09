@@ -42,8 +42,9 @@ static uint64_t GetCurrentTime(void)
     return (uint64_t)now.sec * TIME_THOUSANDS_FACTOR + (uint64_t)now.usec / TIME_THOUSANDS_FACTOR;
 }
 
-static int32_t DlGetDeviceUuid(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceUuid(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (strncpy_s((char*)buf, len, info->uuid, strlen(info->uuid)) != EOK) {
@@ -53,7 +54,7 @@ static int32_t DlGetDeviceUuid(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceOfflineCode(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceOfflineCode(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -64,8 +65,9 @@ static int32_t DlGetDeviceOfflineCode(const char *networkId, void *buf, uint32_t
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceUdid(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceUdid(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     const char *udid = NULL;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -81,8 +83,9 @@ static int32_t DlGetDeviceUdid(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNodeSoftBusVersion(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetNodeSoftBusVersion(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (strncpy_s((char*)buf, len, info->softBusVersion, strlen(info->softBusVersion)) != EOK) {
@@ -92,8 +95,9 @@ static int32_t DlGetNodeSoftBusVersion(const char *networkId, void *buf, uint32_
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceType(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceType(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     char *deviceType = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -109,24 +113,27 @@ static int32_t DlGetDeviceType(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceTypeId(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceTypeId(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     *((int32_t *)buf) = info->deviceInfo.deviceTypeId;
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetAuthType(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetAuthType(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     *((uint32_t *)buf) = info->AuthTypeValue;
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceName(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceName(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *deviceName = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -142,8 +149,9 @@ static int32_t DlGetDeviceName(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetBtMac(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetBtMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *mac = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -159,8 +167,9 @@ static int32_t DlGetBtMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetWlanIp(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetWlanIp(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *ip = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -176,8 +185,9 @@ static int32_t DlGetWlanIp(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetMasterUdid(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetMasterUdid(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *masterUdid = NULL;
 
@@ -197,8 +207,9 @@ static int32_t DlGetMasterUdid(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetNodeBleMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -218,8 +229,9 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetRemotePtk(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetRemotePtk(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     if (len != PTK_DEFAULT_LEN) {
         LNN_LOGE(LNN_LEDGER, "length error");
         return SOFTBUS_INVALID_PARAM;
@@ -233,8 +245,9 @@ static int32_t DlGetRemotePtk(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetStaticCapLen(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetStaticCapLen(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != LNN_COMMON_LEN) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -249,8 +262,9 @@ static int32_t DlGetStaticCapLen(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceSecurityLevel(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceSecurityLevel(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != LNN_COMMON_LEN) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -261,8 +275,9 @@ static int32_t DlGetDeviceSecurityLevel(const char *networkId, void *buf, uint32
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetStaticCap(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetStaticCap(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     if (len > STATIC_CAP_LEN) {
         LNN_LOGE(LNN_LEDGER, "length error");
         return SOFTBUS_INVALID_PARAM;
@@ -302,8 +317,9 @@ void LnnUpdateNodeBleMac(const char *networkId, char *bleMac, uint32_t len)
     SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
 }
 
-static int32_t DlGetAuthPort(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetAuthPort(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -313,8 +329,9 @@ static int32_t DlGetAuthPort(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetSessionPort(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetSessionPort(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -324,8 +341,9 @@ static int32_t DlGetSessionPort(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetProxyPort(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetProxyPort(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -335,8 +353,9 @@ static int32_t DlGetProxyPort(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetNetCap(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -346,8 +365,9 @@ static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetFeatureCap(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetFeatureCap(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != LNN_COMMON_LEN_64) {
         return SOFTBUS_INVALID_PARAM;
@@ -357,8 +377,9 @@ static int32_t DlGetFeatureCap(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNetType(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetNetType(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -368,8 +389,9 @@ static int32_t DlGetNetType(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetMasterWeight(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetMasterWeight(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
 
     if (len != LNN_COMMON_LEN) {
@@ -380,8 +402,9 @@ static int32_t DlGetMasterWeight(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetP2pMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *mac = NULL;
 
@@ -402,8 +425,9 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetWifiDirectAddr(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetWifiDirectAddr(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *wifiDirectAddr = NULL;
 
@@ -424,8 +448,9 @@ static int32_t DlGetWifiDirectAddr(const char *networkId, void *buf, uint32_t le
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNodeAddr(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetNodeAddr(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (!LnnIsNodeOnline(info)) {
@@ -439,8 +464,9 @@ static int32_t DlGetNodeAddr(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetP2pGoMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *mac = NULL;
 
@@ -461,8 +487,9 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetWifiCfg(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetWifiCfg(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *wifiCfg = NULL;
 
@@ -483,8 +510,9 @@ static int32_t DlGetWifiCfg(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetChanList5g(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetChanList5g(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     const char *chanList5g = NULL;
 
@@ -505,8 +533,9 @@ static int32_t DlGetChanList5g(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetP2pRole(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
 
     if (len != LNN_COMMON_LEN) {
@@ -521,8 +550,9 @@ static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetStateVersion(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetStateVersion(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
 
     if (len != LNN_COMMON_LEN) {
@@ -537,8 +567,9 @@ static int32_t DlGetStateVersion(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetStaFrequency(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetStaFrequency(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
 
     if (len != LNN_COMMON_LEN) {
@@ -553,8 +584,9 @@ static int32_t DlGetStaFrequency(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNodeDataChangeFlag(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetNodeDataChangeFlag(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
 
     if (len != DATA_CHANGE_FLAG_BUF_LEN) {
@@ -569,14 +601,14 @@ static int32_t DlGetNodeDataChangeFlag(const char *networkId, void *buf, uint32_
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNodeTlvNegoFlag(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetNodeTlvNegoFlag(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
     if (len != sizeof(bool)) {
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (!LnnIsNodeOnline(info) && !IsMetaNode(info)) {
+    if (checkOnline && !LnnIsNodeOnline(info) && !IsMetaNode(info)) {
         LNN_LOGE(LNN_LEDGER, "node is offline");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
@@ -584,8 +616,9 @@ static int32_t DlGetNodeTlvNegoFlag(const char *networkId, void *buf, uint32_t l
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetAccountHash(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetAccountHash(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     if (len != SHA_256_HASH_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -602,8 +635,9 @@ static int32_t DlGetAccountHash(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceIrk(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceIrk(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (memcpy_s(buf, len, info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != EOK) {
@@ -613,8 +647,9 @@ static int32_t DlGetDeviceIrk(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDevicePubMac(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDevicePubMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (memcpy_s(buf, len, info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != EOK) {
@@ -624,8 +659,9 @@ static int32_t DlGetDevicePubMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceCipherInfoKey(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceCipherInfoKey(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (memcpy_s(buf, len, info->cipherInfo.key, SESSION_KEY_LENGTH) != EOK) {
@@ -635,8 +671,9 @@ static int32_t DlGetDeviceCipherInfoKey(const char *networkId, void *buf, uint32
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetDeviceCipherInfoIv(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetDeviceCipherInfoIv(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (memcpy_s(buf, len, info->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
@@ -646,8 +683,9 @@ static int32_t DlGetDeviceCipherInfoIv(const char *networkId, void *buf, uint32_
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNodeP2pIp(const char *networkId, void *buf, uint32_t len)
+static int32_t DlGetNodeP2pIp(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (strcpy_s((char *)buf, len, info->p2pInfo.p2pIp) != EOK) {
@@ -1049,7 +1087,7 @@ int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint
     for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
-                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, len);
+                ret = g_dlKeyTable[i].getInfo(networkId, true, (void *)info, len);
                 SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
                 return ret;
             }
@@ -1083,7 +1121,7 @@ int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
     for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
-                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, LNN_COMMON_LEN);
+                ret = g_dlKeyTable[i].getInfo(networkId, true, (void *)info, LNN_COMMON_LEN);
                 SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
                 return ret;
             }
@@ -1117,7 +1155,7 @@ int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *inf
     for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
-                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, LNN_COMMON_LEN);
+                ret = g_dlKeyTable[i].getInfo(networkId, true, (void *)info, LNN_COMMON_LEN);
                 SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
                 return ret;
             }
@@ -1150,7 +1188,7 @@ int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *inf
     for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
-                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, LNN_COMMON_LEN_64);
+                ret = g_dlKeyTable[i].getInfo(networkId, true, (void *)info, LNN_COMMON_LEN_64);
                 SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
                 return ret;
             }
@@ -1183,7 +1221,7 @@ int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info)
     for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
-                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, sizeof(int16_t));
+                ret = g_dlKeyTable[i].getInfo(networkId, true, (void *)info, sizeof(int16_t));
                 SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
                 return ret;
             }
@@ -1194,7 +1232,7 @@ int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info)
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info)
+static int32_t LnnGetRemoteBoolInfoCommon(const char *networkId, bool checkOnline, InfoKey key, bool *info)
 {
     uint32_t i;
     int32_t ret;
@@ -1216,7 +1254,7 @@ int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info)
     for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
-                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, sizeof(bool));
+                ret = g_dlKeyTable[i].getInfo(networkId, checkOnline, (void *)info, sizeof(bool));
                 SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
                 return ret;
             }
@@ -1225,6 +1263,16 @@ int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info)
     SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     LNN_LOGE(LNN_LEDGER, "KEY NOT exist");
     return SOFTBUS_NOT_FIND;
+}
+
+int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info)
+{
+    return LnnGetRemoteBoolInfoCommon(networkId, true, key, info);
+}
+
+int32_t LnnGetRemoteBoolInfoIgnoreOnline(const char *networkId, InfoKey key, bool *info)
+{
+    return LnnGetRemoteBoolInfoCommon(networkId, false, key, info);
 }
 
 int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, uint32_t len)
@@ -1246,7 +1294,7 @@ int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, 
     for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
-                ret = g_dlKeyTable[i].getInfo(networkId, info, len);
+                ret = g_dlKeyTable[i].getInfo(networkId, true, info, len);
                 SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
                 return ret;
             }
