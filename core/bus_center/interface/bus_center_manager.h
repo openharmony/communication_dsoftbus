@@ -48,6 +48,7 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
 
 int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len);
 int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info);
+int32_t LnnGetRemoteBoolInfoIgnoreOnline(const char *networkId, InfoKey key, bool *info);
 int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info);
 int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info);
 int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info);

@@ -176,7 +176,7 @@ HWTEST_F(WifiDirectUtilsTest, IsRemoteSupportTlvTest, TestSize.Level1)
     WifiDirectInterfaceMock mock;
 
     EXPECT_CALL(mock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetRemoteBoolInfo(_, _, _))
+    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
         .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
             *info = true;
             return SOFTBUS_OK;
