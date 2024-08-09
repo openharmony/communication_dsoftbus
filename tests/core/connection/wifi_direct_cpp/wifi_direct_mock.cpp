@@ -80,10 +80,10 @@ int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteStrInfo(id, key, info, len);
 }
 
-int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info)
+int32_t LnnGetRemoteBoolInfoIgnoreOnline(const char *networkId, InfoKey key, bool *info)
 {
     auto id = std::string(networkId);
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteBoolInfo(id, key, info);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteBoolInfoIgnoreOnline(id, key, info);
 }
 
 bool LnnGetOnlineStateById(const char *id, IdCategory type)
