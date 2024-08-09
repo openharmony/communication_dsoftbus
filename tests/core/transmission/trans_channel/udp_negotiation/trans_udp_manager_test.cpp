@@ -37,6 +37,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+#define TEST_CHANNEL_ID 1000
+#define TEST_LEN 64
 #define TEST_AUTH_PORT (6000)
 #define INVALID_CHANNEL_SEQ (22579)
 #define INVALID_CHAN_ID (-1)
@@ -200,7 +202,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest005, TestSize.Level1)
     Channel->seq = 20;
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     ASSERT_TRUE(newChannel != nullptr);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 20;
     ret = TransAddUdpChannel(Channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -225,22 +226,21 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest006, TestSize.Level1)
     int64_t seq = INVALID_CHANNEL_SEQ;
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     ASSERT_TRUE(newChannel != nullptr);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 20;
     TransUdpChannelMgrDeinit();
     int32_t ret = TransGetUdpChannelBySeq(Channel->seq, newChannel);
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUdpChannelMgrInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransAddUdpChannel(Channel);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransGetUdpChannelBySeq(seq, NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransGetUdpChannelBySeq(seq, newChannel);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
     SoftBusFree(newChannel);
     TransUdpChannelMgrDeinit();
 }
@@ -259,7 +259,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest007, TestSize.Level1)
     ASSERT_TRUE(Channel != nullptr);
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     ASSERT_TRUE(newChannel != nullptr);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 20;
     ret = TransAddUdpChannel(Channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -284,7 +283,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest008, TestSize.Level1)
     int64_t channlId = INVALID_CHAN_ID;
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     ASSERT_TRUE(newChannel != nullptr);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 20;
     UdpChannelInfo *Channel = GetPackTest();
     ASSERT_TRUE(Channel != nullptr);
@@ -320,7 +318,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest009, TestSize.Level1)
     ASSERT_TRUE(Channel != nullptr);
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     ASSERT_TRUE(newChannel != nullptr);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 20;
     ret = TransAddUdpChannel(Channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -343,7 +340,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest010, TestSize.Level1)
     uint32_t requestId = INVALID_CHANNEL_REQUETID;
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     ASSERT_TRUE(newChannel != nullptr);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 20;
     UdpChannelInfo *Channel = GetPackTest();
     ASSERT_TRUE(Channel != nullptr);
@@ -435,7 +431,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest013, TestSize.Level1)
     ASSERT_TRUE(Channel != nullptr);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = 20;
     ret = TransAddUdpChannel(Channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -455,7 +450,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest014, TestSize.Level1)
     int64_t seq = INVALID_CHANNEL_SEQ;
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = 20;
     UdpChannelInfo *Channel = GetPackTest();
     ASSERT_TRUE(Channel != nullptr);
@@ -576,7 +570,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest018, TestSize.Level1)
     ASSERT_TRUE(Channel != nullptr);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = 20;
     ret = TransAddUdpChannel(Channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -602,7 +595,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest019, TestSize.Level1)
     ASSERT_TRUE(Channel != nullptr);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = 20;
     ret = TransAddUdpChannel(Channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -719,6 +711,63 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest024, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransUdpManagerTest025
+ * @tc.desc: TransUdpGetLocalIpAndConnectTypeById test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest025, TestSize.Level1)
+{
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t channelId = TEST_CHANNEL_ID;
+    uint32_t maxIpLen = TEST_LEN;
+    int32_t connectType = CONNECT_TYPE_MAX;
+
+    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, nullptr, maxIpLen, &connectType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    char localIp[IP_LEN] = { 0 };
+    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, maxIpLen, &connectType);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+
+    UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = channelId;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpGetLocalIpAndConnectTypeById(channelId, localIp, maxIpLen, &connectType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDelUdpChannel(channelId);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransUdpManagerTest026
+ * @tc.desc: IsUdpRecoveryTransLimit test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest026, TestSize.Level1)
+{
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+    bool flag = IsUdpRecoveryTransLimit();
+    EXPECT_EQ(true, flag);
+    channel->info.myData.channelId = TEST_CHANNEL_ID;
+    channel->info.businessType = BUSINESS_TYPE_STREAM;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    flag = IsUdpRecoveryTransLimit();
+    EXPECT_EQ(false, flag);
+    TransDelUdpChannel(TEST_CHANNEL_ID);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
  * @tc.name: TransUdpGetLocalIpAndConnectTypeById
  * @tc.desc: Get localIp and connectType wiht channelId
  * @tc.type: FUNC
@@ -740,6 +789,98 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetLocalIpAndConnectTypeById001, TestSize.
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
     TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransUdpManagerTest027
+ * @tc.desc: UdpChannelFileTransLimit test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest027, TestSize.Level1)
+{
+    TransUdpChannelMgrInit();
+    ChannelInfo *channel = nullptr;
+    int32_t ret = UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channel = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+    channel->channelType = CHANNEL_TYPE_PROXY;
+    ret = UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    (void)memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    channel->businessType = BUSINESS_TYPE_MESSAGE;
+    ret = UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    (void)memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    ret = UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransUdpChannelMgrDeinit();
+    SoftBusFree(channel);
+}
+
+/**
+ * @tc.name: TransUdpManagerTest028
+ * @tc.desc: ModifyUpdChannelTos test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest028, TestSize.Level1)
+{
+    uint8_t tos = FILE_PRIORITY_BK;
+    int32_t ret = ModifyUdpChannelTos(tos);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    TransUdpChannelMgrInit();
+    UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.myData.channelId = TEST_CHANNEL_ID;
+    channel->info.businessType = BUSINESS_TYPE_FILE;
+    channel->info.isClient = true;
+    channel->tos = FILE_PRIORITY_BE;
+
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ModifyUdpChannelTos(tos);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    TransDelUdpChannel(TEST_CHANNEL_ID);
+    TransUdpChannelMgrDeinit();
+}
+
+/**
+ * @tc.name: TransUdpManagerTest029
+ * @tc.desc: UdpChannelFileTransLimit test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest029, TestSize.Level1)
+{
+    int32_t ret = TransUdpGetChannelIdByAddr(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    ret = TransUdpGetChannelIdByAddr(appInfo);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_NE(SOFTBUS_OK, ret);
+    ret = TransUdpGetChannelIdByAddr(appInfo);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    appInfo->peerData.channelId = TEST_CHANNEL_ID;
+    UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    channel->info.peerData.channelId = TEST_CHANNEL_ID;
+    ret = TransAddUdpChannel(channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUdpGetChannelIdByAddr(appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransDelUdpChannel(TEST_CHANNEL_ID);
+    TransUdpChannelMgrDeinit();
+    SoftBusFree(appInfo);
+    appInfo = nullptr;
 }
 
 /**
