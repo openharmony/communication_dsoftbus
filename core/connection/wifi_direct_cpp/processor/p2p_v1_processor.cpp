@@ -129,7 +129,7 @@ void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
     if (nc == nullptr) {
         return;
     }
-    auto messageType = nc->GetNogetiateMessage().GetLegacyP2pCommandType();
+    auto messageType = nc->GetNegotiateMessage().GetLegacyP2pCommandType();
     CONN_LOGI(CONN_WIFI_DIRECT, "messageType = %{public}d", messageType);
     std::set<LegacyCommandType> vaildMessageTypes = {
         LegacyCommandType::CMD_CONN_V1_REQ,
