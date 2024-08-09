@@ -322,6 +322,18 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+/**
+ * @tc.name: TestSoftbusRegisterScanCb001
+ * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_INVALID_PARAM when given invalid param
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb001, TestSize.Level1)
+{
+    int32_t ret = MockBluetooth::interface->RegisterScanListener(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
 //充当参数
 static void FakeScanCallback(int32_t adapterScanld, int32_t status)
 {
@@ -371,6 +383,54 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestSoftbusRegisterScanCb003
+ * @tc.desc: Test SoftbusRegisterScanCb will return OHOS_BT_STATUS_FAIL when BleGattRegisterCallbacks return OHOS_BT_STATUS_FAIL
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb003, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t scannerld = 0;
+    EXPECT_CALL(mocker, BleRegisterScanCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_FAIL));
+    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
+    EXPECT_EQ(ret, OHOS_BT_STATUS_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TestSoftbusRegisterScanCb004
+ * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_BC_ADAPTER_REGISTER_FAIL when scan channel are all uesd
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb004, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t scannerld = 0;
+    EXPECT_CALL(mocker, BleRegisterScanCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
+    EXPECT_EQ(ret, OHOS_BT_STATUS_SUCCESS);
+
+    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
+    EXPECT_EQ(ret, OHOS_BT_STATUS_SUCCESS);
+
+    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_REGISTER_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
  * @tc.name: TestSoftbusUnRegisterScanCb001
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -397,6 +457,30 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb002, TestSize.Level1)
     int32_t scannerld = 0;
     int32_t ret = MockBluetooth::interface->UnRegisterScanListener(scannerld);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/**
+ * @tc.name: TestSoftbusUnRegisterScanCb003
+ * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_OK when successfully unregistered
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb003, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t scannerld = 0;
+    EXPECT_CALL(mocker, BleRegisterScanCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = MockBluetooth::interface->UnRegisterScanListener(scannerld);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->UnRegisterScanListener(scannerld);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -691,6 +775,71 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan001, TestSize.Level1)
     int32_t scannerld = 0;
     int32_t ret = MockBluetooth::interface->StartScan(scannerld, nullptr, nullptr, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TestSoftbusStartScan002
+ * @tc.desc: Test SoftbusStartScan will return SOFTBUS_LOCK_ERR when never called init
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan002, TestSize.Level1)
+{
+    SoftBusBcScanParams scanParam = {
+        .scanInterval = SOFTBUS_BC_SCAN_WINDOW_P10,
+        .scanWindow = SOFTBUS_BC_SCAN_INTERVAL_P10,
+        .scanType = SOFTBUS_BC_SCAN_TYPE_ACTIVE,
+        .scanPhy = SOFTBUS_BC_SCAN_PHY_1M,
+        .scanFilterPolicy = SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL,
+    };
+
+    SoftBusBcScanFilter softBusBcScanFilter = {};
+    softBusBcScanFilter.address = (int8_t*)"address";
+    softBusBcScanFilter.deviceName = (int8_t*)"deviceName";
+    softBusBcScanFilter.serviceUuid = 1;
+    softBusBcScanFilter.serviceDataLength = 1;
+    softBusBcScanFilter.manufactureId = 1;
+    softBusBcScanFilter.manufactureDataLength = 1;
+
+    int32_t scannerld = 0;
+    int32_t filterSize = 1;
+    int32_t ret = MockBluetooth::interface->StartScan(scannerld, &scanParam, &softBusBcScanFilter, filterSize);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/**
+ * @tc.name: TestSoftbusStartScan003
+ * @tc.desc: Test SoftbusStartScan will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when given invalid params scannerld
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan003, TestSize.Level1)
+{
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusBcScanParams scanParam = {
+        .scanInterval = SOFTBUS_BC_SCAN_WINDOW_P10,
+        .scanWindow = SOFTBUS_BC_SCAN_INTERVAL_P10,
+        .scanType = SOFTBUS_BC_SCAN_TYPE_ACTIVE,
+        .scanPhy = SOFTBUS_BC_SCAN_PHY_1M,
+        .scanFilterPolicy = SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL,
+    };
+
+    SoftBusBcScanFilter softBusBcScanFilter = {};
+    softBusBcScanFilter.address = (int8_t*)"address";
+    softBusBcScanFilter.deviceName = (int8_t*)"deviceName";
+    softBusBcScanFilter.serviceUuid = 1;
+    softBusBcScanFilter.serviceDataLength = 1;
+    softBusBcScanFilter.manufactureId = 1;
+    softBusBcScanFilter.manufactureDataLength = 1;
+
+    int32_t filterSize = 1;
+    ret = MockBluetooth::interface->StartScan(GATT_SCAN_MAX_NUM, &scanParam, &softBusBcScanFilter, filterSize);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
