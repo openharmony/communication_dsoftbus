@@ -233,7 +233,7 @@ void P2pV1ProcessorTest::InjectCommonMock(WifiDirectInterfaceMock &mock)
             (void)strcpy_s(buf, len, id.c_str());
             return SOFTBUS_OK;
         });
-    EXPECT_CALL(mock, LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, _))
+    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(networkId, BOOL_KEY_TLV_NEGOTIATION, _))
         .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
             *info = false;
             return SOFTBUS_OK;
