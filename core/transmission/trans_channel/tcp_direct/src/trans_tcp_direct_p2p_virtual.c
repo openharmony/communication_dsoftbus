@@ -44,3 +44,8 @@ ListenerModule GetModuleByHmlIp(const char *ip)
 {
     return UNUSE_BUTT;
 }
+
+ListenerModule GetModuleByPeerUuid(const char *peerUuid)
+{
+    return UNUSE_BUTT;
+}
