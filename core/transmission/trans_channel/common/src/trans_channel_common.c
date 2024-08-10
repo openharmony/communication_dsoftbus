@@ -459,6 +459,7 @@ void TransBuildTransOpenChannelStartEvent(TransEventExtra *extra, AppInfo *appIn
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
         extra->localUdid = nodeInfo->masterUdid;
     }
+    appInfo->osType = nodeInfo->deviceInfo.osType;
     extra->osType = appInfo->osType;
     extra->peerNetworkId = appInfo->peerNetWorkId;
     extra->peerUdid = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceUdid : NULL,
