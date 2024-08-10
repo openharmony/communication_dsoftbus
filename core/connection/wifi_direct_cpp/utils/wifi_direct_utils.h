@@ -97,6 +97,9 @@ public:
     static uint32_t CalculateStringLength(const char *str, uint32_t size);
     static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
     static int32_t GetOsType(const std::string &remoteNetworkId);
+    static int32_t GetOsType(const char *networkId);
+    static int32_t GetDeviceType(const char *networkId);
+    static int32_t GetDeviceType();
 
 private:
     static inline std::mutex serialParallelLock_;
