@@ -53,7 +53,7 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "LnnGetRemoteNodeInfoById failed");
 
     if (IsHmlIpAddr(localIp)) {
-        ListenerModule type = GetModuleByHmlIp(localIp);
+        ListenerModule type = GetModuleByPeerUuid(peerUuid);
         if (type != UNUSE_BUTT) {
             StopHmlListener(type);
             TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");
