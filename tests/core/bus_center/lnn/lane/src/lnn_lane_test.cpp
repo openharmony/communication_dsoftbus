@@ -3293,7 +3293,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_12, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_LANE_13, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
-    uint32_t laneReqId = ApplyLaneReqid(laneType);
+    uint32_t laneReqId = ApplyLaneReqId(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
     NiceMock<LaneDepsInterfaceMock> mock;
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(DoAll(SetArgPointee<1>(NET_CAP), Return(SOFTBUS_OK)));
