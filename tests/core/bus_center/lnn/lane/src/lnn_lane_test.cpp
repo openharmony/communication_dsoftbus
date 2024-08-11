@@ -3308,7 +3308,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_13, TestSize.Level1)
     LaneRequestOption requestOption = {};
     requestOption.type = laneType;
     EXPECT_EQ(strncpy_s(requestOption.requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
-        NODE_NETWORK_ID, strlen(NETWORK_ID_BUF_LEN)), EOK);
+        NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     requestOption.requestInfo.trans.transType = LANE_T_COMMON_VIDEO;
     requestOption.requestInfo.trans.expectedBw = 0;
     requestOption.requestInfo.trans.pid = 0;
@@ -3428,12 +3428,12 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_17, TestSize.Level1)
     selectParam.transType = LANE_T_FILE;
     selectParam.expectedBw = 0;
     selectParam.list.linkTypeNum = 2;
-    selectParam.list..linkType[0] = LANE_WLAN_2P4G;
-    selectParam.list..linkType[1] = LANE_COC_DIRECT;
+    selectParam.list.linkType[0] = LANE_WLAN_2P4G;
+    selectParam.list.linkType[1] = LANE_COC_DIRECT;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     EXPECT_CALL(mock, LnnGetLocalNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(16), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(16), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
@@ -3467,12 +3467,12 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_18, TestSize.Level1)
     selectParam.transType = LANE_T_FILE;
     selectParam.expectedBw = 0;
     selectParam.list.linkTypeNum = 2;
-    selectParam.list..linkType[0] = LANE_WLAN_2P4G;
-    selectParam.list..linkType[1] = LANE_COC_DIRECT;
+    selectParam.list.linkType[0] = LANE_WLAN_2P4G;
+    selectParam.list.linkType[1] = LANE_COC_DIRECT;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     EXPECT_CALL(mock, LnnGetLocalNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(16), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(16), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
