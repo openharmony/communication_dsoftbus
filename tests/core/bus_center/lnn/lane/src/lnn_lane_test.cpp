@@ -65,6 +65,9 @@ constexpr uint32_t PORT_B = 25;
 constexpr uint32_t FD = 888;
 constexpr uint32_t SLEEP_FOR_LOOP_COMPLETION_MS = 50;
 #define NET_CAP 63
+constexpr uint32_t FREQUENCY_2G_FIRST = 2412;
+constexpr uint32_t LOCAL_NUM = 8192;
+constexpr uint32_t ROM_NUM = 8;
 
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
@@ -3314,5 +3317,200 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_13, TestSize.Level1)
 
     int32_t ret = LnnRequestLane(laneReqId, &requestOption, &g_listener2);
     EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_OFF);
+}
+
+/*
+* @tc.name: LNN_LANE_14
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_14, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    LaneSelectParam selectParam = {};
+    LanePreferredLinkList linkList = {};
+    selectParam.transType = LANE_T_RAW_STREAM;
+    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
+    selectParam.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
+
+    wifiMock.SetDefaultResult();
+    EXPECT_CALL(wifiMock, SoftBusGetLinkBand).WillRepeatedly(Return(BAND_24G));
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+
+    int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
+    EXPECT_EQ(ret, SOFTBUS_LANE_WIFI_BAND_ERR);
+}
+
+/*
+* @tc.name: LNN_LANE_15
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_15, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    LaneSelectParam selectParam = {};
+    LanePreferredLinkList linkList = {};
+    selectParam.transType = LANE_T_RAW_STREAM;
+    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
+    selectParam.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
+
+    wifiMock.SetDefaultResult();
+    EXPECT_CALL(wifiMock, SoftBusGetLinkBand).WillRepeatedly(Return(BAND_5G));
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+}
+
+/*
+* @tc.name: LNN_LANE_16
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_16, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    LaneSelectParam selectParam = {};
+    LanePreferredLinkList linkList = {};
+    selectParam.transType = LANE_T_RAW_STREAM;
+    selectParam.qosRequire.minBW = HIGH_BW;
+    selectParam.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
+
+    wifiMock.SetDefaultResult();
+    EXPECT_CALL(wifiMock, SoftBusGetLinkBand).WillRepeatedly(Return(BAND_5G));
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+}
+
+/*
+* @tc.name: LNN_LANE_17
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_17, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    uint32_t listNum = 0;
+    LanePreferredLinkList linkList = {};
+    LaneSelectParam selectParam = {};
+    selectParam.transType = LANE_T_FILE;
+    selectParam.expectedBw = 0;
+    selectParam.list.linkTypeNum = 2;
+    selectParam.list..linkType[0] = LANE_WLAN_2P4G;
+    selectParam.list..linkType[1] = LANE_COC_DIRECT;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(16), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(16), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    EXPECT_CALL(mock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    EXPECT_CALL(mock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    EXPECT_CALL(mock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    wifiMock.SetDefaultResult();
+    SoftBusWifiLinkedInfo wlanInfo;
+    wlanInfo.frequency = 1;
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM1>(wlanInfo), Return(SOFTBUS_OK)));
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_LANE_18
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_18, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    uint32_t listNum = 0;
+    LanePreferredLinkList linkList = {};
+    LaneSelectParam selectParam = {};
+    selectParam.transType = LANE_T_FILE;
+    selectParam.expectedBw = 0;
+    selectParam.list.linkTypeNum = 2;
+    selectParam.list..linkType[0] = LANE_WLAN_2P4G;
+    selectParam.list..linkType[1] = LANE_COC_DIRECT;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(16), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(16), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    EXPECT_CALL(mock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    EXPECT_CALL(mock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    EXPECT_CALL(mock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    wifiMock.SetDefaultResult();
+    SoftBusWifiLinkedInfo wlanInfo;
+    wlanInfo.frequency = FREQUENCY_2G_FIRST + 1;
+    EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM1>(wlanInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(wifiMock, SoftBusGetWifiState).WillRepeatedly(Return(SOFTBUS_WIFI_STATE_SEMIACTIVATING));
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_LANE_19
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_19, TestSize.Level1)
+{
+    LaneLinkType linkType = LANE_COC_DIRECT;
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetLocalNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(ROM_NUM), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(LOCAL_NUM), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(ROM_NUM), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(LOCAL_NUM), Return(SOFTBUS_OK)));
+    int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_COC_CAP);
 }
 } // namespace OHOS
