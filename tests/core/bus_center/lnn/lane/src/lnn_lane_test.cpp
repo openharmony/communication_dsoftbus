@@ -3504,10 +3504,10 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_19, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetLocalNumU64Info)
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(ROM_NUM), Return(SOFTBUS_OK)));
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(LOCAL_NUM), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetRemoteNumU64Info)
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(ROM_NUM), Return(SOFTBUS_OK)));
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(LOCAL_NUM), Return(SOFTBUS_OK)));
     int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
