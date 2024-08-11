@@ -27,6 +27,7 @@ typedef struct {
     char myIp[IP_LEN];
     int32_t myPort;
     ListenerModule moudleType;
+    char peerUuid[UUID_BUF_LEN];
 } HmlListenerInfo;
 
 int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer, bool isLegacyOs);
