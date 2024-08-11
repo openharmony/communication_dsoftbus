@@ -173,6 +173,44 @@ ohos_unittest("TransUdpNegotiationExchangeTest") {
   }
 }
 
+ohos_unittest("TransUdpStaticTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_udp_static_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/src",
+    "$dsoftbus_root_path/third_party/dfinder/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 ohos_unittest("TransUdpManagerTest") {
   module_out_path = module_output_path
   sources = [ "trans_udp_manager_test.cpp" ]
@@ -256,5 +294,6 @@ group("unittest") {
     ":TransUdpNegoTest",
     ":TransUdpNegotiationExchangeTest",
     ":TransUdpNegotiationTest",
+    ":TransUdpStaticTest",
   ]
 }
