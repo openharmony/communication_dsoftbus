@@ -89,10 +89,7 @@ void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 static int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
 {
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, len);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "Get local dev Id failed.");
-        return ret;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "Get local dev Id failed.");
     return SOFTBUS_OK;
 }
 
@@ -107,14 +104,9 @@ int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
 
     uint32_t truncateLen = 0;
     ret = CalculateMbsTruncateSize((const char *)localDevName, size - 1, &truncateLen);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "truncate device name failed");
-        return ret;
-    }
-    if (memcpy_s(deviceName, size, localDevName, truncateLen) != EOK) {
-        DISC_LOGE(DISC_BLE, "copy local device name failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "truncate device name failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(deviceName, size, localDevName, truncateLen) == EOK,
+        SOFTBUS_MEM_ERR, DISC_BLE, "copy local device name failed");
     deviceName[truncateLen] = '\0';
     return SOFTBUS_OK;
 }
@@ -122,62 +114,41 @@ int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
 uint16_t DiscBleGetDeviceType(void)
 {
     char type[DEVICE_TYPE_BUF_LEN] = {0};
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "Get local device type failed.");
-        return TYPE_UNKNOW_ID;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN) == SOFTBUS_OK,
+        TYPE_UNKNOW_ID, DISC_BLE, "Get local device type failed.");
     uint16_t typeId = 0;
-    if (LnnConvertDeviceTypeToId(type, &typeId) != SOFTBUS_OK) {
-        return TYPE_UNKNOW_ID;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(LnnConvertDeviceTypeToId(type, &typeId) == SOFTBUS_OK,
+        TYPE_UNKNOW_ID, DISC_BLE, "Convert device type to id failed.");
     return typeId;
 }
 
 int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash, uint32_t len)
 {
-    if (devIdHash == NULL || len > DISC_MAX_DEVICE_ID_LEN) {
-        DISC_LOGE(DISC_BLE, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(devIdHash != NULL && len <= DISC_MAX_DEVICE_ID_LEN,
+        SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param");
     char udid[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
     int32_t ret = DiscBleGetDeviceUdid(udid, sizeof(udid));
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "GetDeviceId failed");
-        return ret;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "GetDeviceId failed");
     ret = SoftBusGenerateStrHash((const uint8_t *)udid, strlen(udid), (uint8_t *)hashResult);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "GenerateStrHash failed");
-        return ret;
-    }
-    if (memset_s(devIdHash, len, 0, len) != EOK) {
-        DISC_LOGE(DISC_BLE, "memset devIdHash failed");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (memcpy_s(devIdHash, len, hashResult, SHORT_DEVICE_ID_HASH_LENGTH) != EOK) {
-        DISC_LOGE(DISC_BLE, "copy device id hash failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "GenerateStrHash failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(memset_s(devIdHash, len, 0, len) == EOK,
+        SOFTBUS_MEM_ERR, DISC_BLE, "memset devIdHash failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(devIdHash, len, hashResult, SHORT_DEVICE_ID_HASH_LENGTH) == EOK,
+        SOFTBUS_MEM_ERR, DISC_BLE, "copy device id hash failed");
     return SOFTBUS_OK;
 }
 
 int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
 {
-    if (hashStr == NULL || len > SHORT_USER_ID_HASH_LEN) {
-        DISC_LOGE(DISC_BLE, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(hashStr != NULL && len <= SHORT_USER_ID_HASH_LEN,
+        SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param");
     uint8_t account[SHA_256_HASH_LEN] = {0};
     int32_t ret = LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, account, SHA_256_HASH_LEN);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "DiscBleGetShortUserIdHash get local user id failed");
-        return ret;
-    }
-    if (memcpy_s(hashStr, len, account, len) != EOK) {
-        DISC_LOGE(DISC_BLE, "DiscBleGetShortUserIdHash memcpy_s failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        DISC_BLE, "DiscBleGetShortUserIdHash get local user id failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(hashStr, len, account, len) == EOK,
+        SOFTBUS_MEM_ERR, DISC_BLE, "DiscBleGetShortUserIdHash memcpy_s failed");
     return SOFTBUS_OK;
 }
 
@@ -247,10 +218,8 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
     uint32_t dataLen)
 {
     uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen;
-    if (remainLen == 0) {
-        DISC_LOGE(DISC_BLE, "tlv remainLen is 0.");
-        return SOFTBUS_DISCOVER_BLE_ASSEMBLE_DATA_FAIL;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(remainLen != 0, SOFTBUS_DISCOVER_BLE_ASSEMBLE_DATA_FAIL,
+        DISC_BLE, "tlv remainLen is 0.");
     broadcastData->data.data[broadcastData->dataLen] = (dataType << BYTE_SHIFT_4BIT) & MOST_SIGNIFICANT_4BIT_MASK;
     if (dataLen <= TLV_MAX_DATA_LEN) {
         broadcastData->data.data[broadcastData->dataLen] |= dataLen & LEAST_SIGNIFICANT_4BIT_MASK;
@@ -259,10 +228,9 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
     remainLen -= 1;
 
     uint32_t validLen = (dataLen > remainLen) ? remainLen : dataLen;
-    if (memcpy_s(&(broadcastData->data.data[broadcastData->dataLen]), validLen, value, validLen) != EOK) {
-        DISC_LOGE(DISC_BLE, "assemble tlv memcpy failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(
+        memcpy_s(&(broadcastData->data.data[broadcastData->dataLen]), validLen, value, validLen) == EOK,
+        SOFTBUS_MEM_ERR, DISC_BLE, "assemble tlv memcpy failed");
     broadcastData->dataLen += validLen;
     return SOFTBUS_OK;
 }
@@ -272,14 +240,13 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32
 {
     uint32_t i = device->info->addrNum;
     int32_t ret = ConvertBtMacToStr(device->info->addr[i].info.br.brMac, BT_MAC_LEN, (uint8_t *)src, srcLen);
-    if (ret == SOFTBUS_OK) {
-        device->info->addr[i].type = CONNECTION_ADDR_BR;
-        device->info->addrNum += 1;
-        return SOFTBUS_OK;
-    }
-    DISC_LOGE(DISC_BLE, "parse tlv convert br failed, tlvType=TLV_TYPE_BR_MAC, tlvLen=%{public}u, dstLen=%{public}d",
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE,
+        "parse tlv convert br failed, tlvType=TLV_TYPE_BR_MAC, tlvLen=%{public}u, dstLen=%{public}d",
         srcLen, BT_MAC_LEN);
-    return ret;
+
+    device->info->addr[i].type = CONNECTION_ADDR_BR;
+    device->info->addrNum += 1;
+    return SOFTBUS_OK;
 }
 
 static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data, uint32_t len)
@@ -374,13 +341,12 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
     while (curLen < dataLen) {
         uint8_t type = (data[curLen] & MOST_SIGNIFICANT_4BIT_MASK) >> BYTE_SHIFT_4BIT;
         uint32_t len = (uint32_t)(data[curLen] & LEAST_SIGNIFICANT_4BIT_MASK);
-        if (curLen + TL_LEN + len > dataLen || (len == TLV_VARIABLE_DATA_LEN && curLen + TL_LEN  >= dataLen)) {
-            DISC_LOGE(DISC_BLE,
-                "unexperted advData: out of range, "
-                "tlvType=%{public}d, tlvLen=%{public}u, currentPos=%{public}u, totalPos=%{public}u",
-                type, len, curLen, dataLen);
-            return SOFTBUS_BC_MGR_UNEXPECTED_PACKETS;
-        }
+        DISC_CHECK_AND_RETURN_RET_LOGE(
+            curLen + TL_LEN + len <= dataLen && (len != TLV_VARIABLE_DATA_LEN || curLen + TL_LEN  < dataLen),
+            SOFTBUS_BC_MGR_UNEXPECTED_PACKETS, DISC_BLE,
+            "unexperted advData: out of range, "
+            "tlvType=%{public}d, tlvLen=%{public}u, currentPos=%{public}u, totalPos=%{public}u",
+            type, len, curLen, dataLen);
         switch (type) {
             case TLV_TYPE_DEVICE_ID_HASH:
                 ret = CopyDeviceIdHashValue(device, &data[curLen + 1], len);
@@ -430,17 +396,13 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
         reportInfo->packet.bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "payload=NULL is invalid");
     uint16_t bcLen = reportInfo->packet.bcData.payloadLen;
     uint16_t rspLen = reportInfo->packet.rspData.payloadLen;
-    if (bcLen > ADV_DATA_MAX_LEN || bcLen < POS_TLV || rspLen > REAL_RESP_DATA_MAX_LEN) {
-        DISC_LOGE(DISC_BLE, "get discovery adv data fail");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(bcLen <= ADV_DATA_MAX_LEN && bcLen >= POS_TLV && rspLen <= REAL_RESP_DATA_MAX_LEN,
+        SOFTBUS_INVALID_PARAM, DISC_BLE, "get discovery adv data fail");
 
     uint8_t *serviceData = reportInfo->packet.bcData.payload;
-    if (memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
-        &serviceData[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN) != EOK) {
-        DISC_LOGE(DISC_BLE, "copy accountHash failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
+        &serviceData[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN) == EOK, SOFTBUS_MEM_ERR,
+        DISC_BLE, "copy accountHash failed");
     device->info->capabilityBitmap[0] = serviceData[POS_CAPABLITY];
 
     uint32_t bcTlvLen = reportInfo->packet.bcData.payloadLen - POS_TLV;
