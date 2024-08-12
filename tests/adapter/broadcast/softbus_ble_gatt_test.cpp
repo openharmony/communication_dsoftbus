@@ -263,7 +263,6 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     int32_t advld = 0;
-    EXPECT_CALL(mocker, BleGattRegisterCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
     ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -989,6 +988,57 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStopScan001, TestSize.Level1)
 
     ret = MockBluetooth::interface->StopScan(GATT_ADV_MAX_NUM);
     EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TestWrapperAdvEnableCb
+ * @tc.desc: Test WrapperAdvEnableCb
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestWrapperAdvEnableCb, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "TestWrapperAdvEnableCb enter");
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advld = 0;
+
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    MockBluetooth::btGattCallback->advDataCb(advld, 1);
+
+    MockBluetooth::btGattCallback->advUpdateCb(advld, 1);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TestWrapperScanStateChangeCb0
+ * @tc.desc: Test WrapperScanStateChangeCb0
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestWrapperScanStateChangeCb0, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "TestWrapperAdvEnableCb enter");
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t scannerld = 0;
+
+    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    MockBluetooth::bleScanCallback->scanStateChangeCb(scannerld, true);
+    MockBluetooth::bleScanCallback->scanStateChangeCb(scannerld, false);
 
     ret = MockBluetooth::interface->DeInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
