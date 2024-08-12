@@ -106,6 +106,7 @@ public:
     // proxy negotiate channel mock stub
     virtual int ProxyNegotiateChannelSendMessage(int32_t channelId, const NegotiateMessage &msg) const = 0;
     virtual std::string ProxyNegotiateChannelGetRemoteDeviceId(int32_t channelId) const = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
 };
 
 class WifiDirectInterfaceMock : public WifiDirectInterface {
@@ -185,6 +186,7 @@ public:
     MOCK_METHOD(
         int, ProxyNegotiateChannelSendMessage, (int32_t channelId, const NegotiateMessage &msg), (const override));
     MOCK_METHOD(std::string, ProxyNegotiateChannelGetRemoteDeviceId, (int32_t channelId), (const override));
+    MOCK_METHOD(int32_t, LnnGetOsTypeByNetworkId, (const char *networkId, int32_t *osType), (override));
 
     static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
 
