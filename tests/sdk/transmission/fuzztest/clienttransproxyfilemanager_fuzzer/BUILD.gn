@@ -34,8 +34,6 @@ ohos_fuzztest("ClientTransProxyFileManagerFuzzTest") {
     "../../../../../sdk/transmission/trans_channel/proxy/include",
     "../../../../../sdk/transmission/trans_channel/tcp_direct/include",
     "../../../../../sdk/transmission/trans_channel/udp/file/include",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
   cflags = [
@@ -49,7 +47,10 @@ ohos_fuzztest("ClientTransProxyFileManagerFuzzTest") {
 
   deps = [ "../../../../../sdk:softbus_client" ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 group("fuzztest") {

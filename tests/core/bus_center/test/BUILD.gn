@@ -398,11 +398,6 @@ ohos_unittest("ClientProxyTest") {
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/frame/common/include",
-    "../../transmission/ipc/samgr/interfaces/innerkits/samgr_proxy/include",
-    "//foundation/window/window_manager/previewer/mock",
-    "//foundation/communication/ipc/interfaces/innerkits/c/ipc/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include/",
   ]
 
   deps = [

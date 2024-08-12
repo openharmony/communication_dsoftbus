@@ -61,7 +61,6 @@ ohos_fuzztest("SoftbusProxychannelListenerFuzzTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
 
-    "//third_party/cJSON",
     "unittest/common/",
 
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
