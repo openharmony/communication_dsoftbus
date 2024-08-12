@@ -187,7 +187,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
 
     ChannelInfo channelInfo = {0};
     ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 }
 
 /**
@@ -219,7 +219,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
 
     ChannelInfo channelInfo = {0};
     ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     int32_t channelId = 1;
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
