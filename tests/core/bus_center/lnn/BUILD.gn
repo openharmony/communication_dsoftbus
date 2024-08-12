@@ -1633,6 +1633,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "//third_party/bounds_checking_function/include",
     "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
 
   deps = [
