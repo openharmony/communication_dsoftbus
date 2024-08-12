@@ -1038,8 +1038,17 @@ static int32_t UpdateLocalDeviceName(const void *name)
     NodeInfo localNodeInfo = {};
     (void)LnnGetLocalDevInfo(&localNodeInfo);
     const char *beforeName = LnnGetDeviceName(&g_localNetLedger.localInfo.deviceInfo);
-    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s", (char *)beforeName, (char *)name,
-        localNodeInfo.deviceInfo.deviceName);
+    char *anonyBeforeName = NULL;
+    Anonymize(beforeName, &anonyBeforeName);
+    char *anonyName = NULL;
+    Anonymize((char *)name, &anonyName);
+    char *anonyDeviceName = NULL;
+    Anonymize(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
+    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s", anonyBeforeName, anonyName,
+        anonyDeviceName);
+    AnonymizeFree(anonyBeforeName);
+    AnonymizeFree(anonyName);
+    AnonymizeFree(anonyDeviceName);
     if (strcmp(beforeName, (char *)name) != 0) {
         if (LnnSetDeviceName(&g_localNetLedger.localInfo.deviceInfo, (char *)name) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "set device name fail");
