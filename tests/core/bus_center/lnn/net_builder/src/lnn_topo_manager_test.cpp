@@ -16,17 +16,13 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "bus_center_event.h"
 #include "lnn_net_ledger_mock.h"
-#include "lnn_sync_info_manager.h"
 #include "lnn_service_mock.h"
+#include "lnn_sync_info_mock.h"
 #include "lnn_topo_manager.c"
 #include "lnn_topo_manager.h"
-#include "lnn_trans_mock.h"
-#include "message_handler.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_common.h"
-#include "softbus_errcode.h"
+#include "softbus_json_utils.h"
 
 #define LNN_RELATION_JOIN_THREAD 1
 #define LNN_RELATION_ERROR 0
@@ -35,9 +31,43 @@ using namespace testing::ext;
 using namespace testing;
 
 constexpr char UDID[] = "83b37d243c8aac5a660d0cb231a7dbf9643b330245d560f4193956b0749a8651";
-constexpr char UUID[] = "91a0183f4b68272902e7411f8e122fafd59969cd088e22d296be16400dcc9736";
+constexpr char UDID_1[] = "d243c8aac5a660d0cb231a7dbf9643b330245d560f4193956b0749a865183b37";
+constexpr char INVALID_UUID[] = "91a0183f4b68272902e7411f8e122fafd59969cd088e22d296be16400dcc9736123";
 constexpr char PEER_UDID[] = "dac6f8016d28d6cefa0671a1cdaba4928a53fa4e3b3a6b749c3887deda620564";
-constexpr int32_t CHANNELID = 0;
+constexpr char PEER_UDID_1[] = "8d6cefa0671a1cdaba4928a53fa4e3b3a6b749c3887deda620564dac6f8016d2";
+constexpr char NETWORK_ID[] = "abc";
+constexpr char NETWORK_ID_1[] = "abcd";
+constexpr uint8_t OLD_RELATION[] = "1";
+constexpr uint8_t NEW_RELATION_1[] = "0";
+constexpr uint8_t NEW_RELATION_2[] = "1";
+constexpr uint8_t MSG[] = "tempMsg";
+constexpr uint32_t MSG_LEN = 7;
+constexpr uint32_t RELATION_LEN = 1;
+constexpr uint32_t INVALID_RELATION_LEN = 6;
+constexpr char MSG_1[] = "{\"type\": 0, \"seq\": 20, \"complete\": 1, \"info\": \"infoTest\"}";
+constexpr char MSG_2[] = "{\"type\": 0, \"seq\": 20, \"complete\": 1, \"info\": [{\"udid\": \
+    \"83b37d243c8aac5a660d0cb231a7dbf9643b330245d560f4193956b0749a8651\", \"peerUdid\": \
+    \"dac6f8016d28d6cefa0671a1cdaba4928a53fa4e3b3a6b749c3887deda620564\", \"wlanRelation\": 1, \
+    \"brRelation\": 0, \"bleRelation\": 0, \"ethRelation\": 0}]}";
+constexpr char MSG_3[] = "{\"type\": 0, \"seq\": 20, \"complete\": 1, \"info\": [{\"peerUdid\": \
+    \"dac6f8016d28d6cefa0671a1cdaba4928a53fa4e3b3a6b749c3887deda620564\", \"wlanRelation\": 1, \
+    \"brRelation\": 0, \"bleRelation\": 0, \"ethRelation\": 0}]}";
+constexpr char MSG_4[] = "{\"type\": 0, \"seq\": 20, \"complete\": 1, \"info\": [{\"udid\": \
+    \"83b37d243c8aac5a660d0cb231a7dbf9643b330245d560f4193956b0749a8651\", \"wlanRelation\": 1, \
+    \"brRelation\": 0, \"bleRelation\": 0, \"ethRelation\": 0}]}";
+constexpr char MSG_5[] = "{\"type\": 0, \"seq\": 20, \"complete\": 1, \"info\": [{\"udid\": \"\", \"peerUdid\": \
+    \"dac6f8016d28d6cefa0671a1cdaba4928a53fa4e3b3a6b749c3887deda620564\", \"wlanRelation\": 1, \
+    \"brRelation\": 0, \"bleRelation\": 0, \"ethRelation\": 0}]}";
+constexpr char MSG_6[] = "{\"type\": 0, \"seq\": 20, \"complete\": 1, \"info\": [{\"udid\": \
+    \"83b37d243c8aac5a660d0cb231a7dbf9643b330245d560f4193956b0749a8651\", \"peerUdid\": \"\", \"wlanRelation\": 1, \
+    \"brRelation\": 0, \"bleRelation\": 0, \"ethRelation\": 0}]}";
+constexpr char MSG_7[] = "{\"seq\": 20, \"complete\": 1}";
+constexpr char MSG_8[] = "{\"type\": 0, \"complete\": 1}";
+constexpr char MSG_9[] = "{\"type\": 0, \"seq\": 20}";
+constexpr char MSG_10[] = "{\"type\": 1, \"seq\": 20, \"complete\": 1}";
+constexpr char MSG_11[] = "{\"type\": 0, \"seq\": 20, \"complete\": 0}";
+constexpr char RAND_STR1[] = "-20";
+constexpr char RAND_STR2[] = "20";
 
 class LNNTopoManagerTest : public testing::Test {
 public:
@@ -49,12 +79,10 @@ public:
 
 void LNNTopoManagerTest::SetUpTestCase()
 {
-    LooperInit();
 }
 
 void LNNTopoManagerTest::TearDownTestCase()
 {
-    LooperDeinit();
 }
 
 void LNNTopoManagerTest::SetUp()
@@ -65,347 +93,404 @@ void LNNTopoManagerTest::TearDown()
 {
 }
 
-static bool GetEventHandler(LnnEventType event, LnnEventHandler &handler)
-{
-    if (LnnServicetInterfaceMock::g_lnnEventHandlers.find(event) !=
-        LnnServicetInterfaceMock::g_lnnEventHandlers.end()) {
-        handler = LnnServicetInterfaceMock::g_lnnEventHandlers[event];
-        return true;
-    }
-    return false;
-}
-
-void InitMock(LnnTransInterfaceMock &transMock, LnnServicetInterfaceMock &serviceMock)
-{
-    EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener).WillRepeatedly(
-        LnnTransInterfaceMock::ActionOfTransRegister);
-    LnnInitSyncInfoManager();
-    ON_CALL(serviceMock, LnnRegisterEventHandler).WillByDefault(
-        LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
-    int ret = LnnInitTopoManager();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-void DeinitMock(LnnTransInterfaceMock &transMock, LnnServicetInterfaceMock &serviceMock)
-{
-    ON_CALL(serviceMock, LnnUnregisterEventHandler).WillByDefault(Return());
-    LnnDeinitTopoManager();
-    LnnDeinitSyncInfoManager();
-}
-
-/*
-* @tc.name: LNN_GET_RELATION_TEST_001
-* @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
-HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
-{
-    uint8_t relation[CONNECTION_ADDR_MAX + 1];
-    (void)memset_s(relation, sizeof(relation), 0, sizeof(relation));
-    int ret = LnnGetRelation(UDID, PEER_UDID, relation, CONNECTION_ADDR_MAX + 1);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-}
-
-/*
-* @tc.name: LNN_GET_RELATION_TEST_002
-* @tc.desc: Udid and PeerUdid not find return SOFTBUS_NOT_FIND
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
-HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_002, TestSize.Level1)
-{
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<LnnTransInterfaceMock> transMock;
-    InitMock(transMock, serviceMock);
-    uint8_t relation[CONNECTION_ADDR_MAX];
-    (void)memset_s(relation, sizeof(relation), 0, sizeof(relation));
-    int ret = LnnGetRelation(UDID, PEER_UDID, relation, CONNECTION_ADDR_MAX);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
-    DeinitMock(transMock, serviceMock);
-}
-
-/*
-* @tc.name: LNN_GET_ALL_RELATION_TEST_001
-* @tc.desc: relationNum is nullptr return SOFTBUS_INVALID_PARAM
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
-HWTEST_F(LNNTopoManagerTest, LNN_GET_ALL_RELATION_TEST_001, TestSize.Level1)
-{
-    uint32_t *relationNum = nullptr;
-    LnnRelation *relation = nullptr;
-    int ret = LnnGetAllRelation(&relation, relationNum);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-}
-
-/*
-* @tc.name: LNN_GET_RELATION_TEST_002
-* @tc.desc: *invalid parameter
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
-HWTEST_F(LNNTopoManagerTest, LNN_GET_ALL_RELATION_TEST_002, TestSize.Level1)
-{
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<LnnTransInterfaceMock> transMock;
-    InitMock(transMock, serviceMock);
-    uint32_t num = 0;
-    LnnRelation *relation = nullptr;
-    int ret = LnnGetAllRelation(&relation, &num);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    SoftBusFree(relation);
-    relation = nullptr;
-    num = 1;
-    ret = LnnGetAllRelation(&relation, &num);
-    SoftBusFree(relation);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    DeinitMock(transMock, serviceMock);
-}
-
 /*
 * @tc.name: LNN_INIT_TOPO_MANAGER_TEST_001
-* @tc.desc: test notify topo info changed
+* @tc.desc: LnnInitTopoManager test
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
 HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
 {
+    unsigned char *isNoSupportTopo = reinterpret_cast<unsigned char *>(const_cast<char *>("0"));
+    unsigned char *isSupportTopo = reinterpret_cast<unsigned char *>(const_cast<char *>("1"));
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
-    int ret = LnnInitTopoManager();
-    EXPECT_TRUE(ret = SOFTBUS_ERR);
+    EXPECT_CALL(serviceMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(DoAll(SetArgPointee<1>(*isNoSupportTopo), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*isSupportTopo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(serviceMock, LnnRegisterEventHandler).WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(serviceMock, LnnUnregisterEventHandler).WillRepeatedly(Return());
+    NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
+    EXPECT_CALL(lnnSyncInfoMock, LnnRegSyncInfoHandler).WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnSyncInfoMock, LnnUnregSyncInfoHandler).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = LnnInitTopoManager();
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = LnnInitTopoManager();
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    LnnDeinitTopoManager();
+    ret = LnnInitTopoManager();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
-* @tc.name: LNN_INIT_TOPO_MANAGER_TEST_002
-* @tc.desc: test LnnInitTopoManage
+* @tc.name: LNN_GET_RELATION_TEST_001
+* @tc.desc: LnnGetRelation test
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_002, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
 {
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<LnnTransInterfaceMock> transMock;
-    InitMock(transMock, serviceMock);
-
-    LnnEventHandler handler;
-    bool isGet = GetEventHandler(LNN_EVENT_RELATION_CHANGED, handler);
-    ASSERT_TRUE(isGet == true);
-
-    LnnRelationChanedEventInfo eventInfo = {
-        .basic.event = LNN_EVENT_RELATION_CHANGED,
-        .type = CONNECTION_ADDR_BR,
-        .relation = LNN_RELATION_JOIN_THREAD,
-        .isJoin = true,
-        .udid = nullptr,
-    };
-    handler(nullptr);
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    eventInfo.udid = UDID;
-
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation);
-    eventInfo.relation = LNN_RELATION_ERROR;
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1);
-    eventInfo.relation = LNN_RELATION_ERROR;
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
-    eventInfo.relation = LNN_RELATION_ERROR;
-    eventInfo.isJoin = false;
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(Return(SOFTBUS_OK));
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-    DeinitMock(transMock, serviceMock);
+    uint8_t relation[CONNECTION_ADDR_MAX + 1] = { 0 };
+    int ret = LnnGetRelation(UDID, PEER_UDID, relation, CONNECTION_ADDR_MAX + 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRelation(nullptr, PEER_UDID, relation, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRelation(UDID, nullptr, relation, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRelation(UDID, PEER_UDID, nullptr, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRelation(UDID, PEER_UDID, relation, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = LnnGetRelation(UDID, PEER_UDID, relation, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /*
-* @tc.name: LNN_INIT_TOPO_MANAGER_TEST_003
-* @tc.desc: test notify topo info changed
+* @tc.name: ADD_TOPO_INFO_TEST_001
+* @tc.desc: AddTopoInfo test
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_003, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, ADD_TOPO_INFO_TEST_001, TestSize.Level1)
 {
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<LnnTransInterfaceMock> transMock;
-    InitMock(transMock, serviceMock);
-    LnnEventHandler handler;
-    bool isGet = GetEventHandler(LNN_EVENT_RELATION_CHANGED, handler);
-    ASSERT_TRUE(isGet == true);
-    LnnRelationChanedEventInfo eventInfo = {
-        .basic.event = LNN_EVENT_RELATION_CHANGED,
-        .type = CONNECTION_ADDR_BR,
-        .relation = LNN_RELATION_JOIN_THREAD,
-        .isJoin = true,
-        .udid = LnnNetLedgertInterfaceMock::peerId.c_str(),
-    };
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation);
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1);
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
+    int32_t ret = AddTopoInfo(UDID, PEER_UDID, OLD_RELATION, RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddTopoInfo(UDID, PEER_UDID, OLD_RELATION, RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddTopoInfo(UDID, PEER_UDID, OLD_RELATION, RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint8_t relation[CONNECTION_ADDR_MAX + 1] = { 0 };
+    ret = LnnGetRelation(UDID_1, PEER_UDID_1, relation, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = LnnGetRelation(UDID, PEER_UDID_1, relation, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = LnnGetRelation(UDID, PEER_UDID, relation, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnGetRelation(UDID_1, PEER_UDID, relation, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
 
-    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId);
-    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1);
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
+/*
+* @tc.name: IS_SAME_RELATION_TEST_001
+* @tc.desc: IsSameRelation test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, IS_SAME_RELATION_TEST_001, TestSize.Level1)
+{
+    bool ret = IsSameRelation(NEW_RELATION_2, NEW_RELATION_1, RELATION_LEN);
+    EXPECT_EQ(ret, true);
+    ret = IsSameRelation(NEW_RELATION_1, NEW_RELATION_2, RELATION_LEN);
+    EXPECT_EQ(ret, true);
+    ret = IsSameRelation(NEW_RELATION_2, NEW_RELATION_2, RELATION_LEN);
+    EXPECT_EQ(ret, true);
+    ret = IsSameRelation(NEW_RELATION_1, NEW_RELATION_1, RELATION_LEN);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+* @tc.name: HAS_RELATION_TEST_001
+* @tc.desc: HasRelation test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, HAS_RELATION_TEST_001, TestSize.Level1)
+{
+    bool ret = HasRelation(NEW_RELATION_1, RELATION_LEN);
+    EXPECT_EQ(ret, true);
+    ret = HasRelation(NEW_RELATION_2, RELATION_LEN);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+* @tc.name: CREATE_TOPO_ITEM_TEST_001
+* @tc.desc: CreateTopoItem test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, CREATE_TOPO_ITEM_TEST_001, TestSize.Level1)
+{
+    TopoTableItem *item = CreateTopoItem(INVALID_UUID);
+    EXPECT_EQ(item, nullptr);
+    TopoInfo *topo = CreateTopoInfo(INVALID_UUID, OLD_RELATION, RELATION_LEN);
+    EXPECT_EQ(topo, nullptr);
+    topo = CreateTopoInfo(UDID, OLD_RELATION, INVALID_RELATION_LEN);
+    EXPECT_EQ(topo, nullptr);
+    item = FindTopoItem(UDID);
+    EXPECT_EQ(topo, nullptr);
+    item = FindTopoItem(UDID_1);
+    EXPECT_EQ(topo, nullptr);
+    TopoTableItem *topoItem = nullptr;
+    TopoInfo *topoInfo = nullptr;
+    int32_t ret = FindTopoInfo(UDID_1, UDID_1, &topoItem, &topoInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = FindTopoInfo(UDID, UDID_1, &topoItem, &topoInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = FindTopoInfo(UDID_1, PEER_UDID, &topoItem, &topoInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = FindTopoInfo(UDID, PEER_UDID, &topoItem, &topoInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: PACK_COMMON_TOPO_MSG_TEST_001
+* @tc.desc: PackCommonTopoMsg test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, PACK_COMMON_TOPO_MSG_TEST_001, TestSize.Level1)
+{
+    cJSON *json = NULL;
+    cJSON *info = NULL;
+    unsigned char *randStr1 = reinterpret_cast<unsigned char *>(const_cast<char *>(RAND_STR1));
+    unsigned char *randStr2 = reinterpret_cast<unsigned char *>(const_cast<char *>(RAND_STR2));
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(DoAll(SetArgPointee<0>(*randStr1), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<0>(*randStr2), Return(SOFTBUS_OK)));
+    int32_t ret = PackCommonTopoMsg(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = PackCommonTopoMsg(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = PackCommonTopoMsg(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: PACK_TOPO_INFO_TEST_001
+* @tc.desc: PackTopoInfo test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, PACK_TOPO_INFO_TEST_001, TestSize.Level1)
+{
+    cJSON info;
+    (void)memset_s(&info, sizeof(cJSON), 0, sizeof(cJSON));
+    int32_t ret = PackTopoInfo(&info, UDID, PEER_UDID, OLD_RELATION, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = PackTopoInfo(&info, UDID, PEER_UDID, OLD_RELATION, INVALID_RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = PackTopoInfo(&info, nullptr, PEER_UDID, OLD_RELATION, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = PackTopoInfo(&info, UDID, nullptr, OLD_RELATION, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: PACK_ONE_LNN_RELATION_TEST_001
+* @tc.desc: PackOneLnnRelation test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, PACK_ONE_LNN_RELATION_TEST_001, TestSize.Level1)
+{
+    unsigned char *randStr1 = reinterpret_cast<unsigned char *>(const_cast<char *>(RAND_STR1));
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(DoAll(SetArgPointee<0>(*randStr1), Return(SOFTBUS_OK)));
+    const char *msg = PackOneLnnRelation(UDID, PEER_UDID, OLD_RELATION, CONNECTION_ADDR_MAX);
+    EXPECT_EQ(msg, nullptr);
+    msg = PackOneLnnRelation(nullptr, PEER_UDID, OLD_RELATION, INVALID_RELATION_LEN);
+    EXPECT_EQ(msg, nullptr);
+    msg = PackOneLnnRelation(UDID, PEER_UDID, OLD_RELATION, CONNECTION_ADDR_MAX);
+    EXPECT_NE(msg, nullptr);
+}
+
+/*
+* @tc.name: UPDATE_LOCAL_TOPO_TEST_001
+* @tc.desc: UpdateLocalTopo test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, UPDATE_LOCAL_TOPO_TEST_001, TestSize.Level1)
+{
+    int32_t ret = UpdateLocalTopo(UDID_1, UDID_1, NEW_RELATION_1, RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = UpdateLocalTopo(UDID_1, UDID_1, NEW_RELATION_1, RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = UpdateLocalTopo(UDID_1, UDID_1, NEW_RELATION_1, RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = UpdateLocalTopo(UDID_1, UDID_1, NEW_RELATION_2, RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = UpdateLocalTopo(UDID, PEER_UDID, NEW_RELATION_1, RELATION_LEN);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: FORWARD_TOPO_MSG_TO_ALL_TEST_001
+* @tc.desc: ForwardTopoMsgToAll test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, FORWARD_TOPO_MSG_TO_ALL_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+    EXPECT_CALL(ledgerMock, LnnIsLSANode)
+        .WillOnce(Return(true))
+        .WillRepeatedly(Return(false));
+    NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
+    EXPECT_CALL(lnnSyncInfoMock, LnnSendSyncInfoMsg).WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ForwardTopoMsgToAll(NETWORK_ID, MSG, MSG_LEN);
+    ForwardTopoMsgToAll(NETWORK_ID, MSG, MSG_LEN);
+    ForwardTopoMsgToAll(NETWORK_ID, MSG, MSG_LEN);
+    ForwardTopoMsgToAll(NETWORK_ID_1, MSG, MSG_LEN);
+    ForwardTopoMsgToAll(NETWORK_ID_1, MSG, MSG_LEN);
+}
+
+/*
+* @tc.name: TRY_CORRECT_RELATION_TEST_001
+* @tc.desc: TryCorrectRelation test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, TRY_CORRECT_RELATION_TEST_001, TestSize.Level1)
+{
+    char *localUdid1 = const_cast<char *>(UDID);
+    char *localUdid2 = const_cast<char *>(UDID_1);
+    uint8_t *relation = const_cast<uint8_t *>(NEW_RELATION_2);
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(DoAll(SetArgPointee<1>(*localUdid1), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*localUdid2), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetLnnRelation)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(*relation), Return(SOFTBUS_OK)));
+    TryCorrectRelation(NETWORK_ID, UDID, PEER_UDID, NEW_RELATION_2, RELATION_LEN);
+    TryCorrectRelation(NETWORK_ID, UDID, PEER_UDID, NEW_RELATION_2, RELATION_LEN);
+    TryCorrectRelation(NETWORK_ID, UDID, PEER_UDID, NEW_RELATION_1, RELATION_LEN);
+    TryCorrectRelation(NETWORK_ID, UDID, nullptr, NEW_RELATION_1, RELATION_LEN);
+    TryCorrectRelation(NETWORK_ID, UDID, PEER_UDID, NEW_RELATION_1, RELATION_LEN);
+    TryCorrectRelation(NETWORK_ID, UDID, PEER_UDID, NEW_RELATION_1, RELATION_LEN);
+}
+
+/*
+* @tc.name: PROCESS_TOPO_UPDATEINFO_TEST_001
+* @tc.desc: ProcessTopoUpdateInfo test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, PROCESS_TOPO_UPDATEINFO_TEST_001, TestSize.Level1)
+{
+    char *localUdid1 = const_cast<char *>(UDID);
+    char *localUdid2 = const_cast<char *>(PEER_UDID);
+    char *localUdid3 = const_cast<char *>(UDID_1);
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(DoAll(SetArgPointee<1>(*localUdid1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(*localUdid2), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*localUdid3), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
+    char *msg1 = const_cast<char *>(MSG_1);
+    char *msg2 = const_cast<char *>(MSG_2);
+    cJSON *json = cJSON_ParseWithLength(msg1, strlen(msg1));
+    EXPECT_NE(json, nullptr);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    json = cJSON_ParseWithLength(msg2, strlen(msg2));
+    EXPECT_NE(json, nullptr);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    char *msg3 = const_cast<char *>(MSG_3);
+    char *msg4 = const_cast<char *>(MSG_4);
+    json = cJSON_ParseWithLength(msg3, strlen(msg3));
+    EXPECT_NE(json, nullptr);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    json = cJSON_ParseWithLength(msg4, strlen(msg4));
+    EXPECT_NE(json, nullptr);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    char *msg5 = const_cast<char *>(MSG_5);
+    char *msg6 = const_cast<char *>(MSG_6);
+    json = cJSON_ParseWithLength(msg5, strlen(msg5));
+    EXPECT_NE(json, nullptr);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+    json = cJSON_ParseWithLength(msg6, strlen(msg6));
+    EXPECT_NE(json, nullptr);
+    ProcessTopoUpdateInfo(json, NETWORK_ID, MSG, MSG_LEN);
+}
 
-    uint32_t num = 0;
+/*
+* @tc.name: ON_RECEIVE_TOPO_UPDATE_MSG_TEST_001
+* @tc.desc: OnReceiveTopoUpdateMsg test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, ON_RECEIVE_TOPO_UPDATE_MSG_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    uint8_t *msg1 = reinterpret_cast<uint8_t *>(const_cast<char *>(MSG_2));
+    OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_CONNECTION_INFO, NETWORK_ID, msg1, strlen(MSG_2));
+    OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_TOPO_UPDATE, NETWORK_ID, msg1, 0);
+    OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_TOPO_UPDATE, NETWORK_ID, msg1, strlen(MSG_2));
+    uint8_t *msg2 = reinterpret_cast<uint8_t *>(const_cast<char *>(MSG_7));
+    uint8_t *msg3 = reinterpret_cast<uint8_t *>(const_cast<char *>(MSG_8));
+    uint8_t *msg4 = reinterpret_cast<uint8_t *>(const_cast<char *>(MSG_9));
+    OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_TOPO_UPDATE, NETWORK_ID, msg2, strlen(MSG_7));
+    OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_TOPO_UPDATE, NETWORK_ID, msg3, strlen(MSG_8));
+    OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_TOPO_UPDATE, NETWORK_ID, msg4, strlen(MSG_9));
+    uint8_t *msg5 = reinterpret_cast<uint8_t *>(const_cast<char *>(MSG_10));
+    uint8_t *msg6 = reinterpret_cast<uint8_t *>(const_cast<char *>(MSG_11));
+    OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_TOPO_UPDATE, NETWORK_ID, msg5, strlen(MSG_10));
+    OnReceiveTopoUpdateMsg(LNN_INFO_TYPE_TOPO_UPDATE, NETWORK_ID, msg6, strlen(MSG_11));
+    OnLnnRelationChangedDelay(nullptr);
+    LnnRelationChangedMsg *msg =
+        reinterpret_cast<LnnRelationChangedMsg *>(SoftBusCalloc(sizeof(LnnRelationChangedMsg)));
+    EXPECT_NE(msg, nullptr);
+    void *para = reinterpret_cast<void *>(msg);
+    OnLnnRelationChangedDelay(para);
+}
+
+/*
+* @tc.name: FILL_ALL_RELATION_TEST_001
+* @tc.desc: FillAllRelation test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNTopoManagerTest, FILL_ALL_RELATION_TEST_001, TestSize.Level1)
+{
+    LnnRelationChanedEventInfo eventInfo = {
+        .basic.event = LNN_EVENT_NODE_MIGRATE,
+        .udid = nullptr,
+        .type = CONNECTION_ADDR_MAX,
+    };
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    LnnEventBasicInfo *info =
+        reinterpret_cast<LnnEventBasicInfo *>(const_cast<LnnRelationChanedEventInfo *>(&eventInfo));
+    OnLnnRelationChanged(nullptr);
+    OnLnnRelationChanged(info);
+    eventInfo.basic.event = LNN_EVENT_RELATION_CHANGED;
+    info = reinterpret_cast<LnnEventBasicInfo *>(const_cast<LnnRelationChanedEventInfo *>(&eventInfo));
+    OnLnnRelationChanged(info);
+    eventInfo.udid = "udidTest";
+    info = reinterpret_cast<LnnEventBasicInfo *>(const_cast<LnnRelationChanedEventInfo *>(&eventInfo));
+    OnLnnRelationChanged(info);
+    eventInfo.type = CONNECTION_ADDR_WLAN;
+    info = reinterpret_cast<LnnEventBasicInfo *>(const_cast<LnnRelationChanedEventInfo *>(&eventInfo));
+    OnLnnRelationChanged(info);
+    OnLnnRelationChanged(info);
     LnnRelation *relation = nullptr;
-    EXPECT_EQ(LnnGetAllRelation(&relation, &num), SOFTBUS_OK);
-    EXPECT_EQ(num, 0);
-    SoftBusSleepMs(1000);
-
-    uint8_t getRelation[CONNECTION_ADDR_MAX];
-    (void)memset_s(getRelation, sizeof(getRelation), 0, sizeof(getRelation));
-    EXPECT_EQ(LnnGetRelation(LnnNetLedgertInterfaceMock::localId.c_str(), LnnNetLedgertInterfaceMock::peerId.c_str(),
-        getRelation, CONNECTION_ADDR_MAX), SOFTBUS_NOT_FIND);
-    EXPECT_EQ(getRelation[CONNECTION_ADDR_BR], 0);
-
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation1);
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-    DeinitMock(transMock, serviceMock);
-}
-
-static void AssambleSyncMsg(const char *localUdid, const char *peerUdid, uint8_t *relation,
-    char **msg, uint32_t *msgLen)
-{
-    if (*msg != nullptr) {
-        SoftBusFree(*msg);
-        *msg = nullptr;
-    }
-    const char *msgRelation = PackOneLnnRelation(localUdid, peerUdid, relation, CONNECTION_ADDR_MAX);
-    uint32_t msgRelationLen = strlen(msgRelation) + 1;
-    *msgLen = msgRelationLen + sizeof(int32_t);
-    *msg = (char *)SoftBusCalloc(*msgLen);
-    ASSERT_NE(*msg, nullptr);
-    *(int32_t *)(*msg) = LNN_INFO_TYPE_TOPO_UPDATE;
-    ASSERT_EQ(strcpy_s(*msg + sizeof(int32_t), msgRelationLen, msgRelation), EOK);
-    cJSON_free(const_cast<char *>(msgRelation));
-}
-
-/*
-* @tc.name: LNN_INIT_TOPO_MANAGER_TEST_004
-* @tc.desc: test sync online node topo info
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
-HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_004, TestSize.Level1)
-{
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<LnnTransInterfaceMock> transMock;
-    InitMock(transMock, serviceMock);
-
-    uint8_t relation[CONNECTION_ADDR_MAX];
-    (void)memset_s(relation, sizeof(relation), 0, sizeof(relation));
-    relation[CONNECTION_ADDR_BR] = LNN_RELATION_JOIN_THREAD;
-    char *msg = nullptr;
-    uint32_t msgLen = 0;
-    AssambleSyncMsg(LnnNetLedgertInterfaceMock::localId.c_str(),
-        LnnNetLedgertInterfaceMock::peerId.c_str(), relation, &msg, &msgLen);
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1);
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_OK)).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
-    LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, true);
-    LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID, msg, msgLen);
-    SoftBusSleepMs(50);
-
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillOnce(LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation1);
-    LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, true);
-    LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID, msg, msgLen);
-    SoftBusSleepMs(50);
-
-    LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, true);
-    LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID, msg, msgLen);
-    SoftBusFree(msg);
-    SoftBusSleepMs(50);
-    DeinitMock(transMock, serviceMock);
-}
-
-/*
-* @tc.name: LNN_INIT_TOPO_MANAGER_TEST_005
-* @tc.desc: test sync other node topo info
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
-HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_005, TestSize.Level1)
-{
-    EXPECT_STRNE(UDID, LnnNetLedgertInterfaceMock::localId.c_str());
-    EXPECT_STRNE(PEER_UDID, LnnNetLedgertInterfaceMock::peerId.c_str());
-
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<LnnTransInterfaceMock> transMock;
-    InitMock(transMock, serviceMock);
-
-    uint8_t relation[CONNECTION_ADDR_MAX];
-    (void)memset_s(relation, sizeof(relation), 0, sizeof(relation));
-    relation[CONNECTION_ADDR_BR] = LNN_RELATION_JOIN_THREAD;
-    char *msg = nullptr;
-    uint32_t msgLen = 0;
-    AssambleSyncMsg(UUID, PEER_UDID, relation, &msg, &msgLen);
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1);
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
-    LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, true);
-    LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID, msg, msgLen);
-    SoftBusSleepMs(50);
-
-    /* test recv same topo msg */
-    LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, true);
-    LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID, msg, msgLen);
-    SoftBusSleepMs(50);
-
-    /* test recv diff topo msg */
-    relation[CONNECTION_ADDR_BLE] = LNN_RELATION_JOIN_THREAD;
-    AssambleSyncMsg(UUID, PEER_UDID, relation, &msg, &msgLen);
-    LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, true);
-    LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID, msg, msgLen);
-    SoftBusSleepMs(50);
-
-    /* test recv clear diff topo msg */
-    (void)memset_s(relation, sizeof(relation), 0, sizeof(relation));
-    AssambleSyncMsg(UUID, PEER_UDID, relation, &msg, &msgLen);
-    LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, true);
-    LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID, msg, msgLen);
-    SoftBusFree(msg);
-    SoftBusSleepMs(50);
-    DeinitMock(transMock, serviceMock);
+    uint32_t relationNum = 0;
+    int32_t ret = LnnGetAllRelation(&relation, &relationNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnGetAllRelation(nullptr, &relationNum);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetAllRelation(&relation, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(serviceMock, LnnUnregisterEventHandler).WillRepeatedly(Return());
+    NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
+    EXPECT_CALL(lnnSyncInfoMock, LnnUnregSyncInfoHandler).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnDeinitTopoManager();
 }
 } // namespace OHOS
