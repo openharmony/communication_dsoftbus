@@ -1045,6 +1045,34 @@ HWTEST_F(SoftbusBleGattTest, TestWrapperScanStateChangeCb0, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestWrapperLpDeviceInfoCb
+ * @tc.desc: Test WrapperLpDeviceInfoCb
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, TestWrapperLpDeviceInfoCb, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "TestWrapperAdvEnableCb enter");
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t scannerld = 0;
+    BtUuid uuid = {};
+    int32_t type = 0;
+    uint8_t data = 0;
+    uint32_t dataSize = 0;
+
+    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_REGISTER_FAIL);
+
+    MockBluetooth::bleScanCallback->lpDeviceInfoCb(&uuid, type, &data, dataSize);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
  * @tc.name: AdapterBleGattTest_RegisterScanListener
  * @tc.desc: test register scan listener
  * @tc.type: FUNC
