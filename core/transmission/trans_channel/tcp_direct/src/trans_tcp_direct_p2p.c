@@ -216,25 +216,26 @@ ListenerModule GetModuleByHmlIp(const char *ip)
     return UNUSE_BUTT;
 }
 
-ListenerModule GetModuleByPeerUuid(const char *peerUuid)
+void ClearHmlListenerByUuid(const char *peerUuid)
 {
     if (peerUuid == NULL) {
         TRANS_LOGE(TRANS_CTRL, "peerUuid is null.");
-        return UNUSE_BUTT;
+        return;
     }
     HmlListenerInfo *item = NULL;
+    HmlListenerInfo *nextItem = NULL;
     if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock fail");
-        return UNUSE_BUTT;
+        return;
     }
-    LIST_FOR_EACH_ENTRY(item, &g_hmlListenerList->list, HmlListenerInfo, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
-            (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
-            return item->moudleType;
+            StopHmlListener(item->moudleType);
+            TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", item->moudleType);
         }
     }
     (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
-    return UNUSE_BUTT;
+    return;
 }
 
 static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerUuid)
