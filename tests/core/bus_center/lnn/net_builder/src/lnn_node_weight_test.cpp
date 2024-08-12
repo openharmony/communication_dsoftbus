@@ -66,10 +66,10 @@ HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnCompareNodeWeight(WEIGHT, UDID1, WEIGHT2, UDID2);
     EXPECT_TRUE(ret == (WEIGHT - WEIGHT2));
-    ret = LnnCompareNodeWeight(WEIGHT, nullptr, WEIGHT2, UDID2);
-    EXPECT_TRUE(ret == (WEIGHT - WEIGHT2));
-    ret = LnnCompareNodeWeight(WEIGHT, UDID1, WEIGHT2, nullptr);
-    EXPECT_TRUE(ret == (WEIGHT - WEIGHT2));
+    ret = LnnCompareNodeWeight(WEIGHT, nullptr, WEIGHT, UDID2);
+    EXPECT_TRUE(ret == (WEIGHT - WEIGHT));
+    ret = LnnCompareNodeWeight(WEIGHT, UDID1, WEIGHT, nullptr);
+    EXPECT_TRUE(ret == (WEIGHT - WEIGHT));
     ret = LnnCompareNodeWeight(WEIGHT2, UDID1, WEIGHT3, UDID2);
     EXPECT_TRUE(ret < 0);
 }
