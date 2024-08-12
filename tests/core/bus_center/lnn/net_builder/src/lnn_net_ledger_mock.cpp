@@ -593,5 +593,10 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     return GetNetLedgerInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
 }
+
+bool LnnSetDLDeviceNickName(const char *networkId, const char *name)
+{
+    return GetNetLedgerInterface()->LnnSetDLDeviceNickName(networkId, name);
+}
 }
 } // namespace OHOS
