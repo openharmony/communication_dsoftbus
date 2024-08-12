@@ -314,6 +314,21 @@ void WifiDirectInterfaceMock::InjectWifiDirectConnectCallbackMock(WifiDirectConn
     callback.onConnectFailure = OnConnectFailureProxy;
 }
 
+static void OnDisconnectSuccessProxy(uint32_t requestId)
+{
+    OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->OnDisconnectSuccess(requestId);
+}
+static void OnDisconnectFailureProxy(uint32_t requestId, int32_t reason)
+{
+    OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->OnDisconnectFailure(requestId, reason);
+}
+
+void WifiDirectInterfaceMock::InjectWifiDirectDisconnectCallbackMock(WifiDirectDisconnectCallback &callback)
+{
+    callback.onDisconnectSuccess = OnDisconnectSuccessProxy;
+    callback.onDisconnectFailure = OnDisconnectFailureProxy;
+}
+
 WifiErrorCode WifiDirectInterfaceMock::RegisterP2pConnectionChangedCallback(const P2pConnectionChangedCallback callback)
 {
     connectionCallback_ = callback;
