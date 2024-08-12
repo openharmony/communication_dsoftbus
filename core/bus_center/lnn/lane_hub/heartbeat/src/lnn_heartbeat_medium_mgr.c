@@ -1134,12 +1134,15 @@ void LnnDumpHbOnlineNodeList(void)
             continue;
         }
         char *deviceTypeStr = LnnConvertIdToDeviceType(nodeInfo.deviceInfo.deviceTypeId);
+        char *anonyDeviceName = NULL;
+        Anonymize(nodeInfo.deviceInfo.deviceName, &anonyDeviceName);
         LNN_LOGD(LNN_HEART_BEAT,
             "DumpOnlineNodeList count=%{public}d, i=%{public}d, deviceName=%{public}s, deviceTypeId=%{public}d, "
             "deviceTypeStr=%{public}s, masterWeight=%{public}d, discoveryType=%{public}d, "
             "oldTimestamp=%{public}" PRIu64 "",
-            infoNum, i + 1, nodeInfo.deviceInfo.deviceName, nodeInfo.deviceInfo.deviceTypeId,
+            infoNum, i + 1, anonyDeviceName, nodeInfo.deviceInfo.deviceTypeId,
             deviceTypeStr != NULL ? deviceTypeStr : "", nodeInfo.masterWeight, nodeInfo.discoveryType, oldTimestamp);
+        AnonymizeFree(anonyDeviceName);
     }
     SoftBusFree(info);
 }
