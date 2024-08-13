@@ -105,8 +105,8 @@ int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
     uint32_t truncateLen = 0;
     ret = CalculateMbsTruncateSize((const char *)localDevName, size - 1, &truncateLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "truncate device name failed");
-    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(deviceName, size, localDevName, truncateLen) == EOK,
-        SOFTBUS_MEM_ERR, DISC_BLE, "copy local device name failed");
+    errno_t retMem = memcpy_s(deviceName, size, localDevName, truncateLen);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "copy local device name failed");
     deviceName[truncateLen] = '\0';
     return SOFTBUS_OK;
 }
@@ -114,11 +114,11 @@ int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
 uint16_t DiscBleGetDeviceType(void)
 {
     char type[DEVICE_TYPE_BUF_LEN] = {0};
-    DISC_CHECK_AND_RETURN_RET_LOGE(LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN) == SOFTBUS_OK,
-        TYPE_UNKNOW_ID, DISC_BLE, "Get local device type failed.");
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, TYPE_UNKNOW_ID, DISC_BLE, "Get local device type failed.");
     uint16_t typeId = 0;
-    DISC_CHECK_AND_RETURN_RET_LOGE(LnnConvertDeviceTypeToId(type, &typeId) == SOFTBUS_OK,
-        TYPE_UNKNOW_ID, DISC_BLE, "Convert device type to id failed.");
+    ret = LnnConvertDeviceTypeToId(type, &typeId);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, TYPE_UNKNOW_ID, DISC_BLE, "Convert device type to id failed.");
     return typeId;
 }
 
@@ -132,10 +132,10 @@ int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash, uint32_t len)
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "GetDeviceId failed");
     ret = SoftBusGenerateStrHash((const uint8_t *)udid, strlen(udid), (uint8_t *)hashResult);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "GenerateStrHash failed");
-    DISC_CHECK_AND_RETURN_RET_LOGE(memset_s(devIdHash, len, 0, len) == EOK,
-        SOFTBUS_MEM_ERR, DISC_BLE, "memset devIdHash failed");
-    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(devIdHash, len, hashResult, SHORT_DEVICE_ID_HASH_LENGTH) == EOK,
-        SOFTBUS_MEM_ERR, DISC_BLE, "copy device id hash failed");
+    errno_t retMem = memset_s(devIdHash, len, 0, len);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memset devIdHash failed");
+    retMem = memcpy_s(devIdHash, len, hashResult, SHORT_DEVICE_ID_HASH_LENGTH);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "copy device id hash failed");
     return SOFTBUS_OK;
 }
 
@@ -228,9 +228,8 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
     remainLen -= 1;
 
     uint32_t validLen = (dataLen > remainLen) ? remainLen : dataLen;
-    DISC_CHECK_AND_RETURN_RET_LOGE(
-        memcpy_s(&(broadcastData->data.data[broadcastData->dataLen]), validLen, value, validLen) == EOK,
-        SOFTBUS_MEM_ERR, DISC_BLE, "assemble tlv memcpy failed");
+    errno_t retMem = memcpy_s(&(broadcastData->data.data[broadcastData->dataLen]), validLen, value, validLen);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "assemble tlv memcpy failed");
     broadcastData->dataLen += validLen;
     return SOFTBUS_OK;
 }
@@ -251,8 +250,9 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32
 
 static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data, uint32_t len)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(device->info->addr[0].info.ble.udidHash, UDID_HASH_LEN,
-        (void *)data, len) == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "parse tlv copy device id hash value failed");
+    errno_t retMem = memcpy_s(device->info->addr[0].info.ble.udidHash, UDID_HASH_LEN, (void *)data, len);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR,
+        DISC_BLE, "parse tlv copy device id hash value failed");
 
     int32_t ret = ConvertBytesToHexString((char *)device->info->devId, DISC_MAX_DEVICE_ID_LEN,
         (const uint8_t *)device->info->addr[0].info.ble.udidHash, len);
@@ -267,16 +267,18 @@ static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, u
         uint32_t devNameLen = strlen((char *)data) + 1; // +1 is device name end '\0'
         *len = (devNameLen > remainLen) ? remainLen : devNameLen;
     }
-    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
-        (void *)data, *len) == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "parse tlv copy device name value failed");
+    errno_t retMem = memcpy_s(device->info->devName, DISC_MAX_DEVICE_NAME_LEN, (void *)data, *len);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR,
+        DISC_BLE, "parse tlv copy device name value failed");
     return SOFTBUS_OK;
 }
 
 static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const uint32_t len)
 {
     uint8_t recvDevType[DEVICE_TYPE_LEN] = {0};
-    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(recvDevType, DEVICE_TYPE_LEN, (void *)data, len) == EOK,
-        SOFTBUS_MEM_ERR, DISC_BLE, "parse tlv copy device type value failed");
+    errno_t retMem = memcpy_s(recvDevType, DEVICE_TYPE_LEN, (void *)data, len);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR,
+        DISC_BLE, "parse tlv copy device type value failed");
     device->info->devType = recvDevType[0];
     if (len == DEVICE_TYPE_LEN) {
         device->info->devType = (recvDevType[1] << ONE_BYTE_LENGTH) | recvDevType[0];
@@ -367,9 +369,9 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                 if (len > RANGE_POWER_TYPE_LEN) {
                     break;
                 }
-                DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(&device->power, RANGE_POWER_TYPE_LEN,
-                    (void *)&data[curLen + 1], len) == EOK,
-                    SOFTBUS_MEM_ERR, DISC_BLE, "parse tlv copy range power failed");
+                errno_t retMem = memcpy_s(&device->power, RANGE_POWER_TYPE_LEN, (void *)&data[curLen + 1], len);
+                DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR,
+                    DISC_BLE, "parse tlv copy range power failed");
                 break;
             default:
                 DISC_LOGW(DISC_BLE, "Unknown TLV, just skip, tlvType=%{public}d, tlvLen=%{public}u", type, len);
@@ -400,9 +402,9 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
         SOFTBUS_INVALID_PARAM, DISC_BLE, "get discovery adv data fail");
 
     uint8_t *serviceData = reportInfo->packet.bcData.payload;
-    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
-        &serviceData[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN) == EOK, SOFTBUS_MEM_ERR,
-        DISC_BLE, "copy accountHash failed");
+    errno_t retMem = memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
+        &serviceData[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "copy accountHash failed");
     device->info->capabilityBitmap[0] = serviceData[POS_CAPABLITY];
 
     uint32_t bcTlvLen = reportInfo->packet.bcData.payloadLen - POS_TLV;
