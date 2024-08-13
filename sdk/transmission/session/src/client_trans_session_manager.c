@@ -217,6 +217,7 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
             ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
             if (ret != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
+                AnonymizeFree(tmpName);
                 return ret;
             }
             TRANS_LOGI(TRANS_SDK, "delete empty session server, sessionName=%{public}s", tmpName);
