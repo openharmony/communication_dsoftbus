@@ -47,17 +47,14 @@ ohos_unittest("SoftBusFrameStandardTest") {
     "//third_party/googletest:gtest_main",
   ]
 
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
   if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-      "ipc:ipc_single",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
+    external_deps += [ "ipc:ipc_single" ]
   }
 }
 group("unittest") {
