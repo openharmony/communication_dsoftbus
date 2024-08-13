@@ -59,6 +59,7 @@ typedef struct {
     sessionNeed info;
     int32_t routeType;
     int32_t sessionId;
+    OnRenameFileCallback onRenameFile;
 } UdpChannel;
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);
@@ -92,6 +93,8 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos);
 int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId);
 
 int32_t TransUdpChannelSetStreamMultiLayer(int32_t channelId, const void *optValue);
+
+int32_t TransSetUdpChannelRenameHook(int32_t channelId, OnRenameFileCallback onRenameFile);
 #ifdef __cplusplus
 }
 #endif
