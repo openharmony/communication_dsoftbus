@@ -38,7 +38,7 @@ void StopHmlListener(ListenerModule module);
 
 ListenerModule GetModuleByHmlIp(const char *ip);
 
-ListenerModule GetModuleByPeerUuid(const char *peerUuid);
+void ClearHmlListenerByUuid(const char *peerUuid);
 
 #ifdef __cplusplus
 #if __cplusplus
