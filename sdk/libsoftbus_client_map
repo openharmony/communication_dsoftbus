@@ -528,6 +528,7 @@
         "OpenAuthSessionWithPara";
         "ResourceConflictCheck";
         "ClientTransTdcIfChannelForSocket";
+        "SetFileRenameHook";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
