@@ -24,7 +24,6 @@ ohos_distributedtest("DistriStreamTest") {
   include_dirs = [
     "./",
     "$dsoftbus_root_path/tests/sdk/common/include",
-    "//test/testfwk/developer_test/aw/cxx/distributed",
   ]
   deps = [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
   external_deps = [
@@ -41,7 +40,6 @@ ohos_distributedtest("DistriStreamTestAgent") {
   include_dirs = [
     "./",
     "$dsoftbus_root_path/tests/sdk/common/include",
-    "//test/testfwk/developer_test/aw/cxx/distributed",
   ]
 
   deps = [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
