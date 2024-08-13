@@ -174,24 +174,14 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/core/common/include/",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "//third_party/bounds_checking_function/include",
     ]
-    deps = [
-      "../../../adapter:softbus_adapter",
-      "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/googletest:gtest_main",
+    deps = [ "../../../adapter:softbus_adapter" ]
+    external_deps = [
+      "bounds_checking_function:libsec_static",
+      "c_utils:utils",
+      "googletest:gtest_main",
+      "hilog:libhilog",
     ]
-    if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
-    } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
-    }
   }
 
   ohos_unittest("SoftbusThreadTest") {
