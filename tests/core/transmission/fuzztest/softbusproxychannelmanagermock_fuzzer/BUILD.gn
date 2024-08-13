@@ -41,12 +41,12 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock_rtti",
-    "//third_party/googletest:gtest_rtti",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest",
     "hilog:libhilog",
     "ipc:ipc_single",
   ]

@@ -280,8 +280,6 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -289,6 +287,7 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
     "googletest:gmock",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 }
@@ -463,13 +462,13 @@ ohos_unittest("TransTcpDirectCallbackTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 }
