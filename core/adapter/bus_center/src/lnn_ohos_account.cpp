@@ -15,6 +15,7 @@
 #include "lnn_ohos_account.h"
 
 #include <securec.h>
+#include <string>
 
 #include "auth_manager.h"
 #include "bus_center_manager.h"
@@ -22,7 +23,6 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
-#include "ohos_account_kits.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
@@ -108,7 +108,7 @@ void LnnUpdateOhosAccount(bool isNeedUpdateHeartbeat)
         }
     }
     if (memcmp(accountHash, localAccountHash, SHA_256_HASH_LEN) == EOK) {
-        LNN_LOGD(LNN_STATE, "accountHash not changed, accountHash=[%{public}02X, %{public}02X]",
+        LNN_LOGW(LNN_STATE, "accountHash not changed, accountHash=[%{public}02X, %{public}02X]",
             accountHash[0], accountHash[1]);
         return;
     }
