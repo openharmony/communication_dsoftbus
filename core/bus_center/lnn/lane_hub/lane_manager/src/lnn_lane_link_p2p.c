@@ -123,7 +123,6 @@ typedef enum {
 typedef enum {
     LANE_ACTIVE_AUTH_TRIGGER = 0x0,
     LANE_BLE_TRIGGER,
-    LANE_NEW_AUTH_TRIGGER,
     LANE_ACTIVE_AUTH_NEGO,
     LANE_ACTIVE_BR_NEGO,
     LANE_PROXY_AUTH_NEGO,
@@ -783,7 +782,7 @@ static int32_t UpdateReason(const AuthLinkType authType, const WdGuideType guide
     if (guideType == LANE_BLE_TRIGGER) {
         return SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT;
     }
-    if (guideType == LANE_ACTIVE_AUTH_TRIGGER || guideType == LANE_NEW_AUTH_TRIGGER) {
+    if (guideType == LANE_ACTIVE_AUTH_TRIGGER) {
         if (authType == AUTH_LINK_TYPE_WIFI) {
             return SOFTBUS_CONN_HV2_AUTH_WIFI_TRIGGER_TIMEOUT;
         }
@@ -1137,7 +1136,9 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
         int32_t ret = LnnSyncPtk(reqInfo.laneRequestInfo.networkId);
         LNN_LOGI(LNN_LANE, "syncptk done, ret=%{public}d", ret);
     }
-    if (reason == SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED || reason == SOFTBUS_CONN_POST_DATA_FAILED) {
+    if (reason == SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED || reason == SOFTBUS_CONN_POST_DATA_FAILED ||
+        reason == SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT ||
+        reason == SOFTBUS_CONN_PV2_WAIT_CONNECT_RESPONSE_TIMEOUT) {
         LNN_LOGI(LNN_LANE, "guide channel retry, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
         HandleGuideChannelAsyncFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
         return;
@@ -1511,8 +1512,7 @@ static void AuthChannelDetectSucc(uint32_t laneReqId, uint32_t authRequestId, Au
         NotifyLinkFail(ASYNC_RESULT_AUTH, authRequestId, SOFTBUS_LANE_GUIDE_BUILD_FAIL);
         return;
     }
-    if (guideInfo.guideList[guideInfo.guideIdx] == LANE_ACTIVE_AUTH_TRIGGER ||
-        guideInfo.guideList[guideInfo.guideIdx] == LANE_NEW_AUTH_TRIGGER) {
+    if (guideInfo.guideList[guideInfo.guideIdx] == LANE_ACTIVE_AUTH_TRIGGER) {
         OnAuthTriggerConnOpened(authRequestId, authHandle);
     } else {
         OnAuthConnOpened(authRequestId, authHandle);
@@ -1624,18 +1624,16 @@ static int32_t GetCurrentGuideType(uint32_t laneReqId, LaneLinkType linkType, Wd
 
 static int32_t GetAuthConnInfo(const LinkRequest *request, uint32_t laneReqId, AuthConnInfo *connInfo, bool isMetaAuth)
 {
-    WdGuideType guideType = LANE_CHANNEL_BUTT;
-    int32_t ret = GetCurrentGuideType(laneReqId, request->linkType, &guideType);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get current guide channel info fail");
-        return ret;
-    }
-    if (!isMetaAuth && (guideType == LANE_NEW_AUTH_TRIGGER || guideType == LANE_ACTIVE_BR_NEGO ||
-        guideType == LANE_NEW_AUTH_NEGO)) {
-        LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
-        ret = GetPreferAuthByType(request->peerNetworkId, AUTH_LINK_TYPE_BR, connInfo, isMetaAuth);
-    } else {
+    int32_t ret = SOFTBUS_LANE_NOT_FOUND;
+    if (isMetaAuth) {
         ret = GetPreferAuth(request->peerNetworkId, connInfo, isMetaAuth);
+    } else {
+        WdGuideType guideType = LANE_CHANNEL_BUTT;
+        ret = GetCurrentGuideType(laneReqId, request->linkType, &guideType);
+        if ((ret == SOFTBUS_OK) && (guideType == LANE_ACTIVE_BR_NEGO || guideType == LANE_NEW_AUTH_NEGO)) {
+            LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
+            ret = GetPreferAuthByType(request->peerNetworkId, AUTH_LINK_TYPE_BR, connInfo, isMetaAuth);
+        }
     }
     return ret;
 }
@@ -1986,6 +1984,17 @@ static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneReqId
     return ConnectWifiDirectWithReuse(request, laneReqId, callback);
 }
 
+static bool BrAuthIsMostPriority(const char *networkId)
+{
+    char uuid[UUID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get peer uuid fail");
+        return false;
+    }
+    return ((!AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false)) &&
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true));
+}
+
 static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)
 {
     if (request == NULL || guideList == NULL || linksNum == NULL) {
@@ -2011,18 +2020,19 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
         if (CheckHasBleConnection()) {
             guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
         }
-        guideList[(*linksNum)++] = LANE_NEW_AUTH_TRIGGER;
     } else {
         if (IsHasAuthConnInfo(request->peerNetworkId)) {
             guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_NEGO;
         }
-        if (CheckHasBrConnection(request->peerNetworkId)) {
+        if ((!BrAuthIsMostPriority(request->peerNetworkId)) && CheckHasBrConnection(request->peerNetworkId)) {
             guideList[(*linksNum)++] = LANE_ACTIVE_BR_NEGO;
         }
         if (IsSupportProxyNego(request->peerNetworkId)) {
             guideList[(*linksNum)++] = LANE_PROXY_AUTH_NEGO;
         }
-        guideList[(*linksNum)++] = LANE_NEW_AUTH_NEGO;
+        if ((!BrAuthIsMostPriority(request->peerNetworkId)) && (!CheckHasBrConnection(request->peerNetworkId))) {
+            guideList[(*linksNum)++] = LANE_NEW_AUTH_NEGO;
+        }
     }
     return SOFTBUS_OK;
 }
@@ -2057,7 +2067,6 @@ static int32_t AddGuideInfoItem(WdGuideInfo *guideInfo)
 static GuideLinkByType g_channelTable[LANE_CHANNEL_BUTT] = {
     [LANE_ACTIVE_AUTH_TRIGGER] = OpenAuthTriggerToConn,
     [LANE_BLE_TRIGGER] = OpenBleTriggerToConn,
-    [LANE_NEW_AUTH_TRIGGER] = OpenAuthTriggerToConn,
     [LANE_ACTIVE_AUTH_NEGO] = OpenAuthToConnP2p,
     [LANE_ACTIVE_BR_NEGO] = OpenAuthToConnP2p,
     [LANE_PROXY_AUTH_NEGO] = OpenProxyChannelToConnP2p,
@@ -2224,7 +2233,6 @@ static int32_t GenerateWifiDirectNegoChannel(WdGuideType guideType, const P2pLin
                 WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
             break;
         case LANE_ACTIVE_AUTH_TRIGGER:
-        case LANE_NEW_AUTH_TRIGGER:
             info->negoChannel.type = NEGO_CHANNEL_AUTH;
             info->negoChannel.handle.authHandle = reqInfo->auth.authHandle;
             info->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
