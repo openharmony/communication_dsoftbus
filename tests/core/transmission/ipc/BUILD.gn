@@ -31,7 +31,6 @@ ohos_unittest("TransClientProxyTest") {
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/sdk/frame/standard/include",
-    "//foundation/window/window_manager/previewer/mock",
   ]
 
   deps = [

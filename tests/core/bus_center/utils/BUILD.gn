@@ -43,8 +43,6 @@ ohos_unittest("LNNConnAddrUtilsTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
