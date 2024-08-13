@@ -478,7 +478,8 @@ static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
             .power = power,
             .identity = {0}
         };
-        errno_t retMem = memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN, device->addr[0].info.ble.bleMac, BT_MAC_LEN);
+        errno_t retMem = memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN,
+            device->addr[0].info.ble.bleMac, BT_MAC_LEN);
         DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memcpy failed");
 
         int ret = SoftBusBleRange(&param, &range);
