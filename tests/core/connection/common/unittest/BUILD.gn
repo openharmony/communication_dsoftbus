@@ -27,17 +27,15 @@ ohos_unittest("SoftbusConnCommonTest") {
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/common/include",
-    "//third_party/googletest/googletest/include",
-    "//third_party/googletest/googletest/src",
-    "//third_party/bounds_checking_function/include",
   ]
   sources = [ "softbus_conn_common_test.cpp" ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
-
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
 }
