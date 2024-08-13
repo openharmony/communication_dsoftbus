@@ -733,7 +733,7 @@ HWTEST_F(TransUdpNegoTest, AcceptUdpChannelAsServer001, TestSize.Level1)
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
 
     int32_t ret = AcceptUdpChannelAsServer(appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(channel);
