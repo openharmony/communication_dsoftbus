@@ -747,6 +747,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataTest001, TestSize
     sliceData = TransProxyPackFastData(appInfo, &outLen);
     EXPECT_NE(NULL, sliceData);
     SoftBusFree(appInfo);
+    SoftBusFree(sliceData);
 }
 
 /**

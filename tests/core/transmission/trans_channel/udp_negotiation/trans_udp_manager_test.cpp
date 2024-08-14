@@ -867,7 +867,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest029, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUdpChannelMgrInit();
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransUdpGetChannelIdByAddr(appInfo);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     appInfo->peerData.channelId = TEST_CHANNEL_ID;
