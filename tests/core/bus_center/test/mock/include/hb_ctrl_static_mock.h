@@ -63,6 +63,7 @@ public:
     virtual int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType) = 0;
     virtual void RestartCoapDiscovery(void) = 0;
     virtual bool LnnIsLocalSupportBurstFeature(void) = 0;
+    virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -95,6 +96,7 @@ public:
     MOCK_METHOD1(LnnStopHeartBeatAdvByTypeNow, int32_t (LnnHeartbeatType));
     MOCK_METHOD0(RestartCoapDiscovery, void (void));
     MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool (void));
+    MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
 };
 } // namespace OHOS
-#endif // OHOS_LNN_CTRL_STATIC_MOCK_H
+#endif // OHOS_LNN_CTRL_STATIC_MOCK_H
