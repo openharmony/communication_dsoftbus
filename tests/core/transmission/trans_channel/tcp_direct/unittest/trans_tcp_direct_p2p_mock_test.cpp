@@ -70,6 +70,7 @@ public:
 
 void TransTcpDirectP2pMockTest::SetUpTestCase(void)
 {
+    // will free in TearDownTestCase
     SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_TRUE(list != nullptr);
     SoftBusMutexInit(&list->lock, nullptr);
@@ -83,6 +84,7 @@ void TransTcpDirectP2pMockTest::SetUpTestCase(void)
     EXPECT_CALL(TcpP2pDirectMock, TransProxyPipelineRegisterListener).WillOnce(Return(SOFTBUS_OK));
     ret = P2pDirectChannelInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
+    // will free in TearDownTestCase
     SoftBusList *SessionList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_TRUE(SessionList != nullptr);
     SoftBusMutexInit(&SessionList->lock, nullptr);
@@ -131,13 +133,14 @@ SessionConn *TestSetSessionConn()
     testConn->appInfo.routeType = WIFI_P2P;
     testConn->appInfo.peerData.channelId = TEST_CHANNEL_ID;
     testConn->authHandle.type = AUTH_LINK_TYPE_WIFI;
-    (void)memcpy_s(testConn->appInfo.myData.sessionName, SESSION_NAME_SIZE_MAX, SESSION_NAME, (strlen(SESSION_NAME)+1));
-    (void)memcpy_s(testConn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, PKGE_NAME, (strlen(PKGE_NAME)+1));
+    (void)memcpy_s(testConn->appInfo.myData.sessionName, SESSION_NAME_SIZE_MAX,
+        SESSION_NAME, (strlen(SESSION_NAME) + 1));
+    (void)memcpy_s(testConn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, PKGE_NAME, (strlen(PKGE_NAME) + 1));
     (void)memcpy_s(testConn->appInfo.peerData.sessionName,
-        SESSION_NAME_SIZE_MAX, SESSION_NAME, (strlen(SESSION_NAME)+1));
-    (void)memcpy_s(testConn->appInfo.sessionKey, SESSION_KEY_LENGTH, TEST_SESSION_KEY, (strlen(TEST_SESSION_KEY)+1));
-    (void)memcpy_s(testConn->appInfo.groupId, GROUP_ID_SIZE_MAX, TEST_GROUP_ID, (strlen(TEST_GROUP_ID)+1));
-    (void)memcpy_s(testConn->appInfo.peerData.addr, IP_LEN, IP, (strlen(IP)+1));
+        SESSION_NAME_SIZE_MAX, SESSION_NAME, (strlen(SESSION_NAME) + 1));
+    (void)memcpy_s(testConn->appInfo.sessionKey, SESSION_KEY_LENGTH, TEST_SESSION_KEY, (strlen(TEST_SESSION_KEY) + 1));
+    (void)memcpy_s(testConn->appInfo.groupId, GROUP_ID_SIZE_MAX, TEST_GROUP_ID, (strlen(TEST_GROUP_ID) + 1));
+    (void)memcpy_s(testConn->appInfo.peerData.addr, IP_LEN, IP, (strlen(IP) + 1));
     return testConn;
 }
 
@@ -303,6 +306,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, VerifyP2pTest001, TestSize.Level1)
     int32_t port = TEST_PORT;
     // will free in VerifyP2p
     char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
+    ASSERT_TRUE(data != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(nullptr));
@@ -314,6 +318,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, VerifyP2pTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     // will free in VerifyP2p
     char *testData = static_cast<char *>(SoftBusCalloc(TEST_LEN));
+    ASSERT_TRUE(testData != nullptr);
     (void)memcpy_s(testData, TEST_LEN, DATA, TEST_LEN);
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(testData));
     EXPECT_CALL(TcpP2pDirectMock, AuthPostTransData).WillOnce(Return(SOFTBUS_OK));
@@ -340,10 +345,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthConnOpenedTest001, TestSize.Level1)
     OnAuthConnOpenFailed(requestId, reason);
     // will free in OnAuthConnOpened--VerifyP2p
     char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
+    ASSERT_TRUE(data != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
     // will free in TearDownTestCase--GetSessionConnList--DestroySoftBusList
     SoftBusList *SessionList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
+    ASSERT_TRUE(SessionList != nullptr);
     SoftBusMutexInit(&SessionList->lock, nullptr);
     ListInit(&SessionList->list);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
@@ -419,6 +426,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest001, TestSize.Lev
     bool isAuthLink = false;
     // will free in PackAndSendVerifyP2pRsp
     char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
+    ASSERT_TRUE(data != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
@@ -430,6 +438,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest001, TestSize.Lev
 
     isAuthLink = true;
     char *testData = static_cast<char *>(SoftBusCalloc(TEST_LEN));
+    ASSERT_TRUE(testData != nullptr);
     (void)memcpy_s(testData, TEST_LEN, DATA, TEST_LEN);
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(nullptr));
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPackError).WillOnce(Return(testData));
@@ -453,8 +462,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest002, TestSize.Lev
     bool isAuthLink = false;
     // will free in PackAndSendVerifyP2pRsp
     char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
+    ASSERT_TRUE(data != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
     char *newData = static_cast<char *>(SoftBusCalloc(TEST_LEN));
+    ASSERT_TRUE(newData != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
@@ -485,6 +496,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     ASSERT_TRUE(json != nullptr);
     // will free in VerifyP2pPackError
     char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
+    ASSERT_TRUE(data != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
@@ -668,6 +680,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthDataRecvTest001, TestSize.Level1)
     ASSERT_TRUE(json != nullptr);
     const char *str = "data";
     AuthTransData *data = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    ASSERT_TRUE(data != nullptr);
     data->module = MODULE_P2P_LINK;
     data->flag = FLAG_REPLY;
     data->seq = 1;
@@ -851,6 +864,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest001, TestSize.Le
     ASSERT_TRUE(appInfo != nullptr);
     (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
     uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+    ASSERT_TRUE(fastTransData != nullptr);
     appInfo->fastTransData = nullptr;
     FreeFastTransData(appInfo);
     int32_t ret = CopyAppInfoFastTransData(conn, appInfo);
@@ -942,6 +956,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OpenP2pDirectChannelTest001, TestSize.Level1
     ASSERT_TRUE(appInfo != nullptr);
     (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
     uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+    ASSERT_TRUE(fastTransData != nullptr);
     appInfo->fastTransData = fastTransData;
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
