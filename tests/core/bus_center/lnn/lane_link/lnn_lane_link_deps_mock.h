@@ -73,7 +73,8 @@ public:
     MOCK_METHOD1(GetConflictTypeWithErrcode, LinkConflictType (int32_t conflictErrcode));
     MOCK_METHOD3(FindLinkConflictInfoByDevId, int32_t (const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
         LinkConflictInfo *outputInfo));
-    MOCK_METHOD2(RemoveConflictInfoTimelinessMsg, void (const DevIdentifyInfo *inputInfo, LinkConflictType conflictType));
+    MOCK_METHOD2(RemoveConflictInfoTimelinessMsg, void (const DevIdentifyInfo *inputInfo,
+        LinkConflictType conflictType));
     MOCK_METHOD2(DelLinkConflictInfo, int32_t (const DevIdentifyInfo *inputInfo, LinkConflictType conflictType));
     MOCK_METHOD1(ClearLaneResourceByLaneId, int32_t (uint64_t laneId));
     MOCK_METHOD1(RemoveDelayDestroyMessage, void (uint64_t laneId));

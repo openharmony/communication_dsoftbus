@@ -2190,6 +2190,38 @@ static void GuideChannelSelect(SoftBusMessage *msg)
     }
 }
 
+void RecycleP2pLinkedReqByLinkType(const char *peerNetworkId, LaneLinkType linkType)
+{
+    if (peerNetworkId == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    if (g_p2pLinkedList == NULL) {
+        LNN_LOGE(LNN_LANE, "p2p not init");
+        return;
+    }
+    if (LinkLock() != 0) {
+        LNN_LOGE(LNN_LANE, "lock fail");
+        return;
+    }
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    P2pLinkedList *item = NULL;
+    P2pLinkedList *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkedList, P2pLinkedList, node) {
+        if (strncmp(item->networkId, peerNetworkId, NETWORK_ID_BUF_LEN) == 0 &&
+            item->linkType == linkType) {
+            authHandle.authId = item->auth.authHandle.authId;
+            authHandle.type = item->auth.authHandle.type;
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            if (authHandle.authId != INVAILD_AUTH_ID) {
+                AuthCloseConn(authHandle);
+            }
+        }
+    }
+    LinkUnlock();
+}
+
 static int32_t GenerateWifiDirectNegoChannel(WdGuideType guideType, const P2pLinkReqList *reqInfo,
     struct WifiDirectConnectInfo *info)
 {
@@ -2405,40 +2437,6 @@ static void DumpHmlPreferChannel(const LinkRequest *request)
         return;
     }
     LNN_LOGI(LNN_LANE, "[HML]prefer channel=%{public}d", preferChannel);
-}
-
-void RecycleP2pLinkedReqByLinkType(const char *peerNetworkId, LaneLinkType linkType)
-{
-    if (peerNetworkId == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid param");
-        return;
-    }
-    if (g_p2pLinkList == NULL) {
-        if (LnnP2pInit() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "p2p not init");
-            return;
-        }
-    }
-    if (LinkLock() != 0) {
-        LNN_LOGE(LNN_LANE, "lock fail");
-        return;
-    }
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    P2pLinkedList *item = NULL;
-    P2pLinkedList *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkedList, P2pLinkedList, node) {
-        if (strncmp(item->networkId, peerNetworkId, NETWORK_ID_BUF_LEN) == 0 &&
-            item->linkType == linkType) {
-            authHandle.authId = item->auth.authHandle.authId;
-            authHandle.type = item->auth.authHandle.type;
-            ListDelete(&item->node);
-            SoftBusFree(item);
-            if (authHandle.authId != INVAILD_AUTH_ID) {
-                AuthCloseConn(authHandle);
-            }
-        }
-    }
-    LinkUnlock();
 }
 
 int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
