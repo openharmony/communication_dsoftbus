@@ -33,6 +33,13 @@ public:
     static WifiDirectIpManager& GetInstance()
     {
         static WifiDirectIpManager instance;
+        {
+            std::lock_guard lock(clearMutex_);
+            if (!hasClear_) {
+                ClearAllIpv4();
+                hasClear_ = true;
+            }
+        }
         return instance;
     }
     static void Init();
@@ -85,6 +92,8 @@ private:
 
     std::recursive_mutex mutex_;
     static inline Initiator initiator_;
+    static inline bool hasClear_ = false;
+    static inline std::recursive_mutex clearMutex_;
 };
 } // namespace OHOS::SoftBus
 #endif /* WIFI_DIRECT_IP_MANAGER_H */
