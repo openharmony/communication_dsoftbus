@@ -624,16 +624,16 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransProxyGetAuthIdTest001
- * @tc.desc: TransProxyGetAuthId test
+ * @tc.name: TransProxyGetAuthIdByUuidTest001
+ * @tc.desc: TransProxyGetAuthIdByUuid test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdByUuidTest001, TestSize.Level1)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
-    int32_t ret = TransProxyGetAuthId(conn);
+    int32_t ret = TransProxyGetAuthIdByUuid(conn);
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
     SoftBusFree(conn);
 }
