@@ -377,22 +377,6 @@ enum WifiDirectErrorCode {
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
 };
 
-static inline int32_t ErrorCodeToV1ProtocolCode(int32_t reason)
-{
-    if (reason > V1_ERROR_END && reason < V1_ERROR_START) {
-        return reason - V1_ERROR_START;
-    }
-    return reason;
-}
-
-static inline int32_t ErrorCodeFromV1ProtocolCode(int32_t reason)
-{
-    if (reason < 0 && reason > V1_ERROR_END - V1_ERROR_START) {
-        return reason + V1_ERROR_START;
-    }
-    return reason;
-}
-
 static inline int32_t ToSoftBusErrorCode(int32_t errorCode)
 {
     return SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + abs(errorCode);
