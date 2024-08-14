@@ -13,21 +13,15 @@
  * limitations under the License.
  */
 
-#include <securec.h>
-
 #include <gtest/gtest.h>
-#include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_server_frame.h"
-#include "trans_auth_manager.h"
-#include "trans_session_manager.h"
-#include "trans_session_service.h"
-#include "trans_channel_callback.h"
-#include "softbus_conn_interface.h"
-#include "softbus_feature_config.h"
+
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
+#include "softbus_feature_config.h"
+#include "trans_auth_manager.h"
+#include "trans_session_service.h"
 
 using namespace testing::ext;
 
