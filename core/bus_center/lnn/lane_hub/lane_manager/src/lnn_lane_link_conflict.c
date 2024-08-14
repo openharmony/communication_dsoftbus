@@ -71,33 +71,6 @@ static int32_t LinkConflictPostMsgToHandler(int32_t msgType, uint64_t param1, ui
     return SOFTBUS_OK;
 }
 
-static bool IsValidDevInfo(const DevIdentifyInfo *srcInfo, const DevIdentifyInfo *dstInfo)
-{
-    if (srcInfo == NULL || dstInfo == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid param");
-        return false;
-    }
-    switch (srcInfo->type) {
-        case IDENTIFY_TYPE_DEV_ID:
-            if (strncmp(srcInfo->devInfo.peerDevId, dstInfo->devInfo.peerDevId,
-                strlen(srcInfo->devInfo.peerDevId)) != EOK) {
-                break;
-            }
-            return true;
-        case IDENTIFY_TYPE_UDID_HASH:
-            if (strncmp(srcInfo->devInfo.udidHash, dstInfo->devInfo.udidHash,
-                strlen(srcInfo->devInfo.udidHash)) != EOK) {
-                break;
-            }
-            return true;
-        default:
-            LNN_LOGE(LNN_LANE, "invalid identifyType=%{public}d", srcInfo->type);
-            return false;
-    }
-    LNN_LOGE(LNN_LANE, "identify info is different form input info, identifyType=%{public}d", srcInfo->type);
-    return false;
-}
-
 static int32_t PostConflictInfoTimelinessMsg(const DevIdentifyInfo *info, LinkConflictType conflictType)
 {
     if (info == NULL) {
@@ -143,8 +116,7 @@ static int32_t RemoveConflictInfoTimeliness(const SoftBusMessage *msg, void *dat
         return SOFTBUS_INVALID_PARAM;
     }
     if (srcInfo->conflictType == dstInfo->conflictType &&
-        srcInfo->identifyInfo.type == dstInfo->identifyInfo.type &&
-        IsValidDevInfo(&srcInfo->identifyInfo, &dstInfo->identifyInfo)) {
+        memcmp(&srcInfo->identifyInfo, &dstInfo->identifyInfo, sizeof(DevIdentifyInfo)) == 0) {
         LNN_LOGI(LNN_LANE, "remove conflict info timeliness message success");
         SoftBusFree(srcInfo);
         return SOFTBUS_OK;
@@ -255,8 +227,7 @@ static int32_t UpdateExistsLinkConflictInfo(const LinkConflictInfo *inputInfo)
     LinkConflictInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
         if (item->conflictType == inputInfo->conflictType &&
-            item->identifyInfo.type == inputInfo->identifyInfo.type &&
-            IsValidDevInfo(&item->identifyInfo, &inputInfo->identifyInfo)) {
+            memcmp(&item->identifyInfo, &inputInfo->identifyInfo, sizeof(DevIdentifyInfo)) == 0) {
             int32_t ret = GenerateConflictInfo(inputInfo, item);
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LANE, "generate conflictDevInfo fail");
@@ -321,8 +292,8 @@ int32_t DelLinkConflictInfo(const DevIdentifyInfo *inputInfo, LinkConflictType c
     LinkConflictInfo *item = NULL;
     LinkConflictInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
-        if (item->conflictType == conflictType && item->identifyInfo.type == inputInfo->type &&
-            IsValidDevInfo(&item->identifyInfo, inputInfo)) {
+        if (item->conflictType == conflictType &&
+            memcmp(&item->identifyInfo, inputInfo, sizeof(DevIdentifyInfo)) == 0) {
             ListDelete(&item->node);
             if (item->devIdCnt > 0) {
                 SoftBusFree(item->devIdList);
@@ -389,8 +360,8 @@ int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConfli
     LinkConflictInfo *item = NULL;
     LinkConflictInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
-        if (item->conflictType == conflictType && item->identifyInfo.type == inputInfo->type &&
-            IsValidDevInfo(&item->identifyInfo, inputInfo)) {
+        if (item->conflictType == conflictType &&
+            memcmp(&item->identifyInfo, inputInfo, sizeof(DevIdentifyInfo)) == 0) {
             int32_t ret = GenerateConflictInfo(item, outputInfo);
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LANE, "generate link conflict devInfo fail");
@@ -406,7 +377,7 @@ int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConfli
     Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
         inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
     LNN_LOGE(LNN_LANE, "not found link conflict info by identifyType=%{public}d, devInfo=%{public}s,"
-        " conflictType=%{public}d",inputInfo->type, anonyDevInfo, conflictType);
+        " conflictType=%{public}d", inputInfo->type, anonyDevInfo, conflictType);
     AnonymizeFree(anonyDevInfo);
     return SOFTBUS_LANE_NOT_FOUND;
 }
