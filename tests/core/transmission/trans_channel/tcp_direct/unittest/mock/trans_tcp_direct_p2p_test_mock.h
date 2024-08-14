@@ -63,7 +63,7 @@ public:
     TransTcpDirectP2pInterfaceMock();
     ~TransTcpDirectP2pInterfaceMock() override;
     MOCK_METHOD2(TransTdcStartSessionListener, int32_t (ListenerModule module, const LocalListenerInfo *info));
-    MOCK_METHOD0(CreateSoftBusList, SoftBusList * ());
+    MOCK_METHOD0(CreateSoftBusList, SoftBusList *());
     MOCK_METHOD1(StopBaseListener, int32_t (ListenerModule module));
     MOCK_METHOD1(IsHmlIpAddr, bool (const char *ip));
     MOCK_METHOD2(RegAuthTransListener, int32_t (int32_t module, const AuthTransListener *listener));
@@ -83,12 +83,12 @@ public:
     MOCK_METHOD3(ConnOpenClientSocket, int32_t (const ConnectOption *option, const char *bindAddr, bool isNonBlock));
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
     MOCK_METHOD2(TransSrvAddDataBufNode, int32_t (int32_t channelId, int32_t fd));
-    MOCK_METHOD2(cJSON_ParseWithLength, cJSON * (const char *value, size_t buffer_length));
+    MOCK_METHOD2(cJSON_ParseWithLength, cJSON *(const char *value, size_t buffer_length));
     MOCK_METHOD1(TransProxyPipelineGetChannelIdByNetworkId, int32_t (const char *networkId));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD1(TransProxyReuseByChannelId, int32_t (int32_t channelId));
     MOCK_METHOD1(TransProxyPipelineCloseChannelDelay, int32_t (int32_t channelId));
-    MOCK_METHOD2(CreateNewSessinConn, SessionConn * (ListenerModule module, bool isServerSid));
+    MOCK_METHOD2(CreateNewSessinConn, SessionConn *(ListenerModule module, bool isServerSid));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_P2P_TEST_MOCK_H
