@@ -579,6 +579,7 @@ static int32_t PackAndSendVerifyP2pRsp(const char *myIp, int32_t myPort, int64_t
 static int32_t StartHmlListenerByUuid(AuthHandle authHandle, const char *myIp, int32_t *myPort)
 {
     char peerUuid[UUID_BUF_LEN] = { 0 };
+    int32_t ret = SOFTBUS_OK;
     if (authHandle.type == AUTH_LINK_TYPE_BLE) {
         AuthHandle authHandleTmp = { 0 };
         ret = TransProxyGetAuthId(authHandle.authId, &authHandleTmp);
@@ -625,7 +626,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
     if (IsHmlIpAddr(myIp)) {
-        ret = StartHmlListenerByUuid(authHandle, myIp, &myPort)
+        ret = StartHmlListenerByUuid(authHandle, myIp, &myPort);
     } else {
         ret = StartP2pListener(myIp, &myPort);
     }
