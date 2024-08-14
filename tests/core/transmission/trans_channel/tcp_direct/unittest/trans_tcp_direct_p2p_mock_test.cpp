@@ -302,7 +302,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, VerifyP2pTest001, TestSize.Level1)
     int64_t seq = TEST_SEQ;
     int32_t port = TEST_PORT;
     // will free in VerifyP2p
-    char *data = (char *)SoftBusCalloc(TEST_LEN);
+    char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(nullptr));
@@ -313,7 +313,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, VerifyP2pTest001, TestSize.Level1)
     ret = VerifyP2p(authHandle, IP, IP, port, seq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     // will free in VerifyP2p
-    char *testData = (char *)SoftBusCalloc(TEST_LEN);
+    char *testData = static_cast<char *>(SoftBusCalloc(TEST_LEN));
     (void)memcpy_s(testData, TEST_LEN, DATA, TEST_LEN);
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(testData));
     EXPECT_CALL(TcpP2pDirectMock, AuthPostTransData).WillOnce(Return(SOFTBUS_OK));
@@ -339,7 +339,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthConnOpenedTest001, TestSize.Level1)
     OnAuthConnOpened(requestId, authHandle);
     OnAuthConnOpenFailed(requestId, reason);
     // will free in OnAuthConnOpened--VerifyP2p
-    char *data = (char *)SoftBusCalloc(TEST_LEN);
+    char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
     // will free in TearDownTestCase--GetSessionConnList--DestroySoftBusList
@@ -418,7 +418,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest001, TestSize.Lev
     int32_t port = TEST_PORT;
     bool isAuthLink = false;
     // will free in PackAndSendVerifyP2pRsp
-    char *data = (char *)SoftBusCalloc(TEST_LEN);
+    char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
@@ -429,7 +429,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     isAuthLink = true;
-    char *testData = (char *)SoftBusCalloc(TEST_LEN);
+    char *testData = static_cast<char *>(SoftBusCalloc(TEST_LEN));
     (void)memcpy_s(testData, TEST_LEN, DATA, TEST_LEN);
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(nullptr));
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPackError).WillOnce(Return(testData));
@@ -452,9 +452,9 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest002, TestSize.Lev
     int32_t port = TEST_PORT;
     bool isAuthLink = false;
     // will free in PackAndSendVerifyP2pRsp
-    char *data = (char *)SoftBusCalloc(TEST_LEN);
+    char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
-    char *newData = (char *)SoftBusCalloc(TEST_LEN);
+    char *newData = static_cast<char *>(SoftBusCalloc(TEST_LEN));
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
@@ -484,7 +484,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     cJSON *json = TestTransCreateJson();
     ASSERT_TRUE(json != nullptr);
     // will free in VerifyP2pPackError
-    char *data = (char *)SoftBusCalloc(TEST_LEN);
+    char *data = static_cast<char *>(SoftBusCalloc(TEST_LEN));
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
