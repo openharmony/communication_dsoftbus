@@ -594,7 +594,7 @@ static int32_t StartHmlListenerByUuid(AuthHandle authHandle, const char *myIp, i
         TRANS_LOGE(TRANS_CTRL, "fail to get device uuid by authId=%{public}" PRId64, authHandle.authId);
         return ret;
     }
-    return StartHmlListener(myIp, &myPort, peerUuid);
+    return StartHmlListener(myIp, myPort, peerUuid);
 }
 
 static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSON *json, bool isAuthLink)
