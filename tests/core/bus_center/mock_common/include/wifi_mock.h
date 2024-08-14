@@ -16,11 +16,11 @@
 #ifndef DISTRIBUTE_NET_LEDGER_MOCK_H
 #define DISTRIBUTE_NET_LEDGER_MOCK_H
 
-#include "wifi_device.h"
-#include "wifi_errcode.h"
-#include "wifi_hid2d.h"
-#include "wifi_p2p.h"
-#include "wifi_scan.h"
+#include "kits/c/wifi_device.h"
+#include "kits/c/wifi_error_code.h"
+#include "kits/c/wifi_hid2d.h"
+#include "kits/c/wifi_p2p.h"
+#include "kits/c/wifi_scan_info.h"
 #include <gmock/gmock.h>
 #include <mutex>
 
