@@ -43,9 +43,11 @@ AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get device id failed");
     remoteDeviceId_ = remoteUuid;
     auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(remoteUuid);
-    if (!WifiDirectUtils::IsDeviceOnline(remoteNetworkId)) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "diff account");
-        remoteDeviceId_ = "";
+    if (WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
+        if (!WifiDirectUtils::IsDeviceOnline(remoteNetworkId)) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "diff account");
+            remoteDeviceId_ = "";
+        }
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
 }
@@ -100,6 +102,8 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
         type = ProtocolType::JSON;
     }
     auto protocol = WifiDirectProtocolFactory::CreateProtocol(type);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        protocol != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "create protocol failed");
     std::vector<uint8_t> output;
     msg.Marshalling(*protocol, output);
 
@@ -202,9 +206,11 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     msg.Unmarshalling(*protocol, input);
     bool sameAccount = msg.GetExtraData().empty() || msg.GetExtraData().front();
     CONN_LOGI(CONN_WIFI_DIRECT, "sameAccount=%{public}d", sameAccount);
-    if (!WifiDirectUtils::IsDeviceOnline(WifiDirectUtils::UuidToNetworkId(remoteDeviceId)) || !sameAccount) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
-        remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
+    if (type == ProtocolType::TLV) {
+        if (!WifiDirectUtils::IsDeviceOnline(WifiDirectUtils::UuidToNetworkId(remoteDeviceId)) || !sameAccount) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
+            remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
+        }
     }
 
     CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s", msg.MessageTypeToString().c_str());

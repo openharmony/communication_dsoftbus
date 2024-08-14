@@ -199,6 +199,62 @@ char* SoftBusGetWifiInterfaceCoexistCap(void)
     return GetServiceInterface()->SoftBusGetWifiInterfaceCoexistCap();
 }
 
+int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
+{
+    return GetServiceInterface()->LnnAsyncCallbackHelper(looper, callback, para);
+}
+
+int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis)
+{
+    return GetServiceInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
+{
+    return GetServiceInterface()->SoftBusGenerateRandomArray(randStr, len);
+}
+
+int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetDeviceDisplayName(nickName, defaultName, deviceName, len);
+}
+
+int32_t LnnGetUnifiedDeviceName(char *unifiedName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetUnifiedDeviceName(unifiedName, len);
+}
+
+int32_t LnnGetUnifiedDefaultDeviceName(char *unifiedDefaultName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetUnifiedDefaultDeviceName(unifiedDefaultName, len);
+}
+
+int32_t GetCurrentAccount(int64_t *account)
+{
+    return GetServiceInterface()->GetCurrentAccount(account);
+}
+
+int32_t LnnSetLocalUnifiedName(const char *unifiedName)
+{
+    return GetServiceInterface()->LnnSetLocalUnifiedName(unifiedName);
+}
+
+void LnnNotifyLocalNetworkIdChanged(void)
+{
+    return GetServiceInterface()->LnnNotifyLocalNetworkIdChanged();
+}
+
+int32_t LnnGetSettingNickName(const char *defaultName, const char *unifiedName, char *nickName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetSettingNickName(defaultName, unifiedName, nickName, len);
+}
+
+int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+{
+    return GetServiceInterface()->SoftbusGetConfig(type, val, len);
+}
+
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
@@ -229,5 +285,5 @@ int32_t LnnServicetInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceNa
     }
     return SOFTBUS_OK;
 }
-}
-}
+} // extern "C"
+} // namespace OHOS

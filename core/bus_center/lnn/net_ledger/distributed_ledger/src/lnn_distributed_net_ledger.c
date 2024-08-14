@@ -69,6 +69,20 @@ static void UpdateNetworkInfo(const char *udid)
     LnnNotifyBasicInfoChanged(&basic, TYPE_NETWORK_INFO);
 }
 
+static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
+{
+    NodeBasicInfo basic;
+    if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memset_s basic fail!");
+    }
+    if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "GetBasicInfoByUdid fail.");
+        return;
+    }
+    LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.", oldDeviceName, basic.deviceName);
+    LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
+}
+
 int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type)
 {
     if (authTypeValue == NULL || type >= AUTH_TYPE_BUTT) {
@@ -676,6 +690,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
+    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
 
     UpdateNewNodeAccountHash(newInfo);
     UpdateDpSameAccount(newInfo->accountHash, newInfo->deviceInfo.deviceUdid);
@@ -691,14 +706,14 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) ||
-        LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
+    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
         oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
         oldInfo->connectInfo.authPort = newInfo->connectInfo.authPort;
         oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
         oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
     }
-    if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != 0) {
+    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != 0 ||
+        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != 0) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
@@ -716,6 +731,9 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     }
     oldInfo->accountId = newInfo->accountId;
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    if (memcmp(deviceName, newInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
+        UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
+    }
     return SOFTBUS_OK;
 }
 

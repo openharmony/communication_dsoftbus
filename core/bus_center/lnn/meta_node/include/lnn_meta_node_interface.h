@@ -27,6 +27,7 @@ int32_t LnnInitMetaNode(void);
 void LnnDeinitMetaNode(void);
 int32_t LnnInitMetaNodeExtLedger(void);
 void LnnDeinitMetaNodeExtLedger(void);
+void ClearMetaNodeRequestByPid(const char *pkgName, int32_t pid);
 
 #ifdef __cplusplus
 }

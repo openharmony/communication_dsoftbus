@@ -19,7 +19,6 @@
 #include "iservice_registry.h"
 #include "message_option.h"
 #include "message_parcel.h"
-#include "rpc_errno.h"
 #include "softbus_access_token_test.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
@@ -599,7 +598,7 @@ bool StartDiscoveryFuzzTest(const uint8_t *data, size_t size)
 bool StopDiscoveryFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr) {
+    if (object == nullptr || size < INPUT_NAME_SIZE_MAX + sizeof(int32_t)) {
         return false;
     }
     char pkgName[INPUT_NAME_SIZE_MAX] = "";

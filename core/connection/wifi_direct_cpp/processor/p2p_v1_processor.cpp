@@ -129,7 +129,15 @@ void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
     if (nc == nullptr) {
         return;
     }
-    if (nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_CONN_V1_REQ) {
+    auto messageType = nc->GetNegotiateMessage().GetLegacyP2pCommandType();
+    CONN_LOGI(CONN_WIFI_DIRECT, "messageType = %{public}d", messageType);
+    std::set<LegacyCommandType> vaildMessageTypes = {
+        LegacyCommandType::CMD_CONN_V1_REQ,
+        LegacyCommandType::CMD_DISCONNECT_V1_REQ,
+        LegacyCommandType::CMD_REUSE_REQ,
+        LegacyCommandType::CMD_FORCE_DISCONNECT_V1_REQ,
+    };
+    if (vaildMessageTypes.find(messageType) == vaildMessageTypes.end()) {
         return;
     }
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommandFront(*nc);
@@ -558,12 +566,17 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
         CONN_LOGE(CONN_WIFI_DIRECT, "auth connect failed, error=%{public}d", event->reason_);
         Terminate();
     }
-    AuthNegotiateChannel channel(event->handle_);
-    auto ret = SendHandShakeMessage(channel);
+    auto channel = std::make_shared<AuthNegotiateChannel>(event->handle_);
+    channel->SetClose();
+    auto ret = SendHandShakeMessage(*channel);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "send hand shake message failed, error=%{public}d", ret);
         Terminate();
     }
+    LinkManager::GetInstance().ProcessIfPresent(InnerLink::LinkType::P2P, remoteDeviceId_, [&channel](InnerLink &link) {
+        link.SetNegotiateChannel(channel);
+    });
+
     CONN_LOGI(CONN_WIFI_DIRECT, "send hand shake message success");
     if (!active_) {
         WifiDirectSinkLink sinkLink {};
@@ -1235,7 +1248,10 @@ int P2pV1Processor::ProcessGetInterfaceInfoRequest(std::shared_ptr<NegotiateComm
 
 int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    auto channel = command->GetNegotiateChannel();
+    auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(command->GetNegotiateChannel());
+    if (channel != nullptr) {
+        channel->SetClose();
+    }
     auto remoteDeviceId = command->GetRemoteDeviceId();
 
     WifiDirectLink dlink {};

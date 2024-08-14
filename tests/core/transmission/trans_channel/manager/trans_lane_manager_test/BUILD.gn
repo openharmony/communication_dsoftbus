@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022 - 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,6 @@ module_output_path = "dsoftbus/transmission"
 dsoftbus_root_path = "../../../../../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
-## UnitTest TransLaneManagerTest {{{
 ohos_unittest("TransLaneManagerTest") {
   module_out_path = module_output_path
   sources = [ "trans_lane_manager_test.cpp" ]
@@ -62,29 +61,27 @@ ohos_unittest("TransLaneManagerTest") {
     "$dsoftbus_root_path/core/transmission/ipc/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "cJSON:cjson",
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "cJSON:cjson",
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "hilog:libhilog",
-      "hilog_lite:hilog_lite",
-    ]
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+  if (!is_standard_system) {
+    external_deps += [ "hilog_lite:hilog_lite" ]
   }
 }
 

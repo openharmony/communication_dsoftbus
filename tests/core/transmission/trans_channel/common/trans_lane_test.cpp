@@ -193,7 +193,7 @@ HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
     (void)TransReqLanePendingInit();
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransGetLaneReqItemByLaneHandle(invalidId, &bSucc, connInfo, &errCode);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
@@ -234,7 +234,7 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(invalidId, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
@@ -249,7 +249,7 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
     ret = TransDelLaneReqFromPendingList(laneHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransReqLanePendingDeinit();
-    
+
     ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     TransReqLanePendingDeinit();
@@ -271,7 +271,7 @@ HWTEST_F(TransLaneTest, TransLaneTest005, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     TransOnLaneRequestSuccess(invalidId, connInfo);
     connInfo->connInfo.p2p.protocol = 1;
@@ -299,8 +299,7 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     TransOnLaneRequestFail(invalidId, reason);
     connInfo->connInfo.p2p.protocol = 1;
     TransOnLaneRequestFail(laneHandle, reason);
@@ -574,7 +573,6 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneHandle = 1;
-
     LaneConnInfo connInfo = {
         .type = LANE_P2P,
         .connInfo.p2p.protocol = 1,

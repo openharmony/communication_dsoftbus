@@ -82,10 +82,7 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
             extra.challengeCode = challengeCodeStr.c_str();
         }
     }
-
-    extra.peerNetworkId = wifiDirectConnectInfo.remoteNetworkId;
-    auto localNetworkId = WifiDirectUtils::GetLocalNetworkId();
-    extra.localNetworkId = localNetworkId.c_str();
+    
     auto stateMapElement = DurationStatistic::GetInstance().GetStateTimeMapElement(requestId);
     uint64_t startTime = stateMapElement[TotalStart];
     uint64_t endTime = stateMapElement[TotalEnd];
@@ -95,6 +92,16 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
     }
     auto dfxInfo = wifiDirectConnectInfo.dfxInfo;
     extra.bootLinkType = dfxInfo.bootLinkType;
+    extra.peerNetworkId = wifiDirectConnectInfo.remoteNetworkId;
+    auto localNetworkId = WifiDirectUtils::GetLocalNetworkId();
+    extra.localNetworkId = localNetworkId.c_str();
+    extra.osType = WifiDirectUtils::GetOsType(wifiDirectConnectInfo.remoteNetworkId);
+    auto localDeviceType = WifiDirectUtils::GetDeviceType();
+    auto localDeviceTypeStr = std::to_string(localDeviceType);
+    extra.localDeviceType = localDeviceTypeStr.c_str();
+    auto remoteDeviceType = WifiDirectUtils::GetDeviceType(wifiDirectConnectInfo.remoteNetworkId);
+    auto remoteDeviceTypeStr = std::to_string(remoteDeviceType);
+    extra.remoteDeviceType = remoteDeviceTypeStr.c_str();
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 } // namespace OHOS::SoftBus

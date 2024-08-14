@@ -16,23 +16,21 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "lnn_auth_mock.h"
-#include "lnn_connection_fsm.h"
-#include "lnn_devicename_info.h"
-#include "lnn_net_builder.h"
-#include "lnn_service_mock.h"
 #include "lnn_net_ledger_mock.h"
-#include "message_handler.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "lnn_battery_info.c"
+#include "lnn_battery_info.h"
+#include "lnn_sync_info_mock.h"
 
 #define TEST_VALID_PEER_NETWORKID "12345678"
 #define TEST_VALID_UDID_LEN 32
 
 constexpr int32_t LEVEL = 10;
 constexpr char UDID1[] = "123456789AB";
+constexpr uint8_t MSG1[] = "{\"BatteryLeavel\":123,\"IsCharging\":true}";
+constexpr uint8_t MSG2[] = "{\"IsCharging\":true}";
+constexpr uint8_t MSG3[] = "{\"BatteryLeavel\":123}";
+constexpr char NETWORKID[] = "networkIdTest";
 
 namespace OHOS {
 using namespace testing;
@@ -48,12 +46,10 @@ public:
 
 void LNNBatteryInfoTest::SetUpTestCase()
 {
-    LooperInit();
 }
 
 void LNNBatteryInfoTest::TearDownTestCase()
 {
-    LooperDeinit();
 }
 
 void LNNBatteryInfoTest::SetUp()
@@ -98,10 +94,30 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnSyncInfoInterfaceMock> SyncInfoMock;
+    EXPECT_CALL(SyncInfoMock, LnnSendSyncInfoMsg).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncBatteryInfo(UDID1, LEVEL, true);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = LnnSyncBatteryInfo(UDID1, LEVEL, true);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: ON_RECEIVE_BATTERY_INFO_TEST_001
+* @tc.desc: test OnReceiveBatteryInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNBatteryInfoTest, ON_RECEIVE_BATTERY_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnSetDLBatteryInfo).WillOnce(Return(SOFTBUS_OK));
+    const char *networkId = NETWORKID;
+    OnReceiveBatteryInfo(LNN_INFO_TYPE_DEVICE_NAME, networkId, nullptr, 0);
+    OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, networkId, nullptr, 0);
+    OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, networkId, MSG1, 0);
+    OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, networkId, MSG2, 0);
+    OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, networkId, MSG3, 0);
 }
 } // namespace OHOS
 
