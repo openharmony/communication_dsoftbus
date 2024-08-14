@@ -1266,15 +1266,15 @@ static bool IsWifiConnectInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo
         return true;
     }
     if (newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort) {
-        LNN_LOGI(LNN_BUILDER, "peer auth port changed");
+        LNN_LOGI(LNN_BUILDER, "peer authPort changed");
         return true;
     }
     if (newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort) {
-        LNN_LOGI(LNN_BUILDER, "peer auth port changed");
+        LNN_LOGI(LNN_BUILDER, "peer proxyPort changed");
         return true;
     }
     if (newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
-        LNN_LOGI(LNN_BUILDER, "peer auth port changed");
+        LNN_LOGI(LNN_BUILDER, "peer sessionPort changed");
         return true;
     }
     return false;

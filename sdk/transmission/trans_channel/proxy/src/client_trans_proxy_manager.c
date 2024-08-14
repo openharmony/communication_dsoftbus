@@ -682,7 +682,7 @@ static int32_t ClientGetActualDataLen(const SliceHead *head, uint32_t *actualDat
     // The encrypted data length is longer than the actual data length
     maxDataLen += SLICE_LEN;
 
-    if (head->sliceNum > (maxDataLen / SLICE_LEN)) {
+    if ((head->sliceNum < 0) || ((uint32_t)head->sliceNum > (maxDataLen / SLICE_LEN))) {
         TRANS_LOGE(TRANS_SDK, "invalid sliceNum=%{public}d", head->sliceNum);
         return SOFTBUS_INVALID_DATA_HEAD;
     }

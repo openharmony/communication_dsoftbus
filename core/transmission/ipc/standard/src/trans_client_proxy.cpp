@@ -54,7 +54,10 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     const ChannelInfo *channel, int32_t pid)
 {
     if (pid == getpid()) {
-        ISessionListener object = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(pkgName);
+        ISessionListener object;
+        if (SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(pkgName, &object) != SOFTBUS_OK) {
+            return SOFTBUS_NOT_FIND;
+        }
         object.OnSessionOpened(channel->channelId, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
@@ -88,7 +91,10 @@ int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
         return SOFTBUS_INVALID_PARAM;
     }
     if (data->msgPid == getpid()) {
-        ISessionListener object = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName);
+        ISessionListener object;
+        if (SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName, &object) != SOFTBUS_OK) {
+            return SOFTBUS_NOT_FIND;
+        }
         object.OnSessionOpened(data->msgChannelId, errCode);
         return SOFTBUS_OK;
     }
@@ -124,7 +130,10 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
     if (data->msgPid == getpid()) {
-        ISessionListener object = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName);
+        ISessionListener object;
+        if (SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName, &object) != SOFTBUS_OK) {
+            return SOFTBUS_NOT_FIND;
+        }
         object.OnSessionClosed(data->msgChannelId);
         return SOFTBUS_OK;
     }
@@ -168,7 +177,10 @@ int32_t ClientIpcOnChannelMsgReceived(ChannelMsg *data, TransReceiveData *receiv
         return SOFTBUS_INVALID_PARAM;
     }
     if (data->msgPid == getpid()) {
-        ISessionListener object = SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName);
+        ISessionListener object;
+        if (SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName, &object) != SOFTBUS_OK) {
+            return SOFTBUS_NOT_FIND;
+        }
         object.OnBytesReceived(data->msgChannelId, receiveData->data, receiveData->dataLen);
         return SOFTBUS_OK;
     }

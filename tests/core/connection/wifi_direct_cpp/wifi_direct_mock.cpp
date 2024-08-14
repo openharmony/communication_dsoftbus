@@ -80,10 +80,10 @@ int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteStrInfo(id, key, info, len);
 }
 
-int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info)
+int32_t LnnGetRemoteBoolInfoIgnoreOnline(const char *networkId, InfoKey key, bool *info)
 {
     auto id = std::string(networkId);
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteBoolInfo(id, key, info);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteBoolInfoIgnoreOnline(id, key, info);
 }
 
 bool LnnGetOnlineStateById(const char *id, IdCategory type)
@@ -170,6 +170,11 @@ int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t
 int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->SoftBusBase64Encode(dst, dlen, olen, src, slen);
+}
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetOsTypeByNetworkId(networkId, osType);
 }
 
 WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info)
@@ -312,6 +317,21 @@ void WifiDirectInterfaceMock::InjectWifiDirectConnectCallbackMock(WifiDirectConn
 {
     callback.onConnectSuccess = OnConnectSuccessProxy;
     callback.onConnectFailure = OnConnectFailureProxy;
+}
+
+static void OnDisconnectSuccessProxy(uint32_t requestId)
+{
+    OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->OnDisconnectSuccess(requestId);
+}
+static void OnDisconnectFailureProxy(uint32_t requestId, int32_t reason)
+{
+    OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->OnDisconnectFailure(requestId, reason);
+}
+
+void WifiDirectInterfaceMock::InjectWifiDirectDisconnectCallbackMock(WifiDirectDisconnectCallback &callback)
+{
+    callback.onDisconnectSuccess = OnDisconnectSuccessProxy;
+    callback.onDisconnectFailure = OnDisconnectFailureProxy;
 }
 
 WifiErrorCode WifiDirectInterfaceMock::RegisterP2pConnectionChangedCallback(const P2pConnectionChangedCallback callback)

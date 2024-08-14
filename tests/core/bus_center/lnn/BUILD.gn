@@ -342,12 +342,11 @@ ohos_unittest("LNNNetBuilderMockTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/adapter/common/net/wifi/common/softbus_wifi_api_adapter_virtual.c",
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_deviceinfo_to_profile_virtual.c",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_kv_adapter_wrapper_virtual.cpp",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_link_finder_virtul.c",
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/src/auth_deviceprofile_virtual.cpp",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "net_builder/src/lnn_net_builder_deps_mock.cpp",
     "net_builder/src/lnn_net_builder_mock_test.cpp",
   ]
@@ -434,7 +433,6 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_sync_info_mock.cpp",
@@ -483,7 +481,6 @@ ohos_unittest("LNNConnectionFsmMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
@@ -514,28 +511,13 @@ ohos_unittest("LNNConnectionFsmMockTest") {
 ohos_unittest("LNNBatteryInfoTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
-    "net_builder/src/lnn_auth_mock.cpp",
     "net_builder/src/lnn_battery_info_test.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
-    "net_builder/src/lnn_service_mock.cpp",
+    "net_builder/src/lnn_sync_info_mock.cpp",
   ]
 
   include_dirs = lnn_mock_test_include_dirs
-  deps = lnn_mock_test_deps
+  deps = lnn_mock_test_deps_exclude_softbus_server
 
   if (is_standard_system) {
     external_deps = [
@@ -581,26 +563,16 @@ ohos_unittest("LNNSyncInfoItemTest") {
 ohos_unittest("LNNDeviceNameInfoTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
+    "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
-    "net_builder/src/lnn_auth_mock.cpp",
     "net_builder/src/lnn_devicename_info_test.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_service_mock.cpp",
+    "net_builder/src/lnn_sync_info_mock.cpp",
   ]
 
   include_dirs = lnn_mock_test_include_dirs
-  deps = lnn_mock_test_deps
+  deps = lnn_mock_test_deps_exclude_softbus_server
 
   if (is_standard_system) {
     external_deps = [
@@ -648,27 +620,14 @@ ohos_unittest("LNNNetworkInfoTest") {
 ohos_unittest("LNNNodeWeightTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
-    "net_builder/src/lnn_auth_mock.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_node_weight_test.cpp",
     "net_builder/src/lnn_service_mock.cpp",
+    "net_builder/src/lnn_sync_info_mock.cpp",
   ]
 
   include_dirs = lnn_mock_test_include_dirs
-  deps = lnn_mock_test_deps
+  deps = lnn_mock_test_deps_exclude_softbus_server
 
   if (is_standard_system) {
     external_deps = [
@@ -687,26 +646,15 @@ ohos_unittest("LNNNodeWeightTest") {
 ohos_unittest("LNNP2pInfoTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
-    "net_builder/src/lnn_auth_mock.cpp",
+    "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_p2p_info_test.cpp",
     "net_builder/src/lnn_service_mock.cpp",
+    "net_builder/src/lnn_sync_info_mock.cpp",
   ]
 
   include_dirs = lnn_mock_test_include_dirs
-  deps = lnn_mock_test_deps
+  deps = lnn_mock_test_deps_exclude_softbus_server
 
   if (is_standard_system) {
     external_deps = [
@@ -734,7 +682,6 @@ ohos_unittest("LNNSyncInfoManagerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
@@ -764,28 +711,16 @@ ohos_unittest("LNNSyncInfoManagerTest") {
 ohos_unittest("LNNTopoManagerTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
-    "net_builder/src/lnn_auth_mock.cpp",
+    "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_service_mock.cpp",
+    "net_builder/src/lnn_sync_info_mock.cpp",
     "net_builder/src/lnn_topo_manager_test.cpp",
   ]
 
   include_dirs = lnn_mock_test_include_dirs
   include_dirs += [ "$dsoftbus_root_path/core/authentication/include" ]
-  deps = lnn_mock_test_deps
+  deps = lnn_mock_test_deps_exclude_softbus_server
 
   if (is_standard_system) {
     external_deps = [
@@ -1678,6 +1613,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "//third_party/bounds_checking_function/include",
     "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
 
   deps = [
@@ -1957,6 +1893,80 @@ ohos_unittest("LNNDataCloudSyncMockTest") {
   }
 }
 
+ohos_unittest("LNNLaneLinkWifiDirectTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_wifi_direct.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_vap_info_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_ptk_info_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_wifi_direct_test.cpp",
+  ]
+
+  if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_p2p.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_p2p_virtual.c" ]
+  }
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -1972,6 +1982,7 @@ group("unittest") {
     ":LNNHuksUtilsTest",
     ":LNNIpNetworkImplMockTest",
     ":LNNLaneLinkTest",
+    ":LNNLaneLinkWifiDirectTest",
     ":LNNLaneListenerTest",
     ":LNNLaneMockTest",
     ":LNNLaneQueryTest",

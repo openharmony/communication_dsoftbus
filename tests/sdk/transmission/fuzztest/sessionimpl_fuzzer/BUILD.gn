@@ -30,8 +30,6 @@ ohos_fuzztest("SessionImplFuzzTest") {
     "../../../../../interfaces/kits/common",
     "../../../../../interfaces/inner_kits/transport",
     "../../../../../sdk/transmission/session/cpp/src",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
   ]
   cflags = [
     "-g",

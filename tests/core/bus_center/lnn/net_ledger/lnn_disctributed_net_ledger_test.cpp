@@ -601,9 +601,9 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_DEVICE_TYPEID_Test_001, TestSize.Level
     const char *networkId = "softBus";
     char bleMac = '0';
     uint32_t len = 0;
-    int32_t ret = DlGetDeviceTypeId(nullptr, nullptr, len);
+    int32_t ret = DlGetDeviceTypeId(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetNodeBleMac(nullptr, nullptr, len);
+    ret = DlGetNodeBleMac(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     (void)LnnUpdateNodeBleMac(nullptr, nullptr, len);
     (void)LnnUpdateNodeBleMac(networkId, &bleMac, len);
@@ -612,50 +612,50 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_DEVICE_TYPEID_Test_001, TestSize.Level
 HWTEST_F(LNNDisctributedLedgerTest, DL_GET_WIFICFG_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
-    int32_t ret = DlGetWifiCfg(nullptr, nullptr, len);
+    int32_t ret = DlGetWifiCfg(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetChanList5g(nullptr, nullptr, len);
+    ret = DlGetChanList5g(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetP2pRole(nullptr, nullptr, len);
+    ret = DlGetP2pRole(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetStateVersion(nullptr, nullptr, len);
+    ret = DlGetStateVersion(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetStaFrequency(nullptr, nullptr, len);
+    ret = DlGetStaFrequency(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     len = LNN_COMMON_LEN;
-    ret = DlGetStateVersion(nullptr, nullptr, len);
+    ret = DlGetStateVersion(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetStaFrequency(nullptr, nullptr, len);
+    ret = DlGetStaFrequency(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetNodeDataChangeFlag(nullptr, nullptr, len);
+    ret = DlGetNodeDataChangeFlag(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     len = DATA_CHANGE_FLAG_BUF_LEN;
-    ret = DlGetNodeDataChangeFlag(nullptr, nullptr, len);
+    ret = DlGetNodeDataChangeFlag(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetMasterWeight(nullptr, nullptr, len);
+    ret = DlGetMasterWeight(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetNetType(nullptr, nullptr, len);
+    ret = DlGetNetType(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetProxyPort(nullptr, nullptr, len);
+    ret = DlGetProxyPort(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetSessionPort(nullptr, nullptr, len);
+    ret = DlGetSessionPort(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetAuthPort(nullptr, nullptr, len);
+    ret = DlGetAuthPort(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_NODETTLV_NEGOFLAG_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
-    int32_t ret = DlGetNodeTlvNegoFlag(nullptr, nullptr, len);
+    int32_t ret = DlGetNodeTlvNegoFlag(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DlGetAccountHash(nullptr, nullptr, len);
+    ret = DlGetAccountHash(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     len = sizeof(bool);
-    ret = DlGetNodeTlvNegoFlag(nullptr, nullptr, len);
+    ret = DlGetNodeTlvNegoFlag(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     len = SHA_256_HASH_LEN;
-    ret = DlGetAccountHash(nullptr, nullptr, len);
+    ret = DlGetAccountHash(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     (void)DestroyCnnCodeKey(nullptr);
     (void)DeinitDistributedInfo(nullptr);
@@ -875,10 +875,10 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
     uint32_t len = 0;
-    int32_t ret = DlGetFeatureCap(networkId, nullptr, len);
+    int32_t ret = DlGetFeatureCap(networkId, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     len = LNN_COMMON_LEN_64;
-    ret = DlGetFeatureCap(networkId, nullptr, len);
+    ret = DlGetFeatureCap(networkId, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -912,39 +912,39 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLWIFIDIRECT_ADDR_Test_001, TestSize
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
-    int32_t ret = DlGetStaticCap(nullptr, nullptr, len);
+    int32_t ret = DlGetStaticCap(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     len = STATIC_CAP_LEN + 1;
-    ret = DlGetStaticCap(nullptr, nullptr, STATIC_CAP_LEN + 1);
+    ret = DlGetStaticCap(nullptr, true, nullptr, STATIC_CAP_LEN + 1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *networkId = "softbus";
-    ret = DlGetStaticCap(networkId, nullptr, STATIC_CAP_LEN + 1);
+    ret = DlGetStaticCap(networkId, true, nullptr, STATIC_CAP_LEN + 1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_LEN_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
-    int32_t ret = DlGetStaticCapLen(nullptr, nullptr, len);
+    int32_t ret = DlGetStaticCapLen(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     len = STATIC_CAP_LEN + 1;
-    ret = DlGetStaticCapLen(nullptr, nullptr, STATIC_CAP_LEN + 1);
+    ret = DlGetStaticCapLen(nullptr, true, nullptr, STATIC_CAP_LEN + 1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *networkId = "softbus";
-    ret = DlGetStaticCapLen(networkId, nullptr, STATIC_CAP_LEN + 1);
+    ret = DlGetStaticCapLen(networkId, true, nullptr, STATIC_CAP_LEN + 1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_REMOTE_PTK_Test_001, TestSize.Level1)
 {
     uint32_t len = 0;
-    int32_t ret = DlGetRemotePtk(nullptr, nullptr, len);
+    int32_t ret = DlGetRemotePtk(nullptr, true, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     len = STATIC_CAP_LEN + 1;
-    ret = DlGetRemotePtk(nullptr, nullptr, STATIC_CAP_LEN + 1);
+    ret = DlGetRemotePtk(nullptr, true, nullptr, STATIC_CAP_LEN + 1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *networkId = "softbus";
-    ret = DlGetRemotePtk(networkId, nullptr, STATIC_CAP_LEN + 1);
+    ret = DlGetRemotePtk(networkId, true, nullptr, STATIC_CAP_LEN + 1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 

@@ -42,6 +42,7 @@ group("unittest") {
     deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/trans_channel:unittest" ]
     deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/session:unittest" ]
     deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/spe:unittest" ]
+    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/manager:unittest" ]
   }
 }
 

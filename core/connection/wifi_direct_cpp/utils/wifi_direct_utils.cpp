@@ -213,7 +213,7 @@ bool WifiDirectUtils::IsRemoteSupportTlv(const std::string &remoteDeviceId)
 {
     bool result = false;
     auto networkId = UuidToNetworkId(remoteDeviceId);
-    auto ret = LnnGetRemoteBoolInfo(networkId.c_str(), BOOL_KEY_TLV_NEGOTIATION, &result);
+    auto ret = LnnGetRemoteBoolInfoIgnoreOnline(networkId.c_str(), BOOL_KEY_TLV_NEGOTIATION, &result);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, true, CONN_WIFI_DIRECT, "get tlv feature failed");
     return result;
 }
@@ -552,6 +552,33 @@ int32_t WifiDirectUtils::GetOsType(const std::string &remoteNetworkId)
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "get os type success, osType=%{public}d", osType);
     return osType;
+}
+
+int32_t WifiDirectUtils::GetOsType(const char *networkId)
+{
+    int32_t osType = OH_OS_TYPE;
+    auto ret = LnnGetOsTypeByNetworkId(networkId, &osType);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get os type failed");
+    CONN_LOGI(CONN_WIFI_DIRECT, "dfx remote os type %{public}d", osType);
+    return osType;
+}
+
+int32_t WifiDirectUtils::GetDeviceType(const char *networkId)
+{
+    int32_t deviceTypeId = 0;
+    auto ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &deviceTypeId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get remote device type failed");
+    CONN_LOGI(CONN_WIFI_DIRECT, "dfx remote device type %{public}d", deviceTypeId);
+    return deviceTypeId;
+}
+
+int32_t WifiDirectUtils::GetDeviceType()
+{
+    int32_t deviceTypeId = 0;
+    auto ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &deviceTypeId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local device type failed");
+    CONN_LOGI(CONN_WIFI_DIRECT, "dfx local device type %{public}d", deviceTypeId);
+    return deviceTypeId;
 }
 
 } // namespace OHOS::SoftBus
