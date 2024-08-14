@@ -15,10 +15,10 @@
 #include <securec.h>
 #include <gtest/gtest.h>
 
-#include "softbus_client_event_manager.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_client_event_manager.c"
 #include "softbus_client_frame_manager.h"
 #include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
 
 #define protected public
 #define private public
@@ -91,6 +91,22 @@ HWTEST_F(SoftbusClientEventManagerTest, EventClientInit002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EventClientInit003
+ * @tc.desc: EventClientInit, use the wrong parameter.
+ * @tc.desc: EventClientDeinit, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusClientEventManagerTest, EventClientInit003, TestSize.Level1)
+{
+    ASSERT_TRUE(nullptr == g_observerList);
+    g_observerList = CreateSoftBusList();
+    int ret = EventClientInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EventClientDeinit();
+}
+
+/**
  * @tc.name: RegisterEventCallback001
  * @tc.desc: RegisterEventCallback, use the wrong parameter.
  * @tc.desc: CLIENT_NotifyObserver, use the wrong parameter.
@@ -133,6 +149,10 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     CLIENT_NotifyObserver(event, data.get() + FRAME_HEADER_LEN, argLen);
+
+    event = SoftBusEvent::EVENT_BUTT;
+    CLIENT_NotifyObserver(event, data.get() + FRAME_HEADER_LEN, argLen);
+
     if (cb != nullptr) {
         SoftBusFree(cb);
     }
@@ -162,6 +182,39 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback002, TestSize.Level
 
     ret = RegisterEventCallback(event, cb, data.get());
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    unsigned int argLen = 2;
+    CLIENT_NotifyObserver(event, data.get() + FRAME_HEADER_LEN, argLen);
+}
+
+/**
+ * @tc.name: RegisterEventCallback003
+ * @tc.desc: RegisterEventCallback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback003, TestSize.Level1)
+{
+    EventCallback cb = SoftbusClientEventManagerTest::OnEventCallback;
+
+    enum SoftBusEvent event = EVENT_SERVER_RECOVERY;
+    const ssize_t len = 2;
+    std::unique_ptr<char[]> data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
+    ASSERT_TRUE(data != nullptr);
+
+    EventClientDeinit();
+    int ret = RegisterEventCallback(event, cb, data.get() + FRAME_HEADER_LEN);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = EventClientInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = RegisterEventCallback(event, cb, data.get());
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    g_observerList->cnt = MAX_OBSERVER_CNT;
+    ret = RegisterEventCallback(event, cb, data.get());
+    EXPECT_EQ(SOFTBUS_TRANS_OBSERVER_EXCEED_LIMIT, ret);
 }
 
 /**

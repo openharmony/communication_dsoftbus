@@ -135,6 +135,9 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, Test
     int ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
+    ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, data, 0);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
     ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND, ret);
 
@@ -160,6 +163,9 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, Te
     const char *data = "test";
 
     int ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, nullptr, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH);
@@ -189,6 +195,12 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendStreamTest001, Tes
     const StreamFrameInfo param = {0};
 
     int ret = ClientTransChannelSendStream(channelId, CHANNEL_TYPE_UDP, nullptr, &ext, &param);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransChannelSendStream(channelId, CHANNEL_TYPE_UDP, &data, nullptr, &param);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransChannelSendStream(channelId, CHANNEL_TYPE_UDP, &data, &ext, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransChannelSendStream(channelId, CHANNEL_TYPE_UDP, &data, &ext, &param);
