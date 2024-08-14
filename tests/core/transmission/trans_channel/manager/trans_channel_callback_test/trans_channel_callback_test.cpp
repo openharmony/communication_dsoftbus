@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,10 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
-#include "gtest/gtest.h"
-#include "session.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_app_info.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
 #include "trans_channel_callback.c"
-#include "trans_client_proxy.h"
-#include "trans_lane_manager.h"
-#include "trans_session_manager.h"
 
 using namespace testing::ext;
 namespace OHOS {

@@ -13,20 +13,12 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
-#include "gtest/gtest.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
-#include "softbus_json_utils.h"
-#include "session.h"
-#include "softbus_protocol_def.h"
-#include "softbus_trans_def.h"
-#include "trans_channel_common.h"
 #include "trans_channel_common.c"
-#include "trans_lane_manager.h"
 #include "trans_lane_manager.c"
-#include "trans_log.h"
 
 using namespace testing::ext;
 namespace OHOS {

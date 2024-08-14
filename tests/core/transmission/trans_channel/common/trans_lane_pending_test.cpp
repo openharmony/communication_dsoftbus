@@ -13,17 +13,10 @@
  * limitations under the License.
  */
 
-#include <securec.h>
-#include "cJSON.h"
-
 #include "gtest/gtest.h"
-#include "session.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
-#include "softbus_json_utils.h"
-#include "trans_channel_common.h"
+#include <securec.h>
+
 #include "trans_lane_pending_ctl.c"
-#include "trans_lane_pending_ctl.h"
 #include "trans_lane_pending_test_mock.h"
 
 using namespace testing;

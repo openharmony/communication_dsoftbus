@@ -17,10 +17,8 @@
 
 #include "gtest/gtest.h"
 #include "message_handler.h"
-#include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "trans_auth_negotiation.c"
-#include "trans_auth_negotiation.h"
 #include "trans_manager_mock.h"
 #include "trans_session_service.h"
 
