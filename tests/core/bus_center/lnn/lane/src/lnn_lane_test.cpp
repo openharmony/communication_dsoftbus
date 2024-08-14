@@ -3583,4 +3583,55 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_22, TestSize.Level1)
     ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+* @tc.name: LNN_LANE_23
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_23, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    LanePreferredLinkList linkList = {};
+    uint32_t listNum = 0;
+    LaneSelectParam selectParam = {};
+    EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(false));
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+
+    ret = SelectLane(nullptr, &selectParam, &linkList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_LANE_24
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_24, TestSize.Level1)
+{
+    LanePreferredLinkList recommendList = {};
+    LaneSelectParam selectParam = {};
+    int32_t ret = SelectExpectLanesByQos(nullptr, &selectParam, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_LANE_25
+* @tc.desc: SelectLaneRule
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_LANE_25, TestSize.Level1)
+{
+    LaneLinkType linkType = LANE_ETH;
+    int32_t ret = LaneCapCheck(NODE_NETWORK_ID, linkType);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

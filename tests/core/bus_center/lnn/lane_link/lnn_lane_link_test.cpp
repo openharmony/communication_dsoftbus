@@ -207,6 +207,21 @@ static struct WifiDirectManager g_manager3 = {
     .disconnectDevice = DisconnectDevice2,
 };
 
+static bool IsNegotiateChannelNeeded2(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
+{
+    (void)remoteNetworkId;
+    (void)linkType;
+    return true;
+}
+
+static struct WifiDirectManager g_manager5 = {
+    .isNegotiateChannelNeeded= IsNegotiateChannelNeeded2,
+};
+
+static struct WifiDirectManager g_manager6 = {
+    .isNegotiateChannelNeeded= IsNegotiateChannelNeeded,
+};
+
 /*
 * @tc.name: GET_WLAN_LINKED_FREQUENCY_TEST_001
 * @tc.desc: LnnQueryLaneResource test
@@ -1911,5 +1926,100 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_P2P_TEST_003, TestSize.Level1)
     SetCommonFunction(laneReqId, LANE_P2P, g_manager);
     ret = RemoveAuthSessionServer("192.168.1.1");
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/*
+* @tc.name: LNN_LANE_LINK_P2P_TEST_004
+* @tc.desc: LnnLaneLinkP2P test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_P2P_TEST_004, TestSize.Level1)
+{
+    LanePreferredLinkList recommendList = {};
+    LanePreferredLinkList request = {};
+    request.linkTypeNum = 1;
+    request.linkType[0] = LANE_HML;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
+    int32_t ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager6));
+    ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager6));
+    ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager5));
+    ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager5));
+    ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+}
+
+/*
+* @tc.name: LNN_LANE_LINK_P2P_TEST_005
+* @tc.desc: LnnLaneLinkP2P test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_P2P_TEST_005, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    LanePreferredLinkList recommendList = {};
+    LanePreferredLinkList request = {};
+    request.linkTypeNum = 1;
+    request.linkType[0] = LANE_P2P;
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager6));
+    int32_t ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager5));
+    ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager6));
+    ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager5));
+    ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+}
+
+/*
+* @tc.name: LNN_LANE_LINK_P2P_TEST_006
+* @tc.desc: LnnLaneLinkP2P test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_P2P_TEST_006, TestSize.Level1)
+{
+    LanePreferredLinkList recommendList = {};
+    LanePreferredLinkList request = {};
+    request.linkTypeNum = 1;
+    request.linkType[0] = LANE_ETH;
+
+    int32_t ret = SelectAuthLane(NODE_NETWORK_ID, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
 }
 } // namespace OHOS

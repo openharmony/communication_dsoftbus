@@ -1408,6 +1408,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_wifi_direct.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_select.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_vap_info_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_select_rule.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_ptk_info_virtual.c",
@@ -1425,6 +1426,7 @@ ohos_unittest("LNNLaneLinkTest") {
 
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
