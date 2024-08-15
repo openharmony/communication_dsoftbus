@@ -172,7 +172,6 @@ struct WifiDirectConnectInfo {
     enum IpAddrType ipAddrType;
 
     struct WifiDirectDfxInfo dfxInfo;
-    uint64_t timeoutInMs;
 };
 
 struct WifiDirectDisconnectInfo {
