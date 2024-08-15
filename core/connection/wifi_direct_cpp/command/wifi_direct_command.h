@@ -55,12 +55,10 @@ public:
         return duration.count() < validDuration;
     }
 
-protected:
-    std::chrono::time_point<std::chrono::steady_clock> startTime_;
-
 private:
     uint32_t id_ = 0;
     static inline std::atomic_uint32_t commandId_;
+    std::chrono::time_point<std::chrono::steady_clock> startTime_;
 };
 }
 #endif
