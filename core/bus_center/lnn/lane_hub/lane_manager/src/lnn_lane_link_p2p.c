@@ -1622,18 +1622,31 @@ static int32_t GetCurrentGuideType(uint32_t laneReqId, LaneLinkType linkType, Wd
     return SOFTBUS_OK;
 }
 
+static int32_t GetAuthConnInfoWithoutMeta(const LinkRequest *request, uint32_t laneReqId,
+    AuthConnInfo *connInfo, bool isMetaAuth)
+{
+    WdGuideType guideType = LANE_CHANNEL_BUTT;
+    int32_t ret = GetCurrentGuideType(laneReqId, request->linkType, &guideType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "get current guide channel info fail");
+        return ret;
+    }
+    if (guideType == LANE_ACTIVE_BR_NEGO || guideType == LANE_NEW_AUTH_NEGO) {
+        LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
+        ret = GetPreferAuthByType(request->peerNetworkId, AUTH_LINK_TYPE_BR, connInfo, isMetaAuth);
+    } else {
+        ret = GetPreferAuth(request->peerNetworkId, connInfo, isMetaAuth);
+    }
+    return ret;
+}
+
 static int32_t GetAuthConnInfo(const LinkRequest *request, uint32_t laneReqId, AuthConnInfo *connInfo, bool isMetaAuth)
 {
     int32_t ret = SOFTBUS_LANE_NOT_FOUND;
     if (isMetaAuth) {
         ret = GetPreferAuth(request->peerNetworkId, connInfo, isMetaAuth);
     } else {
-        WdGuideType guideType = LANE_CHANNEL_BUTT;
-        ret = GetCurrentGuideType(laneReqId, request->linkType, &guideType);
-        if ((ret == SOFTBUS_OK) && (guideType == LANE_ACTIVE_BR_NEGO || guideType == LANE_NEW_AUTH_NEGO)) {
-            LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
-            ret = GetPreferAuthByType(request->peerNetworkId, AUTH_LINK_TYPE_BR, connInfo, isMetaAuth);
-        }
+        ret = GetAuthConnInfoWithoutMeta(request, laneReqId, connInfo, isMetaAuth);
     }
     return ret;
 }
