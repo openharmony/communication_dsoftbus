@@ -359,6 +359,27 @@ static void LnnHandlerGetDeviceName(DeviceNameType type, const char *name)
     LnnNotifyLocalNetworkIdChanged();
 }
 
+static void UpdateLocalExtendDeviceName(void)
+{
+    if (LnnGetUnifiedDeviceName(unifiedName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK && strlen(unifiedName) != 0) {
+        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_NAME, unifiedName) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set unified name fail");
+        }
+    }
+    if (LnnGetUnifiedDefaultDeviceName(unifiedDefaultName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK &&
+        strlen(unifiedDefaultName) != 0) {
+        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_DEFAULT_NAME, unifiedDefaultName) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set default unified name fail");
+        }
+    }
+    if (LnnGetSettingNickName(deviceName, unifiedName, nickName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK &&
+        strlen(nickName) != 0) {
+        if (LnnSetLocalStrInfo(STRING_KEY_DEV_NICK_NAME, nickName) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set nick name fail");
+        }
+    }
+}
+
 static void UpdataLocalFromSetting(void *p)
 {
     (void)p;
@@ -387,23 +408,6 @@ static void UpdataLocalFromSetting(void *p)
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "UpdataLocalFromSetting set device name fail");
-    }
-    if (LnnGetUnifiedDeviceName(unifiedName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK && strlen(unifiedName) != 0) {
-        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_NAME, unifiedName) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set unified name fail");
-        }
-    }
-    if (LnnGetUnifiedDefaultDeviceName(unifiedDefaultName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK &&
-        strlen(unifiedDefaultName) != 0) {
-        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_DEFAULT_NAME, unifiedDefaultName) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set default unified name fail");
-        }
-    }
-    if (LnnGetSettingNickName(deviceName, unifiedName, nickName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK &&
-        strlen(nickName) != 0) {
-        if (LnnSetLocalStrInfo(STRING_KEY_DEV_NICK_NAME, nickName) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set nick name fail");
-        }
     }
     RegisterNameMonitor();
     g_isDevnameInited = true;
