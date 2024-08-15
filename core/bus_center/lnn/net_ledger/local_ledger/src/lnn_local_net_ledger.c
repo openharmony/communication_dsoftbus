@@ -1170,14 +1170,34 @@ static int32_t UpdateNickName(const void *name)
     return SOFTBUS_OK;
 }
 
-int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
+int32_t LnnUpdateLedgerByRestoreInfo(NodeInfo *restoreInfo)
 {
+    if (restoreInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "restoreInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *anonyDeviceName = NULL;
+    char *anonyMacAddr = NULL;
+    Anonymize(restoreInfo->deviceInfo.deviceName, &anonyDeviceName);
+    Anonymize(restoreInfo->connectInfo.macAddr, &anonyMacAddr);
+    LNN_LOGI(LNN_LEDGER, "update local ledger, stateVersion=%{public}d, deviceName=%{public}s, macAddr=%{public}s, "
+        "networkIdTimestamp=%{public}" PRId64, restoreInfo->stateVersion, anonyDeviceName, anonyMacAddr,
+        restoreInfo->networkIdTimestamp);
+    AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyMacAddr);
+
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
-    g_localNetLedger.localInfo.networkIdTimestamp = time;
-    LNN_LOGI(LNN_LEDGER, "update local networkId timeStamp=%{public}" PRId64, time);
+    (void)UpdateStateVersion((const void *)&restoreInfo->stateVersion);
+    if (restoreInfo->networkIdTimestamp != 0) {
+        g_localNetLedger.localInfo.networkIdTimestamp = restoreInfo->networkIdTimestamp;
+    }
+    if (LnnSetDeviceName(&g_localNetLedger.localInfo.deviceInfo, restoreInfo->deviceInfo.deviceName) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set device name fail");
+    }
+    LnnSetBtMac(&g_localNetLedger.localInfo, restoreInfo->connectInfo.macAddr);
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return SOFTBUS_OK;
 }
