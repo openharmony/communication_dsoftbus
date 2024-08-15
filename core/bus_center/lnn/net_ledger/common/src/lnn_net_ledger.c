@@ -751,19 +751,15 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "NetworkId", networkId);
     if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUdid failed");
-        return;
     }
     if (SoftbusDumpPrintUuid(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUuid failed");
-        return;
     }
     if (SoftbusDumpPrintNetCapacity(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetCapacity failed");
-        return;
     }
     if (SoftbusDumpPrintNetType(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetType failed");
-        return;
     }
     if (SoftbusDumpPrintDeviceLevel(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintDeviceLevel failed");
@@ -779,7 +775,6 @@ static void SoftbusDumpDeviceAddr(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintMac(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintMac failed");
-        return;
     }
     if (SoftbusDumpPrintIp(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintIp failed");
@@ -795,15 +790,12 @@ static void SoftbusDumpDeviceCipher(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintIrk(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintIrk failed");
-        return;
     }
     if (SoftbusDumpPrintBroadcastCipher(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintBroadcastCipher failed");
-        return;
     }
     if (SoftbusDumpPrintRemotePtk(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintRemotePtk failed");
-        return;
     }
     if (SoftbusDumpPrintLocalPtk(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintLocalPtk failed");
