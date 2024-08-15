@@ -50,6 +50,9 @@ private:
 
     struct TimeoutEvent { };
 
+    static int ErrorCodeToV1ProtocolCode(int reason);
+    static int ErrorCodeFromV1ProtocolCode(int reason);
+
     using ProcessorState = void (P2pV1Processor::*)();
     static std::string GetStateName(ProcessorState state);
     void SwitchState(ProcessorState state, int timeoutInMillis);
