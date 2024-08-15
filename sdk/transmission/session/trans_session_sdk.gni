@@ -39,7 +39,10 @@ if (defined(ohos_lite)) {
     "//third_party/cJSON",
     "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interfaces",
   ]
-  trans_session_sdk_src += [ "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_set_timer_virtual.c" ]
+  trans_session_sdk_src += [
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_set_timer_virtual.c",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_ipc_adapter_virtual.c",
+  ]
 } else {
   trans_session_sdk_inc = [
     "$dsoftbus_sdk_path/transmission/session/include",
@@ -55,6 +58,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_impl.cpp",
     "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_mock.cpp",
     "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_service_impl.cpp",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_ipc_adapter.cpp",
   ]
 
   if (defined(global_parts_info) &&
