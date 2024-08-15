@@ -56,11 +56,11 @@ public:
     void SetRetried(bool retried) { hasRetried_ = retried; }
     bool HasRetried() const { return hasRetried_; }
     void SetRetryReason(ConnectCommandRetryReason reason) { retryReason_ = reason; }
-    ConnectCommandRetryReason GetReTryReason() const { return retryReason_; }
+    ConnectCommandRetryReason GetRetryReason() const { return retryReason_; }
+
     void OnSuccess(const WifiDirectLink &link) const;
     void OnFailure(int32_t reason) const;
     bool IsSameCommand(const WifiDirectConnectInfo &info) const;
-    bool IsValid();
 
 protected:
     ConnectInfo info_;
@@ -70,8 +70,6 @@ protected:
     mutable std::string remoteDeviceId_;
     bool hasRetried_ = false;
     ConnectCommandRetryReason retryReason_ = ConnectCommandRetryReason::RETRY_FOR_NOTHING;
-private:
-    static constexpr uint64_t ABANDON_CONNECT_COMMAND_PERIOD = 500;
 };
 }
 #endif
