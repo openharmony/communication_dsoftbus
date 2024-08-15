@@ -159,7 +159,8 @@ LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode)
         conflictErrcode == SOFTBUS_CONN_ACTIVE_TYPE_STA_P2P_HML_225_CONFLICT ||
         conflictErrcode == SOFTBUS_CONN_ACTIVE_TYPE_STA_P2P_HML_255_CONFLICT ||
         conflictErrcode == SOFTBUS_CONN_ACTIVE_TYPE_STA_P2P_HML_525_CONFLICT ||
-        conflictErrcode == SOFTBUS_CONN_ACTIVE_TYPE_STA_P2P_HML_555_CONFLICT) {
+        conflictErrcode == SOFTBUS_CONN_ACTIVE_TYPE_STA_P2P_HML_555_CONFLICT ||
+        conflictErrcode == SOFTBUS_CONN_HML_P2P_DFS_CHANNEL_CONFLICT) {
         return CONFLICT_THREE_VAP;
     }
     if (conflictErrcode == SOFTBUS_CONN_ACTIVE_TYPE_AP_STA_CHIP_CONFLICT ||
