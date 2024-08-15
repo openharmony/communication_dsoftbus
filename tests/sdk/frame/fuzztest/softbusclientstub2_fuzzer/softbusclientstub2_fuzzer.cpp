@@ -76,7 +76,9 @@ public:
 
     void DoRemoteRequest(SoftBusFuncId code, OHOS::MessageParcel &data)
     {
-        if (code == CLIENT_ON_CHANNEL_OPENFAILED) {
+        if (code == CLIENT_ON_CHANNEL_OPENFAILED ||
+            code == CLIENT_ON_CHANNEL_CLOSED ||
+            code == CLIENT_ON_CHANNEL_MSGRECEIVED) {
             return;
         }
         OHOS::MessageParcel reply;
