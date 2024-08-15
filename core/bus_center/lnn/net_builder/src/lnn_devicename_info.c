@@ -379,7 +379,10 @@ static void UpdataLocalFromSetting(void *p)
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_BUILDER, "init UpdataLocalFromSetting fail");
             }
+            return;
         }
+        /* The database field may not be written. Subscribe monitor first. */
+        RegisterNameMonitor();
         return;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName) != SOFTBUS_OK) {
@@ -422,6 +425,7 @@ void UpdateDeviceName(void *p)
         return;
     }
     RegisterDeviceNameHandle();
+    g_tryGetDevnameNums = 0;
     UpdataLocalFromSetting(p);
 }
 
