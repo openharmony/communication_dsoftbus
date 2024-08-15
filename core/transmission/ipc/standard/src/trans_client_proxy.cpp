@@ -58,8 +58,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
         if (SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(pkgName, &object) != SOFTBUS_OK) {
             return SOFTBUS_NOT_FIND;
         }
-        object.OnSessionOpened(channel->channelId, SOFTBUS_OK);
-        return SOFTBUS_OK;
+        return object.OnSessionOpened(channel->channelId, SOFTBUS_OK);
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -95,8 +94,7 @@ int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
         if (SoftbusClientInfoManager::GetInstance().GetSoftbusInnerObject(data->msgPkgName, &object) != SOFTBUS_OK) {
             return SOFTBUS_NOT_FIND;
         }
-        object.OnSessionOpened(data->msgChannelId, errCode);
-        return SOFTBUS_OK;
+        return object.OnSessionOpened(data->msgChannelId, errCode);
     }
     sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
