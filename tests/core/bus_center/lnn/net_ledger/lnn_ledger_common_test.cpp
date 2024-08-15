@@ -454,7 +454,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
 /*
 * @tc.name: LOCAL_LEDGER_UPDATE_TEST001
 * @tc.desc: local ledger update test
-* @tc.type: FUN
+* @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_UPDATE_TEST001, TestSize.Level1)
@@ -481,7 +481,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_UPDATE_TEST001, TestSize.Level1)
 /*
 * @tc.name: LOCAL_LEDGER_UPDATE_TEST002
 * @tc.desc: local ledger update test
-* @tc.type: FUN
+* @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_UPDATE_TEST002, TestSize.Level1)
@@ -505,7 +505,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_UPDATE_TEST002, TestSize.Level1)
 /*
 * @tc.name: LOCAL_LEDGER_UPDATE_TEST003
 * @tc.desc: local ledger update test
-* @tc.type: FUN
+* @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_UPDATE_TEST003, TestSize.Level1)
