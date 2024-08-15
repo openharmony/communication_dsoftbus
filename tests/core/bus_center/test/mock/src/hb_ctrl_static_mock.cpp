@@ -166,5 +166,10 @@ bool LnnIsLocalSupportBurstFeature(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnIsLocalSupportBurstFeature();
 }
+
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
+{
+    return HeartBeatCtrlStaticInterface()->LnnNotifyAccountStateChangeEvent(state);
 }
-} // namespace OHOS
+}
+} // namespace OHOS

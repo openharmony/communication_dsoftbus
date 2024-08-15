@@ -505,6 +505,58 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001, TestSize.Level1
     int32_t result = 1;
     int64_t authId = 10;
     PerformAuthConnCallback(requestId, result, authId);
+    AuthConnCallback cb = {
+        .onConnOpened = OnConnOpenedTest,
+        .onConnOpenFailed = OnConnOpenFailedTest,
+    };
+    request.requestId = 1;
+    request.connInfo.type = AUTH_LINK_TYPE_BLE;
+    request.connCb = cb;
+    ret = AddAuthRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    ret = FindAndDelAuthRequestByConnInfo(requestId, &connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    PerformAuthConnCallback(request.requestId, SOFTBUS_OK, authId);
+    PerformAuthConnCallback(request.requestId, SOFTBUS_NOT_FIND, authId);
+    request.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    ret = AddAuthRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    DelAuthRequest(request.requestId);
+}
+
+/*
+ * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_TEST_002
+ * @tc.desc: update auth request conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_002, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    AuthRequest request;
+    int64_t authId = 10;
+    uint32_t requestId = 1;
+    AuthConnCallback connCb = {
+        .onConnOpened = nullptr,
+        .onConnOpenFailed = nullptr,
+    };
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    request.requestId = requestId;
+    request.connInfo.type = AUTH_LINK_TYPE_BLE;
+    request.connCb = connCb;
+    int32_t ret = AddAuthRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    PerformAuthConnCallback(requestId, SOFTBUS_OK, authId);
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    request.requestId = 2;
+    ret = FindAndDelAuthRequestByConnInfo(request.requestId, &connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    ret = AddAuthRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    DelAuthRequest(requestId);
+    DelAuthRequest(request.requestId);
 }
 
 /*

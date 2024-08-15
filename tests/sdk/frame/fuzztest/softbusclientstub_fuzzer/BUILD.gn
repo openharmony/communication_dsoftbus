@@ -74,7 +74,6 @@ ohos_static_library("softbus_client_static") {
   include_dirs = common_client_inc
   deps = common_client_deps
   external_deps = common_client_ex_deps
-  all_dependent_configs = [ ":dsoftbus_sdk_interface" ]
   public_configs = [ ":dsoftbus_sdk_interface" ]
   defines += TRANS_SDK_DEFINES
 
