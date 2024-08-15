@@ -50,7 +50,8 @@
 #define SESSION_NAME_DBD "distributeddata-default"
 #define SESSION_NAME_DSL "device.security.level"
 #define SESSION_NAME_DSL2_RE "com.*security.devicesec"
-#define MESH_MAGIC_NUMBER 0x5A5A5A5A
+#define DB_MAGIC_BW 0x5A5A5A5A   // p2preuse, wifi and br link
+#define MESH_MAGIC_BW 0xA5A5A5A5 // wifi and br link
 
 typedef struct {
     ListNode node;
@@ -838,6 +839,19 @@ static bool IsShareSession(const char *sessionName)
     return true;
 }
 
+static bool IsDbdSession(const char *sessionName)
+{
+    if (sessionName == NULL) {
+        return false;
+    }
+
+    if (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0) {
+        return true;
+    }
+
+    return false;
+}
+
 static bool IsDslSession(const char *sessionName)
 {
     if (sessionName == NULL) {
@@ -862,17 +876,7 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
         TRANS_LOGE(TRANS_SVC, "failed to get auth capacity");
         return false;
     }
-    TRANS_LOGD(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
-    if (authCapacity == 0 &&
-        (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 || IsDslSession(sessionName))) {
-        return true;
-    }
-    return false;
-}
-
-static bool IsMeshSync(const char *sessionName)
-{
-    if (IsDslSession(sessionName)) {
+    if (authCapacity == 0 && IsDbdSession(sessionName)) {
         return true;
     }
     return false;
@@ -968,10 +972,14 @@ static int32_t GetAllocInfoBySessionParam(const SessionParam *param, LaneAllocIn
     allocInfo->transType = transType;
     allocInfo->acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
     TransGetQosInfo(param, &allocInfo->qosRequire, &(allocInfo->extendInfo));
-
-    if (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName)) {
-        allocInfo->qosRequire.minBW = MESH_MAGIC_NUMBER;
-        TRANS_LOGI(TRANS_SVC, "adapt legacy os device and mesh, isQosLane=%{public}d", param->isQosLane);
+    if (IsDslSession(param->sessionName)) {
+        // support wifi and br link
+        allocInfo->qosRequire.minBW = MESH_MAGIC_BW;
+        TRANS_LOGI(TRANS_SVC, "adapt mesh, minBw=%{public}u", allocInfo->qosRequire.minBW);
+    } else if (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName)) {
+        // support p2preuse, wifi and br link
+        allocInfo->qosRequire.minBW = DB_MAGIC_BW;
+        TRANS_LOGI(TRANS_SVC, "adapt legacy os device and dbd session, minBw=%{public}u", allocInfo->qosRequire.minBW);
     }
 
     NodeInfo info;
@@ -1037,9 +1045,9 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     TransformSessionPreferredToLanePreferred(param, &(requestOption->requestInfo.trans.expectedLink),
         &requestOption->requestInfo.trans);
     if (!(param->isQosLane) &&
-        (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName))) {
+        (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName) || IsDslSession(param->sessionName))) {
         ModuleLaneAdapter(&(requestOption->requestInfo.trans.expectedLink));
-        TRANS_LOGI(TRANS_SVC, "adapt legacy os device and mesh, isQosLane=%{public}d", param->isQosLane);
+        TRANS_LOGI(TRANS_SVC, "adapt expected link, wifi or br");
     }
     requestOption->requestInfo.trans.actionAddr = param->actionId;
     requestOption->requestInfo.trans.isSupportIpv6 = param->attr->dataType != TYPE_STREAM  && param->actionId > 0;
