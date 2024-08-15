@@ -61,7 +61,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include/",
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
-    deps = [ "dsoftbus_root_path/adapter:softbus_adapter" ]
+    deps = [ "../../../adapter:softbus_adapter" ]
     external_deps = [
       "bounds_checking_function:libsec_static",
       "hilog:libhilog",
@@ -160,7 +160,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include/",
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
-    deps = [ "dsoftbus_root_path/adapter:softbus_adapter" ]
+    deps = [ "../../../adapter:softbus_adapter" ]
     external_deps = [
       "bounds_checking_function:libsec_static",
       "googletest:gtest_main",
@@ -261,7 +261,6 @@ if (defined(ohos_lite)) {
     ]
     deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
     external_deps = [
-      "c_utils:utils",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
