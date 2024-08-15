@@ -83,6 +83,7 @@ processorv1_ut_sources = [
   "$current_path/channel/proxy_negotiate_channel.h",
   "$current_path/p2p_v1_processor_test.cpp",
   "$wifi_direct_path/event/wifi_direct_event_dispatcher.cpp",
+  "$wifi_direct_path/processor/null_processor.cpp",
   "$wifi_direct_path/processor/p2p_v1_processor.cpp",
   "$wifi_direct_path/protocol/json_protocol.cpp",
   "$wifi_direct_path/protocol/tlv_protocol.cpp",
