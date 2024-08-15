@@ -359,7 +359,7 @@ static void LnnHandlerGetDeviceName(DeviceNameType type, const char *name)
     LnnNotifyLocalNetworkIdChanged();
 }
 
-static void UpdateLocalExtendDeviceName(void)
+static void UpdateLocalExtendDeviceName(char *unifiedName, char *unifiedDefaultName, char *nickName)
 {
     if (LnnGetUnifiedDeviceName(unifiedName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK && strlen(unifiedName) != 0) {
         if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_NAME, unifiedName) != SOFTBUS_OK) {
@@ -409,6 +409,7 @@ static void UpdataLocalFromSetting(void *p)
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "UpdataLocalFromSetting set device name fail");
     }
+    UpdateLocalExtendDeviceName(unifiedName, unifiedDefaultName, nickName);
     RegisterNameMonitor();
     g_isDevnameInited = true;
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
