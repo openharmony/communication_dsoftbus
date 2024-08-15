@@ -292,6 +292,55 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
   ]
 }
 
+ohos_unittest("TransTcpDirectP2pMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/mock/trans_tcp_direct_p2p_test_mock.cpp",
+    "unittest/trans_tcp_direct_p2p_mock_test.cpp",
+  ]
+
+  include_dirs = [
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/src",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/tcp_direct/unittest/mock",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "unittest/common/",
+    "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("TransTcpDirectP2pTest") {
   module_out_path = module_output_path
   sources = [ "unittest/trans_tcp_direct_p2p_test.cpp" ]
@@ -621,6 +670,7 @@ group("unittest") {
     ":TransTcpDirectMessageAppendTest",
     ":TransTcpDirectMessageStaticTest",
     ":TransTcpDirectMessageTest",
+    ":TransTcpDirectP2pMockTest",
     ":TransTcpDirectP2pTest",
     ":TransTcpDirectWifiTest",
   ]

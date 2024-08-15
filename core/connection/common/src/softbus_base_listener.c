@@ -602,8 +602,11 @@ static bool IsValidTriggerType(TriggerType trigger)
 bool IsListenerNodeExist(ListenerModule module)
 {
     SoftbusListenerNode *node = GetListenerNode(module);
-    bool exist = (node != NULL);
-    ReturnListenerNode(&node);
+    bool exist = false;
+    if (node != NULL) {
+        exist = true;
+        ReturnListenerNode(&node);
+    }
     return exist;
 }
 

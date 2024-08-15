@@ -670,24 +670,18 @@ static int32_t SetConnIdAndAddr(int connId, int serverId, const SoftBusBtAddr *b
     }
     if (!isExist) {
         target = (ServerConnection *)SoftBusCalloc(sizeof(ServerConnection));
+        if (target == NULL) {
+            CONN_LOGE(CONN_BLE, "calloc serverConnection failed");
+            (void)SoftBusMutexUnlock(&g_softBusGattsManager.lock);
+            return SOFTBUS_MALLOC_ERR;
+        }
+        ListInit(&target->node);
+        ListAdd(&g_softBusGattsManager.connections, &target->node);
     }
-    if (target == NULL) {
-        CONN_LOGE(CONN_BLE, "calloc serverConnection failed");
-        (void)SoftBusMutexUnlock(&g_softBusGattsManager.lock);
-        return SOFTBUS_MALLOC_ERR;
-    }
-   
     target->connId = connId;
     target->notifyConnected = false;
     target->handle = -1;
-    if (memcpy_s(&target->btAddr, sizeof(SoftBusBtAddr), btAddr, sizeof(SoftBusBtAddr)) != EOK) {
-        CONN_LOGE(CONN_BLE, "memcpy failed");
-        SoftBusFree(target);
-        (void)SoftBusMutexUnlock(&g_softBusGattsManager.lock);
-        return SOFTBUS_MEM_ERR;
-    }
-    ListInit(&target->node);
-    ListAdd(&g_softBusGattsManager.connections, &target->node);
+    (void)memcpy_s(&target->btAddr, sizeof(SoftBusBtAddr), btAddr, sizeof(SoftBusBtAddr));
     (void)SoftBusMutexUnlock(&g_softBusGattsManager.lock);
     return SOFTBUS_OK;
 }
