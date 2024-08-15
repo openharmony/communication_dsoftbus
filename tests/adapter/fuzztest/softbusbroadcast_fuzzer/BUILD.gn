@@ -38,7 +38,6 @@ ohos_fuzztest("SoftBusBroadcastFuzzTest") {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
     "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
-    "//foundation/communication/bluetooth/interfaces/inner_api/include",
   ]
 
   deps = [
@@ -46,7 +45,10 @@ ohos_fuzztest("SoftBusBroadcastFuzzTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "bluetooth:btframework",
+    "hilog:libhilog",
+  ]
 
   cflags = [
     "-g",

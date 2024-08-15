@@ -26,14 +26,13 @@ ohos_fuzztest("DiscoveryServiceFuzzTest") {
   fuzz_config_file =
       "$dsoftbus_root_path/tests/sdk/discovery/fuzztest/discoveryservice_fuzzer"
   include_dirs = [
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/inner_communication",
-    "../../../../../interfaces/kits/common",
-    "../../../../../interfaces/kits/discovery",
-    "../../../../../sdk/discovery/include",
-    "../../../../../sdk/discovery/manager/include",
-    "//commonlibrary/c_utils/base/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/inner_communication",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/sdk/discovery/include",
+    "$dsoftbus_root_path/sdk/discovery/manager/include",
   ]
   cflags = [
     "-g",

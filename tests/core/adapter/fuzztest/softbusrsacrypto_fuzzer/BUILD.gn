@@ -42,11 +42,10 @@ ohos_fuzztest("SoftBusRsaCryptoFuzzTest") {
   ]
 
   if (is_standard_system) {
-    deps += [ "//third_party/openssl:libcrypto_shared" ]
     external_deps = [
-      "c_utils:utils",
       "hilog:libhilog",
       "huks:libhukssdk",
+      "openssl:libcrypto_shared",
     ]
   } else {
     external_deps = [
