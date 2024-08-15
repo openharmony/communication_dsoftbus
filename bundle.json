@@ -83,7 +83,8 @@
         "cJSON",
         "mbedtls",
         "libcoap",
-        "zlib"
+        "zlib",
+        "libnl"
       ],
       "third_party": [
         "cJSON",
@@ -92,7 +93,8 @@
         "openssl",
         "bounds_checking_function",
         "sqlite",
-        "zlib"
+        "zlib",
+        "libnl"
       ]
     },
     "build": {
