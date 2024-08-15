@@ -75,6 +75,8 @@ constexpr uint32_t LOCAL_CAPACITY = 3;
 constexpr int32_t MASTER_WEIGHT = 10;
 constexpr int32_t P2P_ROLE = 1;
 constexpr int32_t STATIC_LEN = 10;
+constexpr int64_t TEST_NETWORKID_TIMESTAMP = 123456;
+constexpr int32_t TEST_STATE_VERSION = 100;
 using namespace testing;
 class LNNNetLedgerCommonTest : public testing::Test {
 public:
@@ -447,5 +449,81 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
     EXPECT_TRUE(LnnIsMasterNode() == false);
     LnnDeinitLocalLedger();
     LnnDeinitLocalLedger();
+}
+
+/*
+* @tc.name: LOCAL_LEDGER_UPDATE_TEST001
+* @tc.desc: local ledger update test
+* @tc.type: FUN
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_UPDATE_TEST001, TestSize.Level1)
+{
+    int32_t ret = LnnUpdateLedgerByRestoreInfo(NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info.stateVersion = TEST_STATE_VERSION;
+    ret = LnnUpdateLedgerByRestoreInfo(&info);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    ret = LnnInitLocalLedger();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    info.stateVersion = TEST_STATE_VERSION;
+    ret = LnnUpdateLedgerByRestoreInfo(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    int32_t stateVersion;
+    ret = LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion);
+    EXPECT_EQ(TEST_STATE_VERSION, stateVersion);
+}
+
+/*
+* @tc.name: LOCAL_LEDGER_UPDATE_TEST002
+* @tc.desc: local ledger update test
+* @tc.type: FUN
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_UPDATE_TEST002, TestSize.Level1)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info.networkIdTimestamp = TEST_NETWORKID_TIMESTAMP;
+    int32_t ret = LnnUpdateLedgerByRestoreInfo(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    int64_t timestamp = 0;
+    ret = LnnGetLocalNum64Info(NUM_KEY_NETWORK_ID_TIMESTAMP, &timestamp);
+    EXPECT_EQ(TEST_NETWORKID_TIMESTAMP, timestamp);
+
+    info.networkIdTimestamp = 0;
+    ret = LnnUpdateLedgerByRestoreInfo(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnGetLocalNum64Info(NUM_KEY_NETWORK_ID_TIMESTAMP, &timestamp);
+    EXPECT_EQ(TEST_NETWORKID_TIMESTAMP, timestamp);
+}
+
+/*
+* @tc.name: LOCAL_LEDGER_UPDATE_TEST003
+* @tc.desc: local ledger update test
+* @tc.type: FUN
+* @tc.require:
+*/
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_UPDATE_TEST003, TestSize.Level1)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)strncpy_s(info.connectInfo.macAddr, BT_MAC_LEN, LOCAL_BT_MAC, strlen(LOCAL_BT_MAC));
+    (void)strncpy_s(info.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, NODE_DEVICE_NAME, strlen(NODE_DEVICE_NAME));
+    int32_t ret = LnnUpdateLedgerByRestoreInfo(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, DEVICE_NAME_BUF_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_TRUE(strcmp(localDevName, NODE_DEVICE_NAME) == 0);
+    char localBtMac[BT_MAC_LEN];
+    ret = LnnGetLocalStrInfo(STRING_KEY_BT_MAC, localBtMac, BT_MAC_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_TRUE(strcmp(localBtMac, LOCAL_BT_MAC) == 0);
 }
 } // namespace OHOS

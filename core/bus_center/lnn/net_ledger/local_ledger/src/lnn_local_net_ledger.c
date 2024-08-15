@@ -1172,12 +1172,16 @@ static int32_t UpdateNickName(const void *name)
 
 int32_t LnnUpdateLedgerByRestoreInfo(NodeInfo *restoreInfo)
 {
+    if (restoreInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "restoreInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *anonyDeviceName = NULL;
     char *anonyMacAddr = NULL;
     Anonymize(restoreInfo->deviceInfo.deviceName, &anonyDeviceName);
     Anonymize(restoreInfo->connectInfo.macAddr, &anonyMacAddr);
     LNN_LOGI(LNN_LEDGER, "update local ledger, stateVersion=%{public}d, deviceName=%{public}s, macAddr=%{public}s, "
-        "networkIdTimestamp=%{public}, " PRId64, restoreInfo->stateVersion, anonyDeviceName, anonyMacAddr,
+        "networkIdTimestamp=%{public}" PRId64, restoreInfo->stateVersion, anonyDeviceName, anonyMacAddr,
         restoreInfo->networkIdTimestamp);
     AnonymizeFree(anonyDeviceName);
     AnonymizeFree(anonyMacAddr);
@@ -1196,7 +1200,6 @@ int32_t LnnUpdateLedgerByRestoreInfo(NodeInfo *restoreInfo)
     LnnSetBtMac(&g_localNetLedger.localInfo, restoreInfo->connectInfo.macAddr);
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return SOFTBUS_OK;
-
 }
 
 static int32_t UpdateLocalNetworkId(const void *id)
