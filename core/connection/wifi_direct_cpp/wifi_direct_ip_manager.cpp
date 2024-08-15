@@ -14,7 +14,6 @@
  */
 #include "wifi_direct_ip_manager.h"
 #include <arpa/inet.h>
-#include <thread>
 #include "securec.h"
 #include "conn_log.h"
 #include "net_conn_client.h"
