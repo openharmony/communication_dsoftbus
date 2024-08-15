@@ -143,19 +143,14 @@ static void ProcessLocalDeviceInfo(void)
         info.stateVersion++;
         LnnSaveLocalDeviceInfo(&info);
     }
-    LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
-    if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "set state version fail");
+    if (LnnUpdateLedgerByRestoreInfo(&info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update local ledger by restore info fail");
     }
     if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set networkId fail");
     }
     LnnNotifyNetworkIdChangeEvent(info.networkId);
     LnnNotifyLocalNetworkIdChanged();
-    if (info.networkIdTimestamp != 0) {
-        LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
-        LNN_LOGD(LNN_LEDGER, "update networkIdTimestamp=%" PRId64, info.networkIdTimestamp);
-    }
 }
 
 void RestoreLocalDeviceInfo(void)
