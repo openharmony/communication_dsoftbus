@@ -28,7 +28,6 @@ ohos_fuzztest("SetNodeDataChangeFlagFuzzTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/sdk/common/include",
-    "//commonlibrary/c_utils/base/include",
   ]
   cflags = [
     "-g",
