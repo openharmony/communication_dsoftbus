@@ -322,9 +322,12 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     }
     char *anonyNetworkId = NULL;
     Anonymize(info->networkId, &anonyNetworkId);
+    char *anonyDeviceName = NULL;
+    Anonymize(info->deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_EVENT, "notify node. deviceName=%{public}s, isOnline=%{public}s, networkId=%{public}s",
-        info->deviceName, (isOnline == true) ? "online" : "offline", anonyNetworkId);
+        anonyDeviceName, (isOnline == true) ? "online" : "offline", anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
+    AnonymizeFree(anonyDeviceName);
     SetDefaultQdisc();
     (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
@@ -370,7 +373,10 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
         return;
     }
     if (type == TYPE_DEVICE_NAME) {
-        LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s", info->deviceName);
+        char *anonyDeviceName = NULL;
+        Anonymize(info->deviceName, &anonyDeviceName);
+        LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s", anonyDeviceName);
+        AnonymizeFree(anonyDeviceName);
     }
     (void)PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
 }
