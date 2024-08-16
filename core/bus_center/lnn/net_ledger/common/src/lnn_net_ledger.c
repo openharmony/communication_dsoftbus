@@ -803,7 +803,10 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "param is null");
         return;
     }
-    SOFTBUS_DPRINTF(fd, "DeviceName->%s\n", nodeInfo->deviceName);
+    char *anonyDeviceName = NULL;
+    Anonymize(nodeInfo->deviceName, &anonyDeviceName);
+    SOFTBUS_DPRINTF(fd, "DeviceName->%s\n", anonyDeviceName);
+    AnonymizeFree(anonyDeviceName);
     SoftbusDumpPrintAccountId(fd, nodeInfo);
     SoftbusDumpDeviceInfo(fd, nodeInfo);
     SoftbusDumpDeviceAddr(fd, nodeInfo);
