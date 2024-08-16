@@ -223,6 +223,8 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
         ConnShutdownSocket(fd);
         return SOFTBUS_SOCKET_BIND_ERR;
     }
+
+    BindToInterface(option->socketOption.addr, domain, fd, (char *)(option->socketOption.ifName), IF_NAME_SIZE);
     CONN_LOGI(CONN_COMMON, "server listen tcp socket, fd=%{public}d", fd);
     return fd;
 }
@@ -272,8 +274,7 @@ static int32_t SocketConnect(int32_t fd, int32_t domain, const ConnectOption *op
 
 static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool isNonBlock)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON,
-        "invalid param, option is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid param, null option");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_TCP || option->type == CONNECT_P2P ||
         option->type == CONNECT_P2P_REUSE || option->type == CONNECT_HML, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid param, unsupport type=%{public}d", option->type);
@@ -311,6 +312,8 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
         ConnShutdownSocket(fd);
         return ret;
     }
+
+    BindToInterface(myIp, domain, fd, (char *)(option->socketOption.ifName), IF_NAME_SIZE);
     ret = SocketConnect(fd, domain, option);
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
