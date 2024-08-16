@@ -45,10 +45,10 @@ ohos_fuzztest("SoftBusBroadcastFuzzTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
-  external_deps = [
-    "bluetooth:btframework",
-    "hilog:libhilog",
-  ]
+  external_deps = [ "hilog:libhilog" ]
+  if (support_bluetooth) {
+    external_deps += [ "bluetooth:btframework" ]
+  }
 
   cflags = [
     "-g",
