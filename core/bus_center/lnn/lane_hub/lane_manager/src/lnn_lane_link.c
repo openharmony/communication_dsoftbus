@@ -392,6 +392,41 @@ static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t lane
     return SOFTBUS_OK;
 }
 
+static void AddNetworkResourceInner(const LaneLinkInfo *linkInfo, uint64_t laneId)
+{
+    if (linkInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    if (linkInfo->type != LANE_BR && linkInfo->type != LANE_BLE && linkInfo->type != LANE_P2P &&
+        linkInfo->type != LANE_HML) {
+        return;
+    }
+
+    NetworkResource *networkResource = (NetworkResource *)SoftBusCalloc(sizeof(NetworkResource));
+    if (networkResource == NULL) {
+        LNN_LOGE(LNN_LANE, "malloc network resource fail");
+        return;
+    }
+    LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkResource->localUdid, NETWORK_ID_BUF_LEN);
+    networkResource->laneId = laneId;
+    networkResource->laneLinkType = linkInfo->type;
+    char *anonyLocalUdid = NULL;
+    char *anonyRemoteUdid = NULL;
+    Anonymize(networkResource->localUdid, &anonyLocalUdid);
+    Anonymize(linkInfo->peerUdid, &anonyRemoteUdid);
+    if (anonyLocalUdid == NULL || strcpy_s(networkResource->localUdid, NETWORK_ID_BUF_LEN, anonyLocalUdid) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy localUdid fail");
+    }
+    if (anonyRemoteUdid == NULL || strcpy_s(networkResource->peerUdid, NETWORK_ID_BUF_LEN, anonyRemoteUdid) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy peerUdid fail");
+    }
+    AddNetworkResource(networkResource);
+    SoftBusFree(networkResource);
+    AnonymizeFree(anonyLocalUdid);
+    AnonymizeFree(anonyRemoteUdid);
+}
+
 static int32_t UpdateExistLaneResource(LaneResource *resourceItem, bool isServerSide)
 {
     if (isServerSide) {
@@ -433,6 +468,9 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     if (addResult != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "create laneResource fail, result=%{public}d", addResult);
         return addResult;
+    }
+    if (!isServerSide) {
+        AddNetworkResourceInner(linkInfo, laneId);
     }
     if (linkInfo->type == LANE_HML && IsPowerControlEnabled()) {
         DetectEnableWifiDirectApply();
