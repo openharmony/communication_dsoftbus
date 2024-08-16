@@ -267,6 +267,16 @@ void InnerLink::SetCustomPort(int32_t value)
     Set(InnerLinKey::CUSTOM_PORT, value);
 }
 
+bool InnerLink::GetNewPtkFrame() const
+{
+    return Get(InnerLinKey::NEW_PTK_FRAME, false);
+}
+
+void InnerLink::SetNewPtkFrame(bool value)
+{
+    Set(InnerLinKey::NEW_PTK_FRAME, value);
+}
+
 void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4)
 {
     link.linkId = LinkManager::GetInstance().AllocateLinkId();
