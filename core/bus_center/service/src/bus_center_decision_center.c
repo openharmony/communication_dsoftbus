@@ -198,7 +198,7 @@ int32_t InitDecisionCenter(void)
     if (g_exceptionConnMgr.connections == NULL) {
         LNN_LOGE(LNN_INIT, "creat exception conn mgr list failed");
         g_exceptionConnMgr.initFlag = false;
-        return SOFTBUS_ERR;
+        return SOFTBUS_CREATE_LIST_ERR;
     }
     g_exceptionConnMgr.initFlag = true;
     LNN_LOGD(LNN_INIT, "init ok");

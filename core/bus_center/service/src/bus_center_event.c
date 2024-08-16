@@ -703,7 +703,7 @@ int32_t LnnInitBusCenterEvent(void)
     SoftBusLooper *looper = CreateNewLooper("Notify_Lp");
     if (looper == NULL) {
         LNN_LOGE(LNN_EVENT, "create notify looper fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOOPER_ERR;
     }
     g_notifyHandler.looper = looper;
     g_notifyHandler.HandleMessage = HandleNotifyMessage;

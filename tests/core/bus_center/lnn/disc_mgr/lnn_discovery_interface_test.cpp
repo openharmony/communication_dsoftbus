@@ -155,14 +155,14 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Lev
 
     EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
     EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     isInnerRequest = true;
     EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
     EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -222,14 +222,14 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Leve
 
     EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     isInnerRequest = true;
     EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -281,7 +281,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level
     EXPECT_TRUE(ret == SOFTBUS_OK);
     g_discoveryImpl[0].StartDiscoveryImpl = LnnCoapTest;
     ret = LnnStartDiscovery();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
     g_discoveryImpl[0].StartDiscoveryImpl = LnnCoapFuncTest;
     ret = LnnStartDiscovery();
     EXPECT_TRUE(ret == SOFTBUS_OK);
