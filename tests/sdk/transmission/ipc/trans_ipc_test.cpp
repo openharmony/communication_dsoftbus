@@ -46,6 +46,7 @@ static const int32_t PID = 0;
 static const char *g_sessionName = "ohos.distributedschedule.dms.test";
 static const char *g_peerSessionName = "ohos.distributedschedule.dms.test";
 static const char *g_peerDeviceId = "1000";
+static const char *g_peerNetworkId = "123456789";
 static const char *g_pkgName = "com.test.trans.session";
 static const char *g_addr = "192.168.8.1";
 static const uint16_t PORT = 10;
@@ -632,6 +633,29 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ServerIpcCloseChannelWithStatisticsTest001
+ * @tc.desc: ServerIpcCloseChannelWithStatistics, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelWithStatisticsTest001, TestSize.Level0)
+{
+    int32_t channelId = 0;
+    int32_t laneId = 0;
+    const char *dataInfo = "dataInfo";
+    uint32_t length = strlen(dataInfo);
+
+    int32_t ret = ServerIpcCloseChannelWithStatistics(-1,  laneId, (void *)dataInfo, length);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ServerIpcCloseChannelWithStatistics(channelId,  -1, (void *)dataInfo, length);
+    EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
+
+    ret = ServerIpcCloseChannelWithStatistics(channelId,  laneId, (void *)dataInfo, length);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
  * @tc.name: ServerIpcSendMessageTest001
  * @tc.desc: ServerIpcSendMessage, use the wrong parameter.
  * @tc.type: FUNC
@@ -767,5 +791,34 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRemovePermissionTest001, TestSize.Level0
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
 
     TransClientDeinit();
+}
+
+/**
+ * @tc.name: ServerIpcEvaluateQosTest001
+ * @tc.desc: SendMessage, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:I5HQGA
+ */
+HWTEST_F(TransIpcStandardTest, ServerIpcEvaluateQosTest001, TestSize.Level0)
+{
+    TransDataType type = DATA_TYPE_MESSAGE;
+    uint32_t qosCount = QOS_TYPE_BUTT;
+    QosTV *qos = reinterpret_cast<QosTV *>(SoftBusCalloc(sizeof(QosTV)));
+    ASSERT_TRUE(qos != nullptr);
+
+    int32_t ret = ServerIpcEvaluateQos(nullptr, type, qos, qosCount);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ServerIpcEvaluateQos(g_peerNetworkId, DATA_TYPE_BUTT, qos, qosCount);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ServerIpcEvaluateQos(g_peerNetworkId, type, qos, 100);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ServerIpcEvaluateQos(g_peerNetworkId, type, qos, qosCount);
+    EXPECT_EQ(SOFTBUS_NETWORK_NODE_OFFLINE, ret);
+    SoftBusFree(qos);
+    qos = nullptr;
+    ASSERT_TRUE(qos == nullptr);
 }
 }
