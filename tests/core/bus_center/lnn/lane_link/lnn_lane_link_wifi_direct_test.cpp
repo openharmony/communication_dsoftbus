@@ -29,6 +29,7 @@ using namespace testing::ext;
 using namespace testing;
 
 constexpr char NODE_NETWORK_ID[] = "123456789";
+constexpr char UDID_HASH_STR[] = "1122334455667788";
 constexpr uint64_t DEFAULT_LINK_LATENCY = 30000;
 
 int32_t g_laneLinkResult = SOFTBUS_INVALID_PARAM;
@@ -169,38 +170,27 @@ static struct WifiDirectManager g_manager = {
 };
 
 /*
-* @tc.name: HandleWifiDirectConflict_001
-* @tc.desc: test HandleWifiDirectConflict
+* @tc.name: HandleForceDownWifiDirect_001
+* @tc.desc: test HandleForceDownWifiDirect
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneLinkWifiDirectTest, HandleWifiDirectConflict_001, TestSize.Level1)
+HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownWifiDirect_001, TestSize.Level1)
 {
-    LinkRequest request;
-    (void)memset_s(&request, sizeof(LinkRequest), 0, sizeof(LinkRequest));
-    EXPECT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
-    request.linkType = LANE_HML;
-    request.triggerLinkTime = SoftBusGetSysTimeMs();
-    request.availableLinkTime = DEFAULT_LINK_LATENCY;
-    request.actionAddr = 123;
-    uint32_t laneReqId = 21;
-
-    NiceMock<LaneDepsInterfaceMock> linkMock;
+    uint32_t p2pReqId = 1;
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
-        .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
-    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    EXPECT_CALL(laneLinkMock, GetConflictTypeWithErrcode).WillRepeatedly(Return(CONFLICT_THREE_VAP));
-    EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
-    g_connectDeviceTimes = 0;
-    int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 500ms for looper completion.
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
-    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
-    LnnDestroyP2p();
+    EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId).WillOnce(Return(SOFTBUS_NOT_FIND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneLinkMock, RemoveConflictInfoTimelinessMsg).WillRepeatedly(Return());
+    EXPECT_CALL(laneLinkMock, DelLinkConflictInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = HandleForceDownWifiDirect(nullptr, CONFLICT_BUTT, p2pReqId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = HandleForceDownWifiDirect(NODE_NETWORK_ID, CONFLICT_BUTT, p2pReqId);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+
+    ret = HandleForceDownWifiDirect(NODE_NETWORK_ID, CONFLICT_BUTT, p2pReqId);
+    EXPECT_EQ(SOFTBUS_LANE_NOT_FOUND, ret);
 }
 
 /*
@@ -231,7 +221,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_001, TestSize.Level1)
     LinkConflictInfo conflictItem = {};
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
-    EXPECT_NE(devId, nullptr);
+    ASSERT_TRUE(devId != nullptr);
     EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
@@ -243,7 +233,6 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_001, TestSize.Level1)
     g_connectDeviceTimes = 0;
 
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
@@ -279,7 +268,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_002, TestSize.Level1)
     LinkConflictInfo conflictItem = {};
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
-    EXPECT_NE(devId, nullptr);
+    ASSERT_TRUE(devId != nullptr);
     EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
@@ -291,7 +280,6 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_002, TestSize.Level1)
     g_connectDeviceTimes = 0;
 
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
@@ -329,7 +317,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_003, TestSize.Level1)
     LinkConflictInfo conflictItem = {};
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
-    EXPECT_NE(devId, nullptr);
+    ASSERT_TRUE(devId != nullptr);
     EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
@@ -341,7 +329,6 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_003, TestSize.Level1)
     g_connectDeviceTimes = 0;
 
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(SOFTBUS_LANE_BUILD_LINK_FAIL, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
@@ -379,7 +366,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_004, TestSize.Level1)
     LinkConflictInfo conflictItem = {};
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
-    EXPECT_NE(devId, nullptr);
+    ASSERT_TRUE(devId != nullptr);
     EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
@@ -396,7 +383,6 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_004, TestSize.Level1)
     g_isNeedNegotiateChannel = true;
 
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
@@ -433,7 +419,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_005, TestSize.Level1)
     LinkConflictInfo conflictItem = {};
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
-    EXPECT_NE(devId, nullptr);
+    ASSERT_TRUE(devId != nullptr);
     EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
@@ -450,7 +436,6 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_005, TestSize.Level1)
     g_isNeedNegotiateChannel = true;
 
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
@@ -486,12 +471,96 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, RecycleP2pLinkedReq_001, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
 
     int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 500ms for looper completion.
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     RecycleP2pLinkedReqByLinkType(NODE_NETWORK_ID, LANE_P2P);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
     g_manager.connectDevice = ConnectDeviceForForceDown;
+}
+
+/*
+* @tc.name: HandleForceDownWifiDirectTrans_001
+* @tc.desc: test HandleForceDownWifiDirectTrans
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownWifiDirectTrans_001, TestSize.Level1)
+{
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId).WillOnce(Return(SOFTBUS_NOT_FIND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneLinkMock, RemoveConflictInfoTimelinessMsg).WillRepeatedly(Return());
+    EXPECT_CALL(laneLinkMock, DelLinkConflictInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = HandleForceDownWifiDirectTrans(nullptr, CONFLICT_BUTT);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = HandleForceDownWifiDirectTrans(UDID_HASH_STR, CONFLICT_BUTT);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+
+    ret = HandleForceDownWifiDirectTrans(UDID_HASH_STR, CONFLICT_BUTT);
+    EXPECT_EQ(SOFTBUS_LANE_NOT_FOUND, ret);
+}
+
+/*
+* @tc.name: HandleForceDownWifiDirectTrans_001
+* @tc.desc: test WifiDirectForceDownWithoutAuth success
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownWifiDirectTrans_002, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    LinkConflictInfo conflictItem = {};
+    conflictItem.devIdCnt = 1;
+    char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
+    ASSERT_TRUE(devId != nullptr);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    conflictItem.devIdList = devId;
+    EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_LANE_NOT_FOUND));
+    EXPECT_CALL(laneLinkMock, RemoveConflictInfoTimelinessMsg).WillRepeatedly(Return());
+    EXPECT_CALL(laneLinkMock, DelLinkConflictInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
+    g_isNeedNegotiateChannel = false;
+
+    int32_t ret = HandleForceDownWifiDirectTrans(UDID_HASH_STR, CONFLICT_THREE_VAP);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: HandleForceDownWifiDirectTrans_001
+* @tc.desc: test WifiDirectForceDownWithoutAuth fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownWifiDirectTrans_003, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    g_manager.forceDisconnectDevice = ForceDisconnectDeviceFail;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    LinkConflictInfo conflictItem = {};
+    conflictItem.devIdCnt = 1;
+    char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
+    ASSERT_TRUE(devId != nullptr);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    conflictItem.devIdList = devId;
+    EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_LANE_NOT_FOUND));
+    EXPECT_CALL(laneLinkMock, RemoveConflictInfoTimelinessMsg).WillRepeatedly(Return());
+    EXPECT_CALL(laneLinkMock, DelLinkConflictInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
+    g_isNeedNegotiateChannel = false;
+
+    int32_t ret = HandleForceDownWifiDirectTrans(UDID_HASH_STR, CONFLICT_THREE_VAP);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    g_manager.forceDisconnectDevice = ForceDisconnectDeviceSucc;
 }
 } // namespace OHOS
