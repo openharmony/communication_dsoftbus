@@ -57,8 +57,6 @@ bus_center_unittest_dirs = [
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
   "$dsoftbus_root_path/sdk/frame/standard/include",
-  "//commonlibrary/c_utils/base/include",
-  "//third_party/cJSON",
   "unittest/common/",
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/core/frame/standard/client_manager/include",
@@ -81,8 +79,6 @@ bus_center_unittest_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
   "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   "$dsoftbus_root_path/core/frame:softbus_server",
-  "//third_party/googletest:gmock",
-  "//third_party/googletest:gtest_main",
 ]
 
 lnn_mock_test_include_dirs = [
@@ -111,8 +107,6 @@ lnn_mock_test_include_dirs = [
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
-  "//commonlibrary/c_utils/base/include",
-  "//third_party/cJSON",
   "unittest/common/",
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -140,8 +134,6 @@ lnn_mock_test_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
   "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
   "$dsoftbus_root_path/core/frame:softbus_server",
-  "//third_party/googletest:gmock",
-  "//third_party/googletest:gtest_main",
 ]
 
 lnn_mock_test_deps_exclude_softbus_server = [
@@ -149,8 +141,6 @@ lnn_mock_test_deps_exclude_softbus_server = [
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
   "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-  "//third_party/googletest:gmock",
-  "//third_party/googletest:gtest_main",
 ]
 
 ohos_unittest("LaneTest") {
@@ -161,13 +151,19 @@ ohos_unittest("LaneTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -185,13 +181,19 @@ ohos_unittest("NetLedgerTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -209,13 +211,19 @@ ohos_unittest("NetBuilderTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -233,13 +241,19 @@ ohos_unittest("LNNHuksUtilsTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -261,13 +275,19 @@ ohos_unittest("LedgerLaneHubTest") {
   ]
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -301,8 +321,6 @@ ohos_unittest("LNNNetBuilderTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -320,19 +338,23 @@ ohos_unittest("LNNNetBuilderTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -379,8 +401,6 @@ ohos_unittest("LNNNetBuilderMockTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -405,19 +425,23 @@ ohos_unittest("LNNNetBuilderMockTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -452,19 +476,23 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -496,13 +524,19 @@ ohos_unittest("LNNConnectionFsmMockTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -521,13 +555,19 @@ ohos_unittest("LNNBatteryInfoTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -548,13 +588,19 @@ ohos_unittest("LNNSyncInfoItemTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -576,13 +622,19 @@ ohos_unittest("LNNDeviceNameInfoTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -605,13 +657,19 @@ ohos_unittest("LNNNetworkInfoTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -631,13 +689,19 @@ ohos_unittest("LNNNodeWeightTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -658,13 +722,19 @@ ohos_unittest("LNNP2pInfoTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -696,13 +766,19 @@ ohos_unittest("LNNSyncInfoManagerTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -724,13 +800,19 @@ ohos_unittest("LNNTopoManagerTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -767,7 +849,6 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
@@ -790,19 +871,21 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -840,7 +923,6 @@ ohos_unittest("LNNNetworkManagerMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
@@ -864,19 +946,21 @@ ohos_unittest("LNNNetworkManagerMockTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -909,7 +993,6 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
@@ -934,19 +1017,21 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -995,8 +1080,6 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -1016,19 +1099,23 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1063,8 +1150,6 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -1080,8 +1165,6 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
   if (dsoftbus_feature_lnn_net) {
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c" ]
@@ -1091,13 +1174,19 @@ ohos_unittest("LNNNetLedgerCommonTest") {
   }
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1135,8 +1224,6 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -1152,18 +1239,22 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1201,8 +1292,6 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -1218,8 +1307,6 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
   if (dsoftbus_feature_lnn_net) {
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c" ]
@@ -1229,13 +1316,19 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
   }
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1306,10 +1399,7 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
-    "//commonlibrary/c_utils/base/include",
     "//foundation/communication/wifi/wifi/interfaces/kits/c",
-    "//foundation/communication/wifi/wifi/frameworks/native/include",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
@@ -1330,20 +1420,26 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
+      "wifi:wifi_sdk",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
+      "wifi:wifi_sdk",
     ]
   }
 }
@@ -1375,7 +1471,6 @@ ohos_unittest("LNNLaneQueryTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//third_party/cJSON",
     "unittest/common/",
   ]
 
@@ -1384,18 +1479,21 @@ ohos_unittest("LNNLaneQueryTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1464,19 +1562,21 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1533,10 +1633,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
-    "//commonlibrary/c_utils/base/include",
     "//foundation/communication/wifi/wifi/interfaces/kits/c",
-    "//foundation/communication/wifi/wifi/frameworks/native/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
@@ -1545,20 +1642,26 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
+      "wifi:wifi_sdk",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
+      "wifi:wifi_sdk",
     ]
   }
 }
@@ -1610,10 +1713,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
-    "//base/security/device_auth/interfaces/inner_api",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-    "//third_party/bounds_checking_function/include",
-    "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
@@ -1622,20 +1722,27 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
+      "huks:libhukssdk",
     ]
   } else {
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
+      "huks:libhukssdk",
     ]
   }
 }
@@ -1683,19 +1790,21 @@ ohos_unittest("LNNLaneListenerTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1741,8 +1850,6 @@ if (!defined(ohos_lite) && enhanced_test) {
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
-      "//commonlibrary/c_utils/base/include",
-      "//third_party/cJSON",
       "unittest/common/",
       "$dsoftbus_root_path/core/connection/manager",
       "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -1762,19 +1869,23 @@ if (!defined(ohos_lite) && enhanced_test) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "//third_party/googletest:gmock",
-      "//third_party/googletest:gtest_main",
     ]
 
     if (is_standard_system) {
       external_deps = [
+        "cJSON:cjson",
         "c_utils:utils",
         "device_auth:deviceauth_sdk",
+        "googletest:gmock",
+        "googletest:gtest_main",
         "hilog:libhilog",
       ]
     } else {
       external_deps = [
+        "cJSON:cjson",
         "c_utils:utils",
+        "googletest:gmock",
+        "googletest:gtest_main",
         "hilog:libhilog",
       ]
     }
@@ -1805,8 +1916,6 @@ ohos_unittest("LNNDataCloudSyncTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
@@ -1822,19 +1931,23 @@ ohos_unittest("LNNDataCloudSyncTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1851,7 +1964,6 @@ ohos_unittest("LNNDataCloudSyncMockTest") {
 
   include_dirs = [
     "$dsoftbus_root_path/core/authentication/interface",
-    "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -1875,21 +1987,25 @@ ohos_unittest("LNNDataCloudSyncMockTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
     cflags = [ "-Wno-error" ]
     cflags_cc = cflags
   } else {
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
@@ -1951,19 +2067,21 @@ ohos_unittest("LNNLaneLinkWifiDirectTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }
