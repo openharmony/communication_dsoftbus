@@ -48,6 +48,8 @@ enum class TestContextKey {
 
     SWITCH_INJECT_REMOTE_INNER_LINK,
     SWITCH_INJECT_LOCAL_INNER_LINK,
+
+    INTERFACE_ROLE,
 };
 
 namespace OHOS::SoftBus {
