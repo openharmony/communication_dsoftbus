@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +95,7 @@ void DiscClientProxy::OnPublishSuccess(int publishId)
     }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option) == 0,
+    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option) == SOFTBUS_OK,
         DISC_CONTROL, "send request failed");
 }
 
