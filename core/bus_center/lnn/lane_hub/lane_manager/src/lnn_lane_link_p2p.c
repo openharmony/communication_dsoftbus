@@ -2205,6 +2205,14 @@ static void GuideChannelSelect(SoftBusMessage *msg)
 
 void RecycleP2pLinkedReqByLinkType(const char *peerNetworkId, LaneLinkType linkType)
 {
+    if (peerNetworkId == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    if (g_p2pLinkedList == NULL) {
+        LNN_LOGE(LNN_LANE, "p2p not init");
+        return;
+    }
     if (LinkLock() != 0) {
         LNN_LOGE(LNN_LANE, "lock fail");
         return;
