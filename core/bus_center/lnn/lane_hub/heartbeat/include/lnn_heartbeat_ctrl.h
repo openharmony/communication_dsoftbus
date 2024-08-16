@@ -46,6 +46,7 @@ int32_t LnnTriggerDataLevelHeartbeat(void);
 int32_t LnnTriggerCloudSyncHeartbeat(void);
 void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnUnregDataLevelChangeCb(void);
+bool IsHeartbeatEnable(void);
 
 #ifdef __cplusplus
 }
