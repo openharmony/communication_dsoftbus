@@ -182,7 +182,7 @@ int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply)
     uint32_t infoTypeLen;
     ReadUint32(req, &infoTypeLen);
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
-        LNN_LOGE(LNN_STATE, "read infoTypeLen failed, infoTypeLen=%{pubilc}u", infoTypeLen);
+        LNN_LOGE(LNN_STATE, "read infoTypeLen failed, infoTypeLen=%{public}u", infoTypeLen);
         return SOFTBUS_INVALID_PARAM;
     }
     nodeInfo = SoftBusCalloc(infoTypeLen);
@@ -620,7 +620,7 @@ int32_t ServerGetAllMetaNodeInfo(IpcIo *req, IpcIo *reply)
         return SOFTBUS_INVALID_PARAM;
     }
     if ((uint32_t)infoNum > MAX_META_NODE_NUM) {
-        LNN_LOGE(LNN_STATE, "inivalid param, infoNum=%{pubilc}d, maxNum=%{pubilc}d", infoNum, MAX_META_NODE_NUM);
+        LNN_LOGE(LNN_STATE, "inivalid param, infoNum=%{public}d, maxNum=%{public}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_ERR;
     }
     MetaNodeInfo infos[MAX_META_NODE_NUM];
