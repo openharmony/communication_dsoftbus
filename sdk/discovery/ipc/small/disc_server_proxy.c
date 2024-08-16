@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,13 +70,9 @@ void DiscServerProxyDeInit(void)
 int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 {
     DISC_LOGI(DISC_CONTROL, "publish service ipc client push.");
-    if (pkgName == NULL || info == NULL) {
-        DISC_LOGE(DISC_SDK, "Invalid param:null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_serverProxy == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(pkgName != NULL && info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
+        "Invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_serverProxy != NULL, SOFTBUS_NO_INIT, DISC_CONTROL, "g_serverProxy is null");
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
@@ -86,6 +82,7 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
         DISC_LOGE(DISC_SDK, "Write pkgName failed");
         return SOFTBUS_IPC_ERR;
     }
+
     DiscSerializer serializer = {
         .dataLen = info->dataLen,
         .freq = info->freq,
@@ -107,6 +104,7 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
         DISC_LOGE(DISC_SDK, "Write capability failed");
         return SOFTBUS_IPC_ERR;
     }
+
     if (info->dataLen != 0) {
         ret = WriteString(&request, (const char *)(info->capabilityData));
         if (!ret) {
@@ -126,13 +124,9 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 int ServerIpcUnPublishService(const char *pkgName, int publishId)
 {
     DISC_LOGI(DISC_CONTROL, "unpublish service ipc client push.");
-    if (pkgName == NULL) {
-        DISC_LOGE(DISC_SDK, "Invalid param:null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_serverProxy == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(pkgName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
+        "Invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_serverProxy != NULL, SOFTBUS_NO_INIT, DISC_CONTROL, "g_serverProxy is null");
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
@@ -160,13 +154,10 @@ int ServerIpcUnPublishService(const char *pkgName, int publishId)
 int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
 {
     DISC_LOGI(DISC_CONTROL, "start discovery ipc client push.");
-    if (pkgName == NULL || info == NULL) {
-        DISC_LOGE(DISC_SDK, "Invalid param:null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_serverProxy == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
+
+    DISC_CHECK_AND_RETURN_RET_LOGE(pkgName != NULL && info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
+        "Invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_serverProxy != NULL, SOFTBUS_NO_INIT, DISC_CONTROL, "g_serverProxy is null");
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
@@ -217,13 +208,9 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
 int ServerIpcStopDiscovery(const char *pkgName, int subscribeId)
 {
     DISC_LOGI(DISC_SDK, "stop discovery ipc client push.");
-    if (pkgName == NULL) {
-        DISC_LOGE(DISC_SDK, "Invalid param:null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_serverProxy == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(pkgName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
+        "Invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_serverProxy != NULL, SOFTBUS_NO_INIT, DISC_CONTROL, "g_serverProxy is null");
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
