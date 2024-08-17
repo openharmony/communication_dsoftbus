@@ -102,7 +102,7 @@ static void InitHbSpecificConditionState(void)
     }
 }
 
-static bool IsHeartbeatEnable(void)
+bool IsHeartbeatEnable(void)
 {
     if ((g_hbConditionState.lockState == SOFTBUS_SCREEN_LOCK_UNKNOWN) && IsActiveOsAccountUnlocked()) {
         g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
