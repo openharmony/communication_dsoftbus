@@ -28,17 +28,14 @@ ohos_unittest("SoftbusJsonUtilsTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
-    "//third_party/cJSON",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
 
   external_deps = [
-    "c_utils:utils",
+    "cJSON:cjson",
+    "googletest:gmock",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]

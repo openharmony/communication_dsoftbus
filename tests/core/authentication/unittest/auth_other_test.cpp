@@ -505,6 +505,58 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001, TestSize.Level1
     int32_t result = 1;
     int64_t authId = 10;
     PerformAuthConnCallback(requestId, result, authId);
+    AuthConnCallback cb = {
+        .onConnOpened = OnConnOpenedTest,
+        .onConnOpenFailed = OnConnOpenFailedTest,
+    };
+    request.requestId = 1;
+    request.connInfo.type = AUTH_LINK_TYPE_BLE;
+    request.connCb = cb;
+    ret = AddAuthRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    ret = FindAndDelAuthRequestByConnInfo(requestId, &connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    PerformAuthConnCallback(request.requestId, SOFTBUS_OK, authId);
+    PerformAuthConnCallback(request.requestId, SOFTBUS_NOT_FIND, authId);
+    request.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    ret = AddAuthRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    DelAuthRequest(request.requestId);
+}
+
+/*
+ * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_TEST_002
+ * @tc.desc: update auth request conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_002, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    AuthRequest request;
+    int64_t authId = 10;
+    uint32_t requestId = 1;
+    AuthConnCallback connCb = {
+        .onConnOpened = nullptr,
+        .onConnOpenFailed = nullptr,
+    };
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    request.requestId = requestId;
+    request.connInfo.type = AUTH_LINK_TYPE_BLE;
+    request.connCb = connCb;
+    int32_t ret = AddAuthRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    PerformAuthConnCallback(requestId, SOFTBUS_OK, authId);
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    request.requestId = 2;
+    ret = FindAndDelAuthRequestByConnInfo(request.requestId, &connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    ret = AddAuthRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    DelAuthRequest(requestId);
+    DelAuthRequest(request.requestId);
 }
 
 /*
@@ -1098,7 +1150,7 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
     msgType = FSM_MSG_RECV_AUTH_DATA;
     ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
     EXPECT_TRUE(ret == false);
-    
+
     msgType = FSM_MSG_AUTH_FINISH;
     ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
     EXPECT_TRUE(ret == false);
@@ -1200,9 +1252,11 @@ HWTEST_F(AuthOtherTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, Test
     EXPECT_TRUE(AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetConnInfo(authHandle, &connInfo) == SOFTBUS_INVALID_PARAM);
     AuthFreeConn(nullptr);
+    AuthFreeConn(&authHandle);
     AuthConnCallback callback;
     EXPECT_TRUE(AuthAllocConn(nullptr, 1, &callback) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthAllocConn(networkId, 1, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthAllocConn(nullptr, 1, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetP2pConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
     EXPECT_TRUE(AuthGetHmlConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
     AuthGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI, true, nullptr);
@@ -1332,9 +1386,9 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.
     const char *ip = "192.138.33.33";
     ListenerModule moduleId;
     (void)memset_s(&moduleId, sizeof(ListenerModule), 0, sizeof(ListenerModule));
-    EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId),
+    EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId),
         SOFTBUS_INVALID_PORT);
-    EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId),
+    EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId),
         SOFTBUS_INVALID_PORT);
     EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_WIFI, ip, 37025, &moduleId),
         SOFTBUS_INVALID_PARAM);

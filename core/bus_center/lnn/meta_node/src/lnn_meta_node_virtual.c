@@ -38,3 +38,8 @@ void LnnDeinitMetaNodeExtLedger(void)
     return;
 }
 
+void ClearMetaNodeRequestByPid(const char *pkgName, int32_t pid)
+{
+    (void)pkgName;
+    (void)pid;
+}

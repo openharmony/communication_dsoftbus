@@ -47,6 +47,11 @@ public:
     virtual int BleStopScan(int scannerId) = 0;
     virtual int BleStartAdvEx(int *advId, const StartAdvRawData rawData, BleAdvParams advParam) = 0;
     virtual int BleStopAdv(int advId) = 0;
+    virtual int GetAdvHandle(int32_t btAdvId, int32_t *bcHandle) = 0;
+    virtual int EnableSyncDataToLpDevice() = 0;
+    virtual int DisableSyncDataToLpDevice() = 0;
+    virtual int SetLpDeviceAdvParam(
+        int32_t duration, int32_t maxExtAdvEvents, int32_t window, int32_t interval, int32_t bcHandle) = 0;
 
     // GATT Client相关
     virtual int BleGattcRegister(BtUuid appUuid) = 0;
@@ -105,6 +110,11 @@ public:
     MOCK_METHOD(int, BleStopScan, (int scannerId), (override));
     MOCK_METHOD(int, BleStartAdvEx, (int *advId, const StartAdvRawData rawData, BleAdvParams advParam), (override));
     MOCK_METHOD(int, BleStopAdv, (int advId), (override));
+    MOCK_METHOD(int, GetAdvHandle, (int32_t btAdvId, int32_t *bcHandle), (override));
+    MOCK_METHOD(int, EnableSyncDataToLpDevice, (), (override));
+    MOCK_METHOD(int, DisableSyncDataToLpDevice, (), (override));
+    MOCK_METHOD(int, SetLpDeviceAdvParam,
+        (int32_t duration, int32_t maxExtAdvEvents, int32_t window, int32_t interval, int32_t bcHandle), (override));
 
     MOCK_METHOD(int, BleGattcRegister, (BtUuid appUuid), (override));
     MOCK_METHOD(int, BleGattcConnect,

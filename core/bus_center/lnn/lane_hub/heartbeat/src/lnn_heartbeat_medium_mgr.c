@@ -680,12 +680,6 @@ static int32_t SoftBusNetNodeResult(
         anonyUdid, device->addr[0].type, isConnect, connectReason);
     AnonymizeFree(anonyUdid);
 
-    if (IsSameAccountDevice(device) && !IsPotentialTrustedDeviceDp(device->devId)) {
-        if (!AuthHasSameAccountGroup()) {
-            LNN_LOGE(LNN_HEART_BEAT, "device has not same account group relation with local device");
-            return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
-        }
-    }
     LnnDfxDeviceInfoReport info;
     (void)memset_s(&info, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     if (hbResp != NULL) {
@@ -1134,12 +1128,15 @@ void LnnDumpHbOnlineNodeList(void)
             continue;
         }
         char *deviceTypeStr = LnnConvertIdToDeviceType(nodeInfo.deviceInfo.deviceTypeId);
+        char *anonyDeviceName = NULL;
+        Anonymize(nodeInfo.deviceInfo.deviceName, &anonyDeviceName);
         LNN_LOGD(LNN_HEART_BEAT,
             "DumpOnlineNodeList count=%{public}d, i=%{public}d, deviceName=%{public}s, deviceTypeId=%{public}d, "
             "deviceTypeStr=%{public}s, masterWeight=%{public}d, discoveryType=%{public}d, "
             "oldTimestamp=%{public}" PRIu64 "",
-            infoNum, i + 1, nodeInfo.deviceInfo.deviceName, nodeInfo.deviceInfo.deviceTypeId,
+            infoNum, i + 1, anonyDeviceName, nodeInfo.deviceInfo.deviceTypeId,
             deviceTypeStr != NULL ? deviceTypeStr : "", nodeInfo.masterWeight, nodeInfo.discoveryType, oldTimestamp);
+        AnonymizeFree(anonyDeviceName);
     }
     SoftBusFree(info);
 }

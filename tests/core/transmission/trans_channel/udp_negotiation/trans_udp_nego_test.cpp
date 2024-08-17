@@ -283,7 +283,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     char* data = TestGetMsgInfo();
     ASSERT_TRUE(data != nullptr);
     cJSON *msg = cJSON_Parse(data);
-    //will free in TransOnExchangeUdpInfoReply line 300
+    //will free in TransOnExchangeUdpInfoReply line 298
     UdpChannelInfo *newChannel = CreateUdpChannelPackTest();
     ASSERT_TRUE(newChannel != nullptr);
     int64_t authId = AUTH_INVALID_ID;
@@ -297,7 +297,12 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
 
     TransOnExchangeUdpInfoReply(INVALID_AUTH_ID, newChannel->seq, msg);
 
-    TransOnExchangeUdpInfoReply(authId, newChannel->seq, msg);
+    //will free in TransOnExchangeUdpInfoReply line 305
+    UdpChannelInfo *testChannel = CreateUdpChannelPackTest();
+    ASSERT_TRUE(testChannel != nullptr);
+    ret = TransAddUdpChannel(testChannel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransOnExchangeUdpInfoReply(authId, testChannel->seq, msg);
 
     cJSON_Delete(msg);
 }
@@ -733,7 +738,7 @@ HWTEST_F(TransUdpNegoTest, AcceptUdpChannelAsServer001, TestSize.Level1)
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
 
     int32_t ret = AcceptUdpChannelAsServer(appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(channel);

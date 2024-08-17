@@ -28,6 +28,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_socket.h"
 #include "trans_lane_pending_ctl.h"
@@ -216,7 +217,29 @@ ListenerModule GetModuleByHmlIp(const char *ip)
     return UNUSE_BUTT;
 }
 
-static int32_t StartHmlListener(const char *ip, int32_t *port)
+void ClearHmlListenerByUuid(const char *peerUuid)
+{
+    if (peerUuid == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "peerUuid is null.");
+        return;
+    }
+    HmlListenerInfo *item = NULL;
+    HmlListenerInfo *nextItem = NULL;
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
+        if (strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
+            StopHmlListener(item->moudleType);
+            TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", item->moudleType);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+    return;
+}
+
+static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerUuid)
 {
     TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
     if (g_hmlListenerList == NULL) {
@@ -253,8 +276,9 @@ static int32_t StartHmlListener(const char *ip, int32_t *port)
     }
     item->myPort = *port;
     item->moudleType = moudleType;
-    if (strncpy_s(item->myIp, IP_LEN, ip, IP_LEN) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "HmlListenerInfo copy ip fail");
+    if (strncpy_s(item->myIp, IP_LEN, ip, IP_LEN) != EOK ||
+        strncpy_s(item->peerUuid, UUID_BUF_LEN, peerUuid, UUID_BUF_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "HmlListenerInfo copy ip or peer uuid failed.");
         SoftBusFree(item);
         StopHmlListener(moudleType);
         (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
@@ -552,6 +576,27 @@ static int32_t PackAndSendVerifyP2pRsp(const char *myIp, int32_t myPort, int64_t
     return SOFTBUS_OK;
 }
 
+static int32_t StartHmlListenerByUuid(AuthHandle authHandle, const char *myIp, int32_t *myPort)
+{
+    char peerUuid[UUID_BUF_LEN] = { 0 };
+    int32_t ret = SOFTBUS_OK;
+    if (authHandle.type == AUTH_LINK_TYPE_BLE) {
+        AuthHandle authHandleTmp = { 0 };
+        ret = TransProxyGetAuthId(authHandle.authId, &authHandleTmp);
+        if (ret == SOFTBUS_TRANS_NODE_NOT_FOUND) {
+            authHandleTmp.authId = authHandle.authId;
+        }
+        ret = AuthGetDeviceUuid(authHandleTmp.authId, peerUuid, UUID_BUF_LEN);
+    } else {
+        ret = AuthGetDeviceUuid(authHandle.authId, peerUuid, UUID_BUF_LEN);
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "fail to get device uuid by authId=%{public}" PRId64, authHandle.authId);
+        return ret;
+    }
+    return StartHmlListener(myIp, myPort, peerUuid);
+}
+
 static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSON *json, bool isAuthLink)
 {
     TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", seq=%{public}" PRId64, authHandle.authId, seq);
@@ -581,7 +626,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
     if (IsHmlIpAddr(myIp)) {
-        ret = StartHmlListener(myIp, &myPort);
+        ret = StartHmlListenerByUuid(authHandle, myIp, &myPort);
     } else {
         ret = StartP2pListener(myIp, &myPort);
     }
@@ -827,7 +872,7 @@ void OnP2pVerifyChannelClosed(int32_t channelId)
     TRANS_LOGW(TRANS_CTRL, "receive p2p verify close. channelId=%{public}d", channelId);
 }
 
-static int32_t TransProxyGetAuthId(SessionConn *conn)
+static int32_t TransProxyGetAuthIdByUuid(SessionConn *conn)
 {
     AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &conn->authHandle);
     if (conn->authHandle.authId == AUTH_INVALID_ID) {
@@ -866,7 +911,7 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
             return ret;
         }
         TransProxyPipelineCloseChannelDelay(pipeLineChannelId);
-        ret = TransProxyGetAuthId(conn);
+        ret = TransProxyGetAuthIdByUuid(conn);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get auth id failed");
         conn->requestId = REQUEST_INVALID;
         char *msg = VerifyP2pPack(conn->appInfo.myData.addr, conn->appInfo.myData.port, NULL);
@@ -945,16 +990,16 @@ static int32_t BuildSessionConn(const AppInfo *appInfo, SessionConn **conn)
     return SOFTBUS_OK;
 }
 
-static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn)
+static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, const AppInfo *appInfo)
 {
     if (type == CONNECT_P2P) {
         if (IsHmlIpAddr(conn->appInfo.myData.addr)) {
-            return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+            return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId);
         } else {
             return StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
         }
     }
-    return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
+    return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId);
 }
 
 int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
@@ -974,7 +1019,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + (uint64_t)ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
         "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(conn->channelId + ID_OFFSET));
-    ret = StartTransP2pDirectListener(connInfo->type, conn);
+    ret = StartTransP2pDirectListener(connInfo->type, conn, appInfo);
     if (ret != SOFTBUS_OK) {
         FreeFastTransData(&(conn->appInfo));
         SoftBusFree(conn);

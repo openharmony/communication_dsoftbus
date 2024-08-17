@@ -102,6 +102,7 @@ ohos_unittest("P2pEntityTest") {
     "$wifi_direct_cpp_path/entity/p2p_entity_state.cpp",
     "$wifi_direct_cpp_path/entity/p2p_unavailable_state.cpp",
     "$wifi_direct_cpp_path/event/wifi_direct_event_dispatcher.cpp",
+    "$wifi_direct_cpp_path/processor/null_processor.cpp",
     "$wifi_direct_cpp_path/processor/p2p_v1_processor.cpp",
     "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
@@ -118,6 +119,7 @@ ohos_unittest("P2pEntityTest") {
     "$wifi_direct_cpp_path/wifi_direct_scheduler.cpp",
     "$wifi_direct_cpp_unit_path/net_conn_client.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
+    "p2p_available_state_test.cpp",
     "p2p_entity_test.cpp",
   ]
 

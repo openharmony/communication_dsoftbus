@@ -61,23 +61,21 @@ ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
-    deps += [ "//third_party/openssl:libcrypto_shared" ]
     external_deps = [
-      "c_utils:utils",
+      "bounds_checking_function:libsec_static",
+      "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
+      "openssl:libcrypto_shared",
     ]
   } else {
     external_deps = [

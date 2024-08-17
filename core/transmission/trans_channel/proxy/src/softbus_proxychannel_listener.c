@@ -254,11 +254,13 @@ static void TransNotifyAlarm(const AppInfo *appInfo, int32_t errCode)
     return;
 }
 
-int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
+static void TransProxyReportOpenChannelFailEvent(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
-    if (appInfo == NULL) {
-        return SOFTBUS_INVALID_PARAM;
+    if (appInfo->appType == APP_TYPE_INNER) {
+        TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d is inner channel, no need report fail event", channelId);
+        return;
     }
+
     int64_t timeStart = appInfo->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     int8_t isServer;
@@ -290,6 +292,16 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         TransNotifyAlarm(appInfo, errCode);
     }
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+}
+
+int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
+{
+    if (appInfo == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    TransProxyReportOpenChannelFailEvent(channelId, appInfo, errCode);
+
     char *tmpName = NULL;
     Anonymize(appInfo->myData.sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
@@ -349,6 +361,9 @@ int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, con
 static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNetworkId, AppInfo *appInfo)
 {
     int ret = SOFTBUS_TRANS_GET_APP_INFO_FAILED;
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(peerNetworkId, &osType);
+    appInfo->osType = osType;
     appInfo->appType = APP_TYPE_INNER;
     appInfo->myData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;

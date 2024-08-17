@@ -26,6 +26,12 @@
 extern "C" {
 #endif
 
+typedef enum {
+    FORCE_DOWN_LANE = 0,
+    FORCE_DOWN_TRANS,
+    FORCE_DOWN_BUTT,
+} ForceDownType;
+
 typedef struct {
     ListNode node;
     uint32_t p2pRequestId;
@@ -34,11 +40,14 @@ typedef struct {
     LaneLinkType forceDownLink;
     uint32_t authRequestId;
     AuthHandle authHandle;
+    ForceDownType downType;
+    SoftBusCond cond;
 } ForceDownInfo;
 
 int32_t InitLinkWifiDirect(void);
 void DeInitLinkWifiDirect(void);
 int32_t HandleForceDownWifiDirect(const char *networkId, LinkConflictType conflictType, uint32_t p2pRequestId);
+int32_t HandleForceDownWifiDirectTrans(const char *udidhashStr, LinkConflictType conflictType);
 
 #ifdef __cplusplus
 }

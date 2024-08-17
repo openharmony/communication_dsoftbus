@@ -96,6 +96,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/entity/p2p_unavailable_state.cpp",
       "$wifi_direct_path/entity/p2p_broadcast_receiver.cpp",
       "$wifi_direct_path/processor/p2p_v1_processor.cpp",
+      "$wifi_direct_path/processor/null_processor.cpp",
       "$wifi_direct_path/protocol/json_protocol.cpp",
       "$wifi_direct_path/protocol/tlv_protocol.cpp",
       "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",

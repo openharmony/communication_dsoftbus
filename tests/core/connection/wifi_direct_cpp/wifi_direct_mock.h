@@ -103,9 +103,13 @@ public:
     // connect result callback mock stub
     virtual void OnConnectSuccess(uint32_t requestId, const struct WifiDirectLink *link) = 0;
     virtual void OnConnectFailure(uint32_t requestId, int32_t reason) = 0;
+    // disconnect result callback mock stub
+    virtual void OnDisconnectSuccess(uint32_t requestId) = 0;
+    virtual void OnDisconnectFailure(uint32_t requestId, int32_t reason) = 0;
     // proxy negotiate channel mock stub
     virtual int ProxyNegotiateChannelSendMessage(int32_t channelId, const NegotiateMessage &msg) const = 0;
     virtual std::string ProxyNegotiateChannelGetRemoteDeviceId(int32_t channelId) const = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
 };
 
 class WifiDirectInterfaceMock : public WifiDirectInterface {
@@ -182,11 +186,16 @@ public:
     MOCK_METHOD(void, OnConnectSuccess, (uint32_t requestId, const struct WifiDirectLink *link), (override));
     MOCK_METHOD(void, OnConnectFailure, (uint32_t requestId, int32_t reason), (override));
 
+    MOCK_METHOD(void, OnDisconnectSuccess, (uint32_t requestId), (override));
+    MOCK_METHOD(void, OnDisconnectFailure, (uint32_t requestId, int32_t reason), (override));
+
     MOCK_METHOD(
         int, ProxyNegotiateChannelSendMessage, (int32_t channelId, const NegotiateMessage &msg), (const override));
     MOCK_METHOD(std::string, ProxyNegotiateChannelGetRemoteDeviceId, (int32_t channelId), (const override));
+    MOCK_METHOD(int32_t, LnnGetOsTypeByNetworkId, (const char *networkId, int32_t *osType), (override));
 
     static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
+    static void InjectWifiDirectDisconnectCallbackMock(WifiDirectDisconnectCallback &callback);
 
     static WifiErrorCode RegisterP2pStateChangedCallback(const P2pStateChangedCallback callback);
     static WifiErrorCode RegisterP2pConnectionChangedCallback(const P2pConnectionChangedCallback callback);
