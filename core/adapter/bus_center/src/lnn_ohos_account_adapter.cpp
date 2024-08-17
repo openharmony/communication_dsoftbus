@@ -22,6 +22,7 @@
 #include "os_account_manager.h"
 #include "securec.h"
 #include "softbus_errcode.h"
+#include "auth_hichain_adapter.h"
 
 static const int32_t ACCOUNT_STRTOLL_BASE = 10;
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
@@ -33,6 +34,10 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (!IsSameAccountGroupDevice()) {
+        LNN_LOGE(LNN_STATE, "not have same account group, no need update accountId");
+        return SOFTBUS_AUTH_INNER_ERR;
+    }
     auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOhosAccountInfo();
     if (!accountInfo.first) {
         LNN_LOGE(LNN_STATE, "QueryOhosAccountInfo failed");
@@ -66,6 +71,10 @@ int32_t GetCurrentAccount(int64_t *account)
     if (account == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsSameAccountGroupDevice()) {
+        LNN_LOGE(LNN_STATE, "not have same account group, no need update accountId");
+        return SOFTBUS_AUTH_INNER_ERR;
     }
     *account = 0;
     auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOhosAccountInfo();

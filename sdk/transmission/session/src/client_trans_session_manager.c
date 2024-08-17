@@ -32,6 +32,7 @@
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
+#include "session_ipc_adapter.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
@@ -217,6 +218,7 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
             ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
             if (ret != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
+                AnonymizeFree(tmpName);
                 return ret;
             }
             TRANS_LOGI(TRANS_SDK, "delete empty session server, sessionName=%{public}s", tmpName);
@@ -1207,7 +1209,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (strcmp(CAST_SESSION, serverNode->sessionName) == 0) {
+        if (strcmp(CAST_SESSION, serverNode->sessionName) == 0 && CheckIsSystemService()) {
             TRANS_LOGD(TRANS_SDK, "cast plus sessionname is different");
             continue;
         }

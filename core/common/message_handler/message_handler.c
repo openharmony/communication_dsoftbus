@@ -158,16 +158,18 @@ static void *LoopTask(void *arg)
             continue;
         }
         context->currentMsg = msg;
-        (void)SoftBusMutexUnlock(&context->lock);
         if (looper->dumpable) {
             COMM_LOGD(COMM_UTILS,
                 "LoopTask HandleMessage message. name=%{public}s, handle=%{public}s, what=%{public}" PRId32,
                 context->name, msg->handler ? msg->handler->name : "null", msg->what);
         }
+        (void)SoftBusMutexUnlock(&context->lock);
 
         if (msg->handler != NULL && msg->handler->HandleMessage != NULL) {
             msg->handler->HandleMessage(msg);
         }
+
+        (void)SoftBusMutexLock(&context->lock);
         if (looper->dumpable) {
             // Don`t print msg->handler, msg->handler->HandleMessage() may remove handler,
             // so msg->handler maybe invalid pointer
@@ -176,7 +178,6 @@ static void *LoopTask(void *arg)
                 "name=%{public}s, what=%{public}" PRId32 ", arg1=%{public}" PRIu64,
                 context->name, msg->what, msg->arg1);
         }
-        (void)SoftBusMutexLock(&context->lock);
         FreeSoftBusMsg(msg);
         context->currentMsg = NULL;
         (void)SoftBusMutexUnlock(&context->lock);

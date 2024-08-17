@@ -23,15 +23,12 @@ ohos_fuzztest("StreamCommonDataFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/streamcommondata_fuzzer"
 
   include_dirs = [
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "../../../../../adapter/common/include",
     "../../../../../core/common/include",
     "../../../../../core/common/dfx/interface/include",
     "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
     "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
     "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/bounds_checking_function/include",
   ]
   cflags = [
     "-g",
@@ -42,7 +39,10 @@ ohos_fuzztest("StreamCommonDataFuzzTest") {
   ]
   sources = [ "streamcommondata_fuzzer.cpp" ]
   deps = [ "../../../../../sdk:softbus_client" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

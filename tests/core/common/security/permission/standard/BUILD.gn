@@ -32,19 +32,11 @@ ohos_unittest("SoftbusPermissionTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/googletest:gtest_main",
   ]
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("SoftbusPermissionACLTest") {
@@ -66,13 +58,12 @@ ohos_unittest("SoftbusPermissionACLTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "//third_party/googletest:gtest_main",
   ]
   if (is_standard_system) {
     external_deps = [
       "access_token:libaccesstoken_sdk",
       "access_token:libtoken_setproc",
-      "c_utils:utils",
+      "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_single",
       "samgr:samgr_proxy",
@@ -84,6 +75,7 @@ ohos_unittest("SoftbusPermissionACLTest") {
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   }

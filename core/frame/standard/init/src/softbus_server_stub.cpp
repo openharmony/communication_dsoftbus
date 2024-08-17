@@ -1554,7 +1554,7 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
         return SOFTBUS_IPC_ERR;
     }
     if ((uint32_t)infoNum > MAX_META_NODE_NUM) {
-        COMM_LOGE(COMM_SVC, "invalid param, infoNum=%{pubilc}d, maxNum=%{pubilc}d", infoNum, MAX_META_NODE_NUM);
+        COMM_LOGE(COMM_SVC, "invalid param, infoNum=%{public}d, maxNum=%{public}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_IPC_ERR;
     }
     if (GetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {

@@ -71,24 +71,17 @@ ohos_unittest("TransLaneManagerTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "cJSON:cjson",
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "cJSON:cjson",
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "hilog:libhilog",
-      "hilog_lite:hilog_lite",
-    ]
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+  if (!is_standard_system) {
+    external_deps += [ "hilog_lite:hilog_lite" ]
   }
 }
 

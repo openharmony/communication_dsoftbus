@@ -109,6 +109,7 @@ public:
     virtual int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info) = 0;
     virtual int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info) = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
+    virtual bool LnnSetDLDeviceNickName(const char *networkId, const char *name);
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -188,6 +189,7 @@ public:
     MOCK_METHOD2(LnnSetDLBssTransInfo, int32_t (const char *, const BssTransInfo *));
     MOCK_METHOD2(LnnSetDLBatteryInfo, int32_t (const char *, const BatteryInfo *));
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *, int32_t *));
+    MOCK_METHOD2(LnnSetDLDeviceNickName, bool (const char *, const char *));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);

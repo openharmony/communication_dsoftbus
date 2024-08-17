@@ -30,6 +30,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_meta_node_interface.h"
 #include "lnn_ohos_account.h"
 #include "lnn_parameter_utils.h"
 #include "softbus_adapter_mem.h"
@@ -749,4 +750,5 @@ void AuthDeinit(void)
 void AuthServerDeathCallback(const char *pkgName, int32_t pid)
 {
     DelAuthMetaManagerByPid(pkgName, pid);
+    ClearMetaNodeRequestByPid(pkgName, pid);
 }
