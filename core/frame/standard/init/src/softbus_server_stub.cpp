@@ -46,7 +46,7 @@
     } while (false)                                             \
 
 namespace OHOS {
-    namespace{
+    namespace {
         constexpr int32_t JUDG_CNT = 1;
         static const char *DB_PACKAGE_NAME = "distributeddata-default"
     }
@@ -1157,7 +1157,7 @@ int32_t SoftBusServerStub::RegDataLevelChangeCbInner(MessageParcel &data, Messag
         COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if(strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
+    if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
         COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
@@ -1183,7 +1183,7 @@ int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, Mess
         COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName failed!");
         return SOFTBUS_IPC_ERR;
     }
-    IF(strcmp(DB_PACKAGE_NAME, pkgName) != 0){
+    if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
         COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
