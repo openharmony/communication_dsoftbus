@@ -41,6 +41,7 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
+        std::lock_guard executorLock(executorLock_);
     }
     return ret;
 }
@@ -80,6 +81,7 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
+        std::lock_guard executorLock(executorLock_);
     }
     return ret;
 }
@@ -100,6 +102,7 @@ int WifiDirectScheduler::ForceDisconnectDevice(
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
+        std::lock_guard executorLock(executorLock_);
     }
     return ret;
 }
@@ -162,7 +165,6 @@ int WifiDirectScheduler::ScheduleActiveCommand(const std::shared_ptr<WifiDirectC
         return SOFTBUS_CONN_REMOTE_DEVICE_ID_EMPTY;
     }
 
-    std::lock_guard executorLock(executorLock_);
     auto it = executors_.find(remoteDeviceId);
     if (it != executors_.end() || executors_.size() == MAX_EXECUTOR) {
         CONN_LOGI(CONN_WIFI_DIRECT, "push command to list, commandId=%{public}u", command->GetId());
