@@ -435,5 +435,10 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
     return GetLaneDepsInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
 }
+
+void AddNetworkResource(NetworkResource *networkResource)
+{
+    return GetLaneDepsInterface()->AddNetworkResource(networkResource);
+}
 }
 } // namespace OHOS
