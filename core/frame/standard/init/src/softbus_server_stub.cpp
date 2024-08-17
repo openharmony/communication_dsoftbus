@@ -46,7 +46,11 @@
     } while (false)                                             \
 
 namespace OHOS {
-constexpr int32_t JUDG_CNT = 1;
+    namespace{
+        constexpr int32_t JUDG_CNT = 1;
+        static const char *DB_PACKAGE_NAME = "distributeddata-default"
+    }
+
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
@@ -1145,11 +1149,16 @@ int32_t SoftBusServerStub::RegDataLevelChangeCbInner(MessageParcel &data, Messag
 #ifndef ENHANCED_FLAG
     (void)data;
     (void)reply;
+    (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if(strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = RegDataLevelChangeCb(pkgName);
@@ -1166,11 +1175,16 @@ int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, Mess
 #ifndef ENHANCED_FLAG
     (void)data;
     (void)reply;
+    (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    IF(strcmp(DB_PACKAGE_NAME, pkgName) != 0){
+        COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = UnregDataLevelChangeCb(pkgName);
