@@ -48,7 +48,7 @@
 namespace OHOS {
     namespace {
         constexpr int32_t JUDG_CNT = 1;
-        static const char *DB_PACKAGE_NAME = "distributeddata-default"
+        static const char *DB_PACKAGE_NAME = "distributeddata-default";
     }
 
 
