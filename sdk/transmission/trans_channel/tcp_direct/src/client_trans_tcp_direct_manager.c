@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -214,7 +214,7 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-static void TransTdcDelChannelInfo(int32_t channelId)
+static void TransTdcDelChannelInfo(int32_t channelId, int32_t errCode)
 {
     TRANS_LOGI(TRANS_SDK, "Delete tdc channelId=%{public}d.", channelId);
 
@@ -230,7 +230,13 @@ static void TransTdcDelChannelInfo(int32_t channelId)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
-            TransTdcReleaseFd(item->detail.fd);
+            if (errCode == SOFTBUS_TRANS_NEGOTIATE_REJECTED) {
+                TransTdcCloseFd(item->detail.fd);
+                TRANS_LOGI(
+                    TRANS_SDK, "Server reject conn, channelId=%{public}d, fd=%{public}d", channelId, item->detail.fd);
+            } else {
+                TransTdcReleaseFd(item->detail.fd);
+            }
             ListDelete(&item->node);
             SoftBusMutexDestroy(&(item->detail.fdLock));
             SoftBusFree(item);
@@ -328,7 +334,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     ret = ClientTransTdcOnSessionOpened(sessionName, channel);
     if (ret != SOFTBUS_OK) {
         TransDelDataBufNode(channel->channelId);
-        TransTdcDelChannelInfo(channel->channelId);
+        TransTdcDelChannelInfo(channel->channelId, ret);
         TRANS_LOGE(TRANS_SDK, "notify on session opened err.");
         return ret;
     }
@@ -337,7 +343,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     if (ret != SOFTBUS_OK) {
         ClientTransTdcOnSessionClosed(channel->channelId, SHUTDOWN_REASON_LOCAL);
         TransDelDataBufNode(channel->channelId);
-        TransTdcDelChannelInfo(channel->channelId);
+        TransTdcDelChannelInfo(channel->channelId, ret);
         return ret;
     }
 
