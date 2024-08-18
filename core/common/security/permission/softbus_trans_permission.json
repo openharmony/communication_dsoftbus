@@ -1,6 +1,6 @@
 [
   {
-    "SESSION_NAME": "DistributedFileService.*",
+    "SESSION_NAME": "^DistributedFileService.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "APP_INFO": [
@@ -12,7 +12,7 @@
     ]
   },
   {
-    "SESSION_NAME": "distributeddata-default*",
+    "SESSION_NAME": "^distributeddata-default*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "SEC_LEVEL": "public",
@@ -25,7 +25,7 @@
     ]
   },
   {
-    "SESSION_NAME": "objectstoreDB-*",
+    "SESSION_NAME": "^objectstoreDB-*",
     "REGEXP": "true",
     "DEVID": "UDID",
     "SEC_LEVEL": "public",
@@ -38,7 +38,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.distributedschedule.dms.*",
+    "SESSION_NAME": "^ohos.distributedschedule.dms.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "SEC_LEVEL": "public",
@@ -51,7 +51,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.dmsdp.*",
+    "SESSION_NAME": "^com.huawei.dmsdp.*",
     "REGEXP": "true",
     "DEVID": "UDID",
     "APP_INFO": [
@@ -63,7 +63,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.devicegroupmanage",
+    "SESSION_NAME": "^com.huawei.devicegroupmanage",
     "DEVID": "UDID",
     "APP_INFO": [
       {
@@ -74,7 +74,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.distributedhardware.devicemanager.*",
+    "SESSION_NAME": "^ohos.distributedhardware.devicemanager.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "SEC_LEVEL": "public",
@@ -87,7 +87,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.dhardware.*",
+    "SESSION_NAME": "^ohos.dhardware.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -100,7 +100,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.dhardware.dcamera.*",
+    "SESSION_NAME": "^ohos.dhardware.dcamera.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -113,7 +113,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.dhardware.dscreen.*",
+    "SESSION_NAME": "^ohos.dhardware.dscreen.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -126,7 +126,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.dhardware.dinput.*",
+    "SESSION_NAME": "^ohos.dhardware.dinput.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -139,7 +139,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.dhardware.daudio.*",
+    "SESSION_NAME": "^ohos.dhardware.daudio.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -152,7 +152,7 @@
     ]
   },
   {
-    "SESSION_NAME": "security.dpms_channel",
+    "SESSION_NAME": "^security.dpms_channel",
     "DEVID": "NETWORKID",
     "APP_INFO": [
       {
@@ -163,7 +163,7 @@
     ]
   },
   {
-    "SESSION_NAME": "device.security.level*",
+    "SESSION_NAME": "^device.security.level*",
     "REGEXP": "true",
     "DEVID": "UDID",
     "SEC_LEVEL": "public",
@@ -177,7 +177,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.security.atm_channel.*",
+    "SESSION_NAME": "^ohos.security.atm_channel.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -190,7 +190,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.msdp.spatialawareness.*",
+    "SESSION_NAME": "^ohos.msdp.spatialawareness.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "SEC_LEVEL": "public",
@@ -203,7 +203,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.msdp.user_status_awareness.*",
+    "SESSION_NAME": "^ohos.msdp.user_status_awareness.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "APP_INFO": [
@@ -215,7 +215,7 @@
     ]
   },
   {
-    "SESSION_NAME": "IShare*",
+    "SESSION_NAME": "^IShare*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -228,7 +228,7 @@
     ]
   },
   {
-    "SESSION_NAME": "DeviceCollaboration.*",
+    "SESSION_NAME": "^DeviceCollaboration.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -241,7 +241,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.pcassistant.*",
+    "SESSION_NAME": "^com.huawei.pcassistant.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -254,7 +254,7 @@
     ]
   },
   {
-    "SESSION_NAME": "CastPlus*",
+    "SESSION_NAME": "^CastPlus*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -267,7 +267,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.communication.netmanager_enhanced.*",
+    "SESSION_NAME": "^ohos.communication.netmanager_enhanced.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "APP_INFO": [
@@ -279,7 +279,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.mmi.*",
+    "SESSION_NAME": "^ohos.mmi.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -292,7 +292,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.msdp.device_status.*",
+    "SESSION_NAME": "^ohos.msdp.device_status.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -318,7 +318,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.devicemanager.*",
+    "SESSION_NAME": "^com.huawei.devicemanager.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "APP_INFO": [
@@ -330,7 +330,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.*CastPlusDiscoveryModule",
+    "SESSION_NAME": "^com.huawei.*CastPlusDiscoveryModule",
     "REGEXP": "true",
     "DEVID": "UDID",
     "APP_INFO": [
@@ -342,7 +342,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.profile-session*",
+    "SESSION_NAME": "^com.huawei.profile-session*",
     "REGEXP": "true",
     "DEVID": "UDID",
     "SEC_LEVEL": "public",
@@ -355,7 +355,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.ohos.plrdtest.hongyan.*",
+    "SESSION_NAME": "^com.ohos.plrdtest.hongyan.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -368,7 +368,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.ohos.cardsde.channel-session",
+    "SESSION_NAME": "^com.huawei.ohos.cardsde.channel-session",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -381,7 +381,7 @@
     ]
   },
   {
-    "SESSION_NAME": "super_launcher_session",
+    "SESSION_NAME": "^super_launcher_session",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
     "APP_INFO": [
@@ -393,7 +393,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.*security.devicesec",
+    "SESSION_NAME": "^com.*security.devicesec",
     "REGEXP": "true",
     "DEVID": "UDID",
     "SEC_LEVEL": "public",
@@ -407,7 +407,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.communication.network_connectivity_ext.*",
+    "SESSION_NAME": "^ohos.communication.network_connectivity_ext.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -420,7 +420,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.dstb.tee.*",
+    "SESSION_NAME": "^ohos.dstb.tee.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -433,7 +433,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.useriam.*",
+    "SESSION_NAME": "^ohos.useriam.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -446,7 +446,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.systemserver_CHANNEL_DPMS",
+    "SESSION_NAME": "^com.huawei.systemserver_CHANNEL_DPMS",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "APP_INFO": [
@@ -458,7 +458,7 @@
     ]
   },
   {
-    "SESSION_NAME": "Media_Session_RemoteCtrl",
+    "SESSION_NAME": "^Media_Session_RemoteCtrl",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "APP_INFO": [
@@ -470,7 +470,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.boosterd.*",
+    "SESSION_NAME": "^com.huawei.boosterd.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
