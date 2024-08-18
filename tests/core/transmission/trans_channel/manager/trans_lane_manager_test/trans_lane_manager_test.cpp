@@ -43,6 +43,7 @@ static SessionAttribute g_sessionAttr[] = {
     {.dataType = TYPE_STREAM},
     {.dataType = LANE_T_BUTT},
 };
+
 class TransLaneManagerTest : public testing::Test {
 public:
     TransLaneManagerTest()
@@ -423,5 +424,48 @@ HWTEST_F(TransLaneManagerTest, FindConfigType001, TestSize.Level1)
     businessType = BUSINESS_TYPE_BYTE;
     ret = FindConfigType(channelType, businessType);
     EXPECT_EQ(SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH, ret);
+}
+
+/**
+ * @tc.name: ConvertLaneLinkTypeToConnectType Test
+ * @tc.desc: ConvertLaneLinkTypeToConnectType001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, ConvertLaneLinkTypeToConnectType001, TestSize.Level1)
+{
+    ConnectType ret = ConvertLaneLinkTypeToConnectType(LANE_BR);
+    EXPECT_EQ(CONNECT_BR, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_BLE);
+    EXPECT_EQ(CONNECT_BLE, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_P2P);
+    EXPECT_EQ(CONNECT_P2P, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_WLAN_5G);
+    EXPECT_EQ(CONNECT_TCP, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_P2P_REUSE);
+    EXPECT_EQ(CONNECT_P2P_REUSE, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_COC_DIRECT);
+    EXPECT_EQ(CONNECT_BLE_DIRECT, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_HML);
+    EXPECT_EQ(CONNECT_HML, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_BLE_REUSE);
+    EXPECT_EQ(CONNECT_BLE, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_LINK_TYPE_BUTT);
+    EXPECT_EQ(CONNECT_TYPE_MAX, ret);
+}
+
+/**
+ * @tc.name: TransGetConnectTypeByChannelId Test
+ * @tc.desc: TransGetConnectTypeByChannelId001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, TransGetConnectTypeByChannelId001, TestSize.Level1)
+{
+    int32_t ret = TransGetConnectTypeByChannelId(1, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ConnectType type = CONNECT_TCP;
+    ret = TransGetConnectTypeByChannelId(1, &type);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 }
 } // OHOS
