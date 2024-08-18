@@ -300,7 +300,7 @@ HWTEST_F(TransAuthNegotiateTest, SetWlanAuthConnInfo001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthNegotiateTest, TransReNegotiateSessionKey002, TestSize.Level1)
+HWTEST_F(TransAuthNegotiateTest, SetWlanAuthConnInfo002, TestSize.Level1)
 {
     ConnSocketInfo socketInfo;
     socketInfo.protocol = LNN_PROTOCOL_IP;
