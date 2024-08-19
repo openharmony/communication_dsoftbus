@@ -137,7 +137,6 @@ if (defined(ohos_lite)) {
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DDFILE_ENABLE_HIDUMP",
       "-DENABLE_USER_LOG",
-      "-DSSL_AND_CRYPTO_INCLUDED",
     ]
     cflags_cc = cflags
     include_dirs = [
