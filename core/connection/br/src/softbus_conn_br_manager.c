@@ -675,7 +675,7 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
             result = it->result;
         }
     }
-    if (result != 0) {
+    if (result != 0 && result <= CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED) {
         error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
     }
     NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
