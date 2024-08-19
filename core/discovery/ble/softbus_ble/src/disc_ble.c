@@ -1892,17 +1892,22 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 
     ListInit(&g_recvMessageInfo.node);
     g_discBleInnerCb = callback;
-    
-    DISC_CHECK_AND_RETURN_RET_LOGE(
-        SoftBusMutexInit(&g_recvMessageInfo.lock, NULL) == SOFTBUS_OK &&
-        SoftBusMutexInit(&g_bleInfoLock, NULL) == SOFTBUS_OK,
-        NULL, DISC_INIT, "init ble lock failed");
+
+    if (SoftBusMutexInit(&g_recvMessageInfo.lock, NULL) != SOFTBUS_OK ||
+        SoftBusMutexInit(&g_bleInfoLock, NULL) != SOFTBUS_OK) {
+        DiscSoftBusBleDeinit();
+        DISC_LOGE(DISC_INIT, "init ble lock failed");
+        return NULL;
+    }
 
     DiscBleInitPublish();
     DiscBleInitSubscribe();
     InitScanner();
-    DISC_CHECK_AND_RETURN_RET_LOGE(SchedulerInitBroadcast() == SOFTBUS_OK, NULL,
-        DISC_INIT, "init broadcast scheduler failed");
+    if (SchedulerInitBroadcast() != SOFTBUS_OK) {
+        DiscSoftBusBleDeinit();
+        DISC_LOGE(DISC_INIT, "init broadcast scheduler failed");
+        return NULL;
+    }
 
     if (DiscBleLooperInit() != SOFTBUS_OK || InitAdvertiser() != SOFTBUS_OK || InitBleListener() != SOFTBUS_OK)  {
         DiscSoftBusBleDeinit();
@@ -1955,6 +1960,9 @@ static void DiscBleInfoDeinit(void)
 {
     for (uint32_t index = 0; index < BLE_INFO_COUNT; index++) {
         (void)memset_s(&g_bleInfoManager[index], sizeof(DiscBleInfo), 0x0, sizeof(DiscBleInfo));
+    }
+    if (CheckLockInit(&g_bleInfoLock)) {
+        (void)SoftBusMutexDestroy(&g_bleInfoLock);
     }
 }
 
