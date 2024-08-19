@@ -171,7 +171,10 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
     ]
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "openssl:libcrypto_shared",
+    ]
     if (is_standard_system) {
       external_deps += [ "c_utils:utils" ]
     } else {
