@@ -33,6 +33,7 @@
 #include "lnn_lane_interface.h"
 
 #define SOFTBUS_IPC_THREAD_NUM 32
+#define OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS (15 * 1000)
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -163,6 +164,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
                 COMM_LOGE(COMM_SVC, "connect BR memory error");
                 return SOFTBUS_MEM_ERR;
             }
+            connOpt.brOption.waitTimeoutDelay = OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS;
             break;
         default:
             COMM_LOGE(COMM_SVC, "connect type error");

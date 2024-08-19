@@ -227,6 +227,7 @@ static int32_t ConvertCtxToDevice(ConnBrDevice **outDevice, const ConnBrConnectR
         return status;
     }
     device->connectionId = ctx->connectionId;
+    device->waitTimeoutDelay = ctx->waitTimeoutDelay;
     ListAdd(&device->requests, &request->node);
     *outDevice = device;
     return SOFTBUS_OK;
@@ -349,9 +350,7 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
     CONN_LOGI(CONN_BR, "schedule connect request, addr=%{public}s", anomizeAddress);
     int32_t status = SOFTBUS_OK;
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
-    if (connection == NULL) {
-        return SOFTBUS_CONN_BR_INTERNAL_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_BR, "connection is null");
     char *address = NULL;
     KeepAliveBleIfSameAddress(device);
     do {
@@ -371,8 +370,17 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
             break;
         }
         g_brManager.connecting = device;
+        uint32_t waitTimeoutDelay = 0;
+        if (device->waitTimeoutDelay < BR_CONNECT_TIMEOUT_MIN_MILLIS) {
+            waitTimeoutDelay = BR_CONNECT_TIMEOUT_MIN_MILLIS;
+        } else if (device->waitTimeoutDelay > BR_CONNECT_TIMEOUT_MAX_MILLIS) {
+            waitTimeoutDelay = BR_CONNECT_TIMEOUT_MAX_MILLIS;
+        } else {
+            waitTimeoutDelay = device->waitTimeoutDelay;
+        }
+        CONN_LOGI(CONN_BR, "delay=%{public}d, device delay=%{public}d", waitTimeoutDelay, device->waitTimeoutDelay);
         ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_TIMEOUT, connection->connectionId, 0, address,
-            BR_CONNECT_TIMEOUT_MILLIS);
+            waitTimeoutDelay);
         TransitionToState(BR_STATE_CONNECTING);
     } while (false);
 
@@ -1479,6 +1487,7 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
     }
     ctx->result = *result;
     ctx->connectionId = option->brOption.connectionId;
+    ctx->waitTimeoutDelay = option->brOption.waitTimeoutDelay;
     int32_t status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "post msg to looper failed, requestId=%{public}u, addr=%{public}s, error=%{public}d",
