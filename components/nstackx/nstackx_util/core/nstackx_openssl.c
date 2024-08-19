@@ -110,7 +110,8 @@ uint32_t AesGcmEncryptVec(AesVec *vec, uint32_t vecNum, CryptPara *cryptPara, ui
 
     for (uint32_t i = 0; i < vecNum; i++) {
         if ((outLen - GCM_ADDED_LEN) < (retLen + vec[i].len)) {
-            LOGE(TAG, "outBuf len %u is less to %u bytes input", outLen, retLen + vec[i].len);
+            uint32_t add = GCM_ADDED_LEN;
+            LOGE(TAG, "outBuf len %u is less to %u bytes input, addlen:%u", outLen, retLen + vec[i].len, add);
             return 0;
         }
         if (EVP_EncryptUpdate(cryptPara->ctx, outBuf + retLen, &length, vec[i].buf, (int32_t)vec[i].len) == 0 ||
