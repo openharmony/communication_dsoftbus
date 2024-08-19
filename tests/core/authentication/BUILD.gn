@@ -875,9 +875,49 @@ ohos_unittest("AuthLaneTest") {
   }
 }
 
+ohos_unittest("AuthDeviceProfileListenerTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/authentication/bind/auth_device_profile_listener.cpp",
+    "unittest/auth_device_profile_listener_mock.cpp",
+    "unittest/auth_device_profile_listener_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/include",
+  ]
+
+  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.deviceprofile_device_info_manager)) {
+    external_deps = [
+      "device_info_manager:distributed_device_profile_common",
+      "device_info_manager:distributed_device_profile_sdk",
+      "hilog:libhilog",
+      "ipc:ipc_core",
+    ]
+  } else {
+    external_deps = [
+      "hilog:libhilog",
+      "ipc:ipc_core",
+    ]
+  }
+  external_deps += [
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
+    ":AuthDeviceProfileListenerTest",
     ":AuthEnhanceMockTest",
     ":AuthHichainTest",
     ":AuthLaneTest",
