@@ -107,11 +107,11 @@ uint32_t AesGcmEncryptVec(AesVec *vec, uint32_t vecNum, CryptPara *cryptPara, ui
         LOGE(TAG, "InitEncryptCtx error");
         return 0;
     }
-
+    uint32_t add = GCM_ADDED_LEN;
+    LOGI(TAG, "added_len:%u", add);
     for (uint32_t i = 0; i < vecNum; i++) {
         if ((outLen - GCM_ADDED_LEN) < (retLen + vec[i].len)) {
-            uint32_t add = GCM_ADDED_LEN;
-            LOGE(TAG, "outBuf len %u is less to %u bytes input, addlen:%u", outLen, retLen + vec[i].len, add);
+            LOGE(TAG, "outBuf len %u is less to %u bytes input", outLen, retLen + vec[i].len);
             return 0;
         }
         if (EVP_EncryptUpdate(cryptPara->ctx, outBuf + retLen, &length, vec[i].buf, (int32_t)vec[i].len) == 0 ||
