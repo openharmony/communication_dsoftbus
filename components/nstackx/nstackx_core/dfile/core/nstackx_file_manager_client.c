@@ -143,7 +143,6 @@ static FileDataFrame *GetEncryptedDataFrame(FileManager *fileManager, CryptPara 
         fileInfo->errCode = FILE_MANAGER_FILE_EOTHER;
         free(fileDataFrame);
         fileDataFrame = NULL;
-        payLoadLen = GCM_ADDED_LEN;
         DFILE_LOGE(TAG, "data encrypt failed");
     }
 
