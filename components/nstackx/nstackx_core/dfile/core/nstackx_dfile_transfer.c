@@ -1540,7 +1540,6 @@ DFileTrans *DFileTransCreate(const DFileTransPara *para)
 
 void DFileTransDestroy(DFileTrans *dFileTrans)
 {
-    DFILE_LOGI(TAG, "session->allTaskCount %u", dFileTrans->session->allTaskCount);
     dFileTrans->session->allTaskCount--;
     DFileTransDestroyInner(dFileTrans);
 }
