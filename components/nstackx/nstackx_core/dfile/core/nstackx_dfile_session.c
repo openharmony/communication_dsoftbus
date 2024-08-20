@@ -141,7 +141,6 @@ static int32_t SendSmallList(DFileSession *session)
     if (session->fileListProcessingCnt > 0 || session->fileListPendingCnt == 0) {
         while (!ListIsEmpty(&session->smallFileLists)) {
             fileListInfo = (FileListInfo *)ListPopFront(&session->smallFileLists);
-            DFILE_LOGI(TAG, "session->smallListPendingCnt %u", session->smallListPendingCnt);
             session->smallListPendingCnt--;
             if (fileListInfo == NULL) {
                 continue;
@@ -170,7 +169,6 @@ static void SendPendingList(DFileSession *session)
     DFileMsg data;
     while (!ListIsEmpty(&session->pendingFileLists)) {
         fileListInfo = (FileListInfo *)ListPopFront(&session->pendingFileLists);
-        DFILE_LOGI(TAG, "session->fileListPendingCnt %u", session->fileListPendingCnt);
         session->fileListPendingCnt--;
         if (fileListInfo == NULL) {
             continue;
@@ -319,8 +317,9 @@ static void CheckTransDone(DFileSession *session, struct DFileTrans *dFileTrans,
         if (SetTransIdState(session, dFileTrans->transId, STATE_TRANS_DONE) != NSTACKX_EOK) {
             DFILE_LOGE(TAG, "set trans id state fail");
         }
-        DFILE_LOGI(TAG, "currentTransCount: %u", ((PeerInfo *)dFileTrans->context)->currentTransCount);
-        ((PeerInfo *)dFileTrans->context)->currentTransCount--;
+        if (((PeerInfo *)dFileTrans->context)->currentTransCount > 0) {
+            ((PeerInfo *)dFileTrans->context)->currentTransCount--;
+        }
         ListRemoveNode(&dFileTrans->list);
         uint64_t totalBytes = DFileTransGetTotalBytes(dFileTrans);
         DFileTransDestroy(dFileTrans);
@@ -341,7 +340,6 @@ static void DTransMsgReceiver(struct DFileTrans *dFileTrans, DFileTransMsgType m
 {
     PeerInfo *peerInfo = dFileTrans->context;
     DFileSession *session = peerInfo->session;
-    DFILE_LOGI(TAG, "before UpdateMsgProcessInfo, msgtype: %d", msgType);
     UpdateMsgProcessInfo(session, dFileTrans, msgType, msg);
 
     switch (msgType) {
