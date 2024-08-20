@@ -616,7 +616,11 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
         }
         if (auth->connId[info->connInfo.type] != info->connId &&
             auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI) {
+            AuthFsm *fsm = GetAuthFsmByConnId(auth->connId[info->connInfo.type], info->isServer, false);
             DisconnectAuthDevice(&auth->connId[info->connInfo.type]);
+            if (fsm != NULL) {
+                UpdateFd(&fsm->info.connId, AUTH_INVALID_FD);
+            }
             auth->hasAuthPassed[info->connInfo.type] = false;
             AUTH_LOGI(AUTH_FSM, "auth manager may single device on line");
         }
