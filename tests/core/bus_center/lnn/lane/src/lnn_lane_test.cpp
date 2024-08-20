@@ -3239,15 +3239,16 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_10, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_LANE_11, TestSize.Level1)
 {
     LaneLinkInfo linkInfo;
+    NiceMock<LaneDepsInterfaceMock> laneDepMock;
     LnnMacInfo macInfo;
     ASSERT_EQ(memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
     linkInfo.type = LANE_P2P;
     ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
     ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
     uint64_t laneId = LANE_ID_BASE;
+    EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     uint32_t ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    NiceMock<LaneDepsInterfaceMock> laneDepMock;
     EXPECT_CALL(laneDepMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
