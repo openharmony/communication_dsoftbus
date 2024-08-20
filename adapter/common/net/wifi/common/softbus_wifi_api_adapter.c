@@ -23,6 +23,7 @@
 #include "softbus_errcode.h"
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_hid2d.h"
+#include "kits/c/wifi_hotspot.h"
 #include "kits/c/wifi_p2p.h"
 #include "kits/c/wifi_state.h"
 
@@ -414,6 +415,16 @@ bool SoftBusIsWifiActive(void)
     int wifiState = IsWifiActive();
     LNN_LOGI(LNN_STATE, "wifiState=%{public}d", wifiState);
     if (wifiState == WIFI_STA_ACTIVE) {
+        return true;
+    }
+    return false;
+}
+
+bool SoftBusIsHotspotActive(void)
+{
+    int hotspotState = IsHotspotActive();
+    LNN_LOGI(LNN_STATE, "hotspotState=%{public}d", hotspotState);
+    if (hotspotState == WIFI_HOTSPOT_ACTIVE) {
         return true;
     }
     return false;

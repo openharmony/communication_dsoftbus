@@ -869,7 +869,7 @@ int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type)
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
-bool IsSupportLaneLinkReuse(const char *udidHashStr, LaneLinkType type)
+bool FindLaneResourceByDevIdHash(const char *udidHashStr, LaneLinkType type)
 {
     if (udidHashStr == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
