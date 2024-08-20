@@ -564,7 +564,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     return SOFTBUS_OK;
 ERR_FAIL:
     ConnShutdownSocket(fd);
-    result->OnConnectFailed(requestId, SOFTBUS_ERR);
+    result->OnConnectFailed(requestId, SOFTBUS_CONN_SOCKET_INTERNAL_ERR);
     DfxRecordTcpConnectFail(DEFAULT_PID, (ConnectOption *)option, NULL, statistics, error);
     SoftBusFree(statistics);
     return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
