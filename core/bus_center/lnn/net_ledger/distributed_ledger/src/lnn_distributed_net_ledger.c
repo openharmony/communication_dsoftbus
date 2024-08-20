@@ -712,8 +712,8 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
         oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
     }
-    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != 0 ||
-        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != 0) {
+    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
