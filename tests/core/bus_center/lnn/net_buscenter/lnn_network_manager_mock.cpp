@@ -117,5 +117,14 @@ void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
 {
     return GetNetworkManagerInterface()->LnnNotifyAccountStateChangeEvent(state);
 }
+
+void LnnDeinitPhysicalSubnetManager(void)
+{
+    return GetNetworkManagerInterface()->LnnDeinitPhysicalSubnetManager();
+}
+void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    return GetNetworkManagerInterface()->LnnUnregisterEventHandler(event, handler);
+}
 }
 }
