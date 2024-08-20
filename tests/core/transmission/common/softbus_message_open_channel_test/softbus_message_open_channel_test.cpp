@@ -13,20 +13,14 @@
  * limitations under the License.
  */
 
-#include "softbus_message_open_channel.h"
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "session.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
-#include "softbus_utils.h"
-#include "trans_auth_message.h"
-
 // This file needs to be placed after gtest.h (atomic), otherwise will compile error (stdatomic.h)
 #include "softbus_message_open_channel.c"
+#include "trans_auth_message.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -104,7 +98,6 @@ int32_t TestTransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         !AddStringToJsonObject(msg, "DST_BUS_NAME", appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(msg, "FIRST_DATA", reinterpret_cast<const char *>(appInfo->fastTransData)) ||
         !AddNumberToJsonObject(msg, "MTU_SIZE", appInfo->myData.dataConfig)) {
-        TRANS_LOGE(TRANS_SVC, "failed");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     return SOFTBUS_OK;
