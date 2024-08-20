@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,15 @@
  * limitations under the License.
  */
 
-#include <securec.h>
-
 #include <gtest/gtest.h>
-#include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_app_info.h"
-#include "softbus_server_frame.h"
-#include "softbus_adapter_mem.h"
-#include "trans_session_manager.h"
-#include "trans_session_service.h"
-#include "softbus_feature_config.h"
-#include "softbus_conn_interface.h"
+
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
+#include "softbus_feature_config.h"
+#include "trans_session_manager.h"
+#include "trans_session_service.h"
 
 using namespace testing::ext;
 

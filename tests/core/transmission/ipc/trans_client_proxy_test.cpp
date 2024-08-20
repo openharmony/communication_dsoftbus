@@ -14,22 +14,13 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
 
-#include "trans_client_proxy.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "iservice_registry.h"
 #include "if_system_ability_manager.h"
-#include "iremote_object.h"
-#include "softbus_server_death_recipient.h"
-#include "softbus_client_info_manager.h"
-#include "ipc_skeleton.h"
-#include "softbus_trans_def.h"
-#include "session.h"
+#include "iservice_registry.h"
 #include "softbus_adapter_mem.h"
-#include "trans_client_proxy_standard.h"
-
+#include "softbus_client_info_manager.h"
+#include "softbus_server_death_recipient.h"
+#include "trans_client_proxy.h"
 
 using namespace std;
 using namespace testing::ext;
