@@ -743,7 +743,6 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos)
             ret, tos);
         return ret;
     }
-    NotifyTransLimitChanged(channelId, tos);
     return ret;
 }
 
