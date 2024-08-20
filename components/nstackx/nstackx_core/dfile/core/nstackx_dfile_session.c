@@ -270,8 +270,6 @@ static void CalculateSessionTransferRate(DFileSession *session, uint64_t totalBy
     if (msgType != DFILE_TRANS_MSG_FILE_SENT && msgType != DFILE_TRANS_MSG_END) {
         return;
     }
-    uint64_t maxx = UINT64_MAX;
-    DFILE_LOGI(TAG, "session->bytesTransferred %llu max %llu", session->bytesTransferred, maxx);
     if (totalBytes <= UINT64_MAX - session->bytesTransferred) {
         session->bytesTransferred += totalBytes;
     } else {
@@ -340,6 +338,7 @@ static void DTransMsgReceiver(struct DFileTrans *dFileTrans, DFileTransMsgType m
 {
     PeerInfo *peerInfo = dFileTrans->context;
     DFileSession *session = peerInfo->session;
+
     UpdateMsgProcessInfo(session, dFileTrans, msgType, msg);
 
     switch (msgType) {
