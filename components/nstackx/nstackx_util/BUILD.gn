@@ -229,10 +229,6 @@ if (defined(ohos_lite)) {
         "c_utils:utils",
         "openssl:libcrypto_shared",
       ]
-    } else {
-      cflags += [ "-DMBEDTLS_INCLUDED" ]
-      sources += [ "core/nstackx_mbedtls.c" ]
-      external_deps += [ "mbedtls:mbedtls_shared" ]
     }
     public_configs = [ ":nstackx_util_header" ]
     innerapi_tags = [ "platformsdk_indirect" ]
