@@ -28,6 +28,7 @@ namespace {
 const std::string APP_ID = "dsoftbus";
 const std::string STORE_ID = "dsoftbus_kv_db_test";
 shared_ptr<KVAdapter> kvStore = nullptr;
+shared_ptr<DistributedKv::KvStoreObserver> kvStoreObserver = nullptr;
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MAX_MAP_SIZE = 10000;
 const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
@@ -273,4 +274,88 @@ HWTEST_F(KVAdapterTest, Get002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->Get("key11", value));
 }
 
+/**
+ * @tc.name: SetCloudAbility001
+ * @tc.desc: SetCloudAbility succeed.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, SetCloudAbility001, TestSize.Level1)
+{
+    EXPECT_EQ(SOFTBUS_OK, kvStore->SetCloudAbility(true));
+}
+
+/**
+ * @tc.name: SetCloudAbility002
+ * @tc.desc: SetCloudAbility failed, kvDBPtr is null.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, SetCloudAbility002, TestSize.Level1)
+{
+    kvStore->DeInit();
+    EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->SetCloudAbility(true));
+}
+
+/**
+ * @tc.name: RegisterDataChangeListener001
+ * @tc.desc: RegisterDataChangeListener failed, cloud sync disabled.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, RegisterDataChangeListener001, TestSize.Level1)
+{
+    kvStoreObserver = std::make_shared<DistributedKv::KvStoreObserver>();
+    EXPECT_NE(SOFTBUS_OK, kvStore->RegisterDataChangeListener(kvStoreObserver));
+}
+
+/**
+ * @tc.name: DeRegisterDataChangeListener001
+ * @tc.desc: DeRegisterDataChangeListener failed, cloud sync disabled.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, DeRegisterDataChangeListener001, TestSize.Level1)
+{
+    EXPECT_NE(SOFTBUS_OK, kvStore->DeRegisterDataChangeListener());
+}
+
+/**
+ * @tc.name: CloudSync001
+ * @tc.desc: CloudSync failed, cloud sync disabled.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, CloudSync001, TestSize.Level1)
+{
+    EXPECT_NE(SOFTBUS_OK, kvStore->CloudSync());
+}
+
+/**
+ * @tc.name: CloudSyncCallback001
+ * @tc.desc: CloudSyncCallback succeed.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, CloudSyncCallback001, TestSize.Level1)
+{
+    DistributedKv::ProgressDetail detail;
+    detail.code = DistributedKv::Status::SUCCESS;
+    detail.progress = DistributedKv::Progress::SYNC_FINISH;
+    kvStore->CloudSyncCallback(std::move(detail));
+}
+
+/**
+ * @tc.name: CloudSyncCallback002
+ * @tc.desc: CloudSyncCallback failed, Status code is ERROR.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, CloudSyncCallback002, TestSize.Level1)
+{
+    DistributedKv::ProgressDetail detail;
+    detail.code = DistributedKv::Status::ERROR;
+    detail.progress = DistributedKv::Progress::SYNC_FINISH;
+    kvStore->CloudSyncCallback(std::move(detail));
+}
 }
