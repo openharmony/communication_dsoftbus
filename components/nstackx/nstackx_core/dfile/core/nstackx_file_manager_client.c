@@ -127,8 +127,6 @@ static FileDataFrame *GetEncryptedDataFrame(FileManager *fileManager, CryptPara 
         goto L_END;
     }
     fileManager->iorBytes += (uint64_t)targetLenth;
-    payLoadLen = GCM_ADDED_LEN;
-    DFILE_LOGI(TAG, "added_len:%u", payLoadLen);
     payLoadLen = targetLenth + GCM_ADDED_LEN;
     frameOffset = offsetof(FileDataFrame, blockPayload);
     fileDataFrame = (FileDataFrame *)calloc(1, frameOffset + payLoadLen);
