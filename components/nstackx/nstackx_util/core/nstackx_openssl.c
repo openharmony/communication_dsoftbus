@@ -107,6 +107,7 @@ uint32_t AesGcmEncryptVec(AesVec *vec, uint32_t vecNum, CryptPara *cryptPara, ui
         LOGE(TAG, "InitEncryptCtx error");
         return 0;
     }
+
     for (uint32_t i = 0; i < vecNum; i++) {
         if ((outLen - GCM_ADDED_LEN) < (retLen + vec[i].len)) {
             LOGE(TAG, "outBuf len %u is less to %u bytes input", outLen, retLen + vec[i].len);
