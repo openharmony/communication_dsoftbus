@@ -1592,7 +1592,7 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
     if (action == TIMER_ACTION_START) {
-        TRANS_LOGE(TRANS_SDK,
+        TRANS_LOGI(TRANS_SDK,
             "socket=%{public}d, inputMaxWaitTime=%{public}u, maxWaitTime=%{public}u, enableStatus=%{public}d",
             socket, maxWaitTime, sessionNode->lifecycle.maxWaitTime, sessionNode->enableStatus);
         bool binding = (sessionNode->lifecycle.maxWaitTime != 0);
