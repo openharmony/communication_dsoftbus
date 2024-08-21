@@ -18,14 +18,19 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "bus_center_info_key.h"
+#include "bus_center_manager.h"
 #include "lnn_lane_link_wifi_direct.h"
 #include "lnn_log.h"
 #include "message_handler.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
+#include "softbus_utils.h"
 
 #define CONFLICT_INFO_TIMELINESS 30000
+#define CONFLICT_SHORT_HASH_LEN_TMP 8
 
 typedef enum {
     MSG_TYPE_CONFLICT_TIMELINESS = 0,
@@ -346,12 +351,38 @@ int32_t AddLinkConflictInfo(const LinkConflictInfo *inputInfo)
     return SOFTBUS_OK;
 }
 
+static void GenerateConflictInfoWithDevIdHash(const DevIdentifyInfo *inputInfo, DevIdentifyInfo *outputInfo)
+{
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(inputInfo->devInfo.peerDevId, STRING_KEY_DEV_UDID,
+        peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return;
+    }
+    uint8_t udidHash[UDID_HASH_LEN] = {0};
+    if (SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "generate udidHash fail");
+        return;
+    }
+    if (ConvertBytesToHexString(outputInfo->devInfo.udidHash, CONFLICT_UDIDHASH_STR_LEN + 1, udidHash,
+        CONFLICT_SHORT_HASH_LEN_TMP) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "convert bytes to string fail");
+        return;
+    }
+}
+
 int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
     LinkConflictInfo *outputInfo)
 {
     if (inputInfo == NULL || outputInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+    DevIdentifyInfo hashInfo;
+    (void)memset_s(&hashInfo, sizeof(DevIdentifyInfo), 0, sizeof(DevIdentifyInfo));
+    if (inputInfo->type == IDENTIFY_TYPE_DEV_ID) {
+        hashInfo.type = IDENTIFY_TYPE_UDID_HASH;
+        GenerateConflictInfoWithDevIdHash(inputInfo, &hashInfo);
     }
     if (LinkConflictLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "linkConflict lock fail");
@@ -361,7 +392,8 @@ int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConfli
     LinkConflictInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
         if (item->conflictType == conflictType &&
-            memcmp(&item->identifyInfo, inputInfo, sizeof(DevIdentifyInfo)) == 0) {
+            (memcmp(&item->identifyInfo, inputInfo, sizeof(DevIdentifyInfo)) == 0 ||
+            memcmp(&item->identifyInfo, &hashInfo, sizeof(DevIdentifyInfo)) == 0)) {
             int32_t ret = GenerateConflictInfo(item, outputInfo);
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LANE, "generate link conflict devInfo fail");
