@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include "auth_interface.h"
+#include "bus_center_info_key.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "lnn_node_info.h"
@@ -36,13 +37,17 @@ public:
     virtual int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info) = 0;
     virtual uint32_t TransACLGetFirstTokenID() = 0;
     virtual int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo) = 0;
-    virtual int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, uint32_t callingTokenId,
-        int64_t timeStart) = 0;
+    virtual int32_t TransAsyncGetLaneInfo(
+        const SessionParam *param, uint32_t *laneHandle, uint32_t callingTokenId, int64_t timeStart) = 0;
     virtual int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneHandle) = 0;
     virtual int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt) = 0;
-    virtual int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt,
-        int32_t *channelId) = 0;
+    virtual int32_t TransOpenChannelProc(
+        ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt, int32_t *channelId) = 0;
     virtual int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt) = 0;
+    virtual int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid) = 0;
+    virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len) = 0;
+    virtual int32_t TransCommonGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len) = 0;
 };
 class TransManagerInterfaceMock : public TransManagerInterface {
 public:
@@ -58,6 +63,10 @@ public:
     MOCK_METHOD2(TransGetConnectOptByConnInfo, int32_t (const LaneConnInfo *, ConnectOption *));
     MOCK_METHOD4(TransOpenChannelProc, int32_t (ChannelType, AppInfo *, const ConnectOption *, int32_t *));
     MOCK_METHOD2(TransProxyGetConnOptionByChanId, int32_t (int32_t, ConnectOption *));
+    MOCK_METHOD3(TransGetUidAndPid, int32_t (const char *, int32_t *, int32_t *));
+    MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char *, uint32_t));
+    MOCK_METHOD3(TransGetPkgNameBySessionName, int32_t (const char *, char *, uint16_t));
+    MOCK_METHOD3(TransCommonGetLocalConfig, int32_t (int32_t, int32_t, uint32_t *));
 };
 } // namespace OHOS
 #endif // TRANS_MANAGER_MOCK_H
