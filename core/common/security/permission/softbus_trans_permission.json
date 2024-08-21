@@ -41,7 +41,6 @@
     "SESSION_NAME": "^ohos.distributedschedule.dms.*",
     "REGEXP": "true",
     "DEVID": "UUID",
-    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "PKG_NAME": "dms",
