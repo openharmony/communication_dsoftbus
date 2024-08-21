@@ -15,7 +15,5 @@ import("../../../../../dsoftbus.gni")
 
 bluetooth_mock_sources = [ "$dsoftbus_root_path/tests/core/discovery/ble/bluetooth_mock/bluetooth_mock.cpp" ]
 
-bluetooth_mock_include_dirs = [
-  "$dsoftbus_root_path/tests/core/discovery/ble/bluetooth_mock",
-  "//foundation/communication/bluetooth/interfaces/inner_api/include",
-]
+bluetooth_mock_include_dirs =
+    [ "$dsoftbus_root_path/tests/core/discovery/ble/bluetooth_mock" ]
