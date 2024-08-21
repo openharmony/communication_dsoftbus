@@ -315,7 +315,9 @@ static void CheckTransDone(DFileSession *session, struct DFileTrans *dFileTrans,
         if (SetTransIdState(session, dFileTrans->transId, STATE_TRANS_DONE) != NSTACKX_EOK) {
             DFILE_LOGE(TAG, "set trans id state fail");
         }
-        ((PeerInfo *)dFileTrans->context)->currentTransCount--;
+        if (((PeerInfo *)dFileTrans->context)->currentTransCount > 0) {
+            ((PeerInfo *)dFileTrans->context)->currentTransCount--;
+        }
         ListRemoveNode(&dFileTrans->list);
         uint64_t totalBytes = DFileTransGetTotalBytes(dFileTrans);
         DFileTransDestroy(dFileTrans);
