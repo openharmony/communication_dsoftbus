@@ -42,7 +42,10 @@ ohos_unittest("TransSessionManagerTest") {
     "$dsoftbus_core_path/frame:softbus_server",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransSessionServiceTest") {
@@ -71,7 +74,10 @@ ohos_unittest("TransSessionServiceTest") {
     "$dsoftbus_core_path/frame:softbus_server",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 group("unittest") {
