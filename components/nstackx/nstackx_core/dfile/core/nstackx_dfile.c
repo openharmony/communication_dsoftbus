@@ -47,7 +47,7 @@ pthread_mutex_t g_dFileSessionChainMutex = PTHREAD_MUTEX_INITIALIZER;
 List g_dFileSessionChain = {&(g_dFileSessionChain), &(g_dFileSessionChain)};
 static uint16_t g_dFileSessionId = 0;
 /* currently enabled capabilities */
-static uint32_t g_capabilities = NSTACKX_CAPS_WLAN_CATAGORY | NSTACKX_CAPS_CHACHA;
+static uint32_t g_capabilities = NSTACKX_CAPS_WLAN_CATAGORY;
 /* wlan catagory from APP */
 static uint32_t g_wlanCatagory = NSTACKX_WLAN_CAT_TCP;
 
@@ -900,7 +900,7 @@ static inline void PostSessionCreate(DFileSession *session)
 {
     session->capability = g_capabilities;
     session->wlanCatagory = g_wlanCatagory;
-
+    session->cipherCapability = NSTACKX_CIPHER_AES_GCM | NSTACKX_CIPHER_CHACHA;
     DFILE_LOGI(TAG, "current capabilities tcp:%d", CapsTcp(session));
 }
 

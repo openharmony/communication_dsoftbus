@@ -28,11 +28,6 @@
 extern "C" {
 #endif
 
-typedef enum {
-    CIPHER_AES_GCM = 0,
-    CIPHER_CHACHA,
-} DFileCipherType;
-
 #define AES_128_KEY_LENGTH 16
 #define AES_192_KEY_LENGTH 24
 #define AES_256_KEY_LENGTH 32
@@ -53,7 +48,7 @@ typedef struct {
     uint32_t ivLen;
     uint8_t aad[GCM_MAX_AAD_LENGTH];
     uint32_t aadLen;
-    int cipherType;
+    uint8_t cipherType;
     MBEDTLS_CTX *ctx;
 } CryptPara;
 
@@ -66,6 +61,7 @@ NSTACKX_EXPORT uint8_t IsCryptoIncluded(void);
 NSTACKX_EXPORT uint8_t QueryCipherSupportByName(char *name);
 NSTACKX_EXPORT MBEDTLS_CTX ClearCryptCtx(MBEDTLS_CTX *ctx);
 NSTACKX_EXPORT MBEDTLS_CTX *CreateCryptCtx(void);
+NSTACKX_EXPORT uint8_t IsSupportHardwareAesNi(void);
 
 #endif
 
