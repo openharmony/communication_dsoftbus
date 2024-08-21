@@ -61,8 +61,8 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     return GetTransManagerInterface()->TransCommonGetAppInfo(param, appInfo);
 }
 
-int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, uint32_t callingTokenId,
-    int64_t timeStart)
+int32_t TransAsyncGetLaneInfo(
+    const SessionParam *param, uint32_t *laneHandle, uint32_t callingTokenId, int64_t timeStart)
 {
     return GetTransManagerInterface()->TransAsyncGetLaneInfo(param, laneHandle, callingTokenId, timeStart);
 }
@@ -85,6 +85,26 @@ int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOp
 int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt)
 {
     return GetTransManagerInterface()->TransProxyGetConnOptionByChanId(channelId, connOpt);
+}
+
+int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
+{
+    return GetTransManagerInterface()->TransGetUidAndPid(sessionName, uid, pid);
+}
+
+int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+{
+    return GetTransManagerInterface()->LnnGetLocalStrInfo(key, info, len);
+}
+
+int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
+{
+    return GetTransManagerInterface()->TransGetPkgNameBySessionName(sessionName, pkgName, len);
+}
+
+int32_t TransCommonGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
+{
+    return GetTransManagerInterface()->TransCommonGetLocalConfig(channelType, businessType, len);
 }
 }
 }
