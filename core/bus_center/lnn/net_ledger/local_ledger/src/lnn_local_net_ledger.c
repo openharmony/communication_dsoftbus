@@ -936,8 +936,6 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
         info->nickName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get nick name fail");
     }
-    LNN_LOGD(LNN_LEDGER, "info->unifiedDefaultName=%{public}s, unifiedName=%{public}s, nickName=%{public}s",
-        info->unifiedDefaultName, info->unifiedName, info->nickName);
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVTYPE, devType, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVTYPE failed");
         return SOFTBUS_ERR;

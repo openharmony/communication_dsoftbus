@@ -164,14 +164,36 @@ static void NotifyDeviceDisplayNameChange(const char *networkId, const char *udi
     UpdateProfile(&nodeInfo);
 }
 
+static void SetDisplayName(char *displayName, const char *nickName, const NodeInfo *peerNodeInfo,
+    const NodeInfo *localNodeInfo, int64_t accountId)
+{
+    int32_t ret = EOK;
+    if (strlen(peerNodeInfo->deviceInfo.unifiedName) != 0 &&
+        strcmp(peerNodeInfo->deviceInfo.unifiedName, peerNodeInfo->deviceInfo.unifiedDefaultName) != 0) {
+        ret = strcpy_s(displayName, DEVICE_NAME_BUF_LEN, peerNodeInfo->deviceInfo.unifiedName);
+    } else if (strlen(nickName) == 0 || localNodeInfo->accountId == accountId) {
+        ret = strcpy_s(displayName, DEVICE_NAME_BUF_LEN, peerNodeInfo->deviceInfo.unifiedDefaultName);
+    } else {
+        LnnGetDeviceDisplayName(nickName, peerNodeInfo->deviceInfo.unifiedDefaultName,
+            displayName, DEVICE_NAME_BUF_LEN);
+    }
+    if (ret != EOK) {
+        LNN_LOGW(LNN_BUILDER, "strcpy_s fail, use default name");
+    }
+    char *anonyDeviceName = NULL;
+    Anonymize(displayName, &anonyDeviceName);
+    LNN_LOGI(LNN_BUILDER, "peer deviceName=%{public}s", anonyDeviceName);
+    AnonymizeFree(anonyDeviceName);
+}
+
 static void NickNameMsgProc(const char *networkId, int64_t accountId, const char *nickName)
 {
     const NodeInfo *localNodeInfo = LnnGetLocalNodeInfo();
-    if (localNodeInfo == NULL) {
-        LNN_LOGE(LNN_BUILDER, "local devinfo nullptr");
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "nickName is=%{public}s", nickName);
+    LNN_CHECK_AND_RETURN_LOGE(localNodeInfo != NULL, LNN_BUILDER, "local devinfo nullptr");
+    char *anonyNickName = NULL;
+    Anonymize(nickName, &anonyNickName);
+    LNN_LOGI(LNN_BUILDER, "nickName is=%{public}s", anonyNickName);
+    AnonymizeFree(anonyNickName);
     char displayName[DEVICE_NAME_BUF_LEN] = {0};
     NodeInfo peerNodeInfo;
     (void)memset_s(&peerNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -187,24 +209,23 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         LNN_LOGE(LNN_BUILDER, "set remote device nick name fail");
         return;
     }
-    int32_t ret = EOK;
+
+    char *anonyUnifiedDefaultName = NULL;
+    Anonymize(peerNodeInfo.deviceInfo.unifiedDefaultName, &anonyUnifiedDefaultName);
+    anonyNickName = NULL;
+    Anonymize(peerNodeInfo.deviceInfo.nickName, &anonyNickName);
+    char *anonyUnifiedName = NULL;
+    Anonymize(peerNodeInfo.deviceInfo.unifiedName, &anonyUnifiedName);
+    char *anonyDeviceName = NULL;
+    Anonymize(peerNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_BUILDER, "peer unifiedDefaultName=%{public}s, nickName=%{public}s, "
         "unifiedName=%{public}s, deviceName=%{public}s",
-        peerNodeInfo.deviceInfo.unifiedDefaultName, peerNodeInfo.deviceInfo.nickName,
-        peerNodeInfo.deviceInfo.unifiedName, peerNodeInfo.deviceInfo.deviceName);
-    if (strlen(peerNodeInfo.deviceInfo.unifiedName) != 0 &&
-        strcmp(peerNodeInfo.deviceInfo.unifiedName, peerNodeInfo.deviceInfo.unifiedDefaultName) != 0) {
-        ret = strcpy_s(displayName, DEVICE_NAME_BUF_LEN, peerNodeInfo.deviceInfo.unifiedName);
-    } else if (strlen(nickName) == 0 || localNodeInfo->accountId == accountId) {
-        ret = strcpy_s(displayName, DEVICE_NAME_BUF_LEN, peerNodeInfo.deviceInfo.unifiedDefaultName);
-    } else {
-        LnnGetDeviceDisplayName(nickName, peerNodeInfo.deviceInfo.unifiedDefaultName,
-            displayName, DEVICE_NAME_BUF_LEN);
-    }
-    if (ret != EOK) {
-        LNN_LOGW(LNN_BUILDER, "strcpy_s fail, use default name");
-    }
-    LNN_LOGI(LNN_BUILDER, "peer deviceName=%{public}s", displayName);
+        anonyUnifiedDefaultName, anonyNickName, anonyUnifiedName, anonyDeviceName);
+    AnonymizeFree(anonyUnifiedDefaultName);
+    AnonymizeFree(anonyNickName);
+    AnonymizeFree(anonyUnifiedName);
+    AnonymizeFree(anonyDeviceName);
+    SetDisplayName(displayName, nickName, &peerNodeInfo, localNodeInfo, accountId);
     if (strcmp(peerNodeInfo.deviceInfo.deviceName, displayName) == 0 || strlen(displayName) == 0) {
         LNN_LOGI(LNN_BUILDER, "device name not change, ignore this msg");
         return;
@@ -361,6 +382,28 @@ static void LnnHandlerGetDeviceName(DeviceNameType type, const char *name)
     LnnNotifyLocalNetworkIdChanged();
 }
 
+static void UpdateLocalExtendDeviceName(const char *deviceName, char *unifiedName,
+    char *unifiedDefaultName, char *nickName)
+{
+    if (LnnGetUnifiedDeviceName(unifiedName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK && strlen(unifiedName) != 0) {
+        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_NAME, unifiedName) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set unified name fail");
+        }
+    }
+    if (LnnGetUnifiedDefaultDeviceName(unifiedDefaultName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK &&
+        strlen(unifiedDefaultName) != 0) {
+        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_DEFAULT_NAME, unifiedDefaultName) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set default unified name fail");
+        }
+    }
+    if (LnnGetSettingNickName(deviceName, unifiedName, nickName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK &&
+        strlen(nickName) != 0) {
+        if (LnnSetLocalStrInfo(STRING_KEY_DEV_NICK_NAME, nickName) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set nick name fail");
+        }
+    }
+}
+
 static void UpdataLocalFromSetting(void *p)
 {
     (void)p;
@@ -389,28 +432,25 @@ static void UpdataLocalFromSetting(void *p)
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "UpdataLocalFromSetting set device name fail");
     }
-    if (LnnGetUnifiedDeviceName(unifiedName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK && strlen(unifiedName) != 0) {
-        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_NAME, unifiedName) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set unified name fail");
-        }
-    }
-    if (LnnGetUnifiedDefaultDeviceName(unifiedDefaultName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK &&
-        strlen(unifiedDefaultName) != 0) {
-        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_DEFAULT_NAME, unifiedDefaultName) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set default unified name fail");
-        }
-    }
-    if (LnnGetSettingNickName(deviceName, unifiedName, nickName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK &&
-        strlen(nickName) != 0) {
-        if (LnnSetLocalStrInfo(STRING_KEY_DEV_NICK_NAME, nickName) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "UpdateLocalFromSetting set nick name fail");
-        }
-    }
+    UpdateLocalExtendDeviceName(deviceName, unifiedName, unifiedDefaultName, nickName);
     RegisterNameMonitor();
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
     LnnNotifyLocalNetworkIdChanged();
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    char *anonyUnifiedName = NULL;
+    Anonymize(unifiedName, &anonyUnifiedName);
+    char *anonyUnifiedDefaultName = NULL;
+    Anonymize(unifiedDefaultName, &anonyUnifiedDefaultName);
+    char *anonyNickName = NULL;
+    Anonymize(nickName, &anonyNickName);
     LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
-        "unifiedDefaultName=%{public}s, nickName=%{public}s", deviceName, unifiedName, unifiedDefaultName, nickName);
+        "unifiedDefaultName=%{public}s, nickName=%{public}s",
+        anonyDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
+    AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyUnifiedName);
+    AnonymizeFree(anonyUnifiedDefaultName);
+    AnonymizeFree(anonyNickName);
 }
 
 static void UpdateDeviceNameFromSetting(void)
