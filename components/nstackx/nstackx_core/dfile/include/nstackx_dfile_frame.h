@@ -132,6 +132,7 @@ typedef struct {
     uint16_t fileId;
     uint32_t blockSequence;
     uint32_t linkSequence;
+    uint8_t socketIndex;
     uint8_t blockPayload[0];
 } FileDataFrameZS;
 
@@ -156,6 +157,7 @@ typedef struct {
     uint16_t fileId[0];
 } FileTransferDoneAckFrame;
 
+#define VERSION_STR_LEN 64
 typedef struct {
     DFileFrameHeader header;
     uint16_t mtu;
@@ -165,8 +167,13 @@ typedef struct {
     uint32_t capability;
     uint32_t dataFrameSize;
     uint32_t capsCheck;
+    char productVersion[VERSION_STR_LEN]; /* DFX */
+    uint8_t isSupport160M;
+    uint8_t isSupportMtp;
+    uint8_t mtpPort;
+    uint8_t headerEnc;
+    uint32_t mtpCapability;
     uint32_t cipherCapability;
-    uint16_t deviceBits;
 } SettingFrame;
 
 typedef struct {
@@ -178,6 +185,7 @@ typedef struct {
 typedef struct {
     DFileFrameHeader header;
     WifiStationInfo wifiStationInfo;
+    RamInfo ramInfo;
 } CongestionControlFrame;
 #pragma pack(pop)
 

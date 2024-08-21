@@ -186,6 +186,7 @@ if (defined(ohos_lite)) {
     cflags += [
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DENABLE_USER_LOG",
+      "-DNSTACKX_WITH_LINUX_STANDARD",
     ]
     if (defined(board_toolchain_type)) {
       if (board_toolchain_type != "iccarm") {
