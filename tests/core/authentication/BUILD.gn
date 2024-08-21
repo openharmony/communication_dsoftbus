@@ -644,6 +644,7 @@ ohos_unittest("AuthManagerTest") {
       "bounds_checking_function:libsec_shared",
       "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
