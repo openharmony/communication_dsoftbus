@@ -361,11 +361,12 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 {
     uint32_t connId = info->connId;
     bool isServer = (bool)info->isServer;
-    ProxyChannelInfo *disChanInfo = (ProxyChannelInfo *)SoftBusMalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *disChanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (disChanInfo != NULL) {
         if (memcpy_s(disChanInfo, sizeof(ProxyChannelInfo), info, sizeof(ProxyChannelInfo)) != EOK) {
             SoftBusFree(disChanInfo);
-            TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
+            SoftBusFree((void *)info);
+            TRANS_LOGE(TRANS_SVC, "memcpy info to disChanInfo failed");
             return;
         }
     }
