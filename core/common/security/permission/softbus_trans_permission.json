@@ -63,7 +63,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^com.huawei.devicegroupmanage",
+    "SESSION_NAME": "com.huawei.devicegroupmanage",
     "DEVID": "UDID",
     "APP_INFO": [
       {
@@ -152,7 +152,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^security.dpms_channel",
+    "SESSION_NAME": "security.dpms_channel",
     "DEVID": "NETWORKID",
     "APP_INFO": [
       {
@@ -215,7 +215,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^IShare*",
+    "SESSION_NAME": "*IShare*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -381,7 +381,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^super_launcher_session",
+    "SESSION_NAME": "super_launcher_session",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
     "APP_INFO": [
