@@ -45,13 +45,11 @@ ohos_unittest("DiscClientProxyTest") {
   ]
   include_dirs += test_utils_inc
 
-  deps = [
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
-
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 }
@@ -88,14 +86,12 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
   ]
 
-  deps = [
-    "$dsoftbus_dfx_path/log:softbus_dfx_log",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
 
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 }

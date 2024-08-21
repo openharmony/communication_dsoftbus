@@ -53,15 +53,18 @@ ohos_unittest("DiscBleTest") {
     "$softbus_adapter_common/include",
     "$softbus_adapter_common/net/bluetooth/broadcast/interface",
     "$softbus_adapter_common/net/bluetooth/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
   include_dirs += test_utils_inc
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
+  ]
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "huks:libhukssdk",
   ]
 }
 
