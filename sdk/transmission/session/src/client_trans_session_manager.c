@@ -153,6 +153,36 @@ static bool SessionIdIsAvailable(int32_t sessionId)
     return true;
 }
 
+static void ShowAllSessionInfo()
+{
+    TRANS_LOGE(TRANS_SDK, "g_sessionIdNum=%{public}d, g_closingNum=%{public}d", g_sessionIdNum, g_closingNum);
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    int count = 0;
+    char *tmpName = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        Anonymize(serverNode->sessionName, &tmpName);
+        TRANS_LOGE(
+            TRANS_SDK, "client session server is exist. count=%{public}d, sessionName=%{public}s", count, tmpName);
+        AnonymizeFree(tmpName);
+        count++;
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        int sessionCount = 0;
+        char *tmpPeerSessionName = NULL;
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            Anonymize(sessionNode->info.peerSessionName, &tmpPeerSessionName);
+            TRANS_LOGE(TRANS_SDK,
+                "client session info is exist. sessionCount=%{public}d, peerSessionName=%{public}s, "
+                "channelId=%{public}d, channelType=%{public}d",
+                sessionCount, tmpPeerSessionName, sessionNode->channelId, sessionNode->channelType);
+            AnonymizeFree(tmpPeerSessionName);
+            sessionCount++;
+        }
+    }
+}
+
 int32_t GenerateSessionId(void)
 {
     if (g_sessionIdNum >= g_closingNum && g_sessionIdNum - g_closingNum >= MAX_SESSION_ID) {
@@ -422,6 +452,7 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
     /* need get lock before */
     session->sessionId = GenerateSessionId();
     if (session->sessionId < 0) {
+        (void)ShowAllSessionInfo();
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
     ClientSessionServer *serverNode = NULL;
