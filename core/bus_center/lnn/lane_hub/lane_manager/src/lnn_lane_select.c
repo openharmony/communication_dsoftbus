@@ -34,7 +34,8 @@
 #include "wifi_direct_manager.h"
 
 #define INVALID_LINK (-1)
-#define MESH_MAGIC_NUMBER 0x5A5A5A5A
+#define DB_MAGIC_NUMBER 0x5A5A5A5A
+#define MESH_MAGIC_NUMBER 0xA5A5A5A5
 
 static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
@@ -411,6 +412,61 @@ static int32_t SelectMeshLinks(const char *networkId, LaneLinkType *resList, uin
     return SOFTBUS_OK;
 }
 
+static bool IsSupportP2pReuse(const char *networkId)
+{
+    if (networkId == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(networkId, &osType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote osType fail");
+        return false;
+    }
+    if (osType == OH_OS_TYPE) {
+        LNN_LOGI(LNN_LANE, "valid os type, no need reuse p2p");
+        return false;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return false;
+    }
+    LaneResource resourceItem;
+    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    if (FindLaneResourceByLinkType(peerUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "p2p not support reuse");
+        return false;
+    }
+    return true;
+}
+
+static int32_t SelectDbLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
+{
+    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
+    uint32_t optLinkNum = 0;
+    optionalLink[optLinkNum++] = LANE_WLAN_5G;
+    optionalLink[optLinkNum++] = LANE_WLAN_2P4G;
+    if (IsSupportP2pReuse(networkId)) {
+        optionalLink[optLinkNum++] = LANE_P2P;
+    }
+    optionalLink[optLinkNum++] = LANE_BR;
+    optionalLink[optLinkNum++] = LANE_COC_DIRECT;
+    *resNum = 0;
+    for (uint32_t i = 0; i < optLinkNum; i++) {
+        if (LaneCapCheck(networkId, optionalLink[i]) != SOFTBUS_OK) {
+            continue;
+        }
+        resList[(*resNum)++] = optionalLink[i];
+    }
+    if (*resNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
+        return GetErrCodeOfLink(networkId, optionalLink[0]);
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
 {
     LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
@@ -456,6 +512,9 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     } else if (request->qosRequire.minBW == MESH_MAGIC_NUMBER) {
         LNN_LOGI(LNN_LANE, "select lane by mesh linkList");
         ret = SelectMeshLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
+    } else if (request->qosRequire.minBW == DB_MAGIC_NUMBER) {
+        LNN_LOGI(LNN_LANE, "select lane by db linkList");
+        ret = SelectDbLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else if (request->qosRequire.rttLevel == LANE_RTT_LEVEL_LOW) {
         LNN_LOGI(LNN_LANE, "select lane by RTT linkList");
         ret = SelectRttLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
