@@ -214,7 +214,7 @@
     ]
   },
   {
-    "SESSION_NAME": "*IShare*",
+    "SESSION_NAME": "IShare*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
