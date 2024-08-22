@@ -467,10 +467,15 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingReuseResponseState(std::sha
             StopTimer();
             ret = ProcessReuseResponse(command);
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
-            Terminate();
+            break;
         default:
             (void)ProcessNegotiateCommandCommon(command);
             break;
+    }
+    if (ret != SOFTBUS_OK) {
+        connectCommand_->OnFailure(ret);
+        connectCommand_ = nullptr;
+        Terminate();
     }
 }
 
@@ -1182,7 +1187,13 @@ int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &comm
         CONN_LOGE(CONN_WIFI_DIRECT,
             "local reuse failed, send disconnect to remote for decreasing reference, error=%{public}d", ret);
         SendDisconnectRequest(*command->GetNegotiateChannel());
-        return SOFTBUS_OK;
+        CONN_LOGI(CONN_WIFI_DIRECT,
+            "wait for p2p auth to send data, DISCONNECT_WAIT_POST_REQUEST_MS=%{public}dms",
+            DISCONNECT_WAIT_POST_REQUEST_MS);
+        SoftBusSleepMs(DISCONNECT_WAIT_POST_REQUEST_MS);
+        connectCommand_->OnFailure(ret);
+        connectCommand_ = nullptr;
+        Terminate();
     }
 
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
