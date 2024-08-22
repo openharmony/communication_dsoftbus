@@ -839,19 +839,40 @@ int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *de
     return ret;
 }
 
-int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type)
+static int32_t ConvertUdidToHexStr(const char *peerUdid, char *udidHashStr, uint32_t hashStrLen)
 {
-    if (peerNetworkId == NULL || type >= LANE_LINK_TYPE_BUTT) {
+    if (peerUdid == NULL || udidHashStr == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid parem");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t peerUdidHash[UDID_HASH_LEN] = {0};
+    if (SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), peerUdidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "generate udidHash fail");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    if (ConvertBytesToHexString(udidHashStr, hashStrLen, peerUdidHash, UDID_SHORT_HASH_LEN_TMP) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "convert bytes to string fail");
+        return SOFTBUS_BYTE_CONVERT_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t QueryOtherLaneResource(const DevIdentifyInfo *inputInfo, LaneLinkType type)
+{
+    if (inputInfo == NULL || type >= LANE_LINK_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
-    if (LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        char *anonyPeerNetworkId = NULL;
-        Anonymize(peerNetworkId, &anonyPeerNetworkId);
-        LNN_LOGI(LNN_LANE, "get peerUdid fail, peerNetworkId=%{public}s", anonyPeerNetworkId);
-        AnonymizeFree(anonyPeerNetworkId);
-        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    if (inputInfo->type == IDENTIFY_TYPE_DEV_ID) {
+        if (LnnGetRemoteStrInfo(inputInfo->devInfo.peerDevId, STRING_KEY_DEV_UDID,
+            peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+            char *anonyPeerNetworkId = NULL;
+            Anonymize(inputInfo->devInfo.peerDevId, &anonyPeerNetworkId);
+            LNN_LOGI(LNN_LANE, "get peerUdid fail, peerNetworkId=%{public}s", anonyPeerNetworkId);
+            AnonymizeFree(anonyPeerNetworkId);
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
     }
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
@@ -860,9 +881,22 @@ int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type)
     LaneResource *item = NULL;
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
-        if (strcmp(peerUdid, item->link.peerUdid) != 0 && type == item->link.type) {
+        if (type != item->link.type) {
+            continue;
+        }
+        if (inputInfo->type == IDENTIFY_TYPE_DEV_ID && strcmp(peerUdid, item->link.peerUdid) != 0) {
             LaneUnlock();
+            LNN_LOGI(LNN_LANE, "fetch other laneLink by networkId");
             return SOFTBUS_OK;
+        } else if (inputInfo->type == IDENTIFY_TYPE_UDID_HASH && strlen(inputInfo->devInfo.udidHash) > 0) {
+            char hashHexStr[UDID_SHORT_HASH_HEXSTR_LEN_TMP + 1] = {0};
+            if ((ConvertUdidToHexStr(item->link.peerUdid,
+                hashHexStr, UDID_SHORT_HASH_HEXSTR_LEN_TMP + 1) == SOFTBUS_OK) &&
+                (strcmp(hashHexStr, inputInfo->devInfo.udidHash) != 0)) {
+                LaneUnlock();
+                LNN_LOGI(LNN_LANE, "fetch other laneLink by udidHashStr");
+                return SOFTBUS_OK;
+            }
         }
     }
     LaneUnlock();
