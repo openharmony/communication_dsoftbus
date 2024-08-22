@@ -40,9 +40,9 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
+        std::lock_guard executorLock(executorLock_);
         executor->SendEvent(command);
     }
-    std::lock_guard executorLock(executorLock_);
     return ret;
 }
 
@@ -80,9 +80,9 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
+        std::lock_guard executorLock(executorLock_);
         executor->SendEvent(command);
     }
-    std::lock_guard executorLock(executorLock_);
     return ret;
 }
 
@@ -101,9 +101,9 @@ int WifiDirectScheduler::ForceDisconnectDevice(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed, ret=%{public}d", ret);
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
+        std::lock_guard executorLock(executorLock_);
         executor->SendEvent(command);
     }
-    std::lock_guard executorLock(executorLock_);
     return ret;
 }
 
