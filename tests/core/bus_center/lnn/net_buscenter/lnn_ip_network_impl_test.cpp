@@ -160,7 +160,6 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ipMock, LnnIsLinkReady).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(ipMock, GetNetworkIpByIfName).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     int ret = GetAvailableIpAddr(IFNAME_TEST0, const_cast<char *>(WLAN_IP1), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
