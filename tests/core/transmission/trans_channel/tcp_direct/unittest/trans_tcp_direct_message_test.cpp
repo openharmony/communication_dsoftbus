@@ -148,7 +148,7 @@ HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1
 
     connInfo->type = CONNECT_BR;
     ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     StopP2pSessionListener();
     SoftBusFree(appInfo);
