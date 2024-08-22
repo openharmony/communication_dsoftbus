@@ -28,7 +28,7 @@ P2pDestroyGroupState *P2pDestroyGroupState::Instance()
     return &instance;
 }
 
-P2pDestroyGroupState::P2pDestroyGroupState() : timer_("P2pDestroyGroup") { }
+P2pDestroyGroupState::P2pDestroyGroupState() : timer_("P2pDestroyGroup", TIMER_TIMEOUT) { }
 
 void P2pDestroyGroupState::Enter(const std::shared_ptr<P2pOperation> &operation)
 {
@@ -44,8 +44,7 @@ void P2pDestroyGroupState::Enter(const std::shared_ptr<P2pOperation> &operation)
 
 void P2pDestroyGroupState::Exit()
 {
-    timer_.Shutdown(false);
-    operation_ = nullptr;
+    timer_.Shutdown();
 }
 
 int P2pDestroyGroupState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation)
@@ -105,8 +104,9 @@ void P2pDestroyGroupState::OnP2pConnectionChangeEvent(
         result.errorCode_ = SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED;
         CONN_LOGE(CONN_WIFI_DIRECT, "destroy group call event failed, error=%d", result.errorCode_);
     }
-    operation_->promise_.set_value(result);
     ChangeState(P2pAvailableState::Instance(), nullptr);
+    operation_->promise_.set_value(result);
+    operation_ = nullptr;
 }
 
 void P2pDestroyGroupState::OnTimeout()
@@ -117,7 +117,8 @@ void P2pDestroyGroupState::OnTimeout()
         CONN_LOGE(CONN_WIFI_DIRECT, "operation is nullptr");
         return;
     }
-    operation_->promise_.set_value(P2pOperationResult(static_cast<int>(SOFTBUS_TIMOUT)));
     ChangeState(P2pAvailableState::Instance(), nullptr);
+    operation_->promise_.set_value(P2pOperationResult(static_cast<int>(SOFTBUS_CONN_DESTROY_GROUP_TIMEOUT)));
+    operation_ = nullptr;
 }
 } // namespace OHOS::SoftBus

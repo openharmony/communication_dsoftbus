@@ -108,7 +108,7 @@ private:
     std::recursive_mutex operationLock_;
     P2pEntityState *state_;
     int currentFrequency_ = 0;
-    std::mutex pendingOperationLock_;
+    std::recursive_mutex pendingOperationLock_;
     std::queue<std::shared_ptr<P2pOperation>> pendingOperations_;
 
     OHOS::Utils::Timer timer_;
