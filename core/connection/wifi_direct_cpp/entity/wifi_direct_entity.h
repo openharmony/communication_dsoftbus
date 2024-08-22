@@ -15,11 +15,18 @@
 #ifndef WIFI_DIRECT_ENTITY_H
 #define WIFI_DIRECT_ENTITY_H
 
+#include "conn_log.h"
+
 namespace OHOS::SoftBus {
 class WifiDirectEntity {
 public:
     virtual void DisconnectLink(const std::string &remoteMac) = 0;
     virtual void DestroyGroupIfNeeded() = 0;
+    virtual bool SupportHml()
+    {
+        CONN_LOGW(CONN_WIFI_DIRECT, "not support");
+        return false;
+    }
 };
 }
 #endif
