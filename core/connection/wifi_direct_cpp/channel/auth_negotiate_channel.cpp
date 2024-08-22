@@ -220,6 +220,11 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     } else if (msg.GetMessageType() == NegotiateMessageType::CMD_DETECT_LINK_RSP) {
         std::thread(AuthNegotiateChannel::ProcessDetectLinkResponse, handle, msg).detach();
         return;
+    } else if (static_cast<int>(msg.GetMessageType()) ==
+            static_cast<int>(LegacyCommandType::CMD_GC_WIFI_CONFIG_CHANGED) ||
+        msg.GetLegacyP2pCommandType() == LegacyCommandType::CMD_GC_WIFI_CONFIG_CHANGED) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "do not process %{public}d", static_cast<int>(msg.GetMessageType()));
+        return;
     }
 
     msg.SetRemoteDeviceId(remoteDeviceId);
