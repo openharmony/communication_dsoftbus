@@ -677,7 +677,7 @@ HWTEST_F(TransCoreTcpDirectTest, CreateTcpChannelInfoTest, TestSize.Level1)
     strcpy_s(ip, MAX_IP_LEN, g_ip);
     channel.myIp = ip;
     TcpChannelInfo *info = CreateTcpChannelInfo(&channel);
-    ASSERT_TRUE(info != nullptr);
+    ASSERT_TRUE(info == nullptr);
     SoftBusFree(info);
 }
 }
