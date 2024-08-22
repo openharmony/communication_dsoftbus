@@ -141,6 +141,7 @@ ConnBleConnection *ConnBleCreateConnection(
     SoftBusList *list = CreateSoftBusList();
     if (list == NULL) {
         CONN_LOGE(CONN_BLE, "create softbus list failed");
+        SoftBusMutexDestroy(&connection->lock);
         SoftBusFree(connection);
         return NULL;
     }
