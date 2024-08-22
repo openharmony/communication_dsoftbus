@@ -329,7 +329,7 @@ static int32_t RelayHeartbeatV0Split(
         .isRelay = msgPara->isRelay,
         .isLastEnd = true,
     };
-    delayTime += HB_SEND_RELAY_LEN + HB_TIME_FACTOR_TWO_HUNDRED_MS;
+    delayTime += HB_SEND_EACH_SEPARATELY_LEN;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, delayTime) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}d", registedHbType);
         return SOFTBUS_ERR;
