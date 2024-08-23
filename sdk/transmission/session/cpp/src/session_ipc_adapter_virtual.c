@@ -16,7 +16,7 @@
 #include <stdbool.h>
 #include "session_ipc_adapter.h"
 
-bool CheckIsSystemService()
+bool CheckIsSystemService(void)
 {
     return false;
 }

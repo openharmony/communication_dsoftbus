@@ -22,7 +22,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-bool CheckIsSystemService();
+bool CheckIsSystemService(void);
 
 #ifdef __cplusplus
 #if __cplusplus
