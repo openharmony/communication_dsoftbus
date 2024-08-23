@@ -150,7 +150,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
             (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
             (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
-            if (appInfo->myData.channelId == 0) {
+            if (appInfo->myData.channelId == INVALID_CHANNEL_ID) {
                 (void)TransUdpGetChannelIdByAddr(appInfo);
             }
             break;
