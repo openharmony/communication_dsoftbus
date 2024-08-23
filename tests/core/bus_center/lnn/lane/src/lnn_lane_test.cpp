@@ -2904,6 +2904,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_SELECT_RULE_05, TestSize.Level1)
     LaneSelectParam request;
     LanePreferredLinkList recommendList;
 
+    EXPECT_CALL(wifiMock, SoftBusGetLinkBand).WillRepeatedly(Return(BAND_5G));
     request.qosRequire.minLaneLatency = 0;
     EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(Return(SOFTBUS_OK));

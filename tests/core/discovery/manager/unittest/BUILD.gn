@@ -81,6 +81,7 @@ ohos_unittest("DiscManagerMockTest") {
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",
+    "hilog:libhilog",
   ]
 }
 

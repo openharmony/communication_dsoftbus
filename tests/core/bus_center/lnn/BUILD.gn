@@ -1399,7 +1399,6 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
-    "//foundation/communication/wifi/wifi/interfaces/kits/c",
     "unittest/common/",
   ]
 
@@ -1430,8 +1429,10 @@ ohos_unittest("LNNLaneMockTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "wifi:wifi_sdk",
     ]
+    if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
+      external_deps += [ "wifi:wifi_sdk" ]
+    }
   } else {
     external_deps = [
       "cJSON:cjson",
@@ -1673,7 +1674,6 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
-    "//foundation/communication/wifi/wifi/interfaces/kits/c",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
@@ -1692,8 +1692,10 @@ ohos_unittest("LNNTransLaneMockTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "wifi:wifi_sdk",
     ]
+    if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
+      external_deps += [ "wifi:wifi_sdk" ]
+    }
   } else {
     external_deps = [
       "cJSON:cjson",
