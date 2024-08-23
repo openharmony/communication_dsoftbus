@@ -42,13 +42,6 @@ AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
     auto ret = AuthGetDeviceUuid(handle_.authId, remoteUuid, UUID_BUF_LEN);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get device id failed");
     remoteDeviceId_ = remoteUuid;
-    auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(remoteUuid);
-    if (WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
-        if (!WifiDirectUtils::IsDeviceOnline(remoteNetworkId)) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "diff account");
-            remoteDeviceId_ = "";
-        }
-    }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
 }
 
@@ -206,11 +199,9 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     msg.Unmarshalling(*protocol, input);
     bool sameAccount = msg.GetExtraData().empty() || msg.GetExtraData().front();
     CONN_LOGI(CONN_WIFI_DIRECT, "sameAccount=%{public}d", sameAccount);
-    if (type == ProtocolType::TLV) {
-        if (!WifiDirectUtils::IsDeviceOnline(WifiDirectUtils::UuidToNetworkId(remoteDeviceId)) || !sameAccount) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
-            remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
-        }
+    if (!sameAccount) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
+        remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
     }
 
     CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s", msg.MessageTypeToString().c_str());
