@@ -618,8 +618,9 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHand
     connInfo = NULL;
     int32_t tmp = 0;
     int32_t *result = (int32_t *)SoftBusCalloc(count * sizeof(int32_t));
-    if (result != NULL) {
+    if (result == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc result failed");
+        ReleaseSessionConnLock();
         return NULL;
     }
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
