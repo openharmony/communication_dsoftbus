@@ -266,7 +266,7 @@ static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestC
     if (LnnGetConnSubFeatureByUdidHashStr(ctx->udid, &feature) != SOFTBUS_OK) {
         CONN_LOGD(CONN_BLE, "get connSubFeature failed");
     }
-    device->isSupportNetworkIdExchange = feature == 1;
+    device->isSupportNetworkIdExchange = (feature & (1 << CONN_FEATURE_SUPPORT_NETWORKID_EXCAHNGE)) != 0;
     ListInit(&device->requests);
     *outDevice = device;
     return SOFTBUS_OK;

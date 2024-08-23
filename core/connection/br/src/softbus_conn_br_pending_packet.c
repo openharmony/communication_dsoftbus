@@ -76,11 +76,13 @@ int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
     pending->finded = false;
     if (SoftBusMutexInit(&pending->lock, NULL) != SOFTBUS_OK) {
         SoftBusFree(pending);
+        (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_LOCK_ERR;
     }
     if (SoftBusCondInit(&pending->cond) != SOFTBUS_OK) {
         SoftBusMutexDestroy(&pending->lock);
         SoftBusFree(pending);
+        (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_NO_INIT;
     }
     ListTailInsert(&g_pendingList, &(pending->node));
