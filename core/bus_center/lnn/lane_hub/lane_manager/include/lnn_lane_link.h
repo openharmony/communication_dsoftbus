@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include "lnn_lane_def.h"
+#include "lnn_lane_link_conflict.h"
 #include "bus_center_info_key.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
@@ -141,7 +142,7 @@ int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const c
 uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
 int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt);
-int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type);
+int32_t QueryOtherLaneResource(const DevIdentifyInfo *inputInfo, LaneLinkType type);
 bool FindLaneResourceByDevIdHash(const char *udidHashStr, LaneLinkType type);
 
 #ifdef __cplusplus
