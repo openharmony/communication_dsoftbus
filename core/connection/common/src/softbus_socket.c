@@ -17,10 +17,12 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <ifaddrs.h>
 #include <securec.h>
 
 #include "conn_log.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_conn_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_tcp_socket.h"
@@ -483,4 +485,65 @@ bool IsHmlIpAddr(const char *ip)
     }
 
     return strncmp(ip, HML_IPV4_ADDR_PREFIX, strlen(HML_IPV4_ADDR_PREFIX)) == 0;
+}
+
+static int32_t GetIfNameByIp(const char *myIp, int32_t domain, char *ifName, int32_t ifNameMaxLen)
+{
+    if (myIp == NULL || ifName == NULL) {
+        COMM_LOGE(CONN_COMMON, "Invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    struct ifaddrs *ifa = NULL;
+    struct ifaddrs *ifList = NULL;
+    struct in_addr inAddr = { 0 };
+    char animizedIp[IP_LEN] = { 0 };
+    ConvertAnonymizeIpAddress(animizedIp, IP_LEN, myIp, IP_LEN);
+
+    int32_t ret = getifaddrs(&ifList);
+    if (ret != 0) {
+        COMM_LOGE(CONN_COMMON, "ip=%{public}s getifaddrs ifList failed, ret=%{public}d", animizedIp, ret);
+        return SOFTBUS_SOCKET_ADDR_ERR;
+    }
+    if (inet_aton(myIp, &inAddr) == 0) {
+        COMM_LOGE(CONN_COMMON, "inet_aton ip=%{public}s failed.", animizedIp);
+        freeifaddrs(ifList);
+        return SOFTBUS_TCP_SOCKET_ERR;
+    }
+    for (ifa = ifList; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL) {
+            continue;
+        }
+        (void)memset_s(ifName, ifNameMaxLen, 0, ifNameMaxLen);
+        if (memcmp(&inAddr, &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr), sizeof(struct in_addr)) == 0) {
+            if (memcpy_s(ifName, ifNameMaxLen - 1, ifa->ifa_name, strlen(ifa->ifa_name)) != EOK) {
+                COMM_LOGE(CONN_COMMON, "fail to memcpy_s ifName by ip=%{public}s", animizedIp);
+                freeifaddrs(ifList);
+                return SOFTBUS_MEM_ERR;
+            }
+            freeifaddrs(ifList);
+            return SOFTBUS_OK;
+        }
+    }
+    COMM_LOGW(CONN_COMMON, "not found ifName by ip=%{public}s", animizedIp);
+    freeifaddrs(ifList);
+    return SOFTBUS_CONN_NOT_FOUND_FAILED;
+}
+
+// prevent the scenario of using VPN to produce virtual network cards.
+void BindToInterface(const char *myIp, int32_t domain, int fd, char *ifName, int32_t ifNameMaxLen)
+{
+    // The IPv6 socket has already been bound to the network card, there is no need to bind it again.
+    CONN_CHECK_AND_RETURN_LOGW(domain != SOFTBUS_AF_INET6, CONN_COMMON, "Ipv6 addr no need to get ifName.");
+
+    int32_t ret = GetIfNameByIp(myIp, domain, ifName, ifNameMaxLen);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_COMMON, "cannot bind to interface.");
+
+    ret = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_BINDTODEVICE, ifName, strlen(ifName));
+    if (ret < 0) {
+        COMM_LOGE(
+            CONN_COMMON, "socketSetOpt fail, fd=%{public}d, ifName=%{public}s, errno=%{public}d", fd, ifName, ret);
+        return;
+    }
+    return;
 }
