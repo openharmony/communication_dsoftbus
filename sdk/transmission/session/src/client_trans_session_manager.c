@@ -41,7 +41,7 @@ static void ClientTransSessionTimerProc(void);
 
 static int32_t g_sessionIdNum = 0;
 static int32_t g_sessionId = 1;
-static int32_t g_closingNum = 0;
+static int32_t g_closingIdNum = 0;
 static SoftBusList *g_clientSessionServerList = NULL;
 
 static int32_t LockClientSessionServerList()
@@ -153,13 +153,14 @@ static bool SessionIdIsAvailable(int32_t sessionId)
     return true;
 }
 
+// need get g_clientSessionServerList->lock before call this function
 int32_t GenerateSessionId(void)
 {
-    if (g_sessionIdNum >= g_closingNum && g_sessionIdNum - g_closingNum >= MAX_SESSION_ID) {
+    if (g_sessionIdNum >= g_closingIdNum && g_sessionIdNum - g_closingIdNum >= MAX_SESSION_ID) {
         TRANS_LOGE(TRANS_SDK, "sessionid num cross the line error");
         return INVALID_SESSION_ID;
     }
-    int32_t cnt = MAX_SESSION_ID + g_closingNum + 1;
+    int32_t cnt = MAX_SESSION_ID + g_closingIdNum + 1;
     int32_t id = INVALID_SESSION_ID;
 
     while (cnt) {
@@ -177,15 +178,16 @@ int32_t GenerateSessionId(void)
     return id;
 }
 
+// need get g_clientSessionServerList->lock before call this function
 void DestroySessionId(void)
 {
     if (g_sessionIdNum > 0) {
         g_sessionIdNum--;
     }
-    if (g_closingNum > 0) {
-        g_closingNum--;
+
+    if (g_closingIdNum > 0) {
+        g_closingIdNum--;
     }
-    return;
 }
 
 int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName)
@@ -2048,14 +2050,24 @@ int32_t GetSocketLifecycleAndSessionNameBySessionId(
 
 void AddSessionStateClosing(void)
 {
-    g_closingNum++;
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    g_closingIdNum++;
+    UnlockClientSessionServerList();
 }
 
 void DelSessionStateClosing(void)
 {
-    if (g_closingNum > 0) {
-        g_closingNum--;
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
     }
+    if (g_closingIdNum > 0) {
+        g_closingIdNum--;
+    }
+    UnlockClientSessionServerList();
 }
 
 int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState, int32_t optional)
