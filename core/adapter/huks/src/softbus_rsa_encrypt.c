@@ -136,7 +136,7 @@ int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
     };
     if (ConstructKeyParamSet(&paramSet, publicKeyParams, sizeof(publicKeyParams) / sizeof(struct HksParam)) !=
         SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "pubilc key ConstructKeyParamSet failed.");
+        COMM_LOGE(COMM_UTILS, "public key ConstructKeyParamSet failed.");
         return SOFTBUS_HUKS_ERR;
     }
     if (HksExportPublicKey(&g_rsaKeyAlias, paramSet, &publicKeyBlob) != HKS_SUCCESS) {
