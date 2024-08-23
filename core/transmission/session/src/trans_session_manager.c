@@ -92,9 +92,10 @@ bool TransSessionServerIsExist(const char *sessionName)
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return false;
     }
-    char *tmpName = NULL;
+
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
+            char *tmpName = NULL;
             Anonymize(sessionName, &tmpName);
             TRANS_LOGW(TRANS_CTRL, "session server is exist. sessionName=%{public}s", tmpName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
@@ -103,7 +104,6 @@ bool TransSessionServerIsExist(const char *sessionName)
         }
     }
 
-    AnonymizeFree(tmpName);
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     return false;
 }

@@ -1183,7 +1183,10 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransUdpDeathCallback: pkgName=%{public}s, pid=%{public}d", pkgName, pid);
+    char *anonymizePkgName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    TRANS_LOGW(TRANS_CTRL, "TransUdpDeathCallback: pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+    AnonymizeFree(anonymizePkgName);
     if (GetUdpChannelLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
         return;

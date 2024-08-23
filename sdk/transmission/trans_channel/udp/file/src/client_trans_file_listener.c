@@ -108,7 +108,10 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
         return SOFTBUS_MEM_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
-    TRANS_LOGI(TRANS_FILE, "add sessionName=%{public}s", sessionName);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_FILE, "add sessionName=%{public}s", tmpName);
+    AnonymizeFree(tmpName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
