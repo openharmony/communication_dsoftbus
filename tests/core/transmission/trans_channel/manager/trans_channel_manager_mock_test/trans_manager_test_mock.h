@@ -27,8 +27,8 @@ public:
     TransManagerTestInterface() {};
     virtual ~TransManagerTestInterface() {};
     virtual int32_t TransGetLaneHandleByChannelId(int32_t channelId, uint32_t *laneHandle) = 0;
-    virtual int32_t TransGetPidFromSocketChannelInfoBySession(const char *sessionName, int32_t sessionId,
-        int32_t *pid) = 0;
+    virtual int32_t TransGetPidFromSocketChannelInfoBySession(
+        const char *sessionName, int32_t sessionId, int32_t *pid) = 0;
 };
 class TransManagerTestInterfaceMock : public TransManagerTestInterface {
 public:

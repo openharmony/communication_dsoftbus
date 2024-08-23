@@ -113,7 +113,10 @@ ohos_unittest("TransUdpNegotiationExchangeTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransUdpStaticTest") {

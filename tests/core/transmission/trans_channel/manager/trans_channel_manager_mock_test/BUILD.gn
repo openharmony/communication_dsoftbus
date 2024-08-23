@@ -50,6 +50,7 @@ ohos_unittest("TransChannelManagerMockTest") {
   external_deps = [
     "c_utils:utils",
     "googletest:gmock",
+    "hilog:libhilog",
   ]
 
   if (!is_standard_system) {

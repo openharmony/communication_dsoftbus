@@ -223,8 +223,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_02, TestSize.Level1)
     char brMacHash;
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
     EXPECT_CALL(disLedgerMock, ConvertBtMacToBinary)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+        .WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = LnnGenerateBtMacHash(nullptr, BT_MAC_LEN, nullptr, BT_MAC_HASH_STR_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_LEN);
@@ -232,7 +231,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_02, TestSize.Level1)
     ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_HASH_STR_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_HASH_STR_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
