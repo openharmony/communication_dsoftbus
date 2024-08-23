@@ -165,6 +165,7 @@ int WifiDirectScheduler::ScheduleActiveCommand(const std::shared_ptr<WifiDirectC
         return SOFTBUS_CONN_REMOTE_DEVICE_ID_EMPTY;
     }
 
+    std::lock_guard executorLock(executorLock_);
     auto it = executors_.find(remoteDeviceId);
     if (it != executors_.end() || executors_.size() == MAX_EXECUTOR) {
         CONN_LOGI(CONN_WIFI_DIRECT, "push command to list, commandId=%{public}u", command->GetId());
