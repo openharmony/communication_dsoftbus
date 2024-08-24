@@ -2011,14 +2011,17 @@ static int32_t BleAdvertiserDump(int fd)
         SOFTBUS_DPRINTF(fd, "BleAdvertiser channel                   : %d\n", g_bleAdvertiser[i].channel);
         SOFTBUS_DPRINTF(fd, "BleAdvertiser isAdvertising             : %d\n", g_bleAdvertiser[i].isAdvertising);
         SOFTBUS_DPRINTF(fd, "DeviceInfo                              : \n");
-        SOFTBUS_DPRINTF(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
-        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n",
-            g_bleAdvertiser[i].deviceInfo.accountHash);
+        char *anonymizedInfo = NULL;
+        Anonymize(g_bleAdvertiser[i].deviceInfo.devId, &anonymizedInfo);
+        SOFTBUS_DPRINTF(fd, "devId                                   : %s\n", AnonymizeWrapper(anonymizedInfo));
+        AnonymizeFree(anonymizedInfo);
+        Anonymize(g_bleAdvertiser[i].deviceInfo.accountHash, &anonymizedInfo);
+        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n", AnonymizeWrapper(anonymizedInfo));
+        AnonymizeFree(anonymizedInfo);
         SOFTBUS_DPRINTF(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
-        char *anonymizedName = NULL;
-        Anonymize(g_bleAdvertiser[i].deviceInfo.devName, &anonymizedName);
-        SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", AnonymizeWrapper(anonymizedName));
-        AnonymizeFree(anonymizedName);
+        Anonymize(g_bleAdvertiser[i].deviceInfo.devName, &anonymizedInfo);
+        SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", AnonymizeWrapper(anonymizedInfo));
+        AnonymizeFree(anonymizedInfo);
         SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
         SOFTBUS_DPRINTF(fd, "addr type                               : %u\n",
                 g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);

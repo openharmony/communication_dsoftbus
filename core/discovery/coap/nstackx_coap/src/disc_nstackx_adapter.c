@@ -166,8 +166,11 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         }
 
         if ((nstackxDeviceInfo->update & 0x1) == 0) {
+            char *anonymizedName = NULL;
+            Anonymize(nstackxDeviceInfo->deviceName, &anonymizedName);
             DISC_LOGI(DISC_COAP, "duplicate device do not need report. deviceName=%{public}s",
-                nstackxDeviceInfo->deviceName);
+                AnonymizeWrapper(anonymizedName));
+            AnonymizeFree(anonymizedName);
             continue;
         }
         (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
