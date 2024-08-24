@@ -1369,7 +1369,7 @@ static int32_t OpenProxyChannelToConnP2p(const LinkRequest *request, uint32_t la
 
     LnnEventExtra extra = {
         .result = EVENT_STAGE_RESULT_OK,
-        .laneId = laneReqId,
+        .laneId = (int32_t)laneReqId,
         .chanReqId = channelRequestId,
     };
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_START, extra);
@@ -1555,8 +1555,8 @@ static void DetectSuccess(uint32_t laneReqId, LaneLinkType linkType, const LaneL
     }
     LnnEventExtra extra = {
         .result = EVENT_STAGE_RESULT_OK,
-        .laneId = laneReqId,
-        .authRequestId = p2pLinkReqInfo.auth.requestId,
+        .laneId = (int32_t)laneReqId,
+        .authRequestId = (int32_t)p2pLinkReqInfo.auth.requestId,
     };
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_START, extra);
     LNN_LOGI(LNN_LANE, "auth channel detect succ, laneReqId=%{public}u", laneReqId);
