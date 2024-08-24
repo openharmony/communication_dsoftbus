@@ -489,7 +489,7 @@ bool IsHmlIpAddr(const char *ip)
 
 static int32_t GetIfNameByIp(const char *myIp, int32_t domain, char *ifName, int32_t ifNameMaxLen)
 {
-    if (myIp == NULL || ifName == NULL) {
+    if (myIp == NULL || ifName == NULL || strcmp(myIp, BIND_ADDR_ALL) == 0) {
         COMM_LOGE(CONN_COMMON, "Invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
