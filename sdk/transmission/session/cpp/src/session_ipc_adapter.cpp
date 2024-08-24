@@ -18,7 +18,7 @@
 #include "session_ipc_adapter.h"
 #include "trans_log.h"
 
-bool CheckIsSystemService()
+bool CheckIsSystemService(void)
 {
     uint32_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
     auto type = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
