@@ -705,5 +705,11 @@ void UpdateProfile(const NodeInfo *info)
 {
     return GetNetBuilderDepsInterface()->UpdateProfile(info);
 }
+
+void RegisterOOBEMonitor(void *p)
+{
+    (void)p;
+    return GetNetBuilderDepsInterface()->RegisterOOBEMonitor(p);
+}
 } // extern "C"
 } // namespace OHOS
