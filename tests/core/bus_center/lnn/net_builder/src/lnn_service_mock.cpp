@@ -255,6 +255,11 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetServiceInterface()->SoftbusGetConfig(type, val, len);
 }
 
+int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle)
+{
+    return GetServiceInterface()->LnnSubscribeAccountBootEvent(handle);
+}
+
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
