@@ -935,7 +935,7 @@ static int32_t HandleFileSendingProcess(
     int32_t ret = SOFTBUS_FILE_ERR;
     do {
         int32_t osType;
-        ret = ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
+        (void)ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
         ret = CreateSendListenerInfo(&sendInfo, channelId, osType);
         if (ret != SOFTBUS_OK || sendInfo == NULL) {
             TRANS_LOGE(TRANS_FILE, "create send listener info failed! ret=%{public}" PRId32, ret);
