@@ -24,6 +24,7 @@
 #include "disc_interface.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event_monitor_impl.h"
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
@@ -47,7 +48,8 @@
 #define KEY_ACCOUNT "KEY_ACCOUNT"
 
 static int32_t g_tryGetDevnameNums = 0;
-static bool g_isDevnameInited = false;
+static bool g_needSubscribeAccount = false;
+static void UpdataLocalFromSetting(void *p);
 
 static int32_t LnnSyncDeviceName(const char *networkId)
 {
@@ -405,6 +407,21 @@ static void UpdateLocalExtendDeviceName(const char *deviceName, char *unifiedNam
     }
 }
 
+static void AccountBootEventHandle(const char *key, const char *value, void *context)
+{
+    (void)context;
+    LNN_LOGI(LNN_EVENT, "account is ready, key=%{public}s, value=%{public}s", key, value);
+    if (strcmp(key, BOOTEVENT_ACCOUNT_READY) != 0 || strcmp(value, "true") != 0) {
+        return;
+    }
+    g_tryGetDevnameNums = 0;
+    g_needSubscribeAccount = false;
+    int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), UpdataLocalFromSetting, NULL, 0);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "async call boot event fail");
+    }
+}
+
 static void UpdataLocalFromSetting(void *p)
 {
     (void)p;
@@ -414,7 +431,8 @@ static void UpdataLocalFromSetting(void *p)
     char nickName[DEVICE_NAME_BUF_LEN] = {0};
     if (LnnGetSettingDeviceName(deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         g_tryGetDevnameNums++;
-        LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums=%{public}d", g_tryGetDevnameNums);
+        LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums=%{public}d, needSubscribe=%{public}d",
+            g_tryGetDevnameNums, g_needSubscribeAccount);
         if (g_tryGetDevnameNums < MAX_TRY) {
             SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
             if (looper == NULL) {
@@ -427,8 +445,16 @@ static void UpdataLocalFromSetting(void *p)
             }
             return;
         }
-        /* The database field may not be written. Subscribe monitor first. */
-        RegisterNameMonitor();
+        if (!g_needSubscribeAccount) {
+            LNN_LOGE(LNN_BUILDER, "update device name fail");
+            RegisterNameMonitor();
+            return;
+        }
+        LNN_LOGI(LNN_BUILDER, "account or database not ready, retry after account ready");
+        if (LnnSubscribeAccountBootEvent(AccountBootEventHandle) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "watch account server fail");
+            RegisterNameMonitor();
+        }
         return;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName) != SOFTBUS_OK) {
@@ -436,7 +462,6 @@ static void UpdataLocalFromSetting(void *p)
     }
     UpdateLocalExtendDeviceName(deviceName, unifiedName, unifiedDefaultName, nickName);
     RegisterNameMonitor();
-    g_isDevnameInited = true;
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
     LnnNotifyLocalNetworkIdChanged();
     char *anonyDeviceName = NULL;
@@ -463,12 +488,8 @@ static void RegisterDeviceNameHandle(void)
 
 void UpdateDeviceName(void *p)
 {
-    if (g_isDevnameInited) {
-        LNN_LOGI(LNN_BUILDER, "device name already inited");
-        return;
-    }
+    g_needSubscribeAccount = true;
     RegisterDeviceNameHandle();
-    g_tryGetDevnameNums = 0;
     UpdataLocalFromSetting(p);
 }
 

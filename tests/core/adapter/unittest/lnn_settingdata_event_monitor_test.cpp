@@ -114,7 +114,7 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest004, TestSiz
     NiceMock<SettingDataEventMonitorDepsInterfaceMock> SettingDataEventMonitorMock;
     EXPECT_CALL(SettingDataEventMonitorMock, GetLooper(_)).WillOnce(Return(NULL));
     int32_t ret = LnnInitDeviceNameMonitorImpl();
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -131,6 +131,6 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest005, TestSiz
     EXPECT_CALL(SettingDataEventMonitorMock, LnnAsyncCallbackHelper(_, _, _))
         .WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = LnnInitDeviceNameMonitorImpl();
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }

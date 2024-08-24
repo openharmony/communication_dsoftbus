@@ -21,3 +21,8 @@ int32_t LnnInitBootEventMonitorImpl(void)
 {
     return SOFTBUS_OK;
 }
+
+int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle)
+{
+    return SOFTBUS_OK;
+}

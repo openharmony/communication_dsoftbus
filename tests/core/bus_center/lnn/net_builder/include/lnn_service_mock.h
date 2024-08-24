@@ -35,6 +35,7 @@
 #include "softbus_common.h"
 #include "softbus_feature_config.h"
 #include "softbus_wifi_api_adapter.h"
+#include "lnn_event_monitor_impl.h"
 
 namespace OHOS {
 class LnnServiceInterface {
@@ -91,6 +92,7 @@ public:
     virtual int32_t LnnGetSettingNickName(const char *defaultName,
         const char *unifiedName, char *nickName, uint32_t len);
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+    virtual int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle) = 0;
 };
 
 class LnnServicetInterfaceMock : public LnnServiceInterface {
@@ -139,6 +141,7 @@ public:
     MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void ());
     MOCK_METHOD4(LnnGetSettingNickName, int32_t (const char *, const char *, char *, uint32_t));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
+    MOCK_METHOD1(LnnSubscribeAccountBootEvent, int32_t (AccountEventHandle handle));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
