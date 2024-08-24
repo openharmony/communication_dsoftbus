@@ -43,6 +43,8 @@ typedef enum {
     EVENT_STAGE_LNN_LEAVE_SDK = 4,
     EVENT_STAGE_LNN_REG_NODE = 5,
     EVENT_STAGE_LNN_SHIFT_GEAR = 6,
+    EVENT_STAGE_LNN_ROUTE_SELECT_START = 7,
+    EVENT_STAGE_LNN_ROUTE_SELECT_END = 8,
 } LnnEventLnnStage;
 
 typedef enum {
@@ -89,6 +91,9 @@ typedef enum {
 } ConnectOnlineReason;
 
 typedef struct {
+    int32_t laneId;             // LANE_ID
+    int32_t chanReqId;          // CHAN_REQ_ID
+    int32_t connReqId;          // CONN_REQ_ID
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
     int32_t authId;             // AUTH_ID
