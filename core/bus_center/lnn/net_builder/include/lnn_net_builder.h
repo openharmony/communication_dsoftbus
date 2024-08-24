@@ -134,6 +134,7 @@ typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
     bool isNeedConnect;
     ConnectionAddr addr;
+    NodeInfo *dupInfo;
     LnnDfxDeviceInfoReport infoReport;
 } JoinLnnMsgPara;
 
@@ -203,6 +204,7 @@ void ClearPcRestrictMap(void);
 void DeleteNodeFromPcRestrictMap(const char *udidHash);
 int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count);
 int32_t UpdateNodeFromPcRestrictMap(const char *udidHash);
+int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info);
 #ifdef __cplusplus
 }
 #endif

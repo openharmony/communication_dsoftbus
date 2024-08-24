@@ -166,6 +166,9 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
     }
     if (connFsm == NULL || connFsm->isDead) {
         connFsm = StartNewConnectionFsm(&para->addr, para->pkgName, para->isNeedConnect);
+        if (connFsm != NULL) {
+            connFsm->connInfo.dupInfo = (para->dupInfo == NULL) ? NULL : DupNodeInfo(para->dupInfo);
+        }
         isCreate = true;
     }
     if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
