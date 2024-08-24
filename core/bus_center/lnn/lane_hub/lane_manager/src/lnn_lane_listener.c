@@ -591,3 +591,8 @@ int32_t InitLaneListener(void)
     RegisterWifiDirectListener();
     return SOFTBUS_OK;
 }
+
+void DeinitLaneListener(void)
+{
+    (void)SoftBusMutexDestroy(&g_laneStateListenerMutex);
+}
