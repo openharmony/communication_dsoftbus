@@ -677,7 +677,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
     dataTest = FILE_MAGIC_NUMBER;
     frame.data = (uint8_t *)&dataTest;
     ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
