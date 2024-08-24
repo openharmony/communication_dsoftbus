@@ -64,6 +64,7 @@ typedef enum {
 } ConnEventTcpCommonStage;
 
 typedef struct {
+    int32_t connReqId;          // CONN_REQ_ID
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
     int32_t connectionId;       // CONN_ID

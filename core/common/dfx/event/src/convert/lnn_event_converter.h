@@ -34,6 +34,9 @@ extern "C" {
         return false;                                                                                         \
     }
 
+LNN_ASSIGNER(Int32, LaneId, laneId)
+LNN_ASSIGNER(Int32, ChanReqId, chanReqId)
+LNN_ASSIGNER(Int32, ConnReqId, connReqId)
 LNN_ASSIGNER(Errcode, Result, result)
 LNN_ASSIGNER(Errcode, Errcode, errcode)
 LNN_ASSIGNER(Errcode, AuthId, authId)
@@ -67,6 +70,9 @@ LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
 #define LNN_ASSIGNER_SIZE 30 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
+    { "LANE_ID",          HISYSEVENT_INT32,  LnnAssignerLaneId           },
+    { "CHAN_REQ_ID",      HISYSEVENT_INT32,  LnnAssignerChanReqId        },
+    { "CONN_REQ_ID",      HISYSEVENT_INT32,  LnnAssignerConnReqId        },
     { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
     { "AUTH_ID",          HISYSEVENT_INT32,  LnnAssignerAuthId           },

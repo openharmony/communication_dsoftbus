@@ -34,6 +34,7 @@ extern "C" {
         return false;                                                                                         \
     }
 
+CONN_ASSIGNER(Int32, ConnReqId, connReqId)
 CONN_ASSIGNER(Errcode, Result, result)
 CONN_ASSIGNER(Errcode, Errcode, errcode)
 CONN_ASSIGNER(Int32, ConnectionId, connectionId)
@@ -76,6 +77,7 @@ CONN_ASSIGNER(Uint64, LinkTime, linkTime)
 
 #define CONN_ASSIGNER_SIZE 39 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
+    { "CONN_REQ_ID",       HISYSEVENT_INT32,  ConnAssignerConnReqId     },
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
     { "CONN_ID",           HISYSEVENT_INT32,  ConnAssignerConnectionId  },
