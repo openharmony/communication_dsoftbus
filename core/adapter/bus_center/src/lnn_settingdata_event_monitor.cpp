@@ -186,18 +186,12 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
         return ret;
     }
     if (ret == SOFTBUS_OK) {
-        char *anonyDeviceName = NULL;
-        Anonymize(deviceName, &anonyDeviceName);
-        LNN_LOGI(LNN_STATE, "get user defined deviceName=%{public}s", anonyDeviceName);
-        AnonymizeFree(anonyDeviceName);
+        LNN_LOGI(LNN_STATE, "get user defined deviceName success");
         dataShareHelper->Release();
         return SOFTBUS_OK;
     }
     ret = OHOS::BusCenter::GetDefaultDeviceName(dataShareHelper, deviceName, len);
-    char *anonyDeviceName = NULL;
-    Anonymize(deviceName, &anonyDeviceName);
-    LNN_LOGI(LNN_STATE, "get default deviceName=%{public}s, ret=%{public}d", anonyDeviceName, ret);
-    AnonymizeFree(anonyDeviceName);
+    LNN_LOGI(LNN_STATE, "get default deviceName, ret=%{public}d", ret);
     dataShareHelper->Release();
     return ret;
 }
@@ -214,16 +208,8 @@ int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
 
 int32_t LnnInitDeviceNameMonitorImpl(void)
 {
-    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (looper == NULL) {
-        LNN_LOGE(LNN_INIT, "looper is null");
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = LnnAsyncCallbackHelper(looper, UpdateDeviceName, NULL);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackHelper fail");
-    }
-    return ret;
+    UpdateDeviceName(NULL);
+    return SOFTBUS_OK;
 }
 
 void RegisterNameMonitor(void)
