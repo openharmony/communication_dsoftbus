@@ -141,5 +141,10 @@ DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
 {
     return GetLnnConnInterface()->LnnConvAddrTypeToDiscType(type);
 }
+
+void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
+{
+    return GetLnnConnInterface()->LnnNotifyOOBEStateChangeEvent(state);
+}
 }
 } // namespace OHOS

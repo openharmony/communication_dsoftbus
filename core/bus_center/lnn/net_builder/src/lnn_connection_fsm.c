@@ -1414,6 +1414,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
         AnonymizeFree(anonyDeviceName);
     }
     AnonymizeFree(anonyNetworkId);
+    LnnNotifyOOBEStateChangeEvent(SOFTBUS_FACK_OOBE_END);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
