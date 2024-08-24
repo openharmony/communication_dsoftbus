@@ -363,3 +363,7 @@ int32_t InitLaneReliability(void)
     return SOFTBUS_OK;
 }
 
+void DeinitLaneReliability(void)
+{
+    (void)SoftBusMutexDestroy(&g_laneDetectList.lock);
+}

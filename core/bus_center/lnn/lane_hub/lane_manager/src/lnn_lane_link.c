@@ -979,6 +979,11 @@ static void LaneInitP2pAddrList()
     SoftBusMutexInit(&g_P2pAddrList.lock, NULL);
 }
 
+static void LaneDeinitP2pAddrList(void)
+{
+    (void)SoftBusMutexDestroy(&g_P2pAddrList.lock);
+}
+
 void LaneDeleteP2pAddress(const char *networkId, bool isDestroy)
 {
     P2pAddrNode *item = NULL;
@@ -1614,5 +1619,7 @@ int32_t InitLaneLink(void)
 
 void DeinitLaneLink(void)
 {
+    LaneDeinitP2pAddrList();
+    (void)SoftBusMutexDestroy(&g_laneResource.lock);
     LnnDestroyP2p();
 }
