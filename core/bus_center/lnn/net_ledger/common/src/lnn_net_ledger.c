@@ -135,22 +135,22 @@ static void ProcessLocalDeviceInfo(void)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)LnnGetLocalDevInfo(&info);
-    char *anonyNetworkId = NULL;
-    Anonymize(info.networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%{public}s", anonyNetworkId);
-    AnonymizeFree(anonyNetworkId);
+    LnnDumpNodeInfo(&info, "load local deviceInfo success");
     if (IsBleDirectlyOnlineFactorChange(&info)) {
         info.stateVersion++;
         LnnSaveLocalDeviceInfo(&info);
     }
-    if (LnnUpdateLedgerByRestoreInfo(&info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update local ledger by restore info fail");
+    if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set state version fail");
     }
     if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set networkId fail");
     }
     LnnNotifyNetworkIdChangeEvent(info.networkId);
     LnnNotifyLocalNetworkIdChanged();
+    if (info.networkIdTimestamp != 0) {
+        LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
+    }
 }
 
 void RestoreLocalDeviceInfo(void)
