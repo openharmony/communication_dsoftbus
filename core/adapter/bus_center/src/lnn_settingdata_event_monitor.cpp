@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "data_ability_observer_stub.h"
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
@@ -111,7 +112,10 @@ static int32_t GetDeviceNameFromDataShareHelper(std::shared_ptr<DataShare::DataS
         resultSet->Close();
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "deviceName=%{public}s.", deviceName);
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    LNN_LOGI(LNN_STATE, "deviceName=%{public}s.", anonyDeviceName);
+    AnonymizeFree(anonyDeviceName);
     resultSet->Close();
     return SOFTBUS_OK;
 }
@@ -182,12 +186,18 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
         return ret;
     }
     if (ret == SOFTBUS_OK) {
-        LNN_LOGI(LNN_STATE, "get user defined deviceName=%{public}s", deviceName);
+        char *anonyDeviceName = NULL;
+        Anonymize(deviceName, &anonyDeviceName);
+        LNN_LOGI(LNN_STATE, "get user defined deviceName=%{public}s", anonyDeviceName);
+        AnonymizeFree(anonyDeviceName);
         dataShareHelper->Release();
         return SOFTBUS_OK;
     }
     ret = OHOS::BusCenter::GetDefaultDeviceName(dataShareHelper, deviceName, len);
-    LNN_LOGI(LNN_STATE, "get default deviceName=%{public}s, ret=%{public}d", deviceName, ret);
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    LNN_LOGI(LNN_STATE, "get default deviceName=%{public}s, ret=%{public}d", anonyDeviceName, ret);
+    AnonymizeFree(anonyDeviceName);
     dataShareHelper->Release();
     return ret;
 }

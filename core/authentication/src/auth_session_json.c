@@ -2007,11 +2007,25 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
         LnnGetDeviceDisplayName(peerNodeInfo->deviceInfo.nickName,
             peerNodeInfo->deviceInfo.unifiedDefaultName, deviceName, DEVICE_NAME_BUF_LEN);
     }
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    char *anonyPeerDeviceName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
+    char *anonyUnifiedName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.unifiedName, &anonyUnifiedName);
+    char *anonyUnifiedDefaultName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.unifiedDefaultName, &anonyUnifiedDefaultName);
+    char *anonyNickName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.nickName, &anonyNickName);
     AUTH_LOGD(AUTH_FSM,
         "peer tmpDeviceName=%{public}s, deviceName=%{public}s, unifiedName=%{public}s, "
         "unifiedDefaultName=%{public}s, nickName=%{public}s",
-        deviceName, peerNodeInfo->deviceInfo.deviceName, peerNodeInfo->deviceInfo.unifiedName,
-        peerNodeInfo->deviceInfo.unifiedDefaultName, peerNodeInfo->deviceInfo.nickName);
+        anonyDeviceName, anonyPeerDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
+    AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyPeerDeviceName);
+    AnonymizeFree(anonyUnifiedName);
+    AnonymizeFree(anonyUnifiedDefaultName);
+    AnonymizeFree(anonyNickName);
     if (strlen(deviceName) != 0) {
         ret = strcpy_s(peerNodeInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, deviceName);
     }
