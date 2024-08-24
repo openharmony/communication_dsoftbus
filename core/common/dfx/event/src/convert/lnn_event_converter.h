@@ -68,7 +68,7 @@ LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 30 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 33 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "LANE_ID",          HISYSEVENT_INT32,  LnnAssignerLaneId           },
     { "CHAN_REQ_ID",      HISYSEVENT_INT32,  LnnAssignerChanReqId        },

@@ -1335,7 +1335,7 @@ static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
     };
     LnnEventExtra extra = {
         .result = EVENT_STAGE_RESULT_OK,
-        .chanReqId = (int32_t)channelRequestId,
+        .chanReqId = channelRequestId,
         .connReqId = (int32_t)info.requestId,
     };
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_END, extra);
