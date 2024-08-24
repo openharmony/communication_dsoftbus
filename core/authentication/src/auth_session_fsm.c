@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,6 +88,15 @@ typedef struct {
     bool param2;
     AuthFsm *(*getFunc)(int64_t param1, bool param2);
 } AuthFsmGetFunc;
+
+typedef struct {
+    char localIp[IP_LEN];
+    char localBrMac[MAC_LEN];
+    char localBleMac[MAC_LEN];
+    char localUdid[UDID_BUF_LEN];
+    char localNetworkId[NETWORK_ID_BUF_LEN];
+    char localDevName[DEVICE_NAME_BUF_LEN];
+} AuditReportDevInfo;
 
 static ListNode g_authFsmList = { &g_authFsmList, &g_authFsmList };
 
@@ -728,23 +737,32 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
         AUTH_LOGE(AUTH_FSM, "lnnAuditExtra or info is null");
         return;
     }
+    char *anonyBrMac = NULL;
+    char *anonyBleMac = NULL;
+    char *anonyIp = NULL;
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_BR:
-            if (strcpy_s((char *)lnnAuditExtra->peerBrMac, BT_MAC_LEN, info->connInfo.info.brInfo.brMac) != EOK) {
+            Anonymize(info->connInfo.info.brInfo.brMac, &anonyBrMac);
+            if (strcpy_s((char *)lnnAuditExtra->peerBrMac, BT_MAC_LEN, anonyBrMac) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "BR MAC COPY ERROR");
             }
+            AnonymizeFree(anonyBrMac);
             break;
         case AUTH_LINK_TYPE_BLE:
-            if (strcpy_s((char *)lnnAuditExtra->peerBleMac, BT_MAC_LEN, info->connInfo.info.bleInfo.bleMac) != EOK) {
+            Anonymize(info->connInfo.info.bleInfo.bleMac, &anonyBleMac);
+            if (strcpy_s((char *)lnnAuditExtra->peerBleMac, BT_MAC_LEN, anonyBleMac) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "BLE MAC COPY ERROR");
             }
+            AnonymizeFree(anonyBleMac);
             break;
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
-            if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, info->connInfo.info.ipInfo.ip) != EOK) {
+            Anonymize(info->connInfo.info.ipInfo.ip, &anonyIp);
+            if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, anonyIp) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "IP COPY ERROR");
             }
+            AnonymizeFree(anonyIp);
             lnnAuditExtra->peerAuthPort = info->connInfo.info.ipInfo.port;
             break;
         default:
@@ -753,17 +771,58 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
     }
 }
 
+static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra *lnnAuditExtra)
+{
+    (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, reportInfo->localIp, IP_LEN);
+    char *anonyLocalIp = NULL;
+    Anonymize(reportInfo->localIp, &anonyLocalIp);
+    if (strcpy_s((char *)lnnAuditExtra->localIp, IP_LEN, anonyLocalIp) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "LOCAL IP COPY ERROR");
+    }
+    AnonymizeFree(anonyLocalIp);
+
+    (void)LnnGetLocalStrInfo(STRING_KEY_BT_MAC, reportInfo->localBrMac, MAC_LEN);
+    char *anonyLocalBrMac = NULL;
+    Anonymize(reportInfo->localBrMac, &anonyLocalBrMac);
+    if (strcpy_s((char *)lnnAuditExtra->localBrMac, MAC_LEN, anonyLocalBrMac) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "LOCAL BR MAC COPY ERROR");
+    }
+    AnonymizeFree(anonyLocalBrMac);
+
+    (void)LnnGetLocalStrInfo(STRING_KEY_BLE_MAC, reportInfo->localBleMac, MAC_LEN);
+    char *anonyLocalBleMac = NULL;
+    Anonymize(reportInfo->localBleMac, &anonyLocalBleMac);
+    if (strcpy_s((char *)lnnAuditExtra->localBleMac, MAC_LEN, anonyLocalBleMac) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "LOCAL BLE MAC COPY ERROR");
+    }
+    AnonymizeFree(anonyLocalBleMac);
+
+    (void)LnnGetLocalStrInfo(STRING_KEY_NETWORKID, reportInfo->localNetworkId, NETWORK_ID_BUF_LEN);
+    char *anonyLocalNetworkId = NULL;
+    Anonymize(reportInfo->localNetworkId, &anonyLocalNetworkId);
+    if (strcpy_s((char *)lnnAuditExtra->localNetworkId, NETWORK_ID_BUF_LEN, anonyLocalNetworkId) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "LOCAL NETWORKID COPY ERROR");
+    }
+    AnonymizeFree(anonyLocalNetworkId);
+
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, reportInfo->localDevName, DEVICE_NAME_BUF_LEN);
+    char *anonyLocalDevName = NULL;
+    Anonymize(reportInfo->localDevName, &anonyLocalDevName);
+    if (strcpy_s((char *)lnnAuditExtra->localDevName, DEVICE_NAME_BUF_LEN, anonyLocalDevName) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "LOCAL DEVICE NAME COPY ERROR");
+    }
+    AnonymizeFree(anonyLocalDevName);
+}
+
 static void AuditReportSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
 {
     if (lnnAuditExtra == NULL) {
         AUTH_LOGE(AUTH_FSM, "lnnAuditExtra is null");
         return;
     }
-    (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, (char *)lnnAuditExtra->localIp, IP_LEN);
-    (void)LnnGetLocalStrInfo(STRING_KEY_BT_MAC, (char *)lnnAuditExtra->localBrMac, MAC_LEN);
-    (void)LnnGetLocalStrInfo(STRING_KEY_BLE_MAC, (char *)lnnAuditExtra->localBleMac, MAC_LEN);
-    (void)LnnGetLocalStrInfo(STRING_KEY_NETWORKID, (char *)lnnAuditExtra->localNetworkId, NETWORK_ID_BUF_LEN);
-    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, (char *)lnnAuditExtra->localDevName, DEVICE_NAME_BUF_LEN);
+    AuditReportDevInfo reportInfo;
+    (void)memset_s(&reportInfo, sizeof(AuditReportDevInfo), 0, sizeof(AuditReportDevInfo));
+    GetLocalDevReportInfo(&reportInfo, lnnAuditExtra);
     (void)LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &lnnAuditExtra->localAuthPort);
     (void)LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &lnnAuditExtra->localProxyPort);
     (void)LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &lnnAuditExtra->localSessionPort);
@@ -779,10 +838,16 @@ static void AuditReportSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
         AUTH_LOGE(AUTH_FSM, "generate udid hash fail");
         return;
     }
-    if (ConvertBytesToUpperCaseHexString((char *)lnnAuditExtra->localUdid, SHA_256_HEX_HASH_LEN,
-        udidHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+    if (ConvertBytesToUpperCaseHexString(reportInfo.localUdid, SHA_256_HEX_HASH_LEN, udidHash, SHA_256_HASH_LEN) !=
+        SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert hash to upper hex str fail");
     }
+    char *anonyLocalUdid = NULL;
+    Anonymize(reportInfo.localUdid, &anonyLocalUdid);
+    if (strcpy_s((char *)lnnAuditExtra->localUdid, SHA_256_HEX_HASH_LEN, anonyLocalUdid) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "LOCAL UDID COPY ERROR");
+    }
+    AnonymizeFree(anonyLocalUdid);
 }
 
 static void BuildLnnAuditEvent(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info, int32_t result,
