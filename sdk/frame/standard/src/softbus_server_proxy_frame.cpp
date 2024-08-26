@@ -25,7 +25,6 @@
 #include "client_trans_socket_manager.h"
 #include "bus_center_server_proxy.h"
 #include "comm_log.h"
-#include "disc_server_proxy.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -176,7 +175,6 @@ void ClientDeathProcTask(void)
         }
         g_serverProxy.clear();
     }
-    DiscServerProxyDeInit();
     TransServerProxyDeInit();
     BusCenterServerProxyDeInit();
 
@@ -195,7 +193,6 @@ void ClientDeathProcTask(void)
         COMM_LOGE(COMM_SDK, "server proxy init reached the maximum count=%{public}d", cnt);
         return;
     }
-    DiscServerProxyInit();
     TransServerProxyInit();
     BusCenterServerProxyInit();
     InnerRegisterService(&sessionServerInfoList);
