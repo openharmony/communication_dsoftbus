@@ -23,8 +23,6 @@ ohos_benchmarktest("DiscoveryTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/sdk/discovery/include",
-    "$dsoftbus_root_path/sdk/discovery/manager/include",
   ]
   deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
   external_deps = [

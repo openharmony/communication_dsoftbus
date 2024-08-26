@@ -85,45 +85,10 @@ ohos_unittest("DiscManagerMockTest") {
   ]
 }
 
-ohos_unittest("DiscManagerServerTest") {
-  module_out_path = module_output_path
-  sources = [
-    "$dsoftbus_core_path/discovery/manager/src/softbus_disc_server.c",
-    "softbus_disc_server_mock.cpp",
-    "softbus_disc_server_test.cpp",
-  ]
-
-  include_dirs = [
-    "$dsoftbus_core_path/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_core_path/common/dfx/hidumper_adapter/include",
-    "$dsoftbus_core_path/common/include",
-    "$dsoftbus_core_path/discovery/ble/dispatcher/include",
-    "$dsoftbus_core_path/discovery/coap/interface",
-    "$dsoftbus_core_path/discovery/interface",
-    "$dsoftbus_core_path/discovery/ipc/include",
-    "$dsoftbus_core_path/discovery/manager/include",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$softbus_adapter_common/include",
-  ]
-
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-  ]
-
-  external_deps = [
-    "googletest:gmock",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-  ]
-}
-
 group("unittest") {
   testonly = true
   deps = [
     ":DiscManagerMockTest",
-    ":DiscManagerServerTest",
     ":DiscManagerTest",
   ]
 }
