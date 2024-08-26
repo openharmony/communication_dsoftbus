@@ -20,9 +20,6 @@
 namespace OHOS::SoftBus {
 struct P2pOperationResult {
     int errorCode_ {};
-    P2pAdapter::ConnectionState connectState_;
-    int isP2pGroupOwner;
-    std::string groupOwnerAddress;
 };
 }
 #endif

@@ -142,6 +142,7 @@ ConnBleConnection *ConnBleCreateConnection(
     if (list == NULL) {
         CONN_LOGE(CONN_BLE, "create softbus list failed");
         SoftBusFree(connection);
+        SoftBusMutexDestroy(&connection->lock);
         return NULL;
     }
     connection->connectStatus = list;
