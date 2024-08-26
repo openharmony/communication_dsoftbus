@@ -250,10 +250,9 @@
     ]
   },
   {
-    "SESSION_NAME": "CastPlus*",
+    "SESSION_NAME": "^CastPlus*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "PKG_NAME": "CastEngineService",
@@ -326,7 +325,7 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.*CastPlusDiscoveryModule",
+    "SESSION_NAME": "^com.huawei[a-z.+]{20}CastPlusDiscoveryModule$",
     "REGEXP": "true",
     "DEVID": "UDID",
     "APP_INFO": [
@@ -338,10 +337,9 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.profile-session*",
+    "SESSION_NAME": "^com.huawei.profile-session*",
     "REGEXP": "true",
     "DEVID": "UDID",
-    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "PKG_NAME": "com.huawei.profile",
@@ -464,10 +462,9 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.boosterd.*",
+    "SESSION_NAME": "^com.huawei.boosterd.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "PKG_NAME": "boosterd",
