@@ -697,11 +697,11 @@ static int32_t AuthenticationFailedAndRetry(ConnBrConnection *connection, ConnBr
             break;
         }
     }
-    uint32_t time = it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_RFCOM_DM ?
-        BR_CONNECTION_ACL_RETRY_CONNECT_COLLISION_MILLIS : BR_CONNECTION_ACL_CONNECT_COLLISION_MILLIS;
     if (collision && connection->retryCount < MAX_RETRY_COUNT) {
         CONN_LOGW(CONN_BR, "acl collision, wait for retry, id=%{public}u, addr=%{public}s, result=%{public}d",
             connection->connectionId, anomizeAddress, it->result);
+        uint32_t time = it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_RFCOM_DM ?
+            BR_CONNECTION_ACL_RETRY_CONNECT_COLLISION_MILLIS : BR_CONNECTION_ACL_CONNECT_COLLISION_MILLIS;
         // NOTICE: assign connecting NULL first to prevent recursively pending in connecting
         g_brManager.connecting = NULL;
         ProcessAclCollisionException(connectingDevice, anomizeAddress, time);
