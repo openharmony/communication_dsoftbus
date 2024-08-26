@@ -1337,6 +1337,7 @@ static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
         .result = EVENT_STAGE_RESULT_OK,
         .chanReqId = channelRequestId,
         .connReqId = (int32_t)info.requestId,
+        .connectionId = channelId,
     };
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
