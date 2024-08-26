@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 int32_t ClientOnDiscoverySuccess(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        DISC_LOGW(DISC_CONTROL, "invalid param.");
+        DISC_LOGE(DISC_CONTROL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -36,7 +36,7 @@ int32_t ClientOnDiscoverySuccess(IpcIo *data, IpcIo *reply)
 int32_t ClientOnDiscoverFailed(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        DISC_LOGW(DISC_CONTROL, "invalid param.");
+        DISC_LOGE(DISC_CONTROL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -51,7 +51,7 @@ int32_t ClientOnDiscoverFailed(IpcIo *data, IpcIo *reply)
 int32_t ClientOnDeviceFound(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        DISC_LOGW(DISC_CONTROL, "invalid param.");
+        DISC_LOGE(DISC_CONTROL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -66,7 +66,7 @@ int32_t ClientOnDeviceFound(IpcIo *data, IpcIo *reply)
 int32_t ClientOnPublishSuccess(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        DISC_LOGW(DISC_CONTROL, "invalid param.");
+        DISC_LOGE(DISC_CONTROL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -79,7 +79,7 @@ int32_t ClientOnPublishSuccess(IpcIo *data, IpcIo *reply)
 int32_t ClientOnPublishFail(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        DISC_LOGW(DISC_CONTROL, "invalid param.");
+        DISC_LOGE(DISC_CONTROL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
