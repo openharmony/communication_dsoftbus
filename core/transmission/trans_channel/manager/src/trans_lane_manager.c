@@ -307,8 +307,8 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
         if ((strcmp(laneItem->pkgName, pkgName) == 0) && (laneItem->pid == pid)) {
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
-            TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
-                pkgName, laneItem->channelId, laneItem->channelType);
+            TRANS_LOGI(TRANS_SVC, "death del lane. channelId=%{public}d, channelType=%{public}d",
+                laneItem->channelId, laneItem->channelType);
             if (laneItem->isQosLane) {
                 TransFreeLaneByLaneHandle(laneItem->laneHandle, true);
             } else {
