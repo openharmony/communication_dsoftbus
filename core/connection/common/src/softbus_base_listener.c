@@ -178,6 +178,7 @@ static void ReturnListenerNode(SoftbusListenerNode **nodePtr)
         CONN_LOGI(CONN_COMMON, "object reference count <= 0, free listener node, module=%{public}d, "
                                "objectReference=%{public}d", node->module, objectRc);
         (void)ShutdownBaseListener(node);
+        SoftBusMutexDestroy(&node->lock);
         SoftBusFree(node);
     } while (false);
 
@@ -554,7 +555,7 @@ static int32_t ShutdownBaseListener(SoftbusListenerNode *node)
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "stop select thread failed, module=%{public}d, error=%{public}d",
                 node->module, status);
-            break;
+            // fall-through
         }
         node->info.status = LISTENER_IDLE;
 
