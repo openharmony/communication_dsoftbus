@@ -241,9 +241,12 @@ static int32_t TransServerOnChannelBind(const char *pkgName, int32_t pid, int32_
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel bind fail, ret=%{public}d, channelId=%{public}d", ret, channelId);
         return ret;
     }
+    char *anonymizePkgName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
     TRANS_LOGI(TRANS_CTRL,
         "trasn server on channel bind. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
-        pkgName, channelId, channelType);
+        anonymizePkgName, channelId, channelType);
+    AnonymizeFree(anonymizePkgName);
     return SOFTBUS_OK;
 }
 
