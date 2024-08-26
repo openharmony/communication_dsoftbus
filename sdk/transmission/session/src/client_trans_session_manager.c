@@ -1329,7 +1329,13 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     g_clientSessionServerList->cnt++;
 
     UnlockClientSessionServerList();
-    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", server->sessionName, server->pkgName);
+    char *anonymizePkgName = NULL;
+    char *tmpName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", tmpName, anonymizePkgName);
+    AnonymizeFree(anonymizePkgName);
+    AnonymizeFree(tmpName);
     return SOFTBUS_OK;
 }
 
