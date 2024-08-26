@@ -91,9 +91,6 @@ typedef enum {
 } ConnectOnlineReason;
 
 typedef struct {
-    int32_t laneId;             // LANE_ID
-    int32_t chanReqId;          // CHAN_REQ_ID
-    int32_t connReqId;          // CONN_REQ_ID
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
     int32_t authId;             // AUTH_ID
@@ -110,6 +107,9 @@ typedef struct {
     int32_t onlineType;         // ONLINE_TYPE
     int32_t osType;             // OS_TYPE
     uint32_t connOnlineReason;  // CONN_ONLINE_REASON
+    int32_t laneId;             // LANE_ID
+    int32_t chanReqId;          // CHAN_REQ_ID
+    int32_t connReqId;          // CONN_REQ_ID
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC
