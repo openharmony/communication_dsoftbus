@@ -1628,8 +1628,8 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
     }
 
-    TransProxyCloseProxyOtherRes(channelId, info);
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    TransProxyCloseProxyOtherRes(channelId, info);
     return SOFTBUS_OK;
 }
 
