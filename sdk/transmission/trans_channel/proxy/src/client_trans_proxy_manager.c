@@ -34,6 +34,7 @@
 
 #define SLICE_LEN (4 * 1024)
 #define PROXY_ACK_SIZE 4
+#define OH_TYPE 10
 
 static IClientSessionCallBack g_sessionCb;
 static uint32_t g_proxyMaxByteBufSize;
@@ -447,14 +448,19 @@ int32_t TransProxyPackAndSendData(
 static void ClientTransProxySendSessionAck(int32_t channelId, int32_t seq)
 {
     unsigned char ack[PROXY_ACK_SIZE] = { 0 };
-    if (memcpy_s(ack, PROXY_ACK_SIZE, &seq, sizeof(int32_t)) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy seq err");
-        return;
-    }
-
+    int32_t tmpSeq = 0;
     ProxyChannelInfoDetail info;
     if (ClientTransProxyGetInfoByChannelId(channelId, &info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get proxy info err, channelId=%{public}d", channelId);
+        return;
+    }
+    if (info.osType == OH_TYPE) {
+        tmpSeq = SoftBusHtoLl((uint32_t)seq);
+    } else {
+        tmpSeq = SoftBusHtoNl((uint32_t)seq); // convet host order to net order
+    }
+    if (memcpy_s(ack, PROXY_ACK_SIZE, &tmpSeq, sizeof(int32_t)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy seq err");
         return;
     }
     info.sequence = seq;
