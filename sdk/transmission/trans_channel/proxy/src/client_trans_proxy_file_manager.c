@@ -100,7 +100,7 @@ static void ProxyFileTransTimerProc(void)
             continue;
         }
         if (info->recvFileInfo.timeOut >= FILE_TRANS_TIMEOUT) {
-            TRANS_LOGE(TRANS_FILE, "recv timeout, filePath=%{public}s, recvState=%{public}d",
+            TRANS_LOGE(TRANS_FILE, "recv timeout, filePath=%{private}s, recvState=%{public}d",
                 info->recvFileInfo.filePath, info->recvState);
             info->recvFileInfo.fileStatus = NODE_ERR;
             info->recvState = TRANS_FILE_RECV_ERR_STATE;
@@ -669,13 +669,13 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo *sendInfo, const char *so
     uint64_t fileSize = 0;
     uint64_t frameNum = 0;
     if (GetAndCheckFileSize(absSrcPath, &fileSize, &frameNum, sendInfo->crc, sendInfo->packetSize) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "absSrcPath size err. channelId=%{public}d, absSrcPath=%{public}s", sendInfo->channelId,
-            absSrcPath);
+        TRANS_LOGE(TRANS_FILE,
+            "absSrcPath size err. channelId=%{public}d, absSrcPath=%{private}s", sendInfo->channelId, absSrcPath);
         SoftBusFree(absSrcPath);
         return SOFTBUS_FILE_ERR;
     }
     TRANS_LOGI(TRANS_FILE,
-        "channelId=%{public}d, srcPath=%{public}s, srcAbsPath=%{public}s, destPath=%{public}s, "
+        "channelId=%{public}d, srcPath=%{private}s, srcAbsPath=%{private}s, destPath=%{private}s, "
         "fileSize=%{public}" PRIu64 ", frameNum=%{public}" PRIu64,
         sendInfo->channelId, sourceFile, absSrcPath, destFile, fileSize, frameNum);
     int32_t fd = SoftBusOpenFile(absSrcPath, SOFTBUS_O_RDONLY);
@@ -801,7 +801,7 @@ static int32_t CalcAllFilesInfo(FilesInfo *totalInfo, const char *fileList[], ui
     uint64_t curFileSize = 0;
     for (uint32_t i = 0; i < fileCnt; i++) {
         if (GetFileSize(fileList[i], &curFileSize) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "get file size failed, path=%{public}s", fileList[i]);
+            TRANS_LOGE(TRANS_SDK, "get file size failed, path=%{private}s", fileList[i]);
             return SOFTBUS_FILE_ERR;
         }
         totalInfo->bytesTotal += curFileSize;
@@ -1151,7 +1151,7 @@ static int32_t UpdateFileReceivePath(int32_t sessionId, FileListener *fileListen
     const char *rootDir = event.UpdateRecvPath();
     char *absPath = realpath(rootDir, NULL);
     if (absPath == NULL) {
-        TRANS_LOGE(TRANS_SDK, "rootDir not exist, rootDir=%{public}s, errno=%{public}d.",
+        TRANS_LOGE(TRANS_SDK, "rootDir not exist, rootDir=%{private}s, errno=%{public}d.",
             (rootDir == NULL ? "null" : rootDir), errno);
         return SOFTBUS_FILE_ERR;
     }
