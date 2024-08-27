@@ -787,19 +787,6 @@ static int32_t CheckReceiveDeviceInfo(
     return SOFTBUS_OK;
 }
 
-static int32_t CheckJoinLnnRequest(
-    DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, HbRespData *hbResp, uint64_t nowTime)
-{
-    if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
-        ProcessUdidAnonymize(device->devId);
-        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
-    }
-    if (!HbIsValidJoinLnnRequest(device, hbResp)) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
 {
     if (device == NULL || hbResp == NULL) {
@@ -861,6 +848,22 @@ static bool IsSupportCloudSync(DeviceInfo *device)
         IsFeatureSupport(info.feature, BIT_CLOUD_SYNC_DEVICE_INFO);
 }
 
+static int32_t CheckJoinLnnRequest(
+    DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason, bool *isConnect)
+{
+    if (!HbIsValidJoinLnnRequest(device, hbResp)) {
+        return SOFTBUS_ERR;
+    }
+    *isConnect = IsNeedConnectOnLine(device, hbResp, connectReason);
+    if (*isConnect && !device->isOnline) {
+        if (IsSupportCloudSync(device)) {
+            return SOFTBUS_NETWORK_PEER_NODE_CONNECT;
+        }
+        return SOFTBUS_NETWORK_NOT_CONNECTABLE;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -896,20 +899,19 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return ret;
     }
-    res = CheckJoinLnnRequest(device, storedInfo, hbResp, nowTime);
+    ConnectOnlineReason connectReason = CONNECT_INITIAL_VALUE;
+    bool isConnect = false;
+    res = CheckJoinLnnRequest(device, hbResp, &connectReason, &isConnect);
     if (res != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return res;
     }
-    (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-    ConnectOnlineReason connectReason = CONNECT_INITIAL_VALUE;
-    bool isConnect = IsNeedConnectOnLine(device, hbResp, &connectReason);
-    if (isConnect && !device->isOnline) {
-        if (IsSupportCloudSync(device)) {
-            return SOFTBUS_NETWORK_PEER_NODE_CONNECT;
-        }
-        return SOFTBUS_NETWORK_NOT_CONNECTABLE;
+    if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
+        ProcessUdidAnonymize(device->devId);
+        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
+    (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     return SoftBusNetNodeResult(device, hbResp, isConnect, connectReason);
 }
 
