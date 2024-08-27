@@ -307,16 +307,11 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 
 static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
 {
-    if (addrStr == NULL || addrInfo == NULL) {
-        TRANS_LOGE(TRANS_SDK, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        (addrStr != NULL && addrInfo != NULL), SOFTBUS_INVALID_PARAM, TRANS_SDK, "invalid param");
 
     cJSON *obj = cJSON_Parse(addrStr);
-    if (obj == NULL) {
-        TRANS_LOGE(TRANS_SDK, "cJSON_Parse fail");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(obj != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_SDK, "addrStr parse failed.");
     if (memset_s(addrInfo, sizeof(ConnectionAddr), 0x0, sizeof(ConnectionAddr)) != EOK) {
         cJSON_Delete(obj);
         TRANS_LOGE(TRANS_SDK, "memset_s info fail");
@@ -348,7 +343,10 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
     }
     if (GetJsonObjectStringItem(obj, "BLE_MAC", addrInfo->info.ble.bleMac, BT_MAC_LEN)) {
         if (GetJsonObjectStringItem(obj, "deviceId", (char *)addrInfo->info.ble.udidHash, UDID_HASH_LEN)) {
-            TRANS_LOGI(TRANS_SDK, "get deviceid fail");
+            char *udidHash = NULL;
+            Anonymize((char *)addrInfo->info.ble.udidHash, &udidHash);
+            TRANS_LOGI(TRANS_SDK, "get deviceid=%{public}s ok", AnonymizeWrapper(udidHash));
+            AnonymizeFree(udidHash);
         }
         cJSON_Delete(obj);
         addrInfo->type = CONNECTION_ADDR_BLE;
