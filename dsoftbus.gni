@@ -86,6 +86,7 @@ if (defined(ohos_lite)) {
     dsoftbus_build_eng = true
   } else {
     dsoftbus_build_eng = false
+    defines += [ "OPENSSL_NO_FILENAMES" ]
   }
 }
 
