@@ -144,7 +144,7 @@ static int32_t TestRegisterDeviceInfo(const char *ip)
         return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
     }
 
-    (void)memset_s(localDevInfo, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
+    (void)memset_s(localDevInfo,sizeof(NSTACKX_LocalDeviceInfo), 0,sizeof(NSTACKX_LocalDeviceInfo));
     char *udidStr = GetDeviceId();
     if (udidStr == NULL) {
         printf("get device id string failed.\n");

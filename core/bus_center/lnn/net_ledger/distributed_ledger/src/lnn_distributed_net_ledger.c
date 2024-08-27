@@ -1484,11 +1484,11 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
         LNN_LOGE(LNN_LEDGER, "strcpy_s p2pMac to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, (char *)newInfo->rpaInfo.peerIrk,
-            LFINDER_IRK_LEN) != EOK) {
+                 LFINDER_IRK_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s peerIrk to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, (char *)newInfo->rpaInfo.publicAddress,
-            LFINDER_MAC_ADDR_LEN) != EOK) {
+                 LFINDER_MAC_ADDR_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s publicAddress to distributed ledger fail");
     }
     if (memcpy_s((char *)oldInfo->cipherInfo.key, SESSION_KEY_LENGTH, newInfo->cipherInfo.key, SESSION_KEY_LENGTH) !=
