@@ -310,6 +310,7 @@ int32_t P2pAdapter::GetGroupInfo(WifiDirectP2pGroupInfo &groupInfoOut)
     groupInfoOut.isGroupOwner = info.isP2pGroupOwner;
     groupInfoOut.frequency = info.frequency;
     groupInfoOut.interface = info.interface;
+    groupInfoOut.goIpAddr = info.goIpAddress;
     std::vector<uint8_t> devAddrArray(info.owner.devAddr, info.owner.devAddr + sizeof(info.owner.devAddr));
     std::vector<uint8_t> devRandomAddrArray(info.owner.randomDevAddr, info.owner.randomDevAddr +
         sizeof(info.owner.randomDevAddr));
