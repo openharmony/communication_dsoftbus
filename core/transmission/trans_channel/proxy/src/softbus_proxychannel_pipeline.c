@@ -135,7 +135,10 @@ int32_t TransProxyReuseByChannelId(int32_t channelId)
 int32_t TransProxyPipelineGenRequestId(void)
 {
     static int32_t requestIdGenerator = 0;
+    TRANS_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_manager.channels->lock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
     return ++requestIdGenerator;
+    SoftBusMutexUnlock(&g_manager.channels->lock);
 }
 
 int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const ITransProxyPipelineListener *listener)
