@@ -237,7 +237,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const Conne
     if (module == AUTH_P2P || IsEnhanceP2pModuleId(module)) {
         CONN_LOGI(CONN_COMMON, "recv p2p conned. cfd=%{public}d", cfd);
         if (ConnSetTcpKeepalive(
-                cfd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
+            cfd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "set keepalive fail");
             ConnShutdownSocket(cfd);
             return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
@@ -541,7 +541,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     int32_t error = SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR;
     if (option->socketOption.keepAlive == 1) {
         if (ConnSetTcpKeepalive(
-                fd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
+            fd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "set keepalive fail, fd=%{public}d", fd);
             ConnShutdownSocket(fd);
             result->OnConnectFailed(requestId, SOFTBUS_CONN_SOCKET_INTERNAL_ERR);
