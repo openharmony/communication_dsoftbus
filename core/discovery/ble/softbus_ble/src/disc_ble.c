@@ -718,6 +718,8 @@ static int32_t DiscBleGetCustData(DeviceInfo *info)
             break;
         }
     }
+    DISC_CHECK_AND_RETURN_RET_LOGD(
+        pos < CAPABILITY_MAX_BITNUM, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL, DISC_BLE, "not find capBitMap");
     cJSON *json = cJSON_ParseWithLength((const char *)g_bleInfoManager[infoIndex].capabilityData[pos],
         g_bleInfoManager[infoIndex].capDataLen[pos]);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "parse cJSON failed");
