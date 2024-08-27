@@ -1703,7 +1703,6 @@ static void Init(const ILaneIdStateListener *listener)
     if (g_requestList == NULL) {
         LNN_LOGE(LNN_LANE, "transLane malloc fail");
         (void)SoftBusMutexDestroy(&g_transLaneMutex);
-        DeinitLaneReliability();
         return;
     }
     ListInit(&g_requestList->list);
@@ -1735,6 +1734,7 @@ static void Deinit(void)
     (void)SoftBusMutexDestroy(&g_transLaneMutex);
     SoftBusFree(g_requestList);
     g_requestList = NULL;
+    DeinitLaneReliability();
 }
 
 static LaneInterface g_transLaneObject = {
