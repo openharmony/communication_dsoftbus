@@ -416,19 +416,19 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
         (void)TransSetSocketChannelStateByChannel(channelId, channelType, CORE_SESSION_STATE_CANCELLING);
         switch (channelType) {
             case CHANNEL_TYPE_PROXY:
-                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = TransProxyCloseProxyChannel(channelId);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 break;
             case CHANNEL_TYPE_TCP_DIRECT:
-                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 (void)TransDelTcpChannelInfoByChannelId(channelId);
                 TransDelSessionConnById(channelId); // socket Fd will be shutdown when recv peer reply
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = SOFTBUS_OK;
                 break;
             case CHANNEL_TYPE_UDP:
                 (void)NotifyQosChannelClosed(channelId, channelType);
-                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = TransCloseUdpChannel(channelId);
+                (void)TransLaneMgrDelLane(channelId, channelType, false);
                 break;
             case CHANNEL_TYPE_AUTH:
                 ret = TransCloseAuthChannel(channelId);
