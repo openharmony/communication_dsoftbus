@@ -23,6 +23,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
@@ -1179,6 +1180,12 @@ static void OnAuthConnOpened(uint32_t authRequestId, AuthHandle authHandle)
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .authRequestId = (int32_t)authRequestId,
+        .connReqId = (int32_t)info.requestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
         info.requestId, info.connectType);
     ret = GetWifiDirectManager()->connectDevice(&info, &callback);
@@ -1326,6 +1333,13 @@ static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .chanReqId = channelRequestId,
+        .connReqId = (int32_t)info.requestId,
+        .connectionId = channelId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
         info.requestId, info.connectType);
     ret = GetWifiDirectManager()->connectDevice(&info, &callback);
@@ -1353,6 +1367,13 @@ static int32_t OpenProxyChannelToConnP2p(const LinkRequest *request, uint32_t la
         .onChannelOpenFailed = OnProxyChannelOpenFailed,
     };
     int32_t channelRequestId = TransProxyPipelineGenRequestId();
+
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .laneId = (int32_t)laneReqId,
+        .chanReqId = channelRequestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_START, extra);
     int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_CHANNEL, (uint32_t)channelRequestId, laneReqId, request, callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new connect node failed");
@@ -1444,6 +1465,12 @@ static void OnAuthTriggerConnOpened(uint32_t authRequestId, AuthHandle authHandl
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .authRequestId = (int32_t)authRequestId,
+        .connReqId = (int32_t)wifiDirectInfo.requestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     ret = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &callback);
@@ -1527,6 +1554,12 @@ static void DetectSuccess(uint32_t laneReqId, LaneLinkType linkType, const LaneL
         LNN_LOGE(LNN_LANE, "get p2p request fail, laneReqId=%{public}u", laneReqId);
         return;
     }
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .laneId = (int32_t)laneReqId,
+        .authRequestId = (int32_t)p2pLinkReqInfo.auth.requestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_START, extra);
     LNN_LOGI(LNN_LANE, "auth channel detect succ, laneReqId=%{public}u", laneReqId);
     AuthChannelDetectSucc(laneReqId, p2pLinkReqInfo.auth.requestId, p2pLinkReqInfo.auth.authHandle);
 }
@@ -1769,6 +1802,12 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .laneId = (int32_t)laneReqId,
+        .connReqId = (int32_t)wifiDirectInfo.requestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     ret = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb);
@@ -1814,6 +1853,12 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .laneId = (int32_t)laneLinkReqId,
+        .connReqId = (int32_t)wifiDirectInfo.requestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_ROUTE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifi direct action connectDevice. p2pRequestId=%{public}u, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     errCode = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb);
