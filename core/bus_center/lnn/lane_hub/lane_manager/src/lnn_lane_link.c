@@ -981,6 +981,13 @@ static void LaneInitP2pAddrList()
 
 static void LaneDeinitP2pAddrList(void)
 {
+    P2pAddrNode *item = NULL;
+    P2pAddrNode *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_P2pAddrList.list, P2pAddrNode, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    g_P2pAddrList.cnt = 0;
     (void)SoftBusMutexDestroy(&g_P2pAddrList.lock);
 }
 
@@ -1620,6 +1627,13 @@ int32_t InitLaneLink(void)
 void DeinitLaneLink(void)
 {
     LaneDeinitP2pAddrList();
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    g_laneResource.cnt = 0;
     (void)SoftBusMutexDestroy(&g_laneResource.lock);
     LnnDestroyP2p();
 }

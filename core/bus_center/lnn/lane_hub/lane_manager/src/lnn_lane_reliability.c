@@ -365,5 +365,12 @@ int32_t InitLaneReliability(void)
 
 void DeinitLaneReliability(void)
 {
+    LaneDetectInfo *item = NULL;
+    LaneDetectInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneDetectList.list, LaneDetectInfo, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    g_laneDetectList.cnt = 0;
     (void)SoftBusMutexDestroy(&g_laneDetectList.lock);
 }
