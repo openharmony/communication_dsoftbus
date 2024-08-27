@@ -300,7 +300,7 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         // frameLength = magic(4 bytes) + dataLen(8 bytes) + oneFrameLen(4 bytes) + fileSize(8 bytes) + fileName
         fileFrame->magic = SoftBusLtoHl((*(uint32_t *)(fileFrame->data)));
         uint64_t dataLen = SoftBusLtoHll((*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET)));
-        if (FRAME_HEAD_LEN + dataLen > fileFrame->frameLength) {
+        if (dataLen > fileFrame->frameLength - FRAME_HEAD_LEN) {
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
         if (fileFrame->magic != FILE_MAGIC_NUMBER || dataLen < (FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t))) {
