@@ -299,10 +299,11 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         // frameLength = magic(4 bytes) + dataLen(8 bytes) + oneFrameLen(4 bytes) + fileSize(8 bytes) + fileName
         fileFrame->magic = (*(uint32_t *)(fileFrame->data));
         uint64_t dataLen = (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET));
-        if (FRAME_HEAD_LEN + dataLen > fileFrame->frameLength) {
+        if (dataLen > fileFrame->frameLength - FRAME_HEAD_LEN) {
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
-        if (fileFrame->magic != FILE_MAGIC_NUMBER || dataLen < (FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t))) {
+        if (fileFrame->magic != FILE_MAGIC_NUMBER ||
+            dataLen != fileFrame->frameLength - (FRAME_HEAD_LEN + FRAME_CRC_LEN)) {
             TRANS_LOGE(
                 TRANS_FILE, "start info fail magic=%{public}X dataLen=%{public}" PRIu64, fileFrame->magic, dataLen);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;

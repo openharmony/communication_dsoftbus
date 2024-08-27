@@ -224,7 +224,7 @@ int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame, uint3
         fileFrame->magic = (*(uint32_t *)(fileFrame->data));
         uint64_t dataLen = (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET));
         if (fileFrame->magic != FILE_MAGIC_NUMBER ||
-            (dataLen + FRAME_HEAD_LEN + FRAME_CRC_LEN) != fileFrame->frameLength) {
+            dataLen != fileFrame->frameLength - (FRAME_HEAD_LEN + FRAME_CRC_LEN)) {
             TRANS_LOGE(TRANS_FILE, "unpack data frame failed. magic=%{public}u, dataLen=%{public}" PRIu64,
                 fileFrame->magic, dataLen);
             return SOFTBUS_INVALID_DATA_HEAD;
