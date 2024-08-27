@@ -620,12 +620,12 @@ int GetSessionSide(int sessionId)
 static bool IsValidFileReceivePath(const char *rootDir)
 {
     if (!IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_SDK, "recvPath invalid. recvPath=%{public}s", rootDir);
+        TRANS_LOGE(TRANS_SDK, "recvPath invalid. recvPath=%{private}s", rootDir);
         return false;
     }
     char *absPath = realpath(rootDir, NULL);
     if (absPath == NULL) {
-        TRANS_LOGE(TRANS_SDK, "recvPath not exist, recvPath=%{public}s, errno=%{public}d.", rootDir, errno);
+        TRANS_LOGE(TRANS_SDK, "recvPath not exist, recvPath=%{private}s, errno=%{public}d.", rootDir, errno);
         return false;
     }
     SoftBusFree(absPath);
