@@ -93,6 +93,7 @@ int32_t Socket(SocketInfo info)
 
     int32_t socketFd = INVALID_SESSION_ID;
     ret = ClientAddSocket(&info, &socketFd);
+    SocketServerStateUpdate(info.name);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);
         return ret;
