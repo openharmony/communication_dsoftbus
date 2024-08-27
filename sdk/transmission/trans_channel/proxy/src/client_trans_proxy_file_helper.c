@@ -26,6 +26,7 @@
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -55,11 +56,12 @@ int32_t SendFileTransResult(int32_t channelId, uint32_t seq, int32_t result, uin
         TRANS_LOGE(TRANS_FILE, "malloc failedLen=%{public}d.", len);
         return SOFTBUS_MALLOC_ERR;
     }
-    *(uint32_t *)data = FILE_MAGIC_NUMBER;
-    *(uint64_t *)(data + FRAME_MAGIC_OFFSET) = (FRAME_DATA_SEQ_OFFSET + sizeof(uint32_t) + sizeof(int32_t));
-    *(uint32_t *)(data + FRAME_HEAD_LEN) = seq;
-    *(uint32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET) = side;
-    *(int32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + sizeof(uint32_t)) = result;
+    *(uint32_t *)data = SoftBusHtoLl(FILE_MAGIC_NUMBER);
+    *(uint64_t *)(data + FRAME_MAGIC_OFFSET) =
+        SoftBusHtoLll((FRAME_DATA_SEQ_OFFSET + sizeof(uint32_t) + sizeof(int32_t)));
+    *(uint32_t *)(data + FRAME_HEAD_LEN) = SoftBusHtoLl(seq);
+    *(uint32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET) = SoftBusHtoLl(side);
+    *(int32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + sizeof(uint32_t)) = SoftBusHtoLl((uint32_t)result);
 
     int32_t ret = ProxyChannelSendFileStream(channelId, data, len, TRANS_SESSION_FILE_RESULT_FRAME);
     if (ret != SOFTBUS_OK) {
@@ -80,16 +82,17 @@ int32_t UnpackFileTransResultFrame(
         TRANS_LOGE(TRANS_FILE, "recv ack fail. responseLen=%{public}u", len);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-    uint32_t magic = *(uint32_t *)data;
-    uint64_t dataLen = *(uint64_t *)(data + FRAME_MAGIC_OFFSET);
+    uint32_t magic = SoftBusLtoHl(*(uint32_t *)data);
+    uint64_t dataLen = SoftBusLtoHll(*(uint64_t *)(data + FRAME_MAGIC_OFFSET));
     if (magic != FILE_MAGIC_NUMBER || dataLen != (FRAME_DATA_SEQ_OFFSET + sizeof(uint32_t) + sizeof(int32_t))) {
         TRANS_LOGE(
             TRANS_FILE, "recv ack response head fail. magic=%{public}u, dataLen=%{public}" PRIu64, magic, dataLen);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
-    (*seq) = (*(uint32_t *)(data + FRAME_HEAD_LEN));
-    (*side) = (*(uint32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET));
-    (*result) = (*(int32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + sizeof(uint32_t)));
+    (*seq) = SoftBusLtoHl((*(uint32_t *)(data + FRAME_HEAD_LEN)));
+    (*side) = SoftBusLtoHl((*(uint32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET)));
+    (*result) = (int32_t)SoftBusLtoHl(
+        (uint32_t)(*(int32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + sizeof(uint32_t))));
     TRANS_LOGI(TRANS_FILE, "seq=%{public}u, side=%{public}u, result=%{public}d", *seq, *side, *result);
     return SOFTBUS_OK;
 }
@@ -102,10 +105,10 @@ int32_t SendFileAckReqAndResData(int32_t channelId, uint32_t startSeq, uint32_t 
         TRANS_LOGE(TRANS_FILE, "calloc fail! len=%{public}d.", len);
         return SOFTBUS_MALLOC_ERR;
     }
-    *(uint32_t *)data = FILE_MAGIC_NUMBER;
-    *(int64_t *)(data + FRAME_MAGIC_OFFSET) = (FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET);
-    *(uint32_t *)(data + FRAME_HEAD_LEN) = startSeq;
-    *(uint32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET) = value;
+    *(uint32_t *)data = SoftBusHtoLl(FILE_MAGIC_NUMBER);
+    *(int64_t *)(data + FRAME_MAGIC_OFFSET) = SoftBusHtoLll((uint64_t)(FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET));
+    *(uint32_t *)(data + FRAME_HEAD_LEN) = SoftBusHtoLl(startSeq);
+    *(uint32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET) = SoftBusHtoLl(value);
     int32_t ret = ProxyChannelSendFileStream(channelId, data, len, type);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "conn send ack buf fail ret=%{public}d.", ret);
@@ -123,16 +126,16 @@ int32_t UnpackAckReqAndResData(FileFrame *frame, uint32_t *startSeq, uint32_t *v
         TRANS_LOGE(TRANS_FILE, "unpack ack data fail. frameLen=%{public}d", frame->frameLength);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-    frame->magic = (*(uint32_t *)(frame->data));
-    uint64_t dataLen = (*(uint64_t *)(frame->data + FRAME_MAGIC_OFFSET));
+    frame->magic = SoftBusLtoHl((*(uint32_t *)(frame->data)));
+    uint64_t dataLen = SoftBusLtoHll((*(uint64_t *)(frame->data + FRAME_MAGIC_OFFSET)));
     if (frame->magic != FILE_MAGIC_NUMBER || dataLen < FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET) {
         TRANS_LOGE(
             TRANS_FILE, "unpack ack head fail. magic=%{public}u, dataLen=%{public}" PRIu64, frame->magic, dataLen);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     frame->fileData = frame->data + FRAME_HEAD_LEN;
-    (*startSeq) = (*(uint32_t *)(frame->fileData));
-    (*value) = (*(uint32_t *)(frame->fileData + FRAME_DATA_SEQ_OFFSET));
+    (*startSeq) = SoftBusLtoHl((*(uint32_t *)(frame->fileData)));
+    (*value) = SoftBusLtoHl((*(uint32_t *)(frame->fileData + FRAME_DATA_SEQ_OFFSET)));
     return SOFTBUS_OK;
 }
 
@@ -147,7 +150,7 @@ int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint64_t fil
         TRANS_LOGE(TRANS_FILE, "pread src file failed. ret=%{public}" PRId64, len);
         return len;
     }
-    if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
+    if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT && info->osType == OH_TYPE) {
         uint64_t dataLen = (uint64_t)len + FRAME_DATA_SEQ_OFFSET;
         fileFrame->frameLength = FRAME_HEAD_LEN + dataLen + FRAME_CRC_LEN;
         if (fileFrame->frameLength > info->packetSize) {
@@ -155,11 +158,11 @@ int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint64_t fil
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
         uint16_t crc = RTU_CRC(fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, len);
-        (*(uint32_t *)(fileFrame->data)) = fileFrame->magic;
-        (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET)) = dataLen;
+        (*(uint32_t *)(fileFrame->data)) = SoftBusHtoLl(fileFrame->magic);
+        (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET)) = SoftBusHtoLll(dataLen);
         info->seq++;
-        (*(uint32_t *)(fileFrame->fileData)) = info->seq;
-        (*(uint16_t *)(fileFrame->fileData + dataLen)) = crc;
+        (*(uint32_t *)(fileFrame->fileData)) = SoftBusHtoLl(info->seq);
+        (*(uint16_t *)(fileFrame->fileData + dataLen)) = SoftBusHtoLs(crc);
         info->checkSumCRC += crc;
     } else {
         uint64_t tmp = FRAME_DATA_SEQ_OFFSET + (uint64_t)len;
@@ -172,7 +175,7 @@ int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint64_t fil
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
-        (*(int32_t *)(fileFrame->fileData)) = info->channelId;
+        (*(int32_t *)(fileFrame->fileData)) = SoftBusHtoLl((uint32_t)info->channelId);
     }
     return len;
 }
@@ -196,10 +199,10 @@ static int64_t PackReadFileRetransData(
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
     uint16_t crc = RTU_CRC(fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, len);
-    (*(uint32_t *)(fileFrame->data)) = fileFrame->magic;
-    (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET)) = dataLen;
-    (*(uint32_t *)(fileFrame->fileData)) = seq;
-    (*(uint16_t *)(fileFrame->fileData + dataLen)) = crc;
+    (*(uint32_t *)(fileFrame->data)) = SoftBusHtoLl(fileFrame->magic);
+    (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET)) = SoftBusHtoLll(dataLen);
+    (*(uint32_t *)(fileFrame->fileData)) = SoftBusHtoLl(seq);
+    (*(uint16_t *)(fileFrame->fileData + dataLen)) = SoftBusHtoLs(crc);
 
     int32_t ret = ProxyChannelSendFileStream(info->channelId, (char *)fileFrame->data, fileFrame->frameLength,
         FrameIndexToType((uint64_t)seq, info->frameNum));
@@ -221,8 +224,8 @@ int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame, uint3
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
-        fileFrame->magic = (*(uint32_t *)(fileFrame->data));
-        uint64_t dataLen = (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET));
+        fileFrame->magic = SoftBusLtoHl((*(uint32_t *)(fileFrame->data)));
+        uint64_t dataLen = SoftBusLtoHll((*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET)));
         if (fileFrame->magic != FILE_MAGIC_NUMBER ||
             (dataLen + FRAME_HEAD_LEN + FRAME_CRC_LEN) != fileFrame->frameLength) {
             TRANS_LOGE(TRANS_FILE, "unpack data frame failed. magic=%{public}u, dataLen=%{public}" PRIu64,
@@ -230,8 +233,8 @@ int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame, uint3
             return SOFTBUS_INVALID_DATA_HEAD;
         }
         fileFrame->fileData = fileFrame->data + FRAME_HEAD_LEN;
-        fileFrame->seq = (*(uint32_t *)(fileFrame->fileData));
-        uint16_t recvCRC = (*(uint16_t *)(fileFrame->fileData + dataLen));
+        fileFrame->seq = SoftBusLtoHl((*(uint32_t *)(fileFrame->fileData)));
+        uint16_t recvCRC = SoftBusLtoHs((*(uint16_t *)(fileFrame->fileData + dataLen)));
         uint16_t crc = RTU_CRC(fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, dataLen - FRAME_DATA_SEQ_OFFSET);
         if (crc != recvCRC) {
             TRANS_LOGE(
@@ -246,7 +249,7 @@ int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame, uint3
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
-        fileFrame->seq = (*(uint32_t *)(fileFrame->fileData));
+        fileFrame->seq = SoftBusLtoHl((*(uint32_t *)(fileFrame->fileData)));
         *fileDataLen = fileFrame->frameLength;
     }
     return SOFTBUS_OK;
