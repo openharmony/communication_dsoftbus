@@ -598,8 +598,8 @@ void DeinitLaneListener(void)
     LaneBusinessInfo *businessItem = NULL;
     LaneBusinessInfo *businessNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(businessItem, businessNext, &g_laneBusinessInfoList, LaneBusinessInfo, node) {
-        ListDelete(&listenerItem->node);
-        SoftBusFree(listenerItem);
+        ListDelete(&businessItem->node);
+        SoftBusFree(businessItem);
     }
     LaneListenerInfo *listenerItem = NULL;
     LaneListenerInfo *listenerNext = NULL;
