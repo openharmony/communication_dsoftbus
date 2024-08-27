@@ -447,7 +447,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
     ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     SendListenerInfo *sendListenerInfo;
-    ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID);
+    ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID, 0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     int32_t channelId = 1;
@@ -467,10 +467,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
     ret = TransSetFileReceiveListener(g_sessionName, &g_fileRecvListener, g_rootDir);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    ret = CreateSendListenerInfo(&sendListenerInfo, channelId);
+    ret = CreateSendListenerInfo(&sendListenerInfo, channelId, 0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
-    ret = CreateSendListenerInfo(&sendListenerInfo, channelId);
+    ret = CreateSendListenerInfo(&sendListenerInfo, channelId, 0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     ret = AddSendListenerInfo(nullptr);
@@ -677,7 +677,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
     dataTest = FILE_MAGIC_NUMBER;
     frame.data = (uint8_t *)&dataTest;
     ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**

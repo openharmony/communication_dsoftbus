@@ -152,6 +152,36 @@ static bool SessionIdIsAvailable(int32_t sessionId)
     return true;
 }
 
+static void ShowAllSessionInfo()
+{
+    TRANS_LOGI(TRANS_SDK, "g_sessionIdNum=%{public}d, g_closingIdNum=%{public}d", g_sessionIdNum, g_closingIdNum);
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    int count = 0;
+    char *tmpName = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        Anonymize(serverNode->sessionName, &tmpName);
+        TRANS_LOGI(
+            TRANS_SDK, "client session server is exist. count=%{public}d, sessionName=%{public}s", count, tmpName);
+        AnonymizeFree(tmpName);
+        count++;
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        int sessionCount = 0;
+        char *tmpPeerSessionName = NULL;
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            Anonymize(sessionNode->info.peerSessionName, &tmpPeerSessionName);
+            TRANS_LOGI(TRANS_SDK,
+                "client session info is exist. sessionCount=%{public}d, peerSessionName=%{public}s, "
+                "channelId=%{public}d, channelType=%{public}d",
+                sessionCount, tmpPeerSessionName, sessionNode->channelId, sessionNode->channelType);
+            AnonymizeFree(tmpPeerSessionName);
+            sessionCount++;
+        }
+    }
+}
+
 // need get g_clientSessionServerList->lock before call this function
 int32_t GenerateSessionId(void)
 {
@@ -350,7 +380,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     }
 
     if (g_clientSessionServerList->cnt >= MAX_SESSION_SERVER_NUMBER) {
-        (void)ShowClientSessionServer();
+        ShowClientSessionServer();
         UnlockClientSessionServerList();
         TRANS_LOGE(TRANS_SDK, "ClientAddSessionServer: client server num reach max");
         return SOFTBUS_INVALID_NUM;
@@ -422,6 +452,7 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
     /* need get lock before */
     session->sessionId = GenerateSessionId();
     if (session->sessionId < 0) {
+        ShowAllSessionInfo();
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
     ClientSessionServer *serverNode = NULL;
@@ -1311,7 +1342,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     }
 
     if (g_clientSessionServerList->cnt >= MAX_SESSION_SERVER_NUMBER) {
-        (void)ShowClientSessionServer();
+        ShowClientSessionServer();
         UnlockClientSessionServerList();
         TRANS_LOGE(TRANS_SDK, "ClientAddSocketServer: client server num reach max");
         return SOFTBUS_INVALID_NUM;

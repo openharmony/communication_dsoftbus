@@ -154,6 +154,7 @@ typedef struct {
     FileListener fileListener;
     FilesInfo totalInfo;
     uint32_t packetSize;
+    int32_t osType;
 } SendListenerInfo;
 
 int32_t ClinetTransProxyFileManagerInit(void);
