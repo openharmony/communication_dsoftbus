@@ -673,7 +673,7 @@ static int32_t ClientTransProxySliceProcessChkPkgIsValid(
         return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_NO_INVALID;
     }
     if (processor->dataLen > processor->bufLen || (int32_t)len > processor->bufLen - processor->dataLen) {
-        TRANS_LOGE(TRANS_SDK, "data len invalid %{public}u, %{public}d", len, processor->dataLen);
+        TRANS_LOGE(TRANS_SDK, "data len invalid %{public}u, %{public}d", len, processor->dataLen);
         return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_EXCEED_LENGTH;
     }
     if (processor->data == NULL) {
