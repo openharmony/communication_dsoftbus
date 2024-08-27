@@ -943,11 +943,11 @@ int P2pV1Processor::ProcessConnectRequestAsGc(std::shared_ptr<NegotiateCommand> 
 
 int P2pV1Processor::SendConnectResponseAsNone(const NegotiateChannel &channel, const std::string &remoteMac)
 {
-    std::vector<int> channels;
-    auto ret = P2pAdapter::GetChannel5GListIntArray(channels);
+    std::vector<int> frequencyList;
+    auto ret = P2pAdapter::GetFrequency5GListIntArray(frequencyList);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g channels failed, error=%{public}d", ret);
-    auto channelString = WifiDirectUtils::ChannelListToString(channels);
+    auto channelString = WifiDirectUtils::ChannelListToString(frequencyList);
 
     std::string selfWifiConfig;
     ret = P2pAdapter::GetSelfWifiConfigInfo(selfWifiConfig);
@@ -1287,11 +1287,11 @@ int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand
 
 int P2pV1Processor::SendConnectRequestAsNone(const NegotiateChannel &channel, WifiDirectRole expectedRole)
 {
-    std::vector<int> channels;
-    int32_t ret = P2pAdapter::GetChannel5GListIntArray(channels);
+    std::vector<int> frequencyList;
+    int32_t ret = P2pAdapter::GetFrequency5GListIntArray(frequencyList);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g channels failed, error=%{public}d", ret);
-    auto channelString = WifiDirectUtils::ChannelListToString(channels);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g frequencyList failed, error=%{public}d", ret);
+    auto channelString = WifiDirectUtils::ChannelListToString(frequencyList);
 
     std::string selfWifiConfig;
     ret = P2pAdapter::GetSelfWifiConfigInfo(selfWifiConfig);
@@ -1697,12 +1697,12 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
         }
     }
 
-    std::vector<int> goChannels;
-    int32_t ret = P2pAdapter::GetChannel5GListIntArray(goChannels);
+    std::vector<int> goFrequencyList;
+    int32_t ret = P2pAdapter::GetFrequency5GListIntArray(goFrequencyList);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local channel list failed, error=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local goFrequencyList list failed, error=%{public}d", ret);
 
-    for (auto goChannel : goChannels) {
+    for (auto goChannel : goFrequencyList) {
         if (std::find(gcChannels.begin(), gcChannels.end(), goChannel) != gcChannels.end()) {
             return WifiDirectUtils::ChannelToFrequency(goChannel);
         }
