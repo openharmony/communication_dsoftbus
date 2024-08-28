@@ -25,7 +25,7 @@ extern "C" {
 int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo, const LaneLinkCb *callback);
 int32_t LaneDetectFload(const LaneResource *resourceItem);
 int32_t InitLaneReliability(void);
-int32_t DeinitLaneReliability(void);
+void DeinitLaneReliability(void);
 void NotifyDetectTimeout(uint32_t detectId);
 
 #ifdef __cplusplus

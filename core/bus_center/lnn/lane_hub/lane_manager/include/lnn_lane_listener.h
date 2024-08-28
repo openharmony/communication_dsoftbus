@@ -29,7 +29,7 @@ int32_t RegisterLaneListener(LaneType type, const LaneStatusListener *listener);
 int32_t AddLaneBusinessInfoItem(LaneType laneType, uint64_t laneId);
 int32_t DelLaneBusinessInfoItem(LaneType laneType, uint64_t laneId);
 int32_t InitLaneListener(void);
-int32_t DeinitLaneListener(void);
+void DeinitLaneListener(void);
 int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
 int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
 int32_t UpdateLaneBusinessInfoItem(uint64_t oldLaneId, uint64_t newLaneId);
