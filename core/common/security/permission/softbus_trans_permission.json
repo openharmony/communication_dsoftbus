@@ -451,7 +451,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^com.huawei.systemserver_CHANNEL_DPMS",
+    "SESSION_NAME": "com.huawei.systemserver_CHANNEL_DPMS",
     "DEVID": "NETWORKID",
     "APP_INFO": [
       {
