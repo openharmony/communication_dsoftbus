@@ -110,6 +110,7 @@ typedef enum {
     BIT_SUPPORT_NORMALIZED_LINK = 1,
     BIT_SUPPORT_NEGOTIATION_AUTH = 2,
     BIT_SUPPORT_BR_DUP_BLE = 3,
+    BIT_SUPPORT_ADV_OFFLINE = 4,
 } AuthCapability;
 
 typedef struct {

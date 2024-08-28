@@ -88,6 +88,7 @@
         "ClientTransAuthOnChannelOpened";
         "LeaveLNNInner";
         "ShiftLNNGear";
+        "SyncTrustedRelationShip";
         "ClientGetSessionKey";
         "ClientQosReport";
         "ClientTransAuthCloseChannel";
@@ -184,7 +185,7 @@
         "ServerIpcDeactiveMetaNode";
         "LnnOnNodeBasicInfoChanged";
         "LnnOnLocalNetworkIdChanged";
-        "LnnOnNodeDeviceNotTrusted";
+        "LnnOnNodeDeviceTrustedChange";
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
         "ReadSessionLinkType";

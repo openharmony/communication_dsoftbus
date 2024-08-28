@@ -301,6 +301,11 @@ int32_t SoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, c
     return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t SoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    return LnnIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
+}
+
 int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {
