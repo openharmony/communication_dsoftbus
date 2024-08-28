@@ -129,6 +129,7 @@ int32_t P2pAdapter::P2pConnectGroup(const ConnectParam &param)
         ret == EOK, SOFTBUS_CONN_PV2_COPY_SHARE_KEY_FAILED, CONN_WIFI_DIRECT, "copy share key failed");
 
     connectConfig.frequency = strtol(configs[P2P_GROUP_CONFIG_INDEX_FREQ].c_str(), nullptr, DECIMAL_BASE);
+    CONN_LOGI(CONN_WIFI_DIRECT, "connect config frequency=%{public}d", connectConfig.frequency);
 
     if (param.isLegacyGo) {
         connectConfig.dhcpMode = CONNECT_AP_NODHCP;
