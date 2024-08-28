@@ -121,7 +121,7 @@ typedef struct {
 } LaneLinkCb;
 
 int32_t InitLaneLink(void);
-int32_t DeinitLaneLink(void);
+void DeinitLaneLink(void);
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
 int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type);
 

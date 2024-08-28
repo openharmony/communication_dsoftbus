@@ -983,7 +983,7 @@ static void LaneDeinitP2pAddrList(void)
 {
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
-        return false;
+        return;
     }
     P2pAddrNode *item = NULL;
     P2pAddrNode *nextItem = NULL;
@@ -1629,12 +1629,12 @@ int32_t InitLaneLink(void)
     return SOFTBUS_OK;
 }
 
-int32_t DeinitLaneLink(void)
+void DeinitLaneLink(void)
 {
     LaneDeinitP2pAddrList();
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
-        return SOFTBUS_LOCK_ERR;
+        return;
     }
     LaneResource *item = NULL;
     LaneResource *next = NULL;
@@ -1646,5 +1646,4 @@ int32_t DeinitLaneLink(void)
     LaneUnlock();
     LnnDestroyP2p();
     (void)SoftBusMutexDestroy(&g_laneResource.lock);
-    return SOFTBUS_OK;
 }
