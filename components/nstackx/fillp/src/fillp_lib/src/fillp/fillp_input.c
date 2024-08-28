@@ -201,9 +201,6 @@ static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
     item->seqNum = pktHdr->seqNum;
     item->dataLen = pktHdr->dataLen;
 
-    FILLP_LOGINF("recv_seqNUm:%u, recv_pktRecvCache:%u, privRecvCacheSize:%u",
-                 pcb->recv.seqNum, pcb->recv.pktRecvCache, privRecvCacheSize);
-
     if (FillpNumIsbigger(item->seqNum, (pcb->recv.seqNum + pcb->recv.pktRecvCache + privRecvCacheSize))) {
         FILLP_LOGWAR("fillp_sock_id:%d, seqnum received = %u from the peer is not in the send window range = %u",
             FILLP_GET_SOCKET(pcb)->index, item->seqNum,
@@ -325,6 +322,7 @@ static int FillpCheckNackPacket(FILLP_CONST struct FillpPcb *pcb, FILLP_CONST st
     return 0;
 }
 
+__attribute__((no_sanitize("unsigned-integer-overflow")))
 static int FillpCheckNackSeq(FILLP_CONST struct FillpPcb *pcb, FILLP_CONST struct FillpPktHead *pktHdr,
     FILLP_CONST struct FillpSeqPktNum *seqPktNum)
 {
@@ -570,6 +568,7 @@ static void FillpPackInputSendMsgTrace(FILLP_CONST struct FillpPcb *pcb, FILLP_C
     }
 }
 
+__attribute__((no_sanitize("unsigned-integer-overflow")))
 static FILLP_BOOL FillpCheckPackNumber(struct FillpPcb *pcb, struct FillpPktPack *pack,
     FILLP_UINT32 ackSeqNum, FILLP_UINT32 lostSeqNum)
 {
