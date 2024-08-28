@@ -200,6 +200,9 @@ static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
     item->seqNum = pktHdr->seqNum;
     item->dataLen = pktHdr->dataLen;
 
+    FILLP_LOGINF("recv_seqNUm:%u, recv_pktRecvCache:%u, privRecvCacheSize:%u",
+                pcb->recv.seqNum, pcb->recv.pktRecvCache, privRecvCacheSize);
+
     if (FillpNumIsbigger(item->seqNum, (pcb->recv.seqNum + pcb->recv.pktRecvCache + privRecvCacheSize))) {
         FILLP_LOGWAR("fillp_sock_id:%d, seqnum received = %u from the peer is not in the send window range = %u",
             FILLP_GET_SOCKET(pcb)->index, item->seqNum,
