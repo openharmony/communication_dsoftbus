@@ -594,7 +594,10 @@ int32_t InitLaneListener(void)
 
 void DeinitLaneListener(void)
 {
-    (void)SoftBusMutexDestroy(&g_laneStateListenerMutex);
+    if (LaneListenerLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane listener lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     LaneBusinessInfo *businessItem = NULL;
     LaneBusinessInfo *businessNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(businessItem, businessNext, &g_laneBusinessInfoList, LaneBusinessInfo, node) {
@@ -607,4 +610,6 @@ void DeinitLaneListener(void)
         ListDelete(&listenerItem->node);
         SoftBusFree(listenerItem);
     }
+    LaneListenerUnlock();
+    (void)SoftBusMutexDestroy(&g_laneStateListenerMutex);
 }
