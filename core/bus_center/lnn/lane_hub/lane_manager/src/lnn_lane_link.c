@@ -981,8 +981,8 @@ static void LaneInitP2pAddrList()
 
 static void LaneDeinitP2pAddrList(void)
 {
-    if (LaneLock() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "lane lock fail");
+    if (SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "SoftBusMutexLock fail");
         return;
     }
     P2pAddrNode *item = NULL;
@@ -992,7 +992,7 @@ static void LaneDeinitP2pAddrList(void)
         SoftBusFree(item);
     }
     g_P2pAddrList.cnt = 0;
-    LaneUnlock();
+    SoftBusMutexUnlock(&g_P2pAddrList.lock);
     (void)SoftBusMutexDestroy(&g_P2pAddrList.lock);
 }
 
