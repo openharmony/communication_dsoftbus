@@ -49,8 +49,10 @@ ohos_unittest("WifiDirectUtilsTest") {
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
   ]
   sources = [
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/data/ipv4_info.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/duration_statistic.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_anonymous.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_dfx.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_utils.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "wifi_direct_utils_test.cpp",
