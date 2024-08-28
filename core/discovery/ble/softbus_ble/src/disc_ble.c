@@ -2147,7 +2147,7 @@ static int32_t BleAdvertiserDump(int fd)
         SOFTBUS_DPRINTF(fd, "capabilityBitmapNum                     : %u\n",
             g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
         SOFTBUS_DPRINTF(fd, "capabilityBitmap                        : %u\n",
-                *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
+            *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
         SOFTBUS_DPRINTF(fd, "custData                                : %s\n", g_bleAdvertiser[i].deviceInfo.custData);
         SOFTBUS_DPRINTF(fd, "range                                   : %d\n", g_bleAdvertiser[i].deviceInfo.range);
     }
