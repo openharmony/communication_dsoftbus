@@ -386,9 +386,10 @@ typedef enum InnerfillpClientfourhandshakestateEnum {
 #define FILLP_PKT_DISCONN_MSG_FLAG_IS_ACK(_flag) ((_flag)&FILLP_PKT_DISCONN_MSG_FLAG_ACK)
 #define FILLP_PKT_DISCONN_MSG_FLAG_IS_VER(_flag) ((_flag) & FILLP_PKT_DISCONN_MSG_FLAG_VER)
 
+__attribute__((no_sanitize("unsigned-integer-overflow")))
 static __inline FILLP_INT FillpNumIsbigger(FILLP_UINT32 value1, FILLP_UINT32 value2)
 {
-    return value1 > value2;
+    return ((FILLP_INT32)(value1 - value2)) > 0;
 }
 
 void FillpSendConnConfirmAck(struct FillpPcb *pcb);
