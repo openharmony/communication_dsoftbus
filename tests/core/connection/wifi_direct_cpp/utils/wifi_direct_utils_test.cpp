@@ -445,8 +445,8 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePskTest, TestSize.Level1)
     ConnEventExtra conEventExtra = { 0 };
     WifiDirectInterfaceMock mock;
     conInfo.info_.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
-    DurationStatistic::GetInstance().Record(1, TotalStart);
-    DurationStatistic::GetInstance().Record(1, TotalEnd);
+    DurationStatistic::GetInstance().Record(1, TOTAL_START);
+    DurationStatistic::GetInstance().Record(1, TOTAL_END);
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillOnce(Return(SOFTBUS_OK));
