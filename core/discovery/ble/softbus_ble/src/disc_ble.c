@@ -2134,7 +2134,7 @@ static int32_t BleAdvertiserDump(int fd)
         AnonymizeFree(anonymizedInfo);
         SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
         SOFTBUS_DPRINTF(fd, "addr type                               : %u\n",
-                        g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
+            g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
         DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac,
                     BT_MAC_LEN, MAC_DELIMITER, bleMac);
         SOFTBUS_DPRINTF(fd, "Connection bleMac                       : %s\n", bleMac);
@@ -2145,7 +2145,7 @@ static int32_t BleAdvertiserDump(int fd)
                     MAX_ACCOUNT_HASH_LEN, ID_DELIMITER, peerUid);
         SOFTBUS_DPRINTF(fd, "Connection peerUid                      : %s\n", peerUid);
         SOFTBUS_DPRINTF(fd, "capabilityBitmapNum                     : %u\n",
-                        g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
+            g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
         SOFTBUS_DPRINTF(fd, "capabilityBitmap                        : %u\n",
                 *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
         SOFTBUS_DPRINTF(fd, "custData                                : %s\n", g_bleAdvertiser[i].deviceInfo.custData);
