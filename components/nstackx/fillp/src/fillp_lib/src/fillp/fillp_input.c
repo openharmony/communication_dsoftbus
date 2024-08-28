@@ -23,6 +23,7 @@
 #include "fillp_output.h"
 #include "fillp_mgt_msg_log.h"
 #include "fillp_dfx.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -187,6 +188,7 @@ static void FillpProcessItemData(struct FillpPcb *pcb, struct FillpPcbItem *item
         FillpDataToStack(pcb, item);
     }
 }
+
 
 static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
 {
