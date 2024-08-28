@@ -139,6 +139,9 @@ void ReleaseAuthLock(void);
 /* auth config */
 bool GetConfigSupportAsServer(void);
 
+/* auth capacity */
+uint32_t GetAuthCapacity(void);
+
 /* Common Functions */
 uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size);
 int64_t GenSeq(bool isServer);

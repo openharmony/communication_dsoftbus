@@ -386,13 +386,13 @@ void LnnNotifyLocalNetworkIdChanged(void)
     (void)PostNotifyMessageDelay(NOTIFY_LOCAL_NETWORKID_UPDATE, 0);
 }
 
-void LnnNotifyDeviceNotTrusted(const char *msg)
+void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
 {
     if (msg == NULL) {
         LNN_LOGE(LNN_EVENT, "msg is null");
         return;
     }
-    (void)LnnIpcNotifyDeviceNotTrusted(msg);
+    (void)LnnIpcNotifyDeviceTrustedChange(type, msg, msgLen);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
