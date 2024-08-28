@@ -592,7 +592,7 @@ int32_t InitLaneListener(void)
     return SOFTBUS_OK;
 }
 
-void DeinitLaneListener(void)
+int32_t DeinitLaneListener(void)
 {
     if (LaneListenerLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane listener lock fail");
@@ -612,4 +612,5 @@ void DeinitLaneListener(void)
     }
     LaneListenerUnlock();
     (void)SoftBusMutexDestroy(&g_laneStateListenerMutex);
+    return SOFTBUS_OK;
 }
