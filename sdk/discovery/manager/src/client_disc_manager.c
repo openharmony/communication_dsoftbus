@@ -115,7 +115,7 @@ void DiscClientOnDeviceFound(const DeviceInfo *device)
     if (device == NULL) {
         DISC_LOGE(DISC_SDK, "invalid parameter:null");
         return;
-    }   
+    }
     DISC_LOGI(DISC_SDK, "Sdk OnDeviceFound, capabilityBitmap=%{public}d",
         device->capabilityBitmap[0]);
     if (g_discInfo == NULL) {

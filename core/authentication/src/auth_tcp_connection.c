@@ -743,7 +743,7 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
         return SOFTBUS_ADAPTER_ERR;
     }
     if (ConnSetTcpKeepalive(fd, tcpKeepaliveOption.keepaliveIdle, tcpKeepaliveOption.keepaliveIntvl,
-            tcpKeepaliveOption.keepaliveCount) != SOFTBUS_OK) {
+        tcpKeepaliveOption.keepaliveCount) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keepalive fail, fd=%{public}d", fd);
         return SOFTBUS_ADAPTER_ERR;
     }
