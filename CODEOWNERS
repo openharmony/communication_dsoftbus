@@ -45,11 +45,9 @@ tests/core/connection/wifi_direct_cpp/        wuchunbo1@huawei.com
 [Disc]
 adapter/common/range/   fanjingya1@huawei.com
 core/discovery/         fanjingya1@huawei.com
-sdk/discovery/          fanjingya1@huawei.com
 tests/adapter/fuzztest/softbusadapterrange_fuzzer/      fanjingya1@huawei.com
 tests/adapter/unittest/softbus_adapter_range_test.cpp   fanjingya1@huawei.com
 tests/core/discovery/   fanjingya1@huawei.com
-tests/sdk/discovery/    fanjingya1@huawei.com
 
 [DiscInterface]
 interfaces/kits/discovery/  fanjingya1@huawei.com
