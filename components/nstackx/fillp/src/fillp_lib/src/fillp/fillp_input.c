@@ -23,7 +23,6 @@
 #include "fillp_output.h"
 #include "fillp_mgt_msg_log.h"
 #include "fillp_dfx.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -189,7 +188,7 @@ static void FillpProcessItemData(struct FillpPcb *pcb, struct FillpPcbItem *item
     }
 }
 
-
+__attribute__((no_sanitize("unsigned-integer-overflow")))
 static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
 {
     FILLP_CONST struct FillpPktHead *pktHdr = (struct FillpPktHead *)(void *)item->buf.p;
@@ -203,7 +202,7 @@ static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
     item->dataLen = pktHdr->dataLen;
 
     FILLP_LOGINF("recv_seqNUm:%u, recv_pktRecvCache:%u, privRecvCacheSize:%u",
-                pcb->recv.seqNum, pcb->recv.pktRecvCache, privRecvCacheSize);
+                 pcb->recv.seqNum, pcb->recv.pktRecvCache, privRecvCacheSize);
 
     if (FillpNumIsbigger(item->seqNum, (pcb->recv.seqNum + pcb->recv.pktRecvCache + privRecvCacheSize))) {
         FILLP_LOGWAR("fillp_sock_id:%d, seqnum received = %u from the peer is not in the send window range = %u",
