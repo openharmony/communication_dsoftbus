@@ -48,6 +48,7 @@ static void FillpMoveRedundantItemToUnrecvList(struct FillpPcb *pcb)
     }
 }
 
+__attribute__((no_sanitize("unsigned-integer-overflow")))
 static struct FillpPcbItem *FillpGetSendItem(struct FillpSendPcb *sendPcb, struct FillpPcb *pcb)
 {
     struct FillpPcbItem *item = (struct FillpPcbItem *)SkipListPopValue(&sendPcb->unrecvList);
