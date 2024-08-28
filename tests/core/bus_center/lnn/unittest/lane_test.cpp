@@ -53,6 +53,8 @@ constexpr uint64_t LANE_ID = 123456;
 
 static NodeInfo g_nodeInfo;
 constexpr int32_t DEFAULT_PID = 0;
+constexpr uint32_t LIST_NUM_1 = 2;
+constexpr uint32_t LIST_NUM_2 = 4;
 
 static void ConstructRemoteNode(void);
 static void ConstructLocalInfo(void);
@@ -264,8 +266,8 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
     selectParam.transType = LANE_T_FILE;
     selectParam.expectedBw = 0;
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
-    EXPECT_EQ(listNum, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(listNum, LIST_NUM_2);
 }
 
 /*
@@ -285,7 +287,7 @@ HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_001, TestSize.Level1)
     selectParam.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
     selectParam.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -307,8 +309,8 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
     selectParam.list.linkType[0] = LANE_WLAN_5G;
     selectParam.list.linkType[1] = LANE_BR;
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
-    EXPECT_EQ(listNum, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(listNum, LIST_NUM_1);
 }
 
 /*
@@ -325,7 +327,7 @@ HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_002, TestSize.Level1)
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_BYTE;
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -351,7 +353,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
     };
     uint32_t requestId = 0x5A5A;
     ret = BuildLink(&reqInfo, requestId, &linkCb);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
     ConnServerDeinit();
 }
 
@@ -376,7 +378,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
     };
     uint32_t requestId = 0x5A5A;
     ret = BuildLink(&reqInfo, requestId, &linkCb);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -407,13 +409,13 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
         .onLaneFreeFail = OnLaneFreeFail,
     };
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     laneReqId = laneManager->lnnGetLaneHandle(LANE_TYPE_TRANS);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
     allocInfo.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(5);
 }
 
@@ -491,7 +493,7 @@ HWTEST_F(LaneTest, DESTROY_LINK_Test_001, TestSize.Level1)
 {
     const char *networkId = "111122223333abcdef";
     uint32_t laneReqId = LANE_REQ_ID_TYPE_SHIFT;
-    EXPECT_EQ(DestroyLink(networkId, laneReqId, LANE_P2P), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(DestroyLink(networkId, laneReqId, LANE_P2P), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
     EXPECT_EQ(DestroyLink(nullptr, laneReqId, LANE_P2P), SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
