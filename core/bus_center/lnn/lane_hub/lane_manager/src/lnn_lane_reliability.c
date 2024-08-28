@@ -363,7 +363,7 @@ int32_t InitLaneReliability(void)
     return SOFTBUS_OK;
 }
 
-void DeinitLaneReliability(void)
+int32_t DeinitLaneReliability(void)
 {
     if (SoftBusMutexLock(&g_laneDetectList.lock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -377,4 +377,5 @@ void DeinitLaneReliability(void)
     g_laneDetectList.cnt = 0;
     SoftBusMutexUnlock(&g_laneDetectList.lock);
     (void)SoftBusMutexDestroy(&g_laneDetectList.lock);
+    return SOFTBUS_OK;
 }
