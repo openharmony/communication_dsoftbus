@@ -19,7 +19,6 @@
 #include <string.h>
 
 #include "client_bus_center_manager.h"
-#include "client_disc_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "comm_log.h"
@@ -157,7 +156,6 @@ static void ClientModuleDeinit(void)
     BusCenterClientDeinit();
     TransClientDeinit();
     ConnClientDeinit();
-    DiscClientDeinit();
 }
 
 static int32_t ConnClientInit(void)
@@ -187,11 +185,6 @@ static int32_t ClientModuleInit(void)
 
     if (BusCenterClientInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "init bus center failed");
-        goto ERR_EXIT;
-    }
-
-    if (DiscClientInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "init service manager failed");
         goto ERR_EXIT;
     }
 

@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "discovery_service.h"
 #include "inner_session.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
