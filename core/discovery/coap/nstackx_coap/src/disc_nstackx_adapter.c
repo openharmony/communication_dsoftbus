@@ -439,7 +439,7 @@ static int32_t SetLocalDeviceInfo(void)
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->localIfInfo[0].networkIpAddr,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, g_localDeviceInfo->version, sizeof(g_localDeviceInfo->version)) !=
-                           SOFTBUS_OK ||
+        SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->localIfInfo[0].networkName,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkName)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local device info from lnn failed.");
