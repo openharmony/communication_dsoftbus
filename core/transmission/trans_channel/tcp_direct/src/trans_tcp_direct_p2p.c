@@ -805,7 +805,8 @@ static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn,
 
 static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t len)
 {
-    TRANS_CHECK_AND_RETURN_LOGW((data != NULL) && (len > sizeof(int64_t) + sizeof(int64_t)),
+#define MAX_DATA_SIZE 1024
+    TRANS_CHECK_AND_RETURN_LOGW((data != NULL) && (len > sizeof(int64_t) + sizeof(int64_t)) && (len <= MAX_DATA_SIZE),
         TRANS_CTRL, "received data is invalid");
     cJSON *json = cJSON_ParseWithLength((data + sizeof(int64_t) + sizeof(int64_t)),
         len - sizeof(int64_t) - sizeof(int64_t));
