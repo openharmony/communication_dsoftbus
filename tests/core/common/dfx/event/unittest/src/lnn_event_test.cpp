@@ -41,7 +41,7 @@ HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
         .onlineNum = -1, // invalid
         .peerPort = "9000",
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 4;
+    constexpr int32_t VALID_EXTRA_SIZE = 6;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -74,6 +74,8 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
         .onlineNum = 12,
         .peerDeviceAbility = 13,
         .onlineType = 14,
+        .osType = 15,
+        .connOnlineReason = 16,
         .peerDeviceInfo = "testPeerDeviceInfo",
         .peerIp = "10.11.12.1",
         .peerBrMac = "dd:15:bc:b9:f2:04",
@@ -82,6 +84,7 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
         .peerPort = "testPeerPort",
         .peerUdid = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
+        .localDeviceType = "testLocalDeviceType",
         .peerDeviceType = "testPeerDeviceType",
         .localUdidHash = "8f37c149495d2a45",
         .peerUdidHash = "9ada389cd0898797",
@@ -139,12 +142,12 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
         .calleePkg = nullptr,
     };
     constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode, authId is valid
-
+    constexpr int32_t VALID_EXTRA_MATCHER_SIZE = 5;
     HiSysEventMock mock;
     EXPECT_CALL(mock,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
-            LnnInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
-        .Times(1);
+            LnnInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE),
+            ParamArraySizeMatcher(VALID_EXTRA_MATCHER_SIZE))).Times(1);
     LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, invalidExtra);
 }
 
@@ -158,12 +161,12 @@ HWTEST_F(LnnEventTest, LnnEventTest004, TestSize.Level0)
 {
     LnnEventExtra emptyExtra = { 0 };
     constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode, authId is valid
-
+    constexpr int32_t VALID_EXTRA_MATCHER_SIZE = 5;
     HiSysEventMock mock;
     EXPECT_CALL(mock,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
-            LnnInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
-        .Times(1);
+            LnnInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE),
+            ParamArraySizeMatcher(VALID_EXTRA_MATCHER_SIZE))).Times(1);
     LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, emptyExtra);
 }
 
