@@ -229,37 +229,37 @@ int32_t SoftBusHiDumperModuleInit(void)
 {
     if (SoftBusBcMgrHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init BroadcastManager HiDumper fail!");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusHiDumperBroadcastInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Broadcast HiDumper fail!");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Disc HiDumper fail!");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusConnHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Conn HiDumper fail!");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusNStackHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init NStack HiDumper fail!");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusHiDumperBusCenterInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init BusCenter HiDumper fail!");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusTransDumpHandlerInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Trans HiDumper fail!");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
     return SOFTBUS_OK;
 }
