@@ -122,7 +122,7 @@ int SoftBusSleepMs(unsigned int ms)
         ret = select(0, NULL, NULL, NULL, &tm);
     } while ((ret == -1) && (errno == EINTR));
 
-    return SOFTBUS_TIMER_ERR;;
+    return SOFTBUS_TIMER_ERR;
 }
 
 int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
