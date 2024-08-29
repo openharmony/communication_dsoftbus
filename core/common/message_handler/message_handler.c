@@ -574,14 +574,14 @@ int LooperInit(void)
     SoftBusLooper *looper = CreateNewLooper("BusCenter_Lp");
     if (!looper) {
         COMM_LOGE(COMM_UTILS, "init BusCenter looper fail.");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_LOOPER_ERR;
     }
     SetLooper(LOOP_TYPE_DEFAULT, looper);
 
     SoftBusLooper *connLooper = CreateNewLooper("ReactorLink_Lp");
     if (!connLooper) {
         COMM_LOGE(COMM_UTILS, "init connection looper fail.");
-        return SOFTBUS_NO_INIT;
+        return SOFTBUS_LOOPER_ERR;
     }
     SetLooper(LOOP_TYPE_CONN, connLooper);
 
