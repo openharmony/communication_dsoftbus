@@ -457,7 +457,6 @@ void DFileSessionSendSetting(PeerInfo *peerInfo)
     settingFramePara.capsCheck = NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK;
     if (peerInfo->session->fileManager->keyLen) {
         DFileGetCipherCaps(peerInfo->session, &settingFramePara);
-        settingFramePara.deviceBits = DFileGetDeviceBits();
     }
     EncodeSettingFrame(buf, NSTACKX_DEFAULT_FRAME_SIZE, &frameLen, &settingFramePara);
 

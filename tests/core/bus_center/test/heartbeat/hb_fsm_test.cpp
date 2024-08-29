@@ -40,6 +40,7 @@ namespace OHOS {
 #define TEST_TIME1       450
 #define TEST_TIME2       500
 #define TEST_TIME3       2000000
+#define CHECK_DELAY_LEN  10000
 constexpr int32_t MSGTYPE = 2;
 using namespace testing::ext;
 using namespace testing;
@@ -426,15 +427,15 @@ HWTEST_F(HeartBeatFSMTest, IsTimestampExceedLimitTest_01, TestSize.Level1)
     EXPECT_CALL(heartbeatFsmMock, LnnGetGearModeBySpecificType)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    bool ret = IsTimestampExceedLimit(TEST_TIME2, TEST_TIME1, HEARTBEAT_TYPE_BLE_V0);
+    bool ret = IsTimestampExceedLimit(TEST_TIME2, TEST_TIME1, HEARTBEAT_TYPE_BLE_V0, CHECK_DELAY_LEN);
     EXPECT_FALSE(ret);
-    ret = IsTimestampExceedLimit(TEST_TIME3, TEST_TIME1, HEARTBEAT_TYPE_BLE_V0);
+    ret = IsTimestampExceedLimit(TEST_TIME3, TEST_TIME1, HEARTBEAT_TYPE_BLE_V0, CHECK_DELAY_LEN);
     EXPECT_TRUE(ret);
-    ret = IsTimestampExceedLimit(TEST_TIME2, TEST_TIME1, HEARTBEAT_TYPE_BLE_V1);
+    ret = IsTimestampExceedLimit(TEST_TIME2, TEST_TIME1, HEARTBEAT_TYPE_BLE_V1, CHECK_DELAY_LEN);
     EXPECT_FALSE(ret);
-    ret = IsTimestampExceedLimit(TEST_TIME2, TEST_TIME1, HEARTBEAT_TYPE_BLE_V1);
+    ret = IsTimestampExceedLimit(TEST_TIME2, TEST_TIME1, HEARTBEAT_TYPE_BLE_V1, CHECK_DELAY_LEN);
     EXPECT_FALSE(ret);
-    ret = IsTimestampExceedLimit(TEST_TIME3, TEST_TIME1, HEARTBEAT_TYPE_BLE_V1);
+    ret = IsTimestampExceedLimit(TEST_TIME3, TEST_TIME1, HEARTBEAT_TYPE_BLE_V1, CHECK_DELAY_LEN);
     EXPECT_TRUE(ret);
 }
 

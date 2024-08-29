@@ -438,7 +438,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest011, TestSize.Level1)
     datas.WriteUint16(0);
     datas.WriteBool(boolNum);
     ret = softBusServer->OpenSessionInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /**
@@ -519,6 +519,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest014, TestSize.Level1)
 
     datas.WriteInt32(channelId);
     EXPECT_CALL(softbusServerStubMock, TransGetAndComparePid).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, TransReleaseUdpResources).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->ReleaseResourcesInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -1025,7 +1026,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest026, TestSize.Level1)
 
     datas.WriteCString(test);
     ret = softBusServer->RegDataLevelChangeCbInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /**
@@ -1047,7 +1048,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest027, TestSize.Level1)
 
     datas.WriteCString(test);
     ret = softBusServer->UnregDataLevelChangeCbInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /**

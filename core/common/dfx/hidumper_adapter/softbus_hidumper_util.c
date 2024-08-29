@@ -203,7 +203,7 @@ static int32_t TransMapLock(void)
 {
     if (!g_isTransMapInit) {
         if (!TransMapInit()) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_LOCK_ERR;
         }
     }
     return SoftBusMutexLock(&g_transMapLock);
@@ -223,7 +223,7 @@ static int32_t GetInt32ValueByRecord(HiSysEventRecordC* record, char* name)
     int64_t value;
     int32_t res = OH_HiSysEvent_GetParamInt64Value(record, name, &value);
     if (res != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_HISYSEVENT_GET_VALUE_ERR;
     }
     return (int32_t)value;
 }
@@ -233,7 +233,7 @@ static uint64_t GetUint64ValueByRecord(HiSysEventRecordC* record, char* name)
     uint64_t value;
     int32_t res = OH_HiSysEvent_GetParamUint64Value(record, name, &value);
     if (res != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_HISYSEVENT_GET_VALUE_ERR;
     }
     return value;
 }
@@ -273,7 +273,7 @@ static void OnQueryDisc(HiSysEventRecordC srcRecord[], size_t size)
         int32_t stageRes = GetInt32ValueByRecord(&srcRecord[i], STAGE_RES_NAME);
         int32_t discFirstTime = GetInt32ValueByRecord(&srcRecord[i], FIRST_DISCOVERY_TIME_NAME);
         if (scene != EVENT_SCENE_DISC || stage != EVENT_STAGE_DEVICE_FOUND
-            || stageRes != EVENT_STAGE_RESULT_OK || discFirstTime == SOFTBUS_ERR) {
+            || stageRes != EVENT_STAGE_RESULT_OK || discFirstTime == SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             continue;
         }
 
@@ -304,7 +304,7 @@ static void ConnStatsLinkType(int32_t linkTypePara, int32_t connDelayTime, bool 
         return;
     }
     g_connStatsInfo.linkTypeSuccessTotal[linkType]++;
-    if (connDelayTime != SOFTBUS_ERR && reuse == 0) {
+    if (connDelayTime != SOFTBUS_HISYSEVENT_GET_VALUE_ERR && reuse == 0) {
         g_connStatsInfo.delayTimeLinkType[linkType] += connDelayTime;
         g_connStatsInfo.delayNumLinkType[linkType]++;
     }
@@ -360,7 +360,8 @@ static void OnQueryConn(HiSysEventRecordC srcRecord[], size_t size)
         int32_t stage = GetInt32ValueByRecord(&srcRecord[i], BIZ_STAGE_NAME);
         int32_t stageRes = GetInt32ValueByRecord(&srcRecord[i], STAGE_RES_NAME);
         int32_t isReuse = GetInt32ValueByRecord(&srcRecord[i], IS_REUSE);
-        if (scene != EVENT_SCENE_CONNECT || stage != EVENT_STAGE_CONNECT_END || stageRes == SOFTBUS_ERR) {
+        if (scene != EVENT_SCENE_CONNECT || stage != EVENT_STAGE_CONNECT_END ||
+            stageRes == SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             continue;
         }
 
@@ -398,7 +399,7 @@ static void LnnStatsAuthLinkType(int32_t authLinkTypePara, int32_t authDelayTime
         return;
     }
     g_lnnStatsInfo.authLinkTypeSuccessTotal[authLinkType]++;
-    if (authDelayTime != SOFTBUS_ERR) {
+    if (authDelayTime != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
         g_lnnStatsInfo.delayTimeAuth[authLinkType] += authDelayTime;
         g_lnnStatsInfo.delayNumAuth[authLinkType]++;
     }
@@ -441,7 +442,8 @@ static void OnQueryLnn(HiSysEventRecordC srcRecord[], size_t size)
         int32_t scene = GetInt32ValueByRecord(&srcRecord[i], BIZ_SCENE_NAME);
         int32_t stage = GetInt32ValueByRecord(&srcRecord[i], BIZ_STAGE_NAME);
         int32_t stageRes = GetInt32ValueByRecord(&srcRecord[i], STAGE_RES_NAME);
-        if (scene == SOFTBUS_ERR || stage == SOFTBUS_ERR || stageRes == SOFTBUS_ERR) {
+        if (scene == SOFTBUS_HISYSEVENT_GET_VALUE_ERR || stage == SOFTBUS_HISYSEVENT_GET_VALUE_ERR ||
+            stageRes == SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             continue;
         }
 
@@ -450,7 +452,7 @@ static void OnQueryLnn(HiSysEventRecordC srcRecord[], size_t size)
         LnnStats(scene, stage, stageRes, authLinkType, authDelayTime);
 
         int32_t onlineNum = GetInt32ValueByRecord(&srcRecord[i], ONLINE_NUM_NAME);
-        if (onlineNum != SOFTBUS_ERR) {
+        if (onlineNum != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             int32_t onlineMaxNum = g_lnnStatsInfo.onlineDevMaxNum;
             g_lnnStatsInfo.onlineDevMaxNum = (onlineMaxNum > onlineNum) ? onlineMaxNum : onlineNum;
         }
@@ -572,12 +574,14 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
         int32_t scene = GetInt32ValueByRecord(&srcRecord[i], BIZ_SCENE_NAME);
         int32_t stage = GetInt32ValueByRecord(&srcRecord[i], BIZ_STAGE_NAME);
         int32_t stageRes = GetInt32ValueByRecord(&srcRecord[i], STAGE_RES_NAME);
-        if (scene == SOFTBUS_ERR || stage == SOFTBUS_ERR || stageRes == SOFTBUS_ERR) {
+        if (scene == SOFTBUS_HISYSEVENT_GET_VALUE_ERR || stage == SOFTBUS_HISYSEVENT_GET_VALUE_ERR ||
+            stageRes == SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             continue;
         }
 
         int32_t timeConsuming = GetInt32ValueByRecord(&srcRecord[i], TIME_CONSUMING_NAME);
-        if (timeConsuming != SOFTBUS_ERR && stageRes == EVENT_STAGE_RESULT_OK && scene == EVENT_SCENE_OPEN_CHANNEL) {
+        if (timeConsuming != SOFTBUS_HISYSEVENT_GET_VALUE_ERR && stageRes == EVENT_STAGE_RESULT_OK &&
+            scene == EVENT_SCENE_OPEN_CHANNEL) {
             g_transStatsInfo.delayTimeTotal += timeConsuming;
             g_transStatsInfo.delayNum++;
         }
@@ -602,7 +606,7 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
             maxParaSessionNum : g_transStatsInfo.currentParaSessionNum;
 
         int32_t btFlow = GetInt32ValueByRecord(&srcRecord[i], BT_FLOW_NAME);
-        if (btFlow != SOFTBUS_ERR) {
+        if (btFlow != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             g_transStatsInfo.btFlowTotal += btFlow;
         }
     }
@@ -627,32 +631,32 @@ static void OnQueryAlarm(HiSysEventRecordC srcRecord[], size_t size)
     for (size_t i = 0; i < size; i++) {
         AlarmRecord* record = &g_alarmEvtResult.records[i];
         int32_t scene = GetInt32ValueByRecord(&srcRecord[i], BIZ_SCENE_NAME);
-        if (scene != SOFTBUS_ERR) {
+        if (scene != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             record->type = scene;
         }
 
         int32_t callerPid = GetInt32ValueByRecord(&srcRecord[i], CALLER_PID_NAME);
-        if (callerPid != SOFTBUS_ERR) {
+        if (callerPid != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             record->callerPid = callerPid;
         }
 
         int32_t errorCode = GetInt32ValueByRecord(&srcRecord[i], ERROR_CODE_NAME);
-        if (errorCode != SOFTBUS_ERR) {
+        if (errorCode != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             record->errorCode = errorCode;
         }
 
         int32_t linkType = GetInt32ValueByRecord(&srcRecord[i], LINK_TYPE_NAME);
-        if (linkType != SOFTBUS_ERR) {
+        if (linkType != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             record->linkType = linkType;
         }
 
         int32_t minBw = GetInt32ValueByRecord(&srcRecord[i], MIN_BW_NAME);
-        if (minBw != SOFTBUS_ERR) {
+        if (minBw != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             record->minBw = minBw;
         }
 
         int32_t methodId = GetInt32ValueByRecord(&srcRecord[i], METHOD_ID_NAME);
-        if (methodId != SOFTBUS_ERR) {
+        if (methodId != SOFTBUS_HISYSEVENT_GET_VALUE_ERR) {
             record->methodId = methodId;
         }
 
@@ -945,11 +949,11 @@ int32_t SoftBusQueryStatsInfo(int time, SoftBusStatsResult* result)
     COMM_LOGI(COMM_DFX, "SoftBusQueryStatsInfo start");
     if (time <= SOFTBUS_ZERO || time > SEVEN_DAY_MINUTE) {
         COMM_LOGE(COMM_DFX, "SoftBusQueryStatsInfo fail, time=%{public}d", time);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_statsQueryLock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "lock g_statsQueryLock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     for (int i = 0; i < STATS_UNUSE_BUTT; i++) {
         SoftBusEventQueryInfo(time, &g_queryStatsParam[i]);
@@ -968,22 +972,22 @@ int32_t SoftBusQueryAlarmInfo(int time, int type, SoftBusAlarmEvtResult* result)
     COMM_LOGI(COMM_DFX, "SoftBusQueryAlarmInfo start");
     if (time <= SOFTBUS_ZERO || time > SEVEN_DAY_MINUTE) {
         COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, time=%{public}d", time);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (type < SOFTBUS_MANAGEMENT_ALARM_TYPE || type >= ALARM_UNUSE_BUTT) {
         COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, type=%{public}d", type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_alarmQueryLock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, lock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     g_alarmEvtResult.recordSize = 0;
     if (memset_s(g_alarmEvtResult.records, sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT, 0,
         sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT) != EOK) {
         COMM_LOGE(COMM_DFX, "memset g_alarmEvtResult records fail!");
         (void)SoftBusMutexUnlock(&g_alarmQueryLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     SoftBusEventQueryInfo(time, &g_queryAlarmParam[type]);
     while (!g_isAlarmQueryEnd) {
@@ -1001,43 +1005,43 @@ static int32_t InitDumperUtilMutexLock(void)
     if (SoftBusMutexInit(&g_statsQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init statistic lock fail");
         (void)SoftBusMutexDestroy(&g_statsQueryLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (SoftBusMutexInit(&g_alarmQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init alarm lock fail");
         (void)SoftBusMutexDestroy(&g_alarmQueryLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (SoftBusMutexInit(&g_discOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init disc onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_discOnQueryLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (SoftBusMutexInit(&g_connOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init conn onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_connOnQueryLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (SoftBusMutexInit(&g_lnnOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init lnn onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_lnnOnQueryLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (SoftBusMutexInit(&g_transOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init trans onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_transOnQueryLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (SoftBusMutexInit(&g_alarmOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init alarm onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_alarmOnQueryLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1095,103 +1099,6 @@ static void InitSoftBusQueryEventParam(void)
     controlParam->dataSize = MAX_NUM_OF_EVENT_RESULT;
 }
 
-static void QueryStatisticInfo(SoftBusMessage* param)
-{
-    (void)param;
-    SoftBusStatsResult* result = MallocSoftBusStatsResult(sizeof(SoftBusStatsResult));
-    if (result == NULL) {
-        COMM_LOGI(COMM_DFX, "create SoftBusStatsResult failed");
-        return;
-    }
-    
-    if (SoftBusQueryStatsInfo(DAY_MINUTE, result) != SOFTBUS_OK) {
-        COMM_LOGI(COMM_DFX, "QueryStatisticInfo query fail!\n");
-        FreeSoftBusStatsResult(result);
-        return;
-    }
-
-    StatsEventExtra extra = {
-        .btFlow = result->btFlow,
-        .successRate = (int32_t)(result->successRate * RATE_HUNDRED),
-        .maxParaSessionNum = result->maxParaSessionNum,
-        .sessionSuccessDuration = result->sessionSuccessDuration,
-        .deviceOnlineNum = result->deviceOnlineNum,
-        .deviceOnlineTimes = result->deviceOnlineTimes,
-        .deviceOfflineTimes = result->deviceOfflineTimes,
-        .laneScoreOverTimes = result->laneScoreOverTimes,
-        .activationRate = (int32_t)(result->activityRate * RATE_HUNDRED),
-        .detectionTimes = result->detectionTimes,
-        .successRateDetail = result->successRateDetail,
-        .result = EVENT_STAGE_RESULT_OK
-    };
-    DSOFTBUS_STATS(EVENT_SCENE_STATS, extra);
-    COMM_LOGI(COMM_DFX, "QueryStatisticInfo query success!\n");
-    FreeSoftBusStatsResult(result);
-}
-
-static inline SoftBusHandler* CreateHandler(SoftBusLooper* looper, HandleMessageFunc callback)
-{
-    SoftBusHandler* handler = SoftBusMalloc(sizeof(SoftBusHandler));
-    if (handler == NULL) {
-        COMM_LOGI(COMM_DFX, "create handler failed");
-        return NULL;
-    }
-    handler->looper = looper;
-    handler->name = "softbusHidumperHandler";
-    handler->HandleMessage = callback;
-
-    return handler;
-}
-
-static void FreeMessageFunc(SoftBusMessage* msg)
-{
-    if (msg == NULL) {
-        return;
-    }
-
-    if (msg->handler != NULL) {
-        SoftBusFree(msg->handler);
-    }
-    SoftBusFree(msg);
-}
-
-static SoftBusMessage* CreateMessage(SoftBusLooper* looper, HandleMessageFunc callback)
-{
-    SoftBusMessage* msg = SoftBusMalloc(sizeof(SoftBusMessage));
-    if (msg == NULL) {
-        COMM_LOGI(COMM_DFX, "malloc softbus message failed");
-        return NULL;
-    }
-
-    SoftBusHandler* handler = CreateHandler(looper, callback);
-    msg->what = MSG_STATISTIC_QUERY_REPORT;
-    msg->obj = NULL;
-    msg->handler = handler;
-    msg->FreeMessage = FreeMessageFunc;
-    return msg;
-}
-
-static int32_t CreateAndQueryMsgDelay(SoftBusLooper* looper, HandleMessageFunc callback, uint64_t delayMillis)
-{
-    if ((looper == NULL) || (callback == NULL)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    SoftBusMessage* message = CreateMessage(looper, callback);
-    if (message == NULL) {
-        return SOFTBUS_MEM_ERR;
-    }
-
-    looper->PostMessageDelay(looper, message, delayMillis);
-    return SOFTBUS_OK;
-}
-
-static void QueryStatisticInfoPeriod(SoftBusMessage* msg)
-{
-    QueryStatisticInfo(msg);
-    CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME);
-}
-
 int32_t SoftBusHidumperUtilInit(void)
 {
     if (g_isDumperInit) {
@@ -1199,19 +1106,16 @@ int32_t SoftBusHidumperUtilInit(void)
     }
     if (InitDumperUtilMutexLock() != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init dump util lock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     g_alarmEvtResult.records = SoftBusMalloc(sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT);
     if (g_alarmEvtResult.records == NULL) {
         COMM_LOGE(COMM_DFX, "init alarm record fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     InitSoftBusQueryEventParam();
     g_isDumperInit = true;
-    if (CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "CreateAndQueryMsgDelay fail");
-    }
     return SOFTBUS_OK;
 }
 
