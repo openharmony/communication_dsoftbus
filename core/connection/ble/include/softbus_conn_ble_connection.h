@@ -126,6 +126,8 @@ typedef struct {
 
     // ble Quick connection fails due to scan failures
     bool underlayerFastConnectFailedScanFailure;
+
+    bool isOccupied;
 } ConnBleConnection;
 
 typedef struct {
@@ -188,6 +190,7 @@ int32_t ConnBleUpdateConnectionPriority(ConnBleConnection *connection, ConnectBl
 int32_t ConnBleSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
 // connection will be disconnected forcely when idle more than CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS
 void ConnBleRefreshIdleTimeout(ConnBleConnection *connection);
+void ConnBleOccupy(ConnBleConnection *connection);
 
 // complement connection device id
 // NOTICE: MUST ONLY used in ble connection inner module

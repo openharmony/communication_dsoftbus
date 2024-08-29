@@ -1879,6 +1879,7 @@ static bool BleCheckActiveConnection(const ConnectOption *option, bool needOccup
     bool isActive = (connection->state == BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO);
     if (isActive && needOccupy) {
         ConnBleRefreshIdleTimeout(connection);
+        ConnBleOccupy(connection);
     }
     ConnBleReturnConnection(&connection);
     return isActive;

@@ -17,7 +17,6 @@
 
 #include "bus_center_server_stub.h"
 #include "comm_log.h"
-#include "disc_server_stub.h"
 #include "ipc_skeleton.h"
 #include "iproxy_server.h"
 #include "lnn_bus_center_ipc.h"
@@ -178,10 +177,6 @@ typedef struct {
 
 const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { MANAGE_REGISTER_SERVICE, ServerRegisterService },
-    { SERVER_PUBLISH_SERVICE, ServerPublishService },
-    { SERVER_UNPUBLISH_SERVICE, ServerUnPublishService },
-    { SERVER_START_DISCOVERY, ServerStartDiscovery },
-    { SERVER_STOP_DISCOVERY, ServerStopDiscovery },
     { SERVER_JOIN_LNN, ServerJoinLNN },
     { SERVER_JOIN_METANODE, ServerJoinMetaNode },
     { SERVER_LEAVE_LNN, ServerLeaveLNN },
@@ -258,6 +253,7 @@ int ServerStubInit(void)
 
     if (SERVER_InitClient() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "client manager init failed.");
+        LnnIpcDeinit();
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
