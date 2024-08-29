@@ -20,6 +20,8 @@
 #undef protected
 #undef private
 
+#include "data/link_manager.h"
+#include "net_conn_client.h"
 #include "wifi_direct_mock.h"
 #include "wifi_direct_utils.h"
 #include "wifi_direct_anonymous.h"
@@ -32,6 +34,14 @@
 using namespace testing::ext;
 using testing::_;
 using ::testing::Return;
+
+constexpr int32_t FREQ1 = 1500;
+constexpr int32_t FREQ2 = 2437;
+constexpr int32_t FREQ3 = 5300;
+constexpr int32_t FREQ4 = 5745;
+constexpr int32_t CHAN1 = 6;
+constexpr int32_t CHAN2 = 149;
+constexpr int32_t INVALID_CHANNEL = -1;
 
 namespace OHOS::SoftBus {
 class WifiDirectUtilsTest : public testing::Test {
@@ -91,6 +101,27 @@ HWTEST_F(WifiDirectUtilsTest, ChannelToFrequencyTest, TestSize.Level1)
     frequency = -1;
     ret = WifiDirectUtils::ChannelToFrequency(channel);
     EXPECT_EQ(ret, frequency);
+
+    channel = CHAN1;
+    frequency = FREQ2;
+    ret = WifiDirectUtils::ChannelToFrequency(channel);
+    EXPECT_EQ(ret, frequency);
+}
+
+/*
+ * @tc.name: FrequencyToChannelTest
+ * @tc.desc: check FrequencyToChannel method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, FrequencyToChannelTest, TestSize.Level1)
+{
+    auto ret = WifiDirectUtils::FrequencyToChannel(FREQ2);
+    EXPECT_EQ(ret, CHAN1);
+    ret = WifiDirectUtils::FrequencyToChannel(FREQ4);
+    EXPECT_EQ(ret, CHAN2);
+    ret = WifiDirectUtils::FrequencyToChannel(FREQ1);
+    EXPECT_EQ(ret, INVALID_CHANNEL);
 }
 
 /*
@@ -229,6 +260,10 @@ HWTEST_F(WifiDirectUtilsTest, ToWifiDirectRoleTest, TestSize.Level1)
     LinkInfo::LinkMode mode = LinkInfo::LinkMode::INVALID;
     auto ret = WifiDirectUtils::ToWifiDirectRole(mode);
     EXPECT_EQ(ret, WifiDirectRole::WIFI_DIRECT_ROLE_INVALID);
+
+    mode = LinkInfo::LinkMode::NONE;
+    ret = WifiDirectUtils::ToWifiDirectRole(mode);
+    EXPECT_EQ(ret, WifiDirectRole::WIFI_DIRECT_ROLE_NONE);
 
     mode = LinkInfo::LinkMode::STA;
     ret = WifiDirectUtils::ToWifiDirectRole(mode);
@@ -370,6 +405,72 @@ HWTEST_F(WifiDirectUtilsTest, ChannelListToStringTest, TestSize.Level1)
     std::vector<int> channels = {36, 40, 52};
     auto ret = WifiDirectUtils::ChannelListToString(channels);
     EXPECT_EQ(ret, "36##40##52");
+}
+
+/*
+ * @tc.name: IsDfsChannelTest
+ * @tc.desc: check IsDfsChannel method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, IsDfsChannelTest, TestSize.Level1)
+{
+    auto ret = WifiDirectUtils::IsDfsChannel(FREQ2);
+    EXPECT_EQ(ret, false);
+    ret = WifiDirectUtils::IsDfsChannel(FREQ3);
+    EXPECT_EQ(ret, true);
+    ret = WifiDirectUtils::IsDfsChannel(FREQ4);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: CheckLinkAtDfsChannelConflictTest
+ * @tc.desc: check CheckLinkAtDfsChannelConflict method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, CheckLinkAtDfsChannelConflictTest, TestSize.Level1)
+{
+    std::string uuid = "0123456789ABCDEF";
+    std::string remoteDeviceId = "abcdefg";
+    int32_t frequency = FREQ4;
+    InnerLink::LinkType linkType = InnerLink::LinkType::HML;
+    int32_t type = HO_OS_TYPE;
+    char networkId[NETWORK_ID_BUF_LEN] = { 1 };
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetNetworkIdByUuid(_, _, _))
+        .WillRepeatedly([&networkId](const std::string &uuid, char *buf, uint32_t len) {
+            (void)strcpy_s(buf, len, networkId);
+            return SOFTBUS_OK;
+        });
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_WIFI_DIRECT_INIT_FAILED));
+    auto ret = WifiDirectUtils::CheckLinkAtDfsChannelConflict(uuid, linkType);
+    EXPECT_EQ(ret, false);
+
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = WifiDirectUtils::CheckLinkAtDfsChannelConflict(uuid, linkType);
+    EXPECT_EQ(ret, false);
+
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId(_, _))
+        .WillRepeatedly([&type](const char *networkId, int32_t *osType) {
+            *osType = type;
+            return SOFTBUS_OK;
+        });
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceId, [frequency](InnerLink &innerLink) {
+            innerLink.SetFrequency(frequency);
+        });
+    ret = WifiDirectUtils::CheckLinkAtDfsChannelConflict(uuid, linkType);
+    EXPECT_EQ(ret, false);
+
+    frequency = FREQ3;
+    linkType = InnerLink::LinkType::P2P;
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::P2P, remoteDeviceId, [frequency](InnerLink &innerLink) {
+            innerLink.SetFrequency(frequency);
+        });
+    ret = WifiDirectUtils::CheckLinkAtDfsChannelConflict(uuid, linkType);
+    EXPECT_EQ(ret, true);
 }
 
 /*
