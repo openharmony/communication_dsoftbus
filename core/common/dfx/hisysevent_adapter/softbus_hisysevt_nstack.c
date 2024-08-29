@@ -100,12 +100,12 @@ static int32_t CopyEventParamVal(SoftBusEvtParamType type, void *dst, const void
             if (strcpy_s(dst, SOFTBUS_HISYSEVT_PARAM_LEN, src) != EOK) {
                 COMM_LOGE(COMM_DFX, "softbus param string max=%{public}d, nstackParamString=%{public}s",
                     SOFTBUS_HISYSEVT_PARAM_LEN, (char *)src);
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         default:
             COMM_LOGE(COMM_DFX, "unknow param type");
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -115,16 +115,17 @@ static int32_t NstackEventParaToSoftBusEventPara(SoftBusEvtParam *dst, const Nst
     if (src->type >= SOFTBUS_EVT_PARAMTYPE_BUTT) {
         COMM_LOGE(COMM_DFX, "softbus paramType max=%{public}d, nstackParamType=%{public}d",
             SOFTBUS_EVT_PARAMTYPE_BUTT, src->type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     dst->paramType = (SoftBusEvtParamType)src->type;
     if (strcpy_s(dst->paramName, SOFTBUS_HISYSEVT_NAME_LEN, src->paramName) != EOK) {
         COMM_LOGE(COMM_DFX, "softbus paramName maxSize=%{public}d, nstackParamName=%{public}s",
             SOFTBUS_HISYSEVT_NAME_LEN, src->paramName);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
-    if (CopyEventParamVal(dst->paramType, &dst->paramValue, &src->val) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    int32_t ret = CopyEventParamVal(dst->paramType, &dst->paramValue, &src->val);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -133,16 +134,16 @@ static int32_t NstackDfxEvtToSoftBusReportMsg(SoftBusEvtReportMsg *msg, const Ns
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, info->eventName) != EOK) {
         COMM_LOGE(COMM_DFX, "eventName mismatch, nstackEventName=%{public}s", info->eventName);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (info->type >= SOFTBUS_EVT_TYPE_BUTT) {
         COMM_LOGE(COMM_DFX, "eventType mismatch, nstackEventType=%{public}d", info->type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     msg->evtType = (SoftBusEvtType)(info->type);
     if (info->paramNum != 0 && info->paramArray == NULL) {
         COMM_LOGE(COMM_DFX, "param mismatch,  paramArray=NULL, nstackParamNum=%{public}u", info->paramNum);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     msg->paramNum = info->paramNum;
     if (msg->paramNum == 0) {
@@ -151,11 +152,13 @@ static int32_t NstackDfxEvtToSoftBusReportMsg(SoftBusEvtReportMsg *msg, const Ns
     msg->paramArray = (SoftBusEvtParam *)SoftBusCalloc(msg->paramNum * sizeof(SoftBusEvtParam));
     if (msg->paramArray == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusCalloc paramArray failed! paramNum=%{public}u", info->paramNum);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
+    int32_t ret = SOFTBUS_OK;
     for (uint8_t i = 0; i < info->paramNum; i++) {
-        if (NstackEventParaToSoftBusEventPara(&msg->paramArray[i], &info->paramArray[i]) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
+        ret = NstackEventParaToSoftBusEventPara(&msg->paramArray[i], &info->paramArray[i]);
+        if (ret != SOFTBUS_OK) {
+            return ret;
         }
     }
     return SOFTBUS_OK;
