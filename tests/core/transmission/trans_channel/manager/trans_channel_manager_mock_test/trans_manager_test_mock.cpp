@@ -44,5 +44,10 @@ int32_t TransGetPidFromSocketChannelInfoBySession(const char *sessionName, int32
 {
     return GetTransManagerTestInterface()->TransGetPidFromSocketChannelInfoBySession(sessionName, sessionId, pid);
 }
+
+int32_t LnnRequestQosOptimization(const uint64_t *laneIdList, uint32_t listSize, int32_t *result, uint32_t resultSize)
+{
+    return GetTransManagerTestInterface()->LnnRequestQosOptimization(laneIdList, listSize, result, resultSize);
+}
 }
 }
