@@ -28,6 +28,18 @@
 extern "C" {
 #endif
 
+enum RetrySearchServiceReason {
+    BLE_CLIENT_REGISTER_NOTIFICATION_ERR,
+    BLE_CLIENT_REGISTER_NOTIFICATION_FAIL,
+    BLE_CLIENT_SEARCH_SERVICE_ERR,
+    BLE_CLIENT_GET_SERVICE_ERR,
+};
+
+typedef struct {
+    int32_t underlayerHandle;
+    int32_t status;
+} CommonStatusContext;
+
 int32_t ConnGattClientConnect(ConnBleConnection *connection);
 int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool refreshGatt);
 int32_t ConnGattClientSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
