@@ -23,10 +23,7 @@
 
 int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(reply != NULL, SOFTBUS_INVALID_PARAM, TRANS_LOGE, "invalid param.");
     size_t size = 0;
     ChannelInfo channel = {0};
     const char *sessionName = (const char *)ReadString(data, &size);
@@ -49,10 +46,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.myIp = (char *)ReadString(data, &size);
-        if (channel.myIp == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "pointer null error.");
-            return SOFTBUS_IPC_ERR;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(channel.myIp != NULL, SOFTBUS_IPC_ERR, TRANS_LOGE, "pointer null error.");
         channel.fd = ReadFileDescriptor(data);
     }
     ReadInt32(data, &(channel.businessType));
