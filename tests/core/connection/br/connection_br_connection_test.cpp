@@ -1215,4 +1215,35 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager039, TestSize.Level1)
     state = SOFTBUS_BR_STATE_TURN_OFF;
     OnBtStateChanged(listenerId, state);
 }
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager040, TestSize.Level1)
+{
+    const char *addr = "11:22:33:44:55:66";
+    InitBrManager();
+    ConnBrConnection *connection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, -1);
+    ASSERT_TRUE(connection != NULL);
+    int32_t ret = ConnBrSaveConnection(connection);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t error = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
+    bool isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(true, isWait);
+
+    BrUnderlayerStatus *callbackStatus = (BrUnderlayerStatus *)SoftBusCalloc(sizeof(BrUnderlayerStatus));
+    ASSERT_TRUE(callbackStatus != NULL);
+    ListInit(&callbackStatus->node);
+    callbackStatus->status = 0;
+    callbackStatus->result = 4;
+    ListAdd(&connection->connectProcessStatus->list, &callbackStatus->node);
+    isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(false, isWait);
+
+    BrUnderlayerStatus *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
+        if (it->result == 4) {
+            it->result = CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED + 1;
+        }
+    }
+    isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(true, isWait);
+}
 } // namespace OHOS
