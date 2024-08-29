@@ -240,7 +240,7 @@ int32_t OpenDatabase(DbContext **ctx)
     if (rc != SQLITE_OK || sqlite == NULL || chmod(DATABASE_NAME, mode) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "sqlite3_open_v2 fail: errmsg=%{public}s", sqlite3_errmsg(sqlite));
         (void)sqlite3_close_v2(sqlite);
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SQLITE_ERR;
     }
     *ctx = (DbContext *)SoftBusCalloc(sizeof(DbContext));
     if (*ctx == NULL) {
@@ -298,12 +298,12 @@ int32_t DeleteTable(DbContext *ctx, TableNameID id)
     rc = sprintf_s(sql, SQL_DEFAULT_LEN, "%s%s", SQL_DROP_TABLE, g_sqliteMgr[id].tableName);
     if (rc < 0) {
         COMM_LOGE(COMM_UTILS, "sprintf_s sql fail");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SPRINTF_ERR;
     }
     rc = ExecuteSql(ctx, sql, strlen(sql), NULL, NULL);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "delete table fail");
-        rc = SOFTBUS_INVALID_PARAM;
+        rc = SOFTBUS_SQLITE_ERR;
     } else {
         rc = SOFTBUS_OK;
     }
@@ -324,7 +324,7 @@ int32_t CheckTableExist(DbContext *ctx, TableNameID id, bool *isExist)
     rc = sprintf_s(sql, SQL_DEFAULT_LEN, SQL_SEARCH_IF_TABLE_EXIST, g_sqliteMgr[id].tableName);
     if (rc < 0) {
         COMM_LOGE(COMM_UTILS, "sprintf_s sql fail");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SPRINTF_ERR;
     }
     *isExist = false;
     rc = ExecuteSql(ctx, sql, strlen(sql), NULL, NULL);
@@ -392,7 +392,7 @@ int32_t RemoveAllRecord(DbContext *ctx, TableNameID id)
     rc = sprintf_s(sql, SQL_DEFAULT_LEN, "%s%s", SQL_REMOVE_ALL_RECORD, g_sqliteMgr[id].tableName);
     if (rc < 0) {
         COMM_LOGE(COMM_UTILS, "sprintf_s sql fail");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SPRINTF_ERR;
     }
     rc = ExecuteSql(ctx, sql, strlen(sql), NULL, NULL);
     if (rc != SQLITE_DONE) {
@@ -446,7 +446,7 @@ int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data,
     rc = QueryData(ctx, g_sqliteMgr[id].sqlForSearchByKey, strlen(g_sqliteMgr[id].sqlForSearchByKey),
         g_sqliteMgr[id].searchCb, data);
     if (rc != SQLITE_ROW) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SQLITE_ERR;
     }
     do {
         if (g_sqliteMgr[id].queryDataCb != NULL) {
@@ -462,7 +462,7 @@ int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data,
             ctx->stmt = NULL;
         }
         COMM_LOGE(COMM_UTILS, "QueryData failed");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SQLITE_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -482,7 +482,7 @@ int32_t OpenTransaction(DbContext *ctx)
     rc = ExecuteSql(ctx, SQL_BEGIN_TRANSACTION, strlen(SQL_BEGIN_TRANSACTION), NULL, NULL);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "open transaction failed");
-        rc = SOFTBUS_INVALID_PARAM;
+        rc = SOFTBUS_SQLITE_ERR;
     } else {
         ctx->state |= DB_STATE_TRANSACTION;
         rc = SOFTBUS_OK;
@@ -511,7 +511,7 @@ int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type)
     rc = ExecuteSql(ctx, sql, strlen(sql), NULL, NULL);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "close transaction failed");
-        rc = SOFTBUS_INVALID_PARAM;
+        rc = SOFTBUS_SQLITE_ERR;
     } else {
         rc = SOFTBUS_OK;
     }
@@ -532,7 +532,7 @@ int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len)
     rc = sqlite3_key(ctx->db, password, len);
     if (rc != SQLITE_OK) {
         COMM_LOGE(COMM_UTILS, "config key failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SQLITE_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -548,7 +548,7 @@ int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
     rc = sqlite3_rekey(ctx->db, password, len);
     if (rc != SQLITE_OK) {
         COMM_LOGE(COMM_UTILS, "update key failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SQLITE_ERR;
     }
     return SOFTBUS_OK;
 }
