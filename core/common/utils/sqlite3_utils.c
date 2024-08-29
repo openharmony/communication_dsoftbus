@@ -93,9 +93,10 @@ static int32_t GetTrustedDevInfoByIdCb(DbContext *ctx, uint8_t *data, int32_t id
     int32_t i = 0;
     char *info = (char *)data + idx * UDID_BUF_LEN;
 
-    if (GetQueryResultColText(ctx, i, info, UDID_BUF_LEN) != SOFTBUS_OK) {
+    int32_t ret = GetQueryResultColText(ctx, i, info, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "get query result failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -239,7 +240,7 @@ int32_t OpenDatabase(DbContext **ctx)
     if (rc != SQLITE_OK || sqlite == NULL || chmod(DATABASE_NAME, mode) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "sqlite3_open_v2 fail: errmsg=%{public}s", sqlite3_errmsg(sqlite));
         (void)sqlite3_close_v2(sqlite);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *ctx = (DbContext *)SoftBusCalloc(sizeof(DbContext));
     if (*ctx == NULL) {
@@ -275,7 +276,7 @@ int32_t CreateTable(DbContext *ctx, TableNameID id)
     const char *sql = g_sqliteMgr[id].sqlForCreate;
     if (sql == NULL || sql[0] == '\0') {
         COMM_LOGE(COMM_UTILS, "createsql is not impl");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     rc = sqlite3_exec(ctx->db, sql, NULL, NULL, &errMsg);
     if (rc != SQLITE_OK && errMsg != NULL) {
@@ -297,12 +298,12 @@ int32_t DeleteTable(DbContext *ctx, TableNameID id)
     rc = sprintf_s(sql, SQL_DEFAULT_LEN, "%s%s", SQL_DROP_TABLE, g_sqliteMgr[id].tableName);
     if (rc < 0) {
         COMM_LOGE(COMM_UTILS, "sprintf_s sql fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     rc = ExecuteSql(ctx, sql, strlen(sql), NULL, NULL);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "delete table fail");
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_INVALID_PARAM;
     } else {
         rc = SOFTBUS_OK;
     }
@@ -323,7 +324,7 @@ int32_t CheckTableExist(DbContext *ctx, TableNameID id, bool *isExist)
     rc = sprintf_s(sql, SQL_DEFAULT_LEN, SQL_SEARCH_IF_TABLE_EXIST, g_sqliteMgr[id].tableName);
     if (rc < 0) {
         COMM_LOGE(COMM_UTILS, "sprintf_s sql fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *isExist = false;
     rc = ExecuteSql(ctx, sql, strlen(sql), NULL, NULL);
@@ -347,7 +348,7 @@ int32_t InsertRecord(DbContext *ctx, TableNameID id, uint8_t *data)
         ctx, g_sqliteMgr[id].sqlForInsert, strlen(g_sqliteMgr[id].sqlForInsert), g_sqliteMgr[id].insertCb, data);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "insert data failed");
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_INVALID_PARAM;
     } else {
         rc = SOFTBUS_OK;
     }
@@ -369,7 +370,7 @@ int32_t RemoveRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data)
         g_sqliteMgr[id].removeCb, data);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "remove data failed");
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_INVALID_PARAM;
     } else {
         rc = SOFTBUS_OK;
     }
@@ -391,12 +392,12 @@ int32_t RemoveAllRecord(DbContext *ctx, TableNameID id)
     rc = sprintf_s(sql, SQL_DEFAULT_LEN, "%s%s", SQL_REMOVE_ALL_RECORD, g_sqliteMgr[id].tableName);
     if (rc < 0) {
         COMM_LOGE(COMM_UTILS, "sprintf_s sql fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     rc = ExecuteSql(ctx, sql, strlen(sql), NULL, NULL);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "remove data failed");
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_INVALID_PARAM;
     } else {
         rc = SOFTBUS_OK;
     }
@@ -445,7 +446,7 @@ int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data,
     rc = QueryData(ctx, g_sqliteMgr[id].sqlForSearchByKey, strlen(g_sqliteMgr[id].sqlForSearchByKey),
         g_sqliteMgr[id].searchCb, data);
     if (rc != SQLITE_ROW) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     do {
         if (g_sqliteMgr[id].queryDataCb != NULL) {
@@ -461,7 +462,7 @@ int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data,
             ctx->stmt = NULL;
         }
         COMM_LOGE(COMM_UTILS, "QueryData failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -481,7 +482,7 @@ int32_t OpenTransaction(DbContext *ctx)
     rc = ExecuteSql(ctx, SQL_BEGIN_TRANSACTION, strlen(SQL_BEGIN_TRANSACTION), NULL, NULL);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "open transaction failed");
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_INVALID_PARAM;
     } else {
         ctx->state |= DB_STATE_TRANSACTION;
         rc = SOFTBUS_OK;
@@ -510,7 +511,7 @@ int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type)
     rc = ExecuteSql(ctx, sql, strlen(sql), NULL, NULL);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "close transaction failed");
-        rc = SOFTBUS_ERR;
+        rc = SOFTBUS_INVALID_PARAM;
     } else {
         rc = SOFTBUS_OK;
     }
@@ -531,7 +532,7 @@ int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len)
     rc = sqlite3_key(ctx->db, password, len);
     if (rc != SQLITE_OK) {
         COMM_LOGE(COMM_UTILS, "config key failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -547,7 +548,7 @@ int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
     rc = sqlite3_rekey(ctx->db, password, len);
     if (rc != SQLITE_OK) {
         COMM_LOGE(COMM_UTILS, "update key failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -620,7 +621,7 @@ int32_t GetQueryResultColCount(DbContext *ctx, int32_t *count)
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
         COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *count = sqlite3_column_count(ctx->stmt);
     return SOFTBUS_OK;
@@ -636,16 +637,16 @@ int32_t GetQueryResultColText(DbContext *ctx, int32_t iCol, char *text, uint32_t
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
         COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (sqlite3_column_type(ctx->stmt, iCol) != SQLITE_TEXT) {
         COMM_LOGE(COMM_UTILS, "column type not match");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     result = sqlite3_column_text(ctx->stmt, iCol);
     if (strcpy_s(text, len, (const char *)result) != EOK) {
         COMM_LOGE(COMM_UTILS, "strcpy_s fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -658,11 +659,11 @@ int32_t GetQueryResultColInt(DbContext *ctx, int32_t iCol, int32_t *value)
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
         COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (sqlite3_column_type(ctx->stmt, iCol) != SQLITE_INTEGER) {
         COMM_LOGE(COMM_UTILS, "column type not match");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *value = sqlite3_column_int(ctx->stmt, iCol);
     return SOFTBUS_OK;
@@ -676,11 +677,11 @@ int32_t GetQueryResultColInt64(DbContext *ctx, int32_t iCol, int64_t *value)
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
         COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (sqlite3_column_type(ctx->stmt, iCol) != SQLITE_INTEGER) {
         COMM_LOGE(COMM_UTILS, "column type not match");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *value = sqlite3_column_int64(ctx->stmt, iCol);
     return SOFTBUS_OK;
@@ -694,11 +695,11 @@ int32_t GetQueryResultColDouble(DbContext *ctx, int32_t iCol, double *value)
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
         COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (sqlite3_column_type(ctx->stmt, iCol) != SQLITE_FLOAT) {
         COMM_LOGE(COMM_UTILS, "column type not match");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *value = sqlite3_column_double(ctx->stmt, iCol);
     return SOFTBUS_OK;
