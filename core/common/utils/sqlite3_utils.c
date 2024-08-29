@@ -90,14 +90,12 @@ static SqliteManager g_sqliteMgr[TABLE_NAME_ID_MAX] = {
 
 static int32_t GetTrustedDevInfoByIdCb(DbContext *ctx, uint8_t *data, int32_t idx)
 {
-    int32_t rc;
     int32_t i = 0;
     char *info = (char *)data + idx * UDID_BUF_LEN;
 
-    rc = GetQueryResultColText(ctx, i, info, UDID_BUF_LEN);
-    if (rc != SOFTBUS_OK) {
+    if (GetQueryResultColText(ctx, i, info, UDID_BUF_LEN) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "get query result failed");
-        return rc;
+        return SOFTBUS_SQLITE_ERR;
     }
     return SOFTBUS_OK;
 }
