@@ -52,9 +52,10 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     msg->msgHead.peerId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
     ptr += sizeof(uint16_t);
     msg->msgHead.myId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
+    ptr += sizeof(uint16_t);
+    msg->msgHead.reserved = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
     msg->data = data + sizeof(ProxyMessageHead);
     msg->dateLen = len - sizeof(ProxyMessageHead);
-    UnpackProxyMessageHead(&msg->msgHead);
 
     return SOFTBUS_OK;
 }
@@ -70,11 +71,11 @@ static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, u
     offset += sizeof(uint8_t);
     *(buf + offset) = msgHead->cipher;
     offset += sizeof(uint8_t);
-    *(uint16_t *)(buf + offset) = SoftBusBEtoLEs((uint16_t)msgHead->myId);
+    *(uint16_t *)(buf + offset) = SoftBusLEtoBEs((uint16_t)msgHead->myId);
     offset += sizeof(uint16_t);
-    *(uint16_t *)(buf + offset) = SoftBusBEtoLEs((uint16_t)msgHead->peerId);
+    *(uint16_t *)(buf + offset) = SoftBusLEtoBEs((uint16_t)msgHead->peerId);
     offset += sizeof(uint16_t);
-    *(uint16_t *)(buf + offset) = SoftBusBEtoLEs((uint16_t)msgHead->reserved);
+    *(uint16_t *)(buf + offset) = SoftBusLEtoBEs((uint16_t)msgHead->reserved);
 }
 
 static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len)
