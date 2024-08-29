@@ -513,6 +513,23 @@ SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32
     return pItem;
 }
 
+static int32_t CheckPidAndUidDynamic(const SoftBusPermissionEntry *pe, const SoftBusPermissionItem *pItem)
+{
+    SoftBusAppInfo *appInfo = NULL;
+    LIST_FOR_EACH_ENTRY(appInfo, &pe->appInfo, SoftBusAppInfo, node) {
+        if (appInfo->uid == pItem->uid && appInfo->pid == pItem->pid) {
+            return GRANTED_APP;
+        }
+    }
+    char *tmpName = NULL;
+    Anonymize(pe->sessionName, &tmpName);
+    COMM_LOGE(COMM_PERM,
+        "check fail,sessionName=%{public}s, pe->uid=%{public}d, pe->pid=%{public}d, uid=%{public}d, pid=%{public}d",
+        AnonymizeWrapper(tmpName), appInfo->uid, appInfo->pid, pItem->uid, pItem->pid);
+    AnonymizeFree(tmpName);
+    return SOFTBUS_PERMISSION_DENIED;
+}
+
 int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
 {
     if (sessionName == NULL || pItem == NULL) {
@@ -532,8 +549,9 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     LIST_FOR_EACH_ENTRY(pe, &permissionList->list, SoftBusPermissionEntry, node) {
         if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {
             if (isDynamicPermission) {
+                permType = CheckPidAndUidDynamic(pe, pItem);
                 (void)SoftBusMutexUnlock(&permissionList->lock);
-                return GRANTED_APP;
+                return permType;
             }
             permType = CheckPermissionAppInfo(pe, pItem);
             if (permType < 0) {
