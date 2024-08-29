@@ -139,7 +139,7 @@ int32_t SoftBusTimerInit(void)
         COMM_LOGE(COMM_UTILS, "start timer failed.");
         (void)SoftBusDeleteTimer(g_timerId);
         g_timerId = NULL;
-        return SOFTBUS_TIMOUT;
+        return SOFTBUS_TIMER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -340,7 +340,7 @@ int32_t ConvertBtMacToStrNoColon(char *strMac, uint32_t strMacLen, const uint8_t
         binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
     if (ret < 0) {
         COMM_LOGE(COMM_UTILS, "snprintf_s fail");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SPRINTF_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -359,7 +359,7 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
         binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
     if (ret < 0) {
         COMM_LOGE(COMM_UTILS, "snprintf_s fail");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SPRINTF_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -374,7 +374,7 @@ int32_t ConvertReverseBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t
         binMac[MAC_BIT_FIVE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_THREE],
         binMac[MAC_BIT_TWO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_ZERO]);
     if (ret < 0) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SPRINTF_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -389,7 +389,7 @@ int32_t ConvertBtMacToU64(const char *strMac, uint32_t strMacLen, uint64_t *u64M
     int32_t status = ConvertBtMacToBinary(strMac, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
     if (status != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "Convert btMac to binary fail");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_SPRINTF_ERR;
     }
     uint64_t u64Value = 0;
     for (int i = 0; i < BT_ADDR_LEN; i++) {
