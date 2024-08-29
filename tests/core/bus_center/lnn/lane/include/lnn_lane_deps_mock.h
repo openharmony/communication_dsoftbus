@@ -113,6 +113,7 @@ public:
     virtual int SoftBusGetBtState() = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual void AddNetworkResource(NetworkResource *networkResource) = 0;
+    virtual int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -177,6 +178,7 @@ public:
     MOCK_METHOD0(SoftBusGetBtState, int (void));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **info, int32_t *infoNum));
     MOCK_METHOD1(AddNetworkResource, void (NetworkResource *));
+    MOCK_METHOD2(LnnRequestCheckOnlineStatus, int32_t (const char *networkId, uint64_t timeout));
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
         int32_t localFeatureCap, int32_t remoteFeatureCap);

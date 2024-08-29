@@ -39,6 +39,7 @@
 #include "lnn_meta_node_ledger.h"
 #include "lnn_p2p_info.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_oobe_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
@@ -102,7 +103,7 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
         }
     }
     uint32_t authCapacity = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_CAP, (int32_t *)&authCapacity) == SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
             LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
             return true;
@@ -207,6 +208,7 @@ int32_t LnnInitEventMoniterDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init LnnInitDeviceNameMonitorImpl fail");
         return SOFTBUS_ERR;
     }
+    LnnInitOOBEStateMonitorImpl();
     return SOFTBUS_OK;
 }
 
@@ -290,6 +292,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_IP, (char *)info, infoLen);
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return LnnGetRemoteBoolInfo(networkId, BOOL_KEY_SCREEN_STATUS, (bool*)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -469,6 +473,8 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return IP_LEN;
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LNN_COMMON_LEN;
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return DATA_DEVICE_SCREEN_STATUS_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;

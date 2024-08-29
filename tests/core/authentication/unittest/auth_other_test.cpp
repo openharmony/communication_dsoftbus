@@ -369,8 +369,8 @@ HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_VERIFY_PASSED_TEST_001, TestSize.Level1)
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     AuthManager *auth = NewAuthManager(authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    AuthHandle errHandle = {.authId = errAuthId, .type = AUTH_LINK_TYPE_BLE};
-    AuthHandle authHandle = {.authId = authId, .type = AUTH_LINK_TYPE_BLE};
+    AuthHandle errHandle = { .authId = errAuthId, .type = AUTH_LINK_TYPE_BLE };
+    AuthHandle authHandle = { .authId = authId, .type = AUTH_LINK_TYPE_BLE };
     AuthNotifyDeviceVerifyPassed(errHandle, &nodeInfo);
     g_verifyListener.onDeviceVerifyPass = nullptr;
     AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo);
@@ -815,7 +815,7 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
     info->isServer = false;
     info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     SessionKey *sessionKey = (SessionKey*)SoftBusCalloc(sizeof(SessionKey));
-    if (info == NULL) {
+    if (sessionKey == NULL) {
         return;
     }
     sessionKey->len = 0;
@@ -935,7 +935,7 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     (void)strcpy_s(authSessionInfo.udid, UDID_BUF_LEN, udid);
     authFsm->info = authSessionInfo;
     authFsm->authSeq = 512;
-    const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(malloc(sizeof(uint8_t)));
     ASSERT_TRUE(data != nullptr);
     MessagePara *para = NewMessagePara(data, MSG_LEN);
     HandleMsgRecvDeviceInfo(authFsm, para);
@@ -954,7 +954,7 @@ HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
 {
     int32_t msgType = 1;
     int64_t authSeq = 0;
-    const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(malloc(sizeof(uint8_t)));
     ASSERT_TRUE(data != nullptr);
     uint32_t len = 0;
     int32_t ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
@@ -996,7 +996,7 @@ HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
     uint32_t requestId = 1;
     NodeInfo *nodeInfo = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_TRUE(nodeInfo != nullptr);
-    int64_t *authId = (int64_t *)malloc(sizeof(int64_t));
+    int64_t *authId = reinterpret_cast<int64_t *>(malloc(sizeof(int64_t)));
     int32_t ret = AuthRestoreAuthManager(NULL, connInfo, requestId, nodeInfo, authId);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     const char *udidHash = "1234uuid";

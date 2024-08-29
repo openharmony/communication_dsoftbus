@@ -422,6 +422,7 @@ static void AddNetworkResourceInner(const LaneLinkInfo *linkInfo, uint64_t laneI
         LNN_LOGE(LNN_LANE, "strcpy peerUdid fail");
     }
     AddNetworkResource(networkResource);
+    SoftBusFree(networkResource);
     AnonymizeFree(anonyLocalUdid);
     AnonymizeFree(anonyRemoteUdid);
 }

@@ -342,7 +342,8 @@ void AuthNegotiateChannel::OnConnOpenFailed(uint32_t requestId, int32_t reason)
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
 }
 
-int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel)
+int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel,
+    uint32_t &authReqId)
 {
     bool isMeta = false;
     bool needUdid = true;
@@ -394,6 +395,7 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
         std::lock_guard lock(lock_);
         requestIdToDeviceIdMap_.erase(requestId);
     }
+    authReqId = requestId;
     return ret;
 }
 
@@ -402,16 +404,9 @@ void AuthNegotiateChannel::StopCustomListening()
     AuthStopListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P);
 }
 
-void AuthNegotiateChannel::EraseTimeoutOpenAuth(std::string remoteDeviceId)
+void AuthNegotiateChannel::RemovePendingAuthReq(uint32_t authReqId)
 {
     std::lock_guard lock(lock_);
-    for (auto iter = requestIdToDeviceIdMap_.begin(); iter != requestIdToDeviceIdMap_.end(); ++iter) {
-        if (iter->second == remoteDeviceId) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "erase timeout openauth, requestId=%{public}d, remoteDevice=%{public}s",
-                iter->first, WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
-            requestIdToDeviceIdMap_.erase(iter->first);
-            break;
-        }
-    }
+    requestIdToDeviceIdMap_.erase(authReqId);
 }
 } // namespace OHOS::SoftBus

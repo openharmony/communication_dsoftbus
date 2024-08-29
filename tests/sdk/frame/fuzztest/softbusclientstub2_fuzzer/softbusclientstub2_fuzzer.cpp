@@ -31,7 +31,7 @@ const std::vector<SoftBusFuncId> CODE_LIST = {
     CLIENT_ON_JOIN_METANODE_RESULT,
     CLIENT_ON_LEAVE_RESULT,
     CLIENT_ON_LEAVE_METANODE_RESULT,
-    CLIENT_ON_NODE_DEVICE_NOT_TRUST,
+    CLIENT_ON_NODE_DEVICE_TRUST_CHANGED,
     CLIENT_ON_NODE_ONLINE_STATE_CHANGED,
     CLIENT_ON_NODE_BASIC_INFO_CHANGED,
     CLIENT_ON_LOCAL_NETWORK_ID_CHANGED,
@@ -91,17 +91,19 @@ private:
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    static size_t codeIndex = 0;
     static TestEnv env;
     if (!env.IsInited()) {
         return 0;
     }
 
-    SoftBusFuncId code = CODE_LIST[codeIndex++ % CODE_LIST.size()];
+    if (data == nullptr || size == 0) {
+        return 0;
+    }
+    SoftBusFuncId code = CODE_LIST[data[0] % CODE_LIST.size()];
 
     OHOS::MessageParcel parcel;
     parcel.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    parcel.WriteBuffer(data, size);
+    parcel.WriteBuffer(data + 1, size - 1);
 
     env.DoRemoteRequest(code, parcel);
     return 0;

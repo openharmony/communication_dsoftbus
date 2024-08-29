@@ -40,6 +40,12 @@ typedef struct _WifiStationInfo {
     uint32_t freq;
 } WifiStationInfo;
 
+/* DFX */
+typedef struct _RamInfo {
+    uint32_t availableRam;
+    uint32_t totalRam;
+} RamInfo;
+
 typedef enum {
     ROOT_QUEUE = -1,        /* ROOT queueu */
     HI_QUEUE = 1,           /* QDISC queue 1 WLAN_HI_QUEUE = 0 */

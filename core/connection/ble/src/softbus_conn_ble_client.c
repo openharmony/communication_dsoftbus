@@ -42,18 +42,6 @@ enum ClientLoopMsgType {
     MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT,
 };
 
-enum RetrySearchServiceReason {
-    BLE_CLIENT_REGISTER_NOTIFICATION_ERR,
-    BLE_CLIENT_REGISTER_NOTIFICATION_FAIL,
-    BLE_CLIENT_SEARCH_SERVICE_ERR,
-    BLE_CLIENT_GET_SERVICE_ERR,
-};
-
-typedef struct {
-    int32_t underlayerHandle;
-    int32_t status;
-} CommonStatusContext;
-
 typedef struct {
     CommonStatusContext common;
     int32_t mtuSize;

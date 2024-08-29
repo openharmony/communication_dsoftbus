@@ -67,7 +67,6 @@ void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
             CONN_LOGI(CONN_WIFI_DIRECT, "processor run");
             processor_->Run();
         } catch (const ProcessorTerminate &) {
-            AuthNegotiateChannel::EraseTimeoutOpenAuth(remoteDeviceId_);
             LinkManager::GetInstance().Dump();
             CONN_LOGI(CONN_WIFI_DIRECT, "processor terminate");
             ProcessUnHandleCommand();

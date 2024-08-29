@@ -23,6 +23,7 @@
 #include "lnn_network_manager_mock.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_trans_mock.h"
+#include "lnn_oobe_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
