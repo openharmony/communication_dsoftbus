@@ -518,6 +518,9 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
+    if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
+        return SOFTBUS_PERMISSION_SERVER_DENIED;
+    }
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
