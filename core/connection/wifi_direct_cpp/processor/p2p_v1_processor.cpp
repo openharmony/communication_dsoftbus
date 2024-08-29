@@ -1288,7 +1288,7 @@ int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand
 int P2pV1Processor::SendConnectRequestAsNone(const NegotiateChannel &channel, WifiDirectRole expectedRole)
 {
     std::vector<int> channels;
-    int32_t ret = P2pAdapter::GetFrequency5GListIntArray(channels);
+    int32_t ret = P2pAdapter::GetChannel5GListIntArray(channels);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g channels failed, error=%{public}d", ret);
     auto channelString = WifiDirectUtils::ChannelListToString(channels);
@@ -1698,7 +1698,7 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
     }
 
     std::vector<int> goChannels;
-    int32_t ret = P2pAdapter::GetFrequency5GListIntArray(goChannels);
+    int32_t ret = P2pAdapter::GetChannel5GListIntArray(goChannels);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local Channels list failed, error=%{public}d", ret);
 
