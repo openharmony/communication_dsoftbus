@@ -183,6 +183,25 @@ void AuthNegotiateChannel::ProcessDetectLinkResponse(AuthHandle handle, const Ne
     channel->promise_->set_value(response);
 }
 
+static bool CheckSameAccount(const NegotiateMessage &msg)
+{
+    bool ret = true;
+    switch (msg.GetMessageType()) {
+        case NegotiateMessageType::CMD_V3_REQ:
+        case NegotiateMessageType::CMD_V3_RSP:
+        case NegotiateMessageType::CMD_V3_CUSTOM_PORT_REQ:
+        case NegotiateMessageType::CMD_V3_CUSTOM_PORT_RSP:
+        case NegotiateMessageType::CMD_AUTH_HAND_SHAKE:
+        case NegotiateMessageType::CMD_AUTH_HAND_SHAKE_RSP:
+            ret = msg.GetExtraData().empty() || msg.GetExtraData().front();
+            break;
+        default:
+            ret = true;
+            break;
+    }
+    return ret;
+}
+
 static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
 {
     ProtocolType type { ProtocolType::TLV };
@@ -197,7 +216,7 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     input.insert(input.end(), data->data, data->data + data->len);
     NegotiateMessage msg;
     msg.Unmarshalling(*protocol, input);
-    bool sameAccount = msg.GetExtraData().empty() || msg.GetExtraData().front();
+    bool sameAccount = CheckSameAccount(msg);
     CONN_LOGI(CONN_WIFI_DIRECT, "sameAccount=%{public}d", sameAccount);
     if (!sameAccount) {
         CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
