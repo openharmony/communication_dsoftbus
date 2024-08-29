@@ -131,11 +131,14 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     int tmp = 0;
     param->attr = &g_sessionAttr[tmp];
 
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_MEM_ERR));
+
     TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(transInfo != nullptr);
     (void)memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     int ret = TransOpenChannel(param, transInfo);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }

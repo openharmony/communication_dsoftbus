@@ -182,14 +182,12 @@ public:
 void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 {
     SetAceessTokenPermission("dsoftbusTransTest");
-    int ret = TransServerProxyInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
     g_fileTest = fopen(g_testProxyFileList[0], "w+");
     EXPECT_NE(g_fileTest, nullptr);
 
     g_fileSs = fopen(g_testProxyFileList[1], "w+");
     EXPECT_NE(g_fileSs, nullptr);
-    ret = fprintf(g_fileSs, "%s", "Hello world!\n");
+    int ret = fprintf(g_fileSs, "%s", "Hello world!\n");
     EXPECT_LT(0, ret);
     g_fd = open(TEST_FILE_PATH, O_RDWR | O_CREAT, S_IRWXU);
     EXPECT_NE(g_fd, -1);

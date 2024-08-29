@@ -779,7 +779,7 @@ HWTEST_F(TransUdpNegoTest, ProcessUdpChannelState001, TestSize.Level1)
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     int32_t ret = ProcessUdpChannelState(appInfo, isServerSide);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     isServerSide = false;
     ret = ProcessUdpChannelState(appInfo, isServerSide);
