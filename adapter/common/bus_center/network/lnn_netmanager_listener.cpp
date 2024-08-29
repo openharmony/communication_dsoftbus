@@ -129,6 +129,36 @@ int32_t LnnNetManagerListener::OnInterfaceAddressUpdated(
     Anonymize(addr.c_str(), &anonyAddr);
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), anonyAddr);
     AnonymizeFree(anonyAddr);
+    if (strstr(ifName.c_str(), "eth") == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_ethCountLock) != 0) {
+        LNN_LOGE(LNN_BUILDER, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (g_ethCount != 0) {
+        (void)SoftBusMutexUnlock(&g_ethCountLock);
+        return SOFTBUS_OK;
+    }
+
+    uint32_t netCapability = 0;
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get cap from local ledger fail");
+        (void)SoftBusMutexUnlock(&g_ethCountLock);
+        return ret;
+    }
+
+    (void)LnnSetNetCapability(&netCapability, BIT_ETH);
+    ret = LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, netCapability);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
+        (void)SoftBusMutexUnlock(&g_ethCountLock);
+        return ret;
+    }
+    ++g_ethCount;
+    (void)SoftBusMutexUnlock(&g_ethCountLock);
+    LNN_LOGI(LNN_BUILDER, "local ledger netCapability=%{public}u", netCapability);
     return SOFTBUS_OK;
 }
 int32_t LnnNetManagerListener::OnInterfaceAddressRemoved(

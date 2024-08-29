@@ -38,7 +38,7 @@ static constexpr char DEFAULT_NET_MASK[] = "255.255.255.0";
 static constexpr int CHANNEL_ARRAY_NUM_MAX = 256;
 static constexpr int DECIMAL_BASE = 10;
 
-int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
+int32_t P2pAdapter::GetFrequency5GListIntArray(std::vector<int> &frequencyList)
 {
     int array[CHANNEL_ARRAY_NUM_MAX] {};
     auto ret = Hid2dGetChannelListFor5G(array, CHANNEL_ARRAY_NUM_MAX);
@@ -47,7 +47,7 @@ int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
 
     int count = 0;
     while (array[count]) {
-        channels.push_back(array[count]);
+        frequencyList.push_back(array[count]);
         count++;
     }
 
@@ -129,6 +129,7 @@ int32_t P2pAdapter::P2pConnectGroup(const ConnectParam &param)
         ret == EOK, SOFTBUS_CONN_PV2_COPY_SHARE_KEY_FAILED, CONN_WIFI_DIRECT, "copy share key failed");
 
     connectConfig.frequency = strtol(configs[P2P_GROUP_CONFIG_INDEX_FREQ].c_str(), nullptr, DECIMAL_BASE);
+    CONN_LOGI(CONN_WIFI_DIRECT, "connect config frequency=%{public}d", connectConfig.frequency);
 
     if (param.isLegacyGo) {
         connectConfig.dhcpMode = CONNECT_AP_NODHCP;
@@ -198,13 +199,12 @@ int32_t P2pAdapter::GetStationFrequencyWithFilter()
     int32_t frequency = P2pAdapter::GetStationFrequency();
     CONN_CHECK_AND_RETURN_RET_LOGW(frequency > 0, FREQUENCY_INVALID, CONN_WIFI_DIRECT, "invalid frequency");
     if (WifiDirectUtils::Is5GBand(frequency)) {
-        std::vector<int> channelArray;
-        auto ret = P2pAdapter::GetChannel5GListIntArray(channelArray);
+        std::vector<int> frequencyArray;
+        auto ret = P2pAdapter::GetFrequency5GListIntArray(frequencyArray);
         if (ret != SOFTBUS_OK) {
             return ret;
         }
-        int32_t channel = WifiDirectUtils::FrequencyToChannel(frequency);
-        if (WifiDirectUtils::IsInChannelList(channel, channelArray)) {
+        if (WifiDirectUtils::IsInChannelList(frequency, frequencyArray)) {
             return frequency;
         }
         return FREQUENCY_INVALID;
@@ -300,28 +300,30 @@ bool P2pAdapter::IsWideBandSupported()
 
 int32_t P2pAdapter::GetGroupInfo(WifiDirectP2pGroupInfo &groupInfoOut)
 {
-    WifiP2pGroupInfo info {};
-    auto ret = GetCurrentGroup(&info);
+    auto groupInfo = std::make_shared<WifiP2pGroupInfo>();
+    auto ret = GetCurrentGroup(groupInfo.get());
     if (ret != WIFI_SUCCESS) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d",
             ToSoftBusErrorCode(static_cast<int32_t>(ret)));
         return ToSoftBusErrorCode(static_cast<int32_t>(ret));
     }
-    groupInfoOut.isGroupOwner = info.isP2pGroupOwner;
-    groupInfoOut.frequency = info.frequency;
-    groupInfoOut.interface = info.interface;
-    groupInfoOut.goIpAddr = info.goIpAddress;
-    std::vector<uint8_t> devAddrArray(info.owner.devAddr, info.owner.devAddr + sizeof(info.owner.devAddr));
-    std::vector<uint8_t> devRandomAddrArray(info.owner.randomDevAddr, info.owner.randomDevAddr +
-        sizeof(info.owner.randomDevAddr));
+    groupInfoOut.isGroupOwner = groupInfo->isP2pGroupOwner;
+    groupInfoOut.frequency = groupInfo->frequency;
+    groupInfoOut.interface = groupInfo->interface;
+    groupInfoOut.goIpAddr = groupInfo->goIpAddress;
+    std::vector<uint8_t> devAddrArray(groupInfo->owner.devAddr, groupInfo->owner.devAddr +
+        sizeof(groupInfo->owner.devAddr));
+    std::vector<uint8_t> devRandomAddrArray(groupInfo->owner.randomDevAddr, groupInfo->owner.randomDevAddr +
+        sizeof(groupInfo->owner.randomDevAddr));
     groupInfoOut.groupOwner.address = WifiDirectUtils::MacArrayToString(devAddrArray);
     groupInfoOut.groupOwner.randomMac = WifiDirectUtils::MacArrayToString(devRandomAddrArray);
-    for (auto i = 0; i < info.clientDevicesSize; i++) {
+    for (auto i = 0; i < groupInfo->clientDevicesSize; i++) {
         std::vector<uint8_t> clientAddrArray(
-            info.clientDevices[i].devAddr, info.clientDevices[i].devAddr + sizeof(info.clientDevices[i].devAddr));
+            groupInfo->clientDevices[i].devAddr, groupInfo->clientDevices[i].devAddr +
+                sizeof(groupInfo->clientDevices[i].devAddr));
         std::vector<uint8_t> clientRandomAddrArray(
-            info.clientDevices[i].randomDevAddr, info.clientDevices[i].randomDevAddr +
-            sizeof(info.clientDevices[i].randomDevAddr));
+            groupInfo->clientDevices[i].randomDevAddr, groupInfo->clientDevices[i].randomDevAddr +
+            sizeof(groupInfo->clientDevices[i].randomDevAddr));
         WifiDirectP2pDeviceInfo deviceInfo;
         deviceInfo.address = WifiDirectUtils::MacArrayToString(clientAddrArray);
         deviceInfo.randomMac = WifiDirectUtils::MacArrayToString(clientRandomAddrArray);
@@ -391,13 +393,13 @@ std::string P2pAdapter::GetMacAddress()
 
 int32_t P2pAdapter::GetDynamicMacAddress(std::string &macString)
 {
-    WifiP2pGroupInfo groupInfo;
-    int32_t ret = GetCurrentGroup(&groupInfo);
+    auto groupInfo = std::make_shared<WifiP2pGroupInfo>();
+    auto ret = GetCurrentGroup(groupInfo.get());
     if (ret != WIFI_SUCCESS) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ToSoftBusErrorCode(ret));
         return ToSoftBusErrorCode(ret);
     }
-    std::vector<uint8_t> macArray = WifiDirectUtils::GetInterfaceMacAddr(groupInfo.interface);
+    std::vector<uint8_t> macArray = WifiDirectUtils::GetInterfaceMacAddr(groupInfo->interface);
     macString = WifiDirectUtils::MacArrayToString(macArray);
     return SOFTBUS_OK;
 }

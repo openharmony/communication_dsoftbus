@@ -25,18 +25,17 @@
 #include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
-using DurationStatisticEvent = std::string;
-const DurationStatisticEvent TotalStart("TotalStart");
-const DurationStatisticEvent TotalEnd("TotalEnd");
-const DurationStatisticEvent TotalDuration("TotalDuration");
-const DurationStatisticEvent CreateGroupStart("CreateGroupStart");
-const DurationStatisticEvent CreateGroupEnd("CreateGroupEnd");
-const DurationStatisticEvent ConnectGroupStart("ConnectGroupStart");
-const DurationStatisticEvent ConnectGroupEnd("ConnectGroupEnd");
+static constexpr const char *TOTAL_START = "TotalStart";
+static constexpr const char *TOTAL_END = "TotalEnd";
+static constexpr const char *TOTAL_DURATION = "TotalDuration";
+static constexpr const char *CREATE_GROUP_START = "CreateGroupStart";
+static constexpr const char *CREATE_GROUP_END = "CreateGroupEnd";
+static constexpr const char *CONNECT_GROUP_START = "ConnectGroupStart";
+static constexpr const char *CONNECT_GROUP_END = "ConnectGroupEnd";
 
 class DurationStatisticCalculator {
 public:
-    virtual void CalculateAllEvent(uint32_t requestId, std::map<DurationStatisticEvent, uint64_t> records) = 0;
+    virtual void CalculateAllEvent(uint32_t requestId, std::map<std::string, uint64_t> records) = 0;
 };
 
 class P2pCalculator : public DurationStatisticCalculator {
@@ -49,7 +48,7 @@ public:
         return instance;
     }
 
-    void CalculateAllEvent(uint32_t requestId, std::map<DurationStatisticEvent, uint64_t> records) override;
+    void CalculateAllEvent(uint32_t requestId, std::map<std::string, uint64_t> records) override;
 };
 
 class DurationStatisticCalculatorFactory {
@@ -78,14 +77,17 @@ public:
     }
 
     void Start(uint32_t requestId, const std::shared_ptr<DurationStatisticCalculator> &calculator);
-    void Record(uint32_t requestId, const DurationStatisticEvent &event);
+    void Record(uint32_t requestId, const std::string &event);
+    void RecordReNegotiate(uint32_t requestId, bool flag);
     void End(uint32_t requestId);
     void Clear(uint32_t requestId);
-    std::map<DurationStatisticEvent, uint64_t> GetStateTimeMapElement(uint32_t requestId);
+    std::map<std::string, uint64_t> GetStateTimeMapElement(uint32_t requestId);
+    bool ReNegotiateFlag(uint32_t requestId);
 
 private:
     static uint64_t GetTime();
-    std::map<uint32_t, std::map<DurationStatisticEvent, uint64_t>> stateTimeMap_;
+    std::map<uint32_t, std::map<std::string, uint64_t>> stateTimeMap_;
+    std::map<uint32_t, bool> reNegotiateFlagMap_;
     std::map<uint32_t, std::shared_ptr<DurationStatisticCalculator>> calculators_;
 
     std::shared_mutex mutex_;

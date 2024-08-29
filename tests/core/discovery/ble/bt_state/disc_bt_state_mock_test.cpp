@@ -22,7 +22,6 @@
 #include <cstdlib>
 
 #include "bluetooth_mock.h"
-#include "discovery_service.h"
 #include "disc_ble.h"
 #include "disc_log.h"
 #include "lnn_local_net_ledger.h"

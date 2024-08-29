@@ -63,6 +63,11 @@ int32_t LnnIpcInit(void)
     return SOFTBUS_OK;
 }
 
+void LnnIpcDeinit(void)
+{
+    (void)SoftBusMutexDestroy(&g_lnnRequestInfo.lock);
+}
+
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions);
 
