@@ -63,7 +63,6 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiDeviceConfigTest001, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(wifiMock, GetDeviceConfigs)
         .WillOnce(DoAll(SetArgPointee<1>(WIFI_MAX_CONFIG_SIZE + 1), Return(WIFI_SUCCESS)));
-        
     ret = SoftBusGetWifiDeviceConfig(&configList, &num);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     EXPECT_CALL(wifiMock, GetDeviceConfigs)
