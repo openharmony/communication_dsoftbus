@@ -159,9 +159,6 @@ static void FillpProcessItemData(struct FillpPcb *pcb, struct FillpPcbItem *item
         return;
     }
     if (!FillpNumIsbigger(item->seqNum, pcb->recv.seqNum)) {
-        FILLP_LOGDBG("fillp_sock_id:%d seq Recved before: start %u, end: %u, pktNum: %u", FILLP_GET_SOCKET(pcb)->index,
-            pcb->recv.seqNum, item->seqNum, item->pktNum);
-
         FillpFcDataInput(pcb, pktHdr);
         FillpFreeBufItem(item);
         FillpFcRecvDropOne(pcb);
@@ -257,12 +254,6 @@ static void ProcessPcbItem(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf,
             item = (struct FillpPcbItem *)node->item;
             lostSeqNum = (item->seqNum - item->dataLen);
         }
-        FILLP_LOGDTL("can not alloc recv bufer, drop it !!!!!,fillp_sock_id:%d, seqNum:%u, pktNum:%u, "
-            "recv.seqNum:%u, lostSeqNum:%u, recvList:%u, recvBoxPlaceInOrder:%u, recvBox:%lu, "
-            "mpRecvSize:%u, curItemCount:%u",
-            FILLP_GET_SOCKET(pcb)->index, pktHdr->seqNum, pktHdr->pktNum, pcb->recv.seqNum, lostSeqNum,
-            pcb->recv.recvList.nodeNum, pcb->recv.recvBoxPlaceInOrder.nodeNum,
-            FillpQueueValidOnes(pcb->recv.recvBox), pcb->mpRecvSize, pcb->recv.curItemCount);
     }
 }
 
@@ -599,13 +590,6 @@ static FILLP_BOOL FillpCheckPackNumber(struct FillpPcb *pcb, struct FillpPktPack
         FILLP_NTOHL(pack->rate), pktHdr->seqNum, pktHdr->pktNum,
         FILLP_NTOHS(pack->flag), FILLP_NTOHL(pack->oppositeSetRate), lostSeqNum);
 
-    FILLP_LOGDTL("fillp_sock_id:%d, unSendList:%u,unackList:%u,unrecvList:%u, itemWaitTokenLists:%u, "
-        "total:%u,curMemSize:%u,maxACKSeq:%u,ackSeqNum:%u,curSeq:%u",
-        FILLP_GET_SOCKET(pcb)->index, pcb->send.unSendList.size, pcb->send.unackList.count,
-        pcb->send.unrecvList.nodeNum, pcb->send.itemWaitTokenLists.nodeNum,
-        (FILLP_UINT32)(pcb->send.unSendList.size + pcb->send.redunList.nodeNum + pcb->send.unackList.count +
-        pcb->send.unrecvList.nodeNum + pcb->send.itemWaitTokenLists.nodeNum),
-        pcb->send.curItemCount, pcb->send.maxAckNumFromReceiver, pcb->send.ackSeqNum, pcb->send.seqNum);
     return FILLP_TRUE;
 }
 
