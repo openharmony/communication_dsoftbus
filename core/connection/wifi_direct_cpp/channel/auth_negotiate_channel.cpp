@@ -401,4 +401,17 @@ void AuthNegotiateChannel::StopCustomListening()
 {
     AuthStopListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P);
 }
+
+void AuthNegotiateChannel::EraseTimeoutOpenAuth(std::string remoteDeviceId)
+{
+    std::lock_guard lock(lock_);
+    for (auto iter = requestIdToDeviceIdMap_.begin(); iter != requestIdToDeviceIdMap_.end(); ++iter) {
+        if (iter->second == remoteDeviceId) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "erase timeout openauth, requestId=%{public}d, remoteDevice=%{public}s",
+                iter->first, WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+            requestIdToDeviceIdMap_.erase(iter->first);
+            break;
+        }
+    }
+}
 } // namespace OHOS::SoftBus

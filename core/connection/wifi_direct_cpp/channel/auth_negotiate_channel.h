@@ -54,6 +54,7 @@ public:
     static void StopListening(AuthLinkType type, ListenerModule module);
     static int OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel);
     static void StopCustomListening();
+    static void EraseTimeoutOpenAuth(std::string remoteDeviceId);
 
     static void ProcessDetectLinkRequest(const std::shared_ptr<AuthNegotiateChannel> &channel);
     static void ProcessDetectLinkResponse(AuthHandle handle, const NegotiateMessage &response);
