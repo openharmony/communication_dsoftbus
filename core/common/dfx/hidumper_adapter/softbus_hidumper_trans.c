@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "anonymizer.h"
 #include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -73,10 +74,17 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
 
     DataMasking(uidArr, MAX_ID_LEN, ID_DELIMITER, uidStr);
     DataMasking(pidArr, MAX_ID_LEN, ID_DELIMITER, pidStr);
-    SOFTBUS_DPRINTF(fd, "PkgName               : %s\n", pkgName);
-    SOFTBUS_DPRINTF(fd, "SessionName           : %s\n", sessionName);
+
+    char *tmpPkgName = NULL;
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    Anonymize(pkgName, &tmpPkgName);
+    SOFTBUS_DPRINTF(fd, "SessionName           : %s\n", AnonymizeWrapper(tmpName));
+    SOFTBUS_DPRINTF(fd, "pkgName           : %s\n", AnonymizeWrapper(tmpPkgName));
     SOFTBUS_DPRINTF(fd, "PID                   : %s\n", uidStr);
     SOFTBUS_DPRINTF(fd, "UID                   : %s\n", pidStr);
+    AnonymizeFree(tmpName);
+    AnonymizeFree(tmpPkgName);
 }
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
@@ -89,17 +97,22 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     char deviceId[DEVICE_ID_SIZE_MAX] = {0};
     char srcAddr[IP_LEN] = {0};
     char dstAddr[IP_LEN] = {0};
-
+    char *localSessionName = NULL;
+    char *remoteSessionName = NULL;
     DataMasking(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, ID_DELIMITER, deviceId);
     DataMasking(appInfo->myData.addr, IP_LEN, IP_DELIMITER, srcAddr);
     DataMasking(appInfo->peerData.addr, IP_LEN, IP_DELIMITER, dstAddr);
-    SOFTBUS_DPRINTF(fd, "LocalSessionName      : %s\n", appInfo->myData.sessionName);
-    SOFTBUS_DPRINTF(fd, "RemoteSessionName     : %s\n", appInfo->peerData.sessionName);
+    Anonymize(appInfo->myData.sessionName, &localSessionName);
+    Anonymize(appInfo->peerData.sessionName, &remoteSessionName);
+    SOFTBUS_DPRINTF(fd, "LocalSessionName      : %s\n", AnonymizeWrapper(localSessionName));
+    SOFTBUS_DPRINTF(fd, "RemoteSessionName     : %s\n", AnonymizeWrapper(remoteSessionName));
     SOFTBUS_DPRINTF(fd, "PeerDeviceId          : %s\n", deviceId);
     SOFTBUS_DPRINTF(fd, "LinkType              : %s\n", g_linkTypeList[type]);
     SOFTBUS_DPRINTF(fd, "SourceAddress         : %s\n", srcAddr);
     SOFTBUS_DPRINTF(fd, "DestAddress           : %s\n", dstAddr);
     SOFTBUS_DPRINTF(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
+    AnonymizeFree(localSessionName);
+    AnonymizeFree(remoteSessionName);
 }
 
 static int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
