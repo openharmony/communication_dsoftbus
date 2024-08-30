@@ -87,8 +87,6 @@ void TransIpcStandardTest::TearDownTestCase(void)
  */
 HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level0)
 {
-    int subscribeId = 1;
-    int publishId = 1;
     SubscribeInfo* subInfo = (SubscribeInfo*)SoftBusCalloc(sizeof(SubscribeInfo));
     ASSERT_TRUE(subInfo != nullptr);
     (void)memset_s(subInfo, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
@@ -97,19 +95,7 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level0)
     (void)memset_s(pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     TransServerProxy transServerProxy(nullptr);
 
-    int32_t ret = transServerProxy.StartDiscovery(g_pkgName, subInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = transServerProxy.StopDiscovery(g_pkgName, subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = transServerProxy.PublishService(g_pkgName, pubInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = transServerProxy.UnPublishService(g_pkgName, publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = transServerProxy.SoftbusRegisterService(g_pkgName, nullptr);
+    int32_t ret = transServerProxy.SoftbusRegisterService(g_pkgName, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(subInfo);
     SoftBusFree(pubInfo);
@@ -426,23 +412,6 @@ HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level0)
 
     ret = transServerProxy.RemovePermission(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: TransServerProxyInitTest001
- * @tc.desc: TransServerProxyInit, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:I5HQGA
- */
-HWTEST_F(TransIpcStandardTest, TransServerProxyInitTest001, TestSize.Level0)
-{
-    int32_t ret = TransServerProxyInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    TransClientDeinit();
-
-    ret = TransServerProxyInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    TransClientDeinit();
 }
 
 /**

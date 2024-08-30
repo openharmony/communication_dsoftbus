@@ -1106,6 +1106,14 @@ static void GetAndSetLocalUnifiedName(JsonObj *json)
 
 static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
 {
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret == SOFTBUS_OK) {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, localDevName);
+    } else {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo));
+    }
+
     if (strlen(info->deviceInfo.unifiedName) == 0) {
         GetAndSetLocalUnifiedName(json);
     } else {
@@ -1114,7 +1122,6 @@ static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMet
     (void)JSON_AddStringToObject(json, UNIFIED_DEFAULT_DEVICE_NAME, info->deviceInfo.unifiedDefaultName);
     (void)JSON_AddStringToObject(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName);
     if (!JSON_AddStringToObject(json, NETWORK_ID, info->networkId) ||
-        !JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !JSON_AddStringToObject(json, DEVICE_UDID, LnnGetDeviceUdid(info))) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
@@ -1780,8 +1787,14 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
         AUTH_LOGI(AUTH_FSM, "add packdevice mac info fail ");
         return SOFTBUS_AUTH_REG_DATA_FAIL;
     }
-    if (!JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
-        !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret == SOFTBUS_OK) {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, localDevName);
+    } else {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo));
+    }
+    if (!JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !JSON_AddStringToObject(json, DEVICE_VERSION_TYPE, info->versionType) ||
         !JSON_AddStringToObject(json, UUID, info->uuid) ||
         !JSON_AddStringToObject(json, SW_VERSION, info->softBusVersion) ||
@@ -2007,11 +2020,25 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
         LnnGetDeviceDisplayName(peerNodeInfo->deviceInfo.nickName,
             peerNodeInfo->deviceInfo.unifiedDefaultName, deviceName, DEVICE_NAME_BUF_LEN);
     }
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    char *anonyPeerDeviceName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
+    char *anonyUnifiedName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.unifiedName, &anonyUnifiedName);
+    char *anonyUnifiedDefaultName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.unifiedDefaultName, &anonyUnifiedDefaultName);
+    char *anonyNickName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.nickName, &anonyNickName);
     AUTH_LOGD(AUTH_FSM,
         "peer tmpDeviceName=%{public}s, deviceName=%{public}s, unifiedName=%{public}s, "
         "unifiedDefaultName=%{public}s, nickName=%{public}s",
-        deviceName, peerNodeInfo->deviceInfo.deviceName, peerNodeInfo->deviceInfo.unifiedName,
-        peerNodeInfo->deviceInfo.unifiedDefaultName, peerNodeInfo->deviceInfo.nickName);
+        anonyDeviceName, anonyPeerDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
+    AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyPeerDeviceName);
+    AnonymizeFree(anonyUnifiedName);
+    AnonymizeFree(anonyUnifiedDefaultName);
+    AnonymizeFree(anonyNickName);
     if (strlen(deviceName) != 0) {
         ret = strcpy_s(peerNodeInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, deviceName);
     }

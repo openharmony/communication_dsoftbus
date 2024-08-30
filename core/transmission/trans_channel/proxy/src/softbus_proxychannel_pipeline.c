@@ -23,6 +23,7 @@
 #include "lnn_lane_interface.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_error_code.h"
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
@@ -134,7 +135,11 @@ int32_t TransProxyReuseByChannelId(int32_t channelId)
 int32_t TransProxyPipelineGenRequestId(void)
 {
     static int32_t requestIdGenerator = 0;
-    return ++requestIdGenerator;
+    TRANS_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_manager.channels->lock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
+    int32_t retValue = ++requestIdGenerator;
+    SoftBusMutexUnlock(&g_manager.channels->lock);
+    return retValue;
 }
 
 int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const ITransProxyPipelineListener *listener)
@@ -232,7 +237,7 @@ int32_t TransProxyPipelineSendMessage(
 
     char *sendData = (char *)SoftBusCalloc(dataLen + sizeof(uint32_t));
     TRANS_CHECK_AND_RETURN_RET_LOGW(sendData, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc send data failed");
-    *(uint32_t *)sendData = (uint32_t)type;
+    *(uint32_t *)sendData = SoftBusHtoLl((uint32_t)type);
     if (memcpy_s(sendData + sizeof(uint32_t), dataLen, data, dataLen) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy send data failed");
         SoftBusFree(sendData);
@@ -515,7 +520,7 @@ static void TransProxyPipelineOnMessageReceived(int32_t channelId, const char *d
     TRANS_CHECK_AND_RETURN_LOGW(data, TRANS_CTRL, "data is invalid");
     TRANS_CHECK_AND_RETURN_LOGW(len > sizeof(uint32_t), TRANS_CTRL, "len is too short. len=%{public}d", len);
 
-    uint32_t msgType = *(uint32_t *)data;
+    uint32_t msgType = SoftBusLtoHl(*(uint32_t *)data);
     struct ListenerItem *target = NULL;
     for (int32_t i = 0; i < MSG_CNT; i++) {
         if ((uint32_t)(g_manager.listeners[i].type) == msgType) {

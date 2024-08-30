@@ -50,6 +50,9 @@ LNN_ASSIGNER(Int32, PeerDeviceAbility, peerDeviceAbility)
 LNN_ASSIGNER(Int32, OnlineType, onlineType)
 LNN_ASSIGNER(Errcode, OsType, osType)
 LNN_ASSIGNER(Errcode, ConnOnlineReason, connOnlineReason)
+LNN_ASSIGNER(Int32, LaneId, laneId)
+LNN_ASSIGNER(Int32, ChanReqId, chanReqId)
+LNN_ASSIGNER(Int32, ConnReqId, connReqId)
 LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 LNN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -65,7 +68,7 @@ LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 30 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 33 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -83,6 +86,9 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "ONLINE_TYPE",      HISYSEVENT_INT32,  LnnAssignerOnlineType       },
     { "OS_TYPE",          HISYSEVENT_INT32,  LnnAssignerOsType           },
     { "CONN_ONLINE_REAS", HISYSEVENT_INT32,  LnnAssignerConnOnlineReason },
+    { "LANE_ID",          HISYSEVENT_INT32,  LnnAssignerLaneId           },
+    { "CHAN_REQ_ID",      HISYSEVENT_INT32,  LnnAssignerChanReqId        },
+    { "CONN_REQ_ID",      HISYSEVENT_INT32,  LnnAssignerConnReqId        },
     { "PEER_DEV_INFO",    HISYSEVENT_STRING, LnnAssignerPeerDeviceInfo   },
     { "PEER_IP",          HISYSEVENT_STRING, LnnAssignerPeerIp           },
     { "PEER_BR_MAC",      HISYSEVENT_STRING, LnnAssignerPeerBrMac        },

@@ -15,6 +15,7 @@
 
 #include "wifi_direct_utils.h"
 #include "bus_center_manager.h"
+#include "data/link_manager.h"
 #include "conn_log.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
@@ -543,15 +544,38 @@ void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &
     LnnSyncP2pInfo();
 }
 
-int32_t WifiDirectUtils::GetOsType(const std::string &remoteNetworkId)
+static constexpr int DFS_CHANNEL_FIRST = 52;
+static constexpr int DFS_CHANNEL_LAST = 64;
+bool WifiDirectUtils::IsDfsChannel(const int &frequency)
 {
-    int32_t osType = OH_OS_TYPE;
-    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
-        return osType;
+    int32_t channel = FrequencyToChannel(frequency);
+    CONN_LOGI(CONN_WIFI_DIRECT, "channel=%{public}d", channel);
+    if (channel >= DFS_CHANNEL_FIRST && channel <= DFS_CHANNEL_LAST) {
+        return true;
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "get os type success, osType=%{public}d", osType);
-    return osType;
+    return false;
+}
+
+bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type)
+{
+    bool dfsLinkIsExist = false;
+    auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
+
+    int32_t osType = OH_OS_TYPE;
+    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK || osType == OH_OS_TYPE) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
+        return false;
+    }
+
+    LinkManager::GetInstance().ForEach([&dfsLinkIsExist, osType, type](InnerLink &link) {
+        if (link.GetLinkType() == type && IsDfsChannel(link.GetFrequency())) {
+            dfsLinkIsExist = true;
+            return true;
+        }
+        return false;
+    });
+    CONN_LOGI(CONN_WIFI_DIRECT, "dfsLinkIsExist=%{public}d", dfsLinkIsExist);
+    return dfsLinkIsExist;
 }
 
 int32_t WifiDirectUtils::GetOsType(const char *networkId)

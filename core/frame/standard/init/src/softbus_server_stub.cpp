@@ -46,7 +46,11 @@
     } while (false)                                             \
 
 namespace OHOS {
-constexpr int32_t JUDG_CNT = 1;
+    namespace {
+        constexpr int32_t JUDG_CNT = 1;
+        static const char *DB_PACKAGE_NAME = "distributeddata-default";
+    }
+
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
@@ -145,10 +149,6 @@ SoftBusServerStub::SoftBusServerStub()
 
 void SoftBusServerStub::InitMemberFuncMap()
 {
-    memberFuncMap_[SERVER_START_DISCOVERY] = &SoftBusServerStub::StartDiscoveryInner;
-    memberFuncMap_[SERVER_STOP_DISCOVERY] = &SoftBusServerStub::StopDiscoveryInner;
-    memberFuncMap_[SERVER_PUBLISH_SERVICE] = &SoftBusServerStub::PublishServiceInner;
-    memberFuncMap_[SERVER_UNPUBLISH_SERVICE] = &SoftBusServerStub::UnpublishServiceInner;
     memberFuncMap_[MANAGE_REGISTER_SERVICE] = &SoftBusServerStub::SoftbusRegisterServiceInner;
     memberFuncMap_[SERVER_CREATE_SESSION_SERVER] = &SoftBusServerStub::CreateSessionServerInner;
     memberFuncMap_[SERVER_REMOVE_SESSION_SERVER] = &SoftBusServerStub::RemoveSessionServerInner;
@@ -190,10 +190,6 @@ void SoftBusServerStub::InitMemberFuncMap()
 
 void SoftBusServerStub::InitMemberPermissionMap()
 {
-    memberPermissionMap_[SERVER_START_DISCOVERY] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_STOP_DISCOVERY] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_PUBLISH_SERVICE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_UNPUBLISH_SERVICE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[MANAGE_REGISTER_SERVICE] = nullptr;
     memberPermissionMap_[SERVER_CREATE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_REMOVE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
@@ -281,128 +277,6 @@ int32_t SoftBusServerStub::OnRemoteRequest(
     }
     COMM_LOGI(COMM_SVC, "default case, need check.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-}
-
-int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParcel &reply)
-{
-    const char *pkgName = data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read pkgName failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(strnlen(pkgName, PKG_NAME_SIZE_MAX) < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME,
-        COMM_SVC, "pkgName invalid");
-    SoftbusRecordCalledApiInfo(pkgName, SERVER_START_DISCOVERY);
-
-    SubscribeInfo info = {0};
-    int32_t value = 0;
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(info.subscribeId), SOFTBUS_IPC_ERR, COMM_SVC,
-        "read subscribeId failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read mode failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(value == DISCOVER_MODE_PASSIVE || value == DISCOVER_MODE_ACTIVE,
-        SOFTBUS_INVALID_PARAM, COMM_SVC, "mode invalid");
-    info.mode = static_cast<DiscoverMode>(value);
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read medium failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < MEDIUM_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC,
-        "medium invalid");
-    info.medium = static_cast<ExchangeMedium>(value);
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read freq failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < FREQ_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC, "freq invalid");
-    info.freq = static_cast<ExchangeFreq>(value);
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadBool(info.isSameAccount), SOFTBUS_IPC_ERR, COMM_SVC,
-        "read isSameAccount failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadBool(info.isWakeRemote), SOFTBUS_IPC_ERR, COMM_SVC,
-        "read isWakeRemote failed");
-
-    info.capability = data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(info.capability != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capability failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(info.dataLen), SOFTBUS_IPC_ERR, COMM_SVC, "read dataLen failed");
-    if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        const char *capabilityData = data.ReadCString();
-        COMM_CHECK_AND_RETURN_RET_LOGE(capabilityData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capaData failed");
-        COMM_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == info.dataLen, SOFTBUS_INVALID_PARAM, COMM_SVC,
-            "capabilityData invalid");
-        info.capabilityData = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(capabilityData));
-    } else {
-        info.capabilityData = nullptr;
-        info.dataLen = 0;
-    }
-
-    int32_t retReply = StartDiscovery(pkgName, &info);
-    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerStub::StopDiscoveryInner(MessageParcel &data, MessageParcel &reply)
-{
-    const char *pkgName = data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read pkgName failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(strnlen(pkgName, PKG_NAME_SIZE_MAX) < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME,
-        COMM_SVC, "pkgName invalid");
-    SoftbusRecordCalledApiInfo(pkgName, SERVER_STOP_DISCOVERY);
-
-    int32_t subscribeId = 0;
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(subscribeId), SOFTBUS_IPC_ERR, COMM_SVC, "read subscribeId failed");
-
-    int32_t retReply = StopDiscovery(pkgName, subscribeId);
-    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParcel &reply)
-{
-    const char *pkgName = data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read pkgName failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(strnlen(pkgName, PKG_NAME_SIZE_MAX) < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME,
-        COMM_SVC, "pkgName invalid");
-    SoftbusRecordCalledApiInfo(pkgName, SERVER_PUBLISH_SERVICE);
-
-    PublishInfo info = {0};
-    int32_t value = 0;
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(info.publishId), SOFTBUS_IPC_ERR, COMM_SVC,
-        "read publishId failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read mode failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(value == DISCOVER_MODE_PASSIVE || value == DISCOVER_MODE_ACTIVE,
-        SOFTBUS_INVALID_PARAM, COMM_SVC, "mode invalid");
-    info.mode = static_cast<DiscoverMode>(value);
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read medium failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < MEDIUM_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC,
-        "medium invalid");
-    info.medium = static_cast<ExchangeMedium>(value);
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read freq failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < FREQ_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC, "freq invalid");
-    info.freq = static_cast<ExchangeFreq>(value);
-
-    info.capability = data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(info.capability != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capability failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(info.dataLen), SOFTBUS_IPC_ERR, COMM_SVC, "read dataLen failed");
-    if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        const char *capabilityData = data.ReadCString();
-        COMM_CHECK_AND_RETURN_RET_LOGE(capabilityData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capaData failed");
-        COMM_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == info.dataLen, SOFTBUS_INVALID_PARAM, COMM_SVC,
-            "capabilityData invalid");
-        info.capabilityData = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(capabilityData));
-    } else {
-        info.capabilityData = nullptr;
-        info.dataLen = 0;
-    }
-
-    int32_t retReply = PublishService(pkgName, &info);
-    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerStub::UnpublishServiceInner(MessageParcel &data, MessageParcel &reply)
-{
-    const char *pkgName = data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read pkgName failed");
-    COMM_CHECK_AND_RETURN_RET_LOGE(strnlen(pkgName, PKG_NAME_SIZE_MAX) < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME,
-        COMM_SVC, "pkgName invalid");
-    SoftbusRecordCalledApiInfo(pkgName, SERVER_UNPUBLISH_SERVICE);
-
-    int32_t publishId = 0;
-    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(publishId), SOFTBUS_IPC_ERR, COMM_SVC, "read publishId failed");
-
-    int32_t retReply = UnPublishService(pkgName, publishId);
-    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
-    return SOFTBUS_OK;
 }
 
 int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, MessageParcel &reply)
@@ -1145,11 +1019,16 @@ int32_t SoftBusServerStub::RegDataLevelChangeCbInner(MessageParcel &data, Messag
 #ifndef ENHANCED_FLAG
     (void)data;
     (void)reply;
+    (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = RegDataLevelChangeCb(pkgName);
@@ -1166,11 +1045,16 @@ int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, Mess
 #ifndef ENHANCED_FLAG
     (void)data;
     (void)reply;
+    (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = UnregDataLevelChangeCb(pkgName);

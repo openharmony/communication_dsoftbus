@@ -467,10 +467,15 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingReuseResponseState(std::sha
             StopTimer();
             ret = ProcessReuseResponse(command);
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
-            Terminate();
+            break;
         default:
             (void)ProcessNegotiateCommandCommon(command);
             break;
+    }
+    if (ret != SOFTBUS_OK) {
+        connectCommand_->OnFailure(ret);
+        connectCommand_ = nullptr;
+        Terminate();
     }
 }
 
@@ -506,10 +511,13 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::sha
             connectCommand_ = nullptr;
         }
     }
-    if (ret == SOFTBUS_OK && terminate && !active_) {
+    if (ret == SOFTBUS_OK && terminate) {
         WifiDirectSinkLink sinkLink {};
         if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
-            GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
+            GetWifiDirectManager()->notifyOnline(sinkLink.remoteMac, sinkLink.remoteIp, sinkLink.remoteUuid, active_);
+            if (!active_) {
+                GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
+            }
         }
     }
     if (terminate) {
@@ -578,9 +586,10 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
     });
 
     CONN_LOGI(CONN_WIFI_DIRECT, "send hand shake message success");
-    if (!active_) {
-        WifiDirectSinkLink sinkLink {};
-        if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+    WifiDirectSinkLink sinkLink {};
+    if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+        GetWifiDirectManager()->notifyOnline(sinkLink.remoteMac, sinkLink.remoteIp, sinkLink.remoteUuid, active_);
+        if (!active_) {
             GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
         }
     }
@@ -938,11 +947,11 @@ int P2pV1Processor::ProcessConnectRequestAsGc(std::shared_ptr<NegotiateCommand> 
 
 int P2pV1Processor::SendConnectResponseAsNone(const NegotiateChannel &channel, const std::string &remoteMac)
 {
-    std::vector<int> channels;
-    auto ret = P2pAdapter::GetChannel5GListIntArray(channels);
+    std::vector<int> frequencyList;
+    auto ret = P2pAdapter::GetFrequency5GListIntArray(frequencyList);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g channels failed, error=%{public}d", ret);
-    auto channelString = WifiDirectUtils::ChannelListToString(channels);
+    auto channelString = WifiDirectUtils::ChannelListToString(frequencyList);
 
     std::string selfWifiConfig;
     ret = P2pAdapter::GetSelfWifiConfigInfo(selfWifiConfig);
@@ -1182,7 +1191,13 @@ int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &comm
         CONN_LOGE(CONN_WIFI_DIRECT,
             "local reuse failed, send disconnect to remote for decreasing reference, error=%{public}d", ret);
         SendDisconnectRequest(*command->GetNegotiateChannel());
-        return SOFTBUS_OK;
+        CONN_LOGI(CONN_WIFI_DIRECT,
+            "wait for p2p auth to send data, DISCONNECT_WAIT_POST_REQUEST_MS=%{public}dms",
+            DISCONNECT_WAIT_POST_REQUEST_MS);
+        SoftBusSleepMs(DISCONNECT_WAIT_POST_REQUEST_MS);
+        connectCommand_->OnFailure(ret);
+        connectCommand_ = nullptr;
+        Terminate();
     }
 
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
@@ -1276,11 +1291,11 @@ int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand
 
 int P2pV1Processor::SendConnectRequestAsNone(const NegotiateChannel &channel, WifiDirectRole expectedRole)
 {
-    std::vector<int> channels;
-    int32_t ret = P2pAdapter::GetChannel5GListIntArray(channels);
+    std::vector<int> frequencyList;
+    int32_t ret = P2pAdapter::GetFrequency5GListIntArray(frequencyList);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g channels failed, error=%{public}d", ret);
-    auto channelString = WifiDirectUtils::ChannelListToString(channels);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g frequencyList failed, error=%{public}d", ret);
+    auto channelString = WifiDirectUtils::ChannelListToString(frequencyList);
 
     std::string selfWifiConfig;
     ret = P2pAdapter::GetSelfWifiConfigInfo(selfWifiConfig);
@@ -1686,12 +1701,12 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
         }
     }
 
-    std::vector<int> goChannels;
-    int32_t ret = P2pAdapter::GetChannel5GListIntArray(goChannels);
+    std::vector<int> goFrequencyList;
+    int32_t ret = P2pAdapter::GetFrequency5GListIntArray(goFrequencyList);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local channel list failed, error=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local goFrequencyList list failed, error=%{public}d", ret);
 
-    for (auto goChannel : goChannels) {
+    for (auto goChannel : goFrequencyList) {
         if (std::find(gcChannels.begin(), gcChannels.end(), goChannel) != gcChannels.end()) {
             return WifiDirectUtils::ChannelToFrequency(goChannel);
         }
@@ -1853,14 +1868,6 @@ int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
     if (reuseCount == 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount already 0, do not call entity disconnect");
         return SOFTBUS_OK;
-    }
-    if (reuseCount <= 1) {
-        LinkManager::GetInstance().ProcessIfPresent(
-            InnerLink::LinkType::P2P, remoteDeviceId, [](InnerLink &link) {
-                if (link.GetReference() < 1) {
-                    link.SetState(InnerLink::LinkState::DISCONNECTING);
-                }
-        });
     }
     P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
     auto result = P2pEntity::GetInstance().Disconnect(param);

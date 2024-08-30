@@ -23,7 +23,6 @@ if (defined(ohos_lite)) {
         features += [
           "adapter/unittest:AdapterTest",
           "sdk/bus_center/unittest:BusCenterSdkRefreshSmall",
-          "sdk/discovery/unittest:DiscSdkTest",
           "sdk/transmission/trans_channel:TransSdkStreamTest",
         ]
       }
@@ -49,7 +48,6 @@ if (defined(ohos_lite)) {
         "core/frame:unittest",
         "core/transmission:unittest",
         "sdk/bus_center:unittest",
-        "sdk/discovery:unittest",
         "sdk/frame/common:unittest",
         "sdk/frame/standard:unittest",
         "sdk/transmission:unittest",
@@ -71,7 +69,6 @@ if (defined(ohos_lite)) {
       "core/frame:fuzztest",
       "core/transmission:fuzztest",
       "sdk/bus_center:fuzztest",
-      "sdk/discovery:fuzztest",
       "sdk/frame:fuzztest",
       "sdk/transmission:fuzztest",
     ]

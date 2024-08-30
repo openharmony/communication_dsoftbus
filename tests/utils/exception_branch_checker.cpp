@@ -38,7 +38,12 @@ void RemoveHilogModifiers(const char *fmt, char *modifiedFmt)
 }
 }
 
+#ifdef HILOG_FMTID
+int32_t HiLogPrintDictNew(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+    const unsigned int uuid, const unsigned int fmtOffset, const char *fmt, ...)
+#else
 int32_t HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
+#endif
 {
     va_list args = { 0 };
     char buffer[MAX_LOG_LEN] = { 0 };
