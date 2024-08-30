@@ -630,7 +630,7 @@ HWTEST_F(Sqlite3UtilsTest, Db_Password_Test_001, TestSize.Level0)
     ASSERT_TRUE(ctx != nullptr);
     EXPECT_EQ(EncryptedDb(ctx, password, len), SOFTBUS_INVALID_PARAM);
     int testid = EncryptedDb(ctx, PASSWORD1, len);
-    EXPECT_EQ(testid, SOFTBUS_ERR);
+    EXPECT_EQ(testid, SOFTBUS_SQLITE_ERR);
     
     ctx = nullptr;
     EXPECT_EQ(UpdateDbPassword(ctx, password, len), SOFTBUS_INVALID_PARAM);
@@ -638,7 +638,7 @@ HWTEST_F(Sqlite3UtilsTest, Db_Password_Test_001, TestSize.Level0)
     ASSERT_TRUE(ctx != nullptr);
     EXPECT_EQ(UpdateDbPassword(ctx, password, len), SOFTBUS_INVALID_PARAM);
     testid = UpdateDbPassword(ctx, PASSWORD1, len);
-    EXPECT_EQ(testid, SOFTBUS_ERR);
+    EXPECT_EQ(testid, SOFTBUS_SQLITE_ERR);
 }
 
 /*

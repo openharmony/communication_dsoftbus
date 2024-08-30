@@ -54,12 +54,12 @@ int SoftBusStartTimer(void *timerId, unsigned int ms)
 {
     if (timerId == NULL) {
         COMM_LOGE(COMM_ADAPTER, "timerId is NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (osTimerStart(timerId, ms * osKernelGetTickFreq() / MS_PER_SECOND) != osOK) {
         COMM_LOGE(COMM_ADAPTER, "start timer failed");
         (void)osTimerDelete(timerId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TIMER_ERR;
     }
     COMM_LOGI(COMM_ADAPTER, "start timer success");
     return SOFTBUS_OK;
@@ -69,11 +69,11 @@ int SoftBusDeleteTimer(void *timerId)
 {
     if (timerId == NULL) {
         COMM_LOGE(COMM_ADAPTER, "timerId is NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (osTimerDelete(timerId) != osOK) {
         COMM_LOGE(COMM_ADAPTER, "delete timer failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TIMER_ERR;
     }
     COMM_LOGI(COMM_ADAPTER, "delete timer success");
     return SOFTBUS_OK;
