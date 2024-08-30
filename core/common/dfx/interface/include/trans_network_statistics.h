@@ -39,14 +39,10 @@ typedef struct {
 } SocketResource;
 
 typedef struct {
-    ListNode node;
     uint64_t laneId;
     char localUdid[UDID_BUF_LEN];
     char peerUdid[UDID_BUF_LEN];
     int32_t laneLinkType;
-    int64_t startTime;
-    int64_t endTime;
-    ListNode channels;
 } NetworkResource;
 
 void AddNetworkResource(NetworkResource *networkResource);
