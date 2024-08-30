@@ -185,8 +185,7 @@ static void FillpProcessItemData(struct FillpPcb *pcb, struct FillpPcbItem *item
     }
 }
 
-__attribute__((no_sanitize("unsigned-integer-overflow")))
-static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
+IGNORE_OVERFLOW static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
 {
     FILLP_CONST struct FillpPktHead *pktHdr = (struct FillpPktHead *)(void *)item->buf.p;
     FILLP_UINT32 privRecvCacheSize = 0;
@@ -313,9 +312,8 @@ static int FillpCheckNackPacket(FILLP_CONST struct FillpPcb *pcb, FILLP_CONST st
     return 0;
 }
 
-__attribute__((no_sanitize("unsigned-integer-overflow")))
-static int FillpCheckNackSeq(FILLP_CONST struct FillpPcb *pcb, FILLP_CONST struct FillpPktHead *pktHdr,
-    FILLP_CONST struct FillpSeqPktNum *seqPktNum)
+IGNORE_OVERFLOW static int FillpCheckNackSeq(FILLP_CONST struct FillpPcb *pcb,
+    FILLP_CONST struct FillpPktHead *pktHdr, FILLP_CONST struct FillpSeqPktNum *seqPktNum)
 {
     if (FillpNumIsbigger(pktHdr->seqNum, pcb->send.seqNum) ||
         FillpNumIsbigger(pcb->send.seqNum, (pktHdr->seqNum + pcb->send.pktSendCache))) {
@@ -559,9 +557,8 @@ static void FillpPackInputSendMsgTrace(FILLP_CONST struct FillpPcb *pcb, FILLP_C
     }
 }
 
-__attribute__((no_sanitize("unsigned-integer-overflow")))
-static FILLP_BOOL FillpCheckPackNumber(struct FillpPcb *pcb, struct FillpPktPack *pack,
-    FILLP_UINT32 ackSeqNum, FILLP_UINT32 lostSeqNum)
+IGNORE_OVERFLOW static FILLP_BOOL FillpCheckPackNumber(struct FillpPcb *pcb,
+    struct FillpPktPack *pack, FILLP_UINT32 ackSeqNum, FILLP_UINT32 lostSeqNum)
 {
     struct FillpPktHead *pktHdr = (struct FillpPktHead *)pack->head;
     if (FillpNumIsbigger(ackSeqNum, pcb->send.seqNum) ||
