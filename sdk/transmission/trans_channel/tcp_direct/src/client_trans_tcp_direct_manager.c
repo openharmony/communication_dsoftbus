@@ -20,6 +20,7 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
