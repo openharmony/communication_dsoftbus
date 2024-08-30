@@ -20,6 +20,7 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
@@ -274,6 +275,7 @@ static int32_t ClientTransTdcHandleListener(const char *sessionName, const Chann
     (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     TcpDirectChannelInfo *res = TransTdcGetInfoById(channel->channelId, &info);
     if (res == NULL) {
+        DelTrigger(DIRECT_CHANNEL_CLIENT, channel->fd, READ_TRIGGER);
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channel->channelId);
         return SOFTBUS_NOT_FIND;
     }
