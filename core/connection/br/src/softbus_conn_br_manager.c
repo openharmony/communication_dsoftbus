@@ -673,8 +673,17 @@ static void ClientConnected(uint32_t connectionId)
     ConnBrReturnConnection(&connection);
 }
 
-static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection *connection, int32_t error)
+static bool IsNeedWaitCallbackError(uint32_t connectionId, int32_t *error)
 {
+    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, false, CONN_BR,
+        "get conntion failed, connId=%{public}d", connectionId);
+
+    if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "lock failed, connId=%{public}u", connectionId);
+        ConnBrReturnConnection(&connection);
+        return false;
+    }
     int32_t result = 0;
     BrUnderlayerStatus *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
@@ -683,10 +692,13 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
             result = it->result;
         }
     }
+    (void)SoftBusMutexUnlock(&connection->lock);
+    ConnBrReturnConnection(&connection);
     if (result != 0 && result <= CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED) {
-        error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
+        *error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
+        return false;
     }
-    NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
+    return true;
 }
 
 static int32_t AuthenticationFailedAndRetry(ConnBrConnection *connection, ConnBrDevice *connectingDevice,
@@ -771,7 +783,7 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
         if (AuthenticationFailedAndRetry(connection, connectingDevice, anomizeAddress) == SOFTBUS_OK) {
             break;
         }
-        ProcessConnectError(connectingDevice, connection, error);
+        NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
     } while (false);
     ConnBrRemoveConnection(connection);
     ConnBrReturnConnection(&connection);
@@ -1248,9 +1260,12 @@ static void OnClientConnectFailed(uint32_t connectionId, int32_t error)
     ErrorContext *ctx = (ErrorContext *)SoftBusCalloc(sizeof(ErrorContext));
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BR,
         "OnClientConnectFailed: calloc ctx failed, connId=%{public}u, error=%{public}d", connectionId, error);
+    bool needWait = IsNeedWaitCallbackError(connectionId, &error);
     ctx->connectionId = connectionId;
     ctx->error = error;
-    if (ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_FAIL, connectionId, 0, ctx, 0) != SOFTBUS_OK) {
+    uint32_t timeoutDelay = needWait ? BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS : 0;
+    if (ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_FAIL, connectionId,
+        0, ctx, timeoutDelay) != SOFTBUS_OK) {
         SoftBusFree(ctx);
     }
 }
