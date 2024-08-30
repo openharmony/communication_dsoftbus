@@ -84,6 +84,17 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     return SOFTBUS_OK;
 }
 
+int32_t ClientOnNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type)
+{
+    std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
+    SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
+    for (auto proxy : proxyMap) {
+        sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        clientProxy->OnNodeStatusChanged(proxy.first.c_str(), info, infoTypeLen, type);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ClinetOnLocalNetworkIdChanged()
 {
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;

@@ -251,6 +251,7 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log);
 int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
 const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log);
+int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn);
 #ifdef __cplusplus
 }
 #endif
