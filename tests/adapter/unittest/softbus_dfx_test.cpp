@@ -352,7 +352,7 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest031, TestSize.Level1)
     int32_t paramNum = -1;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
     int32_t ret = SoftbusWriteHisEvt(msg);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     SoftbusFreeEvtReportMsg(msg);
 }
 
