@@ -31,6 +31,14 @@ typedef struct {
     uint32_t len;
 } ChannelStatisticsInfo;
 
+typedef struct {
+    ListNode node;
+    NetworkResource resource;
+    int64_t startTime;
+    int64_t endTime;
+    ListNode channels;
+} NetworkStatisticsInfo;
+
 static SoftBusList *g_networkResourceList = NULL;
 
 void AddNetworkResource(NetworkResource *networkResource)
