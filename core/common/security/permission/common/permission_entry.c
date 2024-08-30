@@ -636,7 +636,7 @@ static int32_t NewDynamicPermissionEntry(SoftBusPermissionEntry *permissionEntry
     }
     if (strcpy_s(permissionEntry->sessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
         COMM_LOGE(COMM_PERM, "strcpy failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     permissionEntry->regexp = false;
     permissionEntry->devId = UNKNOWN_VALUE;
@@ -650,7 +650,7 @@ static int32_t NewDynamicPermissionEntry(SoftBusPermissionEntry *permissionEntry
     if (strcpy_s(appInfo->pkgName, PKG_NAME_SIZE_MAX, DBINDER_PACKAGE_NAME) != EOK) {
         COMM_LOGE(COMM_PERM, "strcpy failed");
         SoftBusFree(appInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     appInfo->type = GRANTED_APP;
     appInfo->actions = ACTION_CREATE | ACTION_OPEN;
