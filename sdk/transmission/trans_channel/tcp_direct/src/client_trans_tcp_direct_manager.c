@@ -266,6 +266,7 @@ static int32_t ClientTransTdcHandleListener(const char *sessionName, const Chann
     }
     ret = TransTdcCreateListener(channel->fd);
     if (ret != SOFTBUS_OK) {
+        DelTrigger(DIRECT_CHANNEL_CLIENT, channel->fd, READ_TRIGGER);
         TRANS_LOGE(TRANS_SDK, "create listener fail, channelId=%{public}d", channel->channelId);
         return ret;
     }
@@ -274,6 +275,7 @@ static int32_t ClientTransTdcHandleListener(const char *sessionName, const Chann
     (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     TcpDirectChannelInfo *res = TransTdcGetInfoById(channel->channelId, &info);
     if (res == NULL) {
+        DeleTrigger(DIRECT_CHANNEL_CLIENT, channel->fd, READ_TRIGGER);
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channel->channelId);
         return SOFTBUS_NOT_FIND;
     }
