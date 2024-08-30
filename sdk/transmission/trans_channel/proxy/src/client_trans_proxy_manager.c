@@ -455,9 +455,9 @@ static void ClientTransProxySendSessionAck(int32_t channelId, int32_t seq)
         return;
     }
     if (info.osType == OH_TYPE) {
-        tmpSeq = SoftBusHtoLl((uint32_t)seq);
+        tmpSeq = (int32_t)SoftBusHtoLl((uint32_t)seq);
     } else {
-        tmpSeq = SoftBusHtoNl((uint32_t)seq); // convet host order to net order
+        tmpSeq = (int32_t)SoftBusHtoNl((uint32_t)seq); // convet host order to net order
     }
     if (memcpy_s(ack, PROXY_ACK_SIZE, &tmpSeq, sizeof(int32_t)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy seq err");
@@ -582,7 +582,7 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
     TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%{public}d, inputLen=%{public}d", head.dataLen, len);
-    if (len <= sizeof(PacketHead) || (head.dataLen != len - sizeof(PacketHead))) {
+    if (len <= sizeof(PacketHead) || (head.dataLen != (int32_t)(len - sizeof(PacketHead)))) {
         TRANS_LOGE(TRANS_SDK, "dataLen error, channelId=%{public}d, len=%{public}d, dataLen=%{public}d",
             channelId, len, head.dataLen);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
