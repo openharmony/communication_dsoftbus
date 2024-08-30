@@ -290,6 +290,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_IP, (char *)info, infoLen);
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return LnnGetRemoteBoolInfo(networkId, BOOL_KEY_SCREEN_STATUS, (bool*)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -469,6 +471,8 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return IP_LEN;
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LNN_COMMON_LEN;
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return DATA_DEVICE_SCREEN_STATUS_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
