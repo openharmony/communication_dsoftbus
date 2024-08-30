@@ -364,12 +364,12 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
 
     if (SoftBusMutexInit(&g_randomLock, NULL) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "init mutex failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (SoftBusMutexLock(&g_randomLock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "lock mutex failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     if (initFlag == false) {
         RAND_seed(randStr, (int32_t)len);
@@ -380,7 +380,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     SoftBusMutexUnlock(&g_randomLock);
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "gen random error, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     return SOFTBUS_OK;
 }
