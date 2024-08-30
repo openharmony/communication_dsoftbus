@@ -64,6 +64,8 @@ public:
     virtual void RestartCoapDiscovery(void) = 0;
     virtual bool LnnIsLocalSupportBurstFeature(void) = 0;
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
+    virtual void AuthLoadDeviceKey(void) = 0;
+    virtual int32_t LnnGenerateCeParams(void) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -97,6 +99,8 @@ public:
     MOCK_METHOD0(RestartCoapDiscovery, void (void));
     MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool (void));
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
+    MOCK_METHOD0(AuthLoadDeviceKey, void (void));
+    MOCK_METHOD0(LnnGenerateCeParams, int32_t (void));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

@@ -109,6 +109,7 @@ typedef enum {
     BIT_SUPPORT_EXCHANGE_NETWORKID = 0,
     BIT_SUPPORT_NORMALIZED_LINK = 1,
     BIT_SUPPORT_NEGOTIATION_AUTH = 2,
+    BIT_SUPPORT_BR_DUP_BLE = 3,
 } AuthCapability;
 
 typedef struct {
@@ -249,6 +250,7 @@ int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
 void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log);
 int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
 const char *LnnGetWifiDirectAddr(const NodeInfo *info);
+void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log);
 #ifdef __cplusplus
 }
 #endif

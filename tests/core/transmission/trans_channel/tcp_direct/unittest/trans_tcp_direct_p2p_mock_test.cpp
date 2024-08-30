@@ -44,6 +44,7 @@ using namespace testing::ext;
 #define P2P_IP "P2P_IP"
 #define ERR_CODE "ERR_CODE"
 static const char *IP = "192.168.8.1";
+static const char *MY_IP = "192.168.8.13";
 static const char *DATA = "test_send_data";
 static const char *SESSION_NAME = "com.test.trans.auth.demo";
 static const char *PKGE_NAME = "dms";
@@ -520,11 +521,11 @@ HWTEST_F(TransTcpDirectP2pMockTest, ConnectTcpDirectPeerTest001, TestSize.Level1
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(false));
     EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_NO_INIT));
-    int32_t ret = ConnectTcpDirectPeer(IP, TEST_PORT);
+    int32_t ret = ConnectTcpDirectPeer(IP, TEST_PORT, MY_IP);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(true));
     EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_OK));
-    ret = ConnectTcpDirectPeer(IP, TEST_PORT);
+    ret = ConnectTcpDirectPeer(IP, TEST_PORT, MY_IP);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

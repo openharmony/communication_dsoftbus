@@ -15,7 +15,6 @@
 
 #include "bus_center_client_stub.h"
 #include "comm_log.h"
-#include "disc_client_stub.h"
 #include "iproxy_client.h"
 #include "ipc_skeleton.h"
 #include "softbus_adapter_mem.h"
@@ -42,11 +41,6 @@ struct SoftBusIpcClientCmd {
 };
 
 static struct SoftBusIpcClientCmd g_softBusIpcClientCmdTbl[] = {
-    { CLIENT_DISCOVERY_SUCC, ClientOnDiscoverySuccess },
-    { CLIENT_DISCOVERY_FAIL, ClientOnDiscoverFailed },
-    { CLIENT_DISCOVERY_DEVICE_FOUND, ClientOnDeviceFound },
-    { CLIENT_PUBLISH_SUCC, ClientOnPublishSuccess },
-    { CLIENT_PUBLISH_FAIL, ClientOnPublishFail },
     { CLIENT_ON_JOIN_RESULT, ClientOnJoinLNNResult },
     { CLIENT_ON_JOIN_METANODE_RESULT, ClientOnJoinMetaNodeResult },
     { CLIENT_ON_LEAVE_RESULT, ClientOnLeaveLNNResult },

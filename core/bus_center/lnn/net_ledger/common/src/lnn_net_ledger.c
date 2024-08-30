@@ -135,22 +135,22 @@ static void ProcessLocalDeviceInfo(void)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)LnnGetLocalDevInfo(&info);
-    char *anonyNetworkId = NULL;
-    Anonymize(info.networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%{public}s", anonyNetworkId);
-    AnonymizeFree(anonyNetworkId);
+    LnnDumpNodeInfo(&info, "load local deviceInfo success");
     if (IsBleDirectlyOnlineFactorChange(&info)) {
         info.stateVersion++;
         LnnSaveLocalDeviceInfo(&info);
     }
-    if (LnnUpdateLedgerByRestoreInfo(&info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update local ledger by restore info fail");
+    if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set state version fail");
     }
     if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set networkId fail");
     }
     LnnNotifyNetworkIdChangeEvent(info.networkId);
     LnnNotifyLocalNetworkIdChanged();
+    if (info.networkIdTimestamp != 0) {
+        LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
+    }
 }
 
 void RestoreLocalDeviceInfo(void)
@@ -509,14 +509,15 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_UDID;
     unsigned char udid[UDID_BUF_LEN] = {0};
-    char newUdid[UDID_BUF_LEN] = {0};
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo Udid failed");
         return SOFTBUS_NOT_FIND;
     }
-    DataMasking((char *)udid, UDID_BUF_LEN, ID_DELIMITER, newUdid);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Udid", newUdid);
+    char *anonyUdid = NULL;
+    Anonymize((char *)udid, &anonyUdid);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Udid", anonyUdid);
+    AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }
 
@@ -529,14 +530,15 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_UUID;
     unsigned char uuid[UUID_BUF_LEN] = {0};
-    char newUuid[UUID_BUF_LEN] = {0};
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo Uuid failed");
         return SOFTBUS_NOT_FIND;
     }
-    DataMasking((char *)uuid, UUID_BUF_LEN, ID_DELIMITER, newUuid);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Uuid", newUuid);
+    char *anonyUuid = NULL;
+    Anonymize((char *)uuid, &anonyUuid);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Uuid", anonyUuid);
+    AnonymizeFree(anonyUuid);
     return SOFTBUS_OK;
 }
 
@@ -741,9 +743,10 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "Invalid parameter");
         return;
     }
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    DataMasking(nodeInfo->networkId, NETWORK_ID_BUF_LEN, ID_DELIMITER, networkId);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "NetworkId", networkId);
+    char *anonyNetworkId = NULL;
+    Anonymize(nodeInfo->networkId, &anonyNetworkId);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "NetworkId", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUdid failed");
     }

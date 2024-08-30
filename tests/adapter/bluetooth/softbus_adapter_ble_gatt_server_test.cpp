@@ -535,6 +535,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle3, TestSize.Level3)
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
+    GetStubGattsCallback()->ConnectServerCallback(1, &addr);
     ASSERT_TRUE(connectServerCtx.Expect(1, &addr));
     // 读写数据，及响应回复
     const char *valueExample = "hello gatt server, this is client";

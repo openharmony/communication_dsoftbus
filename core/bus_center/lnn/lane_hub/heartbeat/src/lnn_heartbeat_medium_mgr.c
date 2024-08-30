@@ -452,13 +452,17 @@ static bool IsInvalidBrmac(const char *macAddr)
     return false;
 }
 
-static bool IsUuidChange(const char *oldUuid, const HbRespData *hbResp, uint32_t len)
+static bool IsUuidChange(const char *oldUuid, const HbRespData *hbResp, uint32_t len, DeviceInfo *device)
 {
     uint8_t zeroUuid[UUID_BUF_LEN] = { 0 };
     uint8_t uuidHash[SHA_256_HASH_LEN] = { 0 };
 
-    if (oldUuid == NULL || hbResp == NULL) {
+    if (oldUuid == NULL || hbResp == NULL || device == NULL) {
         LNN_LOGD(LNN_HEART_BEAT, "invalid param");
+        return false;
+    }
+    if (device->devType == TYPE_PC_ID) {
+        LNN_LOGD(LNN_HEART_BEAT, "winpc not support check");
         return false;
     }
     if (memcmp(zeroUuid, hbResp->shortUuid, len) == 0) {
@@ -524,7 +528,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because broadcast key");
         return true;
     }
-    if (IsUuidChange(deviceInfo.uuid, hbResp, HB_SHORT_UUID_LEN)) {
+    if (IsUuidChange(deviceInfo.uuid, hbResp, HB_SHORT_UUID_LEN, device)) {
         return true;
     }
     LNN_LOGI(LNN_HEART_BEAT, "support ble direct online");
@@ -787,19 +791,6 @@ static int32_t CheckReceiveDeviceInfo(
     return SOFTBUS_OK;
 }
 
-static int32_t CheckJoinLnnRequest(
-    DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, HbRespData *hbResp, uint64_t nowTime)
-{
-    if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
-        ProcessUdidAnonymize(device->devId);
-        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
-    }
-    if (!HbIsValidJoinLnnRequest(device, hbResp)) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
 {
     if (device == NULL || hbResp == NULL) {
@@ -861,6 +852,22 @@ static bool IsSupportCloudSync(DeviceInfo *device)
         IsFeatureSupport(info.feature, BIT_CLOUD_SYNC_DEVICE_INFO);
 }
 
+static int32_t CheckJoinLnnRequest(
+    DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason, bool *isConnect)
+{
+    if (!HbIsValidJoinLnnRequest(device, hbResp)) {
+        return SOFTBUS_ERR;
+    }
+    *isConnect = IsNeedConnectOnLine(device, hbResp, connectReason);
+    if (*isConnect && !device->isOnline) {
+        if (IsSupportCloudSync(device)) {
+            return SOFTBUS_NETWORK_PEER_NODE_CONNECT;
+        }
+        return SOFTBUS_NETWORK_NOT_CONNECTABLE;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -888,7 +895,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         if (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
-            !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN)) {
+            !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN, device)) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
@@ -896,20 +903,19 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return ret;
     }
-    res = CheckJoinLnnRequest(device, storedInfo, hbResp, nowTime);
+    ConnectOnlineReason connectReason = CONNECT_INITIAL_VALUE;
+    bool isConnect = false;
+    res = CheckJoinLnnRequest(device, hbResp, &connectReason, &isConnect);
     if (res != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return res;
     }
-    (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-    ConnectOnlineReason connectReason = CONNECT_INITIAL_VALUE;
-    bool isConnect = IsNeedConnectOnLine(device, hbResp, &connectReason);
-    if (isConnect && !device->isOnline) {
-        if (IsSupportCloudSync(device)) {
-            return SOFTBUS_NETWORK_PEER_NODE_CONNECT;
-        }
-        return SOFTBUS_NETWORK_NOT_CONNECTABLE;
+    if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
+        ProcessUdidAnonymize(device->devId);
+        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
+    (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     return SoftBusNetNodeResult(device, hbResp, isConnect, connectReason);
 }
 

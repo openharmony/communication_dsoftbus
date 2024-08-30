@@ -270,4 +270,11 @@ uint8_t QueryCipherSupportByName(char *name)
     LOGI(TAG, "devices no support %s", name);
     return NSTACKX_FALSE;
 }
+
+/* check CPU supports AES-NI hardware optimize */
+uint8_t IsSupportHardwareAesNi(void)
+{
+    LOGI(TAG, "no support AES-NI");
+    return NSTACKX_FALSE;
+}
 #endif // MBEDTLS_INCLUDED

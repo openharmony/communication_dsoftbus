@@ -1125,9 +1125,6 @@ static void FillProxyHandshakeExtra(
     extra->channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY;
     extra->linkType = chan->type;
 
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
-        extra->localUdid = nodeInfo->masterUdid;
-    }
     if (chan->appInfo.appType == APP_TYPE_AUTH &&
         strcpy_s(nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) != EOK) {
         extra->peerUdid = nodeInfo->deviceInfo.deviceUdid;
@@ -1135,6 +1132,9 @@ static void FillProxyHandshakeExtra(
         LnnGetRemoteNodeInfoById(chan->appInfo.peerData.deviceId, CATEGORY_UUID, nodeInfo) == SOFTBUS_OK) {
         extra->peerUdid = nodeInfo->deviceInfo.deviceUdid;
         extra->peerDevVer = nodeInfo->deviceInfo.deviceVersion;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra->localUdid = nodeInfo->masterUdid;
     }
 }
 
@@ -1625,11 +1625,11 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 
     if (TransProxyDelByChannelId(channelId, info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "proxy del failed. channelId=%{public}d", channelId);
-        (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
     }
 
+    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     TransProxyCloseProxyOtherRes(channelId, info);
     return SOFTBUS_OK;
 }
@@ -1930,7 +1930,10 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
 {
     TRANS_CHECK_AND_RETURN_LOGE(
         (pkgName != NULL && g_proxyChannelList != NULL), TRANS_CTRL, "pkgName or proxy channel list is null.");
-    TRANS_LOGW(TRANS_CTRL, "TransProxyDeathCallback: pkgName=%{public}s, pid=%{public}d", pkgName, pid);
+    char *anonymizePkgName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+    AnonymizeFree(anonymizePkgName);
     ListNode destroyList;
     ListInit(&destroyList);
     ProxyChannelInfo *item = NULL;

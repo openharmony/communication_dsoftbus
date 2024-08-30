@@ -87,7 +87,6 @@ enum {
     CAPS_ALG_NORATE, // NoRate algorithm
     CAPS_RESUMABLE_TRANS,
     CAPS_ZEROCOPY,
-    CAPS_CHACHA_CIPHRE,
     /* add more capability here */
     CAPS_MAX,
 };
@@ -104,7 +103,6 @@ enum {
 #define NSTACKX_CAPS_LINK_SEQUENCE          NBITS(CAPS_LINK_SEQUENCE)
 #define NSTACKX_CAPS_WLAN_CATAGORY          NBITS(CAPS_WLAN_CATAGORY)
 #define NSTACKX_CAPS_MULTIPATH              NBITS(CAPS_MULTIPATH)
-#define NSTACKX_CAPS_CHACHA                 NBITS(CAPS_CHACHA_CIPHRE)
 
 #define NSTACKX_CAPS_MASK                   (NBITS(CAPS_MAX) - 1)
 
