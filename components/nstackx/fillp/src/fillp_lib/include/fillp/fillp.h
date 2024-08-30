@@ -386,7 +386,7 @@ typedef enum InnerfillpClientfourhandshakestateEnum {
 #define FILLP_PKT_DISCONN_MSG_FLAG_IS_ACK(_flag) ((_flag)&FILLP_PKT_DISCONN_MSG_FLAG_ACK)
 #define FILLP_PKT_DISCONN_MSG_FLAG_IS_VER(_flag) ((_flag) & FILLP_PKT_DISCONN_MSG_FLAG_VER)
 
-#define IGNORE_OVERFLOW __attribute__((no_sanitize("unsigned-integer-overflow"))
+#define IGNORE_OVERFLOW __attribute__((no_sanitize("unsigned-integer-overflow")))
 IGNORE_OVERFLOW static __inline FILLP_INT FillpNumIsbigger(FILLP_UINT32 value1, FILLP_UINT32 value2)
 {
     return ((FILLP_INT32)(value1 - value2)) > 0;
