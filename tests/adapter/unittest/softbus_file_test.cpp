@@ -139,6 +139,6 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusGetFileSize001, TestSize.Level1)
     ret = SoftBusGetFileSize("/data", &fileSize);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusGetFileSize("/dev/test", &fileSize);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
 }
