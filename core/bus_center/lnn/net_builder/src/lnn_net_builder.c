@@ -75,6 +75,7 @@
 #define NOT_TRUSTED_DEVICE_MSG_DELAY     5000
 #define SHORT_UDID_HASH_STR_LEN          16
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
+#define WAIT_SEND_NOT_TRUST_MSG          200
 
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
@@ -557,6 +558,9 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
     for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
         LNN_LOGI(LNN_BUILDER, "authSeq:%{public}" PRId64 "->%{public}" PRId64, curAuthSeq[type], authSeq[type]);
         if (authSeq[type] == curAuthSeq[type] && authSeq[type] != 0 && curAuthSeq[type] != 0) {
+            if (type == DISCOVERY_TYPE_WIFI) {
+                SoftBusSleepMs(WAIT_SEND_NOT_TRUST_MSG);
+            }
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
             LNN_LOGI(LNN_BUILDER, "networkId=%{public}s, LnnRequestLeaveSpecificType=%{public}d", anonyNetworkId, type);
