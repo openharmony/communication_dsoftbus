@@ -155,6 +155,8 @@ void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConfl
 LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode)
 {
     if (conflictErrcode == SOFTBUS_CONN_ACTIVE_TYPE_P2P_GO_GC_CONFLICT ||
+        conflictErrcode == SOFTBUS_CONN_PV1_BOTH_GO_ERR ||
+        conflictErrcode == SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE ||
         conflictErrcode == SOFTBUS_CONN_PV2_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE) {
         return CONFLICT_ROLE;
     }

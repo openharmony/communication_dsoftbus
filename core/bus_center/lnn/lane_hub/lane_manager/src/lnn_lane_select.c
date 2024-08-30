@@ -480,7 +480,7 @@ static int32_t SelectRttLinks(const char *networkId, LaneLinkType *resList, uint
     int32_t ret = FinalDecideLinkType(networkId, optionalLink, optLinkNum, &recommendList);
     if (recommendList.linkTypeNum == 0) {
         LNN_LOGE(LNN_LANE, "there is none linkResource can be used, reason=%{public}d", ret);
-        return GetErrCodeOfLink(networkId, optionalLink[0]);
+        return ret;
     }
     *resNum = 0;
     for (uint32_t i = 0; i < recommendList.linkTypeNum; i++) {
