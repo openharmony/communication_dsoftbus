@@ -66,7 +66,6 @@ void AddNetworkResource(NetworkResource *networkResource)
         if (temp->resource.laneId == networkResource->laneId) {
             COMM_LOGE(COMM_DFX, "laneId already in g_networkResourceList");
             (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
-            SoftBusFree(networkResource);
             return;
         }
     }
