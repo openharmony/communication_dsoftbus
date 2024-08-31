@@ -541,7 +541,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
         if (LnnUpdateLocalScreenStatus(true) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "update screen status on of local net ledger failed")
         } else {
-            LNN_LOGE(LNN_HEART_BEAT, "update screen status on of local net ledger successfully")
+            LNN_LOGI(LNN_HEART_BEAT, "update screen status on of local net ledger successfully")
         }
         HbRemoveCheckOffLineMessage(HEARTBEAT_TYPE_BLE_V1);
         HbChangeMediumParamByState(g_hbConditionState.screenState);
@@ -563,7 +563,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
         if (LnnUpdateLocalScreenStatus(false) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "update screen status off of local net ledger failed")
         } else {
-            LNN_LOGE(LNN_HEART_BEAT, "update screen status off of local net ledger successfully")
+            LNN_LOGI(LNN_HEART_BEAT, "update screen status off of local net ledger successfully")
         }
         int32_t ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
         if (ret != SOFTBUS_OK) {

@@ -1191,7 +1191,7 @@ int32_t LnnOnNodeStatusChanged(const char *pkgName, void *info, int32_t type)
     }
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "buscenter client not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     if ((type < 0) || (type > TYPE_STATUS_MAX)) {
