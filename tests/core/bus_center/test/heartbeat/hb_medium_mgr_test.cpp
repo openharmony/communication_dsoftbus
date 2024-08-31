@@ -846,11 +846,11 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(heartBeatMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
-    int32_t ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason);
+    int32_t ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason);
+    ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason, false);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_DIRECT_ONLINE);
-    ret = SoftBusNetNodeResult(&device, &hbResp, true, connectReason);
+    ret = SoftBusNetNodeResult(&device, &hbResp, true, connectReason, false);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_OFFLINE);
 }
 
