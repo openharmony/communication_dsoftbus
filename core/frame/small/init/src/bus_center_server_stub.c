@@ -375,7 +375,7 @@ int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply)
 
 static int32_t ServerRecoverPublishLNN(const char *pkgName, PublishInfo* info, IpcIo *reply)
 {
-    int32_t ret = LnnIpcPublishLNN(pkgName, &info);
+    int32_t ret = LnnIpcPublishLNN(pkgName, info);
     WriteInt32(reply, ret);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "LnnIpcPublishLNN failed");
