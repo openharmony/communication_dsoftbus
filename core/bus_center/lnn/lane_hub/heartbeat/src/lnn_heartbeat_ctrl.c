@@ -555,7 +555,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
             RestartCoapDiscovery();
         }
         if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed, ret=%{public}d", ret);
+            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed");
             return;
         }
         return;
@@ -565,7 +565,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
         g_lastScreenOffTime = nowTime;
         (void)LnnUpdateLocalScreenStatus(false);
         if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed, ret=%{public}d", ret);
+            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed");
             return;
         }
         if (LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
