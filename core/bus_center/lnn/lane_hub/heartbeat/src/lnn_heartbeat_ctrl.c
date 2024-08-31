@@ -250,6 +250,7 @@ static void RequestEnableDiscovery(void *para)
 
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
 {
+    LNN_LOGI(LNN_HEART_BEAT, "LnnRequestBleDiscoveryProcess enter");
     if (strategy == REQUEST_DISABLE_BLE_DISCOVERY) {
         if (g_hbConditionState.isRequestDisable) {
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled, need wait timeout or enabled");
