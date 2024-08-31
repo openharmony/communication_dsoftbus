@@ -54,8 +54,7 @@ int32_t TransLaneDepsInterfaceMock::ActionOfLaneLinkFail(const LinkRequest *reqI
 }
 
 extern "C" {
-int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *recommendList,
-    LanePreferredLinkList *request)
+int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *recommendList, LanePreferredLinkList *request)
 {
     return GetTransLaneIf()->SelectAuthLane(networkId, recommendList, request);
 }
