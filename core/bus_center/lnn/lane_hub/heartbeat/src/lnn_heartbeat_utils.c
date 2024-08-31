@@ -595,3 +595,8 @@ bool LnnIsMultiDeviceOnline(void)
 
     return GetOnlineInfoNum(&onlineNum) == SOFTBUS_OK && onlineNum >= HB_MULTI_DEVICE_THRESHOLD;
 }
+
+bool LnnIsSupportHeartbeatCap(uint32_t hbCapacity, HeartbeatCapability capaBit)
+{
+    return ((hbCapacity & (1 << (uint32_t) capaBit)) != 0);
+}

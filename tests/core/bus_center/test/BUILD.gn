@@ -205,6 +205,7 @@ ohos_unittest("HeartBeatStrategyTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
