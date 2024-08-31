@@ -54,10 +54,11 @@
 
 #define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"
 
+#define HB_VERSION_V2         0x04
 #define HB_RECV_INFO_SAVE_LEN (60 * 60 * HB_TIME_FACTOR)
 #define HB_REAUTH_TIME        (10 * HB_TIME_FACTOR)
 #define HB_DFX_DELAY_TIME     (7 * HB_TIME_FACTOR)
-#define PC_RESTRICT_TIME    3
+#define PC_RESTRICT_TIME      3
 typedef struct {
     ListNode node;
     DeviceInfo *device;
@@ -673,8 +674,8 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device, bool *IsRestri
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusNetNodeResult(
-    DeviceInfo *device, HbRespData *hbResp, bool isConnect, ConnectOnlineReason connectReason)
+static int32_t SoftBusNetNodeResult(DeviceInfo *device, HbRespData *hbResp, bool isConnect,
+    ConnectOnlineReason connectReason, bool isDirectlyHb)
 {
     char *anonyUdid = NULL;
     Anonymize(device->devId, &anonyUdid);
@@ -703,6 +704,9 @@ static int32_t SoftBusNetNodeResult(
     if (LnnNotifyDiscoveryDevice(device->addr, &info, isConnect) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
         return SOFTBUS_ERR;
+    }
+    if (isDirectlyHb) {
+        return SOFTBUS_NETWORK_HEARTBEAT_DIRECT;
     }
     if (isConnect) {
         return SOFTBUS_NETWORK_NODE_OFFLINE;
@@ -868,6 +872,19 @@ static int32_t CheckJoinLnnRequest(
     return SOFTBUS_OK;
 }
 
+static bool IsDirectlyHeartBeat(DeviceInfo *device, HbRespData *hbResp)
+{
+    if (device == NULL || hbResp == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "device or resp is null");
+        return false;
+    }
+    if (hbResp->hbVersion == HB_VERSION_V2) {
+        LNN_LOGE(LNN_HEART_BEAT, "hb version is v2");
+        return true;
+    }
+    return false;
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -893,15 +910,16 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     HbDumpRecvDeviceInfo(device, mediumWeight->weight, mediumWeight->localMasterWeight, hbType, nowTime);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    bool isDirectlyHb = IsDirectlyHeartBeat(device, hbResp);
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
-        if (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
-            !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN, device)) {
+        if (isDirectlyHb || (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
+            !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN, device))) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
-        int32_t ret = HbOnlineNodeAuth(device, storedInfo, nowTime);
+        res = HbOnlineNodeAuth(device, storedInfo, nowTime);
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return ret;
+        return res;
     }
     ConnectOnlineReason connectReason = CONNECT_INITIAL_VALUE;
     bool isConnect = false;
@@ -916,7 +934,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-    return SoftBusNetNodeResult(device, hbResp, isConnect, connectReason);
+    return SoftBusNetNodeResult(device, hbResp, isConnect, connectReason, isDirectlyHb);
 }
 
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
