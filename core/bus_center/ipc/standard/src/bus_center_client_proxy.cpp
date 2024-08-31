@@ -90,7 +90,7 @@ int32_t ClientOnNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     if (proxyMap.empty()) {
         LNN_LOGE(LNN_EVENT, "proxyMap is empty");
-        return SOFTBUS_NETWORK_GET_CLIENT_PROXY_ERR;
+        return SOFTBUS_NETWORK_REMOTE_NULL;
     }
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
