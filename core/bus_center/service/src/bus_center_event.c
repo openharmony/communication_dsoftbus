@@ -214,7 +214,7 @@ static NodeStatus *DupNodeStatus(const NodeStatus *nodeStatus)
         LNN_LOGW(LNN_EVENT, "nodeStatus is null");
         return NULL;
     }
-    NodeStatus *dupInfo = SoftBusMalloc(sizeof(NodeStatus));
+    NodeStatus *dupInfo = SoftBusCalloc(sizeof(NodeStatus));
     if (dupInfo == NULL) {
         LNN_LOGE(LNN_EVENT, "malloc NodeStatus err");
         return NULL;

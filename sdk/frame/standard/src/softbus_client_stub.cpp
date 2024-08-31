@@ -469,28 +469,28 @@ int32_t SoftBusClientStub::OnNodeStatusChangedInner(MessageParcel &data, Message
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strlen(pkgName) == 0) {
         COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
-        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t type;
     if (!data.ReadInt32(type)) {
         COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read type failed!");
-        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+        return SOFTBUS_IPC_ERR;
     }
     COMM_LOGD(COMM_SDK, "OnNodeStatusChangedInner type. type=%{public}d", type);
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeStatus)) {
         COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read failed! infoTypeLen=%{public}d", infoTypeLen);
-        return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+        return SOFTBUS_IPC_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
     if (info == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read basic info failed!");
-        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read node status failed!");
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = OnNodeStatusChanged(pkgName, info, infoTypeLen, type);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner write reply failed!");
-        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
