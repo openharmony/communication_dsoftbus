@@ -319,7 +319,7 @@ int32_t BusCenterClientProxy::OnNodeStatusChanged(const char *pkgName, void *inf
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
-        return SOFTBUS_NETWORK_PROXY_REMOTE_NULL;
+        return SOFTBUS_NETWORK_REMOTE_NULL;
     }
     if (pkgName == nullptr || info == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName or info is nullptr");
@@ -328,30 +328,30 @@ int32_t BusCenterClientProxy::OnNodeStatusChanged(const char *pkgName, void *inf
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
-        return SOFTBUS_NETWORK_PROXY_WRITETOKEN_FAILED;
+        return SOFTBUS_NETWORK_WRITETOKEN_FAILED;
     }
     if (!data.WriteCString(pkgName)) {
         LNN_LOGE(LNN_EVENT, "write pkgName failed");
-        return SOFTBUS_NETWORK_PROXY_WRITECSTRING_FAILED;
+        return SOFTBUS_NETWORK_WRITECSTRING_FAILED;
     }
     if (!data.WriteInt32(type)) {
         LNN_LOGE(LNN_EVENT, "write type failed");
-        return SOFTBUS_NETWORK_PROXY_WRITEINT_FAILED;
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
     }
     if (!data.WriteUint32(infoTypeLen)) {
         LNN_LOGE(LNN_EVENT, "write info type length failed");
-        return SOFTBUS_NETWORK_PROXY_WRITEUINT_FAILED;
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
     }
     if (!data.WriteRawData(info, infoTypeLen)) {
         LNN_LOGE(LNN_EVENT, "write node info failed");
-        return SOFTBUS_NETWORK_PROXY_WRITERAWDATA_FAILED;
+        return SOFTBUS_NETWORK_WRITERAWDATA_FAILED;
     }
     MessageParcel reply;
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_NODE_STATUS_CHANGED, data, reply, option);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
-        return SOFTBUS_NETWORK_PROXY_SEND_REQUEST_FAILED;
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
