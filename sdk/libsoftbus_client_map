@@ -184,6 +184,7 @@
         "TransUdpChannelSendStream";
         "ServerIpcDeactiveMetaNode";
         "LnnOnNodeBasicInfoChanged";
+        "LnnOnNodeStatusChanged";
         "LnnOnLocalNetworkIdChanged";
         "LnnOnNodeDeviceTrustedChange";
         "OpenSessionSync";
@@ -564,6 +565,7 @@
             "non-virtual thunk to OHOS::SoftBusClientStub::OnLeaveLNNResult(char const*, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnLeaveMetaNodeResult(char const*, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnNodeBasicInfoChanged(void *, unsigned int, int)";
+            "non-virtual thunk to OHOS::SoftBusClientStub::OnNodeStatusChanged(void *, uint32_t, uint32_t)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnNodeOnlineStateChanged(bool, void *, unsigned int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnPublishLNNResult(int, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnRefreshDeviceFound(void const*, unsigned int)";

@@ -53,6 +53,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen);
 int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
+int32_t LnnIpcNotifyNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t LnnIpcLocalNetworkIdChanged(void);
 int32_t LnnIpcNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen);
 int32_t LnnIpcNotifyTimeSyncResult(

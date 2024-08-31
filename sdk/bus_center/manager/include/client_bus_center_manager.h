@@ -59,6 +59,7 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info);
 int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type);
+int32_t LnnOnNodeStatusChanged(const char *pkgName, void *info, int32_t type);
 int32_t LnnOnLocalNetworkIdChanged(const char *pkgName);
 int32_t LnnOnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg, uint32_t msgLen);
 int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode);
