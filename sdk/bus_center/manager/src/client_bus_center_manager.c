@@ -1184,6 +1184,49 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
     return SOFTBUS_OK;
 }
 
+int32_t LnnOnNodeStatusChanged(const char *pkgName, void *info, int32_t type)
+{
+    NodeStateCallbackItem *item = NULL;
+    NodeStatus *nodeStatus = (NodeStatus *)info;
+    ListNode dupList;
+
+    if (nodeStatus == NULL || pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "info or pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if ((type < 0) || (type > TYPE_STATUS_MAX)) {
+        LNN_LOGE(LNN_STATE, "LnnOnNodeStatusChanged invalid type. type=%{public}d", type);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock node status cb list in notify");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&dupList);
+    DuplicateNodeStateCbList(&dupList);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "unlock node status cb list in notify");
+    }
+    LNN_LOGI(LNN_STATE, "LnnOnNodeStatusChanged, pkgName=%{public}s, type=%{public}d, screen=%{public}d", pkgName,
+        type, nodeStatus->reserved[0]);
+    LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
+        if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+            (item->cb.events & EVENT_NODE_STATUS_CHANGED) != 0 && item->cb.onNodeStatusChanged != NULL) {
+            LNN_LOGI(LNN_STATE, "LnnOnNodeStatusChanged, pkgName=%{public}s, type=%{public}d, screen=%{public}d",
+                pkgName, type, nodeStatus->reserved[0]);
+            item->cb.onNodeStatusChanged((NodeStatusType)type, nodeStatus);
+        }
+    }
+    ClearNodeStateCbList(&dupList);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnOnLocalNetworkIdChanged(const char *pkgName)
 {
     NodeStateCallbackItem *item = NULL;

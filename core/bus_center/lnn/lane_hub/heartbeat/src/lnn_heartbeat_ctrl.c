@@ -546,6 +546,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON && oldstate != SOFTBUS_SCREEN_ON) {
         LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_ON");
         g_isScreenOnOnce = true;
+        (void)LnnUpdateLocalScreenStatus(true);
         HbRemoveCheckOffLineMessage(HEARTBEAT_TYPE_BLE_V1);
         HbChangeMediumParamByState(g_hbConditionState.screenState);
         g_lastScreenOnTime = nowTime;
@@ -553,19 +554,20 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_HEART_BEAT, "screen on start coap discovery");
             RestartCoapDiscovery();
         }
-        if (g_lastScreenOnTime - g_lastScreenOffTime >= HB_OFFLINE_TIME && g_lastScreenOffTime > 0) {
-            LNN_LOGI(LNN_HEART_BEAT, "screen on & screen has been off > 5min");
-            int32_t ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
-            if (ret != SOFTBUS_OK) {
-                LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed, ret=%{public}d", ret);
-                return;
-            }
+        if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed");
+            return;
         }
         return;
     }
     if (g_hbConditionState.screenState == SOFTBUS_SCREEN_OFF && oldstate != SOFTBUS_SCREEN_OFF) {
         LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_OFF");
         g_lastScreenOffTime = nowTime;
+        (void)LnnUpdateLocalScreenStatus(false);
+        if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed");
+            return;
+        }
         if (LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "ctrl disable ble heartbeat failed");
             return;

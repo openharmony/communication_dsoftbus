@@ -492,6 +492,11 @@ int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     return ClinetOnNodeBasicInfoChanged(info, infoTypeLen, type);
 }
 
+int32_t LnnIpcNotifyNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type)
+{
+    return ClientOnNodeStatusChanged(info, infoTypeLen, type);
+}
+
 int32_t LnnIpcLocalNetworkIdChanged(void)
 {
     return ClinetOnLocalNetworkIdChanged();

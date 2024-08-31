@@ -45,6 +45,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_LEAVE_RESULT] = &SoftBusClientStub::OnLeaveLNNResultInner;
     memberFuncMap_[CLIENT_ON_NODE_ONLINE_STATE_CHANGED] = &SoftBusClientStub::OnNodeOnlineStateChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] = &SoftBusClientStub::OnNodeBasicInfoChangedInner;
+    memberFuncMap_[CLIENT_ON_NODE_STATUS_CHANGED] = &SoftBusClientStub::OnNodeStatusChangedInner;
     memberFuncMap_[CLIENT_ON_LOCAL_NETWORK_ID_CHANGED] = &SoftBusClientStub::OnLocalNetworkIdChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_DEVICE_TRUST_CHANGED] = &SoftBusClientStub::OnNodeDeviceTrustedChangeInner;
     memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] = &SoftBusClientStub::OnTimeSyncResultInner;
@@ -463,6 +464,37 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnNodeStatusChangedInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strlen(pkgName) == 0) {
+        COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t type;
+    if (!data.ReadInt32(type)) {
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read type failed!");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    COMM_LOGD(COMM_SDK, "OnNodeStatusChangedInner type. type=%{public}d", type);
+    uint32_t infoTypeLen;
+    if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeStatus)) {
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read failed! infoTypeLen=%{public}d", infoTypeLen);
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    void *info = (void *)data.ReadRawData(infoTypeLen);
+    if (info == nullptr) {
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read node status failed!");
+        return SOFTBUS_NETWORK_READRAWDATA_FAILED;
+    }
+    int32_t retReply = OnNodeStatusChanged(pkgName, info, infoTypeLen, type);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner write reply failed!");
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnLocalNetworkIdChangedInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
@@ -644,6 +676,12 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChanged(const char *pkgName, void *inf
 {
     (void)infoTypeLen;
     return LnnOnNodeBasicInfoChanged(pkgName, info, type);
+}
+
+int32_t SoftBusClientStub::OnNodeStatusChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type)
+{
+    (void)infoTypeLen;
+    return LnnOnNodeStatusChanged(pkgName, info, type);
 }
 
 int32_t SoftBusClientStub::OnLocalNetworkIdChanged(const char *pkgName)
