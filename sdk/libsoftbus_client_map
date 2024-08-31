@@ -27,7 +27,6 @@
         "ActiveMetaNode";
         "GetLocalNodeDeviceInfo";
         "TransOnUdpChannelQosEvent";
-        "ServerIpcPublishLNN";
         "ClientDeleteSession";
         "ClientTransUdpMgrDeinit";
         "ServerIpcNotifyAuthSuccess";
@@ -46,7 +45,6 @@
         "ClientTransAuthInit";
         "StartNStackXDFileServer";
         "BusCenterServerProxyInit";
-        "ServerIpcStopRefreshLNN";
         "TransGetUdpChannel";
         "ClientTransProxyDeinit";
         "JoinMetaNode";
@@ -55,13 +53,11 @@
         "FrameIndexToType";
         "ServerIpcStopTimeSync";
         "GetMySessionNameInner";
-        "RefreshLNNInner";
         "LnnOnLeaveResult";
         "GetSessionSide";
         "TransOnChannelClosed";
         "TransProxyChannelSendBytes";
         "TransGetUdpChannelByFileId";
-        "StopRefreshLNNInner";
         "ReadMaxSendBytesSize";
         "TransDisableSessionListener";
         "ServerIpcCreateSessionServer";
@@ -138,7 +134,6 @@
         "ServerIpcGetLocalDeviceInfo";
         "ClientAddAuthSession";
         "TransTdcGetInfoByIdWithIncSeq";
-        "PublishLNNInner";
         "ServerIpcSetNodeDataChangeFlag";
         "ServerIpcRegDataLevelChangeCb";
         "ServerIpcUnregDataLevelChangeCb";
@@ -148,14 +143,12 @@
         "ClientTransProxyOnChannelOpenFailed";
         "BusCenterServerProxyDeInit";
         "LnnOnRefreshLNNResult";
-        "StopPublishLNNInner";
         "UnregNodeDeviceStateCbInner";
         "TransProxyChannelSendFile";
         "ClientTransChannelSendFile";
         "ClientEnableSessionByChannelId";
         "ClientGetFileConfigInfoById";
         "CheckDestFilePathValid";
-        "ServerIpcStopPublishLNN";
         "RegisterFileCb";
         "InnerOnBytesReceived";
         "RemoveSessionServer";
@@ -285,7 +278,6 @@
         "SendBytesInner";
         "GetPeerSessionNameInner";
         "TransTdcManagerDeinit";
-        "ServerIpcRefreshLNN";
         "DeletePendingPacket";
         "ClientDisableSessionListener";
         "GetSessionOption";
@@ -404,8 +396,6 @@
         "DfsBind";
         "ClientAddPolicyReportCallback";
         "ClientDeletePolicyReportCallback";
-        "ServerEnableDiscoveryPolicy";
-        "ServerSetDiscoveryPolicy";
         "ClientResetIdleTimeoutById";
         "IsSessionExceedLimit";
         "DiscRecoveryPublish";

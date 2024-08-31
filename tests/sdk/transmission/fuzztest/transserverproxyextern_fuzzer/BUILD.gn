@@ -43,7 +43,7 @@ ohos_fuzztest("TransServerProxyExternFuzzTest") {
 
   sources = [ "transserverproxyextern_fuzzer.cpp" ]
 
-  deps = [ "$dsoftbus_test_path/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static" ]
+  deps = [ "$dsoftbus_test_path/sdk:softbus_client_static" ]
 
   external_deps = [
     "c_utils:utils",

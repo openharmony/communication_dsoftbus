@@ -89,8 +89,8 @@ ohos_unittest("TransUdpNegotiationTest") {
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_test_path/sdk:softbus_client_static",
     "$dsoftbus_test_path/sdk/common:softbus_access_token_test",
-    "$dsoftbus_test_path/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
   ]
 
   external_deps = [
