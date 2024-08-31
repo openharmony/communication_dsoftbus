@@ -24,11 +24,12 @@
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
+#include "lnn_meta_node_interface.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
-#include "lnn_meta_node_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_permission.h"
@@ -430,6 +431,11 @@ int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char
     return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    return LnnSyncTrustedRelationShip(pkgName, msg, msgLen);
+}
+
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
     int32_t retCode)
 {
@@ -491,9 +497,9 @@ int32_t LnnIpcLocalNetworkIdChanged(void)
     return ClinetOnLocalNetworkIdChanged();
 }
 
-int32_t LnnIpcNotifyDeviceNotTrusted(const char *msg)
+int32_t LnnIpcNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
 {
-    return ClinetNotifyDeviceNotTrusted(msg);
+    return ClinetNotifyDeviceTrustedChange(type, msg, msgLen);
 }
 
 int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,

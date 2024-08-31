@@ -54,12 +54,13 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen);
 int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t LnnIpcLocalNetworkIdChanged(void);
-int32_t LnnIpcNotifyDeviceNotTrusted(const char *msg);
+int32_t LnnIpcNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen);
 int32_t LnnIpcNotifyTimeSyncResult(
     const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen, int32_t retCode);
 
 int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
+int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
 
 void BusCenterServerDeathCallback(const char *pkgName);
 

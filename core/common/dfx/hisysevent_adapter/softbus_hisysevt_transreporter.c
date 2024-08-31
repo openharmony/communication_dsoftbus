@@ -115,6 +115,7 @@ static ApiNameIdMap g_apiNameIdMapTbl[] = {
     {SERVER_DEACTIVE_META_NODE, "DeactiveMetaNode"},
     {SERVER_GET_ALL_META_NODE_INFO, "GetAllMetaNodeInfo"},
     {SERVER_SHIFT_LNN_GEAR, "ShiftLNNGear"},
+    {SERVER_SYNC_TRUSTED_RELATION, "SyncTrustedRelationShip"},
     {SERVER_RIPPLE_STATS, "RippleStats"},
     {SERVER_CTRL_LNN_BLE_HB, "CtrlLNNBleHb"},
 };

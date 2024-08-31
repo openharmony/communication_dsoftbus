@@ -1026,6 +1026,11 @@ int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char 
     return ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    return ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
+}
+
 NO_SANITIZE("cfi") int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;
@@ -1212,7 +1217,7 @@ int32_t LnnOnLocalNetworkIdChanged(const char *pkgName)
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+int32_t LnnOnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg, uint32_t msgLen)
 {
     NodeStateCallbackItem *item = NULL;
     ListNode dupList;
@@ -1237,8 +1242,8 @@ int32_t LnnOnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
         if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
-            (item->cb.onNodeDeviceNotTrusted) != NULL) {
-            item->cb.onNodeDeviceNotTrusted(msg);
+            (item->cb.onNodeDeviceTrustedChange) != NULL) {
+            item->cb.onNodeDeviceTrustedChange((TrustChangeType)type, msg, msgLen);
         }
     }
     ClearNodeStateCbList(&dupList);

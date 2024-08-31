@@ -249,7 +249,7 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
 void LnnNotifyLocalNetworkIdChanged(void);
-void LnnNotifyDeviceNotTrusted(const char *msg);
+void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen);
 void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info);
 
 void LnnNotifyWlanStateChangeEvent(void *state);

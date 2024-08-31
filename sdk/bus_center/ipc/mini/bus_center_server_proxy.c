@@ -135,3 +135,11 @@ int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const c
 {
     return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
+
+int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    (void)pkgName;
+    (void)msg;
+    (void)msgLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

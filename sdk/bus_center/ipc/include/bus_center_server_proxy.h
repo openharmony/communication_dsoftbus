@@ -51,6 +51,7 @@ int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId);
 int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
 int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
+int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
 
 #ifdef __cplusplus
 #if __cplusplus

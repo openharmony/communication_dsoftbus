@@ -50,6 +50,7 @@
 #define LNN_SUPPORT_CAPBILITY 62
 #define LNN_SUPPORT_FEATURE     0x177C2
 #define AUTH_ABILITY_COLLECTION 0
+#define DEFAULT_SUPPORT_AUTHCAPACITY 0xF
 #define ADAPTER_LOG_LEVEL 0
 #ifndef DEFAULT_STORAGE_PATH
 #define DEFAULT_STORAGE_PATH "/data/service/el1/public"
@@ -120,6 +121,7 @@ typedef struct {
     uint64_t supportFeature;
     int32_t connCocMaxDataLen;
     int32_t connCocSendMtu;
+    uint32_t authCapacity;
     int32_t connBleCloseDelayTime;
     int32_t bleMacAutoRefreshSwitch;
 } ConfigItem;
@@ -151,6 +153,7 @@ ConfigItem g_config = {
     LNN_SUPPORT_FEATURE,
     CONN_COC_MAX_DATA_LENGTH,
     CONN_COC_SEND_MTU_LEN,
+    DEFAULT_SUPPORT_AUTHCAPACITY,
     CONN_BLE_CLOSE_DELAY,
     DEFAULT_BLE_MAC_AUTO_REFRESH,
 };
@@ -350,6 +353,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_DISC_COAP_MAX_DEVICE_NUM,
         (unsigned char *)&(g_discConfig.discCoapMaxDeviceNum),
         sizeof(g_discConfig.discCoapMaxDeviceNum)
+    },
+    {
+        SOFTBUS_INT_AUTH_CAPACITY,
+        (unsigned char *)&(g_config.authCapacity),
+        sizeof(g_config.authCapacity)
     },
 };
 
