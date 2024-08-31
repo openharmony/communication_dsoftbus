@@ -550,8 +550,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_HEART_BEAT, "screen on start coap discovery");
             RestartCoapDiscovery();
         }
-        int32_t ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
-        if (ret != SOFTBUS_OK) {
+        if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed, ret=%{public}d", ret);
             return;
         }
@@ -565,8 +564,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
         } else {
             LNN_LOGI(LNN_HEART_BEAT, "update screen status off of local net ledger successfully")
         }
-        int32_t ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
-        if (ret != SOFTBUS_OK) {
+        if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed, ret=%{public}d", ret);
             return;
         }
