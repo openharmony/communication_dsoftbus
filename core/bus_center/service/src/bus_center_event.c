@@ -219,7 +219,7 @@ static NodeStatus *DupNodeStatus(const NodeStatus *nodeStatus)
         LNN_LOGE(LNN_EVENT, "malloc NodeStatus err");
         return NULL;
     }
-    if (memcpy_s(dupInfo, sizeof(NodeStatus), info, sizeof(NodeStatus)) != EOK) {
+    if (memcpy_s(dupInfo, sizeof(NodeStatus), nodeStatus, sizeof(NodeStatus)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy NodeStatus fail");
         SoftBusFree(dupInfo);
         return NULL;

@@ -329,7 +329,7 @@ bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool *isScreenOn)
     }
     NodeInfo *info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (info == NULL) {
-        LNN_LOGE(LNN_LODGER, "get node info fail.");
+        LNN_LOGE(LNN_LEDGER, "get node info fail.");
         SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return false;
     }
