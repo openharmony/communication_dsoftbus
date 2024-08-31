@@ -287,7 +287,7 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
         SoftBusFree(registerCapaData);
         return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_DATA_FAIL;
     }
-    DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ. registerCapaData=%{public}s", registerCapaData);
+    DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ.");
     SoftBusFree(registerCapaData);
     return SOFTBUS_OK;
 }
