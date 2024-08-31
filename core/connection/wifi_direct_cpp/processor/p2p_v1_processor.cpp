@@ -30,8 +30,10 @@
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_scheduler_factory.h"
 #include "wifi_direct_manager.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
+static constexpr int DECIMAL_BASE = 10;
 std::map<std::string, P2pV1Processor::ProcessorState> P2pV1Processor::stateNameMapping = {
     {"AvailableState",             &P2pV1Processor::AvailableState           },
     { "WaitingReqResponseState",   &P2pV1Processor::WaitingReqResponseState  },
@@ -1480,8 +1482,8 @@ int P2pV1Processor::ProcessConnectResponseWithGoInfoAsNone(std::shared_ptr<Negot
 {
     auto msg = command->GetNegotiateMessage();
     auto ret = ConnectGroup(msg, command->GetNegotiateChannel());
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_CONN_PV1_CONNECT_GROUP_FAIL, CONN_WIFI_DIRECT,
-        "connect group failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", ret);
 
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
     auto pid = connectCommand_->GetConnectInfo().info_.pid;
@@ -1550,31 +1552,8 @@ int P2pV1Processor::ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<Ne
     return SOFTBUS_OK;
 }
 
-int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
+int P2pV1Processor::UpdateWhenCreateSuccess(const NegotiateMessage &msg)
 {
-    auto isRemoteWideBandSupported = msg.GetLegacyP2pWideBandSupported();
-    auto stationFrequency = msg.GetLegacyP2pStationFrequency();
-    auto channelListString = msg.GetLegacyP2pGcChannelList();
-    auto finalFrequency = ChooseFrequency(stationFrequency, WifiDirectUtils::StringToChannelList(channelListString));
-    CONN_CHECK_AND_RETURN_RET_LOGW(finalFrequency > 0, finalFrequency, CONN_WIFI_DIRECT,
-        "choose frequency failed, frequency=%{public}d", finalFrequency);
-
-    bool isLocalWideBandSupported = P2pAdapter::IsWideBandSupported();
-    CONN_LOGI(CONN_WIFI_DIRECT,
-        "stationFrequency=%{public}d, finalFrequency=%{public}d, "
-        "localWideBand=%{public}d, remoteWideBand=%{public}d",
-        stationFrequency, finalFrequency, isLocalWideBandSupported, isRemoteWideBandSupported);
-
-    P2pAdapter::CreateGroupParam param {};
-    param.frequency = finalFrequency;
-    param.isWideBandSupported = isLocalWideBandSupported && isRemoteWideBandSupported;
-    auto result = P2pEntity::GetInstance().CreateGroup(param);
-    if (connectCommand_ != nullptr) {
-        connectCommand_->GetConnectInfo().info_.dfxInfo.frequency = param.frequency;
-    }
-    CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
-        "create group failed, error=%{public}d", result.errorCode_);
-
     std::string remoteMac = msg.GetLegacyP2pMac();
     std::string remoteIp;
     int32_t ret = P2pAdapter::RequestGcIp(remoteMac, remoteIp);
@@ -1607,6 +1586,35 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
 
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
     return StartAuthListening(localIp);
+}
+
+int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
+{
+    auto isRemoteWideBandSupported = msg.GetLegacyP2pWideBandSupported();
+    auto stationFrequency = msg.GetLegacyP2pStationFrequency();
+    auto channelListString = msg.GetLegacyP2pGcChannelList();
+    auto finalFrequency = ChooseFrequency(stationFrequency, WifiDirectUtils::StringToChannelList(channelListString));
+    CONN_CHECK_AND_RETURN_RET_LOGW(finalFrequency > 0, finalFrequency, CONN_WIFI_DIRECT,
+        "choose frequency failed, frequency=%{public}d", finalFrequency);
+    int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P0, WifiDirectUtils::FrequencyToChannel(finalFrequency));
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, errorcode=%{public}d", coexCode);
+    bool isLocalWideBandSupported = P2pAdapter::IsWideBandSupported();
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "stationFrequency=%{public}d, finalFrequency=%{public}d, "
+        "localWideBand=%{public}d, remoteWideBand=%{public}d",
+        stationFrequency, finalFrequency, isLocalWideBandSupported, isRemoteWideBandSupported);
+
+    P2pAdapter::CreateGroupParam param {};
+    param.frequency = finalFrequency;
+    param.isWideBandSupported = isLocalWideBandSupported && isRemoteWideBandSupported;
+    auto result = P2pEntity::GetInstance().CreateGroup(param);
+    if (connectCommand_ != nullptr) {
+        connectCommand_->GetConnectInfo().info_.dfxInfo.frequency = param.frequency;
+    }
+    CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
+        "create group failed, error=%{public}d", result.errorCode_);
+    return UpdateWhenCreateSuccess(msg);
 }
 
 int P2pV1Processor::UpdateWhenConnectSuccess(std::string groupConfig, const NegotiateMessage &msg)
@@ -1652,7 +1660,15 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     auto groupConfig = msg.GetLegacyP2pGroupConfig();
     auto gcIp = msg.GetLegacyP2pGcIp();
     CONN_LOGI(CONN_WIFI_DIRECT, "goPort=%{public}d, gcIp=%{public}s", goPort, WifiDirectAnonymizeIp(gcIp).c_str());
-
+    std::vector<std::string> configs = WifiDirectUtils::SplitString(groupConfig, "\n");
+    if (configs.size() < P2P_GROUP_CONFIG_INDEX_FREQ) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "wifi config spilt size is invaild param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    auto freq = strtol(configs[P2P_GROUP_CONFIG_INDEX_FREQ].c_str(), nullptr, DECIMAL_BASE);
+    int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P0, WifiDirectUtils::FrequencyToChannel(freq));
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, errorcode=%{public}d", coexCode);
     P2pAdapter::ConnectParam params {};
     params.isNeedDhcp = IsNeedDhcp(gcIp, groupConfig);
     params.groupConfig = groupConfig;
