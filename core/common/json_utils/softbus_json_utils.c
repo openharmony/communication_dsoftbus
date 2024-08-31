@@ -31,7 +31,7 @@ int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, 
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsString(item)) {
         COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     uint32_t length = strlen(item->valuestring);
     if (length >= targetLen) {
@@ -41,7 +41,7 @@ int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, 
     int32_t ret = strcpy_s(target, targetLen, item->valuestring);
     if (ret != EOK) {
         COMM_LOGE(COMM_UTILS, "strcpy error. ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }

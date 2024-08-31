@@ -184,7 +184,7 @@ void LnnHbClearRecvList(void)
 
 int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
 {
-    return GetDecisionDbDepsInterface()->LnnConvertHbTypeToId();
+    return GetDecisionDbDepsInterface()->LnnConvertHbTypeToId(type);
 }
 
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)

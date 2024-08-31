@@ -110,13 +110,13 @@ int32_t SoftBusAddDumpVarToList(const char *dumpVar, SoftBusVarDumpCb cb, ListNo
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL || varList == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusRegDiscDumpCb invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     SoftBusDumpVarNode *varNode = SoftBusCreateDumpVarNode(dumpVar, cb);
     if (varNode == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusRegDiscDumpCb node create fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     varNode->dumpCallback = cb;
     ListTailInsert(varList, &varNode->node);
@@ -177,13 +177,13 @@ int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerF
     if (moduleName == NULL || strlen(moduleName) >= SOFTBUS_MODULE_NAME_LEN || helpInfo == NULL ||
         strlen(helpInfo) >= SOFTBUS_MODULE_HELP_LEN || handler == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusRegHiDumperHandler invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     HandlerNode *handlerNode = CreateHiDumperHandlerNode(moduleName, helpInfo, handler);
     if (handlerNode == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusRegHiDumperHandler node create fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     ListTailInsert(&g_hidumperhander_list, &handlerNode->node);
     return SOFTBUS_OK;
@@ -193,7 +193,7 @@ int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusDumpProcess: param invalid ");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (argc <= 1 || strcmp(argv[0], "-h") == 0) {
@@ -229,37 +229,37 @@ int32_t SoftBusHiDumperModuleInit(void)
 {
     if (SoftBusBcMgrHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init BroadcastManager HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusHiDumperBroadcastInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Broadcast HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Disc HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusConnHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Conn HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusNStackHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init NStack HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusHiDumperBusCenterInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init BusCenter HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusTransDumpHandlerInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Trans HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
     return SOFTBUS_OK;
 }

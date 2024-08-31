@@ -705,5 +705,15 @@ void UpdateProfile(const NodeInfo *info)
 {
     return GetNetBuilderDepsInterface()->UpdateProfile(info);
 }
+
+bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit)
+{
+    return GetNetBuilderDepsInterface()->IsSupportFeatureByCapaBit(feature, capaBit);
+}
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->LnnGetRemoteNodeInfoByKey(key, info);
+}
 } // extern "C"
 } // namespace OHOS

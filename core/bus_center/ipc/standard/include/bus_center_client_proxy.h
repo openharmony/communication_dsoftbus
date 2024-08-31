@@ -40,7 +40,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
 int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t ClientOnNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t ClinetOnLocalNetworkIdChanged(void);
-int32_t ClinetNotifyDeviceNotTrusted(const char *msg);
+int32_t ClinetNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen);
 int32_t ClientOnTimeSyncResult(
     const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen, int32_t retCode);
 int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId, int32_t reason);
