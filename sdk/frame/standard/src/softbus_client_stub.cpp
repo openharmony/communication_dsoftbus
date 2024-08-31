@@ -47,7 +47,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] = &SoftBusClientStub::OnNodeBasicInfoChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_STATUS_CHANGED] = &SoftBusClientStub::OnNodeStatusChangedInner;
     memberFuncMap_[CLIENT_ON_LOCAL_NETWORK_ID_CHANGED] = &SoftBusClientStub::OnLocalNetworkIdChangedInner;
-    memberFuncMap_[CLIENT_ON_NODE_DEVICE_NOT_TRUST] = &SoftBusClientStub::OnNodeDeviceNotTrustedInner;
+    memberFuncMap_[CLIENT_ON_NODE_DEVICE_TRUST_CHANGED] = &SoftBusClientStub::OnNodeDeviceTrustedChangeInner;
     memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] = &SoftBusClientStub::OnTimeSyncResultInner;
     memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] = &SoftBusClientStub::OnPublishLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] = &SoftBusClientStub::OnRefreshLNNResultInner;
@@ -510,22 +510,32 @@ int32_t SoftBusClientStub::OnLocalNetworkIdChangedInner(MessageParcel &data, Mes
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusClientStub::OnNodeDeviceNotTrustedInner(MessageParcel &data, MessageParcel &reply)
+int32_t SoftBusClientStub::OnNodeDeviceTrustedChangeInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strlen(pkgName) == 0) {
         COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
         return SOFTBUS_INVALID_PARAM;
     }
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        COMM_LOGE(COMM_SDK, "read type failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
     const char *msg = data.ReadCString();
     if (msg == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnNodeDeviceNotTrustedInner read msg failed!");
+        COMM_LOGE(COMM_SDK, "read msg failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
-    int32_t retReply = OnNodeDeviceNotTrusted(pkgName, msg);
+    uint32_t msgLen = 0;
+    if (!data.ReadUint32(msgLen)) {
+        COMM_LOGE(COMM_SDK, "read failed! msgLen=%{public}u", msgLen);
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t retReply = OnNodeDeviceTrustedChange(pkgName, type, msg, msgLen);
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SDK, "OnNodeDeviceNotTrustedInner write reply failed!");
-        return SOFTBUS_IPC_ERR;
+        COMM_LOGE(COMM_SDK, "write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -679,9 +689,10 @@ int32_t SoftBusClientStub::OnLocalNetworkIdChanged(const char *pkgName)
     return LnnOnLocalNetworkIdChanged(pkgName);
 }
 
-int32_t SoftBusClientStub::OnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+int32_t SoftBusClientStub::OnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg,
+    uint32_t msgLen)
 {
-    return LnnOnNodeDeviceNotTrusted(pkgName, msg);
+    return LnnOnNodeDeviceTrustedChange(pkgName, type, msg, msgLen);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)

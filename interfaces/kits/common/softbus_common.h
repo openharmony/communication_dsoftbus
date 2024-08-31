@@ -569,6 +569,18 @@ typedef struct {
     ExchangeMedium medium;
 } InnerDeviceInfoAddtions;
 
+/**
+ * @brief Defines the capability enumeration of suppressing and restoring ble.
+ * the value same as lnn_heartbeat_utils.h
+ *
+ */
+typedef enum {
+    /* Suppress ble */
+    REQUEST_DISABLE_BLE_DISCOVERY = 100,
+    /* Restore ble */
+    REQUEST_ENABLE_BLE_DISCOVERY,
+} StrategyForBle;
+
 #ifdef __cplusplus
 }
 #endif

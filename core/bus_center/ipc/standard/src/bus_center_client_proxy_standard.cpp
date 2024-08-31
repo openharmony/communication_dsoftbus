@@ -396,7 +396,8 @@ int32_t BusCenterClientProxy::OnLocalNetworkIdChanged(const char *pkgName)
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterClientProxy::OnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+int32_t BusCenterClientProxy::OnNodeDeviceTrustedChange(const char *pkgName, int32_t type,
+    const char *msg, uint32_t msgLen)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -416,13 +417,21 @@ int32_t BusCenterClientProxy::OnNodeDeviceNotTrusted(const char *pkgName, const 
         LNN_LOGE(LNN_EVENT, "write pkgName failed");
         return SOFTBUS_IPC_ERR;
     }
+    if (!data.WriteInt32(type)) {
+        LNN_LOGE(LNN_EVENT, "write type failed");
+        return SOFTBUS_IPC_ERR;
+    }
     if (!data.WriteCString(msg)) {
         LNN_LOGE(LNN_EVENT, "write msg failed");
         return SOFTBUS_IPC_ERR;
     }
+    if (!data.WriteUint32(msgLen)) {
+        LNN_LOGE(LNN_EVENT, "write msg length failed");
+        return SOFTBUS_IPC_ERR;
+    }
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
-    if (remote->SendRequest(CLIENT_ON_NODE_DEVICE_NOT_TRUST, data, reply, option) != 0) {
+    if (remote->SendRequest(CLIENT_ON_NODE_DEVICE_TRUST_CHANGED, data, reply, option) != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
         return SOFTBUS_IPC_ERR;
     }

@@ -39,4 +39,10 @@
 #define BYTE_BITS_NUM 8
 #define TYPE_BITS_NUM(_type) (sizeof(_type) * BYTE_BITS_NUM)
 
+typedef enum {
+    CIPHER_AES_GCM = 0,
+    CIPHER_CHACHA,
+    CIPHER_AES_NI, // hardware optimize
+} DFileCipherType;
+
 #endif // NSTACKX_COMMON_HEADER_H

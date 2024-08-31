@@ -48,7 +48,9 @@
 namespace OHOS {
     namespace {
         constexpr int32_t JUDG_CNT = 1;
+        constexpr int32_t MSG_MAX_SIZE = 1024 * 2;
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
+        static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
     }
 
 
@@ -183,6 +185,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_DEACTIVE_META_NODE] = &SoftBusServerStub::DeactiveMetaNodeInner;
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
     memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
+    memberFuncMap_[SERVER_SYNC_TRUSTED_RELATION] = &SoftBusServerStub::SyncTrustedRelationShipInner;
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
@@ -225,6 +228,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_DEACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_SYNC_TRUSTED_RELATION] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_RIPPLE_STATS] = nullptr;
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
@@ -1488,6 +1492,38 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
     int32_t retReply = ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "ShiftLNNGearInner write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    if (strcmp(DM_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_SYNC_TRUSTED_RELATION);
+    const char *msg = data.ReadCString();
+    if (msg == nullptr) {
+        COMM_LOGE(COMM_SVC, "read msg failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    uint32_t msgLen = data.ReadUint32();
+    if (msgLen > MSG_MAX_SIZE || msgLen != strlen(msg)) {
+        COMM_LOGE(COMM_SVC, "msgLen invalid!, msgLen=%{public}u", msgLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t retReply = SyncTrustedRelationShip(pkgName, msg, msgLen);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;

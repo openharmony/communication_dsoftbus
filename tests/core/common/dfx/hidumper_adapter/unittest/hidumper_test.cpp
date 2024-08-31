@@ -239,7 +239,7 @@ HWTEST_F(HidumperTest, SoftBusRegDiscVarDump002, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump002, Start");
     int32_t ret = SoftBusRegDiscVarDump(nullptr, &DiscVarTest1Dumper);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump002, end");
 }
 
@@ -253,7 +253,7 @@ HWTEST_F(HidumperTest, SoftBusRegDiscVarDump003, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump003, Start");
     int32_t ret = SoftBusRegDiscVarDump(const_cast<char *>(g_testDumpVar), nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump003, end");
 }
 
@@ -268,7 +268,7 @@ HWTEST_F(HidumperTest, SoftBusRegDiscVarDump004, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump004, Start");
     int32_t ret = SoftBusRegDiscVarDump(nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegDiscVarDump004, end");
 }
 
@@ -323,7 +323,7 @@ HWTEST_F(HidumperTest, SoftBusRegConnVarDump002, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump002, Start");
     int32_t ret = SoftBusRegConnVarDump(nullptr, &ConnVarTest1Dumper);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump002, end");
 }
 
@@ -337,7 +337,7 @@ HWTEST_F(HidumperTest, SoftBusRegConnVarDump003, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump003, Start");
     int32_t ret = SoftBusRegConnVarDump(const_cast<char *>(g_testDumpVar), nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump003, end");
 }
 
@@ -352,7 +352,7 @@ HWTEST_F(HidumperTest, SoftBusRegConnVarDump004, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump004, Start");
     int32_t ret = SoftBusRegConnVarDump(nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegConnVarDump004, end");
 }
 
@@ -407,7 +407,7 @@ HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump002, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump002, Start");
     int32_t ret = SoftBusRegBusCenterVarDump(nullptr, &DiscVarTest1Dumper);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump002, end");
 }
 
@@ -421,7 +421,7 @@ HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump003, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump003, Start");
     int32_t ret = SoftBusRegBusCenterVarDump(const_cast<char *>(g_testDumpVar), nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump003, end");
 }
 
@@ -436,7 +436,7 @@ HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump004, TestSize.Level1)
 {
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump004, Start");
     int32_t ret = SoftBusRegBusCenterVarDump(nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegBusCenterVarDump004, end");
 }
 
@@ -497,10 +497,10 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess002, TestSize.Level1)
     for (int i = 0; i < DISC_DUMP_PROCESS_VALID_TEST_NUM; i++) {
         ret = SoftBusDumpProcess(testInvalidDiscCmdArray[i].fd, testInvalidDiscCmdArray[i].argc,
             testInvalidDiscCmdArray[i].argv);
-        EXPECT_EQ(SOFTBUS_ERR, ret);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     }
     ret = SoftBusDumpProcess(0, 1, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess002, end");
 }
 
@@ -550,10 +550,10 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess004, TestSize.Level1)
     for (int i = 0; i < CONN_DUMP_PROCESS_INVALID_TEST_NUM; i++) {
         ret = SoftBusDumpProcess(testInValidConnCmdArray[i].fd, testInValidConnCmdArray[i].argc,
             testInValidConnCmdArray[i].argv);
-        EXPECT_EQ(SOFTBUS_ERR, ret);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     }
     ret = SoftBusDumpProcess(0, 1, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess004, end");
 }
 
@@ -603,10 +603,10 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess006, TestSize.Level1)
     for (int i = 0; i < BUSCENTER_DUMP_PROCESS_INVALID_TEST_NUM; i++) {
         ret = SoftBusDumpProcess(testInValidBusCenterCmdArray[i].fd, testInValidBusCenterCmdArray[i].argc,
             testInValidBusCenterCmdArray[i].argv);
-        EXPECT_EQ(SOFTBUS_ERR, ret);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     }
     ret = SoftBusDumpProcess(0, 1, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess006, end");
 }
 
@@ -675,10 +675,10 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess009, TestSize.Level1)
     for (int i = 0; i < NSTACK_DUMP_PROCESS_VALID_TEST_NUM; i++) {
         ret = SoftBusDumpProcess(testInValidStatsCmdArray[i].fd, testInValidStatsCmdArray[i].argc,
             testInValidStatsCmdArray[i].argv);
-        EXPECT_EQ(SOFTBUS_ERR, ret);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     }
     ret = SoftBusDumpProcess(0, 1, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess009, end");
 }
 
@@ -723,10 +723,10 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess011, TestSize.Level1)
     for (int i = 0; i < ALARM_DUMP_PROCESS_INVALID_TEST_NUM; i++) {
         ret = SoftBusDumpProcess(testInValidAlarmCmdArray[i].fd, testInValidAlarmCmdArray[i].argc,
             testInValidAlarmCmdArray[i].argv);
-        EXPECT_EQ(SOFTBUS_ERR, ret);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     }
     ret = SoftBusDumpProcess(0, 1, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess011, end");
 }
 
@@ -749,9 +749,9 @@ HWTEST_F(HidumperTest, SoftBusRegHiDumperHandler001, TestSize.Level1)
         const_cast<char *>(g_testHelpInfo), DumpHandlerTest1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusRegHiDumperHandler(nullptr, const_cast<char *>(g_testHelpInfo), DumpHandlerTest1);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = SoftBusRegHiDumperHandler(const_cast<char *>(g_testModuleName), const_cast<char *>(g_testHelpInfo), nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     SoftBusDumpShowHelp(ERR_FD);
     SoftBusDumpErrInfo(ERR_FD, g_testDumpVar);
     SoftBusDumpSubModuleHelp(ERR_FD, const_cast<char *>(g_testModuleName), nullptr);
@@ -761,11 +761,11 @@ HWTEST_F(HidumperTest, SoftBusRegHiDumperHandler001, TestSize.Level1)
     const char **tmpTestHandle = &testHandler;
 
     ret = SoftBusDumpDispatch(ERR_FD, TEST_ARGC_ONE, tmpTestHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = SoftBusDumpDispatch(TEST_FD_ZERO, ERR_ARGC, tmpTestHandle);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = SoftBusDumpDispatch(TEST_FD_ZERO, TEST_ARGC_ONE, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegHiDumperHandler001, end");
 }
 } // namespace OHOS

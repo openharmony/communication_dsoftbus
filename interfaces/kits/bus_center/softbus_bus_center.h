@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -411,6 +411,17 @@ typedef struct {
 } IRefreshCallback;
 
 /**
+ * @brief Enumerates error codes for trust relationship change type.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    DEVICE_NOT_TRUSTED = 0,               /**< device not trusted */
+    DEVICE_TRUST_RELATIONSHIP_CHANGE = 1, /**< device trust relationship change */
+} TrustChangeType;
+
+/**
  * @brief Defines a callback that is invoked when the device state or information changes.
  * For details, see {@link RegNodeDeviceStateCb}.
  *
@@ -462,14 +473,16 @@ typedef struct {
     */
     void (*onLocalNetworkIdChanged)(void);
     /**
-    * @brief Called when the device is not trusted.
+    * @brief Called when the device trust relationship change.
     *
-    * @param msg Indicates the pointer to untrusted device information.
+    * @param type type Indicates the trust relationship change type.
+    * @param msg Indicates the pointer to relationship change information.
+    * @param msgLen The length of msg.
     *
     * @since 1.0
     * @version 1.0
     */
-    void (*onNodeDeviceNotTrusted)(const char *msg);
+    void (*onNodeDeviceTrustedChange)(TrustChangeType type, const char *msg, uint32_t msgLen);
     /**
      * @brief Called when the running status of a device changes.
      *
@@ -884,6 +897,20 @@ int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *in
  */
 int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
 
+/**
+ * @brief For dm use only. Broadcast notification of device trust relation changes.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param msg The value must be in JSON format and comply with the API usage restrictions.
+ * @param msgLen The length of msg.
+ *
+ * @return Returns <b>0</b> if the call is success; returns any other value if it fails.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
 #ifdef __cplusplus
 }
 #endif
