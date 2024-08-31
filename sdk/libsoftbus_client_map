@@ -512,6 +512,7 @@
         "RegisterFileSchema";
         "UnRegisterFileSchema";
         "SoftBusDFileSetSessionOpt";
+        "CtrlLNNBleHb";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
