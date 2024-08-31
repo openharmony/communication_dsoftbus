@@ -1219,7 +1219,7 @@ int32_t LnnOnNodeStatusChanged(const char *pkgName, void *info, int32_t type)
         if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
             (item->cb.events & EVENT_NODE_STATUS_CHANGED) != 0 && item->cb.onNodeStatusChanged != NULL) {
             LNN_LOGI(LNN_STATE, "LnnOnNodeStatusChanged, pkgName=%{public}s, type=%{public}d, screen=%{public}d",
-            pkgName, type, nodeStatus->reserved[0]);
+                pkgName, type, nodeStatus->reserved[0]);
             item->cb.onNodeStatusChanged((NodeStatusType)type, nodeStatus);
         }
     }

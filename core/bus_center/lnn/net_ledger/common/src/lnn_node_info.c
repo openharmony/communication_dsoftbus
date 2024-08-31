@@ -625,8 +625,7 @@ void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log)
 
 int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn)
 {
-    if (info == NULL)
-    {
+    if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
