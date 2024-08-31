@@ -2276,9 +2276,9 @@ bool LnnIsMasterNode(void)
     return ret;
 }
 
-int32_t LnnUpdateLocalScreenStatus(bool isScreenOn) 
+int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
 {
-    if (SoftBusMutexLock(&g_localNetLedger.lock) !=0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex failed");
         return SOFTBUS_LOCK_ERR;
     }
