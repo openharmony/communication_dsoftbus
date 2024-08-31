@@ -36,19 +36,21 @@
 static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc != 1 || argv == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     SoftBusStatsResult *result = MallocSoftBusStatsResult(sizeof(SoftBusStatsResult));
     if (result == NULL) {
         SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander result malloc fail!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
+    int32_t ret = SOFTBUS_OK;
     if (strcmp(argv[0], SOFTBUS_FIFTEEN_MINUTES_STATS_ORDER) == SOFTBUS_OK) {
-        if (SoftBusQueryStatsInfo(FIFTEEN_MINUTES, result) != SOFTBUS_OK) {
+        ret = SoftBusQueryStatsInfo(FIFTEEN_MINUTES, result);
+        if (ret != SOFTBUS_OK) {
             SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander query fail!\n");
             FreeSoftBusStatsResult(result);
-            return SOFTBUS_ERR;
+            return ret;
         }
         SOFTBUS_DPRINTF(fd, "SoftBus 15min Statistics:\n");
         SOFTBUS_DPRINTF(fd, "BT traffic = NA\n");
@@ -59,10 +61,11 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
         SOFTBUS_DPRINTF(fd, "Online/Offine times = %d/%d\n", result->deviceOnlineTimes, result->deviceOfflineTimes);
         SOFTBUS_DPRINTF(fd, "Channel score exceeded times = %d\n", result->laneScoreOverTimes);
     } else if (strcmp(argv[0], SOFTBUS_TWENTY_FOUR_HOURS_STATS_ORDER) == SOFTBUS_OK) {
-        if (SoftBusQueryStatsInfo(TWENTY_FOUR_HOURS, result) != SOFTBUS_OK) {
+        ret = SoftBusQueryStatsInfo(TWENTY_FOUR_HOURS, result);
+        if (ret != SOFTBUS_OK) {
             FreeSoftBusStatsResult(result);
             SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander query fail!\n");
-            return SOFTBUS_ERR;
+            return ret;
         }
         SOFTBUS_DPRINTF(fd, "SoftBus 24h Statistics:\n");
         SOFTBUS_DPRINTF(fd, "BT traffic = NA\n");
@@ -75,11 +78,11 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
     } else {
         SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander invalid param!\n");
         FreeSoftBusStatsResult(result);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCMP_ERR;
     }
     
     FreeSoftBusStatsResult(result);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t SoftBusStatsHiDumperInit(void)

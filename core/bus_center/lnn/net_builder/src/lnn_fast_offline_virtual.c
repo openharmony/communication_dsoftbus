@@ -51,3 +51,12 @@ void EhLoginEventHandler(void)
 {
     LNN_LOGI(LNN_BUILDER, "EH handle SOFTBUS_ACCOUNT_LOG_IN");
 }
+
+int32_t LnnSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    (void)pkgName;
+    (void)msg;
+    (void)msgLen;
+    LNN_LOGI(LNN_BUILDER, "not implement");
+    return SOFTBUS_OK;
+}

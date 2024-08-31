@@ -102,7 +102,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject004, TestSize.Level1)
     cJSON *json = cJSON_CreateObject();
     char target[ARRAY_LEN];
     int32_t ret = GetStringItemByJsonObject(json, "string", target, ARRAY_LEN);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(json);
 }
 
