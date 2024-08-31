@@ -38,6 +38,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout);
 
 void LnnHbOnTrustedRelationIncreased(int32_t groupType);
 void LnnHbOnTrustedRelationReduced(void);
+int32_t LnnTriggerDirectHeartbeat(const char *networkId, uint64_t timeout);
 
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);

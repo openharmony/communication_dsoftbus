@@ -47,6 +47,7 @@
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
+#define DEFAULT_SUPPORT_HBCAPACITY 0x1
 #define DEFAULT_CONN_SUB_FEATURE 1
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
@@ -2210,6 +2211,7 @@ int32_t LnnInitLocalLedger(void)
     }
     nodeInfo->groupType = ALL_GROUP_TYPE;
     nodeInfo->discoveryType = 0;
+    nodeInfo->heartbeatCapacity = DEFAULT_SUPPORT_HBCAPACITY;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
     nodeInfo->authCapacity = GetAuthCapacity();
     nodeInfo->feature = LnnGetFeatureCapabilty();

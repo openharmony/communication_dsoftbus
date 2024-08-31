@@ -1212,6 +1212,18 @@ int32_t LnnTriggerDataLevelHeartbeat(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnTriggerDirectHeartbeat(const char *networkId, uint64_t timeout)
+{
+    LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDirectHeartbeat");
+    int32_t ret = LnnStartHbByTypeAndStrategyDirectly(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_DIRECT,
+        false, networkId, timeout);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start direct ble heartbeat fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnTriggerCloudSyncHeartbeat(void)
 {
     LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerCloudSyncHeartbeat");
