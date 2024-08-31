@@ -68,6 +68,7 @@ public:
     int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum) override;
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
+    int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen) override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,

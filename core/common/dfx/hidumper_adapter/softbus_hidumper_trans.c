@@ -50,7 +50,7 @@ int32_t SoftBusRegTransVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusRegTransVarDump invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_trans_var_list);
 }
@@ -119,7 +119,7 @@ static int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argv == NULL || argc < 0) {
         COMM_LOGE(COMM_DFX, "param is invalid ");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (argc == 0 || ((argc == 1) && (strcmp(argv[0], "-h") == 0)) || (argc == 1 && strcmp(argv[0], "-l") == 0)) {
         SoftBusDumpSubModuleHelp(fd, (char *)MODULE_NAME_TRAN, &g_trans_var_list);

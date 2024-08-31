@@ -180,6 +180,17 @@ bool GetConfigSupportAsServer(void)
     return ((ability & AUTH_SUPPORT_AS_SERVER_MASK) != 0);
 }
 
+/* auth capacity */
+uint32_t GetAuthCapacity(void)
+{
+    uint32_t authCapacity = 0;
+    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_CAPACITY, (uint8_t *)(&authCapacity), sizeof(authCapacity)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get auth capacity from config file fail");
+    }
+    AUTH_LOGI(AUTH_CONN, "auth capacity=%{public}u", authCapacity);
+    return authCapacity;
+}
+
 /* auth common function */
 uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
 {

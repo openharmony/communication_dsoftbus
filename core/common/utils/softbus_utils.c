@@ -97,7 +97,7 @@ int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
     if (callback == NULL || timerFunId >= SOFTBUS_MAX_TIMER_FUN_NUM ||
         timerFunId < SOFTBUS_CONN_TIMER_FUN) {
         COMM_LOGE(COMM_UTILS, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_timerFunList[timerFunId] != NULL) {
         return SOFTBUS_OK;
@@ -139,7 +139,7 @@ int32_t SoftBusTimerInit(void)
         COMM_LOGE(COMM_UTILS, "start timer failed.");
         (void)SoftBusDeleteTimer(g_timerId);
         g_timerId = NULL;
-        return SOFTBUS_ERR;
+        return SOFTBUS_TIMER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -157,7 +157,7 @@ int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
         COMM_LOGE(COMM_UTILS, "invalid param, inlen=%{public}u, outBufLen=%{public}u", inLen, outBufLen);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     while (inLen > 0) {
@@ -190,7 +190,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
     uint32_t outLen = UN_HEXIFY_LEN(inLen);
     if (outLen > outBufLen) {
         COMM_LOGE(COMM_UTILS, "outLen > outBufLen");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     uint32_t i = 0;
     while (i < outLen) {
@@ -203,7 +203,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
             c -= 'A' - DEC_MAX_NUM;
         } else {
             COMM_LOGE(COMM_UTILS, "HexToString Error! inBuf=%{public}c", c);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
         }
         unsigned char c2 = *inBuf++;
         if ((c2 >= '0') && (c2 <= '9')) {
@@ -214,7 +214,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
             c2 -= 'A' - DEC_MAX_NUM;
         } else {
             COMM_LOGE(COMM_UTILS, "HexToString Error! inBuf2=%{public}c", c2);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
         }
         *outBuf++ = (c << HEX_MAX_BIT_NUM) | c2;
         i++;
@@ -227,7 +227,7 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
         COMM_LOGD(COMM_UTILS, "outBufLen=%{public}d, inLen=%{public}d", outBufLen, inLen);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     while (inLen > 0) {
@@ -261,15 +261,19 @@ int32_t GenerateRandomStr(char *str, uint32_t len)
         return SOFTBUS_MEM_ERR;
     }
     (void)memset_s(hexAuthId, hexLen, 0, hexLen);
-    if (SoftBusGenerateRandomArray(hexAuthId, hexLen) != SOFTBUS_OK) {
+
+    int32_t ret = SoftBusGenerateRandomArray(hexAuthId, hexLen);
+    if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "Generate random array fail");
         SoftBusFree(hexAuthId);
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (ConvertBytesToHexString(str, len, hexAuthId, hexLen) != SOFTBUS_OK) {
+
+    ret = ConvertBytesToHexString(str, len, hexAuthId, hexLen);
+    if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "Convert bytes to hexstring fail");
         SoftBusFree(hexAuthId);
-        return SOFTBUS_ERR;
+        return ret;
     }
     SoftBusFree(hexAuthId);
     return SOFTBUS_OK;
@@ -313,7 +317,7 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
     for (int i = 0; i < BT_ADDR_LEN; i++) {
         if (token == NULL) {
             SoftBusFree(tmpMac);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
         }
         binMac[i] = strtoul(token, &endptr, BT_ADDR_BASE);
         token = strtok_r(NULL, BT_ADDR_DELIMITER, &nextTokenPtr);
@@ -336,7 +340,7 @@ int32_t ConvertBtMacToStrNoColon(char *strMac, uint32_t strMacLen, const uint8_t
         binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
     if (ret < 0) {
         COMM_LOGE(COMM_UTILS, "snprintf_s fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SPRINTF_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -355,7 +359,7 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
         binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
     if (ret < 0) {
         COMM_LOGE(COMM_UTILS, "snprintf_s fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SPRINTF_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -370,7 +374,7 @@ int32_t ConvertReverseBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t
         binMac[MAC_BIT_FIVE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_THREE],
         binMac[MAC_BIT_TWO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_ZERO]);
     if (ret < 0) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_SPRINTF_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -385,7 +389,7 @@ int32_t ConvertBtMacToU64(const char *strMac, uint32_t strMacLen, uint64_t *u64M
     int32_t status = ConvertBtMacToBinary(strMac, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
     if (status != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "Convert btMac to binary fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SPRINTF_ERR;
     }
     uint64_t u64Value = 0;
     for (int i = 0; i < BT_ADDR_LEN; i++) {
@@ -426,7 +430,7 @@ static char ToLowerCase(char ch)
 int32_t StringToUpperCase(const char *str, char *buf, int32_t size)
 {
     if (str == NULL || buf == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     memset_s(buf, size, 0, size);
     int32_t i;
@@ -439,7 +443,7 @@ int32_t StringToUpperCase(const char *str, char *buf, int32_t size)
 int32_t StringToLowerCase(const char *str, char *buf, int32_t size)
 {
     if (str == NULL || buf == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     memset_s(buf, size, 0, size);
     int32_t i;
@@ -465,16 +469,16 @@ int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
 {
     if (str1 == NULL || str2 == NULL) {
         COMM_LOGD(COMM_UTILS, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t i;
     for (i = 0; str1[i] != '\0' && str2[i] != '\0'; i++) {
         if (ToUpperCase(str1[i]) != ToUpperCase(str2[i])) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
         }
     }
     if (str1[i] != '\0' || str2[i] != '\0') {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }

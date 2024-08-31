@@ -74,6 +74,7 @@ static int64_t g_lastScreenOffTime = 0;
 static atomic_bool g_enableState = false;
 static bool g_isScreenOnOnce = false;
 static DcTask g_dcTask;
+static atomic_bool g_isCloudSyncEnd = false;
 
 static void InitHbConditionState(void)
 {
@@ -129,6 +130,11 @@ bool IsHeartbeatEnable(void)
 SoftBusScreenState GetScreenState(void)
 {
     return g_hbConditionState.screenState;
+}
+
+bool LnnIsCloudSyncEnd(void)
+{
+    return g_isCloudSyncEnd;
 }
 
 void SetScreenState(SoftBusScreenState state)
@@ -244,6 +250,7 @@ static void RequestEnableDiscovery(void *para)
 
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
 {
+    LNN_LOGI(LNN_HEART_BEAT, "LnnRequestBleDiscoveryProcess enter");
     if (strategy == REQUEST_DISABLE_BLE_DISCOVERY) {
         if (g_hbConditionState.isRequestDisable) {
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled, need wait timeout or enabled");
@@ -477,6 +484,7 @@ static void HbDelayConditionChanged(void *para)
 {
     (void)para;
 
+    g_isCloudSyncEnd = true;
     LNN_LOGI(LNN_HEART_BEAT, "HB handle delay condition changed");
     LnnUpdateOhosAccount(true);
     LnnUpdateSendInfoStrategy(UPDATE_HB_ACCOUNT_INFO);
@@ -581,7 +589,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_HEART_BEAT, "user unlocked");
         (void)LnnGenerateCeParams();
         AuthLoadDeviceKey();
-        LnnUpdateOhosAccount(true);
+        LnnUpdateOhosAccount(false);
         if (!LnnIsDefaultOhosAccount()) {
             LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
         }
@@ -1192,6 +1200,18 @@ int32_t LnnTriggerDataLevelHeartbeat(void)
     if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
         return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnTriggerDirectHeartbeat(const char *networkId, uint64_t timeout)
+{
+    LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDirectHeartbeat");
+    int32_t ret = LnnStartHbByTypeAndStrategyDirectly(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_DIRECT,
+        false, networkId, timeout);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start direct ble heartbeat fail");
+        return ret;
     }
     return SOFTBUS_OK;
 }
