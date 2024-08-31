@@ -372,7 +372,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level
     ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = HbMediumMgrRecvHigherWeight(nullptr, TEST_WEIGHT, CONNECTION_ADDR_BR, true, true);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(hbStrategyMock, LnnNotifyMasterElect).WillRepeatedly(Return(SOFTBUS_OK));
     ret = HbMediumMgrRecvHigherWeight(udidHash, TEST_WEIGHT, CONNECTION_ADDR_BR, false, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -846,7 +846,6 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(heartBeatMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
-    EXPECT_CALL(ledgerMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = SoftBusNetNodeResult(&device, &hbResp, false, connectReason);

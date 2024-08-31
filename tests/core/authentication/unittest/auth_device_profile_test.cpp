@@ -27,7 +27,7 @@ namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
 
-class DsoftbusAppBindTest : public testing::Test {
+class AuthDeviceProfileTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -35,13 +35,13 @@ public:
     void TearDown();
 };
 
-void DsoftbusAppBindTest::SetUpTestCase() { }
+void AuthDeviceProfileTest::SetUpTestCase() { }
 
-void DsoftbusAppBindTest::TearDownTestCase() { }
+void AuthDeviceProfileTest::TearDownTestCase() { }
 
-void DsoftbusAppBindTest::SetUp() { }
+void AuthDeviceProfileTest::SetUp() { }
 
-void DsoftbusAppBindTest::TearDown() { }
+void AuthDeviceProfileTest::TearDown() { }
 
 static void OnDeviceBound(const char *udid, const char *groupInfo)
 {
@@ -67,7 +67,7 @@ static DeviceProfileChangeListener g_deviceProfilePara = {
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusAppBindTest, TRUST_DEVICE_PROFILE_ADD_TEST_001, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, TRUST_DEVICE_PROFILE_ADD_TEST_001, TestSize.Level1)
 {
     RegisterToDp(&g_deviceProfilePara);
     std::unique_ptr<AuthToDeviceProfile::AuthDeviceProfileListener> myFunc_ =
@@ -83,7 +83,7 @@ HWTEST_F(DsoftbusAppBindTest, TRUST_DEVICE_PROFILE_ADD_TEST_001, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusAppBindTest, TRUST_DEVICE_PROFILE_DELETE_TEST_002, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, TRUST_DEVICE_PROFILE_DELETE_TEST_002, TestSize.Level1)
 {
     RegisterToDp(&g_deviceProfilePara);
     std::unique_ptr<AuthToDeviceProfile::AuthDeviceProfileListener> myFunc_ =
@@ -99,7 +99,7 @@ HWTEST_F(DsoftbusAppBindTest, TRUST_DEVICE_PROFILE_DELETE_TEST_002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusAppBindTest, IS_POTENTIAL_DEVCIE_TEST_003, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_003, TestSize.Level1)
 {
     const char *deviceIdHash = nullptr;
     bool ret = IsPotentialTrustedDeviceDp(deviceIdHash);

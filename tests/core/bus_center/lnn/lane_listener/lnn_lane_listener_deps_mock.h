@@ -60,7 +60,6 @@ public:
     MOCK_METHOD1(DelLogicAndLaneRelationship, void (uint64_t laneId));
     MOCK_METHOD1(ClearLaneResourceByLaneId, int32_t (uint64_t laneId));
     MOCK_METHOD1(RemoveDelayDestroyMessage, void (uint64_t laneId));
-    MOCK_METHOD0(GetLaneManager, LnnLaneManager* (void));
     MOCK_METHOD3(AddLaneResourceToPool, int32_t (const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide));
     MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
     MOCK_METHOD0(DetectDisableWifiDirectApply, void (void));
