@@ -86,6 +86,7 @@ int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *con
 int32_t LnnSetLocalUnifiedName(const char *unifiedName);
 bool LnnIsMasterNode(void);
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
+int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout);
 
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName);
 int32_t LnnServerLeave(const char *networkId, const char *pkgName);
