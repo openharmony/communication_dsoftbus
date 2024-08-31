@@ -184,8 +184,10 @@ bool GetConfigSupportAsServer(void)
 uint32_t GetAuthCapacity(void)
 {
     uint32_t authCapacity = 0;
-    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_CAPACITY, (uint8_t *)(&authCapacity), sizeof(authCapacity)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get auth capacity from config file fail");
+    int32_t ret = SoftbusGetConfig(SOFTBUS_INT_AUTH_CAPACITY, (uint8_t *)(&authCapacity), sizeof(authCapacity));
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get auth capacity from config file fail, ret=%{public}d", ret);
+        return authCapacity;
     }
     AUTH_LOGI(AUTH_CONN, "auth capacity=%{public}u", authCapacity);
     return authCapacity;
