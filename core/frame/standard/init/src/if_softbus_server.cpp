@@ -101,6 +101,15 @@ int32_t ISoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, 
     return SOFTBUS_IPC_ERR;
 }
 
+int32_t ISoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    (void)pkgName;
+    (void)msg;
+    (void)msgLen;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
 int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
     COMM_LOGE(COMM_SVC, "GetSoftbusSpecObject ipc default impl");
