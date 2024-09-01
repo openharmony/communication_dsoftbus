@@ -152,7 +152,7 @@ static bool SessionIdIsAvailable(int32_t sessionId)
     return true;
 }
 
-static void ShowAllSessionInfo()
+static void ShowAllSessionInfo(void)
 {
     TRANS_LOGI(TRANS_SDK, "g_sessionIdNum=%{public}d, g_closingIdNum=%{public}d", g_sessionIdNum, g_closingIdNum);
     ClientSessionServer *serverNode = NULL;
