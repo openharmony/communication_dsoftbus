@@ -106,6 +106,7 @@ TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirect
         if (item->channelId == channelId) {
             (void)memcpy_s(info, sizeof(TcpDirectChannelInfo), item, sizeof(TcpDirectChannelInfo));
             item->detail.sequence++;
+            item->detail.fdInUse = true;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             return item;
         }
@@ -148,17 +149,20 @@ void TransTdcCloseChannel(int32_t channelId)
     }
 
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
-        if (item->channelId == channelId) {
-            TransTdcReleaseFd(item->detail.fd);
-            ListDelete(&item->node);
-            SoftBusMutexDestroy(&(item->detail.fdLock));
-            SoftBusFree(item);
-            item = NULL;
-            (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            DelPendingPacket(channelId, PENDING_TYPE_DIRECT);
-            TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
-            return;
+        if (item->channelId != channelId) {
+            continue;
         }
+        TransTdcReleaseFd(item->detail.fd);
+        ListDelete(&item->node);
+        if (!item->detail.fdInUse) {
+            SoftBusMutexDestroy(&(item->detail.fdLock));
+        }
+        SoftBusFree(item);
+        item = NULL;
+        (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+        DelPendingPacket(channelId, PENDING_TYPE_DIRECT);
+        TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
+        return;
     }
 
     TRANS_LOGE(TRANS_SDK, "Target item not exist. channelId=%{public}d", channelId);
@@ -445,4 +449,29 @@ int32_t TransDisableSessionListener(int32_t channelId)
         TRANS_LOGW(TRANS_SDK, "stop read failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
     }
     return SOFTBUS_OK;
+}
+
+void TransUpdateFdState(int32_t channelId, bool fdInUse)
+{
+    if (g_tcpDirectChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "g_tcpDirectChannelInfoList is NULL, channelId=%{public}d", channelId);
+        return;
+    }
+    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed, channelId=%{public}d", channelId);
+        return;
+    }
+
+    TcpDirectChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
+        if (item->channelId == channelId) {
+            item->detail.fdInUse = fdInUse;
+            (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+            return;
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+    TRANS_LOGE(TRANS_SDK, "channel not found, channelId=%{public}d", channelId);
+    return;
 }
