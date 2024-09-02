@@ -1734,6 +1734,7 @@ static void Deinit(void)
     (void)SoftBusMutexDestroy(&g_transLaneMutex);
     SoftBusFree(g_requestList);
     g_requestList = NULL;
+    DeinitLaneReliability();
 }
 
 static LaneInterface g_transLaneObject = {
