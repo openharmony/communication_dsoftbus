@@ -52,7 +52,7 @@ public:
 
     virtual int32_t LnnGetRemoteStrInfo(const std::string &networkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetNetworkIdByUuid(const std::string &uuid, char *buf, uint32_t len) = 0;
-    virtual int32_t LnnGetRemoteBoolInfo(const std::string &networkId, InfoKey key, bool *info) = 0;
+    virtual int32_t LnnGetRemoteBoolInfoIgnoreOnline(const std::string &networkId, InfoKey key, bool *info) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId) = 0;
@@ -129,7 +129,7 @@ public:
     MOCK_METHOD(int32_t, LnnGetRemoteStrInfo, (const std::string &networkId, InfoKey key, char *info, uint32_t len),
         (override));
     MOCK_METHOD(int32_t, LnnGetNetworkIdByUuid, (const std::string &, char *, uint32_t), (override));
-    MOCK_METHOD(int32_t, LnnGetRemoteBoolInfo, (const std::string &, InfoKey, bool *), (override));
+    MOCK_METHOD(int32_t, LnnGetRemoteBoolInfoIgnoreOnline, (const std::string &, InfoKey, bool *), (override));
     MOCK_METHOD(bool, LnnGetOnlineStateById, (const char *, IdCategory), (override));
     MOCK_METHOD(void, AuthCloseConn, (AuthHandle), (override));
     MOCK_METHOD(void, AuthStopListeningForWifiDirect, (AuthLinkType, ListenerModule), (override));
