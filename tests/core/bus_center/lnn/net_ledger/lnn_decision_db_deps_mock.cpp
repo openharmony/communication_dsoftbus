@@ -184,12 +184,25 @@ void LnnHbClearRecvList(void)
 
 int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
 {
-    return GetDecisionDbDepsInterface()->LnnConvertHbTypeToId();
+    return GetDecisionDbDepsInterface()->LnnConvertHbTypeToId(type);
 }
 
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)
 {
     return GetDecisionDbDepsInterface()->LnnVisitHbTypeSet(callback, typeSet, data);
 }
+
+int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    return GetDecisionDbDepsInterface()->LnnCeEncryptDataByHuks(keyAlias, inData, outData);
+}
+
+int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    return GetDecisionDbDepsInterface()->LnnCeDecryptDataByHuks(keyAlias, inData, outData);
+}
+
 } // extern "C"
 } // namespace OHOS

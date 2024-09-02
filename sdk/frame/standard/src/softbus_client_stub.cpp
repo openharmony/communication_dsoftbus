@@ -18,7 +18,6 @@
 #include <string>
 
 #include "client_bus_center_manager.h"
-#include "client_disc_manager.h"
 #include "client_trans_channel_callback.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
@@ -36,11 +35,6 @@
 namespace OHOS {
 SoftBusClientStub::SoftBusClientStub()
 {
-    memberFuncMap_[CLIENT_DISCOVERY_DEVICE_FOUND] = &SoftBusClientStub::OnDeviceFoundInner;
-    memberFuncMap_[CLIENT_DISCOVERY_SUCC] = &SoftBusClientStub::OnDiscoverySuccessInner;
-    memberFuncMap_[CLIENT_DISCOVERY_FAIL] = &SoftBusClientStub::OnDiscoverFailedInner;
-    memberFuncMap_[CLIENT_PUBLISH_SUCC] = &SoftBusClientStub::OnPublishSuccessInner;
-    memberFuncMap_[CLIENT_PUBLISH_FAIL] = &SoftBusClientStub::OnPublishFailInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_OPENED] = &SoftBusClientStub::OnChannelOpenedInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_OPENFAILED] = &SoftBusClientStub::OnChannelOpenFailedInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_LINKDOWN] = &SoftBusClientStub::OnChannelLinkDownInner;
@@ -51,8 +45,9 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_LEAVE_RESULT] = &SoftBusClientStub::OnLeaveLNNResultInner;
     memberFuncMap_[CLIENT_ON_NODE_ONLINE_STATE_CHANGED] = &SoftBusClientStub::OnNodeOnlineStateChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] = &SoftBusClientStub::OnNodeBasicInfoChangedInner;
+    memberFuncMap_[CLIENT_ON_NODE_STATUS_CHANGED] = &SoftBusClientStub::OnNodeStatusChangedInner;
     memberFuncMap_[CLIENT_ON_LOCAL_NETWORK_ID_CHANGED] = &SoftBusClientStub::OnLocalNetworkIdChangedInner;
-    memberFuncMap_[CLIENT_ON_NODE_DEVICE_NOT_TRUST] = &SoftBusClientStub::OnNodeDeviceNotTrustedInner;
+    memberFuncMap_[CLIENT_ON_NODE_DEVICE_TRUST_CHANGED] = &SoftBusClientStub::OnNodeDeviceTrustedChangeInner;
     memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] = &SoftBusClientStub::OnTimeSyncResultInner;
     memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] = &SoftBusClientStub::OnPublishLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] = &SoftBusClientStub::OnRefreshLNNResultInner;
@@ -97,50 +92,6 @@ int32_t SoftBusClientStub::OnClientPermissonChangeInner(MessageParcel &data, Mes
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusClientStub::OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply)
-{
-    const unsigned char *info = data.ReadBuffer(sizeof(DeviceInfo));
-    if (info == nullptr) {
-        return SOFTBUS_TRANS_PROXY_READBUFFER_FAILED;
-    }
-    DeviceInfo deviceInfo;
-    if (memcpy_s(&deviceInfo, sizeof(DeviceInfo), info, sizeof(DeviceInfo)) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    OnDeviceFound(&deviceInfo);
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnDiscoverFailedInner(MessageParcel &data, MessageParcel &reply)
-{
-    int subscribeId = data.ReadInt32();
-    int failReason = data.ReadInt32();
-    OnDiscoverFailed(subscribeId, failReason);
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnDiscoverySuccessInner(MessageParcel &data, MessageParcel &reply)
-{
-    int subscribeId = data.ReadInt32();
-    OnDiscoverySuccess(subscribeId);
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnPublishSuccessInner(MessageParcel &data, MessageParcel &reply)
-{
-    int publishId = data.ReadInt32();
-    OnPublishSuccess(publishId);
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnPublishFailInner(MessageParcel &data, MessageParcel &reply)
-{
-    int publishId = data.ReadInt32();
-    int failReason = data.ReadInt32();
-    OnPublishFail(publishId, failReason);
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusClientStub::OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t channelId;
@@ -161,31 +112,6 @@ int32_t SoftBusClientStub::OnClientTransLimitChangeInner(MessageParcel &data, Me
 int32_t SoftBusClientStub::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
 {
     return TransLimitChange(channelId, tos);
-}
-
-void SoftBusClientStub::OnDeviceFound(const DeviceInfo *device)
-{
-    DiscClientOnDeviceFound(device);
-}
-
-void SoftBusClientStub::OnDiscoverFailed(int subscribeId, int failReason)
-{
-    DiscClientOnDiscoverFailed(subscribeId, (DiscoveryFailReason)failReason);
-}
-
-void SoftBusClientStub::OnDiscoverySuccess(int subscribeId)
-{
-    DiscClientOnDiscoverySuccess(subscribeId);
-}
-
-void SoftBusClientStub::OnPublishSuccess(int publishId)
-{
-    DiscClientOnPublishSuccess(publishId);
-}
-
-void SoftBusClientStub::OnPublishFail(int publishId, int reason)
-{
-    DiscClientOnPublishFail(publishId, (PublishFailReason)reason);
 }
 
 int32_t SoftBusClientStub::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
@@ -538,6 +464,37 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnNodeStatusChangedInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strlen(pkgName) == 0) {
+        COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t type;
+    if (!data.ReadInt32(type)) {
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read type failed!");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    COMM_LOGD(COMM_SDK, "OnNodeStatusChangedInner type. type=%{public}d", type);
+    uint32_t infoTypeLen;
+    if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeStatus)) {
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read failed! infoTypeLen=%{public}d", infoTypeLen);
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    void *info = (void *)data.ReadRawData(infoTypeLen);
+    if (info == nullptr) {
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read node status failed!");
+        return SOFTBUS_NETWORK_READRAWDATA_FAILED;
+    }
+    int32_t retReply = OnNodeStatusChanged(pkgName, info, infoTypeLen, type);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner write reply failed!");
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnLocalNetworkIdChangedInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
@@ -553,22 +510,32 @@ int32_t SoftBusClientStub::OnLocalNetworkIdChangedInner(MessageParcel &data, Mes
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusClientStub::OnNodeDeviceNotTrustedInner(MessageParcel &data, MessageParcel &reply)
+int32_t SoftBusClientStub::OnNodeDeviceTrustedChangeInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strlen(pkgName) == 0) {
         COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
         return SOFTBUS_INVALID_PARAM;
     }
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        COMM_LOGE(COMM_SDK, "read type failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
     const char *msg = data.ReadCString();
     if (msg == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnNodeDeviceNotTrustedInner read msg failed!");
+        COMM_LOGE(COMM_SDK, "read msg failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
-    int32_t retReply = OnNodeDeviceNotTrusted(pkgName, msg);
+    uint32_t msgLen = 0;
+    if (!data.ReadUint32(msgLen)) {
+        COMM_LOGE(COMM_SDK, "read failed! msgLen=%{public}u", msgLen);
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t retReply = OnNodeDeviceTrustedChange(pkgName, type, msg, msgLen);
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SDK, "OnNodeDeviceNotTrustedInner write reply failed!");
-        return SOFTBUS_IPC_ERR;
+        COMM_LOGE(COMM_SDK, "write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -711,14 +678,21 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChanged(const char *pkgName, void *inf
     return LnnOnNodeBasicInfoChanged(pkgName, info, type);
 }
 
+int32_t SoftBusClientStub::OnNodeStatusChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type)
+{
+    (void)infoTypeLen;
+    return LnnOnNodeStatusChanged(pkgName, info, type);
+}
+
 int32_t SoftBusClientStub::OnLocalNetworkIdChanged(const char *pkgName)
 {
     return LnnOnLocalNetworkIdChanged(pkgName);
 }
 
-int32_t SoftBusClientStub::OnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+int32_t SoftBusClientStub::OnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg,
+    uint32_t msgLen)
 {
-    return LnnOnNodeDeviceNotTrusted(pkgName, msg);
+    return LnnOnNodeDeviceTrustedChange(pkgName, type, msg, msgLen);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)

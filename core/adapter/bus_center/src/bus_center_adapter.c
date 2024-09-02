@@ -33,7 +33,6 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 
-#define DEFAULT_DEVICE_NAME "OpenHarmony"
 #define OHOS_API_VERSION    "const.ohos.apiversion"
 #define OHOS_BOOT_SN        "ohos.boot.sn"
 #define OS_VERSION          "const.ohos.fullname"      /* Read osversion by the string */
@@ -151,10 +150,7 @@ int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
     const char *devType = NULL;
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
-            LNN_LOGI(LNN_STATE, "set default devicename in netledger init");
-            if (strcpy_s(value, len, DEFAULT_DEVICE_NAME) != EOK) {
-                return SOFTBUS_ERR;
-            }
+            /* set real value when device name init */
             break;
         case COMM_DEVICE_KEY_UDID:
             if (GetDevUdid(localUdid, UDID_BUF_LEN) != 0) {

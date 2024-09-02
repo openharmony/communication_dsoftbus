@@ -48,12 +48,12 @@ static int32_t SoftBusNStackDstreamDumpHander(int fd, int32_t argc, const char *
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusNStackDstreamDumpHander invalid input");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 #ifdef FILLP_ENHANCED
     if (FtDfxHiDumper((uint32_t)argc, argv, &fd, SoftBufNstackDumpFunc) != 0) {
         COMM_LOGE(COMM_DFX, "call FtDfxHiDumper failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NSTACK_DUMP_ERR;
     }
 #endif
     return SOFTBUS_OK;
@@ -62,12 +62,12 @@ static int32_t SoftBusNStackDfileDumpHander(int fd, int32_t argc, const char **a
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusNStackDfileDumpHander invalid input");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 #ifdef FILLP_ENHANCED
     if (NSTACKX_DFileDump((uint32_t)argc, argv, &fd, SoftBufNstackDumpFunc) != 0) {
         COMM_LOGE(COMM_DFX, "call NSTACKX_DFileDump failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NSTACK_DUMP_ERR;
     }
 #endif
     return SOFTBUS_OK;
@@ -76,12 +76,12 @@ static int32_t SoftBusNStackDumpDfinderHander(int fd, int32_t argc, const char *
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         COMM_LOGE(COMM_DFX, "NSTACKX_DFinderDump invalid input!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 #ifdef FILLP_ENHANCED
     if (NSTACKX_DFinderDump(argv, (uint32_t)argc, &fd, SoftBufNstackDumpFunc) != 0) {
         COMM_LOGE(COMM_DFX, "call NSTACKX_DFinderDump failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NSTACK_DUMP_ERR;
     }
 #endif
     return SOFTBUS_OK;
@@ -91,7 +91,7 @@ static int32_t SoftBusNStackDmsgDumpHander(int fd, int32_t argc, const char **ar
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     return SOFTBUS_OK;

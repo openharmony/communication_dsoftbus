@@ -26,13 +26,13 @@
 #include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
+#include "session_ipc_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
-#include "session_ipc_adapter.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
@@ -151,6 +151,36 @@ static bool SessionIdIsAvailable(int32_t sessionId)
     }
 
     return true;
+}
+
+static void ShowAllSessionInfo(void)
+{
+    TRANS_LOGI(TRANS_SDK, "g_sessionIdNum=%{public}d, g_closingIdNum=%{public}d", g_sessionIdNum, g_closingIdNum);
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    int count = 0;
+    char *tmpName = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        Anonymize(serverNode->sessionName, &tmpName);
+        TRANS_LOGI(
+            TRANS_SDK, "client session server is exist. count=%{public}d, sessionName=%{public}s", count, tmpName);
+        AnonymizeFree(tmpName);
+        count++;
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        int sessionCount = 0;
+        char *tmpPeerSessionName = NULL;
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            Anonymize(sessionNode->info.peerSessionName, &tmpPeerSessionName);
+            TRANS_LOGI(TRANS_SDK,
+                "client session info is exist. sessionCount=%{public}d, peerSessionName=%{public}s, "
+                "channelId=%{public}d, channelType=%{public}d",
+                sessionCount, tmpPeerSessionName, sessionNode->channelId, sessionNode->channelType);
+            AnonymizeFree(tmpPeerSessionName);
+            sessionCount++;
+        }
+    }
 }
 
 // need get g_clientSessionServerList->lock before call this function
@@ -352,7 +382,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     }
 
     if (g_clientSessionServerList->cnt >= MAX_SESSION_SERVER_NUMBER) {
-        (void)ShowClientSessionServer();
+        ShowClientSessionServer();
         UnlockClientSessionServerList();
         TRANS_LOGE(TRANS_SDK, "ClientAddSessionServer: client server num reach max");
         return SOFTBUS_INVALID_NUM;
@@ -424,6 +454,7 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
     /* need get lock before */
     session->sessionId = GenerateSessionId();
     if (session->sessionId < 0) {
+        ShowAllSessionInfo();
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
     ClientSessionServer *serverNode = NULL;
@@ -1010,6 +1041,17 @@ int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, u
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
+// Only need to operate on the action guidance ishare auth channel
+static void ClientSetAuthSessionTimer(const ClientSessionServer *serverNode, SessionInfo *sessionNode)
+{
+    if (strcmp(serverNode->sessionName, ISHARE_AUTH_SESSION) == 0 && sessionNode->channelType == CHANNEL_TYPE_AUTH &&
+        sessionNode->actionId != 0) {
+        sessionNode->lifecycle.maxWaitTime = ISHARE_AUTH_SESSION_MAX_IDLE_TIME;
+        sessionNode->lifecycle.waitTime = 0;
+        TRANS_LOGI(TRANS_SDK, "set auth sessionId=%{public}d waitTime success.", sessionNode->sessionId);
+    }
+}
+
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -1045,6 +1087,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->isEncrypt = channel->isEncrypt;
                 *sessionId = sessionNode->sessionId;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
+                    ClientSetAuthSessionTimer(serverNode, sessionNode);
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
                         channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
                         UnlockClientSessionServerList();
@@ -1313,7 +1356,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     }
 
     if (g_clientSessionServerList->cnt >= MAX_SESSION_SERVER_NUMBER) {
-        (void)ShowClientSessionServer();
+        ShowClientSessionServer();
         UnlockClientSessionServerList();
         TRANS_LOGE(TRANS_SDK, "ClientAddSocketServer: client server num reach max");
         return SOFTBUS_INVALID_NUM;
@@ -1329,7 +1372,13 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     g_clientSessionServerList->cnt++;
 
     UnlockClientSessionServerList();
-    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", server->sessionName, server->pkgName);
+    char *anonymizePkgName = NULL;
+    char *tmpName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", tmpName, anonymizePkgName);
+    AnonymizeFree(anonymizePkgName);
+    AnonymizeFree(tmpName);
     return SOFTBUS_OK;
 }
 
@@ -1783,7 +1832,7 @@ static void ClientTransSessionTimerProc(void)
         }
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
             ClientUpdateIdleTimeout(serverNode, sessionNode, &destroyList);
-            ClientCheckWaitTimeOut(sessionNode, waitOutSocket, MAX_SESSION_ID, &waitOutNum);
+            ClientCheckWaitTimeOut(serverNode, sessionNode, waitOutSocket, MAX_SESSION_ID, &waitOutNum);
         }
     }
     UnlockClientSessionServerList();
@@ -2262,4 +2311,51 @@ int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo)
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t ClientUpdateAuthSessionTimer(SessionInfo *sessionNode, int32_t sessionId)
+{
+    // Only need to operate on the action guidance channel
+    if (sessionNode->actionId == 0) {
+        return SOFTBUS_OK;
+    }
+    if (sessionNode->lifecycle.maxWaitTime == 0) {
+        TRANS_LOGE(TRANS_SDK, "sessionId=%{public}d is not need update.", sessionId);
+        return SOFTBUS_NOT_NEED_UPDATE;
+    }
+    sessionNode->lifecycle.maxWaitTime = 0;
+    return SOFTBUS_OK;
+}
+
+int32_t ClientCancelAuthSessionTimer(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId");
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList) || strcmp(serverNode->sessionName, ISHARE_AUTH_SESSION) != 0) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId != sessionId || sessionNode->channelType != CHANNEL_TYPE_AUTH) {
+                continue;
+            }
+            ret = ClientUpdateAuthSessionTimer(sessionNode, sessionId);
+            UnlockClientSessionServerList();
+            return ret;
+        }
+    }
+    UnlockClientSessionServerList();
+    TRANS_LOGE(TRANS_SDK, "not found ishare auth session by sessionId=%{public}d", sessionId);
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }

@@ -42,14 +42,14 @@ static int32_t SoftBusCreateFile(const char *fileName)
         }
         if (memcpy_s(dirPath, sizeof(dirPath), fileName, len) != EOK) {
             COMM_LOGE(COMM_ADAPTER, "memory copy dir name failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_MEM_ERR;
         }
         dirPath[len] = 0;
         if (access(dirPath, F_OK) != 0) {
             int32_t ret = mkdir(dirPath, S_IRWXU);
             if (ret != 0) {
                 COMM_LOGE(COMM_ADAPTER, "make dir failed, ret=%{public}d", ret);
-                return SOFTBUS_ERR;
+                return SOFTBUS_FILE_ERR;
             }
         }
         dir++;
@@ -57,7 +57,7 @@ static int32_t SoftBusCreateFile(const char *fileName)
     int32_t fd = open(fileName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         COMM_LOGE(COMM_ADAPTER, "create file failed, errno=%{public}d", errno);
-        return SOFTBUS_ERR;
+        return SOFTBUS_FILE_ERR;
     }
     close(fd);
     return SOFTBUS_OK;
@@ -222,7 +222,7 @@ int64_t SoftBusPreadFile(int32_t fd, void *buf, uint64_t readBytes, uint64_t off
 {
     if (buf == NULL) {
         COMM_LOGE(COMM_ADAPTER, "softbus pread file [buff is null]");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int64_t len = pread(fd, buf, readBytes, offset);
     if (len < 0) {
@@ -235,7 +235,7 @@ int64_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint
 {
     if (buf == NULL) {
         COMM_LOGE(COMM_ADAPTER, "softbus pwrite file [buff is null]");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int64_t len = pwrite(fd, buf, writeBytes, offset);
     if (len < 0) {
@@ -248,13 +248,13 @@ int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
 {
     if (pathName == NULL) {
         COMM_LOGE(COMM_ADAPTER, "softbus access path [pathName is null]");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret = access(pathName, mode);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "softbus access path fail. errno=%{public}s", strerror(errno));
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADAPTER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -263,7 +263,7 @@ int32_t SoftBusMakeDir(const char *pathName, int32_t mode)
 {
     if (pathName == NULL) {
         COMM_LOGE(COMM_ADAPTER, "softbus mkdir file [pathName is null]");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret = mkdir(pathName, mode);
@@ -279,13 +279,13 @@ int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
 {
     if ((fileName == NULL) || (fileSize == NULL)) {
         COMM_LOGE(COMM_ADAPTER, "softbus mkdir file [fileName or fileSize is null]");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     struct stat statBuff;
     if (stat(fileName, &statBuff) < 0) {
         COMM_LOGE(COMM_ADAPTER, "stat file fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_ADAPTER_ERR;
     } else {
         *fileSize = statBuff.st_size;
     }

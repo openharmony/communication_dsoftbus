@@ -32,10 +32,19 @@ void DurationStatistic::Start(uint32_t requestId, const std::shared_ptr<Duration
     calculators_.insert(std::make_pair(requestId, calculator));
 }
 
-void DurationStatistic::Record(uint32_t requestId, const DurationStatisticEvent &event)
+void DurationStatistic::Record(uint32_t requestId, const std::string &event)
 {
     std::lock_guard lock(mutex_);
+    if (stateTimeMap_[requestId].find(event) != stateTimeMap_[requestId].end()) {
+        stateTimeMap_[requestId][event] = GetTime();
+    }
     stateTimeMap_[requestId].insert(std::make_pair(event, GetTime()));
+}
+
+void DurationStatistic::RecordReNegotiate(uint32_t requestId, bool flag)
+{
+    std::lock_guard lock(mutex_);
+    reNegotiateFlagMap_.insert(std::make_pair(requestId, flag));
 }
 
 void DurationStatistic::End(uint32_t requestId)
@@ -51,9 +60,10 @@ void DurationStatistic::Clear(uint32_t requestId)
     std::lock_guard lock(mutex_);
     stateTimeMap_.erase(requestId);
     calculators_.erase(requestId);
+    reNegotiateFlagMap_.erase(requestId);
 }
 
-void P2pCalculator::CalculateAllEvent(uint32_t requestId, std::map<DurationStatisticEvent, uint64_t> records)
+void P2pCalculator::CalculateAllEvent(uint32_t requestId, std::map<std::string, uint64_t> records)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "p2p calculateEvent");
 }
@@ -74,9 +84,18 @@ std::shared_ptr<DurationStatisticCalculator> DurationStatisticCalculatorFactory:
     return creator_(type);
 }
 
-std::map<DurationStatisticEvent, uint64_t> DurationStatistic::GetStateTimeMapElement(uint32_t requestId)
+std::map<std::string, uint64_t> DurationStatistic::GetStateTimeMapElement(uint32_t requestId)
 {
     std::shared_lock lock(mutex_);
     return stateTimeMap_[requestId];
+}
+
+bool DurationStatistic::ReNegotiateFlag(uint32_t requestId)
+{
+    std::shared_lock lock(mutex_);
+    if (reNegotiateFlagMap_.find(requestId) != reNegotiateFlagMap_.end()) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::SoftBus
