@@ -248,8 +248,7 @@ if (!oobe_enhanced) {
   bus_center_server_inc +=
       [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
 } else {
-  bus_center_server_src +=
-      [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_oobe_manager.cpp" ]
+  bus_center_server_src += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/oobe/lnn_oobe_manager.cpp" ]
 
   bus_center_server_inc += [
     "$dsoftbus_root_path/adapter/common/bus_center/include",
