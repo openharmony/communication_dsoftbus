@@ -131,6 +131,7 @@ typedef enum {
 typedef enum {
     SOFTBUS_OOBE_RUNNING,
     SOFTBUS_OOBE_END,
+    SOFTBUS_FACK_OOBE_END,
     SOFTBUS_OOBE_UNKNOWN,
 } SoftBusOOBEState;
 

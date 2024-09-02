@@ -51,6 +51,7 @@
 #include "lnn_node_info.h"
 #include "lnn_node_weight.h"
 #include "lnn_ohos_account.h"
+#include "lnn_oobe_manager.h"
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_sync_info_manager.h"
@@ -690,6 +691,7 @@ static void UserSwitchedHandler(const LnnEventBasicInfo *info)
     switch (userSwitchState) {
         case SOFTBUS_USER_SWITCHED:
             LNN_LOGI(LNN_BUILDER, "SOFTBUS_USER_SWITCHED");
+            RegisterOOBEMonitor(NULL);
             LnnSetUnlockState();
             break;
         default:

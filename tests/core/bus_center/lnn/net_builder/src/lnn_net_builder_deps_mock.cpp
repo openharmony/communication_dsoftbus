@@ -715,5 +715,11 @@ int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
 {
     return GetNetBuilderDepsInterface()->LnnGetRemoteNodeInfoByKey(key, info);
 }
+
+void RegisterOOBEMonitor(void *p)
+{
+    (void)p;
+    return GetNetBuilderDepsInterface()->RegisterOOBEMonitor(p);
+}
 } // extern "C"
 } // namespace OHOS

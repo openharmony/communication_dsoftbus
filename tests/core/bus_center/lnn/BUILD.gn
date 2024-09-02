@@ -894,6 +894,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
 ohos_unittest("LNNNetworkManagerMockTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_oobe_manager_virtual.cpp",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_fast_offline_virtual.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_common_utils.c",
@@ -1124,7 +1125,10 @@ ohos_unittest("LNNLedgerMockTest") {
 
 ohos_unittest("LNNNetLedgerCommonTest") {
   module_out_path = module_output_path
-  sources = [ "net_ledger/lnn_ledger_common_test.cpp" ]
+  sources = [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_oobe_manager_virtual.cpp",
+    "net_ledger/lnn_ledger_common_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
