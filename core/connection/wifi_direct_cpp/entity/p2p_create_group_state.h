@@ -39,6 +39,7 @@ public:
 
 private:
     static constexpr int CREATE_GROUP_TIMEOUT_MS = 5000;
+
     P2pCreateGroupState();
 
     std::shared_ptr<P2pOperation> operation_;
