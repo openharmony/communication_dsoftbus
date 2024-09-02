@@ -591,3 +591,25 @@ int32_t InitLaneListener(void)
     RegisterWifiDirectListener();
     return SOFTBUS_OK;
 }
+
+void DeinitLaneListener(void)
+{
+    if (LaneListenerLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane listener lock fail");
+        return;
+    }
+    LaneBusinessInfo *businessItem = NULL;
+    LaneBusinessInfo *businessNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(businessItem, businessNext, &g_laneBusinessInfoList, LaneBusinessInfo, node) {
+        ListDelete(&businessItem->node);
+        SoftBusFree(businessItem);
+    }
+    LaneListenerInfo *listenerItem = NULL;
+    LaneListenerInfo *listenerNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(listenerItem, listenerNext, &g_laneListenerList, LaneListenerInfo, node) {
+        ListDelete(&listenerItem->node);
+        SoftBusFree(listenerItem);
+    }
+    LaneListenerUnlock();
+    (void)SoftBusMutexDestroy(&g_laneStateListenerMutex);
+}
