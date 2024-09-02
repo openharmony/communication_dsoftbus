@@ -40,7 +40,7 @@ ohos_unittest("TransClientSessionManagerTest") {
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
   ]
 
   if (is_standard_system) {
@@ -219,8 +219,8 @@ ohos_unittest("TransClientSessionTest") {
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
   ]
 
   if (is_standard_system) {
@@ -317,7 +317,7 @@ ohos_unittest("TransClientSessionImplTest") {
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
   ]
 
   if (is_standard_system) {
@@ -338,7 +338,7 @@ ohos_unittest("TransClientSessionServiceImplTest") {
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
   ]
 
   if (is_standard_system) {
