@@ -49,7 +49,7 @@ void DurationStatistic::RecordReNegotiate(uint32_t requestId, bool flag)
 
 void DurationStatistic::End(uint32_t requestId)
 {
-    std::shared_lock lock(mutex_);
+    std::lock_guard lock(mutex_);
     if (calculators_[requestId] != nullptr) {
         calculators_[requestId]->CalculateAllEvent(requestId, stateTimeMap_[requestId]);
     }
@@ -86,13 +86,13 @@ std::shared_ptr<DurationStatisticCalculator> DurationStatisticCalculatorFactory:
 
 std::map<std::string, uint64_t> DurationStatistic::GetStateTimeMapElement(uint32_t requestId)
 {
-    std::shared_lock lock(mutex_);
+    std::lock_guard lock(mutex_);
     return stateTimeMap_[requestId];
 }
 
 bool DurationStatistic::ReNegotiateFlag(uint32_t requestId)
 {
-    std::shared_lock lock(mutex_);
+    std::lock_guard lock(mutex_);
     if (reNegotiateFlagMap_.find(requestId) != reNegotiateFlagMap_.end()) {
         return true;
     }

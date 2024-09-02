@@ -40,7 +40,7 @@ private:
     void ReportConnEventExtra(ConnEventExtra &extra, const ConnectInfo &connectInfo);
     
     std::map<uint32_t, uint16_t> challengeCodeMap_;
-    std::shared_mutex mutex_;
+    std::recursive_mutex mutex_;
 };
 } // namespace OHOS::SoftBus
 

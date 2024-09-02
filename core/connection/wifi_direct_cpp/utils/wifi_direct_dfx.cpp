@@ -77,7 +77,7 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const ConnectInf
     auto requestId = wifiDirectConnectInfo.requestId;
     std::string challengeCodeStr;
     {
-        std::shared_lock lock(mutex_);
+        std::lock_guard lock(mutex_);
         if (challengeCodeMap_.find(requestId) != challengeCodeMap_.end()) {
             challengeCodeStr = std::to_string(challengeCodeMap_[requestId]);
             extra.challengeCode = challengeCodeStr.c_str();
