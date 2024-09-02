@@ -213,7 +213,7 @@ bool WifiDirectUtils::IsRemoteSupportTlv(const std::string &remoteDeviceId)
 {
     bool result = false;
     auto networkId = UuidToNetworkId(remoteDeviceId);
-    auto ret = LnnGetRemoteBoolInfo(networkId.c_str(), BOOL_KEY_TLV_NEGOTIATION, &result);
+    auto ret = LnnGetRemoteBoolInfoIgnoreOnline(networkId.c_str(), BOOL_KEY_TLV_NEGOTIATION, &result);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, true, CONN_WIFI_DIRECT, "get tlv feature failed");
     return result;
 }
