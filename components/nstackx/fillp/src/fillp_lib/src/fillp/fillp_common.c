@@ -377,7 +377,7 @@ static void FillpSendAdhocpack(struct FillpPcb *pcb)
 }
 #endif
 
-void FillpUploadRecvBox(struct FillpPcb *pcb)
+IGNORE_OVERFLOW void FillpUploadRecvBox(struct FillpPcb *pcb)
 {
     struct FillpPcbItem *item = FILLP_NULL_PTR;
     struct SkipListNode *node = FILLP_NULL_PTR;
