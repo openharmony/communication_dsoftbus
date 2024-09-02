@@ -1597,7 +1597,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest001, TestSize.Level1)
 {
-    SessionConn *conn = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
+    SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_NO_INIT));
@@ -1614,7 +1614,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest001, TestSize.Le
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest002, TestSize.Level1)
 {
-    SessionConn *conn = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
+    SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
@@ -1634,7 +1634,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest002, TestSize.Le
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest003, TestSize.Level1)
 {
-    SessionConn *conn = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
+    SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     TdcPacketHead packetHead = {0};
     packetHead.dataLen = TEST_LEN;

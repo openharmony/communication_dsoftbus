@@ -74,7 +74,7 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
 {
     if (timerId == NULL) {
         COMM_LOGE(COMM_ADAPTER, "timerId is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_FD;
     }
     struct itimerspec value;
     (void)memset_s(&value, sizeof(value), 0, sizeof(value));
@@ -90,7 +90,7 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
 
     if (timer_settime(timerId, 0, &value, NULL) != 0) {
         COMM_LOGE(COMM_ADAPTER, "timer start error, errnoCode=%{public}d", errno);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TIMER_ERR;
     }
 
     return SOFTBUS_OK;
@@ -100,12 +100,12 @@ int SoftBusDeleteTimer(void *timerId)
 {
     if (timerId == NULL) {
         COMM_LOGE(COMM_ADAPTER, "timerId is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_FD;
     }
 
     if (timer_delete(timerId) != 0) {
         COMM_LOGE(COMM_ADAPTER, "timer delete err, errnoCode=%{public}d", errno);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TIMER_ERR;
     }
 
     return SOFTBUS_OK;
@@ -122,7 +122,7 @@ int SoftBusSleepMs(unsigned int ms)
         ret = select(0, NULL, NULL, NULL, &tm);
     } while ((ret == -1) && (errno == EINTR));
 
-    return SOFTBUS_ERR;
+    return SOFTBUS_TIMER_ERR;
 }
 
 int32_t SoftBusGetTime(SoftBusSysTime *sysTime)

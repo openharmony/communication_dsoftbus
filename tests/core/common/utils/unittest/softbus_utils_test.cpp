@@ -60,16 +60,16 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_RegisterTimeoutCallback_001, TestSiz
     int32_t timerFunId = SOFTBUS_CONN_TIMER_FUN;
     TimerFunCallback callbac = NULL;
     int32_t ret = RegisterTimeoutCallback(timerFunId, callbac);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     callbac = MockSoftBusTimer;
     timerFunId = SOFTBUS_CONN_TIMER_FUN - 1;
     ret = RegisterTimeoutCallback(timerFunId, callbac);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     timerFunId = SOFTBUS_MAX_TIMER_FUN_NUM;
     ret = RegisterTimeoutCallback(timerFunId, callbac);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -156,14 +156,14 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_001, TestSiz
     inBuf = "414243FG";
     inLen = 8;
     ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     outBuf = outBufArray;
     outBufLen = 5;
     inBuf = "414243GF";
     inLen = 8;
     ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -200,20 +200,20 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSiz
     const unsigned char inBuf[5] = "ABCD";
     uint32_t inLen = 4;
     int32_t ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     char outBufArray[5] = "\0";
     outBuf = outBufArray;
     outBufLen = 4;
     inLen = 8;
     ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     outBufLen = 9;
     const unsigned char *inBuf2 = NULL;
     inLen = 0;
     ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf2, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**

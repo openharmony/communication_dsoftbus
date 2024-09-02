@@ -15,6 +15,7 @@
 
 #include "lnn_ble_heartbeat.h"
 
+#include "bus_center_manager.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_log.h"
 #include "softbus_errcode.h"
@@ -107,3 +108,10 @@ int32_t LnnSendBroadcastInfoToLp(void)
 }
 
 void LnnAdjustScanPolicy(void) { }
+
+int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout)
+{
+    (void)networkId;
+    (void)timeout;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

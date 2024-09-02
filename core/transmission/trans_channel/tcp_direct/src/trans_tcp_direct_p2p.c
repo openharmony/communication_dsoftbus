@@ -23,6 +23,7 @@
 #include "lnn_lane_link.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_common.h"
 #include "softbus_conn_interface.h"
@@ -507,8 +508,8 @@ static void SendVerifyP2pFailRsp(AuthHandle authHandle, int64_t seq,
             cJSON_free(reply);
             return;
         }
-        *(int64_t*)sendMsg = P2P_VERIFY_REPLY;
-        *(int64_t*)(sendMsg + sizeof(int64_t)) = seq;
+        *(int64_t*)sendMsg = SoftBusHtoLll((uint64_t)P2P_VERIFY_REPLY);
+        *(int64_t*)(sendMsg + sizeof(int64_t)) = SoftBusHtoLll((uint64_t)seq);
         if (strcpy_s(sendMsg  + sizeof(int64_t) + sizeof(int64_t), strLen, reply) != EOK) {
             cJSON_free(reply);
             SoftBusFree(sendMsg);
@@ -534,8 +535,8 @@ static int32_t SendVerifyP2pRsp(AuthHandle authHandle, int32_t module, int32_t f
         uint32_t strLen = strlen(reply) + 1;
         char *sendMsg = (char *)SoftBusCalloc(strLen + sizeof(int64_t) + sizeof(int64_t));
         TRANS_CHECK_AND_RETURN_RET_LOGE(sendMsg != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc sendMsg failed");
-        *(int64_t *)sendMsg = P2P_VERIFY_REPLY;
-        *(int64_t *)(sendMsg + sizeof(int64_t)) = seq;
+        *(int64_t *)sendMsg = SoftBusHtoLll((uint64_t)P2P_VERIFY_REPLY);
+        *(int64_t *)(sendMsg + sizeof(int64_t)) = SoftBusHtoLll((uint64_t)seq);
         if (strcpy_s(sendMsg  + sizeof(int64_t) + sizeof(int64_t), strLen, reply) != EOK) {
             SoftBusFree(sendMsg);
             return SOFTBUS_STRCPY_ERR;
@@ -849,18 +850,19 @@ static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn,
 
 static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t len)
 {
-    TRANS_CHECK_AND_RETURN_LOGW((data != NULL) && (len > sizeof(int64_t) + sizeof(int64_t)),
+#define MAX_DATA_SIZE 1024
+    TRANS_CHECK_AND_RETURN_LOGW((data != NULL) && (len > sizeof(int64_t) + sizeof(int64_t)) && (len <= MAX_DATA_SIZE),
         TRANS_CTRL, "received data is invalid");
     cJSON *json = cJSON_ParseWithLength((data + sizeof(int64_t) + sizeof(int64_t)),
         len - sizeof(int64_t) - sizeof(int64_t));
     TRANS_CHECK_AND_RETURN_LOGW((json != NULL), TRANS_CTRL, "parse json failed");
 
-    int64_t msgType = *(int64_t*)data;
+    int64_t msgType = (int64_t)SoftBusLtoHll((uint64_t)*(int64_t*)data);
     AuthHandle authHandle = { .authId = channelId, .type = AUTH_LINK_TYPE_BLE };
     if (msgType == P2P_VERIFY_REQUEST) {
-        OnVerifyP2pRequest(authHandle, *(int64_t*)(data + sizeof(int64_t)), json, false);
+        OnVerifyP2pRequest(authHandle, SoftBusLtoHll((uint64_t)*(int64_t*)(data + sizeof(int64_t))), json, false);
     } else if (msgType == P2P_VERIFY_REPLY) {
-        OnVerifyP2pReply(channelId, *(int64_t*)(data + sizeof(int64_t)), json);
+        OnVerifyP2pReply(channelId, SoftBusLtoHll((uint64_t)*(int64_t*)(data + sizeof(int64_t))), json);
     } else {
         TRANS_LOGE(TRANS_CTRL, "invalid msgType=%{public}" PRIu64, msgType);
     }
@@ -925,8 +927,8 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
             cJSON_free(msg);
             return SOFTBUS_MALLOC_ERR;
         }
-        *(int64_t*)sendMsg = P2P_VERIFY_REQUEST;
-        *(int64_t*)(sendMsg + sizeof(int64_t)) = conn->req;
+        *(int64_t*)sendMsg = SoftBusHtoLll((uint64_t)P2P_VERIFY_REQUEST);
+        *(int64_t*)(sendMsg + sizeof(int64_t)) = SoftBusHtoLll((uint64_t)conn->req);
         if (strcpy_s(sendMsg  + sizeof(int64_t) + sizeof(int64_t), strLen, msg) != EOK) {
             cJSON_free(msg);
             SoftBusFree(sendMsg);

@@ -30,7 +30,7 @@ int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusRegDiscDumpCb invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_disc_var_list);
 }
@@ -39,7 +39,7 @@ static int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusDiscDumpHander invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {

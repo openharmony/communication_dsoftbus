@@ -115,3 +115,8 @@ void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
 }
 
 void LnnUnregDataLevelChangeCb(void) { }
+
+bool LnnIsCloudSyncEnd(void)
+{
+    return true;
+}

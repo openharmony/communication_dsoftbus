@@ -29,6 +29,8 @@ public:
     virtual int32_t TransGetLaneHandleByChannelId(int32_t channelId, uint32_t *laneHandle) = 0;
     virtual int32_t TransGetPidFromSocketChannelInfoBySession(
         const char *sessionName, int32_t sessionId, int32_t *pid) = 0;
+    virtual int32_t LnnRequestQosOptimization(const uint64_t *laneIdList, uint32_t listSize,
+        int32_t *result, uint32_t resultSize) = 0;
 };
 class TransManagerTestInterfaceMock : public TransManagerTestInterface {
 public:
@@ -36,6 +38,8 @@ public:
     ~TransManagerTestInterfaceMock() override;
     MOCK_METHOD2(TransGetLaneHandleByChannelId, int32_t (int32_t, uint32_t *));
     MOCK_METHOD3(TransGetPidFromSocketChannelInfoBySession, int32_t (const char *, int32_t, int32_t *));
+    MOCK_METHOD4(LnnRequestQosOptimization, int32_t (const uint64_t *laneIdList, uint32_t listSize,
+        int32_t *result, uint32_t resultSize));
 };
 } // namespace OHOS
 #endif // TRANS_MANAGER_TEST_MOCK_H

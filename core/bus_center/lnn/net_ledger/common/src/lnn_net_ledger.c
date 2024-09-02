@@ -136,22 +136,22 @@ static void ProcessLocalDeviceInfo(void)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)LnnGetLocalDevInfo(&info);
-    char *anonyNetworkId = NULL;
-    Anonymize(info.networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%{public}s", anonyNetworkId);
-    AnonymizeFree(anonyNetworkId);
+    LnnDumpNodeInfo(&info, "load local deviceInfo success");
     if (IsBleDirectlyOnlineFactorChange(&info)) {
         info.stateVersion++;
         LnnSaveLocalDeviceInfo(&info);
     }
-    if (LnnUpdateLedgerByRestoreInfo(&info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update local ledger by restore info fail");
+    if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set state version fail");
     }
     if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set networkId fail");
     }
     LnnNotifyNetworkIdChangeEvent(info.networkId);
     LnnNotifyLocalNetworkIdChanged();
+    if (info.networkIdTimestamp != 0) {
+        LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
+    }
 }
 
 void RestoreLocalDeviceInfo(void)
@@ -292,6 +292,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_IP, (char *)info, infoLen);
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return LnnGetRemoteBoolInfo(networkId, BOOL_KEY_SCREEN_STATUS, (bool*)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -471,6 +473,8 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return IP_LEN;
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LNN_COMMON_LEN;
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return DATA_DEVICE_SCREEN_STATUS_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;

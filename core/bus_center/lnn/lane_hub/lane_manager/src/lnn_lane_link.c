@@ -422,6 +422,7 @@ static void AddNetworkResourceInner(const LaneLinkInfo *linkInfo, uint64_t laneI
         LNN_LOGE(LNN_LANE, "strcpy peerUdid fail");
     }
     AddNetworkResource(networkResource);
+    SoftBusFree(networkResource);
     AnonymizeFree(anonyLocalUdid);
     AnonymizeFree(anonyRemoteUdid);
 }
@@ -977,6 +978,23 @@ static void LaneInitP2pAddrList()
     ListInit(&g_P2pAddrList.list);
     g_P2pAddrList.cnt = 0;
     SoftBusMutexInit(&g_P2pAddrList.lock, NULL);
+}
+
+static void LaneDeinitP2pAddrList(void)
+{
+    if (SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "SoftBusMutexLock fail");
+        return;
+    }
+    P2pAddrNode *item = NULL;
+    P2pAddrNode *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_P2pAddrList.list, P2pAddrNode, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    g_P2pAddrList.cnt = 0;
+    SoftBusMutexUnlock(&g_P2pAddrList.lock);
+    (void)SoftBusMutexDestroy(&g_P2pAddrList.lock);
 }
 
 void LaneDeleteP2pAddress(const char *networkId, bool isDestroy)
@@ -1614,5 +1632,19 @@ int32_t InitLaneLink(void)
 
 void DeinitLaneLink(void)
 {
+    LaneDeinitP2pAddrList();
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    g_laneResource.cnt = 0;
+    LaneUnlock();
     LnnDestroyP2p();
+    (void)SoftBusMutexDestroy(&g_laneResource.lock);
 }

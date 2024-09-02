@@ -36,7 +36,7 @@ extern "C" {
 
 TRANS_ASSIGNER(Errcode, Result, result)
 TRANS_ASSIGNER(Errcode, Errcode, errcode)
-TRANS_ASSIGNER(String, SocketName, socketName)
+TRANS_ASSIGNER(AnonymizeString, SocketName, socketName)
 TRANS_ASSIGNER(Int32, DataType, dataType)
 TRANS_ASSIGNER(Int32, ChannelType, channelType)
 TRANS_ASSIGNER(Int32, LaneId, laneId)
@@ -131,7 +131,7 @@ TRANS_ALARM_ASSIGNER(String, ConflictName, conflictName)
 TRANS_ALARM_ASSIGNER(String, ConflictedName, conflictedName)
 TRANS_ALARM_ASSIGNER(String, OccupyedName, occupyedName)
 TRANS_ALARM_ASSIGNER(String, PermissionName, permissionName)
-TRANS_ALARM_ASSIGNER(String, AlarmSessionName, sessionName)
+TRANS_ALARM_ASSIGNER(AnonymizeString, AlarmSessionName, sessionName)
 
 #define TRANS_ALARM_ASSIGNER_SIZE 20 // Size of g_transAlarmAssigners
 static const HiSysEventParamAssigner g_transAlarmAssigners[] = {

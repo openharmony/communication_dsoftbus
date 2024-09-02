@@ -23,6 +23,7 @@
 #include "data/ipv4_info.h"
 #include "wifi_direct_types.h"
 #include "data/link_info.h"
+#include "data/inner_link.h"
 
 namespace OHOS::SoftBus {
 static constexpr int FREQUENCY_2G_FIRST = 2412;
@@ -96,7 +97,8 @@ public:
     static void ParallelFlowExit();
     static uint32_t CalculateStringLength(const char *str, uint32_t size);
     static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
-    static int32_t GetOsType(const std::string &remoteNetworkId);
+    static bool IsDfsChannel(const int &frequency);
+    static bool CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type);
     static int32_t GetOsType(const char *networkId);
     static int32_t GetDeviceType(const char *networkId);
     static int32_t GetDeviceType();

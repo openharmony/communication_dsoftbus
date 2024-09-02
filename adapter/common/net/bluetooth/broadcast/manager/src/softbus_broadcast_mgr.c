@@ -1901,7 +1901,8 @@ static int32_t RegisterInfoDump(int fd)
 
     SOFTBUS_DPRINTF(fd, "\n---------------------------Register Listener Info----------------------------\n");
     SOFTBUS_DPRINTF(fd, "max listener num                      : %d\n", SCAN_NUM_MAX);
-    SOFTBUS_DPRINTF(fd, "freq : 0 - low power, 1 - 60/3000, 2 - 30/1500, 3 - 30/300, 4 - 60/240, 5 - 1000/1000\n");
+    SOFTBUS_DPRINTF(fd, "freq : 0 - low power, 1 - 60/3000, 2 - 30/1500, 3 - 30/300, 4 - 60/240, 5 - 30/60, "
+        "6 - 30/40, 7 - 1000/1000\n");
     SOFTBUS_DPRINTF(fd, "isNeedReset/isScanning : 0 - false, 1 - true\n\n");
     for (managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         if (!g_scanManager[managerId].isUsed) {

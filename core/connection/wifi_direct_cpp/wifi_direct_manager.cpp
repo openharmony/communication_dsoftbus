@@ -122,7 +122,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
 
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
-    OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
+    OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TOTAL_START);
 
     ConnEventExtra extra;
     SetElementTypeExtra(info, &extra);

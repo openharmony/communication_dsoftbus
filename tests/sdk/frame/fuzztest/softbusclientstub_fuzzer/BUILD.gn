@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,16 +18,15 @@ import("//build/test.gni")
 import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
 import("../../../../../sdk/bus_center/bus_center_sdk.gni")
-import("../../../../../sdk/discovery/disc_sdk.gni")
 import("../../../../../sdk/frame/frame_sdk.gni")
 import("../../../../../sdk/frame/frame_sdk.gni")
 import("../../../../../sdk/transmission/trans_sdk.gni")
 dsoftbus_root_path = "../../../../.."
 
-common_client_src = bus_center_sdk_src + disc_sdk_src +
-                    softbus_client_frame_src + trans_session_manager_sdk_src
-common_client_inc = bus_center_sdk_inc + disc_sdk_inc +
-                    softbus_client_frame_inc + trans_session_manager_sdk_inc
+common_client_src = bus_center_sdk_src + softbus_client_frame_src +
+                    trans_session_manager_sdk_src
+common_client_inc = bus_center_sdk_inc + softbus_client_frame_inc +
+                    trans_session_manager_sdk_inc
 common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
 common_client_deps += [

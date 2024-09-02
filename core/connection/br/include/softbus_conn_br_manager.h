@@ -38,6 +38,8 @@ extern "C" {
 #define BR_WAIT_BLE_DISCONNECTED_PEND_MILLIS             (10 * 1000)
 #define BR_NIP_SEQ                                       (0xeaddeaddeaddeadd)
 
+#define BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS      (500)
+
 enum ConnBrDeviceState {
     BR_DEVICE_STATE_INIT,
     BR_DEVICE_STATE_WAIT_EVENT,

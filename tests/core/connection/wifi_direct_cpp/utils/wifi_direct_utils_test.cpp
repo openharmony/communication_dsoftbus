@@ -16,11 +16,13 @@
 #define private   public
 #define protected public
 #include "duration_statistic.h"
+#include "wifi_direct_dfx.h"
 #undef protected
 #undef private
 
 #include "wifi_direct_mock.h"
 #include "wifi_direct_utils.h"
+#include "wifi_direct_anonymous.h"
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
@@ -329,4 +331,173 @@ HWTEST_F(WifiDirectUtilsTest, DurationStatisticEndTest, TestSize.Level1)
     EXPECT_EQ(requestid, 0);
     EXPECT_NE(ptr, nullptr);
 }
+
+/*
+ * @tc.name: GetLocalIpv4InfosTest
+ * @tc.desc: check GetLocalIpv4Infos method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, GetLocalIpv4InfosTest, TestSize.Level1)
+{
+    auto ret = WifiDirectUtils::GetLocalIpv4Infos();
+    EXPECT_EQ(ret.empty(), true);
+}
+
+/*
+ * @tc.name: IpStringToIntArrayTest
+ * @tc.desc: check IpStringToIntArray method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, IpStringToIntArrayTest, TestSize.Level1)
+{
+    static char addrString[] = "255.255.255.0";
+    static const uint32_t LEN = 4;
+    uint32_t addrArray[LEN];
+    auto ret = WifiDirectUtils::IpStringToIntArray(addrString, addrArray, LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ChannelListToStringTest
+ * @tc.desc: check ChannelListToString method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, ChannelListToStringTest, TestSize.Level1)
+{
+    std::vector<int> channels = {36, 40, 52};
+    auto ret = WifiDirectUtils::ChannelListToString(channels);
+    EXPECT_EQ(ret, "36##40##52");
+}
+
+/*
+ * @tc.name: GetInterfaceIpv6AddrTest
+ * @tc.desc: check GetInterfaceIpv6Addr method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, GetInterfaceIpv6AddrTest, TestSize.Level1)
+{
+    std::string interface = "wlan0";
+    auto ret = WifiDirectUtils::GetInterfaceIpv6Addr(interface);
+    EXPECT_EQ(ret, "");
+}
+
+/*
+ * @tc.name: WifiDirectAnonymizeIpTest
+ * @tc.desc: check WifiDirectAnonymizeIp method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeIpTest, TestSize.Level1)
+{
+    std::string ip = "192";
+    auto ret = WifiDirectAnonymizeIp(ip);
+    EXPECT_EQ(ret, "");
+    ip = "192.168";
+    ret = WifiDirectAnonymizeIp(ip);
+    EXPECT_EQ(ret, "");
+    ip = "192..";
+    ret = WifiDirectAnonymizeIp(ip);
+    EXPECT_EQ(ret, "");
+    ip = "70:60";
+    ret = WifiDirectAnonymizeIp(ip);
+    EXPECT_EQ(ret, "");
+    ip = "192.168.1.2";
+    ret = WifiDirectAnonymizeIp(ip);
+    EXPECT_EQ(ret, "192**.1.2");
+    ip = "70:f8:56:s5:80:9a";
+    ret = WifiDirectAnonymizeIp(ip);
+    EXPECT_EQ(ret, "70:f8***9a");
+}
+
+/*
+ * @tc.name: WifiDirectAnonymizeSsidTest
+ * @tc.desc: check WifiDirectAnonymizeSsid method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeSsidTest, TestSize.Level1)
+{
+    std::string ssid = "";
+    auto ret = WifiDirectAnonymizeSsid(ssid);
+    EXPECT_EQ(ret, "");
+    ssid = "te";
+    ret = WifiDirectAnonymizeSsid(ssid);
+    EXPECT_EQ(ret, "");
+    ssid = "aaaaaaaa";
+    ret = WifiDirectAnonymizeSsid(ssid);
+    EXPECT_EQ(ret, "aa**aa");
+}
+
+/*
+ * @tc.name: WifiDirectAnonymizePskTest
+ * @tc.desc: check WifiDirectAnonymizePsk method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePskTest, TestSize.Level1)
+{
+    std::string psk = "";
+    ConnectInfo conInfo{};
+    ConnEventExtra conEventExtra = { 0 };
+    WifiDirectInterfaceMock mock;
+    conInfo.info_.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
+    DurationStatistic::GetInstance().Record(1, TOTAL_START);
+    DurationStatistic::GetInstance().Record(1, TOTAL_END);
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_OK));
+    WifiDirectDfx::GetInstance().ReportConnEventExtra(conEventExtra, conInfo);
+    auto ret = WifiDirectAnonymizePsk(psk);
+    EXPECT_EQ(ret, "");
+    psk = "1234";
+    ret = WifiDirectAnonymizePsk(psk);
+    EXPECT_EQ(ret, "");
+    psk = "123456789";
+    ret = WifiDirectAnonymizePsk(psk);
+    EXPECT_EQ(ret, "12****9");
+}
+
+/*
+ * @tc.name: WifiDirectAnonymizePtkTest
+ * @tc.desc: check WifiDirectAnonymizePtk method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePtkTest, TestSize.Level1)
+{
+    std::string ptk = "";
+    auto ret = WifiDirectAnonymizePtk(ptk);
+    EXPECT_EQ(ret, "");
+    ptk = "123456";
+    ret = WifiDirectAnonymizePtk(ptk);
+    EXPECT_EQ(ret, "");
+    ptk = "123456789000000";
+    ret = WifiDirectAnonymizePtk(ptk);
+    EXPECT_EQ(ret, "1234****0000");
+}
+
+/*
+ * @tc.name: WifiDirectAnonymizeDataTest
+ * @tc.desc: check WifiDirectAnonymizeData method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeDataTest, TestSize.Level1)
+{
+    std::string data = "";
+    auto ret = WifiDirectAnonymizeData(data);
+    EXPECT_EQ(ret, "");
+    data = "12345";
+    ret = WifiDirectAnonymizeData(data);
+    EXPECT_EQ(ret, "");
+    data = "0123456789";
+    ret = WifiDirectAnonymizeData(data);
+    EXPECT_EQ(ret, "01****89");
+}
+
 } // namespace OHOS::SoftBus

@@ -42,19 +42,27 @@ InnerLink::InnerLink(LinkType type, const std::string &remoteDeviceId)
 InnerLink::~InnerLink()
 {
     auto listenerModuleId = GetListenerModule();
+    bool hasAnotherUsed = false;
+    LinkManager::GetInstance().ForEach([&hasAnotherUsed, this](InnerLink &innerLink) {
+        if (innerLink.GetLinkType() == InnerLink::LinkType::P2P && innerLink.GetLocalIpv4() == this->GetLocalIpv4() &&
+            innerLink.GetRemoteDeviceId() != this->GetRemoteDeviceId()) {
+                hasAnotherUsed = true;
+            }
+        return false;
+    });
+    CONN_LOGI(CONN_WIFI_DIRECT, "hasAnotherUsed=%{public}d", hasAnotherUsed);
     if (listenerModuleId != UNUSE_BUTT) {
         CONN_LOGI(CONN_WIFI_DIRECT, "stop auth listening");
         if (GetLinkType() == LinkType::HML) {
             AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_ENHANCED_P2P, listenerModuleId);
-            if (GetLocalCustomPort() > 0) {
-                CONN_LOGI(CONN_WIFI_DIRECT, "localCustomPort=%{public}d, stop custom listening", GetLocalCustomPort());
-                AuthNegotiateChannel::StopCustomListening();
-            }
+            StopCustomListen(GetLocalCustomPort());
         } else {
-            AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_P2P, listenerModuleId);
+            if (!hasAnotherUsed) {
+                AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_P2P, listenerModuleId);
+            }
         }
     }
-    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty()) {
+    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() && !hasAnotherUsed) {
         CONN_LOGI(CONN_WIFI_DIRECT, "release ip");
         WifiDirectIpManager::GetInstance().ReleaseIpv4(
             GetLocalInterface(), Ipv4Info(GetLocalIpv4()), Ipv4Info(GetRemoteIpv4()), GetRemoteBaseMac());
@@ -274,6 +282,23 @@ void InnerLink::SetLocalCustomPort(int32_t value)
 int32_t InnerLink::GetRemoteCustomPort() const
 {
     return Get(InnerLinKey::REMOTE_CUSTOM_PORT, 0);
+}
+
+void InnerLink::StopCustomListen(int32_t localCustomPort)
+{
+    CONN_CHECK_AND_RETURN_LOGE(localCustomPort > 0, CONN_WIFI_DIRECT, "loacl custom port is zero");
+    bool hasMoreLocalCustomPort = false;
+    LinkManager::GetInstance().ForEach([&hasMoreLocalCustomPort] (InnerLink &link) {
+        if (link.GetLocalCustomPort() > 0) {
+            hasMoreLocalCustomPort = true;
+            return true;
+        }
+        return false;
+    });
+    if (!hasMoreLocalCustomPort) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "localCustomPort=%{public}d, stop custom listening", localCustomPort);
+        AuthNegotiateChannel::StopCustomListening();
+    }
 }
 
 void InnerLink::SetRemoteCustomPort(int32_t value)

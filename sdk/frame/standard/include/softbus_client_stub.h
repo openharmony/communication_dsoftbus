@@ -35,11 +35,6 @@ public:
     SoftBusClientStub();
     virtual ~SoftBusClientStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void OnDeviceFound(const DeviceInfo *device) override;
-    void OnDiscoverFailed(int subscribeId, int failReason) override;
-    void OnDiscoverySuccess(int subscribeId) override;
-    void OnPublishSuccess(int publishId) override;
-    void OnPublishFail(int publishId, int reason) override;
     int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *info) override;
     int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode) override;
     int32_t OnChannelLinkDown(const char *networkId, int32_t routeType) override;
@@ -53,8 +48,9 @@ public:
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
     int32_t OnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info, uint32_t infoTypeLen) override;
     int32_t OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type) override;
+    int32_t OnNodeStatusChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type) override;
     int32_t OnLocalNetworkIdChanged(const char *pkgName) override;
-    int32_t OnNodeDeviceNotTrusted(const char *pkgName, const char *msg) override;
+    int32_t OnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg, uint32_t msgLen) override;
     int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override;
     void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
@@ -64,11 +60,6 @@ public:
     int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
 
 private:
-    int32_t OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnDiscoverFailedInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnDiscoverySuccessInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnPublishSuccessInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnPublishFailInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOpenFailedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelLinkDownInner(MessageParcel &data, MessageParcel &reply);
@@ -80,8 +71,9 @@ private:
     int32_t OnLeaveLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeOnlineStateChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeBasicInfoChangedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnNodeStatusChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnLocalNetworkIdChangedInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnNodeDeviceNotTrustedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnNodeDeviceTrustedChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnPublishLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshLNNResultInner(MessageParcel &data, MessageParcel &reply);

@@ -45,11 +45,9 @@ tests/core/connection/wifi_direct_cpp/        wuchunbo1@huawei.com
 [Disc]
 adapter/common/range/   fanjingya1@huawei.com
 core/discovery/         fanjingya1@huawei.com
-sdk/discovery/          fanjingya1@huawei.com
 tests/adapter/fuzztest/softbusadapterrange_fuzzer/      fanjingya1@huawei.com
 tests/adapter/unittest/softbus_adapter_range_test.cpp   fanjingya1@huawei.com
 tests/core/discovery/   fanjingya1@huawei.com
-tests/sdk/discovery/    fanjingya1@huawei.com
 
 [DiscInterface]
 interfaces/kits/discovery/  fanjingya1@huawei.com
@@ -124,7 +122,7 @@ components/mbedtls/         chenbotong1@huawei.com
 core/adapter/huks/          chenbotong1@huawei.com
 
 ^[2nd-Party]
-components/nstackx/         libing3@huawei.com libaolong3@huawei.com
+components/nstackx/         libing3@huawei.com libaolong3@huawei.com lumin17@huawei.com
 
 [InterfaceCode]
 # any change to core/common/include/softbus_server_ipc_interface_code.h needs to be reviewed by @leonchan5

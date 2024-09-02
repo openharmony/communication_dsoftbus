@@ -79,7 +79,14 @@ static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
         LNN_LOGE(LNN_LEDGER, "GetBasicInfoByUdid fail.");
         return;
     }
-    LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.", oldDeviceName, basic.deviceName);
+    char *anonyOldDeviceName = NULL;
+    Anonymize(oldDeviceName, &anonyOldDeviceName);
+    char *anonyDeviceName = NULL;
+    Anonymize(basic.deviceName, &anonyDeviceName);
+    LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.",
+        anonyOldDeviceName, anonyDeviceName);
+    AnonymizeFree(anonyOldDeviceName);
+    AnonymizeFree(anonyDeviceName);
     LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
 }
 
