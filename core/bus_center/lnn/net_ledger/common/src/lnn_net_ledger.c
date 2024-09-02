@@ -39,6 +39,7 @@
 #include "lnn_meta_node_ledger.h"
 #include "lnn_p2p_info.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_oobe_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
@@ -207,6 +208,7 @@ int32_t LnnInitEventMoniterDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init LnnInitDeviceNameMonitorImpl fail");
         return SOFTBUS_ERR;
     }
+    LnnInitOOBEStateMonitorImpl();
     return SOFTBUS_OK;
 }
 

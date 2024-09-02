@@ -31,6 +31,7 @@
 #include "lnn_net_capability.h"
 #include "lnn_net_ledger.h"
 #include "lnn_node_info.h"
+#include "lnn_oobe_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
