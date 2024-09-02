@@ -103,7 +103,7 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
         }
     }
     uint32_t authCapacity = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_CAP, (int32_t *)&authCapacity) == SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
             LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}d->%{public}d", info->authCapacity, authCapacity);
             return true;
