@@ -58,6 +58,7 @@ typedef enum {
 typedef struct {
     SessionState sessionState;
     SoftBusCond callbackCond;
+    bool condIsWaiting;
     int32_t bindErrCode;
     uint32_t maxWaitTime; // 0 means no check time out, for Bind end
     uint32_t waitTime;
