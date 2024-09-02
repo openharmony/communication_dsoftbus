@@ -64,7 +64,8 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByFd(fd, &channel) == NULL) {
-        TRANS_LOGE(TRANS_SDK, "can not match fd. fd=%{public}d", fd);
+        TransTdcReleaseFd(fd);
+        TRANS_LOGE(TRANS_SDK, "can not match fd. release fd=%{public}d", fd);
         return SOFTBUS_MEM_ERR;
     }
 
