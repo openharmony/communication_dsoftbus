@@ -48,7 +48,7 @@
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
 #define DEFAULT_SUPPORT_HBCAPACITY 0x1
-#define DEFAULT_CONN_SUB_FEATURE 1
+#define DEFAULT_CONN_SUB_FEATURE 3
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
@@ -665,6 +665,16 @@ static int32_t LlGetFeatureCapa(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((uint64_t *)buf) = info->feature;
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetConnSubFeatureCapa(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(uint64_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    *((uint64_t *)buf) = info->connSubFeature;
     return SOFTBUS_OK;
 }
 
@@ -1300,6 +1310,15 @@ static int32_t UpdateLocalFeatureCapability(const void *capability)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateLocalConnSubFeatureCapability(const void *capability)
+{
+    if (capability == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.connSubFeature |= *(uint64_t *)capability;
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateMasgerNodeWeight(const void *weight)
 {
     if (weight == NULL) {
@@ -1803,6 +1822,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DATA_SWITCH_LENGTH, sizeof(uint16_t), L1GetDataSwitchLength, UpdateDataSwitchLength},
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
+    {NUM_KEY_CONN_SUB_FEATURE_CAPA, -1, L1GetConnSubFeatureCapa, UpdateLocalConnSubFeatureCapability},
     {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
     {NUM_KEY_DEVICE_SECURITY_LEVEL, sizeof(int32_t), LlGetDeviceSecurityLevel, LlUpdateDeviceSecurityLevel},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},

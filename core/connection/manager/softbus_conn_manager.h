@@ -115,7 +115,10 @@ typedef struct {
 } ConnectFuncInterface;
 
 #define MAGIC_NUMBER  0xBABEFACE
+
 #define CONN_FEATURE_SUPPORT_NETWORKID_EXCAHNGE 0
+#define CONN_FEATURE_SUPPORT_ACTION_ENCODE 1
+
 typedef struct {
     int32_t magic;
     int32_t module;
