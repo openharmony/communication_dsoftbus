@@ -59,6 +59,11 @@ int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnSetLocalNumInfo(key, info);
 }
 
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalNumU64Info(key, info);
+}
+
 int32_t LnnSyncP2pInfo()
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnSyncP2pInfo();
@@ -84,6 +89,12 @@ int32_t LnnGetRemoteBoolInfoIgnoreOnline(const char *networkId, InfoKey key, boo
 {
     auto id = std::string(networkId);
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteBoolInfoIgnoreOnline(id, key, info);
+}
+
+int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
+{
+    auto id = std::string(networkId);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteNumU64Info(id, key, info);
 }
 
 bool LnnGetOnlineStateById(const char *id, IdCategory type)
