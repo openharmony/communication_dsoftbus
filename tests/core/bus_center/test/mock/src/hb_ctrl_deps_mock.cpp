@@ -86,5 +86,10 @@ int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle)
 {
     return HeartBeatCtrlDepsInterface()->AuthSendKeepaliveOption(uuid, cycle);
 }
+
+int32_t LnnGenerateCeParams(void)
+{
+    return HeartBeatCtrlDepsInterface()->LnnGenerateCeParams();
+}
 }
 } // namespace OHOS
