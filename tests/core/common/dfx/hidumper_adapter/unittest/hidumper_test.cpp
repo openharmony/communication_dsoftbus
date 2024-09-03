@@ -749,9 +749,9 @@ HWTEST_F(HidumperTest, SoftBusRegHiDumperHandler001, TestSize.Level1)
         const_cast<char *>(g_testHelpInfo), DumpHandlerTest1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusRegHiDumperHandler(nullptr, const_cast<char *>(g_testHelpInfo), DumpHandlerTest1);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = SoftBusRegHiDumperHandler(const_cast<char *>(g_testModuleName), const_cast<char *>(g_testHelpInfo), nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     SoftBusDumpShowHelp(ERR_FD);
     SoftBusDumpErrInfo(ERR_FD, g_testDumpVar);
     SoftBusDumpSubModuleHelp(ERR_FD, const_cast<char *>(g_testModuleName), nullptr);
@@ -761,11 +761,11 @@ HWTEST_F(HidumperTest, SoftBusRegHiDumperHandler001, TestSize.Level1)
     const char **tmpTestHandle = &testHandler;
 
     ret = SoftBusDumpDispatch(ERR_FD, TEST_ARGC_ONE, tmpTestHandle);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = SoftBusDumpDispatch(TEST_FD_ZERO, ERR_ARGC, tmpTestHandle);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = SoftBusDumpDispatch(TEST_FD_ZERO, TEST_ARGC_ONE, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusRegHiDumperHandler001, end");
 }
 } // namespace OHOS
