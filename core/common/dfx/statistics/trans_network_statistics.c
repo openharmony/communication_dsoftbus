@@ -31,6 +31,14 @@ typedef struct {
     uint32_t len;
 } ChannelStatisticsInfo;
 
+typedef struct {
+    ListNode node;
+    NetworkResource resource;
+    int64_t startTime;
+    int64_t endTime;
+    ListNode channels;
+} NetworkStatisticsInfo;
+
 static SoftBusList *g_networkResourceList = NULL;
 
 void AddNetworkResource(NetworkResource *networkResource)
@@ -41,34 +49,42 @@ void AddNetworkResource(NetworkResource *networkResource)
     }
     if (g_networkResourceList == NULL) {
         COMM_LOGE(COMM_DFX, "g_networkResourceList init fail");
-        SoftBusFree(networkResource);
         return;
     }
     if (SoftBusMutexLock(&g_networkResourceList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "lock failed");
-        SoftBusFree(networkResource);
         return;
     }
     if ((int32_t)g_networkResourceList->cnt >= MAX_NETWORK_RESOURCE_NUM) {
         COMM_LOGE(COMM_DFX, "network Resource out of max num");
         (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
-        SoftBusFree(networkResource);
         return;
     }
 
-    NetworkResource *temp = NULL;
-    LIST_FOR_EACH_ENTRY(temp, &g_networkResourceList->list, NetworkResource, node) {
-        if (temp->laneId == networkResource->laneId) {
+    NetworkStatisticsInfo *temp = NULL;
+    LIST_FOR_EACH_ENTRY(temp, &g_networkResourceList->list, NetworkStatisticsInfo, node) {
+        if (temp->resource.laneId == networkResource->laneId) {
             COMM_LOGE(COMM_DFX, "laneId already in g_networkResourceList");
             (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
-            SoftBusFree(networkResource);
             return;
         }
     }
-    ListInit(&networkResource->node);
-    ListInit(&networkResource->channels);
-    networkResource->startTime = SoftBusGetSysTimeMs();
-    ListAdd(&g_networkResourceList->list, &networkResource->node);
+    NetworkStatisticsInfo *info = (NetworkStatisticsInfo *)SoftBusCalloc(sizeof(NetworkStatisticsInfo));
+    if (info == NULL) {
+        COMM_LOGE(COMM_DFX, "network resource info SoftBusCalloc fail");
+        (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
+        return;
+    }
+    if (memcpy_s(&info->resource, sizeof(NetworkResource), networkResource, sizeof(NetworkResource)) != EOK) {
+        COMM_LOGE(COMM_DFX, "network resource memcpy fail");
+        (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
+        SoftBusFree(info);
+        return;
+    }
+    ListInit(&info->node);
+    ListInit(&info->channels);
+    info->startTime = SoftBusGetSysTimeMs();
+    ListAdd(&g_networkResourceList->list, &info->node);
     g_networkResourceList->cnt++;
     (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
 }
@@ -84,9 +100,9 @@ void UpdateNetworkResourceByLaneId(int32_t channelId, uint64_t laneId, const voi
         return;
     }
 
-    NetworkResource *temp = NULL;
-    LIST_FOR_EACH_ENTRY(temp, &g_networkResourceList->list, NetworkResource, node) {
-        if (temp->laneId != laneId) {
+    NetworkStatisticsInfo *temp = NULL;
+    LIST_FOR_EACH_ENTRY(temp, &g_networkResourceList->list, NetworkStatisticsInfo, node) {
+        if (temp->resource.laneId != laneId) {
             continue;
         }
         ChannelStatisticsInfo *item = NULL;
@@ -117,26 +133,26 @@ void UpdateNetworkResourceByLaneId(int32_t channelId, uint64_t laneId, const voi
     (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
 }
 
-static int32_t PackNetworkStatistics(cJSON *json, NetworkResource *resource)
+static int32_t PackNetworkStatistics(cJSON *json, NetworkStatisticsInfo *info)
 {
-    if (json == NULL || resource == NULL) {
+    if (json == NULL || info == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
  
     char laneId[MAX_LANE_ID_LEN] = { 0 };
-    if (sprintf_s(laneId, sizeof(laneId), "%"PRIu64"", resource->laneId) < 0) {
+    if (sprintf_s(laneId, sizeof(laneId), "%"PRIu64"", info->resource.laneId) < 0) {
         COMM_LOGE(COMM_DFX, "sprintf lane id fail");
         return SOFTBUS_MEM_ERR;
     }
     if (!AddStringToJsonObject(json, "laneId", laneId) ||
-        !AddStringToJsonObject(json, "localUdid", resource->localUdid) ||
-        !AddStringToJsonObject(json, "peerUdid", resource->peerUdid)) {
+        !AddStringToJsonObject(json, "localUdid", info->resource.localUdid) ||
+        !AddStringToJsonObject(json, "peerUdid", info->resource.peerUdid)) {
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (!AddNumberToJsonObject(json, "lineLinkType", resource->laneLinkType) ||
-        !AddNumber64ToJsonObject(json, "startTime", resource->startTime) ||
-        !AddNumber64ToJsonObject(json, "endTime", resource->endTime)) {
+    if (!AddNumberToJsonObject(json, "lineLinkType", info->resource.laneLinkType) ||
+        !AddNumber64ToJsonObject(json, "startTime", info->startTime) ||
+        !AddNumber64ToJsonObject(json, "endTime", info->endTime)) {
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
@@ -145,7 +161,7 @@ static int32_t PackNetworkStatistics(cJSON *json, NetworkResource *resource)
         return SOFTBUS_PARSE_JSON_ERR;
     }
     ChannelStatisticsInfo *temp = NULL;
-    LIST_FOR_EACH_ENTRY(temp, &resource->channels, ChannelStatisticsInfo, node) {
+    LIST_FOR_EACH_ENTRY(temp, &info->channels, ChannelStatisticsInfo, node) {
         if (temp->channelInfo != NULL) {
             cJSON_AddItemToArray(channelStatsObj, cJSON_Parse(temp->channelInfo));
         }
@@ -153,19 +169,19 @@ static int32_t PackNetworkStatistics(cJSON *json, NetworkResource *resource)
     return SOFTBUS_OK;
 }
 
-static void DfxRecordTransChannelStatistics(NetworkResource *networkResource)
+static void DfxRecordTransChannelStatistics(NetworkStatisticsInfo *networkStatisticsInfo)
 {
-    if (networkResource == NULL) {
+    if (networkStatisticsInfo == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    if (IsListEmpty(&networkResource->channels)) {
+    if (IsListEmpty(&networkStatisticsInfo->channels)) {
         return;
     }
     cJSON *json = cJSON_CreateObject();
     COMM_CHECK_AND_RETURN_LOGW(json != NULL, COMM_DFX, "cJSON_CreateObject fail");
 
-    if (PackNetworkStatistics(json, networkResource) != SOFTBUS_OK) {
+    if (PackNetworkStatistics(json, networkStatisticsInfo) != SOFTBUS_OK) {
         cJSON_Delete(json);
         return;
     }
@@ -191,10 +207,10 @@ void DeleteNetworkResourceByLaneId(uint64_t laneId)
         return;
     }
 
-    NetworkResource *item = NULL;
-    NetworkResource *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_networkResourceList->list), NetworkResource, node) {
-        if (item->laneId == laneId) {
+    NetworkStatisticsInfo *item = NULL;
+    NetworkStatisticsInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_networkResourceList->list), NetworkStatisticsInfo, node) {
+        if (item->resource.laneId == laneId) {
             item->endTime = SoftBusGetSysTimeMs();
             DfxRecordTransChannelStatistics(item);
             ChannelStatisticsInfo *channelItem = NULL;
@@ -238,9 +254,9 @@ void TransNetworkStatisticsDeinit(void)
         COMM_LOGE(COMM_DFX, "lock failed");
         return;
     }
-    NetworkResource *item = NULL;
-    NetworkResource *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_networkResourceList->list), NetworkResource, node) {
+    NetworkStatisticsInfo *item = NULL;
+    NetworkStatisticsInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_networkResourceList->list), NetworkStatisticsInfo, node) {
         if (!IsListEmpty(&item->channels)) {
             ChannelStatisticsInfo *channelItem = NULL;
             ChannelStatisticsInfo *channelNext = NULL;
