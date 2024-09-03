@@ -18,15 +18,20 @@
 #include <securec.h>
 
 #include "lnn_log.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 #define LNN_HUKS_MAX_UPDATE_RESERVED 32
 #define LNN_HUKS_MAX_UPDATE_SIZE (8 * 1024)
 #define LNN_HUKS_MAX_OUTDATA_SIZE (LNN_HUKS_MAX_UPDATE_SIZE + LNN_HUKS_MAX_UPDATE_RESERVED)
+#define DEFAULT_ACCOUNT_ID 100
 
 #define LNN_HUKS_IV_SIZE 16
 static uint8_t g_huksIv[LNN_HUKS_IV_SIZE] = {0};
+static bool g_isGenCeParams = false;
+static pthread_mutex_t g_ceParamsLock = PTHREAD_MUTEX_INITIALIZER;
 
 static struct HksParam g_genParams[] = {
     {
@@ -47,6 +52,31 @@ static struct HksParam g_genParams[] = {
     }, {
         .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
         .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE
+    }
+};
+
+static struct HksParam g_genCeParams[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_SPECIFIC_USER_ID,
+        .int32Param = DEFAULT_ACCOUNT_ID
+    }, {
+        .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
+        .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE
     }
 };
 
@@ -81,6 +111,40 @@ static struct HksParam g_encryptParams[] = {
     }
 };
 
+static struct HksParam g_ceEncryptParams[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }, {
+        .tag = HKS_TAG_IV,
+        .blob = {
+            .size = LNN_HUKS_IV_SIZE,
+            .data = (uint8_t *)g_huksIv
+        }
+    }, {
+        .tag = HKS_TAG_SPECIFIC_USER_ID,
+        .int32Param = DEFAULT_ACCOUNT_ID
+    }, {
+        .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
+        .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE
+    }
+};
+
 static struct HksParam g_decryptParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -112,9 +176,46 @@ static struct HksParam g_decryptParams[] = {
     }
 };
 
+static struct HksParam g_ceDecryptParams[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }, {
+        .tag = HKS_TAG_IV,
+        .blob = {
+            .size = LNN_HUKS_IV_SIZE,
+            .data = (uint8_t *)g_huksIv
+        }
+    }, {
+        .tag = HKS_TAG_SPECIFIC_USER_ID,
+        .int32Param = DEFAULT_ACCOUNT_ID
+    }, {
+        .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
+        .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE
+    }
+};
+
 static struct HksParamSet *g_genParamSet = NULL;
+static struct HksParamSet *g_genCeParamSet = NULL;
 static struct HksParamSet *g_encryptParamSet = NULL;
+static struct HksParamSet *g_ceEncryptParamSet = NULL;
 static struct HksParamSet *g_decryptParamSet = NULL;
+static struct HksParamSet *g_ceDecryptParamSet = NULL;
 
 static int32_t LoopFinishByHuks(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inDataSeg, uint8_t *cur, uint32_t *outDataSize)
@@ -197,6 +298,26 @@ static int32_t InitParamSetByHuks(struct HksParamSet **paramSet, const struct Hk
     return SOFTBUS_OK;
 }
 
+static int32_t InitCeParamSetByHuks(void)
+{
+    if (InitParamSetByHuks(&g_genCeParamSet, g_genCeParams,
+        sizeof(g_genCeParams) / sizeof(struct HksParam)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "huks init gen ce param set fail");
+        return SOFTBUS_ERR;
+    }
+    if (InitParamSetByHuks(&g_ceEncryptParamSet, g_ceEncryptParams,
+        sizeof(g_ceEncryptParams) / sizeof(struct HksParam)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "huks init ce encrypt param set fail");
+        return SOFTBUS_ERR;
+    }
+    if (InitParamSetByHuks(&g_ceDecryptParamSet, g_ceDecryptParams,
+        sizeof(g_ceDecryptParams) / sizeof(struct HksParam)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "huks init ce decrypt param set fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitHuksInterface(void)
 {
     int32_t ret = HksInitialize();
@@ -219,7 +340,24 @@ int32_t LnnInitHuksInterface(void)
         LNN_LOGE(LNN_LEDGER, "huks init decrypt param set fail");
         return SOFTBUS_ERR;
     }
+    if (InitCeParamSetByHuks() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "huks init ce param set fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
+}
+
+static void DeinitHuksCeInterface(void)
+{
+    if (g_genCeParamSet != NULL) {
+        HksFreeParamSet(&g_genCeParamSet);
+    }
+    if (g_ceEncryptParamSet != NULL) {
+        HksFreeParamSet(&g_ceEncryptParamSet);
+    }
+    if (g_ceDecryptParamSet != NULL) {
+        HksFreeParamSet(&g_ceDecryptParamSet);
+    }
 }
 
 void LnnDeinitHuksInterface(void)
@@ -233,6 +371,7 @@ void LnnDeinitHuksInterface(void)
     if (g_decryptParamSet != NULL) {
         HksFreeParamSet(&g_decryptParamSet);
     }
+    DeinitHuksCeInterface();
 }
 
 static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramCount)
@@ -256,30 +395,147 @@ static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct 
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
+static int32_t GenerateCeKeyByHuks(struct HksBlob *keyAlias)
 {
-    if (keyAlias == NULL) {
-        LNN_LOGE(LNN_LEDGER, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
+    struct HksParamSet *paramSet = NULL;
+    struct HksParam keyExistparams[] = {
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = DEFAULT_ACCOUNT_ID},
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE},
+    };
+    if (ConstructKeyParamSet(&paramSet, keyExistparams, sizeof(keyExistparams) / sizeof(struct HksParam)) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate ce key ConstructKeyParamSet failed.");
+        return SOFTBUS_HUKS_ERR;
     }
+    if (HksKeyExist(keyAlias, paramSet) == HKS_SUCCESS) {
+        LNN_LOGD(LNN_LEDGER, "huks ce key has generated");
+        HksFreeParamSet(&paramSet);
+        return SOFTBUS_OK;
+    }
+    HksFreeParamSet(&paramSet);
+    int32_t ret = HksGenerateKey(keyAlias, g_genCeParamSet, NULL);
+    if (ret != HKS_SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "huks generate ce key fail, errcode=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GenerateDeKeyByHuks(struct HksBlob *keyAlias)
+{
     struct HksParamSet *paramSet = NULL;
     struct HksParam keyExistparams[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
     };
     if (ConstructKeyParamSet(&paramSet, keyExistparams, sizeof(keyExistparams) / sizeof(struct HksParam)) !=
         SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "generate key ConstructKeyParamSet failed.");
+        LNN_LOGE(LNN_LEDGER, "generate de key ConstructKeyParamSet failed.");
         return SOFTBUS_HUKS_ERR;
     }
     if (HksKeyExist(keyAlias, paramSet) == HKS_SUCCESS) {
-        LNN_LOGD(LNN_LEDGER, "huks key has generated");
+        LNN_LOGD(LNN_LEDGER, "huks de key has generated");
         HksFreeParamSet(&paramSet);
         return SOFTBUS_OK;
     }
     HksFreeParamSet(&paramSet);
     int32_t ret = HksGenerateKey(keyAlias, g_genParamSet, NULL);
     if (ret != HKS_SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "huks generate key fail, errcode=%{public}d", ret);
+        LNN_LOGE(LNN_LEDGER, "huks generate de key fail, errcode=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DeleteDeKeyByHuks(struct HksBlob *keyAlias)
+{
+    struct HksParamSet *paramSet = NULL;
+    struct HksParam keyExistparams[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    if (ConstructKeyParamSet(&paramSet, keyExistparams, sizeof(keyExistparams) / sizeof(struct HksParam)) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delete de key ConstructKeyParamSet failed.");
+        return SOFTBUS_HUKS_ERR;
+    }
+    if (HksKeyExist(keyAlias, paramSet) != HKS_SUCCESS) {
+        LNN_LOGD(LNN_LEDGER, "huks de key has deleted");
+        HksFreeParamSet(&paramSet);
+        return SOFTBUS_OK;
+    }
+    HksFreeParamSet(&paramSet);
+    int32_t ret = HksDeleteKey(keyAlias, g_genParamSet);
+    if (ret != HKS_SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "huks de delete key fail, errcode=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DeleteCeKeyByHuks(struct HksBlob *keyAlias)
+{
+    struct HksParamSet *paramSet = NULL;
+    struct HksParam keyExistparams[] = {
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = DEFAULT_ACCOUNT_ID},
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE},
+    };
+    if (ConstructKeyParamSet(&paramSet, keyExistparams, sizeof(keyExistparams) / sizeof(struct HksParam)) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delete ce key ConstructKeyParamSet failed.");
+        return SOFTBUS_HUKS_ERR;
+    }
+    if (HksKeyExist(keyAlias, paramSet) != HKS_SUCCESS) {
+        LNN_LOGD(LNN_LEDGER, "huks ce key has deleted");
+        HksFreeParamSet(&paramSet);
+        return SOFTBUS_OK;
+    }
+    HksFreeParamSet(&paramSet);
+    int32_t ret = HksDeleteKey(keyAlias, g_genCeParamSet);
+    if (ret != HKS_SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "huks delete ce key fail, errcode=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias)
+{
+    if (keyAlias == NULL) {
+        LNN_LOGE(LNN_LEDGER, "gen ce invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (pthread_mutex_lock(&g_ceParamsLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "gen ce mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!g_isGenCeParams && (GenerateCeKeyByHuks(keyAlias) == SOFTBUS_OK)) {
+        LNN_LOGI(LNN_LEDGER, "gen ce param success");
+        g_isGenCeParams = true;
+    }
+    (void)pthread_mutex_unlock(&g_ceParamsLock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
+{
+    if (keyAlias == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GenerateDeKeyByHuks(keyAlias) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate de key fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias)
+{
+    if (keyAlias == NULL) {
+        LNN_LOGE(LNN_LEDGER, "delete ce invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (DeleteCeKeyByHuks(keyAlias) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delete ce key fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -291,24 +547,8 @@ int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    struct HksParamSet *paramSet = NULL;
-    struct HksParam keyExistparams[] = {
-        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    if (ConstructKeyParamSet(&paramSet, keyExistparams, sizeof(keyExistparams) / sizeof(struct HksParam)) !=
-        SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "delete key ConstructKeyParamSet failed.");
-        return SOFTBUS_HUKS_ERR;
-    }
-    if (HksKeyExist(keyAlias, paramSet) != HKS_SUCCESS) {
-        LNN_LOGD(LNN_LEDGER, "huks key has deleted");
-        HksFreeParamSet(&paramSet);
-        return SOFTBUS_OK;
-    }
-    HksFreeParamSet(&paramSet);
-    int32_t ret = HksDeleteKey(keyAlias, g_genParamSet);
-    if (ret != HKS_SUCCESS) {
-        LNN_LOGE(LNN_LEDGER, "huks delete key fail, errcode=%{public}d", ret);
+    if (DeleteDeKeyByHuks(keyAlias) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delete de key fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -373,6 +613,82 @@ int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     }
     struct HksBlob plainText = {inData->size, plain};
     if (UpdateLoopFinishByHuks(&handleDecrypt, g_decryptParamSet, inData, &plainText) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "huks decrypt data update and finish fail");
+        (void)memset_s(plain, inData->size, 0x0, inData->size);
+        SoftBusFree(plain);
+        return SOFTBUS_ERR;
+    }
+    outData->size = plainText.size;
+    if (memcpy_s(outData->data, plainText.size, plainText.data, plainText.size) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "huks memcpy_s decrypt data fail");
+        (void)memset_s(plain, inData->size, 0x0, inData->size);
+        SoftBusFree(plain);
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)memset_s(plain, inData->size, 0x0, inData->size);
+    SoftBusFree(plain);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
+    struct HksBlob *outData)
+{
+    if (keyAlias == NULL || inData == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t handleE[sizeof(uint64_t)] = {0};
+    struct HksBlob handleEncrypt = {sizeof(uint64_t), handleE};
+    int32_t ret = HksInit(keyAlias, g_ceEncryptParamSet, &handleEncrypt, NULL);
+    if (ret != HKS_SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "huks encrypt data init fail, errcode=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    uint8_t *cipher = (uint8_t *)SoftBusCalloc(inData->size);
+    if (cipher == NULL) {
+        LNN_LOGE(LNN_LEDGER, "calloc encrypt data fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    struct HksBlob cipherText = {inData->size, cipher};
+    if (UpdateLoopFinishByHuks(&handleEncrypt, g_ceEncryptParamSet, inData, &cipherText) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "huks encrypt data update and finish fail");
+        (void)memset_s(cipher, inData->size, 0x0, inData->size);
+        SoftBusFree(cipher);
+        return SOFTBUS_ERR;
+    }
+    outData->size = cipherText.size;
+    if (memcpy_s(outData->data, cipherText.size, cipherText.data, cipherText.size) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "huks memcpy_s encrypt data fail");
+        (void)memset_s(cipher, inData->size, 0x0, inData->size);
+        SoftBusFree(cipher);
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)memset_s(cipher, inData->size, 0x0, inData->size);
+    SoftBusFree(cipher);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
+    struct HksBlob *outData)
+{
+    if (keyAlias == NULL || inData == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t handleD[sizeof(uint64_t)] = {0};
+    struct HksBlob handleDecrypt = {sizeof(uint64_t), handleD};
+    int32_t ret = HksInit(keyAlias, g_ceDecryptParamSet, &handleDecrypt, NULL);
+    if (ret != HKS_SUCCESS) {
+        LNN_LOGE(LNN_LEDGER, "huks decrypt data init fail, errcode=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    uint8_t *plain = (uint8_t *)SoftBusCalloc(inData->size);
+    if (plain == NULL) {
+        LNN_LOGE(LNN_LEDGER, "calloc encrypt data fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    struct HksBlob plainText = {inData->size, plain};
+    if (UpdateLoopFinishByHuks(&handleDecrypt, g_ceDecryptParamSet, inData, &plainText) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "huks decrypt data update and finish fail");
         (void)memset_s(plain, inData->size, 0x0, inData->size);
         SoftBusFree(plain);
