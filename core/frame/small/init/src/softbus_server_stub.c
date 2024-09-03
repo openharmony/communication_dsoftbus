@@ -258,6 +258,7 @@ int ServerStubInit(void)
 
     if (SERVER_InitClient() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "client manager init failed.");
+        LnnIpcDeinit();
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
