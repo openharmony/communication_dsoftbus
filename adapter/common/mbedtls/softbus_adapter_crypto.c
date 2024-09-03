@@ -238,7 +238,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
         if (ret != 0) {
             SoftBusMutexUnlock(&g_randomLock);
             COMM_LOGE(COMM_ADAPTER, "gen random seed error, ret=%{public}d", ret);
-            return SOFTBUS_ENCRYPT_ERR;
+            return SOFTBUS_ERR;
         }
         initFlag = true;
     }
@@ -252,7 +252,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     SoftBusMutexUnlock(&g_randomLock);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "gen random error, ret=%{public}d", ret);
-        return SOFTBUS_ENCRYPT_ERR;
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }

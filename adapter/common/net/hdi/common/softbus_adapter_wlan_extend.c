@@ -88,7 +88,7 @@ int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
     g_channelList.buff = (int32_t *)SoftBusCalloc(sizeof(int32_t) * num);
     if (g_channelList.buff == NULL) {
         LNN_LOGE(LNN_STATE, " SoftBusCalloc channelId fail");
-        return SOFTBUS_MALLOC_ERR;
+        return SOFTBUS_ERR;
     }
     g_channelList.num = num;
     g_channelList.measNum = 0;
@@ -96,7 +96,7 @@ int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
         LNN_LOGE(LNN_STATE, "net hdi memcpy fail");
         SoftBusFree(g_channelList.buff);
         g_channelList.buff = NULL;
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_ERR;
     }
 
     g_channelInfoList.buff = (WlanChannelInfo *)SoftBusCalloc(sizeof(WlanChannelInfo) * num);
@@ -104,7 +104,7 @@ int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
         LNN_LOGE(LNN_STATE, "SoftBusCalloc WlanChannelInfo fail");
         SoftBusFree(g_channelList.buff);
         g_channelList.buff = NULL;
-        return SOFTBUS_MALLOC_ERR;
+        return SOFTBUS_ERR;
     }
     g_channelInfoList.num = num;
     WlanChannelInfo *temp = g_channelInfoList.buff;

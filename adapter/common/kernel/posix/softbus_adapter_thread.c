@@ -47,7 +47,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
     }
     if (pthread_mutex_lock(&g_adapterStaticLock) != 0) {
         COMM_LOGE(COMM_ADAPTER, "mutex init : g_adapterStaticLock lock failed");
-        return SOFTBUS_LOCK_ERR;
+        return SOFTBUS_ERR;
     }
     if ((void *)*mutex != NULL) {
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
@@ -81,7 +81,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
         SoftBusFree(tempMutex);
         tempMutex = NULL;
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
-        return SOFTBUS_LOCK_ERR;
+        return SOFTBUS_ERR;
     }
 
     *mutex = (SoftBusMutex)tempMutex;
@@ -111,7 +111,7 @@ int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
         COMM_LOGE(COMM_ADAPTER, "SoftBusMutexDestroy failed, ret=%{public}d", ret);
         SoftBusFree((void *)*mutex);
         *mutex = (SoftBusMutex)NULL;
-        return SOFTBUS_LOCK_ERR;
+        return SOFTBUS_ERR;
     }
 
     SoftBusFree((void *)*mutex);
@@ -223,19 +223,19 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
     int32_t ret = SoftbusSetThreadPolicy(threadAttr, attr);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "SoftbusSetThreadPolicy failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     ret = SoftbusSetThreadDetachState(threadAttr, attr);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "SoftbusSetThreadDetachState failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     ret = SoftbusSetThreadPeriority(threadAttr, attr);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "SoftbusSetThreadPeriority failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     uint64_t stackSize = threadAttr->stackSize;
@@ -243,7 +243,7 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
         ret = pthread_attr_setstacksize(attr, stackSize);
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "pthread_attr_setstacksize failed, ret=%{public}d", ret);
-            return SOFTBUS_PTHREAD_ERR;
+            return SOFTBUS_ERR;
         }
     }
 
@@ -268,24 +268,24 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
         ret = pthread_create((pthread_t *)thread, NULL, threadEntry, arg);
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "Thread create failed, ret=%{public}d", ret);
-            return SOFTBUS_PTHREAD_ERR;
+            return SOFTBUS_ERR;
         }
     } else {
         pthread_attr_t attr;
         ret = pthread_attr_init(&attr);
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "pthread_attr_init failed, ret=%{public}d", ret);
-            return SOFTBUS_PTHREAD_ERR;
+            return SOFTBUS_ERR;
         }
         ret = SoftBusConfTransPthreadAttr(threadAttr, &attr);
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "SoftBusConfTransPthreadAttr failed, ret=%{public}d", ret);
-            return SOFTBUS_PTHREAD_ERR;
+            return SOFTBUS_ERR;
         }
         ret = pthread_create((pthread_t *)thread, &attr, threadEntry, arg);
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "Thread create failed, ret=%{public}d", ret);
-            return SOFTBUS_PTHREAD_ERR;
+            return SOFTBUS_ERR;
         }
 
         if (threadAttr->taskName != NULL) {
@@ -309,7 +309,7 @@ int32_t SoftBusThreadJoin(SoftBusThread thread, void **value)
     int32_t ret = pthread_join((pthread_t)thread, value);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "Thread join failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     return SOFTBUS_OK;
@@ -334,7 +334,7 @@ int32_t SoftBusThreadSetName(SoftBusThread thread, const char *name)
     int32_t ret = pthread_setname_np((pthread_t)thread, name);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "Thread set name failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     return SOFTBUS_OK;
@@ -356,25 +356,25 @@ int32_t SoftBusCondInit(SoftBusCond *cond)
     int32_t ret = pthread_condattr_init(&attr);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "pthread_condattr_init failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
     ret = pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "set clock failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     pthread_cond_t *tempCond = (pthread_cond_t *)SoftBusCalloc(sizeof(pthread_cond_t));
     if (tempCond == NULL) {
         COMM_LOGE(COMM_ADAPTER, "tempCond is null");
-        return SOFTBUS_MALLOC_ERR;
+        return SOFTBUS_ERR;
     }
     ret = pthread_cond_init(tempCond, &attr);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusCondInit failed, ret=%{public}d", ret);
         SoftBusFree(tempCond);
         tempCond = NULL;
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     *cond = (SoftBusCond)tempCond;
@@ -391,7 +391,7 @@ int32_t SoftBusCondSignal(SoftBusCond *cond)
     int32_t ret = pthread_cond_signal((pthread_cond_t *)*cond);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusCondSignal failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     return SOFTBUS_OK;
@@ -407,7 +407,7 @@ int32_t SoftBusCondBroadcast(SoftBusCond *cond)
     int32_t ret = pthread_cond_broadcast((pthread_cond_t *)*cond);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusCondBroadcast failed, ret=%{public}d", ret);
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     return SOFTBUS_OK;
@@ -431,7 +431,7 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
         ret = pthread_cond_wait((pthread_cond_t *)*cond, (pthread_mutex_t *)*mutex);
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "SoftBusCondWait failed, ret=%{public}d", ret);
-            return SOFTBUS_PTHREAD_ERR;
+            return SOFTBUS_ERR;
         }
     } else {
         struct timespec tv;
@@ -445,7 +445,7 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
 
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "SoftBusCondTimedWait failed, ret=%{public}d", ret);
-            return SOFTBUS_PTHREAD_ERR;
+            return SOFTBUS_ERR;
         }
     }
 
@@ -464,7 +464,7 @@ int32_t SoftBusCondDestroy(SoftBusCond *cond)
         COMM_LOGE(COMM_ADAPTER, "SoftBusCondDestroy failed, ret=%{public}d", ret);
         SoftBusFree((void *)*cond);
         *cond = (SoftBusCond)NULL;
-        return SOFTBUS_PTHREAD_ERR;
+        return SOFTBUS_ERR;
     }
 
     SoftBusFree((void *)*cond);

@@ -68,32 +68,32 @@ static void SoftBusGetAlarmInfo(int fd, AlarmRecord *record)
 static int32_t SoftBusAlarmDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc != 1 || argv == NULL) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_ERR;
     }
 
     SoftBusAlarmEvtResult *result = (SoftBusAlarmEvtResult *)SoftBusMalloc(sizeof(SoftBusAlarmEvtResult));
     if (result == NULL) {
         SOFTBUS_DPRINTF(fd, "SoftBusAlarmDumpHander result malloc fail!\n");
-        return SOFTBUS_MALLOC_ERR;
+        return SOFTBUS_ERR;
     }
     if (strcmp(argv[0], SOFTBUS_MANAGEMENT_ALARM_ORDER) == SOFTBUS_OK) {
         if (SoftBusQueryAlarmInfo(TWENTY_FOUR_HOURS, SOFTBUS_MANAGEMENT_ALARM_TYPE, result) != SOFTBUS_OK) {
             SOFTBUS_DPRINTF(fd, "SoftBusAlarmDumpHander query fail!\n");
             SoftBusFree(result);
-            return SOFTBUS_STRCPY_ERR;
+            return SOFTBUS_ERR;
         }
         SOFTBUS_DPRINTF(fd, "SoftBus Management Plane Alarms:\n");
     } else if (strcmp(argv[0], SOFTBUS_CONTROL_ALARM_ORDER) == SOFTBUS_OK) {
         if (SoftBusQueryAlarmInfo(TWENTY_FOUR_HOURS, SOFTBUS_CONTROL_ALARM_TYPE, result) != SOFTBUS_OK) {
             SOFTBUS_DPRINTF(fd, "SoftBusAlarmDumpHander query fail!\n");
             SoftBusFree(result);
-            return SOFTBUS_STRCPY_ERR;
+            return SOFTBUS_ERR;
         }
         SOFTBUS_DPRINTF(fd, "SoftBus Control Plane Alarms:\n");
     } else {
         SOFTBUS_DPRINTF(fd, "SoftBusAlarmDumpHander invalid param!\n");
         SoftBusFree(result);
-        return SOFTBUS_STRCPY_ERR;
+        return SOFTBUS_ERR;
     }
 
     if (result->recordSize == 0) {
@@ -101,7 +101,7 @@ static int32_t SoftBusAlarmDumpHander(int fd, int32_t argc, const char **argv)
         SoftBusFree(result);
         return SOFTBUS_OK;
     }
-
+    
     for (size_t i = 0; i < result->recordSize; i++) {
         AlarmRecord *record = &result->records[i];
         if (record == NULL) {
@@ -109,7 +109,7 @@ static int32_t SoftBusAlarmDumpHander(int fd, int32_t argc, const char **argv)
         }
         SoftBusGetAlarmInfo(fd, record);
     }
-
+    
     SoftBusFree(result);
     return SOFTBUS_OK;
 }
