@@ -22,7 +22,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
-#include "softbus_adapter_errcode.h"
 
 static const char *g_domain = "DSOFTBUS";
 static bool g_init_lock = false;
@@ -116,16 +115,16 @@ static int32_t ConvertMsgToHiSysEvent(SoftBusEvtReportMsg *msg)
     if (memset_s(g_dstParam, sizeof(HiSysEventParam) * SOFTBUS_EVT_PARAM_BUTT, 0,
         sizeof(HiSysEventParam) * SOFTBUS_EVT_PARAM_BUTT) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "init  g_dstParam fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < msg->paramNum; i++) {
         if (strcpy_s(g_dstParam[i].name, MAX_LENGTH_OF_PARAM_NAME, msg->paramArray[i].paramName) != EOK) {
             COMM_LOGE(COMM_ADAPTER, "copy param fail");
-            return SOFTBUS_STRCPY_ERR;
+            return SOFTBUS_ERR;
         }
         if (ConvertEventParam(&msg->paramArray[i], &g_dstParam[i]) != SOFTBUS_OK) {
             COMM_LOGE(COMM_ADAPTER, "ConvertMsgToHiSysEvent:convert param fail");
-            return SOFTBUS_ADAPTER_ERR;
+            return SOFTBUS_ERR;
         }
     }
     return SOFTBUS_OK;
@@ -181,7 +180,7 @@ extern "C" {
 int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg *reportMsg)
 {
     if (reportMsg == nullptr) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_ERR;
     }
     if (!g_init_lock) {
         InitHisEvtMutexLock();

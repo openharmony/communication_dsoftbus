@@ -18,7 +18,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
-#include "softbus_adapter_errcode.h"
 #include "wifi_mock.h"
 
 namespace OHOS {
@@ -64,14 +63,15 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiDeviceConfigTest001, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(wifiMock, GetDeviceConfigs)
         .WillOnce(DoAll(SetArgPointee<1>(WIFI_MAX_CONFIG_SIZE + 1), Return(WIFI_SUCCESS)));
+        
     ret = SoftBusGetWifiDeviceConfig(&configList, &num);
-    EXPECT_TRUE(ret == SOFTBUS_MEM_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     EXPECT_CALL(wifiMock, GetDeviceConfigs)
         .WillOnce(DoAll(SetArgPointee<1>(TEST_CONFIG_SIZE), Return(ERROR_WIFI_INVALID_ARGS)));
     ret = SoftBusGetWifiDeviceConfig(&configList, &num);
-    EXPECT_TRUE(ret == SOFTBUS_MEM_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = SoftBusGetWifiDeviceConfig(nullptr, &num);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -98,7 +98,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusConnectToDeviceTest001, TestSize.Level1
     ret = SoftBusConnectToDevice(&configList);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = SoftBusConnectToDevice(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -114,7 +114,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusStartWifiScanTest001, TestSize.Level1)
     int32_t ret = SoftBusStartWifiScan();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = SoftBusStartWifiScan();
-    EXPECT_TRUE(ret == SOFTBUS_ADAPTER_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -151,14 +151,14 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiScanListTest001, TestSize.Level1
     SoftBusWifiScanInfo *result = nullptr;
     uint32_t size;
     int32_t ret = SoftBusGetWifiScanList(nullptr, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = SoftBusGetWifiScanList(&result, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = SoftBusGetWifiScanList(&result, &size);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(wifiMock, GetScanInfoList).WillRepeatedly(Return(ERROR_WIFI_INVALID_ARGS));
     ret = SoftBusGetWifiScanList(&result, &size);
-    EXPECT_TRUE(ret == SOFTBUS_MEM_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -200,9 +200,9 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetChannelListFor5GTest001, TestSize.Le
     int32_t ret = SoftBusGetChannelListFor5G(&channelList, num);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = SoftBusGetChannelListFor5G(&channelList, num);
-    EXPECT_TRUE(ret == SOFTBUS_ADAPTER_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = SoftBusGetChannelListFor5G(nullptr, num);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -252,7 +252,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetLinkedInfoTest001, TestSize.Level1)
     int32_t ret = SoftBusGetLinkedInfo(&info);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = SoftBusGetLinkedInfo(&info);
-    EXPECT_TRUE(ret == SOFTBUS_ADAPTER_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
