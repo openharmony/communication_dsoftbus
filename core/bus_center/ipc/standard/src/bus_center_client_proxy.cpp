@@ -92,7 +92,7 @@ int32_t ClientOnNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type
         LNN_LOGE(LNN_EVENT, "proxyMap is empty");
         return SOFTBUS_NETWORK_REMOTE_NULL;
     }
-    for (auto proxy : proxyMap) {
+    for (const auto &proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
         clientProxy->OnNodeStatusChanged(proxy.first.c_str(), info, infoTypeLen, type);
     }
