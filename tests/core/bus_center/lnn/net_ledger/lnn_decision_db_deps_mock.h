@@ -71,6 +71,10 @@ public:
     virtual void LnnHbClearRecvList(void) = 0;
     virtual int32_t LnnConvertHbTypeToId(LnnHeartbeatType type) = 0;
     virtual bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data) = 0;
+    virtual int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias,
+        const struct HksBlob *inData, struct HksBlob *outData);
+    virtual int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias,
+        const struct HksBlob *inData, struct HksBlob *outData);
 };
 class DecisionDbDepsInterfaceMock : public DecisionDbDepsInterface {
 public:
@@ -105,6 +109,8 @@ public:
     MOCK_METHOD3(LnnVisitHbTypeSet, bool (VisitHbTypeCb, LnnHeartbeatType *, void *));
     MOCK_METHOD1(LnnConvertHbTypeToId, int32_t (LnnHeartbeatType));
     static int32_t DecisionDbAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para);
+    MOCK_METHOD3(LnnCeEncryptDataByHuks, int32_t (const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
+    MOCK_METHOD3(LnnCeDecryptDataByHuks, int32_t (const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
 };
 } // namespace OHOS
 #endif // LNN_DECISION_DB_DEPS_MOCK_H
