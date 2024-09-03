@@ -196,6 +196,9 @@ public:
     virtual void DeleteFromProfile(const char *udid) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual void UpdateProfile(const NodeInfo *info) = 0;
+    virtual bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
+    virtual void RegisterOOBEMonitor(void *p);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -331,6 +334,9 @@ public:
     MOCK_METHOD1(DeleteFromProfile, void (const char *));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD1(UpdateProfile, void (const NodeInfo *));
+    MOCK_METHOD2(IsSupportFeatureByCapaBit, bool (uint32_t, AuthCapability));
+    MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t (const char *, NodeInfo *));
+    MOCK_METHOD1(RegisterOOBEMonitor, void (void *p));
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
 };

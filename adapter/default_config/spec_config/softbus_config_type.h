@@ -58,6 +58,7 @@ typedef enum {
     SOFTBUS_INT_CONN_BLE_CLOSE_DELAY_TIME, /* the default val is 1000 */
     SOFTBUS_INT_BLE_MAC_AUTO_REFRESH_SWITCH, /* the default val is 1 */
     SOFTBUS_INT_DISC_COAP_MAX_DEVICE_NUM, /* the default val is 20 */
+    SOFTBUS_INT_AUTH_CAPACITY, /* the default val is 0x07 */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 

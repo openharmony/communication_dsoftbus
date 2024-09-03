@@ -61,17 +61,13 @@ enum SoftBusFuncId {
     CLIENT_ON_CHANNEL_MSGRECEIVED,
     CLIENT_ON_CHANNEL_QOSEVENT,
 
-    CLIENT_DISCOVERY_SUCC,
-    CLIENT_DISCOVERY_FAIL,
     CLIENT_DISCOVERY_DEVICE_FOUND,
-    CLIENT_PUBLISH_SUCC,
-    CLIENT_PUBLISH_FAIL,
 
     CLIENT_ON_JOIN_RESULT,
     CLIENT_ON_JOIN_METANODE_RESULT,
     CLIENT_ON_LEAVE_RESULT,
     CLIENT_ON_LEAVE_METANODE_RESULT,
-    CLIENT_ON_NODE_DEVICE_NOT_TRUST,
+    CLIENT_ON_NODE_DEVICE_TRUST_CHANGED,
     CLIENT_ON_NODE_ONLINE_STATE_CHANGED,
     CLIENT_ON_NODE_BASIC_INFO_CHANGED,
     CLIENT_ON_LOCAL_NETWORK_ID_CHANGED,
@@ -379,7 +375,7 @@ bool OnLeaveMetaNodeResultInnerTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool OnNodeDeviceNotTrustedInnerTest(const uint8_t *data, size_t size)
+bool OnNodeDeviceTrustedChangeInnerTest(const uint8_t *data, size_t size)
 {
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
@@ -391,7 +387,7 @@ bool OnNodeDeviceNotTrustedInnerTest(const uint8_t *data, size_t size)
     if (softBusClientStub == nullptr) {
         return false;
     }
-    softBusClientStub->OnRemoteRequest(CLIENT_ON_NODE_DEVICE_NOT_TRUST, datas, reply, option);
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_NODE_DEVICE_TRUST_CHANGED, datas, reply, option);
     return true;
 }
 

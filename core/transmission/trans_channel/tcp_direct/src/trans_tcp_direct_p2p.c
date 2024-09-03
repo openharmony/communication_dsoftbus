@@ -857,7 +857,7 @@ static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t
         len - sizeof(int64_t) - sizeof(int64_t));
     TRANS_CHECK_AND_RETURN_LOGW((json != NULL), TRANS_CTRL, "parse json failed");
 
-    int64_t msgType = SoftBusLtoHll((uint64_t)*(int64_t*)data);
+    int64_t msgType = (int64_t)SoftBusLtoHll((uint64_t)*(int64_t*)data);
     AuthHandle authHandle = { .authId = channelId, .type = AUTH_LINK_TYPE_BLE };
     if (msgType == P2P_VERIFY_REQUEST) {
         OnVerifyP2pRequest(authHandle, SoftBusLtoHll((uint64_t)*(int64_t*)(data + sizeof(int64_t))), json, false);

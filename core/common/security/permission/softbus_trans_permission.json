@@ -451,7 +451,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^com.huawei.systemserver_CHANNEL_DPMS",
+    "SESSION_NAME": "com.huawei.systemserver_CHANNEL_DPMS",
     "DEVID": "NETWORKID",
     "APP_INFO": [
       {
@@ -468,6 +468,17 @@
     "APP_INFO": [
       {
         "PKG_NAME": "boosterd",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "hiview_distributed_network_softbus",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.hmos.hiviewcare",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }

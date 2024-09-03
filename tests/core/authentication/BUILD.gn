@@ -511,9 +511,9 @@ ohos_unittest("AuthHichainTest") {
   }
 }
 
-ohos_unittest("DsoftbusAppBindTest") {
+ohos_unittest("AuthDeviceProfileTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/dsoftbus_app_bind_test.cpp" ]
+  sources = [ "unittest/auth_device_profile_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/interfaces/kits",
@@ -879,6 +879,7 @@ ohos_unittest("AuthLaneTest") {
 group("unittest") {
   testonly = true
   deps = [
+    ":AuthDeviceProfileTest",
     ":AuthEnhanceMockTest",
     ":AuthHichainTest",
     ":AuthLaneTest",
@@ -891,7 +892,6 @@ group("unittest") {
     ":AuthTcpConnectionTest",
     ":AuthTest",
     ":AuthTestCallBackTest",
-    ":DsoftbusAppBindTest",
   ]
 }
 

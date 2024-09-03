@@ -674,6 +674,7 @@ void DeinitLane(void)
 {
     DeinitLaneModel();
     DeinitLaneLink();
+    DeinitLaneListener();
     LnnDeinitScore();
     LnnDeinitVapInfo();
     DeinitLaneLinkConflict();

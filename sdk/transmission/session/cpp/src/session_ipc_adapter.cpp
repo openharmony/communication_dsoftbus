@@ -22,7 +22,7 @@ bool CheckIsSystemService(void)
 {
     uint32_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
     auto type = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    TRANS_LOGD(TRANS_SDK, "system level=%{public}d", type);
+    TRANS_LOGD(TRANS_SDK, "access token type=%{public}d", type);
     if (type == OHOS::Security::AccessToken::TOKEN_NATIVE) {
         return true;
     }
