@@ -110,7 +110,7 @@ std::string P2pConnectState::CalculateGcIp(const std::string &goIpAddr)
     int gcIpSuffix = 0;
     int count = 0;
     do {
-        gcIpSuffix = SoftBusCryptoRand() % IP_SUFFIX_RANGE + GC_IP_SUFFIX_START;
+        gcIpSuffix = static_cast<int>(SoftBusCryptoRand() % IP_SUFFIX_RANGE + GC_IP_SUFFIX_START);
         count++;
     } while (gcIpSuffix == goIpSuffix && count < MAX_CALCULATE_GC_IP_COUNT);
     CONN_CHECK_AND_RETURN_RET_LOGE(gcIpSuffix != goIpSuffix, "", CONN_WIFI_DIRECT, "goIp is equal to gcIp");
