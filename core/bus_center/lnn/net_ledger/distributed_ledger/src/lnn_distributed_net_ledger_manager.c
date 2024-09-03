@@ -317,13 +317,13 @@ void LnnUpdateNodeBleMac(const char *networkId, char *bleMac, uint32_t len)
     SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
 }
 
-bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool *isScreenOn)
+bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool isScreenOn)
 {
-    if ((networkId == NULL) || (isScreenOn == NULL)) {
+    if (networkId == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid arg");
         return false;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return false;
     }
@@ -333,7 +333,7 @@ bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool *isScreenOn)
         SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return false;
     }
-    info->isScreenOn = *isScreenOn;
+    info->isScreenOn = isScreenOn;
     SoftBusMutexUnlock(&LnnGetDistributedNetLedger()->lock);
     return true;
 }
