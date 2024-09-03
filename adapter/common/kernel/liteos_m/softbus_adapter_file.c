@@ -145,7 +145,7 @@ int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
 {
     (void)pathName;
     (void)mode;
-    return SOFTBUS_INVALID_FD;
+    return SOFTBUS_ERR;
 }
 
 int32_t SoftBusMakeDir(const char *pathName, int32_t mode)
@@ -158,7 +158,7 @@ int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
 {
     (void)fileName;
     (void)fileSize;
-    return SOFTBUS_INVALID_FD;
+    return SOFTBUS_ERR;
 }
 
 char *SoftBusRealPath(const char *path, char *absPath)
