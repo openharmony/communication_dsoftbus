@@ -282,7 +282,7 @@ int32_t CreateTable(DbContext *ctx, TableNameID id)
         COMM_LOGE(COMM_UTILS, "sqlite_exec fail: errmsg=%{public}s", errMsg);
         sqlite3_free(errMsg);
     }
-    return rc == SQLITE_OK ? SOFTBUS_OK : SOFTBUS_ERR;
+    return rc == SQLITE_OK ? SOFTBUS_OK : SOFTBUS_SQLITE_ERR;
 }
 
 int32_t DeleteTable(DbContext *ctx, TableNameID id)

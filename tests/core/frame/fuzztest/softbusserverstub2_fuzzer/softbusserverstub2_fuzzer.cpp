@@ -30,8 +30,6 @@ constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 const std::u16string SOFTBUS_SERVER_STUB_INTERFACE_TOKEN = u"OHOS.ISoftBusServer";
 const std::vector<SoftBusFuncId> CODE_LIST = {
     MANAGE_REGISTER_SERVICE,
-    SERVER_PUBLISH_SERVICE,
-    SERVER_UNPUBLISH_SERVICE,
     SERVER_CREATE_SESSION_SERVER,
     SERVER_REMOVE_SESSION_SERVER,
     SERVER_OPEN_SESSION,
@@ -45,8 +43,6 @@ const std::vector<SoftBusFuncId> CODE_LIST = {
     SERVER_REMOVE_PERMISSION,
     SERVER_STREAM_STATS,
     SERVER_GET_SOFTBUS_SPEC_OBJECT,
-    SERVER_START_DISCOVERY,
-    SERVER_STOP_DISCOVERY,
     SERVER_JOIN_LNN,
     SERVER_JOIN_METANODE,
     SERVER_LEAVE_LNN,
@@ -114,17 +110,19 @@ private:
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    static size_t codeIndex = 0;
     static TestEnv env;
     if (!env.IsInited()) {
         return 0;
     }
 
-    SoftBusFuncId code = CODE_LIST[codeIndex++ % CODE_LIST.size()];
+    if (data == nullptr || size == 0) {
+        return 0;
+    }
+    SoftBusFuncId code = CODE_LIST[data[0] % CODE_LIST.size()];
 
     OHOS::MessageParcel parcel;
     parcel.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
-    parcel.WriteBuffer(data, size);
+    parcel.WriteBuffer(data + 1, size - 1);
 
     env.DoRemoteRequest(code, parcel);
     return 0;

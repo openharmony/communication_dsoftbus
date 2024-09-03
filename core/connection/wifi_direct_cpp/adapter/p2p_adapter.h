@@ -56,6 +56,7 @@ public:
         bool isGroupOwner;
         int32_t frequency;
         std::string interface;
+        std::string goIpAddr;
         WifiDirectP2pDeviceInfo groupOwner;
         std::vector<WifiDirectP2pDeviceInfo> clientDevices;
     };

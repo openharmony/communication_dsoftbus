@@ -1669,6 +1669,7 @@ int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int32_t fd)
         SOFTBUS_DPRINTF(fd, "\n[NO.%d]\n", i + 1);
         SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
     }
+    SoftBusFree(remoteNodeInfo);
     return SOFTBUS_OK;
 }
 

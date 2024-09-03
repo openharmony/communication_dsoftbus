@@ -511,10 +511,13 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::sha
             connectCommand_ = nullptr;
         }
     }
-    if (ret == SOFTBUS_OK && terminate && !active_) {
+    if (ret == SOFTBUS_OK && terminate) {
         WifiDirectSinkLink sinkLink {};
         if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
-            GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
+            GetWifiDirectManager()->notifyOnline(sinkLink.remoteMac, sinkLink.remoteIp, sinkLink.remoteUuid, active_);
+            if (!active_) {
+                GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
+            }
         }
     }
     if (terminate) {
@@ -583,9 +586,10 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
     });
 
     CONN_LOGI(CONN_WIFI_DIRECT, "send hand shake message success");
-    if (!active_) {
-        WifiDirectSinkLink sinkLink {};
-        if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+    WifiDirectSinkLink sinkLink {};
+    if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+        GetWifiDirectManager()->notifyOnline(sinkLink.remoteMac, sinkLink.remoteIp, sinkLink.remoteUuid, active_);
+        if (!active_) {
             GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
         }
     }
@@ -1864,14 +1868,6 @@ int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
     if (reuseCount == 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount already 0, do not call entity disconnect");
         return SOFTBUS_OK;
-    }
-    if (reuseCount <= 1) {
-        LinkManager::GetInstance().ProcessIfPresent(
-            InnerLink::LinkType::P2P, remoteDeviceId, [](InnerLink &link) {
-                if (link.GetReference() < 1) {
-                    link.SetState(InnerLink::LinkState::DISCONNECTING);
-                }
-        });
     }
     P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
     auto result = P2pEntity::GetInstance().Disconnect(param);

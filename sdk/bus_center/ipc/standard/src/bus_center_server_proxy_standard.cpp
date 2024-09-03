@@ -17,7 +17,6 @@
 
 #include <securec.h>
 #include "bus_center_server_proxy.h"
-#include "discovery_service.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -80,34 +79,6 @@ int32_t BusCenterServerProxy::BusCenterServerProxyStandardInit(void)
 void BusCenterServerProxy::BusCenterServerProxyStandardDeInit(void)
 {
     g_remoteProxy.clear();
-}
-
-int32_t BusCenterServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
-{
-    (void)pkgName;
-    (void)subInfo;
-    return SOFTBUS_OK;
-}
-
-int32_t BusCenterServerProxy::StopDiscovery(const char *pkgName, int32_t subscribeId)
-{
-    (void)pkgName;
-    (void)subscribeId;
-    return SOFTBUS_OK;
-}
-
-int32_t BusCenterServerProxy::PublishService(const char *pkgName, const PublishInfo *pubInfo)
-{
-    (void)pkgName;
-    (void)pubInfo;
-    return SOFTBUS_OK;
-}
-
-int32_t BusCenterServerProxy::UnPublishService(const char *pkgName, int32_t publishId)
-{
-    (void)pkgName;
-    (void)publishId;
-    return SOFTBUS_OK;
 }
 
 int32_t BusCenterServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject>& object)
@@ -1046,6 +1017,50 @@ int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *call
     if (!reply.ReadInt32(serverRet)) {
         LNN_LOGE(LNN_EVENT, "read serverRet failed");
         return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    if (pkgName == nullptr || msg == nullptr || msgLen == 0) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkg name failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteCString(msg)) {
+        LNN_LOGE(LNN_EVENT, "write msg failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteUint32(msgLen)) {
+        LNN_LOGE(LNN_EVENT, "write msg length failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_SYNC_TRUSTED_RELATION, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
     return serverRet;
 }

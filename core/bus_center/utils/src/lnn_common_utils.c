@@ -19,6 +19,7 @@
 
 #include "lnn_common_utils.h"
 #include "lnn_log.h"
+#include "lnn_oobe_manager.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -32,7 +33,12 @@ bool IsEnableSoftBusHeartbeat(void)
 
 bool IsOOBEState(void)
 {
-    return false;
+    SoftBusOOBEState state = SOFTBUS_OOBE_RUNNING;
+    if (LnnGetOOBEState(&state) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get oobe state fail");
+        return true;
+    }
+    return state != SOFTBUS_OOBE_END;
 }
 
 bool IsScreenUnlock(void)

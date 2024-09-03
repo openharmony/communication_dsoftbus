@@ -598,5 +598,10 @@ bool LnnSetDLDeviceNickName(const char *networkId, const char *name)
 {
     return GetNetLedgerInterface()->LnnSetDLDeviceNickName(networkId, name);
 }
+
+int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
+{
+    return GetNetLedgerInterface()->LnnUpdateLocalScreenStatus(isScreenOn);
+}
 }
 } // namespace OHOS
