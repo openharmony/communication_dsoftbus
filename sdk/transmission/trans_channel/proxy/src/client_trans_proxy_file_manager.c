@@ -317,7 +317,7 @@ static int32_t UnpackFileTransStartInfo(
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
         file->fileSize = SoftBusLtoHll((*(uint64_t *)(fileFrame->fileData + FRAME_DATA_SEQ_OFFSET)));
-        if (file->fileSize >= MAX_FILE_SIZE) {
+        if (file->fileSize > MAX_FILE_SIZE) {
             TRANS_LOGE(TRANS_FILE, "fileSize is too large, please check, fileSize=%{public}" PRIu64, file->fileSize);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
