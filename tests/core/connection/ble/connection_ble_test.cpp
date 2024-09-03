@@ -27,6 +27,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_ble_send_queue.h"
 #include "softbus_conn_ble_trans.h"
+#include "ble_protocol_interface_factory.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -294,5 +295,21 @@ HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
     ret = ConnStopLocalListening(&info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+}
+
+/*
+* @tc.name: InterFaceFactoryTest
+* @tc.desc: Test ConnBleGetUnifyInterface
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleTest, InterFaceFactoryTest001, TestSize.Level1)
+{
+    const BleUnifyInterface *ret = ConnBleGetUnifyInterface(BLE_PROTOCOL_MAX);
+    EXPECT_EQ(nullptr, ret);
+    ret = ConnBleGetUnifyInterface(BLE_GATT);
+    EXPECT_NE(nullptr, ret);
 }
 }
