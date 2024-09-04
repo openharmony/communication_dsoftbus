@@ -775,10 +775,6 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
                 break;
             }
         }
-        if (error != SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL) {
-            NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
-            break;
-        }
 
         if (AuthenticationFailedAndRetry(connection, connectingDevice, anomizeAddress) == SOFTBUS_OK) {
             break;
