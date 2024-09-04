@@ -804,6 +804,7 @@ int32_t ConnGattClientSend(ConnBleConnection *connection, const uint8_t *data, u
         },
         .value = data,
         .valueLen = dataLen,
+        .writeType = SOFTBUS_GATT_WRITE_NO_RSP,
     };
     return SoftbusGattcWriteCharacteristic(underlayerHandle, &gattcData);
 }
