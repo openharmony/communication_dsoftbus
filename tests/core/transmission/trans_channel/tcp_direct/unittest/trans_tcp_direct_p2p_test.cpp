@@ -522,7 +522,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest001, TestSize.Level1)
 {
-    int32_t ret = StartHmlListener(g_ip, &g_port);
+    int32_t ret = StartHmlListener(g_ip, &g_port, g_udid);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
@@ -536,7 +536,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
 {
     int32_t ret = CreatHmlListenerList();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StartHmlListener(g_ip, &g_port);
+    ret = StartHmlListener(g_ip, &g_port, g_udid);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
     ListenerModule moduleType = GetModuleByHmlIp(g_ip);
@@ -624,16 +624,16 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransProxyGetAuthIdTest001
- * @tc.desc: TransProxyGetAuthId test
+ * @tc.name: TransProxyGetAuthIdByUuidTest001
+ * @tc.desc: TransProxyGetAuthIdByUuid test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdByUuidTest001, TestSize.Level1)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
-    int32_t ret = TransProxyGetAuthId(conn);
+    int32_t ret = TransProxyGetAuthIdByUuid(conn);
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
     SoftBusFree(conn);
 }
