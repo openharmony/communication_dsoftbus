@@ -102,6 +102,8 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
         type = ProtocolType::JSON;
     }
     auto protocol = WifiDirectProtocolFactory::CreateProtocol(type);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        protocol != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "create protocol failed");
     std::vector<uint8_t> output;
     msg.Marshalling(*protocol, output);
 
