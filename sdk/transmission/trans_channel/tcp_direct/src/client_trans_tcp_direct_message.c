@@ -172,6 +172,19 @@ static bool CheckCollaborationSessionName(const char *sessionName)
     return false;
 }
 
+static void CheckMutexAndUpdateFdState(TcpDirectChannelInfo *channel)
+{
+    TcpDirectChannelInfo info;
+    (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
+    if (TransTdcGetInfoById(channel->channelId, &info) == NULL) {
+        SoftBusMutexDestroy(&(channel->detail.fdLock));
+        TRANS_LOGI(
+            TRANS_SDK, "destroy fd=%{public}d fdLock, channelId=%{public}d", channel->detail.fd, channel->channelId);
+        return;
+    }
+    TransUpdateFdState(channel->channelId, false);
+}
+
 static int32_t TransTdcProcessPostData(TcpDirectChannelInfo *channel, const char *data, uint32_t len, int32_t flags)
 {
     uint32_t outLen = 0;
@@ -229,6 +242,7 @@ int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len)
     }
 
     int ret = TransTdcProcessPostData(&channel, data, len, FLAG_BYTES);
+    CheckMutexAndUpdateFdState(&channel);
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "tdc send bytes failed, channelId=%{public}d, ret=%{public}d.", channelId, ret);
@@ -257,6 +271,7 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
         return ret;
     }
     ret = TransTdcProcessPostData(&channel, data, len, FLAG_MESSAGE);
+    CheckMutexAndUpdateFdState(&channel);
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (ret != SOFTBUS_OK) {
         DelPendingPacketbyChannelId(channelId, sequence, PENDING_TYPE_DIRECT);
