@@ -450,8 +450,8 @@ static FileDataFrame *CreateSendBlockFrame(FileManager *fileManager, FileListTas
         fileDataFrame->header.flag |= NSTACKX_DFILE_DATA_FRAME_CONTINUE_FLAG;
     }
     g_num++;
-    if (g_num % 10 == 0) {
-        DFILE_LOGI(TAG, "create frame");
+    if (g_num % 100 == 0) {
+        DFILE_LOGI(TAG, "create frame:%d", g_num);
     }
     return fileDataFrame;
 }
