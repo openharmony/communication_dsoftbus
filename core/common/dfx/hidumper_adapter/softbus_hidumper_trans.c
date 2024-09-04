@@ -80,7 +80,7 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
     Anonymize(sessionName, &tmpName);
     Anonymize(pkgName, &tmpPkgName);
     SOFTBUS_DPRINTF(fd, "SessionName           : %s\n", AnonymizeWrapper(tmpName));
-    SOFTBUS_DPRINTF(fd, "pkgName           : %s\n", AnonymizeWrapper(tmpPkgName));
+    SOFTBUS_DPRINTF(fd, "PkgName               : %s\n", AnonymizeWrapper(tmpPkgName));
     SOFTBUS_DPRINTF(fd, "PID                   : %s\n", uidStr);
     SOFTBUS_DPRINTF(fd, "UID                   : %s\n", pidStr);
     AnonymizeFree(tmpName);
