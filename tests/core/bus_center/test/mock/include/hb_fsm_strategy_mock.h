@@ -67,6 +67,7 @@ public:
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax) = 0;
+    virtual bool LnnIsMultiDeviceOnline(void) = 0;
 };
 
 class HeartBeatFSMStrategyInterfaceMock : public HeartBeatFSMStrategyInterface {
@@ -106,6 +107,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
     MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
     MOCK_METHOD2(GenerateRandomNumForHb, uint32_t (uint32_t, uint32_t));
+    MOCK_METHOD0(LnnIsMultiDeviceOnline, bool ());
 };
 } // namespace OHOS
 #endif // HEARTBEAT_FSM_STRATEGY_H

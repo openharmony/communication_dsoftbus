@@ -86,23 +86,23 @@ void DelNotTrustDevice(const char *udid)
     LNN_LOGI(LNN_STATE, "not need remove");
 }
 
-static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> &trustDevices,
+static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
     const char *deviceIdHash, const char *anonyDeviceIdHash)
 {
     for (const auto &trustDevice : trustDevices) {
         if (trustDevice.GetDeviceIdType() != (int32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
-            trustDevice.GetDeviceId().empty()) {
+            trustDevice.GetTrustDeviceId().empty()) {
             continue;
         }
         char *anonyUdid = nullptr;
-        Anonymize(trustDevice.GetDeviceId().c_str(), &anonyUdid);
+        Anonymize(trustDevice.GetTrustDeviceId().c_str(), &anonyUdid);
         LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", anonyUdid, anonyDeviceIdHash);
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};
-        if (SoftBusGenerateStrHash((const unsigned char *)trustDevice.GetDeviceId().c_str(),
-            trustDevice.GetDeviceId().length(), udidHash) != SOFTBUS_OK) {
+        if (SoftBusGenerateStrHash((const unsigned char *)trustDevice.GetTrustDeviceId().c_str(),
+            trustDevice.GetTrustDeviceId().length(), udidHash) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "generate udidhash fail");
             continue;
         }
@@ -125,21 +125,21 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         LNN_LOGE(LNN_STATE, "deviceIdHash is null or device not trusted");
         return false;
     }
-    std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> trustDevices;
-    int32_t ret = DpClient::GetInstance().GetAllTrustDeviceProfile(trustDevices);
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
     if (ret != OHOS::DistributedDeviceProfile::DP_NOT_FIND_DATA && ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "GetAllTrustDeviceProfile ret=%{public}d", ret);
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
         return false;
     }
-    if (trustDevices.empty()) {
-        LNN_LOGE(LNN_STATE, "trustDevices is empty");
+    if (aclProfiles.empty()) {
+        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
         InsertNotTrustDevice(deviceIdHash);
         return false;
     }
     char *anonyDeviceIdHash = nullptr;
     Anonymize(deviceIdHash, &anonyDeviceIdHash);
     static uint32_t callCount = 0;
-    if (IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash)) {
+    if (IsTrustDevice(aclProfiles, deviceIdHash, anonyDeviceIdHash)) {
         AnonymizeFree(anonyDeviceIdHash);
         return true;
     }

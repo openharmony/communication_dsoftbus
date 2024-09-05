@@ -22,6 +22,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "auth_common.h"
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
@@ -46,10 +47,11 @@
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
-#define DEFAULT_SUPPORT_AUTHCAPACITY 0x7
+#define DEFAULT_SUPPORT_HBCAPACITY 0x1
 #define DEFAULT_CONN_SUB_FEATURE 1
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
+#define DEFAULT_DEVICE_NAME "OpenHarmony"
 
 typedef struct {
     NodeInfo localInfo;
@@ -380,9 +382,17 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "get device name fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s((char *)buf, len, deviceName, strlen(deviceName)) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
-        return SOFTBUS_MEM_ERR;
+    if (strlen(deviceName) != 0) {
+        if (strncpy_s((char *)buf, len, deviceName, strlen(deviceName)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        LNN_LOGI(LNN_LEDGER, "device name not inited, user default value");
+        if (strncpy_s((char *)buf, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+            return SOFTBUS_MEM_ERR;
+        }
     }
     return SOFTBUS_OK;
 }
@@ -585,6 +595,21 @@ static int32_t LlGetProxyPort(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static bool IsLocalLedgerReady(void)
+{
+    bool accountIdInited = (g_localNetLedger.localInfo.accountId != 0);
+    bool deviceNameInited = (strlen(g_localNetLedger.localInfo.deviceInfo.deviceName) != 0);
+    bool networkIdInited = (strlen(g_localNetLedger.localInfo.networkId) != 0);
+    bool btMacInited = (strlen(g_localNetLedger.localInfo.connectInfo.macAddr) != 0);
+    if (accountIdInited & deviceNameInited & networkIdInited & btMacInited) {
+        return true;
+    }
+    LNN_LOGI(LNN_LEDGER, "no need upload to cloud. stateVersion=%{public}d, accountIdInited=%{public}d, "
+        "deviceNameInited=%{public}d, networkIdInited=%{public}d, btMacInited=%{public}d",
+        g_localNetLedger.localInfo.stateVersion, accountIdInited, deviceNameInited, networkIdInited, btMacInited);
+    return false;
+}
+
 static int32_t UpdateStateVersion(const void *buf)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -599,8 +624,7 @@ static int32_t UpdateStateVersion(const void *buf)
         return SOFTBUS_OK;
     }
     info->stateVersion = *(int32_t *)buf;
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud, stateVersion=%{public}d", info->stateVersion);
+    if (!IsLocalLedgerReady()) {
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_LEDGER, "stateVersion is changed, stateVersion=%{public}d", info->stateVersion);
@@ -936,8 +960,6 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
         info->nickName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get nick name fail");
     }
-    LNN_LOGD(LNN_LEDGER, "info->unifiedDefaultName=%{public}s, unifiedName=%{public}s, nickName=%{public}s",
-        info->unifiedDefaultName, info->unifiedName, info->nickName);
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVTYPE, devType, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVTYPE failed");
         return SOFTBUS_ERR;
@@ -1038,8 +1060,17 @@ static int32_t UpdateLocalDeviceName(const void *name)
     NodeInfo localNodeInfo = {};
     (void)LnnGetLocalDevInfo(&localNodeInfo);
     const char *beforeName = LnnGetDeviceName(&g_localNetLedger.localInfo.deviceInfo);
-    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s", (char *)beforeName, (char *)name,
-        localNodeInfo.deviceInfo.deviceName);
+    char *anonyBeforeName = NULL;
+    Anonymize(beforeName, &anonyBeforeName);
+    char *anonyName = NULL;
+    Anonymize((char *)name, &anonyName);
+    char *anonyDeviceName = NULL;
+    Anonymize(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
+    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s", anonyBeforeName, anonyName,
+        anonyDeviceName);
+    AnonymizeFree(anonyBeforeName);
+    AnonymizeFree(anonyName);
+    AnonymizeFree(anonyDeviceName);
     if (strcmp(beforeName, (char *)name) != 0) {
         if (LnnSetDeviceName(&g_localNetLedger.localInfo.deviceInfo, (char *)name) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "set device name fail");
@@ -1050,8 +1081,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
             return SOFTBUS_OK;
         }
         UpdateStateVersionAndStore(UPDATE_DEV_NAME);
-        if (g_localNetLedger.localInfo.accountId == 0) {
-            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        if (!IsLocalLedgerReady()) {
             return SOFTBUS_OK;
         }
         NodeInfo nodeInfo = {};
@@ -1084,8 +1114,7 @@ static int32_t UpdateUnifiedName(const void *name)
             return SOFTBUS_OK;
         }
         UpdateStateVersionAndStore(UPDATE_DEV_UNIFIED_NAME);
-        if (g_localNetLedger.localInfo.accountId == 0) {
-            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        if (!IsLocalLedgerReady()) {
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "unified device name is changed");
@@ -1119,8 +1148,7 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
             return SOFTBUS_OK;
         }
         UpdateStateVersionAndStore(UPDATE_DEV_UNIFIED_DEFAULT_NAME);
-        if (g_localNetLedger.localInfo.accountId == 0) {
-            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        if (!IsLocalLedgerReady()) {
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "device unified default name is changed");
@@ -1153,8 +1181,7 @@ static int32_t UpdateNickName(const void *name)
             return SOFTBUS_OK;
         }
         UpdateStateVersionAndStore(UPDATE_DEV_NICK_NAME);
-        if (g_localNetLedger.localInfo.accountId == 0) {
-            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        if (!IsLocalLedgerReady()) {
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "device nick name is changed");
@@ -1170,34 +1197,13 @@ static int32_t UpdateNickName(const void *name)
     return SOFTBUS_OK;
 }
 
-int32_t LnnUpdateLedgerByRestoreInfo(NodeInfo *restoreInfo)
+int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
 {
-    if (restoreInfo == NULL) {
-        LNN_LOGE(LNN_LEDGER, "restoreInfo is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    char *anonyDeviceName = NULL;
-    char *anonyMacAddr = NULL;
-    Anonymize(restoreInfo->deviceInfo.deviceName, &anonyDeviceName);
-    Anonymize(restoreInfo->connectInfo.macAddr, &anonyMacAddr);
-    LNN_LOGI(LNN_LEDGER, "update local ledger, stateVersion=%{public}d, deviceName=%{public}s, macAddr=%{public}s, "
-        "networkIdTimestamp=%{public}" PRId64, restoreInfo->stateVersion, anonyDeviceName, anonyMacAddr,
-        restoreInfo->networkIdTimestamp);
-    AnonymizeFree(anonyDeviceName);
-    AnonymizeFree(anonyMacAddr);
-
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
-    (void)UpdateStateVersion((const void *)&restoreInfo->stateVersion);
-    if (restoreInfo->networkIdTimestamp != 0) {
-        g_localNetLedger.localInfo.networkIdTimestamp = restoreInfo->networkIdTimestamp;
-    }
-    if (LnnSetDeviceName(&g_localNetLedger.localInfo.deviceInfo, restoreInfo->deviceInfo.deviceName) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "set device name fail");
-    }
-    LnnSetBtMac(&g_localNetLedger.localInfo, restoreInfo->connectInfo.macAddr);
+    g_localNetLedger.localInfo.networkIdTimestamp = time;
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -1221,8 +1227,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
     UpdateStateVersionAndStore(UPDATE_NETWORKID);
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyOldNetworkId);
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+    if (!IsLocalLedgerReady()) {
         return SOFTBUS_OK;
     }
     NodeInfo nodeInfo =  {};
@@ -1352,8 +1357,7 @@ static int32_t UpdateLocalBtMac(const void *mac)
     } else {
         LNN_LOGE(LNN_LEDGER, "get local device info fail");
     }
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+    if (!IsLocalLedgerReady()) {
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_LEDGER, "device bt mac is changed");
@@ -1517,8 +1521,7 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
 void LnnUpdateStateVersion(StateVersionChangeReason reason)
 {
     UpdateStateVersionAndStore(reason);
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+    if (!IsLocalLedgerReady()) {
         return;
     }
     NodeInfo nodeInfo = {};
@@ -2208,8 +2211,9 @@ int32_t LnnInitLocalLedger(void)
     }
     nodeInfo->groupType = ALL_GROUP_TYPE;
     nodeInfo->discoveryType = 0;
+    nodeInfo->heartbeatCapacity = DEFAULT_SUPPORT_HBCAPACITY;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
-    nodeInfo->authCapacity = DEFAULT_SUPPORT_AUTHCAPACITY;
+    nodeInfo->authCapacity = GetAuthCapacity();
     nodeInfo->feature = LnnGetFeatureCapabilty();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
     if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {
@@ -2272,4 +2276,15 @@ bool LnnIsMasterNode(void)
     ret = strncmp(masterUdid, deviceUdid, strlen(deviceUdid)) == 0;
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return ret;
+}
+
+int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LnnSetScreenStatus(&g_localNetLedger.localInfo, isScreenOn);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
 }

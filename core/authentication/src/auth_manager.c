@@ -616,7 +616,11 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
         }
         if (auth->connId[info->connInfo.type] != info->connId &&
             auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI) {
+            AuthFsm *fsm = GetAuthFsmByConnId(auth->connId[info->connInfo.type], info->isServer, false);
             DisconnectAuthDevice(&auth->connId[info->connInfo.type]);
+            if (fsm != NULL) {
+                UpdateFd(&fsm->info.connId, AUTH_INVALID_FD);
+            }
             auth->hasAuthPassed[info->connInfo.type] = false;
             AUTH_LOGI(AUTH_FSM, "auth manager may single device on line");
         }
@@ -975,7 +979,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     ReportAuthRequestFailed(info->requestId, reason);
     if (GetConnType(info->connId) == AUTH_LINK_TYPE_WIFI) {
         DisconnectAuthDevice((uint64_t *)&info->connId);
-    } else if (!info->isServer) {
+    } else if (!info->isConnectServer) {
         /* Bluetooth networking only the client to close the connection. */
         UpdateAuthDevicePriority(info->connId);
         DisconnectAuthDevice((uint64_t *)&info->connId);

@@ -28,10 +28,6 @@ public:
     SoftBusServer(int32_t saId, bool runOnCreate);
     ~SoftBusServer() = default;
 
-    int32_t StartDiscovery(const char *pkgName, const SubscribeInfo *info) override;
-    int32_t StopDiscovery(const char *pkgName, int subscribeId) override;
-    int32_t PublishService(const char *pkgName, const PublishInfo *info) override;
-    int32_t UnPublishService(const char *pkgName, int publishId) override;
     int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
 
     int32_t CreateSessionServer(const char *pkgName, const char *sessionName) override;
@@ -72,6 +68,7 @@ public:
     int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum) override;
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
+    int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen) override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,

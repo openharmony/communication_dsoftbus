@@ -178,6 +178,22 @@ void reset(int32_t reason)
     return;
 }
 
+void BuildParam(ConnBrManager *manager)
+{
+    manager->state->handlePendingRequest = handlePendingRequest;
+    manager->state->connectRequest = connectRequest;
+    manager->state->clientConnected = clientConnected;
+    manager->state->clientConnectTimeout = clientConnectTimeout;
+    manager->state->clientConnectFailed = clientConnectFailed;
+    manager->state->serverAccepted = serverAccepted;
+    manager->state->dataReceived = dataReceived;
+    manager->state->connectionException = connectionException;
+    manager->state->connectionResume = connectionResume;
+    manager->state->disconnectRequest = disconnectRequest;
+    manager->state->unpend = Unpend;
+    manager->state->reset = reset;
+}
+
 class ConnectionBrConnectionTest : public testing::Test {
 public:
     ConnectionBrConnectionTest() { }
@@ -206,7 +222,7 @@ void ConnectionBrConnectionTest::TearDown(void) { }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     char mac[BT_MAC_LEN] = { 0 };
     int32_t socketHandle = 111;
     ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_SERVER, socketHandle);
@@ -231,7 +247,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection001, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     char mac[BT_MAC_LEN] = { 0 };
     int32_t socketHandle = 222;
     ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_SERVER, socketHandle);
@@ -252,7 +268,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection002, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnBrConnection connection;
 
     connection.socketHandle = MAX_BR_READ_BUFFER_CAPACITY;
@@ -277,7 +293,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection004, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection005, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnBrConnection connection;
     const cJSON *json = nullptr;
     NiceMock<ConnectionBrInterfaceMock> brMock;
@@ -294,7 +310,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection005, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection006, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ServerState serverState;
 
     g_serverState = &serverState;
@@ -308,7 +324,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection006, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection007, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
 
     g_serverState->serverId = 1;
     ret = ConnBrStopServer();
@@ -333,7 +349,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection008, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection009, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SoftBusMessage msg;
     SoftBusMessage args;
 
@@ -409,9 +425,9 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection012, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
 {
-    int ret;
-    int val;
-    int mtu;
+    int32_t ret;
+    int32_t val;
+    int32_t mtu;
 
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 0;
     ret = InitProperty();
@@ -545,7 +561,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager006, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager007, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnBrDevice device;
     const char *anomizeAddress;
 
@@ -564,7 +580,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager007, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager008, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnBrDevice *device;
     const char *anomizeAddress;
     ConnBrDevice conn;
@@ -936,19 +952,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager028, TestSize.Level1)
     SoftBusMessage msg;
     ErrorContext obj;
 
-    g_brManager.state->handlePendingRequest = handlePendingRequest;
-    g_brManager.state->connectRequest = connectRequest;
-    g_brManager.state->clientConnected = clientConnected;
-    g_brManager.state->clientConnectTimeout = clientConnectTimeout;
-    g_brManager.state->clientConnectFailed = clientConnectFailed;
-    g_brManager.state->serverAccepted = serverAccepted;
-    g_brManager.state->dataReceived = dataReceived;
-    g_brManager.state->connectionException = connectionException;
-    g_brManager.state->connectionResume = connectionResume;
-    g_brManager.state->disconnectRequest = disconnectRequest;
-    g_brManager.state->unpend = Unpend;
-    g_brManager.state->reset = reset;
-
+    BuildParam(&g_brManager);
     obj.connectionId = 0;
     obj.error = 0;
     msg.obj = &obj;
@@ -995,7 +999,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager028, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager029, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SoftBusMessage msg;
     SoftBusMessage args;
     ConnBrPendInfo msgInfo;
@@ -1038,11 +1042,17 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager029, TestSize.Level1)
     args.obj = &ctxInfo;
     ret = BrCompareManagerLooperEventFunc(&msg, &args);
     EXPECT_EQ(COMPARE_FAILED, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager030, TestSize.Level1)
+{
+    SoftBusMessage msg;
+    SoftBusMessage args;
 
     msg.what = MSG_CONNECT_REQUEST;
     args.what = MSG_CONNECT_REQUEST;
     args.arg1 = 1;
-    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    int32_t ret = BrCompareManagerLooperEventFunc(&msg, &args);
     EXPECT_EQ(COMPARE_FAILED, ret);
 
     args.arg1 = 0;
@@ -1052,7 +1062,8 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager029, TestSize.Level1)
     EXPECT_EQ(COMPARE_SUCCESS, ret);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager030, TestSize.Level1)
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager031, TestSize.Level1)
 {
     uint32_t connectionId = 0;
     uint32_t len = 0;
@@ -1067,9 +1078,9 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager030, TestSize.Level1)
     OnPostByteFinshed(connectionId, len, pid, flag, module, seq, error);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager031, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager032, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     char mac[BT_MAC_LEN] = { 0 };
     int32_t socketHandle = 333;
     ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_SERVER, socketHandle);
@@ -1082,9 +1093,9 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager031, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager032, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager033, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnBrConnection it;
 
     ListInit(&g_brManager.connections->list);
@@ -1094,7 +1105,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager032, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager033, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager034, TestSize.Level1)
 {
     ConnBrConnection *connection;
     ConnBrConnection target;
@@ -1108,7 +1119,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager033, TestSize.Level1)
     ConnBrRemoveConnection(connection);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager034, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager035, TestSize.Level1)
 {
     ConnBrConnection *connection;
     ConnBrConnection target;
@@ -1122,9 +1133,9 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager034, TestSize.Level1)
     ConnBrRemoveConnection(connection);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager035, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager036, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectOption option;
     uint32_t time = 10;
     BrPending it;
@@ -1147,9 +1158,9 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager035, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager036, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager037, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectOption option;
     uint32_t time = 10;
     BrPending it;
@@ -1172,9 +1183,9 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager036, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager037, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager038, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectOption option;
     uint32_t time = 10;
     BrPending it;
@@ -1192,7 +1203,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager037, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager038, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager039, TestSize.Level1)
 {
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
@@ -1203,10 +1214,10 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager038, TestSize.Level1)
     DumpLocalBtMac();
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager039, TestSize.Level1)
+HWTEST_F(ConnectionBrConnectionTest, testBrManager040, TestSize.Level1)
 {
-    int listenerId = 0;
-    int state = SOFTBUS_BR_STATE_TURN_ON;
+    int32_t listenerId = 0;
+    int32_t state = SOFTBUS_BR_STATE_TURN_ON;
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
     EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
@@ -1214,5 +1225,36 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager039, TestSize.Level1)
 
     state = SOFTBUS_BR_STATE_TURN_OFF;
     OnBtStateChanged(listenerId, state);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager041, TestSize.Level1)
+{
+    const char *addr = "11:22:33:44:55:66";
+    InitBrManager();
+    ConnBrConnection *connection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, -1);
+    ASSERT_TRUE(connection != NULL);
+    int32_t ret = ConnBrSaveConnection(connection);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t error = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
+    bool isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(true, isWait);
+
+    BrUnderlayerStatus *callbackStatus = (BrUnderlayerStatus *)SoftBusCalloc(sizeof(BrUnderlayerStatus));
+    ASSERT_TRUE(callbackStatus != NULL);
+    ListInit(&callbackStatus->node);
+    callbackStatus->status = 0;
+    callbackStatus->result = 4;
+    ListAdd(&connection->connectProcessStatus->list, &callbackStatus->node);
+    isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(false, isWait);
+
+    BrUnderlayerStatus *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
+        if (it->result == 4) {
+            it->result = CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED + 1;
+        }
+    }
+    isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(true, isWait);
 }
 } // namespace OHOS

@@ -406,19 +406,36 @@ int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
     return SOFTBUS_OK;
 }
 
+static BtGattWriteType ConvertBtWriteType(SoftBusGattWriteType writeType)
+{
+    switch (writeType) {
+        case SOFTBUS_GATT_WRITE_NO_RSP:
+            return OHOS_GATT_WRITE_NO_RSP;
+        case SOFTBUS_GATT_WRITE_DEFAULT:
+            return OHOS_GATT_WRITE_DEFAULT;
+        case SOFTBUS_GATT_WRITE_PREPARE:
+            return OHOS_GATT_WRITE_PREPARE;
+        case SOFTBUS_GATT_WRITE_SIGNED:
+            return OHOS_GATT_WRITE_SIGNED;
+        default:
+            return OHOS_GATT_WRITE_TYPE_UNKNOWN;
+    }
+}
+
 int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData)
 {
     if (clientId <= 0 || clientData == NULL) {
         CONN_LOGE(CONN_BLE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    CONN_LOGI(CONN_BLE, "clientId = %{public}d", clientId);
+    CONN_LOGI(CONN_BLE, "clientId = %{public}d, writeType=%{public}d", clientId, clientData->writeType);
     BtGattCharacteristic characteristic;
     characteristic.serviceUuid.uuid = clientData->serviceUuid.uuid;
     characteristic.serviceUuid.uuidLen = clientData->serviceUuid.uuidLen;
     characteristic.characteristicUuid.uuid = clientData->characterUuid.uuid;
     characteristic.characteristicUuid.uuidLen = clientData->characterUuid.uuidLen;
-    if (BleGattcWriteCharacteristic(clientId, characteristic, OHOS_GATT_WRITE_NO_RSP, clientData->valueLen,
+    BtGattWriteType writeType = ConvertBtWriteType(clientData->writeType);
+    if (BleGattcWriteCharacteristic(clientId, characteristic, writeType, clientData->valueLen,
         (const char *)clientData->value) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;

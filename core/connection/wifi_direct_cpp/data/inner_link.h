@@ -143,6 +143,7 @@ public:
 
     int32_t GetLocalCustomPort() const;
     void SetLocalCustomPort(int32_t value);
+    static void StopCustomListen(int32_t localCustomPort);
 
     int32_t GetRemoteCustomPort() const;
     void SetRemoteCustomPort(int32_t value);

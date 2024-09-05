@@ -481,7 +481,10 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
 
 void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
 {
-    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s pid=%{public}d died, clean all resource", pkgName, pid);
+    char *anonymizePkgName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s pid=%{public}d died, clean all resource", anonymizePkgName, pid);
+    AnonymizeFree(anonymizePkgName);
     if (g_tcpChannelInfoList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
         return;
@@ -618,6 +621,11 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHand
     connInfo = NULL;
     int32_t tmp = 0;
     int32_t *result = (int32_t *)SoftBusCalloc(count * sizeof(int32_t));
+    if (result == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc result failed");
+        ReleaseSessionConnLock();
+        return NULL;
+    }
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->authHandle.authId == authHandle->authId && connInfo->status == status &&
             connInfo->authHandle.type == authHandle->type) {

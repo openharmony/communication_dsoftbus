@@ -33,6 +33,7 @@
 #include "lnn_lane_interface.h"
 
 #define SOFTBUS_IPC_THREAD_NUM 32
+#define OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS (15 * 1000)
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -55,26 +56,6 @@ static ConnectType ConvertConnectType(ConnectionAddrType type)
 
 SoftBusServer::SoftBusServer(int32_t saId, bool runOnCreate) : SystemAbility(saId, runOnCreate)
 {
-}
-
-int32_t SoftBusServer::StartDiscovery(const char *pkgName, const SubscribeInfo *info)
-{
-    return DiscIpcStartDiscovery(pkgName, info);
-}
-
-int32_t SoftBusServer::StopDiscovery(const char *pkgName, int subscribeId)
-{
-    return DiscIpcStopDiscovery(pkgName, subscribeId);
-}
-
-int32_t SoftBusServer::PublishService(const char *pkgName, const PublishInfo *info)
-{
-    return DiscIpcPublishService(pkgName, (PublishInfo *)(info));
-}
-
-int32_t SoftBusServer::UnPublishService(const char *pkgName, int publishId)
-{
-    return DiscIpcUnPublishService(pkgName, publishId);
 }
 
 int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
@@ -163,6 +144,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
                 COMM_LOGE(COMM_SVC, "connect BR memory error");
                 return SOFTBUS_MEM_ERR;
             }
+            connOpt.brOption.waitTimeoutDelay = OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS;
             break;
         default:
             COMM_LOGE(COMM_SVC, "connect type error");
@@ -317,6 +299,11 @@ int32_t SoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, c
     const GearMode *mode)
 {
     return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+}
+
+int32_t SoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    return LnnIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
 int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)

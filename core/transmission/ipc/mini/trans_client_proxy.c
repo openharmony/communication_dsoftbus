@@ -79,3 +79,10 @@ int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t ch
     (void)tos;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid)
+{
+    (void)pkgName;
+    (void)pid;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

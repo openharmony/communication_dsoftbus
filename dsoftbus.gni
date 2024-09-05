@@ -89,6 +89,8 @@ if (defined(ohos_lite)) {
   }
 }
 
+defines += [ "OPENSSL_NO_FILENAMES" ]
+
 if (defined(global_parts_info) &&
     !defined(global_parts_info.distributeddatamgr_kv_store)) {
   dsoftbus_feature_lnn_cloud_sync = false

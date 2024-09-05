@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,31 +13,18 @@
  * limitations under the License.
  */
 
-#include <securec.h>
 #include "gtest/gtest.h"
+#include <securec.h>
 
-#include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "disc_event_manager.h"
 #include "lnn_lane_qos.h"
 #include "message_handler.h"
-#include "session.h"
-#include "softbus_conn_ble_direct.h"
-#include "softbus_conn_interface.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_feature_config.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
 #include "softbus_server_frame.h"
-#include "softbus_trans_def.h"
-#include "trans_channel_callback.h"
-#include "trans_channel_callback.c"
 #include "trans_channel_manager.c"
-#include "trans_channel_manager.h"
-#include "trans_lane_manager.h"
 #include "trans_lane_manager.c"
-#include "trans_log.h"
 #include "trans_manager_mock.h"
 #include "trans_session_service.h"
 
@@ -53,6 +40,8 @@ namespace OHOS {
 #define TRANS_TEST_INVALID_PID (-1)
 #define TRANS_TEST_INVALID_UID (-1)
 #define TRANS_TEST_PID 4700
+#define TEST_PROXY_CHANNEL_ID 1026
+#define TEST_TDC_CHANNEL_ID 2048
 
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
@@ -134,7 +123,7 @@ HWTEST_F(TransChannelManagerTest, TransChannelDeinit001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
 {
-    SessionParam *param = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     ASSERT_TRUE(param != nullptr);
     (void)memset_s(param, sizeof(SessionParam), 0, sizeof(SessionParam));
     param->sessionName = TEST_SESSION_NAME;
@@ -142,11 +131,14 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     int tmp = 0;
     param->attr = &g_sessionAttr[tmp];
 
-    TransInfo *transInfo = (TransInfo *)SoftBusMalloc(sizeof(TransInfo));
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_MEM_ERR));
+
+    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(transInfo != nullptr);
     (void)memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     int ret = TransOpenChannel(param, transInfo);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -174,29 +166,6 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAuthAppInfo001
- * @tc.desc: GetAuthAppInfo, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelManagerTest, GetAuthAppInfo001, TestSize.Level1)
-{
-    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-
-    const char *mySessionName = TEST_PKG_NAME;
-
-    int32_t ret = TransSessionMgrInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    appInfo = GetAuthAppInfo(mySessionName);
-
-    EXPECT_TRUE(appInfo == NULL);
-
-    SoftBusFree(appInfo);
-}
-
-/**
  * @tc.name: TransOpenAuthChannel001
  * @tc.desc: TransOpenAuthChannel001, use the wrong parameter.
  * @tc.type: FUNC
@@ -215,19 +184,6 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
     ret = TransOpenAuthChannel(NULL, connOpt, NULL);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-
-    connOpt->type = CONNECT_TCP;
-    ret = TransOpenAuthChannel(sessionName, connOpt, NULL);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-
-    connOpt->type = CONNECT_BR;
-    ret = TransOpenAuthChannel(sessionName, connOpt, NULL);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-
-    connOpt->type = CONNECT_P2P;
-    ret = TransOpenAuthChannel(sessionName, connOpt, NULL);
-    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-
     SoftBusFree(connOpt);
 }
 
@@ -239,11 +195,11 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
 {
-    StreamSendStats *src = (StreamSendStats *)SoftBusMalloc(sizeof(StreamSendStats));
+    StreamSendStats *src = (StreamSendStats *)SoftBusCalloc(sizeof(StreamSendStats));
     ASSERT_TRUE(src != nullptr);
     memset_s(src, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
 
-    FrameSendStats *dest = (FrameSendStats *)SoftBusMalloc(sizeof(FrameSendStats));
+    FrameSendStats *dest = (FrameSendStats *)SoftBusCalloc(sizeof(FrameSendStats));
     ASSERT_TRUE(dest != nullptr);
     memset_s(dest, sizeof(FrameSendStats), 0, sizeof(FrameSendStats));
 
@@ -276,11 +232,11 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
 {
     int32_t channelId = 1111;
     int32_t channelType = 222;
-    StreamSendStats *data = (StreamSendStats *)SoftBusMalloc(sizeof(StreamSendStats));
+    StreamSendStats *data = (StreamSendStats *)SoftBusCalloc(sizeof(StreamSendStats));
     ASSERT_TRUE(data != nullptr);
     memset_s(data, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
 
-    TrafficStats *trafficStats = (TrafficStats *)SoftBusMalloc(sizeof(TrafficStats));
+    TrafficStats *trafficStats = (TrafficStats *)SoftBusCalloc(sizeof(TrafficStats));
     ASSERT_TRUE(trafficStats != nullptr);
     memset_s(trafficStats, sizeof(TrafficStats), 0, sizeof(TrafficStats));
 
@@ -410,7 +366,7 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
 {
-    TransInfo *info = (TransInfo *)SoftBusMalloc(sizeof(TransInfo));
+    TransInfo *info = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(info != nullptr);
     memset_s(info, sizeof(TransInfo), 0, sizeof(TransInfo));
     char pkgName[] = "testPackage";
@@ -451,18 +407,17 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
-    int32_t channelId = 111;
+    int32_t channelId = 1;
     int32_t channelType = 222;
 
-    int32_t ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
+    int32_t ret = TransGetAppInfoByChanId(channelId, channelType, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    channelType = CHANNEL_TYPE_TCP_DIRECT;
-    ret = TransGetAppInfoByChanId(channelId, channelType, NULL);
+    ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelType = CHANNEL_TYPE_TCP_DIRECT;
@@ -483,7 +438,7 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransGetConnByChanId001
+ * @tc.name: TransGetConnByChanId Test
  * @tc.desc: TransGetConnByChanId001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
@@ -500,24 +455,18 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransGetLocalConfig001
- * @tc.desc: TransGetLocalConfig001, use the wrong parameter.
+ * @tc.name: TransGetConnByChanId Test
+ * @tc.desc: TransGetConnByChanId002, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransChannelManagerTest, TransGetLocalConfig001, TestSize.Level1)
+HWTEST_F(TransChannelManagerTest, TransGetConnByChanId002, TestSize.Level1)
 {
-    int32_t channelType = 0;
-    int32_t businessType = 0;
-    uint32_t len = 0;
-
-    int32_t ret = TransCommonGetLocalConfig(channelType, businessType, &len);
+    int32_t channelId = 1;
+    int32_t connId = 1;
+    int32_t channelType = CHANNEL_TYPE_AUTH;
+    int32_t ret = TransGetConnByChanId(channelId, channelType, &connId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    channelType = CHANNEL_TYPE_AUTH;
-    businessType = BUSINESS_TYPE_BYTE;
-    ret = TransCommonGetLocalConfig(channelType, businessType, &len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -528,9 +477,13 @@ HWTEST_F(TransChannelManagerTest, TransGetLocalConfig001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, GenerateProxyChannelId001, TestSize.Level1)
 {
+    SoftBusMutexInit(&g_myIdLock, NULL);
     int32_t channelId = GenerateProxyChannelId();
-    EXPECT_EQ(SOFTBUS_LOCK_ERR, channelId);
-    ReleaseProxyChannelId(1);
+    EXPECT_EQ(TEST_PROXY_CHANNEL_ID, channelId);
+    channelId = GenerateTdcChannelId();
+    EXPECT_EQ(TEST_TDC_CHANNEL_ID, channelId);
+    ReleaseProxyChannelId(channelId);
+    SoftBusMutexDestroy(&g_myIdLock);
 }
 
 /**
@@ -556,7 +509,7 @@ HWTEST_F(TransChannelManagerTest, IsLaneModuleError001, TestSize.Level1)
 HWTEST_F(TransChannelManagerTest, TransSetFirstTokenInfo001, TestSize.Level1)
 {
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != nullptr);
+    ASSERT_TRUE(appInfo != nullptr);
     (void)strcpy_s(appInfo->tokenName, SESSION_NAME_SIZE_MAX, TEST_SESSION_NAME);
     appInfo->callingTokenId = 2;
     TransEventExtra extra;
@@ -627,7 +580,7 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg002, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransOpenChannel003, TestSize.Level1)
 {
-    SessionParam *param = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     ASSERT_TRUE(param != nullptr);
     param->sessionName = TEST_SESSION_NAME;
     param->sessionId = 1;
@@ -635,7 +588,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel003, TestSize.Level1)
     param->attr = &g_sessionAttr[tmp];
     param->isQosLane = true;
 
-    TransInfo *transInfo = (TransInfo *)SoftBusMalloc(sizeof(TransInfo));
+    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(transInfo != nullptr);
 
     g_socketChannelList = CreateSoftBusList();
@@ -658,7 +611,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel003, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransOpenChannel004, TestSize.Level1)
 {
-    SessionParam *param = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     ASSERT_TRUE(param != nullptr);
     param->sessionName = TEST_SESSION_NAME;
     param->sessionId = 1;
@@ -666,7 +619,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel004, TestSize.Level1)
     param->attr = &g_sessionAttr[tmp];
     param->isQosLane = false;
 
-    TransInfo *transInfo = (TransInfo *)SoftBusMalloc(sizeof(TransInfo));
+    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(transInfo != nullptr);
     transInfo->channelId = 1;
     transInfo->channelType = 1;
@@ -682,5 +635,161 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel004, TestSize.Level1)
     g_socketChannelList = NULL;
     SoftBusFree(param);
     SoftBusFree(transInfo);
+}
+
+/**
+ * @tc.name: TransOpenChannel test
+ * @tc.desc: TransOpenChannel005
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransOpenChannel005, TestSize.Level1)
+{
+    SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(param != nullptr);
+    param->sessionName = TEST_SESSION_NAME;
+    param->sessionId = 1;
+    int tmp = 0;
+    param->attr = &g_sessionAttr[tmp];
+    param->isQosLane = true;
+
+    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
+    ASSERT_TRUE(transInfo != nullptr);
+
+    g_socketChannelList = CreateSoftBusList();
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransAsyncGetLaneInfo).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransOpenChannel(param, transInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DestroySoftBusList(g_socketChannelList);
+    g_socketChannelList = NULL;
+    SoftBusFree(param);
+    SoftBusFree(transInfo);
+}
+
+/**
+ * @tc.name: TransOpenChannel test
+ * @tc.desc: TransOpenChannel006
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransOpenChannel006, TestSize.Level1)
+{
+    SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(param != nullptr);
+    param->sessionName = TEST_SESSION_NAME;
+    param->sessionId = 1;
+    int tmp = 0;
+    param->attr = &g_sessionAttr[tmp];
+    param->isQosLane = false;
+
+    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
+    ASSERT_TRUE(transInfo != nullptr);
+    transInfo->channelId = 1;
+    transInfo->channelType = 1;
+
+    g_socketChannelList = CreateSoftBusList();
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransGetLaneInfo).WillOnce(Return(SOFTBUS_NOT_FIND));
+    int32_t ret = TransOpenChannel(param, transInfo);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    DestroySoftBusList(g_socketChannelList);
+    g_socketChannelList = NULL;
+    SoftBusFree(param);
+    SoftBusFree(transInfo);
+}
+
+/**
+ * @tc.name: GetAuthAppInfo Test
+ * @tc.desc: GetAuthAppInfo001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetAuthAppInfo001, TestSize.Level1)
+{
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetUidAndPid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransCommonGetLocalConfig).WillOnce(Return(SOFTBUS_OK));
+    AppInfo *appInfo = GetAuthAppInfo(g_sessionName);
+    EXPECT_NE(nullptr, appInfo);
+}
+
+/**
+ * @tc.name: GetAuthAppInfo Test
+ * @tc.desc: GetAuthAppInfo002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetAuthAppInfo002, TestSize.Level1)
+{
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetUidAndPid).WillOnce(Return(SOFTBUS_NO_INIT));
+    AppInfo *appInfo = GetAuthAppInfo(g_sessionName);
+    EXPECT_EQ(nullptr, appInfo);
+}
+
+/**
+ * @tc.name: GetAuthAppInfo Test
+ * @tc.desc: GetAuthAppInfo003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetAuthAppInfo003, TestSize.Level1)
+{
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetUidAndPid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    AppInfo *appInfo = GetAuthAppInfo(g_sessionName);
+    EXPECT_EQ(nullptr, appInfo);
+}
+
+/**
+ * @tc.name: GetAuthAppInfo Test
+ * @tc.desc: GetAuthAppInfo004
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetAuthAppInfo004, TestSize.Level1)
+{
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetUidAndPid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST));
+    AppInfo *appInfo = GetAuthAppInfo(g_sessionName);
+    EXPECT_EQ(nullptr, appInfo);
+}
+
+/**
+ * @tc.name: GetAuthAppInfo Test
+ * @tc.desc: GetAuthAppInfo005
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetAuthAppInfo005, TestSize.Level1)
+{
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetUidAndPid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransCommonGetLocalConfig).WillOnce(Return(SOFTBUS_GET_CONFIG_VAL_ERR));
+    AppInfo *appInfo = GetAuthAppInfo(g_sessionName);
+    EXPECT_EQ(nullptr, appInfo);
+}
+
+/**
+ * @tc.name: TransGetAndComparePid Test
+ * @tc.desc: TransGetAndComparePid001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransGetAndComparePid001, TestSize.Level1)
+{
+    int32_t ret = TransGetAndComparePid(TRANS_TEST_PID, 1, CHANNEL_TYPE_TCP_DIRECT);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransGetAndComparePid(TRANS_TEST_PID, 1, CHANNEL_TYPE_AUTH);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // OHOS

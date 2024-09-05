@@ -212,7 +212,7 @@ private:
     int scene_ = UNKNOWN_SCENE;
     int streamHdrSize_ = 0;
     bool isDestroyed_ = false;
-    OnFrameEvt onStreamEvtCb_;
+    OnFrameEvt onStreamEvtCb_ = nullptr;
 };
 } // namespace SoftBus
 } // namespace Communication

@@ -220,7 +220,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%{public}s, pid=%{public}d", pkgName, pid);
+
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -236,7 +236,10 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if ((strcmp(item->appInfo.myData.pkgName, pkgName) == 0) && (item->appInfo.myData.pid == pid)) {
             ListDelete(&item->node);
-            TRANS_LOGI(TRANS_CTRL, "delete pkgName=%{public}s, pid=%{public}d", pkgName, pid);
+            char *anonymizePkgName = NULL;
+            Anonymize(pkgName, &anonymizePkgName);
+            TRANS_LOGI(TRANS_CTRL, "delete pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+            AnonymizeFree(anonymizePkgName);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
             ConnShutdownSocket(item->appInfo.fd);

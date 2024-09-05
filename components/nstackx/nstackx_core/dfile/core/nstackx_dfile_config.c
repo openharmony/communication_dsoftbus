@@ -41,6 +41,14 @@ BindInfo g_recver8CoreList[DFILE_BIND_TYPE_INDEX_MAX][DFILE_MAX_THREAD_NUM] = {
     {{0, 0x00}, {0, 0x00}, {0, 0x00}, {0, 0x00}, {0, 0x00}, {0, 0x00}, {0, 0x20}, {0, 0x00}}, /* lowspeed */
 };
 
+enum {
+    NO_CHECK = 0,
+    CHECKED_NOT_SUPPORT,
+    CHECKED_SUPPORT
+};
+
+static uint8_t g_aesInChecked = NO_CHECK;
+
 void SetTidToBindInfo(const DFileSession *session, uint32_t pos)
 {
     pid_t tid = gettid();
@@ -199,24 +207,54 @@ void SetTcpKeepAlive(SocketDesc fd)
 #endif
 }
 
+static bool CheckIsSupportHardwareAesNi(void)
+{
+    if (g_aesInChecked == NO_CHECK) {
+        g_aesInChecked = IsSupportHardwareAesNi() ? CHECKED_SUPPORT : CHECKED_NOT_SUPPORT;
+        DFILE_LOGI(TAG, "g_aesInChecked is set as %hhu", g_aesInChecked);
+    }
+    return g_aesInChecked == CHECKED_SUPPORT;
+}
+
 void DFileGetCipherCaps(DFileSession *session, SettingFrame *settingFramePara)
 {
-    if (CapsChaCha(session) && DFileGetDeviceBits() == DEVICE_32_BITS &&
-        QueryCipherSupportByName(CHACHA20_POLY1305_NAME)) {
-        settingFramePara->cipherCapability |= NSTACKX_CIPHER_CHACHA;
+    if (CapsChaCha(session) && QueryCipherSupportByName(CHACHA20_POLY1305_NAME)) {
+        session->cipherCapability |= NSTACKX_CIPHER_CHACHA;
+        DFILE_LOGI(TAG, "local cipher support %s.", CHACHA20_POLY1305_NAME);
     } else {
-        session->capability &= ~NSTACKX_CAPS_CHACHA;
-        DFILE_LOGI(TAG, "local cipher no support %s.", CHACHA20_POLY1305_NAME);
+        session->cipherCapability &= ~NSTACKX_CIPHER_CHACHA;
+        DFILE_LOGI(TAG, "local cipher no support %s, CapsChaCha is %hhu.", CHACHA20_POLY1305_NAME, CapsChaCha(session));
     }
+
+    bool ret = CheckIsSupportHardwareAesNi();
+    if (ret) {
+        session->cipherCapability |= NSTACKX_CIPHER_AES_NI;
+    }
+    settingFramePara->cipherCapability = session->cipherCapability;
+    DFILE_LOGI(TAG, "local cipher AES_NI state is %s", ret ? "true" : "false");
 }
 
 void DFileChooseCipherType(SettingFrame *hostSettingFrame, DFileSession *session)
 {
-    if ((hostSettingFrame->cipherCapability & NSTACKX_CIPHER_CHACHA) && (DFileGetDeviceBits() == DEVICE_32_BITS) &&
-        (session->fileManager->keyLen == CHACHA20_KEY_LENGTH)) {
-        session->capability |= NSTACKX_CAPS_CHACHA;
-    } else {
-        session->capability &= ~NSTACKX_CAPS_CHACHA;
+    if (session->fileManager->keyLen != CHACHA20_KEY_LENGTH) {
+        session->cipherCapability &= ~NSTACKX_CIPHER_CHACHA;
+        DFILE_LOGI(TAG, "opposite replies no use chacha cipher");
+        return;
     }
+
+    uint8_t isRemoteSupportChacha = ((hostSettingFrame->cipherCapability & NSTACKX_CIPHER_CHACHA) != 0);
+    uint8_t isRemoteSupportAesNi = ((hostSettingFrame->cipherCapability & NSTACKX_CIPHER_AES_NI) != 0);
+    uint8_t isUseMtp = NSTACKX_FALSE;
+#ifdef DFILE_ADAPT_MTP
+    isUseMtp = session->useMtpFlag;
+#endif
+    uint8_t isLocalUseChacha = QueryCipherSupportByName(CHACHA20_POLY1305_NAME) && !isUseMtp;
+    bool isLocalSupportAesNi = CheckIsSupportHardwareAesNi();
+    if (isRemoteSupportChacha && isLocalUseChacha && !(isRemoteSupportAesNi && isLocalSupportAesNi)) {
+        session->cipherCapability |= NSTACKX_CIPHER_CHACHA;
+    } else {
+        session->cipherCapability &= ~NSTACKX_CIPHER_CHACHA;
+    }
+
     DFILE_LOGI(TAG, "opposite replies %s use chacha cipher", CapsChaCha(session) ? "" : "no");
 }

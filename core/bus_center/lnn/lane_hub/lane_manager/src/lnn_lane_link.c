@@ -392,6 +392,41 @@ static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t lane
     return SOFTBUS_OK;
 }
 
+static void AddNetworkResourceInner(const LaneLinkInfo *linkInfo, uint64_t laneId)
+{
+    if (linkInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    if (linkInfo->type != LANE_BR && linkInfo->type != LANE_BLE && linkInfo->type != LANE_P2P &&
+        linkInfo->type != LANE_HML) {
+        return;
+    }
+
+    NetworkResource *networkResource = (NetworkResource *)SoftBusCalloc(sizeof(NetworkResource));
+    if (networkResource == NULL) {
+        LNN_LOGE(LNN_LANE, "malloc network resource fail");
+        return;
+    }
+    LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkResource->localUdid, NETWORK_ID_BUF_LEN);
+    networkResource->laneId = laneId;
+    networkResource->laneLinkType = linkInfo->type;
+    char *anonyLocalUdid = NULL;
+    char *anonyRemoteUdid = NULL;
+    Anonymize(networkResource->localUdid, &anonyLocalUdid);
+    Anonymize(linkInfo->peerUdid, &anonyRemoteUdid);
+    if (anonyLocalUdid == NULL || strcpy_s(networkResource->localUdid, NETWORK_ID_BUF_LEN, anonyLocalUdid) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy localUdid fail");
+    }
+    if (anonyRemoteUdid == NULL || strcpy_s(networkResource->peerUdid, NETWORK_ID_BUF_LEN, anonyRemoteUdid) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy peerUdid fail");
+    }
+    AddNetworkResource(networkResource);
+    SoftBusFree(networkResource);
+    AnonymizeFree(anonyLocalUdid);
+    AnonymizeFree(anonyRemoteUdid);
+}
+
 static int32_t UpdateExistLaneResource(LaneResource *resourceItem, bool isServerSide)
 {
     if (isServerSide) {
@@ -433,6 +468,9 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     if (addResult != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "create laneResource fail, result=%{public}d", addResult);
         return addResult;
+    }
+    if (!isServerSide) {
+        AddNetworkResourceInner(linkInfo, laneId);
     }
     if (linkInfo->type == LANE_HML && IsPowerControlEnabled()) {
         DetectEnableWifiDirectApply();
@@ -802,19 +840,40 @@ int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *de
     return ret;
 }
 
-int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type)
+static int32_t ConvertUdidToHexStr(const char *peerUdid, char *udidHashStr, uint32_t hashStrLen)
 {
-    if (peerNetworkId == NULL || type >= LANE_LINK_TYPE_BUTT) {
+    if (peerUdid == NULL || udidHashStr == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid parem");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t peerUdidHash[UDID_HASH_LEN] = {0};
+    if (SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), peerUdidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "generate udidHash fail");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    if (ConvertBytesToHexString(udidHashStr, hashStrLen, peerUdidHash, UDID_SHORT_HASH_LEN_TMP) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "convert bytes to string fail");
+        return SOFTBUS_BYTE_CONVERT_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t QueryOtherLaneResource(const DevIdentifyInfo *inputInfo, LaneLinkType type)
+{
+    if (inputInfo == NULL || type >= LANE_LINK_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
-    if (LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        char *anonyPeerNetworkId = NULL;
-        Anonymize(peerNetworkId, &anonyPeerNetworkId);
-        LNN_LOGI(LNN_LANE, "get peerUdid fail, peerNetworkId=%{public}s", anonyPeerNetworkId);
-        AnonymizeFree(anonyPeerNetworkId);
-        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    if (inputInfo->type == IDENTIFY_TYPE_DEV_ID) {
+        if (LnnGetRemoteStrInfo(inputInfo->devInfo.peerDevId, STRING_KEY_DEV_UDID,
+            peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+            char *anonyPeerNetworkId = NULL;
+            Anonymize(inputInfo->devInfo.peerDevId, &anonyPeerNetworkId);
+            LNN_LOGI(LNN_LANE, "get peerUdid fail, peerNetworkId=%{public}s", anonyPeerNetworkId);
+            AnonymizeFree(anonyPeerNetworkId);
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
     }
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
@@ -823,16 +882,29 @@ int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type)
     LaneResource *item = NULL;
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
-        if (strcmp(peerUdid, item->link.peerUdid) != 0 && type == item->link.type) {
+        if (type != item->link.type) {
+            continue;
+        }
+        if (inputInfo->type == IDENTIFY_TYPE_DEV_ID && strcmp(peerUdid, item->link.peerUdid) != 0) {
             LaneUnlock();
+            LNN_LOGI(LNN_LANE, "fetch other laneLink by networkId");
             return SOFTBUS_OK;
+        } else if (inputInfo->type == IDENTIFY_TYPE_UDID_HASH && strlen(inputInfo->devInfo.udidHash) > 0) {
+            char hashHexStr[UDID_SHORT_HASH_HEXSTR_LEN_TMP + 1] = {0};
+            if ((ConvertUdidToHexStr(item->link.peerUdid,
+                hashHexStr, UDID_SHORT_HASH_HEXSTR_LEN_TMP + 1) == SOFTBUS_OK) &&
+                (strcmp(hashHexStr, inputInfo->devInfo.udidHash) != 0)) {
+                LaneUnlock();
+                LNN_LOGI(LNN_LANE, "fetch other laneLink by udidHashStr");
+                return SOFTBUS_OK;
+            }
         }
     }
     LaneUnlock();
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
-bool IsSupportLaneLinkReuse(const char *udidHashStr, LaneLinkType type)
+bool FindLaneResourceByDevIdHash(const char *udidHashStr, LaneLinkType type)
 {
     if (udidHashStr == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
@@ -906,6 +978,23 @@ static void LaneInitP2pAddrList()
     ListInit(&g_P2pAddrList.list);
     g_P2pAddrList.cnt = 0;
     SoftBusMutexInit(&g_P2pAddrList.lock, NULL);
+}
+
+static void LaneDeinitP2pAddrList(void)
+{
+    if (SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "SoftBusMutexLock fail");
+        return;
+    }
+    P2pAddrNode *item = NULL;
+    P2pAddrNode *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_P2pAddrList.list, P2pAddrNode, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    g_P2pAddrList.cnt = 0;
+    SoftBusMutexUnlock(&g_P2pAddrList.lock);
+    (void)SoftBusMutexDestroy(&g_P2pAddrList.lock);
 }
 
 void LaneDeleteP2pAddress(const char *networkId, bool isDestroy)
@@ -1543,5 +1632,19 @@ int32_t InitLaneLink(void)
 
 void DeinitLaneLink(void)
 {
+    LaneDeinitP2pAddrList();
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    g_laneResource.cnt = 0;
+    LaneUnlock();
     LnnDestroyP2p();
+    (void)SoftBusMutexDestroy(&g_laneResource.lock);
 }

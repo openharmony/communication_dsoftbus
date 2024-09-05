@@ -17,27 +17,17 @@
 #define INTERFACES_INNERKITS_SOFTBUS_CLIENT_H_
 
 #include "data_level_inner.h"
-#include "discovery_service.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "session.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 
 namespace OHOS {
 class ISoftBusClient : public IRemoteBroker {
 public:
     ~ISoftBusClient() override = default;
-
-    virtual void OnDeviceFound(const DeviceInfo *device);
-
-    virtual void OnDiscoverFailed(int subscribeId, int failReason);
-
-    virtual void OnDiscoverySuccess(int subscribeId);
-
-    virtual void OnPublishSuccess(int publishId);
-
-    virtual void OnPublishFail(int publishId, int reason);
 
     virtual int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel);
 
@@ -67,9 +57,11 @@ public:
 
     virtual int32_t OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type);
 
+    virtual int32_t OnNodeStatusChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type);
+
     virtual int32_t OnLocalNetworkIdChanged(const char *pkgName);
 
-    virtual int32_t OnNodeDeviceNotTrusted(const char *pkgName, const char *msg);
+    virtual int32_t OnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg, uint32_t msgLen);
 
     virtual int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode);
 

@@ -51,6 +51,7 @@
 #include "lnn_node_info.h"
 #include "lnn_node_weight.h"
 #include "lnn_ohos_account.h"
+#include "lnn_oobe_manager.h"
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_sync_info_manager.h"
@@ -166,6 +167,9 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
     }
     if (connFsm == NULL || connFsm->isDead) {
         connFsm = StartNewConnectionFsm(&para->addr, para->pkgName, para->isNeedConnect);
+        if (connFsm != NULL) {
+            connFsm->connInfo.dupInfo = (para->dupInfo == NULL) ? NULL : DupNodeInfo(para->dupInfo);
+        }
         isCreate = true;
     }
     if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
@@ -589,6 +593,37 @@ static void OnDeviceDisconnect(AuthHandle authHandle)
     }
 }
 
+static bool IsNeedNotifyOfflineByAdv(const char *udid)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoByKey(udid, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get nodeinfo fail");
+        return false;
+    }
+    if (!IsSupportFeatureByCapaBit(info.authCapacity, BIT_SUPPORT_ADV_OFFLINE)) {
+        LNN_LOGI(LNN_BUILDER, "peer device not support notify offline by adv");
+        return false;
+    }
+    if (LnnHasDiscoveryType(&info, DISCOVERY_TYPE_WIFI)) {
+        LNN_LOGI(LNN_BUILDER, "wifi online, no need notify offline by adv");
+        return false;
+    }
+
+    uint32_t local = 0;
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &local);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "lnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, local);
+        return false;
+    }
+    if (((local & (1 << BIT_BLE)) == 0) || ((info.netCapacity & (1 << BIT_BLE)) == 0)) {
+        LNN_LOGE(LNN_BUILDER, "ble capa disable, local=%{public}u, remote=%{public}u", local, info.netCapacity);
+        return false;
+    }
+    LnnRequestLeaveSpecific(info.networkId, CONNECTION_ADDR_MAX);
+    return true;
+}
+
 static void OnDeviceNotTrusted(const char *peerUdid)
 {
     if (peerUdid == NULL) {
@@ -614,11 +649,9 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         return;
     }
     LnnDeleteLinkFinderInfo(peerUdid);
+    LNN_CHECK_AND_RETURN_LOGW(!IsNeedNotifyOfflineByAdv(peerUdid), LNN_BUILDER, "need notify offline by adv");
     NotTrustedDelayInfo *info = (NotTrustedDelayInfo *)SoftBusCalloc(sizeof(NotTrustedDelayInfo));
-    if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "malloc NotTrustedDelayInfo fail");
-        return;
-    }
+    LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "malloc NotTrustedDelayInfo fail");
     if (AuthGetLatestAuthSeqList(useUdid, info->authSeq, DISCOVERY_TYPE_COUNT) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get latest AuthSeq list fail");
         SoftBusFree(info);
@@ -658,6 +691,7 @@ static void UserSwitchedHandler(const LnnEventBasicInfo *info)
     switch (userSwitchState) {
         case SOFTBUS_USER_SWITCHED:
             LNN_LOGI(LNN_BUILDER, "SOFTBUS_USER_SWITCHED");
+            RegisterOOBEMonitor(NULL);
             LnnSetUnlockState();
             break;
         default:

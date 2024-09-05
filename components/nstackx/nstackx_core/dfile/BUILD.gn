@@ -137,6 +137,7 @@ if (defined(ohos_lite)) {
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DDFILE_ENABLE_HIDUMP",
       "-DENABLE_USER_LOG",
+      "-DSSL_AND_CRYPTO_INCLUDED",
     ]
     cflags_cc = cflags
     include_dirs = [
@@ -170,11 +171,12 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
     ]
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "openssl:libcrypto_shared",
+    ]
     if (is_standard_system) {
       external_deps += [ "c_utils:utils" ]
-    } else {
-      cflags += [ "-DMBEDTLS_INCLUDED" ]
     }
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

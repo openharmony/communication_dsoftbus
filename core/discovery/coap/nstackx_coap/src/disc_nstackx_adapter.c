@@ -166,8 +166,11 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         }
 
         if ((nstackxDeviceInfo->update & 0x1) == 0) {
+            char *anonymizedName = NULL;
+            Anonymize(nstackxDeviceInfo->deviceName, &anonymizedName);
             DISC_LOGI(DISC_COAP, "duplicate device do not need report. deviceName=%{public}s",
-                nstackxDeviceInfo->deviceName);
+                AnonymizeWrapper(anonymizedName));
+            AnonymizeFree(anonymizedName);
             continue;
         }
         (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -201,7 +204,7 @@ static NSTACKX_Parameter g_nstackxCallBack = {
 int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(discCoapCb != NULL && g_discCoapInnerCb != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "discCoapCb is null");
+        DISC_COAP, "invalid param");
     if (memcpy_s(g_discCoapInnerCb, sizeof(DiscInnerCallback), discCoapCb, sizeof(DiscInnerCallback)) != EOK) {
         DISC_LOGE(DISC_COAP, "memcpy_s failed.");
         return SOFTBUS_MEM_ERR;
@@ -283,7 +286,7 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
         SoftBusFree(registerCapaData);
         return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_DATA_FAIL;
     }
-    DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ. registerCapaData=%{public}s", registerCapaData);
+    DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ.");
     SoftBusFree(registerCapaData);
     return SOFTBUS_OK;
 }
@@ -345,7 +348,7 @@ static void FreeDiscSet(NSTACKX_DiscoverySettings *discSet)
 
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is null.");
     DISC_CHECK_AND_RETURN_RET_LOGE(option->mode >= ACTIVE_PUBLISH && option->mode <= ACTIVE_DISCOVERY,
         SOFTBUS_INVALID_PARAM, DISC_COAP, "option->mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
@@ -412,7 +415,7 @@ static int32_t SetLocalDeviceInfo(void)
     DISC_CHECK_AND_RETURN_RET_LOGE(g_localDeviceInfo != NULL, SOFTBUS_DISCOVER_COAP_NOT_INIT, DISC_COAP,
         "disc coap not init");
     int32_t res = memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo));
-    DISC_CHECK_AND_RETURN_RET_LOGE(res == EOK, SOFTBUS_MEM_ERR, DISC_COAP, "memset_s local Device Info failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(res == EOK, SOFTBUS_MEM_ERR, DISC_COAP, "memset_s local device info failed");
 
     char *deviceIdStr = GetDeviceId();
     DISC_CHECK_AND_RETURN_RET_LOGE(deviceIdStr != NULL, SOFTBUS_DISCOVER_COAP_GET_DEVICE_INFO_FAIL, DISC_COAP,

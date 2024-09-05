@@ -28,6 +28,8 @@ extern "C" {
 
 #define IS_SERVER 0
 #define IS_CLIENT 1
+#define ISHARE_AUTH_SESSION "IShareAuthSession"
+#define ISHARE_AUTH_SESSION_MAX_IDLE_TIME 5000 // 5s
 
 typedef struct {
     char peerSessionName[SESSION_NAME_SIZE_MAX];
@@ -56,6 +58,7 @@ typedef enum {
 typedef struct {
     SessionState sessionState;
     SoftBusCond callbackCond;
+    bool condIsWaiting;
     int32_t bindErrCode;
     uint32_t maxWaitTime; // 0 means no check time out, for Bind end
     uint32_t waitTime;
@@ -278,6 +281,8 @@ int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode);
 int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo);
 
 void SocketServerStateUpdate(const char *sessionName);
+
+int32_t ClientCancelAuthSessionTimer(int32_t sessionId);
 #ifdef __cplusplus
 }
 #endif

@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
-#include "gtest/gtest.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "trans_channel_callback.h"
-#include "trans_channel_manager.h"
 #include "trans_udp_negotiation.c"
-#include "trans_udp_negotiation.h"
 
 using namespace testing::ext;
 
