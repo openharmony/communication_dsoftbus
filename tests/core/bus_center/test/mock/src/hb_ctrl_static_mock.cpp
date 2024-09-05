@@ -171,5 +171,15 @@ void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
 {
     return HeartBeatCtrlStaticInterface()->LnnNotifyAccountStateChangeEvent(state);
 }
+
+void AuthLoadDeviceKey(void)
+{
+    return HeartBeatCtrlStaticInterface()->AuthLoadDeviceKey();
+}
+
+int32_t LnnGenerateCeParams(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
+}
 }
 } // namespace OHOS

@@ -52,6 +52,7 @@ typedef struct {
 typedef enum {
     NOTIFY_ONLINE_STATE_CHANGED = 0,
     NOTIFY_NODE_BASIC_INFO_CHANGED,
+    NOTIFY_NODE_STATUS_CHANGED,
     NOTIFY_NETWORKID_UPDATE,
     NOTIFY_LOCAL_NETWORKID_UPDATE,
 } NotifyType;
@@ -117,6 +118,16 @@ static void HandleNodeBasicInfoChangedMessage(SoftBusMessage *msg)
     LnnIpcNotifyBasicInfoChanged(msg->obj, sizeof(NodeBasicInfo), type);
 }
 
+static void HandleNodeStatusChangedMessage(SoftBusMessage *msg)
+{
+    if (msg->obj == NULL) {
+        LNN_LOGE(LNN_EVENT, "invalid node basic info message");
+        return;
+    }
+    int32_t type = (int32_t)msg->arg1;
+    LnnIpcNotifyNodeStatusChanged(msg->obj, sizeof(NodeStatus), type);
+}
+
 static void HandleLocalNetworkIdChangedMessage(void)
 {
     LnnIpcLocalNetworkIdChanged();
@@ -150,6 +161,9 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             break;
         case NOTIFY_NODE_BASIC_INFO_CHANGED:
             HandleNodeBasicInfoChangedMessage(msg);
+            break;
+        case NOTIFY_NODE_STATUS_CHANGED:
+            HandleNodeStatusChangedMessage(msg);
             break;
         case NOTIFY_LOCAL_NETWORKID_UPDATE:
             HandleLocalNetworkIdChangedMessage();
@@ -194,6 +208,25 @@ static NodeBasicInfo *DupNodeBasicInfo(const NodeBasicInfo *info)
     return dupInfo;
 }
 
+static NodeStatus *DupNodeStatus(const NodeStatus *nodeStatus)
+{
+    if (nodeStatus == NULL) {
+        LNN_LOGW(LNN_EVENT, "nodeStatus is null");
+        return NULL;
+    }
+    NodeStatus *dupInfo = SoftBusCalloc(sizeof(NodeStatus));
+    if (dupInfo == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc NodeStatus err");
+        return NULL;
+    }
+    if (memcpy_s(dupInfo, sizeof(NodeStatus), nodeStatus, sizeof(NodeStatus)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy NodeStatus fail");
+        SoftBusFree(dupInfo);
+        return NULL;
+    }
+    return dupInfo;
+}
+
 static int32_t PostNotifyMessage(int32_t what, uint64_t arg, const NodeBasicInfo *info)
 {
     SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
@@ -206,6 +239,26 @@ static int32_t PostNotifyMessage(int32_t what, uint64_t arg, const NodeBasicInfo
     msg->obj = DupNodeBasicInfo(info);
     if (msg->obj == NULL) {
         LNN_LOGE(LNN_EVENT, "dup NodeBasicInfo err");
+        SoftBusFree(msg);
+        return SOFTBUS_MEM_ERR;
+    }
+    msg->handler = &g_notifyHandler;
+    msg->FreeMessage = FreeNotifyMessage;
+    return PostMessageToHandlerDelay(msg, 0);
+}
+
+static int32_t PostNotifyNodeStatusMessage(int32_t what, uint64_t arg, const NodeStatus *info)
+{
+    SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc msg err");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    msg->what = what;
+    msg->arg1 = arg;
+    msg->obj = DupNodeStatus(info);
+    if (msg->obj == NULL) {
+        LNN_LOGE(LNN_EVENT, "dup NodeStatus err");
         SoftBusFree(msg);
         return SOFTBUS_MEM_ERR;
     }
@@ -322,9 +375,12 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     }
     char *anonyNetworkId = NULL;
     Anonymize(info->networkId, &anonyNetworkId);
+    char *anonyDeviceName = NULL;
+    Anonymize(info->deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_EVENT, "notify node. deviceName=%{public}s, isOnline=%{public}s, networkId=%{public}s",
-        info->deviceName, (isOnline == true) ? "online" : "offline", anonyNetworkId);
+        anonyDeviceName, (isOnline == true) ? "online" : "offline", anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
+    AnonymizeFree(anonyDeviceName);
     SetDefaultQdisc();
     (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
@@ -370,9 +426,21 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
         return;
     }
     if (type == TYPE_DEVICE_NAME) {
-        LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s", info->deviceName);
+        char *anonyDeviceName = NULL;
+        Anonymize(info->deviceName, &anonyDeviceName);
+        LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s", anonyDeviceName);
+        AnonymizeFree(anonyDeviceName);
     }
     (void)PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
+}
+
+void LnnNotifyNodeStatusChanged(NodeStatus *info, NodeStatusType type)
+{
+    if (info == NULL) {
+        LNN_LOGW(LNN_EVENT, "info = null");
+        return;
+    }
+    (void)PostNotifyNodeStatusMessage(NOTIFY_NODE_STATUS_CHANGED, (uint64_t)type, info);
 }
 
 void LnnNotifyLocalNetworkIdChanged(void)
@@ -380,13 +448,13 @@ void LnnNotifyLocalNetworkIdChanged(void)
     (void)PostNotifyMessageDelay(NOTIFY_LOCAL_NETWORKID_UPDATE, 0);
 }
 
-void LnnNotifyDeviceNotTrusted(const char *msg)
+void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
 {
     if (msg == NULL) {
         LNN_LOGE(LNN_EVENT, "msg is null");
         return;
     }
-    (void)LnnIpcNotifyDeviceNotTrusted(msg);
+    (void)LnnIpcNotifyDeviceTrustedChange(type, msg, msgLen);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -559,6 +627,7 @@ void LnnNotifyHomeGroupChangeEvent(SoftBusHomeGroupState state)
 
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 {
+    LNN_LOGI(LNN_EVENT, "notify OOBE state change");
     if (state < SOFTBUS_OOBE_RUNNING || state >= SOFTBUS_OOBE_UNKNOWN) {
         LNN_LOGW(LNN_EVENT, "bad OOBEState=%{public}d", state);
         return;

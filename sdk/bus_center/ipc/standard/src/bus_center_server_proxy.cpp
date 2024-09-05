@@ -305,3 +305,16 @@ int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const c
     }
     return ret;
 }
+
+int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    int32_t ret = g_serverProxy->SyncTrustedRelationShip(pkgName, msg, msgLen);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "SyncTrustedRelationShip failed");
+    }
+    return ret;
+}

@@ -302,7 +302,6 @@ void EncodeSettingFrame(uint8_t *buffer, size_t length, size_t *frameLength, con
     settingFrame->dataFrameSize = htonl(settingFramePara->dataFrameSize);
     settingFrame->capsCheck = htonl(settingFramePara->capsCheck);
     settingFrame->cipherCapability = htonl(settingFramePara->cipherCapability);
-    settingFrame->deviceBits = htons(settingFramePara->deviceBits);
 }
 
 /* Caller should make sure that "length" can cover the minimum header length */
@@ -530,39 +529,59 @@ static uint8_t IsSettingFrameLengthValid(const SettingFrame *hostSettingFrame, u
      * From dfile with historical version NSTACKX_DFILE_VERSION_0, whose setting frame is composed of header,
      * mtu and connType.
      */
-    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType)) {
+    size_t hostFrameLength = 0;
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType))) {
         return NSTACKX_TRUE;
     }
 
-    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
-        sizeof(hostSettingFrame->dFileVersion)) {
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->dFileVersion))) {
         return NSTACKX_TRUE;
     }
 
-    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
-        sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability)) {
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->abmCapability))) {
         return NSTACKX_TRUE;
     }
 
-    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
-        sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
-        sizeof(hostSettingFrame->capability)) {
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->capability))) {
         return NSTACKX_TRUE;
     }
 
-    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
-        sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
-        sizeof(hostSettingFrame->capability) + sizeof(hostSettingFrame->dataFrameSize)) {
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->dataFrameSize))) {
         return NSTACKX_TRUE;
     }
 
-    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
-        sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
-        sizeof(hostSettingFrame->capability) + sizeof(hostSettingFrame->dataFrameSize) +
-        sizeof(hostSettingFrame->capsCheck)) {
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->capsCheck))) {
         return NSTACKX_TRUE;
     }
 
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->capsCheck))) {
+        return NSTACKX_TRUE;
+    }
+
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->productVersion))) {
+        return NSTACKX_TRUE;
+    }
+
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->isSupport160M))) {
+        return NSTACKX_TRUE;
+    }
+
+    if (payloadLength ==
+        (hostFrameLength += sizeof(hostSettingFrame->isSupportMtp) + sizeof(hostSettingFrame->mtpPort))) {
+        return NSTACKX_TRUE;
+    }
+
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->headerEnc))) {
+        return NSTACKX_TRUE;
+    }
+
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->mtpCapability))) {
+        return NSTACKX_TRUE;
+    }
+
+    if (payloadLength == (hostFrameLength += sizeof(hostSettingFrame->cipherCapability))) {
+        return NSTACKX_TRUE;
+    }
     /*
      * From dfile with the same version with local dfile.
      */
@@ -649,14 +668,13 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
             sizeof(hostSettingFrame->capability) + sizeof(hostSettingFrame->dataFrameSize) +
             sizeof(hostSettingFrame->capsCheck))) {
             hostSettingFrame->cipherCapability = ntohl(netSettingFrame->cipherCapability);
-            hostSettingFrame->deviceBits = ntohs(netSettingFrame->deviceBits);
         }
     }
     DFILE_LOGI(TAG, "local version is %u, remote version is %u capability 0x%x dataFrameSize %u capsCheck 0x%x "
-        "cipherCaps 0x%x deviceBits %u",
+        "cipherCaps 0x%x",
         NSTACKX_DFILE_VERSION, hostSettingFrame->dFileVersion, hostSettingFrame->capability,
         hostSettingFrame->dataFrameSize, hostSettingFrame->capsCheck,
-        hostSettingFrame->cipherCapability, hostSettingFrame->deviceBits);
+        hostSettingFrame->cipherCapability);
     return NSTACKX_EOK;
 }
 

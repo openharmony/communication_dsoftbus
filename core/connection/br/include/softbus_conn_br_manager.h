@@ -29,13 +29,16 @@
 extern "C" {
 #endif
 
-#define BR_CONNECT_TIMEOUT_MILLIS                        (10 * 1000)
+#define BR_CONNECT_TIMEOUT_MIN_MILLIS                    (10 * 1000)
+#define BR_CONNECT_TIMEOUT_MAX_MILLIS                    (20 * 1000)
 
 #define BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS            (10 * 1000)
 #define BR_CONNECTION_ACL_RETRY_CONNECT_COLLISION_MILLIS (3 * 1000)
 #define BR_CONNECTION_ACL_CONNECT_COLLISION_MILLIS       (6 * 1000)
 #define BR_WAIT_BLE_DISCONNECTED_PEND_MILLIS             (10 * 1000)
 #define BR_NIP_SEQ                                       (0xeaddeaddeaddeadd)
+
+#define BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS      (500)
 
 enum ConnBrDeviceState {
     BR_DEVICE_STATE_INIT,
@@ -55,6 +58,7 @@ typedef struct {
         uint32_t keepAliveBleRequestId;
         uint32_t keepAliveBleConnectionId;
     } bleKeepAliveInfo;
+    uint32_t waitTimeoutDelay;
 } ConnBrDevice;
 
 typedef struct {
@@ -70,6 +74,7 @@ typedef struct {
     char addr[BT_MAC_LEN];
     ConnectResult result;
     ConnectStatistics statistics;
+    uint32_t waitTimeoutDelay;
 } ConnBrConnectRequestContext;
 
 typedef struct {

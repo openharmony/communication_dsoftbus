@@ -38,6 +38,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout);
 
 void LnnHbOnTrustedRelationIncreased(int32_t groupType);
 void LnnHbOnTrustedRelationReduced(void);
+int32_t LnnTriggerDirectHeartbeat(const char *networkId, uint64_t timeout);
 
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);
@@ -46,6 +47,8 @@ int32_t LnnTriggerDataLevelHeartbeat(void);
 int32_t LnnTriggerCloudSyncHeartbeat(void);
 void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnUnregDataLevelChangeCb(void);
+bool IsHeartbeatEnable(void);
+bool LnnIsCloudSyncEnd(void);
 
 #ifdef __cplusplus
 }

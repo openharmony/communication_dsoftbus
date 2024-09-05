@@ -245,11 +245,7 @@ static int32_t HandleSyncBindSuccess(int32_t sessionId, const SocketLifecycleDat
         return ret;
     }
 
-    ret = SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED, 0);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "sync set session state failed, ret=%{public}d", ret);
-        return ret;
-    }
+    (void)SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED, 0);
     return SOFTBUS_OK;
 }
 
@@ -397,12 +393,14 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
     int32_t sessionId = INVALID_SESSION_ID;
     int32_t ret = SOFTBUS_NO_INIT;
     SessionListenerAdapter sessionCallback;
+    SessionEnableStatus enableStatus;
     bool isServer = false;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
 
+    (void)ClientGetChannelBySessionId(sessionId, NULL, NULL, &enableStatus);
     TRANS_LOGI(TRANS_SDK, "trigger session close callback");
-    if (sessionCallback.isSocketListener) {
+    if (sessionCallback.isSocketListener && enableStatus == ENABLE_STATUS_SUCCESS) {
         ISocketListener *listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
         if (listener->OnShutdown != NULL) {
             listener->OnShutdown(sessionId, reason);

@@ -69,7 +69,8 @@ void ClientConvertRetVal(int32_t socket, int32_t *retOut);
 
 void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList);
 
-void ClientCheckWaitTimeOut(SessionInfo *sessionNode, int32_t waitOutSocket[], uint32_t capacity, uint32_t *num);
+void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode,
+    int32_t waitOutSocket[], uint32_t capacity, uint32_t *num);
 
 void ClientCleanUpWaitTimeoutSocket(int32_t waitOutSocket[], uint32_t waitOutNum);
 

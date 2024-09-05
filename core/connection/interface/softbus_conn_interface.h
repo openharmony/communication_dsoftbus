@@ -71,11 +71,12 @@ typedef enum {
 #define CONN_INVALID_LISTENER_MODULE_ID    0xffff
 #define CONN_DYNAMIC_LISTENER_MODULE_COUNT 32
 #define DEVID_BUFF_LEN                     65
+#define NETIF_NAME_LEN                     16
 
 #define BT_LINK_TYPE_BR  1
 #define BT_LINK_TYPE_BLE 2
-#define HML_INDEX 3
-#define AUTH_ENHANCED_P2P_NUM 4
+#define HML_NUM 8
+#define AUTH_ENHANCED_P2P_NUM 8
 
 typedef enum {
     PROXY = 0,
@@ -87,7 +88,7 @@ typedef enum {
     DIRECT_CHANNEL_CLIENT,
     DIRECT_CHANNEL_SERVER_WIFI,
     DIRECT_CHANNEL_SERVER_HML_START,
-    DIRECT_CHANNEL_SERVER_HML_END = DIRECT_CHANNEL_SERVER_HML_START + HML_INDEX,
+    DIRECT_CHANNEL_SERVER_HML_END = DIRECT_CHANNEL_SERVER_HML_START + HML_NUM - 1,
     LANE,
     NETLINK,
     AUTH_RAW_P2P_SERVER,
@@ -165,6 +166,7 @@ struct BrOption {
     uint32_t connectionId;
     char brMac[BT_MAC_LEN];
     ConnSideType sideType;
+    uint32_t waitTimeoutDelay;
 };
 
 struct BleOption {
@@ -187,6 +189,7 @@ struct SocketOption {
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
     int32_t keepAlive;
+    char ifName[NETIF_NAME_LEN];
 };
 
 typedef struct {
@@ -219,6 +222,7 @@ struct ListenerSocketOption {
     int32_t port;
     ListenerModule moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
+    char ifName[NETIF_NAME_LEN];
 };
 
 typedef struct {

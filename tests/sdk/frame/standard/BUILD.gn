@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,6 @@ import("../../../../dsoftbus.gni")
 import("../../../../sdk/frame/frame_sdk.gni")
 
 module_output_path = "dsoftbus/transmission"
-dsoftbus_root_path = "../../../../"
 
 ohos_unittest("SoftBusFrameStandardTest") {
   module_out_path = module_output_path
@@ -28,8 +27,6 @@ ohos_unittest("SoftBusFrameStandardTest") {
     "${dsoftbus_root_path}/interfaces/kits/discovery",
     "${dsoftbus_root_path}/sdk/bus_center/manager/include",
     "${dsoftbus_root_path}/sdk/bus_center/ipc/include",
-    "${dsoftbus_root_path}/sdk/discovery/manager/include",
-    "${dsoftbus_root_path}/sdk/discovery/ipc/include",
     "${dsoftbus_root_path}/sdk/frame/common/include",
     "${dsoftbus_root_path}/sdk/frame/standard/include",
     "${dsoftbus_root_path}/sdk/frame/standard/src",
@@ -43,8 +40,6 @@ ohos_unittest("SoftBusFrameStandardTest") {
     "${dsoftbus_root_path}/core/common:softbus_utils",
     "${dsoftbus_root_path}/core/frame:softbus_server",
     "${dsoftbus_root_path}/sdk:softbus_client",
-    "//third_party/googletest:gtest",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -53,15 +48,13 @@ ohos_unittest("SoftBusFrameStandardTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
+
   if (is_standard_system) {
     external_deps += [ "ipc:ipc_single" ]
   }
 }
+
 group("unittest") {
   testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":SoftBusFrameStandardTest",
-  ]
+  deps = [ ":SoftBusFrameStandardTest" ]
 }

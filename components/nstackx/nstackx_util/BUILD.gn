@@ -186,6 +186,7 @@ if (defined(ohos_lite)) {
     cflags += [
       "-DNSTACKX_WITH_HMOS_LINUX",
       "-DENABLE_USER_LOG",
+      "-DNSTACKX_WITH_LINUX_STANDARD",
     ]
     if (defined(board_toolchain_type)) {
       if (board_toolchain_type != "iccarm") {
@@ -229,10 +230,6 @@ if (defined(ohos_lite)) {
         "c_utils:utils",
         "openssl:libcrypto_shared",
       ]
-    } else {
-      cflags += [ "-DMBEDTLS_INCLUDED" ]
-      sources += [ "core/nstackx_mbedtls.c" ]
-      external_deps += [ "mbedtls:mbedtls_shared" ]
     }
     public_configs = [ ":nstackx_util_header" ]
     innerapi_tags = [ "platformsdk_indirect" ]

@@ -31,6 +31,9 @@ static SoftBusMutex g_linkWifiDirectMutex;
 static ListNode *g_forceDownList = NULL;
 
 #define INVAILD_AUTH_ID (-1)
+#define INVALID_P2P_REQUEST_ID (-1)
+#define TRANS_FORCE_DOWN_TIMEOUT 2000
+#define USECTONSEC 1000LL
 
 typedef enum {
     INFO_TYPE_P2P = 0,
@@ -51,7 +54,7 @@ static void LinkWifiDirectUnlock(void)
 
 static bool IsForceDownInfoExists(uint32_t p2pRequestId)
 {
-    if (LinkWifiDirectLock() != 0) {
+    if (LinkWifiDirectLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "link wifidirect lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -87,8 +90,13 @@ static int32_t AddForceDownInfo(const ForceDownInfo *forceDownInfo)
         SoftBusFree(newNode);
         return SOFTBUS_MEM_ERR;
     }
-    if (LinkWifiDirectLock() != 0) {
+    if (SoftBusCondInit(&newNode->cond) != SOFTBUS_OK) {
+        SoftBusFree(newNode);
+        return SOFTBUS_NO_INIT;
+    }
+    if (LinkWifiDirectLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "link wifidirect lock fail");
+        (void)SoftBusCondDestroy(&newNode->cond);
         SoftBusFree(newNode);
         return SOFTBUS_LOCK_ERR;
     }
@@ -96,16 +104,16 @@ static int32_t AddForceDownInfo(const ForceDownInfo *forceDownInfo)
     LinkWifiDirectUnlock();
     char *anonyNetworkId = NULL;
     Anonymize(forceDownInfo->forceDownDevId, &anonyNetworkId);
-    LNN_LOGI(LNN_LANE, "add new forceDownInfo success, p2pRequestId=%{public}u, forceDownDevId=%{public}s,"
-        "forceDownReqId=%{public}u, forceDownLink=%{public}d", forceDownInfo->p2pRequestId, anonyNetworkId,
-        forceDownInfo->forceDownReqId, forceDownInfo->forceDownLink);
+    LNN_LOGI(LNN_LANE, "add new forceDownInfo success, p2pRequestId=%{public}u, forceDownDevId=%{public}s, "
+        "forceDownReqId=%{public}u, forceDownLink=%{public}d, forceDownType=%{public}d", forceDownInfo->p2pRequestId,
+        anonyNetworkId, forceDownInfo->forceDownReqId, forceDownInfo->forceDownLink, forceDownInfo->downType);
     AnonymizeFree(anonyNetworkId);
     return SOFTBUS_OK;
 }
 
 static int32_t DelForceDownInfo(uint32_t forceDownReqId)
 {
-    if (LinkWifiDirectLock() != 0) {
+    if (LinkWifiDirectLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -114,7 +122,11 @@ static int32_t DelForceDownInfo(uint32_t forceDownReqId)
     ForceDownInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_forceDownList, ForceDownInfo, node) {
         if (item->forceDownReqId == forceDownReqId) {
+            if (item->downType == FORCE_DOWN_TRANS) {
+                (void)SoftBusCondSignal(&item->cond);
+            }
             ListDelete(&item->node);
+            (void)SoftBusCondDestroy(&item->cond);
             SoftBusFree(item);
             LinkWifiDirectUnlock();
             return SOFTBUS_OK;
@@ -141,7 +153,7 @@ static ForceDownInfo* GetForceDownInfoWithoutLock(ForceDisconnectInfoType type, 
 static int32_t FindForceDownInfoByReqId(ForceDisconnectInfoType type, uint32_t requestId,
     ForceDownInfo *info)
 {
-    if (LinkWifiDirectLock() != 0) {
+    if (LinkWifiDirectLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "link wifidirect lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -183,6 +195,12 @@ static void FreeResourceForForceDisconnect(ForceDownInfo *forceDownInfo)
         if (forceDownInfo->forceDownLink == LANE_HML) {
             RemoveDelayDestroyMessage(resourceItem.laneId);
         }
+        DelLogicAndLaneRelationship(resourceItem.laneId);
+        ClearLaneResourceByLaneId(resourceItem.laneId);
+    }
+    if (forceDownInfo->forceDownLink == LANE_HML &&
+        FindLaneResourceByLinkType(peerUdid, LANE_HML_RAW, &resourceItem) == SOFTBUS_OK) {
+        DelLogicAndLaneRelationship(resourceItem.laneId);
         ClearLaneResourceByLaneId(resourceItem.laneId);
     }
 }
@@ -222,11 +240,13 @@ static void OnWifiDirectForceDisconnectSuccess(uint32_t requestId)
         return;
     }
     FreeResourceForForceDisconnect(&forceDownInfo);
-    ret = WifiDirectReconnectDevice(forceDownInfo.p2pRequestId);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "wifidirect reconnect device fail, p2pRequest=%{public}u",
-            forceDownInfo.p2pRequestId);
-        NotifyLinkFailForForceDown(forceDownInfo.p2pRequestId, ret);
+    if (forceDownInfo.downType == FORCE_DOWN_LANE) {
+        ret = WifiDirectReconnectDevice(forceDownInfo.p2pRequestId);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "wifidirect reconnect device fail, p2pRequest=%{public}u",
+                forceDownInfo.p2pRequestId);
+            NotifyLinkFailForForceDown(forceDownInfo.p2pRequestId, ret);
+        }
     }
 }
 
@@ -245,7 +265,9 @@ static void OnWifiDirectForceDisconnectFailure(uint32_t requestId, int32_t reaso
     if (forceDownInfo.authHandle.authId != INVAILD_AUTH_ID) {
         AuthCloseConn(forceDownInfo.authHandle);
     }
-    NotifyLinkFailForForceDown(forceDownInfo.p2pRequestId, reason);
+    if (forceDownInfo.downType == FORCE_DOWN_LANE) {
+        NotifyLinkFailForForceDown(forceDownInfo.p2pRequestId, reason);
+    }
 }
 
 static int32_t GenerateForceDownWifiDirectInfo(const ForceDownInfo* forceDownInfo,
@@ -277,7 +299,7 @@ static int32_t UpdateForceDownInfoParam(uint32_t authRequestId, AuthHandle authH
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LinkWifiDirectLock() != 0) {
+    if (LinkWifiDirectLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "link wifidirect lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -334,7 +356,9 @@ FAIL:
     if (authHandle.authId != INVAILD_AUTH_ID) {
         AuthCloseConn(authHandle);
     }
-    NotifyLinkFailForForceDown(forceDownInfo.p2pRequestId, ret);
+    if (forceDownInfo.downType == FORCE_DOWN_LANE) {
+        NotifyLinkFailForForceDown(forceDownInfo.p2pRequestId, ret);
+    }
 }
 
 static int32_t ForceDisconnectWifiDirectWithoutAuth(const ForceDownInfo *forceDownInfo)
@@ -378,7 +402,9 @@ static void OnConnOpenFailedForForceDisconnect(uint32_t authRequestId, int32_t r
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "force disconnect device fail, reason=%{public}d", ret);
         (void)DelForceDownInfo(forceDownInfo.forceDownReqId);
-        NotifyLinkFailForForceDown(forceDownInfo.p2pRequestId, reason);
+        if (forceDownInfo.downType == FORCE_DOWN_LANE) {
+            NotifyLinkFailForForceDown(forceDownInfo.p2pRequestId, reason);
+        }
     }
     return;
 }
@@ -398,7 +424,7 @@ static int32_t OpenAuthToForceDisconnect(const char *forceDownDevId, uint32_t fo
         return ret;
     }
     uint32_t authRequestId = AuthGenRequestId();
-    if (LinkWifiDirectLock() != 0) {
+    if (LinkWifiDirectLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "link wifidirect lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -423,7 +449,7 @@ static int32_t OpenAuthToForceDisconnect(const char *forceDownDevId, uint32_t fo
     return SOFTBUS_OK;
 }
 
-static int32_t AddNewForceDownInfo(const char *forceDownDevId, LaneLinkType forceDownLink,
+static int32_t AddNewForceDownInfo(ForceDownType downType, const char *forceDownDevId, LaneLinkType forceDownLink,
     uint32_t p2pRequestId, uint32_t forceDownReqId)
 {
     if (forceDownDevId == NULL) {
@@ -443,6 +469,7 @@ static int32_t AddNewForceDownInfo(const char *forceDownDevId, LaneLinkType forc
     forceDownInfo.authRequestId = AUTH_INVALID_ID;
     AuthHandle authHandle = { .authId = INVAILD_AUTH_ID };
     forceDownInfo.authHandle = authHandle;
+    forceDownInfo.downType = downType;
     int32_t ret = AddForceDownInfo(&forceDownInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new forceDownInfo fail");
@@ -451,32 +478,69 @@ static int32_t AddNewForceDownInfo(const char *forceDownDevId, LaneLinkType forc
     return SOFTBUS_OK;
 }
 
-static void FreeLinkConflictDevInfo(LinkConflictInfo *linkConflictItem)
+static void FreeLinkConflictDevInfo(LinkConflictInfo *inputItem)
 {
-    if (linkConflictItem == NULL) {
+    if (inputItem == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    if (linkConflictItem->devIdCnt > 0) {
-        SoftBusFree(linkConflictItem->devIdList);
-        linkConflictItem->devIdList = NULL;
+    if (inputItem->devIdCnt > 0) {
+        SoftBusFree(inputItem->devIdList);
+        inputItem->devIdList = NULL;
     }
-    if (linkConflictItem->devIpCnt > 0) {
-        SoftBusFree(linkConflictItem->devIpList);
-        linkConflictItem->devIpList = NULL;
+    if (inputItem->devIpCnt > 0) {
+        SoftBusFree(inputItem->devIpList);
+        inputItem->devIpList = NULL;
     }
-    linkConflictItem->devIdCnt = 0;
-    linkConflictItem->devIpCnt = 0;
+    inputItem->devIdCnt = 0;
+    inputItem->devIpCnt = 0;
 }
 
-static int32_t ForceDisconnectWifiDirect(const char *forceDownDevId, LaneLinkType forceDownLink, uint32_t p2pRequestId)
+static void ComputeWaitForceDownTime(uint32_t waitMillis, SoftBusSysTime *outtime)
+{
+    SoftBusSysTime now;
+    (void)SoftBusGetTime(&now);
+    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + (int64_t)waitMillis * USECTONSEC;
+    outtime->sec = time / USECTONSEC / USECTONSEC;
+    outtime->usec = time % (USECTONSEC * USECTONSEC);
+}
+
+static void ForceDownCondWait(ForceDownType downType, uint32_t forceDownReqId)
+{
+    if (downType != FORCE_DOWN_TRANS) {
+        LNN_LOGI(LNN_LANE, "not support downType=%{public}d", downType);
+        return;
+    }
+    SoftBusSysTime outtime;
+    ComputeWaitForceDownTime(TRANS_FORCE_DOWN_TIMEOUT, &outtime);
+    LNN_LOGI(LNN_LANE, "set forceDown condWait with %{public}d millis, forceDownReqId=%{public}u",
+        TRANS_FORCE_DOWN_TIMEOUT, forceDownReqId);
+    if (LinkWifiDirectLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lock fail");
+        return;
+    }
+    ForceDownInfo *item = NULL;
+    ForceDownInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_forceDownList, ForceDownInfo, node) {
+        if (item->forceDownReqId == forceDownReqId) {
+            (void)SoftBusCondWait(&item->cond, &g_linkWifiDirectMutex, &outtime);
+            LinkWifiDirectUnlock();
+            return;
+        }
+    }
+    LinkWifiDirectUnlock();
+    LNN_LOGE(LNN_LANE, "not found forceDownInfo when set condWait");
+}
+
+static int32_t ForceDisconnectWifiDirect(ForceDownType downType, const char *forceDownDevId,
+    LaneLinkType forceDownLink, uint32_t p2pRequestId)
 {
     if (forceDownDevId == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t forceDownReqId = GetWifiDirectManager()->getRequestId();
-    int32_t ret = AddNewForceDownInfo(forceDownDevId, forceDownLink, p2pRequestId, forceDownReqId);
+    int32_t ret = AddNewForceDownInfo(downType, forceDownDevId, forceDownLink, p2pRequestId, forceDownReqId);
     if (ret !=SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new force disconnect info fail");
         return ret;
@@ -500,6 +564,9 @@ static int32_t ForceDisconnectWifiDirect(const char *forceDownDevId, LaneLinkTyp
             LNN_LOGE(LNN_LANE, "force disconnect wifidirect without auth fail, reason=%{public}d", ret);
         }
     }
+    if (ret == SOFTBUS_OK) {
+        ForceDownCondWait(downType, forceDownReqId);
+    }
     return ret;
 }
 
@@ -509,27 +576,75 @@ int32_t HandleForceDownWifiDirect(const char *networkId, LinkConflictType confli
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    LinkConflictInfo linkConflictItem;
-    (void)memset_s(&linkConflictItem, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
-    int32_t ret = FindLinkConflictInfoByDevId(networkId, conflictType, &linkConflictItem);
+    LinkConflictInfo conflictItem;
+    (void)memset_s(&conflictItem, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
+    DevIdentifyInfo identifyInfo;
+    (void)memset_s(&identifyInfo, sizeof(DevIdentifyInfo), 0, sizeof(DevIdentifyInfo));
+    identifyInfo.type = IDENTIFY_TYPE_DEV_ID;
+    if (strcpy_s(identifyInfo.devInfo.peerDevId, sizeof(identifyInfo.devInfo.peerDevId), networkId) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy peerDevId fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    int32_t ret = FindLinkConflictInfoByDevId(&identifyInfo, conflictType, &conflictItem);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "find link conflict info fail");
         return ret;
     }
-    RemoveConflictInfoTimelinessMsg(networkId, conflictType);
-    (void)DelLinkConflictInfo(networkId, conflictType);
-    if (linkConflictItem.devIdCnt > 0) {
+    RemoveConflictInfoTimelinessMsg(&(conflictItem.identifyInfo), conflictType);
+    (void)DelLinkConflictInfo(&(conflictItem.identifyInfo), conflictType);
+    if (conflictItem.devIdCnt > 0) {
         char forceDownDevId[NETWORK_ID_BUF_LEN] = {0};
-        if (memcpy_s(forceDownDevId, NETWORK_ID_BUF_LEN, linkConflictItem.devIdList, NETWORK_ID_BUF_LEN) != EOK) {
+        if (memcpy_s(forceDownDevId, NETWORK_ID_BUF_LEN, conflictItem.devIdList, NETWORK_ID_BUF_LEN) != EOK) {
             LNN_LOGE(LNN_LANE, "memcpy networkId fail");
-            FreeLinkConflictDevInfo(&linkConflictItem);
+            FreeLinkConflictDevInfo(&conflictItem);
             return SOFTBUS_MEM_ERR;
         }
-        ret = ForceDisconnectWifiDirect(forceDownDevId, linkConflictItem.releaseLink, p2pRequestId);
+        ret = ForceDisconnectWifiDirect(FORCE_DOWN_LANE, forceDownDevId, conflictItem.releaseLink, p2pRequestId);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "force disconnect wifidirect fail");
         }
-        FreeLinkConflictDevInfo(&linkConflictItem);
+        FreeLinkConflictDevInfo(&conflictItem);
+        return ret;
+    }
+    LNN_LOGI(LNN_LANE, "link conflict device not exists, no need force disconnect");
+    return SOFTBUS_LANE_NOT_FOUND;
+}
+
+int32_t HandleForceDownWifiDirectTrans(const char *udidhashStr, LinkConflictType conflictType)
+{
+    if (udidhashStr == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LinkConflictInfo conflictItem;
+    (void)memset_s(&conflictItem, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
+    DevIdentifyInfo identifyInfo;
+    (void)memset_s(&identifyInfo, sizeof(DevIdentifyInfo), 0, sizeof(DevIdentifyInfo));
+    identifyInfo.type = IDENTIFY_TYPE_UDID_HASH;
+    if (strcpy_s(identifyInfo.devInfo.udidHash, sizeof(identifyInfo.devInfo.udidHash), udidhashStr) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy peerDevId fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    int32_t ret = FindLinkConflictInfoByDevId(&identifyInfo, conflictType, &conflictItem);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "find link conflict info fail");
+        return ret;
+    }
+    RemoveConflictInfoTimelinessMsg(&(conflictItem.identifyInfo), conflictType);
+    (void)DelLinkConflictInfo(&(conflictItem.identifyInfo), conflictType);
+    if (conflictItem.devIdCnt > 0) {
+        char forceDownDevId[NETWORK_ID_BUF_LEN] = {0};
+        if (memcpy_s(forceDownDevId, NETWORK_ID_BUF_LEN, conflictItem.devIdList, NETWORK_ID_BUF_LEN) != EOK) {
+            LNN_LOGE(LNN_LANE, "memcpy networkId fail");
+            FreeLinkConflictDevInfo(&conflictItem);
+            return SOFTBUS_MEM_ERR;
+        }
+        ret = ForceDisconnectWifiDirect(FORCE_DOWN_TRANS, forceDownDevId, conflictItem.releaseLink,
+            INVALID_P2P_REQUEST_ID);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "force disconnect wifidirect fail");
+        }
+        FreeLinkConflictDevInfo(&conflictItem);
         return ret;
     }
     LNN_LOGI(LNN_LANE, "link conflict device not exists, no need force disconnect");
@@ -557,7 +672,7 @@ void DeInitLinkWifiDirect(void)
     if (g_forceDownList == NULL) {
         return;
     }
-    if (LinkWifiDirectLock() != 0) {
+    if (LinkWifiDirectLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "link wifidirect lock fail");
         return;
     }

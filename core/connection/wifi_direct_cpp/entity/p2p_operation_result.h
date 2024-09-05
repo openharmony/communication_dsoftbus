@@ -22,9 +22,6 @@ struct P2pOperationResult {
     P2pOperationResult() = default;
     explicit P2pOperationResult(int code) : errorCode_(code) {}
     int errorCode_ {};
-    P2pAdapter::ConnectionState connectState_;
-    int isP2pGroupOwner;
-    std::string groupOwnerAddress;
 };
 }
 #endif

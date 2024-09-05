@@ -30,6 +30,7 @@
 #include "conn_event.h"
 #include "wifi_direct_role_option.h"
 #include "command/processor_selector_factory.h"
+#include "entity/entity_factory.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::list<WifiDirectStatusListener> g_listeners;
@@ -121,7 +122,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
 
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
-    OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
+    OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TOTAL_START);
 
     ConnEventExtra extra;
     SetElementTypeExtra(info, &extra);
@@ -476,6 +477,14 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
+static bool IsHmlSupport(void)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    OHOS::SoftBus::InnerLink::LinkType type = OHOS::SoftBus::InnerLink::LinkType::HML;
+    auto &entity = OHOS::SoftBus::EntityFactory::GetInstance().GetEntity(type);
+    return entity.SupportHml();
+}
+
 static bool IsWifiP2pEnabled(void)
 {
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
@@ -549,6 +558,7 @@ static struct WifiDirectManager g_manager = {
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,
+    .isHmlSupport = IsHmlSupport,
 
     .init = Init,
     .notifyOnline = NotifyOnline,

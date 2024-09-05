@@ -23,6 +23,13 @@
 extern "C" {
 #endif
 
+typedef enum {
+    LNN_ENCRYPT_LEVEL_DE = 0,
+    LNN_ENCRYPT_LEVEL_CE,
+    LNN_ENCRYPT_LEVEL_ECE,
+    LNN_ENCRYPT_LEVEL_MAX,
+} LnnEncryptDataLevel;
+
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid);
 int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid);
 int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
@@ -30,8 +37,9 @@ bool LnnIsPotentialHomeGroup(const char *udid);
 int32_t UpdateRecoveryDeviceInfoFromDb(void);
 
 int32_t LnnInitDecisionDbDelay(void);
-int32_t EncryptStorageData(uint8_t *data, uint32_t len);
-int32_t DecryptStorageData(uint8_t *data, uint32_t len);
+int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
+int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
+int32_t LnnGenerateCeParams(void);
 
 #ifdef __cplusplus
 }

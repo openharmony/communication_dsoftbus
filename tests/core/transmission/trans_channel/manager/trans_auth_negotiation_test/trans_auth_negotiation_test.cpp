@@ -17,10 +17,8 @@
 
 #include "gtest/gtest.h"
 #include "message_handler.h"
-#include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "trans_auth_negotiation.c"
-#include "trans_auth_negotiation.h"
 #include "trans_manager_mock.h"
 #include "trans_session_service.h"
 
@@ -300,7 +298,7 @@ HWTEST_F(TransAuthNegotiateTest, SetWlanAuthConnInfo001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthNegotiateTest, TransReNegotiateSessionKey002, TestSize.Level1)
+HWTEST_F(TransAuthNegotiateTest, SetWlanAuthConnInfo002, TestSize.Level1)
 {
     ConnSocketInfo socketInfo;
     socketInfo.protocol = LNN_PROTOCOL_IP;

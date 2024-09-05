@@ -270,6 +270,18 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcWriteCharacteristic, TestSize.Lev
 
     EXPECT_CALL(mocker, BleGattcWriteCharacteristic).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
     EXPECT_EQ(SoftbusGattcWriteCharacteristic(1, &data), SOFTBUS_OK);
+
+    data.writeType = SOFTBUS_GATT_WRITE_NO_RSP;
+    EXPECT_EQ(SoftbusGattcWriteCharacteristic(1, &data), SOFTBUS_OK);
+
+    data.writeType = SOFTBUS_GATT_WRITE_PREPARE;
+    EXPECT_EQ(SoftbusGattcWriteCharacteristic(1, &data), SOFTBUS_OK);
+
+    data.writeType = SOFTBUS_GATT_WRITE_DEFAULT;
+    EXPECT_EQ(SoftbusGattcWriteCharacteristic(1, &data), SOFTBUS_OK);
+
+    data.writeType = SOFTBUS_GATT_WRITE_SIGNED;
+    EXPECT_EQ(SoftbusGattcWriteCharacteristic(1, &data), SOFTBUS_OK);
 }
 
 /**

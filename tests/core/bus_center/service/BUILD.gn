@@ -18,10 +18,14 @@ module_output_path = "dsoftbus/bus_center"
 
 ohos_unittest("BusCenterDecisionTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/bus_center_decision_center_test.cpp" ]
+  sources = [
+    "unittest/bus_center_decision_center_deps_mock.cpp",
+    "unittest/bus_center_decision_center_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/service/unittest",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/core/connection/interface",

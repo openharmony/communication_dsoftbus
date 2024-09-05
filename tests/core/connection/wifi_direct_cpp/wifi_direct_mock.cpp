@@ -177,6 +177,11 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetOsTypeByNetworkId(networkId, osType);
 }
 
+int32_t GetInterfaceIpString(const std::string &interface, std::string &ip)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetInterfaceIpString(interface, ip);
+}
+
 WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetLinkedInfo(info);

@@ -48,6 +48,7 @@ static bool g_isDbListInit = false;
 #define LNN_DB_KEY_AILAS "dsoftbus_decision_db_key_alias"
 
 static struct HksBlob g_keyAlias = { sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS };
+static struct HksBlob g_ceKeyAlias = { sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS };
 
 static bool DeviceDbRecoveryInit(void)
 {
@@ -105,21 +106,30 @@ static void DbUnlock(void)
     (void)SoftBusMutexUnlock(&g_dbMutex);
 }
 
-int32_t EncryptStorageData(uint8_t *dbKey, uint32_t len)
+int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len)
 {
     struct HksBlob plainData = { 0 };
     struct HksBlob encryptData = { 0 };
-
+    if (level < LNN_ENCRYPT_LEVEL_DE || level > LNN_ENCRYPT_LEVEL_ECE) {
+        LNN_LOGE(LNN_LEDGER, "invalid param, level=%{public}u", level);
+        return SOFTBUS_MEM_ERR;
+    }
     encryptData.data = (uint8_t *)SoftBusCalloc(len);
     if (encryptData.data == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc encrypt dbKey fail");
         return SOFTBUS_MEM_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "Encrypt, data len=%{public}u", len);
+    LNN_LOGI(LNN_LEDGER, "Encrypt data, level=%{public}u len=%{public}u", level, len);
     plainData.size = len;
     plainData.data = dbKey;
-    if (LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "encrypt dbKey by huks fail");
+    int32_t ret = SOFTBUS_OK;
+    if (level == LNN_ENCRYPT_LEVEL_CE) {
+        ret = LnnCeEncryptDataByHuks(&g_ceKeyAlias, &plainData, &encryptData);
+    } else {
+        ret = LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData);
+    }
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "encrypt dbKey by huks fail, ret=%{public}d", ret);
         (void)memset_s(plainData.data, len, 0x0, len);
         SoftBusFree(encryptData.data);
         return SOFTBUS_ERR;
@@ -135,11 +145,14 @@ int32_t EncryptStorageData(uint8_t *dbKey, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t DecryptStorageData(uint8_t *dbKey, uint32_t len)
+int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len)
 {
     struct HksBlob encryptData = { 0 };
     struct HksBlob decryptData = { 0 };
-
+    if (level < LNN_ENCRYPT_LEVEL_DE || level > LNN_ENCRYPT_LEVEL_ECE) {
+        LNN_LOGE(LNN_LEDGER, "invalid param, level=%{public}u", level);
+        return SOFTBUS_MEM_ERR;
+    }
     decryptData.data = (uint8_t *)SoftBusCalloc(len);
     if (decryptData.data == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc decrypt dbKey fail");
@@ -149,9 +162,13 @@ int32_t DecryptStorageData(uint8_t *dbKey, uint32_t len)
     encryptData.data = dbKey;
     int32_t ret;
     do {
-        if (LnnDecryptDataByHuks(&g_keyAlias, &encryptData, &decryptData) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "decrypt dbKey by huks fail");
-            ret = SOFTBUS_ERR;
+        if (level == LNN_ENCRYPT_LEVEL_CE) {
+            ret = LnnCeDecryptDataByHuks(&g_ceKeyAlias, &encryptData, &decryptData);
+        } else {
+            ret = LnnDecryptDataByHuks(&g_keyAlias, &encryptData, &decryptData);
+        }
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "decrypt dbKey by huks fail, ret=%{public}d", ret);
             break;
         }
         if (memcpy_s(dbKey, len, decryptData.data, decryptData.size) != SOFTBUS_OK) {
@@ -168,7 +185,7 @@ int32_t DecryptStorageData(uint8_t *dbKey, uint32_t len)
 
 static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
 {
-    char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN];
+    char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
 
     if (LnnGetFullStoragePath(LNN_FILE_ID_DB_KEY, dbKeyFilePath, SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get dbKey save path fail");
@@ -183,7 +200,7 @@ static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
             LNN_LOGE(LNN_LEDGER, "generate random dbKey fail");
             return SOFTBUS_ERR;
         }
-        if (EncryptStorageData(dbKey, len) != SOFTBUS_OK) {
+        if (EncryptStorageData(LNN_ENCRYPT_LEVEL_DE, dbKey, len) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "encrypt dbKey fail");
             return SOFTBUS_ERR;
         }
@@ -196,7 +213,7 @@ static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
         LNN_LOGE(LNN_LEDGER, "read dbKey from file fail");
         return SOFTBUS_ERR;
     }
-    if (DecryptStorageData(dbKey, len) != SOFTBUS_OK) {
+    if (DecryptStorageData(LNN_ENCRYPT_LEVEL_DE, dbKey, len) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "decrypt dbKey fail");
         return SOFTBUS_ERR;
     }
@@ -226,7 +243,11 @@ static int32_t UpdateDecisionDbKey(DbContext *ctx)
     uint8_t dbKey[LNN_DB_KEY_LEN] = {0};
 
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update decision db root key fail");
+        LNN_LOGE(LNN_LEDGER, "update decision db de key fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update decision db ce key fail");
         return SOFTBUS_ERR;
     }
     if (GetDecisionDbKey(dbKey, sizeof(dbKey), true) != SOFTBUS_OK) {
@@ -762,7 +783,7 @@ static int32_t InitTrustedDevInfoTable(void)
 
 static int32_t TryRecoveryTrustedDevInfoTable(void)
 {
-    char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN];
+    char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
 
     if (LnnGetFullStoragePath(LNN_FILE_ID_DB_KEY, dbKeyFilePath, SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get dbKey save path fail");
@@ -781,10 +802,19 @@ bool LnnIsPotentialHomeGroup(const char *udid)
     return false;
 }
 
+int32_t LnnGenerateCeParams(void)
+{
+    return LnnGenerateCeKeyByHuks(&g_ceKeyAlias);
+}
+
 int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "generate decision db huks key fail");
+        LNN_LOGE(LNN_LEDGER, "generate decision db huks de key fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update decision db huks ce key fail");
         return SOFTBUS_ERR;
     }
     if (InitTrustedDevInfoTable() != SOFTBUS_OK) {

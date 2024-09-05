@@ -120,6 +120,7 @@ ohos_unittest("P2pEntityTest") {
     "$wifi_direct_cpp_unit_path/net_conn_client.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
     "p2p_available_state_test.cpp",
+    "p2p_connect_state_test.cpp",
     "p2p_entity_test.cpp",
   ]
 

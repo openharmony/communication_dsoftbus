@@ -35,6 +35,7 @@
 #include "softbus_network_utils.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_base_listener.h"
+#include "trans_network_statistics.h"
 #include "wifi_direct_manager.h"
 
 typedef enum {
@@ -111,6 +112,8 @@ public:
     virtual void DeleteNetworkResourceByLaneId(uint64_t laneId) = 0;
     virtual int SoftBusGetBtState() = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
+    virtual void AddNetworkResource(NetworkResource *networkResource) = 0;
+    virtual int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -174,6 +177,8 @@ public:
     MOCK_METHOD1(DeleteNetworkResourceByLaneId, void (uint64_t laneId));
     MOCK_METHOD0(SoftBusGetBtState, int (void));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **info, int32_t *infoNum));
+    MOCK_METHOD1(AddNetworkResource, void (NetworkResource *));
+    MOCK_METHOD2(LnnRequestCheckOnlineStatus, int32_t (const char *networkId, uint64_t timeout));
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
         int32_t localFeatureCap, int32_t remoteFeatureCap);

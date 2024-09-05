@@ -16,7 +16,11 @@
 #ifndef VTP_STREAM_OPT_H
 #define VTP_STREAM_OPT_H
 
+#ifdef __cplusplus
+#include <cstdbool>
+#else
 #include <stdbool.h>
+#endif
 #include "fillpinc.h"
 #include "trans_type.h"
 

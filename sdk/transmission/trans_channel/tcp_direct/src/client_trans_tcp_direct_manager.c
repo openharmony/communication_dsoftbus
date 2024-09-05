@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
@@ -105,6 +106,7 @@ TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirect
         if (item->channelId == channelId) {
             (void)memcpy_s(info, sizeof(TcpDirectChannelInfo), item, sizeof(TcpDirectChannelInfo));
             item->detail.sequence++;
+            item->detail.fdInUse = true;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             return item;
         }
@@ -147,17 +149,20 @@ void TransTdcCloseChannel(int32_t channelId)
     }
 
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
-        if (item->channelId == channelId) {
-            TransTdcReleaseFd(item->detail.fd);
-            ListDelete(&item->node);
-            SoftBusMutexDestroy(&(item->detail.fdLock));
-            SoftBusFree(item);
-            item = NULL;
-            (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            DelPendingPacket(channelId, PENDING_TYPE_DIRECT);
-            TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
-            return;
+        if (item->channelId != channelId) {
+            continue;
         }
+        TransTdcReleaseFd(item->detail.fd);
+        ListDelete(&item->node);
+        if (!item->detail.fdInUse) {
+            SoftBusMutexDestroy(&(item->detail.fdLock));
+        }
+        SoftBusFree(item);
+        item = NULL;
+        (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+        DelPendingPacket(channelId, PENDING_TYPE_DIRECT);
+        TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
+        return;
     }
 
     TRANS_LOGE(TRANS_SDK, "Target item not exist. channelId=%{public}d", channelId);
@@ -214,7 +219,7 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-static void TransTdcDelChannelInfo(int32_t channelId)
+static void TransTdcDelChannelInfo(int32_t channelId, int32_t errCode)
 {
     TRANS_LOGI(TRANS_SDK, "Delete tdc channelId=%{public}d.", channelId);
 
@@ -230,7 +235,13 @@ static void TransTdcDelChannelInfo(int32_t channelId)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
-            TransTdcReleaseFd(item->detail.fd);
+            if (errCode == SOFTBUS_TRANS_NEGOTIATE_REJECTED) {
+                TransTdcCloseFd(item->detail.fd);
+                TRANS_LOGI(
+                    TRANS_SDK, "Server reject conn, channelId=%{public}d, fd=%{public}d", channelId, item->detail.fd);
+            } else {
+                TransTdcReleaseFd(item->detail.fd);
+            }
             ListDelete(&item->node);
             SoftBusMutexDestroy(&(item->detail.fdLock));
             SoftBusFree(item);
@@ -268,6 +279,7 @@ static int32_t ClientTransTdcHandleListener(const char *sessionName, const Chann
     (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     TcpDirectChannelInfo *res = TransTdcGetInfoById(channel->channelId, &info);
     if (res == NULL) {
+        DelTrigger(DIRECT_CHANNEL_CLIENT, channel->fd, READ_TRIGGER);
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channel->channelId);
         return SOFTBUS_NOT_FIND;
     }
@@ -328,7 +340,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     ret = ClientTransTdcOnSessionOpened(sessionName, channel);
     if (ret != SOFTBUS_OK) {
         TransDelDataBufNode(channel->channelId);
-        TransTdcDelChannelInfo(channel->channelId);
+        TransTdcDelChannelInfo(channel->channelId, ret);
         TRANS_LOGE(TRANS_SDK, "notify on session opened err.");
         return ret;
     }
@@ -337,7 +349,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     if (ret != SOFTBUS_OK) {
         ClientTransTdcOnSessionClosed(channel->channelId, SHUTDOWN_REASON_LOCAL);
         TransDelDataBufNode(channel->channelId);
-        TransTdcDelChannelInfo(channel->channelId);
+        TransTdcDelChannelInfo(channel->channelId, ret);
         return ret;
     }
 
@@ -437,4 +449,29 @@ int32_t TransDisableSessionListener(int32_t channelId)
         TRANS_LOGW(TRANS_SDK, "stop read failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
     }
     return SOFTBUS_OK;
+}
+
+void TransUpdateFdState(int32_t channelId, bool fdInUse)
+{
+    if (g_tcpDirectChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "g_tcpDirectChannelInfoList is NULL, channelId=%{public}d", channelId);
+        return;
+    }
+    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed, channelId=%{public}d", channelId);
+        return;
+    }
+
+    TcpDirectChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
+        if (item->channelId == channelId) {
+            item->detail.fdInUse = fdInUse;
+            (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+            return;
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+    TRANS_LOGE(TRANS_SDK, "channel not found, channelId=%{public}d", channelId);
+    return;
 }

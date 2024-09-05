@@ -32,9 +32,7 @@ P2pUnavailableState *P2pUnavailableState::Instance()
 void P2pUnavailableState::Enter(const std::shared_ptr<P2pOperation> &operation)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-    if (P2pEntity::GetInstance().HasPendingOperation()) {
-        P2pEntity::GetInstance().ClearPendingOperation();
-    }
+    P2pEntity::GetInstance().ClearPendingOperation();
 }
 
 void P2pUnavailableState::Exit()

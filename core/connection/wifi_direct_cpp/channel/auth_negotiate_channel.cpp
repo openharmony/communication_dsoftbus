@@ -42,13 +42,6 @@ AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
     auto ret = AuthGetDeviceUuid(handle_.authId, remoteUuid, UUID_BUF_LEN);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get device id failed");
     remoteDeviceId_ = remoteUuid;
-    auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(remoteUuid);
-    if (WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
-        if (!WifiDirectUtils::IsDeviceOnline(remoteNetworkId)) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "diff account");
-            remoteDeviceId_ = "";
-        }
-    }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
 }
 
@@ -190,6 +183,25 @@ void AuthNegotiateChannel::ProcessDetectLinkResponse(AuthHandle handle, const Ne
     channel->promise_->set_value(response);
 }
 
+static bool CheckSameAccount(const NegotiateMessage &msg)
+{
+    bool ret = true;
+    switch (msg.GetMessageType()) {
+        case NegotiateMessageType::CMD_V3_REQ:
+        case NegotiateMessageType::CMD_V3_RSP:
+        case NegotiateMessageType::CMD_V3_CUSTOM_PORT_REQ:
+        case NegotiateMessageType::CMD_V3_CUSTOM_PORT_RSP:
+        case NegotiateMessageType::CMD_AUTH_HAND_SHAKE:
+        case NegotiateMessageType::CMD_AUTH_HAND_SHAKE_RSP:
+            ret = msg.GetExtraData().empty() || msg.GetExtraData().front();
+            break;
+        default:
+            ret = true;
+            break;
+    }
+    return ret;
+}
+
 static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
 {
     ProtocolType type { ProtocolType::TLV };
@@ -204,13 +216,11 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     input.insert(input.end(), data->data, data->data + data->len);
     NegotiateMessage msg;
     msg.Unmarshalling(*protocol, input);
-    bool sameAccount = msg.GetExtraData().empty() || msg.GetExtraData().front();
+    bool sameAccount = CheckSameAccount(msg);
     CONN_LOGI(CONN_WIFI_DIRECT, "sameAccount=%{public}d", sameAccount);
-    if (type == ProtocolType::TLV) {
-        if (!WifiDirectUtils::IsDeviceOnline(WifiDirectUtils::UuidToNetworkId(remoteDeviceId)) || !sameAccount) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
-            remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
-        }
+    if (!sameAccount) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
+        remoteDeviceId = msg.GetLinkInfo().GetRemoteBaseMac();
     }
 
     CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s", msg.MessageTypeToString().c_str());
@@ -219,6 +229,11 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
         return;
     } else if (msg.GetMessageType() == NegotiateMessageType::CMD_DETECT_LINK_RSP) {
         std::thread(AuthNegotiateChannel::ProcessDetectLinkResponse, handle, msg).detach();
+        return;
+    } else if (static_cast<int>(msg.GetMessageType()) ==
+            static_cast<int>(LegacyCommandType::CMD_GC_WIFI_CONFIG_CHANGED) ||
+        msg.GetLegacyP2pCommandType() == LegacyCommandType::CMD_GC_WIFI_CONFIG_CHANGED) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "do not process %{public}d", static_cast<int>(msg.GetMessageType()));
         return;
     }
 

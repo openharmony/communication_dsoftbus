@@ -266,7 +266,7 @@ static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestC
     if (LnnGetConnSubFeatureByUdidHashStr(ctx->udid, &feature) != SOFTBUS_OK) {
         CONN_LOGD(CONN_BLE, "get connSubFeature failed");
     }
-    device->isSupportNetworkIdExchange = feature == 1;
+    device->isSupportNetworkIdExchange = (feature & (1 << CONN_FEATURE_SUPPORT_NETWORKID_EXCAHNGE)) != 0;
     ListInit(&device->requests);
     *outDevice = device;
     return SOFTBUS_OK;
@@ -1873,12 +1873,15 @@ static bool BleCheckActiveConnection(const ConnectOption *option, bool needOccup
         CONN_LOGE(CONN_BLE, "convert bytes to array failed");
         return false;
     }
+    char anomizeUdid[UDID_BUF_LEN] = { 0 };
+    ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, hashStr);
     ConnBleConnection *connection = ConnBleGetConnectionByUdid(NULL, hashStr, option->bleOption.protocol);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        connection != NULL, false, CONN_BLE, "ble check action connection: connection is not exist");
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, false, CONN_BLE,
+        "connection not exist, udid=%{public}s, protocol=%{public}d", anomizeUdid, option->bleOption.protocol);
     bool isActive = (connection->state == BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO);
     if (isActive && needOccupy) {
         ConnBleRefreshIdleTimeout(connection);
+        ConnBleOccupy(connection);
     }
     ConnBleReturnConnection(&connection);
     return isActive;

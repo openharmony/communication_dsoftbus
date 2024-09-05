@@ -43,12 +43,13 @@ public:
     virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
     virtual void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode) = 0;
     virtual LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode) = 0;
-    virtual int32_t FindLinkConflictInfoByDevId(const char *peerDevId, LinkConflictType conflictType,
-        LinkConflictInfo *linkConflictInfo) = 0;
-    virtual void RemoveConflictInfoTimelinessMsg(const char *peerDevId, LinkConflictType conflictType) = 0;
-    virtual int32_t DelLinkConflictInfo(const char *peerDevId, LinkConflictType conflictType) = 0;
+    virtual int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
+        LinkConflictInfo *outputInfo) = 0;
+    virtual void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType) = 0;
+    virtual int32_t DelLinkConflictInfo(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType) = 0;
     virtual int32_t ClearLaneResourceByLaneId(uint64_t laneId) = 0;
     virtual void RemoveDelayDestroyMessage(uint64_t laneId) = 0;
+    virtual void DelLogicAndLaneRelationship(uint64_t laneId) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -71,12 +72,14 @@ public:
     MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
     MOCK_METHOD2(NotifyFreeLaneResult, void (uint32_t laneReqId, int32_t errCode));
     MOCK_METHOD1(GetConflictTypeWithErrcode, LinkConflictType (int32_t conflictErrcode));
-    MOCK_METHOD3(FindLinkConflictInfoByDevId, int32_t (const char *peerDevId, LinkConflictType conflictType,
-        LinkConflictInfo *linkConflictInfo));
-    MOCK_METHOD2(RemoveConflictInfoTimelinessMsg, void (const char *peerDevId, LinkConflictType conflictType));
-    MOCK_METHOD2(DelLinkConflictInfo, int32_t (const char *peerDevId, LinkConflictType conflictType));
+    MOCK_METHOD3(FindLinkConflictInfoByDevId, int32_t (const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
+        LinkConflictInfo *outputInfo));
+    MOCK_METHOD2(RemoveConflictInfoTimelinessMsg, void (const DevIdentifyInfo *inputInfo,
+        LinkConflictType conflictType));
+    MOCK_METHOD2(DelLinkConflictInfo, int32_t (const DevIdentifyInfo *inputInfo, LinkConflictType conflictType));
     MOCK_METHOD1(ClearLaneResourceByLaneId, int32_t (uint64_t laneId));
     MOCK_METHOD1(RemoveDelayDestroyMessage, void (uint64_t laneId));
+    MOCK_METHOD1(DelLogicAndLaneRelationship, void (uint64_t laneId));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);
