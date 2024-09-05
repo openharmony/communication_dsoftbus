@@ -1847,7 +1847,8 @@ int P2pV1Processor::OpenAuthConnection(const NegotiateMessage &msg, const std::s
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get listen module failed, error=%{public}d", ret);
 
     auto authChannel = std::dynamic_pointer_cast<AuthNegotiateChannel>(channel);
-    ret = AuthNegotiateChannel::OpenConnection(param, authChannel);
+    uint32_t authReqId = 0;
+    ret = AuthNegotiateChannel::OpenConnection(param, authChannel, authReqId);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "open p2p auth failed, error=%{public}d", ret);
     return SOFTBUS_OK;
