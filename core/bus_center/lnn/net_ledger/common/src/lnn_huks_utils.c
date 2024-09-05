@@ -557,7 +557,7 @@ int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
 int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
-    if (keyAlias == NULL || inData == NULL) {
+    if (keyAlias == NULL || inData == NULL || outData == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -595,7 +595,7 @@ int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
 int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
-    if (keyAlias == NULL || inData == NULL) {
+    if (keyAlias == NULL || inData == NULL || outData == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -633,7 +633,7 @@ int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
 int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
-    if (keyAlias == NULL || inData == NULL) {
+    if (keyAlias == NULL || inData == NULL || outData == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -671,7 +671,7 @@ int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
 int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
-    if (keyAlias == NULL || inData == NULL) {
+    if (keyAlias == NULL || inData == NULL || outData == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -708,6 +708,10 @@ int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
 
 int32_t LnnGenerateRandomByHuks(uint8_t *random, uint32_t len)
 {
+    if (random == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     struct HksBlob tmp = {0};
     tmp.size = len;
     tmp.data = (uint8_t *)SoftBusCalloc(tmp.size);
