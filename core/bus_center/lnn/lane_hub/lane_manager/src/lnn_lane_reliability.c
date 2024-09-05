@@ -88,10 +88,13 @@ static int32_t ClientConnectTcp(LaneDetectInfo *infoItem)
         return SOFTBUS_MEM_ERR;
     }
     char localIp[IP_LEN] = {0};
+    int32_t fd = 0;
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get local ip fail");
+        fd = ConnOpenClientSocket(&option, BIND_ADDR_ALL, true);
+    } else {
+        fd = ConnOpenClientSocket(&option, localIp, true);
     }
-    int32_t fd = ConnOpenClientSocket(&option, localIp, true);
     if (fd < 0) {
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
