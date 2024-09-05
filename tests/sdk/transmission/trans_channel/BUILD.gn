@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -236,6 +236,36 @@ if (defined(ohos_lite)) {
   }
 
   module_output_path = "dsoftbus/transmission"
+  ohos_unittest("ClientTransProxyFileManagerMockTest") {
+    module_out_path = module_output_path
+    sources = [
+      "proxy/client_trans_proxy_file_manager_mock_test.cpp",
+      "proxy/mock/client_trans_proxy_file_manager_mock.cpp",
+    ]
+    include_dirs = trans_sdk_test_common_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/sdk/bus_center/manager/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/tests/sdk/transmission/trans_channel/proxy/mock",
+    ]
+    deps = trans_sdk_test_common_deps
+    deps += trans_sdk_proxy_test_deps
+    external_deps = [
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
+  }
+
+  module_output_path = "dsoftbus/transmission"
   ohos_unittest("ClientTransChannelManagerTest") {
     module_out_path = module_output_path
     sources = [ "manager/client_trans_channel_manager_test.cpp" ]
@@ -355,6 +385,7 @@ if (defined(ohos_lite)) {
       ":ClientTransChannelManagerTest",
       ":ClientTransPendingTest",
       ":ClientTransProxyFileCommonTest",
+      ":ClientTransProxyFileManagerMockTest",
       ":ClientTransProxyFileManagerTest",
       ":ClientTransProxyManagerTest",
       ":ClientTransSessionImplTest",
