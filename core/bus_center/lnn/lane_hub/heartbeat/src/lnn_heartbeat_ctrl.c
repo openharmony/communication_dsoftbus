@@ -28,7 +28,6 @@
 #include "lnn_ble_heartbeat.h"
 #include "lnn_common_utils.h"
 #include "lnn_data_cloud_sync.h"
-#include "lnn_decision_center.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
@@ -73,7 +72,6 @@ static int64_t g_lastScreenOnTime = 0;
 static int64_t g_lastScreenOffTime = 0;
 static atomic_bool g_enableState = false;
 static bool g_isScreenOnOnce = false;
-static DcTask g_dcTask;
 static atomic_bool g_isCloudSyncEnd = false;
 
 static void InitHbConditionState(void)
@@ -1072,19 +1070,6 @@ void LnnHbOnTrustedRelationReduced(void)
     }
 }
 
-static int32_t LnnHbSubscribeTask(void)
-{
-    (void)memset_s(&g_dcTask, sizeof(DcTask), 0, sizeof(DcTask));
-    g_dcTask.preferredSystem = TASK_RULE_SYSTEM;
-    g_dcTask.optimizeStrategy = LnnHbMediumMgrSetParam;
-    return LnnDcSubscribe(&g_dcTask);
-}
-
-static void LnnHbUnsubscribeTask(void)
-{
-    LnnDcUnsubscribe(&g_dcTask);
-}
-
 static int32_t LnnRegisterCommonEvent(void)
 {
     if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler) != SOFTBUS_OK) {
@@ -1172,17 +1157,12 @@ int32_t LnnInitHeartbeat(void)
     }
     InitHbConditionState();
     InitHbSpecificConditionState();
-    if (LnnHbSubscribeTask() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "subscribe task fail");
-        return SOFTBUS_ERR;
-    }
     LNN_LOGI(LNN_INIT, "heartbeat(HB) init success");
     return SOFTBUS_OK;
 }
 
 void LnnDeinitHeartbeat(void)
 {
-    LnnHbUnsubscribeTask();
     LnnHbStrategyDeinit();
     LnnHbMediumMgrDeinit();
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler);
