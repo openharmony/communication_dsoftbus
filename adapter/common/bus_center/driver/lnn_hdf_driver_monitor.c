@@ -27,10 +27,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 
-#define DRIVER_SERVICE_NAME "hdf_dsoftbus"
-
-#define NETIF_NAME_LENGTH 16
-
+#define DRIVER_SERVICE_NAME      "hdf_dsoftbus"
+#define NETIF_NAME_LENGTH        16
 #define BIND_HDF_DELAY           1000
 #define MAX_BIND_HDF_RETRY_COUNT 10
 
@@ -100,6 +98,10 @@ static int32_t OnReceiveDriverEvent(
 {
     (void)listener;
     (void)service;
+    if (data == NULL) {
+        LNN_LOGI(LNN_EVENT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     LNN_LOGI(LNN_EVENT, "receive hdf event, moudle=%{public}d", moduleId);
     if (moduleId >= LNN_DRIVER_MODULE_MAX_INDEX) {
         return SOFTBUS_OK;

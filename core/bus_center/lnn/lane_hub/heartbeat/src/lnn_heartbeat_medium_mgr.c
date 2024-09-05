@@ -663,6 +663,8 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device, bool *IsRestri
             *IsRestrict = true;
         }
         if (!IsExistLnnDfxNodeByUdidHash(udidHash, &bleExtra)) {
+            bleExtra.status = BLE_REPORT_EVENT_INIT;
+            AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
             ret = LnnAsyncCallbackDelayHelper(
                 GetLooper(LOOP_TYPE_DEFAULT), HbProcessDfxMessage, (void *)udidHash, HB_DFX_DELAY_TIME);
             if (ret != SOFTBUS_OK) {
@@ -670,8 +672,6 @@ static int32_t HbAddAsyncProcessCallbackDelay(DeviceInfo *device, bool *IsRestri
                 SoftBusFree(udidHash);
                 return ret;
             }
-            bleExtra.status = BLE_REPORT_EVENT_INIT;
-            AddNodeToLnnBleReportExtraMap(udidHash, &bleExtra);
             // udidHash will free When the callback function HbProcessDfxMessage is started.
             return SOFTBUS_OK;
         }
