@@ -255,7 +255,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     g_discoveryImpl[0].StartPublishImpl = LnnCoapTest;
     ret = LnnStartPublish();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     g_discoveryImpl[0].StartPublishImpl = LnnCoapFuncTest;
     ret = LnnStartPublish();
     EXPECT_TRUE(ret == SOFTBUS_OK);
