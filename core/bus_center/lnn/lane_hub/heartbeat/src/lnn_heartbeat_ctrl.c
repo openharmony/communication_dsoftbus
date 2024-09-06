@@ -1113,26 +1113,17 @@ static void LnnHbUnsubscribeTask(void)
 
 static int32_t LnnRegisterCommonEvent(void)
 {
-    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist screen state change evt handler fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, HbScreenLockChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist screen lock state change evt handler fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist night mode state evt handler fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist OOBE state evt handler fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist user switch evt handler fail!");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret;
+    ret = LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist screen state change evt handler fail");
+    ret = LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, HbScreenLockChangeEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist screen lock state change evt handler fai");
+    ret = LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist night mode state evt handler fail");
+    ret = LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist OOBE state evt handler fail");
+    ret = LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist user switch evt handler fail");
     return SOFTBUS_OK;
 }
 
