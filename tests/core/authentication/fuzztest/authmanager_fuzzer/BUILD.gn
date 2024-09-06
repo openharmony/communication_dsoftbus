@@ -42,21 +42,19 @@ ohos_fuzztest("AuthManagerFuzzTest") {
   fuzz_sources = [ "authmanager_fuzzer.cpp" ]
   fuzz_sources += auth_manager_source
   sources = fuzz_sources
-  gtest_root_path = "//third_party/googletest"
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$gtest_root_path:gmock_rtti",
-    "$gtest_root_path:gtest_rtti",
   ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "init:libbegetutil",
