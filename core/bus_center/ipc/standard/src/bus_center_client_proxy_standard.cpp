@@ -348,7 +348,7 @@ int32_t BusCenterClientProxy::OnNodeStatusChanged(const char *pkgName, void *inf
     }
     MessageParcel reply;
     MessageOption option;
-    int ret = remote->SendRequest(CLIENT_ON_NODE_STATUS_CHANGED, data, reply, option);
+    int32_t ret = remote->SendRequest(CLIENT_ON_NODE_STATUS_CHANGED, data, reply, option);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
         return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
