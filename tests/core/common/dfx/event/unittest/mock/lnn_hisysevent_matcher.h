@@ -71,6 +71,7 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.onlineType);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.osType);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.connOnlineReason);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.strategy);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceInfo);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
