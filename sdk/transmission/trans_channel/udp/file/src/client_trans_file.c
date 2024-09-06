@@ -588,7 +588,7 @@ int32_t NotifyTransLimitChanged(int32_t channelId, uint8_t tos)
         return ret;
     }
     int32_t sessionId = INVALID_SESSION_ID;
-    ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_UDP, &sessionId, false);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "get file listener failed");
         return ret;
