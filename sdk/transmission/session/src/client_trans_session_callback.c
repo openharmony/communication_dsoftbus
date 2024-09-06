@@ -86,7 +86,7 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
         TRANS_LOGW(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId);
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId, false);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
@@ -107,7 +107,29 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId);
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId, false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    ret = ClientGetSessionCallbackAdapterById(*sessionId, sessionCallback, isServer);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socket callback failed, channelId=%{public}d,
+            sessionId=%{public}d, ret=%{public}d", channelId, sessionId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetSocketCallbackAdapterByCloseChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId,
+    SessionListenerAdapter *sessionCallback, bool *isServer)
+{
+    if ((channelId < 0) || (sessionId == NULL) || (sessionCallback == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId, true);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
@@ -395,8 +417,13 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
     SessionListenerAdapter sessionCallback;
     SessionEnableStatus enableStatus;
     bool isServer = false;
+    bool isClosing = (channelType == CHANNEL_TYPE_UDP ? true : false);
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
-    (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    if (isClosing) {
+        (void)GetSocketCallbackAdapterByCloseChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    } else {
+        (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    }
 
     (void)ClientGetChannelBySessionId(sessionId, NULL, NULL, &enableStatus);
     TRANS_LOGI(TRANS_SDK, "trigger session close callback");

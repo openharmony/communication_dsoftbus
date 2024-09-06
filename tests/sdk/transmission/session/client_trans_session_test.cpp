@@ -264,7 +264,8 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
     }
 
     int32_t sessionId = 0;
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId);
+    bool isClosing = false;
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId, isClosing);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -531,6 +532,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest09, TestSize.Level1)
 {
     int32_t sessionId = 0;
+    bool isClosing = false;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -548,7 +550,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest09, TestSize.Level1)
     session->isServer = true;
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId, isClosing);
     EXPECT_EQ(ret, SOFTBUS_OK);
     NotifyAuthSuccess(sessionId);
     ret = ClientDeleteSession(sessionId);
@@ -567,6 +569,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest09, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
 {
     int32_t sessionId = 0;
+    bool isClosing = false;
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
@@ -580,7 +583,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId, isClosing);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = CheckSessionIsOpened(sessionId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -600,6 +603,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest11, TestSize.Level1)
 {
     int32_t sessionId = 0;
+    bool isClosing = false;
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     CloseSession(TRANS_TEST_INVALID_SESSION_ID);
@@ -613,7 +617,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest11, TestSize.Level1)
     CloseSession(TRANS_TEST_SESSION_ID);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CloseSession(sessionId);
     ret = ClientDeleteSession(sessionId);
@@ -623,7 +627,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest11, TestSize.Level1)
     session->channelType = CHANNEL_TYPE_AUTH;
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_AUTH, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_AUTH, &sessionId, isClosing);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CloseSession(sessionId);
     ret = ClientDeleteSession(sessionId);

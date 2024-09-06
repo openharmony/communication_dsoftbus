@@ -389,6 +389,11 @@ static void NotifyCallback(UdpChannel *channel, int32_t channelId, ShutdownReaso
 
 static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
 {
+    int32_t sessionId = channel->sessionId;
+    int32_t ret = ClientSetStatusClosingBySocket(sessionId, true);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SDK, "trans del udp channel failed. channelId=%{public}d", channelId);
     }
@@ -414,7 +419,7 @@ static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, Shutd
     }
 
     if (channel != NULL) {
-        int32_t ret = TransDeleteBusinnessChannel(channel);
+        ret = TransDeleteBusinnessChannel(channel);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "del business channel failed. channelId=%{public}d", channelId);
             return ret;
@@ -541,7 +546,7 @@ static int32_t OnFileGetSessionId(int32_t channelId, int32_t *sessionId)
     if ((g_sessionCb == NULL) || (g_sessionCb->OnGetSessionId == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    return g_sessionCb->OnGetSessionId(channelId, CHANNEL_TYPE_UDP, sessionId);
+    return g_sessionCb->OnGetSessionId(channelId, CHANNEL_TYPE_UDP, sessionId, false);
 }
 
 static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
