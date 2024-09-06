@@ -122,7 +122,7 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
     return SOFTBUS_OK;
 }
 
-static int32_t GetSocketCallbackAdapterByCloseChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId,
+static int32_t GetSocketCallbackAdapterByUdpChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId,
     SessionListenerAdapter *sessionCallback, bool *isServer)
 {
     if ((channelId < 0) || (sessionId == NULL) ||
@@ -419,10 +419,10 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
     SessionListenerAdapter sessionCallback;
     SessionEnableStatus enableStatus;
     bool isServer = false;
-    bool isClosing = (channelType == CHANNEL_TYPE_UDP ? true : false);
+    bool isUdpType = (channelType == CHANNEL_TYPE_UDP ? true : false);
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
-    if (isClosing) {
-        (void)GetSocketCallbackAdapterByCloseChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
+    if (isUdpType) {
+        (void)GetSocketCallbackAdapterByUdpChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     } else {
         (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     }
