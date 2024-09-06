@@ -115,7 +115,7 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
     ret = ClientGetSessionCallbackAdapterById(*sessionId, sessionCallback, isServer);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get socket callback failed, channelId=%{public}d,"
-            "sessionId=%{public}d, ret=%{public}d", channelId, sessionId, ret);
+            "ret=%{public}d", channelId, ret);
         return ret;
     }
     return SOFTBUS_OK;
