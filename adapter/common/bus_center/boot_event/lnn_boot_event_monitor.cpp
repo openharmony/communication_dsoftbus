@@ -24,7 +24,6 @@
 #include "lnn_ohos_account.h"
 #include "softbus_error_code.h"
 #include "parameter.h"
-#include "lnn_settingdata_event_monitor.h"
 
 static void ProcessBootEvent(void *para)
 {
