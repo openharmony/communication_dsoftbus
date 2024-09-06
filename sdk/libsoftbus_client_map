@@ -529,6 +529,7 @@
         "ResourceConflictCheck";
         "ClientTransTdcIfChannelForSocket";
         "SetFileRenameHook";
+        "CtrlLNNBleHb";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
