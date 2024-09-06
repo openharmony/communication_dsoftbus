@@ -304,8 +304,7 @@ static int32_t UnpackFileTransStartInfo(
         if (dataLen > fileFrame->frameLength - FRAME_HEAD_LEN) {
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
-        if (fileFrame->magic != FILE_MAGIC_NUMBER ||
-            dataLen != fileFrame->frameLength - (FRAME_HEAD_LEN + FRAME_CRC_LEN)) {
+        if (fileFrame->magic != FILE_MAGIC_NUMBER || dataLen < (FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t))) {
             TRANS_LOGE(
                 TRANS_FILE, "start info fail magic=%{public}X dataLen=%{public}" PRIu64, fileFrame->magic, dataLen);
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
