@@ -771,7 +771,7 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
 static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
-        LNN_LOGW(LNN_LNN_HEART_BEATBUILDER, "invalid param");
+        LNN_LOGW(LNN_HEART_BEAT, "invalid param");
         return;
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
@@ -779,7 +779,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
     switch (userSwitchState) {
         case SOFTBUS_USER_SWITCHED:
             LNN_LOGI(LNN_HEART_BEAT, "HB SOFTBUS_USER_SWITCHED");
-            LnnUpdateAccountInfo(true);
+            LnnUpdateOhosAccount(true);
             HbConditionChanged(false);
             if (IsHeartbeatEnable()) {
                 if (LnnStartHbByTypeAndStrategy(
