@@ -190,7 +190,8 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
     }
 
     int32_t sessionId = 0;
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId);
+    bool isClosing = false;
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId, isClosing);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
         SoftBusFree(sessionParam);
@@ -294,7 +295,8 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest02, TestSiz
     ret = ClientAddNewSession(g_sessionName, session);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     int32_t sessionId = 0;
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    bool isClosing = false;
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = QosReport(sessionId, APP_TYPE_AUTH, QOS_IMPROVE);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_INVALID_SESSION_ID);
@@ -305,7 +307,7 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest02, TestSiz
     session->channelType = CHANNEL_TYPE_UDP;
     ret = ClientAddNewSession(g_sessionName, session);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = QosReport(sessionId, APP_TYPE_AUTH, QOS_IMPROVE);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_NODE_NOT_FOUND);
