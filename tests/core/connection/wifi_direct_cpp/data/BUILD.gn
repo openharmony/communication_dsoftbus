@@ -18,7 +18,7 @@ ut_out_path = "dsoftbus/connection/wifi_direct_cpp/data"
 wifi_direct_cpp_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 wifi_direct_cpp_unit_path =
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
-
+dsoftbus_dfx_path = "$dsoftbus_root_path/core/common/dfx"
 config("wifi_direct_include_dirs") {
   include_dirs = [
     "//third_party/cJSON",
@@ -64,6 +64,7 @@ ohos_unittest("LinkInfoTest") {
     "link_info_test.cpp",
   ]
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -89,6 +90,7 @@ ohos_unittest("NegotiateMessageTest") {
     "negotiate_message_test.cpp",
   ]
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -156,6 +158,7 @@ ohos_unittest("InnerLinkTest") {
     "inner_link_test.cpp",
   ]
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gmock_rtti",
@@ -235,6 +238,7 @@ ohos_unittest("LinkManagerTest") {
     "link_manager_test.cpp",
   ]
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gmock_rtti",
@@ -271,6 +275,7 @@ ohos_unittest("InterfaceInfoTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -300,6 +305,7 @@ ohos_unittest("InterfaceManagerTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -327,6 +333,7 @@ ohos_unittest("WifiConfigInfoTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]

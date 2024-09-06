@@ -27,6 +27,7 @@ std::string WifiDirectAnonymizeSsid(const std::string &ssid);
 std::string WifiDirectAnonymizePsk(const std::string &psk);
 std::string WifiDirectAnonymizePtk(const std::string &ptk);
 std::string WifiDirectAnonymizeData(const std::string &data);
+std::string WifiDirectAnonymize(const std::string &data);
 }
 
 #endif
