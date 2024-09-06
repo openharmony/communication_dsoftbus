@@ -868,7 +868,7 @@ static int32_t GetSendListenerInfoByChannelId(int32_t channelId, SendListenerInf
         TRANS_LOGW(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_PROXY, &sessionId);
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_PROXY, &sessionId, false);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "get sessionId failed, channelId=%{public}d", channelId);
         return ret;

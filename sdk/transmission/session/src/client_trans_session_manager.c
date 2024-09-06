@@ -759,6 +759,32 @@ int32_t ClientGetChannelBySessionId(
     return SOFTBUS_OK;
 }
 
+int32_t ClientSetStatusClosingBySocket(int32_t socket, bool isClosing)
+{
+    if (socket < 0) {
+        TRANS_LOGE(TRANS_INIT, "invalid socket=%{public}d", socket);
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socket=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    sessionNode->isClosing = isClosing;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
 int32_t ClientSetEnableStatusBySocket(int32_t socket, SessionEnableStatus enableStatus)
 {
     if (socket < 0) {
@@ -909,7 +935,7 @@ int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType,
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
-int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId)
+int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing)
 {
     if ((channelId < 0) || (sessionId == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
@@ -931,7 +957,8 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
         }
 
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) {
+            bool flag = (isClosing ? sessionNode->isClosing : true);
+            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType && flag) {
                 *sessionId = sessionNode->sessionId;
                 UnlockClientSessionServerList();
                 return SOFTBUS_OK;

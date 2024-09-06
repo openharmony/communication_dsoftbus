@@ -61,7 +61,7 @@ void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
     if (newItem == NULL) {
         return;
     }
-    ClientGetSessionIdByChannelId(channel->channelId, channel->channelType, &newItem->socketId);
+    ClientGetSessionIdByChannelId(channel->channelId, channel->channelType, &newItem->socketId, false);
     if (SoftBusMutexLock(&g_channelStatisticsList->lock) != SOFTBUS_OK) {
         SoftBusFree(newItem);
         return;
@@ -149,7 +149,7 @@ void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
         return;
     }
     int32_t socketId;
-    ClientGetSessionIdByChannelId(channelId, channelType, &socketId);
+    ClientGetSessionIdByChannelId(channelId, channelType, &socketId, false);
     SocketResource *item = NULL;
     SocketResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_channelStatisticsList->list, SocketResource, node) {
