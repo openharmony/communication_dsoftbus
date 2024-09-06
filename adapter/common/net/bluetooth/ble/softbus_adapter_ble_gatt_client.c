@@ -41,6 +41,7 @@ static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId);
 static BtGattClientCallbacks g_btGattClientCallbacks = { 0 };
 static SoftBusList *g_softBusGattcManager = NULL;
 static SoftBusList *g_btAddrs = NULL;
+static SoftBusBleSendSignal g_clientSendSignal;
 typedef struct {
     ListNode node;
     char addr[BT_MAC_LEN];
@@ -94,6 +95,11 @@ static void GattcReadCharacteristicCallback(int clientId, BtGattReadData *readDa
 
 static void GattcWriteCharacteristicCallback(int clientId, BtGattCharacteristic *characteristic, int status)
 {
+    CONN_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_clientSendSignal.g_sendCondLock) == SOFTBUS_OK, CONN_BLE, "lock fail!");
+    g_clientSendSignal.isWriteAvailable = true;
+    (void)SoftBusCondBroadcast(&g_clientSendSignal.g_sendCond);
+    (void)SoftBusMutexUnlock(&g_clientSendSignal.g_sendCondLock);
     (void)characteristic;
     CONN_LOGI(CONN_BLE, "clientId=%{public}d, status=%{public}d", clientId, status);
 }
@@ -429,6 +435,22 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
         return SOFTBUS_INVALID_PARAM;
     }
     CONN_LOGI(CONN_BLE, "clientId = %{public}d, writeType=%{public}d", clientId, clientData->writeType);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_clientSendSignal.g_sendCondLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
+    if (!g_clientSendSignal.isWriteAvailable) {
+        SoftBusSysTime waitTime = {0};
+        int32_t ret = SoftBusGetTime(&waitTime);
+        CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BLE, "softbus get time failed");
+        waitTime.usec += BLE_WRITE_TIMEOUT_IN_MICRS;
+        ret = SoftBusCondWait(&g_clientSendSignal.g_sendCond, &g_clientSendSignal.g_sendCondLock, &waitTime);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "SoftBusCondWait fail, ret=%{public}d", ret);
+            if (ret == SOFTBUS_TIMOUT && !g_clientSendSignal.isWriteAvailable) {
+                (void)SoftBusMutexUnlock(&g_clientSendSignal.g_sendCondLock);
+                return SOFTBUS_CONN_BLE_WRITE_WAIT_CALLBACK_TIMEOUT;
+            }
+        }
+    }
     BtGattCharacteristic characteristic;
     characteristic.serviceUuid.uuid = clientData->serviceUuid.uuid;
     characteristic.serviceUuid.uuidLen = clientData->serviceUuid.uuidLen;
@@ -438,8 +460,11 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
     if (BleGattcWriteCharacteristic(clientId, characteristic, writeType, clientData->valueLen,
         (const char *)clientData->value) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "error");
+        (void)SoftBusMutexUnlock(&g_clientSendSignal.g_sendCondLock);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
+    g_clientSendSignal.isWriteAvailable = false;
+    (void)SoftBusMutexUnlock(&g_clientSendSignal.g_sendCondLock);
     return SOFTBUS_OK;
 }
 
@@ -488,6 +513,20 @@ int32_t InitSoftbusAdapterClient(void)
         g_softBusGattcManager = NULL;
         return SOFTBUS_CREATE_LIST_ERR;
     }
+
+    if (SoftBusMutexInit(&g_clientSendSignal.g_sendCondLock, NULL) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "mutex init failed");
+        DestroySoftBusList(g_softBusGattcManager);
+        DestroySoftBusList(g_btAddrs);
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusCondInit(&g_clientSendSignal.g_sendCond) != SOFTBUS_OK) {
+        DestroySoftBusList(g_softBusGattcManager);
+        DestroySoftBusList(g_btAddrs);
+        (void)SoftBusMutexDestroy(&g_clientSendSignal.g_sendCondLock);
+        return SOFTBUS_NO_INIT;
+    }
+    g_clientSendSignal.isWriteAvailable = true;
     g_btGattClientCallbacks.ConnectionStateCb = GattcConnectionStateChangedCallback;
     g_btGattClientCallbacks.connectParaUpdateCb = GattcConnectParaUpdateCallback;
     g_btGattClientCallbacks.searchServiceCompleteCb = GattcSearchServiceCompleteCallback;
