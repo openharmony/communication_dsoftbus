@@ -768,6 +768,32 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
+        LNN_LOGW(LNN_LNN_HEART_BEATBUILDER, "invalid param");
+        return;
+    }
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
+    SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
+    switch (userSwitchState) {
+        case SOFTBUS_USER_SWITCHED:
+            LNN_LOGI(LNN_HEART_BEAT, "HB SOFTBUS_USER_SWITCHED");
+            LnnUpdateAccountInfo(true);
+            HbConditionChanged(false);
+            if (IsHeartbeatEnable()) {
+                if (LnnStartHbByTypeAndStrategy(
+                    HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+                    LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
+                }
+            }
+            RestartCoapDiscovery();
+            break;
+        default:
+            return;
+    }
+}
+
 static void HbLpEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_LP_EVENT_REPORT) {
@@ -1101,6 +1127,10 @@ static int32_t LnnRegisterCommonEvent(void)
     }
     if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist OOBE state evt handler fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist user switch evt handler fail!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
