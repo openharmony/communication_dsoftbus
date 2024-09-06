@@ -102,7 +102,8 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
 static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId,
     SessionListenerAdapter *sessionCallback, bool *isServer)
 {
-    if ((channelId < 0) || (sessionId == NULL) || (sessionCallback == NULL)) {
+    if ((channelId < 0) || (sessionId == NULL) ||
+        (sessionCallback == NULL) || (isServer == NULL)) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -124,7 +125,8 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
 static int32_t GetSocketCallbackAdapterByCloseChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId,
     SessionListenerAdapter *sessionCallback, bool *isServer)
 {
-    if ((channelId < 0) || (sessionId == NULL) || (sessionCallback == NULL)) {
+    if ((channelId < 0) || (sessionId == NULL) ||
+        (sessionCallback == NULL) || (isServer == NULL)) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
