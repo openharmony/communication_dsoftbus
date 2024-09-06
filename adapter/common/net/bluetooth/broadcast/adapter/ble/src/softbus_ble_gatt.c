@@ -430,7 +430,7 @@ static int32_t SoftbusUnRegisterScanCb(int32_t scannerId)
         SoftBusMutexUnlock(&g_scannerLock);
         return SOFTBUS_OK;
     }
-    int ret = BleDeregisterScanCallbacks(g_scanChannel[scannerId].scannerId);
+    int32_t ret = BleDeregisterScanCallbacks(g_scanChannel[scannerId].scannerId);
     DISC_LOGI(DISC_BLE_ADAPTER, "scannerId=%{public}d, bt-scannerId=%{public}d, result=%{public}d",
         scannerId, g_scanChannel[scannerId].scannerId, ret);
     g_scanChannel[scannerId].scannerId = -1;
@@ -454,7 +454,7 @@ static bool CheckAdvChanInUsed(int32_t advId)
     return true;
 }
 
-static int32_t StartBleAdv(int32_t advId, int *btAdvId, const SoftbusBroadcastParam *param,
+static int32_t StartBleAdv(int32_t advId, int32_t *btAdvId, const SoftbusBroadcastParam *param,
     const SoftbusBroadcastData *data)
 {
     BleAdvParams advParam = {};
@@ -477,7 +477,7 @@ static int32_t StartBleAdv(int32_t advId, int *btAdvId, const SoftbusBroadcastPa
         }
     }
     DumpSoftbusAdapterData("mgr pkg:", advRawData.advData, advRawData.advDataLen);
-    int ret = BleStartAdvEx(btAdvId, advRawData, advParam);
+    int32_t ret = BleStartAdvEx(btAdvId, advRawData, advParam);
     SoftBusFree(advRawData.advData);
     SoftBusFree(advRawData.rspData);
     return (ret == OHOS_BT_STATUS_SUCCESS) ? SOFTBUS_OK : ret;
@@ -540,7 +540,7 @@ static int32_t SoftbusStopAdv(int32_t advId)
     }
     g_advChannel[advId].isAdvertising = false;
     SoftBusMutexUnlock(&g_advLock);
-    int ret = BleStopAdv(btAdvId);
+    int32_t ret = BleStopAdv(btAdvId);
     DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, btAdvId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         return ret;
@@ -656,7 +656,7 @@ static int32_t SoftbusStartScan(int32_t scannerId, const SoftBusBcScanParams *pa
     BleScanConfigs scanConfig = {};
     scanConfig.scanMode = GetBtScanMode(param->scanInterval, param->scanWindow);
     scanConfig.phy = (int)param->scanPhy;
-    int ret = BleStartScanEx(btScannerId, &scanConfig, nativeFilter, (uint32_t)filterSize);
+    int32_t ret = BleStartScanEx(btScannerId, &scanConfig, nativeFilter, (uint32_t)filterSize);
     FreeBtFilter(nativeFilter, filterSize);
     DISC_LOGD(DISC_BLE_ADAPTER, "scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
         scannerId, btScannerId, ret);
@@ -693,7 +693,7 @@ static int32_t SoftbusStopScan(int32_t scannerId)
     }
     g_scanChannel[scannerId].isScanning = false;
     SoftBusMutexUnlock(&g_scannerLock);
-    int ret = BleStopScan(btScannerId);
+    int32_t ret = BleStopScan(btScannerId);
     DISC_LOGD(DISC_BLE_ADAPTER, "stop scan, scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
         scannerId, btScannerId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
@@ -728,7 +728,7 @@ static int32_t SetBtUuidByBroadCastType(LpServerType type, BtUuid *btUuid)
     return SOFTBUS_OK;
 }
 
-static void FreeManufactureData(BleScanNativeFilter *nativeFilter, int32_t filterSize)
+static void FreeManufactureFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
 {
     while (filterSize-- > 0) {
         SoftBusFree((nativeFilter + filterSize)->manufactureData);
@@ -777,9 +777,9 @@ static bool SoftbusSetLpParam(LpServerType type,
     lpParam.deliveryMode = LP_DELIVERY_MODE_REPLY;
     lpParam.advHandle = bcParam->advHandle;
     lpParam.duration = LP_ADV_DURATION_MS;
-    int ret = SetLpDeviceParam(&lpParam);
+    int32_t ret = SetLpDeviceParam(&lpParam);
     if (type == SOFTBUS_HEARTBEAT_TYPE) {
-        FreeManufactureData(lpParam.filter, scanParam->filterSize);
+        FreeManufactureFilter(lpParam.filter, scanParam->filterSize);
     }
     FreeBtFilter(lpParam.filter, scanParam->filterSize);
     SoftBusFree(lpParam.rawData.advData);
@@ -801,7 +801,7 @@ static int32_t SoftbusGetBroadcastHandle(int32_t advId, int32_t *bcHandle)
     }
     int32_t btAdvId = g_advChannel[advId].advId;
     SoftBusMutexUnlock(&g_advLock);
-    int ret = GetAdvHandle(btAdvId, bcHandle);
+    int32_t ret = GetAdvHandle(btAdvId, bcHandle);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         DISC_LOGW(DISC_BLE_ADAPTER, "get adv handle failed, advId=%{public}d, bt-advId=%{public}d, ret=%{public}d",
             advId, btAdvId, ret);
@@ -812,7 +812,7 @@ static int32_t SoftbusGetBroadcastHandle(int32_t advId, int32_t *bcHandle)
 
 static int32_t SoftbusEnableSyncDataToLp(void)
 {
-    int ret = EnableSyncDataToLpDevice();
+    int32_t ret = EnableSyncDataToLpDevice();
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         DISC_LOGW(DISC_BLE_ADAPTER, "enable failed, enable sync data to lp, ret=%{public}d", ret);
         return ret;
@@ -822,7 +822,7 @@ static int32_t SoftbusEnableSyncDataToLp(void)
 
 static int32_t SoftbusDisableSyncDataToLp(void)
 {
-    int ret = DisableSyncDataToLpDevice();
+    int32_t ret = DisableSyncDataToLpDevice();
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         DISC_LOGW(DISC_BLE_ADAPTER, "disable failed, disable sync data to lp, ret=%{public}d", ret);
         return ret;
@@ -843,7 +843,7 @@ static int32_t SoftbusSetScanReportChanToLp(int32_t scannerId, bool enable)
     }
     int32_t btScannerId = g_scanChannel[scannerId].scannerId;
     SoftBusMutexUnlock(&g_scannerLock);
-    int ret = SetScanReportChannelToLpDevice(btScannerId, enable);
+    int32_t ret = SetScanReportChannelToLpDevice(btScannerId, enable);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         DISC_LOGW(DISC_BLE_ADAPTER, "set channel failed, scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
             scannerId, btScannerId, ret);
@@ -855,7 +855,7 @@ static int32_t SoftbusSetScanReportChanToLp(int32_t scannerId, bool enable)
 static int32_t SoftbusSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
     int32_t interval, int32_t bcHandle)
 {
-    int ret = SetLpDeviceAdvParam(duration, maxExtAdvEvents, window, interval, bcHandle);
+    int32_t ret = SetLpDeviceAdvParam(duration, maxExtAdvEvents, window, interval, bcHandle);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         DISC_LOGW(DISC_BLE_ADAPTER, "set lp adv param failed, advHandle=%{public}d, ret=%{public}d", bcHandle, ret);
         return ret;
