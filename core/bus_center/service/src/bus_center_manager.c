@@ -177,11 +177,11 @@ static int32_t BusCenterServerInitFirstStep(void)
         return SOFTBUS_LOOPER_ERR;
     }
     if (LnnInitNetLedger() != SOFTBUS_OK) {
-        return SOFTBUS_NET_LEDGER_INIT_FAILED;
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
     if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "start decision center init fail");
-        return SOFTBUS_DECISION_CENTER_INIT_FAILED;
+        return SOFTBUS_NO_INIT;
     }
     if (LnnInitBusCenterEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init bus center event fail");
@@ -201,11 +201,11 @@ static int32_t BusCenterServerInitFirstStep(void)
     }
     if (LnnInitNetBuilder() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init net builder fail");
-        return SOFTBUS_NET_BUILDER_INIT_FAILED;
+        return SOFTBUS_NETWORK_BUILDER_INIT_FAILED;
     }
     if (LnnInitMetaNode() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init meta node fail");
-        return SOFTBUS_META_NODE_INIT_FAILED;
+        return SOFTBUS_NETWORK_META_NODE_INIT_FAILED;
     }
     if (IsActiveOsAccountUnlocked()) {
         LNN_LOGI(LNN_INIT, "user unlocked try load local deviceinfo");
@@ -235,11 +235,11 @@ static int32_t BusCenterServerInitSecondStep(void)
     }
     if (InitDecisionCenter() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initDecisionCenter fail");
-        return SOFTBUS_DECISION_CENTER_INIT_FAILED;
+        return SOFTBUS_NO_INIT;
     }
     if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init bus center decision center fail");
-        return SOFTBUS_DECISION_CENTER_INIT_FAILED;
+        return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
 }
