@@ -496,22 +496,22 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeIpTest, TestSize.Level1)
 {
     std::string ip = "192";
     auto ret = WifiDirectAnonymizeIp(ip);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "**2");
     ip = "192.168";
     ret = WifiDirectAnonymizeIp(ip);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "1****68");
     ip = "192..";
     ret = WifiDirectAnonymizeIp(ip);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "1***.");
     ip = "70:60";
     ret = WifiDirectAnonymizeIp(ip);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "7***0");
     ip = "192.168.1.2";
     ret = WifiDirectAnonymizeIp(ip);
-    EXPECT_EQ(ret, "192**.1.2");
+    EXPECT_EQ(ret, "192.168.1.*");
     ip = "70:f8:56:s5:80:9a";
     ret = WifiDirectAnonymizeIp(ip);
-    EXPECT_EQ(ret, "70:f8***9a");
+    EXPECT_EQ(ret, "70:f*********0:9a");
 }
 
 /*
@@ -527,10 +527,10 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeSsidTest, TestSize.Level1)
     EXPECT_EQ(ret, "");
     ssid = "te";
     ret = WifiDirectAnonymizeSsid(ssid);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "*e");
     ssid = "aaaaaaaa";
     ret = WifiDirectAnonymizeSsid(ssid);
-    EXPECT_EQ(ret, "aa**aa");
+    EXPECT_EQ(ret, "aa****aa");
 }
 
 /*
@@ -576,10 +576,10 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePtkTest, TestSize.Level1)
     EXPECT_EQ(ret, "");
     ptk = "123456";
     ret = WifiDirectAnonymizePtk(ptk);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "1***56");
     ptk = "123456789000000";
     ret = WifiDirectAnonymizePtk(ptk);
-    EXPECT_EQ(ret, "1234****0000");
+    EXPECT_EQ(ret, "123********0000");
 }
 
 /*
@@ -595,10 +595,10 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeDataTest, TestSize.Level1)
     EXPECT_EQ(ret, "");
     data = "12345";
     ret = WifiDirectAnonymizeData(data);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "1***5");
     data = "0123456789";
     ret = WifiDirectAnonymizeData(data);
-    EXPECT_EQ(ret, "01****89");
+    EXPECT_EQ(ret, "01*****789");
 }
 
 } // namespace OHOS::SoftBus
