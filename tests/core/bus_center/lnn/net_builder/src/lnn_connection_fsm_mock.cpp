@@ -135,5 +135,10 @@ void SetLpKeepAliveState(void *para)
 {
     return GetLnnConnInterface()->SetLpKeepAliveState(para);
 }
+
+void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
+{
+    return GetLnnConnInterface()->LnnNotifyOOBEStateChangeEvent(state);
+}
 }
 } // namespace OHOS

@@ -114,7 +114,8 @@ bool IsHeartbeatEnable(void)
     bool isLogIn = g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN;
     bool isBackground = g_hbConditionState.backgroundState == SOFTBUS_USER_BACKGROUND;
     bool isNightMode = g_hbConditionState.nightModeState == SOFTBUS_NIGHT_MODE_ON;
-    bool isOOBEEnd = g_hbConditionState.OOBEState == SOFTBUS_OOBE_END;
+    bool isOOBEEnd =
+        g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
 
     LNN_LOGI(LNN_HEART_BEAT,
         "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
@@ -740,9 +741,14 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
             HbConditionChanged(false);
             break;
         case SOFTBUS_OOBE_END:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_OOBE_END");
-            g_hbConditionState.OOBEState = state;
-            HbConditionChanged(false);
+            __attribute__((fallthrough));
+        case SOFTBUS_FACK_OOBE_END:
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle oobe state=%{public}d", state);
+            if (g_hbConditionState.OOBEState != SOFTBUS_OOBE_END &&
+                g_hbConditionState.OOBEState != SOFTBUS_FACK_OOBE_END) {
+                g_hbConditionState.OOBEState = state;
+                HbConditionChanged(false);
+            }
             break;
         default:
             return;

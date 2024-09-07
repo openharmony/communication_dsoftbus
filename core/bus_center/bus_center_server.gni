@@ -233,3 +233,26 @@ if (dsoftbus_feature_lnn_net && lnn_disc_enhanced) {
 } else {
   bus_center_server_src += [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_coap_adapter_virtual.c" ]
 }
+
+native_source_path = rebase_path("$dsoftbus_root_path")
+oobe_dir = "dsoftbus_enhance/adapter/common/oobe"
+oobe_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                            [
+                              "$native_source_path",
+                              "$oobe_dir",
+                            ],
+                            "value")
+
+if (!oobe_enhanced) {
+  bus_center_server_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_oobe_manager_virtual.cpp" ]
+  bus_center_server_inc +=
+      [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+} else {
+  bus_center_server_src +=
+      [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_oobe_manager.cpp" ]
+
+  bus_center_server_inc += [
+    "$dsoftbus_root_path/adapter/common/bus_center/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+  ]
+}
