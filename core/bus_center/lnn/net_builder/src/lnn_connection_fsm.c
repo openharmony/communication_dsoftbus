@@ -1523,6 +1523,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     AnonymizeFree(anonyUdid);
     AnonymizeFree(anonyNetworkId);
+    LnnNotifyOOBEStateChangeEvent(SOFTBUS_FACK_OOBE_END);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }

@@ -559,6 +559,7 @@ void LnnNotifyHomeGroupChangeEvent(SoftBusHomeGroupState state)
 
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 {
+    LNN_LOGI(LNN_EVENT, "notify OOBE state change");
     if (state < SOFTBUS_OOBE_RUNNING || state >= SOFTBUS_OOBE_UNKNOWN) {
         LNN_LOGW(LNN_EVENT, "bad OOBEState=%{public}d", state);
         return;
