@@ -1761,15 +1761,22 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
             &serverNode->listener, sizeof(SessionListenerAdapter));
         UnlockClientSessionServerList();
         if (ret != EOK) {
+            char *tmpName = NULL;
+            Anonymize(sessionName, &tmpName);
             TRANS_LOGE(TRANS_SDK,
-                "memcpy SessionListenerAdapter failed, sessionName=%{public}s, ret=%{public}d", sessionName, ret);
+                "memcpy SessionListenerAdapter failed, sessionName=%{public}s, ret=%{public}d",
+                AnonymizeWrapper(tmpName), ret);
+            AnonymizeFree(tmpName);
             return SOFTBUS_MEM_ERR;
         }
         return SOFTBUS_OK;
     }
 
     UnlockClientSessionServerList();
-    TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%{public}s", sessionName);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%{public}s", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
     return SOFTBUS_NOT_FIND;
 }
 
