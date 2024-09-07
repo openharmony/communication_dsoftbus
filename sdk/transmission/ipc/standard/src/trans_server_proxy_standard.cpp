@@ -426,9 +426,13 @@ int32_t TransServerProxy::CloseChannel(const char *sessionName, int32_t channelI
     return serverRet;
 }
 
-int32_t TransServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-    uint32_t len)
+int32_t TransServerProxy::CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
+    if (dataInfo == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
@@ -441,6 +445,10 @@ int32_t TransServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t
     }
     if (!data.WriteInt32(channelId)) {
         TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write channel id failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteInt32(channelType)) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write channel type failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     if (!data.WriteUint64(laneId)) {
