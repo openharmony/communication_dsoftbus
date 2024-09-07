@@ -607,7 +607,7 @@ static int32_t OnStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *par
     LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_AS_MASTER_NODE, NULL);
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
         /* Send once ble v0 heartbeat to recovery ble network. */
-        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
     }
     return SOFTBUS_OK;
 }
@@ -622,7 +622,7 @@ static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *p
         return SOFTBUS_ERR;
     }
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
-        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
     }
     return SOFTBUS_OK;
 }
