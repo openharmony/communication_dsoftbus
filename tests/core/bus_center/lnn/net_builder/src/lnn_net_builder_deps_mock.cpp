@@ -666,5 +666,11 @@ void LnnNotifyLocalNetworkIdChanged(void)
 {
     return GetNetBuilderDepsInterface()->LnnNotifyLocalNetworkIdChanged();
 }
+
+void RegisterOOBEMonitor(void *p)
+{
+    (void)p;
+    return GetNetBuilderDepsInterface()->RegisterOOBEMonitor(p);
+}
 } // extern "C"
 } // namespace OHOS
