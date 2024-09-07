@@ -189,6 +189,7 @@ public:
     virtual bool IsSupportLpFeature(void);
     virtual bool LnnSubcribeKvStoreService(void);
     virtual void LnnNotifyLocalNetworkIdChanged(void);
+    virtual void RegisterOOBEMonitor(void *p);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -320,6 +321,7 @@ public:
     MOCK_METHOD1(AuthFlushDevice, int32_t (const char *uuid));
     MOCK_METHOD0(IsSupportLpFeature, bool ());
     MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void ());
+    MOCK_METHOD1(RegisterOOBEMonitor, void (void *p));
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };
 } // namespace OHOS
