@@ -601,4 +601,43 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeDataTest, TestSize.Level1)
     EXPECT_EQ(ret, "01*****789");
 }
 
+/*
+ * @tc.name: GetLocalConnSubFeatureTest
+ * @tc.desc: check GetLocalConnSubFeature method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, GetLocalConnSubFeatureTest, TestSize.Level1)
+{
+    uint64_t feature = 0;
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNumU64Info(_, _)).WillOnce([](InfoKey key, uint64_t *info) {
+        *info = 1;
+        return SOFTBUS_OK;
+    });
+
+    auto ret = WifiDirectUtils::GetLocalConnSubFeature(feature);
+    EXPECT_EQ(feature, 1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: GetRemoteConnSubFeatureTest
+ * @tc.desc: check GetRemoteConnSubFeature method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, GetRemoteConnSubFeatureTest, TestSize.Level1)
+{
+    uint64_t feature = 0;
+    std::string networkId = "1234567890";
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetRemoteNumU64Info(_, _, _))
+        .WillOnce([](const std::string &networkId, InfoKey key, uint64_t *info) {
+            return SOFTBUS_OK;
+        });
+
+    auto ret = WifiDirectUtils::GetRemoteConnSubFeature(networkId, feature);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS::SoftBus
