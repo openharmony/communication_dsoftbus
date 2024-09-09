@@ -116,7 +116,7 @@ static bool IsLinkTypeValid(LaneLinkType type)
 
 int32_t LaneCapCheck(const char *networkId, LaneLinkType linkType)
 {
-    if (!IsLinkTypeValid(linkType)) {
+    if ((networkId == NULL) || (!IsLinkTypeValid(linkType))) {
         return SOFTBUS_INVALID_PARAM;
     }
     LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
