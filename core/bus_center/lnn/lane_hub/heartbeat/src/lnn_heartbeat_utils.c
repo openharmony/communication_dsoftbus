@@ -584,7 +584,7 @@ static int32_t GetOnlineInfoNum(int32_t *nums)
         return SOFTBUS_ERR;
     }
     *nums = infoNum;
-    LNN_LOGI(LNN_HEART_BEAT, "online nums=%{public}d", infoNum);
+    LNN_LOGD(LNN_HEART_BEAT, "online nums=%{public}d", infoNum);
     SoftBusFree(netInfo);
     return SOFTBUS_OK;
 }

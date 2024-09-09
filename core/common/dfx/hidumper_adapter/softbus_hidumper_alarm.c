@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "anonymizer.h"
 #include "softbus_hidumper_alarm.h"
 
 #include <stdio.h>
@@ -60,7 +61,10 @@ static void SoftBusGetAlarmInfo(int fd, AlarmRecord *record)
     }
 
     if (record->sessionName != NULL) {
-        SOFTBUS_DPRINTF(fd, ", SessionName=%s", record->sessionName);
+        char *tmpName = NULL;
+        Anonymize(record->sessionName, &tmpName);
+        SOFTBUS_DPRINTF(fd, ", SessionName=%s", AnonymizeWrapper(tmpName));
+        AnonymizeFree(tmpName);
     }
     SOFTBUS_DPRINTF(fd, "\n");
 }

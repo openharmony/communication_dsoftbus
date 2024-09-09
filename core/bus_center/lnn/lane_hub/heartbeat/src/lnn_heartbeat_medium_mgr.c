@@ -1031,7 +1031,7 @@ static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType typ
     Anonymize(udidHash, &anonyUdid);
     LNN_LOGD(LNN_HEART_BEAT, "mgr relay process, udidhash=%{public}s, hbType=%{public}d", anonyUdid, hbType);
     AnonymizeFree(anonyUdid);
-    if (LnnStartHbByTypeAndStrategy(hbType, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
+    if (LnnStartHbByTypeAndStrategy(hbType | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr relay process fail");
         return;
     }
