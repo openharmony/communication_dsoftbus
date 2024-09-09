@@ -946,7 +946,6 @@ static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLi
             LNN_LOGE(LNN_LANE, "strcpy localIp fail");
             return SOFTBUS_STRCPY_ERR;
         }
-        linkInfo->linkInfo.p2p.channel = link->channelId;
     }
     return SOFTBUS_OK;
 }
