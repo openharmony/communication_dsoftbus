@@ -350,6 +350,13 @@ bool WifiDirectUtils::SupportHml()
     return support;
 }
 
+bool WifiDirectUtils::SupportHmlTwo()
+{
+    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", true);
+    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%{public}d", support);
+    return support;
+}
+
 int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std::string &ip)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s", interface.c_str());
