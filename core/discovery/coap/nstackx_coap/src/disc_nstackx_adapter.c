@@ -510,7 +510,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
     // convert multi byte str to wide str
     wchar_t wideStr[MAX_WIDE_STR_LEN] = {0};
     size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
-    if (numConverted <= 0 || numConverted > INT32_MAX) {
+    if (numConverted == 0 || numConverted > multiByteStrLen) {
         DISC_LOGE(DISC_COAP, "mbstowcs failed");
         RestoreLocale(localeBefore);
         return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
