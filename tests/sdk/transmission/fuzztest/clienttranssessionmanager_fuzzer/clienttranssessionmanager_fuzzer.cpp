@@ -154,7 +154,8 @@ void ClientGetSessionIdByChannelIdTest(const uint8_t* data, size_t size)
     int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
     int32_t channelType = *(reinterpret_cast<const int32_t*>(data));
     int32_t sessionId;
-    ClientGetSessionIdByChannelId(channelId, channelType, &sessionId);
+    bool isClosing = false;
+    ClientGetSessionIdByChannelId(channelId, channelType, &sessionId, isClosing);
 }
 
 void ClientEnableSessionByChannelIdTest(const uint8_t* data, size_t size)

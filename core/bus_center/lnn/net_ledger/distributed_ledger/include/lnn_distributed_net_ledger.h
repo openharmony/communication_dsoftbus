@@ -59,7 +59,7 @@ int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info); /* key means
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
 bool LnnSetDLDeviceNickName(const char *networkId, const char *name);
 bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info);
-bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool *isScreenOn);
+bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool isScreenOn);
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
 int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
     char *dstIdBuf, uint32_t dstIdBufLen);

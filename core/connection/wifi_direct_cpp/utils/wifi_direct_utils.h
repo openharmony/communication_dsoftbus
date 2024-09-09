@@ -57,6 +57,7 @@ public:
     static std::string UuidToNetworkId(const std::string &uuid);
     static std::string GetLocalNetworkId();
     static std::string GetLocalUuid();
+    static int32_t GetLocalConnSubFeature(uint64_t &feature);
     static std::vector<uint8_t> GetLocalPtk(const std::string &remoteNetworkId);
     static std::vector<uint8_t> GetRemotePtk(const std::string &remoteNetworkId);
     static bool IsRemoteSupportTlv(const std::string &remoteDeviceId);
@@ -102,6 +103,7 @@ public:
     static int32_t GetOsType(const char *networkId);
     static int32_t GetDeviceType(const char *networkId);
     static int32_t GetDeviceType();
+    static int32_t GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature);
 
 private:
     static inline std::mutex serialParallelLock_;

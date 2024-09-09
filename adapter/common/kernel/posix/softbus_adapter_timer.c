@@ -33,10 +33,10 @@
 #define DATE_TIME_BUFF_LEN 24 // yyyy-MM-dd HH:mm:ss.SSS
 
 static unsigned int g_timerType;
-static TimerFunc g_timerFunc = NULL;
+__attribute__((no_sanitize("hwaddress"))) static TimerFunc g_timerFunc = NULL;
 static _Thread_local char g_dateTimeBuff[DATE_TIME_BUFF_LEN] = {0};
 
-static void HandleTimeoutAdapterFun(union sigval para)
+__attribute__((no_sanitize("hwaddress"))) static void HandleTimeoutAdapterFun(union sigval para)
 {
     (void)para;
     if (g_timerFunc != NULL) {
@@ -44,7 +44,7 @@ static void HandleTimeoutAdapterFun(union sigval para)
     }
 }
 
-void SetTimerFunc(TimerFunc func)
+__attribute__((no_sanitize("hwaddress"))) void SetTimerFunc(TimerFunc func)
 {
     g_timerFunc = func;
 }

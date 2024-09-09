@@ -78,6 +78,9 @@ typedef struct {
     ChannelType channelType;
     SessionTag info;
     bool isServer;
+    bool isEncyptedRawStream;
+    bool isAsync;
+    bool isClosing;
     SessionRole role;
     uint32_t maxIdleTime;
     uint32_t timeout;
@@ -92,8 +95,6 @@ typedef struct {
     int32_t crc;
     LinkType linkType[LINK_TYPE_MAX];
     uint32_t dataConfig;
-    bool isEncyptedRawStream;
-    bool isAsync;
     SocketLifecycleData lifecycle;
     uint32_t actionId;
 } SessionInfo;
@@ -182,7 +183,7 @@ int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *d
 
 int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType, SessionState *sessionState);
 
-int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId);
+int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing);
 
 int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync);
 
@@ -283,6 +284,8 @@ int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo);
 void SocketServerStateUpdate(const char *sessionName);
 
 int32_t ClientCancelAuthSessionTimer(int32_t sessionId);
+
+int32_t ClientSetStatusClosingBySocket(int32_t socket, bool isClosing);
 #ifdef __cplusplus
 }
 #endif
