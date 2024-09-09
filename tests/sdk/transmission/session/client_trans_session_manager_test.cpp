@@ -652,9 +652,10 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest17, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest18, TestSize.Level1)
 {
     int32_t sessionId = 0;
+    bool isClosing = false;
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
@@ -665,7 +666,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest18, TestSiz
     session->channelType = CHANNEL_TYPE_UDP;
     ret = ClientAddNewSession(g_sessionName, session);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
@@ -848,6 +849,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest24, TestSiz
     int32_t fileEncrypt = 0;
     int32_t algorithm = 0;
     int32_t crc = 0;
+    bool isClosing = false;
     int32_t ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, &fileEncrypt, &algorithm, &crc);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
@@ -862,7 +864,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest24, TestSiz
     session->channelType = CHANNEL_TYPE_UDP;
     ret = ClientAddNewSession(g_sessionName, session);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientGetFileConfigInfoById(sessionId, &fileEncrypt, &algorithm, &crc);
     EXPECT_EQ(ret,  SOFTBUS_OK);
@@ -1019,14 +1021,15 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestroyTest01, TestSiz
     ASSERT_EQ(ret, SOFTBUS_OK);
     ClientTransOnLinkDown(g_networkId, WIFI_STA);
     int32_t sessionId = 0;
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID + 1, CHANNEL_TYPE_UDP, &sessionId);
+    bool isClosing = false;
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID + 1, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_GT(sessionId, 0);
     ClientTransOnLinkDown(g_networkId, ROUTE_TYPE_ALL);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID + 1, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID + 1, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ClientTransOnLinkDown(g_deviceId, ROUTE_TYPE_ALL);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1255,11 +1258,12 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest35, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest36, TestSize.Level1)
 {
     int sessionId = 0;
-    int32_t ret = ClientGetSessionIdByChannelId(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    bool isClosing = false;
+    int32_t ret = ClientGetSessionIdByChannelId(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, NULL);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, NULL, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
     char data[SESSION_NAME_SIZE_MAX] = {0};
     ret = ClientGetSessionDataById(TRANS_TEST_SESSION_ID, data, SESSION_NAME_SIZE_MAX, KEY_PEER_SESSION_NAME);

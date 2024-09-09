@@ -102,6 +102,10 @@ int32_t ISoftBusClient::OnNodeBasicInfoChanged(const char *pkgName, void *info, 
 
 int32_t ISoftBusClient::OnNodeStatusChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type)
 {
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
+    (void)type;
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
