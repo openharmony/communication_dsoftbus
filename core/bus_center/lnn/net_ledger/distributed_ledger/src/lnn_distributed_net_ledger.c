@@ -1043,7 +1043,7 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
         // update lnn discovery type
         info->discoveryType |= oldInfo->discoveryType;
         info->AuthTypeValue = oldInfo->AuthTypeValue;
-        info->heartbeatTimestamp = oldInfo->heartbeatTimestamp;
+        info->heartbeatTimeStamp = oldInfo->heartbeatTimeStamp;
         MergeLnnInfo(oldInfo, info);
         UpdateProfile(info);
     }
@@ -1256,14 +1256,6 @@ static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type
     return REPORT_OFFLINE;
 }
 
-static void LnnCleanNodeInfo(NodeInfo *info)
-{
-    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
-    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
-    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-    LNN_LOGI(LNN_LEDGER, "need to report offline");
-}
-
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
@@ -1307,7 +1299,10 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         LNN_LOGI(LNN_LEDGER, "the state is already offline, no need to report offline");
         return REPORT_NONE;
     }
-    LnnCleanNodeInfo(info);
+    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
+    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    LNN_LOGI(LNN_LEDGER, "need to report offline");
     DfxRecordLnnSetNodeOfflineEnd(udid, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
     return REPORT_OFFLINE;
 }
