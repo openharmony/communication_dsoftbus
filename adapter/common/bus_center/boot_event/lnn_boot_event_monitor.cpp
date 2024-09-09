@@ -24,7 +24,6 @@
 #include "lnn_ohos_account.h"
 #include "softbus_error_code.h"
 #include "parameter.h"
-#include "lnn_settingdata_event_monitor.h"
 
 #define BOOTEVENT_ACCOUNT_READY "bootevent.account.ready"
 
@@ -33,7 +32,6 @@ static void ProcessBootEvent(void *para)
     (void)para;
     LNN_LOGI(LNN_EVENT, "start process account ready event");
     LnnUpdateOhosAccount(true);
-    LnnInitDeviceNameMonitorImpl();
     if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
         LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
         return;
