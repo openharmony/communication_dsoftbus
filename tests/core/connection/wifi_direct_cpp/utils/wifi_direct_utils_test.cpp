@@ -462,6 +462,7 @@ HWTEST_F(WifiDirectUtilsTest, CheckLinkAtDfsChannelConflictTest, TestSize.Level1
         });
     ret = WifiDirectUtils::CheckLinkAtDfsChannelConflict(uuid, linkType);
     EXPECT_EQ(ret, false);
+    LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::HML, remoteDeviceId);
 
     frequency = FREQ3;
     linkType = InnerLink::LinkType::P2P;
@@ -557,10 +558,10 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePskTest, TestSize.Level1)
     EXPECT_EQ(ret, "");
     psk = "1234";
     ret = WifiDirectAnonymizePsk(psk);
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "1**4");
     psk = "123456789";
     ret = WifiDirectAnonymizePsk(psk);
-    EXPECT_EQ(ret, "12****9");
+    EXPECT_EQ(ret, "12*****89");
 }
 
 /*
