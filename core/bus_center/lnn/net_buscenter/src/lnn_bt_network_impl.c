@@ -100,6 +100,7 @@ static int32_t EnableBtSubnet(LnnPhysicalSubnet *subnet)
 
 static int32_t DisableBrSubnet(LnnPhysicalSubnet *subnet)
 {
+    int32_t ret;
     bool addrType[CONNECTION_ADDR_MAX] = {
         [CONNECTION_ADDR_BR] = true,
     };
@@ -108,7 +109,7 @@ static int32_t DisableBrSubnet(LnnPhysicalSubnet *subnet)
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_BUILDER, "br subnet is disable, start leave br network");
-    int32_t ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
+    ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "leave br network fail, ret=%{public}d", ret);
         return ret;
@@ -198,7 +199,8 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         case BT_SUBNET_MANAGER_EVENT_IF_DOWN:
             if (type == LNN_NETIF_TYPE_BR) {
                 ret = DisableBrSubnet(subnet);
-            } else if (type == LNN_NETIF_TYPE_BLE) {
+            }
+            if (type == LNN_NETIF_TYPE_BLE) {
                 ret = DisableBleSubnet(subnet);
             }
             break;

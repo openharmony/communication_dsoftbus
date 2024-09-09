@@ -53,7 +53,6 @@ int32_t LnnNotifyDiscoveryDevice(
 {
     (void)addr;
     (void)infoReport;
-    (void)isNeedConnec;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

@@ -57,6 +57,11 @@ int32_t LnnInitDecisionDbDelay(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnGenerateCeParams(void)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t UpdateRecoveryDeviceInfoFromDb(void)
 {
     return SOFTBUS_OK;

@@ -92,8 +92,8 @@ int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort
 int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);
 int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
-bool LnnSetDlPtk(const char *networkId, const char *remotePtk);
 bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr);
+bool LnnSetDlPtk(const char *networkId, const char *remotePtk);
 int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType);
 int32_t LnnSetDLUnifiedDeviceName(const char *udid, const char *name);
 int32_t LnnSetDLUnifiedDefaultDeviceName(const char *udid, const char *name);

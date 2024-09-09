@@ -21,6 +21,7 @@
 #include "lnn_device_info.h"
 #include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 #define MAX_WEIGHT_VALUE        1000

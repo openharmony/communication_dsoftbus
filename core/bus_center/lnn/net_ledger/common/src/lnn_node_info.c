@@ -21,6 +21,7 @@
 
 #include "anonymizer.h"
 #include "lnn_log.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 
@@ -28,6 +29,7 @@
 #define STATIC_LEVEL_INVALID 0xFFFF
 #define SWITCH_LEVEL_INVALID 0xFFFFFFFF
 #define SWTICH_LENGTH_INVALID 0xFFFF
+#define SWITCH_MAX_LENGTH 24
 
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
@@ -125,6 +127,7 @@ void LnnSetBtMac(NodeInfo *info, const char *mac)
     if (strncpy_s(info->connectInfo.macAddr, MAC_LEN, mac, strlen(mac)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "str copy error");
     }
+    return;
 }
 
 const char *LnnGetBleMac(const NodeInfo *info)
@@ -466,7 +469,7 @@ uint16_t LnnGetDataSwitchLength(const NodeInfo *info)
 
 int32_t LnnSetDataSwitchLength(NodeInfo *info, uint16_t dataSwitchLength)
 {
-    if (info == NULL) {
+    if (info == NULL || dataSwitchLength > SWITCH_MAX_LENGTH) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -513,6 +516,19 @@ int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols)
         return SOFTBUS_INVALID_PARAM;
     }
     info->supportedProtocols = protocols;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
+{
+    if (info == NULL || wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(info->wifiDirectAddr, sizeof(info->wifiDirectAddr), wifiDirectAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s wifidirect addr err");
+        return SOFTBUS_MEM_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -563,19 +579,6 @@ int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk)
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
-{
-    if (info == NULL || wifiDirectAddr == NULL) {
-        LNN_LOGE(LNN_LEDGER, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (strcpy_s(info->wifiDirectAddr, sizeof(info->wifiDirectAddr), wifiDirectAddr) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s wifidirect addr err");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
 {
     char ptkStr[PTK_STR_LEN] = { 0 };
@@ -597,7 +600,7 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
     char *anonyOldPtk = NULL;
     Anonymize(ptkStr, &anonyPtk);
     Anonymize(oldPtkStr, &anonyOldPtk);
-    LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{public}s, oldPtk=%{public}s", log, anonyPtk, anonyOldPtk);
+    LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{private}s, oldPtk=%{private}s", log, anonyPtk, anonyOldPtk);
     AnonymizeFree(anonyPtk);
     AnonymizeFree(anonyOldPtk);
     (void)memset_s(&ptkStr, PTK_STR_LEN, 0, PTK_STR_LEN);

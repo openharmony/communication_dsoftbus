@@ -50,7 +50,7 @@ static void RemoveOldKey(SessionKeyList *list)
     if (num <= SESSION_KEY_MAX_NUM) {
         return;
     }
-    
+
     SessionKeyItem *oldKey = NULL;
     uint64_t oldKeyUseTime = UINT64_MAX;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
@@ -72,7 +72,7 @@ static void RemoveOldKey(SessionKeyList *list)
 
 void InitSessionKeyList(SessionKeyList *list)
 {
-    AUTH_CHECK_AND_RETURN_LOGE(list != NULL, AUTH_FSM, "list is NULL");
+    CHECK_NULL_PTR_RETURN_VOID(list);
     ListInit(list);
 }
 
@@ -144,14 +144,13 @@ int32_t ClearOldKey(const SessionKeyList *list, AuthLinkType type)
 
 int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(srcList != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "srcList is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(dstList != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "dstList is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(srcList, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(dstList, SOFTBUS_INVALID_PARAM);
     SessionKeyItem *item = NULL;
     SessionKeyItem *newItem = NULL;
     LIST_FOR_EACH_ENTRY(item, srcList, SessionKeyItem, node) {
         newItem = (SessionKeyItem *)DupMemBuffer((uint8_t *)item, sizeof(SessionKeyItem));
         if (newItem == NULL) {
-            AUTH_LOGE(AUTH_FSM, "malloc newItem fail");
             DestroySessionKeyList(dstList);
             return SOFTBUS_MALLOC_ERR;
         }
@@ -162,7 +161,7 @@ int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList
 
 void DestroySessionKeyList(SessionKeyList *list)
 {
-    AUTH_CHECK_AND_RETURN_LOGE(list != NULL, AUTH_FSM, "list is NULL");
+    CHECK_NULL_PTR_RETURN_VOID(list);
     SessionKeyItem *item = NULL;
     SessionKeyItem *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, list, SessionKeyItem, node) {
@@ -174,7 +173,7 @@ void DestroySessionKeyList(SessionKeyList *list)
 
 bool HasSessionKey(const SessionKeyList *list)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, false, AUTH_FSM, "list is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(list, false);
     return !IsListEmpty(list);
 }
 
@@ -249,8 +248,8 @@ int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index)
 
 int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key, AuthLinkType type, bool isOldKey)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
     if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
         AUTH_LOGE(AUTH_FSM, "type error");
         return SOFTBUS_INVALID_PARAM;
@@ -279,9 +278,9 @@ int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key
 
 int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(index != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "index is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(index, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
     if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
         AUTH_LOGE(AUTH_FSM, "type error");
         return SOFTBUS_INVALID_PARAM;
@@ -344,8 +343,8 @@ int32_t SetSessionKeyAuthLinkType(const SessionKeyList *list, int32_t index, Aut
 
 int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, AuthLinkType type, SessionKey *key)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
     if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
         AUTH_LOGE(AUTH_FSM, "type error");
         return SOFTBUS_INVALID_PARAM;
@@ -370,7 +369,7 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, AuthLink
 
 void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index, AuthLinkType type)
 {
-    AUTH_CHECK_AND_RETURN_LOGE(list != NULL, AUTH_FSM, "list is NULL");
+    CHECK_NULL_PTR_RETURN_VOID(list);
     bool isFind = false;
     SessionKeyItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
@@ -532,7 +531,7 @@ int32_t DecryptInner(const SessionKeyList *list, AuthLinkType type, const InData
 /* For Debug */
 void DumpSessionkeyList(const SessionKeyList *list)
 {
-    AUTH_CHECK_AND_RETURN_LOGE(list != NULL, AUTH_FSM, "list is NULL");
+    CHECK_NULL_PTR_RETURN_VOID(list);
     uint32_t keyNum = 0;
     SessionKeyItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
@@ -573,8 +572,8 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
 
 static int32_t RemoveUpdateSessionKeyFunc(const void *obj, void *para)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(obj != NULL, SOFTBUS_ERR, AUTH_FSM, "obj is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(para != NULL, SOFTBUS_ERR, AUTH_FSM, "para is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(obj, SOFTBUS_ERR);
+    CHECK_NULL_PTR_RETURN_VALUE(para, SOFTBUS_ERR);
     int64_t authId = *(int64_t *)(obj);
     if (authId == *(int64_t *)(para)) {
         AUTH_LOGI(AUTH_FSM, "remove update session key event, authId=%{public}" PRId64, authId);

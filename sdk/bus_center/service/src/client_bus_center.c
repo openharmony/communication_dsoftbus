@@ -301,8 +301,8 @@ int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16
 
 int32_t RegDataLevelChangeCb(const char *pkgName, IDataLevelCb *callback)
 {
-    if (pkgName == NULL) {
-        LNN_LOGE(LNN_STATE, "pkgName is null");
+    if (pkgName == NULL || callback == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName or callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcmp(g_dbPkgName, pkgName) != 0) {

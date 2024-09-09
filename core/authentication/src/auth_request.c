@@ -15,6 +15,8 @@
 
 #include "auth_request.h"
 
+#include <securec.h>
+
 #include "auth_common.h"
 #include "auth_log.h"
 #include "softbus_adapter_mem.h"
@@ -33,7 +35,7 @@ static AuthRequest *FindAuthRequestByRequestId(uint64_t requestId)
     return NULL;
 }
 
-static uint32_t GetAuthRequestWaitNum(const AuthRequest *request)
+static uint32_t GetAuthRequestWaitNum(AuthRequest *request)
 {
     uint32_t num = 0;
     AuthRequest *item = NULL;
@@ -67,7 +69,7 @@ static uint32_t GetAuthRequestWaitNum(const AuthRequest *request)
 
 uint32_t AddAuthRequest(const AuthRequest *request)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(request != NULL, 0, AUTH_CONN, "request is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(request, 0);
     AuthRequest *newRequest = SoftBusCalloc(sizeof(AuthRequest));
     if (newRequest == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc AuthRequest fail");
@@ -87,7 +89,7 @@ uint32_t AddAuthRequest(const AuthRequest *request)
 
 int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(request != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "request is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
@@ -103,10 +105,9 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
 
 int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest *request)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(request != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "request is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);
     AuthRequest *item = FindAuthRequestByRequestId(requestId);
     if (item == NULL) {
-        AUTH_LOGE(AUTH_CONN, "find auth request failed");
         return SOFTBUS_NOT_FIND;
     }
     *request = *item;
@@ -115,8 +116,8 @@ int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest *request)
 
 int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connInfo is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(request != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "request is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
@@ -136,7 +137,7 @@ int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *req
 
 int32_t FindAndDelAuthRequestByConnInfo(uint32_t requestId, const AuthConnInfo *connInfo)
 {
-    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connInfo is NULL");
+    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
@@ -197,11 +198,9 @@ void ClearAuthRequest(void)
 bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb)
 {
     if (verifyCb == NULL) {
-        AUTH_LOGE(AUTH_CONN, "verifyCb is null");
         return false;
     }
     if (verifyCb->onVerifyPassed == NULL || verifyCb->onVerifyFailed == NULL) {
-        AUTH_LOGE(AUTH_CONN, "onVerifyPassed or onVerifyFailed is null");
         return false;
     }
     return true;
@@ -210,11 +209,9 @@ bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb)
 bool CheckAuthConnCallback(const AuthConnCallback *connCb)
 {
     if (connCb == NULL) {
-        AUTH_LOGE(AUTH_CONN, "connCb is null");
         return false;
     }
     if (connCb->onConnOpened == NULL || connCb->onConnOpenFailed == NULL) {
-        AUTH_LOGE(AUTH_CONN, "onConnOpened or onConnOpenFailed is null");
         return false;
     }
     return true;
@@ -228,11 +225,9 @@ void PerformVerifyCallback(uint32_t requestId, int32_t result, AuthHandle authHa
     }
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get auth request failed");
         return;
     }
     if (!CheckVerifyCallback(&request.verifyCb)) {
-        AUTH_LOGE(AUTH_CONN, "check verifyCb failed");
         return;
     }
     if (result == SOFTBUS_OK) {
