@@ -1628,7 +1628,7 @@ static int32_t GetAuthConnInfoWithoutMeta(const LinkRequest *request, uint32_t l
     WdGuideType guideType = LANE_CHANNEL_BUTT;
     int32_t ret = GetCurrentGuideType(laneReqId, request->linkType, &guideType);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "get current guide channel info fail");
+        LNN_LOGE(LNN_LANE, "get current guide channel info fail");
         return ret;
     }
     if (guideType == LANE_ACTIVE_BR_NEGO || guideType == LANE_NEW_AUTH_NEGO) {
