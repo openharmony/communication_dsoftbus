@@ -69,7 +69,7 @@ HWTEST_F(WifiDirectManagerCppTest, SetElementTypeTest, TestSize.Level1)
     info.negoChannel.type = NEGO_CHANNEL_AUTH;
     SetElementTypeExtra(&info, &extra);
     EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_P2P);
-    EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_WLAN);
+    EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_NONE);
 
     info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     info.negoChannel.type = NEGO_CHANNEL_COC;

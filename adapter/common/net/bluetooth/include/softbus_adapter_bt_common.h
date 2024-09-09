@@ -32,7 +32,7 @@ extern "C" {
 #define MAC_FIRST_INDEX 0
 #define MAC_ONE_INDEX 1
 #define MAC_FIVE_INDEX 5
-#define BLE_WRITE_TIMEOUT_IN_MICRS 500000
+#define BLE_WRITE_TIMEOUT_IN_MS 500
 
 typedef enum {
     BLE_DISABLE = 0,
@@ -128,6 +128,8 @@ int SoftBusSetBtName(const char *name);
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener);
 
 int SoftBusRemoveBtStateListener(int listenerId);
+
+void SoftBusComputeWaitBleSendDataTime(uint32_t waitMillis, SoftBusSysTime *outtime);
 
 int SoftBusBtInit(void);
 

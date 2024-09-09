@@ -31,6 +31,8 @@
 #include "conn_log.h"
 #include "softbus_adapter_ble_gatt_client.h"
 
+#include "adapter_bt_utils.h"
+
 #define WAIT_HAL_REG_TIME_MS 5 // ms
 #define WAIT_HAL_REG_RETRY 3
 
@@ -52,7 +54,7 @@ static _Atomic int g_halServerId = -1;
 static _Atomic int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 static SoftBusGattsManager g_softBusGattsManager = { 0 };
 static _Atomic bool g_isRegisterHalCallback = false;
-static SoftBusBleSendSignal g_serverSendSignal;
+static SoftBusBleSendSignal g_serverSendSignal = {0};
 
 static bool IsGattsManagerEmpty(void)
 {
@@ -273,31 +275,30 @@ int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
         .valueLen = param->valueLen,
         .value = param->value
     };
-    CONN_LOGI(CONN_BLE, "halconnId:%{public}d, attrHandle:%{public}d, confirm:%{public}d",
-        notify.connectId, notify.attrHandle, notify.confirm);
     CONN_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_serverSendSignal.g_sendCondLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
     if (!g_serverSendSignal.isWriteAvailable) {
         SoftBusSysTime waitTime = {0};
-        int32_t ret = SoftBusGetTime(&waitTime);
-        CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BLE, "softbus get time failed");
-        waitTime.usec += BLE_WRITE_TIMEOUT_IN_MICRS;
-        ret = SoftBusCondWait(&g_serverSendSignal.g_sendCond, &g_serverSendSignal.g_sendCondLock, &waitTime);
+        SoftBusComputeWaitBleSendDataTime(BLE_WRITE_TIMEOUT_IN_MS, &waitTime);
+        int32_t ret = SoftBusCondWait(&g_serverSendSignal.g_sendCond, &g_serverSendSignal.g_sendCondLock, &waitTime);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "SoftBusCondWait fail, ret=%{public}d", ret);
-            if (ret == SOFTBUS_TIMOUT && !g_serverSendSignal.isWriteAvailable) {
-                (void)SoftBusMutexUnlock(&g_serverSendSignal.g_sendCondLock);
-                return SOFTBUS_CONN_BLE_WRITE_WAIT_CALLBACK_TIMEOUT;
-            }
+            CONN_LOGE(CONN_BLE, "SoftBusCondWait fail, ret=%{public}d, isWriteAvailable=%{public}d",
+                ret, g_serverSendSignal.isWriteAvailable);
+            // fall-through: The protocol stack in the blue zone on a signal framework may not be called back.
         }
-    }
-    if (BleGattsSendIndication(g_halServerId, &notify) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "BleGattsSendIndication failed");
-        (void)SoftBusMutexUnlock(&g_serverSendSignal.g_sendCondLock);
-        return SOFTBUS_CONN_BLE_UNDERLAY_SERVER_SEND_INDICATION_ERR;
     }
     g_serverSendSignal.isWriteAvailable = false;
     (void)SoftBusMutexUnlock(&g_serverSendSignal.g_sendCondLock);
+    CONN_LOGI(CONN_BLE, "halconnId:%{public}d, attrHandle:%{public}d, confirm:%{public}d",
+        notify.connectId, notify.attrHandle, notify.confirm);
+    if (BleGattsSendIndication(g_halServerId, &notify) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "BleGattsSendIndication failed");
+        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_serverSendSignal.g_sendCondLock) == SOFTBUS_OK,
+            SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
+        g_serverSendSignal.isWriteAvailable = true;
+        (void)SoftBusMutexUnlock(&g_serverSendSignal.g_sendCondLock);
+        return SOFTBUS_CONN_BLE_UNDERLAY_SERVER_SEND_INDICATION_ERR;
+    }
     return SOFTBUS_OK;
 }
 
