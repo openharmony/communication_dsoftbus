@@ -58,7 +58,7 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     int32_t index = 0;
     MatchTransEventNameTypeExtraInt32Param(params, index, extra.result);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
-    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.socketName);
+    MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.socketName);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.dataType);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.channelType);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.laneId);
@@ -121,6 +121,18 @@ static void MatchTransAlarmNameTypeExtraStrParam(const HiSysEventParam *params, 
     EXPECT_STREQ(params[index].v.s, extraParam);
 }
 
+static void MatchTransAlarmNameTypeExtraStrParamAnony(const HiSysEventParam *params, int32_t index,
+    const char *extraParam)
+{
+    char *anonyStr = NULL;
+    EXPECT_STREQ(params[index].name, g_transAlarmAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_transAlarmAssigners[index].type);
+
+    Anonymize(extraParam, &anonyStr);
+    EXPECT_STREQ(params[index].v.s, AnonymizeWrapper(anonyStr));
+    AnonymizeFree(anonyStr);
+}
+
 MATCHER_P2(TransAlarmValidParamArrayMatcher, inExtra, validSize, "trans alarm valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
@@ -146,7 +158,7 @@ MATCHER_P2(TransAlarmValidParamArrayMatcher, inExtra, validSize, "trans alarm va
     MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.conflictedName);
     MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.occupyedName);
     MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.permissionName);
-    MatchTransAlarmNameTypeExtraStrParam(params, ++index, extra.sessionName);
+    MatchTransAlarmNameTypeExtraStrParamAnony(params, ++index, extra.sessionName);
     EXPECT_EQ(++index, validSize);
     return true;
 }
