@@ -844,6 +844,7 @@ static int32_t CancelLane(uint32_t laneReqId)
     LNN_LOGE(LNN_LANE, "cancel lane fail, lane reqinfo not find, laneReqId=%{public}u", laneReqId);
     return SOFTBUS_LANE_NOT_FOUND;
 }
+
 int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId)
 {
     if (Lock() != SOFTBUS_OK) {
@@ -854,21 +855,20 @@ int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId)
     LIST_FOR_EACH_ENTRY(item, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == oldLaneId) {
             item->laneId = newLaneId;
-            LNN_LOGI(LNN_LANE, "update newLaneId=%{public}" PRIu64 " oldLaneId=%{public}" PRIu64,
+            LNN_LOGI(LNN_LANE, "update newLaneId=%{public}" PRIu64 "oldLaneId=%{public}" PRIu64,
                 newLaneId, oldLaneId);
             Unlock();
             return SOFTBUS_OK;
         }
     }
     Unlock();
-    LNN_LOGI(LNN_LANE, "laneId=%{public}" PRIu64 " not found", oldLaneId);
     return SOFTBUS_NOT_FIND;
 }
 
-static bool GetAuthType(const char *peerNetworkId)
+static bool GetAuthType(const char *peerNetWorkId)
 {
     int32_t value = 0;
-    int32_t ret = LnnGetRemoteNumInfo(peerNetworkId, NUM_KEY_META_NODE, &value);
+    int32_t ret = LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_NODE, &value);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "fail, ret=%{public}d", ret);
         return false;
