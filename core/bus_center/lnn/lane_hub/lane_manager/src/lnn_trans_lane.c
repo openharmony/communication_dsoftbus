@@ -1657,7 +1657,9 @@ static void HandelNotifyFreeLaneResult(SoftBusMessage *msg)
 {
     uint32_t laneReqId = (uint32_t)msg->arg1;
     int32_t errCode = (int32_t)msg->arg2;
-    (void)NotifyFreeLaneResult(laneReqId, errCode);
+    LNN_LOGI(LNN_LANE, "handle notify free lane result, laneReqId=%{public}u, errCode=%{public}d",
+        laneReqId, errCode);
+    NotifyFreeLaneResult(laneReqId, errCode);
 }
 
 static void MsgHandler(SoftBusMessage *msg)
