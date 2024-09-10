@@ -73,21 +73,31 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
         .medium = COAP,
     };
     char *anonymizedName = NULL;
+    char *anonymizedId = NULL;
+    char *anonymizedIp = NULL;
     Anonymize(devInfo->devName, &anonymizedName);
-
+    Anonymize(devInfo->devId, &anonymizedId);
+    Anonymize(devInfo->addr[0].info.ip.ip, &anonymizedIp);
     if (nstackxInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||
         nstackxInfo->mode == PUBLISH_MODE_PROACTIVE) {
-        DISC_LOGI(DISC_COAP, "DiscFound: devName=%{public}s, netIf=%{public}s",
-            AnonymizeWrapper(anonymizedName), nstackxInfo->networkName);
+        DISC_LOGI(DISC_COAP, "DiscFound: devName=%{public}s, netIf=%{public}s, capa=%{public}u, port=%{public}hu, "
+            "devId=%{public}s, devType=%{public}03x, ip=%{public}s, accountHash=%{public}02X%{public}02X",
+            AnonymizeWrapper(anonymizedName), nstackxInfo->networkName, devInfo->capabilityBitmap[0],
+            devInfo->addr[0].info.ip.port, AnonymizeWrapper(anonymizedId), devInfo->devType,
+            AnonymizeWrapper(anonymizedIp), devInfo->accountHash[0], devInfo->accountHash[1]);
         AnonymizeFree(anonymizedName);
+        AnonymizeFree(anonymizedId);
+        AnonymizeFree(anonymizedIp);
         discCb->OnDeviceFound(devInfo, &additions);
         return SOFTBUS_OK;
     }
 
     uint8_t bType = nstackxInfo->businessType;
-    DISC_LOGI(DISC_COAP, "DiscRecv: broadcast devName=%{public}s, bType=%{public}u",
-        AnonymizeWrapper(anonymizedName), bType);
+    DISC_LOGI(DISC_COAP, "DiscRecv: broadcast devName=%{public}s, devId=%{public}s, ip=%{public}s, bType=%{public}u",
+        AnonymizeWrapper(anonymizedName), AnonymizeWrapper(anonymizedId), AnonymizeWrapper(anonymizedIp), bType);
     AnonymizeFree(anonymizedName);
+    AnonymizeFree(anonymizedId);
+    AnonymizeFree(anonymizedIp);
     if (bType != NSTACKX_BUSINESS_TYPE_NULL && DiscCoapSendRsp(devInfo, bType) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "send response failed");
         return SOFTBUS_DISCOVER_COAP_SEND_RSP_FAIL;

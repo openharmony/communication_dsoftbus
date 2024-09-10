@@ -521,9 +521,12 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
     add.medium = BLE;
 
     if (ProcessHashAccount(foundInfo)) {
+        char *anonyLocalBleMac = NULL;
+        Anonymize(foundInfo->addr[0].info.ble.bleMac, &anonyLocalBleMac);
         DISC_LOGI(DISC_BLE, "start report found device, addrNum=%{public}u, addr[0].type=%{public}u,"
-            "capabilityBitmap=%{public}u, callCount=%{public}u", foundInfo->addrNum, foundInfo->addr[0].type,
-            foundInfo->capabilityBitmap[0], callCount++);
+            "capabilityBitmap=%{public}u, bleMac=%{public}s, callCount=%{public}u", foundInfo->addrNum,
+            foundInfo->addr[0].type, foundInfo->capabilityBitmap[0], AnonymizeWrapper(anonyLocalBleMac), callCount++);
+        AnonymizeFree(anonyLocalBleMac);
         uint32_t tempCap = 0;
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         DISC_CHECK_AND_RETURN_LOGE(tempCap != 0, DISC_BLE, "unsupported ble capability. capabilityBitmap=%{public}d",
