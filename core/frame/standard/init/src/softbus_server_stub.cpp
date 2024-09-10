@@ -29,6 +29,7 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
+#include "trans_network_statistics.h"
 #include "trans_session_manager.h"
 
 #ifdef SUPPORT_BUNDLENAME
@@ -48,7 +49,9 @@
 namespace OHOS {
     namespace {
         constexpr int32_t JUDG_CNT = 1;
+        constexpr int32_t MSG_MAX_SIZE = 1024 * 2;
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
+        static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
     }
 
 
@@ -183,6 +186,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_DEACTIVE_META_NODE] = &SoftBusServerStub::DeactiveMetaNodeInner;
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
     memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
+    memberFuncMap_[SERVER_SYNC_TRUSTED_RELATION] = &SoftBusServerStub::SyncTrustedRelationShipInner;
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
@@ -225,6 +229,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_DEACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_SYNC_TRUSTED_RELATION] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_RIPPLE_STATS] = nullptr;
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
@@ -591,6 +596,7 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
         goto EXIT;
     }
     retReply = OpenAuthSession(sessionName, addrInfo);
+    AddChannelStatisticsInfo(retReply, CHANNEL_TYPE_AUTH);
     COMM_LOGI(COMM_SVC, "OpenAuthSession channelId=%{public}d", retReply);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
@@ -670,14 +676,14 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
         }
         int32_t ret = TransGetAndComparePidBySession(callingPid, sessionName, channelId);
         if (ret != SOFTBUS_OK) {
-            COMM_LOGE(COMM_SVC, "Pid can not close channel, pid = %{public}d, sessionId = %{public}d, ret = %{public}d",
+            COMM_LOGE(COMM_SVC, "Pid can not close channel, pid=%{public}d, sessionId=%{public}d, ret=%{public}d",
                 callingPid, channelId, ret);
             return ret;
         }
     } else {
         int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
         if (ret != SOFTBUS_OK) {
-            COMM_LOGE(COMM_SVC, "Pid can not close channel, pid = %{public}d, channelId = %{public}d, ret = %{public}d",
+            COMM_LOGE(COMM_SVC, "Pid can not close channel, pid=%{public}d, channelId=%{public}d, ret=%{public}d",
                 callingPid, channelId, ret);
             return ret;
         }
@@ -696,12 +702,17 @@ int32_t SoftBusServerStub::CloseChannelWithStatisticsInner(MessageParcel &data, 
     COMM_LOGD(COMM_SVC, "enter");
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
-        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read channel Id failed!");
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read channel id failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read channel type failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
     uint64_t laneId;
     if (!data.ReadUint64(laneId)) {
-        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read lane Id failed!");
+        COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner read lane id failed!");
         return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
     }
     uint32_t len;
@@ -714,7 +725,7 @@ int32_t SoftBusServerStub::CloseChannelWithStatisticsInner(MessageParcel &data, 
     COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read len failed.");
     void *dataInfo = const_cast<void *>(rawData);
 
-    int32_t retReply = CloseChannelWithStatistics(channelId, laneId, dataInfo, len);
+    int32_t retReply = CloseChannelWithStatistics(channelId, channelType, laneId, dataInfo, len);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "CloseChannelInner write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
@@ -1167,7 +1178,13 @@ int32_t SoftBusServerStub::QosReportInner(MessageParcel &data, MessageParcel &re
         COMM_LOGE(COMM_SVC, "QosReportInner read quality failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
-
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "Pid can not get qos report, pid=%{public}d, channelId=%{public}d, ret=%{public}d",
+            callingPid, channelId, ret);
+        return ret;
+    }
     int32_t retReply = QosReport(channelId, channelType, appType, quality);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "QosReportInner write reply failed!");
@@ -1194,6 +1211,13 @@ int32_t SoftBusServerStub::StreamStatsInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "read StreamSendStats fail, stats is nullptr");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
     }
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "Pid can not get stream stats, pid=%{public}d, channelId=%{public}d, ret=%{public}d",
+            callingPid, channelId, ret);
+        return ret;
+    }
     int32_t retReply = StreamStats(channelId, channelType, stats);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "StreamStatsInner write reply fail");
@@ -1219,6 +1243,13 @@ int32_t SoftBusServerStub::RippleStatsInner(MessageParcel &data, MessageParcel &
     if (stats == nullptr) {
         COMM_LOGE(COMM_SVC, "read rippleStats fail, stats is nullptr");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "Pid can not get pipple stats, pid=%{public}d, channelId=%{public}d, ret=%{public}d",
+            callingPid, channelId, ret);
+        return ret;
     }
     int32_t retReply = RippleStats(channelId, channelType, stats);
     if (!reply.WriteInt32(retReply)) {
@@ -1488,6 +1519,38 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
     int32_t retReply = ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "ShiftLNNGearInner write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    if (strcmp(DM_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_SYNC_TRUSTED_RELATION);
+    const char *msg = data.ReadCString();
+    if (msg == nullptr) {
+        COMM_LOGE(COMM_SVC, "read msg failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    uint32_t msgLen = data.ReadUint32();
+    if (msgLen > MSG_MAX_SIZE || msgLen != strlen(msg)) {
+        COMM_LOGE(COMM_SVC, "msgLen invalid!, msgLen=%{public}u", msgLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t retReply = SyncTrustedRelationShip(pkgName, msg, msgLen);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;

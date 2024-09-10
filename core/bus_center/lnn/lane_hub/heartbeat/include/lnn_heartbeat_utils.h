@@ -51,6 +51,7 @@ extern "C" {
 #define HB_RESTART_LEN                        (3 * HB_TIME_FACTOR)
 #define HB_PERIOD_DUMP_LOCAL_INFO_LEN         (5 * 60 * HB_TIME_FACTOR)
 #define HB_SEND_RELAY_LEN_ONCE                (3 * HB_TIME_FACTOR)
+#define HB_SEND_DIRECT_LEN_ONCE               (5 * HB_TIME_FACTOR)
 #define HB_OFFLINE_PERIOD                     2
 
 #define HB_SEND_EACH_SEPARATELY_LEN (2 * HB_TIME_FACTOR) // Split and send a single heartbeat
@@ -102,6 +103,7 @@ typedef enum {
     STRATEGY_HB_SEND_ADJUSTABLE_PERIOD,
     STRATEGY_HB_RECV_SINGLE = 3,
     STRATEGY_HB_RECV_REMOVE_REPEAT,
+    STRATEGY_HB_SEND_DIRECT,
 } LnnHeartbeatStrategyType;
 
 typedef enum {
@@ -123,7 +125,12 @@ typedef struct {
     uint32_t switchLevel;
     int32_t preferChannel;
     uint8_t shortUuid[HB_SHORT_UUID_LEN];
+    uint8_t hbVersion;
 } HbRespData;
+
+typedef enum {
+    BIT_SUPPORT_DIRECT_TRIGGER = 0,
+} HeartbeatCapability;
 
 #define STATE_VERSION_INVALID (-1)
 #define ENABLE_COC_CAP        (1 << 0)
@@ -154,6 +161,7 @@ void LnnDumpLocalBasicInfo(void);
 void LnnDumpOnlineDeviceInfo(void);
 uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax);
 bool LnnIsMultiDeviceOnline(void);
+bool LnnIsSupportHeartbeatCap(uint32_t hbCapacity, HeartbeatCapability capaBit);
 
 #ifdef __cplusplus
 }

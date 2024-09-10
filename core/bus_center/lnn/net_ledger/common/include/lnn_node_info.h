@@ -110,6 +110,7 @@ typedef enum {
     BIT_SUPPORT_NORMALIZED_LINK = 1,
     BIT_SUPPORT_NEGOTIATION_AUTH = 2,
     BIT_SUPPORT_BR_DUP_BLE = 3,
+    BIT_SUPPORT_ADV_OFFLINE = 4,
 } AuthCapability;
 
 typedef struct {
@@ -141,6 +142,7 @@ typedef struct {
     ConnectStatus status;
     uint32_t netCapacity;
     uint32_t authCapacity;
+    uint32_t heartbeatCapacity;
     uint32_t discoveryType;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
@@ -251,6 +253,7 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log);
 int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
 const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log);
+int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn);
 #ifdef __cplusplus
 }
 #endif

@@ -609,18 +609,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
  */
 HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelWithStatisticsTest001, TestSize.Level0)
 {
-    int32_t channelId = 0;
+    int32_t channelId = -1;
+    int32_t channelType = 0;
     int32_t laneId = 0;
     const char *dataInfo = "dataInfo";
     uint32_t length = strlen(dataInfo);
 
-    int32_t ret = ServerIpcCloseChannelWithStatistics(-1,  laneId, (void *)dataInfo, length);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = ServerIpcCloseChannelWithStatistics(channelId,  -1, (void *)dataInfo, length);
-    EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
-
-    ret = ServerIpcCloseChannelWithStatistics(channelId,  laneId, (void *)dataInfo, length);
+    int32_t ret = ServerIpcCloseChannelWithStatistics(channelId, channelType, laneId, (void *)dataInfo, length);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

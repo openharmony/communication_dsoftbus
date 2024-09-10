@@ -21,6 +21,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "lnn_decision_db.h"
 #include "lnn_file_utils.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
@@ -97,26 +98,93 @@ int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t IrkAnonymizePrint(unsigned char *irk)
+{
+    if (irk == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char irkStr[LFINDER_IRK_STR_LEN] = {0};
+    if (ConvertBytesToHexString(irkStr, LFINDER_IRK_STR_LEN, irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGW(LNN_STATE, "convert irk to string fail");
+        return SOFTBUS_ERR;
+    }
+    char *anonyIrk = NULL;
+    Anonymize(irkStr, &anonyIrk);
+    LNN_LOGI(LNN_STATE, "get irk success:irk=%{public}s", AnonymizeWrapper(anonyIrk));
+    AnonymizeFree(anonyIrk);
+    return SOFTBUS_OK;
+}
+
+static int32_t EncryptSaveIrk(const char *filePath, unsigned char *irk, uint32_t len)
+{
+    if (EncryptStorageData(LNN_ENCRYPT_LEVEL_DE, (uint8_t *)irk, len) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "encrypt irk fail");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusWriteFile(filePath, (char *)irk, len) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "write encrypted irk to file failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetIrkFromOldFile(const char *irkFilePath, const char *encryptIrkFilePath,
+    unsigned char *irk, uint32_t len)
+{
+    unsigned char locaIrk[LFINDER_IRK_LEN] = {0};
+    if (SoftBusReadFullFile(irkFilePath, (char *)locaIrk, len) != SOFTBUS_OK) {
+        if (SoftBusGenerateRandomArray(locaIrk, len) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "generate deviceIrk id fail");
+            return SOFTBUS_ERR;
+        }
+    }
+    if (memcpy_s(irk, len, locaIrk, LFINDER_IRK_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "copy irk id fail");
+        (void)memset_s(locaIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+        return SOFTBUS_ERR;
+    }
+    if (IrkAnonymizePrint(irk) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "print anonymize irk failed");
+    }
+    if (EncryptSaveIrk(encryptIrkFilePath, locaIrk, len) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "save deviceIrk id fail");
+        return SOFTBUS_ERR;
+    }
+    if (IrkAnonymizePrint(locaIrk) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "print anonymize encrypted irk failed");
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t GetIrkFromFile(unsigned char *irk, uint32_t len)
 {
     int32_t rc;
     char irkFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
+    char encryptIrkFilePath[SOFTBUS_MAX_PATH_LEN] = {0};
 
+    rc = LnnGetFullStoragePath(LNN_FILE_ID_DEVICEIRK_KEY, encryptIrkFilePath, SOFTBUS_MAX_PATH_LEN);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get deviceIrk save path fail");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusReadFullFile(encryptIrkFilePath, (char *)irk, len) == SOFTBUS_OK) {
+        if (DecryptStorageData(LNN_ENCRYPT_LEVEL_DE, (uint8_t *)irk, len) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "decrypt deviceIrk fail");
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    LNN_LOGI(LNN_STATE, "device irk file not exist");
     rc = LnnGetFullStoragePath(LNN_FILE_ID_IRK_KEY, irkFilePath, SOFTBUS_MAX_PATH_LEN);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get irk save path fail");
         return SOFTBUS_ERR;
     }
-    if (SoftBusReadFullFile(irkFilePath, (char *)irk, len) != SOFTBUS_OK) {
-        if (SoftBusGenerateRandomArray(irk, len) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "generate irk id fail");
-            return SOFTBUS_ERR;
-        }
-        if (SoftBusWriteFile(irkFilePath, (char *)irk, len) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "write irk to file failed");
-            return SOFTBUS_ERR;
-        }
+    if (GetIrkFromOldFile(irkFilePath, encryptIrkFilePath, irk, len) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get old irk fail");
+        return SOFTBUS_ERR;
     }
+    SoftBusRemoveFile(irkFilePath);
     return SOFTBUS_OK;
 }
 

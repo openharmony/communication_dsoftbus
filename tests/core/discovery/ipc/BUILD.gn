@@ -36,6 +36,7 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",

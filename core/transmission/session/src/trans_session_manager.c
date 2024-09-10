@@ -25,6 +25,7 @@
 #include "softbus_utils.h"
 #include "softbus_hidumper_trans.h"
 #include "trans_channel_callback.h"
+#include "trans_client_proxy.h"
 #include "trans_log.h"
 
 #define MAX_SESSION_SERVER_NUM 100
@@ -125,13 +126,8 @@ static void ShowSessionServer(void)
 
 int32_t TransSessionServerAddItem(SessionServer *newNode)
 {
-    if (newNode == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_sessionServerList == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "not init");
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionServerList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "not init");
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return SOFTBUS_LOCK_ERR;
@@ -150,24 +146,32 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         if (strcmp(pos->sessionName, newNode->sessionName) == 0) {
             Anonymize(newNode->sessionName, &tmpName);
             if ((pos->uid == newNode->uid) && (pos->pid == newNode->pid)) {
-                TRANS_LOGI(TRANS_CTRL, "session server is exist, sessionName=%{public}s",
-                    tmpName);
+                TRANS_LOGI(TRANS_CTRL, "session server is exist, sessionName=%{public}s", AnonymizeWrapper(tmpName));
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_REPEATED;
-            } else {
+            }
+            if (CheckServiceIsRegistered(pos->pkgName, pos->pid) == SOFTBUS_OK) {
                 TRANS_LOGI(TRANS_CTRL,
-                    "sessionName has been used by other processes. sessionName=%{public}s", tmpName);
+                    "sessionName=%{public}s has been used by other processes, old Pid=%{public}d, new pid=%{public}d",
+                    AnonymizeWrapper(tmpName), pos->pid, newNode->pid);
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_USED;
             }
+            pos->pid = newNode->pid;
+            TRANS_LOGI(TRANS_CTRL, "sessionName=%{public}s is exist. old pid=%{public}d, new pid=%{public}d",
+                AnonymizeWrapper(tmpName), pos->pid, newNode->pid);
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            AnonymizeFree(tmpName);
+            SoftBusFree(newNode);
+            return SOFTBUS_OK;
         }
     }
 
     Anonymize(newNode->sessionName, &tmpName);
     ListAdd(&(g_sessionServerList->list), &(newNode->node));
-    TRANS_LOGI(TRANS_CTRL, "add sessionName = %{public}s", tmpName);
+    TRANS_LOGI(TRANS_CTRL, "add sessionName=%{public}s", AnonymizeWrapper(tmpName));
     g_sessionServerList->cnt++;
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     AnonymizeFree(tmpName);

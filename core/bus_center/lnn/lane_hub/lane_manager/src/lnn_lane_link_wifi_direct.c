@@ -195,6 +195,12 @@ static void FreeResourceForForceDisconnect(ForceDownInfo *forceDownInfo)
         if (forceDownInfo->forceDownLink == LANE_HML) {
             RemoveDelayDestroyMessage(resourceItem.laneId);
         }
+        DelLogicAndLaneRelationship(resourceItem.laneId);
+        ClearLaneResourceByLaneId(resourceItem.laneId);
+    }
+    if (forceDownInfo->forceDownLink == LANE_HML &&
+        FindLaneResourceByLinkType(peerUdid, LANE_HML_RAW, &resourceItem) == SOFTBUS_OK) {
+        DelLogicAndLaneRelationship(resourceItem.laneId);
         ClearLaneResourceByLaneId(resourceItem.laneId);
     }
 }

@@ -959,6 +959,7 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
         return;
     }
+    deviceInfo->netCapacity = info->netCapacity;
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return;
@@ -1669,6 +1670,7 @@ int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int32_t fd)
         SOFTBUS_DPRINTF(fd, "\n[NO.%d]\n", i + 1);
         SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
     }
+    SoftBusFree(remoteNodeInfo);
     return SOFTBUS_OK;
 }
 

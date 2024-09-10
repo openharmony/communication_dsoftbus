@@ -54,7 +54,7 @@ ohos_fuzztest("AuthManagerFuzzTest") {
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
-    "googletest:gtest_main",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "init:libbegetutil",

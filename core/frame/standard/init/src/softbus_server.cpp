@@ -168,10 +168,10 @@ int32_t SoftBusServer::CloseChannel(const char *sessionName, int32_t channelId, 
     return TransCloseChannel(sessionName, channelId, channelType);
 }
 
-int32_t SoftBusServer::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-    uint32_t len)
+int32_t SoftBusServer::CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
-    return TransCloseChannelWithStatistics(channelId, laneId, dataInfo, len);
+    return TransCloseChannelWithStatistics(channelId, channelType, laneId, dataInfo, len);
 }
 
 int32_t SoftBusServer::SendMessage(int32_t channelId, int32_t channelType, const void *data,
@@ -299,6 +299,11 @@ int32_t SoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, c
     const GearMode *mode)
 {
     return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+}
+
+int32_t SoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    return LnnIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
 int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)

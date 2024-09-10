@@ -90,7 +90,7 @@ private:
     std::map<uint32_t, bool> reNegotiateFlagMap_;
     std::map<uint32_t, std::shared_ptr<DurationStatisticCalculator>> calculators_;
 
-    std::shared_mutex mutex_;
+    std::recursive_mutex mutex_;
 };
 
 } // namespace OHOS::SoftBus

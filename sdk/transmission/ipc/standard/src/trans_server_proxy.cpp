@@ -198,22 +198,23 @@ int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_
     return proxy->CloseChannel(sessionName, channelId, channelType);
 }
 
-int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
+    if (dataInfo == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     sptr<TransServerProxy> proxy = GetProxy();
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
 
-    if (channelId < 0) {
+    if (channelId < MIN_CHANNEL_ID) {
         TRANS_LOGE(TRANS_SDK, "invalid channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (laneId == 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid laneId!");
-        return SOFTBUS_INVALID_PARAM;
-    }
 
-    return proxy->CloseChannelWithStatistics(channelId, laneId, dataInfo, len);
+    return proxy->CloseChannelWithStatistics(channelId, channelType, laneId, dataInfo, len);
 }
 
 int32_t ServerIpcReleaseResources(int32_t channelId)

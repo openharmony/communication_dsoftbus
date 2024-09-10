@@ -39,6 +39,7 @@ public:
 
 private:
     static constexpr int DESTROY_GROUP_TIMEOUT_MS = 2000;
+
     P2pDestroyGroupState();
 
     std::shared_ptr<P2pOperation> operation_;

@@ -440,5 +440,10 @@ void AddNetworkResource(NetworkResource *networkResource)
 {
     return GetLaneDepsInterface()->AddNetworkResource(networkResource);
 }
+
+int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout)
+{
+    return GetLaneDepsInterface()->LnnRequestCheckOnlineStatus(networkId, timeout);
+}
 }
 } // namespace OHOS

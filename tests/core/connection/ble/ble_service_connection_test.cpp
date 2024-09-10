@@ -285,6 +285,12 @@ HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
     SoftBusMutexInit(&connection.lock, nullptr);
     ret = ConnGattClientUpdatePriority(&connection, priority);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    connection.state = BLE_CONNECTION_STATE_CONNECTED;
+    for (int32_t i = 0; i <= 3; i++) {
+        ret = ConnGattClientUpdatePriority(&connection, (ConnectBlePriority)i);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
 }
 
 /*

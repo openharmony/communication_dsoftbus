@@ -13,31 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef WIFI_DIRECET_STATISTIC_H
-#define WIFI_DIRECET_STATISTIC_H
+#ifndef DISC_SDK_TEST_BT_STATUS_H
+#define DISC_SDK_TEST_BT_STATUS_H
 
-#include "stdint.h"
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-enum StatisticLinkType {
-    STATISTIC_P2P = 0,
-    STATISTIC_HML = 1,
-    STATISTIC_TRIGGER_HML = 2,
-    STATISTIC_LINK_TYPE_NUM = 3,
-};
+bool SoftbusTestGetBtStatus(void);
 
-enum StatisticBootLinkType {
-    STATISTIC_NONE = 0,
-    STATISTIC_WLAN = 1,
-    STATISTIC_BLE = 2,
-    STATISTIC_BR = 3,
-    STATISTIC_RENEGOTIATE = 4,
-    STATISTIC_BOOT_LINK_TYPE_NUM = 5,
-};
 #ifdef __cplusplus
 }
-#endif
-
-#endif
+#endif // __cplusplus
+#endif // DISC_SDK_TEST_BT_STATUS_H

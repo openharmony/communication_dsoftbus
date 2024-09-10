@@ -556,7 +556,7 @@ HWTEST_F(TransChannelManagerTest, TransReleaseUdpResources001, TestSize.Level1)
 HWTEST_F(TransChannelManagerTest, TransCloseChannelWithStatistics001, TestSize.Level1)
 {
     const char *data = "test";
-    int32_t ret = TransCloseChannelWithStatistics(1, 1, static_cast<const void *>(data), strlen(data));
+    int32_t ret = TransCloseChannelWithStatistics(1, 1, 1, static_cast<const void *>(data), strlen(data));
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

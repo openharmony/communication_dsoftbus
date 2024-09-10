@@ -37,8 +37,8 @@ public:
     virtual int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) = 0;
     virtual int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) = 0;
     virtual int32_t CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType) = 0;
-    virtual int32_t CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-        uint32_t len) = 0;
+    virtual int32_t CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+        const void *dataInfo, uint32_t len) = 0;
     virtual int32_t ReleaseResources(int32_t channelId) = 0;
     virtual int32_t SendMessage(int32_t channelId, int32_t channelType,
         const void *data, uint32_t len, int32_t msgType) = 0;
@@ -69,6 +69,7 @@ public:
     virtual int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum);
     virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode);
+    virtual int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
     virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
     virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);
     virtual int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,

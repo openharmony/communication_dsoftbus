@@ -27,7 +27,6 @@
         "ActiveMetaNode";
         "GetLocalNodeDeviceInfo";
         "TransOnUdpChannelQosEvent";
-        "ServerIpcPublishLNN";
         "ClientDeleteSession";
         "ClientTransUdpMgrDeinit";
         "ServerIpcNotifyAuthSuccess";
@@ -46,7 +45,6 @@
         "ClientTransAuthInit";
         "StartNStackXDFileServer";
         "BusCenterServerProxyInit";
-        "ServerIpcStopRefreshLNN";
         "TransGetUdpChannel";
         "ClientTransProxyDeinit";
         "JoinMetaNode";
@@ -55,13 +53,11 @@
         "FrameIndexToType";
         "ServerIpcStopTimeSync";
         "GetMySessionNameInner";
-        "RefreshLNNInner";
         "LnnOnLeaveResult";
         "GetSessionSide";
         "TransOnChannelClosed";
         "TransProxyChannelSendBytes";
         "TransGetUdpChannelByFileId";
-        "StopRefreshLNNInner";
         "ReadMaxSendBytesSize";
         "TransDisableSessionListener";
         "ServerIpcCreateSessionServer";
@@ -88,6 +84,7 @@
         "ClientTransAuthOnChannelOpened";
         "LeaveLNNInner";
         "ShiftLNNGear";
+        "SyncTrustedRelationShip";
         "ClientGetSessionKey";
         "ClientQosReport";
         "ClientTransAuthCloseChannel";
@@ -138,7 +135,6 @@
         "ServerIpcGetLocalDeviceInfo";
         "ClientAddAuthSession";
         "TransTdcGetInfoByIdWithIncSeq";
-        "PublishLNNInner";
         "ServerIpcSetNodeDataChangeFlag";
         "ServerIpcRegDataLevelChangeCb";
         "ServerIpcUnregDataLevelChangeCb";
@@ -148,14 +144,12 @@
         "ClientTransProxyOnChannelOpenFailed";
         "BusCenterServerProxyDeInit";
         "LnnOnRefreshLNNResult";
-        "StopPublishLNNInner";
         "UnregNodeDeviceStateCbInner";
         "TransProxyChannelSendFile";
         "ClientTransChannelSendFile";
         "ClientEnableSessionByChannelId";
         "ClientGetFileConfigInfoById";
         "CheckDestFilePathValid";
-        "ServerIpcStopPublishLNN";
         "RegisterFileCb";
         "InnerOnBytesReceived";
         "RemoveSessionServer";
@@ -183,8 +177,9 @@
         "TransUdpChannelSendStream";
         "ServerIpcDeactiveMetaNode";
         "LnnOnNodeBasicInfoChanged";
+        "LnnOnNodeStatusChanged";
         "LnnOnLocalNetworkIdChanged";
-        "LnnOnNodeDeviceNotTrusted";
+        "LnnOnNodeDeviceTrustedChange";
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
         "ReadSessionLinkType";
@@ -285,7 +280,6 @@
         "SendBytesInner";
         "GetPeerSessionNameInner";
         "TransTdcManagerDeinit";
-        "ServerIpcRefreshLNN";
         "DeletePendingPacket";
         "ClientDisableSessionListener";
         "GetSessionOption";
@@ -404,8 +398,6 @@
         "DfsBind";
         "ClientAddPolicyReportCallback";
         "ClientDeletePolicyReportCallback";
-        "ServerEnableDiscoveryPolicy";
-        "ServerSetDiscoveryPolicy";
         "ClientResetIdleTimeoutById";
         "IsSessionExceedLimit";
         "DiscRecoveryPublish";
@@ -512,6 +504,7 @@
         "RegisterFileSchema";
         "UnRegisterFileSchema";
         "SoftBusDFileSetSessionOpt";
+        "CtrlLNNBleHb";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
@@ -562,6 +555,7 @@
             "non-virtual thunk to OHOS::SoftBusClientStub::OnLeaveLNNResult(char const*, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnLeaveMetaNodeResult(char const*, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnNodeBasicInfoChanged(void *, unsigned int, int)";
+            "non-virtual thunk to OHOS::SoftBusClientStub::OnNodeStatusChanged(void *, uint32_t, uint32_t)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnNodeOnlineStateChanged(bool, void *, unsigned int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnPublishLNNResult(int, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnRefreshDeviceFound(void const*, unsigned int)";
