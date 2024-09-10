@@ -1318,7 +1318,7 @@ static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get p2p link param fail");
         TransProxyPipelineCloseChannel(channelId);
-        NotifyLinkFail(ASYNC_RESULT_CHANNEL, channelRequestId, ret);
+        NotifyLinkFail(ASYNC_RESULT_CHANNEL, (uint32_t)channelRequestId, ret);
         return;
     }
 
@@ -1331,7 +1331,7 @@ static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
     ret = GetWifiDirectManager()->connectDevice(&info, &callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "connect p2p device fail");
-        NotifyLinkFail(ASYNC_RESULT_CHANNEL, channelRequestId, ret);
+        NotifyLinkFail(ASYNC_RESULT_CHANNEL, (uint32_t)channelRequestId, ret);
     }
 }
 
@@ -1883,22 +1883,6 @@ static bool IsSupportProxyNego(const char *networkId)
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0);
 }
 
-static bool CheckHasBleConnection(void)
-{
-    uint32_t local;
-    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &local);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d", ret);
-        return false;
-    }
-    if (!(local & (1 << BIT_BLE))) {
-        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}u", local);
-        return false;
-    }
-    LNN_LOGI(LNN_LANE, "ble link ok, local=%{public}u", local);
-    return true;
-}
-
 static int32_t UpdateP2pReuseInfoByReqId(AsyncResultType type, uint32_t requestId)
 {
     if (LinkLock() != 0) {
@@ -2031,9 +2015,7 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
         if (IsHasAuthConnInfo(request->peerNetworkId)) {
             guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
         }
-        if (CheckHasBleConnection()) {
-            guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
-        }
+        guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
     } else {
         if (IsHasAuthConnInfo(request->peerNetworkId)) {
             guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_NEGO;
@@ -2122,7 +2104,7 @@ static int32_t SelectGuideChannel(const LinkRequest *request, uint32_t laneReqId
     uint32_t guideChannelNum = 0;
     if (GetGuideChannelInfo(request, guideChannelList, &guideChannelNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add guideChannelList fail, LinkType=%{public}d", request->linkType);
-        return SOFTBUS_LANE_GUIDE_NO_AVAILABLE_LINK;
+        return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     }
     for (uint32_t i = 0; i < guideChannelNum; i++) {
         LNN_LOGI(LNN_LANE, "add guideChannelType=%{public}d", guideChannelList[i]);
