@@ -320,4 +320,20 @@ HWTEST_F(AnonymizerTest, AnonymizeTest013, TestSize.Level0)
     EXPECT_STREQ("12*****890", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
+
+/**
+ * @tc.name: AnonymizeTest014
+ * @tc.desc: Test anonymize invalid utf-8 str
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizerTest, AnonymizeTest014, TestSize.Level0)
+{
+    char *anonymizedStr = nullptr;
+    const char *invalidUTF8Str = "invalid \xC0";
+
+    Anonymize(invalidUTF8Str, &anonymizedStr);
+    EXPECT_STREQ(invalidUTF8Str, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+}
 } // namespace OHOS
