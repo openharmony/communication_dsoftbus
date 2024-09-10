@@ -64,6 +64,7 @@ struct WifiDirectManager {
     int32_t (*getLocalAndRemoteMacByLocalIp)(const char *localIp, char *localMac, size_t localMacSize, char *remoteMac,
         size_t remoteMacSize);
 
+    bool (*supportHmlTwo)(void);
     bool (*isWifiP2pEnabled)(void);
     int (*getStationFrequency)(void);
     bool (*isHmlConnected)(void);
