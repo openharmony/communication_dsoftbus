@@ -104,11 +104,11 @@ NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *ses
     destroyNode->channelId = sessionNode->channelId;
     destroyNode->channelType = sessionNode->channelType;
     destroyNode->isAsync = sessionNode->isAsync;
-    if (memcpy_s(&(destroyNode->lifecycle), sizeof(SocketLifecycleData), &(sessionNode->lifecycle),
-            sizeof(SocketLifecycleData)) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy_s lifecycle fail.");
-        SoftBusFree(destroyNode);
-        return NULL;
+    if (!sessionNode->lifecycle.condIsWaiting) {
+        (void)SoftBusCondDestroy(&(sessionNode->lifecycle.callbackCond));
+    } else {
+        (void)SoftBusCondSignal(&(sessionNode->lifecycle.callbackCond)); // destroy in CheckSessionEnableStatus
+        TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d condition is waiting", sessionNode->sessionId);
     }
     if (memcpy_s(destroyNode->sessionName, SESSION_NAME_SIZE_MAX, server->sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy_s sessionName fail.");
@@ -143,9 +143,6 @@ NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, Shutdo
         int32_t id = destroyNode->sessionId;
         (void)ClientDeleteRecvFileList(id);
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
-        if ((!destroyNode->isAsync) && destroyNode->lifecycle.sessionState == SESSION_STATE_CANCELLING) {
-            (void)SoftBusCondSignal(&(destroyNode->lifecycle.callbackCond));
-        }
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
         } else if (destroyNode->OnShutdown != NULL) {
@@ -477,6 +474,7 @@ static void ClientInitSession(SessionInfo *session, const SessionParam *param)
     session->isEncrypt = true;
     session->isAsync = false;
     session->lifecycle.sessionState = SESSION_STATE_INIT;
+    session->lifecycle.condIsWaiting = false;
     session->actionId = param->actionId;
 }
 

@@ -1873,9 +1873,11 @@ static bool BleCheckActiveConnection(const ConnectOption *option, bool needOccup
         CONN_LOGE(CONN_BLE, "convert bytes to array failed");
         return false;
     }
+    char anomizeUdid[UDID_BUF_LEN] = { 0 };
+    ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, hashStr);
     ConnBleConnection *connection = ConnBleGetConnectionByUdid(NULL, hashStr, option->bleOption.protocol);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        connection != NULL, false, CONN_BLE, "ble check action connection: connection is not exist");
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, false, CONN_BLE,
+        "connection not exist, udid=%{public}s, protocol=%{public}d", anomizeUdid, option->bleOption.protocol);
     bool isActive = (connection->state == BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO);
     if (isActive && needOccupy) {
         ConnBleRefreshIdleTimeout(connection);

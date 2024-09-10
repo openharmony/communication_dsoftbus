@@ -45,6 +45,7 @@ public:
     virtual WifiErrorCode GetP2pEnableStatus(P2pState* state) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info) = 0;
+    virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
     virtual int32_t LnnSyncP2pInfo() = 0;
     virtual uint64_t LnnGetFeatureCapabilty() = 0;
@@ -53,6 +54,7 @@ public:
     virtual int32_t LnnGetRemoteStrInfo(const std::string &networkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetNetworkIdByUuid(const std::string &uuid, char *buf, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteBoolInfoIgnoreOnline(const std::string &networkId, InfoKey key, bool *info) = 0;
+    virtual int32_t LnnGetRemoteNumU64Info(const std::string &networkId, InfoKey key, uint64_t *info) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId) = 0;
@@ -135,6 +137,8 @@ public:
         (override));
     MOCK_METHOD(int32_t, LnnGetNetworkIdByUuid, (const std::string &, char *, uint32_t), (override));
     MOCK_METHOD(int32_t, LnnGetRemoteBoolInfoIgnoreOnline, (const std::string &, InfoKey, bool *), (override));
+    MOCK_METHOD(
+        int32_t, LnnGetRemoteNumU64Info, (const std::string &networkId, InfoKey key, uint64_t *info), (override));
     MOCK_METHOD(bool, LnnGetOnlineStateById, (const char *, IdCategory), (override));
     MOCK_METHOD(void, AuthCloseConn, (AuthHandle), (override));
     MOCK_METHOD(void, AuthStopListeningForWifiDirect, (AuthLinkType, ListenerModule), (override));
@@ -156,6 +160,7 @@ public:
 
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
     MOCK_METHOD2(LnnSetLocalNumInfo, int32_t (InfoKey, int32_t));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
     MOCK_METHOD(int32_t, LnnSyncP2pInfo, (), (override));
     MOCK_METHOD(uint64_t, LnnGetFeatureCapabilty, (), (override));
     MOCK_METHOD(bool, IsFeatureSupport, (uint64_t, FeatureCapability), (override));

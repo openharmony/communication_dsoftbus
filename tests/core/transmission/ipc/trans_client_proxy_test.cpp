@@ -458,4 +458,19 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Leve
     ret = ClientIpcOnTransLimitChange(g_pkgName, TEST_PID, TEST_CHANNELID, tos);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: CheckServiceIsRegisteredTest001
+ * @tc.desc: CheckServiceIsRegistered test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level0)
+{
+    int32_t ret = CheckServiceIsRegistered(nullptr, TEST_PID);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = CheckServiceIsRegistered(g_pkgName, TEST_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+}
 } // namespace OHOS

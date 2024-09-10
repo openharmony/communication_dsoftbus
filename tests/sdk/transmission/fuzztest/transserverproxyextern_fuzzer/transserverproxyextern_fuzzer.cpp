@@ -154,9 +154,10 @@ void ServerIpcCloseChannelWithStatisticsTest(const uint8_t *data, size_t size)
     }
 
     int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
+    int32_t channelType = *(reinterpret_cast<const int32_t *>(data));
     uint64_t laneId = *(reinterpret_cast<const uint64_t *>(data));
 
-    (void)ServerIpcCloseChannelWithStatistics(channelId, laneId, data, size);
+    (void)ServerIpcCloseChannelWithStatistics(channelId, channelType, laneId, data, size);
 }
 
 void ServerIpcReleaseResourcesTest(const uint8_t *data, size_t size)

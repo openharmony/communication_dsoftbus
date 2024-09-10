@@ -172,7 +172,7 @@ HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
 
     // invalid status
     MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, -1);
-    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_ERR);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_COMM_BLUETOOTH_SWITCH_STATE_ERR);
     EXPECT_TRUE(btStateResult);
 
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
@@ -217,7 +217,7 @@ HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
 
     // invalid GapAclState
     MockBluetooth::btGapCallback->aclStateChangedCallbak(&bdAddr, (GapAclState)-1, 0);
-    aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ERR);
+    aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_COMM_BLUETOOTH_ACL_SWITCH_STATE_ERR);
     EXPECT_TRUE(aclStateResult);
 
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);

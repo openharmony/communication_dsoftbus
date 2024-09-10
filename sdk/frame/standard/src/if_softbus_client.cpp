@@ -100,14 +100,28 @@ int32_t ISoftBusClient::OnNodeBasicInfoChanged(const char *pkgName, void *info, 
     return SOFTBUS_OK;
 }
 
+int32_t ISoftBusClient::OnNodeStatusChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type)
+{
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
+    (void)type;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
 int32_t ISoftBusClient::OnLocalNetworkIdChanged(const char *pkgName)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
 
-int32_t ISoftBusClient::OnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+int32_t ISoftBusClient::OnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg, uint32_t msgLen)
 {
+    (void)pkgName;
+    (void)type;
+    (void)msg;
+    (void)msgLen;
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }

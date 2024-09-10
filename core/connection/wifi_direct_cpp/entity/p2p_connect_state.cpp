@@ -34,7 +34,7 @@ P2pConnectState *P2pConnectState::Instance()
     return &instance;
 }
 
-P2pConnectState::P2pConnectState() : timer_("P2pConnect") { }
+P2pConnectState::P2pConnectState() : timer_("P2pConnect", TIMER_TIMEOUT) { }
 
 void P2pConnectState::Enter(const std::shared_ptr<P2pOperation> &operation)
 {
@@ -55,8 +55,7 @@ void P2pConnectState::Enter(const std::shared_ptr<P2pOperation> &operation)
 
 void P2pConnectState::Exit()
 {
-    timer_.Shutdown(false);
-    operation_ = nullptr;
+    timer_.Shutdown();
 }
 
 int P2pConnectState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation)
@@ -111,7 +110,7 @@ std::string P2pConnectState::CalculateGcIp(const std::string &goIpAddr)
     int gcIpSuffix = 0;
     int count = 0;
     do {
-        gcIpSuffix = SoftBusCryptoRand() % IP_SUFFIX_RANGE + GC_IP_SUFFIX_START;
+        gcIpSuffix = static_cast<int>(SoftBusCryptoRand() % IP_SUFFIX_RANGE + GC_IP_SUFFIX_START);
         count++;
     } while (gcIpSuffix == goIpSuffix && count < MAX_CALCULATE_GC_IP_COUNT);
     CONN_CHECK_AND_RETURN_RET_LOGE(gcIpSuffix != goIpSuffix, "", CONN_WIFI_DIRECT, "goIp is equal to gcIp");
@@ -158,11 +157,11 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
         result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
         CONN_LOGE(CONN_WIFI_DIRECT, "connect call event failed, error=%d", result.errorCode_);
     } else {
-        auto connectOp = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
         result.errorCode_ = SOFTBUS_OK;
     }
-    operation_->promise_.set_value(result);
     ChangeState(P2pAvailableState::Instance(), nullptr);
+    operation_->promise_.set_value(result);
+    operation_ = nullptr;
 }
 
 void P2pConnectState::OnTimeout()
@@ -172,7 +171,8 @@ void P2pConnectState::OnTimeout()
         CONN_LOGE(CONN_WIFI_DIRECT, "operation is nullptr");
         return;
     }
-    operation_->promise_.set_value(P2pOperationResult(static_cast<int>(SOFTBUS_TIMOUT)));
     ChangeState(P2pAvailableState::Instance(), nullptr);
+    operation_->promise_.set_value(P2pOperationResult(static_cast<int>(SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT)));
+    operation_ = nullptr;
 }
 } // namespace OHOS::SoftBus

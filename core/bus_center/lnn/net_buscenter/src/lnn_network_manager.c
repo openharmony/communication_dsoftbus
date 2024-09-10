@@ -294,9 +294,13 @@ static void NetOOBEStateEventHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_RUNNING");
             break;
         case SOFTBUS_OOBE_END:
-            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_END");
-            g_isOOBEEnd = true;
-            RestartCoapDiscovery();
+            __attribute__((fallthrough));
+        case SOFTBUS_FACK_OOBE_END:
+            LNN_LOGI(LNN_BUILDER, "wifi handle oobe state=%{public}d", state);
+            if (!g_isOOBEEnd) {
+                g_isOOBEEnd = true;
+                RestartCoapDiscovery();
+            }
             break;
         default:
             return;

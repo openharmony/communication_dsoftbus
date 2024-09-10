@@ -607,7 +607,7 @@ static int32_t OnStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *par
     LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_AS_MASTER_NODE, NULL);
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
         /* Send once ble v0 heartbeat to recovery ble network. */
-        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
     }
     return SOFTBUS_OK;
 }
@@ -622,7 +622,7 @@ static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *p
         return SOFTBUS_ERR;
     }
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
-        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
     }
     return SOFTBUS_OK;
 }
@@ -808,7 +808,7 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
     return SOFTBUS_OK;
 }
 
-static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnHeartbeatType hbType)
+static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnHeartbeatType hbType, uint64_t delayTime)
 {
     GearMode mode;
     (void)memset_s(&mode, sizeof(GearMode), 0, sizeof(GearMode));
@@ -816,7 +816,7 @@ static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnH
 
     switch (hbType) {
         case HEARTBEAT_TYPE_BLE_V0:
-            if ((nowTime - oldTimeStamp) <= HB_CHECK_OFFLINE_TOLERANCE_LEN) {
+            if ((nowTime - oldTimeStamp) <= delayTime) {
                 return false;
             }
             break;
@@ -868,7 +868,7 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     }
     SoftBusGetTime(&times);
     nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
-    if (!IsTimestampExceedLimit(nowTime, oldTimeStamp, hbType)) {
+    if (!IsTimestampExceedLimit(nowTime, oldTimeStamp, hbType, msgPara->checkDelay)) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "check dev status receive heartbeat in time, networkId=%{public}s, "
             "nowTime=%{public}" PRIu64 ", oldTimeStamp=%{public}" PRIu64, anonyNetworkId, nowTime, oldTimeStamp);
@@ -1170,6 +1170,11 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     custData->isNeedRestart = msgPara->isNeedRestart;
     custData->hasScanRsp = msgPara->hasScanRsp;
     custData->isFirstBegin = msgPara->isFirstBegin;
+    custData->isDirectBoardcast = msgPara->isDirectBoardcast;
+    if (strcpy_s(custData->networkId, NETWORK_ID_BUF_LEN, msgPara->networkId) != EOK) {
+        LNN_LOGE(LNN_HEART_BEAT, "cpy networkId fail");
+        return SOFTBUS_MEM_ERR;
+    }
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN, (void *)custData, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post send begin msg to hbFsm fail");
         SoftBusFree(custData);
@@ -1268,8 +1273,8 @@ int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnHeartbe
     return SOFTBUS_OK;
 }
 
-int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
-    const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis)
+int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para,
+    uint64_t delayMillis)
 {
     LnnCheckDevStatusMsgPara *dupPara = NULL;
 
@@ -1290,6 +1295,7 @@ int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
         SoftBusFree(dupPara);
         return SOFTBUS_MEM_ERR;
     }
+    dupPara->checkDelay = delayMillis;
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_CHECK_DEV_STATUS, (void *)dupPara, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post check dev status msg to hbFsm fail");
         SoftBusFree(dupPara);

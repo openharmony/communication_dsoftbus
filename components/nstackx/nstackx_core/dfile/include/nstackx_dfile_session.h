@@ -151,6 +151,7 @@ struct DFileSession {
     int32_t allTaskCount;
     pthread_mutex_t backPressLock;
     uint32_t stopSendCnt[NSTACKX_MAX_CLIENT_SEND_THREAD_NUM];
+    uint32_t cipherCapability;
 };
 
 PeerInfo *CreatePeerInfo(DFileSession *session, const struct sockaddr_in *peerAddr,
@@ -238,7 +239,8 @@ static inline bool CapsRecvFeedback(const struct DFileSession *session)
 
 static inline bool CapsChaCha(const struct DFileSession *session)
 {
-    return (session->fileManager->keyLen == CHACHA20_KEY_LENGTH) && (session->capability & NSTACKX_CAPS_CHACHA);
+    return (session->fileManager->keyLen == CHACHA20_KEY_LENGTH) &&
+        (session->cipherCapability & NSTACKX_CIPHER_CHACHA);
 }
 
 void NSTACKX_DFileAssembleFunc(void *softObj, const DFileEvent *info);

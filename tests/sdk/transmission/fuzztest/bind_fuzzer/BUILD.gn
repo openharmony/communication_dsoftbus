@@ -30,9 +30,7 @@ ohos_fuzztest("BindFuzzTest") {
     "-fstack-protector-strong",
   ]
   sources = [ "bind_fuzzer.cpp" ]
-  deps = [
-    "../../../frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static",
-  ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",

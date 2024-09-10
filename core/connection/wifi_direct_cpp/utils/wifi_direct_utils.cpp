@@ -180,6 +180,15 @@ std::string WifiDirectUtils::GetLocalUuid()
     return uuid;
 }
 
+int32_t WifiDirectUtils::GetLocalConnSubFeature(uint64_t &feature)
+{
+    uint64_t connSubFeature = 0;
+    auto ret = LnnGetLocalNumU64Info(NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get connSubFeature failed");
+    feature = connSubFeature;
+    return SOFTBUS_OK;
+}
+
 static constexpr int PTK_128BIT_LEN = 16;
 std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetworkId)
 {
@@ -605,4 +614,13 @@ int32_t WifiDirectUtils::GetDeviceType()
     return deviceTypeId;
 }
 
+int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature)
+{
+    uint64_t connSubFeature = 0;
+    auto ret = LnnGetRemoteNumU64Info(remoteNetworkId.c_str(), NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT,
+        "remoteNetworkId=%{public}s, get connSubFeature failed", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
+    feature = connSubFeature;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS::SoftBus

@@ -137,10 +137,11 @@ int32_t BusCenterServerProxy::CloseChannel(const char *sessionName, int32_t chan
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-    uint32_t len)
+int32_t BusCenterServerProxy::CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
     (void)channelId;
+    (void)channelType;
     (void)laneId;
     (void)dataInfo;
     (void)len;
@@ -1017,6 +1018,50 @@ int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *call
     if (!reply.ReadInt32(serverRet)) {
         LNN_LOGE(LNN_EVENT, "read serverRet failed");
         return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    if (pkgName == nullptr || msg == nullptr || msgLen == 0) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkg name failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteCString(msg)) {
+        LNN_LOGE(LNN_EVENT, "write msg failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteUint32(msgLen)) {
+        LNN_LOGE(LNN_EVENT, "write msg length failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_SYNC_TRUSTED_RELATION, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
     return serverRet;
 }

@@ -22,6 +22,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "auth_common.h"
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
@@ -46,8 +47,8 @@
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
-#define DEFAULT_SUPPORT_AUTHCAPACITY 0xF
-#define DEFAULT_CONN_SUB_FEATURE 1
+#define DEFAULT_SUPPORT_HBCAPACITY 0x1
+#define DEFAULT_CONN_SUB_FEATURE 3
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
@@ -664,6 +665,16 @@ static int32_t LlGetFeatureCapa(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((uint64_t *)buf) = info->feature;
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetConnSubFeatureCapa(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(uint64_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    *((uint64_t *)buf) = info->connSubFeature;
     return SOFTBUS_OK;
 }
 
@@ -1299,6 +1310,15 @@ static int32_t UpdateLocalFeatureCapability(const void *capability)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateLocalConnSubFeatureCapability(const void *capability)
+{
+    if (capability == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.connSubFeature |= *(uint64_t *)capability;
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateMasgerNodeWeight(const void *weight)
 {
     if (weight == NULL) {
@@ -1802,6 +1822,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DATA_SWITCH_LENGTH, sizeof(uint16_t), L1GetDataSwitchLength, UpdateDataSwitchLength},
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
+    {NUM_KEY_CONN_SUB_FEATURE_CAPA, -1, L1GetConnSubFeatureCapa, UpdateLocalConnSubFeatureCapability},
     {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
     {NUM_KEY_DEVICE_SECURITY_LEVEL, sizeof(int32_t), LlGetDeviceSecurityLevel, LlUpdateDeviceSecurityLevel},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
@@ -2210,8 +2231,9 @@ int32_t LnnInitLocalLedger(void)
     }
     nodeInfo->groupType = ALL_GROUP_TYPE;
     nodeInfo->discoveryType = 0;
+    nodeInfo->heartbeatCapacity = DEFAULT_SUPPORT_HBCAPACITY;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
-    nodeInfo->authCapacity = DEFAULT_SUPPORT_AUTHCAPACITY;
+    nodeInfo->authCapacity = GetAuthCapacity();
     nodeInfo->feature = LnnGetFeatureCapabilty();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
     if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {
@@ -2274,4 +2296,15 @@ bool LnnIsMasterNode(void)
     ret = strncmp(masterUdid, deviceUdid, strlen(deviceUdid)) == 0;
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return ret;
+}
+
+int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LnnSetScreenStatus(&g_localNetLedger.localInfo, isScreenOn);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
 }

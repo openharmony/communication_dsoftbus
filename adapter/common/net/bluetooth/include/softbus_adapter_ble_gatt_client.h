@@ -34,11 +34,20 @@ typedef struct {
     uint8_t *data;
 } SoftBusGattcNotify;
 
+typedef enum {
+    SOFTBUS_GATT_WRITE_NO_RSP = 0x1,
+    SOFTBUS_GATT_WRITE_DEFAULT,
+    SOFTBUS_GATT_WRITE_PREPARE,
+    SOFTBUS_GATT_WRITE_SIGNED,
+    SOFTBUS_GATT_WRITE_TYPE_UNKNOWN,
+} SoftBusGattWriteType;
+
 typedef struct {
     SoftBusBtUuid serviceUuid;
     SoftBusBtUuid characterUuid;
     uint32_t valueLen;
     const uint8_t *value;
+    SoftBusGattWriteType writeType;
 } SoftBusGattcData;
 
 typedef struct {
