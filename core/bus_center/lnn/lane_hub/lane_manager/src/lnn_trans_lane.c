@@ -508,8 +508,6 @@ static int32_t LaneAllocInfoConvert(const LaneAllocInfoExt *allocInfoExt, LaneAl
 {
     allocInfo->type = allocInfoExt->type;
     allocInfo->transType = allocInfoExt->commInfo.transType;
-    allocInfo->extendInfo.isSupportIpv6 = allocInfoExt->commInfo.isSupportIpv6;
-    allocInfo->extendInfo.actionAddr = allocInfoExt->commInfo.actionAddr;
     if (strcpy_s(allocInfo->networkId, NETWORK_ID_BUF_LEN, allocInfoExt->commInfo.networkId) != EOK) {
         return SOFTBUS_STRCPY_ERR;
     }
@@ -632,8 +630,6 @@ static int32_t ProcessSpecifiedLink(uint32_t laneHandle, const LaneAllocInfo *al
     }
     info.type = allocInfo->type;
     info.commInfo.transType = allocInfo->transType;
-    info.commInfo.isSupportIpv6 = allocInfo->extendInfo.isSupportIpv6;
-    info.commInfo.actionAddr = allocInfo->extendInfo.actionAddr;
     if (strcpy_s(info.commInfo.networkId, NETWORK_ID_BUF_LEN, allocInfo->networkId) != EOK) {
         return SOFTBUS_STRCPY_ERR;
     }
