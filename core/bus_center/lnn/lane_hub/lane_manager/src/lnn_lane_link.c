@@ -56,6 +56,8 @@
 #define TYPE_BUF_LEN 2
 #define LANE_ID_BUF_LEN (UDID_BUF_LEN + UDID_BUF_LEN + TYPE_BUF_LEN)
 #define LANE_ID_HASH_LEN 32
+#define UDID_SHORT_HASH_HEXSTR_LEN_TMP 16
+#define UDID_SHORT_HASH_LEN_TMP 8
 
 static bool g_enabledLowPower = false;
 
@@ -866,6 +868,46 @@ int32_t QueryOtherLaneResource(const char *peerNetworkId, LaneLinkType type)
     }
     LaneUnlock();
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
+}
+
+bool IsSupportLaneLinkReuse(const char *udidHashStr, LaneLinkType type)
+{
+    if (udidHashStr == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return false;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        uint8_t currUdidHash[UDID_HASH_LEN] = {0};
+        if (SoftBusGenerateStrHash((const unsigned char*)item->link.peerUdid, strlen(item->link.peerUdid),
+            currUdidHash) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "generate udidHash fail");
+            continue;
+        }
+        char hashHexStr[UDID_SHORT_HASH_HEXSTR_LEN_TMP + 1] = {0};
+        if (ConvertBytesToHexString(hashHexStr, UDID_SHORT_HASH_HEXSTR_LEN_TMP + 1, currUdidHash,
+            UDID_SHORT_HASH_LEN_TMP) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "convert bytes to string fail");
+            continue;
+        }
+        if (item->link.type == type && strcmp(hashHexStr, udidHashStr) == 0) {
+            LaneUnlock();
+            LNN_LOGE(LNN_LANE, "fetch laneLink by udidHashStr");
+            return true;
+        }
+    }
+    LaneUnlock();
+    char *anonyUdidHashStr = NULL;
+    Anonymize(udidHashStr, &anonyUdidHashStr);
+    LNN_LOGE(LNN_LANE, "no found lane resource by udidHashStr=%{public}s, linkType=%{public}d",
+        anonyUdidHashStr, type);
+    AnonymizeFree(anonyUdidHashStr);
+    return false;
 }
 
 static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
