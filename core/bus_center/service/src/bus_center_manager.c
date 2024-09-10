@@ -267,11 +267,13 @@ void LnnDeinitLnnLooper(void)
 
 int32_t BusCenterServerInit(void)
 {
-    if (BusCenterServerInitFirstStep() != SOFTBUS_OK) {
-        return SOFTBUS_CENTER_SERVER_INIT_FAILED;
+    int32_t ret = BusCenterServerInitFirstStep();
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
-    if (BusCenterServerInitSecondStep() != SOFTBUS_OK) {
-        return SOFTBUS_CENTER_SERVER_INIT_FAILED;
+    ret = BusCenterServerInitSecondStep();
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     LNN_LOGI(LNN_INIT, "bus center server init ok");
     return SOFTBUS_OK;
