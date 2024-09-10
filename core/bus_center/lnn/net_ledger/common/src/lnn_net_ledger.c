@@ -639,6 +639,22 @@ static int32_t SoftbusDumpPrintDeviceLevel(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
+static int32_t SoftbusDumpPrintScreenStatus(int fd, NodeBasicInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    bool isScreenOn = false;
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, NODE_KEY_DEVICE_SCREEN_STATUS, (uint8_t *)&isScreenOn,
+        DATA_DEVICE_SCREEN_STATUS_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo isScreenOn failed");
+        return SOFTBUS_NOT_FIND;
+    }
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "isScreenOn", isScreenOn ? "on" : "off");
+    return SOFTBUS_OK;
+}
+
 static int32_t SoftbusDumpPrintIrk(int fd, NodeBasicInfo *nodeInfo)
 {
     if (nodeInfo == NULL) {
@@ -767,6 +783,9 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintDeviceLevel(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintDeviceLevel failed");
+    }
+    if (SoftbusDumpPrintScreenStatus(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintScreenStatus failed");
     }
 }
 

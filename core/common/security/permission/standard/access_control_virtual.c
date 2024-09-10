@@ -23,6 +23,14 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     (void)peerNetworkId;
     return SOFTBUS_OK;
 }
+
+int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionName)
+{
+    (void)mySessionName;
+    (void)peerSessionName;
+    return SOFTBUS_OK;
+}
+
 int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
 {
     (void)firstCallingId;

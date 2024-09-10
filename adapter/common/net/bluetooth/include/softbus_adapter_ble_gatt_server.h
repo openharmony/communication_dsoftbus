@@ -164,6 +164,7 @@ int SoftBusGattsConnect(SoftBusBtAddr btAddr);
 int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId);
 int SoftBusGattsSendResponse(SoftBusGattsResponse *param);
 int SoftBusGattsSendNotify(SoftBusGattsNotify *param);
+void RemoveConnId(int32_t connId);
 int InitSoftbusAdapterServer(void);
 
 #ifdef __cplusplus

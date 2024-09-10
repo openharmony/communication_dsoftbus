@@ -52,6 +52,7 @@ static _Atomic int g_halServerId = -1;
 static _Atomic int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 static SoftBusGattsManager g_softBusGattsManager = { 0 };
 static _Atomic bool g_isRegisterHalCallback = false;
+static SoftBusBleSendSignal g_serverSendSignal = {0};
 
 static bool IsGattsManagerEmpty(void)
 {
@@ -272,10 +273,28 @@ int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
         .valueLen = param->valueLen,
         .value = param->value
     };
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_serverSendSignal.g_sendCondLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
+    if (!g_serverSendSignal.isWriteAvailable) {
+        SoftBusSysTime waitTime = {0};
+        SoftBusComputeWaitBleSendDataTime(BLE_WRITE_TIMEOUT_IN_MS, &waitTime);
+        int32_t ret = SoftBusCondWait(&g_serverSendSignal.g_sendCond, &g_serverSendSignal.g_sendCondLock, &waitTime);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "SoftBusCondWait fail, ret=%{public}d, isWriteAvailable=%{public}d",
+                ret, g_serverSendSignal.isWriteAvailable);
+            // fall-through: The protocol stack in the blue zone on a signal framework may not be called back.
+        }
+    }
+    g_serverSendSignal.isWriteAvailable = false;
+    (void)SoftBusMutexUnlock(&g_serverSendSignal.g_sendCondLock);
     CONN_LOGI(CONN_BLE, "halconnId:%{public}d, attrHandle:%{public}d, confirm:%{public}d",
         notify.connectId, notify.attrHandle, notify.confirm);
     if (BleGattsSendIndication(g_halServerId, &notify) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "BleGattsSendIndication failed");
+        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_serverSendSignal.g_sendCondLock) == SOFTBUS_OK,
+            SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
+        g_serverSendSignal.isWriteAvailable = true;
+        (void)SoftBusMutexUnlock(&g_serverSendSignal.g_sendCondLock);
         return SOFTBUS_CONN_BLE_UNDERLAY_SERVER_SEND_INDICATION_ERR;
     }
     return SOFTBUS_OK;
@@ -300,7 +319,7 @@ static void BleRegisterServerCallback(int status, int serverId, BtUuid *appUuid)
     } else {
         atomic_store_explicit(&g_halRegFlag, 1, memory_order_release);
         g_halServerId = serverId;
-        CONN_LOGI(CONN_BLE, "g_halServerId:%{public}d)", g_halServerId);
+        CONN_LOGE(CONN_BLE, "g_halServerId:%{public}d)", g_halServerId);
     }
 }
 
@@ -321,10 +340,10 @@ static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdA
         CONN_LOGI(CONN_BLE, "invalid serverId, halserverId=%{public}d", g_halServerId);
         return;
     }
-    SetConnIdAndAddr(connId, serverId, (SoftBusBtAddr *)bdAddr);
+    (void)SetConnIdAndAddr(connId, serverId, (SoftBusBtAddr *)bdAddr);
 }
 
-static void RemoveConnId(int32_t connId)
+void RemoveConnId(int32_t connId)
 {
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_softBusGattsManager.lock) == SOFTBUS_OK,
         CONN_BLE, "try to lock failed, connId=%{public}d", connId);
@@ -587,6 +606,11 @@ static void BleResponseConfirmationCallback(int status, int handle)
 static void BleIndicationSentCallback(int connId, int status)
 {
     CONN_LOGI(CONN_BLE, "status=%{public}d, connId=%{public}d\n", status, connId);
+    CONN_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_serverSendSignal.g_sendCondLock) == SOFTBUS_OK, CONN_BLE, "lock fail!");
+    g_serverSendSignal.isWriteAvailable = true;
+    (void)SoftBusCondBroadcast(&g_serverSendSignal.g_sendCond);
+    (void)SoftBusMutexUnlock(&g_serverSendSignal.g_sendCondLock);
     SoftBusGattsCallback callback = { 0 };
     FindCallbackByConnId(connId, &callback);
     if (callback.NotifySentCallback == NULL) {
@@ -660,15 +684,13 @@ static int32_t SetConnIdAndAddr(int connId, int serverId, const SoftBusBtAddr *b
         CONN_BLE, "try to lock failed, connId=%{public}d", connId);
     ServerConnection *it = NULL;
     ServerConnection *target =  NULL;
-    bool isExist = false;
     LIST_FOR_EACH_ENTRY(it, &g_softBusGattsManager.connections, ServerConnection, node) {
         if (it->connId == connId) {
             target = it;
-            isExist = true;
             break;
         }
     }
-    if (!isExist) {
+    if (target == NULL) {
         target = (ServerConnection *)SoftBusCalloc(sizeof(ServerConnection));
         if (target == NULL) {
             CONN_LOGE(CONN_BLE, "calloc serverConnection failed");
@@ -822,5 +844,18 @@ int InitSoftbusAdapterServer(void)
 {
     ListInit(&g_softBusGattsManager.services);
     ListInit(&g_softBusGattsManager.connections);
+    if (SoftBusMutexInit(&g_serverSendSignal.g_sendCondLock, NULL) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "mutex init failed");
+        ListDelInit(&g_softBusGattsManager.services);
+        ListDelInit(&g_softBusGattsManager.connections);
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusCondInit(&g_serverSendSignal.g_sendCond) != SOFTBUS_OK) {
+        ListDelInit(&g_softBusGattsManager.services);
+        ListDelInit(&g_softBusGattsManager.connections);
+        (void)SoftBusMutexDestroy(&g_serverSendSignal.g_sendCondLock);
+        return SOFTBUS_NO_INIT;
+    }
+    g_serverSendSignal.isWriteAvailable = true;
     return SoftBusMutexInit(&g_softBusGattsManager.lock, NULL);
 }

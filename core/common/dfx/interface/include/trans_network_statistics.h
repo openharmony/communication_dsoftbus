@@ -26,12 +26,15 @@ extern "C" {
 #define MAX_LANE_ID_LEN 64
 #define MAX_SOCKET_RESOURCE_NUM 128
 #define MAX_NETWORK_RESOURCE_NUM 128
+#define MAX_CHANNEL_INFO_NUM 128
+#define MAX_SOCKET_RESOURCE_LEN 1024
 
 typedef struct {
     ListNode node;
     char socketName[SESSION_NAME_SIZE_MAX];
     int32_t socketId;
     int32_t channelId;
+    int32_t channelType;
     uint64_t laneId;
     int64_t traffic;
     int64_t startTime;
@@ -45,9 +48,12 @@ typedef struct {
     int32_t laneLinkType;
 } NetworkResource;
 
+void AddChannelStatisticsInfo(int32_t channelId, int32_t channelType);
+
 void AddNetworkResource(NetworkResource *networkResource);
 
-void UpdateNetworkResourceByLaneId(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len);
+void UpdateNetworkResourceByLaneId(int32_t channelId, int32_t channelType, uint64_t laneId, const void *dataInfo,
+    uint32_t len);
 
 void DeleteNetworkResourceByLaneId(uint64_t laneId);
 

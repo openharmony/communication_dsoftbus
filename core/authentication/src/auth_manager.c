@@ -410,6 +410,35 @@ int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthConnInfo 
     return SOFTBUS_OK;
 }
 
+static int32_t GetAvailableAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo)
+{
+    if (!RequireAuthLock()) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthManager *auth = FindAuthManagerByUuid(uuid, type, false);
+    if (auth == NULL) {
+        auth = FindAuthManagerByUuid(uuid, type, true);
+    }
+    char *anonyUuid = NULL;
+    Anonymize(uuid, &anonyUuid);
+    if (auth == NULL) {
+        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AnonymizeFree(anonyUuid);
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    if (GetLatestAvailableSessionKeyTime(&auth->sessionKeyList, type) == 0) {
+        AUTH_LOGI(AUTH_FSM, "not available session key, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AnonymizeFree(anonyUuid);
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_SESSION_KEY_INVALID;
+    }
+    AnonymizeFree(anonyUuid);
+    *connInfo = auth->connInfo[type];
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
+}
+
 /* Note: must call DelDupAuthManager(auth) to free. */
 AuthManager *GetAuthManagerByAuthId(int64_t authId)
 {
@@ -1702,7 +1731,7 @@ int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo)
         AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = GetAuthConnInfoByUuid(uuid, AUTH_LINK_TYPE_P2P, connInfo);
+    int32_t ret = GetAvailableAuthConnInfoByUuid(uuid, AUTH_LINK_TYPE_P2P, connInfo);
     if (ret == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_CONN, "select auth type=%{public}d", AUTH_LINK_TYPE_P2P);
     }

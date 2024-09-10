@@ -34,6 +34,7 @@
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
+#include "trans_network_statistics.h"
 #include "trans_qos_info.h"
 #include "trans_session_manager.h"
 
@@ -581,6 +582,7 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
         goto EXIT_ERR;
     }
+    AddChannelStatisticsInfo(transInfo.channelId, transInfo.channelType);
     return;
 EXIT_ERR:
     RecordFailOpenSessionDFX(appInfo, connInnerInfo, extra, &transInfo, ret);
