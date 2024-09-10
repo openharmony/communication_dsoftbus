@@ -31,8 +31,6 @@
 #include "conn_log.h"
 #include "softbus_adapter_ble_gatt_client.h"
 
-#include "adapter_bt_utils.h"
-
 #define WAIT_HAL_REG_TIME_MS 5 // ms
 #define WAIT_HAL_REG_RETRY 3
 
@@ -321,7 +319,7 @@ static void BleRegisterServerCallback(int status, int serverId, BtUuid *appUuid)
     } else {
         atomic_store_explicit(&g_halRegFlag, 1, memory_order_release);
         g_halServerId = serverId;
-        CONN_LOGI(CONN_BLE, "g_halServerId:%{public}d)", g_halServerId);
+        CONN_LOGE(CONN_BLE, "g_halServerId:%{public}d)", g_halServerId);
     }
 }
 
@@ -342,10 +340,10 @@ static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdA
         CONN_LOGI(CONN_BLE, "invalid serverId, halserverId=%{public}d", g_halServerId);
         return;
     }
-    SetConnIdAndAddr(connId, serverId, (SoftBusBtAddr *)bdAddr);
+    (void)SetConnIdAndAddr(connId, serverId, (SoftBusBtAddr *)bdAddr);
 }
 
-static void RemoveConnId(int32_t connId)
+void RemoveConnId(int32_t connId)
 {
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_softBusGattsManager.lock) == SOFTBUS_OK,
         CONN_BLE, "try to lock failed, connId=%{public}d", connId);
@@ -686,15 +684,13 @@ static int32_t SetConnIdAndAddr(int connId, int serverId, const SoftBusBtAddr *b
         CONN_BLE, "try to lock failed, connId=%{public}d", connId);
     ServerConnection *it = NULL;
     ServerConnection *target =  NULL;
-    bool isExist = false;
     LIST_FOR_EACH_ENTRY(it, &g_softBusGattsManager.connections, ServerConnection, node) {
         if (it->connId == connId) {
             target = it;
-            isExist = true;
             break;
         }
     }
-    if (!isExist) {
+    if (target == NULL) {
         target = (ServerConnection *)SoftBusCalloc(sizeof(ServerConnection));
         if (target == NULL) {
             CONN_LOGE(CONN_BLE, "calloc serverConnection failed");
