@@ -100,7 +100,6 @@ typedef struct {
     uint16_t protocol;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
-    uint16_t port;
 } P2pConnInfo;
 
 typedef struct {
@@ -242,8 +241,6 @@ typedef struct {
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LaneTransType transType;
-    bool isSupportIpv6;
-    uint32_t actionAddr;
 } LaneAllocCommInfo;
 
 typedef struct {
@@ -256,7 +253,7 @@ typedef struct {
     int32_t (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
     uint32_t (*lnnGetLaneHandle)(LaneType type);
     int32_t (*lnnAllocLane)(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
-    int32_t (*lnnAllocRawLane)(uint32_t laneHandle, const RawLaneAllocInfo *request,
+    int32_t (*lnnAllocRawLane)(uint32_t laneRequestId, const RawLaneAllocInfo *request,
         const LaneAllocListener *listener);
     int32_t (*lnnReAllocLane)(uint32_t laneHandle, uint64_t laneId, const LaneAllocInfo *allocInfo,
         const LaneAllocListener *listener);
