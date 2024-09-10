@@ -285,6 +285,16 @@ int SoftBusSetBtName(const char *name)
     return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_SET_NAME_ERR;
 }
 
+void SoftBusComputeWaitBleSendDataTime(uint32_t waitMillis, SoftBusSysTime *outtime)
+{
+#define USECTONSEC 1000
+    SoftBusSysTime now;
+    (void)SoftBusGetTime(&now);
+    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + (int64_t)waitMillis * USECTONSEC;
+    outtime->sec = time / USECTONSEC / USECTONSEC;
+    outtime->usec = time % (USECTONSEC * USECTONSEC);
+}
+
 int SoftBusBtInit(void)
 {
     if (SoftBusMutexInit(&g_lock, NULL) != SOFTBUS_OK) {
