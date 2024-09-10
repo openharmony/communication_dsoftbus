@@ -21,6 +21,7 @@
 #include "softbus_def.h"
 
 #define CONFLICT_DEV_IP_LEN 32
+#define CONFLICT_UDIDHASH_STR_LEN 16
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,9 +35,23 @@ typedef enum {
     CONFLICT_BUTT,
 } LinkConflictType;
 
+typedef enum {
+    IDENTIFY_TYPE_DEV_ID = 0,
+    IDENTIFY_TYPE_UDID_HASH,
+    IDENTIFY_TYPE_BUTT,
+} DevIdentifyType;
+
+typedef struct {
+    DevIdentifyType type;
+    union {
+        char peerDevId[NETWORK_ID_BUF_LEN];
+        char udidHash[CONFLICT_UDIDHASH_STR_LEN + 1];
+    } devInfo;
+} DevIdentifyInfo;
+
 typedef struct {
     ListNode node;
-    char peerDevId[NETWORK_ID_BUF_LEN];
+    DevIdentifyInfo identifyInfo;
     LaneLinkType releaseLink;
     LinkConflictType conflictType;
     uint8_t devIdCnt;
@@ -48,11 +63,11 @@ typedef struct {
 int32_t InitLaneLinkConflict(void);
 void DeinitLaneLinkConflict(void);
 LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode);
-int32_t AddLinkConflictInfo(const LinkConflictInfo *linkConflictInfo);
-int32_t DelLinkConflictInfo(const char *peerDevId, LinkConflictType conflictType);
-int32_t FindLinkConflictInfoByDevId(const char *peerDevId, LinkConflictType conflictType,
-    LinkConflictInfo *linkConflictInfo);
-void RemoveConflictInfoTimelinessMsg(const char *peerDevId, LinkConflictType conflictType);
+int32_t AddLinkConflictInfo(const LinkConflictInfo *inputInfo);
+int32_t DelLinkConflictInfo(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType);
+int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
+    LinkConflictInfo *outputInfo);
+void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType);
 
 #ifdef __cplusplus
 }
