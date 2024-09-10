@@ -2231,6 +2231,7 @@ static int32_t CheckSessionEnableStatus(int32_t socket, SoftBusCond *callbackCon
 
 int32_t ClientWaitSyncBind(int32_t socket)
 {
+#define EXTRA_WAIT_TIME 20000 // 20s, ensure that the timeout here occurs after ClientCheckWaitTimeOut
     if (socket <= 0) {
         TRANS_LOGE(TRANS_SDK, "invalid param sessionId =%{public}d", socket);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
@@ -2257,7 +2258,16 @@ int32_t ClientWaitSyncBind(int32_t socket)
     }
     SoftBusCond *callbackCond = &(sessionNode->lifecycle.callbackCond);
     sessionNode->lifecycle.condIsWaiting = true;
-    ret = SoftBusCondWait(callbackCond, &(g_clientSessionServerList->lock), NULL);
+    SoftBusSysTime *timePtr = NULL;
+    if (sessionNode->lifecycle.maxWaitTime != 0) {
+        SoftBusSysTime absTime = {0};
+        ret = SoftBusGetTime(&absTime);
+        if (ret == SOFTBUS_OK) {
+            absTime.sec += (sessionNode->lifecycle.maxWaitTime + EXTRA_WAIT_TIME);
+            timePtr = &absTime;
+        }
+    }
+    ret = SoftBusCondWait(callbackCond, &(g_clientSessionServerList->lock), timePtr);
     if (ret != SOFTBUS_OK) {
         UnlockClientSessionServerList();
         TRANS_LOGE(TRANS_SDK, "cond wait failed, socket=%{public}d", socket);
