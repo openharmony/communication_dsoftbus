@@ -33,7 +33,7 @@ ohos_unittest("auth_session_gtest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
