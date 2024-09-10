@@ -490,6 +490,11 @@ static bool IsWifiP2pEnabled(void)
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
 }
 
+static bool SupportHmlTwo(void)
+{
+    return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
+}
+
 static int GetStationFrequency(void)
 {
     return OHOS::SoftBus::P2pAdapter::GetStationFrequency();
@@ -557,6 +562,7 @@ static struct WifiDirectManager g_manager = {
     .getRemoteUuidByIp = GetRemoteUuidByIp,
     .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 
+    .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,
