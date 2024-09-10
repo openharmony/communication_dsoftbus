@@ -206,7 +206,8 @@ static int32_t AddSessionServerAndSession(
     }
 
     int32_t sessionId = 0;
-    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId);
+    bool isClosing = false;
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId, isClosing);
     if (ret != SOFTBUS_OK) {
         return ret;
     }

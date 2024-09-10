@@ -608,7 +608,7 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
         return SOFTBUS_OK;
     }
     LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
-    bool isRelayV0 = msgPara->isRelay && registedHbType == HEARTBEAT_TYPE_BLE_V0;
+    bool isRelayV0 = msgPara->isRelay && ((registedHbType & HEARTBEAT_TYPE_BLE_V0) == HEARTBEAT_TYPE_BLE_V0);
     if (msgPara->isDirectBoardcast) {
         if (SendDirectBoardcast(hbFsm, msgPara, mode, registedHbType, isRelayV0) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "HB send direct boardcast fail, hbType=%{public}d", registedHbType);

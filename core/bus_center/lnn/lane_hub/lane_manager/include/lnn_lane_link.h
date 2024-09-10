@@ -143,7 +143,7 @@ uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkT
 int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt);
 int32_t QueryOtherLaneResource(const DevIdentifyInfo *inputInfo, LaneLinkType type);
-bool FindLaneResourceByDevIdHash(const char *udidHashStr, LaneLinkType type);
+bool FindLaneResourceByDevInfo(const DevIdentifyInfo *inputInfo, LaneLinkType type);
 
 #ifdef __cplusplus
 }

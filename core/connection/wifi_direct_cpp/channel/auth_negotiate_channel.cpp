@@ -342,7 +342,8 @@ void AuthNegotiateChannel::OnConnOpenFailed(uint32_t requestId, int32_t reason)
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
 }
 
-int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel)
+int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel,
+    uint32_t &authReqId)
 {
     bool isMeta = false;
     bool needUdid = true;
@@ -394,11 +395,18 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
         std::lock_guard lock(lock_);
         requestIdToDeviceIdMap_.erase(requestId);
     }
+    authReqId = requestId;
     return ret;
 }
 
 void AuthNegotiateChannel::StopCustomListening()
 {
     AuthStopListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P);
+}
+
+void AuthNegotiateChannel::RemovePendingAuthReq(uint32_t authReqId)
+{
+    std::lock_guard lock(lock_);
+    requestIdToDeviceIdMap_.erase(authReqId);
 }
 } // namespace OHOS::SoftBus
