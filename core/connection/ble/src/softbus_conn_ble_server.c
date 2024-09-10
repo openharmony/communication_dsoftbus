@@ -1020,6 +1020,7 @@ static void BleServerWaitDisconnectTimeoutHandler(uint32_t connectionId)
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE,
         "ble server wait disconnect timeout handler failed: connection not exist, connId=%{public}u", connectionId);
+    RemoveConnId(connection->underlayerHandle);
     ConnBleReturnConnection(&connection);
     g_serverEventListener.onServerConnectionClosed(connectionId, SOFTBUS_CONN_BLE_DISCONNECT_WAIT_TIMEOUT_ERR);
 }
