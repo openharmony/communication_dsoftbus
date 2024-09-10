@@ -186,11 +186,11 @@ static void RemoveLinkTimeoutMessage(uint32_t laneReqId, LaneLinkType linkType)
 
 static void LinkSuccess(uint32_t laneReqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo)
 {
+    LNN_LOGI(LNN_LANE, "build link succ, laneReqId=%{public}u, link=%{public}d", laneReqId, linkType);
     if (linkInfo == NULL) {
         LNN_LOGE(LNN_LANE, "linkSuccess param invalid");
         return;
     }
-    LNN_LOGI(LNN_LANE, "build link succ, laneReqId=%{public}u, link=%{public}d", laneReqId, linkType);
     RemoveLinkTimeoutMessage(laneReqId, linkType);
     LaneLinkInfo *linkParam = (LaneLinkInfo *)SoftBusCalloc(sizeof(LaneLinkInfo));
     if (linkParam == NULL) {
@@ -925,8 +925,8 @@ static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDel
     }
     bool isHichain = GetAuthType(networkId);
     LNN_LOGD(LNN_LANE, "isHichain=%{public}d", isHichain);
-    if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1 &&
-        CheckLinkConflict(resourceItem.link.peerUdid, resourceItem.link.type) && isHichain) {
+    if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1 && isHichain &&
+        CheckLinkConflict(resourceItem.link.peerUdid, resourceItem.link.type) == SOFTBUS_OK) {
         if (PostDelayDestroyMessage(laneReqId, laneId, DELAY_DESTROY_LANE_TIME) == SOFTBUS_OK) {
             *isDelayFree = true;
             return;
