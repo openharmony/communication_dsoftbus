@@ -31,7 +31,7 @@
 #include "softbus_event.h"
 #include "stats_event.h"
 #include "hisysevent_manager_c.h"
-#include "wifi_direct_statistic.h"
+#include "wifi_direct_types.h"
 
 #define BIZ_SCENE_NAME "BIZ_SCENE"
 #define BIZ_STAGE_NAME "BIZ_STAGE"
