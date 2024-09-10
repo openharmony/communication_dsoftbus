@@ -389,15 +389,17 @@ static void NotifyCallback(UdpChannel *channel, int32_t channelId, ShutdownReaso
 
 static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
 {
-    int32_t sessionId = channel->sessionId;
-    int32_t ret = ClientSetStatusClosingBySocket(sessionId, true);
-    if (ret != SOFTBUS_OK) {
-        return ret;
+    int32_t ret;
+    if (channel != NULL) {
+        int32_t sessionId = channel->sessionId;
+        ret = ClientSetStatusClosingBySocket(sessionId, true);
+        if (ret != SOFTBUS_OK) {
+            return ret;
+        }
     }
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SDK, "trans del udp channel failed. channelId=%{public}d", channelId);
     }
-
     switch (reason) {
         case SHUTDOWN_REASON_PEER:
             break;

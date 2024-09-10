@@ -18,3 +18,8 @@ group("benchmarktest") {
   testonly = true
   deps = [ "benchmarktest:benchmarktest" ]
 }
+
+group("unittest") {
+  testonly = true
+  deps = [ "unittest:unittest" ]
+}
