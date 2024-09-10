@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include "softbus_type_def.h"
+#include "softbus_adapter_thread.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,6 +32,7 @@ extern "C" {
 #define MAC_FIRST_INDEX 0
 #define MAC_ONE_INDEX 1
 #define MAC_FIVE_INDEX 5
+#define BLE_WRITE_TIMEOUT_IN_MS 500
 
 typedef enum {
     BLE_DISABLE = 0,
@@ -103,6 +105,12 @@ typedef struct {
     void (*OnBtAclStateChanged)(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState, int32_t hciReason);
 } SoftBusBtStateListener;
 
+typedef struct {
+    bool isWriteAvailable;
+    SoftBusCond g_sendCond;
+    SoftBusMutex g_sendCondLock;
+} SoftBusBleSendSignal;
+
 int SoftBusEnableBt(void);
 
 int SoftBusDisableBt(void);
@@ -120,6 +128,8 @@ int SoftBusSetBtName(const char *name);
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener);
 
 int SoftBusRemoveBtStateListener(int listenerId);
+
+void SoftBusComputeWaitBleSendDataTime(uint32_t waitMillis, SoftBusSysTime *outtime);
 
 int SoftBusBtInit(void);
 
