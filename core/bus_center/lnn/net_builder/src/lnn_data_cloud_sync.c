@@ -868,6 +868,9 @@ static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
     if (memcpy_s((char *)oldInfo->cipherInfo.iv, BROADCAST_IV_LEN, newInfo->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo iv to cache info fail");
     }
+    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s remotePtk to cache info fail");
+    }
     UpdateDevBasicInfoToCache(newInfo, oldInfo);
     return SOFTBUS_OK;
 }

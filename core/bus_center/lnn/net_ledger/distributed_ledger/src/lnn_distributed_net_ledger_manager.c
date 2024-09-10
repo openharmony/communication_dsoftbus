@@ -398,6 +398,18 @@ static int32_t DlGetFeatureCap(const char *networkId, bool checkOnline, void *bu
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetConnSubFeatureCap(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+    if (len != LNN_COMMON_LEN_64) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((uint64_t *)buf) = info->connSubFeature;
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetNetType(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     (void)checkOnline;
@@ -764,6 +776,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_DEV_TYPE_ID, DlGetDeviceTypeId},
     {NUM_KEY_STATIC_CAP_LEN, DlGetStaticCapLen},
     {NUM_KEY_DEVICE_SECURITY_LEVEL, DlGetDeviceSecurityLevel},
+    {NUM_KEY_CONN_SUB_FEATURE_CAPA, DlGetConnSubFeatureCap},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BOOL_KEY_SCREEN_STATUS, DlGetNodeScreenOnFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
