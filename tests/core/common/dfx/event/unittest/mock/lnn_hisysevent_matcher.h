@@ -30,6 +30,13 @@ static void MatchLnnEventNameTypeExtraInt32Param(const HiSysEventParam *params, 
     EXPECT_EQ(params[index].v.i32, extraParam);
 }
 
+static void MatchLnnEventNameTypeExtraUint32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_EQ(params[index].v.ui32, extraParam);
+}
+
 static void MatchLnnEventNameTypeExtraStrParam(const HiSysEventParam *params, int32_t index, const char *extraParam)
 {
     EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
@@ -71,6 +78,9 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.onlineType);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.osType);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.connOnlineReason);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.laneId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.chanReqId);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.connReqId);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.strategy);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceInfo);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
