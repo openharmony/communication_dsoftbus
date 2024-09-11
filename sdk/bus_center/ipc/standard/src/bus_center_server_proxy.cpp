@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,10 +41,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
         return nullptr;
     }
-    if (!data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER)) {
-        LNN_LOGE(LNN_EVENT, "write SOFTBUS_SERVER_SA_ID_INNER failed");
-        return nullptr;
-    }
+    data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
