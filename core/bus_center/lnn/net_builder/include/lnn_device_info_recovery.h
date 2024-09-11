@@ -98,6 +98,7 @@ int32_t LnnLoadLocalDeviceInfo(void);
 int32_t LnnLoadRemoteDeviceInfo(void);
 int32_t LnnSaveLocalDeviceInfo(const NodeInfo *deviceInfo);
 int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo);
+int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums);
 int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo);
 int32_t LnnUpdateRemoteDeviceInfo(const NodeInfo *deviceInfo);
 int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo);
