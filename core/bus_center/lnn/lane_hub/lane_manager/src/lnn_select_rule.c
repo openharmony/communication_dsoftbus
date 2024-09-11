@@ -103,7 +103,7 @@ static int32_t NodeStateCheck(const char *networkId)
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LANE, "wlan not online, anonyNetworkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        return SOFTBUS_LANE_WIFI_NOT_ONLINE;
     }
     return SOFTBUS_OK;
 }

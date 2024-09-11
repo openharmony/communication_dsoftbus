@@ -481,7 +481,7 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
     }
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
-        LNN_LOGE(LNN_LANE, "no available link to alloc, laneReqId=%{public}u", laneReqId);
+        LNN_LOGE(LNN_LANE, "no available link resources, laneReqId=%{public}u", laneReqId);
         return SOFTBUS_LANE_NO_AVAILABLE_LINK;
     }
     for (uint32_t i = 0; i < recommendLinkList->linkTypeNum; i++) {
@@ -786,7 +786,7 @@ void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
     LNN_LOGI(LNN_LANE, "notify free lane result, laneReqId=%{public}d, errCode=%{public}d",
         laneReqId, errCode);
     DelLaneResourceByLaneId(reqInfo.laneId, false);
-    if (reqInfo.isWithQos &&  !reqInfo.hasNotifiedFree && reqInfo.listener.onLaneFreeSuccess != NULL) {
+    if (reqInfo.isWithQos && !reqInfo.hasNotifiedFree && reqInfo.listener.onLaneFreeSuccess != NULL) {
         if (errCode == SOFTBUS_OK) {
             reqInfo.listener.onLaneFreeSuccess(laneReqId);
         } else {
@@ -806,9 +806,6 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
     }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(resourceItem.link.peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        if (resourceItem.link.type == LANE_HML_RAW) {
-            LnnDisconnectP2pWithoutLnn(laneReqId);
-        }
         LNN_LOGE(LNN_LANE, "get networkId fail");
     }
     return DestroyLink(networkId, laneReqId, resourceItem.link.type);
