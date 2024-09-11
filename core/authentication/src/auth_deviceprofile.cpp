@@ -90,7 +90,7 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::TrustDevic
     const char *deviceIdHash, const char *anonyDeviceIdHash)
 {
     for (const auto &trustDevice : trustDevices) {
-        if (trustDevice.GetDeviceIdType() != (int32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
+        if (trustDevice.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
             trustDevice.GetDeviceId().empty()) {
             continue;

@@ -71,33 +71,34 @@ static int32_t LinkConflictPostMsgToHandler(int32_t msgType, uint64_t param1, ui
     return SOFTBUS_OK;
 }
 
-static int32_t PostConflictInfoTimelinessMsg(const char *peerNetworkId, LinkConflictType conflictType)
+static int32_t PostConflictInfoTimelinessMsg(const DevIdentifyInfo *info, LinkConflictType conflictType)
 {
-    if (peerNetworkId == NULL) {
+    if (info == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    char *anonynetworkId = NULL;
-    Anonymize(peerNetworkId, &anonynetworkId);
-    LNN_LOGI(LNN_LANE, "post conflict info timeliness msg, peerNetworkId=%{public}s, conflictType=%{public}d",
-        anonynetworkId, conflictType);
-    AnonymizeFree(anonynetworkId);
-    LinkConflictInfo *linkConflictItem = (LinkConflictInfo *)SoftBusCalloc(sizeof(LinkConflictInfo));
-    if (linkConflictItem == NULL) {
-        LNN_LOGE(LNN_LANE, "calloc linkConflictItem fail");
+    char *anonyDevInfo = NULL;
+    Anonymize(info->type == IDENTIFY_TYPE_UDID_HASH ? info->devInfo.udidHash : info->devInfo.peerDevId,
+        &anonyDevInfo);
+    LNN_LOGI(LNN_LANE, "post conflict info timeliness msg, identifyType=%{public}d, devInfo=%{public}s,"
+        " conflictType=%{public}d", info->type, anonyDevInfo, conflictType);
+    AnonymizeFree(anonyDevInfo);
+    LinkConflictInfo *conflictItem = (LinkConflictInfo *)SoftBusCalloc(sizeof(LinkConflictInfo));
+    if (conflictItem == NULL) {
+        LNN_LOGE(LNN_LANE, "calloc conflictItem fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (strncpy_s(linkConflictItem->peerDevId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
-        LNN_LOGE(LNN_LANE, "strcpy peerDevId fail");
-        SoftBusFree(linkConflictItem);
-        return SOFTBUS_STRCPY_ERR;
+    if (memcpy_s(&conflictItem->identifyInfo, sizeof(DevIdentifyInfo), info, sizeof(DevIdentifyInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy identifyInfo fail");
+        SoftBusFree(conflictItem);
+        return SOFTBUS_MEM_ERR;
     }
-    linkConflictItem->conflictType = conflictType;
+    conflictItem->conflictType = conflictType;
     int32_t ret = LinkConflictPostMsgToHandler(MSG_TYPE_CONFLICT_TIMELINESS, 0, 0,
-        linkConflictItem, CONFLICT_INFO_TIMELINESS);
+        conflictItem, CONFLICT_INFO_TIMELINESS);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post link conflict msg fail");
-        SoftBusFree(linkConflictItem);
+        SoftBusFree(conflictItem);
         return ret;
     }
     return SOFTBUS_OK;
@@ -109,40 +110,41 @@ static int32_t RemoveConflictInfoTimeliness(const SoftBusMessage *msg, void *dat
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    LinkConflictInfo *linkConflictSrc = (LinkConflictInfo*)msg->obj;
-    LinkConflictInfo *linkConflictDst = (LinkConflictInfo*)data;
+    LinkConflictInfo *srcInfo = (LinkConflictInfo*)msg->obj;
+    LinkConflictInfo *dstInfo = (LinkConflictInfo*)data;
     if (msg->what != MSG_TYPE_CONFLICT_TIMELINESS) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncmp(linkConflictSrc->peerDevId, linkConflictDst->peerDevId, NETWORK_ID_BUF_LEN) == 0 &&
-        linkConflictSrc->conflictType == linkConflictDst->conflictType) {
+    if (srcInfo->conflictType == dstInfo->conflictType &&
+        memcmp(&srcInfo->identifyInfo, &dstInfo->identifyInfo, sizeof(DevIdentifyInfo)) == 0) {
         LNN_LOGI(LNN_LANE, "remove conflict info timeliness message success");
-        SoftBusFree(linkConflictSrc);
+        SoftBusFree(srcInfo);
         return SOFTBUS_OK;
     }
     return SOFTBUS_INVALID_PARAM;
 }
 
-void RemoveConflictInfoTimelinessMsg(const char *peerNetworkId, LinkConflictType conflictType)
+void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType)
 {
-    if (peerNetworkId == NULL) {
+    if (inputInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    char *anonynetworkId = NULL;
-    Anonymize(peerNetworkId, &anonynetworkId);
-    LNN_LOGI(LNN_LANE, "remove conflict info timeliness msg, peerNetworkId=%{public}s, conflictType=%{public}d",
-        anonynetworkId, conflictType);
-    AnonymizeFree(anonynetworkId);
-    LinkConflictInfo linkConflictItem;
-    (void)memset_s(&linkConflictItem, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
-    if (strncpy_s(linkConflictItem.peerDevId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
-        LNN_LOGE(LNN_LANE, "strcpy peerDevId fail");
+    char *anonyDevInfo = NULL;
+    Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
+        inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
+    LNN_LOGI(LNN_LANE, "remove conflict info timeliness msg, identifyType=%{public}d, devInfo=%{public}s,"
+        " conflictType=%{public}d", inputInfo->type, anonyDevInfo, conflictType);
+    AnonymizeFree(anonyDevInfo);
+    LinkConflictInfo conflictItem;
+    (void)memset_s(&conflictItem, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
+    if (memcpy_s(&conflictItem.identifyInfo, sizeof(DevIdentifyInfo), inputInfo, sizeof(DevIdentifyInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy identifyInfo fail");
         return;
     }
-    linkConflictItem.conflictType = conflictType;
+    conflictItem.conflictType = conflictType;
     g_linkConflictLoopHandler.looper->RemoveMessageCustom(g_linkConflictLoopHandler.looper,
-        &g_linkConflictLoopHandler, RemoveConflictInfoTimeliness, &linkConflictItem);
+        &g_linkConflictLoopHandler, RemoveConflictInfoTimeliness, &conflictItem);
 }
 
 LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode)
@@ -173,53 +175,47 @@ LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode)
     return CONFLICT_BUTT;
 }
 
-static int32_t GenerateConflictInfo(const LinkConflictInfo *linkConflictSrc, LinkConflictInfo *linkConflictDst)
+static int32_t GenerateConflictInfo(const LinkConflictInfo *inputInfo, LinkConflictInfo *outputInfo)
 {
-    if (linkConflictSrc == NULL || linkConflictDst == NULL) {
+    if (inputInfo == NULL || outputInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (linkConflictDst->devIdCnt > 0) {
-        SoftBusFree(linkConflictDst->devIdList);
-        linkConflictDst->devIdList = NULL;
-        linkConflictDst->devIdCnt = 0;
+    if (memcpy_s(&outputInfo->identifyInfo, sizeof(DevIdentifyInfo), &inputInfo->identifyInfo,
+        sizeof(DevIdentifyInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy identifyInfo fail");
+        return SOFTBUS_MEM_ERR;
     }
-    if (linkConflictSrc->devIdCnt > 0) {
+    if (outputInfo->devIdCnt > 0) {
+        SoftBusFree(outputInfo->devIdList);
+        outputInfo->devIdList = NULL;
+        outputInfo->devIdCnt = 0;
+    }
+    if (inputInfo->devIdCnt > 0) {
         char (*devIdList)[NETWORK_ID_BUF_LEN] =
-            (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(linkConflictSrc->devIdCnt * NETWORK_ID_BUF_LEN);
+            (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(inputInfo->devIdCnt * NETWORK_ID_BUF_LEN);
         if (devIdList == NULL) {
             LNN_LOGE(LNN_LANE, "calloc devIdList fail");
             return SOFTBUS_MALLOC_ERR;
         }
-        linkConflictDst->devIdList = devIdList;
-        if (memcpy_s(devIdList, linkConflictSrc->devIdCnt * NETWORK_ID_BUF_LEN,
-            linkConflictSrc->devIdList, linkConflictSrc->devIdCnt * NETWORK_ID_BUF_LEN) != EOK) {
+        outputInfo->devIdList = devIdList;
+        if (memcpy_s(devIdList, inputInfo->devIdCnt * NETWORK_ID_BUF_LEN,
+            inputInfo->devIdList, inputInfo->devIdCnt * NETWORK_ID_BUF_LEN) != EOK) {
             LNN_LOGE(LNN_LANE, "memcpy devIdList fail");
             SoftBusFree(devIdList);
-            linkConflictDst->devIdList = NULL;
+            outputInfo->devIdList = NULL;
             return SOFTBUS_MEM_ERR;
         }
-        linkConflictDst->devIdCnt = linkConflictSrc->devIdCnt;
+        outputInfo->devIdCnt = inputInfo->devIdCnt;
     }
-
-    if (strncpy_s(linkConflictDst->peerDevId, NETWORK_ID_BUF_LEN,
-        linkConflictSrc->peerDevId, NETWORK_ID_BUF_LEN) != EOK) {
-        if (linkConflictDst->devIdCnt > 0) {
-            SoftBusFree(linkConflictDst->devIdList);
-            linkConflictDst->devIdList = NULL;
-            linkConflictDst->devIdCnt = 0;
-        }
-        LNN_LOGE(LNN_LANE, "strcpy peerDevId fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    linkConflictDst->releaseLink = linkConflictSrc->releaseLink;
-    linkConflictDst->conflictType = linkConflictSrc->conflictType;
+    outputInfo->releaseLink = inputInfo->releaseLink;
+    outputInfo->conflictType = inputInfo->conflictType;
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateExistsLinkConflictInfo(const LinkConflictInfo *linkConflictInfo)
+static int32_t UpdateExistsLinkConflictInfo(const LinkConflictInfo *inputInfo)
 {
-    if (linkConflictInfo == NULL) {
+    if (inputInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -230,9 +226,9 @@ static int32_t UpdateExistsLinkConflictInfo(const LinkConflictInfo *linkConflict
     LinkConflictInfo *item = NULL;
     LinkConflictInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
-        if (strncmp(item->peerDevId, linkConflictInfo->peerDevId, NETWORK_ID_BUF_LEN) == 0 &&
-            item->conflictType == linkConflictInfo->conflictType) {
-            int32_t ret = GenerateConflictInfo(linkConflictInfo, item);
+        if (item->conflictType == inputInfo->conflictType &&
+            memcmp(&item->identifyInfo, &inputInfo->identifyInfo, sizeof(DevIdentifyInfo)) == 0) {
+            int32_t ret = GenerateConflictInfo(inputInfo, item);
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LANE, "generate conflictDevInfo fail");
                 LinkConflictUnlock();
@@ -246,14 +242,14 @@ static int32_t UpdateExistsLinkConflictInfo(const LinkConflictInfo *linkConflict
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
-static int32_t CreateNewLinkConflictInfo(const LinkConflictInfo *linkConflictInfo)
+static int32_t CreateNewLinkConflictInfo(const LinkConflictInfo *inputInfo)
 {
     LinkConflictInfo *linkConflictItem = (LinkConflictInfo *)SoftBusCalloc(sizeof(LinkConflictInfo));
     if (linkConflictItem == NULL) {
         LNN_LOGE(LNN_LANE, "calloc linkConflictItem fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    int32_t ret = GenerateConflictInfo(linkConflictInfo, linkConflictItem);
+    int32_t ret = GenerateConflictInfo(inputInfo, linkConflictItem);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "generate conflictDevInfo fail");
         SoftBusFree(linkConflictItem);
@@ -267,17 +263,19 @@ static int32_t CreateNewLinkConflictInfo(const LinkConflictInfo *linkConflictInf
     ListAdd(&g_linkConflictList.list, &linkConflictItem->node);
     g_linkConflictList.cnt++;
     LinkConflictUnlock();
-    char *anonyNetworkId = NULL;
-    Anonymize(linkConflictInfo->peerDevId, &anonyNetworkId);
-    LNN_LOGI(LNN_LANE, "create new conflict link success, peerNetworkId=%{public}s, conflictType=%{public}d, "
-        "releaseLink=%{public}d", anonyNetworkId, linkConflictInfo->conflictType, linkConflictInfo->releaseLink);
-    AnonymizeFree(anonyNetworkId);
+    char *anonyDevInfo = NULL;
+    Anonymize(inputInfo->identifyInfo.type == IDENTIFY_TYPE_UDID_HASH ?
+        inputInfo->identifyInfo.devInfo.udidHash : inputInfo->identifyInfo.devInfo.peerDevId, &anonyDevInfo);
+    LNN_LOGI(LNN_LANE, "create new conflict link success, identifyType=%{public}d, devInfo=%{public}s, "
+        "conflictType=%{public}d, releaseLink=%{public}d", inputInfo->identifyInfo.type, anonyDevInfo,
+        inputInfo->conflictType, inputInfo->releaseLink);
+    AnonymizeFree(anonyDevInfo);
     return SOFTBUS_OK;
 }
 
-int32_t DelLinkConflictInfo(const char *peerNetworkId, LinkConflictType conflictType)
+int32_t DelLinkConflictInfo(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType)
 {
-    if (peerNetworkId == NULL) {
+    if (inputInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -285,16 +283,17 @@ int32_t DelLinkConflictInfo(const char *peerNetworkId, LinkConflictType conflict
         LNN_LOGE(LNN_LANE, "linkConflict lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    char *anonyPeerNetworkId = NULL;
-    Anonymize(peerNetworkId, &anonyPeerNetworkId);
-    LNN_LOGI(LNN_LANE, "start to del link conflict info by peerNetworkId=%{public}s, conflictType=%{public}d",
-        anonyPeerNetworkId, conflictType);
-    AnonymizeFree(anonyPeerNetworkId);
+    char *anonyDevInfo = NULL;
+    Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
+        inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
+    LNN_LOGI(LNN_LANE, "start to del link conflict info by identifyType=%{public}d, devInfo=%{public}s,"
+        " conflictType=%{public}d", inputInfo->type, anonyDevInfo, conflictType);
+    AnonymizeFree(anonyDevInfo);
     LinkConflictInfo *item = NULL;
     LinkConflictInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
-        if (strncmp(item->peerDevId, peerNetworkId, NETWORK_ID_BUF_LEN) == 0 &&
-            item->conflictType == conflictType) {
+        if (item->conflictType == conflictType &&
+            memcmp(&item->identifyInfo, inputInfo, sizeof(DevIdentifyInfo)) == 0) {
             ListDelete(&item->node);
             if (item->devIdCnt > 0) {
                 SoftBusFree(item->devIdList);
@@ -315,42 +314,42 @@ int32_t DelLinkConflictInfo(const char *peerNetworkId, LinkConflictType conflict
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
-int32_t AddLinkConflictInfo(const LinkConflictInfo *linkConflictInfo)
+int32_t AddLinkConflictInfo(const LinkConflictInfo *inputInfo)
 {
-    if (linkConflictInfo == NULL) {
+    if (inputInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = UpdateExistsLinkConflictInfo(linkConflictInfo);
+    int32_t ret = UpdateExistsLinkConflictInfo(inputInfo);
     if (ret == SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "update exists link conflict info success, update conflict info timeliness");
-        RemoveConflictInfoTimelinessMsg(linkConflictInfo->peerDevId, linkConflictInfo->conflictType);
-        ret = PostConflictInfoTimelinessMsg(linkConflictInfo->peerDevId, linkConflictInfo->conflictType);
+        RemoveConflictInfoTimelinessMsg(&inputInfo->identifyInfo, inputInfo->conflictType);
+        ret = PostConflictInfoTimelinessMsg(&inputInfo->identifyInfo, inputInfo->conflictType);
         if (ret != SOFTBUS_OK) {
-            (void)DelLinkConflictInfo(linkConflictInfo->peerDevId, linkConflictInfo->conflictType);
+            (void)DelLinkConflictInfo(&inputInfo->identifyInfo, inputInfo->conflictType);
             LNN_LOGE(LNN_LANE, "post conflict info timeliness msg fail, reason=%{public}d", ret);
             return ret;
         }
         return SOFTBUS_OK;
     }
-    ret = CreateNewLinkConflictInfo(linkConflictInfo);
+    ret = CreateNewLinkConflictInfo(inputInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "create new link conflict info fail, reason=%{public}d", ret);
         return ret;
     }
-    ret = PostConflictInfoTimelinessMsg(linkConflictInfo->peerDevId, linkConflictInfo->conflictType);
+    ret = PostConflictInfoTimelinessMsg(&inputInfo->identifyInfo, inputInfo->conflictType);
     if (ret != SOFTBUS_OK) {
-        (void)DelLinkConflictInfo(linkConflictInfo->peerDevId, linkConflictInfo->conflictType);
+        (void)DelLinkConflictInfo(&inputInfo->identifyInfo, inputInfo->conflictType);
         LNN_LOGE(LNN_LANE, "post conflict info timeliness msg fail, reason=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
 }
 
-int32_t FindLinkConflictInfoByDevId(const char *peerNetworkId, LinkConflictType conflictType,
-    LinkConflictInfo *linkConflictInfo)
+int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
+    LinkConflictInfo *outputInfo)
 {
-    if (peerNetworkId == NULL || linkConflictInfo == NULL) {
+    if (inputInfo == NULL || outputInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -361,9 +360,9 @@ int32_t FindLinkConflictInfoByDevId(const char *peerNetworkId, LinkConflictType 
     LinkConflictInfo *item = NULL;
     LinkConflictInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_linkConflictList.list, LinkConflictInfo, node) {
-        if (strncmp(item->peerDevId, peerNetworkId, NETWORK_ID_BUF_LEN) == 0 &&
-            item->conflictType == conflictType) {
-            int32_t ret = GenerateConflictInfo(item, linkConflictInfo);
+        if (item->conflictType == conflictType &&
+            memcmp(&item->identifyInfo, inputInfo, sizeof(DevIdentifyInfo)) == 0) {
+            int32_t ret = GenerateConflictInfo(item, outputInfo);
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LANE, "generate link conflict devInfo fail");
                 LinkConflictUnlock();
@@ -374,11 +373,12 @@ int32_t FindLinkConflictInfoByDevId(const char *peerNetworkId, LinkConflictType 
         }
     }
     LinkConflictUnlock();
-    char *anonyPeerNetworkId = NULL;
-    Anonymize(peerNetworkId, &anonyPeerNetworkId);
-    LNN_LOGE(LNN_LANE, "not found link conflict info by peerNetworkId=%{public}s, conflictType=%{public}d",
-        anonyPeerNetworkId, conflictType);
-    AnonymizeFree(anonyPeerNetworkId);
+    char *anonyDevInfo = NULL;
+    Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
+        inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
+    LNN_LOGE(LNN_LANE, "not found link conflict info by identifyType=%{public}d, devInfo=%{public}s,"
+        " conflictType=%{public}d", inputInfo->type, anonyDevInfo, conflictType);
+    AnonymizeFree(anonyDevInfo);
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
@@ -388,12 +388,12 @@ static void HandleConflictInfoTimeliness(SoftBusMessage *msg)
         LNN_LOGE(LNN_LANE, "invalid msg->obj");
         return;
     }
-    LinkConflictInfo *linkConflictItem = (LinkConflictInfo*)msg->obj;
+    LinkConflictInfo *conflictItem = (LinkConflictInfo*)msg->obj;
     LNN_LOGI(LNN_LANE, "handle conflict info timeliness");
-    if (DelLinkConflictInfo(linkConflictItem->peerDevId, linkConflictItem->conflictType) != SOFTBUS_OK) {
+    if (DelLinkConflictInfo(&conflictItem->identifyInfo, conflictItem->conflictType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "del link conflict info fail");
     }
-    SoftBusFree(linkConflictItem);
+    SoftBusFree(conflictItem);
 }
 
 static void MsgHandler(SoftBusMessage *msg)

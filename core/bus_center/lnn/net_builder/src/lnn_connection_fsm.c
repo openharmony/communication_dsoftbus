@@ -1400,19 +1400,25 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     char *anonyUdid = NULL;
     char *anonyUuid = NULL;
     char *anonyNetworkId = NULL;
+    char *anonyDeviceName = NULL;
     Anonymize(connFsm->connInfo.peerNetworkId, &anonyNetworkId);
     if (isNodeInfoValid) {
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
         Anonymize(connFsm->connInfo.nodeInfo->uuid, &anonyUuid);
+        Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
+        LNN_LOGI(LNN_BUILDER,
+            "online state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, "
+            "uuid=%{public}s, deviceName=%{public}s, peer%{public}s",
+            connFsm->id, anonyNetworkId, anonyUdid, anonyUuid, anonyDeviceName,
+            LnnPrintConnectionAddr(&connFsm->connInfo.addr));
+        AnonymizeFree(anonyUdid);
+        AnonymizeFree(anonyUuid);
+        AnonymizeFree(anonyDeviceName);
+    } else {
+        LNN_LOGI(LNN_BUILDER,
+            "online state enter. [id=%{public}u], networkId=%{public}s, peer%{public}s",
+            connFsm->id, anonyNetworkId, LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     }
-    LNN_LOGI(LNN_BUILDER,
-        "online state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, "
-        "uuid=%{public}s, deviceName=%{public}s, peer%{public}s",
-        connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "", isNodeInfoValid ? anonyUuid : "",
-        isNodeInfoValid ? connFsm->connInfo.nodeInfo->deviceInfo.deviceName : "",
-        LnnPrintConnectionAddr(&connFsm->connInfo.addr));
-    AnonymizeFree(anonyUdid);
-    AnonymizeFree(anonyUuid);
     AnonymizeFree(anonyNetworkId);
     if (CheckDeadFlag(connFsm, true)) {
         return;
@@ -1511,17 +1517,23 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     bool isNodeInfoValid = (connFsm->connInfo.nodeInfo != NULL);
     char *anonyUdid = NULL;
     char *anonyNetworkId = NULL;
+    char *anonyDeviceName = NULL;
     Anonymize(connFsm->connInfo.peerNetworkId, &anonyNetworkId);
     if (isNodeInfoValid) {
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
+        Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
+        LNN_LOGI(LNN_BUILDER,
+            "leaving state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
+            "peer%{public}s",
+            connFsm->id, anonyNetworkId, anonyUdid, anonyDeviceName,
+            LnnPrintConnectionAddr(&connFsm->connInfo.addr));
+        AnonymizeFree(anonyUdid);
+        AnonymizeFree(anonyDeviceName);
+    } else {
+        LNN_LOGI(LNN_BUILDER,
+            "leaving state enter. [id=%{public}u], networkId=%{public}s, peer%{public}s",
+            connFsm->id, anonyNetworkId, LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     }
-    LNN_LOGI(LNN_BUILDER,
-        "leaving state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
-        "peer%{public}s",
-        connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "",
-        isNodeInfoValid ? connFsm->connInfo.nodeInfo->deviceInfo.deviceName : "",
-        LnnPrintConnectionAddr(&connFsm->connInfo.addr));
-    AnonymizeFree(anonyUdid);
     AnonymizeFree(anonyNetworkId);
     LnnNotifyOOBEStateChangeEvent(SOFTBUS_FACK_OOBE_END);
     if (CheckDeadFlag(connFsm, true)) {

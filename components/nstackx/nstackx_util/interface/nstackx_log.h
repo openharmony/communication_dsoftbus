@@ -57,13 +57,12 @@ NSTACKX_EXPORT_VARIABLE extern NstakcxLogCallback g_nstackxLogCallBack;
 NSTACKX_EXPORT int32_t SetLogCallback(NstakcxLogCallback logCb);
 NSTACKX_EXPORT void SetDefaultLogCallback(void);
 
-#define FILE_NAME (__builtin_strrchr("/" __FILE__, '/') + 1)
-#define NSTACKX_LOG_COMMON(moduleName, logLevel, moduleDebugLevel, format, ...)                                      \
-    do {                                                                                                             \
-        if (logLevel <= moduleDebugLevel && g_nstackxLogCallBack != NULL) {                                          \
-            g_nstackxLogCallBack(                                                                                    \
-                moduleName, logLevel, "[%s:%d] %s# " format "\n", FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
-        }                                                                                                            \
+#define NSTACKX_LOG_COMMON(moduleName, logLevel, moduleDebugLevel, format, ...) \
+    do { \
+        if (logLevel <= moduleDebugLevel && g_nstackxLogCallBack != NULL) { \
+            g_nstackxLogCallBack(moduleName, logLevel, "%s:[%d] :" format "\n", \
+                __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+        } \
     } while (0)
 
 #define LOGF(moduleName, format, ...) \

@@ -89,7 +89,10 @@ static int32_t DBDeviceNameInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s devicename fail");
             return SOFTBUS_STRCPY_ERR;
         }
-        LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", cacheInfo->deviceInfo.deviceName);
+        char *anonyDeviceName = NULL;
+        Anonymize(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
+        LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", anonyDeviceName);
+        AnonymizeFree(anonyDeviceName);
     } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
         if (strcpy_s(cacheInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, value) != EOK) {
             LNN_LOGE(LNN_BUILDER, "fail:strcpy_s unifiedname fail");
@@ -733,10 +736,7 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
 
 static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
 {
-    if (cacheInfo == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid param");
-        return;
-    }
+    LNN_CHECK_AND_RETURN_LOGW(cacheInfo != NULL, LNN_BUILDER, "invalid param");
     char accountId[INT64_TO_STR_MAX_LEN] = {0};
     if (!Int64ToString(cacheInfo->accountId, accountId, INT64_TO_STR_MAX_LEN)) {
         LNN_LOGE(LNN_BUILDER, "accountId to str fail");
@@ -755,12 +755,13 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     Anonymize(cacheInfo->networkId, &anonyNetworkId);
     char *anonyDeviceVersion = NULL;
     Anonymize(cacheInfo->deviceInfo.deviceVersion, &anonyDeviceVersion);
+    char *anonyDeviceName = NULL;
+    Anonymize(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_BUILDER,
         "Sync NodeInfo: WIFI_VERSION=%{public}" PRId64 ", BLE_VERSION=%{public}" PRId64
         ", ACCOUNT_ID=%{public}s, TRANSPORT_PROTOCOL=%{public}" PRIu64 ", FEATURE=%{public}" PRIu64
         ", CONN_SUB_FEATURE=%{public}" PRIu64 ", TIMESTAMP=%{public}" PRIu64 ", "
         "P2P_MAC_ADDR=%{public}s, PKG_VERSION=%{public}s, DEVICE_NAME=%{public}s, "
-        "UNIFIED_DEFAULT_DEVICE_NAME=%{public}s, UNIFIED_DEVICE_NAME=%{public}s, SETTINGS_NICK_NAME=%{public}s, "
         "AUTH_CAP=%{public}u, OS_TYPE=%{public}d, OS_VERSION=%{public}s, BLE_P2P=%{public}d, BT_MAC=%{public}s, "
         "DEVICE_TYPE=%{public}d, SW_VERSION=%{public}s, DEVICE_UDID=%{public}s, DEVICE_UUID=%{public}s, "
         "NETWORK_ID=%{public}s, STATE_VERSION=%{public}d, BROADCAST_CIPHER_KEY=%{public}02x, "
@@ -768,8 +769,7 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
         "DEVICE_VERSION=%{public}s",
         cacheInfo->wifiVersion, cacheInfo->bleVersion, AnonymizeWrapper(anonyAccountId), cacheInfo->supportedProtocols,
         cacheInfo->feature, cacheInfo->connSubFeature, cacheInfo->updateTimestamp, anonyP2pMac, cacheInfo->pkgVersion,
-        cacheInfo->deviceInfo.deviceName, cacheInfo->deviceInfo.unifiedDefaultName, cacheInfo->deviceInfo.unifiedName,
-        cacheInfo->deviceInfo.nickName, cacheInfo->authCapacity, cacheInfo->deviceInfo.osType,
+        anonyDeviceName, cacheInfo->authCapacity, cacheInfo->deviceInfo.osType,
         cacheInfo->deviceInfo.osVersion, cacheInfo->isBleP2p, anonyMacAddr, cacheInfo->deviceInfo.deviceTypeId,
         cacheInfo->softBusVersion, anonyUdid, anonyUuid, anonyNetworkId, cacheInfo->stateVersion,
         *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv, *cacheInfo->rpaInfo.peerIrk,
@@ -781,6 +781,7 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     AnonymizeFree(anonyUuid);
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyDeviceVersion);
+    AnonymizeFree(anonyDeviceName);
 }
 
 static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo)
