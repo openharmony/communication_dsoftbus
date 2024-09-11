@@ -456,7 +456,7 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    int32_t addResult = SOFTBUS_ERR;
+    int32_t addResult = SOFTBUS_LANE_RESOURCE_EXCEPT;
     LaneResource* resourceItem = GetValidLaneResource(linkInfo);
     if (resourceItem != NULL) {
         addResult = UpdateExistLaneResource(resourceItem, isServerSide);
@@ -711,45 +711,6 @@ int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource)
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
-static int32_t CopyAllDevIdWithoutLock(LaneLinkType type, uint8_t resourceNum, char **devIdList, uint8_t *devIdCnt)
-{
-    char (*itemList)[NETWORK_ID_BUF_LEN] =
-        (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(resourceNum * NETWORK_ID_BUF_LEN);
-    if (itemList == NULL) {
-        LNN_LOGE(LNN_LANE, "device id list calloc fail");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    char (*tmpList)[NETWORK_ID_BUF_LEN] = itemList;
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    uint8_t tmpCnt = 0;
-    LaneResource *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_laneResource.list, LaneResource, node) {
-        if (item->link.type == type) {
-            if (LnnGetNetworkIdByUdid(item->link.peerUdid, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_LANE, "get networkid fail");
-                continue;
-            }
-            if (memcpy_s(*tmpList, NETWORK_ID_BUF_LEN, networkId, NETWORK_ID_BUF_LEN) != EOK) {
-                LNN_LOGE(LNN_LANE, "memcpy networkid fail");
-                continue;
-            }
-            char *anonyNetworkId = NULL;
-            Anonymize(networkId, &anonyNetworkId);
-            LNN_LOGI(LNN_LANE, "networkId=%{public}s exist link=%{public}d", anonyNetworkId, type);
-            AnonymizeFree(anonyNetworkId);
-            tmpList += 1;
-            tmpCnt += 1;
-        }
-    }
-    if (tmpCnt == 0) {
-        SoftBusFree(itemList);
-        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
-    }
-    *devIdList = (char *)itemList;
-    *devIdCnt = tmpCnt;
-    return SOFTBUS_OK;
-}
-
 int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const char *peerUdid)
 {
     if (oldLaneId == INVALID_LANE_ID || newLaneId == INVALID_LANE_ID || peerUdid == NULL) {
@@ -807,6 +768,45 @@ int32_t CheckLaneResourceNumByLinkType(const char *peerUdid, LaneLinkType type, 
     LNN_LOGE(LNN_LANE, "no find lane resource by linktype=%{public}d, peerUdid=%{public}s", type, anonyPeerUdid);
     AnonymizeFree(anonyPeerUdid);
     return SOFTBUS_NOT_FIND;
+}
+
+static int32_t CopyAllDevIdWithoutLock(LaneLinkType type, uint8_t resourceNum, char **devIdList, uint8_t *devIdCnt)
+{
+    char (*itemList)[NETWORK_ID_BUF_LEN] =
+        (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(resourceNum * NETWORK_ID_BUF_LEN);
+    if (itemList == NULL) {
+        LNN_LOGE(LNN_LANE, "device id list calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    char (*tmpList)[NETWORK_ID_BUF_LEN] = itemList;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    uint8_t tmpCnt = 0;
+    LaneResource *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_laneResource.list, LaneResource, node) {
+        if (item->link.type == type) {
+            if (LnnGetNetworkIdByUdid(item->link.peerUdid, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LANE, "get networkid fail");
+                continue;
+            }
+            if (memcpy_s(*tmpList, NETWORK_ID_BUF_LEN, networkId, NETWORK_ID_BUF_LEN) != EOK) {
+                LNN_LOGE(LNN_LANE, "memcpy networkid fail");
+                continue;
+            }
+            char *anonyNetworkId = NULL;
+            Anonymize(networkId, &anonyNetworkId);
+            LNN_LOGI(LNN_LANE, "networkId=%{public}s exist link=%{public}d", anonyNetworkId, type);
+            AnonymizeFree(anonyNetworkId);
+            tmpList += 1;
+            tmpCnt += 1;
+        }
+    }
+    if (tmpCnt == 0) {
+        SoftBusFree(itemList);
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    *devIdList = (char *)itemList;
+    *devIdCnt = tmpCnt;
+    return SOFTBUS_OK;
 }
 
 int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt)
