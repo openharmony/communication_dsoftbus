@@ -1124,9 +1124,6 @@ static void FillProxyHandshakeExtra(
     extra->channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY;
     extra->linkType = chan->type;
 
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
-        extra->localUdid = nodeInfo->masterUdid;
-    }
     if (chan->appInfo.appType == APP_TYPE_AUTH &&
         strcpy_s(nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) != EOK) {
         extra->peerUdid = nodeInfo->deviceInfo.deviceUdid;
@@ -1134,6 +1131,9 @@ static void FillProxyHandshakeExtra(
         LnnGetRemoteNodeInfoById(chan->appInfo.peerData.deviceId, CATEGORY_UUID, nodeInfo) == SOFTBUS_OK) {
         extra->peerUdid = nodeInfo->deviceInfo.deviceUdid;
         extra->peerDevVer = nodeInfo->deviceInfo.deviceVersion;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra->localUdid = nodeInfo->masterUdid;
     }
 }
 
