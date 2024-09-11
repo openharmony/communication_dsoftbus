@@ -297,7 +297,7 @@ static void InstSetUdidForRemoteInfoByUuid(InstantRemoteInfo *remoteInfo)
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    NodeInfo nodeInfo = { 0 };
+    NodeInfo nodeInfo = { { 0 } };
     if (LnnGetRemoteNodeInfoById(remoteInfo->uuid.c_str(), CATEGORY_UUID, &nodeInfo) == SOFTBUS_OK) {
         (void)InstSetPeerDeviceIdForRemoteInfo(remoteInfo->udid, nodeInfo.deviceInfo.deviceUdid);
     }
@@ -309,7 +309,7 @@ static void InstSetUuidForRemoteInfoByUdid(InstantRemoteInfo *remoteInfo)
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    NodeInfo nodeInfo = { 0 };
+    NodeInfo nodeInfo = { { 0 } };
     if (LnnGetRemoteNodeInfoById(remoteInfo->udid.c_str(), CATEGORY_UDID, &nodeInfo) == SOFTBUS_OK) {
         (void)InstSetPeerDeviceIdForRemoteInfo(remoteInfo->uuid, nodeInfo.uuid);
     }
@@ -839,7 +839,7 @@ static void InstUpdateRemoteInfoByLnn(InstantRemoteInfo *remoteInfo, NodeBasicIn
     if (remoteInfo == NULL || info == NULL) {
         return;
     }
-    NodeInfo nodeInfo = { 0 };
+    NodeInfo nodeInfo = { { 0 } };
     if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &nodeInfo) == SOFTBUS_OK) {
         remoteInfo->udid = std::string(nodeInfo.deviceInfo.deviceUdid);
         remoteInfo->uuid = std::string(nodeInfo.uuid);

@@ -216,7 +216,10 @@ static void ProcessSyncP2pInfo(void *para)
         }
         if (IsNeedSyncP2pInfo(localInfo, &info[i]) &&
             LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "sync p2p info fail. deviceName=%{public}s", info[i].deviceName);
+            char *anonyDeviceName = NULL;
+            Anonymize(info[i].deviceName, &anonyDeviceName);
+            LNN_LOGE(LNN_BUILDER, "sync p2p info fail. deviceName=%{public}s", anonyDeviceName);
+            AnonymizeFree(anonyDeviceName);
         }
     }
     cJSON_free(msg);

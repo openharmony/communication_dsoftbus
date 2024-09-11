@@ -100,7 +100,6 @@ typedef struct {
     uint16_t protocol;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
-    uint16_t port;
 } P2pConnInfo;
 
 typedef struct {
@@ -207,18 +206,18 @@ typedef struct {
 } LaneRequestOption;
 
 typedef struct {
-    void (*onLaneLinkup)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
-    void (*onLaneLinkdown)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
-    void (*onLaneStateChange)(uint64_t laneId, LaneState state);
-} LaneStatusListener;
-
-typedef struct {
     LaneType type;
     LaneTransType transType;
     QosInfo qosRequire;
     uint32_t actionAddr;
     uint8_t udidHash[UDID_HASH_LEN];
 } RawLaneAllocInfo;
+
+typedef struct {
+    void (*onLaneLinkup)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
+    void (*onLaneLinkdown)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
+    void (*onLaneStateChange)(uint64_t laneId, LaneState state);
+} LaneStatusListener;
 
 typedef struct {
     char peerBleMac[MAX_MAC_LEN];
@@ -242,8 +241,6 @@ typedef struct {
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LaneTransType transType;
-    bool isSupportIpv6;
-    uint32_t actionAddr;
 } LaneAllocCommInfo;
 
 typedef struct {
@@ -256,7 +253,7 @@ typedef struct {
     int32_t (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
     uint32_t (*lnnGetLaneHandle)(LaneType type);
     int32_t (*lnnAllocLane)(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
-    int32_t (*lnnAllocRawLane)(uint32_t laneHandle, const RawLaneAllocInfo *request,
+    int32_t (*lnnAllocRawLane)(uint32_t laneRequestId, const RawLaneAllocInfo *request,
         const LaneAllocListener *listener);
     int32_t (*lnnReAllocLane)(uint32_t laneHandle, uint64_t laneId, const LaneAllocInfo *allocInfo,
         const LaneAllocListener *listener);
@@ -264,7 +261,6 @@ typedef struct {
         const LaneAllocListener *listener);
     int32_t (*lnnCancelLane)(uint32_t laneHandle);
     int32_t (*lnnFreeLane)(uint32_t laneHandle);
-    int32_t (*lnnQosLimit)(uint32_t laneHandle, uint32_t expectBw, uint32_t *actualBw);
     int32_t (*registerLaneListener)(LaneType type, const LaneStatusListener *listener);
     int32_t (*unRegisterLaneListener)(LaneType type);
 } LnnLaneManager;

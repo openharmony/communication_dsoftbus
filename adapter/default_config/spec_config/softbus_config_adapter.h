@@ -31,4 +31,4 @@ void SoftbusConfigAdapterInit(const ConfigSetProc *sets);
 #endif
 #endif /* __cplusplus */
 
-#endif /* SOFTBUS_CONFIG_ADAPT_H */
+#endif
