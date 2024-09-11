@@ -138,12 +138,12 @@ static ConnectCallback g_connectCallback = { 0 };
 
 static char *BleNameAvailableState(void)
 {
-    return (char *)("avaible state");
+    return "avaible state";
 }
 
 static char *BleNameConnectingState(void)
 {
-    return (char *)("connectting state");
+    return "connectting state";
 }
 
 static void BleEnterAvailableState(void)
@@ -189,8 +189,7 @@ static void DfxRecordBleConnectFail(
         .costTime = costTime,
         .peerBleMac = device->addr,
         .errcode = reason,
-        .result = EVENT_STAGE_RESULT_FAILED,
-        .peerUdid = device->udid,
+        .result = EVENT_STAGE_RESULT_FAILED
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     ConnAlarmExtra extraAlarm = {
@@ -228,7 +227,7 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
 
 static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectRequestContext *ctx)
 {
-    ConnBleRequest *request = (ConnBleRequest *)SoftBusCalloc(sizeof(ConnBleRequest));
+    ConnBleRequest *request = SoftBusCalloc(sizeof(ConnBleRequest));
     if (request == NULL) {
         CONN_LOGE(CONN_BLE, "request calloc faild");
         return SOFTBUS_MALLOC_ERR;
@@ -246,7 +245,7 @@ static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectReque
 
 static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestContext *ctx)
 {
-    ConnBleDevice *device = (ConnBleDevice *)SoftBusCalloc(sizeof(ConnBleDevice));
+    ConnBleDevice *device = SoftBusCalloc(sizeof(ConnBleDevice));
     if (device == NULL) {
         CONN_LOGE(CONN_BLE, "device calloc faild");
         return SOFTBUS_MALLOC_ERR;
@@ -1008,7 +1007,7 @@ static void ReceivedControlData(ConnBleConnection *connection, const uint8_t *da
 
 static int32_t BleReuseConnectionCommon(const char *udid, const char *anomizeAddress, ProtocolType protocol)
 {
-    ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, (BleProtocolType)protocol);
+    ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, protocol);
     if (connection == NULL) {
         return SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR;
     }
@@ -1074,7 +1073,7 @@ static int32_t BleReuseConnectionRequestOnConnectingState(const ConnBleReuseConn
     }
 
     // merge connect request
-    ConnBleRequest *request = (ConnBleRequest *)SoftBusCalloc(sizeof(ConnBleRequest));
+    ConnBleRequest *request = SoftBusCalloc(sizeof(ConnBleRequest));
     if (request == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -1738,8 +1737,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udidHashStr);
 
-    ConnBleConnectRequestContext *ctx =
-        (ConnBleConnectRequestContext *)SoftBusCalloc(sizeof(ConnBleConnectRequestContext));
+    ConnBleConnectRequestContext *ctx = SoftBusCalloc(sizeof(ConnBleConnectRequestContext));
     CONN_CHECK_AND_RETURN_RET_LOGE(ctx != NULL, SOFTBUS_MEM_ERR, CONN_BLE,
         "calloc connect request context object failed: reqId=%{public}u, addr=%{public}s, udid=%{public}s",
         requestId, anomizeAddress, anomizeUdid);
@@ -1914,7 +1912,8 @@ static void OnConnectFailed(uint32_t connectionId, int32_t error)
 {
     CONN_LOGW(CONN_BLE,
         "receive ble client connect failed notify, connId=%{public}u, err=%{public}d", connectionId, error);
-    BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
+    BleStatusContext *ctx = SoftBusCalloc(sizeof(BleStatusContext));
+
     CONN_CHECK_AND_RETURN_LOGW(ctx != NULL, CONN_BLE, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;
     ctx->status = error;
@@ -1923,7 +1922,7 @@ static void OnConnectFailed(uint32_t connectionId, int32_t error)
 
 static void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *data, uint32_t dataLen)
 {
-    ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)SoftBusCalloc(sizeof(ConnBleDataReceivedContext));
+    ConnBleDataReceivedContext *ctx = SoftBusCalloc(sizeof(ConnBleDataReceivedContext));
     if (ctx == NULL) {
         CONN_LOGE(CONN_BLE,
             "calloc data received context failed, "
@@ -1948,7 +1947,7 @@ static void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uin
 
 static void OnConnectionClosed(uint32_t connectionId, int32_t status)
 {
-    BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
+    BleStatusContext *ctx = SoftBusCalloc(sizeof(BleStatusContext));
     CONN_CHECK_AND_RETURN_LOGW(ctx != NULL, CONN_BLE, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;
     ctx->status = status;
@@ -1994,7 +1993,7 @@ static void OnBtStateChanged(int listenerId, int state)
     if (state == SOFTBUS_BLE_STATE_TURN_OFF) {
         status = ConnBleStopServer();
         CONN_LOGI(CONN_BLE, "ble manager receive bt off event, stop server, status=%{public}d", status);
-        BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
+        BleStatusContext *ctx = SoftBusCalloc(sizeof(BleStatusContext));
         if (ctx == NULL) {
             CONN_LOGE(CONN_BLE,
                 "ble manager receive bt off event, send reset event failed: calloc ctx object failed");
@@ -2066,7 +2065,7 @@ static bool ConflictPostBytes(int32_t underlayHandle, uint8_t *data, uint32_t da
     ConnBleReturnConnection(&connection);
 
     uint32_t payloadLen = ConnGetHeadSize() + dataLen;
-    uint8_t *payload = (uint8_t *)SoftBusCalloc(payloadLen);
+    uint8_t *payload = SoftBusCalloc(payloadLen);
     CONN_CHECK_AND_RETURN_RET_LOGE(payload != NULL, false, CONN_BLE,
         "conflict post bytes failed: alloc payload failed, underlayHandle=%{public}d", underlayHandle);
 
@@ -2113,7 +2112,7 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK, CONN_BLE,
         "ATTENTION UNEXPECTED ERROR! conflict occupy failed: try to lock failed, udid=%{public}s", anomizeUdid);
     do {
-        char *copyUdid = (char *)SoftBusCalloc(UDID_BUF_LEN);
+        char *copyUdid = SoftBusCalloc(UDID_BUF_LEN);
         if (copyUdid == NULL) {
             CONN_LOGE(CONN_BLE, "calloc udid failed, udid=%{public}s", anomizeUdid);
             break;
@@ -2141,7 +2140,7 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
             ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
             break;
         }
-        BlePrevent *prevent = (BlePrevent *)SoftBusCalloc(sizeof(BlePrevent));
+        BlePrevent *prevent = SoftBusCalloc(sizeof(BlePrevent));
         if (prevent == NULL) {
             SoftBusFree(copyUdid);
             CONN_LOGE(CONN_BLE, "calloc prevent object failed, udid=%{public}s", anomizeUdid);

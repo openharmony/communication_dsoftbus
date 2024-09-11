@@ -15,11 +15,11 @@
 
 #include "wifi_direct_utils.h"
 #include "bus_center_manager.h"
+#include "data/link_manager.h"
 #include "conn_log.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_node_info.h"
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "syspara/parameters.h"
@@ -143,7 +143,7 @@ int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
     int channelIdLnn = 0;
     ret = LnnGetRecommendChannel(udid, &channelIdLnn);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn failed, ret = %{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn fail, ret = %{public}d", ret);
     return channelIdLnn;
 }
 
@@ -414,7 +414,7 @@ int32_t WifiDirectUtils::IpStringToIntArray(const char *addrString, uint32_t *ad
 std::string WifiDirectUtils::ChannelListToString(const std::vector<int> &channels)
 {
     std::string stringChannels;
-    for (size_t i = 0; i < channels.size(); i++) {
+    for (auto i = 0; i < channels.size(); i++) {
         if (i != 0) {
             stringChannels += "##";
         }
@@ -520,9 +520,9 @@ void WifiDirectUtils::ParallelFlowExit()
 
 uint32_t WifiDirectUtils::CalculateStringLength(const char *str, uint32_t size)
 {
-    for (int32_t i = static_cast<int32_t>(size - 1); i >= 0; i--) {
+    for (int32_t i = static_cast<int32_t>(size) - 1; i >= 0; i--) {
         if (str[i] != '\0') {
-            return static_cast<uint32_t>(i + 1);
+            return static_cast<uint32_t>(i) + 1;
         }
     }
     return 0;
@@ -550,15 +550,36 @@ void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &
     LnnSyncP2pInfo();
 }
 
-int32_t WifiDirectUtils::GetOsType(const std::string &remoteNetworkId)
+static constexpr int DFS_CHANNEL_FIRST = 52;
+static constexpr int DFS_CHANNEL_LAST = 64;
+bool WifiDirectUtils::IsDfsChannel(const int &frequency)
 {
+    int channel = FrequencyToChannel(frequency);
+    CONN_LOGI(CONN_WIFI_DIRECT, "channel=%{public}d", channel);
+    if (channel >= DFS_CHANNEL_FIRST && channel <= DFS_CHANNEL_LAST) {
+        return true;
+    }
+    return false;
+}
+
+bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type)
+{
+    bool dfsLinkIsExist = false;
+    auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
     int32_t osType = OH_OS_TYPE;
     if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
-        return osType;
+        return false;
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "get os type success, osType=%{public}d", osType);
-    return osType;
+    LinkManager::GetInstance().ForEach([&dfsLinkIsExist, osType, type](InnerLink &link) {
+        if (link.GetLinkType() == type && osType != OH_OS_TYPE && IsDfsChannel(link.GetFrequency())) {
+            dfsLinkIsExist = true;
+            return true;
+        }
+        return false;
+    });
+    CONN_LOGI(CONN_WIFI_DIRECT, "dfsLinkIsExist=%{public}d", dfsLinkIsExist);
+    return dfsLinkIsExist;
 }
 
 } // namespace OHOS::SoftBus

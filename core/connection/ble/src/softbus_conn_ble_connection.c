@@ -104,7 +104,7 @@ ConnBleConnection *ConnBleCreateConnection(
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(addr != NULL, NULL, CONN_BLE, "invalid parameter: ble addr is NULL");
 
-    ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+    ConnBleConnection *connection = SoftBusCalloc(sizeof(ConnBleConnection));
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, NULL, CONN_BLE, "calloc ble connection failed");
     ListInit(&connection->node);
     // the final connectionId value is allocate on saving global
@@ -141,8 +141,8 @@ ConnBleConnection *ConnBleCreateConnection(
     SoftBusList *list = CreateSoftBusList();
     if (list == NULL) {
         CONN_LOGE(CONN_BLE, "create softbus list failed");
-        SoftBusFree(connection);
         SoftBusMutexDestroy(&connection->lock);
+        SoftBusFree(connection);
         return NULL;
     }
     connection->connectStatus = list;
@@ -287,6 +287,7 @@ int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconne
     return interface->bleServerDisconnect(connection);
 }
 
+
 static void OnDisconnectedDataFinished(uint32_t connectionId, int32_t error)
 {
     if (error != SOFTBUS_OK) {
@@ -334,7 +335,6 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
 {
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "Lock faild, err=%{public}d", status);
         return SOFTBUS_LOCK_ERR;
     }
     int32_t underlayerHandle = connection->underlayerHandle;
@@ -874,8 +874,8 @@ void BleOnServerStarted(BleProtocolType protocol, int32_t status)
         "on server start event handle failed, try to lock failed");
     g_serverCoordination.status[protocol] = status;
     g_serverCoordination.actual =
-        ((g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK) && (g_serverCoordination.status[BLE_COC] == SOFTBUS_OK ?
-                BLE_SERVER_STATE_STARTED : BLE_SERVER_STATE_STOPPED));
+        (g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK && g_serverCoordination.status[BLE_COC] == SOFTBUS_OK ?
+                BLE_SERVER_STATE_STARTED : BLE_SERVER_STATE_STOPPED);
     if (g_serverCoordination.expect != g_serverCoordination.actual) {
         ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_RETRY_SERVER_STATE_CONSISTENT, 0, 0, NULL,
             RETRY_SERVER_STATE_CONSISTENT_MILLIS);

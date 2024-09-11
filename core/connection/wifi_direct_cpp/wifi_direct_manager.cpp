@@ -38,7 +38,7 @@ static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static WifiDirectEnhanceManager g_enhanceManager;
 static SyncPtkListener g_syncPtkListener;
 
-static uint32_t GetRequestId(void)
+static uint32_t GetRequestId()
 {
     return g_requestId++;
 }
@@ -69,7 +69,7 @@ static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExt
     }
 }
 
-static int32_t AllocateListenerModuleId(void)
+static int32_t AllocateListenerModuleId()
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::lock_guard lock(g_listenerModuleIdLock);
@@ -224,7 +224,7 @@ static void AddSyncPtkListener(SyncPtkListener listener)
     g_syncPtkListener = listener;
 }
 
-static OHOS::SoftBus::InnerLink::LinkType LinkTypeConver(enum WifiDirectLinkType linkType)
+static  OHOS::SoftBus::InnerLink::LinkType LinkTypeConver(enum WifiDirectLinkType linkType)
 {
     switch (linkType) {
         case WIFI_DIRECT_LINK_TYPE_HML:
@@ -251,15 +251,6 @@ static bool IsNoneLinkByType(enum WifiDirectLinkType linkType)
             return false;
         });
     return result;
-}
-
-static void StopCustomListening(void)
-{
-    if (g_enhanceManager.stopCustomListening == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
-        return;
-    }
-    return g_enhanceManager.stopCustomListening();
 }
 
 static bool IsDeviceOnline(const char *remoteMac)
@@ -506,19 +497,6 @@ static void RegisterEnhanceManager(WifiDirectEnhanceManager *manager)
     g_enhanceManager = *manager;
 }
 
-static bool IsHmlConnected()
-{
-    bool ret = false;
-    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
-        if (innerLink.GetLinkType() == OHOS::SoftBus::InnerLink::LinkType::HML) {
-            ret = true;
-            return true;
-        }
-        return false;
-    });
-    return ret;
-}
-
 static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
 {
     if (g_syncPtkListener == nullptr) {
@@ -528,7 +506,7 @@ static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
     g_syncPtkListener(remoteDeviceId, result);
 }
 
-static int32_t Init(void)
+static int32_t Init()
 {
     CONN_LOGI(CONN_INIT, "init enter");
     OHOS::SoftBus::WifiDirectInitiator::GetInstance().Init();
@@ -554,8 +532,6 @@ static struct WifiDirectManager g_manager = {
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
 
-    .stopCustomListening = StopCustomListening,
-
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
@@ -565,7 +541,6 @@ static struct WifiDirectManager g_manager = {
     .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
-    .isHmlConnected = IsHmlConnected,
 
     .init = Init,
     .notifyOnline = NotifyOnline,

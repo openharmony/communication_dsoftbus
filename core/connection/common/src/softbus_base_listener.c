@@ -38,7 +38,6 @@
 #define DEFAULT_BACKLOG   4
 #define FDARR_EXPAND_BASE 2
 #define SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS (3 * 1000)
-#define SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS (3 * 10) /* wait retry time for an abnotmal event by select*/
 
 enum BaseListenerStatus {
     LISTENER_IDLE = 0,
@@ -383,7 +382,7 @@ static int32_t StartServerListenUnsafe(SoftbusListenerNode *node, const LocalLis
         if (listenFd < 0) {
             CONN_LOGE(CONN_COMMON, "create server socket failed: module=%{public}d, listenFd=%{public}d",
                 module, listenFd);
-            status = SOFTBUS_TCP_SOCKET_ERR;
+            status = listenFd;
             break;
         }
         status = SoftBusSocketListen(listenFd, DEFAULT_BACKLOG);
@@ -490,7 +489,7 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
         if (listenPort <= 0) {
             CONN_LOGE(CONN_COMMON, "start server failed, module=%{public}d, listenPort=%{public}d",
                 module, listenPort);
-            status = SOFTBUS_CONN_FAIL;
+            status = listenPort;
             break;
         }
 
@@ -603,9 +602,7 @@ static bool IsValidTriggerType(TriggerType trigger)
 bool IsListenerNodeExist(ListenerModule module)
 {
     SoftbusListenerNode *node = GetListenerNode(module);
-    bool exist = (node != NULL);
-    ReturnListenerNode(&node);
-    return exist;
+    return node != NULL;
 }
 
 int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
@@ -1169,8 +1166,8 @@ static void *SelectTask(void *arg)
         if (nEvents < 0) {
             CONN_LOGE(CONN_COMMON, "unexpect wakeup, retry after some times. "
                                    "waitDelay=%{public}dms, wakeupTraceId=%{public}d, events=%{public}d",
-                SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
-            SoftBusSleepMs(SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
+                SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
+            SoftBusSleepMs(SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS);
             continue;
         }
         CONN_LOGI(CONN_COMMON, "select task, wakeup from select, selectTrace=%{public}d, wakeupTraceId=%{public}d, "

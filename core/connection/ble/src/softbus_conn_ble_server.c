@@ -495,8 +495,8 @@ static int32_t BleNetDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
     };
     rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
-        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
-        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
+            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
+            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
         SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
     if (rc != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "underlayer add characteristic failed, err=%{public}d", rc);
@@ -546,7 +546,7 @@ static void BleServiceStartCallback(int32_t status, int32_t srvcHandle)
 {
     CONN_LOGI(CONN_BLE,
         "gatt server callback, service start, srvcHandle=%{public}u, status=%{public}d", srvcHandle, status);
-    CommonStatusMsgContext *ctx = (CommonStatusMsgContext *)SoftBusCalloc(sizeof(CommonStatusMsgContext));
+    CommonStatusMsgContext *ctx = SoftBusCalloc(sizeof(CommonStatusMsgContext));
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BLE, "calloc service start status msg failed");
     ctx->srvcHandle = srvcHandle;
     ctx->status = status;
@@ -751,7 +751,8 @@ static void BleServiceStopCallback(int32_t status, int32_t srvcHandle)
 {
     CONN_LOGI(CONN_BLE,
         "gatt server callback, service stop, srvcHandle=%{public}u, status=%{public}d", srvcHandle, status);
-    CommonStatusMsgContext *ctx = (CommonStatusMsgContext *)SoftBusCalloc(sizeof(CommonStatusMsgContext));
+    CommonStatusMsgContext *ctx = SoftBusCalloc(sizeof(CommonStatusMsgContext));
+
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BLE,
         "receive gatt server callback, service stop handle failed: calloc service stop status msg failed");
     ctx->srvcHandle = srvcHandle;
@@ -813,7 +814,7 @@ static void BleServiceDeleteCallback(int32_t status, int32_t srvcHandle)
 {
     CONN_LOGI(CONN_BLE,
         "gatt server callback, service deleted, srvcHandle=%{public}u, status=%{public}d", srvcHandle, status);
-    CommonStatusMsgContext *ctx = (CommonStatusMsgContext *)SoftBusCalloc(sizeof(CommonStatusMsgContext));
+    CommonStatusMsgContext *ctx = SoftBusCalloc(sizeof(CommonStatusMsgContext));
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BLE,
         "gatt server callback, service deleted handle failed: calloc service stop status msg failed");
     ctx->srvcHandle = srvcHandle;

@@ -15,11 +15,13 @@
 
 #include "softbus_wifi_api_adapter.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "lnn_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_hid2d.h"
@@ -131,11 +133,12 @@ int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num
 
 int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
 {
+    WifiDeviceConfig wifiDevConfig;
+
     if (wifiConfig == NULL) {
         LNN_LOGE(LNN_STATE, "para wifiConfig is NULL");
         return SOFTBUS_ERR;
     }
-    WifiDeviceConfig wifiDevConfig;
     (void)memset_s(&wifiDevConfig, sizeof(WifiDeviceConfig), 0, sizeof(WifiDeviceConfig));
     if (ConvertWifiDevConfFromSoftBusWifiConf(wifiConfig, &wifiDevConfig) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "convert wifi config failed");
@@ -160,7 +163,10 @@ static bool g_registerFlag = true;
 
 int32_t SoftBusStartWifiScan(void)
 {
-    if (Scan() != WIFI_SUCCESS) {
+    int32_t ret;
+
+    ret = Scan();
+    if (ret != WIFI_SUCCESS) {
         LNN_LOGE(LNN_STATE, "softbus start wifi scan failed");
         return SOFTBUS_ERR;
     }
@@ -197,10 +203,7 @@ static int32_t FindFreeCallbackIndex(void)
 
 int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
 {
-    if (cb == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid para");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    int32_t ret;
 
     int index = FindFreeCallbackIndex();
     if (index == MAX_CALLBACK_NUM) {
@@ -209,7 +212,6 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
     }
     g_scanResultCb[index] = cb;
 
-    int32_t ret = 0;
     if (g_registerFlag) {
         ret = RegisterWifiEvent(&g_event);
         if (ret == WIFI_SUCCESS) {
@@ -222,7 +224,7 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
     return SOFTBUS_OK;
 }
 
-static int32_t ConvertSoftBusWifiScanInfoFromWifi(WifiScanInfo *info, SoftBusWifiScanInfo *result, const uint32_t *size)
+static int32_t ConvertSoftBusWifiScanInfoFromWifi(WifiScanInfo *info, SoftBusWifiScanInfo *result, uint32_t *size)
 {
     if (info == NULL || result == NULL || size == NULL) {
         LNN_LOGE(LNN_STATE, "invalid para");
@@ -301,10 +303,7 @@ static bool IsScanResultCbEmpty(void)
 
 int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
 {
-    if (cb == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid para");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    int32_t ret;
 
     for (int i = 0; i < MAX_CALLBACK_NUM; i++) {
         if (g_scanResultCb[i] == cb) {
@@ -312,7 +311,6 @@ int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
         }
     }
 
-    int32_t ret = 0;
     if (IsScanResultCbEmpty()) {
         ret = UnRegisterWifiEvent(&g_event);
         if (ret == WIFI_SUCCESS) {
@@ -352,17 +350,13 @@ SoftBusBand SoftBusGetLinkBand(void)
     } else if (result.band == BAND_5G) {
         return BAND_5G;
     } else {
-        LNN_LOGE(LNN_STATE, "band unknown");
+        LNN_LOGE(LNN_STATE, "get SoftBusGetLinkBand success");
         return BAND_UNKNOWN;
     }
 }
 
 int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
 {
-    if (info == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid para");
-        return SOFTBUS_INVALID_PARAM;
-    }
     WifiLinkedInfo result;
     if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
         LNN_LOGE(LNN_STATE, "get SoftBusGetLinkedInfo failed");
@@ -379,10 +373,6 @@ int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
 
 int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
 {
-    if (groupInfo == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid para");
-        return SOFTBUS_INVALID_PARAM;
-    }
     WifiP2pGroupInfo result;
     if (GetCurrentGroup(&result) != WIFI_SUCCESS) {
         LNN_LOGD(LNN_STATE, "get SoftBusGetCurrentGroup failed");
