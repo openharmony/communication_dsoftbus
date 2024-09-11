@@ -540,7 +540,10 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "param is null");
         return;
     }
-    SOFTBUS_DPRINTF(fd, "DeviceName = %s\n", nodeInfo->deviceName);
+    char *anonyDeviceName = NULL;
+    Anonymize(nodeInfo->deviceName, &anonyDeviceName);
+    SOFTBUS_DPRINTF(fd, "DeviceName = %s\n", anonyDeviceName);
+    AnonymizeFree(anonyDeviceName);
     char *anonyNetworkId = NULL;
     Anonymize(nodeInfo->networkId, &anonyNetworkId);
     SOFTBUS_DPRINTF(fd, "NetworkId = %s\n", anonyNetworkId);

@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "data_ability_observer_stub.h"
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
@@ -119,7 +120,10 @@ static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
         dataShareHelper->Release();
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "GetDeviceNameFromDataShareHelper, deviceName=%{public}s.", deviceName);
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    LNN_LOGI(LNN_STATE, "GetDeviceNameFromDataShareHelper, deviceName=%{public}s.", anonyDeviceName);
+    AnonymizeFree(anonyDeviceName);
     resultSet->Close();
     dataShareHelper->Release();
     return SOFTBUS_OK;
