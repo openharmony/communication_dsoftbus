@@ -23,6 +23,7 @@
 #include "softbus_def.h"
 #include "softbus_socket.h"
 #include "softbus_type_def.h"
+#include "anonymizer.h"
 
 #define HIGH_PRIORITY_DEFAULT_LIMIT   32
 #define MIDDLE_PRIORITY_DEFAULT_LIMIT 32
@@ -35,6 +36,18 @@ static const int32_t QUEUE_LIMIT[QUEUE_NUM_PER_PID] = {
     MIDDLE_PRIORITY_DEFAULT_LIMIT,
     LOW_PRIORITY_DEFAULT_LIMIT,
 };
+
+static void AnonymizeData(char *outAnomize, uint32_t anomizeLen, const char *data)
+{
+    char *temp = NULL;
+    Anonymize(data, &temp);
+    if (strcpy_s(outAnomize, anomizeLen, AnonymizeWrapper(temp)) != EOK) {
+        CONN_LOGE(CONN_COMMON, "copy anonymize data fail");
+        AnonymizeFree(temp);
+        return;
+    }
+    AnonymizeFree(temp);
+}
 
 int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *taskName)
 {
@@ -52,41 +65,7 @@ void ConvertAnonymizeMacAddress(char *outAnomize, uint32_t anomizeLen, const cha
     if (anomizeLen < BT_MAC_LEN || macLen != BT_MAC_LEN) {
         return;
     }
-
-    if (strcpy_s(outAnomize, anomizeLen, mac) != EOK) {
-        return;
-    }
-    // anomize format: 11:**:**:**:44:55
-    outAnomize[3] = '*';
-    outAnomize[4] = '*';
-    outAnomize[6] = '*';
-    outAnomize[7] = '*';
-    outAnomize[9] = '*';
-    outAnomize[10] = '*';
-}
-
-static void AnonymizeIpv6(char *outAnomize, uint32_t anomizeLen)
-{
-    uint32_t dotCnt = 0;
-    for (uint32_t i = 0; i < anomizeLen; i++) {
-        if (outAnomize[i] == '\0') {
-            break;
-        }
-        if (outAnomize[i] == ':') {
-            dotCnt += 1;
-        }
-    }
-    uint32_t index = 0;
-    for (uint32_t i = 0; i < anomizeLen; i++) {
-        if (outAnomize[i] == '\0') {
-            break;
-        }
-        if (outAnomize[i] == ':') {
-            index += 1;
-        } else if (index < dotCnt) {
-            outAnomize[i] = '*';
-        }
-    }
+    AnonymizeData(outAnomize, anomizeLen, mac);
 }
 
 void ConvertAnonymizeIpAddress(char *outAnomize, uint32_t anomizeLen, const char *ip, uint32_t ipLen)
@@ -94,27 +73,7 @@ void ConvertAnonymizeIpAddress(char *outAnomize, uint32_t anomizeLen, const char
     if (anomizeLen < IP_LEN || ipLen != IP_LEN) {
         return;
     }
-
-    if (strcpy_s(outAnomize, anomizeLen, ip) != EOK) {
-        return;
-    }
-    int32_t domain = GetDomainByAddr(ip);
-    if (domain == SOFTBUS_AF_INET6) {
-        AnonymizeIpv6(outAnomize, anomizeLen);
-        return;
-    }
-    uint32_t dotCnt = 0;
-    for (uint32_t i = 0; i < anomizeLen; i++) {
-        if (outAnomize[i] == '\0') {
-            break;
-        }
-
-        if (outAnomize[i] == '.') {
-            dotCnt += 1;
-        } else if (dotCnt >= 1 && dotCnt <= 2) {
-            outAnomize[i] = '*';
-        }
-    }
+    AnonymizeData(outAnomize, anomizeLen, ip);
 }
 
 void ConvertAnonymizeSensitiveString(char *outAnomize, uint32_t anomizeLen, const char *origin)
@@ -122,18 +81,7 @@ void ConvertAnonymizeSensitiveString(char *outAnomize, uint32_t anomizeLen, cons
     if (outAnomize == NULL || origin == NULL) {
         return;
     }
-    uint32_t originStrLen = (uint32_t)strlen(origin);
-    if (anomizeLen < originStrLen + 1) {
-        return;
-    }
-    if (strcpy_s(outAnomize, anomizeLen, origin) != EOK) {
-        return;
-    }
-
-    uint32_t anomizeSize = originStrLen / 3;
-    for (uint32_t i = anomizeSize; i < originStrLen - anomizeSize; i++) {
-        outAnomize[i] = '*';
-    }
+    AnonymizeData(outAnomize, anomizeLen, origin);
 }
 
 static void ConnFreeMessage(SoftBusMessage *msg)
