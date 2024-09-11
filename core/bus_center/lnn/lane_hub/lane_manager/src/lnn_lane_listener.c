@@ -548,9 +548,10 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
         AnonymizeFree(anonyUuid);
         return;
     }
+    LaneLinkType linkType = link->linkType == WIFI_DIRECT_LINK_TYPE_HML ? LANE_HML : LANE_P2P;
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    if (FindLaneResourceByLinkType(nodeInfo.deviceInfo.deviceUdid, LANE_HML, &resourceItem) != SOFTBUS_OK) {
+    if (FindLaneResourceByLinkType(nodeInfo.deviceInfo.deviceUdid, linkType, &resourceItem) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "find lane resource fail");
         return;
     }
