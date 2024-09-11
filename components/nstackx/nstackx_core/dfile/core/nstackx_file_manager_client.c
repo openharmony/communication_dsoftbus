@@ -32,8 +32,6 @@
 
 #define TAG "nStackXDFile"
 
-static int g_num = 0;
-
 static void CheckSendListFullAndWait(FileManager *fileManager, sem_t *sem)
 {
     int32_t semValue;
@@ -442,16 +440,11 @@ static FileDataFrame *CreateSendBlockFrame(FileManager *fileManager, FileListTas
     fileDataFrame->header.transId = htons(fileList->transId);
     fileDataFrame->header.type = NSTACKX_DFILE_FILE_DATA_FRAME;
     if (isEndFrame) {
-        DFILE_LOGI(TAG, "end frame");
         fileDataFrame->header.flag |= NSTACKX_DFILE_DATA_FRAME_END_FLAG;
     } else if (isStartFrame) {
         fileDataFrame->header.flag |= NSTACKX_DFILE_DATA_FRAME_START_FLAG;
     } else {
         fileDataFrame->header.flag |= NSTACKX_DFILE_DATA_FRAME_CONTINUE_FLAG;
-    }
-    g_num++;
-    if (g_num % 100 == 0) {
-        DFILE_LOGI(TAG, "create frame:%d", g_num);
     }
     return fileDataFrame;
 }
