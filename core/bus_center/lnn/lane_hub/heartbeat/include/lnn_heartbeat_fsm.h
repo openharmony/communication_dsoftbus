@@ -83,6 +83,7 @@ typedef struct {
     bool isNeedRestart;
     bool hasScanRsp;
     bool isFirstBegin;
+    bool isFast;
 } LnnProcessSendOnceMsgPara;
 
 int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
