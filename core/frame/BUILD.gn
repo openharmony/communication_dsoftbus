@@ -283,6 +283,7 @@ if (defined(ohos_lite)) {
       external_deps += [
         "access_token:libaccesstoken_sdk",
         "access_token:libprivacy_sdk",
+        "access_token:libtokenid_sdk",
         "device_auth:deviceauth_sdk",
         "hilog:libhilog",
         "ipc:ipc_core",
