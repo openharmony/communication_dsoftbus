@@ -129,7 +129,15 @@ void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
     if (nc == nullptr) {
         return;
     }
-    if (nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_CONN_V1_REQ) {
+    auto messageType = nc->GetNegotiateMessage().GetLegacyP2pCommandType();
+    CONN_LOGI(CONN_WIFI_DIRECT, "messageType = %{public}d", messageType);
+    std::set<LegacyCommandType> vaildMessageTypes = {
+        LegacyCommandType::CMD_CONN_V1_REQ,
+        LegacyCommandType::CMD_DISCONNECT_V1_REQ,
+        LegacyCommandType::CMD_REUSE_REQ,
+        LegacyCommandType::CMD_FORCE_DISCONNECT_V1_REQ,
+    };
+    if (vaildMessageTypes.find(messageType) == vaildMessageTypes.end()) {
         return;
     }
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().QueueCommandFront(*nc);
@@ -459,10 +467,15 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingReuseResponseState(std::sha
             StopTimer();
             ret = ProcessReuseResponse(command);
             CleanupIfNeed(ret, command->GetRemoteDeviceId());
-            Terminate();
+            break;
         default:
             (void)ProcessNegotiateCommandCommon(command);
             break;
+    }
+    if (ret != SOFTBUS_OK) {
+        connectCommand_->OnFailure(ret);
+        connectCommand_ = nullptr;
+        Terminate();
     }
 }
 
@@ -498,10 +511,13 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::sha
             connectCommand_ = nullptr;
         }
     }
-    if (ret == SOFTBUS_OK && terminate && !active_) {
+    if (ret == SOFTBUS_OK && terminate) {
         WifiDirectSinkLink sinkLink {};
         if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
-            GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
+            GetWifiDirectManager()->notifyOnline(sinkLink.remoteMac, sinkLink.remoteIp, sinkLink.remoteUuid, active_);
+            if (!active_) {
+                GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
+            }
         }
     }
     if (terminate) {
@@ -570,9 +586,10 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
     });
 
     CONN_LOGI(CONN_WIFI_DIRECT, "send hand shake message success");
-    if (!active_) {
-        WifiDirectSinkLink sinkLink {};
-        if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+    WifiDirectSinkLink sinkLink {};
+    if (GenerateSinkLink(sinkLink) == SOFTBUS_OK) {
+        GetWifiDirectManager()->notifyOnline(sinkLink.remoteMac, sinkLink.remoteIp, sinkLink.remoteUuid, active_);
+        if (!active_) {
             GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
         }
     }
@@ -1174,7 +1191,13 @@ int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &comm
         CONN_LOGE(CONN_WIFI_DIRECT,
             "local reuse failed, send disconnect to remote for decreasing reference, error=%{public}d", ret);
         SendDisconnectRequest(*command->GetNegotiateChannel());
-        return SOFTBUS_OK;
+        CONN_LOGI(CONN_WIFI_DIRECT,
+            "wait for p2p auth to send data, DISCONNECT_WAIT_POST_REQUEST_MS=%{public}dms",
+            DISCONNECT_WAIT_POST_REQUEST_MS);
+        SoftBusSleepMs(DISCONNECT_WAIT_POST_REQUEST_MS);
+        connectCommand_->OnFailure(ret);
+        connectCommand_ = nullptr;
+        Terminate();
     }
 
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
@@ -1681,7 +1704,7 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
     std::vector<int> goChannels;
     int32_t ret = P2pAdapter::GetChannel5GListIntArray(goChannels);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local Channel list failed, error=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local channel list failed, error=%{public}d", ret);
 
     for (auto goChannel : goChannels) {
         if (std::find(gcChannels.begin(), gcChannels.end(), goChannel) != gcChannels.end()) {
@@ -1845,14 +1868,6 @@ int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
     if (reuseCount == 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount already 0, do not call entity disconnect");
         return SOFTBUS_OK;
-    }
-    if (reuseCount <= 1) {
-        LinkManager::GetInstance().ProcessIfPresent(
-            InnerLink::LinkType::P2P, remoteDeviceId, [](InnerLink &link) {
-                if (link.GetReference() < 1) {
-                    link.SetState(InnerLink::LinkState::DISCONNECTING);
-                }
-        });
     }
     P2pAdapter::DestroyGroupParam param { IF_NAME_P2P0 };
     auto result = P2pEntity::GetInstance().Disconnect(param);

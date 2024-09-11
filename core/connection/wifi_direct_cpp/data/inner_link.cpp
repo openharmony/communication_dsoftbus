@@ -42,15 +42,30 @@ InnerLink::InnerLink(LinkType type, const std::string &remoteDeviceId)
 InnerLink::~InnerLink()
 {
     auto listenerModuleId = GetListenerModule();
+    bool hasAnotherUsed = false;
+    LinkManager::GetInstance().ForEach([&hasAnotherUsed, this](InnerLink &innerLink) {
+        if (innerLink.GetLinkType() == InnerLink::LinkType::P2P && innerLink.GetLocalIpv4() == this->GetLocalIpv4() &&
+            innerLink.GetRemoteDeviceId() != this->GetRemoteDeviceId()) {
+                hasAnotherUsed = true;
+            }
+        return false;
+    });
+    CONN_LOGI(CONN_WIFI_DIRECT, "hasAnotherUsed=%{public}d", hasAnotherUsed);
     if (listenerModuleId != UNUSE_BUTT) {
         CONN_LOGI(CONN_WIFI_DIRECT, "stop auth listening");
         if (GetLinkType() == LinkType::HML) {
             AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_ENHANCED_P2P, listenerModuleId);
+            if (GetLocalCustomPort() > 0) {
+                CONN_LOGI(CONN_WIFI_DIRECT, "localCustomPort=%{public}d, stop custom listening", GetLocalCustomPort());
+                AuthNegotiateChannel::StopCustomListening();
+            }
         } else {
-            AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_P2P, listenerModuleId);
+            if (!hasAnotherUsed) {
+                AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_P2P, listenerModuleId);
+            }
         }
     }
-    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty()) {
+    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() && !hasAnotherUsed) {
         CONN_LOGI(CONN_WIFI_DIRECT, "release ip");
         WifiDirectIpManager::GetInstance().ReleaseIpv4(
             GetLocalInterface(), Ipv4Info(GetLocalIpv4()), Ipv4Info(GetRemoteIpv4()), GetRemoteBaseMac());
@@ -257,14 +272,24 @@ void InnerLink::SetPtk(bool value)
     Set(InnerLinKey::HAS_PTK, value);
 }
 
-int32_t InnerLink::GetCustomPort() const
+int32_t InnerLink::GetLocalCustomPort() const
 {
-    return Get(InnerLinKey::CUSTOM_PORT, 0);
+    return Get(InnerLinKey::LOCAL_CUSTOM_PORT, 0);
 }
 
-void InnerLink::SetCustomPort(int32_t value)
+void InnerLink::SetLocalCustomPort(int32_t value)
 {
-    Set(InnerLinKey::CUSTOM_PORT, value);
+    Set(InnerLinKey::LOCAL_CUSTOM_PORT, value);
+}
+
+int32_t InnerLink::GetRemoteCustomPort() const
+{
+    return Get(InnerLinKey::REMOTE_CUSTOM_PORT, 0);
+}
+
+void InnerLink::SetRemoteCustomPort(int32_t value)
+{
+    Set(InnerLinKey::REMOTE_CUSTOM_PORT, value);
 }
 
 bool InnerLink::GetNewPtkFrame() const
@@ -309,7 +334,7 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, 
         CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy failed, link id=%{public}d", link.linkId);
         // fall-through
     }
-    link.remotePort = GetCustomPort();
+    link.remotePort = GetRemoteCustomPort();
 }
 
 void InnerLink::AddId(int linkId, uint32_t requestId, int pid)
@@ -374,7 +399,8 @@ void InnerLink::Dump() const
     object["LOCAL_PORT"] = GetLocalPort();
     object["LISTENER_MODULE_ID"] = GetListenerModule();
     object["NEGOTIATION_CHANNEL"] = channel_ != nullptr;
-    object["CUSTOM_PORT"] = GetCustomPort();
+    object["LOCAL_CUSTOM_PORT"] = GetLocalCustomPort();
+    object["REMOTE_CUSTOM_PORT"] = GetRemoteCustomPort();
 
     auto linkIdArrayObject = nlohmann::json::array();
     for (const auto &[key, value] : linkIds_) {

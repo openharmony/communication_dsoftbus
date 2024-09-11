@@ -132,6 +132,11 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthOpenConn(info, requestId, callback, isMeta);
 }
 
+void AuthStopListening(AuthLinkType type)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthStopListening(type);
+}
+
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalNumInfo(key, info);

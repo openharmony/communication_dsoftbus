@@ -23,6 +23,7 @@
 #include "data/ipv4_info.h"
 #include "wifi_direct_types.h"
 #include "data/link_info.h"
+#include "data/inner_link.h"
 
 namespace OHOS::SoftBus {
 static constexpr int FREQUENCY_2G_FIRST = 2412;
@@ -90,14 +91,14 @@ public:
     static WifiDirectBandWidth BandWidthNumberToEnum(int bandWidth);
     static int BandWidthEnumToNumber(WifiDirectBandWidth bandWidth);
     static int GetRecommendChannelFromLnn(const std::string &networkId);
-
     static void SerialFlowEnter();
     static void SerialFlowExit();
     static void ParallelFlowEnter();
     static void ParallelFlowExit();
     static uint32_t CalculateStringLength(const char *str, uint32_t size);
     static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
-    static int32_t GetOsType(const std::string &remoteNetworkId);
+    static bool IsDfsChannel(const int &frequency);
+    static bool CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type);
 
 private:
     static inline std::mutex serialParallelLock_;
