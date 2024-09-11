@@ -107,8 +107,8 @@ typedef struct {
 
 typedef struct {
     bool isWriteAvailable;
-    SoftBusCond g_sendCond;
-    SoftBusMutex g_sendCondLock;
+    SoftBusCond sendCond;
+    SoftBusMutex sendCondLock;
 } SoftBusBleSendSignal;
 
 int SoftBusEnableBt(void);
