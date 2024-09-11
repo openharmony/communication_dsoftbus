@@ -74,3 +74,10 @@ int32_t LnnSetCloudAbility(const bool isEnableCloud)
     (void)isEnableCloud;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId)
+{
+    (void)udid;
+    (void)accountId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

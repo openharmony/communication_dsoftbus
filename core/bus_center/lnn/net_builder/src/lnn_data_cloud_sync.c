@@ -1149,6 +1149,35 @@ int32_t LnnDeleteSyncToDB(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId)
+{
+    if (udid == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char key[KEY_MAX_LEN] = { 0 };
+    if (sprintf_s(key, KEY_MAX_LEN, "%ld#%s", accountId, udid) < 0) {
+        LNN_LOGE(LNN_BUILDER, "sprintf_s key fail");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    int32_t dbId = g_dbId;
+    int32_t ret = LnnDeleteDBDataByPrefix(dbId, key, strlen(key));
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "fail:data delete sync to DB fail");
+        return ret;
+    }
+    ret = LnnCloudSync(dbId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "fail:data delete cloud sync fail, errorcode=%{public}d", ret);
+        return ret;
+    }
+    char *anonyUdid = NULL;
+    Anonymize(udid, &anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "delete udid=%{public}s success.", anonyUdid);
+    AnonymizeFree(anonyUdid);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnSetCloudAbility(const bool isEnableCloud)
 {
     LNN_LOGI(LNN_BUILDER, "enter.");
