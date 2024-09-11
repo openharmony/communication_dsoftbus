@@ -364,7 +364,7 @@ static int32_t LocalUpdateNetworkIdTimeStamp(const void *buf)
         return SOFTBUS_INVALID_PARAM;
     }
     info->networkIdTimestamp = *((int64_t *)buf);
-    LNN_LOGD(LNN_LEDGER, "local networkId timeStamp=%{public}" PRId64, info->networkIdTimestamp);
+    LNN_LOGI(LNN_LEDGER, "local networkId timeStamp=%{public}" PRId64, info->networkIdTimestamp);
     return SOFTBUS_OK;
 }
 
@@ -609,7 +609,7 @@ static int32_t UpdateStateVersion(const void *buf)
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+    if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger stateversion change sync to cloud failed");
     }
     return SOFTBUS_OK;
@@ -1066,7 +1066,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
-        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger device name change sync to cloud failed");
         }
     }
@@ -1101,7 +1101,7 @@ static int32_t UpdateUnifiedName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
-        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified device name change sync to cloud failed");
         }
     }
@@ -1136,7 +1136,7 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
-        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified default device name change sync to cloud failed");
         }
     }
@@ -1170,7 +1170,7 @@ static int32_t UpdateNickName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
-        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger nick name change sync to cloud failed");
         }
     }
@@ -1184,7 +1184,6 @@ int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
         return SOFTBUS_LOCK_ERR;
     }
     g_localNetLedger.localInfo.networkIdTimestamp = time;
-    LNN_LOGI(LNN_LEDGER, "update local networkId timeStamp=%{public}" PRId64, time);
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -1217,7 +1216,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+    if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger networkId change sync to cloud failed");
     }
     return SOFTBUS_OK;
@@ -1349,7 +1348,7 @@ static int32_t UpdateLocalBtMac(const void *mac)
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+    if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger btMac change sync to cloud failed");
     }
     return SOFTBUS_OK;
@@ -1513,7 +1512,7 @@ void LnnUpdateStateVersion(StateVersionChangeReason reason)
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return;
     }
-    if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+    if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger stateversion change sync to cloud failed");
     }
 }
@@ -1787,12 +1786,12 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DATA_SWITCH_LENGTH, sizeof(uint16_t), L1GetDataSwitchLength, UpdateDataSwitchLength},
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
-    {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
-    {NUM_KEY_DEVICE_SECURITY_LEVEL, sizeof(int32_t), LlGetDeviceSecurityLevel, LlUpdateDeviceSecurityLevel},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
     {BYTE_KEY_BROADCAST_CIPHER_IV, BROADCAST_IV_LEN, LlGetCipherInfoIv, UpdateLocalCipherInfoIv},
+    {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
+    {NUM_KEY_DEVICE_SECURITY_LEVEL, sizeof(int32_t), LlGetDeviceSecurityLevel, LlUpdateDeviceSecurityLevel},
     {NUM_KEY_NETWORK_ID_TIMESTAMP, sizeof(int64_t), LocalGetNetworkIdTimeStamp, LocalUpdateNetworkIdTimeStamp},
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
     {BYTE_KEY_STATIC_CAPABILITY, STATIC_CAP_LEN, LlGetStaticCapability, LlUpdateStaticCapability},
@@ -2023,13 +2022,20 @@ static int32_t LnnGenBroadcastCipherInfo(void)
 int32_t LnnSetLocalStateVersionReason(void)
 {
     int32_t ret = SOFTBUS_OK;
+    NodeInfo localInfo;
+    (void)memset_s(&localInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
     g_localNetLedger.localInfo.stateVersionReason = 0;
+    if (memcpy_s(&localInfo, sizeof(NodeInfo), LnnGetLocalNodeInfo(), sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy node info fail");
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
     SoftBusMutexUnlock(&g_localNetLedger.lock);
-    ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo);
+    ret = LnnSaveLocalDeviceInfo(&localInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update local store fail");
         return ret;
@@ -2040,57 +2046,57 @@ int32_t LnnSetLocalStateVersionReason(void)
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int32_t));
 }
 
 int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int64_t));
 }
 
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint64_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint64_t));
 }
 
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int16_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int16_t));
 }
 
 int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNumU16Info(InfoKey key, uint16_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint16_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint16_t));
 }
 
 int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint32_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint32_t));
 }
 
 int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)

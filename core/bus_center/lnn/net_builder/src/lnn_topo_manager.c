@@ -28,9 +28,11 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
+#include "softbus_adapter_json.h"
 
 #define JSON_KEY_TYPE "type"
 #define JSON_KEY_SEQ "seq"
@@ -557,7 +559,6 @@ static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
     LnnRelationChangedMsg *msg = NULL;
 
     if (info == NULL || info->event != LNN_EVENT_RELATION_CHANGED) {
-        LNN_LOGE(LNN_BUILDER, "info or event invalid");
         return;
     }
     if (eventInfo->udid == NULL || eventInfo->type == CONNECTION_ADDR_MAX) {

@@ -26,11 +26,14 @@
 #include "lnn_log.h"
 
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_utils.h"
 
 #define HB_GEARMODE_MAX_SET_CNT        100
 #define HB_GEARMODE_LIFETIME_PERMANENT (-1)
@@ -40,7 +43,7 @@ typedef struct {
     const char *callerId;
     ListNode node;
     GearMode mode;
-    int64_t lifeTimestamp; // unit is milliseconds
+    int64_t lifeTimeStamp; // unit is milliseconds
 } GearModeStorageInfo;
 
 typedef struct {
@@ -98,8 +101,8 @@ static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeLis
             "DumpGearModeSettingList count=%{public}d, callerId=%{public}s, cycle=%{public}d, "
             "duration=%{public}d, wakeupFlag=%{public}d, lifeTimestamp=%{public}" PRId64 ", needClean=%{public}s",
             dumpCount, info->callerId, info->mode.cycle, info->mode.duration, info->mode.wakeupFlag,
-            info->lifeTimestamp,
-            info->lifeTimestamp != HB_GEARMODE_LIFETIME_PERMANENT && info->lifeTimestamp <= nowTime ? "true" : "false");
+            info->lifeTimeStamp,
+            info->lifeTimeStamp != HB_GEARMODE_LIFETIME_PERMANENT && info->lifeTimeStamp <= nowTime ? "true" : "false");
     }
 }
 
@@ -119,7 +122,7 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
             LNN_LOGD(LNN_HEART_BEAT, "HB get Gearmode from setting list is empty");
             return SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST;
         }
-        if (info->lifeTimestamp < nowTime && info->lifeTimestamp != HB_GEARMODE_LIFETIME_PERMANENT) {
+        if (info->lifeTimeStamp < nowTime && info->lifeTimeStamp != HB_GEARMODE_LIFETIME_PERMANENT) {
             ListDelete(&info->node);
             SoftBusFree((void *)info->callerId);
             SoftBusFree(info);
@@ -222,9 +225,9 @@ static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime,
         return SOFTBUS_ERR;
     }
     if (strcmp(callerId, HB_DEFAULT_CALLER_ID) == 0) {
-        info->lifeTimestamp = HB_GEARMODE_LIFETIME_PERMANENT;
+        info->lifeTimeStamp = HB_GEARMODE_LIFETIME_PERMANENT;
     } else {
-        info->lifeTimestamp = nowTime + mode->duration * HB_TIME_FACTOR;
+        info->lifeTimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
     }
     ListAdd(list, &info->node);
     return SOFTBUS_OK;
@@ -263,7 +266,7 @@ int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
             (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
             return SOFTBUS_MEM_ERR;
         }
-        info->lifeTimestamp = nowTime + mode->duration * HB_TIME_FACTOR;
+        info->lifeTimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_OK;
     }

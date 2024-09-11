@@ -72,6 +72,7 @@ if (dsoftbus_feature_lnn_net) {
     ]
     auth_server_inc += [
       "$dsoftbus_root_path/adapter/common/include/",
+      "$dsoftbus_root_path/core/adapter/huks/include/",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/include/",
     ]
   } else {

@@ -77,13 +77,13 @@ static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int sock
         CONN_LOGE(CONN_BR, "connect failed, ret=%{public}d", ret);
         return SOFTBUS_CONN_BR_SOCKET_CONNECT_ERR;
     }
-    CONN_LOGI(CONN_BR, "SocketConnectEx ok. clientId=%{public}d", ret);
+    CONN_LOGI(CONN_BR, "SocketConnect ok. clientId=%{public}d", ret);
     return ret;
 }
 
 static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
 {
-    return ConnectByPort(uuid, mac, -1 ,connectCallback);
+    return ConnectByPort(uuid, mac, -1, connectCallback);
 }
 
 static int32_t DisConnect(int32_t clientFd)

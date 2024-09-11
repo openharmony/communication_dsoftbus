@@ -550,7 +550,7 @@ static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, C
     };
     ret = ConnConnectDevice(&option, requestId, &result);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "ConnConnectDevice fail=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "ConnConnectDevice fail. ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -770,6 +770,7 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
             .protocol = LNN_PROTOCOL_IP,
         },
     };
+
     if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
         AUTH_LOGE(AUTH_CONN, "strcpy_s ip fail");
         return SOFTBUS_STRCPY_ERR;
@@ -826,7 +827,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
         AUTH_CHECK_AND_RETURN_RET_LOGE(local.socketOption.moduleId < UNUSE_BUTT, SOFTBUS_ERR, AUTH_CONN,
                                        "alloc listener module id failed");
     } else {
-        AUTH_LOGE(AUTH_CONN, "type invalid. type=%{public}d", type);
+        AUTH_LOGE(AUTH_CONN, "invalid type=%{public}d", type);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -836,7 +837,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
             GetWifiDirectManager()->freeListenerModuleId(local.socketOption.moduleId);
         }
         AUTH_LOGE(AUTH_CONN, "start local listening failed");
-        return SOFTBUS_INVALID_PORT;
+        return realPort;
     }
     AUTH_LOGI(AUTH_CONN, "moduleId=%{public}u, port=%{public}d", local.socketOption.moduleId, realPort);
     *moduleId = local.socketOption.moduleId;
@@ -846,7 +847,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
 void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId)
 {
     AUTH_CHECK_AND_RETURN_LOGE(type == AUTH_LINK_TYPE_P2P || type == AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_CONN,
-                               "type invalid. type=%{public}d", type);
+                               "invalid type=%{public}d", type);
     LocalListenerInfo local = {
         .type = CONNECT_TCP,
         .socketOption = {

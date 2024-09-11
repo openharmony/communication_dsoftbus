@@ -160,16 +160,15 @@ static SoftBusAppInfo *AppInfoMemoryRequest()
 {
     SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
     if (appInfo == NULL) {
-        COMM_LOGE(COMM_PERM, "appInfo is null");
         return NULL;
     }
+
     ListInit(&appInfo->node);
     appInfo->type = UNKNOWN_VALUE;
     appInfo->uid = UNKNOWN_VALUE;
     appInfo->pid = UNKNOWN_VALUE;
     appInfo->actions = 0;
 
-    COMM_LOGI(COMM_PERM, "appInfo malloc succ.");
     return appInfo;
 }
 
@@ -460,7 +459,7 @@ int32_t LoadPermissionJson(const char *fileName)
             g_permissionEntryList->cnt++;
         }
     }
-    SoftBusMutexUnlock(&g_permissionEntryList->lock);
+    (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
     cJSON_Delete(jsonArray);
     return SOFTBUS_OK;
 }

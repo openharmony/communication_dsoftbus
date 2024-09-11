@@ -65,18 +65,18 @@ void LNNDataCloudSyncTest::TearDown() {}
 HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level1)
 {
     NodeInfo *info = nullptr;
-    int32_t ret = LnnLedgerAllDataSyncToDB(info);
+    int32_t ret = LnnAsyncCallLedgerAllDataSyncToDB(info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     info->accountId = 0;
     ret = LnnLedgerAllDataSyncToDB(info);
     if (ret != SOFTBUS_NOT_IMPLEMENT) {
-        EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+        EXPECT_EQ(ret, SOFTBUS_KV_CLOUD_DISABLED);
     } else {
         EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     }
     info->accountId = 18390933952;
-    ret = LnnLedgerAllDataSyncToDB(info);
+    ret = LnnAsyncCallLedgerAllDataSyncToDB(info);
     EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(info);
 }

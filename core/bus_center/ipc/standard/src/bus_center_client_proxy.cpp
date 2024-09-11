@@ -176,13 +176,8 @@ int32_t ClientOnRefreshDeviceFound(
 int32_t ClientOnDataLevelChanged(const char *pkgName, int32_t pid, const char *networkId,
     const DataLevelInfo *dataLevelInfo)
 {
-    if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (networkId == nullptr) {
-        LNN_LOGE(LNN_EVENT, "networkId is null");
+    if (pkgName == nullptr || networkId == nullptr || dataLevelInfo == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 

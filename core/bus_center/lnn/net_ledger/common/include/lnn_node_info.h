@@ -141,6 +141,7 @@ typedef struct {
     uint32_t netCapacity;
     uint32_t authCapacity;
     uint32_t discoveryType;
+    uint64_t bleDirectTimeStamp;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
     BssTransInfo bssTransInfo;
@@ -185,8 +186,7 @@ typedef struct {
     uint8_t relation[CONNECTION_ADDR_MAX];
     int64_t authSeqNum;
     int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
-    uint64_t heartbeatTimestamp;
-    uint64_t bleDirectTimestamp;
+    uint64_t heartbeatTimeStamp;
     uint64_t onlinetTimestamp;
     uint64_t updateTimestamp;
     bool isAuthExchangeUdid;
@@ -243,12 +243,12 @@ int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
 const char *LnnGetP2pGoMac(const NodeInfo *info);
 uint64_t LnnGetSupportedProtocols(const NodeInfo *info);
 int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
+const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
 void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log);
-int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
-const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 #ifdef __cplusplus
 }
 #endif

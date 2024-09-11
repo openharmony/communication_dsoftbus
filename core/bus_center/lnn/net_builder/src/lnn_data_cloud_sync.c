@@ -960,33 +960,28 @@ static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
     return SOFTBUS_OK;
 }
 
-static void ProcessSyncToDB(void *para)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
 {
-    NodeInfo *info = (NodeInfo *)para;
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param, info is NULL");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (info->accountId == 0) {
         LNN_LOGI(LNN_BUILDER, "ledger accountid is null, all data no need sync to cloud");
-        SoftBusFree(info);
-        return;
+        return SOFTBUS_KV_CLOUD_DISABLED;
     }
     char putKey[KEY_MAX_LEN] = { 0 };
     if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s", info->accountId, info->deviceInfo.deviceUdid) < 0) {
-        SoftBusFree(info);
-        return;
+        return SOFTBUS_MEM_ERR;
     }
     info->updateTimestamp = SoftBusGetSysTimeMs();
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        SoftBusFree(info);
-        return;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     if (PackBroadcastCipherKeyInner(json, info) != SOFTBUS_OK) {
         cJSON_Delete(json);
-        SoftBusFree(info);
-        return;
+        return SOFTBUS_ERR;
     }
     char *putValue = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
@@ -996,17 +991,24 @@ static void ProcessSyncToDB(void *para)
     cJSON_free(putValue);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode=%{public}d", ret);
-        SoftBusFree(info);
-        return;
+        return SOFTBUS_KV_PUT_DB_FAIL;
     }
     LNN_LOGI(LNN_BUILDER, "sync all data to db success. stateVersion=%{public}d", info->stateVersion);
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch cloud sync fail, errorcode=%{public}d", ret);
     }
+    return ret;
 }
 
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
+static void ProcessSyncToDB(void *para)
+{
+    NodeInfo *info = (NodeInfo *)para;
+    (void)LnnLedgerAllDataSyncToDB(info);
+    SoftBusFree(info);
+}
+
+int32_t LnnAsyncCallLedgerAllDataSyncToDB(NodeInfo *info)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");

@@ -222,6 +222,10 @@ int32_t AuthCheckSessionKeyValidByAuthHandle(const AuthHandle *authHandle)
         AUTH_LOGE(AUTH_CONN, "param is null");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (authHandle->type < AUTH_LINK_TYPE_WIFI || authHandle->type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "auth type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth == NULL) {
         AUTH_LOGE(AUTH_CONN, "not found auth manager, type=%{public}d, authId=%{public}" PRId64,
