@@ -49,7 +49,7 @@ static int32_t GetRequestListByUdidHash(char *udidHash, bool isNeedClear,
     NormalizeRequest **requests, uint32_t *num)
 {
     if (udidHash == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "udidHash is null or len < SHORT_HASH_LEN");
+        AUTH_LOGE(AUTH_HICHAIN, "udidHash is null");
         return SOFTBUS_INVALID_PARAM;
     }
     *num = GetSameRequestNum(udidHash);
@@ -138,7 +138,7 @@ bool AuthIsRepeatedAuthRequest(int64_t authSeq)
 {
     if (!RequireAuthLock()) {
         AUTH_LOGE(AUTH_HICHAIN, "RequireAuthLock fail");
-        return SOFTBUS_ERR;
+        return false;
     }
     NormalizeRequest *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_normalizeRequestList, NormalizeRequest, node) {

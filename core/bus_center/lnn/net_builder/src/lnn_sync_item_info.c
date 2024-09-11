@@ -19,13 +19,15 @@
 
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_socket.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
+#include "softbus_adapter_socket.h"
 
 #define CONN_CODE_SHIFT 16
 #define DISCOVERY_TYPE_MASK 0x7FFF

@@ -230,7 +230,7 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "wifi user background state change evt handler get invalid param");
         return;
     }
-    bool addrType[CONNECTION_ADDR_MAX] = {false};
+    bool addrType[CONNECTION_ADDR_MAX] = {0};
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusUserState userState = (SoftBusUserState)event->status;
     switch (userState) {
@@ -434,7 +434,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     (void)groupId;
     LNN_LOGI(LNN_BUILDER, "OnGroupCreated, groupType=%{public}d", groupType);
-    LnnUpdateOhosAccount(true);
+    LnnUpdateOhosAccount(false);
     LnnHbOnTrustedRelationIncreased(groupType);
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
         LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);

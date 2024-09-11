@@ -207,28 +207,6 @@ static int32_t DlGetMasterUdid(const char *networkId, bool checkOnline, void *bu
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetNodeBleMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
-{
-    (void)checkOnline;
-    NodeInfo *info = NULL;
-
-    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (strlen(info->connectInfo.bleMacAddr) == 0) {
-        LNN_LOGE(LNN_LEDGER, "ble mac is invalid.");
-        return SOFTBUS_ERR;
-    }
-    if (info->bleMacRefreshSwitch != 0) {
-        uint64_t currentTimeMs = GetCurrentTime();
-        LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
-            LNN_LEDGER, "ble mac out date, lastAdvTime=%{public}" PRIu64 ", now=%{public}" PRIu64,
-            info->connectInfo.latestTime, currentTimeMs);
-    }
-    if (strcpy_s((char *)buf, len, info->connectInfo.bleMacAddr) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t DlGetRemotePtk(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     (void)checkOnline;
@@ -286,6 +264,28 @@ static int32_t DlGetStaticCap(const char *networkId, bool checkOnline, void *buf
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (memcpy_s(buf, len, info->staticCapability, STATIC_CAP_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy static cap err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetNodeBleMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (strlen(info->connectInfo.bleMacAddr) == 0) {
+        LNN_LOGE(LNN_LEDGER, "ble mac is invalid.");
+        return SOFTBUS_ERR;
+    }
+    if (info->bleMacRefreshSwitch != 0) {
+        uint64_t currentTimeMs = GetCurrentTime();
+        LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
+            LNN_LEDGER, "ble mac out date, lastAdvTime=%{public}" PRIu64 ", now=%{public}" PRIu64,
+            info->connectInfo.latestTime, currentTimeMs);
+    }
+    if (strcpy_s((char *)buf, len, info->connectInfo.bleMacAddr) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -730,12 +730,12 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_DEVICE_SECURITY_LEVEL, DlGetDeviceSecurityLevel},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
-    {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
-    {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap},
     {BYTE_KEY_IRK, DlGetDeviceIrk},
     {BYTE_KEY_PUB_MAC, DlGetDevicePubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, DlGetDeviceCipherInfoKey},
     {BYTE_KEY_BROADCAST_CIPHER_IV, DlGetDeviceCipherInfoIv},
+    {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
+    {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap},
 };
 
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
@@ -1518,7 +1518,7 @@ int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    *timestamp = nodeInfo->heartbeatTimestamp;
+    *timestamp = nodeInfo->heartbeatTimeStamp;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }
@@ -1535,7 +1535,7 @@ int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->heartbeatTimestamp = timestamp;
+    nodeInfo->heartbeatTimeStamp = timestamp;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }
@@ -1556,7 +1556,7 @@ int32_t LnnGetDLBleDirectTimestamp(const char *networkId, uint64_t *timestamp)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    *timestamp = nodeInfo->bleDirectTimestamp;
+    *timestamp = nodeInfo->bleDirectTimeStamp;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }
@@ -1611,7 +1611,7 @@ int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->bleDirectTimestamp = timestamp;
+    nodeInfo->bleDirectTimeStamp = timestamp;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }

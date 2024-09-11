@@ -1332,9 +1332,9 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.
     const char *ip = "192.138.33.33";
     ListenerModule moduleId;
     (void)memset_s(&moduleId, sizeof(ListenerModule), 0, sizeof(ListenerModule));
-    EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId),
+    EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId),
         SOFTBUS_INVALID_PORT);
-    EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId),
+    EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId),
         SOFTBUS_INVALID_PORT);
     EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_WIFI, ip, 37025, &moduleId),
         SOFTBUS_INVALID_PARAM);

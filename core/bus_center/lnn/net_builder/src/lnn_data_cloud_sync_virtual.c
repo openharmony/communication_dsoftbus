@@ -33,6 +33,12 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnAsyncCallLedgerAllDataSyncToDB(NodeInfo *info)
+{
+    (void)info;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t valueLength)
 {
     (void)key;
