@@ -832,7 +832,7 @@ bool PublishLNNFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr || data == nullptr || size < (INPUT_NAME_SIZE_MAX * SIZE_NUM_THREE) +
-        (sizeof(int32_t) * SIZE_NUM_FIVE)) {
+        (sizeof(int32_t) * SIZE_NUM_FIVE) + sizeof(bool)) {
         return false;
     }
     MessageParcel datas;
