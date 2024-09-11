@@ -171,4 +171,4 @@ int InitSoftbusAdapterServer(void);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif /* SOFTBUS_ADAPTER_BLE_GATT_SERVER_H */
+#endif

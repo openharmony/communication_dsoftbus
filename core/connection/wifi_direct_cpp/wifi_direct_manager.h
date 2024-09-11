@@ -70,7 +70,6 @@ struct WifiDirectManager {
     bool (*supportHmlTwo)(void);
     bool (*isWifiP2pEnabled)(void);
     int (*getStationFrequency)(void);
-    bool (*isHmlConnected)(void);
 
     int32_t (*init)(void);
 

@@ -132,30 +132,8 @@ void ConnectCommand::PreferNegotiateChannel()
     info_.channel_ = innerLink->GetNegotiateChannel();
 }
 
-bool ConnectCommand::IsSameCommand(const WifiDirectConnectInfo &info) const
+bool ConnectCommand::IsSameCommand(const WifiDirectConnectInfo &info)
 {
     return (info.requestId == info_.info_.requestId) && (info.pid == info_.info_.pid);
 }
-
-
-bool ConnectCommand::IsValid()
-{
-    if (info_.info_.timeoutInMs == 0) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "timeoutInMs=%{public}" PRIu64 "ms", info_.info_.timeoutInMs);
-        return true;
-    }
-    uint64_t duration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime_).count();
-    CONN_LOGI(CONN_WIFI_DIRECT, "timeoutInMs=%{public}" PRIu64 "ms, duration=%{public}" PRIu64 "ms",
-        info_.info_.timeoutInMs, duration);
-    if (duration >= info_.info_.timeoutInMs) {
-        return false;
-    }
-    uint32_t availableTime = info_.info_.timeoutInMs - duration;
-    if (availableTime < ABANDON_CONNECT_COMMAND_PERIOD) {
-        return false;
-    }
-    return true;
-}
-
 } // namespace OHOS::SoftBus

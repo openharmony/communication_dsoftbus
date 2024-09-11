@@ -19,6 +19,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "softbus_error_code.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,7 +46,7 @@ void SoftbusBleConflictNotifyDateReceive(int32_t underlayerHandle, const uint8_t
 void SoftbusBleConflictNotifyDisconnect(const char *addr, const char *udid);
 
 int32_t LegacyConflictReuseConnection(const char *address, const char *udid, uint32_t requestId,
-    uint32_t *connectionId);
+    int32_t *underlayerHandle);
 bool LegacyConflictPostBytes(uint32_t connectionId, uint8_t *data, uint32_t dataLen);
 void LegacyConflictDisconnect(int32_t underlayerHandle, bool isForce);
 void LegacyConflictCancelOccupy(const char *udid);

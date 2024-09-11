@@ -340,10 +340,10 @@ void ConnBrOccupy(ConnBrConnection *connection)
         "lock failed, connId=%{public}u", connection->connectionId);
     ConnRemoveMsgFromLooper(
         &g_brConnectionAsyncHandler, MSG_CONNECTION_OCCUPY_RELEASE, connection->connectionId, 0, NULL);
-    int32_t ret = ConnPostMsgToLooper(&g_brConnectionAsyncHandler,
+    int32_t res = ConnPostMsgToLooper(&g_brConnectionAsyncHandler,
         MSG_CONNECTION_OCCUPY_RELEASE, connection->connectionId, 0, NULL, WAIT_TIMEOUT_OCCUPY);
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BR, "post msg failed, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
+    if (res != SOFTBUS_OK) {
+        CONN_LOGW(CONN_BR, "post msg failed, connId=%{public}u, err=%{public}d", connection->connectionId, res);
         (void)SoftBusMutexUnlock(&connection->lock);
         return;
     }
@@ -512,8 +512,8 @@ static int32_t BrPostReplyMessage(uint32_t connectionId, int32_t localRc)
 static int32_t NotifyReferenceRequest(uint32_t connectionId, int32_t delta, int32_t peerRc)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL,
-        SOFTBUS_INVALID_PARAM, CONN_BR, "conn not exist, id=%{public}u", connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "conn not exist, id=%{public}u", connectionId);
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "lock failed, connectionId=%{public}u, error=%{public}d", connectionId, status);
@@ -594,12 +594,12 @@ static int32_t BrOnReferenceRequest(uint32_t connectionId, ReferenceCount *refer
         referenceParam->delta = delta;
         referenceParam->peerRc = peerRc;
 
-        int32_t ret = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_PEER_RC,
-            connectionId, 0, referenceParam, WAIT_TIMEOUT_TRY_AGAIN);
-        if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "post msg failed, connectionId=%{public}u, error=%{public}d", connectionId, ret);
+        int32_t res = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_PEER_RC, connectionId, 0,
+            referenceParam, WAIT_TIMEOUT_TRY_AGAIN);
+        if (res != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "post msg failed, connectionId=%{public}u, error=%{public}d", connectionId, res);
             SoftBusFree(referenceParam);
-            return ret;
+            return status;
         }
         return SOFTBUS_OK;
     }

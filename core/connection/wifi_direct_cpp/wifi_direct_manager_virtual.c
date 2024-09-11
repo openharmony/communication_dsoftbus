@@ -151,10 +151,6 @@ static void AddSyncPtkListener(SyncPtkListener listener)
     (void)listener;
 }
 
-static void StopCustomListening(void)
-{
-}
-
 static bool SupportHmlTwo(void)
 {
     return false;
@@ -168,11 +164,6 @@ static bool IsWifiP2pEnabled(void)
 static int GetStationFrequency(void)
 {
     return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static bool IsHmlConnected()
-{
-    return false;
 }
 
 static void RegisterEnhanceManager(struct WifiDirectEnhanceManager *manager)
@@ -208,8 +199,6 @@ static struct WifiDirectManager g_manager = {
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
 
-    .stopCustomListening = StopCustomListening,
-
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
@@ -218,7 +207,6 @@ static struct WifiDirectManager g_manager = {
     .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
-    .isHmlConnected = IsHmlConnected,
 
     .init = Init,
     .notifyOnline = NotifyOnline,

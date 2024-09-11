@@ -66,11 +66,6 @@ static void GattcConnectionStateChangedCallback(int clientId, int connectionStat
 
 static void GattcConnectParaUpdateCallback(int clientId, int interval, int latency, int timeout, int status)
 {
-    (void)clientId;
-    (void)interval;
-    (void)latency;
-    (void)timeout;
-    (void)status;
     CONN_LOGI(CONN_BLE, "ParaUpdateCallback");
 }
 
@@ -313,7 +308,7 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
     BdAddr bdAddr = {0};
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
-        CONN_LOGE(CONN_BLE, "memcpy error");
+        CONN_LOGE(CONN_BLE, "SoftbusGattcConnect memcpy error");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t status = SoftbusGattcAddMacAddrToList(clientId, addr);
@@ -361,7 +356,7 @@ int32_t SoftbusGattcRefreshServices(int32_t clientId)
 int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
 {
     if (clientId <= 0) {
-        CONN_LOGE(CONN_BLE, "invalid param");
+        CONN_LOGE(CONN_BLE, "SoftbusGattcGetService invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     BtUuid btUuid;
@@ -394,11 +389,6 @@ int32_t SoftbusGattcRegisterNotification(
 
 int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
 {
-    if (clientId <= 0) {
-        CONN_LOGE(CONN_BLE, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
     if (BleGattcConfigureMtuSize(clientId, mtuSize) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "BleGattcConfigureMtuSize error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
@@ -409,7 +399,7 @@ int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
 int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData)
 {
     if (clientId <= 0 || clientData == NULL) {
-        CONN_LOGE(CONN_BLE, "invalid param");
+        CONN_LOGE(CONN_BLE, "SoftbusGattcWriteCharacteristic invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     CONN_LOGI(CONN_BLE, "clientId = %{public}d", clientId);
