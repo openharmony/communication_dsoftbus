@@ -73,7 +73,13 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
 static void OnWifiDirectRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
     (void)oldRole;
-    (void)newRole;
+    if (newRole == WIFI_DIRECT_ROLE_NONE) {
+        TRANS_LOGI(TRANS_SVC, "my role change to NONE");
+        StopP2pSessionListener();
+        for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
+            StopHmlListener(i);
+        }
+    }
 }
 
 static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid, bool isSource)

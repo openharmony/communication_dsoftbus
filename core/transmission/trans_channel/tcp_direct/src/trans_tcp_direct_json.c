@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "trans_tcp_direct_json.h"
-
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_message.h"
@@ -30,12 +30,10 @@
 char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
 {
     if (errDesc == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
         return NULL;
     }
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "create object failed");
         return NULL;
     }
     if (!AddNumberToJsonObject(json, MSG_CODE, code) ||
@@ -52,12 +50,10 @@ char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
 char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp)
 {
     if (myIp == NULL || myPort <= 0) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
         return NULL;
     }
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "create object failed");
         return NULL;
     }
     if (peerIp != NULL) {
@@ -67,7 +63,6 @@ char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp)
         !AddStringToJsonObject(json, P2P_IP, myIp) ||
         !AddNumberToJsonObject(json, P2P_PORT, myPort)) {
         cJSON_Delete(json);
-        TRANS_LOGE(TRANS_CTRL, "add json object failed");
         return NULL;
     }
     char *data = cJSON_PrintUnformatted(json);
@@ -78,7 +73,6 @@ char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp)
 int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port)
 {
     if (json == NULL || ip == NULL || port == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t errCode = 0;

@@ -100,7 +100,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
             TRANS_LOGW(TRANS_CTRL, "Cancel bind name=%{public}s, channelId=%{public}d", tmpName, channel->channelId);
             AnonymizeFree(tmpName);
             extra.result = EVENT_STAGE_RESULT_CANCELED;
-            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
             return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
         }
         TransSetSocketChannelStateByChannel(
@@ -110,7 +110,6 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "NotifyQosChannelOpened failed.");
     int32_t sceneCommand = channel->isServer ? EVENT_SCENE_OPEN_CHANNEL_SERVER : EVENT_SCENE_OPEN_CHANNEL;
     TRANS_EVENT(sceneCommand, EVENT_STAGE_OPEN_CHANNEL_END, extra);
-
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
@@ -241,9 +240,12 @@ static int32_t TransServerOnChannelBind(const char *pkgName, int32_t pid, int32_
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel bind fail, ret=%{public}d, channelId=%{public}d", ret, channelId);
         return ret;
     }
+    char *anonymizePkgName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
     TRANS_LOGI(TRANS_CTRL,
         "trasn server on channel bind. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
-        pkgName, channelId, channelType);
+        anonymizePkgName, channelId, channelType);
+    AnonymizeFree(anonymizePkgName);
     return SOFTBUS_OK;
 }
 
