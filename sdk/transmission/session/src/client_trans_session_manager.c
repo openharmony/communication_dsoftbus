@@ -1487,7 +1487,6 @@ int32_t ClientAddSocketSession(
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
@@ -1496,10 +1495,13 @@ int32_t ClientAddSocketSession(
 
     SessionInfo *session = GetSocketExistSession(param, isEncyptedRawStream);
     if (session != NULL) {
-        *sessionId = session->sessionId;
-        *isEnabled = session->enableStatus;
-        UnlockClientSessionServerList();
-        return SOFTBUS_TRANS_SESSION_REPEATED;
+        if (session->lifecycle.bindErrCode != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
+            *sessionId = session->sessionId;
+            *isEnabled = session->enableStatus;
+            UnlockClientSessionServerList();
+            return SOFTBUS_TRANS_SESSION_REPEATED;
+        }
+        TRANS_LOGI(TRANS_SDK, "socket=%{public}d is shutdown", session->sessionId);
     }
 
     session = CreateNewSocketSession(param);
