@@ -16,7 +16,7 @@ import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection/wifi_direct_cpp"
 wifi_direct_cpp_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
-
+dsoftbus_dfx_path = "$dsoftbus_root_path/core/common/dfx"
 ohos_unittest("WifiDirectUtilsTest") {
   module_out_path = module_output_path
 
@@ -70,6 +70,7 @@ ohos_unittest("WifiDirectUtilsTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gmock_rtti",
