@@ -19,7 +19,7 @@ wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 wifi_direct_unit_path =
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
 ut_out_path = "dsoftbus/connection/wifi_direct_cpp/processor"
-
+dsoftbus_dfx_path = "$dsoftbus_root_path/core/common/dfx"
 ohos_unittest("P2pv1ProcessorTest") {
   module_out_path = ut_out_path
 
@@ -45,6 +45,7 @@ ohos_unittest("P2pv1ProcessorTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "//third_party/googletest:gmock_rtti",
     "//third_party/googletest:gtest_rtti",
