@@ -100,6 +100,7 @@ void UnregAuthTransListener(int32_t module)
         if (g_moduleListener[i].module == module) {
             g_moduleListener[i].listener.onDataReceived = NULL;
             g_moduleListener[i].listener.onDisconnected = NULL;
+            g_moduleListener[i].listener.onException = NULL;
             return;
         }
     }
