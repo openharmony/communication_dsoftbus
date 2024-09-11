@@ -84,6 +84,7 @@ int32_t DiscServerProxyInit(void)
 
 void DiscServerProxyDeInit(void)
 {
+    DISC_LOGI(DISC_INIT, "enter");
     g_serverProxy.clear();
 }
 

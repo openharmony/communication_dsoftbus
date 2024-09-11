@@ -22,7 +22,6 @@
 #include <wchar.h>
 
 #include "nstackx.h"
-
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "disc_coap_capability.h"
@@ -205,7 +204,7 @@ static NSTACKX_Parameter g_nstackxCallBack = {
 int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(discCoapCb != NULL && g_discCoapInnerCb != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "discCoapCb is null");
+        DISC_COAP, "invalid param");
     if (memcpy_s(g_discCoapInnerCb, sizeof(DiscInnerCallback), discCoapCb, sizeof(DiscInnerCallback)) != EOK) {
         DISC_LOGE(DISC_COAP, "memcpy_s failed.");
         return SOFTBUS_MEM_ERR;
@@ -349,7 +348,7 @@ static void FreeDiscSet(NSTACKX_DiscoverySettings *discSet)
 
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option=NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(option->mode >= ACTIVE_PUBLISH && option->mode <= ACTIVE_DISCOVERY,
         SOFTBUS_INVALID_PARAM, DISC_COAP, "option->mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,

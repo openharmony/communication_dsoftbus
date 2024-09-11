@@ -128,20 +128,20 @@ LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode)
     return GetLaneLinkDepsInterface()->GetConflictTypeWithErrcode(conflictErrcode);
 }
 
-int32_t FindLinkConflictInfoByDevId(const char *peerDevId, LinkConflictType conflictType,
-    LinkConflictInfo *linkConflictInfo)
+int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
+    LinkConflictInfo *outputInfo)
 {
-    return GetLaneLinkDepsInterface()->FindLinkConflictInfoByDevId(peerDevId, conflictType, linkConflictInfo);
+    return GetLaneLinkDepsInterface()->FindLinkConflictInfoByDevId(inputInfo, conflictType, outputInfo);
 }
 
-void RemoveConflictInfoTimelinessMsg(const char *peerDevId, LinkConflictType conflictType)
+void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType)
 {
-    GetLaneLinkDepsInterface()->RemoveConflictInfoTimelinessMsg(peerDevId, conflictType);
+    GetLaneLinkDepsInterface()->RemoveConflictInfoTimelinessMsg(inputInfo, conflictType);
 }
 
-int32_t DelLinkConflictInfo(const char *peerDevId, LinkConflictType conflictType)
+int32_t DelLinkConflictInfo(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType)
 {
-    return GetLaneLinkDepsInterface()->DelLinkConflictInfo(peerDevId, conflictType);
+    return GetLaneLinkDepsInterface()->DelLinkConflictInfo(inputInfo, conflictType);
 }
 
 int32_t ClearLaneResourceByLaneId(uint64_t laneId)
