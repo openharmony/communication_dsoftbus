@@ -766,7 +766,7 @@ int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const c
         if (item->laneId == oldLaneId) {
             item->laneId = newLaneId;
             if (strcpy_s(item->link.peerUdid, UDID_BUF_LEN, peerUdid) != EOK) {
-                LNN_LOGE(LNN_LANE, "strcpy udid fail");
+                LNN_LOGE(LNN_LANE, "stcpy udid fail");
                 LaneUnlock();
                 return SOFTBUS_STRCPY_ERR;
             }
@@ -1032,7 +1032,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
             return;
         }
         p2pAddrNode->port = port;
-        p2pAddrNode->cnt = 1;
+        p2pAddrNode->cnt--;
         ListAdd(&g_P2pAddrList.list, &p2pAddrNode->node);
     }
 
@@ -1074,7 +1074,7 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
         }
         p2pAddrNode->networkId[0] = 0;
         p2pAddrNode->port = port;
-        p2pAddrNode->cnt = 1;
+        p2pAddrNode->cnt--;
         ListAdd(&g_P2pAddrList.list, &p2pAddrNode->node);
     }
 

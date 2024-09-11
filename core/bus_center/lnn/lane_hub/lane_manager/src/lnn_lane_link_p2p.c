@@ -1846,6 +1846,7 @@ static bool IsSupportWifiDirect(const char *networkId)
     }
     return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
 }
+
 static bool CheckHasBrConnection(const char *networkId)
 {
     ConnectOption connOpt;
@@ -1995,7 +1996,8 @@ static bool BrAuthIsMostPriority(const char *networkId)
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true));
 }
 
-static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)
+static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guideList,
+    uint32_t *linksNum)
 {
     if (request == NULL || guideList == NULL || linksNum == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
@@ -2006,10 +2008,9 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
         return SOFTBUS_INVALID_PARAM;
     }
     *linksNum = 0;
-    if ((request->linkType == LANE_HML || request->linkType == LANE_HML_RAW) &&
-        request->actionAddr > 0) {
+    if ((request->linkType == LANE_HML || request->linkType == LANE_HML_RAW) && request->actionAddr > 0) {
         LNN_LOGI(LNN_LANE, "actionAddr is valid, value=%{public}u, linkType=%{public}d, add action Trigger",
-            request->linkType, request->linkType);
+            request->actionAddr, request->linkType);
         guideList[(*linksNum)++] = LANE_ACTION_TRIGGER;
         return SOFTBUS_OK;
     }

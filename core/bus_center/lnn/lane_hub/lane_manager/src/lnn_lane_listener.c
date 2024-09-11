@@ -105,7 +105,8 @@ int32_t UpdateLaneBusinessInfoItem(uint64_t oldLaneId, uint64_t newLaneId)
     LaneBusinessInfo *item = GetLaneBusinessInfoWithoutLock(&laneBusinessInfo);
     if (item != NULL) {
         item->laneId = newLaneId;
-        LNN_LOGI(LNN_LANE, "update oldLaneId=%{public}" PRIu64 " newLaneId=%{public}" PRIu64, oldLaneId, newLaneId);
+        LNN_LOGI(LNN_LANE, "update laneId succ, oldLaneId=%{public}" PRIu64 " newLaneId=%{public}" PRIu64,
+            oldLaneId, newLaneId);
         LaneListenerUnlock();
         return SOFTBUS_OK;
     }
