@@ -28,6 +28,13 @@ ohos_fuzztest("SoftBusSendMessageFuzzTest") {
     "../../../../../core/common/dfx/interface/include",
     "../../../../../interfaces/kits/common",
     "../../../../../interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/adapter/default_config/spec_config/",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
   ]
   cflags = [
     "-g",
@@ -38,11 +45,12 @@ ohos_fuzztest("SoftBusSendMessageFuzzTest") {
   ]
   sources = [ "softbussendmessage_fuzzer.cpp" ]
 
-  deps = [ "../../../../../sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "bounds_checking_function:libsec_static",
     "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
