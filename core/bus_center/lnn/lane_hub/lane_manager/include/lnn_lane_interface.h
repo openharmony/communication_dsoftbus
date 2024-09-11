@@ -206,18 +206,18 @@ typedef struct {
 } LaneRequestOption;
 
 typedef struct {
-    void (*onLaneLinkup)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
-    void (*onLaneLinkdown)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
-    void (*onLaneStateChange)(uint64_t laneId, LaneState state);
-} LaneStatusListener;
-
-typedef struct {
     LaneType type;
     LaneTransType transType;
     QosInfo qosRequire;
     uint32_t actionAddr;
     uint8_t udidHash[UDID_HASH_LEN];
 } RawLaneAllocInfo;
+
+typedef struct {
+    void (*onLaneLinkup)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
+    void (*onLaneLinkdown)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
+    void (*onLaneStateChange)(uint64_t laneId, LaneState state);
+} LaneStatusListener;
 
 typedef struct {
     char peerBleMac[MAX_MAC_LEN];
