@@ -16,12 +16,15 @@
 #include "softbus_adapter_timer.h"
 
 #include <sys/time.h>
+#include <time.h>
+
 #include "cmsis_os2.h"
 #include "comm_log.h"
 #include "softbus_errcode.h"
 
 #define MS_PER_SECOND  1000
 #define US_PER_MSECOND 1000
+#define NS_PER_USECOND 1000
 
 static TimerFunc g_timerFunc = NULL;
 
@@ -95,6 +98,19 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
     gettimeofday(&time, NULL);
     sysTime->sec = time.tv_sec;
     sysTime->usec = time.tv_usec;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusGetRealTime(SoftBusSysTime *sysTime)
+{
+    if (sysTime == NULL) {
+        COMM_LOGW(COMM_ADAPTER, "sysTime is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    struct timespec time = {0};
+    (void)clock_gettime(CLOCK_BOOTTIME, &time);
+    sysTime->sec = time.tv_sec;
+    sysTime->usec = time.tv_nsec / NS_PER_USECOND;
     return SOFTBUS_OK;
 }
 
