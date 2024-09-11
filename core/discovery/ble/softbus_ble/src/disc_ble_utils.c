@@ -288,6 +288,8 @@ static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const
 
 static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const uint32_t len)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(len >= CUST_CAPABILITY_LEN, SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "the length of cust data is too short");
     if ((int32_t)data[0] != (int32_t)CAST_PLUS) {
         DISC_LOGI(DISC_BLE, "not castPlus, just ignore");
         return SOFTBUS_OK;
