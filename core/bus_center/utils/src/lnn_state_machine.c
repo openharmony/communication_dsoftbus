@@ -182,7 +182,7 @@ static void ProcessDeinitMessage(SoftBusMessage *msg)
         LNN_LOGE(LNN_STATE, "fsm is null in deinit msg process");
         return;
     }
-    if (fsm->looper != NULL) {
+    if (fsm->looper != NULL && fsm->looper->RemoveMessageCustom != NULL) {
         fsm->looper->RemoveMessageCustom(fsm->looper, &fsm->handler, RemoveAllMessageFunc, NULL);
     }
     if (fsm->deinitCallback != NULL) {
@@ -227,6 +227,10 @@ static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg
     if (msg == NULL) {
         LNN_LOGE(LNN_STATE, "create fsm handle msg fail");
         return SOFTBUS_ERR;
+    }
+    if (fsm->looper->PostMessage == NULL) {
+        LNN_LOGE(LNN_STATE, "PostMessage is null");
+        return SOFTBUS_INVALID_PARAM;
     }
     fsm->looper->PostMessage(fsm->looper, msg);
     return SOFTBUS_OK;
@@ -329,13 +333,17 @@ int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
         LNN_LOGE(LNN_STATE, "create fsm handle msg fail");
         return SOFTBUS_ERR;
     }
+    if (fsm->looper->PostMessageDelay == NULL) {
+        LNN_LOGE(LNN_STATE, "PostMessageDelay is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     fsm->looper->PostMessageDelay(fsm->looper, msg, delayMillis);
     return SOFTBUS_OK;
 }
 
 int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what)
 {
-    if (fsm == NULL || fsm->looper == NULL) {
+    if (fsm == NULL || fsm->looper == NULL || fsm->looper->RemoveMessage == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     fsm->looper->RemoveMessage(fsm->looper, &fsm->handler, what);
@@ -344,7 +352,7 @@ int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what)
 
 int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType)
 {
-    if (fsm == NULL || fsm->looper == NULL) {
+    if (fsm == NULL || fsm->looper == NULL || fsm->looper->RemoveMessageCustom == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     fsm->looper->RemoveMessageCustom(fsm->looper, &fsm->handler,
@@ -355,7 +363,7 @@ int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType)
 int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
     int32_t (*customFunc)(const SoftBusMessage*, void*), void *args)
 {
-    if (fsm == NULL || fsm->looper == NULL) {
+    if (fsm == NULL || fsm->looper == NULL || fsm->looper->RemoveMessageCustom == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     fsm->looper->RemoveMessageCustom(fsm->looper, &fsm->handler,
