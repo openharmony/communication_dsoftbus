@@ -30,5 +30,4 @@ bool IsAuthReuseP2p(const char *networkId, const char *udid, AuthLinkType authTy
 #ifdef __cplusplus
 }
 #endif
-#endif // LNN_CTRL_LANE_H
-
+#endif

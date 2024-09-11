@@ -95,7 +95,7 @@ void DiscClientProxy::OnPublishSuccess(int publishId)
     }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option) == 0,
+    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option) == SOFTBUS_OK,
         DISC_CONTROL, "send request failed");
 }
 

@@ -427,14 +427,15 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_UDID;
     unsigned char udid[UDID_BUF_LEN] = {0};
-    char newUdid[UDID_BUF_LEN] = {0};
+    char *anonyUdid = NULL;
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, udid, UDID_BUF_LEN) != 0) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo Udid failed");
         return SOFTBUS_ERR;
     }
-    DataMasking((char *)udid, UDID_BUF_LEN, ID_DELIMITER, newUdid);
-    SOFTBUS_DPRINTF(fd, "Udid = %s\n", newUdid);
+    Anonymize((char *)udid, &anonyUdid);
+    SOFTBUS_DPRINTF(fd, "Udid = %s\n", anonyUdid);
+    AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }
 
@@ -447,14 +448,15 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_UUID;
     unsigned char uuid[UUID_BUF_LEN] = {0};
-    char newUuid[UUID_BUF_LEN] = {0};
+    char *anonyUuid = NULL;
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, uuid, UUID_BUF_LEN) != 0) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo Uuid failed");
         return SOFTBUS_ERR;
     }
-    DataMasking((char *)uuid, UUID_BUF_LEN, ID_DELIMITER, newUuid);
-    SOFTBUS_DPRINTF(fd, "Uuid = %s\n", newUuid);
+    Anonymize((char *)uuid, &anonyUuid);
+    SOFTBUS_DPRINTF(fd, "Uuid = %s\n", anonyUuid);
+    AnonymizeFree(anonyUuid);
     return SOFTBUS_OK;
 }
 
@@ -538,10 +540,14 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "param is null");
         return;
     }
-    SOFTBUS_DPRINTF(fd, "DeviceName = %s\n", nodeInfo->deviceName);
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    DataMasking(nodeInfo->networkId, NETWORK_ID_BUF_LEN, ID_DELIMITER, networkId);
-    SOFTBUS_DPRINTF(fd, "NetworkId = %s\n", networkId);
+    char *anonyDeviceName = NULL;
+    Anonymize(nodeInfo->deviceName, &anonyDeviceName);
+    SOFTBUS_DPRINTF(fd, "DeviceName = %s\n", anonyDeviceName);
+    AnonymizeFree(anonyDeviceName);
+    char *anonyNetworkId = NULL;
+    Anonymize(nodeInfo->networkId, &anonyNetworkId);
+    SOFTBUS_DPRINTF(fd, "NetworkId = %s\n", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUdid failed");
         return;
