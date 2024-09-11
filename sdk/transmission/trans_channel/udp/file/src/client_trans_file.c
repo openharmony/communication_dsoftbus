@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,9 +99,9 @@ static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
             notStartedIndex++;
         }
     }
-    event->statusList.completedList.fileCnt = (uint32_t)completedIndex;
-    event->statusList.notCompletedList.fileCnt = (uint32_t)notCompletedIndex;
-    event->statusList.notStartedList.fileCnt = (uint32_t)notStartedIndex;
+    event->statusList.completedList.fileCnt = completedIndex;
+    event->statusList.notCompletedList.fileCnt = notCompletedIndex;
+    event->statusList.notStartedList.fileCnt = notStartedIndex;
     TRANS_LOGI(TRANS_SDK,
         "status list totalFileNum=%{public}d, completedNum=%{public}d, notCompletedNum=%{public}d, "
         "notStartedNum=%{public}d",

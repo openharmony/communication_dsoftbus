@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "permission_status_change_cb.h"
 #include "trans_client_proxy.h"
+#include "softbus_errcode.h"
+#include "message_parcel.h"
 
 namespace OHOS {
 void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& result)

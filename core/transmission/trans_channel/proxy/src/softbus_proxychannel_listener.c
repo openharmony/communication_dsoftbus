@@ -186,7 +186,7 @@ static int32_t TransProxyGetChannelIsServer(int32_t channelId, int8_t *isServer)
 {
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
-        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%{public}d", channelId);
+        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%d", channelId);
         return SOFTBUS_MALLOC_ERR;
     }
     if (TransProxyGetChanByChanId(channelId, chan) != SOFTBUS_OK) {
