@@ -67,7 +67,7 @@ typedef struct {
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
     int32_t connectionId;       // CONN_ID
-    int32_t requestId;          // REQ_ID
+    int32_t requestId;          // CONN_REQ_ID
     int32_t linkType;           // LINK_TYPE
     int32_t authType;           // AUTH_TYPE
     int32_t authId;             // AUTH_ID
