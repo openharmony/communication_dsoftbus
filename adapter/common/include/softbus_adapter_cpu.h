@@ -38,7 +38,7 @@ extern "C" {
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
 #define DSB() __asm__ volatile("dsb" ::: "memory")
 #ifdef __riscv
-#define DMB() __asm__ __volatile__ ("fence iorw,iorw" ::: "memory");
+#define DMB() __asm__ __volatile__ ("fence iorw,iorw" ::: "memory")
 #elif __aarch64__
 #define DMB() __asm__ volatile("DMB ISHLD" : : : "memory")
 #else
