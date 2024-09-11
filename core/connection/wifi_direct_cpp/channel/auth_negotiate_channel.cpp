@@ -220,6 +220,11 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     } else if (msg.GetMessageType() == NegotiateMessageType::CMD_DETECT_LINK_RSP) {
         std::thread(AuthNegotiateChannel::ProcessDetectLinkResponse, handle, msg).detach();
         return;
+    } else if (static_cast<int>(msg.GetMessageType()) ==
+            static_cast<int>(LegacyCommandType::CMD_GC_WIFI_CONFIG_CHANGED) ||
+        msg.GetLegacyP2pCommandType() == LegacyCommandType::CMD_GC_WIFI_CONFIG_CHANGED) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "do not process %{public}d", static_cast<int>(msg.GetMessageType()));
+        return;
     }
 
     msg.SetRemoteDeviceId(remoteDeviceId);
@@ -351,15 +356,13 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
         authConnInfo.info.ipInfo.authId = channel->handle_.authId;
     }
     auto ret = strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, param.remoteIp.c_str());
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_IP_FAILED, CONN_WIFI_DIRECT, "copy ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy ip failed");
     if (needUdid) {
         const char *remoteUdid = LnnConvertDLidToUdid(param.remoteUuid.c_str(), CATEGORY_UUID);
         CONN_CHECK_AND_RETURN_RET_LOGE(remoteUdid != nullptr && strlen(remoteUdid) != 0,
-            SOFTBUS_CONN_OPEN_CONNECTION_GET_REMOTE_UUID_FAILED, CONN_WIFI_DIRECT, "get remote udid failed");
+                                       SOFTBUS_ERR, CONN_WIFI_DIRECT, "get remote udid failed");
         ret = strcpy_s(authConnInfo.info.ipInfo.udid, UDID_BUF_LEN, remoteUdid);
-        CONN_CHECK_AND_RETURN_RET_LOGE(
-            ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_UUID_FAILED, CONN_WIFI_DIRECT, "copy udid failed");
+        CONN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy udid failed");
     }
 
     AuthConnCallback authConnCallback = {
@@ -380,5 +383,10 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
         requestIdToDeviceIdMap_.erase(requestId);
     }
     return ret;
+}
+
+void AuthNegotiateChannel::StopCustomListening()
+{
+    AuthStopListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P);
 }
 } // namespace OHOS::SoftBus

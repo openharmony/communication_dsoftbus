@@ -66,7 +66,7 @@ protected:
     WifiDirectExecutor *executor_ {};
 
 private:
-    bool acceptNegotiateData_;
+    std::atomic<bool> acceptNegotiateData_;
 };
 } // namespace OHOS::SoftBus
 #endif

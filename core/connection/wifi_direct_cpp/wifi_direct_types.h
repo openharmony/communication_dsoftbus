@@ -171,9 +171,7 @@ struct WifiDirectConnectInfo {
     bool isNetworkDelegate;
     int32_t bandWidth;
     enum IpAddrType ipAddrType;
-
     struct WifiDirectDfxInfo dfxInfo;
-    uint64_t timeoutInMs;
 };
 
 struct WifiDirectDisconnectInfo {

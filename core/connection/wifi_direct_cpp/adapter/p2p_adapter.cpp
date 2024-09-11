@@ -139,7 +139,8 @@ int32_t P2pAdapter::P2pConnectGroup(const ConnectParam &param)
             connectConfig.dhcpMode = CONNECT_AP_DHCP;
         }
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "dhcpMode=%{public}d", connectConfig.dhcpMode);
+    CONN_LOGI(
+        CONN_WIFI_DIRECT, "dhcpMode=%{public}d frequency=%{public}d", connectConfig.dhcpMode, connectConfig.frequency);
     ret = Hid2dConnect(&connectConfig);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
         CONN_WIFI_DIRECT, "connect group failed");
@@ -289,7 +290,7 @@ int32_t P2pAdapter::SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size)
 {
     (void)cfg;
     (void)size;
-    return SOFTBUS_ERR;
+    return SOFTBUS_CONN_SET_PEER_WIFI_CONFIG_FAIL;
 }
 
 bool P2pAdapter::IsWideBandSupported()
