@@ -462,6 +462,7 @@ static int32_t OtherHeartbeatSplit(
     msgPara->hasScanRsp = true;
     msgPara->isSyncData = false;
     msgPara->isFirstBegin = true;
+    msgPara->isFast = (!LnnIsMultiDeviceOnline());
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, totalDelay) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
         return SOFTBUS_ERR;
@@ -485,6 +486,7 @@ static int32_t OtherHeartbeatSplit(
     msgPara->isFirstBegin = false;
     SendEachOnce(hbFsm, msgPara, &endData, &totalDelay, HB_SEND_EACH_SEPARATELY_LEN);
     totalDelay += GenerateRandomNumForHb(HB_ADV_RANDOM_TIME_300, HB_ADV_RANDOM_TIME_600);
+    msgPara->isFast = false;
     msgPara->hasScanRsp = true;
     SendEachOnce(hbFsm, msgPara, &endData, &totalDelay, HB_SEND_EACH_SEPARATELY_LEN);
     msgPara->hasScanRsp = false;

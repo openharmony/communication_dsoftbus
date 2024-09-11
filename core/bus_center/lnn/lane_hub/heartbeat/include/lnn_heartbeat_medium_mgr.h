@@ -65,6 +65,7 @@ typedef struct {
     bool isFirstBegin;
     bool isNeedRestart;
     bool hasScanRsp;
+    bool isFast;
 } LnnHeartbeatSendBeginData;
 
 typedef struct {
