@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,10 @@
 
 #include "softbusclientstub_fuzzer.h"
 
-#include <cstddef>
+#include "securec.h"
 #include <cstdint>
 
 #include "client_trans_channel_manager.h"
-#include "message_parcel.h"
-#include "securec.h"
-#include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_stub.h"
 
