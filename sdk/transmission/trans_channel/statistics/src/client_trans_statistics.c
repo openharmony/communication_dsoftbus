@@ -70,7 +70,7 @@ void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
         (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
         return;
     }
-    SocketResource *newItem = SoftBusCalloc(sizeof(SocketResource));
+    SocketResource *newItem = (SocketResource *)SoftBusCalloc(sizeof(SocketResource));
     if (newItem == NULL) {
         TRANS_LOGE(TRANS_SDK, "socket resource calloc fail");
         (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
@@ -134,7 +134,7 @@ static int32_t PackStatistics(cJSON *json, SocketResource *resource)
         return SOFTBUS_INVALID_PARAM;
     }
     char laneId[MAX_LANE_ID_LEN] = { 0 };
-    if (sprintf_s(laneId, sizeof(laneId), "%"PRIu64"", resource->laneId) < 0) {
+    if (sprintf_s(laneId, sizeof(laneId), "%" PRIu64"", resource->laneId) < 0) {
         TRANS_LOGE(TRANS_SDK, "sprintf laneId fail");
         return SOFTBUS_INVALID_PARAM;
     }
