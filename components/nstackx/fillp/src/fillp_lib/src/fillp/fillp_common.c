@@ -283,7 +283,8 @@ static void FreeUnackList(struct FillpPcb *pcb, struct FillpPcbItem *item, struc
     FillpFreeItemAndEvent(pcb, item);
 }
 
-static void FillpAckUnackList(struct FillpPcb *pcb, FILLP_UINT32 curSeq, FILLP_INT cntLimit)
+IGNORE_OVERFLOW static void FillpAckUnackList(struct FillpPcb *pcb,
+    FILLP_UINT32 curSeq, FILLP_INT cntLimit)
 {
     FILLP_UINT32 i, loopCount;
 
@@ -344,7 +345,7 @@ END:
     SpungeEpollEventCallback(sock, SPUNGE_EPOLLOUT, count);
 }
 
-void FillpAckSendPcb(struct FillpPcb *pcb, FILLP_INT cntLimit)
+IGNORE_OVERFLOW void FillpAckSendPcb(struct FillpPcb *pcb, FILLP_INT cntLimit)
 {
     FILLP_UINT32 pktSendCnt;
     /* ack the item in unackList */
@@ -377,7 +378,7 @@ static void FillpSendAdhocpack(struct FillpPcb *pcb)
 }
 #endif
 
-void FillpUploadRecvBox(struct FillpPcb *pcb)
+IGNORE_OVERFLOW void FillpUploadRecvBox(struct FillpPcb *pcb)
 {
     struct FillpPcbItem *item = FILLP_NULL_PTR;
     struct SkipListNode *node = FILLP_NULL_PTR;
