@@ -318,6 +318,11 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
         DelLogicAndLaneRelationship(resourceItem.laneId);
         ClearLaneResourceByLaneId(resourceItem.laneId);
     }
+    if (laneLinkInfo->type == LANE_HML &&
+        FindLaneResourceByLinkType(peerUdid, LANE_HML_RAW, &resourceItem) == SOFTBUS_OK) {
+        DelLogicAndLaneRelationship(resourceItem.laneId);
+        ClearLaneResourceByLaneId(resourceItem.laneId);
+    }
     uint32_t resNum;
     LaneBusinessInfo laneBusinessInfo[LANE_TYPE_BUTT];
     if (FindLaneBusinessInfoByLinkInfo(laneLinkInfo, &resNum, laneBusinessInfo, LANE_TYPE_BUTT) != SOFTBUS_OK) {
