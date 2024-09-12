@@ -769,6 +769,7 @@ int32_t ConifgLocalLedger(void)
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
+    (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
 
     // irk fail should not cause softbus init fail
     if (LnnUpdateLinkFinderInfo() != SOFTBUS_OK) {
