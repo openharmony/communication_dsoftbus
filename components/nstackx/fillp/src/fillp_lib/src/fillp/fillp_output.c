@@ -48,7 +48,8 @@ static void FillpMoveRedundantItemToUnrecvList(struct FillpPcb *pcb)
     }
 }
 
-static struct FillpPcbItem *FillpGetSendItem(struct FillpSendPcb *sendPcb, struct FillpPcb *pcb)
+IGNORE_OVERFLOW static struct FillpPcbItem *FillpGetSendItem(struct FillpSendPcb *sendPcb,
+    struct FillpPcb *pcb)
 {
     struct FillpPcbItem *item = (struct FillpPcbItem *)SkipListPopValue(&sendPcb->unrecvList);
     if (item != FILLP_NULL_PTR) {
