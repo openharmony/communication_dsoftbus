@@ -453,7 +453,7 @@ static void OnConnOpenFailedForDisconnect(uint32_t authRequestId, int32_t reason
 {
     LNN_LOGI(LNN_LANE, "auth open fail to disconnect wifidirect, authRequestId=%{public}u, reason=%{public}d",
         authRequestId, reason);
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     struct WifiDirectDisconnectInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     P2pLinkedList reqInfo;
@@ -507,7 +507,7 @@ static void OnConnOpenedForDisconnect(uint32_t authRequestId, AuthHandle authHan
         .onDisconnectSuccess = OnWifiDirectDisconnectSuccess,
         .onDisconnectFailure = OnWifiDirectDisconnectFailure,
     };
-    LNN_LOGI(LNN_LANE, "disconnect wifiirect, p2pRequestId=%{public}u, linkId=%{public}d",
+    LNN_LOGI(LNN_LANE, "disconnect wifidirect, p2pRequestId=%{public}u, linkId=%{public}d",
         info.requestId, info.linkId);
     errCode = GetWifiDirectManager()->disconnectDevice(&info, &callback);
     if (errCode != SOFTBUS_OK) {
@@ -926,12 +926,12 @@ static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLi
 
     if (isRaw) {
         linkInfo->type = LANE_HML_RAW;
-        if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.localIp, IP_LEN, link->localIp) != EOK) {
-            LNN_LOGE(LNN_LANE, "strcpy localIp fail");
-            return SOFTBUS_STRCPY_ERR;
-        }
         if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.peerIp, IP_LEN, link->remoteIp) != EOK) {
             LNN_LOGE(LNN_LANE, "strcpy peerIp fail");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.localIp, IP_LEN, link->localIp) != EOK) {
+            LNN_LOGE(LNN_LANE, "strcpy localIp fail");
             return SOFTBUS_STRCPY_ERR;
         }
         linkInfo->linkInfo.rawWifiDirect.port = link->remotePort;
@@ -1807,7 +1807,6 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
             return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
         }
     }
-    LNN_LOGI(LNN_LANE, "open ble trigger with laneReqId=%{public}u", laneReqId);
     wifiDirectInfo.requestId = GetWifiDirectManager()->getRequestId();
     int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneReqId, request, callback);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_LANE, "add new connect node failed");
@@ -1911,7 +1910,7 @@ static bool IsSupportWifiDirect(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
-    return IsSupportHmlTwo(local, remote);
+    return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
 }
 static bool CheckHasBrConnection(const char *networkId)
 {
@@ -2001,7 +2000,8 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t l
         wifiDirectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
         wifiDirectInfo.negoChannel.handle.actionAddr = request->actionAddr;
     } else {
-        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+        wifiDirectInfo.connectType = GetWifiDirectManager()->supportHmlTwo() ?
+            WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     }
     wifiDirectInfo.reuseOnly = true;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
@@ -2240,6 +2240,7 @@ static int32_t GetRequest(P2pLinkReqList *p2pLinkReqInfo, LinkRequest *request)
     request->bandWidth = p2pLinkReqInfo->p2pInfo.bandWidth;
     request->triggerLinkTime = p2pLinkReqInfo->p2pInfo.triggerLinkTime;
     request->availableLinkTime = p2pLinkReqInfo->p2pInfo.availableLinkTime;
+    request->isSupportIpv6 = p2pLinkReqInfo->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
     return SOFTBUS_OK;
 }
 

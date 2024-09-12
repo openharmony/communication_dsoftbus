@@ -343,7 +343,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         TRANS_LOGE(TRANS_SDK, "accept session failed, ret=%{public}d", ret);
         return ret;
     }
-    if (channel->channelType == CHANNEL_TYPE_UDP && channel->businessType == BUSINESS_TYPE_FILE) {
+    if (channel->channelType == CHANNEL_TYPE_UDP) {
         TransSetUdpChanelSessionId(channel->channelId, sessionId);
     }
     int id = SetTimer("OnSessionOpened", DFX_TIMERS_S);

@@ -171,6 +171,11 @@ static int32_t DisconnectDevice2(struct WifiDirectDisconnectInfo *info, struct W
     return SOFTBUS_ERR;
 }
 
+static bool SupportHmlTwo(void)
+{
+    return true;
+}
+
 static int32_t CancelConnectDevice(const struct WifiDirectConnectInfo *info)
 {
     GTEST_LOG_(INFO) << "CancelConnectDevice enter";
@@ -191,6 +196,7 @@ static struct WifiDirectManager g_manager = {
     .connectDevice = ConnectDevice,
     .cancelConnectDevice = CancelConnectDevice,
     .disconnectDevice = DisconnectDevice,
+    .supportHmlTwo = SupportHmlTwo,
 };
 
 static struct WifiDirectManager g_manager2 = {

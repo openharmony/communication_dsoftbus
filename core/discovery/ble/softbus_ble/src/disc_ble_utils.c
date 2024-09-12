@@ -188,7 +188,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
     // convert multi byte str to wide str
     wchar_t wideStr[WIDE_STR_MAX_LEN] = {0};
     size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
-    if (numConverted <= 0) {
+    if (numConverted == 0 || numConverted > multiByteStrLen) {
         DISC_LOGE(DISC_BLE, "mbstowcs failed");
         RestoreLocale(localeBefore);
         return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
@@ -288,6 +288,8 @@ static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const
 
 static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const uint32_t len)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(len >= CUST_CAPABILITY_LEN, SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "the length of cust data is too short");
     if ((int32_t)data[0] != (int32_t)CAST_PLUS) {
         DISC_LOGI(DISC_BLE, "not castPlus, just ignore");
         return SOFTBUS_OK;
