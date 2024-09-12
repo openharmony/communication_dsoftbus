@@ -561,11 +561,11 @@ void StubConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
 static SoftBusGattcCallback *GetStubGattcCallback()
 {
     static SoftBusGattcCallback callback = {
-        .ConnectionStateCallback = StubConnectionStateCallback,
-        .ServiceCompleteCallback = StubServiceCompleteCallback,
-        .RegistNotificationCallback = StubRegistNotificationCallback,
-        .NotificationReceiveCallback = StubNotificationReceiveCallback,
-        .ConfigureMtuSizeCallback = StubConfigureMtuSizeCallback,
+        .connectionStateCallback = StubConnectionStateCallback,
+        .serviceCompleteCallback = StubServiceCompleteCallback,
+        .registNotificationCallback = StubRegistNotificationCallback,
+        .notificationReceiveCallback = StubNotificationReceiveCallback,
+        .configureMtuSizeCallback = StubConfigureMtuSizeCallback,
     };
     return &callback;
 }
