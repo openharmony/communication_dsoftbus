@@ -630,5 +630,6 @@ int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn)
         return SOFTBUS_INVALID_PARAM;
     }
     info->isScreenOn = isScreenOn;
+    LNN_LOGI(LNN_LEDGER, "set local screen status to %{public}s", isScreenOn ? "on" : "off");
     return SOFTBUS_OK;
 }

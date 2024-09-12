@@ -121,7 +121,7 @@ static void HandleNodeBasicInfoChangedMessage(SoftBusMessage *msg)
 static void HandleNodeStatusChangedMessage(SoftBusMessage *msg)
 {
     if (msg->obj == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid node basic info message");
+        LNN_LOGE(LNN_EVENT, "invalid node status message");
         return;
     }
     int32_t type = (int32_t)msg->arg1;
