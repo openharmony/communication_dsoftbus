@@ -91,8 +91,8 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     char *anonyDevName = NULL;
     Anonymize(device->devName, &anonyDevName);
     // devId format is hex hash string here
-    LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s, devType=%{public}03X",
-        anonyDevName, anonyDevId, device->devType);
+    LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s, devType=%{public}03X, port=%{public}u",
+        anonyDevName, anonyDevId, device->devType, device->addr[0].info.ip.port);
     AnonymizeFree(anonyDevName);
     if (!AuthIsPotentialTrusted(device)) {
         LNN_LOGW(LNN_BUILDER, "discovery device is not potential trusted, devId=%{public}s, "
