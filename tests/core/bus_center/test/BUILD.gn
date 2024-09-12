@@ -100,7 +100,7 @@ ohos_unittest("HeartBeatMediumTest") {
   }
   external_deps += [
     "c_utils:utils",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -170,7 +170,7 @@ ohos_unittest("HeartBeatFSMTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   } else {
     external_deps = [
@@ -179,7 +179,7 @@ ohos_unittest("HeartBeatFSMTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 }
@@ -237,7 +237,7 @@ ohos_unittest("HeartBeatStrategyTest") {
   }
   external_deps += [
     "c_utils:utils",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -300,7 +300,7 @@ ohos_unittest("HeartBeatUtilsTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   } else {
     external_deps = [
@@ -309,7 +309,7 @@ ohos_unittest("HeartBeatUtilsTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 }
@@ -391,7 +391,7 @@ ohos_unittest("HeartBeatCtrlTest") {
   }
   external_deps += [
     "c_utils:utils",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -427,7 +427,7 @@ ohos_unittest("ClientProxyTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
       "samgr:samgr_proxy",
     ]
   } else {
@@ -437,7 +437,7 @@ ohos_unittest("ClientProxyTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
       "samgr:samgr_proxy",
     ]
   }
@@ -488,7 +488,7 @@ ohos_unittest("BusCenterIpcTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   } else {
     external_deps = [
@@ -497,7 +497,7 @@ ohos_unittest("BusCenterIpcTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 }
@@ -584,7 +584,7 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
   }
   external_deps += [
     "c_utils:utils",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
