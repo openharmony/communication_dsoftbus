@@ -268,7 +268,6 @@ static void FreeSendNode(SendQueueNode *node)
 
 static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
-#define BLE_SEND_PACKET_DELAY_MILLIS 20
     const uint8_t *waitSendData = data;
     uint32_t waitSendLen = dataLen;
     uint32_t offset = 0;
@@ -306,8 +305,6 @@ static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *d
         waitSendData += amount;
         waitSendLen -= amount;
         offset += amount;
-        // Temporarily add delay to avoid packet loss
-        SoftBusSleepMs(BLE_SEND_PACKET_DELAY_MILLIS);
     }
     return SOFTBUS_OK;
 }
