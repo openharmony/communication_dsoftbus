@@ -178,10 +178,6 @@ static int32_t BusCenterServerInitFirstStep(void)
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
-    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "start decision center init fail");
-        return SOFTBUS_NO_INIT;
-    }
     if (LnnInitBusCenterEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init bus center event fail");
         return SOFTBUS_CENTER_EVENT_INIT_FAILED;
@@ -234,10 +230,6 @@ static int32_t BusCenterServerInitSecondStep(void)
     }
     if (InitDecisionCenter() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initDecisionCenter fail");
-        return SOFTBUS_NO_INIT;
-    }
-    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init bus center decision center fail");
         return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
