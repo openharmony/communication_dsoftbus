@@ -36,6 +36,12 @@ ohos_fuzztest("SessionMockFuzzTest") {
     "../../../../../components/nstackx/nstackx_util/interface",
     "../../../../../sdk/transmission/session/include",
     "../../../../../sdk/transmission/session/cpp/src",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/qos/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/sdk/frame/common/include",
+    "$dsoftbus_root_path/adapter/default_config/spec_config",
+    "$dsoftbus_root_path/sdk/transmission/ipc/include",
   ]
   cflags = [
     "-g",
@@ -45,11 +51,12 @@ ohos_fuzztest("SessionMockFuzzTest") {
     "-fstack-protector-strong",
   ]
   sources = [ "sessionmock_fuzzer.cpp" ]
-  deps = [ "../../../../../sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "bounds_checking_function:libsec_static",
     "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 

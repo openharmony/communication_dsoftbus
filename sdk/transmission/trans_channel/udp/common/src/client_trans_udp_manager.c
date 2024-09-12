@@ -392,10 +392,7 @@ static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, Shutd
     int32_t ret;
     if (channel != NULL) {
         int32_t sessionId = channel->sessionId;
-        ret = ClientSetStatusClosingBySocket(sessionId, true);
-        if (ret != SOFTBUS_OK) {
-            return ret;
-        }
+        (void)ClientSetStatusClosingBySocket(sessionId, true);
     }
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SDK, "trans del udp channel failed. channelId=%{public}d", channelId);

@@ -22,7 +22,6 @@
 #include "bus_center_event.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_coap_discovery_impl.h"
-#include "lnn_decision_center.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
@@ -288,7 +287,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitNetworkManager();
     LnnDeinitEventMonitor();
     LnnDeinitBusCenterEvent();
-    LnnDeinitDecisionCenter();
     LnnDeinitNetLedger();
     DeinitDecisionCenter();
     LnnDeinitMetaNode();
