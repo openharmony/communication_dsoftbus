@@ -450,4 +450,19 @@ int32_t P2pAdapter::P2pConfigGcIp(const std::string &interface, const std::strin
     CONN_LOGI(CONN_WIFI_DIRECT, "success");
     return SOFTBUS_OK;
 }
+
+void P2pAdapter::Register(const GetCoexConflictCodeHook &coexConflictor)
+{
+    getCoexConflictCodeHook_ = coexConflictor;
+}
+
+int P2pAdapter::GetCoexConflictCode(const char *ifName, int32_t channelId)
+{
+    if (getCoexConflictCodeHook_ == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "not support, no conflict");
+        return SOFTBUS_OK;
+    }
+    return getCoexConflictCodeHook_(ifName, channelId);
+}
+
 } // namespace OHOS::SoftBus
