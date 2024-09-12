@@ -18,7 +18,6 @@
 #include <securec.h>
 #include <string.h>
 
-#include "client_bus_center_manager.h"
 #include "data_level.h"
 #include "client_trans_session_manager.h"
 #include "lnn_event.h"
@@ -263,7 +262,7 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
 int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInfoKey key,
     uint8_t *info, int32_t infoLen)
 {
-    if (pkgName == NULL || infoLen <= 0) {
+    if (pkgName == NULL) {
         LNN_LOGE(LNN_STATE, "pkgName is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -275,10 +274,7 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (memset_s(info, infoLen, 0, infoLen) != EOK) {
-        LNN_LOGE(LNN_STATE, "memset nodekey info failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    (void)memset_s(info, infoLen, 0, infoLen);
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
 }
 
