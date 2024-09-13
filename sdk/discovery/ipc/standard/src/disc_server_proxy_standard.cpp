@@ -280,10 +280,11 @@ int32_t DiscServerProxy::CloseChannel(const char *sessionName, int32_t channelId
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-    uint32_t len)
+int32_t DiscServerProxy::CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
     (void)channelId;
+    (void)channelType;
     (void)laneId;
     (void)dataInfo;
     (void)len;

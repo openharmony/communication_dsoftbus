@@ -142,10 +142,11 @@ int32_t BusCenterServerProxy::CloseChannel(const char *sessionName, int32_t chan
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-    uint32_t len)
+int32_t BusCenterServerProxy::CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
     (void)channelId;
+    (void)channelType;
     (void)laneId;
     (void)dataInfo;
     (void)len;
