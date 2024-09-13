@@ -40,7 +40,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if ((info->freq < LOW) || (info->freq >= FREQ_BUTT)) {
+    if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
         DISC_LOGE(DISC_SDK, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -74,7 +74,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if ((info->freq < LOW) || (info->freq >= FREQ_BUTT)) {
+    if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
         DISC_LOGE(DISC_SDK, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }

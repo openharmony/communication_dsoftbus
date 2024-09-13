@@ -64,8 +64,6 @@ typedef enum {
     SCAN_FREQ_P2_30_1500,
     SCAN_FREQ_P10_30_300,
     SCAN_FREQ_P25_60_240,
-    SCAN_FREQ_P50_30_60,
-    SCAN_FREQ_P75_30_40,
     SCAN_FREQ_P100_1000_1000,
     SCAN_FREQ_BUTT,
 } ScanFreq;
@@ -1060,14 +1058,6 @@ static void GetScanIntervalAndWindow(int32_t freq, SoftBusBcScanParams *adapterP
         adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P25;
         adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P25;
     }
-    if (freq == SCAN_FREQ_P50_30_60) {
-        adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P50;
-        adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P50;
-    }
-    if (freq == SCAN_FREQ_P75_30_40) {
-        adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P75;
-        adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P75;
-    }
     if (freq == SCAN_FREQ_P100_1000_1000) {
         adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P100;
         adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P100;
@@ -1506,12 +1496,6 @@ static int32_t GetScanFreq(uint16_t scanInterval, uint16_t scanWindow)
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P25 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P25) {
         return SCAN_FREQ_P25_60_240;
-    }
-    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P50 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P50) {
-        return SCAN_FREQ_P50_30_60;
-    }
-    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P75 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P75) {
-        return SCAN_FREQ_P75_30_40;
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P100 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P100) {
         return SCAN_FREQ_P100_1000_1000;

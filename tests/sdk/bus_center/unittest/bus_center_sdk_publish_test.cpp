@@ -181,7 +181,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -386,12 +386,6 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -434,12 +428,6 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.freq = SUPER_HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
@@ -490,12 +478,6 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest008, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -538,12 +520,6 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest009, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.freq = SUPER_HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
@@ -730,11 +706,6 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-
-    testInfo.freq = EXTREME_HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
 /**
@@ -774,11 +745,6 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest015, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 
     testInfo.freq = SUPER_HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-
-    testInfo.freq = EXTREME_HIGH;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);

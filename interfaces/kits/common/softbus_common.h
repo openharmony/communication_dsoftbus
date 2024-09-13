@@ -340,8 +340,6 @@ typedef enum {
     HIGH = 2,
     /** Super-high */
     SUPER_HIGH = 3,
-    /** Extreme-high */
-    EXTREME_HIGH = 4,
     FREQ_BUTT
 } ExchangeFreq;
 
