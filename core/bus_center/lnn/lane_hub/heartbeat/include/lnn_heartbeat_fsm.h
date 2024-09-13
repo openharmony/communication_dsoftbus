@@ -84,6 +84,7 @@ typedef struct {
     bool isNeedRestart;
     bool hasScanRsp;
     bool isFirstBegin;
+    bool isFast;
     bool isDirectBoardcast;
     char networkId[NETWORK_ID_BUF_LEN];
     uint64_t checkDelay;
