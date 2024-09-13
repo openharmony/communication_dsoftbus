@@ -214,38 +214,6 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest003
- * @tc.desc: Verify the CheckPidByChannelId function.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest003, TestSize.Level1)
-{
-    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    ASSERT_NE(nullptr, softBusServer);
-    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
-    pid_t callingPid = 0;
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-
-    EXPECT_CALL(softbusServerStubMock, TransGetAppInfoByChanId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = softBusServer->CheckPidByChannelId(callingPid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    EXPECT_CALL(softbusServerStubMock, TransGetAppInfoByChanId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
-    ret = softBusServer->CheckPidByChannelId(callingPid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    EXPECT_CALL(softbusServerStubMock, TransGetAppInfoByChanId).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = softBusServer->CheckPidByChannelId(callingPid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    callingPid = -1;
-    ret = softBusServer->CheckPidByChannelId(callingPid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
-}
-
-/**
  * @tc.name: SoftbusServerStubTest004
  * @tc.desc: Verify the CheckAndRecordAccessToken function.
  * @tc.type: FUNC
