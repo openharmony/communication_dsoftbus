@@ -400,7 +400,7 @@ static int32_t CheckPublishInfo(const PublishInfo *info)
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= COAP,
         SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq < FREQ_BUTT,
+    DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq <= SUPER_HIGH,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
 
     if (info->capabilityData == NULL) {
@@ -440,7 +440,7 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= COAP,
         SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq < FREQ_BUTT,
+    DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq <= SUPER_HIGH,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
 
     if (info->capabilityData == NULL) {

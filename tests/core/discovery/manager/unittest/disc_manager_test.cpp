@@ -329,7 +329,7 @@ HWTEST_F(DiscManagerTest, DiscPublishTest002, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = DiscPublish(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -437,11 +437,6 @@ void DiscPublishTestAbstract001(DiscModule module, PublishInfo *info)
     DiscUnpublish(module, info->publishId);
 
     info->freq = SUPER_HIGH;
-    ret = DiscPublish(module, info);
-    TEST_ASSERT_TRUE(ret == 0);
-    DiscUnpublish(module, info->publishId);
-
-    info->freq = EXTREME_HIGH;
     ret = DiscPublish(module, info);
     TEST_ASSERT_TRUE(ret == 0);
     DiscUnpublish(module, info->publishId);
@@ -566,7 +561,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest002, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = DiscStartScan(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -733,7 +728,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -879,11 +874,6 @@ void DiscStartAdvertiseTestAbstract002(DiscModule module, SubscribeInfo *info)
     TEST_ASSERT_TRUE(ret == 0);
     DiscStopAdvertise(MODULE_LNN, info->subscribeId);
 
-    info->freq = EXTREME_HIGH;
-    ret = DiscStartAdvertise(MODULE_LNN, info);
-    TEST_ASSERT_TRUE(ret == 0);
-    DiscStopAdvertise(MODULE_LNN, info->subscribeId);
-
     info->freq = LOW;
     DiscMgrDeinit();
 }
@@ -953,7 +943,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest002, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = DiscSubscribe(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -1207,11 +1197,6 @@ void DiscUnpublishTestAbstract001(DiscModule module, PublishInfo *info)
     ret = DiscUnpublish(module, info->publishId);
     TEST_ASSERT_TRUE(ret == 0);
 
-    info->freq = EXTREME_HIGH;
-    DiscPublish(module, info);
-    ret = DiscUnpublish(module, info->publishId);
-    TEST_ASSERT_TRUE(ret == 0);
-
     info->freq = LOW;
     DiscMgrDeinit();
 }
@@ -1373,11 +1358,6 @@ void DiscStopAdvertiseTestAbstract001(DiscModule module, SubscribeInfo *info)
     ret = DiscStopAdvertise(module, info->subscribeId);
     TEST_ASSERT_TRUE(ret == 0);
 
-    info->freq = EXTREME_HIGH;
-    DiscStartAdvertise(module, info);
-    ret = DiscStopAdvertise(module, info->subscribeId);
-    TEST_ASSERT_TRUE(ret == 0);
-
     info->freq = LOW;
     DiscMgrDeinit();
 }
@@ -1461,7 +1441,7 @@ HWTEST_F(DiscManagerTest, PublishServiceTest002, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = DiscPublishService("pkgname1", &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -1651,11 +1631,6 @@ void PublishServiceTestAbstract001(PublishInfo *info)
     TEST_ASSERT_TRUE(ret == 0);
     DiscUnPublishService("pkgname1", info->publishId);
 
-    info->freq = EXTREME_HIGH;
-    ret = DiscPublishService("pkgname1", info);
-    TEST_ASSERT_TRUE(ret == 0);
-    DiscUnPublishService("pkgname1", info->publishId);
-
     info->freq = LOW;
     DiscMgrDeinit();
 }
@@ -1749,7 +1724,7 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest002, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -1892,11 +1867,6 @@ void StartDiscoveryTestAbstract001(SubscribeInfo *info)
     TEST_ASSERT_TRUE(ret == 0);
     DiscStopDiscovery("pkgname1", info->subscribeId);
 
-    info->freq = EXTREME_HIGH;
-    ret = DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
-    TEST_ASSERT_TRUE(ret == 0);
-    DiscStopDiscovery("pkgname1", info->subscribeId);
-
     DiscMgrDeinit();
 }
 
@@ -2031,11 +2001,6 @@ void UnPublishServiceTestAbstract001(PublishInfo *info)
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = SUPER_HIGH;
-    DiscPublishService("pkgname1", info);
-    ret = DiscUnPublishService("pkgname1", info->publishId);
-    TEST_ASSERT_TRUE(ret == 0);
-
-    info->freq = EXTREME_HIGH;
     DiscPublishService("pkgname1", info);
     ret = DiscUnPublishService("pkgname1", info->publishId);
     TEST_ASSERT_TRUE(ret == 0);
@@ -2186,11 +2151,6 @@ void StopDiscoveryTestAbstract001(SubscribeInfo *info)
     TEST_ASSERT_TRUE(ret == 0);
 
     info->freq = SUPER_HIGH;
-    DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
-    ret = DiscStopDiscovery("pkgname1", info->subscribeId);
-    TEST_ASSERT_TRUE(ret == 0);
-
-    info->freq = EXTREME_HIGH;
     DiscStartDiscovery("pkgname1", info, &g_subscribeCb);
     ret = DiscStopDiscovery("pkgname1", info->subscribeId);
     TEST_ASSERT_TRUE(ret == 0);
