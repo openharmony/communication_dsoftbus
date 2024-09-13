@@ -20,12 +20,12 @@ module_output_path = "dsoftbus/common/dfx"
 ohos_unittest("SoftBusDfxEventTest") {
   module_out_path = module_output_path
   sources = [
+    "conn_event_test.cpp",
+    "disc_event_test.cpp",
+    "lnn_event_test.cpp",
     "mock/hisysevent_mock.cpp",
-    "src/conn_event_test.cpp",
-    "src/disc_event_test.cpp",
-    "src/lnn_event_test.cpp",
-    "src/softbus_event_test.cpp",
-    "src/trans_event_test.cpp",
+    "softbus_event_test.cpp",
+    "trans_event_test.cpp",
   ]
   include_dirs = [
     "$dsoftbus_dfx_path/event/src",
