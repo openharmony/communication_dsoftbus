@@ -192,7 +192,7 @@ static void RemoveChannelDfxInfo(int32_t channelId, int32_t channelType)
     (void)SoftBusMutexUnlock(&g_channelDfxInfoList->lock);
 }
 
-static int32_t SetChannelStatisticsInfo(ChannelStatisticsInfo *info, int32_t channelId, const void *dataInfo,
+static int32_t ChannelStatisticsInfoInit(ChannelStatisticsInfo *info, int32_t channelId, const void *dataInfo,
     uint32_t len)
 {
     if (info == NULL || dataInfo == NULL || len > MAX_SOCKET_RESOURCE_LEN) {
@@ -200,12 +200,12 @@ static int32_t SetChannelStatisticsInfo(ChannelStatisticsInfo *info, int32_t cha
         return SOFTBUS_INVALID_PARAM;
     }
 
-    info->channelInfo = (char *)SoftBusMalloc(len);
+    info->channelInfo = (char *)SoftBusCalloc(len + 1);
     if (info->channelInfo == NULL) {
         COMM_LOGE(COMM_DFX, "channel info mallloc fail, channelId=%{public}d", channelId);
         return SOFTBUS_MALLOC_ERR;
     }
-    if (memcpy_s(info->channelInfo, len, (char *)dataInfo, len) != EOK) {
+    if (memcpy_s(info->channelInfo, len + 1, (char *)dataInfo, len) != EOK) {
         COMM_LOGE(COMM_DFX, "channel info memcpy fail, channelId=%{public}d", channelId);
         SoftBusFree(info->channelInfo);
         return SOFTBUS_MEM_ERR;
@@ -251,7 +251,7 @@ void UpdateNetworkResourceByLaneId(int32_t channelId, int32_t channelType, uint6
             (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
             return;
         }
-        if (SetChannelStatisticsInfo(info, channelId, dataInfo, len) != SOFTBUS_OK) {
+        if (ChannelStatisticsInfoInit(info, channelId, dataInfo, len) != SOFTBUS_OK) {
             COMM_LOGE(COMM_DFX, "channel statistics info set fail, channelId=%{public}d", channelId);
             (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
             SoftBusFree(info);

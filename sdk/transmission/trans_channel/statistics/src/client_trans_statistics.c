@@ -45,7 +45,7 @@ static void CreateSocketResource(SocketResource *item, const char *sessionName, 
 
     char *tmpSessionName = NULL;
     Anonymize(sessionName, &tmpSessionName);
-    if (strcpy_s(item->socketName, SESSION_NAME_SIZE_MAX, tmpSessionName) != EOK) {
+    if (strcpy_s(item->socketName, SESSION_NAME_SIZE_MAX, AnonymizeWrapper(tmpSessionName)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "strcpy failed");
     }
     AnonymizeFree(tmpSessionName);
