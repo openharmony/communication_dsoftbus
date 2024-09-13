@@ -280,7 +280,6 @@ static int32_t PostMessageAtTimeParamVerify(const SoftBusLooper *looper, SoftBus
         COMM_LOGE(COMM_UTILS, "[%s] msg handler is null", looper->context->name);
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 
@@ -474,7 +473,7 @@ struct LoopConfigItem {
 static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_DEFAULT, NULL},
     {LOOP_TYPE_CONN, NULL},
-    {LOOP_TYPE_LNN, NULL}
+    {LOOP_TYPE_LNN, NULL},
 };
 
 SoftBusLooper *GetLooper(int type)

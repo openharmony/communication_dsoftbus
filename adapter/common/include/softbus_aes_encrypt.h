@@ -68,4 +68,5 @@ int32_t SoftBusAesGcmEncrypt(
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* SOFTBUS_AES_ENCRYPT_H */
