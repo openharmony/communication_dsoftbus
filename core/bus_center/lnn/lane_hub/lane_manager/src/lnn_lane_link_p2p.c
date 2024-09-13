@@ -467,7 +467,7 @@ static void OnConnOpenFailedForDisconnect(uint32_t authRequestId, int32_t reason
         .onDisconnectSuccess = OnWifiDirectDisconnectSuccess,
         .onDisconnectFailure = OnWifiDirectDisconnectFailure,
     };
-    LNN_LOGD(LNN_LANE, "disconnect wifiDirect, p2pRequestId=%{public}u, linkId=%{public}d",
+    LNN_LOGI(LNN_LANE, "disconnect wifiDirect, p2pRequestId=%{public}u, linkId=%{public}d",
         info.requestId, info.linkId);
     errCode = GetWifiDirectManager()->disconnectDevice(&info, &callback);
     if (errCode != SOFTBUS_OK) {
@@ -490,7 +490,7 @@ static void OnConnOpenedForDisconnect(uint32_t authRequestId, AuthHandle authHan
         LNN_LOGE(LNN_LANE, "authHandle type error");
         return;
     }
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     struct WifiDirectDisconnectInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     P2pLinkedList reqInfo;
@@ -2066,7 +2066,7 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
     }
     *linksNum = 0;
     if ((request->linkType == LANE_HML || request->linkType == LANE_HML_RAW) && request->actionAddr > 0) {
-        LNN_LOGI(LNN_LANE, "actionAddr is valid, value=%{public}u, linkType=%{public}d, add action Trigger",
+        LNN_LOGI(LNN_LANE, "actionAddr is valid, value=%{public}u, linkType=%{public}d, add actionTrigger",
             request->actionAddr, request->linkType);
         guideList[(*linksNum)++] = LANE_ACTION_TRIGGER;
         return SOFTBUS_OK;
