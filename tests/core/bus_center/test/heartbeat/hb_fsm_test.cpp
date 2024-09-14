@@ -995,7 +995,6 @@ HWTEST_F(HeartBeatFSMTest, HbFsmStateProcessFunc_01, TestSize.Level1)
     LnnHeartbeatFsm hbFsm;
     (void)memset_s(&hbFsm, sizeof(LnnHeartbeatFsm), 0, sizeof(LnnHeartbeatFsm));
     void *para = SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
-    (void)memset_s(para, sizeof(LnnCheckDevStatusMsgPara), 0, sizeof(LnnCheckDevStatusMsgPara));
     int32_t msgType = EVENT_HB_MIN;
     bool ret = HbFsmStateProcessFunc(nullptr, msgType, nullptr);
     EXPECT_EQ(ret, false);

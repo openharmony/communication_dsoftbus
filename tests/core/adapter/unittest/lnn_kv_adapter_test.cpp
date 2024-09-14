@@ -26,7 +26,7 @@ namespace OHOS {
 
 namespace {
 const std::string APP_ID = "dsoftbus";
-const std::string STORE_ID = "dsoftbus_kv_db_test";
+const std::string STORE_ID = "dsoftbus_kv_db";
 shared_ptr<KVAdapter> kvStore = nullptr;
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MAX_MAP_SIZE = 10000;
@@ -129,12 +129,12 @@ HWTEST_F(KVAdapterTest, Put004, TestSize.Level1)
     string key = "key";
     string value = "value";
     EXPECT_EQ(SOFTBUS_OK, kvStore->Put(key, value));
-    
+
     for (int32_t i = 0; i < MAX_STRING_LEN + 5; i++) {
         value += 'a';
     }
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
-    
+
     value = "";
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
 
@@ -142,7 +142,7 @@ HWTEST_F(KVAdapterTest, Put004, TestSize.Level1)
         key += 'a';
     }
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
-    
+
     key = "";
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
 }
@@ -171,8 +171,8 @@ HWTEST_F(KVAdapterTest, PutBatch002, TestSize.Level1)
 {
     map<string, string> values;
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->PutBatch(values));
-    
-    for (int32_t i = 0; i< MAX_MAP_SIZE + 5; i++) {
+
+    for (int32_t i = 0; i < MAX_MAP_SIZE + 5; i++) {
         values[to_string(i)] = "value";
     }
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->PutBatch(values));
