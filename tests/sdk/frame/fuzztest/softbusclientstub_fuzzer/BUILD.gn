@@ -14,26 +14,19 @@
 #####################hydra-fuzz###################
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
-dsoftbus_root_path = "../../../../.."
 
 ##############################fuzztest##########################################
 ohos_fuzztest("SoftbusClientStubFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
+
   fuzz_config_file =
-      "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer"
+      "$dsoftbus_test_path/sdk/frame/fuzztest/softbusclientstub_fuzzer"
+
   include_dirs = [
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/inner_communication",
-    "../../../../../interfaces/kits/common",
-    "../../../../../sdk/frame/standard/include",
-    "../../../../../sdk/frame/small/include",
-    "../../../../../sdk/frame/mini/include",
-    "../../../../../sdk/frame/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../sdk/transmission/trans_channel/manager/include/",
+    "$dsoftbus_sdk_path/frame/standard/include",
+    "$dsoftbus_sdk_path/transmission/trans_channel/manager/include/",
   ]
+
   cflags = [
     "-g",
     "-O0",
@@ -41,13 +34,17 @@ ohos_fuzztest("SoftbusClientStubFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fstack-protector-strong",
   ]
+
   sources = [ "softbusclientstub_fuzzer.cpp" ]
-  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_test_path/sdk:softbus_client_static",
+  ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "ipc:ipc_core",
     "ipc:ipc_single",
   ]
 }
@@ -55,10 +52,6 @@ ohos_fuzztest("SoftbusClientStubFuzzTest") {
 ###############################################################################
 group("fuzztest") {
   testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":SoftbusClientStubFuzzTest",
-  ]
+  deps = [ ":SoftbusClientStubFuzzTest" ]
 }
 ###############################################################################

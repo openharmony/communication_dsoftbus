@@ -14,30 +14,31 @@
 #####################hydra-fuzz###################
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
-dsoftbus_root_path = "../../../../.."
 
 ##############################fuzztest##########################################
 ohos_fuzztest("SoftbusClientStub2FuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
   fuzz_config_file =
-      "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub2_fuzzer"
+      "$dsoftbus_test_path/sdk/frame/fuzztest/softbusclientstub2_fuzzer"
 
   sources = [ "softbusclientstub2_fuzzer.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/sdk/frame/standard/include",
+    "$dsoftbus_core_path/common/dfx/interface/include",
+    "$dsoftbus_core_path/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+
+    "$dsoftbus_sdk_path/frame/standard/include",
+
+    "$softbus_adapter_common/include",
   ]
 
-  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
+  deps = [ "$dsoftbus_test_path/sdk:softbus_client_static" ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "ipc:ipc_core",
     "ipc:ipc_single",
   ]
 

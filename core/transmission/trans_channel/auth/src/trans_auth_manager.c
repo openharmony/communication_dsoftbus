@@ -1025,7 +1025,7 @@ int32_t TransOpenAuthMsgChannelWithPara(const char *sessionName, const LaneConnI
     if (TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "TransPostAuthRequest failed");
         DelAuthChannelInfoByChanId(*channelId);
-        TransAuthCloseChannel(channel->authId, LANE_HML_RAW, true);
+        TransAuthCloseChannel(authId, LANE_HML_RAW, true);
         return SOFTBUS_TRANS_AUTH_POST_CHANMSG_FAIL;
     }
 

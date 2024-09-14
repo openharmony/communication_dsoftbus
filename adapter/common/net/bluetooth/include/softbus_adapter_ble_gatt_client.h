@@ -51,11 +51,11 @@ typedef struct {
 } SoftBusGattcData;
 
 typedef struct {
-    void (*ConnectionStateCallback)(int32_t clientId, int32_t connState, int32_t status);
-    void (*ServiceCompleteCallback)(int32_t clientId, int32_t status);
-    void (*RegistNotificationCallback)(int32_t clientId, int status);
-    void (*NotificationReceiveCallback)(int32_t clientId, SoftBusGattcNotify *param, int32_t status);
-    void (*ConfigureMtuSizeCallback)(int clientId, int mtuSize, int status);
+    void (*connectionStateCallback)(int32_t clientId, int32_t connState, int32_t status);
+    void (*serviceCompleteCallback)(int32_t clientId, int32_t status);
+    void (*registNotificationCallback)(int32_t clientId, int status);
+    void (*notificationReceiveCallback)(int32_t clientId, SoftBusGattcNotify *param, int32_t status);
+    void (*configureMtuSizeCallback)(int clientId, int mtuSize, int status);
 } SoftBusGattcCallback;
 
 typedef enum {

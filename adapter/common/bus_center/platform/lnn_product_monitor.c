@@ -29,7 +29,9 @@ static int OnDevEventReceived(void* priv, unsigned int id, struct HdfSBuf* data)
 {
     (void)data;
     if (id == IP_READY) {
-        LNN_LOGI(LNN_STATE, "dev event received, envent=%{public}s, id=%{public}u", (char*)priv, id);
+        if (priv != NULL) {
+            LNN_LOGI(LNN_STATE, "dev event received, event=%{public}s, id=%{public}u", (char*)priv, id);
+        }
         LnnNotifyAddressChangedEvent(NULL);
     }
     return HDF_SUCCESS;
@@ -45,14 +47,15 @@ int32_t LnnInitProductMonitorImpl(void)
     g_serv = HdfIoServiceBind(HISYSLINK_SERVICE_NAME);
     if (g_serv == NULL) {
         LNN_LOGI(LNN_STATE, "fail to get service. HISYSLINK_SERVICE_NAME=%{public}s", HISYSLINK_SERVICE_NAME);
-        return SOFTBUS_OK;
+        return SOFTBUS_BIND_DRIVER_FAIL;
     }
 
-    if (HdfDeviceRegisterEventListener(g_serv, &g_listener) != HDF_SUCCESS) {
+    int32_t ret = HdfDeviceRegisterEventListener(g_serv, &g_listener);
+    if (ret != HDF_SUCCESS) {
         LNN_LOGI(LNN_STATE, "fail to register event listener");
         HdfIoServiceRecycle(g_serv);
         g_serv = NULL;
-        return SOFTBUS_OK;
+        return ret;
     }
     LNN_LOGI(LNN_STATE, "start success");
     return SOFTBUS_OK;

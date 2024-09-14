@@ -535,7 +535,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle3, TestSize.Level3)
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
-    GetStubGattsCallback()->ConnectServerCallback(1, &addr);
+    GetStubGattsCallback()->connectServerCallback(1, &addr);
     ASSERT_TRUE(connectServerCtx.Expect(1, &addr));
     // 读写数据，及响应回复
     const char *valueExample = "hello gatt server, this is client";
@@ -562,7 +562,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle3, TestSize.Level3)
         .isPrep = false,
         .value = (unsigned char *)valueExample,
     };
-    GetStubGattsCallback()->RequestWriteCallback(writeParam);
+    GetStubGattsCallback()->requestWriteCallback(writeParam);
     ASSERT_TRUE(ExpectGattWriteRequest(requestWriteCtx, writeParam));
     SoftBusGattsResponse resp = {0};
     ASSERT_EQ(SoftBusGattsSendResponse(&resp), SOFTBUS_OK);
@@ -607,7 +607,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle4, TestSize.Level3)
         .offset = 0,
         .isLong = false,
     };
-    GetStubGattsCallback()->RequestReadCallback(readParam);
+    GetStubGattsCallback()->requestReadCallback(readParam);
     ASSERT_TRUE(ExpectGattReadRequest(requestReadCtx, readParam));
     SoftBusGattsNotify notify = {0};
     ASSERT_EQ(SoftBusGattsSendNotify(&notify), SOFTBUS_OK);
@@ -786,19 +786,19 @@ static void StubMtuChangeCallback(int connId, int mtu)
 static SoftBusGattsCallback *GetStubGattsCallback()
 {
     static SoftBusGattsCallback callbacks = {
-        .ServiceAddCallback = StubServiceAddCallback,
-        .CharacteristicAddCallback = StubCharacteristicAddCallback,
-        .DescriptorAddCallback = StubDescriptorAddCallback,
-        .ServiceStartCallback = StubServiceStartCallback,
-        .ServiceStopCallback = StubServiceStopCallback,
-        .ServiceDeleteCallback = StubServiceDeleteCallback,
-        .ConnectServerCallback = StubConnectServerCallback,
-        .DisconnectServerCallback = StubDisconnectServerCallback,
-        .RequestReadCallback = StubRequestReadCallback,
-        .RequestWriteCallback = StubRequestWriteCallback,
-        .ResponseConfirmationCallback = StubResponseConfirmationCallback,
-        .NotifySentCallback = StubNotifySentCallback,
-        .MtuChangeCallback = StubMtuChangeCallback,
+        .serviceAddCallback = StubServiceAddCallback,
+        .characteristicAddCallback = StubCharacteristicAddCallback,
+        .descriptorAddCallback = StubDescriptorAddCallback,
+        .serviceStartCallback = StubServiceStartCallback,
+        .serviceStopCallback = StubServiceStopCallback,
+        .serviceDeleteCallback = StubServiceDeleteCallback,
+        .connectServerCallback = StubConnectServerCallback,
+        .disconnectServerCallback = StubDisconnectServerCallback,
+        .requestReadCallback = StubRequestReadCallback,
+        .requestWriteCallback = StubRequestWriteCallback,
+        .responseConfirmationCallback = StubResponseConfirmationCallback,
+        .notifySentCallback = StubNotifySentCallback,
+        .mtuChangeCallback = StubMtuChangeCallback,
     };
     return &callbacks;
 }

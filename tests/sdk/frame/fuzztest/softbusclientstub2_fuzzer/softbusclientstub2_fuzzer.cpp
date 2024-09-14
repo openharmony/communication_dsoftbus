@@ -15,6 +15,7 @@
 
 #include "softbusclientstub2_fuzzer.h"
 
+#include "client_trans_channel_manager.h"
 #include "softbus_client_stub.h"
 #include "softbus_server_ipc_interface_code.h"
 
@@ -56,12 +57,14 @@ public:
             return;
         }
         isInited_ = true;
+        (void)ClientTransChannelInit();
     }
 
     ~TestEnv()
     {
         isInited_ = false;
         stub_ = nullptr;
+        (void)ClientTransChannelDeinit();
     }
 
     bool IsInited(void) const noexcept

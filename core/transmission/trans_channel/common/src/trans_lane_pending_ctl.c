@@ -685,6 +685,16 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
     (void)TransDelLaneReqFromPendingList(laneHandle, true);
 }
 
+static void TransBuildLaneAllocFailEvent(
+    TransEventExtra *extra, TransInfo *transInfo, AppInfo *appInfo, SessionParam *param, int32_t reason)
+{
+    extra->peerUdid = appInfo->peerUdid;
+    extra->peerDevVer = appInfo->peerVersion;
+    extra->deviceState = TransGetDeviceState(param->peerDeviceId);
+    extra->osType = appInfo->osType;
+    TransBuildTransOpenChannelEndEvent(extra, transInfo, appInfo->timeStart, reason);
+}
+
 static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
 {
     TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
@@ -706,6 +716,9 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     extra.linkType = LANE_LINK_TYPE_BUTT;
     BuildTransEventExtra(&extra, &param, laneHandle, transType, reason);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_SELECT_LANE, extra);
+    if (reason == SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT) {
+        SoftbusReportTransErrorEvt(SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT);
+    }
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         TRANS_LOGE(TRANS_SVC, "malloc appInfo failed");
@@ -725,11 +738,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     char localUdid[UDID_BUF_LEN] = { 0 };
     (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, sizeof(localUdid));
     extra.localUdid = localUdid;
-    extra.peerUdid = appInfo->peerUdid;
-    extra.peerDevVer = appInfo->peerVersion;
-    extra.deviceState = TransGetDeviceState(param.peerDeviceId);
-    extra.osType = appInfo->osType;
-    TransBuildTransOpenChannelEndEvent(&extra, &transInfo, appInfo->timeStart, reason);
+    TransBuildLaneAllocFailEvent(&extra, &transInfo, appInfo, &param, reason);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransFreeAppInfo(appInfo);
     (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
