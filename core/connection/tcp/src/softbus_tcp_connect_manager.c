@@ -186,7 +186,7 @@ static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t
     CONN_LOGE(CONN_COMMON,
         "delete tcp conn failed. connId not found. connId=%{public}u, module=%{public}d, fd=%{public}d",
         connectionId, module, fd);
-    DelTrigger(module, fd, RW_TRIGGER);
+    (void)DelTrigger(module, fd, RW_TRIGGER);
 }
 
 static void DelTcpConnNode(uint32_t connectionId)
