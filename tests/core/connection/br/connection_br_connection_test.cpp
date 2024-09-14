@@ -557,6 +557,8 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager006, TestSize.Level1)
     (void)strcpy_s((char *)(addr.addr), BT_ADDR_LEN, addrress);
     ListInit(&(g_brManager.pendings->list));
     (void)strcpy_s((char *)(addr.addr), BT_ADDR_LEN, addrress);
+    EXPECT_NE(g_brManager.pendings->list.next, nullptr);
+    EXPECT_NE(g_brManager.pendings->list.prev, nullptr);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager007, TestSize.Level1)
@@ -945,6 +947,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager027, TestSize.Level1)
     TransitionToState(target);
     target = BR_STATE_CONNECTING;
     TransitionToState(target);
+    EXPECT_NE(g_brManager.state, nullptr);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager028, TestSize.Level1)
