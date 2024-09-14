@@ -17,14 +17,23 @@
 
 #include "access_control.h"
 #include "accesstoken_kit.h"
+#include "access_token.h"
+#include "accesstoken_kit.h"
 #include "anonymizer.h"
+#include "comm_log.h"
+#include "discovery_service.h"
 #include "ipc_skeleton.h"
+#include "ipc_types.h"
 #include "privacy_kit.h"
 #include "regex.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_bus_center.h"
+#include "softbus_conn_interface.h"
+#include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_permission.h"
+#include "softbus_server.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_channel_manager.h"
@@ -33,6 +42,7 @@
 #include "trans_session_manager.h"
 
 #ifdef SUPPORT_BUNDLENAME
+#include "bundle_mgr_interface.h"
 #include "bundle_mgr_proxy.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -49,7 +59,10 @@
 using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
-constexpr int32_t JUDG_CNT = 1;
+namespace {
+    constexpr int32_t JUDG_CNT = 1;
+    static const char *DB_PACKAGE_NAME = "distributedata-default";
+}
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
@@ -1153,11 +1166,16 @@ int32_t SoftBusServerStub::RegDataLevelChangeCbInner(MessageParcel &data, Messag
 #ifndef ENHANCED_FLAG
     (void)data;
     (void)reply;
+    (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = RegDataLevelChangeCb(pkgName);
@@ -1174,11 +1192,16 @@ int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, Mess
 #ifndef ENHANCED_FLAG
     (void)data;
     (void)reply;
+    (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName invalid!");
         return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = UnregDataLevelChangeCb(pkgName);
@@ -1423,7 +1446,6 @@ int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &r
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read freq failed");
     COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < FREQ_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC, "freq invalid");
     info.freq = static_cast<ExchangeFreq>(value);
-
     info.capability = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(info.capability != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capability failed");
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(info.dataLen), SOFTBUS_IPC_ERR, COMM_SVC, "read dataLen failed");
