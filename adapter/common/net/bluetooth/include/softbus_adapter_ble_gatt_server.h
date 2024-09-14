@@ -96,20 +96,20 @@ typedef struct {
 
 
 typedef struct {
-    void (*ServiceAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle);
-    void (*CharacteristicAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle, int characteristicHandle);
-    void (*DescriptorAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle, int descriptorHandle);
-    void (*ServiceStartCallback)(int status, int srvcHandle);
-    void (*ServiceStopCallback)(int status, int srvcHandle);
-    void (*ServiceDeleteCallback)(int status, int srvcHandle);
-    void (*ConnectServerCallback)(int connId, const SoftBusBtAddr *btAddr);
-    void (*DisconnectServerCallback)(int connId, const SoftBusBtAddr *btAddr);
-    void (*RequestReadCallback)(SoftBusGattReadRequest readCbPara);
-    void (*RequestWriteCallback)(SoftBusGattWriteRequest writeCbPara);
-    void (*ResponseConfirmationCallback)(int status, int handle);
-    void (*NotifySentCallback)(int connId, int status);
-    void (*MtuChangeCallback)(int connId, int mtu);
-    bool (*IsConcernedAttrHandle)(int srvcHandle, int attrHandle);
+    void (*serviceAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle);
+    void (*characteristicAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle, int characteristicHandle);
+    void (*descriptorAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle, int descriptorHandle);
+    void (*serviceStartCallback)(int status, int srvcHandle);
+    void (*serviceStopCallback)(int status, int srvcHandle);
+    void (*serviceDeleteCallback)(int status, int srvcHandle);
+    void (*connectServerCallback)(int connId, const SoftBusBtAddr *btAddr);
+    void (*disconnectServerCallback)(int connId, const SoftBusBtAddr *btAddr);
+    void (*requestReadCallback)(SoftBusGattReadRequest readCbPara);
+    void (*requestWriteCallback)(SoftBusGattWriteRequest writeCbPara);
+    void (*responseConfirmationCallback)(int status, int handle);
+    void (*notifySentCallback)(int connId, int status);
+    void (*mtuChangeCallback)(int connId, int mtu);
+    bool (*isConcernedAttrHandle)(int srvcHandle, int attrHandle);
 } SoftBusGattsCallback;
 
 typedef struct {

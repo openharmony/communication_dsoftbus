@@ -22,8 +22,8 @@
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
-#include "softbus_error_code.h"
 #include "parameter.h"
+#include "softbus_error_code.h"
 
 static void ProcessBootEvent(void *para)
 {

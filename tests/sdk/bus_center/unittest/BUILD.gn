@@ -128,7 +128,7 @@ if (defined(ohos_lite)) {
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
       "c_utils:utils",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 
@@ -151,7 +151,7 @@ if (defined(ohos_lite)) {
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
       "c_utils:utils",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 
@@ -174,7 +174,7 @@ if (defined(ohos_lite)) {
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
       "c_utils:utils",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 
@@ -197,7 +197,7 @@ if (defined(ohos_lite)) {
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
       "c_utils:utils",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 
@@ -220,7 +220,7 @@ if (defined(ohos_lite)) {
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
       "c_utils:utils",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 
@@ -302,7 +302,7 @@ if (defined(ohos_lite)) {
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
       "c_utils:utils",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 

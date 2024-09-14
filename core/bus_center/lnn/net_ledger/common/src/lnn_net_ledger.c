@@ -670,12 +670,15 @@ static int32_t SoftbusDumpPrintIrk(int fd, NodeBasicInfo *nodeInfo)
     char peerIrkStr[LFINDER_IRK_STR_LEN] = {0};
     if (ConvertBytesToHexString(peerIrkStr, LFINDER_IRK_STR_LEN, irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert irk to string fail.");
+        (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyIrk = NULL;
     Anonymize(peerIrkStr, &anonyIrk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IRK", anonyIrk);
     AnonymizeFree(anonyIrk);
+    (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+    (void)memset_s(peerIrkStr, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
     return SOFTBUS_OK;
 }
 
@@ -694,6 +697,7 @@ static int32_t SoftbusDumpPrintBroadcastCipher(int fd, NodeBasicInfo *nodeInfo)
     char broadcastCipherStr[SESSION_KEY_STR_LEN] = {0};
     if (ConvertBytesToHexString(broadcastCipherStr, SESSION_KEY_STR_LEN,
         broadcastCipher, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        (void)memset_s(broadcastCipher, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         LNN_LOGE(LNN_LEDGER, "convert broadcastCipher to string fail.");
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
@@ -701,6 +705,8 @@ static int32_t SoftbusDumpPrintBroadcastCipher(int fd, NodeBasicInfo *nodeInfo)
     Anonymize((char *)broadcastCipherStr, &anonyBroadcastCipher);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BroadcastCipher", anonyBroadcastCipher);
     AnonymizeFree(anonyBroadcastCipher);
+    (void)memset_s(broadcastCipher, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    (void)memset_s(broadcastCipherStr, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
     return SOFTBUS_OK;
 }
 
@@ -720,12 +726,15 @@ static int32_t SoftbusDumpPrintRemotePtk(int fd, NodeBasicInfo *nodeInfo)
     if (ConvertBytesToHexString(remotePtkStr, PTK_STR_LEN,
         (unsigned char *)remotePtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert remotePtk to string fail.");
+        (void)memset_s(remotePtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyRemotePtk = NULL;
     Anonymize(remotePtkStr, &anonyRemotePtk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "RemotePtk", anonyRemotePtk);
     AnonymizeFree(anonyRemotePtk);
+    (void)memset_s(remotePtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
+    (void)memset_s(remotePtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
     return SOFTBUS_OK;
 }
 
@@ -749,12 +758,15 @@ static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
     if (ConvertBytesToHexString(localPtkStr, PTK_STR_LEN,
         (unsigned char *)localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "convert localPtk to string fail.");
+        (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyLocalPtk = NULL;
     Anonymize(localPtkStr, &anonyLocalPtk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "LocalPtk", anonyLocalPtk);
     AnonymizeFree(anonyLocalPtk);
+    (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
+    (void)memset_s(localPtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
     return SOFTBUS_OK;
 }
 

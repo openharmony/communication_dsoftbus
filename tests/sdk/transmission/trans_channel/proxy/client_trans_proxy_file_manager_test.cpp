@@ -1774,22 +1774,6 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest00
 }
 
 /**
- * @tc.name: ClinetTransProxyClearSendInfoTest001
- * @tc.desc: client trans proxy clear send info test, use normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyClearSendInfoTest001, TestSize.Level0)
-{
-    SendListenerInfo info = {
-        .fileSize = TEST_FILE_SIZE,
-        .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
-    };
-
-    ClearSendInfo(&info);
-}
-
-/**
  * @tc.name: ClinetTransProxyCalcAllFilesInfoTest001
  * @tc.desc: client trans proxy calc all files info test, use normal parameter.
  * @tc.type: FUNC
@@ -1810,6 +1794,12 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileSizeTest001, Te
         .bytesProcessed = 0,
     };
     uint32_t fileCnt = TEST_FILE_CNT;
+
+    SendListenerInfo info = {
+        .fileSize = TEST_FILE_SIZE,
+        .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
+    };
+    ClearSendInfo(&info);
 
     int ret = CalcAllFilesInfo(&totalInfo, fileList, fileCnt);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);

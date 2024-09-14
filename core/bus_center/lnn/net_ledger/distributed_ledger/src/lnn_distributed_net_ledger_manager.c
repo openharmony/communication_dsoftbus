@@ -56,6 +56,7 @@ static int32_t DlGetDeviceUuid(const char *networkId, bool checkOnline, void *bu
 
 static int32_t DlGetDeviceOfflineCode(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
+    (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (memcpy_s(buf, len, info->offlineCode, OFFLINE_CODE_BYTE_SIZE) != EOK) {
@@ -116,6 +117,7 @@ static int32_t DlGetDeviceType(const char *networkId, bool checkOnline, void *bu
 static int32_t DlGetDeviceTypeId(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     (void)checkOnline;
+    (void)len;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     *((int32_t *)buf) = info->deviceInfo.deviceTypeId;
@@ -317,6 +319,14 @@ void LnnUpdateNodeBleMac(const char *networkId, char *bleMac, uint32_t len)
     SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
 }
 
+int32_t IsNodeInfoScreenStatusSupport(const NodeInfo *info)
+{
+    if (!LnnIsSupportHeartbeatCap(info->heartbeatCapacity, BIT_SUPPORT_SCREEN_STATUS)) {
+        return SOFTBUS_NETWORK_NOT_SUPPORT;
+    }
+    return SOFTBUS_OK;
+}
+
 bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool isScreenOn)
 {
     if (networkId == NULL) {
@@ -327,14 +337,26 @@ bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool isScreenOn)
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return false;
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
     NodeInfo *info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (info == NULL) {
-        LNN_LOGE(LNN_LEDGER, "get node info fail.");
+        LNN_LOGE(LNN_LEDGER, "networkId=%{public}s, get node info fail.", anonyNetworkId);
         SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        AnonymizeFree(anonyNetworkId);
         return false;
     }
+    if (IsNodeInfoScreenStatusSupport(info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "networkId=%{public}s, node screen status is not supported", anonyNetworkId);
+        SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    
     info->isScreenOn = isScreenOn;
+    LNN_LOGI(LNN_LEDGER, "set %{public}s screen status to %{public}s", anonyNetworkId, isScreenOn ? "on" : "off");
     SoftBusMutexUnlock(&LnnGetDistributedNetLedger()->lock);
+    AnonymizeFree(anonyNetworkId);
     return true;
 }
 
@@ -656,10 +678,20 @@ static int32_t DlGetNodeScreenOnFlag(const char *networkId, bool checkOnline, vo
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    int32_t ret = IsNodeInfoScreenStatusSupport(info);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "%{public}s get node screen not support", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return ret;
+    }
     if (checkOnline && !LnnIsNodeOnline(info) && !IsMetaNode(info)) {
-        LNN_LOGE(LNN_LEDGER, "node is offline");
+        LNN_LOGE(LNN_LEDGER, "%{public}s node is offline", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
+    AnonymizeFree(anonyNetworkId);
     *((bool *)buf) = info->isScreenOn;
     return SOFTBUS_OK;
 }

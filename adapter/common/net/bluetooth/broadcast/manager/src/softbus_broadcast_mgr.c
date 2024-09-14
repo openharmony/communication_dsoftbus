@@ -1238,8 +1238,12 @@ static void ConvertBcParams(const BroadcastParam *srcParam, SoftbusBroadcastPara
 
 static void DumpBroadcastPacket(const BroadcastPayload *bcData, const BroadcastPayload *rspData)
 {
-    DumpSoftbusData("BroadcastPayload bcData", bcData->payloadLen, bcData->payload);
-    DumpSoftbusData("BroadcastPayload rspData", rspData->payloadLen, rspData->payload);
+    if (bcData->payloadLen != 0 && bcData->payload != NULL) {
+        DumpSoftbusData("BroadcastPayload bcData", bcData->payloadLen, bcData->payload);
+    }
+    if (rspData->payloadLen != 0 && rspData->payload != NULL) {
+        DumpSoftbusData("BroadcastPayload rspData", rspData->payloadLen, rspData->payload);
+    }
 }
 
 static int32_t SoftBusCondWaitSec(int64_t sec, int32_t bcId, SoftBusMutex *mutex)

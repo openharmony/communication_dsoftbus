@@ -29,6 +29,7 @@
 #include "lnn_heartbeat_strategy.h"
 #include "want.h"
 
+#include "power_mgr_client.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 
@@ -111,6 +112,17 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
 } // namespace EventFwk
 } // namespace OHOS
 
+bool LnnQueryLocalScreenStatusOnce(bool notify)
+{
+    bool isScreenOn = OHOS::PowerMgr::PowerMgrClient::GetInstance().IsScreenOn(true);
+    LNN_LOGI(LNN_EVENT, "query screen status is %{public}s", isScreenOn ? "on" : "off");
+    if (notify) {
+        SoftBusScreenState screenState = isScreenOn ? SOFTBUS_SCREEN_ON : SOFTBUS_SCREEN_OFF;
+        LnnNotifyScreenStateChangeEvent(screenState);
+    }
+    return isScreenOn;
+}
+
 static void LnnSubscribeCommonEvent(void *para)
 {
     (void)para;
@@ -139,6 +151,7 @@ static void LnnSubscribeCommonEvent(void *para)
         }
     }
     delete subscriberPtr;
+    (void)LnnQueryLocalScreenStatusOnce(true);
 }
 
 int32_t LnnInitCommonEventMonitorImpl(void)

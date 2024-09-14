@@ -222,7 +222,7 @@ if (defined(ohos_lite)) {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
       "samgr:samgr_proxy",
     ]
     if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {

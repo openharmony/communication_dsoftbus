@@ -169,7 +169,7 @@ ohos_unittest("LaneTest") {
   }
   external_deps += [
     "huks:libhukssdk",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -199,7 +199,7 @@ ohos_unittest("NetLedgerTest") {
   }
   external_deps += [
     "huks:libhukssdk",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -229,7 +229,7 @@ ohos_unittest("NetBuilderTest") {
   }
   external_deps += [
     "huks:libhukssdk",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -259,7 +259,7 @@ ohos_unittest("LNNHuksUtilsTest") {
   }
   external_deps += [
     "huks:libhukssdk",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -293,7 +293,7 @@ ohos_unittest("LedgerLaneHubTest") {
   }
   external_deps += [
     "huks:libhukssdk",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
