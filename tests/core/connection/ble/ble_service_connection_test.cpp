@@ -265,30 +265,37 @@ HWTEST_F(ServiceConnectionTest, ClientConnection002, TestSize.Level1)
 HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
 {
     int32_t ret;
-    ConnBleConnection connection;
     ConnectBlePriority priority;
+    int32_t underlayerHandle = 1;
+    const char *bleMac = "11:22:33:44:55:66";
+    ConnBleConnection *connection =
+        ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_CLIENT, underlayerHandle, false);
+    ASSERT_NE(nullptr, connection);
     NiceMock<ConnectionBleInterfaceMock> bleMock;
 
     priority = CONN_BLE_PRIORITY_BALANCED;
     ret = ConnGattClientUpdatePriority(NULL, priority);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    connection.underlayerHandle = 1;
-    connection.connectionId = 1;
-    connection.state = BLE_CONNECTION_STATE_CONNECTING;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = ConnGattClientUpdatePriority(&connection, priority);
+    connection->connectionId = 1;
+    connection->state = BLE_CONNECTION_STATE_CONNECTING;
+    ret = ConnGattClientUpdatePriority(connection, priority);
     EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
 
-    connection.state = BLE_CONNECTION_STATE_SERVICE_SEARCHING;
+    connection->state = BLE_CONNECTION_STATE_SERVICE_SEARCHING;
     EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = ConnGattClientUpdatePriority(&connection, priority);
+    ret = ConnGattClientUpdatePriority(connection, priority);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    connection.state = BLE_CONNECTION_STATE_CONNECTED;
+    connection->state = BLE_CONNECTION_STATE_CONNECTED;
+    EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(bleMock, BleGattcSetPriority).WillRepeatedly(Return(SOFTBUS_OK));
     for (int32_t i = 0; i <= 3; i++) {
-        ret = ConnGattClientUpdatePriority(&connection, (ConnectBlePriority)i);
+        ret = ConnGattClientUpdatePriority(connection, (ConnectBlePriority)i);
+        if (i == 3) {
+            EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
+            break;
+        }
         EXPECT_EQ(SOFTBUS_OK, ret);
     }
 }
@@ -495,6 +502,28 @@ HWTEST_F(ServiceConnectionTest, ServiceDeleteCallback, TestSize.Level1)
     ret = ConnBleSaveConnection(bleConnection);
     ASSERT_EQ(SOFTBUS_OK, ret);
     g_callback->mtuChangeCallback(bleConnection->underlayerHandle, 5);
+    SoftBusSleepMs(500);
+}
+
+/*
+* @tc.name: ServiceStopCallback 001
+* @tc.desc: Test ServiceStopCallback.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ServiceConnectionTest, ServiceAttrHandleCallback, TestSize.Level1)
+{
+    int32_t effectHandle = -1;
+    int32_t invalidAttrHandle = 11;
+    int32_t invalidSrvcHandle = 10;
+    bool ret = g_callback->isConcernedAttrHandle(invalidSrvcHandle, invalidAttrHandle);
+    EXPECT_EQ(false, ret);
+    ret = g_callback->isConcernedAttrHandle(effectHandle, invalidAttrHandle);
+    EXPECT_EQ(false, ret);
+    ret = g_callback->isConcernedAttrHandle(effectHandle, effectHandle);
+    EXPECT_EQ(true, ret);
     SoftBusSleepMs(500);
 }
 }

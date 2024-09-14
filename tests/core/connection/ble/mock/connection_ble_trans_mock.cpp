@@ -66,21 +66,5 @@ char *cJSON_PrintUnformatted(const cJSON *json)
 {
     return GetConnectionBleTransInterface()->cJSON_PrintUnformatted(json);
 }
-
-int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *taskName)
-{
-    return GetConnectionBleTransInterface()->ConnStartActionAsync(arg, runnable, taskName);
-}
-
-int32_t GetMsg(ConnectionQueue *queue, void **msg, bool *isFull, QueuePriority leastPriority)
-{
-    return GetConnectionBleTransInterface()->GetMsg(queue, msg, isFull, leastPriority);
-}
-
-int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen, SoftBusCond *cond,
-    SoftBusMutex *mutex)
-{
-    return GetConnectionBleTransInterface()->WaitQueueLength(lockFreeQueue, maxLen, diffLen, cond, mutex);
-}
 }
 }
