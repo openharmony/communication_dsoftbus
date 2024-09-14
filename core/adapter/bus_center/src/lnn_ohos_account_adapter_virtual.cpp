@@ -40,3 +40,11 @@ bool IsActiveOsAccountUnlocked(void)
 {
     return true;
 }
+
+int32_t GetOsAccountUid(char *id, uint32_t idLen, uint32_t *len)
+{
+    (void)id;
+    (void)idLen;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
