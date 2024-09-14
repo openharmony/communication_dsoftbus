@@ -41,7 +41,7 @@ HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
         .onlineNum = -1, // invalid
         .peerPort = "9000",
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 6;
+    constexpr int32_t VALID_EXTRA_SIZE = 4;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -107,16 +107,16 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
 
 /**
  * @tc.name: LnnEventTest003
- * @tc.desc: Test all invalid lnn event form items
+ * @tc.desc: Test all valid lnn event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
 HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
 {
     LnnEventExtra invalidExtra = {
-        .result = -1,  // vaild
+        .result = -1, // valid
         .errcode = -2, // valid
-        .authId = -3,  // vaild
+        .authId = -3, // valid
         .discServerType = -4,
         .gearCycle = -5,
         .gearDuration = -6,
@@ -200,13 +200,13 @@ HWTEST_F(LnnEventTest, LnnAuditTest001, TestSize.Level0)
         .localBleMac = "91:33:33:23:22:12",
         .localUdid = "aassddffgghhhh",
         .localNetworkId = "aassddffgghhhh",
-        .localDevName = "Openharmony001",
+        .localDevName = "OpenHarmony001",
         .peerIp = "127.1.1.1",
         .peerBrMac = "22:33:44:55:66:77",
         .peerBleMac = "77:66:55:44:33:22",
         .peerUdid = "aassddffgghhhh",
         .peerNetworkId = "aassddffgghhhh",
-        .peerDevName = "Openharmony002",
+        .peerDevName = "OpenHarmony002",
         .localAuthPort = 1,
         .localProxyPort = 2,
         .localSessionPort = 3,

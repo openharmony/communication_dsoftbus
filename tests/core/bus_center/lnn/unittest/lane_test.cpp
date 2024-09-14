@@ -42,6 +42,7 @@ constexpr uint32_t REMOTE_AUTH_PORT = 7070;
 constexpr uint32_t REMOTE_PROXY_PORT = 8080;
 constexpr char REMOTE_WLAN_IP[] = "10.146.181.134";
 constexpr char LOCAL_NETWORK_ID[] = "444455556666abcdef";
+constexpr uint32_t FILE_DEFAULT_LINK_NUM = 4;
 constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
 constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
 constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 10000;
@@ -53,8 +54,6 @@ constexpr uint64_t LANE_ID = 123456;
 
 static NodeInfo g_nodeInfo;
 constexpr int32_t DEFAULT_PID = 0;
-constexpr uint32_t LIST_NUM_1 = 2;
-constexpr uint32_t LIST_NUM_2 = 4;
 
 static void ConstructRemoteNode(void);
 static void ConstructLocalInfo(void);
@@ -267,7 +266,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
     selectParam.expectedBw = 0;
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(listNum, LIST_NUM_2);
+    EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
 }
 
 /*
@@ -310,7 +309,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
     selectParam.list.linkType[1] = LANE_BR;
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(listNum, LIST_NUM_1);
+    EXPECT_EQ(listNum, LANE_PREFERRED_LINK_NUM);
 }
 
 /*
@@ -343,7 +342,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
     LinkRequest reqInfo;
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     int32_t ret = memcpy_s(reqInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
-    EXPECT_TRUE(ret == EOK);
+    EXPECT_EQ(ret, EOK);
     reqInfo.linkType = LANE_WLAN_2P4G;
     reqInfo.transType = LANE_T_BYTE;
     reqInfo.pid = DEFAULT_PID;

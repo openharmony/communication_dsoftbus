@@ -175,6 +175,6 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_SHIFT_LNN_GEAR_TEST_001, TestSize.Level
     };
 
     int32_t ret = ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, &mode);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

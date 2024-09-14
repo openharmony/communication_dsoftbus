@@ -24,6 +24,7 @@
 #include "softbus_common.h"
 #include "softbus_bus_center.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_event_monitor_impl.h"
 
 namespace OHOS {
 class LnnServiceInterface {

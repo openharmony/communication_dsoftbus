@@ -132,7 +132,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
-    EXPECT_TRUE(ret!= SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_ERR);
 }
