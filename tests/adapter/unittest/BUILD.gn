@@ -257,6 +257,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter/common/net/wifi/include",
       "$dsoftbus_root_path/adapter/common/net/wifi/common",
       "//foundation/communication/wifi/wifi/frameworks/native/interfaces",
+      "//foundation/communication/wifi/wifi/interfaces",
       "//foundation/communication/wifi/wifi/interfaces/kits/c",
       "//foundation/communication/wifi/wifi/interfaces/inner_api",
       "//foundation/communication/wifi/wifi/frameworks/native/include",
