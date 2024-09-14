@@ -30,12 +30,12 @@ namespace OHOS {
 class TransLogTest : public testing::Test { };
 
 /**
- * @tc.name: TransLogTest001
- * @tc.desc: Test SoftBusLogLabel is consistent with TransLogLabelEnum
+ * @tc.name: TransLogTest002
+ * @tc.desc: Test TRANS_LOGD
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
-HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
+HWTEST_F(TransLogTest, TransLogTest002, TestSize.Level0)
 {
     int32_t index = 0;
     int32_t transDomainBase = 0xd005740;
@@ -50,16 +50,6 @@ HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_STREAM, ++transDomainBase, "TransStream");
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_QOS, ++transDomainBase, "TransQos");
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_TEST, DOMAIN_ID_TEST, "TransTest");
-}
-
-/**
- * @tc.name: TransLogTest002
- * @tc.desc: Test TRANS_LOGD
- * @tc.type: FUNC
- * @tc.require: I8DW1W
- */
-HWTEST_F(TransLogTest, TransLogTest002, TestSize.Level0)
-{
     SoftBusLogLabel label = TRANS_LABELS[TRANS_TEST];
     HilogMock mock;
     EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_DEBUG), Eq(label.domain), StrEq(label.tag), _, _)).Times(1);
