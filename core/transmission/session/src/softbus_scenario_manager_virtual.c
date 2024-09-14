@@ -15,9 +15,9 @@
 
 #include "softbus_scenario_manager.h"
 
-int32_t ScenarioManagerGetInstance(void)
+ScenarioManager *ScenarioManagerGetInstance(void)
 {
-    return 0;
+    return NULL;
 }
 
 // update scenarios based on the command and determine whether to deliver the driver.

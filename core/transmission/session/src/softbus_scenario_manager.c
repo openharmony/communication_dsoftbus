@@ -93,8 +93,7 @@ static void NotifyWifi(const char *ifName, const char *localMac,
     const char *peerMac, uint32_t finalType, int32_t businessType)
 {
     (void)peerMac;
-    TRANS_LOGI(TRANS_CTRL,
-        "ifName=%{public}s, finalType=%{public}u, businessType=%{public}d",
+    TRANS_LOGI(TRANS_CTRL, "ifName=%{public}s, finalType=%{public}u, businessType=%{public}d",
         ifName, finalType, businessType);
     Hid2dUpperScene *scene = NULL;
     scene = (Hid2dUpperScene *)SoftBusCalloc(sizeof(Hid2dUpperScene));
@@ -412,7 +411,7 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
     }
     LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
     if (localScenarioCount == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "localScenarioCount is null");
+        TRANS_LOGE(TRANS_CTRL, "localScenarioCount is null!");
         return;
     }
     uint32_t finalType = item->finalType;
@@ -570,8 +569,7 @@ static int32_t UpdateOriginalScenario(ScenarioManager *manager, OriginalScenario
         TRANS_LOGE(TRANS_CTRL, "invalid local mac!");
         return SOFTBUS_INVALID_NUM;
     }
-    TRANS_LOGI(TRANS_CTRL,
-        "UpdateOriginalScenario: "
+    TRANS_LOGI(TRANS_CTRL, "UpdateOriginalScenario: "
         "localPid=%{public}d, businessType=%{public}d, isAdd=%{public}d",
         info->localPid, info->businessType, isAdd);
 
@@ -671,7 +669,7 @@ int32_t DelScenario(const char *localMac, const char *peerMac, int localPid, int
 }
 
 
-int32_t ScenarioManagerGetInstance()
+ScenarioManager *ScenarioManagerGetInstance()
 {
     static ScenarioManager manager;
     if (g_manager == NULL) {
@@ -680,7 +678,7 @@ int32_t ScenarioManagerGetInstance()
         g_manager = &manager;
     }
     TRANS_LOGI(TRANS_CTRL, "creat g_manager success!");
-    return SOFTBUS_OK;
+    return g_manager;
 }
 
 void ScenarioManagerdestroyInstance()

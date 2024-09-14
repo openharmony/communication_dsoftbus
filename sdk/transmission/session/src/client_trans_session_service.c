@@ -242,19 +242,6 @@ static SessionAttribute *BuildParamSessionAttribute(const SessionAttribute *attr
     return tmpAttr;
 }
 
-static void InitSessionParam(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
-    const char *groupId, SessionParam *param)
-{
-    param->sessionName = mySessionName;
-    param->peerSessionName = peerSessionName;
-    param->peerDeviceId = peerNetworkId;
-    param->groupId = groupId;
-    param->isQosLane = false;
-    param->qosCount = 0;
-    param->isAsync = false;
-    param->actionId = INVALID_ACTION_ID;
-}
-
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
@@ -264,9 +251,16 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     PrintSessionName(mySessionName, peerSessionName);
     SessionAttribute *tmpAttr = BuildParamSessionAttribute(attr);
     TRANS_CHECK_AND_RETURN_RET_LOGE(tmpAttr != NULL, SOFTBUS_MEM_ERR, TRANS_SDK, "Build SessionAttribute failed.");
-    SessionParam param = { 0 };
-    InitSessionParam(mySessionName, peerSessionName, peerNetworkId, groupId, &param);
-    param.attr = tmpAttr;
+    SessionParam param = {
+        .sessionName = mySessionName,
+        .peerSessionName = peerSessionName,
+        .peerDeviceId = peerNetworkId,
+        .groupId = groupId,
+        .attr = tmpAttr,
+        .isQosLane = false,
+        .qosCount = 0,
+        .actionId = INVALID_ACTION_ID,
+    };
     (void)memset_s(param.qos, sizeof(param.qos), 0, sizeof(param.qos));
 
     int32_t sessionId = INVALID_SESSION_ID;
@@ -282,6 +276,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         TRANS_LOGE(TRANS_SDK, "add session err: ret=%{public}d", ret);
         return ret;
     }
+    param.isAsync = false;
     param.sessionId = sessionId;
     TransInfo transInfo = { 0 };
     ret = ServerIpcOpenSession(&param, &transInfo);
@@ -1114,6 +1109,7 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     }
     ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
+
     if (!isAsync) {
         (void)ClientGetChannelBySessionId(socket, &(transInfo.channelId), &(transInfo.channelType), NULL);
         TRANS_LOGI(TRANS_SDK, "Bind ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d", socket,
@@ -1200,7 +1196,6 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         } else {
             AddSessionStateClosing();
         }
-        
         ret = ClientTransCloseChannel(channelId, type);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,
