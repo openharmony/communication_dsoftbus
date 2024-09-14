@@ -95,5 +95,10 @@ int BleGattcUnRegister(int clientId)
 {
     return GetConnectionBleInterface()->BleGattcUnRegister(clientId);
 }
+
+int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority priority)
+{
+    return GetConnectionBleInterface()->BleGattcSetPriority(clientId, bdAddr, priority);
+}
 }
 }

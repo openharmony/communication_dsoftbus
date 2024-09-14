@@ -28,6 +28,7 @@
 #include "softbus_config_type.h"
 #include "softbus_conn_ble_connection.h"
 #include "ohos_bt_def.h"
+#include "ohos_bt_gatt_client.h"
 
 
 namespace OHOS {
@@ -48,6 +49,7 @@ public:
     virtual bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target) = 0;
     virtual int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number) = 0;
     virtual int BleGattcUnRegister(int clientId) = 0;
+    virtual int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority priority) = 0;
 };
 
 class ConnectionBleInterfaceMock : public ConnectionBleInterface {
@@ -66,6 +68,7 @@ public:
     MOCK_METHOD3(GetJsonObjectSignedNumberItem, bool (const cJSON *, const char * const, int *));
     MOCK_METHOD(int, BleGattsAddService, (int, BtUuid, bool, int), (override));
     MOCK_METHOD(int, BleGattcUnRegister, (int), (override));
+    MOCK_METHOD(int, BleGattcSetPriority, (int, const BdAddr *, BtGattPriority), (override));
 };
 } // namespace OHOS
 #endif // CONNECTION_BLE_MOCK_H
