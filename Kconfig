@@ -39,12 +39,6 @@ config dsoftbus_feature_conn_br
     help
       Answer Y to enable connection with br
 
-config dsoftbus_feature_conn_wifi
-      bool "Enable connection with wifi"
-      default n
-      help
-        Answer Y to enable connection with wifi
-
 config dsoftbus_feature_conn_ble
     bool "Enable connection with ble"
     default n

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #include <securec.h>
+#include "gtest/gtest.h"
 
 #include "softbus_adapter_wlan_extend.h"
 #include "lnn_async_callback_utils.h"
