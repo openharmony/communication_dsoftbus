@@ -156,7 +156,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -213,7 +213,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -270,7 +270,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -327,7 +327,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -384,7 +384,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -441,7 +441,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -498,7 +498,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
@@ -555,7 +555,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    testInfo.freq = (ExchangeFreq)(FREQ_BUTT);
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
     ret = RefreshLNN(PKG_NAME1, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;

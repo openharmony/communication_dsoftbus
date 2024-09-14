@@ -292,12 +292,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    testOption.freq = EXTREME_HIGH;
-    ret = DiscCoapStartDiscovery(&testOption);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
-    ret = DiscCoapStopDiscovery();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
     testOption.freq = LOW - 1;
     ret = DiscCoapStartDiscovery(&testOption);
     EXPECT_NE(ret, SOFTBUS_OK);
