@@ -161,7 +161,7 @@ uint32_t AddNormalizeRequest(const NormalizeRequest *request)
     }
     *newRequest = *request;
     if (!RequireAuthLock()) {
-        AUTH_LOGE(AUTH_CONN, "lock fail");
+        AUTH_LOGE(AUTH_CONN, "loca fail");
         SoftBusFree(newRequest);
         return 0;
     }

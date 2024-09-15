@@ -249,6 +249,7 @@ int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
 void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log);
+void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log);
 #ifdef __cplusplus
 }
 #endif

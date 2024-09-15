@@ -736,7 +736,7 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
 
 static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
 {
-    LNN_CHECK_AND_RETURN_LOGW(cacheInfo != NULL, LNN_BUILDER, "invalid param");
+    LNN_CHECK_AND_RETURN_LOGE(cacheInfo != NULL, LNN_BUILDER, "invalid param");
     char accountId[INT64_TO_STR_MAX_LEN] = {0};
     if (!Int64ToString(cacheInfo->accountId, accountId, INT64_TO_STR_MAX_LEN)) {
         LNN_LOGE(LNN_BUILDER, "accountId to str fail");
@@ -1035,17 +1035,17 @@ static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
 {
     if (LnnPackCloudSyncDeviceInfo(json, info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "pack cloud sync info fail");
-        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
+        return SOFTBUS_ERR;
     }
     CloudSyncInfo syncInfo = { 0 };
     if (LnnGetLocalBroadcastCipherInfo(&syncInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cipher info fail");
-        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
+        return SOFTBUS_ERR;
     }
     if (!AddStringToJsonObject(json, DEVICE_INFO_JSON_BROADCAST_KEY_TABLE, syncInfo.broadcastCipherKey)) {
         JSON_Free(syncInfo.broadcastCipherKey);
         LNN_LOGE(LNN_BUILDER, "add string info fail");
-        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
+        return SOFTBUS_ERR;
     }
     JSON_Free(syncInfo.broadcastCipherKey);
     return SOFTBUS_OK;
