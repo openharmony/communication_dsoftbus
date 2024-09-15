@@ -58,9 +58,10 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
         return ret;
     }
-    if (ScenarioManagerGetInstance() == NULL) {
+    ret = ScenarioManagerGetInstance();
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
-        return SOFTBUS_NO_INIT;
+        return ret;
     }
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
     TRANS_LOGI(TRANS_INIT, "trans session server list init succ");
