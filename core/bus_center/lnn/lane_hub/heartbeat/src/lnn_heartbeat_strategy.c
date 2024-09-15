@@ -43,7 +43,7 @@ typedef struct {
     const char *callerId;
     ListNode node;
     GearMode mode;
-    int64_t lifeTimeStamp; // unit is milliseconds
+    int64_t lifetimeStamp; // unit is milliseconds
 } GearModeStorageInfo;
 
 typedef struct {
@@ -101,8 +101,8 @@ static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeLis
             "DumpGearModeSettingList count=%{public}d, callerId=%{public}s, cycle=%{public}d, "
             "duration=%{public}d, wakeupFlag=%{public}d, lifeTimestamp=%{public}" PRId64 ", needClean=%{public}s",
             dumpCount, info->callerId, info->mode.cycle, info->mode.duration, info->mode.wakeupFlag,
-            info->lifeTimeStamp,
-            info->lifeTimeStamp != HB_GEARMODE_LIFETIME_PERMANENT && info->lifeTimeStamp <= nowTime ? "true" : "false");
+            info->lifetimeStamp,
+            info->lifetimeStamp != HB_GEARMODE_LIFETIME_PERMANENT && info->lifetimeStamp <= nowTime ? "true" : "false");
     }
 }
 
@@ -122,7 +122,7 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
             LNN_LOGD(LNN_HEART_BEAT, "HB get Gearmode from setting list is empty");
             return SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST;
         }
-        if (info->lifeTimeStamp < nowTime && info->lifeTimeStamp != HB_GEARMODE_LIFETIME_PERMANENT) {
+        if (info->lifetimeStamp < nowTime && info->lifetimeStamp != HB_GEARMODE_LIFETIME_PERMANENT) {
             ListDelete(&info->node);
             SoftBusFree((void *)info->callerId);
             SoftBusFree(info);
@@ -225,9 +225,9 @@ static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime,
         return SOFTBUS_ERR;
     }
     if (strcmp(callerId, HB_DEFAULT_CALLER_ID) == 0) {
-        info->lifeTimeStamp = HB_GEARMODE_LIFETIME_PERMANENT;
+        info->lifetimeStamp = HB_GEARMODE_LIFETIME_PERMANENT;
     } else {
-        info->lifeTimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
+        info->lifetimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
     }
     ListAdd(list, &info->node);
     return SOFTBUS_OK;
@@ -266,7 +266,7 @@ int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
             (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
             return SOFTBUS_MEM_ERR;
         }
-        info->lifeTimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
+        info->lifetimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_OK;
     }
@@ -414,6 +414,7 @@ static int32_t RelayHeartbeatV1Split(
 {
     msgPara->isFirstBegin = true;
     msgPara->isNeedRestart = true;
+    msgPara->hasScanRsp = true;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
         return SOFTBUS_ERR;
@@ -552,7 +553,7 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
         return SOFTBUS_OK;
     }
     LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
-    bool isRelayV0 = msgPara->isRelay && registedHbType == HEARTBEAT_TYPE_BLE_V0;
+    bool isRelayV0 = msgPara->isRelay && ((registedHbType & HEARTBEAT_TYPE_BLE_V0) == HEARTBEAT_TYPE_BLE_V0);
     if (SendEachSeparately(hbFsm, msgPara, mode, registedHbType, isRelayV0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send each separately fail, hbType=%{public}d", registedHbType);
         return SOFTBUS_ERR;

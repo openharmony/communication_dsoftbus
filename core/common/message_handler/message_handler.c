@@ -195,7 +195,7 @@ static void *LoopTask(void *arg)
 
 static int StartNewLooperThread(SoftBusLooper *looper)
 {
-#if defined(__aarch64__) || defined(__x86_64__) || (defined(__riscv) && (__riscv_xlen == 64))
+#if (defined(__aarch64__) || defined(__x86_64__))
 #define MAINLOOP_STACK_SIZE (2 * 1024 * 1024)
 #else
 #ifdef ASAN_BUILD

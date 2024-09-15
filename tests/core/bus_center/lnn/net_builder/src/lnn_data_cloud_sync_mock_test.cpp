@@ -604,8 +604,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSiz
     ASSERT_TRUE(json != nullptr);
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_EQ(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_KV_CLOUD_SYNC_FAIL);
-    EXPECT_EQ(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_KV_CLOUD_SYNC_FAIL);
+    EXPECT_EQ(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_ERR);
+    EXPECT_EQ(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_ERR);
     EXPECT_EQ(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_OK);
     cJSON_Delete(json);
 }
