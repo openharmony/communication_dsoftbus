@@ -752,18 +752,24 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusOOBEState state = (SoftBusOOBEState)event->status;
+    LNN_LOGI(
+        LNN_HEART_BEAT, "HB handle oobe state=%{public}d, g_state=%{public}d", state, g_hbConditionState.OOBEState);
     switch (state) {
         case SOFTBUS_OOBE_RUNNING:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_OOBE_RUNNING");
-            g_hbConditionState.OOBEState = state;
-            HbConditionChanged(false);
+            if (g_hbConditionState.OOBEState != SOFTBUS_FACK_OOBE_END) {
+                g_hbConditionState.OOBEState = state;
+                HbConditionChanged(false);
+            }
             break;
-        case SOFTBUS_OOBE_END:
-            __attribute__((fallthrough));
         case SOFTBUS_FACK_OOBE_END:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle oobe state=%{public}d", state);
             if (g_hbConditionState.OOBEState != SOFTBUS_OOBE_END &&
                 g_hbConditionState.OOBEState != SOFTBUS_FACK_OOBE_END) {
+                g_hbConditionState.OOBEState = state;
+                HbConditionChanged(false);
+            }
+            break;
+        case SOFTBUS_OOBE_END:
+            if (g_hbConditionState.OOBEState != SOFTBUS_OOBE_END) {
                 g_hbConditionState.OOBEState = state;
                 HbConditionChanged(false);
             }
