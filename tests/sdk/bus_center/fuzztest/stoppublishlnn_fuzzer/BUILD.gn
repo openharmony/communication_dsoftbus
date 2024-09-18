@@ -40,7 +40,7 @@ ohos_fuzztest("StopPublishLNNFuzzTest") {
   sources = [ "stoppublishlnn_fuzzer.cpp" ]
 
   deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
