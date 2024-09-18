@@ -26,9 +26,9 @@ ohos_fuzztest("BrConnectionFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/br/fuzztest/brconnection_fuzzer"
 
   include_dirs = [
+    "$dsoftbus_root_path/core/connection/br/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/connection/br/include",
     "$dsoftbus_root_path/core/adapter/br/include",
     "$dsoftbus_root_path/core/connection/interface",
   ]
@@ -40,12 +40,15 @@ ohos_fuzztest("BrConnectionFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "brconnection_fuzzer.cpp" ]
+  if (dsoftbus_feature_conn_br) {
+    sources = [ "brconnection_fuzzer.cpp" ]
+  }
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
   external_deps = [

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef CONNECTIONCOMMON_FUZZER_H
-#define CONNECTIONCOMMON_FUZZER_H
+#ifndef BLECONNECTION_FUZZER_H
+#define BLECONNECTION_FUZZER_H
 
 #include <cstdint>
 #include <unistd.h>
@@ -23,6 +23,6 @@
 #include <cstdlib>
 #include <fcntl.h>
 
-#define FUZZ_PROJECT_NAME "connectioncommon_fuzzer"
+#define FUZZ_PROJECT_NAME "bleconnection_fuzzer"
 
-#endif // CONNECTIONCOMMON_FUZZER_H
+#endif // BLECONNECTION_FUZZER_H

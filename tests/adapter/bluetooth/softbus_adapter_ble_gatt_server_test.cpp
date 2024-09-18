@@ -15,7 +15,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "conn_log.h"
+
 #include "bluetooth_mock.h"
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gatt_server.h"
@@ -27,9 +27,9 @@
 using namespace testing::ext;
 using ::testing::Return;
 
-#define MOCK_GATT_SERVER_HANDLE     0
-#define MOCK_GATT_SERVICE_HANDLE    1
-#define MOCK_GATT_CHARA_HANDLE      2
+#define MOCK_GATT_SERVER_HANDLE 0
+#define MOCK_GATT_SERVICE_HANDLE 1
+#define MOCK_GATT_CHARA_HANDLE 2
 #define MOCK_GATT_DESCRIPTOR_HANDLE 3
 
 namespace OHOS {
@@ -40,6 +40,7 @@ public:
     ~BtUuidRecordCtx();
     bool Update(int id, int st, SoftBusBtUuid *param);
     testing::AssertionResult Expect(int id, int st, SoftBusBtUuid *param);
+
 private:
     SoftBusBtUuid uuid;
     void Reset();
@@ -50,6 +51,7 @@ public:
     explicit BtGattRecordCtx(const char *identifier);
     bool Update(int id, int st, int handle, SoftBusBtUuid *param);
     testing::AssertionResult Expect(int id, int st, int handle, SoftBusBtUuid *param);
+
 private:
     int handle;
 };
@@ -219,19 +221,17 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic, TestSize.Level
         .uuid = nullptr,
     };
     int properties = SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
-        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
-        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE;
+                     SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
+                     SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE;
     int permissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
-    ASSERT_EQ(
-        SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions),
+    ASSERT_EQ(SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions),
         SOFTBUS_INVALID_PARAM);
 
     const char *netCharacteristic = "00002B00-0000-1000-8000-00805F9B34FB";
     characteristic.uuid = (char *)netCharacteristic;
     characteristic.uuidLen = strlen(netCharacteristic);
     EXPECT_CALL(mocker, BleGattsAddCharacteristic).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(
-        SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions),
+    ASSERT_EQ(SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions),
         SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_ERR);
 
     EXPECT_CALL(mocker, BleGattsAddCharacteristic).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
@@ -432,6 +432,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendNotify, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle1, TestSize.Level3)
 {
+    // 注册service
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
         .uuidLen = strlen(serviceUuid),
@@ -457,8 +458,8 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle1, TestSize.Level3)
         .uuid = (char *)netCharacteristic,
     };
     int properties = SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
-        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
-        SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE;
+                     SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
+                     SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE;
     int charaPermissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
     ASSERT_EQ(SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, charaPermissions),
         SOFTBUS_OK);
@@ -466,8 +467,11 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle1, TestSize.Level3)
         .uuidLen = strlen(netCharacteristic),
         .uuid = (char *)netCharacteristic,
     };
-    gattServerCallback->characteristicAddCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, &btCharacteristic,
-        MOCK_GATT_SERVICE_HANDLE, MOCK_GATT_CHARA_HANDLE);
+    gattServerCallback->characteristicAddCb(OHOS_BT_STATUS_SUCCESS,
+        MOCK_GATT_SERVER_HANDLE,
+        &btCharacteristic,
+        MOCK_GATT_SERVICE_HANDLE,
+        MOCK_GATT_CHARA_HANDLE);
     ASSERT_TRUE(
         characteristicAddCtx.Expect(MOCK_GATT_SERVICE_HANDLE, SOFTBUS_OK, MOCK_GATT_CHARA_HANDLE, &characteristic));
 }
@@ -501,10 +505,14 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle2, TestSize.Level3)
         .uuidLen = strlen(connDesciptor),
         .uuid = (char *)connDesciptor,
     };
-    gattServerCallback->descriptorAddCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, &btDescriptor,
-        MOCK_GATT_SERVICE_HANDLE, MOCK_GATT_DESCRIPTOR_HANDLE);
+    gattServerCallback->descriptorAddCb(OHOS_BT_STATUS_SUCCESS,
+        MOCK_GATT_SERVER_HANDLE,
+        &btDescriptor,
+        MOCK_GATT_SERVICE_HANDLE,
+        MOCK_GATT_DESCRIPTOR_HANDLE);
     ASSERT_TRUE(
         descriptorAddCtx.Expect(MOCK_GATT_SERVICE_HANDLE, SOFTBUS_OK, MOCK_GATT_DESCRIPTOR_HANDLE, &descriptor));
+
     // 启动Listen
     ASSERT_EQ(SoftBusGattsStartService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_OK);
     gattServerCallback->serviceStartCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, MOCK_GATT_SERVICE_HANDLE);
@@ -535,7 +543,6 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle3, TestSize.Level3)
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
-    GetStubGattsCallback()->ConnectServerCallback(1, &addr);
     ASSERT_TRUE(connectServerCtx.Expect(1, &addr));
     // 读写数据，及响应回复
     const char *valueExample = "hello gatt server, this is client";
@@ -611,6 +618,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle4, TestSize.Level3)
     ASSERT_TRUE(ExpectGattReadRequest(requestReadCtx, readParam));
     SoftBusGattsNotify notify = {0};
     ASSERT_EQ(SoftBusGattsSendNotify(&notify), SOFTBUS_OK);
+
     // server断链
     ASSERT_EQ(SoftBusGattsDisconnect(addr, 1), SOFTBUS_OK);
     gattServerCallback->disconnectServerCb(1, MOCK_GATT_SERVER_HANDLE, &bdAddr);
@@ -805,14 +813,10 @@ static SoftBusGattsCallback *GetStubGattsCallback()
 
 static testing::AssertionResult ExpectGattWriteRequest(SoftBusGattWriteRequest actual, SoftBusGattWriteRequest want)
 {
-    if (want.connId != actual.connId ||
-        want.transId != actual.transId ||
-        memcmp(want.btAddr->addr, actual.btAddr->addr, BT_ADDR_LEN) != 0 ||
-        want.attrHandle != actual.attrHandle ||
-        want.offset != actual.offset ||
-        want.length != actual.length ||
-        !(want.needRsp ? actual.needRsp : !actual.needRsp) ||
-        !(want.isPrep ? actual.isPrep : !actual.isPrep) ||
+    if (want.connId != actual.connId || want.transId != actual.transId ||
+        memcmp(want.btAddr->addr, actual.btAddr->addr, BT_ADDR_LEN) != 0 || want.attrHandle != actual.attrHandle ||
+        want.offset != actual.offset || want.length != actual.length ||
+        !(want.needRsp ? actual.needRsp : !actual.needRsp) || !(want.isPrep ? actual.isPrep : !actual.isPrep) ||
         memcmp(want.value, actual.value, want.length) != 0) {
         return testing::AssertionFailure() << "SoftBusGattWriteRequest is unexpected";
     }
@@ -821,12 +825,9 @@ static testing::AssertionResult ExpectGattWriteRequest(SoftBusGattWriteRequest a
 
 static testing::AssertionResult ExpectGattReadRequest(SoftBusGattReadRequest actual, SoftBusGattReadRequest want)
 {
-    if (want.connId != actual.connId ||
-        want.transId != actual.transId ||
-        memcmp(want.btAddr->addr, actual.btAddr->addr, BT_ADDR_LEN) != 0 ||
-        want.attrHandle != actual.attrHandle ||
-        want.offset != actual.offset ||
-        !(want.isLong ? actual.isLong : !actual.isLong)) {
+    if (want.connId != actual.connId || want.transId != actual.transId ||
+        memcmp(want.btAddr->addr, actual.btAddr->addr, BT_ADDR_LEN) != 0 || want.attrHandle != actual.attrHandle ||
+        want.offset != actual.offset || !(want.isLong ? actual.isLong : !actual.isLong)) {
         return testing::AssertionFailure() << "SoftBusGattReadRequest is unexpected";
     }
     return testing::AssertionSuccess();

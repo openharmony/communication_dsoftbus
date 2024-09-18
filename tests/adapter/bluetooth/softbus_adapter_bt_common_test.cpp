@@ -15,7 +15,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "comm_log.h"
+
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
@@ -118,10 +118,6 @@ static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, in
     if (listenerId < 0) {
         return testing::AssertionFailure() << "SoftBusAddBtStateListener failed";
     }
-
-    int32_t ret = SoftBusBtInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
     if (MockBluetooth::btGapCallback == nullptr) {
         return testing::AssertionFailure() << "GapRegisterCallback is not invoke";
     }

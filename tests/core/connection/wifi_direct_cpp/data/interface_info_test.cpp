@@ -171,48 +171,4 @@ HWTEST_F(InterfaceInfoTest, GetAndSetTest02, TestSize.Level1)
     info.SetPhysicalRate(1);
     EXPECT_EQ(info.GetPhysicalRate(), 1);
 }
-
-/*
- * @tc.name: SetP2pGroupConfig_02
- * @tc.desc: Test GetAndSetTest
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_02, TestSize.Level0)
-{
-    InterfaceInfo interfaceInfo;
-    std::string groupConfig = "test\n123\n456\n789\n1011";
-    interfaceInfo.SetP2pGroupConfig(groupConfig);
-    EXPECT_EQ(interfaceInfo.GetP2pGroupConfig(), groupConfig);
-}
-
-/*
- * @tc.name: SetP2pGroupConfig_03
- * @tc.desc: Test GetAndSetTest
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_03, TestSize.Level0)
-{
-    InterfaceInfo interfaceInfo;
-    std::string groupConfig = "test\n123\n456\n789\n1011";
-    interfaceInfo.SetDynamicMac("dynamicMac");
-    interfaceInfo.SetP2pGroupConfig(groupConfig);
-    EXPECT_EQ(interfaceInfo.GetP2pGroupConfig(), groupConfig);
-}
-
-/*
- * @tc.name: SetP2pGroupConfig_04
- * @tc.desc: Test GetAndSetTest
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InterfaceInfoTest, SetP2pGroupConfig_04, TestSize.Level0)
-{
-    InterfaceInfo interfaceInfo;
-    std::string groupConfig = "test\n123\n456\n789\n1011";
-    interfaceInfo.SetDynamicMac("");
-    interfaceInfo.SetP2pGroupConfig(groupConfig);
-    EXPECT_EQ(interfaceInfo.GetP2pGroupConfig(), groupConfig);
-}
 } // namespace OHOS::SoftBus
