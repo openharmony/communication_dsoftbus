@@ -141,6 +141,7 @@ public:
 
 void ConnectionBrConnectionTest::SetUpTestCase(void)
 {
+    LooperInit();
     NiceMock<ConnectionBrInterfaceMock>InitMock;
     EXPECT_CALL(InitMock, SoftBusThreadCreate).WillOnce(Return(SOFTBUS_OK));
     LooperInit();
@@ -170,6 +171,7 @@ ConnectFuncInterface *g_connectFuncInterface = NULL;
 
 ConnectFuncInterface *ConnInit(void)
 {
+    LooperInit();
     ConnectCallback callback = {
         .OnConnected = OnConnected,
         .OnDisconnected = OnDisconnected,

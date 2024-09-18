@@ -911,15 +911,12 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleSend001, TestSize.Level1)
     EXPECT_CALL(bleMock, ConnGattServerSend).WillOnce(Return(SOFTBUS_OK));
     ret = ConnBleSend(connection, data, dataLen, MODULE_CONNECTION);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
     connection->side = CONN_SIDE_CLIENT;
     EXPECT_CALL(bleMock, ConnGattClientSend).WillOnce(Return(SOFTBUS_OK));
     ret = ConnBleSend(connection, data, dataLen, MODULE_CONNECTION);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
     ret = ConnBleSaveConnection(connection);
     ASSERT_EQ(SOFTBUS_OK, ret);
     ConnBleRefreshIdleTimeout(connection);
-    SoftBusSleepMs(CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS); // sleep 60s to call timout event
 }
 } // namespace OHOS

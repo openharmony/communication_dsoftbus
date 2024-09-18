@@ -26,8 +26,8 @@ ohos_fuzztest("BleConnectionFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/ble/fuzztest/bleconnection_fuzzer"
 
   include_dirs = [
-    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/interface",
   ]
 
@@ -38,12 +38,15 @@ ohos_fuzztest("BleConnectionFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "bleconnection_fuzzer.cpp" ]
+  if (dsoftbus_feature_conn_ble) {
+    sources = [ "bleconnection_fuzzer.cpp" ]
+  }
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
   external_deps = [

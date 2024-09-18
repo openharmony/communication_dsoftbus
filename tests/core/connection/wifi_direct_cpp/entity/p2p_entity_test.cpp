@@ -136,6 +136,24 @@ HWTEST_F(P2pEntityTest, ConnectTest001, TestSize.Level1)
         EXPECT_EQ(result.errorCode_, SOFTBUS_OK);
     }
 
+    EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
+    {
+        EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(WifiDirectInterfaceMock::ConnectSuccessAction);
+        EXPECT_CALL(mock, GetInterfaceIpString).WillRepeatedly(Return(SOFTBUS_CONN_OPEN_SOCKET_FAILED));
+        P2pConnectParam param{"123\n01:02:03:04:05:06\n555\n16\n1", false, true};
+        P2pOperationResult result = P2pEntity::GetInstance().Connect(param);
+        EXPECT_EQ(result.errorCode_, SOFTBUS_OK);
+    }
+
+    EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
+    {
+        EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(WifiDirectInterfaceMock::ConnectSuccessAction);
+        EXPECT_CALL(mock, GetInterfaceIpString).WillRepeatedly(Return(SOFTBUS_OK));
+        P2pConnectParam param{"123\n01:02:03:04:05:06\n555\n16\n1", false, true};
+        P2pOperationResult result = P2pEntity::GetInstance().Connect(param);
+        EXPECT_EQ(result.errorCode_, SOFTBUS_OK);
+    }
+
     {
         EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(WifiDirectInterfaceMock::ConnectFailureAction);
         P2pConnectParam param{"123\n01:02:03:04:05:06\n555\n16\n1", false, false};
