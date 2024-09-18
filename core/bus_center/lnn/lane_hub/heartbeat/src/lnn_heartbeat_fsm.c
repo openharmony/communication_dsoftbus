@@ -1170,6 +1170,7 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     custData->isNeedRestart = msgPara->isNeedRestart;
     custData->hasScanRsp = msgPara->hasScanRsp;
     custData->isFirstBegin = msgPara->isFirstBegin;
+    custData->isFast = msgPara->isFast;
     custData->isDirectBoardcast = msgPara->isDirectBoardcast;
     if (strcpy_s(custData->networkId, NETWORK_ID_BUF_LEN, msgPara->networkId) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "cpy networkId fail");

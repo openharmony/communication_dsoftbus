@@ -59,11 +59,11 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
 static void BleGattcConfigureMtuSizeCallback(int32_t underlayerHandle, int32_t mtuSize, int32_t status);
 static ConnBleClientEventListener g_clientEventListener = { 0 };
 static SoftBusGattcCallback g_gattcCallback = {
-    .ConnectionStateCallback = BleGattcConnStateCallback,
-    .ServiceCompleteCallback = BleGattcSearchServiceCallback,
-    .RegistNotificationCallback = BleGattcRegisterNotificationCallback,
-    .NotificationReceiveCallback = BleGattcNotificationReceiveCallback,
-    .ConfigureMtuSizeCallback = BleGattcConfigureMtuSizeCallback,
+    .connectionStateCallback = BleGattcConnStateCallback,
+    .serviceCompleteCallback = BleGattcSearchServiceCallback,
+    .registNotificationCallback = BleGattcRegisterNotificationCallback,
+    .notificationReceiveCallback = BleGattcNotificationReceiveCallback,
+    .configureMtuSizeCallback = BleGattcConfigureMtuSizeCallback,
 };
 static SoftBusHandlerWrapper g_bleGattClientAsyncHandler = {
     .handler = {

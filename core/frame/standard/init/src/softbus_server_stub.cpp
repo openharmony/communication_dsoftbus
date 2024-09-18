@@ -31,6 +31,7 @@
 #include "trans_event.h"
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 #ifdef SUPPORT_BUNDLENAME
 #include "bundle_mgr_proxy.h"
@@ -71,6 +72,11 @@ int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
         return SOFTBUS_PERMISSION_DENIED;
     }
 
+    if (!CheckUidAndPid(param->sessionName, callingUid, callingPid)) {
+        COMM_LOGE(COMM_SVC, "Check Uid and Pid failed, sessionName=%{public}s", param->sessionName);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
+
     if (CheckTransSecLevel(param->sessionName, param->peerSessionName) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "OpenSession sec level invalid");
         return SOFTBUS_PERMISSION_DENIED;
@@ -97,29 +103,6 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
         return SOFTBUS_PERMISSION_DENIED;
     }
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerStub::CheckPidByChannelId(pid_t callingPid, int32_t channelId, int32_t channelType)
-{
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == NULL) {
-        COMM_LOGE(COMM_SVC, "malloc appInfo failed");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    int32_t ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
-    (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "get AppInfo by channelId failed!");
-        SoftBusFree(appInfo);
-        return ret == SOFTBUS_NOT_FIND ? SOFTBUS_OK : ret;
-    }
-    if (callingPid != appInfo->myData.pid) {
-        COMM_LOGE(COMM_SVC, "callingPid not match!");
-        SoftBusFree(appInfo);
-        return SOFTBUS_TRANS_CHECK_PID_ERROR;
-    }
-    SoftBusFree(appInfo);
     return SOFTBUS_OK;
 }
 
@@ -194,7 +177,7 @@ void SoftBusServerStub::InitMemberFuncMap()
 
 void SoftBusServerStub::InitMemberPermissionMap()
 {
-    memberPermissionMap_[MANAGE_REGISTER_SERVICE] = nullptr;
+    memberPermissionMap_[MANAGE_REGISTER_SERVICE] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_CREATE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_REMOVE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_RELEASE_RESOURCES] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
@@ -217,10 +200,10 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_SET_DATA_LEVEL] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_START_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_STOP_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_QOS_REPORT] = nullptr;
-    memberPermissionMap_[SERVER_STREAM_STATS] = nullptr;
-    memberPermissionMap_[SERVER_GRANT_PERMISSION] = nullptr;
-    memberPermissionMap_[SERVER_REMOVE_PERMISSION] = nullptr;
+    memberPermissionMap_[SERVER_QOS_REPORT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_STREAM_STATS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GRANT_PERMISSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_REMOVE_PERMISSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PUBLISH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_STOP_PUBLISH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_REFRESH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
@@ -230,9 +213,10 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SYNC_TRUSTED_RELATION] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_RIPPLE_STATS] = nullptr;
+    memberPermissionMap_[SERVER_RIPPLE_STATS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -611,6 +595,7 @@ int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessagePa
     COMM_LOGD(COMM_SVC, "enter");
     int32_t channelId;
     int32_t channelType;
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
     if (!data.ReadInt32(channelId)) {
         COMM_LOGE(COMM_SVC, "NotifyAuthSuccessInner read channel Id failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
@@ -618,6 +603,12 @@ int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessagePa
     if (!data.ReadInt32(channelType)) {
         COMM_LOGE(COMM_SVC, "NotifyAuthSuccessInner read channel type failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "callingPid not equal pid, callingPid=%{public}d, channelId=%{public}d",
+            callingPid, channelId);
+        return ret;
     }
     int32_t retReply = NotifyAuthSuccess(channelId, channelType);
     if (!reply.WriteInt32(retReply)) {
@@ -761,7 +752,7 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    if (CheckPidByChannelId(callingPid, channelId, channelType) != SOFTBUS_OK) {
+    if (TransGetAndComparePid(callingPid, channelId, channelType) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "pid permission check failed!");
         return SOFTBUS_PERMISSION_DENIED;
     }

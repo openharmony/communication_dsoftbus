@@ -185,6 +185,15 @@ int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     return LnnOnNodeBasicInfoChanged("", info, type);
 }
 
+int32_t LnnIpcNotifyNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type)
+{
+    (void)info;
+    (void)infoTypeLen;
+    (void)type;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
 int32_t LnnIpcLocalNetworkIdChanged(void)
 {
     LNN_LOGI(LNN_EVENT, "not implement");

@@ -558,7 +558,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
     SoftBusScreenState oldstate = g_hbConditionState.screenState;
     g_hbConditionState.screenState = (SoftBusScreenState)event->status;
-    SoftBusGetTime(&time);
+    SoftBusGetRealTime(&time);
     nowTime = time.sec * HB_TIME_FACTOR + time.usec / HB_TIME_FACTOR;
     HbScreenOnOnceTryCloudSync();
     if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON && oldstate != SOFTBUS_SCREEN_ON) {

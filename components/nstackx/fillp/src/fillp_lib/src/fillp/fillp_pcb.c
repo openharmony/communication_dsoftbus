@@ -30,7 +30,8 @@ extern "C" {
 
 #define FILLP_PCB_GET_CONN(pcb) (struct FtNetconn *)((struct SpungePcb *)((pcb)->spcb))->conn
 #define FILLP_UNRECV_THRESHOLD 2
-static inline FILLP_INT FillpSkiplistCmp(void *t1, void *t2)
+
+IGNORE_OVERFLOW static inline FILLP_INT FillpSkiplistCmp(void *t1, void *t2)
 {
     struct FillpPcbItem *value1 = (struct FillpPcbItem *)t1;
     struct FillpPcbItem *value2 = (struct FillpPcbItem *)t2;
@@ -42,7 +43,7 @@ static inline FILLP_INT FillpSkiplistCmp(void *t1, void *t2)
     return ((FILLP_INT32)(value1->seqNum - value2->seqNum)) > 0;
 }
 
-static inline FILLP_INT FillpSkiplistRecvcmp(void *t1, void *t2)
+IGNORE_OVERFLOW static inline FILLP_INT FillpSkiplistRecvcmp(void *t1, void *t2)
 {
     struct FillpPcbItem *value1 = (struct FillpPcbItem *)t1;
     struct FillpPcbItem *value2 = (struct FillpPcbItem *)t2;
