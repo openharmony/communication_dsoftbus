@@ -95,7 +95,7 @@ static int32_t ReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
         return SOFTBUS_FILE_ERR;
     }
     if (fileLen > (int32_t)maxLen) {
-        COMM_LOGE(COMM_ADAPTER, "ReadFile over max len, fileLen=%{public}d, maxLen=%{public}d", fileLen, maxLen);
+        COMM_LOGE(COMM_ADAPTER, "ReadFile over max len, fileLen=%{public}d, maxLen=%{public}u", fileLen, maxLen);
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
