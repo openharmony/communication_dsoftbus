@@ -106,6 +106,7 @@ if (defined(ohos_lite)) {
       "common_event_service:cesfwk_innerkits",
       "init:libbeget_proxy",
       "netmanager_base:net_conn_manager_if",
+      "power_manager:powermgr_client",
     ]
   } else {
     bus_center_adapter_src += [

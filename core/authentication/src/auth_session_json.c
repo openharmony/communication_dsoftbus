@@ -1192,10 +1192,6 @@ static void PackWifiDirectInfo(
             return;
         }
     } else {
-        if (remoteUuid == NULL) {
-            AUTH_LOGE(AUTH_FSM, "invalid uuid");
-            return;
-        }
         if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
             return;
@@ -1206,13 +1202,17 @@ static void PackWifiDirectInfo(
     if (SoftBusBase64Encode(encodePtk, PTK_ENCODE_LEN, &keyLen, (unsigned char *)localPtk,
         PTK_DEFAULT_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "encode ptk fail");
+        (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
         return;
     }
+    (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     AuthPrintBase64Ptk((const char *)encodePtk);
     if (!JSON_AddStringToObject(json, PTK, (char *)encodePtk)) {
         AUTH_LOGE(AUTH_FSM, "add ptk string to json fail");
+        (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
         return;
     }
+    (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
     if (!JSON_AddInt32ToObject(json, STATIC_CAP_LENGTH, info->staticCapLen)) {
         AUTH_LOGE(AUTH_FSM, "add static cap len fail");
         return;
@@ -1276,23 +1276,29 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
     if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN,
         info->cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert cipher iv to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN,
         info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert peerIrk to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN,
         info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert publicAddress to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
         return SOFTBUS_ERR;
     }
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_KEY, cipherKey);
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, cipherIv);
     (void)JSON_AddStringToObject(json, IRK, peerIrk);
     (void)JSON_AddStringToObject(json, PUB_MAC, pubMac);
-    AUTH_LOGI(AUTH_FSM, "pack cipher and rpa info success!");
+    DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
+    (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+    (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
 
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
@@ -1305,7 +1311,6 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
         (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         return SOFTBUS_ERR;
     }
-    DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return SOFTBUS_OK;
 }
@@ -1504,6 +1509,7 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMet
     } else {
         UnpackPtk(info->remotePtk, encodePtk);
     }
+    (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
 }
 
 static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)

@@ -18,6 +18,7 @@
 #include <securec.h>
 #include "cJSON.h"
 
+#include "anonymizer.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "common_list.h"
@@ -42,9 +43,12 @@ static void CreateSocketResource(SocketResource *item, const char *sessionName, 
     item->channelType = channel->channelType;
     item->startTime = (int64_t)SoftBusGetSysTimeMs();
 
-    if (strcpy_s(item->socketName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
+    char *tmpSessionName = NULL;
+    Anonymize(sessionName, &tmpSessionName);
+    if (strcpy_s(item->socketName, SESSION_NAME_SIZE_MAX, AnonymizeWrapper(tmpSessionName)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "strcpy failed");
     }
+    AnonymizeFree(tmpSessionName);
 }
 
 void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
@@ -212,7 +216,7 @@ void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
 int32_t ClientTransStatisticsInit(void)
 {
     if (g_channelStatisticsList != NULL) {
-        TRANS_LOGE(TRANS_SDK, "channel statistics list has init");
+        TRANS_LOGW(TRANS_SDK, "channel statistics list has init");
         return SOFTBUS_OK;
     }
     g_channelStatisticsList = CreateSoftBusList();
@@ -227,7 +231,7 @@ int32_t ClientTransStatisticsInit(void)
 void ClientTransStatisticsDeinit(void)
 {
     if (g_channelStatisticsList == NULL) {
-        TRANS_LOGE(TRANS_SDK, "channel statistics list has deinit");
+        TRANS_LOGW(TRANS_SDK, "channel statistics list has deinit");
         return;
     }
     if (SoftBusMutexLock(&g_channelStatisticsList->lock) != SOFTBUS_OK) {

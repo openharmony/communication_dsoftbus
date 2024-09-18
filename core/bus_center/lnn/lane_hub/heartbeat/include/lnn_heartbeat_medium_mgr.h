@@ -65,6 +65,7 @@ typedef struct {
     bool isFirstBegin;
     bool isNeedRestart;
     bool hasScanRsp;
+    bool isFast;
     bool isDirectBoardcast;
     char networkId[NETWORK_ID_BUF_LEN];
 } LnnHeartbeatSendBeginData;
