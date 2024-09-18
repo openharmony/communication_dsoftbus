@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1408,7 +1408,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_004, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(8), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)\
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(8), Return(SOFTBUS_OK)));
 
     int32_t ret = SelectLane(NODE_NETWORK_ID, &request, &recommendList, &listNum);
