@@ -352,8 +352,8 @@ bool LnnIsSupportBurstFeature(const char *networkId)
         LNN_LOGE(LNN_HEART_BEAT, "get local or remote feature fail");
         return false;
     }
-    return IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT) &&
-        IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT);
+    return IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
+        IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT);
 }
 
 bool LnnIsLocalSupportBurstFeature(void)
@@ -363,7 +363,7 @@ bool LnnIsLocalSupportBurstFeature(void)
         LNN_LOGE(LNN_HEART_BEAT, "get local feature fail");
         return false;
     }
-    return IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT);
+    return IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT);
 }
 
 void LnnDumpLocalBasicInfo(void)
