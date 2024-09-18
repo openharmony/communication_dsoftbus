@@ -24,6 +24,7 @@
 #include "softbus_common.h"
 #include "softbus_bus_center.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_event_monitor_impl.h"
 
 namespace OHOS {
 class LnnServiceInterface {
@@ -52,6 +53,7 @@ public:
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
+    virtual int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle) = 0;
 };
 
 class LnnServicetInterfaceMock : public LnnServiceInterface {
@@ -77,6 +79,7 @@ public:
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char*, uint16_t));
+    MOCK_METHOD1(LnnSubscribeAccountBootEvent, int32_t (AccountEventHandle handle));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
