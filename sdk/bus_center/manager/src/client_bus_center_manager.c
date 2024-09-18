@@ -283,7 +283,7 @@ static void DuplicateNodeStateCbList(ListNode *list)
             LNN_LOGE(LNN_STATE, "malloc node state callback item fail");
             continue;
         }
-        strncpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName, PKG_NAME_SIZE_MAX - 1);
+        (void)strncpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName, PKG_NAME_SIZE_MAX - 1);
         ListInit(&copyItem->node);
         copyItem->cb = item->cb;
         ListAdd(list, &copyItem->node);
@@ -692,7 +692,7 @@ void RestartRegDataLevelChange(void)
 
 int32_t UnregDataLevelChangeCbInner(const char *pkgName)
 {
-    LNN_LOGI(LNN_STATE, "enter");
+    LNN_LOGI(LNN_STATE, "UnregDataLevelChangeCbInner enter");
     g_busCenterClient.dataLevelCb.onDataLevelChanged = NULL;
     int32_t ret = ServerIpcUnregDataLevelChangeCb(pkgName);
     if (ret != SOFTBUS_OK) {
@@ -718,9 +718,8 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
         LNN_LOGE(LNN_STATE, "join lnn not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         LNN_LOGE(LNN_STATE, "lock join lnn cb list in join");
-        return SOFTBUS_LOCK_ERR;
     }
 
     do {
@@ -904,7 +903,7 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
     TimeSyncCallbackItem *item = NULL;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "stop time sync cb not init");
+        LNN_LOGE(LNN_STATE, "stop time sync cb list not init");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
@@ -920,7 +919,7 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
             SoftBusFree(item);
         }
     }
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
         LNN_LOGE(LNN_STATE, "unlock time sync cb list");
     }
     return rc;
@@ -1014,7 +1013,6 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         LNN_LOGE(LNN_STATE, "lock join lnn cb list in join result");
-        return SOFTBUS_LOCK_ERR;
     }
     while ((item = FindJoinLNNCbItem((ConnectionAddr *)addr, NULL)) != NULL) {
         ListDelete(&item->node);
@@ -1027,7 +1025,6 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
         SoftBusFree(item);
         if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
             LNN_LOGE(LNN_STATE, "lock join lnn cb list in join result");
-            return SOFTBUS_LOCK_ERR;
         }
     }
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
@@ -1051,7 +1048,6 @@ int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
 
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         LNN_LOGE(LNN_STATE, "lock leave lnn cb list fail");
-        return SOFTBUS_LOCK_ERR;
     }
     while ((item = FindLeaveLNNCbItem(networkId, NULL)) != NULL) {
         ListDelete(&item->node);
@@ -1064,7 +1060,6 @@ int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
         SoftBusFree(item);
         if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
             LNN_LOGE(LNN_STATE, "lock leave lnn cb list fail");
-            return SOFTBUS_LOCK_ERR;
         }
     }
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
@@ -1088,7 +1083,6 @@ int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *in
 
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         LNN_LOGE(LNN_STATE, "lock node state cb list in notify");
-        return SOFTBUS_LOCK_ERR;
     }
     ListInit(&dupList);
     DuplicateNodeStateCbList(&dupList);
@@ -1232,7 +1226,6 @@ int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode)
 
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         LNN_LOGE(LNN_STATE, "lock time sync cb list in time sync result");
-        return SOFTBUS_LOCK_ERR;
     }
     ListInit(&dupList);
     DuplicateTimeSyncResultCbList(&dupList, basicInfo->target.targetNetworkId);

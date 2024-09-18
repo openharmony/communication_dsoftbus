@@ -736,7 +736,7 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
 
 static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
 {
-    LNN_CHECK_AND_RETURN_LOGW(cacheInfo != NULL, LNN_BUILDER, "invalid param");
+    LNN_CHECK_AND_RETURN_LOGE(cacheInfo != NULL, LNN_BUILDER, "invalid param");
     char accountId[INT64_TO_STR_MAX_LEN] = {0};
     if (!Int64ToString(cacheInfo->accountId, accountId, INT64_TO_STR_MAX_LEN)) {
         LNN_LOGE(LNN_BUILDER, "accountId to str fail");
@@ -784,9 +784,96 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     AnonymizeFree(anonyDeviceName);
 }
 
-static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo)
+static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo)
 {
-    if (cacheInfo == NULL) {
+    if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s deviceName to cache info fail");
+    }
+    if (strcpy_s(oldInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedName to cache info fail");
+    }
+    if (strcpy_s(oldInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.unifiedDefaultName) !=
+        EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s unifiedDefaultName to cache info fail");
+    }
+    if (strcpy_s(oldInfo->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.nickName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s nickName to cache info fail");
+    }
+    if (strcpy_s(oldInfo->deviceInfo.deviceUdid, UDID_BUF_LEN, newInfo->deviceInfo.deviceUdid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s deviceUdid to cache info fail");
+    }
+    if (strcpy_s(oldInfo->deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, newInfo->deviceInfo.deviceVersion) !=
+        EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s deviceVersion to cache info fail");
+    }
+    if (strcpy_s(oldInfo->uuid, UUID_BUF_LEN, newInfo->uuid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s uuid to cache info fail");
+    }
+    if (strcpy_s(oldInfo->networkId, NETWORK_ID_BUF_LEN, newInfo->networkId) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s networkid to cache info fail");
+    }
+    oldInfo->deviceInfo.deviceTypeId = newInfo->deviceInfo.deviceTypeId;
+    oldInfo->isBleP2p = newInfo->isBleP2p;
+    oldInfo->supportedProtocols = newInfo->supportedProtocols;
+    oldInfo->wifiVersion = newInfo->wifiVersion;
+    oldInfo->bleVersion = newInfo->bleVersion;
+    oldInfo->accountId = newInfo->accountId;
+    oldInfo->feature = newInfo->feature;
+    oldInfo->connSubFeature = newInfo->connSubFeature;
+    oldInfo->authCapacity = newInfo->authCapacity;
+    oldInfo->deviceInfo.osType = newInfo->deviceInfo.osType;
+    oldInfo->stateVersion = newInfo->stateVersion;
+    oldInfo->updateTimestamp = newInfo->updateTimestamp;
+    oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
+    oldInfo->localStateVersion = newInfo->localStateVersion;
+}
+
+static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
+{
+    if (newInfo == NULL || oldInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(oldInfo->softBusVersion, VERSION_MAX_LEN, newInfo->softBusVersion) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s softBusVersion to cache info fail");
+    }
+    if (strcpy_s(oldInfo->pkgVersion, VERSION_MAX_LEN, newInfo->pkgVersion) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s pkgVersion to cache info fail");
+    }
+    if (strcpy_s(oldInfo->connectInfo.macAddr, MAC_LEN, newInfo->connectInfo.macAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s macAddr to cache info fail");
+    }
+    if (strcpy_s(oldInfo->deviceInfo.osVersion, OS_VERSION_BUF_LEN, newInfo->deviceInfo.osVersion) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s osVersion to cache info fail");
+    }
+    if (strcpy_s(oldInfo->p2pInfo.p2pMac, MAC_LEN, newInfo->p2pInfo.p2pMac) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s p2pMac to cache info fail");
+    }
+    if (memcpy_s((char *)oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, (char *)newInfo->rpaInfo.peerIrk,
+        LFINDER_IRK_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s peerIrk to cache info fail");
+    }
+    if (memcpy_s((char *)oldInfo->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, (char *)newInfo->rpaInfo.publicAddress,
+        LFINDER_MAC_ADDR_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s publicAddress to cache info fail");
+    }
+    if (memcpy_s((char *)oldInfo->cipherInfo.key, SESSION_KEY_LENGTH, newInfo->cipherInfo.key, SESSION_KEY_LENGTH) !=
+        EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo key to cache info fail");
+    }
+    if (memcpy_s((char *)oldInfo->cipherInfo.iv, BROADCAST_IV_LEN, newInfo->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo iv to cache info fail");
+    }
+    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s remotePtk to cache info fail");
+    }
+    UpdateDevBasicInfoToCache(newInfo, oldInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *oldCacheInfo)
+{
+    if (cacheInfo == NULL || oldCacheInfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -812,7 +899,11 @@ static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo)
         return ret;
     }
     cacheInfo->localStateVersion = localCacheInfo.stateVersion;
-    (void)LnnSaveRemoteDeviceInfo(cacheInfo);
+    if (LnnUpdateOldCacheInfo(cacheInfo, oldCacheInfo) != SOFTBUS_OK ||
+        LnnSaveRemoteDeviceInfo(oldCacheInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "update cache info fail, use cloud sync data");
+        (void)LnnSaveRemoteDeviceInfo(cacheInfo);
+    }
     char *anonyUdid = NULL;
     Anonymize(cacheInfo->deviceInfo.deviceUdid, &anonyUdid);
     LNN_LOGI(LNN_BUILDER,
@@ -856,7 +947,7 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
             cacheInfo.updateTimestamp)) {
         return SOFTBUS_ERR;
     }
-    if (LnnSaveAndUpdateDistributedNode(&cacheInfo) != SOFTBUS_OK) {
+    if (LnnSaveAndUpdateDistributedNode(&cacheInfo, &oldCacheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "save and update distribute node info fail");
         (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         return SOFTBUS_ERR;
@@ -944,17 +1035,17 @@ static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
 {
     if (LnnPackCloudSyncDeviceInfo(json, info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "pack cloud sync info fail");
-        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
+        return SOFTBUS_ERR;
     }
     CloudSyncInfo syncInfo = { 0 };
     if (LnnGetLocalBroadcastCipherInfo(&syncInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cipher info fail");
-        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
+        return SOFTBUS_ERR;
     }
     if (!AddStringToJsonObject(json, DEVICE_INFO_JSON_BROADCAST_KEY_TABLE, syncInfo.broadcastCipherKey)) {
         JSON_Free(syncInfo.broadcastCipherKey);
         LNN_LOGE(LNN_BUILDER, "add string info fail");
-        return SOFTBUS_KV_CLOUD_SYNC_FAIL;
+        return SOFTBUS_ERR;
     }
     JSON_Free(syncInfo.broadcastCipherKey);
     return SOFTBUS_OK;

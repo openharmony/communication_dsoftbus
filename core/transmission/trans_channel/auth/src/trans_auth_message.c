@@ -15,12 +15,12 @@
 
 #include "trans_auth_message.h"
 
-#include "lnn_lane_interface.h"
 #include "securec.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "lnn_lane_interface.h"
 
 #define CODE_OPEN_AUTH_MSG_CHANNEL 4
 
@@ -53,7 +53,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
             !AddStringToJsonObject(msg, "LOCAL_HML_RAW_IP", appInfo->myData.addr) ||
             !AddStringToJsonObject(msg, "PEER_HML_RAW_IP", appInfo->peerData.addr)) {
             TRANS_LOGE(TRANS_SVC, "add linkType and ip failed");
-            return SOFTBUS_CREATE_JSON_ERR;
+            return SOFTBUS_PARSE_JSON_ERR;
         }
     }
     return SOFTBUS_OK;
@@ -91,7 +91,7 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
     if (!GetJsonObjectNumberItem(obj, "MTU_SIZE", (int32_t *)&(appInfo->peerData.dataConfig))) {
         TRANS_LOGW(TRANS_SVC, "peer dataconfig is null.");
     }
-    if (!GetJsonObjectInt32Item(obj, "ROUTE_TYPE", (int32_t *)&(appInfo->routeType))) {
+    if (!GetJsonObjectNumberItem(obj, "ROUTE_TYPE", (int32_t *)&(appInfo->routeType))) {
         TRANS_LOGW(TRANS_SVC, "routeType is null.");
     }
     if (GetJsonObjectNumberItem(obj, "LANE_LINK_TYPE", (int32_t *)&(appInfo->linkType))

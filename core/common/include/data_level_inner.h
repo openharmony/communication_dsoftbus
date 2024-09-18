@@ -22,6 +22,7 @@
 extern "C" {
 #endif
 #endif
+
 typedef struct {
     uint16_t dynamicLevel;
     uint16_t staticLevel;

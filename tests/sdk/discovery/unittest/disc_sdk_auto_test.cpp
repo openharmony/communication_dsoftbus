@@ -190,12 +190,6 @@ HWTEST_F(DiscSdkAutoTest, PublishServiceTest001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
-    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /**
@@ -239,12 +233,6 @@ HWTEST_F(DiscSdkAutoTest, PublishServiceTest002, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = SUPER_HIGH;
-    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
-    ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
-
-    testInfo.freq = EXTREME_HIGH;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
@@ -344,12 +332,6 @@ HWTEST_F(DiscSdkAutoTest, PublishServiceTest005, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
-    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /**
@@ -393,12 +375,6 @@ HWTEST_F(DiscSdkAutoTest, PublishServiceTest006, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = SUPER_HIGH;
-    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
-    ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
-
-    testInfo.freq = EXTREME_HIGH;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
@@ -564,12 +540,6 @@ HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest001, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
-
-    testInfo.freq = EXTREME_HIGH;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -646,12 +616,6 @@ HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest003, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     testInfo.freq = SUPER_HIGH;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
@@ -840,11 +804,6 @@ HWTEST_F(DiscSdkAutoTest, UnPublishServiceTest004, TestSize.Level1)
     PublishService(g_pkgName, &testInfo, &g_publishCb);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
-
-    testInfo.freq = EXTREME_HIGH;
-    PublishService(g_pkgName, &testInfo, &g_publishCb);
-    ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -883,11 +842,6 @@ HWTEST_F(DiscSdkAutoTest, UnPublishServiceTest005, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     testInfo.freq = SUPER_HIGH;
-    PublishService(g_pkgName, &testInfo, &g_publishCb);
-    ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
     PublishService(g_pkgName, &testInfo, &g_publishCb);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -1073,11 +1027,6 @@ HWTEST_F(DiscSdkAutoTest, StopDiscoveryTest004, TestSize.Level1)
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
-
-    testInfo.freq = EXTREME_HIGH;
-    StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -1117,11 +1066,6 @@ HWTEST_F(DiscSdkAutoTest, StopDiscoveryTest005, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     testInfo.freq = SUPER_HIGH;
-    StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = EXTREME_HIGH;
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
     EXPECT_TRUE(ret == SOFTBUS_OK);

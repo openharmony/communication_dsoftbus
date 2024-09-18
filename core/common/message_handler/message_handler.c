@@ -195,7 +195,7 @@ static void *LoopTask(void *arg)
 
 static int StartNewLooperThread(SoftBusLooper *looper)
 {
-#if defined(__aarch64__) || defined(__x86_64__) || (defined(__riscv) && (__riscv_xlen == 64))
+#if (defined(__aarch64__) || defined(__x86_64__))
 #define MAINLOOP_STACK_SIZE (2 * 1024 * 1024)
 #else
 #ifdef ASAN_BUILD
@@ -280,7 +280,6 @@ static int32_t PostMessageAtTimeParamVerify(const SoftBusLooper *looper, SoftBus
         COMM_LOGE(COMM_UTILS, "[%s] msg handler is null", looper->context->name);
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 
@@ -474,7 +473,7 @@ struct LoopConfigItem {
 static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_DEFAULT, NULL},
     {LOOP_TYPE_CONN, NULL},
-    {LOOP_TYPE_LNN, NULL}
+    {LOOP_TYPE_LNN, NULL},
 };
 
 SoftBusLooper *GetLooper(int type)

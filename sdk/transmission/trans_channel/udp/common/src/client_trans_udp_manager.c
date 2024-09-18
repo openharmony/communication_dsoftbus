@@ -368,7 +368,7 @@ static int32_t RleaseUdpResources(int32_t channelId)
     return ServerIpcReleaseResources(channelId);
 }
 
-static void NotifyCb(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
+static void NotifyCallback(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
 {
     if (channel != NULL && (!channel->isEnable) && g_sessionCb != NULL && g_sessionCb->OnSessionOpenFailed != NULL) {
         SessionState sessionState = SESSION_STATE_INIT;
@@ -422,7 +422,7 @@ static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, Shutd
     }
 
     if (reason != SHUTDOWN_REASON_LOCAL) {
-        NotifyCb(channel, channelId, reason);
+        NotifyCallback(channel, channelId, reason);
     }
     return SOFTBUS_OK;
 }
@@ -495,25 +495,10 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
     if (!channel.isEnable) {
-        TRANS_LOGE(TRANS_STREAM, "udp channel is not enable channelId=%{public}d.", channelId);
+        TRANS_LOGE(TRANS_STREAM, "udp channel is not enable.");
         return SOFTBUS_TRANS_UDP_CHANNEL_DISABLE;
     }
     return TransSendStream(channelId, data, ext, param);
-}
-
-int32_t TransUdpChannelSetStreamMultiLayer(int32_t channelId, const void *optValue)
-{
-    UdpChannel channel;
-    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
-    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_STREAM, "get channel by channelId=%{public}d failed.", channelId);
-        return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
-    }
-    if (!channel.isEnable) {
-        TRANS_LOGE(TRANS_STREAM, "udp channel %{public}d is not enable.", channelId);
-        return SOFTBUS_TRANS_UDP_CHANNEL_DISABLE;
-    }
-    return TransSetStreamMultiLayer(channelId, optValue);
 }
 
 static void OnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
@@ -743,7 +728,6 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos)
             ret, tos);
         return ret;
     }
-    NotifyTransLimitChanged(channelId, tos);
     return ret;
 }
 

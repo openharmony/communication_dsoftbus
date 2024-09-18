@@ -31,16 +31,18 @@
 #include "trans_auth_message.h"
 #include "trans_channel_common.h"
 #include "trans_channel_limit.h"
-#include "trans_channel_manager.h"
 #include "trans_event.h"
-#include "trans_lane_manager.h"
-#include "trans_log.h"
 #include "trans_session_manager.h"
+#include "trans_channel_manager.h"
+#include "trans_log.h"
+#include "trans_lane_manager.h"
 #include "wifi_direct_manager.h"
 
 #define AUTH_CHANNEL_REQ 0
 #define AUTH_CHANNEL_REPLY 1
 
+#define IPV4_TYPE 1
+#define IPV6_TYPE 2
 #define AUTH_GROUP_ID "auth group id"
 #define AUTH_SESSION_KEY "auth session key"
 

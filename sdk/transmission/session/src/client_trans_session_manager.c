@@ -43,7 +43,7 @@ static int32_t g_sessionId = 1;
 static int32_t g_closingIdNum = 0;
 static SoftBusList *g_clientSessionServerList = NULL;
 
-static int32_t LockClientSessionServerList()
+static int32_t LockClientSessionServerList(void)
 {
     if (g_clientSessionServerList == NULL) {
         TRANS_LOGE(TRANS_INIT, "entry list not init");
@@ -56,7 +56,7 @@ static int32_t LockClientSessionServerList()
     return SOFTBUS_OK;
 }
 
-static void UnlockClientSessionServerList()
+static void UnlockClientSessionServerList(void)
 {
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
 }
@@ -707,7 +707,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
             *data = sessionNode->peerUid;
             break;
         case KEY_ACTION_ID:
-            *data = (int)sessionNode->actionId;
+            *data = (int32_t)sessionNode->actionId;
             break;
         default:
             UnlockClientSessionServerList();
@@ -1358,7 +1358,13 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     g_clientSessionServerList->cnt++;
 
     UnlockClientSessionServerList();
-    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", server->sessionName, server->pkgName);
+    char *anonymizePkgName = NULL;
+    char *tmpName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", tmpName, anonymizePkgName);
+    AnonymizeFree(anonymizePkgName);
+    AnonymizeFree(tmpName);
     return SOFTBUS_OK;
 }
 
@@ -1570,30 +1576,33 @@ int32_t ClientSetActionIdBySessionId(int32_t sessionId, uint32_t actionId)
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = LockClientSessionServerList();
-    if (ret != SOFTBUS_OK) {
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
-        return ret;
+        return SOFTBUS_LOCK_ERR;
     }
 
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
 
-    ret = GetSessionById(sessionId, &serverNode, &sessionNode);
+    int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
-        UnlockClientSessionServerList();
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "not found");
         return ret;
     }
 
     if (sessionNode->role != SESSION_ROLE_INIT) {
         TRANS_LOGE(TRANS_SDK, "socket in use, currentRole=%{public}d", sessionNode->role);
-        UnlockClientSessionServerList();
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SOCKET_IN_USE;
     }
 
     sessionNode->actionId = actionId;
-    UnlockClientSessionServerList();
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
 
@@ -1676,6 +1685,52 @@ int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRol
         serverNode->isSrvEncryptedRawStream = sessionNode->isEncyptedRawStream;
     }
     UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
+int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo)
+{
+    if (sessionId < 0 || transInfo == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "session not found. sessionId=%{public}d", sessionId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    ret = CheckBindSocketInfo(sessionNode);
+    if (ret != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "check socekt info failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    SessionAttribute tmpAttr;
+    (void)memset_s(&tmpAttr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    SessionParam param;
+    FillDfsSocketParam(&param, &tmpAttr, serverNode, sessionNode);
+    UnlockClientSessionServerList();
+
+    param.sessionId = sessionId;
+    ret = SetSessionStateBySessionId(param.sessionId, SESSION_STATE_OPENING, 0);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set session state failed, maybe cancel, ret=%{public}d", ret);
+    ret = ServerIpcOpenSession(&param, transInfo);
+    if (ret != SOFTBUS_OK) {
+        ClientConvertRetVal(sessionId, &ret);
+        TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 
@@ -2244,51 +2299,5 @@ int32_t ClientSignalSyncBind(int32_t socket, int32_t errCode)
     UnlockClientSessionServerList();
     TRANS_LOGI(TRANS_SDK, "socket=%{public}d signal success", socket);
     TransWaitForBindReturn(socket);
-    return SOFTBUS_OK;
-}
-
-int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo)
-{
-    if (sessionId < 0 || transInfo == NULL) {
-        TRANS_LOGE(TRANS_SDK, "Invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    int32_t ret = LockClientSessionServerList();
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
-        return ret;
-    }
-
-    ClientSessionServer *serverNode = NULL;
-    SessionInfo *sessionNode = NULL;
-    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
-        UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "session not found. sessionId=%{public}d", sessionId);
-        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
-    }
-    ret = CheckBindSocketInfo(sessionNode);
-    if (ret != SOFTBUS_OK) {
-        UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "check socekt info failed, ret=%{public}d", ret);
-        return ret;
-    }
-
-    SessionAttribute tmpAttr;
-    (void)memset_s(&tmpAttr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
-    SessionParam param;
-    FillDfsSocketParam(&param, &tmpAttr, serverNode, sessionNode);
-    UnlockClientSessionServerList();
-
-    param.sessionId = sessionId;
-    ret = SetSessionStateBySessionId(param.sessionId, SESSION_STATE_OPENING, 0);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_SDK, "set session state failed, maybe cancel, ret=%{public}d", ret);
-    ret = ServerIpcOpenSession(&param, transInfo);
-    if (ret != SOFTBUS_OK) {
-        ClientConvertRetVal(sessionId, &ret);
-        TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);
-        return ret;
-    }
     return SOFTBUS_OK;
 }

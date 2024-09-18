@@ -293,7 +293,10 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return;
     }
-    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", pkgName, pid);
+    char *anonymizePkgName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
+    AnonymizeFree(anonymizePkgName);
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return;
@@ -304,8 +307,8 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
         if ((strcmp(laneItem->pkgName, pkgName) == 0) && (laneItem->pid == pid)) {
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
-            TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
-                pkgName, laneItem->channelId, laneItem->channelType);
+            TRANS_LOGI(TRANS_SVC, "death del lane. channelId=%{public}d, channelType=%{public}d",
+                laneItem->channelId, laneItem->channelType);
             if (laneItem->isQosLane) {
                 TransFreeLaneByLaneHandle(laneItem->laneHandle, true);
             } else {
@@ -680,6 +683,10 @@ int32_t TransGetSocketChannelStateBySession(const char *sessionName, int32_t ses
     if (state == NULL) {
         TRANS_LOGE(TRANS_SVC, "Invaild param, state is null");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_socketChannelList ==NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");

@@ -64,10 +64,8 @@ void TransFileDeinit(void)
 int32_t TransSetFileReceiveListener(const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
 {
-    if (g_fileListener == NULL) {
-        TRANS_LOGE(TRANS_INIT, "file listener hasn't init.");
-        return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_fileListener != NULL, SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT, TRANS_CTRL, "file listener hasn't init.");
     if (SoftBusMutexLock(&(g_fileListener->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "file receive listener lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -108,7 +106,10 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
         return SOFTBUS_MEM_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
-    TRANS_LOGI(TRANS_FILE, "add sessionName=%{public}s", sessionName);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_FILE, "add sessionName=%{public}s", tmpName);
+    AnonymizeFree(tmpName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
