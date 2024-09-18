@@ -2414,7 +2414,8 @@ int32_t ClientCancelAuthSessionTimer(int32_t sessionId)
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->sessionId != sessionId || sessionNode->channelType != CHANNEL_TYPE_AUTH) {
+            if (sessionNode->sessionId != sessionId ||
+                (sessionNode->channelType != CHANNEL_TYPE_PROXY && sessionNode->channelType != CHANNEL_TYPE_AUTH)) {
                 continue;
             }
             ret = ClientUpdateAuthSessionTimer(sessionNode, sessionId);
