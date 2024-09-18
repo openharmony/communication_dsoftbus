@@ -21,6 +21,7 @@
 #include "disc_event_manager.h"
 #include "instant_statistics.h"
 #include "lnn_bus_center_ipc.h"
+#include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_conn_ble_direct.h"
 #include "softbus_conn_interface.h"

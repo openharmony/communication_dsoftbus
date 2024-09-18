@@ -256,8 +256,8 @@ static int32_t TransUpdateAppInfo(AppInfo *appInfo, const ConnectOption *connInf
         TRANS_LOGE(TRANS_CTRL, "strcpy_s remote ip fail.");
         return SOFTBUS_STRCPY_ERR;
     }
-    appInfo->routeType = connInfo->type == CONNECT_TCP ? WIFI_STA : WIFI_P2P;
 
+    appInfo->routeType = connInfo->type == CONNECT_TCP ? WIFI_STA : WIFI_P2P;
     appInfo->protocol = connInfo->socketOption.protocol;
 
     if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP) {
@@ -316,7 +316,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         .socketName = appInfo->myData.sessionName,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
-    
+
     SessionConn conn;
     if (GetSessionConnById(*channelId, &conn) == SOFTBUS_OK) {
         extra.authId = conn.authHandle.authId;
