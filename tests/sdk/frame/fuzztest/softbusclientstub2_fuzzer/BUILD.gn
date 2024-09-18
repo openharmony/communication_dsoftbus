@@ -30,6 +30,7 @@ ohos_fuzztest("SoftbusClientStub2FuzzTest") {
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/sdk/frame/standard/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
   ]
 
   deps = [ "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer:softbus_client_static" ]
