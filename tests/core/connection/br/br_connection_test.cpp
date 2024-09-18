@@ -260,6 +260,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest003, TestSize.Level1)
 
     NiceMock<ConnectionBrInterfaceMock>brMock;
     ConnectOption *option = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    ASSERT_NE(nullptr, option);
     option->type = CONNECT_BR;
     (void)strcpy_s(option->brOption.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     uint32_t requestId = 1;
@@ -280,6 +281,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest004, TestSize.Level1)
     NiceMock<ConnectionBrInterfaceMock>brMock;
     uint32_t connectionId = 1;
     uint8_t *data1 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    ASSERT_NE(nullptr, data1);
     (void)memset_s(data1, sizeof(uint8_t), 0, sizeof(uint8_t));
     int32_t pid = 1;
     int32_t flag = 1;
@@ -288,13 +290,16 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     uint8_t *data2 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    ASSERT_NE(nullptr, data2);
     (void)memset_s(data2, sizeof(uint8_t), 0, sizeof(uint8_t));
     ConnBrDevice *device = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
+    ASSERT_NE(nullptr, device);
     (void)strcpy_s(device->addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     ret = g_connectFuncInterface->PostBytes(connectionId, data2, 3, pid, flag, MODULE_BLE_CONN, seq);
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
 
     uint8_t *data3 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    ASSERT_NE(nullptr, data3);
     (void)memset_s(data3, sizeof(uint8_t), 0, sizeof(uint8_t));
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
     ConnBrSaveConnection(connection);
@@ -302,6 +307,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_READY_ERR, ret);
 
     uint8_t *data4 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    ASSERT_NE(nullptr, data4);
     (void)memset_s(data4, sizeof(uint8_t), 0, sizeof(uint8_t));
     EXPECT_CALL(brMock, ConnBrEnqueueNonBlock).WillOnce(Return(SOFTBUS_OK));
     ret = g_connectFuncInterface->PostBytes(connection->connectionId, data4, 3, pid, flag, MODULE_CONNECTION, seq);
@@ -313,6 +319,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest005, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnInitBr5, Start");
 
     ConnBrDevice *device = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
+    ASSERT_NE(nullptr, device);
     (void)strcpy_s(device->addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
 
     g_connectFuncInterface = ConnInit();
@@ -327,10 +334,12 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest006, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnInitBr6, Start");
 
     ConnectOption *option = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    ASSERT_NE(nullptr, option);
     option->type = CONNECT_BR;
     option->brOption.sideType = CONN_SIDE_ANY;
     (void)strcpy_s(option->brOption.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     ConnBrDevice *device = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
+    ASSERT_NE(nullptr, device);
     (void)strcpy_s(device->addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
 
     g_connectFuncInterface = ConnInit();
@@ -345,8 +354,10 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest007, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnInitBr7, Start");
 
     ConnBrDevice *device = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
+    ASSERT_NE(nullptr, device);
     (void)strcpy_s(device->addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     ConnectionInfo *info = (ConnectionInfo *)SoftBusCalloc(sizeof(ConnectionInfo));
+    ASSERT_NE(nullptr, info);
     (void)strcpy_s(info->brInfo.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     
     g_connectFuncInterface = ConnInit();
@@ -362,6 +373,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest008, TestSize.Level1)
 
     NiceMock<ConnectionBrInterfaceMock>brMock;
     LocalListenerInfo *info = (LocalListenerInfo *)SoftBusCalloc(sizeof(LocalListenerInfo));
+    ASSERT_NE(nullptr, info);
     info->type = CONNECT_BR;
     EXPECT_CALL(brMock, SoftBusThreadCreate).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = g_connectFuncInterface->StartLocalListening(info);
@@ -380,6 +392,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest009, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnInitBr9, Start");
 
     ConnectOption *option = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    ASSERT_NE(nullptr, option);
     option->type = CONNECT_BR;
     option->brOption.sideType = CONN_SIDE_ANY;
     (void)strcpy_s(option->brOption.brMac, BT_MAC_LEN, "24:DA:33:6A:06:EC");
