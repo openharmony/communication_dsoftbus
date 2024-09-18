@@ -562,6 +562,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     nowTime = time.sec * HB_TIME_FACTOR + time.usec / HB_TIME_FACTOR;
     HbScreenOnOnceTryCloudSync();
     if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON && oldstate != SOFTBUS_SCREEN_ON) {
+        (void)LnnUpdateLocalScreenStatus(true);
         HbScreenOnChangeEventHandler(nowTime);
         return;
     }
@@ -569,10 +570,11 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_OFF");
         g_lastScreenOffTime = nowTime;
         (void)LnnUpdateLocalScreenStatus(false);
-        if (LnnStartHbByTypeAndStrategy(
-            HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed");
-            return;
+        if (!LnnIsLocalSupportBurstFeature()) {
+            if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed");
+                return;
+            }
         }
         if (LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "ctrl disable ble heartbeat failed");
