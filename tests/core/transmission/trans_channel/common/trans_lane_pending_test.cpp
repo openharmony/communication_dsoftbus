@@ -756,22 +756,11 @@ HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProc001, TestSize.Level1)
     param->attr = nullptr;
     SoftBusFree(param);
     param = nullptr;
-}
 
-/**
- * @tc.name: TransAsyncSetFirstTokenInfo001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLanePendingTest, TransAsyncSetFirstTokenInfo001, TestSize.Level1)
-{
     uint32_t firstTokenId;
-    AppInfo appInfo;
-    TransEventExtra event;
     firstTokenId = TOKENID_NOT_SET;
     appInfo.callingTokenId = TEST_TOKEN_ID;
-    TransAsyncSetFirstTokenInfo(firstTokenId, &appInfo, &event);
+    TransAsyncSetFirstTokenInfo(firstTokenId, &appInfo, &extra);
 }
 
 /**
@@ -1246,18 +1235,6 @@ HWTEST_F(TransLanePendingTest, PeerDeviceIsLegacyOs001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ModuleLaneAdapter001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLanePendingTest, ModuleLaneAdapter001, TestSize.Level1)
-{
-    LanePreferredLinkList preferred;
-    ModuleLaneAdapter(&preferred);
-}
-
-/**
  * @tc.name: GetAllocInfoBySessionParam001
  * @tc.desc:
  * @tc.type: FUNC
@@ -1265,6 +1242,8 @@ HWTEST_F(TransLanePendingTest, ModuleLaneAdapter001, TestSize.Level1)
  */
 HWTEST_F(TransLanePendingTest, GetAllocInfoBySessionParam001, TestSize.Level1)
 {
+    LanePreferredLinkList preferred;
+    ModuleLaneAdapter(&preferred);
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
     EXPECT_CALL(TransLanePendingMock, TransGetLaneTransTypeBySession).WillOnce(Return(LANE_T_BUTT));
     SessionParam *param = TestCreateSessionParamWithPara(SESSION_NAME_PHONEPAD);

@@ -130,6 +130,7 @@ typedef struct {
 
 typedef enum {
     BIT_SUPPORT_DIRECT_TRIGGER = 0,
+    BIT_SUPPORT_SCREEN_STATUS = 0,
 } HeartbeatCapability;
 
 #define STATE_VERSION_INVALID (-1)

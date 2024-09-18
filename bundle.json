@@ -84,7 +84,8 @@
         "mbedtls",
         "libcoap",
         "zlib",
-        "libnl"
+        "libnl",
+        "power_manager"
       ],
       "third_party": [
         "cJSON",

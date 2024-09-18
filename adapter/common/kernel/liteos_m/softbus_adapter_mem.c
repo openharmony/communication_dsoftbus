@@ -61,3 +61,12 @@ void SoftBusFree(void *pt)
     free(pt);
 #endif
 }
+
+void SoftBusClearFree(void *pt, unsigned int size)
+{
+    if (pt == NULL) {
+        return;
+    }
+    (void)memset_s(pt, size, 0, size);
+    SoftBusFree(pt);
+}
