@@ -606,3 +606,22 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
     (void)memset_s(&ptkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
     (void)memset_s(&oldPtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
 }
+
+void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log)
+{
+    char *anonyNetworkId = NULL;
+    char *anonyUdid = NULL;
+    char *anonyDeviceName = NULL;
+    char *anonyBtMac = NULL;
+    Anonymize(deviceInfo->networkId, &anonyNetworkId);
+    Anonymize(deviceInfo->deviceInfo.deviceUdid, &anonyUdid);
+    Anonymize(deviceInfo->deviceInfo.deviceName, &anonyDeviceName);
+    Anonymize(deviceInfo->connectInfo.macAddr, &anonyBtMac);
+    LNN_LOGI(LNN_LEDGER, "log=%{public}s, stateVersion=%{public}d, networkId=%{public}s, udid=%{public}s, "
+        "deviceName=%{public}s, btMac=%{public}s, networkIdTimestamp=%{public}" PRId64, log, deviceInfo->stateVersion,
+        anonyNetworkId, anonyUdid, anonyDeviceName, anonyBtMac, deviceInfo->networkIdTimestamp);
+    AnonymizeFree(anonyNetworkId);
+    AnonymizeFree(anonyUdid);
+    AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyBtMac);
+}

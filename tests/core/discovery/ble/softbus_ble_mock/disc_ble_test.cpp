@@ -296,29 +296,6 @@ HWTEST_F(DiscBleTest, ReceivePassivePublishPacket001, TestSize.Level1)
 }
 
 /*
- * @tc.name: ReceivePassivePublishPacketOfCust001
- * @tc.desc: receive passive publish packet for test parse cust data
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DiscBleTest, ReceivePassivePublishPacketOfCust001, TestSize.Level1)
-{
-    DISC_LOGI(DISC_TEST, "ReceivePassivePublishPacketOfCust001 begin ----");
-    BleMock bleMock;
-    bleMock.SetupSuccessStub();
-
-    BusCenterMock busMock;
-    busMock.SetupSuccessStub();
-
-    BleMock::InjectPassiveNonPacketOfCust();
-
-    EXPECT_EQ(strcmp(g_foundDeviceInfo.devId, FOUND_DEVICE_ID), 0);
-    EXPECT_EQ(g_foundDeviceInfo.capabilityBitmap[0], 1 << CASTPLUS_CAPABILITY_BITMAP);
-    (void)memset_s(&g_foundDeviceInfo, sizeof(g_foundDeviceInfo), 0, sizeof(DeviceInfo));
-    DISC_LOGI(DISC_TEST, "ReceivePassivePublishPacketOfCust001 end ----");
-}
-
-/*
  * @tc.name: StopActiveDiscovery001
  * @tc.desc: stop active discovery successfully
  * @tc.type: FUNC

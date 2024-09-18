@@ -81,7 +81,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         LNN_LOGE(LNN_STATE, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if ((info->freq < LOW) || (info->freq >= FREQ_BUTT)) {
+    if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
         LNN_LOGE(LNN_STATE, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -115,7 +115,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
         LNN_LOGE(LNN_STATE, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if ((info->freq < LOW) || (info->freq >= FREQ_BUTT)) {
+    if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
         LNN_LOGE(LNN_STATE, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }

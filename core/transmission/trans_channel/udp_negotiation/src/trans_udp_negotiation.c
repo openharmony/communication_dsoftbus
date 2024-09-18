@@ -900,6 +900,7 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
         ret = AuthGetHmlConnInfo(peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK && (linkType == LANE_P2P || linkType == LANE_P2P_REUSE)) {
+        TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", linkType);
         ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK) {
@@ -1183,7 +1184,7 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransUdpDeathCallback: pkgName=%{public}s, pid=%{public}d", pkgName, pid);
+
     if (GetUdpChannelLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
         return;
@@ -1202,7 +1203,10 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
             }
             *tempNode = *udpChannelNode;
             ListAdd(&destroyList, &tempNode->node);
-            TRANS_LOGI(TRANS_CTRL, "add pkgName = %{public}s", pkgName);
+            char *anonymizePkgName = NULL;
+            Anonymize(pkgName, &anonymizePkgName);
+            TRANS_LOGW(TRANS_CTRL, "add pkgName = %{public}s, pid=%{public}d", anonymizePkgName, pid);
+            AnonymizeFree(anonymizePkgName);
         }
     }
     (void)ReleaseUdpChannelLock();
@@ -1215,6 +1219,6 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
         ListDelete(&udpChannelNode->node);
         SoftBusFree(udpChannelNode);
     }
-    TRANS_LOGI(TRANS_CTRL, "TransUdpDeathCallback end pkgName=%{public}s", pkgName);
+
     return;
 }

@@ -31,6 +31,8 @@ typedef struct {
 #define SOFTBUS_RSA_ENCRYPT_LEN (SOFTBUS_RSA_LEN / 8)
 #define SOFTBUS_RSA_PUB_KEY_LEN (SOFTBUS_RSA_ENCRYPT_LEN + 38)
 
+#define RSA_PUB_KEY_LEN_SUBTRACT_ENCRYPT_LEN 38
+
 int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen);
 int32_t SoftBusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
     uint32_t *encryptedDataLen);
@@ -40,4 +42,5 @@ int32_t SoftBusRsaDecrypt(
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* SOFTBUS_RSA_ENCRYPT_H */

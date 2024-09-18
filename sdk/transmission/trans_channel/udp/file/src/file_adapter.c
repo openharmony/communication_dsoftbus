@@ -67,14 +67,14 @@ static int CreateServerSocketByIpv4(const char *ip, int port)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "reuse addr error, ret=%{public}d.", ret);
         ConnShutdownSocket(fd);
-        return SOFTBUS_SOCKET_BIND_ERR;
+        return ret;
     }
 
     ret = SetReusePort(fd, 1);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "reuse port error, ret=%{public}d.", ret);
         ConnShutdownSocket(fd);
-        return SOFTBUS_SOCKET_BIND_ERR;
+        return ret;
     }
 
     ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
@@ -83,7 +83,6 @@ static int CreateServerSocketByIpv4(const char *ip, int port)
         ConnShutdownSocket(fd);
         return ret;
     }
-
     return fd;
 }
 
@@ -156,11 +155,11 @@ static int32_t CreateServerSocket(const char *ip, int32_t *fd, int32_t *port)
     if (socketPort < 0) {
         TRANS_LOGE(TRANS_FILE, "failed to get port from tcp socket");
         ConnShutdownSocket(socketFd);
-        return SOFTBUS_INVALID_PORT;
+        return SOFTBUS_ERR;
     }
     *fd = socketFd;
     *port = socketPort;
-    TRANS_LOGI(TRANS_FILE, "create socket success, fd=%{public}d, port=%{public}d", socketFd, socketPort);
+    TRANS_LOGE(TRANS_FILE, "create socket success, fd=%{public}d, port=%{public}d", socketFd, socketPort);
     return SOFTBUS_OK;
 }
 
@@ -170,6 +169,8 @@ static int32_t InitSockAddrInByIpPort(const char *ip, int32_t port, struct socka
         TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
+
+    (void)memset_s(addr, sizeof(struct sockaddr_in), 0, sizeof(struct sockaddr_in));
     addr->sin_family = AF_INET;
     addr->sin_port = port;
     addr->sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(ip));
@@ -190,6 +191,8 @@ static int32_t InitSockAddrIn6ByIpPort(const char *ip, int32_t port, struct sock
         TRANS_LOGE(TRANS_FILE, "init addr error, ret=%{public}d", ret);
         return ret;
     }
+
+    (void)memset_s(addr, sizeof(struct sockaddr_in6), 0, sizeof(struct sockaddr_in6));
     addr->sin6_family = AF_INET6;
     addr->sin6_port = addrIn6.sin6Port;
     addr->sin6_scope_id = addrIn6.sin6ScopeId;
@@ -216,7 +219,7 @@ int32_t StartNStackXDFileServer(
     }
     int sessionId = -1;
     if (GetDomainByAddr(myIp) == SOFTBUS_AF_INET6) {
-        struct sockaddr_in6 localAddr = { 0 };
+        struct sockaddr_in6 localAddr;
         ret = InitSockAddrIn6ByIpPort(myIp, port, &localAddr);
         if (ret != SOFTBUS_OK) {
             ConnShutdownSocket(fd);
@@ -226,7 +229,7 @@ int32_t StartNStackXDFileServer(
         socklen_t addrLen = sizeof(struct sockaddr_in6);
         sessionId = NSTACKX_DFileServer((struct sockaddr_in *)&localAddr, addrLen, key, keyLen, msgReceiver);
     } else {
-        struct sockaddr_in localAddr = { 0 };
+        struct sockaddr_in localAddr;
         ret = InitSockAddrInByIpPort(myIp, port, &localAddr);
         if (ret != SOFTBUS_OK) {
             ConnShutdownSocket(fd);
@@ -259,7 +262,8 @@ int32_t StartNStackXDFileClient(
 
     int32_t sessionId = -1;
     if (GetDomainByAddr(peerIp) == SOFTBUS_AF_INET6) {
-        struct sockaddr_in6 localAddr = { 0 };
+        struct sockaddr_in6 localAddr;
+        (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
         int32_t ret = InitSockAddrIn6ByIpPort(peerIp, peerPort, &localAddr);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in6, ret=%{public}d", ret);
@@ -268,7 +272,7 @@ int32_t StartNStackXDFileClient(
         socklen_t addrLen = sizeof(struct sockaddr_in6);
         sessionId = NSTACKX_DFileClient((struct sockaddr_in *)&localAddr, addrLen, key, keyLen, msgReceiver);
     } else {
-        struct sockaddr_in localAddr = { 0 };
+        struct sockaddr_in localAddr;
         int32_t ret = InitSockAddrInByIpPort(peerIp, peerPort, &localAddr);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in, ret=%{public}d", ret);
