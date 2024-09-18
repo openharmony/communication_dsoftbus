@@ -133,12 +133,12 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.L
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     uint32_t netCapability = 0;
     int32_t ret = LnnSendP2pSyncInfoMsg(nullptr, netCapability);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(ledgerMock, AuthDeviceGetLatestIdByUuid)
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle);
     EXPECT_CALL(ledgerMock, AuthGetLatestAuthSeqListByType)
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthSeqList);
     ret = LnnSendP2pSyncInfoMsg(NETWORKID, netCapability);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

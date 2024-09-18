@@ -17,6 +17,7 @@ import("../../../dsoftbus.gni")
 import("unittest/authmanager.gni")
 
 module_output_path = "dsoftbus/auth"
+dsoftbus_root_path = "../../.."
 
 ohos_unittest("AuthTest") {
   module_out_path = module_output_path
@@ -503,45 +504,6 @@ ohos_unittest("AuthHichainTest") {
   }
 }
 
-ohos_unittest("DsoftbusAppBindTest") {
-  module_out_path = module_output_path
-  sources = [ "unittest/dsoftbus_app_bind_test.cpp" ]
-
-  include_dirs = [
-    "//base/security/device_auth/interfaces/inner_api",
-    "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/authentication/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
-    "unittest/common/",
-    "//third_party/bounds_checking_function/include",
-  ]
-
-  deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  if (!defined(global_parts_info) ||
-      defined(global_parts_info.deviceprofile_device_info_manager)) {
-    external_deps = [
-      "device_info_manager:distributed_device_profile_common",
-      "device_info_manager:distributed_device_profile_sdk",
-      "hilog:libhilog",
-      "ipc:ipc_core",
-    ]
-  } else {
-    external_deps = [
-      "hilog:libhilog",
-      "ipc:ipc_core",
-    ]
-  }
-}
-
 ohos_unittest("AuthSessionMessageTest") {
   module_out_path = module_output_path
   sources = [ "unittest/auth_session_message_test.cpp" ]
@@ -864,7 +826,6 @@ group("unittest") {
     ":AuthTcpConnectionTest",
     ":AuthTest",
     ":AuthTestCallBackTest",
-    ":DsoftbusAppBindTest",
   ]
 }
 

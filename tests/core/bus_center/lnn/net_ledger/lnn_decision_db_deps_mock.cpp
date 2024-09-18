@@ -59,6 +59,16 @@ int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
     return GetDecisionDbDepsInterface()->LnnDeleteKeyByHuks(keyAlias);
 }
 
+int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias)
+{
+    return GetDecisionDbDepsInterface()->LnnCeGenerateKeyByHuks(keyAlias);
+}
+
+int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias)
+{
+    return GetDecisionDbDepsInterface()->LnnCeDeleteKeyByHuks(keyAlias);
+}
+
 int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
@@ -184,7 +194,7 @@ void LnnHbClearRecvList(void)
 
 int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
 {
-    return GetDecisionDbDepsInterface()->LnnConvertHbTypeToId();
+    return GetDecisionDbDepsInterface()->LnnConvertHbTypeToId(type);
 }
 
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)

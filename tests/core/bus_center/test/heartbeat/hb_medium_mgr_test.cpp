@@ -980,8 +980,8 @@ HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     nodeInfo.feature = 0x1FFFF;
-    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo).
-        WillOnce(DoAll(SetArgPointee<1>(nodeInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(hbStrateMock, LnnRetrieveDeviceInfo)
+        .WillOnce(DoAll(SetArgPointee<1>(nodeInfo), Return(SOFTBUS_OK)));
     ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
     EXPECT_TRUE(ret == true);
 
