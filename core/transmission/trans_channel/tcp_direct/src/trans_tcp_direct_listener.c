@@ -209,7 +209,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         TRANS_LOGW(TRANS_CTRL, "invalid param, cfd=%{public}d", cfd);
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret;
+    int32_t ret;
     int32_t channelId = GenerateChannelId(true);
     TransEventExtra extra = {
         .socketName = NULL,
@@ -330,7 +330,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "start verify session fail, ret = %{public}d", ret);
+        TRANS_LOGE(TRANS_CTRL, "start verify session failed, ret = %{public}d", ret);
         DelTrigger(conn->listenMod, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
         (void)NotifyChannelOpenFailed(conn->channelId, ret);

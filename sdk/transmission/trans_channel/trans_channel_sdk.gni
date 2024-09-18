@@ -34,8 +34,7 @@ trans_channel_sdk_src += [
   "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/src/client_trans_channel_callback.c",
   "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/src/client_trans_channel_manager.c",
 ]
-trans_channel_sdk_inc += [
-  "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
-  "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
-  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-]
+trans_channel_sdk_inc +=
+    ["$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include"]

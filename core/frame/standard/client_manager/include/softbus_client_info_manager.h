@@ -35,7 +35,7 @@ public:
     int32_t SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName, int32_t* pid);
     int32_t SoftbusAddServiceInner(const std::string &pkgName, ISessionListener *listener, int32_t pid);
     int32_t SoftbusRemoveServiceInner(const std::string &pkgName);
-    int32_t GetSoftbusInnerObject(const std::string &pkgName, ISessionListener *listerer);
+    int32_t GetSoftbusInnerObject(const std::string &pkgName, ISessionListener *listener);
     sptr<IRemoteObject> GetSoftbusClientProxy(const std::string &pkgName);
     sptr<IRemoteObject> GetSoftbusClientProxy(const std::string &pkgName, int32_t pid);
     void GetSoftbusClientProxyMap(std::multimap<std::string, sptr<IRemoteObject>> &softbusClientMap);
