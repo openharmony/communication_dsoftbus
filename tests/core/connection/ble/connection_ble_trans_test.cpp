@@ -106,6 +106,7 @@ HWTEST_F(ConnectionBleTransTest, TransRecv, TestSize.Level1)
     buffer.length = sizeof(ConnPktHead) - 1;
     buffer.buffer = (uint8_t *)(&head);
     outLen = (int32_t *)SoftBusCalloc(sizeof(ConnPktHead));
+    ASSERT_NE(nullptr, outLen);
     data = ConnCocTransRecv(connectionId, &buffer, outLen);
     EXPECT_EQ(nullptr, data);
 
@@ -211,6 +212,7 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, ret);
 
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+    ASSERT_NE(nullptr, connection);
     connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
     SoftBusMutexInit(&connection->lock, NULL);
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillOnce(Return(connection));
@@ -220,6 +222,7 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
 
     uint8_t *value3 = (uint8_t *)malloc(sizeof(uint8_t));
     ConnBleConnection *bleConnectionconnection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+    ASSERT_NE(nullptr, connection);
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillRepeatedly(Return(bleConnectionconnection));
     SoftBusMutexInit(&bleConnectionconnection->lock, NULL);
     bleConnectionconnection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
