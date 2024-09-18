@@ -286,7 +286,7 @@ if (defined(ohos_lite)) {
         "access_token:libtokenid_sdk",
         "device_auth:deviceauth_sdk",
         "hilog:libhilog",
-        "ipc:ipc_core",
+        "ipc:ipc_single",
         "kv_store:distributeddata_inner",
         "netmanager_base:net_conn_manager_if",
         "safwk:system_ability_fwk",

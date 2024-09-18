@@ -337,6 +337,28 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
 }
 
 /*
+* @tc.name: BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_002
+* @tc.desc: get node key info(screen status) interface test
+* @tc.type: FUNC
+* @tc.require: I5I7B9
+*/
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_002, TestSize.Level0)
+{
+    NodeBasicInfo info;
+    NodeBasicInfo *remoteNodeInfo = nullptr;
+    int32_t infoNum = 0;
+    bool isScreenOn = false;
+    (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
+    for (int32_t i = 0; i < infoNum; i++) {
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_DEVICE_SCREEN_STATUS,
+            (uint8_t*)&isScreenOn, DATA_DEVICE_SCREEN_STATUS_LEN) == SOFTBUS_OK);
+    }
+    FreeNodeInfo(remoteNodeInfo);
+}
+
+/*
 * @tc.name: BUS_CENTER_SDK_START_TIME_SYNC_Test_001
 * @tc.desc: start time sync interface test
 * @tc.type: FUNC

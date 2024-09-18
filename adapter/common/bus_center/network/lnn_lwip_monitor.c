@@ -34,7 +34,7 @@ static int32_t NetifStatusCallback(
 
     if (reason == LWIP_NSC_IPSTATUS_CHANGE) {
         LNN_LOGI(LNN_BUILDER, "ip monitor start success");
-        char ifnameBuffer[NET_IF_NAME_LEN];
+        char ifnameBuffer[NET_IF_NAME_LEN] = {0};
         char *ifName = lwip_if_indextoname(netif->num, ifnameBuffer);
         if (ifName == NULL) {
             LNN_LOGE(LNN_BUILDER, "Cannot find ifName");

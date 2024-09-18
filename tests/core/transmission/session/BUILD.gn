@@ -80,9 +80,30 @@ ohos_unittest("TransSessionServiceTest") {
   ]
 }
 
+ohos_unittest("TransScenarioManagerTest") {
+  module_out_path = module_output_path
+  sources = [ "softbus_scenario_manager_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_core_path/common/include",
+    "$dsoftbus_core_path/transmission/session/include",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
+    ":TransScenarioManagerTest",
     ":TransSessionManagerTest",
     ":TransSessionServiceTest",
   ]
