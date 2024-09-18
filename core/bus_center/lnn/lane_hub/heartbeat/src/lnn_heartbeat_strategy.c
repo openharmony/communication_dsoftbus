@@ -306,12 +306,12 @@ static void SendEachOnce(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgP
     uint32_t *delayTime, uint32_t sendLen)
 {
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, endData->hbType, endData->wakeupFlag, msgPara, *delayTime) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", endData->hbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}u", endData->hbType);
         return;
     }
     *delayTime += sendLen;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, endData, *delayTime) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}d", endData->hbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}u", endData->hbType);
     }
 }
 
@@ -323,7 +323,7 @@ static int32_t RelayHeartbeatV0SplitOld(LnnHeartbeatFsm *hbFsm, LnnProcessSendOn
     msgPara->isNeedRestart = false;
     msgPara->isFirstBegin = false;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, 0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     uint32_t sendCnt = isRelayV0 ? 1 : HB_SEND_SEPARATELY_CNT;
@@ -341,7 +341,7 @@ static int32_t RelayHeartbeatV0SplitOld(LnnHeartbeatFsm *hbFsm, LnnProcessSendOn
         }
         if (i == sendCnt - 1) {
             if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}d", splitHbType);
+                LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}u", splitHbType);
                 return SOFTBUS_ERR;
             }
             msgPara->isSyncData = true;
@@ -349,7 +349,7 @@ static int32_t RelayHeartbeatV0SplitOld(LnnHeartbeatFsm *hbFsm, LnnProcessSendOn
             if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara, i * HB_SEND_EACH_SEPARATELY_LEN) !=
                 SOFTBUS_OK) {
                 msgPara->isSyncData = false;
-                LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%{public}d", splitHbType);
+                LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%{public}u", splitHbType);
                 return SOFTBUS_ERR;
             }
         }
@@ -359,7 +359,7 @@ static int32_t RelayHeartbeatV0SplitOld(LnnHeartbeatFsm *hbFsm, LnnProcessSendOn
     if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, isRelayV0 ? HB_SEND_EACH_SEPARATELY_LEN
         : HB_SEND_ONCE_LEN) != SOFTBUS_OK) {
         msgPara->isSyncData = false;
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     msgPara->isSyncData = false;
@@ -375,7 +375,7 @@ static int32_t RelayHeartbeatV0Split(
     msgPara->isFirstBegin = false;
     uint32_t delayTime = GenerateRandomNumForHb(HB_ADV_RANDOM_TIME_50, HB_ADV_RANDOM_TIME_500);
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, delayTime) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     LnnHeartbeatType splitHbType = registedHbType;
@@ -388,20 +388,20 @@ static int32_t RelayHeartbeatV0Split(
     };
     delayTime += HB_SEND_RELAY_LEN + HB_TIME_FACTOR_TWO_HUNDRED_MS;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, delayTime) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     delayTime += GenerateRandomNumForHb(HB_ADV_RANDOM_TIME_300, HB_ADV_RANDOM_TIME_600);
     msgPara->hasScanRsp = false;
     msgPara->isNeedRestart = false;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, delayTime) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     delayTime += HB_SEND_RELAY_LEN + HB_TIME_FACTOR_TWO_HUNDRED_MS;
     msgPara->hasScanRsp = true;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, delayTime) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     delayTime += HB_SEND_RELAY_LEN_ONCE;
@@ -418,7 +418,7 @@ static int32_t RelayHeartbeatV1Split(
     msgPara->isFirstBegin = true;
     msgPara->isNeedRestart = true;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, 0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     uint32_t sendCnt = HB_SEND_SEPARATELY_CNT;
@@ -436,7 +436,7 @@ static int32_t RelayHeartbeatV1Split(
         }
         if (i == sendCnt - 1) {
             if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}d", splitHbType);
+                LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}u", splitHbType);
                 return SOFTBUS_ERR;
             }
             msgPara->isSyncData = true;
@@ -444,7 +444,7 @@ static int32_t RelayHeartbeatV1Split(
             if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara, i * HB_SEND_EACH_SEPARATELY_LEN) !=
                 SOFTBUS_OK) {
                 msgPara->isSyncData = false;
-                LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%{public}d", splitHbType);
+                LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%{public}u", splitHbType);
                 return SOFTBUS_ERR;
             }
         }
@@ -453,7 +453,7 @@ static int32_t RelayHeartbeatV1Split(
     endData.isLastEnd = true;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, HB_SEND_ONCE_LEN) != SOFTBUS_OK) {
         msgPara->isSyncData = false;
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     msgPara->isSyncData = false;
@@ -470,7 +470,7 @@ static int32_t OtherHeartbeatSplit(
     msgPara->isFirstBegin = true;
     msgPara->isFast = (!LnnIsMultiDeviceOnline());
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, totalDelay) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}u", registedHbType);
         return SOFTBUS_ERR;
     }
     LnnHeartbeatType splitHbType = registedHbType;
@@ -483,7 +483,7 @@ static int32_t OtherHeartbeatSplit(
     };
     totalDelay += HB_SEND_EACH_SEPARATELY_LEN + HB_SEND_RELAY_LEN;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, totalDelay) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}d", splitHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%{public}u", splitHbType);
         return SOFTBUS_ERR;
     }
     totalDelay += GenerateRandomNumForHb(HB_ADV_RANDOM_TIME_200, HB_ADV_RANDOM_TIME_500);
