@@ -81,10 +81,10 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_SEND_TRANS_REQ_TEST_001, TestSize.Level1)
 
     int32_t ret = LnnSendTransReq(nullptr, transInfo);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    
+
     ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    
+
     ret = LnnSendTransReq(TEST_VALID_PEER_NETWORKID, transInfo);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
