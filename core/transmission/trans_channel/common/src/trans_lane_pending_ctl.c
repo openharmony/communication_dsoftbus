@@ -110,7 +110,7 @@ int32_t TransFreeLanePendingInit(void)
     }
     g_freeLanePendingList = CreateSoftBusList();
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_freeLanePendingList != NULL,
-        SOFTBUS_MALLOC_ERR, TRANS_INIT, "g_freeLanePendingList is null");
+        SOFTBUS_MALLOC_ERR, TRANS_INIT, "g_freeLanePendingList is null.");
     return SOFTBUS_OK;
 }
 
@@ -1639,7 +1639,7 @@ int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessio
 
     item->sessionName = (char *)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
     if (item->sessionName == NULL) {
-        TRANS_LOGE(TRANS_SVC, "SoftBusCalloc item->sessionName failed,");
+        TRANS_LOGE(TRANS_SVC, "SoftBusCalloc item->sessionName failed.");
         SoftBusFree(item);
         return SOFTBUS_MALLOC_ERR;
     }

@@ -87,10 +87,10 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
     }
     int32_t ret = ReCreateSessionServerToServer(sessionServerInfoList);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed\n");
+        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!\n");
         return ret;
     }
-    COMM_LOGD(COMM_SDK, "softbus server register service success\n");
+    COMM_LOGD(COMM_SDK, "softbus server register service success!\n");
     return SOFTBUS_OK;
 }
 
@@ -131,18 +131,18 @@ static int32_t ServerProxyInit(void)
 
         if (g_serverProxy == g_oldServerProxy) {
             g_serverProxy = nullptr;
-            COMM_LOGE(COMM_SDK, "g_serverProxy not update");
+            COMM_LOGE(COMM_SDK, "g_serverProxy not update\n");
             return SOFTBUS_IPC_ERR;
         }
 
         g_clientDeath =
             OHOS::sptr<OHOS::IRemoteObject::DeathRecipient>(new (std::nothrow) OHOS::SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
-            COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr");
-            return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
+            COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr\n");
+            return SOFTBUS_TRANS_DEATH_RECIPIENT_INVALID;
         }
         if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
-            COMM_LOGE(COMM_SDK, "AddDeathRecipient failed");
+            COMM_LOGE(COMM_SDK, "AddDeathRecipient failed\n");
             return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
         }
     }
