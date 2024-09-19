@@ -44,7 +44,6 @@ void BusCenterHeartbeatSdkTest::SetUpTestCase()
 {
     SetAceessTokenPermission("busCenterTest");
     LnnInitLnnLooper();
-    LnnInitDecisionCenter(DC_VERSION_1_0);
     LooperInit();
     LnnInitBusCenterEvent();
     LnnInitHeartbeat();
@@ -55,7 +54,6 @@ void BusCenterHeartbeatSdkTest::TearDownTestCase()
     LnnDeinitHeartbeat();
     LnnDeinitBusCenterEvent();
     LooperDeinit();
-    LnnDeinitDecisionCenter();
     LnnDeinitLnnLooper();
 }
 

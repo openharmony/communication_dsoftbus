@@ -27,8 +27,7 @@ if (enhanced) {
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/decision_center/decision_center_enhance.gni")
 } else {
-  bus_center_decision_center_inc =
-      [ "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include" ]
-  bus_center_decision_center_src = [ "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_decision_center_virtual.c" ]
+  bus_center_decision_center_inc = []
+  bus_center_decision_center_src = []
   bus_center_decision_center_deps = []
 }
