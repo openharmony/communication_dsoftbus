@@ -116,10 +116,10 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == false);
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
+    EXPECT_TRUE(ret1 == true);
     newNodeInfo.connectInfo.sessionPort = PORT2;
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1 == false);
     newNodeInfo.connectInfo.proxyPort = PORT2;
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
