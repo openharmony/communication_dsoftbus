@@ -97,8 +97,8 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     return GetNetworkManagerInterface()->LnnRequestLeaveByAddrType(type, typeLen);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetNetworkManagerInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
@@ -128,4 +128,4 @@ void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
     return GetNetworkManagerInterface()->LnnNotifyAccountStateChangeEvent(state);
 }
 }
-}
+} // namespace OHOS
