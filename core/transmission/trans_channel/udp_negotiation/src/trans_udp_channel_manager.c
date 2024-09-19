@@ -180,14 +180,14 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
             return SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST;
         }
     }
+    int64_t channelId = channel->info.myData.channelId;
     ListInit(&(channel->node));
     ListAdd(&(g_udpChannelMgr->list), &(channel->node));
-    TRANS_LOGI(TRANS_CTRL, "add channelId=%{public}" PRId64, channel->info.myData.channelId);
+    TRANS_LOGI(TRANS_CTRL, "add channelId=%{public}" PRId64, channelId);
     g_udpChannelMgr->cnt++;
 
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    TRANS_LOGI(TRANS_CTRL, "add udp channel success. channelId=%{public}" PRId64,
-        channel->info.myData.channelId);
+    TRANS_LOGI(TRANS_CTRL, "add udp channel success. channelId=%{public}" PRId64, channelId);
     return SOFTBUS_OK;
 }
 
