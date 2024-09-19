@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "softbus_adapter_range.h"
 #include <math.h>
-#include <stdlib.h>
 #include "comm_log.h"
-#include "softbus_error_code.h"
+#include "softbus_adapter_range.h"
+#include "softbus_errcode.h"
 
 #define MOCK_POWER (-17)
 #define DB_BASE (10.0)
@@ -31,7 +30,7 @@ int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range)
     }
 
     *range = (int32_t)pow(DB_BASE, param->rssi * -1 / DB_COEFFICIENT);
-    return 0;
+    return SOFTBUS_OK;
 }
 
 int SoftBusGetBlePower(int8_t *power)
@@ -41,5 +40,5 @@ int SoftBusGetBlePower(int8_t *power)
         return SOFTBUS_INVALID_PARAM;
     }
     *power = MOCK_POWER;
-    return 0;
+    return SOFTBUS_OK;
 }

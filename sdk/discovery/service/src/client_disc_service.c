@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         DISC_LOGE(DISC_SDK, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
+
     return SOFTBUS_OK;
 }
 
@@ -120,7 +121,7 @@ int PublishService(const char *packageName, const PublishInfo *info, const IPubl
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
         DfxRecordDiscServerEnd(SERVER_PUBLISH, SOFTBUS_INVALID_PARAM, packageName);
-        DISC_LOGE(DISC_SDK, "invalid parameter:null");
+        DISC_LOGE(DISC_SDK, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -170,7 +171,7 @@ int StartDiscovery(const char *packageName, const SubscribeInfo *info, const IDi
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
         DfxRecordDiscServerEnd(SERVER_DISCOVERY, SOFTBUS_INVALID_PARAM, packageName);
-        DISC_LOGE(DISC_SDK, " invalid parameter:null");
+        DISC_LOGE(DISC_SDK, " invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     if (InitSoftBus(packageName) != SOFTBUS_OK) {
@@ -198,7 +199,7 @@ int StopDiscovery(const char *packageName, int subscribeId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
         DfxRecordDiscServerEnd(SERVER_STOP_DISCOVERY, SOFTBUS_INVALID_PARAM, packageName);
-        DISC_LOGE(DISC_SDK, "invalid packageName:null");
+        DISC_LOGE(DISC_SDK, "invalid packageName");
         return SOFTBUS_INVALID_PARAM;
     }
 
