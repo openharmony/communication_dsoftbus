@@ -399,9 +399,13 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
 
     UnlockClientSessionServerList();
     char *tmpName = NULL;
-    Anonymize(server->sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", tmpName, server->pkgName);
+    char *tmpPkgName = NULL;
+    Anonymize(pkgName, &tmpPkgName);
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s",
+        AnonymizeFree(tmpName), AnonymizeFree(tmpPkgName));
     AnonymizeFree(tmpName);
+    AnonymizeFree(tmpPkgName);
     return SOFTBUS_OK;
 }
 
