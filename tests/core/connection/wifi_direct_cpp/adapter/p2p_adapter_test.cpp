@@ -252,7 +252,7 @@ HWTEST_F(P2pAdapterTest, SetPeerWifiConfigInfoV2Test001, TestSize.Level1)
 {
     const uint8_t cfg[] = {0, 0, 0, 0, 0};
     int32_t ret = P2pAdapter::SetPeerWifiConfigInfoV2(cfg, sizeof(cfg));
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_SET_PEER_WIFI_CONFIG_FAIL);
 }
 
 /*

@@ -54,6 +54,7 @@ public:
     virtual int32_t LnnGetNetworkIdByUuid(const std::string &uuid, char *buf, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteBoolInfoIgnoreOnline(const std::string &networkId, InfoKey key, bool *info) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
+
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId) = 0;
     virtual int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip,
@@ -106,6 +107,7 @@ public:
     // proxy negotiate channel mock stub
     virtual int ProxyNegotiateChannelSendMessage(int32_t channelId, const NegotiateMessage &msg) const = 0;
     virtual std::string ProxyNegotiateChannelGetRemoteDeviceId(int32_t channelId) const = 0;
+    virtual int32_t GetInterfaceIpString(const std::string &interface, std::string &ip) = 0;
 };
 
 class WifiDirectInterfaceMock : public WifiDirectInterface {
@@ -185,6 +187,7 @@ public:
     MOCK_METHOD(
         int, ProxyNegotiateChannelSendMessage, (int32_t channelId, const NegotiateMessage &msg), (const override));
     MOCK_METHOD(std::string, ProxyNegotiateChannelGetRemoteDeviceId, (int32_t channelId), (const override));
+    MOCK_METHOD(int32_t, GetInterfaceIpString, (const std::string &interface, std::string &ip), (override));
 
     static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
 

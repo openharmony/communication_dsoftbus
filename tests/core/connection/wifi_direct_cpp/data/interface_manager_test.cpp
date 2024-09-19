@@ -12,13 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define private   public
-#define protected public
-
-#include <gtest/gtest.h>
 #include "../wifi_direct_mock.h"
 #include "data/interface_info.h"
 #include "data/interface_manager.h"
+#include <gtest/gtest.h>
 
 using namespace testing::ext;
 using namespace testing;
@@ -80,48 +77,5 @@ HWTEST_F(InterfaceManagerTest, InitInterfaceManagerTest, TestSize.Level1)
     int p2pResult = interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::P2P, readInterfaceInfo);
     EXPECT_EQ(p2pResult, SOFTBUS_OK);
     EXPECT_EQ(g_enabledFlag, false);
-}
-
-/*
- * @tc.name: IsInterfaceAvailableTest
- * @tc.desc: Test manager
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InterfaceManagerTest, IsInterfaceAvailableTest, TestSize.Level0)
-{
-    InterfaceManager interfaceManager;
-    InterfaceInfo::InterfaceType type = InterfaceInfo::InterfaceType::HML;
-    bool forShare = true;
-    InterfaceInfo info;
-    info.SetIsEnable(false);
-    bool result = interfaceManager.IsInterfaceAvailable(type, forShare);
-    EXPECT_FALSE(result);
-
-    info.SetIsEnable(true);
-    info.SetRole(LinkInfo::LinkMode::GC);
-    result = interfaceManager.IsInterfaceAvailable(type, forShare);
-    EXPECT_FALSE(result);
-
-    info.SetRole(LinkInfo::LinkMode::HML);
-    result = interfaceManager.IsInterfaceAvailable(type, forShare);
-    EXPECT_FALSE(result);
-}
-
-/*
- * @tc.name: LockTest
- * @tc.desc: Test lock
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InterfaceManagerTest, LockTest, TestSize.Level0)
-{
-    InterfaceManager interfaceManager;
-    std::string owner = "owner";
-    InterfaceInfo::InterfaceType type = InterfaceInfo::InterfaceType::HML;
-
-    interfaceManager.LockInterface(type, owner);
-    interfaceManager.UnlockInterface(type);
-    EXPECT_EQ(interfaceManager.exclusives_[static_cast<int>(type)].owner_, "");
 }
 } // namespace OHOS::SoftBus

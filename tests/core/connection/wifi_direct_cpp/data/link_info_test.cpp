@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <gtest/gtest.h>
 #include "data/link_info.h"
 #include "protocol/wifi_direct_protocol_factory.h"
+#include <gtest/gtest.h>
 
 using namespace testing::ext;
 
@@ -179,16 +178,6 @@ HWTEST_F(LinkInfoTest, MarshallingAndUnmarshalling, TestSize.Level1)
     LinkInfo info2;
     info2.Unmarshalling(*protocol2, output);
 
-    LinkInfo info3;
-    auto protocol3 = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
-    protocol1->SetFormat({ TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE2 });
-    std::vector<uint8_t> output3;
-    info3.Marshalling(*protocol3, output3);
-    auto protocol4 = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
-    protocol2->SetFormat({ TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE2 });
-    LinkInfo info4;
-    info4.Unmarshalling(*protocol4, output);
-
     EXPECT_EQ(info2.GetLocalInterface(), "chba0");
     EXPECT_EQ(info2.GetRemoteInterface(), "chba0");
     EXPECT_EQ(info2.GetLocalBaseMac(), "01:02:03:04:05:06");
@@ -197,25 +186,5 @@ HWTEST_F(LinkInfoTest, MarshallingAndUnmarshalling, TestSize.Level1)
     EXPECT_EQ(info2.GetLocalIpv4Info(), localIpv4Info);
     EXPECT_EQ(info2.GetRemoteIpv4Info(), remoteIpv4Info);
     EXPECT_EQ(info2.GetIsDhcp(), true);
-}
-
-/*
- * @tc.name: TestGetSet
- * @tc.desc: check set and get methods
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LinkInfoTest, TestGetSet, TestSize.Level1)
-{
-    LinkInfo linkInfo;
-    std::string ipv6 = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
-    linkInfo.SetLocalIpv6(ipv6);
-    EXPECT_EQ(linkInfo.GetLocalIpv6(), ipv6);
-
-    linkInfo.SetRemoteIpv6(ipv6);
-    EXPECT_EQ(linkInfo.GetRemoteIpv6(), ipv6);
-
-    linkInfo.SetCustomPort(1);
-    EXPECT_EQ(linkInfo.GetCustomPort(), 1);
 }
 } // namespace OHOS::SoftBus

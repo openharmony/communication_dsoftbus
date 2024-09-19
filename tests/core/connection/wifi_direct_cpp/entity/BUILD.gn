@@ -49,9 +49,11 @@ ohos_unittest("P2pEntityTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
     "$wifi_direct_cpp_path",
     "$wifi_direct_cpp_unit_path",
+    "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
   ]
 
   remove_configs = [
