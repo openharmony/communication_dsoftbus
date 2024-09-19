@@ -223,3 +223,21 @@ int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t ch
     
     return clientProxy->OnClientTransLimitChange(channelId, tos);
 }
+
+int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid)
+{
+    if (pkgName == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName, pid);
+    if (clientObject == nullptr) {
+        char *anonymizePkgName = nullptr;
+        Anonymize(pkgName, &anonymizePkgName);
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr! pkgname=%{public}s, pid=%{public}d",
+            AnonymizeWrapper(anonymizePkgName), pid);
+        AnonymizeFree(anonymizePkgName);
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+    return SOFTBUS_OK;
+}
