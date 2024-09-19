@@ -669,20 +669,26 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
 
 int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
 {
+    int32_t curChannelPid;
+    int32_t ret = SOFTBUS_OK;
     if ((ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        TRANS_LOGD(TRANS_CTRL, "channel type is tcp direct!");
-        return SOFTBUS_OK;
+        ret = TransGetPidByChanId(channelId, channelType, &curChannelPid);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get pid by channelId failed, channelId=%{public}d", channelId);
+            return ret;
+        }
+    } else {
+        AppInfo appInfo;
+        ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
+        (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, channelId=%{public}d", channelId);
+            return ret;
+        }
+        curChannelPid = appInfo.myData.pid;
     }
-    AppInfo appInfo;
-    int32_t ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
-    (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, ret = %{public}d", ret);
-        return ret;
-    }
-    pid_t curChannelPid = appInfo.myData.pid;
-    if (pid != curChannelPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid, callingPid = %{public}d, pid = %{public}d",
+    if (pid != (pid_t)curChannelPid) {
+        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid, callingPid=%{public}d, pid=%{public}d",
             pid, curChannelPid);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }

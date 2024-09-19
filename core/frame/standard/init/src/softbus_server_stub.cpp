@@ -81,6 +81,11 @@ int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
         return SOFTBUS_PERMISSION_DENIED;
     }
 
+    if (!CheckUidAndPid(param->sessionName, callingUid, callingPid)) {
+        COMM_LOGE(COMM_SVC, "Check Uid and Pid failed, sessionName=%{public}s", param->sessionName);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
+
     if (CheckTransSecLevel(param->sessionName, param->peerSessionName) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "OpenSession sec level invalid");
         return SOFTBUS_PERMISSION_DENIED;
@@ -107,29 +112,6 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
         return SOFTBUS_PERMISSION_DENIED;
     }
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerStub::CheckPidByChannelId(pid_t callingPid, int32_t channelId, int32_t channelType)
-{
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == NULL) {
-        COMM_LOGE(COMM_SVC, "malloc appInfo failed");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    int32_t ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
-    (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "get AppInfo by channelId failed!");
-        SoftBusFree(appInfo);
-        return ret == SOFTBUS_NOT_FIND ? SOFTBUS_OK : ret;
-    }
-    if (callingPid != appInfo->myData.pid) {
-        COMM_LOGE(COMM_SVC, "callingPid not match!");
-        SoftBusFree(appInfo);
-        return SOFTBUS_TRANS_CHECK_PID_ERROR;
-    }
-    SoftBusFree(appInfo);
     return SOFTBUS_OK;
 }
 
@@ -748,6 +730,7 @@ int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessagePa
     COMM_LOGD(COMM_SVC, "enter");
     int32_t channelId;
     int32_t channelType;
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
     if (!data.ReadInt32(channelId)) {
         COMM_LOGE(COMM_SVC, "NotifyAuthSuccessInner read channel Id failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
@@ -755,6 +738,12 @@ int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessagePa
     if (!data.ReadInt32(channelType)) {
         COMM_LOGE(COMM_SVC, "NotifyAuthSuccessInner read channel type failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "callingPid not equal pid, callingPid=%{public}d, channelId=%{public}d",
+            callingPid, channelId);
+        return ret;
     }
     int32_t retReply = NotifyAuthSuccess(channelId, channelType);
     if (!reply.WriteInt32(retReply)) {
@@ -898,7 +887,7 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    if (CheckPidByChannelId(callingPid, channelId, channelType) != SOFTBUS_OK) {
+    if (TransGetAndComparePid(callingPid, channelId, channelType) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "pid permission check failed!");
         return SOFTBUS_PERMISSION_DENIED;
     }
