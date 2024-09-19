@@ -71,4 +71,4 @@ typedef struct {
 #endif
 #endif /* __cplusplus */
 
-#endif /* SOFTBUS_CONFIG_TYPE_H */
+#endif
