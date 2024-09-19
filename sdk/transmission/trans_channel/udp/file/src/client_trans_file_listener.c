@@ -286,7 +286,7 @@ void TransDeleteFileListener(const char *sessionName)
             ListDelete(&fileNode->node);
             char *tmpName = NULL;
             Anonymize(sessionName, &tmpName);
-            TRANS_LOGI(TRANS_FILE, "delete sessionName = %{public}s", AnonymizeFree(tmpName));
+            TRANS_LOGI(TRANS_FILE, "delete sessionName=%{public}s", AnonymizeWrapper(tmpName));
             AnonymizeFree(tmpName);
             SoftBusFree(fileNode);
             break;

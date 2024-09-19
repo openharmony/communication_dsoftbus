@@ -403,7 +403,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     Anonymize(pkgName, &tmpPkgName);
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s",
-        AnonymizeFree(tmpName), AnonymizeFree(tmpPkgName));
+        AnonymizeWrapper(tmpName), AnonymizeWrapper(tmpPkgName));
     AnonymizeFree(tmpName);
     AnonymizeFree(tmpPkgName);
     return SOFTBUS_OK;
