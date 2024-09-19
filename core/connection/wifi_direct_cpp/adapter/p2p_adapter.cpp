@@ -38,7 +38,7 @@ static constexpr char DEFAULT_NET_MASK[] = "255.255.255.0";
 static constexpr int CHANNEL_ARRAY_NUM_MAX = 256;
 static constexpr int DECIMAL_BASE = 10;
 
-int32_t P2pAdapter::GetFrequency5GListIntArray(std::vector<int> &frequencyList)
+int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
 {
     int array[CHANNEL_ARRAY_NUM_MAX] {};
     auto ret = Hid2dGetChannelListFor5G(array, CHANNEL_ARRAY_NUM_MAX);
@@ -47,7 +47,7 @@ int32_t P2pAdapter::GetFrequency5GListIntArray(std::vector<int> &frequencyList)
 
     int count = 0;
     while (array[count]) {
-        frequencyList.push_back(array[count]);
+        channels.push_back(array[count]);
         count++;
     }
 
@@ -199,12 +199,13 @@ int32_t P2pAdapter::GetStationFrequencyWithFilter()
     int32_t frequency = P2pAdapter::GetStationFrequency();
     CONN_CHECK_AND_RETURN_RET_LOGW(frequency > 0, FREQUENCY_INVALID, CONN_WIFI_DIRECT, "invalid frequency");
     if (WifiDirectUtils::Is5GBand(frequency)) {
-        std::vector<int> frequencyArray;
-        auto ret = P2pAdapter::GetFrequency5GListIntArray(frequencyArray);
+        std::vector<int> channelArray;
+        auto ret = P2pAdapter::GetChannel5GListIntArray(channelArray);
         if (ret != SOFTBUS_OK) {
             return ret;
         }
-        if (WifiDirectUtils::IsInChannelList(frequency, frequencyArray)) {
+        int32_t channel = WifiDirectUtils::FrequencyToChannel(frequency);
+        if (WifiDirectUtils::IsInChannelList(channel, channelArray)) {
             return frequency;
         }
         return FREQUENCY_INVALID;
