@@ -40,6 +40,7 @@
 #include "trans_event.h"
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 #ifdef SUPPORT_BUNDLENAME
 #include "bundle_mgr_interface.h"
@@ -61,7 +62,7 @@ using namespace OHOS::Security::AccessToken;
 namespace OHOS {
 namespace {
     constexpr int32_t JUDG_CNT = 1;
-    static const char *DB_PACKAGE_NAME = "distributedata-default";
+    static const char *DB_PACKAGE_NAME = "distributeddata-default";
 }
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
