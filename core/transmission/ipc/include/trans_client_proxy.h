@@ -45,6 +45,7 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid);
 int32_t ClientIpcSetChannelInfo(
     const char *pkgName, const char *sessionName, int32_t sessionId, const TransInfo *transInfo, int32_t pid);
 int32_t ClientIpcOnTransLimitChange(const char *pkgName, int32_t pid, int32_t channelId, uint8_t tos);
+int32_t CheckServiceIsRegistered(const char *pkgName, int32_t pid);
 
 #ifdef __cplusplus
 }
