@@ -41,7 +41,7 @@ HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
         .onlineNum = -1, // invalid
         .peerPort = "9000",
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 4;
+    constexpr int32_t VALID_EXTRA_SIZE = 6;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -107,16 +107,16 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
 
 /**
  * @tc.name: LnnEventTest003
- * @tc.desc: Test all valid lnn event form items
+ * @tc.desc: Test all invalid lnn event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
 HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
 {
     LnnEventExtra invalidExtra = {
-        .result = -1, // valid
+        .result = -1,  // valid
         .errcode = -2, // valid
-        .authId = -3, // valid
+        .authId = -3,  // valid
         .discServerType = -4,
         .gearCycle = -5,
         .gearDuration = -6,
