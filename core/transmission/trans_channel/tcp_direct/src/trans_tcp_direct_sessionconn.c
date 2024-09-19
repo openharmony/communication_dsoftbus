@@ -631,3 +631,33 @@ int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHand
     ReleaseSessionConnLock();
     return result;
 }
+
+int32_t TransGetPidByChanId(int32_t channelId, int32_t channelType, int32_t *pid)
+{
+    if (pid == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "pid is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "tcp channel info list hasn't init.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&(g_tcpChannelInfoList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    TcpChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &(g_tcpChannelInfoList->list), TcpChannelInfo, node) {
+        if (info->channelId == channelId && info->channelType == channelType) {
+            *pid = info->pid;
+            (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+    TRANS_LOGE(TRANS_SVC, "can not find pid by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
+}
