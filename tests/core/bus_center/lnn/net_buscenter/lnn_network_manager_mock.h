@@ -55,6 +55,8 @@ public:
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
+    virtual void LnnDeinitPhysicalSubnetManager(void) = 0;
+    virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -79,6 +81,8 @@ public:
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void (SoftBusOOBEState));
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void (SoftBusAccountState));
+    MOCK_METHOD0(LnnDeinitPhysicalSubnetManager, void (void));
+    MOCK_METHOD2(LnnUnregisterEventHandler, void (LnnEventType, LnnEventHandler));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H

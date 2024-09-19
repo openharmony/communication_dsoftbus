@@ -46,11 +46,15 @@ void KVAdapterWrapperTest::SetUpTestCase(void)
     int32_t dbID;
     LnnCreateKvAdapter(&dbID, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
     g_dbId = dbID;
+
+    LnnCreateKvAdapter(&dbID, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
 }
 
 void KVAdapterWrapperTest::TearDownTestCase(void)
 {
-    LnnDestroyKvAdapter(g_dbId);
+    LnnDestroyKvAdapter(g_dbId + 1);
+
+    LnnDestroyKvAdapter(g_dbId);  // g_dbId = 1
 }
 
 void KVAdapterWrapperTest::SetUp()
@@ -126,6 +130,10 @@ HWTEST_F(KVAdapterWrapperTest, LnnDelete001, TestSize.Level1)
 HWTEST_F(KVAdapterWrapperTest, LnnDeleteByPrefix001, TestSize.Level1)
 {
     int32_t dbId = g_dbId;
+    LnnRegisterDataChangeListener(dbId, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
+    LnnRegisterDataChangeListener(dbId + 1, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
+    dbId = g_dbId;
+    LnnRegisterDataChangeListener(dbId, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
     string keyStr = "aa11";
     string valueStr = "111";
     EXPECT_EQ(LnnPutDBData(dbId, keyStr.c_str(), 4, valueStr.c_str(), 3), SOFTBUS_OK);
@@ -153,6 +161,10 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteByPrefix001, TestSize.Level1)
 HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
 {
     int32_t dbId = g_dbId;
+    LnnUnRegisterDataChangeListener(dbId);
+    LnnUnRegisterDataChangeListener(dbId + 1);
+    dbId = g_dbId;
+    LnnUnRegisterDataChangeListener(dbId);
     string keyStr = "aaa";
     string valueStr = "aaa";
     char *value = nullptr;
@@ -168,6 +180,34 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
     EXPECT_EQ(LnnGetDBData(dbId, keyStr.c_str(), MIN_STRING_LEN - 1, &value), SOFTBUS_INVALID_PARAM);
     char *keyPtr = nullptr;
     EXPECT_EQ(LnnGetDBData(dbId, keyPtr, MIN_STRING_LEN - 1, &value), SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnCloudSync
+ * @tc.desc: LnnCloudSync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    int32_t lnnCloudRet = LnnCloudSync(dbId);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_ERR);
+
+    lnnCloudRet = LnnCloudSync(dbId + 1);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnSubcribeKvStoreService
+ * @tc.desc: LnnSubcribeKvStoreService
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnSubcribeKvStoreService001, TestSize.Level1)
+{
+    bool lnnSubcribeKvStoreRet = LnnSubcribeKvStoreService();
+    EXPECT_EQ(lnnSubcribeKvStoreRet, true);
 }
 
 /**
