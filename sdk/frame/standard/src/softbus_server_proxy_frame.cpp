@@ -47,6 +47,7 @@ OHOS::sptr<OHOS::IRemoteObject> g_oldServerProxy = nullptr;
 OHOS::sptr<OHOS::IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
 std::mutex g_mutex;
 constexpr uint32_t WAIT_SERVER_INTERVAL = 50;
+constexpr uint32_t SOFTBUS_MAX_RETRY_TIMES = 25;
 uint32_t g_getSystemAbilityId = 2;
 uint32_t g_printRequestFailedCount = 0;
 constexpr int32_t RANDOM_RANGE_MAX = 501; // range of random numbers is (0, 500ms)
@@ -241,8 +242,13 @@ int ClientRegisterService(const char *pkgName)
         COMM_LOGE(COMM_SDK, "serverProxyFrame is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
-    while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) != SOFTBUS_OK) {
+    int sleepCnt = 0;
+    while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) == SOFTBUS_IPC_ERR) {
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
+        sleepCnt++;
+        if (sleepCnt >= SOFTBUS_MAX_RETRY_TIMES) {
+            return SOFTBUS_SERVER_NOT_INIT;
+        }
     }
 
     COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s", pkgName);
