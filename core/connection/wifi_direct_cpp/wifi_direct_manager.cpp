@@ -499,17 +499,17 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
-static bool IsWifiP2pEnabled(void)
-{
-    return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
-}
-
-static bool SupportHmlTwo(void)
+static bool SupportHmlTwo()
 {
     return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
 }
 
-static int GetStationFrequency(void)
+static bool IsWifiP2pEnabled()
+{
+    return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
+}
+
+static int GetStationFrequency()
 {
     return OHOS::SoftBus::P2pAdapter::GetStationFrequency();
 }

@@ -20,14 +20,16 @@
 #include <pthread.h>
 #include <cstddef>
 #include <string>
+
+#include "comm_log.h"
+#include "softbus_conn_br_connection.h"
 #include "softbus_json_utils.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_conn_br_connection.h"
 
 namespace OHOS {
-const uint8_t *g_baseFuzzData = nullptr;
-size_t g_baseFuzzSize = 0;
-size_t g_baseFuzzPos;
+    const uint8_t *g_baseFuzzData = nullptr;
+    size_t g_baseFuzzSize = 0;
+    size_t g_baseFuzzPos;
 
 template <class T> T GetData()
 {
