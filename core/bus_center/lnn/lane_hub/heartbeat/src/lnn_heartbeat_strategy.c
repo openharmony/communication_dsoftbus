@@ -72,7 +72,7 @@ static LnnHeartbeatStrategyManager g_hbStrategyMgr[] = {
         .onProcess = FixedPeriodSendStrategy,
     },
     [STRATEGY_HB_SEND_ADJUSTABLE_PERIOD] = {
-        .supportType = HEARTBEAT_TYPE_BLE_V0,
+        .supportType = HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3,
         .onProcess = AdjustablePeriodSendStrategy,
     },
     [STRATEGY_HB_RECV_SINGLE] = {
