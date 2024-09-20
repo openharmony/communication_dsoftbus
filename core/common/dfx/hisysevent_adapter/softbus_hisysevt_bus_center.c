@@ -113,16 +113,16 @@ typedef enum {
 
 typedef struct {
     SoftBusMutex lock;
-    uint8_t linkType;
     uint64_t totalTime;
+    char softBusVer[SOFTBUS_HISYSEVT_NAME_LEN];
+    char packName[SOFTBUS_HISYSEVT_NAME_LEN];
+    uint8_t linkType;
     uint32_t totalCount;
     uint32_t count1;
     uint32_t count2;
     uint32_t count3;
     uint32_t count4;
     uint32_t count5;
-    char softBusVer[SOFTBUS_HISYSEVT_NAME_LEN];
-    char packName[SOFTBUS_HISYSEVT_NAME_LEN];
 } BusCenterDuraRecord;
 
 typedef struct {
@@ -139,22 +139,22 @@ typedef struct {
 } DevOnlineDurRecord;
 
 typedef struct {
-    SoftBusMutex lock;
     uint8_t linkType;
-    uint64_t authTotalTime;
+    char softBusVer[SOFTBUS_HISYSEVT_NAME_LEN];
+    char packName[SOFTBUS_HISYSEVT_NAME_LEN];
     uint32_t authTotalCount;
     uint32_t authCount1;
     uint32_t authCount2;
     uint32_t authCount3;
     uint32_t authCount4;
     uint32_t authCount5;
-    uint64_t failTotalTime;
     uint32_t failTotalCount;
     uint32_t connFailTotalCount;
     uint32_t authFailTotalCount;
     uint32_t exchangeFailTotalCount;
-    char softBusVer[SOFTBUS_HISYSEVT_NAME_LEN];
-    char packName[SOFTBUS_HISYSEVT_NAME_LEN];
+    uint64_t failTotalTime;
+    uint64_t authTotalTime;
+    SoftBusMutex lock;
 } AuthResultRecord;
 
 typedef struct {
@@ -171,15 +171,15 @@ typedef struct {
 } DevUdidNode;
 
 typedef struct {
-    SoftBusMutex lock;
+    char businessDiscoveryDetail[SOFTBUS_HISYSEVT_NAME_LEN];
+    char softBusVer[SOFTBUS_HISYSEVT_NAME_LEN];
+    char packName[SOFTBUS_HISYSEVT_NAME_LEN];
     uint64_t startDiscoveryCnt;
     uint64_t sendBroadCastCnt;
     uint64_t recvBroadCastCnt;
     uint64_t devFoundCnt;
     uint64_t businessDiscoveryCnt;
-    char businessDiscoveryDetail[SOFTBUS_HISYSEVT_NAME_LEN];
-    char softBusVer[SOFTBUS_HISYSEVT_NAME_LEN];
-    char packName[SOFTBUS_HISYSEVT_NAME_LEN];
+    SoftBusMutex lock;
 } DevDiscoveryRecord;
 
 static SoftBusEvtParamSize g_busCenterDurStaticParam[BUS_CENTER_DURATION_PARAM_NUM] = {

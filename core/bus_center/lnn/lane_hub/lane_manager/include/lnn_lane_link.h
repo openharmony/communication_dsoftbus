@@ -47,18 +47,19 @@ typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     bool networkDelegate;
     bool p2pOnly;
+    //OldInfo
+    char peerBleMac[MAX_MAC_LEN];
+    bool isSupportIpv6;
+    int32_t psm;
+    LaneTransType transType;
+    uint32_t actionAddr;
+
     LaneLinkType linkType;
     ProtocolType acceptableProtocols;
     int32_t pid;
     uint32_t bandWidth;
     uint64_t triggerLinkTime;
     uint64_t availableLinkTime;
-    //OldInfo
-    LaneTransType transType;
-    char peerBleMac[MAX_MAC_LEN];
-    int32_t psm;
-    bool isSupportIpv6;
-    uint32_t actionAddr;
 } LinkRequest;
 
 typedef struct {
@@ -79,9 +80,9 @@ typedef struct {
 
 // 'GATT' and 'CoC' protocols under BLE use the same definitions
 typedef struct {
-    BleProtocolType protoType;
     char bleMac[BT_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
+    BleProtocolType protoType;
     int32_t psm;
 } BleLinkInfo;
 
@@ -106,13 +107,13 @@ typedef struct {
 } LaneLinkInfo;
 
 typedef struct {
-    ListNode node;
-    uint64_t laneId;
     bool isServerSide;
-    LaneLinkInfo link;
     uint32_t laneScore;
     uint32_t laneFload;
     uint32_t clientRef;
+    LaneLinkInfo link;
+    ListNode node;
+    uint64_t laneId;
 } LaneResource;
 
 typedef struct {

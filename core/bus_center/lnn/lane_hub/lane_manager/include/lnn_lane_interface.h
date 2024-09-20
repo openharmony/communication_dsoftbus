@@ -110,11 +110,12 @@ typedef struct {
 } WlanConnInfo;
 
 typedef struct {
-    uint16_t protocol;
+    bool isReuse;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
+    uint16_t protocol;
     int32_t port;
-    bool isReuse;
+    int32_t pid;
 } RawWifiDirectConnInfo;
 
 typedef struct {
@@ -185,18 +186,18 @@ typedef struct {
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
-    LaneTransType transType;
+    char peerBleMac[MAX_MAC_LEN];
     bool networkDelegate;
     bool p2pOnly;
+    bool isSupportIpv6;
+    LaneTransType transType;
     ProtocolType acceptableProtocols;
     int32_t pid;
-    char peerBleMac[MAX_MAC_LEN];
     //'psm' is valid only when 'expectedlink' contains 'LANE_COC'
     int32_t psm;
     uint32_t expectedBw;
-    LanePreferredLinkList expectedLink;
     uint32_t actionAddr;
-    bool isSupportIpv6;
+    LanePreferredLinkList expectedLink;
 } TransOption;
 
 typedef struct {
@@ -213,43 +214,43 @@ typedef struct {
 } LaneStatusListener;
 
 typedef struct {
+    uint8_t udidHash[UDID_HASH_LEN];
     LaneType type;
     LaneTransType transType;
-    QosInfo qosRequire;
     uint32_t actionAddr;
-    uint8_t udidHash[UDID_HASH_LEN];
+    QosInfo qosRequire;
 } RawLaneAllocInfo;
 
 typedef struct {
     char peerBleMac[MAX_MAC_LEN];
     bool networkDelegate;
     bool isSpecifiedLink;
+    bool isSupportIpv6;
     LaneSpecifiedLink linkType;
     uint32_t actionAddr;
-    bool isSupportIpv6;
 } AllocExtendInfo;
 
 typedef struct {
-    LaneType type;
     char networkId[NETWORK_ID_BUF_LEN];
-    QosInfo qosRequire;
+    LaneType type;
     LaneTransType transType;
     int32_t pid;
     ProtocolType acceptableProtocols;
+    QosInfo qosRequire;
     AllocExtendInfo extendInfo;
 } LaneAllocInfo;
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
-    LaneTransType transType;
     bool isSupportIpv6;
+    LaneTransType transType;
     uint32_t actionAddr;
 } LaneAllocCommInfo;
 
 typedef struct {
     LaneType type;
-    LaneAllocCommInfo commInfo;
     LanePreferredLinkList linkList;
+    LaneAllocCommInfo commInfo;
 } LaneAllocInfoExt;
 
 typedef struct {

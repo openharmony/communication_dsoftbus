@@ -77,11 +77,11 @@ typedef struct {
 } ConnectionCode;
 
 typedef struct {
-    DoubleHashMap distributedInfo;
-    ConnectionCode cnnCode;
     int32_t countMax;
-    SoftBusMutex lock;
     DistributedLedgerStatus status;
+    SoftBusMutex lock;
+    ConnectionCode cnnCode;
+    DoubleHashMap distributedInfo;
 } DistributedNetLedger;
 
 typedef struct {

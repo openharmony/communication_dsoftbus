@@ -147,22 +147,18 @@ typedef enum {
 } BusinessType;
 
 typedef struct {
+    bool isServer;
+    bool isEnabled;
+    bool isEncrypt;
+    bool isUdpFile;
+    bool isFastData;
     int32_t channelId;
     int32_t channelType;
     int32_t businessType;
     int32_t fd;
-    bool isServer;
-    bool isEnabled;
-    bool isEncrypt;
     int32_t peerUid;
     int32_t peerPid;
-    char *groupId;
     uint32_t keyLen;
-    char *sessionKey;
-    char *peerSessionName;
-    char *peerDeviceId;
-    char *myIp;
-    char *peerIp;
     int32_t peerPort;
     int32_t routeType;
     int32_t streamType;
@@ -171,17 +167,21 @@ typedef struct {
     int32_t algorithm;
     int32_t crc;
     int32_t autoCloseTime;
-    bool isUdpFile;
     int myHandleId;
     int peerHandleId;
-    char *reqId;
-    int64_t timeStart;
     int32_t linkType;
     int32_t connectType;
-    bool isFastData;
     uint32_t dataConfig;
-    uint64_t laneId;
     int32_t osType;
+    int64_t timeStart;
+    uint64_t laneId;
+    char *groupId;
+    char *sessionKey;
+    char *peerSessionName;
+    char *peerDeviceId;
+    char *myIp;
+    char *peerIp;
+    char *reqId;
 } ChannelInfo;
 
 #ifdef __cplusplus

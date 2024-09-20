@@ -54,9 +54,9 @@
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
 
 typedef struct {
-    NodeInfo localInfo;
-    SoftBusMutex lock;
     LocalLedgerStatus status;
+    SoftBusMutex lock;
+    NodeInfo localInfo;
 } LocalNetLedger;
 
 static LocalNetLedger g_localNetLedger;

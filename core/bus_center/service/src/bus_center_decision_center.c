@@ -36,9 +36,9 @@
 
 typedef struct {
     ListNode node;
-    ConnectOption option;
     int32_t errorCode;
     uint32_t count;
+    ConnectOption option;
 } ExceptionConnInfo;
 
 typedef struct {
