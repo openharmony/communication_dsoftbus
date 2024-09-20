@@ -189,7 +189,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnDestroy001, TestSize.Level1)
  * @tc.name: LnnCreateKvAdapter_InvalidDbId
  * @tc.desc: Test LnnCreateKvAdapter with dbId being nullptr.
  * @tc.type: Functional Test
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidDbId, TestSize.Level1)
 {
@@ -206,7 +206,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidDbId, TestSize.Level1)
  * @tc.name: LnnCreateKvAdapter_InvalidAppId
  * @tc.desc: Test LnnCreateKvAdapter with appId being nullptr.
  * @tc.type: Functional Test
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppId, TestSize.Level1)
 {
@@ -223,7 +223,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppId, TestSize.Level1)
  * @tc.name: LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin
  * @tc.desc: Test LnnCreateKvAdapter with appIdLen being less than MIN_STRING_LEN.
  * @tc.type: Functional Test
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin, TestSize.Level1)
 {
@@ -240,7 +240,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin, T
  * @tc.name: LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax
  * @tc.desc: Test LnnCreateKvAdapter with appIdLen being greater than MAX_STRING_LEN.
  * @tc.type: Functional Test
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax, TestSize.Level1)
 {
@@ -257,7 +257,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax
  * @tc.name: LnnCreateKvAdapter_InvalidStoreId
  * @tc.desc: Test LnnCreateKvAdapter with storeId being nullptr.
  * @tc.type: Functional Test
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreId, TestSize.Level1)
 {
@@ -274,7 +274,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreId, TestSize.Level
  * @tc.name: LnnCreateKvAdapter_InvalidStoreIdLen_LessThanMin
  * @tc.desc: Test LnnCreateKvAdapter with storeIdLen being less than MIN_STRING_LEN.
  * @tc.type: Functional Test
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_LessThanMin, TestSize.Level1)
 {
@@ -291,7 +291,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_LessThanMin,
  * @tc.name: LnnCreateKvAdapter_InvalidStoreIdLen_GreaterThanMax
  * @tc.desc: Test LnnCreateKvAdapter with storeIdLen being greater than MAX_STRING_LEN.
  * @tc.type: Functional Test
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_GreaterThanMax, TestSize.Level1)
 {
@@ -328,8 +328,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_InvalidKey, TestSize.Level1)
     int32_t dbId = g_dbId;
     const char *key = nullptr;
     int32_t keyLen = 10;
-    const char *value="validValue";
-    int32_t valueLen =  strlen(value);
+    const char *value = "validValue";
+    int32_t valueLen = strlen(value);
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -345,8 +345,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_KeyLen_LessThanMin, TestSize.Level1)
     int32_t dbId = g_dbId;
     const char *key = "validKey";
     int32_t keyLen = MIN_STRING_LEN - 1;
-    const char *value="validValue";
-    int32_t valueLen =  strlen(value);
+    const char *value = "validValue";
+    int32_t valueLen = strlen(value);
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -363,7 +363,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_KeyLen_GreaterThanMax, TestSize.Leve
     const char *key = "validKey";
     int32_t keyLen = MAX_STRING_LEN + 1;
     const char *value = "validValue";
-    int32_t valueLen =  strlen(value);
+    int32_t valueLen = strlen(value);
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -380,7 +380,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_InvalidValue, TestSize.Level1)
     const char *key = "validKey";
     int32_t keyLen = strlen(key);
     const char *value = nullptr;
-    int32_t valueLen =  10;
+    int32_t valueLen = 10;
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -396,8 +396,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_ValueLen_LessThanMin, TestSize.Level
     int32_t dbId = g_dbId;
     const char *key = "validKey";
     int32_t keyLen = strlen(key);
-    const char *value="validValue";
-    int32_t valueLen =  MIN_STRING_LEN - 1;
+    const char *value = "validValue";
+    int32_t valueLen = MIN_STRING_LEN - 1;
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -414,7 +414,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_ValueLen_GreaterThanMax, TestSize.Le
     const char *key = "validKey";
     int32_t keyLen = strlen(key);
     const char *value = "validValue";
-    int32_t valueLen =  MAX_STRING_LEN + 1;
+    int32_t valueLen = MAX_STRING_LEN + 1;
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -427,11 +427,11 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_ValueLen_GreaterThanMax, TestSize.Le
  */
 HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_Dbid_LessThanMin, TestSize.Level1)
 {
-    int32_t dbId = MIN_DBID_COUNT-1;
+    int32_t dbId = MIN_DBID_COUNT - 1;
     const char *key = "validKey";
     int32_t keyLen = strlen(key);
-    const char *value="validValue";
-    int32_t valueLen =  strlen(value);
+    const char *value = "validValue";
+    int32_t valueLen = strlen(value);
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -523,39 +523,44 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_InvalidKey, TestSize.Level1)
     int32_t dbId = g_dbId;
     const char *key = nullptr;
     int32_t keyLen = 10;
-    const int num = 3;
-    char** value = new (std::nothrow) char*[num];
+    const int32_t num = 3;
+    char **value = new (std::nothrow) char *[num];
     if (value == nullptr) {
         return;
     }
-    value[0] = new (std::nothrow) char[strlen("value") + 1];
+    std::string strValue0 = "value";
+    value[0] = new (std::nothrow) char[strValue0.size() + 1];
     if (value[0] == nullptr) {
         delete[] value;
         return;
     }
-    std::strcpy(value[0], "value");
-    value[1] = new (std::nothrow) char[strlen("test") + 1];
+    std::copy_n(strValue0.c_str(), strValue0.size(), value[0]);
+    value[0][strValue0.size()] = '\0';
+    std::string strValue1 = "test";
+    value[1] = new (std::nothrow) char[strValue1.size() + 1];
     if (value[1] == nullptr) {
         delete[] value[0];
         delete[] value;
         return;
     }
-    std::strcpy(value[1], "test");
-    value[2] = new (std::nothrow) char[strlen("char") + 1];
+    std::copy_n(strValue1.c_str(), strValue1.size(), value[1]);
+    value[1][strValue1.size()] = '\0';
+    std::string strValue2 = "char";
+    value[2] = new (std::nothrow) char[strValue2.size() + 1];
     if (value[2] == nullptr) {
         delete[] value[1];
         delete[] value[0];
         delete[] value;
         return;
     }
-    std::strcpy(value[2], "char");
+    std::copy_n(strValue2.c_str(), strValue2.size(), value[2]);
+    value[2][strValue2.size()] = '\0';
     int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
-    for (int i = 0; i < num; ++i) {
+    for (int32_t i = 0; i < num; ++i) {
         delete[] value[i];
     }
     delete[] value;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
 }
 
 /**
@@ -569,34 +574,40 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_LessThanMin, TestSize.Level1)
     int32_t dbId = g_dbId;
     const char *key = "validKey";
     int32_t keyLen = MIN_STRING_LEN - 1;
-    const int num = 3;
-    char** value = new (std::nothrow) char*[num];
+    const int32_t num = 3;
+    char **value = new (std::nothrow) char *[num];
     if (value == nullptr) {
         return;
     }
-    value[0] = new (std::nothrow) char[strlen("value") + 1];
+    std::string strValue0 = "value";
+    value[0] = new (std::nothrow) char[strValue0.size() + 1];
     if (value[0] == nullptr) {
         delete[] value;
         return;
     }
-    std::strcpy(value[0], "value");
-    value[1] = new (std::nothrow) char[strlen("test") + 1];
+    std::copy_n(strValue0.c_str(), strValue0.size(), value[0]);
+    value[0][strValue0.size()] = '\0';
+    std::string strValue1 = "test";
+    value[1] = new (std::nothrow) char[strValue1.size() + 1];
     if (value[1] == nullptr) {
         delete[] value[0];
         delete[] value;
         return;
     }
-    std::strcpy(value[1], "test");
-    value[2] = new (std::nothrow) char[strlen("char") + 1];
+    std::copy_n(strValue1.c_str(), strValue1.size(), value[1]);
+    value[1][strValue1.size()] = '\0';
+    std::string strValue2 = "char";
+    value[2] = new (std::nothrow) char[strValue2.size() + 1];
     if (value[2] == nullptr) {
         delete[] value[1];
         delete[] value[0];
         delete[] value;
         return;
     }
-    std::strcpy(value[2], "char");
+    std::copy_n(strValue2.c_str(), strValue2.size(), value[2]);
+    value[2][strValue2.size()] = '\0';
     int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
-    for (int i = 0; i < num; ++i) {
+    for (int32_t i = 0; i < num; ++i) {
         delete[] value[i];
     }
     delete[] value;
@@ -614,34 +625,40 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_GreaterThanMax, TestSize.Leve
     int32_t dbId = g_dbId;
     const char *key = "validKey";
     int32_t keyLen = MAX_STRING_LEN + 1;
-    const int num = 3;
-    char** value = new (std::nothrow) char*[num];
+    const int32_t num = 3;
+    char **value = new (std::nothrow) char *[num];
     if (value == nullptr) {
         return;
     }
-    value[0] = new (std::nothrow) char[strlen("value") + 1];
+    std::string strValue0 = "value";
+    value[0] = new (std::nothrow) char[strValue0.size() + 1];
     if (value[0] == nullptr) {
         delete[] value;
         return;
     }
-    std::strcpy(value[0], "value");
-    value[1] = new (std::nothrow) char[strlen("test") + 1];
+    std::copy_n(strValue0.c_str(), strValue0.size(), value[0]);
+    value[0][strValue0.size()] = '\0';
+    std::string strValue1 = "test";
+    value[1] = new (std::nothrow) char[strValue1.size() + 1];
     if (value[1] == nullptr) {
         delete[] value[0];
         delete[] value;
         return;
     }
-    std::strcpy(value[1], "test");
-    value[2] = new (std::nothrow) char[strlen("char") + 1];
+    std::copy_n(strValue1.c_str(), strValue1.size(), value[1]);
+    value[1][strValue1.size()] = '\0';
+    std::string strValue2 = "char";
+    value[2] = new (std::nothrow) char[strValue2.size() + 1];
     if (value[2] == nullptr) {
         delete[] value[1];
         delete[] value[0];
         delete[] value;
         return;
     }
-    std::strcpy(value[2], "char");
+    std::copy_n(strValue2.c_str(), strValue2.size(), value[2]);
+    value[2][strValue2.size()] = '\0';
     int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
-    for (int i = 0; i < num; ++i) {
+    for (int32_t i = 0; i < num; ++i) {
         delete[] value[i];
     }
     delete[] value;
@@ -659,34 +676,40 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_Dbid_LessThanMin, TestSize.Level1)
     int32_t dbId = MIN_DBID_COUNT - 1;
     const char *key = "validKey";
     int32_t keyLen = strlen(key);
-    const int num = 3;
-    char** value = new (std::nothrow) char*[num];
+    const int32_t num = 3;
+    char **value = new (std::nothrow) char *[num];
     if (value == nullptr) {
         return;
     }
-    value[0] = new (std::nothrow) char[strlen("value") + 1];
+    std::string strValue0 = "value";
+    value[0] = new (std::nothrow) char[strValue0.size() + 1];
     if (value[0] == nullptr) {
         delete[] value;
         return;
     }
-    std::strcpy(value[0], "value");
-    value[1] = new (std::nothrow) char[strlen("test") + 1];
+    std::copy_n(strValue0.c_str(), strValue0.size(), value[0]);
+    value[0][strValue0.size()] = '\0';
+    std::string strValue1 = "test";
+    value[1] = new (std::nothrow) char[strValue1.size() + 1];
     if (value[1] == nullptr) {
         delete[] value[0];
         delete[] value;
         return;
     }
-    std::strcpy(value[1], "test");
-    value[2] = new (std::nothrow) char[strlen("char") + 1];
+    std::copy_n(strValue1.c_str(), strValue1.size(), value[1]);
+    value[1][strValue1.size()] = '\0';
+    std::string strValue2 = "char";
+    value[2] = new (std::nothrow) char[strValue2.size() + 1];
     if (value[2] == nullptr) {
         delete[] value[1];
         delete[] value[0];
         delete[] value;
         return;
     }
-    std::strcpy(value[2], "char");
+    std::copy_n(strValue2.c_str(), strValue2.size(), value[2]);
+    value[2][strValue2.size()] = '\0';
     int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
-    for (int i = 0; i < num; ++i) {
+    for (int32_t i = 0; i < num; ++i) {
         delete[] value[i];
     }
     delete[] value;
