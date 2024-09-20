@@ -30,6 +30,7 @@ constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MIN_STRING_LEN = 1;
 constexpr int32_t APP_ID_LEN = 8;
 constexpr int32_t STORE_ID_LEN = 19;
+constexpr int32_t MIN_DBID_COUNT = 1;
 const std::string APP_ID = "dsoftbus";
 const std::string STORE_ID = "dsoftbus_kv_db_test";
 }
@@ -188,7 +189,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnDestroy001, TestSize.Level1)
  * @tc.name: LnnCreateKvAdapter_InvalidDbId
  * @tc.desc: Test LnnCreateKvAdapter with dbId being nullptr.
  * @tc.type: Functional Test
- * @tc.require:
+ * @tc.require: 
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidDbId, TestSize.Level1)
 {
@@ -205,7 +206,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidDbId, TestSize.Level1)
  * @tc.name: LnnCreateKvAdapter_InvalidAppId
  * @tc.desc: Test LnnCreateKvAdapter with appId being nullptr.
  * @tc.type: Functional Test
- * @tc.require:
+ * @tc.require: 
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppId, TestSize.Level1)
 {
@@ -222,7 +223,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppId, TestSize.Level1)
  * @tc.name: LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin
  * @tc.desc: Test LnnCreateKvAdapter with appIdLen being less than MIN_STRING_LEN.
  * @tc.type: Functional Test
- * @tc.require:
+ * @tc.require: 
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin, TestSize.Level1)
 {
@@ -239,7 +240,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin, T
  * @tc.name: LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax
  * @tc.desc: Test LnnCreateKvAdapter with appIdLen being greater than MAX_STRING_LEN.
  * @tc.type: Functional Test
- * @tc.require:
+ * @tc.require: 
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax, TestSize.Level1)
 {
@@ -256,7 +257,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax
  * @tc.name: LnnCreateKvAdapter_InvalidStoreId
  * @tc.desc: Test LnnCreateKvAdapter with storeId being nullptr.
  * @tc.type: Functional Test
- * @tc.require:
+ * @tc.require: 
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreId, TestSize.Level1)
 {
@@ -273,7 +274,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreId, TestSize.Level
  * @tc.name: LnnCreateKvAdapter_InvalidStoreIdLen_LessThanMin
  * @tc.desc: Test LnnCreateKvAdapter with storeIdLen being less than MIN_STRING_LEN.
  * @tc.type: Functional Test
- * @tc.require:
+ * @tc.require: 
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_LessThanMin, TestSize.Level1)
 {
@@ -290,7 +291,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_LessThanMin,
  * @tc.name: LnnCreateKvAdapter_InvalidStoreIdLen_GreaterThanMax
  * @tc.desc: Test LnnCreateKvAdapter with storeIdLen being greater than MAX_STRING_LEN.
  * @tc.type: Functional Test
- * @tc.require:
+ * @tc.require: 
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_GreaterThanMax, TestSize.Level1)
 {
@@ -300,6 +301,482 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_GreaterThanM
     const char *storeId = "validStoreId";
     int32_t storeIdLen = MAX_STRING_LEN + 1; // Greater than MAX_STRING_LEN
     int32_t ret = LnnCreateKvAdapter(&dbId, appId, appIdLen, storeId, storeIdLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDestroyKvAdapter_Dbid_LessThanMin
+ * @tc.desc: Test LnnDestroyKvAdapter with dbId being less than MIN_DBID_COUNT.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDestroyKvAdapter_Dbid_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = MIN_DBID_COUNT - 1;
+    int32_t ret = LnnDestroyKvAdapter(dbId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnPutDBData_InvalidKey
+ * @tc.desc: Test LnnPutDBData with key being nullptr.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_InvalidKey, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = nullptr;
+    int32_t keyLen = 10;
+    const char *value="validValue";
+    int32_t valueLen =  strlen(value);
+    int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnPutDBData_KeyLen_LessThanMin
+ * @tc.desc: Test LnnPutDBData with keyLen being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_KeyLen_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = MIN_STRING_LEN - 1;
+    const char *value="validValue";
+    int32_t valueLen =  strlen(value);
+    int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnPutDBData_KeyLen_GreaterThanMax
+ * @tc.desc: Test LnnPutDBData with keyLen being greater than MAX_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_KeyLen_GreaterThanMax, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = MAX_STRING_LEN + 1;
+    const char *value = "validValue";
+    int32_t valueLen =  strlen(value);
+    int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnPutDBData_InvalidValue
+ * @tc.desc: Test LnnPutDBData with value being nullptr.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_InvalidValue, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = strlen(key);
+    const char *value = nullptr;
+    int32_t valueLen =  10;
+    int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnPutDBData_ValueLen_LessThanMin
+ * @tc.desc: Test LnnPutDBData with valueLen being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_ValueLen_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = strlen(key);
+    const char *value="validValue";
+    int32_t valueLen =  MIN_STRING_LEN - 1;
+    int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnPutDBData_ValueLen_GreaterThanMax
+ * @tc.desc: Test LnnPutDBData with valueLen being greater than MAX_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_ValueLen_GreaterThanMax, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = strlen(key);
+    const char *value = "validValue";
+    int32_t valueLen =  MAX_STRING_LEN + 1;
+    int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnPutDBData_Dbid_LessThanMin
+ * @tc.desc: Test LnnPutDBData with dbid being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_Dbid_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = MIN_DBID_COUNT-1;
+    const char *key = "validKey";
+    int32_t keyLen = strlen(key);
+    const char *value="validValue";
+    int32_t valueLen =  strlen(value);
+    int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBData_InvalidKey
+ * @tc.desc: Test LnnDeleteDBData with key being nullptr.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_InvalidKey, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = nullptr;
+    int32_t keyLen = 10;
+    int32_t ret = LnnDeleteDBData(dbId, key, keyLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBData_KeyLen_LessThanMin
+ * @tc.desc: Test LnnDeleteDBData with keyLen being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_KeyLen_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = MIN_STRING_LEN - 1;
+    int32_t ret = LnnDeleteDBData(dbId, key, keyLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBData_KeyLen_GreaterThanMax
+ * @tc.desc: Test LnnDeleteDBData with keyLen being greater than MAX_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_KeyLen_GreaterThanMax, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = MAX_STRING_LEN + 1;
+    int32_t ret = LnnDeleteDBData(dbId, key, keyLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBData_Dbid_LessThanMin
+ * @tc.desc: Test LnnDeleteDBData with dbid being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_Dbid_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = MIN_DBID_COUNT-1;
+    const char *key = "validKey";
+    int32_t keyLen = strlen(key);
+    int32_t ret = LnnDeleteDBData(dbId, key, keyLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetDBData_InvalidValue
+ * @tc.desc: Test LnnGetDBData with value being nullptr.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_InvalidValue, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = strlen(key);
+    char **value = nullptr;
+    int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetDBData_InvalidKey
+ * @tc.desc: Test LnnGetDBData with key being nullptr.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_InvalidKey, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = nullptr;
+    int32_t keyLen = 10;
+    const int num = 3;
+    char** value = new (std::nothrow) char*[num];
+    if (value == nullptr) {
+        return;
+    }
+    value[0] = new (std::nothrow) char[strlen("value") + 1];
+    if (value[0] == nullptr) {
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[0], "value");
+    value[1] = new (std::nothrow) char[strlen("test") + 1];
+    if (value[1] == nullptr) {
+        delete[] value[0];
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[1], "test");
+    value[2] = new (std::nothrow) char[strlen("char") + 1];
+    if (value[2] == nullptr) {
+        delete[] value[1];
+        delete[] value[0];
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[2], "char");
+    int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
+    for (int i = 0; i < num; ++i) {
+        delete[] value[i];
+    }
+    delete[] value;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+}
+
+/**
+ * @tc.name: LnnGetDBData_KeyLen_LessThanMin
+ * @tc.desc: Test LnnGetDBData with keyLen being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = MIN_STRING_LEN - 1;
+    const int num = 3;
+    char** value = new (std::nothrow) char*[num];
+    if (value == nullptr) {
+        return;
+    }
+    value[0] = new (std::nothrow) char[strlen("value") + 1];
+    if (value[0] == nullptr) {
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[0], "value");
+    value[1] = new (std::nothrow) char[strlen("test") + 1];
+    if (value[1] == nullptr) {
+        delete[] value[0];
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[1], "test");
+    value[2] = new (std::nothrow) char[strlen("char") + 1];
+    if (value[2] == nullptr) {
+        delete[] value[1];
+        delete[] value[0];
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[2], "char");
+    int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
+    for (int i = 0; i < num; ++i) {
+        delete[] value[i];
+    }
+    delete[] value;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetDBData_KeyLen_GreaterThanMax
+ * @tc.desc: Test LnnGetDBData with keyLen being greater than MAX_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_GreaterThanMax, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *key = "validKey";
+    int32_t keyLen = MAX_STRING_LEN + 1;
+    const int num = 3;
+    char** value = new (std::nothrow) char*[num];
+    if (value == nullptr) {
+        return;
+    }
+    value[0] = new (std::nothrow) char[strlen("value") + 1];
+    if (value[0] == nullptr) {
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[0], "value");
+    value[1] = new (std::nothrow) char[strlen("test") + 1];
+    if (value[1] == nullptr) {
+        delete[] value[0];
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[1], "test");
+    value[2] = new (std::nothrow) char[strlen("char") + 1];
+    if (value[2] == nullptr) {
+        delete[] value[1];
+        delete[] value[0];
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[2], "char");
+    int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
+    for (int i = 0; i < num; ++i) {
+        delete[] value[i];
+    }
+    delete[] value;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetDBData_Dbid_LessThanMin
+ * @tc.desc: Test LnnGetDBData with dbid being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_Dbid_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = MIN_DBID_COUNT - 1;
+    const char *key = "validKey";
+    int32_t keyLen = strlen(key);
+    const int num = 3;
+    char** value = new (std::nothrow) char*[num];
+    if (value == nullptr) {
+        return;
+    }
+    value[0] = new (std::nothrow) char[strlen("value") + 1];
+    if (value[0] == nullptr) {
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[0], "value");
+    value[1] = new (std::nothrow) char[strlen("test") + 1];
+    if (value[1] == nullptr) {
+        delete[] value[0];
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[1], "test");
+    value[2] = new (std::nothrow) char[strlen("char") + 1];
+    if (value[2] == nullptr) {
+        delete[] value[1];
+        delete[] value[0];
+        delete[] value;
+        return;
+    }
+    std::strcpy(value[2], "char");
+    int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
+    for (int i = 0; i < num; ++i) {
+        delete[] value[i];
+    }
+    delete[] value;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBDataByPrefix_InvalidKeyPrefix
+ * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefix being nullptr.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByPrefix_InvalidKeyPrefix, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *keyPrefix = nullptr;
+    int32_t keyPrefixLen = 10;
+    int32_t ret = LnnDeleteDBDataByPrefix(dbId, keyPrefix, keyPrefixLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBDataByPrefix_KeyPrefixLen_LessThanMin
+ * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefixLen being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByPrefix_KeyPrefixLen_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *keyPrefix = "validKeyPrefix";
+    int32_t keyPrefixLen = MIN_STRING_LEN - 1;
+    int32_t ret = LnnDeleteDBDataByPrefix(dbId, keyPrefix, keyPrefixLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBDataByPrefix_KeyPrefixLen_GreaterThanMax
+ * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefixLen being greater than MAX_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByPrefix_KeyPrefixLen_GreaterThanMax, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char *keyPrefix = "validKeyPrefix";
+    int32_t keyPrefixLen = MAX_STRING_LEN + 1;
+    int32_t ret = LnnDeleteDBDataByPrefix(dbId, keyPrefix, keyPrefixLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBDataByPrefix_Dbid_LessThanMin
+ * @tc.desc: Test LnnDeleteDBDataByPrefix with dbid being less than MIN_STRING_LEN.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByPrefix_Dbid_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = MIN_DBID_COUNT - 1;
+    const char *keyPrefix = "validKeyPrefix";
+    int32_t keyPrefixLen = strlen(keyPrefix);
+    int32_t ret = LnnDeleteDBDataByPrefix(dbId, keyPrefix, keyPrefixLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnCloudSync_Dbid_LessThanMin
+ * @tc.desc: Test LnnCloudSync with dbId being less than MIN_DBID_COUNT.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnCloudSync_Dbid_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = MIN_DBID_COUNT - 1;
+    int32_t ret = LnnCloudSync(dbId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnSetCloudAbilityInner_Dbid_LessThanMin
+ * @tc.desc: Test LnnSetCloudAbilityInner with dbId being less than MIN_DBID_COUNT.
+ * @tc.type: Functional Test
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSize.Level1)
+{
+    int32_t dbId = MIN_DBID_COUNT - 1;
+    const bool isEnableCloud = true;
+    int32_t ret = LnnSetCloudAbilityInner(dbId, isEnableCloud);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
