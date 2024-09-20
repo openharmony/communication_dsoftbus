@@ -39,7 +39,7 @@ ohos_fuzztest("ClientTransStreamFuzzTest") {
     "-fstack-protector-strong",
   ]
   sources = [ "clienttransstream_fuzzer.cpp" ]
-  deps = [ "../../../../../sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",

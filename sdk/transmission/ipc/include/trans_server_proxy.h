@@ -32,7 +32,8 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info);
 int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo);
 int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType);
 int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType);
-int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len);
+int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len);
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);
 int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality);
 int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName);

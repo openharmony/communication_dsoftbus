@@ -122,6 +122,8 @@ static BleAdvType SoftbusAdvTypeToBt(uint8_t advType)
 
 void SoftbusAdvParamToBt(const SoftbusBroadcastParam *src, BleAdvParams *dst)
 {
+    DISC_CHECK_AND_RETURN_LOGE(src != NULL, DISC_BLE_ADAPTER, "src is null!");
+    DISC_CHECK_AND_RETURN_LOGE(dst != NULL, DISC_BLE_ADAPTER, "dst is null!");
     if (memcpy_s(dst->peerAddr.addr, SOFTBUS_ADDR_MAC_LEN, src->peerAddr.addr, SOFTBUS_ADDR_MAC_LEN) != EOK) {
         DISC_LOGW(DISC_BLE_ADAPTER, "copy peer addr failed");
     }
@@ -220,6 +222,8 @@ static uint8_t BtScanPhyTypeToSoftbus(unsigned char phyType)
 
 void BtScanResultToSoftbus(const BtScanResultData *src, SoftBusBcScanResult *dst)
 {
+    DISC_CHECK_AND_RETURN_LOGE(src != NULL, DISC_BLE_ADAPTER, "src is null!");
+    DISC_CHECK_AND_RETURN_LOGE(dst != NULL, DISC_BLE_ADAPTER, "dst is null!");
     dst->eventType = BtScanEventTypeToSoftbus(src->eventType);
     dst->dataStatus = BtScanDataStatusToSoftbus(src->dataStatus);
     dst->addrType = BtScanAddrTypeToSoftbus(src->addrType);
@@ -235,6 +239,9 @@ void BtScanResultToSoftbus(const BtScanResultData *src, SoftBusBcScanResult *dst
 
 void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFilter *filter, uint8_t filterSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(nativeFilter != NULL, DISC_BLE_ADAPTER, "ble scan native filter is null!");
+    DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BLE_ADAPTER, "bc scan filter is null!");
+    DISC_CHECK_AND_RETURN_LOGE(filterSize > 0, DISC_BLE_ADAPTER, "filter size is 0 or smaller!");
     while (filterSize-- > 0) {
         (nativeFilter + filterSize)->address = (char *)(filter + filterSize)->address;
         (nativeFilter + filterSize)->deviceName = (char *)(filter + filterSize)->deviceName;
@@ -283,6 +290,8 @@ void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFil
 
 void SoftbusSetManufactureFilter(BleScanNativeFilter *nativeFilter, uint8_t filterSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(nativeFilter != NULL, DISC_BLE_ADAPTER, "ble scan native filter is null!");
+    DISC_CHECK_AND_RETURN_LOGE(filterSize > 0, DISC_BLE_ADAPTER, "filter size is 0 or smaller!");
     while (filterSize-- > 0) {
         uint8_t *manufactureData = (uint8_t *)SoftBusCalloc(MANUFACTURE_DATA_LEN);
         if (manufactureData == NULL) {
@@ -304,6 +313,8 @@ void SoftbusSetManufactureFilter(BleScanNativeFilter *nativeFilter, uint8_t filt
 
 void FreeBtFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(nativeFilter != NULL, DISC_BLE_ADAPTER, "ble scan native filter is null!");
+    DISC_CHECK_AND_RETURN_LOGE(filterSize > 0, DISC_BLE_ADAPTER, "filter size is 0 or smaller!");
     while (filterSize-- > 0) {
         SoftBusFree((nativeFilter + filterSize)->serviceData);
         SoftBusFree((nativeFilter + filterSize)->serviceDataMask);
@@ -313,6 +324,8 @@ void FreeBtFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
 
 void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(nativeFilter != NULL, DISC_BLE_ADAPTER, "ble scan native filter is null!");
+    DISC_CHECK_AND_RETURN_LOGE(filterSize > 0, DISC_BLE_ADAPTER, "filter size is 0 or smaller!");
     while (filterSize-- > 0) {
         bool advIndReport = (nativeFilter + filterSize)->advIndReport;
         uint32_t len = (nativeFilter + filterSize)->serviceDataLength;
@@ -367,6 +380,8 @@ int GetBtScanMode(uint16_t scanInterval, uint16_t scanWindow)
 
 uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, NULL, DISC_BLE_ADAPTER, "data is null!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(dataLen != NULL, NULL, DISC_BLE_ADAPTER, "data len is null!");
     uint16_t payloadLen = (data->bcData.payloadLen > BC_DATA_MAX_LEN) ? BC_DATA_MAX_LEN : data->bcData.payloadLen;
     uint16_t len = data->isSupportFlag ? payloadLen + BC_HEAD_LEN : payloadLen + BC_HEAD_LEN - BC_FLAG_LEN;
     uint8_t *advData = (uint8_t *)SoftBusCalloc(len);
@@ -400,6 +415,8 @@ uint8_t *AssembleAdvData(const SoftbusBroadcastData *data, uint16_t *dataLen)
 
 uint8_t *AssembleRspData(const SoftbusBroadcastPayload *data, uint16_t *dataLen)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, NULL, DISC_BLE_ADAPTER, "data is null!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(dataLen != NULL, NULL, DISC_BLE_ADAPTER, "data len is null!");
     uint16_t payloadLen = (data->payloadLen > RSP_DATA_MAX_LEN) ? RSP_DATA_MAX_LEN : data->payloadLen;
     uint16_t len = payloadLen + RSP_HEAD_LEN;
     uint8_t *rspData = (uint8_t *)SoftBusCalloc(len);
@@ -449,6 +466,8 @@ static int32_t ParseLocalName(const uint8_t *advData, uint8_t advLen, SoftBusBcS
 
 int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL && dst != NULL && advLen > 0, SOFTBUS_INVALID_PARAM,
+        DISC_BLE_ADAPTER, "input is invalid!");
     uint8_t index = 0;
     bool isRsp = false;
     while (index < advLen) {

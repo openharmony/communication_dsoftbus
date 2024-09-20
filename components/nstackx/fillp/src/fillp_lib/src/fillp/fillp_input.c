@@ -159,9 +159,6 @@ static void FillpProcessItemData(struct FillpPcb *pcb, struct FillpPcbItem *item
         return;
     }
     if (!FillpNumIsbigger(item->seqNum, pcb->recv.seqNum)) {
-        FILLP_LOGDBG("fillp_sock_id:%d seq Recved before: start %u, end: %u, pktNum: %u", FILLP_GET_SOCKET(pcb)->index,
-            pcb->recv.seqNum, item->seqNum, item->pktNum);
-
         FillpFcDataInput(pcb, pktHdr);
         FillpFreeBufItem(item);
         FillpFcRecvDropOne(pcb);
@@ -188,7 +185,7 @@ static void FillpProcessItemData(struct FillpPcb *pcb, struct FillpPcbItem *item
     }
 }
 
-static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
+IGNORE_OVERFLOW static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
 {
     FILLP_CONST struct FillpPktHead *pktHdr = (struct FillpPktHead *)(void *)item->buf.p;
     FILLP_UINT32 privRecvCacheSize = 0;
@@ -256,12 +253,6 @@ static void ProcessPcbItem(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf,
             item = (struct FillpPcbItem *)node->item;
             lostSeqNum = (item->seqNum - item->dataLen);
         }
-        FILLP_LOGDTL("can not alloc recv bufer, drop it !!!!!,fillp_sock_id:%d, seqNum:%u, pktNum:%u, "
-            "recv.seqNum:%u, lostSeqNum:%u, recvList:%u, recvBoxPlaceInOrder:%u, recvBox:%lu, "
-            "mpRecvSize:%u, curItemCount:%u",
-            FILLP_GET_SOCKET(pcb)->index, pktHdr->seqNum, pktHdr->pktNum, pcb->recv.seqNum, lostSeqNum,
-            pcb->recv.recvList.nodeNum, pcb->recv.recvBoxPlaceInOrder.nodeNum,
-            FillpQueueValidOnes(pcb->recv.recvBox), pcb->mpRecvSize, pcb->recv.curItemCount);
     }
 }
 
@@ -321,8 +312,8 @@ static int FillpCheckNackPacket(FILLP_CONST struct FillpPcb *pcb, FILLP_CONST st
     return 0;
 }
 
-static int FillpCheckNackSeq(FILLP_CONST struct FillpPcb *pcb, FILLP_CONST struct FillpPktHead *pktHdr,
-    FILLP_CONST struct FillpSeqPktNum *seqPktNum)
+IGNORE_OVERFLOW static int FillpCheckNackSeq(FILLP_CONST struct FillpPcb *pcb,
+    FILLP_CONST struct FillpPktHead *pktHdr, FILLP_CONST struct FillpSeqPktNum *seqPktNum)
 {
     if (FillpNumIsbigger(pktHdr->seqNum, pcb->send.seqNum) ||
         FillpNumIsbigger(pcb->send.seqNum, (pktHdr->seqNum + pcb->send.pktSendCache))) {
@@ -566,8 +557,8 @@ static void FillpPackInputSendMsgTrace(FILLP_CONST struct FillpPcb *pcb, FILLP_C
     }
 }
 
-static FILLP_BOOL FillpCheckPackNumber(struct FillpPcb *pcb, struct FillpPktPack *pack,
-    FILLP_UINT32 ackSeqNum, FILLP_UINT32 lostSeqNum)
+IGNORE_OVERFLOW static FILLP_BOOL FillpCheckPackNumber(struct FillpPcb *pcb,
+    struct FillpPktPack *pack, FILLP_UINT32 ackSeqNum, FILLP_UINT32 lostSeqNum)
 {
     struct FillpPktHead *pktHdr = (struct FillpPktHead *)pack->head;
     if (FillpNumIsbigger(ackSeqNum, pcb->send.seqNum) ||
@@ -596,13 +587,6 @@ static FILLP_BOOL FillpCheckPackNumber(struct FillpPcb *pcb, struct FillpPktPack
         FILLP_NTOHL(pack->rate), pktHdr->seqNum, pktHdr->pktNum,
         FILLP_NTOHS(pack->flag), FILLP_NTOHL(pack->oppositeSetRate), lostSeqNum);
 
-    FILLP_LOGDTL("fillp_sock_id:%d, unSendList:%u,unackList:%u,unrecvList:%u, itemWaitTokenLists:%u, "
-        "total:%u,curMemSize:%u,maxACKSeq:%u,ackSeqNum:%u,curSeq:%u",
-        FILLP_GET_SOCKET(pcb)->index, pcb->send.unSendList.size, pcb->send.unackList.count,
-        pcb->send.unrecvList.nodeNum, pcb->send.itemWaitTokenLists.nodeNum,
-        (FILLP_UINT32)(pcb->send.unSendList.size + pcb->send.redunList.nodeNum + pcb->send.unackList.count +
-        pcb->send.unrecvList.nodeNum + pcb->send.itemWaitTokenLists.nodeNum),
-        pcb->send.curItemCount, pcb->send.maxAckNumFromReceiver, pcb->send.ackSeqNum, pcb->send.seqNum);
     return FILLP_TRUE;
 }
 

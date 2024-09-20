@@ -24,31 +24,32 @@ ohos_static_library("wifi_direct") {
   wifi_direct_connection_src = []
 
   wifi_direct_connection_inc = [
+    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/bus_center/utils/include/",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include/",
+    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
 
   if (!defined(ohos_lite)) {
@@ -65,7 +66,7 @@ ohos_static_library("wifi_direct") {
       cfi_cross_dso = true
       debug = false
     }
-
+    branch_protector_ret = "pac_ret"
     wifi_direct_connection_src += [
       "$wifi_direct_path/adapter/p2p_adapter.cpp",
       "$wifi_direct_path/channel/auth_negotiate_channel.cpp",

@@ -161,20 +161,20 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection004, TestSize.Level1)
     ConnBleConnection connection;
     (void)memset_s(&connection, sizeof(ConnBleConnection), 0, sizeof(ConnBleConnection));
     writeCbPara.needRsp = true;
-    g_callback->RequestWriteCallback(writeCbPara);
+    g_callback->requestWriteCallback(writeCbPara);
     ret = ConnGattServerConnect(&connection);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
     
     writeCbPara.needRsp = false;
     writeCbPara.attrHandle = -1;
-    g_callback->RequestWriteCallback(writeCbPara);
+    g_callback->requestWriteCallback(writeCbPara);
     ret = SoftBusMutexInit(&connection.lock, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     writeCbPara.needRsp = false;
     writeCbPara.attrHandle = 1;
     writeCbPara.connId = 1;
-    g_callback->RequestWriteCallback(writeCbPara);
+    g_callback->requestWriteCallback(writeCbPara);
     connection.underlayerHandle = INVALID_UNDERLAY_HANDLE;
     ret = ConnGattServerConnect(&connection);
     EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
@@ -285,6 +285,12 @@ HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
     SoftBusMutexInit(&connection.lock, nullptr);
     ret = ConnGattClientUpdatePriority(&connection, priority);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    connection.state = BLE_CONNECTION_STATE_CONNECTED;
+    for (int32_t i = 0; i <= 3; i++) {
+        ret = ConnGattClientUpdatePriority(&connection, (ConnectBlePriority)i);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
 }
 
 /*
@@ -408,40 +414,41 @@ HWTEST_F(ServiceConnectionTest, ConnGattClientSend, TestSize.Level1)
 */
 HWTEST_F(ServiceConnectionTest, ServiceStopCallback001, TestSize.Level1)
 {
-    g_callback->ServiceStopCallback(SOFTBUS_INVALID_PARAM, 1);
+    g_callback->serviceStopCallback(SOFTBUS_INVALID_PARAM, 1);
     SoftBusSleepMs(500);
-    g_callback->ServiceStopCallback(SOFTBUS_OK, 2);
+    g_callback->serviceStopCallback(SOFTBUS_OK, 2);
     SoftBusSleepMs(500);
 
     SoftBusBtUuid uuid = {
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
     uuid.uuid = (char *)SoftBusCalloc(uuid.uuidLen+1);
+    ASSERT_NE(nullptr, uuid.uuid);
     int32_t ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);
-    g_callback->ServiceAddCallback(SOFTBUS_OK, &uuid, 10);
+    g_callback->serviceAddCallback(SOFTBUS_OK, &uuid, 10);
     SoftBusSleepMs(500);
 
     ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);
-    g_callback->ServiceAddCallback(SOFTBUS_OK, &uuid, 10);
+    g_callback->serviceAddCallback(SOFTBUS_OK, &uuid, 10);
     SoftBusSleepMs(500);
 
     ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_SERVICE_UUID);
     EXPECT_EQ(EOK, ret);
-    g_callback->ServiceAddCallback(SOFTBUS_INVALID_PARAM, &uuid, 10);
+    g_callback->serviceAddCallback(SOFTBUS_INVALID_PARAM, &uuid, 10);
     SoftBusSleepMs(500);
 
     ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_SERVICE_UUID);
     EXPECT_EQ(EOK, ret);
-    g_callback->ServiceAddCallback(SOFTBUS_OK, &uuid, 10);
+    g_callback->serviceAddCallback(SOFTBUS_OK, &uuid, 10);
 
-    g_callback->ServiceAddCallback(SOFTBUS_OK, &uuid, 1);
+    g_callback->serviceAddCallback(SOFTBUS_OK, &uuid, 1);
 
-    g_callback->ServiceStopCallback(SOFTBUS_OK, 3);
+    g_callback->serviceStopCallback(SOFTBUS_OK, 3);
 
-    g_callback->ServiceDeleteCallback(SOFTBUS_INVALID_PARAM, 1);
-    g_callback->ServiceDeleteCallback(SOFTBUS_OK, 1);
+    g_callback->serviceDeleteCallback(SOFTBUS_INVALID_PARAM, 1);
+    g_callback->serviceDeleteCallback(SOFTBUS_OK, 1);
     const char *bleAddr = "12:22:33:44:55:66";
 
     SoftBusBtAddr addr = {
@@ -449,7 +456,7 @@ HWTEST_F(ServiceConnectionTest, ServiceStopCallback001, TestSize.Level1)
     };
     ConnBleConnection *connection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_SERVER, 1, false);
     EXPECT_NE(nullptr, connection);
-    g_callback->ConnectServerCallback(connection->underlayerHandle, &addr);
+    g_callback->connectServerCallback(connection->underlayerHandle, &addr);
     SoftBusSleepMs(500);
 }
 
@@ -466,29 +473,29 @@ HWTEST_F(ServiceConnectionTest, ServiceDeleteCallback, TestSize.Level1)
     SoftBusBtAddr addr = {
         .addr = {0x13, 0x23, 0x33, 0x43, 0x53, 0x63},
     };
-    g_callback->DisconnectServerCallback(20, &addr);
+    g_callback->disconnectServerCallback(20, &addr);
 
     const char *bleAddr = "13:23:33:43:53:63";
     ConnBleConnection *connection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_SERVER, 11, false);
     EXPECT_NE(nullptr, connection);
     int32_t ret = ConnBleSaveConnection(connection);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    g_callback->DisconnectServerCallback(connection->underlayerHandle, &addr);
+    g_callback->disconnectServerCallback(connection->underlayerHandle, &addr);
     SoftBusGattReadRequest readCbPara = {
         .connId = 1,
         .transId = 1,
     };
-    g_callback->RequestReadCallback(readCbPara);
-    g_callback->ResponseConfirmationCallback(SOFTBUS_OK, 1);
-    g_callback->NotifySentCallback(1, SOFTBUS_OK);
-    g_callback->MtuChangeCallback(4, 5);
+    g_callback->requestReadCallback(readCbPara);
+    g_callback->responseConfirmationCallback(SOFTBUS_OK, 1);
+    g_callback->notifySentCallback(1, SOFTBUS_OK);
+    g_callback->mtuChangeCallback(4, 5);
 
     const char *bleMac = "15:25:35:45:55:65";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleMac, BLE_GATT, CONN_SIDE_SERVER, 20, false);
     EXPECT_NE(nullptr, bleConnection);
     ret = ConnBleSaveConnection(bleConnection);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    g_callback->MtuChangeCallback(bleConnection->underlayerHandle, 5);
+    g_callback->mtuChangeCallback(bleConnection->underlayerHandle, 5);
     SoftBusSleepMs(500);
 }
 }

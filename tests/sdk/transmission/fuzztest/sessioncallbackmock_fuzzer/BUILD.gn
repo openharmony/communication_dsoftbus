@@ -27,6 +27,9 @@ ohos_fuzztest("SessionCallbackMockFuzzTest") {
     "../../../../../sdk/transmission/session/cpp/include",
     "../../../../../interfaces/kits/transport",
     "../../../../../interfaces/kits/common",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
   ]
   cflags = [
     "-g",
@@ -35,9 +38,12 @@ ohos_fuzztest("SessionCallbackMockFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "sessioncallbackmock_fuzzer.cpp" ]
-  deps = [ "../../../../../sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

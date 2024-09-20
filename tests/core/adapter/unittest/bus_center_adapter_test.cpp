@@ -53,6 +53,12 @@ void DsoftbusOtherTest::TearDown(void)
 {
 }
 
+/*
+* @tc.name: GetCommonDevInfoTest001
+* @tc.desc: value is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
 HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo001, TestSize.Level0)
 {
     char value[] = "abcdefg";

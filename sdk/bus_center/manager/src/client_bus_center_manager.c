@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "bus_center_server_proxy.h"
 #include "common_list.h"
 #include "lnn_log.h"
@@ -1026,6 +1027,11 @@ int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char 
     return ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    return ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
+}
+
 NO_SANITIZE("cfi") int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;
@@ -1179,6 +1185,51 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
     return SOFTBUS_OK;
 }
 
+int32_t LnnOnNodeStatusChanged(const char *pkgName, void *info, int32_t type)
+{
+    if (pkgName == NULL || info == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName or info is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeStateCallbackItem *item = NULL;
+    NodeStatus *nodeStatus = (NodeStatus *)info;
+    ListNode dupList;
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if ((type < 0) || (type > TYPE_STATUS_MAX)) {
+        LNN_LOGE(LNN_STATE, "LnnOnNodeStatusChanged invalid type. type=%{public}d", type);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock node status cb list in notify");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&dupList);
+    DuplicateNodeStateCbList(&dupList);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "unlock node status cb list in notify");
+    }
+    char *anonyPkgName = NULL;
+    Anonymize(pkgName, &anonyPkgName);
+    LNN_LOGI(LNN_STATE, "LnnOnNodeStatusChanged, pkgName=%{public}s, type=%{public}d, screen=%{public}d", anonyPkgName,
+        type, nodeStatus->reserved[0]);
+    LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
+        if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+            (item->cb.events & EVENT_NODE_STATUS_CHANGED) != 0 && item->cb.onNodeStatusChanged != NULL) {
+            LNN_LOGI(LNN_STATE, "LnnOnNodeStatusChanged, pkgName=%{public}s, type=%{public}d, screen=%{public}d",
+                anonyPkgName, type, nodeStatus->reserved[0]);
+            item->cb.onNodeStatusChanged((NodeStatusType)type, nodeStatus);
+        }
+    }
+    AnonymizeFree(anonyPkgName);
+    ClearNodeStateCbList(&dupList);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnOnLocalNetworkIdChanged(const char *pkgName)
 {
     NodeStateCallbackItem *item = NULL;
@@ -1212,7 +1263,7 @@ int32_t LnnOnLocalNetworkIdChanged(const char *pkgName)
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
+int32_t LnnOnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const char *msg, uint32_t msgLen)
 {
     NodeStateCallbackItem *item = NULL;
     ListNode dupList;
@@ -1237,8 +1288,8 @@ int32_t LnnOnNodeDeviceNotTrusted(const char *pkgName, const char *msg)
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
         if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
-            (item->cb.onNodeDeviceNotTrusted) != NULL) {
-            item->cb.onNodeDeviceNotTrusted(msg);
+            (item->cb.onNodeDeviceTrustedChange) != NULL) {
+            item->cb.onNodeDeviceTrustedChange((TrustChangeType)type, msg, msgLen);
         }
     }
     ClearNodeStateCbList(&dupList);

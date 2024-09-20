@@ -34,6 +34,9 @@ extern "C" {
 #define WAIT_QUEUE_BUFFER_PERIOD_LEN 2
 #define QUEUE_NUM_PER_PID            3
 
+#define WAIT_TIMEOUT_OCCUPY                        (3 * 1000)
+#define WAIT_TIMEOUT_TRY_AGAIN                     (1 * 1000)
+
 // provide remove event compare function field
 typedef struct {
     SoftBusHandler handler;

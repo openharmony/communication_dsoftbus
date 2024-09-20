@@ -48,8 +48,8 @@ void InsertUnrecvListFail(struct FillpPcb *pcb, struct FillpPcbItem *item);
 void FillpAjustTlpParameterByRtt(struct FillpPcb *pcb, FILLP_LLONG rtt);
 void FillpFreeItemAndEvent(struct FillpPcb *pcb, struct FillpPcbItem *item);
 void FillpAdjustFcParamsByRtt(struct FillpPcb *pcb);
-void FillpAckSendPcb(struct FillpPcb *pcb, FILLP_INT seqNum);
-void FillpUploadRecvBox(struct FillpPcb *pcb);
+IGNORE_OVERFLOW void FillpAckSendPcb(struct FillpPcb *pcb, FILLP_INT seqNum);
+IGNORE_OVERFLOW void FillpUploadRecvBox(struct FillpPcb *pcb);
 void FillpSendNack(struct FillpPcb *pcb, FILLP_UINT32 startPktNum, FILLP_UINT32 endPktNum);
 void FillpBuildAndSendPack(struct FillpPcb *pcb, struct FtSocket *ftSock, struct FillpPktPack *pack,
     FILLP_UINT16 dataLen);

@@ -1020,6 +1020,7 @@ static void BleServerWaitDisconnectTimeoutHandler(uint32_t connectionId)
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE,
         "ble server wait disconnect timeout handler failed: connection not exist, connId=%{public}u", connectionId);
+    RemoveConnId(connection->underlayerHandle);
     ConnBleReturnConnection(&connection);
     g_serverEventListener.onServerConnectionClosed(connectionId, SOFTBUS_CONN_BLE_DISCONNECT_WAIT_TIMEOUT_ERR);
 }
@@ -1209,20 +1210,20 @@ static bool BleIsConcernedAttrHandle(int32_t srvcHandle, int32_t attrHandle)
 static int32_t BleRegisterGattServerCallback(void)
 {
     static SoftBusGattsCallback bleGattsCallback = {
-        .ServiceAddCallback = BleServiceAddCallback,
-        .CharacteristicAddCallback = BleCharacteristicAddCallback,
-        .DescriptorAddCallback = BleDescriptorAddCallback,
-        .ServiceStartCallback = BleServiceStartCallback,
-        .ServiceStopCallback = BleServiceStopCallback,
-        .ServiceDeleteCallback = BleServiceDeleteCallback,
-        .ConnectServerCallback = BleConnectServerCallback,
-        .DisconnectServerCallback = BleDisconnectServerCallback,
-        .RequestReadCallback = BleRequestReadCallback,
-        .RequestWriteCallback = BleRequestWriteCallback,
-        .ResponseConfirmationCallback = BleResponseConfirmationCallback,
-        .NotifySentCallback = BleNotifySentCallback,
-        .MtuChangeCallback = BleMtuChangeCallback,
-        .IsConcernedAttrHandle = BleIsConcernedAttrHandle,
+        .serviceAddCallback = BleServiceAddCallback,
+        .characteristicAddCallback = BleCharacteristicAddCallback,
+        .descriptorAddCallback = BleDescriptorAddCallback,
+        .serviceStartCallback = BleServiceStartCallback,
+        .serviceStopCallback = BleServiceStopCallback,
+        .serviceDeleteCallback = BleServiceDeleteCallback,
+        .connectServerCallback = BleConnectServerCallback,
+        .disconnectServerCallback = BleDisconnectServerCallback,
+        .requestReadCallback = BleRequestReadCallback,
+        .requestWriteCallback = BleRequestWriteCallback,
+        .responseConfirmationCallback = BleResponseConfirmationCallback,
+        .notifySentCallback = BleNotifySentCallback,
+        .mtuChangeCallback = BleMtuChangeCallback,
+        .isConcernedAttrHandle = BleIsConcernedAttrHandle,
     };
     SoftBusBtUuid serviceUuid = {
         .uuid = SOFTBUS_SERVICE_UUID,

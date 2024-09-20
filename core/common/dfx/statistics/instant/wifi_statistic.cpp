@@ -41,7 +41,7 @@ int32_t WifiStatistic::GetWifiStatisticInfo(cJSON *json)
         return SOFTBUS_INVALID_PARAM;
     }
     if (GetStaInfo(json) != SOFTBUS_OK || GetSoftApInfo(json) != SOFTBUS_OK || GetP2PInfo(json) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }

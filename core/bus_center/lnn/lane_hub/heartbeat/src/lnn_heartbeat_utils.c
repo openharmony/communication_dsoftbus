@@ -584,7 +584,7 @@ static int32_t GetOnlineInfoNum(int32_t *nums)
         return SOFTBUS_ERR;
     }
     *nums = infoNum;
-    LNN_LOGI(LNN_HEART_BEAT, "online nums=%{public}d", infoNum);
+    LNN_LOGD(LNN_HEART_BEAT, "online nums=%{public}d", infoNum);
     SoftBusFree(netInfo);
     return SOFTBUS_OK;
 }
@@ -594,4 +594,9 @@ bool LnnIsMultiDeviceOnline(void)
     int32_t onlineNum = 0;
 
     return GetOnlineInfoNum(&onlineNum) == SOFTBUS_OK && onlineNum >= HB_MULTI_DEVICE_THRESHOLD;
+}
+
+bool LnnIsSupportHeartbeatCap(uint32_t hbCapacity, HeartbeatCapability capaBit)
+{
+    return ((hbCapacity & (1 << (uint32_t) capaBit)) != 0);
 }

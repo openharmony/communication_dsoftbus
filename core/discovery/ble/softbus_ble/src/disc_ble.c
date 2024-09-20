@@ -26,7 +26,6 @@
 #include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
-#include "discovery_service.h"
 #include "lnn_device_info.h"
 #include "lnn_ohos_account.h"
 #include "message_handler.h"
@@ -175,7 +174,7 @@ static DiscBleListener g_bleListener = {
     .scanListenerId = -1
 };
 
-//g_conncernCapabilityMask support capability of this ble discovery
+// g_conncernCapabilityMask support capability of this ble discovery
 static uint32_t g_concernCapabilityMask =
     1 << CASTPLUS_CAPABILITY_BITMAP |
     1 << DVKIT_CAPABILITY_BITMAP |
@@ -376,7 +375,8 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
     DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->dataStatus == SOFTBUS_BC_DATA_COMPLETE,
         SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
         "dataStatus is invalid. dataStatus=%{public}u", reportInfo->dataStatus);
-    DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE, "advData is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
+        "advData is null");
     DISC_CHECK_AND_RETURN_RET_LOGE(advLen >= POS_TLV, SOFTBUS_DISCOVER_BLE_REPORT_FILTER_FAIL, DISC_BLE,
         "advLen is too short, less than adv header length. advLen=%{public}u", advLen);
 
@@ -521,9 +521,12 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
     add.medium = BLE;
 
     if (ProcessHashAccount(foundInfo)) {
+        char *anonyLocalBleMac = NULL;
+        Anonymize(foundInfo->addr[0].info.ble.bleMac, &anonyLocalBleMac);
         DISC_LOGI(DISC_BLE, "start report found device, addrNum=%{public}u, addr[0].type=%{public}u,"
-            "capabilityBitmap=%{public}u, callCount=%{public}u", foundInfo->addrNum, foundInfo->addr[0].type,
-            foundInfo->capabilityBitmap[0], callCount++);
+            "capabilityBitmap=%{public}u, bleMac=%{public}s, callCount=%{public}u", foundInfo->addrNum,
+            foundInfo->addr[0].type, foundInfo->capabilityBitmap[0], AnonymizeWrapper(anonyLocalBleMac), callCount++);
+        AnonymizeFree(anonyLocalBleMac);
         uint32_t tempCap = 0;
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         DISC_CHECK_AND_RETURN_LOGE(tempCap != 0, DISC_BLE, "unsupported ble capability. capabilityBitmap=%{public}d",
@@ -561,8 +564,8 @@ static void ProcessDistributePacket(const BroadcastReportInfo *reportInfo)
 static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *reportInfo)
 {
     (void)listenerId;
-    DISC_CHECK_AND_RETURN_LOGW(listenerId == g_bleListener.scanListenerId, DISC_BLE, "listenerId not match");
-    DISC_CHECK_AND_RETURN_LOGW(reportInfo != NULL, DISC_BLE, "scan result is null");
+    DISC_CHECK_AND_RETURN_LOGE(listenerId == g_bleListener.scanListenerId, DISC_BLE, "listenerId not match");
+    DISC_CHECK_AND_RETURN_LOGE(reportInfo != NULL, DISC_BLE, "scan result is null");
     DISC_CHECK_AND_RETURN_LOGD(ScanFilter(reportInfo) == SOFTBUS_OK, DISC_BLE, "scan filter failed");
 
     uint8_t *advData = reportInfo->packet.bcData.payload;
@@ -600,11 +603,11 @@ static void BtOnStateChanged(int32_t listenerId, int32_t state)
     SoftBusMessage *msg = NULL;
     switch (state) {
         case SOFTBUS_BLE_STATE_TURN_ON:
-            DISC_LOGI(DISC_CONTROL, "bt turn on");
+            DISC_LOGI(DISC_CONTROL, "ble turn on");
             msg = CreateBleHandlerMsg(RECOVERY, 0, 0, NULL);
             break;
         case SOFTBUS_BLE_STATE_TURN_OFF:
-            DISC_LOGI(DISC_CONTROL, "bt turn off");
+            DISC_LOGI(DISC_CONTROL, "ble turn off");
             msg = CreateBleHandlerMsg(TURN_OFF, 0, 0, NULL);
             break;
         case SOFTBUS_BR_STATE_TURN_ON:
@@ -670,6 +673,8 @@ static int32_t DiscBleGetCustData(DeviceInfo *info)
             break;
         }
     }
+    DISC_CHECK_AND_RETURN_RET_LOGD(
+        pos < CAPABILITY_MAX_BITNUM, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL, DISC_BLE, "not find capBitMap");
     cJSON *json = cJSON_ParseWithLength((const char *)g_bleInfoManager[infoIndex].capabilityData[pos],
         g_bleInfoManager[infoIndex].capDataLen[pos]);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "parse cJSON failed");
@@ -1690,12 +1695,11 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
         if (oldAggregateCap != newAggregateCap) {
             UpdateInfoManager(NON_ADV_ID, true);
         }
-        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     } else {
-        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
         RemoveTimeout(recvMsg->key);
     }
     StartTimeout(recvMsg->key);
+    SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     DfxRecordAddRecvMsgEnd(capBitMap, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
@@ -1837,7 +1841,7 @@ static void DiscBleSetScanFilter(int32_t listenerId, int32_t type)
 {
     DISC_CHECK_AND_RETURN_LOGW(type != 0, DISC_BLE, "not disc capblity, not set filter");
     BcScanFilter *filter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter));
-    DISC_CHECK_AND_RETURN_LOGW(filter != NULL, DISC_BLE, "malloc filter failed");
+    DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BLE, "malloc filter failed");
 
     filter->serviceData = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
     filter->serviceDataMask = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
@@ -1893,7 +1897,10 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
     ListInit(&g_recvMessageInfo.node);
     g_discBleInnerCb = callback;
 
-    if (SoftBusMutexInit(&g_recvMessageInfo.lock, NULL) != SOFTBUS_OK ||
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_RECURSIVE,
+    };
+    if (SoftBusMutexInit(&g_recvMessageInfo.lock, &mutexAttr) != SOFTBUS_OK ||
         SoftBusMutexInit(&g_bleInfoLock, NULL) != SOFTBUS_OK) {
         DiscSoftBusBleDeinit();
         DISC_LOGE(DISC_INIT, "init ble lock failed");
@@ -2009,14 +2016,17 @@ static int32_t BleAdvertiserDump(int fd)
         SOFTBUS_DPRINTF(fd, "BleAdvertiser channel                   : %d\n", g_bleAdvertiser[i].channel);
         SOFTBUS_DPRINTF(fd, "BleAdvertiser isAdvertising             : %d\n", g_bleAdvertiser[i].isAdvertising);
         SOFTBUS_DPRINTF(fd, "DeviceInfo                              : \n");
-        SOFTBUS_DPRINTF(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
-        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n",
-            g_bleAdvertiser[i].deviceInfo.accountHash);
+        char *anonymizedInfo = NULL;
+        Anonymize(g_bleAdvertiser[i].deviceInfo.devId, &anonymizedInfo);
+        SOFTBUS_DPRINTF(fd, "devId                                   : %s\n", AnonymizeWrapper(anonymizedInfo));
+        AnonymizeFree(anonymizedInfo);
+        Anonymize(g_bleAdvertiser[i].deviceInfo.accountHash, &anonymizedInfo);
+        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n", AnonymizeWrapper(anonymizedInfo));
+        AnonymizeFree(anonymizedInfo);
         SOFTBUS_DPRINTF(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
-        char *anonymizedName = NULL;
-        Anonymize(g_bleAdvertiser[i].deviceInfo.devName, &anonymizedName);
-        SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", AnonymizeWrapper(anonymizedName));
-        AnonymizeFree(anonymizedName);
+        Anonymize(g_bleAdvertiser[i].deviceInfo.devName, &anonymizedInfo);
+        SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", AnonymizeWrapper(anonymizedInfo));
+        AnonymizeFree(anonymizedInfo);
         SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
         SOFTBUS_DPRINTF(fd, "addr type                               : %u\n",
                 g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);

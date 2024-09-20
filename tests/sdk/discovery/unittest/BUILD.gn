@@ -57,7 +57,7 @@ if (defined(ohos_lite)) {
       "unittest/common/",
     ]
     deps = [
-      "$dsoftbus_root_path/sdk:softbus_client",
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
       "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     ]
     external_deps = [
@@ -75,6 +75,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk/bus_center/manager/include",
       "$dsoftbus_root_path/core/common/inner_communication",
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
       "$dsoftbus_root_path/interfaces/kits/discovery",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/sdk/discovery/include",
@@ -83,7 +84,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/tests/sdk/common/include",
     ]
     deps = [
-      "$dsoftbus_root_path/sdk:softbus_client",
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
       "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     ]
     external_deps = [
@@ -99,69 +100,11 @@ if (defined(ohos_lite)) {
     } else {
       sources += [ "disc_sdk_test_bt_status_virtual.c" ]
     }
-  }
-
-  ohos_unittest("DiscSdkAutoTest") {
-    sanitize = {
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
-    }
-    module_out_path = module_output_path
-    sources = [ "disc_sdk_auto_test.cpp" ]
-    include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/tests/sdk/common/include",
-      "$dsoftbus_root_path/interfaces/kits/common",
-      "$dsoftbus_root_path/interfaces/kits/discovery",
-    ]
-    deps = [
-      "$dsoftbus_root_path/sdk:softbus_client",
-      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    ]
-    external_deps = [
-      "bounds_checking_function:libsec_static",
-      "c_utils:utils",
-      "googletest:gtest_main",
-      "hilog:libhilog",
-    ]
-    if (support_bluetooth &&
-        (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
-      sources += [ "disc_sdk_test_bt_status.c" ]
-      external_deps += [ "bluetooth:btframework" ]
-    } else {
-      sources += [ "disc_sdk_test_bt_status_virtual.c" ]
-    }
-  }
-
-  ohos_unittest("DiscSdkManagerTest") {
-    module_out_path = module_output_path
-    sources = [ "disc_sdk_manager_test.cpp" ]
-    include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/interfaces/kits/common",
-      "$dsoftbus_root_path/interfaces/kits/discovery",
-      "$dsoftbus_root_path/sdk/discovery/ipc/include",
-      "$dsoftbus_root_path/sdk/discovery/ipc/standard/include",
-      "$dsoftbus_root_path/sdk/discovery/manager/include",
-      "$dsoftbus_root_path/tests/sdk/common/include",
-    ]
-    deps = [
-      "$dsoftbus_root_path/sdk:softbus_client",
-      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    ]
-    external_deps = [
-      "c_utils:utils",
-      "googletest:gtest_main",
-      "hilog:libhilog",
-    ]
   }
 
   group("unittest") {
     testonly = true
     deps = [
-      ":DiscSdkAutoTest",
-      ":DiscSdkManagerTest",
       ":DiscSdkOnlyL2Test",
       ":DiscSdkTest",
     ]

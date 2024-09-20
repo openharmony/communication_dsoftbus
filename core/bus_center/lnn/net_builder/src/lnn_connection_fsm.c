@@ -1058,6 +1058,29 @@ static void DfxRecordConnAuthStart(const AuthConnInfo *connInfo, LnnConnectionFs
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
 
+static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn, NodeInfo *deviceInfo, bool dupOk)
+{
+    int32_t ret;
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
+    char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    ret = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1,
+        (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
+    char *anonyUdidHash = NULL;
+    Anonymize(udidHash, &anonyUdidHash);
+    LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", anonyUdidHash);
+    AnonymizeFree(anonyUdidHash);
+    if (ret == SOFTBUS_OK) {
+        if ((dupOk || LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK) &&
+            AuthRestoreAuthManager(udidHash, authConn, connInfo->requestId, deviceInfo,
+                &authHandle.authId) == SOFTBUS_OK && LnnRecoveryBroadcastKey() == SOFTBUS_OK) {
+            FilterRetrieveDeviceInfo(deviceInfo);
+            LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authHandle, deviceInfo);
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_ERR;
+}
+
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
@@ -1073,28 +1096,20 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+    NodeInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    bool dupOk = false;
+    if (connFsm->connInfo.dupInfo != NULL) {
+        deviceInfo = *connFsm->connInfo.dupInfo;
+        dupOk = true;
+        SoftBusFree(connFsm->connInfo.dupInfo);
+        connFsm->connInfo.dupInfo = NULL;
+        LNN_LOGI(LNN_BUILDER, "join dup node info ok");
+    }
     if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
         // go to online
-        LNN_LOGI(LNN_BUILDER, "begin to start ble direct online");
-        int32_t ret;
-        NodeInfo deviceInfo;
-        (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-        AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
-        char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-        ret = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1,
-            (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
-        char *anonyUdidHash = NULL;
-        Anonymize(udidHash, &anonyUdidHash);
-        LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", anonyUdidHash);
-        AnonymizeFree(anonyUdidHash);
-        if (ret == EOK) {
-            if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
-                AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo,
-                    &authHandle.authId) == SOFTBUS_OK && LnnRecoveryBroadcastKey() == SOFTBUS_OK) {
-                FilterRetrieveDeviceInfo(&deviceInfo);
-                LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authHandle, &deviceInfo);
-                return SOFTBUS_OK;
-            }
+        if (BleDirectOnline(connInfo, &authConn, &deviceInfo, dupOk) == SOFTBUS_OK) {
+            return SOFTBUS_OK;
         }
     }
     DfxRecordConnAuthStart(&authConn, connFsm, connInfo->requestId);
@@ -1144,6 +1159,49 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
     return SOFTBUS_OK;
 }
 
+static bool IsSupportBrDupBle(uint32_t feature, AuthCapability capaBit)
+{
+    return ((feature & (1 << (uint32_t)capaBit)) != 0);
+}
+
+static void ProcessBleOnline(const LnnConntionInfo *connInfo)
+{
+    NodeInfo remoteInfo;
+    if (!IsSupportBrDupBle(connInfo->nodeInfo->authCapacity, BIT_SUPPORT_BR_DUP_BLE)) {
+        LNN_LOGI(LNN_BUILDER, "remote not support br dup ble, no need to go online");
+        return;
+    }
+    if (LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID,
+        &remoteInfo) == SOFTBUS_OK && LnnHasDiscoveryType(&remoteInfo, DISCOVERY_TYPE_BLE)) {
+        LNN_LOGI(LNN_BUILDER, "ble has online, no need to go online");
+        return;
+    }
+    ConnectionAddr addr;
+    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    addr.type = CONNECTION_ADDR_BLE;
+    if (memcpy_s(addr.info.ble.bleMac, BT_MAC_LEN, connInfo->addr.info.br.brMac,
+        BT_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "bt mac memcpy to ble fail");
+        return;
+    }
+    if (SoftBusGenerateStrHash((uint8_t *)connInfo->nodeInfo->deviceInfo.deviceUdid,
+        strlen(connInfo->nodeInfo->deviceInfo.deviceUdid), hash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate udid short hash fail.");
+        return;
+    }
+    if (memcpy_s(addr.info.ble.udidHash, UDID_HASH_LEN, hash, SHORT_UDID_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "memcpy udid hash fail");
+        return;
+    }
+    if (JoinLnnWithNodeInfo(&addr, connInfo->nodeInfo) == SOFTBUS_OK) {
+        LNN_LOGI(LNN_BUILDER, "join with node info success");
+    } else {
+        LNN_LOGE(LNN_BUILDER, "join with node info fail");
+    }
+    return;
+}
+
 static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -1164,6 +1222,9 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
         LNN_LOGI(LNN_BUILDER,
             "[id=%{public}u] auth passed, authId=%{public}" PRId64, connFsm->id, connInfo->authHandle.authId);
         (void)LnnFillConnInfo(connInfo);
+        if (connInfo->addr.type == CONNECTION_ADDR_BR && connInfo->nodeInfo != NULL) {
+            ProcessBleOnline(connInfo);
+        }
         LnnFsmTransactState(&connFsm->fsm, g_states + STATE_CLEAN_INVALID_CONN_INDEX);
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);
     } else {
@@ -1414,6 +1475,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
         AnonymizeFree(anonyDeviceName);
     }
     AnonymizeFree(anonyNetworkId);
+    LnnNotifyOOBEStateChangeEvent(SOFTBUS_FACK_OOBE_END);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
@@ -1657,6 +1719,9 @@ void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
     }
     if (connFsm->connInfo.nodeInfo != NULL) {
         SoftBusFree(connFsm->connInfo.nodeInfo);
+    }
+    if (connFsm->connInfo.dupInfo != NULL) {
+        SoftBusFree(connFsm->connInfo.dupInfo);
     }
     SoftBusFree(connFsm);
 }

@@ -144,6 +144,10 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
 
 void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusErrCode)
 {
+    if (softbusErrCode == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "softbusErrCode is null");
+        return;
+    }
     if (hichainErrCode >= HICHAIN_DAS_ERRCODE_MIN && hichainErrCode <= HICHAIN_DAS_ERRCODE_MAX) {
         *softbusErrCode = hichainErrCode & MASK_LOW_16BIT;
         *softbusErrCode = -(((SOFTBUS_SUB_SYSTEM) << ERRCODE_SHIFT_21BIT) |

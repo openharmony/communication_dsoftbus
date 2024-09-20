@@ -230,14 +230,18 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     int32_t ret = INVALID_CHANNEL_ID;
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
     CoreSessionState state = CORE_SESSION_STATE_INIT;
-    ret = TransAddSocketChannelInfo(
-        param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Add socket channel record failed.");
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc appInfo failed.");
     ret = TransCommonGetAppInfo(param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appinfo failed");
+        TransFreeAppInfo(appInfo);
+        return ret;
+    }
+    ret = TransAddSocketChannelInfo(
+        param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Add socket channel record failed.");
         TransFreeAppInfo(appInfo);
         return ret;
     }
@@ -317,6 +321,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
+    AddChannelStatisticsInfo(transInfo->channelId, transInfo->channelType);
     TransFreeAppInfo(appInfo);
     TRANS_LOGI(TRANS_CTRL,
         "server TransOpenChannel ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d, "
@@ -591,9 +596,10 @@ int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t ch
     return ret;
 }
 
-int32_t TransCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+int32_t TransCloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
-    (void)UpdateNetworkResourceByLaneId(channelId, laneId, dataInfo, len);
+    UpdateNetworkResourceByLaneId(channelId, channelType, laneId, dataInfo, len);
     return SOFTBUS_OK;
 }
 
@@ -651,20 +657,26 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
 
 int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
 {
+    int32_t curChannelPid;
+    int32_t ret = SOFTBUS_OK;
     if ((ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        TRANS_LOGD(TRANS_CTRL, "channel type is tcp direct!");
-        return SOFTBUS_OK;
+        ret = TransGetPidByChanId(channelId, channelType, &curChannelPid);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get pid by channelId failed, channelId=%{public}d", channelId);
+            return ret;
+        }
+    } else {
+        AppInfo appInfo;
+        ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
+        (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, channelId=%{public}d", channelId);
+            return ret;
+        }
+        curChannelPid = appInfo.myData.pid;
     }
-    AppInfo appInfo;
-    int32_t ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
-    (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, ret = %{public}d", ret);
-        return ret;
-    }
-    pid_t curChannelPid = appInfo.myData.pid;
-    if (pid != curChannelPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid, callingPid = %{public}d, pid = %{public}d",
+    if (pid != (pid_t)curChannelPid) {
+        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid, callingPid=%{public}d, pid=%{public}d",
             pid, curChannelPid);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }

@@ -45,7 +45,7 @@ ohos_fuzztest("ClientTransProxyFileManagerFuzzTest") {
 
   sources = [ "clienttransproxyfilemanager_fuzzer.cpp" ]
 
-  deps = [ "../../../../../sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "c_utils:utils",

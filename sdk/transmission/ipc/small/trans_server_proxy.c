@@ -59,6 +59,32 @@ static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
+static bool WriteQosInfo(IpcIo *request, const SessionParam *param)
+{
+    if (!WriteBool(request, param->isQosLane)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write qos flag failed!");
+        return false;
+    }
+
+    if (!param->isQosLane) {
+        return true;
+    }
+
+    if (!WriteUint32(request, param->qosCount)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write count of qos failed!");
+        return false;
+    }
+
+    if (param->qosCount > 0) {
+        if (!WriteBuffer(request, param->qos, sizeof(QosTV) * param->qosCount)) {
+            TRANS_LOGE(TRANS_SDK, "OpenSession write qos info failed!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 int32_t TransServerProxyInit(void)
 {
     if (g_serverProxy != NULL) {
@@ -154,7 +180,7 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
 static bool TransWriteIpcSessionAttrs(IpcIo *request, const SessionAttribute *attrs)
 {
     if (attrs == NULL || request == NULL) {
-        TRANS_LOGE(TRANS_SDK, "attrs is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "attrs is NULL!");
         return false;
     }
 
@@ -213,6 +239,11 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     WriteInt32(&request, param->sessionId);
     if (!TransWriteIpcSessionAttrs(&request, param->attr)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+
+    if (!WriteQosInfo(&request, param)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write qosinfo failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
 
@@ -329,9 +360,11 @@ int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_
     return ret;
 }
 
-int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
     (void)channelId;
+    (void)channelType;
     (void)laneId;
     (void)dataInfo;
     (void)len;

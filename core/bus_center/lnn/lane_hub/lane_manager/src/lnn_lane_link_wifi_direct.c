@@ -195,6 +195,12 @@ static void FreeResourceForForceDisconnect(ForceDownInfo *forceDownInfo)
         if (forceDownInfo->forceDownLink == LANE_HML) {
             RemoveDelayDestroyMessage(resourceItem.laneId);
         }
+        DelLogicAndLaneRelationship(resourceItem.laneId);
+        ClearLaneResourceByLaneId(resourceItem.laneId);
+    }
+    if (forceDownInfo->forceDownLink == LANE_HML &&
+        FindLaneResourceByLinkType(peerUdid, LANE_HML_RAW, &resourceItem) == SOFTBUS_OK) {
+        DelLogicAndLaneRelationship(resourceItem.laneId);
         ClearLaneResourceByLaneId(resourceItem.laneId);
     }
 }
@@ -584,8 +590,8 @@ int32_t HandleForceDownWifiDirect(const char *networkId, LinkConflictType confli
         LNN_LOGE(LNN_LANE, "find link conflict info fail");
         return ret;
     }
-    RemoveConflictInfoTimelinessMsg(&identifyInfo, conflictType);
-    (void)DelLinkConflictInfo(&identifyInfo, conflictType);
+    RemoveConflictInfoTimelinessMsg(&(conflictItem.identifyInfo), conflictType);
+    (void)DelLinkConflictInfo(&(conflictItem.identifyInfo), conflictType);
     if (conflictItem.devIdCnt > 0) {
         char forceDownDevId[NETWORK_ID_BUF_LEN] = {0};
         if (memcpy_s(forceDownDevId, NETWORK_ID_BUF_LEN, conflictItem.devIdList, NETWORK_ID_BUF_LEN) != EOK) {
@@ -624,8 +630,8 @@ int32_t HandleForceDownWifiDirectTrans(const char *udidhashStr, LinkConflictType
         LNN_LOGE(LNN_LANE, "find link conflict info fail");
         return ret;
     }
-    RemoveConflictInfoTimelinessMsg(&identifyInfo, conflictType);
-    (void)DelLinkConflictInfo(&identifyInfo, conflictType);
+    RemoveConflictInfoTimelinessMsg(&(conflictItem.identifyInfo), conflictType);
+    (void)DelLinkConflictInfo(&(conflictItem.identifyInfo), conflictType);
     if (conflictItem.devIdCnt > 0) {
         char forceDownDevId[NETWORK_ID_BUF_LEN] = {0};
         if (memcpy_s(forceDownDevId, NETWORK_ID_BUF_LEN, conflictItem.devIdList, NETWORK_ID_BUF_LEN) != EOK) {

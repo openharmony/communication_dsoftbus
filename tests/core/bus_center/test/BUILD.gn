@@ -100,7 +100,7 @@ ohos_unittest("HeartBeatMediumTest") {
   }
   external_deps += [
     "c_utils:utils",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -170,7 +170,7 @@ ohos_unittest("HeartBeatFSMTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   } else {
     external_deps = [
@@ -179,7 +179,7 @@ ohos_unittest("HeartBeatFSMTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 }
@@ -205,6 +205,7 @@ ohos_unittest("HeartBeatStrategyTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
@@ -236,7 +237,7 @@ ohos_unittest("HeartBeatStrategyTest") {
   }
   external_deps += [
     "c_utils:utils",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -299,7 +300,7 @@ ohos_unittest("HeartBeatUtilsTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   } else {
     external_deps = [
@@ -308,7 +309,7 @@ ohos_unittest("HeartBeatUtilsTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 }
@@ -390,7 +391,7 @@ ohos_unittest("HeartBeatCtrlTest") {
   }
   external_deps += [
     "c_utils:utils",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -426,7 +427,7 @@ ohos_unittest("ClientProxyTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
       "samgr:samgr_proxy",
     ]
   } else {
@@ -436,7 +437,7 @@ ohos_unittest("ClientProxyTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
       "samgr:samgr_proxy",
     ]
   }
@@ -454,6 +455,7 @@ ohos_unittest("BusCenterIpcTest") {
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
@@ -486,7 +488,7 @@ ohos_unittest("BusCenterIpcTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   } else {
     external_deps = [
@@ -495,7 +497,7 @@ ohos_unittest("BusCenterIpcTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 }
@@ -582,7 +584,7 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
   }
   external_deps += [
     "c_utils:utils",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 

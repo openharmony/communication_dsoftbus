@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_time_sync_impl.h"
 #include "lnn_log.h"
@@ -145,6 +146,8 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
 {
     StartTimeSyncReq *item = NULL;
 
+    char *anonyPkgName = NULL;
+    Anonymize(startReq->pkgName, &anonyPkgName);
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
         if (strcmp(startReq->pkgName, item->pkgName) != 0 || item->pid != startReq->pid) {
             continue;
@@ -153,14 +156,16 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
             LNN_LOGI(LNN_CLOCK,
                 "update exist request. pkgName=%{public}s, "
                 "accuracy:%{public}d->%{public}d, period:%{public}d->%{public}d",
-                startReq->pkgName, item->accuracy, startReq->accuracy, item->period, startReq->period);
+                AnonymizeWrapper(anonyPkgName), item->accuracy, startReq->accuracy, item->period, startReq->period);
             item->accuracy = startReq->accuracy;
             item->period = startReq->period;
         }
+        AnonymizeFree(anonyPkgName);
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_CLOCK, "add start time sync request. pkgName=%{public}s, accuracy=%{public}d, period=%{public}d",
-        startReq->pkgName, startReq->accuracy, startReq->period);
+        AnonymizeWrapper(anonyPkgName), startReq->accuracy, startReq->period);
+    AnonymizeFree(anonyPkgName);
     item = CreateStartTimeSyncReq(startReq->pkgName, startReq->accuracy, startReq->period);
     if (item == NULL) {
         LNN_LOGE(LNN_CLOCK, "create start time sync request fail");
@@ -181,7 +186,10 @@ static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgN
         }
         ListDelete(&item->node);
         SoftBusFree(item);
-        LNN_LOGI(LNN_CLOCK, "remove start time sync req. pkgName=%{public}s", pkgName);
+        char *anonyPkgName = NULL;
+        Anonymize(pkgName, &anonyPkgName);
+        LNN_LOGI(LNN_CLOCK, "remove start time sync req. pkgName=%{public}s", AnonymizeWrapper(anonyPkgName));
+        AnonymizeFree(anonyPkgName);
         break;
     }
 }
@@ -293,7 +301,10 @@ static int32_t ProcessStopTimeSyncRequest(const StopTimeSyncReqMsgPara *para)
     }
     info = FindTimeSyncReqInfo(para->targetNetworkId);
     if (info == NULL) {
-        LNN_LOGI(LNN_CLOCK, "no specific networkId. pkgName=%{public}s", para->pkgName);
+        char *anonyPkgName = NULL;
+        Anonymize(para->pkgName, &anonyPkgName);
+        LNN_LOGI(LNN_CLOCK, "no specific networkId. pkgName=%{public}s", AnonymizeWrapper(anonyPkgName));
+        AnonymizeFree(anonyPkgName);
         SoftBusFree((void *)para);
         return SOFTBUS_NOT_FIND;
     }
@@ -328,7 +339,10 @@ static void NotifyTimeSyncResult(const TimeSyncReqInfo *info, double offset, int
         "notify time sync result. millisecond=%{public}d, microsecond=%{public}d, accuracy=%{public}d, flag=%{public}d",
         resultInfo.result.millisecond, resultInfo.result.microsecond, resultInfo.result.accuracy, resultInfo.flag);
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
-        LNN_LOGI(LNN_CLOCK, "notify time sync result. pkgName=%{public}s", item->pkgName);
+        char *anonyPkgName = NULL;
+        Anonymize(item->pkgName, &anonyPkgName);
+        LNN_LOGI(LNN_CLOCK, "notify time sync result. pkgName=%{public}s", AnonymizeWrapper(anonyPkgName));
+        AnonymizeFree(anonyPkgName);
         LnnNotifyTimeSyncResult(item->pkgName, item->pid, &resultInfo, retCode);
     }
 }

@@ -152,6 +152,15 @@ int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char
     return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
+{
+    (void)pkgName;
+    (void)msg;
+    (void)msgLen;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
     int32_t retCode)
 {
@@ -176,14 +185,26 @@ int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     return LnnOnNodeBasicInfoChanged("", info, type);
 }
 
+int32_t LnnIpcNotifyNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type)
+{
+    (void)info;
+    (void)infoTypeLen;
+    (void)type;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
 int32_t LnnIpcLocalNetworkIdChanged(void)
 {
     LNN_LOGI(LNN_EVENT, "not implement");
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcNotifyDeviceNotTrusted(const char *msg)
+int32_t LnnIpcNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
 {
+    (void)type;
+    (void)msg;
+    (void)msgLen;
     LNN_LOGI(LNN_EVENT, "not implement");
     return SOFTBUS_OK;
 }

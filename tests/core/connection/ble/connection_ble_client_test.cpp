@@ -253,24 +253,24 @@ HWTEST_F(ClientConnectionTest, ConnectionStateCallback001, TestSize.Level1)
     connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
     ret = ConnBleSaveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    gattCb->ConnectionStateCallback(connection->underlayerHandle, 5, SOFTBUS_OK);
-    gattCb->ConnectionStateCallback(0, SOFTBUS_BT_CONNECT, SOFTBUS_OK);
+    gattCb->connectionStateCallback(connection->underlayerHandle, 5, SOFTBUS_OK);
+    gattCb->connectionStateCallback(0, SOFTBUS_BT_CONNECT, SOFTBUS_OK);
 
     EXPECT_CALL(bleMock, SoftbusBleGattcDisconnect).WillRepeatedly(Return(
         SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
-    gattCb->ConnectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_DISCONNECT,
+    gattCb->connectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_DISCONNECT,
         SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR);
 
     connection->state = BLE_CONNECTION_STATE_SERVICE_SEARCHING;
     ret = ConnBleSaveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    gattCb->ConnectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_DISCONNECT,
+    gattCb->connectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_DISCONNECT,
         SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR);
-    gattCb->ConnectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_CONNECT,
+    gattCb->connectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_CONNECT,
         SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR);
 
-    gattCb->ConnectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_CONNECT,
+    gattCb->connectionStateCallback(connection->underlayerHandle, SOFTBUS_BT_CONNECT,
         SOFTBUS_OK);
     SoftBusSleepMs(1500);
 }
@@ -298,9 +298,9 @@ HWTEST_F(ClientConnectionTest, ServiceCompleteCallback001, TestSize.Level1)
     int32_t ret = ConnBleSaveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    gattCb->ServiceCompleteCallback(10, SOFTBUS_OK);
-    gattCb->ServiceCompleteCallback(connection->underlayerHandle, SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR);
-    gattCb->ServiceCompleteCallback(connection->underlayerHandle, SOFTBUS_OK);
+    gattCb->serviceCompleteCallback(10, SOFTBUS_OK);
+    gattCb->serviceCompleteCallback(connection->underlayerHandle, SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR);
+    gattCb->serviceCompleteCallback(connection->underlayerHandle, SOFTBUS_OK);
     connection->state = BLE_CONNECTION_STATE_SERVICE_SEARCHING;
 
     const char *bleAddr = "11:22:33:44:55:33";
@@ -314,19 +314,19 @@ HWTEST_F(ClientConnectionTest, ServiceCompleteCallback001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, SoftbusGattcRegisterNotification)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    gattCb->ServiceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
+    gattCb->serviceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
 
     EXPECT_CALL(bleMock, SoftbusGattcGetService)
         .WillRepeatedly(Return(  SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_GET_SERVICE_ERR));
     EXPECT_CALL(bleMock, SoftbusGattcRefreshServices)
         .WillRepeatedly(Return(SOFTBUS_CONN_BLE_INTERNAL_ERR));
-    gattCb->ServiceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
+    gattCb->serviceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
 
     EXPECT_CALL(bleMock, SoftbusGattcRefreshServices)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, SoftbusGattcSearchServices)
         .WillRepeatedly(Return(SOFTBUS_CONN_BLE_INTERNAL_ERR));
-    gattCb->ServiceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
+    gattCb->serviceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
     EXPECT_CALL(bleMock, SoftbusGattcSearchServices)
         .WillRepeatedly(Return(SOFTBUS_OK));
     SoftBusSleepMs(500);
@@ -358,7 +358,7 @@ HWTEST_F(ClientConnectionTest, ServiceCompleteCallback002, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_CONN_BLE_INTERNAL_ERR));
     EXPECT_CALL(bleMock, SoftbusGattcRefreshServices)
         .WillOnce(Return(SOFTBUS_CONN_BLE_INTERNAL_ERR));
-    gattCb->ServiceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
+    gattCb->serviceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
     SoftBusSleepMs(500);
     
     EXPECT_CALL(bleMock, SoftbusGattcRefreshServices)
@@ -369,7 +369,7 @@ HWTEST_F(ClientConnectionTest, ServiceCompleteCallback002, TestSize.Level1)
     bleConnection->state = BLE_CONNECTION_STATE_SERVICE_SEARCHING;
     ret = ConnBleSaveConnection(bleConnection);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    gattCb->ServiceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
+    gattCb->serviceCompleteCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 
@@ -383,7 +383,7 @@ HWTEST_F(ClientConnectionTest, ServiceCompleteCallback002, TestSize.Level1)
 */
 HWTEST_F(ClientConnectionTest, RegistNotificationCallback001, TestSize.Level1)
 {
-    gattCb->RegistNotificationCallback(100, SOFTBUS_OK);
+    gattCb->registNotificationCallback(100, SOFTBUS_OK);
     const char *bleAddr = "11:22:33:44:55:66";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 4, false);
     EXPECT_NE(NULL, bleConnection);
@@ -396,14 +396,14 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, SoftbusGattcSearchServices)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    gattCb->RegistNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_CONN_BLE_INTERNAL_ERR);
+    gattCb->registNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_CONN_BLE_INTERNAL_ERR);
     SoftBusSleepMs(500);
 
     bleConnection->retrySearchServiceCnt = 5;
     bleConnection->state = BLE_CONNECTION_STATE_CONN_NOTIFICATING;
     ret = ConnBleSaveConnection(bleConnection);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    gattCb->RegistNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_CONN_BLE_INTERNAL_ERR);
+    gattCb->registNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_CONN_BLE_INTERNAL_ERR);
     SoftBusSleepMs(500);
 }
 
@@ -427,7 +427,7 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback002, TestSize.Level1)
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, SoftbusGattcRegisterNotification)
         .WillOnce(Return(SOFTBUS_OK));
-    gattCb->RegistNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
+    gattCb->registNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     bleConnection->retrySearchServiceCnt = 0;
@@ -439,7 +439,7 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback002, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, SoftbusGattcSearchServices)
         .WillOnce(Return(SOFTBUS_OK));
-    gattCb->RegistNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
+    gattCb->registNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 
@@ -465,7 +465,7 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback003, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
     EXPECT_CALL(bleMock, SoftbusGattcConfigureMtuSize)
         .WillOnce(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONFIGURE_MTU_ERR));
-    gattCb->RegistNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
+    gattCb->registNotificationCallback(bleConnection->underlayerHandle, SOFTBUS_OK);
     SoftBusSleepMs(500);
     
     const char *addr = "11:22:33:44:44:37";
@@ -477,13 +477,13 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(bleMock, SoftbusGattcConfigureMtuSize)
         .WillOnce(Return(SOFTBUS_OK));
-    gattCb->RegistNotificationCallback(connection->underlayerHandle, SOFTBUS_OK);
+    gattCb->registNotificationCallback(connection->underlayerHandle, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     connection->state = BLE_CONNECTION_STATE_CLOSED;
     ret = ConnBleSaveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    gattCb->RegistNotificationCallback(connection->underlayerHandle, SOFTBUS_OK);
+    gattCb->registNotificationCallback(connection->underlayerHandle, SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 
@@ -509,33 +509,36 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback001, TestSize.Level1)
         .charaUuid.uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
     param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_SERVICE_UUID);
     EXPECT_EQ(EOK, ret);
 
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param,
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param,
         SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_REGISTER_NOTIFICATION_ERR);
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
     SoftBusFree(param.charaUuid.uuid);
     param.charaUuid.uuid = nullptr;
 
     param.charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID);
     param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLECONN_UUID);
     EXPECT_EQ(EOK, ret);
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, ConnGattTransRecv).WillOnce(Return(nullptr));
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
 
     SoftBusFree(param.charaUuid.uuid);
     param.charaUuid.uuid = nullptr;
     param.charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID);
     param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);
     SoftBusSleepMs(500);
     EXPECT_CALL(bleMock, ConnGattTransRecv).WillOnce(Return(nullptr));
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 
@@ -568,16 +571,16 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback002, TestSize.Level1)
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, ConnGattTransRecv)
         .WillOnce(ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnConnModule);
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     EXPECT_CALL(bleMock, ConnGattTransRecv)
         .WillOnce(ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnOldNearby);
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     EXPECT_CALL(bleMock, ConnGattTransRecv).WillOnce(ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnDefult);
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 
@@ -611,7 +614,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback003, TestSize.Level1)
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, ConnGattTransRecv)
         .WillOnce(ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnConnModule);
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     bleConnection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
@@ -620,7 +623,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback003, TestSize.Level1)
     EXPECT_CALL(bleMock, ConnGattTransRecv).WillOnce(ConnectionBleClientInterfaceMock::ActionOfConnGattTransRecv);
     EXPECT_CALL(bleMock, SoftbusBleGattcDisconnect)
         .WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 
@@ -655,7 +658,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback004, TestSize.Level1)
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, ConnGattTransRecv)
         .WillOnce(ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnConnModule1);
-    gattCb->NotificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(bleConnection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     const char *addr = "11:22:33:44:22:06";
@@ -666,7 +669,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(bleMock, ConnGattTransRecv)
         .WillOnce(ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnConnModule);
-    gattCb->NotificationReceiveCallback(connection->underlayerHandle, &param, SOFTBUS_OK);
+    gattCb->notificationReceiveCallback(connection->underlayerHandle, &param, SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 
@@ -680,7 +683,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback004, TestSize.Level1)
 */
 HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback001, TestSize.Level1)
 {
-    gattCb->ConfigureMtuSizeCallback(100, 20, SOFTBUS_OK);
+    gattCb->configureMtuSizeCallback(100, 20, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     const char *bleAddr = "11:22:33:44:22:05";
@@ -692,10 +695,10 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback001, TestSize.Level1)
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, SoftbusBleGattcDisconnect)
         .WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
-    gattCb->ConfigureMtuSizeCallback(bleConnection->underlayerHandle, 20, SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR);
+    gattCb->configureMtuSizeCallback(bleConnection->underlayerHandle, 20, SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR);
     SoftBusSleepMs(500);
 
-    gattCb->ConfigureMtuSizeCallback(bleConnection->underlayerHandle, 20, SOFTBUS_OK);
+    gattCb->configureMtuSizeCallback(bleConnection->underlayerHandle, 20, SOFTBUS_OK);
     SoftBusSleepMs(500);
     const char *addr = "11:22:33:44:22:06";
     ConnBleConnection *connection = ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, 11, false);
@@ -707,7 +710,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback001, TestSize.Level1)
     EXPECT_CALL(bleMock, LnnGetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
     
-    gattCb->ConfigureMtuSizeCallback(connection->underlayerHandle, 21, SOFTBUS_OK);
+    gattCb->configureMtuSizeCallback(connection->underlayerHandle, 21, SOFTBUS_OK);
         SoftBusSleepMs(500);
 }
 
@@ -732,7 +735,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback002, TestSize.Level1)
     EXPECT_CALL(bleMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, LnnGetLocalNumInfo)
         .WillOnce(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
-    gattCb->ConfigureMtuSizeCallback(connection->underlayerHandle, 21, SOFTBUS_OK);
+    gattCb->configureMtuSizeCallback(connection->underlayerHandle, 21, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     const char *bleAddr = "11:22:33:44:22:56";
@@ -744,7 +747,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback002, TestSize.Level1)
     EXPECT_CALL(bleMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillOnce(Return(SOFTBUS_OK));
-    gattCb->ConfigureMtuSizeCallback(bleConnection->underlayerHandle, 21, SOFTBUS_OK);
+    gattCb->configureMtuSizeCallback(bleConnection->underlayerHandle, 21, SOFTBUS_OK);
     SoftBusSleepMs(500);
 
     const char *addrBle = "11:22:33:44:22:56";
@@ -756,7 +759,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback002, TestSize.Level1)
     EXPECT_CALL(bleMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillOnce(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
-    gattCb->ConfigureMtuSizeCallback(connectionBle->underlayerHandle, 22, SOFTBUS_OK);
+    gattCb->configureMtuSizeCallback(connectionBle->underlayerHandle, 22, SOFTBUS_OK);
     SoftBusSleepMs(500);
 }
 }

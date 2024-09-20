@@ -897,11 +897,13 @@ HWTEST_F(ConnectionBrTest, testBrBrans005, TestSize.Level1)
 
     len = MAX_DATA_LEN + 1;
     data = (uint8_t *)SoftBusCalloc(len);
+    ASSERT_NE(nullptr, data);
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     len = MAX_DATA_LEN;
     data = (uint8_t *)SoftBusCalloc(len);
+    ASSERT_NE(nullptr, data);
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
 }

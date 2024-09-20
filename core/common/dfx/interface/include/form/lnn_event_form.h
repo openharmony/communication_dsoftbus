@@ -43,6 +43,9 @@ typedef enum {
     EVENT_STAGE_LNN_LEAVE_SDK = 4,
     EVENT_STAGE_LNN_REG_NODE = 5,
     EVENT_STAGE_LNN_SHIFT_GEAR = 6,
+    EVENT_STAGE_LNN_LANE_SELECT_START = 7,
+    EVENT_STAGE_LNN_LANE_SELECT_END = 8,
+    EVENT_STAGE_LNN_CTRL_BLE = 9,
 } LnnEventLnnStage;
 
 typedef enum {
@@ -105,6 +108,10 @@ typedef struct {
     int32_t onlineType;         // ONLINE_TYPE
     int32_t osType;             // OS_TYPE
     uint32_t connOnlineReason;  // CONN_ONLINE_REASON
+    int32_t laneId;             // LANE_ID
+    int32_t chanReqId;          // CHAN_REQ_ID
+    int32_t connReqId;          // CONN_REQ_ID
+    int32_t strategy;           // STRATEGY_FOR_LNN_BLE
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC

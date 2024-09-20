@@ -204,6 +204,12 @@ extern "C" {
 #define DATA_SWITCH_LEVEL_BUF_LEN 4
 
 /**
+ * @brief Device screen on/off bool data.
+ *
+ */
+#define DATA_DEVICE_SCREEN_STATUS_LEN 1
+
+/**
  * @brief Indicates the maximum length of the database switch length in <b>IDataLevelCb</b>.
  *
  */
@@ -226,6 +232,13 @@ extern "C" {
  *
  */
 #define DEVICE_TYPE_MAX_SIZE 3
+
+/**
+ * @brief Indicates the length of the node screen status.
+ *
+ */
+#define NODE_SCREEN_STATUS_LEN 1
+
 /**
  * @brief Enumerates {@link ConnectionAddrType} types of a device that is added to a LNN.
  *
@@ -555,6 +568,18 @@ typedef struct {
     /** medium which describe the device found by. */
     ExchangeMedium medium;
 } InnerDeviceInfoAddtions;
+
+/**
+ * @brief Defines the capability enumeration of suppressing and restoring ble.
+ * the value same as lnn_heartbeat_utils.h
+ *
+ */
+typedef enum {
+    /* Suppress ble */
+    REQUEST_DISABLE_BLE_DISCOVERY = 100,
+    /* Restore ble */
+    REQUEST_ENABLE_BLE_DISCOVERY,
+} StrategyForBle;
 
 #ifdef __cplusplus
 }

@@ -91,6 +91,7 @@
 #define BLE_MAC "BLE_MAC"
 #define CONN_CAP "CONN_CAP"
 #define AUTH_CAP "AUTH_CAP"
+#define HB_CAP "HB_CAP"
 #define SW_VERSION "SW_VERSION"
 #define MASTER_UDID "MASTER_UDID"
 #define MASTER_WEIGHT "MASTER_WEIGHT"
@@ -1106,6 +1107,14 @@ static void GetAndSetLocalUnifiedName(JsonObj *json)
 
 static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
 {
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret == SOFTBUS_OK) {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, localDevName);
+    } else {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo));
+    }
+
     if (strlen(info->deviceInfo.unifiedName) == 0) {
         GetAndSetLocalUnifiedName(json);
     } else {
@@ -1114,7 +1123,6 @@ static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMet
     (void)JSON_AddStringToObject(json, UNIFIED_DEFAULT_DEVICE_NAME, info->deviceInfo.unifiedDefaultName);
     (void)JSON_AddStringToObject(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName);
     if (!JSON_AddStringToObject(json, NETWORK_ID, info->networkId) ||
-        !JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !JSON_AddStringToObject(json, DEVICE_UDID, LnnGetDeviceUdid(info))) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
@@ -1184,10 +1192,6 @@ static void PackWifiDirectInfo(
             return;
         }
     } else {
-        if (remoteUuid == NULL) {
-            AUTH_LOGE(AUTH_FSM, "invalid uuid");
-            return;
-        }
         if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
             return;
@@ -1198,13 +1202,17 @@ static void PackWifiDirectInfo(
     if (SoftBusBase64Encode(encodePtk, PTK_ENCODE_LEN, &keyLen, (unsigned char *)localPtk,
         PTK_DEFAULT_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "encode ptk fail");
+        (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
         return;
     }
+    (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     AuthPrintBase64Ptk((const char *)encodePtk);
     if (!JSON_AddStringToObject(json, PTK, (char *)encodePtk)) {
         AUTH_LOGE(AUTH_FSM, "add ptk string to json fail");
+        (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
         return;
     }
+    (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
     if (!JSON_AddInt32ToObject(json, STATIC_CAP_LENGTH, info->staticCapLen)) {
         AUTH_LOGE(AUTH_FSM, "add static cap len fail");
         return;
@@ -1268,23 +1276,29 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
     if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN,
         info->cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert cipher iv to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN,
         info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert peerIrk to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN,
         info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert publicAddress to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
         return SOFTBUS_ERR;
     }
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_KEY, cipherKey);
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, cipherIv);
     (void)JSON_AddStringToObject(json, IRK, peerIrk);
     (void)JSON_AddStringToObject(json, PUB_MAC, pubMac);
-    AUTH_LOGI(AUTH_FSM, "pack cipher and rpa info success!");
+    DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
+    (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+    (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
 
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
@@ -1297,7 +1311,6 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
         (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         return SOFTBUS_ERR;
     }
-    DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return SOFTBUS_OK;
 }
@@ -1350,6 +1363,7 @@ static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
         !JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
         !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
         !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
+        !JSON_AddInt32ToObject(json, HB_CAP, info->heartbeatCapacity) ||
         !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
@@ -1495,6 +1509,7 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMet
     } else {
         UnpackPtk(info->remotePtk, encodePtk);
     }
+    (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
 }
 
 static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
@@ -1521,6 +1536,7 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
     (void)JSON_GetStringFromOject(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
     (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
     (void)JSON_GetInt32FromOject(json, AUTH_CAP, (int32_t *)&info->authCapacity);
+    (void)JSON_GetInt32FromOject(json, HB_CAP, (int32_t *)&info->heartbeatCapacity);
     info->isBleP2p = false;
     (void)JSON_GetBoolFromOject(json, BLE_P2P, &info->isBleP2p);
     (void)JSON_GetInt16FromOject(json, DATA_CHANGE_FLAG, (int16_t *)&info->dataChangeFlag);
@@ -1780,8 +1796,14 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
         AUTH_LOGI(AUTH_FSM, "add packdevice mac info fail ");
         return SOFTBUS_AUTH_REG_DATA_FAIL;
     }
-    if (!JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
-        !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret == SOFTBUS_OK) {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, localDevName);
+    } else {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo));
+    }
+    if (!JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !JSON_AddStringToObject(json, DEVICE_VERSION_TYPE, info->versionType) ||
         !JSON_AddStringToObject(json, UUID, info->uuid) ||
         !JSON_AddStringToObject(json, SW_VERSION, info->softBusVersion) ||
@@ -2007,11 +2029,25 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
         LnnGetDeviceDisplayName(peerNodeInfo->deviceInfo.nickName,
             peerNodeInfo->deviceInfo.unifiedDefaultName, deviceName, DEVICE_NAME_BUF_LEN);
     }
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    char *anonyPeerDeviceName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
+    char *anonyUnifiedName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.unifiedName, &anonyUnifiedName);
+    char *anonyUnifiedDefaultName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.unifiedDefaultName, &anonyUnifiedDefaultName);
+    char *anonyNickName = NULL;
+    Anonymize(peerNodeInfo->deviceInfo.nickName, &anonyNickName);
     AUTH_LOGD(AUTH_FSM,
         "peer tmpDeviceName=%{public}s, deviceName=%{public}s, unifiedName=%{public}s, "
         "unifiedDefaultName=%{public}s, nickName=%{public}s",
-        deviceName, peerNodeInfo->deviceInfo.deviceName, peerNodeInfo->deviceInfo.unifiedName,
-        peerNodeInfo->deviceInfo.unifiedDefaultName, peerNodeInfo->deviceInfo.nickName);
+        anonyDeviceName, anonyPeerDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
+    AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyPeerDeviceName);
+    AnonymizeFree(anonyUnifiedName);
+    AnonymizeFree(anonyUnifiedDefaultName);
+    AnonymizeFree(anonyNickName);
     if (strlen(deviceName) != 0) {
         ret = strcpy_s(peerNodeInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, deviceName);
     }

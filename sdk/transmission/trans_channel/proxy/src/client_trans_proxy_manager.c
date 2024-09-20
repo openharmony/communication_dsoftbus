@@ -34,6 +34,7 @@
 
 #define SLICE_LEN (4 * 1024)
 #define PROXY_ACK_SIZE 4
+#define OH_TYPE 10
 
 static IClientSessionCallBack g_sessionCb;
 static uint32_t g_proxyMaxByteBufSize;
@@ -447,14 +448,19 @@ int32_t TransProxyPackAndSendData(
 static void ClientTransProxySendSessionAck(int32_t channelId, int32_t seq)
 {
     unsigned char ack[PROXY_ACK_SIZE] = { 0 };
-    if (memcpy_s(ack, PROXY_ACK_SIZE, &seq, sizeof(int32_t)) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy seq err");
-        return;
-    }
-
+    int32_t tmpSeq = 0;
     ProxyChannelInfoDetail info;
     if (ClientTransProxyGetInfoByChannelId(channelId, &info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get proxy info err, channelId=%{public}d", channelId);
+        return;
+    }
+    if (info.osType == OH_TYPE) {
+        tmpSeq = (int32_t)SoftBusHtoLl((uint32_t)seq);
+    } else {
+        tmpSeq = (int32_t)SoftBusHtoNl((uint32_t)seq); // convet host order to net order
+    }
+    if (memcpy_s(ack, PROXY_ACK_SIZE, &tmpSeq, sizeof(int32_t)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy seq err");
         return;
     }
     info.sequence = seq;
@@ -576,7 +582,7 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
     TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%{public}d, inputLen=%{public}d", head.dataLen, len);
-    if (head.dataLen + sizeof(PacketHead) != len) {
+    if (len <= sizeof(PacketHead) || (head.dataLen != (int32_t)(len - sizeof(PacketHead)))) {
         TRANS_LOGE(TRANS_SDK, "dataLen error, channelId=%{public}d, len=%{public}d, dataLen=%{public}d",
             channelId, len, head.dataLen);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
@@ -661,11 +667,13 @@ static int32_t ClientTransProxySliceProcessChkPkgIsValid(
 {
     (void)data;
     if (head->sliceNum != processor->sliceNumber || head->sliceSeq != processor->expectedSeq) {
-        TRANS_LOGE(TRANS_SDK, "unmatched normal slice received");
+        TRANS_LOGE(TRANS_SDK, "unmatched normal slice received, head sliceNum=%{public}d, sliceSeq=%{public}d,\
+            processor sliceNumber=%{public}d, expectedSeq=%{public}d", head->sliceNum,
+            head->sliceSeq, processor->sliceNumber, processor->expectedSeq);
         return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_NO_INVALID;
     }
-    if ((int32_t)len + processor->dataLen > processor->bufLen) {
-        TRANS_LOGE(TRANS_SDK, "data len invalid");
+    if (processor->dataLen > processor->bufLen || (int32_t)len > processor->bufLen - processor->dataLen) {
+        TRANS_LOGE(TRANS_SDK, "data len invalid %{public}u, %{public}d", len, processor->dataLen);
         return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_EXCEED_LENGTH;
     }
     if (processor->data == NULL) {

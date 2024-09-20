@@ -42,18 +42,6 @@ enum ClientLoopMsgType {
     MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT,
 };
 
-enum RetrySearchServiceReason {
-    BLE_CLIENT_REGISTER_NOTIFICATION_ERR,
-    BLE_CLIENT_REGISTER_NOTIFICATION_FAIL,
-    BLE_CLIENT_SEARCH_SERVICE_ERR,
-    BLE_CLIENT_GET_SERVICE_ERR,
-};
-
-typedef struct {
-    int32_t underlayerHandle;
-    int32_t status;
-} CommonStatusContext;
-
 typedef struct {
     CommonStatusContext common;
     int32_t mtuSize;
@@ -71,11 +59,11 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
 static void BleGattcConfigureMtuSizeCallback(int32_t underlayerHandle, int32_t mtuSize, int32_t status);
 static ConnBleClientEventListener g_clientEventListener = { 0 };
 static SoftBusGattcCallback g_gattcCallback = {
-    .ConnectionStateCallback = BleGattcConnStateCallback,
-    .ServiceCompleteCallback = BleGattcSearchServiceCallback,
-    .RegistNotificationCallback = BleGattcRegisterNotificationCallback,
-    .NotificationReceiveCallback = BleGattcNotificationReceiveCallback,
-    .ConfigureMtuSizeCallback = BleGattcConfigureMtuSizeCallback,
+    .connectionStateCallback = BleGattcConnStateCallback,
+    .serviceCompleteCallback = BleGattcSearchServiceCallback,
+    .registNotificationCallback = BleGattcRegisterNotificationCallback,
+    .notificationReceiveCallback = BleGattcNotificationReceiveCallback,
+    .configureMtuSizeCallback = BleGattcConfigureMtuSizeCallback,
 };
 static SoftBusHandlerWrapper g_bleGattClientAsyncHandler = {
     .handler = {
@@ -816,6 +804,7 @@ int32_t ConnGattClientSend(ConnBleConnection *connection, const uint8_t *data, u
         },
         .value = data,
         .valueLen = dataLen,
+        .writeType = SOFTBUS_GATT_WRITE_NO_RSP,
     };
     return SoftbusGattcWriteCharacteristic(underlayerHandle, &gattcData);
 }

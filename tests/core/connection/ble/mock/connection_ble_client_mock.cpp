@@ -35,6 +35,9 @@ uint8_t *ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnConnModule(uin
     uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
 {
     ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    if (head == nullptr) {
+        return nullptr;
+    }
     head->flag = 0;
     head->module = MODULE_CONNECTION;
     int64_t seq = 10;
@@ -47,6 +50,9 @@ uint8_t *ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnConnModule1(ui
     uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
 {
     ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    if (head == nullptr) {
+        return nullptr;
+    }
     head->magic = 1;
     head->flag = 1;
     head->module = MODULE_CONNECTION;
@@ -60,6 +66,9 @@ uint8_t *ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnOldNearby(uint
     uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
 {
     ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    if (head == nullptr) {
+        return nullptr;
+    }
     head->flag = 0;
     head->module = MODULE_OLD_NEARBY;
     int64_t seq = 10;
@@ -72,6 +81,9 @@ uint8_t *ConnectionBleClientInterfaceMock::ConnGattTransRecvReturnDefult(uint32_
     uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
 {
     ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    if (head == nullptr) {
+        return nullptr;
+    }
     head->flag = 0;
     head->module = MODULE_AUTH_CHANNEL;
     int64_t seq = 10;
@@ -84,6 +96,9 @@ uint8_t *ConnectionBleClientInterfaceMock::ActionOfConnGattTransRecv(uint32_t co
     uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
 {
     ConnPktHead *head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    if (head == nullptr) {
+        return nullptr;
+    }
     head->flag = 0;
     head->module = MODULE_AUTH_CHANNEL;
     int64_t seq = 10;

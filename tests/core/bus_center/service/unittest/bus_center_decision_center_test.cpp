@@ -16,13 +16,16 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "common_list.h"
 #include "bus_center_decision_center.h"
+#include "bus_center_decision_center_deps_mock.h"
 #include "message_handler.h"
 #include "softbus_conn_interface.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "softbus_bus_center.h"
@@ -30,6 +33,8 @@
 
 using namespace testing;
 using namespace testing::ext;
+#define NETWORK_ID_BUF_LEN 65
+#define NODE_NETWORK_ID "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0"
 
 namespace OHOS {
 
@@ -63,7 +68,7 @@ void BusCenterDecisionTest::TearDown(void)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level0)
+HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level1)
 {
     ConnectOption option;
     memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
@@ -71,6 +76,75 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level0)
     LnnDCReportConnectException(&option, 1);
     option.type = CONNECT_P2P;
     LnnDCReportConnectException(&option, 1);
+}
+
+/*
+* @tc.name: BusCenterDecisionTest002
+* @tc.desc:bus center decision test
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest002, TestSize.Level1)
+{
+    ConnectOption option;
+    memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    option.type = CONNECT_BR;
+    LnnDCClearConnectException(&option);
+    option.type = CONNECT_P2P;
+    LnnDCClearConnectException(&option);
+}
+
+/*
+* @tc.name: BusCenterDecisionTest003
+* @tc.desc:bus center decision test
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest003, TestSize.Level1)
+{
+    NodeBasicInfo info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+    bool isOnline = true;
+    LnnDCProcessOnlineState(isOnline, &info);
+    isOnline = false;
+    LnnDCProcessOnlineState(isOnline, &info);
+    (void)strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    LnnDCProcessOnlineState(isOnline, &info);
+}
+
+/*
+* @tc.name: BusCenterDecisionTest004
+* @tc.desc:bus center decision test
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest004, TestSize.Level1)
+{
+    NiceMock<BusCenterDecisionCenterDepsInterfaceMock> BusCenterDecisionMock;
+    EXPECT_CALL(BusCenterDecisionMock, CreateSoftBusList).WillOnce(Return(nullptr));
+    int32_t ret = InitDecisionCenter();
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: BusCenterDecisionTest005
+* @tc.desc:bus center decision test
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest005, TestSize.Level1)
+{
+    // list will free when go to TransSrvDataListDeinit
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    SoftBusMutexInit(&list->lock, &mutexAttr);
+    ListInit(&list->list);
+    NiceMock<BusCenterDecisionCenterDepsInterfaceMock> BusCenterDecisionMock;
+    EXPECT_CALL(BusCenterDecisionMock, CreateSoftBusList).WillOnce(Return(list));
+    int32_t ret = InitDecisionCenter();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DeinitDecisionCenter();
 }
 }
        

@@ -318,6 +318,11 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
         DelLogicAndLaneRelationship(resourceItem.laneId);
         ClearLaneResourceByLaneId(resourceItem.laneId);
     }
+    if (laneLinkInfo->type == LANE_HML &&
+        FindLaneResourceByLinkType(peerUdid, LANE_HML_RAW, &resourceItem) == SOFTBUS_OK) {
+        DelLogicAndLaneRelationship(resourceItem.laneId);
+        ClearLaneResourceByLaneId(resourceItem.laneId);
+    }
     uint32_t resNum;
     LaneBusinessInfo laneBusinessInfo[LANE_TYPE_BUTT];
     if (FindLaneBusinessInfoByLinkInfo(laneLinkInfo, &resNum, laneBusinessInfo, LANE_TYPE_BUTT) != SOFTBUS_OK) {
@@ -549,9 +554,10 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
         AnonymizeFree(anonyUuid);
         return;
     }
+    LaneLinkType linkType = link->linkType == WIFI_DIRECT_LINK_TYPE_HML ? LANE_HML : LANE_P2P;
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    if (FindLaneResourceByLinkType(nodeInfo.deviceInfo.deviceUdid, LANE_HML, &resourceItem) != SOFTBUS_OK) {
+    if (FindLaneResourceByLinkType(nodeInfo.deviceInfo.deviceUdid, linkType, &resourceItem) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "find lane resource fail");
         return;
     }
@@ -590,4 +596,26 @@ int32_t InitLaneListener(void)
 
     RegisterWifiDirectListener();
     return SOFTBUS_OK;
+}
+
+void DeinitLaneListener(void)
+{
+    if (LaneListenerLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane listener lock fail");
+        return;
+    }
+    LaneBusinessInfo *businessItem = NULL;
+    LaneBusinessInfo *businessNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(businessItem, businessNext, &g_laneBusinessInfoList, LaneBusinessInfo, node) {
+        ListDelete(&businessItem->node);
+        SoftBusFree(businessItem);
+    }
+    LaneListenerInfo *listenerItem = NULL;
+    LaneListenerInfo *listenerNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(listenerItem, listenerNext, &g_laneListenerList, LaneListenerInfo, node) {
+        ListDelete(&listenerItem->node);
+        SoftBusFree(listenerItem);
+    }
+    LaneListenerUnlock();
+    (void)SoftBusMutexDestroy(&g_laneStateListenerMutex);
 }

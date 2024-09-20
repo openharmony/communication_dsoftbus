@@ -254,20 +254,11 @@ HWTEST_F(TransTcpDirectP2pTest, StartP2pListenerTest001, TestSize.Level1)
     ret = StartP2pListener(g_ip, &g_port);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
-    StopP2pSessionListener();
-}
-
-/**
- * @tc.name: OnChannelOpenFailTest001
- * @tc.desc: OnChannelOpenFail, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pTest, OnChannelOpenFailTest001, TestSize.Level1)
-{
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
     OnChannelOpenFail(channelId, errCode);
+
+    StopP2pSessionListener();
 }
 
 /**
@@ -345,7 +336,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
 {
-    int32_t ret = ConnectTcpDirectPeer(g_addr, g_port);
+    int32_t ret = ConnectTcpDirectPeer(g_addr, g_port, g_ip);
     EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
 }
 

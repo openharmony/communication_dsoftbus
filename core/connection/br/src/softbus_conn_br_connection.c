@@ -265,8 +265,7 @@ static void *StartServerServe(void *serveCtx)
     int32_t socketHandle = ctx->socketHandle;
     SoftBusFree(ctx);
     ConnBrConnection *connection = CreateAndSaveConnection(socketHandle);
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, NULL, CONN_BR,
-        "connection is not exist, connectionId=%{public}u", connection->connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, NULL, CONN_BR, "connection is not exist");
     do {
         CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId, socketHandle);
         g_eventListener.onServerAccepted(connection->connectionId);

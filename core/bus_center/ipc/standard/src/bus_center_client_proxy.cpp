@@ -84,6 +84,21 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     return SOFTBUS_OK;
 }
 
+int32_t ClientOnNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type)
+{
+    std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
+    SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
+    if (proxyMap.empty()) {
+        LNN_LOGE(LNN_EVENT, "proxyMap is empty");
+        return SOFTBUS_NETWORK_REMOTE_NULL;
+    }
+    for (const auto &proxy : proxyMap) {
+        sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
+        clientProxy->OnNodeStatusChanged(proxy.first.c_str(), info, infoTypeLen, type);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ClinetOnLocalNetworkIdChanged()
 {
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
@@ -95,7 +110,7 @@ int32_t ClinetOnLocalNetworkIdChanged()
     return SOFTBUS_OK;
 }
 
-int32_t ClinetNotifyDeviceNotTrusted(const char *msg)
+int32_t ClinetNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
 {
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
@@ -105,7 +120,7 @@ int32_t ClinetNotifyDeviceNotTrusted(const char *msg)
             continue;
         }
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
-        clientProxy->OnNodeDeviceNotTrusted(proxy.first.c_str(), msg);
+        clientProxy->OnNodeDeviceTrustedChange(proxy.first.c_str(), type, msg, msgLen);
     }
     return SOFTBUS_OK;
 }

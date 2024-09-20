@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,122 +12,21 @@
 # limitations under the License.
 
 #####################hydra-fuzz###################
-import("//build/config/features.gni")
-import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
-import("../../../../../sdk/bus_center/bus_center_sdk.gni")
-import("../../../../../sdk/discovery/disc_sdk.gni")
-import("../../../../../sdk/frame/frame_sdk.gni")
-import("../../../../../sdk/frame/frame_sdk.gni")
-import("../../../../../sdk/transmission/trans_sdk.gni")
-dsoftbus_root_path = "../../../../.."
-
-common_client_src = bus_center_sdk_src + disc_sdk_src +
-                    softbus_client_frame_src + trans_session_manager_sdk_src
-common_client_inc = bus_center_sdk_inc + disc_sdk_inc +
-                    softbus_client_frame_inc + trans_session_manager_sdk_inc
-common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
-
-common_client_deps += [
-  "$dsoftbus_dfx_path/log:softbus_dfx_log",
-  "$dsoftbus_root_path/adapter:softbus_adapter",
-  "$dsoftbus_root_path/core/common:softbus_utils",
-]
-common_client_ex_deps = []
-if (defined(ohos_lite)) {
-  if (dsoftbus_feature_build_shared_sdk == true) {
-    build_type = "shared_library"
-  } else {
-    build_type = "static_library"
-  }
-  if (ohos_kernel_type != "liteos_m") {
-    common_client_ex_deps += [ "bounds_checking_function:libsec_shared" ]
-  }
-} else {
-  common_client_ex_deps += [ "bounds_checking_function:libsec_shared" ]
-}
-
-config("dsoftbus_sdk_interface") {
-  include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
-    "$dsoftbus_root_path/interfaces/inner_kits/transport",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-  ]
-}
-
-ohos_static_library("softbus_client_static") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  branch_protector_ret = "pac_ret"
-
-  sources = common_client_src
-  include_dirs = common_client_inc
-  deps = common_client_deps
-  external_deps = common_client_ex_deps
-  public_configs = [ ":dsoftbus_sdk_interface" ]
-  defines += TRANS_SDK_DEFINES
-
-  if (defined(ohos_lite)) {
-    cflags_cc = [ "-stdc=c++14" ]
-    if (board_toolchain_type != "iccarm") {
-      configs -= [ "//build/lite/config:language_cpp" ]
-      cflags = [ "-fPIC" ]
-      cflags_cc += [ "-fPIC" ]
-    } else {
-      cflags = [
-        "--diag_suppress",
-        "Pa153",
-      ]
-    }
-    ldflags = [ "-lstdc++" ]
-  } else {
-    cflags = [ "-fPIC" ]
-    cflags_cc = [ "-std=c++14" ]
-    if (is_standard_system) {
-      external_deps += [
-        "access_token:libaccesstoken_sdk",
-        "c_utils:utils",
-        "hilog:libhilog",
-        "ipc:ipc_single",
-      ]
-    }
-    if (defined(global_parts_info) &&
-        defined(global_parts_info.hiviewdfx_hicollie)) {
-      external_deps += [ "hicollie:libhicollie" ]
-    }
-    part_name = "dsoftbus"
-    subsystem_name = "communication"
-  }
-}
 
 ##############################fuzztest##########################################
 ohos_fuzztest("SoftbusClientStubFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
+
   fuzz_config_file =
-      "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer"
+      "$dsoftbus_test_path/sdk/frame/fuzztest/softbusclientstub_fuzzer"
+
   include_dirs = [
-    "../../../../../adapter/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../core/common/include",
-    "../../../../../core/common/inner_communication",
-    "../../../../../interfaces/kits/common",
-    "../../../../../sdk/frame/standard/include",
-    "../../../../../sdk/frame/small/include",
-    "../../../../../sdk/frame/mini/include",
-    "../../../../../sdk/frame/common/include",
-    "../../../../../core/common/dfx/interface/include",
-    "../../../../../sdk/transmission/trans_channel/manager/include/",
+    "$dsoftbus_sdk_path/frame/standard/include",
+    "$dsoftbus_sdk_path/transmission/trans_channel/manager/include/",
   ]
+
   cflags = [
     "-g",
     "-O0",
@@ -135,13 +34,17 @@ ohos_fuzztest("SoftbusClientStubFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fstack-protector-strong",
   ]
+
   sources = [ "softbusclientstub_fuzzer.cpp" ]
-  deps = [ ":softbus_client_static" ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_test_path/sdk:softbus_client_static",
+  ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "ipc:ipc_core",
     "ipc:ipc_single",
   ]
 }
@@ -149,10 +52,6 @@ ohos_fuzztest("SoftbusClientStubFuzzTest") {
 ###############################################################################
 group("fuzztest") {
   testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":SoftbusClientStubFuzzTest",
-  ]
+  deps = [ ":SoftbusClientStubFuzzTest" ]
 }
 ###############################################################################

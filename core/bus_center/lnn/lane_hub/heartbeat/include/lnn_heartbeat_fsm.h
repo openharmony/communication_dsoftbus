@@ -73,6 +73,7 @@ typedef struct {
     bool hasNetworkId;
     bool isWakeUp;
     const char networkId[NETWORK_ID_BUF_LEN];
+    uint64_t checkDelay;
 } LnnCheckDevStatusMsgPara;
 
 typedef struct {
@@ -83,6 +84,10 @@ typedef struct {
     bool isNeedRestart;
     bool hasScanRsp;
     bool isFirstBegin;
+    bool isFast;
+    bool isDirectBoardcast;
+    char networkId[NETWORK_ID_BUF_LEN];
+    uint64_t checkDelay;
 } LnnProcessSendOnceMsgPara;
 
 int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm);

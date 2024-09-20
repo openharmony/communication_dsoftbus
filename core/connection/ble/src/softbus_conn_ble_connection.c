@@ -40,6 +40,8 @@ enum ConnectionLoopMsgType {
     MSG_CONNECTION_EXCHANGE_BASIC_INFO_TIMEOUT,
     MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
     MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT,
+    MSG_CONNECTION_OCCUPY_RELEASE,
+    MSG_CONNECTION_UPDATE_REFRENCE,
 };
 
 enum BleServerState {
@@ -62,7 +64,8 @@ typedef struct {
     int32_t delta;
     int32_t peerRc;
     uint16_t challengeCode;
-} BleReferenceCount;
+    bool isActiveUpdateLocalRc;
+} BleReferenceContext;
 
 typedef struct {
     int32_t delta;
@@ -138,9 +141,11 @@ ConnBleConnection *ConnBleCreateConnection(
     connection->objectRc = 1;
     connection->retrySearchServiceCnt = 0;
     connection->underlayerFastConnectFailedScanFailure = false;
+    connection->isOccupied = false;
     SoftBusList *list = CreateSoftBusList();
     if (list == NULL) {
         CONN_LOGE(CONN_BLE, "create softbus list failed");
+        SoftBusMutexDestroy(&connection->lock);
         SoftBusFree(connection);
         return NULL;
     }
@@ -329,19 +334,55 @@ static int32_t ConnPackCtlMsgRcSendDeltaData(RcPackCtlMsgPara *rcMsgPara)
         ConnBlePostBytesInner(rcMsgPara->connId, data, dataLen, 0, flag, MODULE_CONNECTION, seq, NULL);
 }
 
-int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challengeCode, int32_t delta)
+static bool NeedProccessOccupy(ConnBleConnection *connection, int32_t delta, uint16_t challengeCode,
+    bool isActiveUpdateLocalRc, int32_t peerRc)
 {
     int32_t status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "Lock faild, err=%{public}d", status);
-        return SOFTBUS_LOCK_ERR;
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock err");
+    bool isOccupied = connection->isOccupied;
+    (void)SoftBusMutexUnlock(&connection->lock);
+    if (delta > 0 || !isOccupied) {
+        return false;
     }
+
+    CONN_LOGI(CONN_BLE, "is occupied, process later, connId=%{public}u", connection->connectionId);
+    BleReferenceContext *referenceContext = (BleReferenceContext *)SoftBusMalloc(sizeof(BleReferenceContext));
+    CONN_CHECK_AND_RETURN_RET_LOGE(referenceContext != NULL, false, CONN_BLE,
+        "malloc buffer failed, connectionId=%{public}u", connection->connectionId);
+    referenceContext->delta = delta;
+    referenceContext->challengeCode = challengeCode;
+    referenceContext->isActiveUpdateLocalRc = isActiveUpdateLocalRc;
+    referenceContext->peerRc = peerRc;
+    status = ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_UPDATE_REFRENCE,
+        connection->connectionId, 0, referenceContext, WAIT_TIMEOUT_TRY_AGAIN);
+    if (status != SOFTBUS_OK) {
+        SoftBusFree(referenceContext);
+        CONN_LOGE(CONN_BLE, "post msg failed, connectionId=%{public}u, error=%{public}d",
+            connection->connectionId, status);
+        return false;
+    }
+    return true;
+}
+
+int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challengeCode, int32_t delta)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "connection is null");
+    if (NeedProccessOccupy(connection, delta, challengeCode, true, 0)) {
+        return SOFTBUS_OK;
+    }
+    int32_t status = SoftBusMutexLock(&connection->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE,
+        "Lock faild, err=%{public}d", status);
     int32_t underlayerHandle = connection->underlayerHandle;
     ConnBleFeatureBitSet featureBitSet = connection->featureBitSet;
     connection->connectionRc += delta;
     int32_t localRc = connection->connectionRc;
     if (localRc <= 0) {
         connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
+    } else if (connection->state == BLE_CONNECTION_STATE_NEGOTIATION_CLOSING) {
+        ConnRemoveMsgFromLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
+            connection->connectionId, 0, NULL);
+        connection->state = BLE_CONNECTION_STATE_CONNECTED;
     }
     (void)SoftBusMutexUnlock(&connection->lock);
     ConnEventExtra extra = {
@@ -378,11 +419,14 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
     return ConnPackCtlMsgRcSendDeltaData(&rcMsgPara);
 }
 
-static int32_t BleOnReferenceRequest(ConnBleConnection *connection, BleReferenceCount *referenceCount)
+static int32_t BleOnReferenceRequest(ConnBleConnection *connection, BleReferenceContext *referenceCount)
 {
     int32_t delta = referenceCount->delta;
     int32_t peerRc = referenceCount->peerRc;
     uint16_t challengeCode = referenceCount->challengeCode;
+    if (NeedProccessOccupy(connection, delta, challengeCode, false, peerRc)) {
+        return SOFTBUS_OK;
+    }
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "try to lock failed, connId=%{public}u, err=%{public}d", connection->connectionId, status);
@@ -438,7 +482,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
         CONN_LOGW(CONN_BLE, "old version NOT have KEY_CHALLENGE field. connId=%{public}u", connection->connectionId);
     }
 
-    BleReferenceCount referenceCount = {
+    BleReferenceContext referenceCount = {
         .delta = delta,
         .peerRc = peerRc,
         .challengeCode = challengeCode,
@@ -953,6 +997,21 @@ static int32_t DoRetryAction(enum BleServerState expect)
     return (statusGatt != SOFTBUS_OK || statusCoc != SOFTBUS_OK) ? SOFTBUS_CONN_BLE_CHECK_STATUS_ERR : SOFTBUS_OK;
 }
 
+void ConnBleOccupy(ConnBleConnection *connection)
+{
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "conn is NULL");
+    ConnRemoveMsgFromLooper(
+        &g_bleConnectionAsyncHandler, MSG_CONNECTION_OCCUPY_RELEASE, connection->connectionId, 0, NULL);
+    int32_t ret = ConnPostMsgToLooper(&g_bleConnectionAsyncHandler,
+        MSG_CONNECTION_OCCUPY_RELEASE, connection->connectionId, 0, NULL, WAIT_TIMEOUT_OCCUPY);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_BLE, "post msg failed, connId=%{public}u, err=%{public}d",
+        connection->connectionId, ret);
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, CONN_BLE,
+        "lock failed, connId=%{public}u", connection->connectionId);
+    connection->isOccupied = true;
+    (void)SoftBusMutexUnlock(&connection->lock);
+}
+
 static void RetryServerStatConsistentHandler(void)
 {
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK, CONN_BLE,
@@ -1035,6 +1094,34 @@ static void ConnectionIdleDisconnectTimeoutHandler(uint32_t connectionId)
     ConnBleReturnConnection(&connection);
 }
 
+static void BleOnOccupyRelease(uint32_t connectionId)
+{
+    ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "conn not exist, id=%{public}u", connectionId);
+    int32_t status = SoftBusMutexLock(&connection->lock);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "lock failed, connectionId=%{public}u, error=%{public}d", connectionId, status);
+        ConnBleReturnConnection(&connection);
+        return;
+    }
+    connection->isOccupied = false;
+    (void)SoftBusMutexUnlock(&connection->lock);
+    ConnBleReturnConnection(&connection);
+}
+
+static void BleRetryUpdateConnectionRc(uint32_t connectionId, BleReferenceContext *referenceContext)
+{
+    CONN_CHECK_AND_RETURN_LOGE(referenceContext != NULL, CONN_BLE, "referenceContext is null");
+    ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "conn not exist, id=%{public}u", connectionId);
+    if (referenceContext->isActiveUpdateLocalRc) {
+        ConnBleUpdateConnectionRc(connection, referenceContext->challengeCode, referenceContext->delta);
+    } else {
+        BleOnReferenceRequest(connection, referenceContext);
+    }
+    ConnBleReturnConnection(&connection);
+}
+
 static void BleConnectionMsgHandler(SoftBusMessage *msg)
 {
     CONN_LOGI(CONN_BLE, "ble connection looper receive msg, msg=%{public}d", msg->what);
@@ -1050,6 +1137,12 @@ static void BleConnectionMsgHandler(SoftBusMessage *msg)
             break;
         case MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT:
             ConnectionIdleDisconnectTimeoutHandler((uint32_t)msg->arg1);
+            break;
+        case MSG_CONNECTION_OCCUPY_RELEASE:
+            BleOnOccupyRelease((uint32_t)msg->arg1);
+            break;
+        case MSG_CONNECTION_UPDATE_REFRENCE:
+            BleRetryUpdateConnectionRc((uint32_t)msg->arg1, (BleReferenceContext *)msg->obj);
             break;
         default:
             CONN_LOGW(CONN_BLE,
@@ -1068,7 +1161,9 @@ static int BleCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *
     switch (ctx->what) {
         case MSG_CONNECTION_EXCHANGE_BASIC_INFO_TIMEOUT:
         case MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT:
-        case MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT: {
+        case MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT:
+        case MSG_CONNECTION_UPDATE_REFRENCE:
+        case MSG_CONNECTION_OCCUPY_RELEASE: {
             if (msg->arg1 == ctx->arg1) {
                 return COMPARE_SUCCESS;
             }

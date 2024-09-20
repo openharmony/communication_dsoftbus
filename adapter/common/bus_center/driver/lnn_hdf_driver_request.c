@@ -30,19 +30,19 @@ static int32_t ParseReply(struct HdfSBuf *rspData, uint8_t *reply, uint32_t repl
     uint32_t dataSize;
 
     if (reply == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (!HdfSbufReadBuffer(rspData, (const void **)&data, &dataSize)) {
         LNN_LOGE(LNN_STATE, "read cmd reply fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_READ_BUFFER_FAIL;
     }
     if (dataSize > replyLen) {
         LNN_LOGE(LNN_STATE, "no enough space save reply");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_ENOUGH_DATA;
     }
     if (memcpy_s(reply, replyLen, data, dataSize) != EOK) {
         LNN_LOGE(LNN_STATE, "memcpy reply fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -50,7 +50,7 @@ static int32_t ParseReply(struct HdfSBuf *rspData, uint8_t *reply, uint32_t repl
 int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen,
     uint8_t *reply, uint32_t replyLen)
 {
-    int32_t rc = SOFTBUS_ERR;
+    int32_t rc = SOFTBUS_DRIVER_SERVICE_FAIL;
     struct HdfIoService *softbusService = NULL;
     struct HdfSBuf *reqData = NULL;
     struct HdfSBuf *rspData = NULL;
@@ -62,13 +62,13 @@ int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen
     softbusService = HdfIoServiceBind(DRIVER_SERVICE_NAME);
     if (softbusService == NULL) {
         LNN_LOGE(LNN_STATE, "bind hdf softbus fail for module=%{public}d", moduleId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_BIND_DRIVER_FAIL;
     }
     if (softbusService->dispatcher == NULL ||
         softbusService->dispatcher->Dispatch == NULL) {
-        LNN_LOGE(LNN_STATE, "bind hdf softbus fail for module=%{public}d", moduleId);
+        LNN_LOGE(LNN_STATE, "dispatcher is null, bind hdf softbus fail for module=%{public}d", moduleId);
         HdfIoServiceRecycle(softbusService);
-        return SOFTBUS_ERR;
+        return SOFTBUS_BIND_DRIVER_FAIL;
     }
     reqData = HdfSbufObtainDefaultSize();
     rspData = HdfSbufObtainDefaultSize();
