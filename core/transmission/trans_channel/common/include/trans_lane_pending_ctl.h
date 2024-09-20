@@ -28,15 +28,15 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-    ListNode node;
+    bool bSucc;
+    bool isFinished;
+    char sessionName[SESSION_NAME_SIZE_MAX];
     int32_t errCode;
     uint32_t laneReqId;
     int32_t channelId;
-    char sessionName[SESSION_NAME_SIZE_MAX];
+    ListNode node;
     LinkPara linkPara;
     LaneConnInfo connInfo;
-    bool bSucc;
-    bool isFinished;
 } TransAuthWithParaNode;
 
 int32_t TransReqLanePendingInit(void);

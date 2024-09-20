@@ -31,15 +31,15 @@ typedef enum {
 } UdpChannelStatus;
 
 typedef struct {
-    ListNode node;
-    int64_t seq;
-    AppInfo info;
-    uint32_t timeOut;
+    bool isMeta;
+    uint8_t tos;
     UdpChannelStatus status;
     uint32_t requestId;
-    bool isMeta;
     int32_t errCode;
-    uint8_t tos;
+    uint32_t timeOut;
+    int64_t seq;
+    ListNode node;
+    AppInfo info;
 } UdpChannelInfo;
 
 typedef struct {

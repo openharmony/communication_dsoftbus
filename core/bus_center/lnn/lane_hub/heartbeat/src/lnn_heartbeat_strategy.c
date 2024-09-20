@@ -39,17 +39,17 @@
 
 typedef struct {
     const char *callerId;
+    int64_t lifeTimestamp; // unit is milliseconds
     ListNode node;
     GearMode mode;
-    int64_t lifeTimestamp; // unit is milliseconds
 } GearModeStorageInfo;
 
 typedef struct {
-    LnnHeartbeatType type;
-    LnnHeartbeatMediumParam *param;
-    int32_t gearModeCnt;
-    ListNode gearModeList;
     bool isEnable;
+    LnnHeartbeatType type;
+    int32_t gearModeCnt;
+    LnnHeartbeatMediumParam *param;
+    ListNode gearModeList;
 } LnnHeartbeatParamManager;
 
 static SoftBusMutex g_hbStrategyMutex;

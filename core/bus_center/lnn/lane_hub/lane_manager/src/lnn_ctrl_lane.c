@@ -28,12 +28,12 @@
 #include "wifi_direct_manager.h"
 
 typedef struct {
-    ListNode node;
     uint32_t laneHandle;
-    uint64_t laneId;
     uint32_t linkListIdx;
     LaneAllocInfo allocInfo;
+    uint64_t laneId;
     LanePreferredLinkList linkList;
+    ListNode node;
     LaneAllocListener listener;
 } CtrlReqInfo;
 

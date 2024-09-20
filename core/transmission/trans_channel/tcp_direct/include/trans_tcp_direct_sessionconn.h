@@ -42,17 +42,17 @@ typedef enum {
 } TcpDirectChannelStatus;
 
 typedef struct {
-    ListNode node;
     bool serverSide;
-    int32_t channelId;
-    AppInfo appInfo;
-    uint32_t status;
-    uint32_t timeout;
-    int64_t req;
-    uint32_t requestId;
-    AuthHandle authHandle;
     bool isMeta;
     ListenerModule listenMod;
+    int32_t channelId;
+    uint32_t status;
+    uint32_t timeout;
+    uint32_t requestId;
+    int64_t req;
+    ListNode node;
+    AuthHandle authHandle;
+    AppInfo appInfo;
 } SessionConn;
 
 typedef struct {

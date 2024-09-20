@@ -50,35 +50,33 @@ typedef enum {
 } LnnHeartbeatEventType;
 
 typedef struct {
-    ListNode node;
-    uint16_t id;
-    LnnHeartbeatType hbType;
-
     char fsmName[HB_FSM_NAME_LEN];
-    FsmStateMachine fsm;
+    uint16_t id;
     LnnHeartbeatState state;
     LnnHeartbeatStrategyType strategyType;
+    LnnHeartbeatType hbType;
+
+    ListNode node;
+    FsmStateMachine fsm;
 } LnnHeartbeatFsm;
 
 typedef struct {
-    LnnHeartbeatType hbType;
     bool wakeupFlag;
     bool isRelay;
+    LnnHeartbeatType hbType;
     bool *isRemoved;
 } LnnRemoveSendEndMsgPara;
 
 typedef struct {
-    LnnHeartbeatType hbType;
-    ConnectionAddrType addrType;
     bool hasNetworkId;
     bool isWakeUp;
     const char networkId[NETWORK_ID_BUF_LEN];
+    LnnHeartbeatType hbType;
+    ConnectionAddrType addrType;
     uint64_t checkDelay;
 } LnnCheckDevStatusMsgPara;
 
 typedef struct {
-    LnnHeartbeatType hbType;
-    LnnHeartbeatStrategyType strategyType;
     bool isRelay;
     bool isSyncData;
     bool isNeedRestart;
@@ -87,6 +85,8 @@ typedef struct {
     bool isFast;
     bool isDirectBoardcast;
     char networkId[NETWORK_ID_BUF_LEN];
+    LnnHeartbeatType hbType;
+    LnnHeartbeatStrategyType strategyType;
     uint64_t checkDelay;
 } LnnProcessSendOnceMsgPara;
 
