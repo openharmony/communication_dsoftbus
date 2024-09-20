@@ -243,7 +243,7 @@ int ClientRegisterService(const char *pkgName)
         return SOFTBUS_INVALID_PARAM;
     }
     int sleepCnt = 0;
-    while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) == SOFTBUS_IPC_ERR) {
+    while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) != SOFTBUS_OK) {
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
         sleepCnt++;
         if (sleepCnt >= SOFTBUS_MAX_RETRY_TIMES) {
