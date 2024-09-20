@@ -885,9 +885,8 @@ static int CheckLocalDeviceInfo(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
     }
 
     if (!StringHasEOF(localDeviceInfo->deviceId, sizeof(localDeviceInfo->deviceId)) ||
-        !StringHasEOF(localDeviceInfo->name, sizeof(localDeviceInfo->name)) ||
-        !StringHasEOF(localDeviceInfo->version, sizeof(localDeviceInfo->version))) {
-        DFINDER_LOGE(TAG, "device id or device name or version is not ended");
+        !StringHasEOF(localDeviceInfo->name, sizeof(localDeviceInfo->name))) {
+        DFINDER_LOGE(TAG, "device id or device name is not ended");
         return NSTACKX_EINVAL;
     }
 
@@ -910,7 +909,6 @@ static void DeviceInfoV2Init(NSTACKX_LocalDeviceInfoV2 *v2,
 {
     v2->name = localDeviceInfo->name;
     v2->deviceId = localDeviceInfo->deviceId;
-    v2->version = localDeviceInfo->version;
     v2->deviceType = localDeviceInfo->deviceType;
     v2->businessType = localDeviceInfo->businessType;
     v2->hasDeviceHash = hasDeviceHash;
@@ -1013,8 +1011,7 @@ static void RegisterDeviceV2(void *arg)
 static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo, int registerType)
 {
     if (localDeviceInfo == NULL || localDeviceInfo->name == NULL ||
-        localDeviceInfo->deviceId == NULL || localDeviceInfo->version == NULL ||
-        localDeviceInfo->ifNums > NSTACKX_MAX_LOCAL_IFACE_NUM ||
+        localDeviceInfo->deviceId == NULL || localDeviceInfo->ifNums > NSTACKX_MAX_LOCAL_IFACE_NUM ||
         (localDeviceInfo->ifNums != 0 && localDeviceInfo->localIfInfo == NULL) ||
         CheckInterfaceInfo(localDeviceInfo->localIfInfo, localDeviceInfo->ifNums) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "invalid args");

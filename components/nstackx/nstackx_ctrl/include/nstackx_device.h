@@ -127,7 +127,6 @@ typedef struct DeviceInfo {
     /* Capability data */
     uint32_t capabilityBitmapNum;
     uint32_t capabilityBitmap[NSTACKX_MAX_CAPABILITY_NUM];
-    char version[NSTACKX_MAX_HICOM_VERSION];
     uint8_t mode;
     uint8_t discoveryType;
     char deviceHash[DEVICE_HASH_LEN];
