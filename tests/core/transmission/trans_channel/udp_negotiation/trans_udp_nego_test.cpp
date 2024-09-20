@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
 #include "auth_common.h"
-#include "gtest/gtest.h"
-#include "softbus_app_info.h"
+#include "bus_center_event.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_qos.h"
-#include "trans_channel_manager.h"
 #include "trans_session_manager.h"
-#include "trans_log.h"
-#include "trans_udp_channel_manager.c"
+#include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.c"
 #include "trans_udp_negotiation_exchange.c"
 
@@ -780,7 +779,7 @@ HWTEST_F(TransUdpNegoTest, ProcessUdpChannelState001, TestSize.Level1)
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     int32_t ret = ProcessUdpChannelState(appInfo, isServerSide);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     isServerSide = false;
     ret = ProcessUdpChannelState(appInfo, isServerSide);

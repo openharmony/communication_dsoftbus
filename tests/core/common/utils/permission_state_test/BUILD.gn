@@ -41,7 +41,7 @@ ohos_unittest("PermissionStateTest") {
       "device_auth:deviceauth_sdk",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   } else {
     external_deps = [

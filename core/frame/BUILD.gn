@@ -144,7 +144,6 @@ if (defined(ohos_lite)) {
         "common/src/softbus_server_frame.c",
         "small/client_manager/src/softbus_client_info_manager.c",
         "small/init/src/bus_center_server_stub.c",
-        "small/init/src/disc_server_stub.c",
         "small/init/src/softbus_server_stub.c",
         "small/init/src/trans_server_stub.c",
       ]
@@ -284,9 +283,10 @@ if (defined(ohos_lite)) {
       external_deps += [
         "access_token:libaccesstoken_sdk",
         "access_token:libprivacy_sdk",
+        "access_token:libtokenid_sdk",
         "device_auth:deviceauth_sdk",
         "hilog:libhilog",
-        "ipc:ipc_core",
+        "ipc:ipc_single",
         "kv_store:distributeddata_inner",
         "netmanager_base:net_conn_manager_if",
         "safwk:system_ability_fwk",

@@ -34,19 +34,28 @@ typedef struct {
     uint8_t *data;
 } SoftBusGattcNotify;
 
+typedef enum {
+    SOFTBUS_GATT_WRITE_NO_RSP = 0x1,
+    SOFTBUS_GATT_WRITE_DEFAULT,
+    SOFTBUS_GATT_WRITE_PREPARE,
+    SOFTBUS_GATT_WRITE_SIGNED,
+    SOFTBUS_GATT_WRITE_TYPE_UNKNOWN,
+} SoftBusGattWriteType;
+
 typedef struct {
     SoftBusBtUuid serviceUuid;
     SoftBusBtUuid characterUuid;
     uint32_t valueLen;
     const uint8_t *value;
+    SoftBusGattWriteType writeType;
 } SoftBusGattcData;
 
 typedef struct {
-    void (*ConnectionStateCallback)(int32_t clientId, int32_t connState, int32_t status);
-    void (*ServiceCompleteCallback)(int32_t clientId, int32_t status);
-    void (*RegistNotificationCallback)(int32_t clientId, int status);
-    void (*NotificationReceiveCallback)(int32_t clientId, SoftBusGattcNotify *param, int32_t status);
-    void (*ConfigureMtuSizeCallback)(int clientId, int mtuSize, int status);
+    void (*connectionStateCallback)(int32_t clientId, int32_t connState, int32_t status);
+    void (*serviceCompleteCallback)(int32_t clientId, int32_t status);
+    void (*registNotificationCallback)(int32_t clientId, int status);
+    void (*notificationReceiveCallback)(int32_t clientId, SoftBusGattcNotify *param, int32_t status);
+    void (*configureMtuSizeCallback)(int clientId, int mtuSize, int status);
 } SoftBusGattcCallback;
 
 typedef enum {

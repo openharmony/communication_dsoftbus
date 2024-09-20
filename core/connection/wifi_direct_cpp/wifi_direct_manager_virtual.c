@@ -15,7 +15,7 @@
 #include "wifi_direct_manager.h"
 #include "softbus_error_code.h"
 
-static uint32_t GetRequestId()
+static uint32_t GetRequestId(void)
 {
     return 0;
 }
@@ -151,6 +151,11 @@ static void AddSyncPtkListener(SyncPtkListener listener)
     (void)listener;
 }
 
+static bool SupportHmlTwo(void)
+{
+    return false;
+}
+
 static bool IsWifiP2pEnabled(void)
 {
     return false;
@@ -161,7 +166,7 @@ static int GetStationFrequency(void)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static bool IsHmlConnected()
+static bool IsHmlConnected(void)
 {
     return false;
 }
@@ -177,7 +182,7 @@ static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
     (void)result;
 }
 
-static int32_t Init()
+static int32_t Init(void)
 {
     return SOFTBUS_OK;
 }
@@ -204,6 +209,7 @@ static struct WifiDirectManager g_manager = {
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
     .getRemoteUuidByIp = GetRemoteUuidByIp,
 
+    .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,

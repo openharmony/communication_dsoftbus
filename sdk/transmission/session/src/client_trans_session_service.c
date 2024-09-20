@@ -307,21 +307,10 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 
 static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
 {
-    if (addrStr == NULL || addrInfo == NULL) {
-        TRANS_LOGE(TRANS_SDK, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        (addrStr != NULL && addrInfo != NULL), SOFTBUS_INVALID_PARAM, TRANS_SDK, "invalid param");
     cJSON *obj = cJSON_Parse(addrStr);
-    if (obj == NULL) {
-        TRANS_LOGE(TRANS_SDK, "cJSON_Parse fail");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    if (memset_s(addrInfo, sizeof(ConnectionAddr), 0x0, sizeof(ConnectionAddr)) != EOK) {
-        cJSON_Delete(obj);
-        TRANS_LOGE(TRANS_SDK, "memset_s info fail");
-        return SOFTBUS_MEM_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(obj != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_SDK, "addrStr parse failed.");
     int32_t port;
     if (GetJsonObjectStringItem(obj, "ETH_IP", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
         GetJsonObjectNumberItem(obj, "ETH_PORT", &port)) {
@@ -347,8 +336,15 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
         return SOFTBUS_OK;
     }
     if (GetJsonObjectStringItem(obj, "BLE_MAC", addrInfo->info.ble.bleMac, BT_MAC_LEN)) {
-        if (GetJsonObjectStringItem(obj, "deviceId", (char *)addrInfo->info.ble.udidHash, UDID_HASH_LEN)) {
-            TRANS_LOGI(TRANS_SDK, "get deviceid fail");
+        char udidHash[UDID_HASH_LEN] = {0};
+        if (GetJsonObjectStringItem(obj, "deviceId", udidHash, UDID_HASH_LEN)) {
+            char *tmpUdidHash = NULL;
+            Anonymize(udidHash, &tmpUdidHash);
+            int ret = ConvertHexStringToBytes(
+                (unsigned char *)addrInfo->info.ble.udidHash, UDID_HASH_LEN, udidHash, strlen(udidHash));
+            TRANS_LOGI(TRANS_SDK, "string to bytes ret=%{public}d, udidHash=%{public}s",
+                ret, AnonymizeWrapper(tmpUdidHash));
+            AnonymizeFree(tmpUdidHash);
         }
         cJSON_Delete(obj);
         addrInfo->type = CONNECTION_ADDR_BLE;
@@ -396,6 +392,10 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     int32_t addrIndex = IsValidAddrInfoArr(addrInfo, num);
     ConnectionAddr *addr = NULL;
     ConnectionAddr mix;
+    if (memset_s(&mix, sizeof(ConnectionAddr), 0x0, sizeof(ConnectionAddr)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memset_s info fail");
+        return SOFTBUS_MEM_ERR;
+    }
     if (addrIndex < 0) {
         if (ConvertAddrStr(mixAddr, &mix) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "invalid addrInfo param");
@@ -620,12 +620,12 @@ int GetSessionSide(int sessionId)
 static bool IsValidFileReceivePath(const char *rootDir)
 {
     if (!IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_SDK, "recvPath invalid. recvPath=%{public}s", rootDir);
+        TRANS_LOGE(TRANS_SDK, "recvPath invalid. recvPath=%{private}s", rootDir);
         return false;
     }
     char *absPath = realpath(rootDir, NULL);
     if (absPath == NULL) {
-        TRANS_LOGE(TRANS_SDK, "recvPath not exist, recvPath=%{public}s, errno=%{public}d.", rootDir, errno);
+        TRANS_LOGE(TRANS_SDK, "recvPath not exist, recvPath=%{private}s, errno=%{public}d.", rootDir, errno);
         return false;
     }
     SoftBusFree(absPath);

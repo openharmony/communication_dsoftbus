@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,17 @@
  * limitations under the License.
  */
 
-#include <securec.h>
-
 #include "gtest/gtest.h"
+
+#include "auth_interface.h"
+#include "bus_center_manager.h"
 #include "disc_event_manager.h"
 #include "message_handler.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_feature_config.h"
-#include "softbus_json_utils.h"
-#include "session.h"
-#include "softbus_trans_def.h"
-#include "trans_channel_callback.c"
 #include "trans_channel_manager.h"
-#include "trans_channel_manager.c"
-#include "trans_log.h"
 #include "trans_manager_test_mock.h"
 #include "trans_session_service.h"
-
 
 using namespace testing;
 using namespace testing::ext;
@@ -79,13 +72,50 @@ HWTEST_F(TransChannelManagerMockTest, TransStreamStats002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t channelType = 1;
-    StreamSendStats *data = (StreamSendStats *)SoftBusMalloc(sizeof(StreamSendStats));
+    StreamSendStats *data = (StreamSendStats *)SoftBusCalloc(sizeof(StreamSendStats));
     ASSERT_TRUE(data != nullptr);
     TransManagerTestInterfaceMock mock;
     EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = TransStreamStats(channelId, channelType, data);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(data);
+}
+
+/**
+ * @tc.name: TransStreamStats test
+ * @tc.desc: TransStreamStats003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerMockTest, TransStreamStats003, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t channelType = 1;
+    StreamSendStats *data = (StreamSendStats *)SoftBusCalloc(sizeof(StreamSendStats));
+    ASSERT_TRUE(data != nullptr);
+    TransManagerTestInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_TRANS_NODE_NOT_FOUND));
+    int32_t ret = TransStreamStats(channelId, channelType, data);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: TransRequestQos test
+ * @tc.desc: TransRequestQos001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerMockTest, TransRequestQos001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t chanType = 1;
+    int32_t appType = 1;
+    TransManagerTestInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnRequestQosOptimization).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -101,6 +131,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos002, TestSize.Level1)
     int32_t appType = 1;
     TransManagerTestInterfaceMock mock;
     EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnRequestQosOptimization).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
     EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
 }
@@ -134,6 +165,23 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransRequestQos test
+ * @tc.desc: TransRequestQos005
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerMockTest, TransRequestQos005, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t chanType = 1;
+    int32_t appType = 1;
+    TransManagerTestInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_TRANS_NODE_NOT_FOUND));
+    int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+}
+
+/**
  * @tc.name: TransRippleStats test
  * @tc.desc: TransRippleStats002
  * @tc.type: FUNC
@@ -141,7 +189,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos004, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerMockTest, TransRippleStats002, TestSize.Level1)
 {
-    TrafficStats *trafficStats = (TrafficStats *)SoftBusMalloc(sizeof(TrafficStats));
+    TrafficStats *trafficStats = (TrafficStats *)SoftBusCalloc(sizeof(TrafficStats));
     ASSERT_TRUE(trafficStats != nullptr);
     trafficStats->stats[0] = 't';
     trafficStats->stats[1] = 'e';
@@ -149,6 +197,25 @@ HWTEST_F(TransChannelManagerMockTest, TransRippleStats002, TestSize.Level1)
     EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = TransRippleStats(1, 1, trafficStats);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(trafficStats);
+}
+
+/**
+ * @tc.name: TransRippleStats test
+ * @tc.desc: TransRippleStats003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerMockTest, TransRippleStats003, TestSize.Level1)
+{
+    TrafficStats *trafficStats = (TrafficStats *)SoftBusCalloc(sizeof(TrafficStats));
+    ASSERT_TRUE(trafficStats != nullptr);
+    trafficStats->stats[0] = 't';
+    trafficStats->stats[1] = 'e';
+    TransManagerTestInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_TRANS_NODE_NOT_FOUND));
+    int32_t ret = TransRippleStats(1, 1, trafficStats);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     SoftBusFree(trafficStats);
 }
 

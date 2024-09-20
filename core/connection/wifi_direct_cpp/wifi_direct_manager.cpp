@@ -30,6 +30,8 @@
 #include "conn_event.h"
 #include "wifi_direct_role_option.h"
 #include "command/processor_selector_factory.h"
+#include "entity/entity_factory.h"
+#include "auth_interface.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::list<WifiDirectStatusListener> g_listeners;
@@ -43,6 +45,28 @@ static uint32_t GetRequestId(void)
     return g_requestId++;
 }
 
+static void SetBootLinkTypeByAuthHandle(WifiDirectConnectInfo &info)
+{
+    auto type = info.negoChannel.handle.authHandle.type;
+    auto authHandleType = static_cast<AuthLinkType>(type);
+    CONN_LOGI(CONN_WIFI_DIRECT, "auth handle type %{public}d", authHandleType);
+    switch (authHandleType) {
+        case AUTH_LINK_TYPE_WIFI:
+            info.dfxInfo.bootLinkType = STATISTIC_WLAN;
+            break;
+        case AUTH_LINK_TYPE_BR:
+            info.dfxInfo.bootLinkType = STATISTIC_BR;
+            break;
+        case AUTH_LINK_TYPE_BLE:
+            info.dfxInfo.bootLinkType = STATISTIC_BLE;
+            break;
+        default:
+            CONN_LOGE(CONN_WIFI_DIRECT, "undefined handle type");
+            info.dfxInfo.bootLinkType = STATISTIC_NONE;
+            break;
+    }
+}
+
 static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExtra *extra)
 {
     extra->requestId = static_cast<int32_t>(info->requestId);
@@ -50,22 +74,22 @@ static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExt
     extra->expectRole = static_cast<int32_t>(info->expectApiRole);
     extra->peerIp = info->remoteMac;
 
+    info->dfxInfo.bootLinkType = STATISTIC_NONE;
     if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
         info->dfxInfo.linkType = STATISTIC_P2P;
     } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
         info->dfxInfo.linkType = STATISTIC_HML;
-    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
-        info->dfxInfo.linkType = STATISTIC_TRIGGER_HML;
-        info->dfxInfo.bootLinkType = STATISTIC_NONE;
-    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
+    } else {
         info->dfxInfo.linkType = STATISTIC_TRIGGER_HML;
     }
 
     WifiDirectNegoChannelType type = info->negoChannel.type;
     if (type == NEGO_CHANNEL_AUTH) {
-        info->dfxInfo.bootLinkType = STATISTIC_WLAN;
+        SetBootLinkTypeByAuthHandle(*info);
     } else if (type == NEGO_CHANNEL_COC) {
         info->dfxInfo.bootLinkType = STATISTIC_COC;
+    } else if (type == NEGO_CHANNEL_ACTION) {
+        info->dfxInfo.bootLinkType = STATISTIC_ACTION;
     }
 }
 
@@ -121,7 +145,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
 
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
-    OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
+    OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TOTAL_START);
 
     ConnEventExtra extra;
     SetElementTypeExtra(info, &extra);
@@ -476,9 +500,22 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
+static bool IsHmlSupport(void)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    OHOS::SoftBus::InnerLink::LinkType type = OHOS::SoftBus::InnerLink::LinkType::HML;
+    auto &entity = OHOS::SoftBus::EntityFactory::GetInstance().GetEntity(type);
+    return entity.SupportHml();
+}
+
 static bool IsWifiP2pEnabled(void)
 {
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
+}
+
+static bool SupportHmlTwo(void)
+{
+    return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
 }
 
 static int GetStationFrequency(void)
@@ -546,9 +583,11 @@ static struct WifiDirectManager g_manager = {
     .getRemoteUuidByIp = GetRemoteUuidByIp,
     .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 
+    .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,
+    .isHmlSupport = IsHmlSupport,
 
     .init = Init,
     .notifyOnline = NotifyOnline,

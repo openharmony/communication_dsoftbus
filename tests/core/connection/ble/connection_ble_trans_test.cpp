@@ -106,6 +106,7 @@ HWTEST_F(ConnectionBleTransTest, TransRecv, TestSize.Level1)
     buffer.length = sizeof(ConnPktHead) - 1;
     buffer.buffer = (uint8_t *)(&head);
     outLen = (int32_t *)SoftBusCalloc(sizeof(ConnPktHead));
+    ASSERT_NE(nullptr, outLen);
     data = ConnCocTransRecv(connectionId, &buffer, outLen);
     EXPECT_EQ(nullptr, data);
 
@@ -123,6 +124,11 @@ HWTEST_F(ConnectionBleTransTest, TransRecv, TestSize.Level1)
     buffer.capacity = sizeof(ConnPktHead) + sizeof(ConnPktHead) + 1;
     data = ConnCocTransRecv(connectionId, &buffer, outLen);
     EXPECT_EQ(nullptr, data);
+
+    buffer.length = head.len + sizeof(ConnPktHead) + 1;
+    buffer.capacity = sizeof(ConnPktHead) + sizeof(ConnPktHead) + 1;
+    data = ConnCocTransRecv(connectionId, &buffer, outLen);
+    EXPECT_NE(nullptr, data);
 }
 
 /*
@@ -206,6 +212,7 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, ret);
 
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+    ASSERT_NE(nullptr, connection);
     connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
     SoftBusMutexInit(&connection->lock, NULL);
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillOnce(Return(connection));
@@ -215,6 +222,7 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
 
     uint8_t *value3 = (uint8_t *)malloc(sizeof(uint8_t));
     ConnBleConnection *bleConnectionconnection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+    ASSERT_NE(nullptr, connection);
     EXPECT_CALL(bleMock, ConnBleGetConnectionById).WillRepeatedly(Return(bleConnectionconnection));
     SoftBusMutexInit(&bleConnectionconnection->lock, NULL);
     bleConnectionconnection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
@@ -225,14 +233,14 @@ HWTEST_F(ConnectionBleTransTest, TransPostBytesInner, TestSize.Level1)
 }
 
 /*
-* @tc.name: GattTransRecv
-* @tc.desc: Test ConnGattTransRecv.
+* @tc.name: GattTransRecv001
+* @tc.desc: Test ConnGattTransRecv001.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionBleTransTest, GattTransRecv, TestSize.Level1)
+HWTEST_F(ConnectionBleTransTest, GattTransRecv001, TestSize.Level1)
 {
     uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
     uint32_t dataLen = sizeof(uint8_t) + sizeof(BleTransHeader);
@@ -251,6 +259,79 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv, TestSize.Level1)
     data = (uint8_t *)&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
+
+    tmp.size = 0x11;
+    data = (uint8_t *)&tmp;
+    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+}
+
+/*
+* @tc.name: GattTransRecv002
+* @tc.desc: Test ConnGattTransRecv002.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleTransTest, GattTransRecv002, TestSize.Level1)
+{
+    uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
+    uint32_t dataLen = sizeof(uint8_t) + sizeof(BleTransHeader);
+    ConnBleReadBuffer buffer;
+    uint32_t outLen = 0;
+    uint32_t connectionId = 1;
+    uint32_t received[3] = {0, 1000, 1};
+    BleTransHeader tmp;
+    NiceMock<ConnectionBleTransInterfaceMock> bleMock;
+    tmp.seq = 100000;
+    tmp.size = dataLen - sizeof(BleTransHeader) + 1;
+    tmp.total = tmp.size;
+    tmp.offset = tmp.total - tmp.size + 1;
+    buffer.seq = 100001;
+    buffer.total = tmp.total + 1;
+    data = (uint8_t *)&tmp;
+    uint8_t *value = ConnGattTransRecv(connectionId, data, BLE_TRANS_HEADER_SIZE - 1, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+
+    tmp.total = tmp.size + 1;
+    data = (uint8_t *)&tmp;
+    value = ConnGattTransRecv(connectionId, data, BLE_TRANS_HEADER_SIZE - 1, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+
+    for (uint32_t i = 0; i < sizeof(received) / sizeof(received[0]); i++) {
+        buffer.received = received[i];
+        value = ConnGattTransRecv(connectionId, data, BLE_TRANS_HEADER_SIZE - 1, &buffer, &outLen);
+        EXPECT_EQ(nullptr, value);
+    }
+
+    value = ConnGattTransRecv(connectionId, data, BLE_TRANS_HEADER_SIZE - 1, &buffer, &outLen);
+    EXPECT_EQ(nullptr, value);
+}
+
+/*
+* @tc.name: ConnBleTransConfigPostLimit
+* @tc.desc: Test ConnBleTransConfigPostLimit.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleTransTest, ConnBleTransConfigPostLimit, TestSize.Level1)
+{
+    LimitConfiguration configuration;
+    configuration.type = CONNECT_TCP;
+    int32_t ret = ConnBleTransConfigPostLimit(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ConnBleTransConfigPostLimit(&configuration);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    configuration.type = CONNECT_BLE;
+    configuration.active = false;
+    ret = ConnBleTransConfigPostLimit(&configuration);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+    configuration.active = true;
+    ret = ConnBleTransConfigPostLimit(&configuration);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -283,5 +364,27 @@ HWTEST_F(ConnectionBleTransTest, QueueBlock, TestSize.Level1)
     ret = ConnBleDequeueBlock(&msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ConnBleDeinitSendQueue();
+
+    NiceMock<ConnectionBleTransInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, WaitQueueLength).WillRepeatedly(Return(!SOFTBUS_OK));
+    ret = ConnBleEnqueueNonBlock(&queueNode);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    {
+        InSequence seq;
+        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
+        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(SOFTBUS_OK));
+        ret = ConnBleDequeueBlock(&msg);
+        EXPECT_NE(SOFTBUS_OK, ret);
+        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
+        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
+        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(SOFTBUS_OK));
+        ret = ConnBleDequeueBlock(&msg);
+        EXPECT_NE(SOFTBUS_OK, ret);
+        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
+        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
+        EXPECT_CALL(bleMock, GetMsg).Times(1).WillOnce(Return(!SOFTBUS_OK));
+        ret = ConnBleDequeueBlock(&msg);
+        EXPECT_NE(SOFTBUS_OK, ret);
+    }
 }
 }

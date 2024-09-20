@@ -262,6 +262,9 @@ void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan)
     if (msg == NULL) {
         TRANS_LOGE(TRANS_MSG, "msg create failed");
         if (chan != NULL) {
+            (void)memset_s(
+                (void *)chan->appInfo.sessionKey,
+                sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
             SoftBusFree((void *)chan);
         }
         return;

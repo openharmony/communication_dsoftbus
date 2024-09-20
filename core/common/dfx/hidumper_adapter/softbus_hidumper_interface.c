@@ -25,7 +25,7 @@ int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusDumpProcess: param invalid ");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SoftBusDumpDispatch(fd, argc, argv);
 }
@@ -34,17 +34,17 @@ int32_t SoftBusHiDumperInit(void)
 {
     if (SoftBusAlarmHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Alarm HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusHidumperUtilInit() != SOFTBUS_OK || SoftBusHiDumperModuleInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "SoftBusHiDumperInit fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
 
     if (SoftBusStatsHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Stats HiDumper fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DFX_INIT_FAILED;
     }
     return SOFTBUS_OK;
 }

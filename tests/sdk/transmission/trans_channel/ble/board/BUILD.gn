@@ -26,15 +26,13 @@ ohos_unittest("dsoftbus_auth_ble_board") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
-    "$dsoftbus_root_path/sdk/discovery/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "unittest/common/",
-    "$dsoftbus_root_path/sdk/discovery/manager/include",
   ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",

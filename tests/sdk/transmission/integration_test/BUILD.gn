@@ -45,7 +45,7 @@ ohos_unittest("DeviceManagerTest") {
     "$dsoftbus_root_path/adapter/common/include",
   ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   if (is_standard_system) {
     external_deps = [

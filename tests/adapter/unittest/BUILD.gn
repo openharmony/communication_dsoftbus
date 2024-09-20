@@ -222,10 +222,12 @@ if (defined(ohos_lite)) {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
       "samgr:samgr_proxy",
-      "wifi:wifi_sdk",
     ]
+    if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
+      external_deps += [ "wifi:wifi_sdk" ]
+    }
   }
 
   ohos_unittest("AdapterDsoftbusNetworkTest") {

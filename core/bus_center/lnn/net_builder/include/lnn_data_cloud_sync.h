@@ -48,6 +48,7 @@ typedef struct {
     uint64_t feature;
     uint64_t connSubFeature;
     uint32_t authCapacity;
+    uint32_t heartbeatCapacity;
     int32_t osType;
     char osVersion[OS_VERSION_BUF_LEN];
     int32_t stateVersion;
@@ -74,6 +75,7 @@ void LnnDeInitCloudSyncModule(void);
 int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info);
 int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t valueLength);
 int32_t LnnDeleteSyncToDB(void);
+int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId);
 int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeType changeType);
 int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize);
 int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value);

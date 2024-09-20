@@ -58,8 +58,9 @@ void LnnDeinitLocalLedger(void);
 const NodeInfo *LnnGetLocalNodeInfo(void);
 int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info);
 int32_t LnnUpdateLocalNetworkId(const void *id);
+int32_t LnnUpdateLocalNetworkIdTime(int64_t time);
+int32_t LnnUpdateLocalScreenStatus(bool isScreenOn);
 void LnnUpdateStateVersion(StateVersionChangeReason reason);
-int32_t LnnUpdateLedgerByRestoreInfo(NodeInfo *restoreInfo);
 
 #ifdef __cplusplus
 }

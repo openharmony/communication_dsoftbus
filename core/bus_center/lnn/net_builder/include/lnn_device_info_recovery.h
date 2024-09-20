@@ -68,6 +68,7 @@ extern "C" {
 #define DEVICE_INFO_CONN_CAP "CONN_CAP"
 #define DEVICE_INFO_NEW_CONN_CAP "NEW_CONN_CAP"
 #define DEVICE_INFO_AUTH_CAP "AUTH_CAP"
+#define DEVICE_INFO_HB_CAP "HB_CAP"
 #define DEVICE_INFO_EXTDATA "EXTDATA"
 #define DEVICE_INFO_STATE_VERSION "STATE_VERSION"
 #define DEVICE_INFO_LOCAL_STATE_VERSION "LOCAL_STATE_VERSION"
@@ -98,6 +99,7 @@ int32_t LnnLoadLocalDeviceInfo(void);
 int32_t LnnLoadRemoteDeviceInfo(void);
 int32_t LnnSaveLocalDeviceInfo(const NodeInfo *deviceInfo);
 int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo);
+int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums);
 int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo);
 int32_t LnnUpdateRemoteDeviceInfo(const NodeInfo *deviceInfo);
 int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo);

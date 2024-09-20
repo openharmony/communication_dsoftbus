@@ -25,7 +25,7 @@ ohos_moduletest("TransSocketStreamEncryptMt") {
     "tmessenger.cpp",
   ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   install_enable = false
 

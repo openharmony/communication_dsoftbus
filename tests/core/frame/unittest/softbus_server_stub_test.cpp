@@ -214,38 +214,6 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusServerStubTest003
- * @tc.desc: Verify the CheckPidByChannelId function.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest003, TestSize.Level1)
-{
-    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    ASSERT_NE(nullptr, softBusServer);
-    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
-    pid_t callingPid = 0;
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-
-    EXPECT_CALL(softbusServerStubMock, TransGetAppInfoByChanId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = softBusServer->CheckPidByChannelId(callingPid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    EXPECT_CALL(softbusServerStubMock, TransGetAppInfoByChanId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
-    ret = softBusServer->CheckPidByChannelId(callingPid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    EXPECT_CALL(softbusServerStubMock, TransGetAppInfoByChanId).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = softBusServer->CheckPidByChannelId(callingPid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    callingPid = -1;
-    ret = softBusServer->CheckPidByChannelId(callingPid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
-}
-
-/**
  * @tc.name: SoftbusServerStubTest004
  * @tc.desc: Verify the CheckAndRecordAccessToken function.
  * @tc.type: FUNC
@@ -256,86 +224,6 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest004, TestSize.Level1)
     char permission[50] = "test";
     int32_t ret = CheckAndRecordAccessToken(permission);
     EXPECT_EQ(Security::AccessToken::PERMISSION_DENIED, ret);
-}
-
-/**
- * @tc.name: SoftbusServerStubTest005
- * @tc.desc: Verify the Start and Stop DiscoveryInner function.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest005, TestSize.Level1)
-{
-    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    ASSERT_NE(nullptr, softBusServer);
-
-    softBusServer->InitMemberFuncMap();
-    softBusServer->InitMemberPermissionMap();
-
-    uint32_t ipcCode = SERVER_OPEN_SESSION;
-    SoftbusReportPermissionFaultEvt(ipcCode);
-
-    char test[10] = "test";
-    int32_t subscribeId = 5;
-    int32_t mode = 85;
-    int32_t medium = 4;
-    int32_t freq = 3;
-    bool boolNum = true;
-    unsigned int dataLen = 0;
-    MessageParcel datas;
-    MessageParcel reply;
-
-    datas.WriteCString(test);
-    datas.WriteInt32(subscribeId);
-    datas.WriteInt32(mode);
-    datas.WriteInt32(medium);
-    datas.WriteInt32(freq);
-    datas.WriteBool(boolNum);
-    datas.WriteBool(boolNum);
-    datas.WriteCString(test);
-    datas.WriteUint32(dataLen);
-    int32_t ret = softBusServer->StartDiscoveryInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    datas.WriteCString(test);
-    datas.WriteInt32(subscribeId);
-    ret = softBusServer->StopDiscoveryInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: SoftbusServerStubTest006
- * @tc.desc: Verify the Publish and Unpublish Service Inner function.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest006, TestSize.Level1)
-{
-    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    ASSERT_NE(nullptr, softBusServer);
-    char test[10] = "test";
-    int32_t publishId = 5;
-    int32_t mode = 85;
-    int32_t medium = 4;
-    int32_t freq = 3;
-    unsigned int dataLen = 0;
-    MessageParcel datas;
-    MessageParcel reply;
-
-    datas.WriteCString(test);
-    datas.WriteInt32(publishId);
-    datas.WriteInt32(mode);
-    datas.WriteInt32(medium);
-    datas.WriteInt32(freq);
-    datas.WriteCString(test);
-    datas.WriteUint32(dataLen);
-    int32_t ret = softBusServer->PublishServiceInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    datas.WriteCString(test);
-    datas.WriteInt32(publishId);
-    ret = softBusServer->UnpublishServiceInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -518,7 +406,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest011, TestSize.Level1)
     datas.WriteUint16(0);
     datas.WriteBool(boolNum);
     ret = softBusServer->OpenSessionInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /**
@@ -599,6 +487,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest014, TestSize.Level1)
 
     datas.WriteInt32(channelId);
     EXPECT_CALL(softbusServerStubMock, TransGetAndComparePid).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, TransReleaseUdpResources).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->ReleaseResourcesInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -1105,7 +994,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest026, TestSize.Level1)
 
     datas.WriteCString(test);
     ret = softBusServer->RegDataLevelChangeCbInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /**
@@ -1127,7 +1016,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest027, TestSize.Level1)
 
     datas.WriteCString(test);
     ret = softBusServer->UnregDataLevelChangeCbInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /**

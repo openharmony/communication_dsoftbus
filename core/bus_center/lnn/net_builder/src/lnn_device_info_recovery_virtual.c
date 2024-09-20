@@ -33,6 +33,13 @@ int32_t LnnSaveLocalDeviceInfo(const NodeInfo *deviceInfo)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums)
+{
+    (void)info;
+    (void)nums;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo)
 {
     (void)deviceInfo;

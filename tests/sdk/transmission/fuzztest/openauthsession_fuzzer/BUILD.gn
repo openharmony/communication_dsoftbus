@@ -37,7 +37,7 @@ ohos_fuzztest("OpenAuthSessionFuzzTest") {
     "-fstack-protector-strong",
   ]
   sources = [ "openauthsession_fuzzer.cpp" ]
-  deps = [ "../../../../../sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   external_deps = [
     "bounds_checking_function:libsec_static",
     "c_utils:utils",

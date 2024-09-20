@@ -79,7 +79,14 @@ static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
         LNN_LOGE(LNN_LEDGER, "GetBasicInfoByUdid fail.");
         return;
     }
-    LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.", oldDeviceName, basic.deviceName);
+    char *anonyOldDeviceName = NULL;
+    Anonymize(oldDeviceName, &anonyOldDeviceName);
+    char *anonyDeviceName = NULL;
+    Anonymize(basic.deviceName, &anonyDeviceName);
+    LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.",
+        anonyOldDeviceName, anonyDeviceName);
+    AnonymizeFree(anonyOldDeviceName);
+    AnonymizeFree(anonyDeviceName);
     LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
 }
 
@@ -712,8 +719,8 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
         oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
     }
-    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != 0 ||
-        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != 0) {
+    if (strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, oldInfo->deviceInfo.deviceName) != EOK ||
+        strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s fail");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
@@ -952,6 +959,7 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
         return;
     }
+    deviceInfo->netCapacity = info->netCapacity;
     if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return;
@@ -1662,6 +1670,7 @@ int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int32_t fd)
         SOFTBUS_DPRINTF(fd, "\n[NO.%d]\n", i + 1);
         SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
     }
+    SoftBusFree(remoteNodeInfo);
     return SOFTBUS_OK;
 }
 

@@ -23,8 +23,11 @@
 extern "C" {
 #endif
 
+#define BOOTEVENT_ACCOUNT_READY "bootevent.account.ready"
+
 typedef int32_t (*LnnInitEventMonitorImpl)(void);
 typedef void (*LnnDeinitEventMonitorImpl)(void);
+typedef void (*AccountEventHandle)(const char *key, const char *value, void *context);
 
 int32_t LnnInitNetlinkMonitorImpl(void);
 
@@ -54,6 +57,9 @@ void LnnDeinitDriverMonitorImpl(void);
 
 void LnnDeInitNetlinkMonitorImpl(void);
 
+int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle);
+
+bool LnnQueryLocalScreenStatusOnce(bool notify);
 #ifdef __cplusplus
 }
 #endif

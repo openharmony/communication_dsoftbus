@@ -23,6 +23,7 @@
 #include "data/ipv4_info.h"
 #include "wifi_direct_types.h"
 #include "data/link_info.h"
+#include "data/inner_link.h"
 
 namespace OHOS::SoftBus {
 static constexpr int FREQUENCY_2G_FIRST = 2412;
@@ -56,6 +57,7 @@ public:
     static std::string UuidToNetworkId(const std::string &uuid);
     static std::string GetLocalNetworkId();
     static std::string GetLocalUuid();
+    static int32_t GetLocalConnSubFeature(uint64_t &feature);
     static std::vector<uint8_t> GetLocalPtk(const std::string &remoteNetworkId);
     static std::vector<uint8_t> GetRemotePtk(const std::string &remoteNetworkId);
     static bool IsRemoteSupportTlv(const std::string &remoteDeviceId);
@@ -74,6 +76,7 @@ public:
     static int CompareIgnoreCase(const std::string &left, const std::string &right);
 
     static bool SupportHml();
+    static bool SupportHmlTwo();
     static int32_t GetInterfaceIpString(const std::string &interface, std::string &ip);
     static bool IsInChannelList(int32_t channel, const std::vector<int> &channelArray);
     static int32_t IpStringToIntArray(const char *addrString, uint32_t *addrArray, size_t addrArraySize);
@@ -96,10 +99,12 @@ public:
     static void ParallelFlowExit();
     static uint32_t CalculateStringLength(const char *str, uint32_t size);
     static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
-    static int32_t GetOsType(const std::string &remoteNetworkId);
+    static bool IsDfsChannel(const int &frequency);
+    static bool CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type);
     static int32_t GetOsType(const char *networkId);
     static int32_t GetDeviceType(const char *networkId);
     static int32_t GetDeviceType();
+    static int32_t GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature);
 
 private:
     static inline std::mutex serialParallelLock_;

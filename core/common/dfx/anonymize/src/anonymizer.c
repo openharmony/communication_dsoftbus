@@ -265,12 +265,15 @@ static int32_t AnonymizeMultiByteStr(const char *str, uint32_t len, uint32_t len
     COMM_CHECK_AND_RETURN_RET_LOGE(lenRatio != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "lenRatio is 0");
     COMM_CHECK_AND_RETURN_RET_LOGE(posRatio != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "posRatio is 0");
 
-    *anonymized = MallocStr(len);
-    COMM_CHECK_AND_RETURN_RET_LOGE(*anonymized != NULL, SOFTBUS_MALLOC_ERR, COMM_DFX, "malloc failed");
-
     wchar_t wideStr[DEVICE_NAME_MAX_LEN] = {0};
     size_t wideCharNum = mbstowcs(wideStr, str, len);
-    COMM_CHECK_AND_RETURN_RET_LOGE(wideCharNum > 0, SOFTBUS_WIDECHAR_ERR, COMM_DFX, "convert wide str failed");
+    if (wideCharNum == 0 || wideCharNum > len) {
+        COMM_LOGW(COMM_DFX, "convert wide str failed");
+        return CopyStr(str, anonymized);
+    }
+
+    *anonymized = MallocStr(len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(*anonymized != NULL, SOFTBUS_MALLOC_ERR, COMM_DFX, "malloc failed");
 
     uint32_t wideStrLen = (uint32_t)wideCharNum;
     uint32_t anonymizedNum = (wideStrLen + lenRatio - 1) / lenRatio; // +ratio-1 for round up

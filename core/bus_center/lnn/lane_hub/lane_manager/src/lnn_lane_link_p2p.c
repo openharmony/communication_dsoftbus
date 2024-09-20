@@ -23,6 +23,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
@@ -149,11 +150,22 @@ static SoftBusHandler g_guideChannelHandler;
 static ListNode *g_authSessionServerList = NULL;
 static SoftBusMutex g_AuthTagLock;
 
-#define INVAILD_AUTH_ID (-1)
-#define INVALID_P2P_REQUEST_ID (-1)
-#define LANE_REQ_ID_TYPE_SHIFT 28
+#define INVAILD_AUTH_ID                (-1)
+#define INVALID_P2P_REQUEST_ID         (-1)
+#define LANE_REQ_ID_TYPE_SHIFT         28
 #define SHORT_RANGE_PTK_NOT_MATCH_CODE 4
-#define SOFTBUS_LNN_PTK_NOT_MATCH (SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + SHORT_RANGE_PTK_NOT_MATCH_CODE)
+#define BLE_TRIGGER_TIMEOUT            3000
+#define SOFTBUS_LNN_PTK_NOT_MATCH  (SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + SHORT_RANGE_PTK_NOT_MATCH_CODE)
+
+#define DFX_RECORD_LNN_LANE_SELECT_END(lnnLaneId, lnnConnReqId)                     \
+    do {                                                                      \
+        LnnEventExtra extra = { 0 };                                          \
+        LnnEventExtraInit(&extra);                                            \
+        extra.result = EVENT_STAGE_RESULT_OK;                                 \
+        extra.laneId = (int32_t)lnnLaneId;                                       \
+        extra.connReqId = (int32_t)lnnConnReqId;                                 \
+        LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);   \
+    } while (0)
 
 typedef int32_t (*GuideLinkByType)(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
 
@@ -451,7 +463,7 @@ static void OnConnOpenFailedForDisconnect(uint32_t authRequestId, int32_t reason
 {
     LNN_LOGI(LNN_LANE, "auth open fail to disconnect wifidirect, authRequestId=%{public}u, reason=%{public}d",
         authRequestId, reason);
-    int32_t errCode = SOFTBUS_ERR;
+    int32_t errCode = SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     struct WifiDirectDisconnectInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     P2pLinkedList reqInfo;
@@ -505,7 +517,7 @@ static void OnConnOpenedForDisconnect(uint32_t authRequestId, AuthHandle authHan
         .onDisconnectSuccess = OnWifiDirectDisconnectSuccess,
         .onDisconnectFailure = OnWifiDirectDisconnectFailure,
     };
-    LNN_LOGI(LNN_LANE, "disconnect wifiirect, p2pRequestId=%{public}u, linkId=%{public}d",
+    LNN_LOGI(LNN_LANE, "disconnect wifidirect, p2pRequestId=%{public}u, linkId=%{public}d",
         info.requestId, info.linkId);
     errCode = GetWifiDirectManager()->disconnectDevice(&info, &callback);
     if (errCode != SOFTBUS_OK) {
@@ -924,12 +936,12 @@ static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLi
 
     if (isRaw) {
         linkInfo->type = LANE_HML_RAW;
-        if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.localIp, IP_LEN, link->localIp) != EOK) {
-            LNN_LOGE(LNN_LANE, "strcpy localIp fail");
-            return SOFTBUS_STRCPY_ERR;
-        }
         if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.peerIp, IP_LEN, link->remoteIp) != EOK) {
             LNN_LOGE(LNN_LANE, "strcpy peerIp fail");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        if (strcpy_s(linkInfo->linkInfo.rawWifiDirect.localIp, IP_LEN, link->localIp) != EOK) {
+            LNN_LOGE(LNN_LANE, "strcpy localIp fail");
             return SOFTBUS_STRCPY_ERR;
         }
         linkInfo->linkInfo.rawWifiDirect.port = link->remotePort;
@@ -1101,6 +1113,17 @@ static void HandleGuideChannelAsyncFail(AsyncResultType type, uint32_t requestId
     HandleGuideChannelRetry(laneReqId, linkType, reason);
 }
 
+static int32_t GetCurrentGuideType(uint32_t laneReqId, LaneLinkType linkType, WdGuideType *guideType)
+{
+    WdGuideInfo guideInfo = {0};
+    if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get guide channel info fail.");
+        return SOFTBUS_LANE_NOT_FOUND;
+    }
+    *guideType = guideInfo.guideList[guideInfo.guideIdx];
+    return SOFTBUS_OK;
+}
+
 static int32_t HandleWifiDirectConflict(uint32_t p2pRequestId, LinkConflictType conflictType)
 {
     P2pLinkReqList reqInfo;
@@ -1116,6 +1139,26 @@ static int32_t HandleWifiDirectConflict(uint32_t p2pRequestId, LinkConflictType 
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+static void HandleActionTriggerError(uint32_t p2pRequestId)
+{
+    P2pLinkReqList reqInfo = { 0 };
+    if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get p2pLinkReq fail, type=%{public}d, requestId=%{public}u",
+            ASYNC_RESULT_P2P, p2pRequestId);
+        return;
+    }
+    WdGuideType guideType = LANE_CHANNEL_BUTT;
+    if (GetCurrentGuideType(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType,
+        &guideType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "GetCurrentGuideType fail");
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
+    if (guideType == LANE_ACTION_TRIGGER || guideType == LANE_BLE_TRIGGER) {
+        (void)LnnRequestCheckOnlineStatus(reqInfo.laneRequestInfo.networkId, BLE_TRIGGER_TIMEOUT);
+    }
 }
 
 static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
@@ -1142,6 +1185,9 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
         LNN_LOGI(LNN_LANE, "guide channel retry, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
         HandleGuideChannelAsyncFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
         return;
+    }
+    if (reason == SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT || reason == SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT) {
+        HandleActionTriggerError(p2pRequestId);
     }
     LinkConflictType conflictType = GetConflictTypeWithErrcode(reason);
     if (conflictType == CONFLICT_THREE_VAP || conflictType == CONFLICT_ROLE ||
@@ -1179,6 +1225,12 @@ static void OnAuthConnOpened(uint32_t authRequestId, AuthHandle authHandle)
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .authRequestId = (int32_t)authRequestId,
+        .connReqId = (int32_t)info.requestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
         info.requestId, info.connectType);
     ret = GetWifiDirectManager()->connectDevice(&info, &callback);
@@ -1326,6 +1378,13 @@ static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .chanReqId = channelRequestId,
+        .connReqId = (int32_t)info.requestId,
+        .connectionId = channelId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
         info.requestId, info.connectType);
     ret = GetWifiDirectManager()->connectDevice(&info, &callback);
@@ -1353,6 +1412,13 @@ static int32_t OpenProxyChannelToConnP2p(const LinkRequest *request, uint32_t la
         .onChannelOpenFailed = OnProxyChannelOpenFailed,
     };
     int32_t channelRequestId = TransProxyPipelineGenRequestId();
+
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .laneId = (int32_t)laneReqId,
+        .chanReqId = channelRequestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_START, extra);
     int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_CHANNEL, (uint32_t)channelRequestId, laneReqId, request, callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new connect node failed");
@@ -1444,6 +1510,12 @@ static void OnAuthTriggerConnOpened(uint32_t authRequestId, AuthHandle authHandl
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .authRequestId = (int32_t)authRequestId,
+        .connReqId = (int32_t)wifiDirectInfo.requestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     ret = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &callback);
@@ -1527,6 +1599,12 @@ static void DetectSuccess(uint32_t laneReqId, LaneLinkType linkType, const LaneL
         LNN_LOGE(LNN_LANE, "get p2p request fail, laneReqId=%{public}u", laneReqId);
         return;
     }
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .laneId = (int32_t)laneReqId,
+        .authRequestId = (int32_t)p2pLinkReqInfo.auth.requestId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_START, extra);
     LNN_LOGI(LNN_LANE, "auth channel detect succ, laneReqId=%{public}u", laneReqId);
     AuthChannelDetectSucc(laneReqId, p2pLinkReqInfo.auth.requestId, p2pLinkReqInfo.auth.authHandle);
 }
@@ -1611,17 +1689,6 @@ static int32_t GetPreferAuthByType(const char *networkId, AuthLinkType type, Aut
     return AuthGetConnInfoByType(uuid, type, connInfo, isMetaAuth);
 }
 
-static int32_t GetCurrentGuideType(uint32_t laneReqId, LaneLinkType linkType, WdGuideType *guideType)
-{
-    WdGuideInfo guideInfo = {0};
-    if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get guide channel info fail.");
-        return SOFTBUS_LANE_NOT_FOUND;
-    }
-    *guideType = guideInfo.guideList[guideInfo.guideIdx];
-    return SOFTBUS_OK;
-}
-
 static int32_t GetAuthConnInfoWithoutMeta(const LinkRequest *request, uint32_t laneReqId,
     AuthConnInfo *connInfo, bool isMetaAuth)
 {
@@ -1669,6 +1736,12 @@ static int32_t OpenAuthToConnP2p(const LinkRequest *request, uint32_t laneReqId,
         .onConnOpened = GuideChannelDetect,
         .onConnOpenFailed = OnAuthConnOpenFailed,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .authRequestId = (int32_t)authRequestId,
+        .laneId = (int32_t)laneReqId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_START, extra);
     LNN_LOGI(LNN_LANE, "open auth with authRequestId=%{public}u", authRequestId);
     ret = AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth);
     if (ret != SOFTBUS_OK) {
@@ -1700,6 +1773,12 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneRe
         .onConnOpened = GuideChannelDetect,
         .onConnOpenFailed = OnAuthConnOpenFailed,
     };
+    LnnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .authRequestId = (int32_t)authRequestId,
+        .laneId = (int32_t)laneReqId,
+    };
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_START, extra);
     LNN_LOGI(LNN_LANE, "open auth trigger with authRequestId=%{public}u", authRequestId);
     ret = AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth);
     if (ret != SOFTBUS_OK) {
@@ -1750,7 +1829,6 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
             return SOFTBUS_LANE_BUILD_LINK_TIMEOUT;
         }
     }
-    LNN_LOGI(LNN_LANE, "open ble trigger with laneReqId=%{public}u", laneReqId);
     wifiDirectInfo.requestId = GetWifiDirectManager()->getRequestId();
     int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneReqId, request, callback);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_LANE, "add new connect node failed");
@@ -1769,6 +1847,7 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    DFX_RECORD_LNN_LANE_SELECT_END(laneReqId, wifiDirectInfo.requestId);
     LNN_LOGI(LNN_LANE, "wifidirect connect device. p2pRequestId=%{public}u, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     ret = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb);
@@ -1814,6 +1893,7 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    DFX_RECORD_LNN_LANE_SELECT_END(laneLinkReqId, wifiDirectInfo.requestId);
     LNN_LOGI(LNN_LANE, "wifi direct action connectDevice. p2pRequestId=%{public}u, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     errCode = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb);
@@ -1842,7 +1922,7 @@ static bool IsSupportWifiDirect(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
-    return IsSupportHmlTwo(local, remote);
+    return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
 }
 static bool CheckHasBrConnection(const char *networkId)
 {
@@ -1932,7 +2012,8 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t l
         wifiDirectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
         wifiDirectInfo.negoChannel.handle.actionAddr = request->actionAddr;
     } else {
-        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+        wifiDirectInfo.connectType = GetWifiDirectManager()->supportHmlTwo() ?
+            WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     }
     wifiDirectInfo.reuseOnly = true;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
@@ -1960,6 +2041,7 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t l
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
+    DFX_RECORD_LNN_LANE_SELECT_END(laneReqId, wifiDirectInfo.requestId);
     LNN_LOGI(LNN_LANE, "wifidirect reuse connect with p2pRequestId=%{public}u, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     ret = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb);
@@ -2171,6 +2253,7 @@ static int32_t GetRequest(P2pLinkReqList *p2pLinkReqInfo, LinkRequest *request)
     request->bandWidth = p2pLinkReqInfo->p2pInfo.bandWidth;
     request->triggerLinkTime = p2pLinkReqInfo->p2pInfo.triggerLinkTime;
     request->availableLinkTime = p2pLinkReqInfo->p2pInfo.availableLinkTime;
+    request->isSupportIpv6 = p2pLinkReqInfo->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
     return SOFTBUS_OK;
 }
 

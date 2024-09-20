@@ -186,13 +186,7 @@ static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t
     CONN_LOGE(CONN_COMMON,
         "delete tcp conn failed. connId not found. connId=%{public}u, module=%{public}d, fd=%{public}d",
         connectionId, module, fd);
-    if (module >= UNUSE_BUTT || module < 0 || fd < 0) {
-        return;
-    }
-    status = DelTrigger(module, fd, RW_TRIGGER);
-    if (status != SOFTBUS_TCPFD_NOT_IN_TRIGGER) {
-        ConnShutdownSocket(fd);
-    }
+    (void)DelTrigger(module, fd, RW_TRIGGER);
 }
 
 static void DelTcpConnNode(uint32_t connectionId)
@@ -564,7 +558,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     return SOFTBUS_OK;
 ERR_FAIL:
     ConnShutdownSocket(fd);
-    result->OnConnectFailed(requestId, SOFTBUS_ERR);
+    result->OnConnectFailed(requestId, SOFTBUS_CONN_SOCKET_INTERNAL_ERR);
     DfxRecordTcpConnectFail(DEFAULT_PID, (ConnectOption *)option, NULL, statistics, error);
     SoftBusFree(statistics);
     return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;

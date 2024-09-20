@@ -25,11 +25,19 @@ ohos_benchmarktest("TransTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transmission",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/sdk/discovery/include",
-    "$dsoftbus_root_path/sdk/discovery/manager/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/qos/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/sdk/frame/common/include",
+    "$dsoftbus_root_path/adapter/default_config/spec_config/",
+    "$dsoftbus_root_path/sdk/transmission/ipc/include",
   ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
@@ -38,6 +46,7 @@ ohos_benchmarktest("TransTest") {
     "bounds_checking_function:libsec_static",
     "c_utils:utils",
     "googletest:gtest_main",
+    "hilog:libhilog",
   ]
 }
 

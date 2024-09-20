@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,41 +15,37 @@ import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
-dsoftbus_root_path = "../../../.."
 
 ohos_unittest("TransSessionManagerTest") {
   module_out_path = module_output_path
   sources = [ "trans_session_manager_test.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/frame/common/include",
-    "$dsoftbus_root_path/core/transmission/common/include",
-    "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_core_path/authentication/interface",
+
+    "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+
+    "$dsoftbus_core_path/common/include",
+
+    "$dsoftbus_core_path/connection/interface",
+
+    "$dsoftbus_core_path/discovery/manager/include",
+    "$dsoftbus_core_path/discovery/interface",
+
+    "$dsoftbus_core_path/transmission/common/include",
+    "$dsoftbus_core_path/transmission/session/include",
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("TransSessionServiceTest") {
@@ -57,39 +53,57 @@ ohos_unittest("TransSessionServiceTest") {
   sources = [ "trans_session_service_test.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/frame/common/include",
-    "$dsoftbus_root_path/core/transmission/common/include",
-    "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_core_path/authentication/interface",
+
+    "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+
+    "$dsoftbus_core_path/common/include",
+
+    "$dsoftbus_core_path/connection/interface",
+
+    "$dsoftbus_core_path/discovery/interface",
+    "$dsoftbus_core_path/discovery/manager/include",
+
+    "$dsoftbus_core_path/transmission/common/include",
+    "$dsoftbus_core_path/transmission/session/include",
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("TransScenarioManagerTest") {
+  module_out_path = module_output_path
+  sources = [ "softbus_scenario_manager_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_core_path/common/include",
+    "$dsoftbus_core_path/transmission/session/include",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 group("unittest") {
   testonly = true
   deps = [
+    ":TransScenarioManagerTest",
     ":TransSessionManagerTest",
     ":TransSessionServiceTest",
   ]

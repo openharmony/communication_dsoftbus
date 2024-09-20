@@ -180,6 +180,11 @@ uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->GenerateRandomNumForHb(randMin, randMax);
 }
+
+bool LnnIsMultiDeviceOnline(void)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnIsMultiDeviceOnline();
+}
 }
 } // namespace OHOS
 

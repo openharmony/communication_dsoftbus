@@ -166,5 +166,25 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
 {
     return GetLnnIpNetworkImplInterface()->GetNetworkIpByIfName(ifName, ip, netmask, len);
 }
+
+int32_t lnnRegistProtocol(LnnProtocolManager *protocolMgr)
+{
+    return GetLnnIpNetworkImplInterface()->LnnRegistProtocol(protocolMgr);
+}
+
+int32_t LnnGetWlanIpv4Addr(char *ip, uint32_t size)
+{
+    return GetLnnIpNetworkImplInterface()->GetWlanIpv4Addr(ip, size);
+}
+
+int32_t ConnCoapStartServerListen(void)
+{
+    return GetLnnIpNetworkImplInterface()->ConnCoapStartServerListen();
+}
+
+void ConnCoapStopServerListen(void)
+{
+    return GetLnnIpNetworkImplInterface()->ConnCoapStopServerListen();
+}
 }
 }

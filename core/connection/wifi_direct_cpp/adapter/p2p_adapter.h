@@ -56,11 +56,12 @@ public:
         bool isGroupOwner;
         int32_t frequency;
         std::string interface;
+        std::string goIpAddr;
         WifiDirectP2pDeviceInfo groupOwner;
         std::vector<WifiDirectP2pDeviceInfo> clientDevices;
     };
 
-    static int32_t GetChannel5GListIntArray(std::vector<int> &channels);
+    static int32_t GetChannel5GListIntArray(std::vector<int> &frequencyList);
     static bool IsWifiP2pEnabled();
     static std::string GetInterfaceCoexistCap();
     static int32_t GetStationFrequency();
@@ -85,6 +86,9 @@ public:
     static bool IsWideBandSupported();
     static bool IsWifiEnable();
     static bool IsWifiConnected();
+    using GetCoexConflictCodeHook = std::function<int(const char *, int32_t)>;
+    static void Register(const GetCoexConflictCodeHook &coexConflictor);
+    static int GetCoexConflictCode(const char *ifName, int32_t channelId);
 
 private:
     static constexpr int P2P_GROUP_CONFIG_INDEX_SSID = 0;
@@ -93,6 +97,8 @@ private:
     static constexpr int P2P_GROUP_CONFIG_INDEX_FREQ = 3;
     static constexpr int P2P_GROUP_CONFIG_INDEX_MODE = 4;
     static constexpr int P2P_GROUP_CONFIG_INDEX_MAX = 5;
+
+    static inline GetCoexConflictCodeHook getCoexConflictCodeHook_;
 };
 } // namespace OHOS::SoftBus
 #endif

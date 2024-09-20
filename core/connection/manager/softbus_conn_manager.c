@@ -419,6 +419,7 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
         CONN_LOGE(CONN_COMMON, "get node failed, connId=%{public}u", connectionId);
+        SoftBusFree(node);
         return;
     }
 
@@ -439,6 +440,7 @@ void ConnManagerReusedConnected(uint32_t connectionId, const ConnectionInfo *inf
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
         CONN_LOGE(CONN_COMMON, "get node failed, connId=%{public}u", connectionId);
+        SoftBusFree(node);
         return;
     }
 
@@ -461,6 +463,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
         CONN_LOGE(CONN_COMMON, "get node failed, connId=%{public}u", connectionId);
+        SoftBusFree(node);
         return;
     }
     for (int32_t i = 0; i < num; i++) {

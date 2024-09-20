@@ -94,5 +94,9 @@ int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 {
     return GetSoftbusServerStubTestInterface()->LnnIpcGetAllMetaNodeInfo(infos, infoNum);
 }
+int32_t TransReleaseUdpResources(int32_t channelId)
+{
+    return GetSoftbusServerStubTestInterface()->TransReleaseUdpResources(channelId);
+}
 }
 }

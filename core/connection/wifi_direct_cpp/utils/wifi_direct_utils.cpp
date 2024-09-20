@@ -15,6 +15,7 @@
 
 #include "wifi_direct_utils.h"
 #include "bus_center_manager.h"
+#include "data/link_manager.h"
 #include "conn_log.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
@@ -177,6 +178,15 @@ std::string WifiDirectUtils::GetLocalUuid()
     auto ret = LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get uuid id failed");
     return uuid;
+}
+
+int32_t WifiDirectUtils::GetLocalConnSubFeature(uint64_t &feature)
+{
+    uint64_t connSubFeature = 0;
+    auto ret = LnnGetLocalNumU64Info(NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get connSubFeature failed");
+    feature = connSubFeature;
+    return SOFTBUS_OK;
 }
 
 static constexpr int PTK_128BIT_LEN = 16;
@@ -347,6 +357,13 @@ bool WifiDirectUtils::SupportHml()
 {
     bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml", true);
     CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml=%{public}d", support);
+    return support;
+}
+
+bool WifiDirectUtils::SupportHmlTwo()
+{
+    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", true);
+    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%{public}d", support);
     return support;
 }
 
@@ -543,15 +560,38 @@ void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &
     LnnSyncP2pInfo();
 }
 
-int32_t WifiDirectUtils::GetOsType(const std::string &remoteNetworkId)
+static constexpr int DFS_CHANNEL_FIRST = 52;
+static constexpr int DFS_CHANNEL_LAST = 64;
+bool WifiDirectUtils::IsDfsChannel(const int &frequency)
 {
-    int32_t osType = OH_OS_TYPE;
-    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
-        return osType;
+    int32_t channel = FrequencyToChannel(frequency);
+    CONN_LOGI(CONN_WIFI_DIRECT, "channel=%{public}d", channel);
+    if (channel >= DFS_CHANNEL_FIRST && channel <= DFS_CHANNEL_LAST) {
+        return true;
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "get os type success, osType=%{public}d", osType);
-    return osType;
+    return false;
+}
+
+bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type)
+{
+    bool dfsLinkIsExist = false;
+    auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
+
+    int32_t osType = OH_OS_TYPE;
+    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK || osType == OH_OS_TYPE) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
+        return false;
+    }
+
+    LinkManager::GetInstance().ForEach([&dfsLinkIsExist, osType, type](InnerLink &link) {
+        if (link.GetLinkType() == type && IsDfsChannel(link.GetFrequency())) {
+            dfsLinkIsExist = true;
+            return true;
+        }
+        return false;
+    });
+    CONN_LOGI(CONN_WIFI_DIRECT, "dfsLinkIsExist=%{public}d", dfsLinkIsExist);
+    return dfsLinkIsExist;
 }
 
 int32_t WifiDirectUtils::GetOsType(const char *networkId)
@@ -581,4 +621,13 @@ int32_t WifiDirectUtils::GetDeviceType()
     return deviceTypeId;
 }
 
+int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature)
+{
+    uint64_t connSubFeature = 0;
+    auto ret = LnnGetRemoteNumU64Info(remoteNetworkId.c_str(), NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT,
+        "remoteNetworkId=%{public}s, get connSubFeature failed", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
+    feature = connSubFeature;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS::SoftBus

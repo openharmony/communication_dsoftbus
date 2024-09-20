@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,14 @@
  * limitations under the License.
  */
 
+#include "securec.h"
 #include <gtest/gtest.h>
-#include <sys/socket.h>
 
-#include "iremote_broker.h"
-#include "message_parcel.h"
-#include "peer_holder.h"
-#include "softbus_errcode.h"
-#include "softbus_server_ipc_interface_code.h"
-#include "softbus_common.h"
-#include "softbus_trans_def.h"
 #include "softbus_def.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_feature_config.h"
-#include "softbus_access_token_test.h"
-#include "session.h"
 #include "trans_server_proxy.h"
-#include "trans_server_proxy_standard.h"
 #include "trans_server_proxy_standard.cpp"
 #include "client_trans_session_manager.h"
-#include "client_trans_socket_manager.h"
-#include "client_trans_session_service.h"
 
 using namespace testing::ext;
 
@@ -87,8 +74,6 @@ void TransIpcStandardTest::TearDownTestCase(void)
  */
 HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level0)
 {
-    int subscribeId = 1;
-    int publishId = 1;
     SubscribeInfo* subInfo = (SubscribeInfo*)SoftBusCalloc(sizeof(SubscribeInfo));
     ASSERT_TRUE(subInfo != nullptr);
     (void)memset_s(subInfo, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
@@ -97,19 +82,7 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level0)
     (void)memset_s(pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     TransServerProxy transServerProxy(nullptr);
 
-    int32_t ret = transServerProxy.StartDiscovery(g_pkgName, subInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = transServerProxy.StopDiscovery(g_pkgName, subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = transServerProxy.PublishService(g_pkgName, pubInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = transServerProxy.UnPublishService(g_pkgName, publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = transServerProxy.SoftbusRegisterService(g_pkgName, nullptr);
+    int32_t ret = transServerProxy.SoftbusRegisterService(g_pkgName, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(subInfo);
     SoftBusFree(pubInfo);
@@ -429,23 +402,6 @@ HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransServerProxyInitTest001
- * @tc.desc: TransServerProxyInit, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:I5HQGA
- */
-HWTEST_F(TransIpcStandardTest, TransServerProxyInitTest001, TestSize.Level0)
-{
-    int32_t ret = TransServerProxyInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    TransClientDeinit();
-
-    ret = TransServerProxyInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    TransClientDeinit();
-}
-
-/**
  * @tc.name: ServerIpcCreateSessionServerTest001
  * @tc.desc: ServerIpcCreateSessionServer, use the wrong parameter.
  * @tc.type: FUNC
@@ -640,18 +596,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
  */
 HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelWithStatisticsTest001, TestSize.Level0)
 {
-    int32_t channelId = 0;
+    int32_t channelId = -1;
+    int32_t channelType = 0;
     int32_t laneId = 0;
     const char *dataInfo = "dataInfo";
     uint32_t length = strlen(dataInfo);
 
-    int32_t ret = ServerIpcCloseChannelWithStatistics(-1,  laneId, (void *)dataInfo, length);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = ServerIpcCloseChannelWithStatistics(channelId,  -1, (void *)dataInfo, length);
-    EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
-
-    ret = ServerIpcCloseChannelWithStatistics(channelId,  laneId, (void *)dataInfo, length);
+    int32_t ret = ServerIpcCloseChannelWithStatistics(channelId, channelType, laneId, (void *)dataInfo, length);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

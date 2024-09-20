@@ -22,18 +22,14 @@
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
-#include "softbus_error_code.h"
 #include "parameter.h"
-#include "lnn_settingdata_event_monitor.h"
-
-#define BOOTEVENT_ACCOUNT_READY "bootevent.account.ready"
+#include "softbus_error_code.h"
 
 static void ProcessBootEvent(void *para)
 {
     (void)para;
     LNN_LOGI(LNN_EVENT, "start process account ready event");
     LnnUpdateOhosAccount(true);
-    LnnInitDeviceNameMonitorImpl();
     if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
         LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
         return;
@@ -55,7 +51,16 @@ static void AccountBootEventCb(const char *key, const char *value, void *context
 
 int32_t LnnInitBootEventMonitorImpl(void)
 {
-    int32_t ret = WatchParameter("bootevent.account.ready", AccountBootEventCb, NULL);
+    int32_t ret = WatchParameter(BOOTEVENT_ACCOUNT_READY, AccountBootEventCb, NULL);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "watch account server fail");
+    }
+    return ret;
+}
+
+int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle)
+{
+    int32_t ret = WatchParameter(BOOTEVENT_ACCOUNT_READY, handle, NULL);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "watch account server fail");
     }

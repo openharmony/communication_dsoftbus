@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "ble_mock.h"
 #include <iostream>
 #include <sstream>

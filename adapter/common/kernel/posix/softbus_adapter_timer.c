@@ -33,10 +33,10 @@
 #define DATE_TIME_BUFF_LEN 24 // yyyy-MM-dd HH:mm:ss.SSS
 
 static unsigned int g_timerType;
-static TimerFunc g_timerFunc = NULL;
+__attribute__((no_sanitize("hwaddress"))) static TimerFunc g_timerFunc = NULL;
 static _Thread_local char g_dateTimeBuff[DATE_TIME_BUFF_LEN] = {0};
 
-static void HandleTimeoutAdapterFun(union sigval para)
+__attribute__((no_sanitize("hwaddress"))) static void HandleTimeoutAdapterFun(union sigval para)
 {
     (void)para;
     if (g_timerFunc != NULL) {
@@ -44,7 +44,7 @@ static void HandleTimeoutAdapterFun(union sigval para)
     }
 }
 
-void SetTimerFunc(TimerFunc func)
+__attribute__((no_sanitize("hwaddress"))) void SetTimerFunc(TimerFunc func)
 {
     g_timerFunc = func;
 }
@@ -134,6 +134,19 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
     struct timespec time = {0};
     (void)clock_gettime(CLOCK_MONOTONIC, &time);
 
+    sysTime->sec = time.tv_sec;
+    sysTime->usec = time.tv_nsec / NS_PER_USECOND;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusGetRealTime(SoftBusSysTime *sysTime)
+{
+    if (sysTime == NULL) {
+        COMM_LOGW(COMM_ADAPTER, "sysTime is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    struct timespec time = {0};
+    (void)clock_gettime(CLOCK_BOOTTIME, &time);
     sysTime->sec = time.tv_sec;
     sysTime->usec = time.tv_nsec / NS_PER_USECOND;
     return SOFTBUS_OK;

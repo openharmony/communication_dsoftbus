@@ -511,9 +511,9 @@ ohos_unittest("AuthHichainTest") {
   }
 }
 
-ohos_unittest("DsoftbusAppBindTest") {
+ohos_unittest("AuthDeviceProfileTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/dsoftbus_app_bind_test.cpp" ]
+  sources = [ "unittest/auth_device_profile_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/interfaces/kits",
@@ -644,6 +644,7 @@ ohos_unittest("AuthManagerTest") {
       "bounds_checking_function:libsec_shared",
       "cJSON:cjson",
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
@@ -918,6 +919,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":AuthDeviceProfileListenerTest",
+    ":AuthDeviceProfileTest",
     ":AuthEnhanceMockTest",
     ":AuthHichainTest",
     ":AuthLaneTest",
@@ -930,7 +932,6 @@ group("unittest") {
     ":AuthTcpConnectionTest",
     ":AuthTest",
     ":AuthTestCallBackTest",
-    ":DsoftbusAppBindTest",
   ]
 }
 

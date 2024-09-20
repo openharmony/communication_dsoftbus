@@ -636,19 +636,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestErrorTest001, TestSi
 }
 
 /**
- * @tc.name: OpenDataBusRequestOutSessionNameTest001
- * @tc.desc: OpenDataBusRequestOutSessionName
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestOutSessionNameTest001, TestSize.Level1)
-{
-    char *mySessionName = nullptr;
-    char *peerSessionName = nullptr;
-    OpenDataBusRequestOutSessionName(mySessionName, peerSessionName);
-}
-
-/**
  * @tc.name: NotifyFastDataRecvTest001
  * @tc.desc: NotifyFastDataRecv
  * @tc.type: FUNC
@@ -661,6 +648,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyFastDataRecvTest001, TestSize.Le
 
     int32_t channelId = 1;
     NotifyFastDataRecv(conn, channelId);
+
+    char *mySessionName = nullptr;
+    char *peerSessionName = nullptr;
+    OpenDataBusRequestOutSessionName(mySessionName, peerSessionName);
 
     SoftBusFree(conn);
 }
