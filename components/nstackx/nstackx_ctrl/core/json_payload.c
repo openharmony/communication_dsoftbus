@@ -76,12 +76,6 @@ static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
         return NSTACKX_EFAILED;
     }
 
-    item = cJSON_CreateString(deviceInfo->version);
-    if (item == NULL || !cJSON_AddItemToObject(data, JSON_HICOM_VERSION, item)) {
-        cJSON_Delete(item);
-        return NSTACKX_EFAILED;
-    }
-
     item = cJSON_CreateNumber(deviceInfo->mode);
     if (item == NULL || !cJSON_AddItemToObject(data, JSON_REQUEST_MODE, item)) {
         cJSON_Delete(item);
@@ -215,15 +209,6 @@ static int32_t ParseDeviceJsonData(const cJSON *data, DeviceInfo *dev)
         } else {
             dev->deviceType = (uint32_t)item->valuedouble;
         }
-    }
-
-    item = cJSON_GetObjectItemCaseSensitive(data, JSON_HICOM_VERSION);
-    if (!cJSON_IsString(item) || !strlen(item->valuestring)) {
-        DFINDER_LOGD(TAG, "Can't find hicom version");
-        return NSTACKX_EOK;
-    }
-    if (strcpy_s(dev->version, sizeof(dev->version), item->valuestring) != EOK) {
-        return NSTACKX_EFAILED;
     }
 
     return NSTACKX_EOK;
@@ -428,18 +413,6 @@ static int JsonAddStr(cJSON *data, const char *key, const char *value)
     return NSTACKX_EOK;
 }
 
-/*
- * Service Discover JSON format
- * {
- *   "deviceId":[device ID, string],
- *   "deviceName":[device name, string],
- *   "type": [device type, number],
- *   "version":[hicom version, string],
- *   "wlanIp":[WLAN IP address, string],
- *   "capabilityBitmap":[bitmap, bitmap, bitmap, ...]
- *   "coapUri":[coap uri for discover, string]   <-- optional. When present, means it's broadcast request.
- * }
- */
 static char *PrepareServiceDiscoverEx(const char *locaIpStr, uint8_t isBroadcast, uint8_t businessType)
 {
     cJSON *data = cJSON_CreateObject();
