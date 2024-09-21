@@ -91,6 +91,7 @@
 #define BLE_MAC "BLE_MAC"
 #define CONN_CAP "CONN_CAP"
 #define AUTH_CAP "AUTH_CAP"
+#define HB_CAP "HB_CAP"
 #define SW_VERSION "SW_VERSION"
 #define MASTER_UDID "MASTER_UDID"
 #define MASTER_WEIGHT "MASTER_WEIGHT"
@@ -1350,6 +1351,7 @@ static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
         !JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
         !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
         !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
+        !JSON_AddInt32ToObject(json, HB_CAP, info->heartbeatCapacity) ||
         !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
@@ -1521,6 +1523,7 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
     (void)JSON_GetStringFromOject(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
     (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
     (void)JSON_GetInt32FromOject(json, AUTH_CAP, (int32_t *)&info->authCapacity);
+    (void)JSON_GetInt32FromOject(json, HB_CAP, (int32_t *)&info->heartbeatCapacity);
     info->isBleP2p = false;
     (void)JSON_GetBoolFromOject(json, BLE_P2P, &info->isBleP2p);
     (void)JSON_GetInt16FromOject(json, DATA_CHANGE_FLAG, (int16_t *)&info->dataChangeFlag);

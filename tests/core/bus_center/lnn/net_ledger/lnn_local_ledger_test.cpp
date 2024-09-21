@@ -92,6 +92,7 @@ static void LocalLedgerKeyTestPackaged(void)
     EXPECT_EQ(LlUpdateStaticCapLen(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LlUpdateAccount(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LlUpdateStaticCapability(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnUpdateLocalScreenStatus(true), SOFTBUS_OK);
 }
 
 /*
@@ -489,4 +490,28 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
     SoftBusFree(buf);
 }
 
+/*
+* @tc.name: Local_Ledger_Key_Test_008
+* @tc.desc: local ledger key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_008, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock,
+        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(LnnUpdateLocalScreenStatus(true), SOFTBUS_OK);
+    EXPECT_EQ(LnnUpdateLocalScreenStatus(false), SOFTBUS_OK);
+    LnnDeinitLocalLedger();
+}
 } // namespace OHOS

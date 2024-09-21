@@ -606,3 +606,14 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
     (void)memset_s(&ptkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
     (void)memset_s(&oldPtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
 }
+
+int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->isScreenOn = isScreenOn;
+    LNN_LOGI(LNN_LEDGER, "set local screen status to %{public}s", isScreenOn ? "on" : "off");
+    return SOFTBUS_OK;
+}

@@ -140,6 +140,7 @@ typedef struct {
     ConnectStatus status;
     uint32_t netCapacity;
     uint32_t authCapacity;
+    uint32_t heartbeatCapacity;
     uint32_t discoveryType;
     uint64_t bleDirectTimeStamp;
     DeviceBasicInfo deviceInfo;
@@ -249,6 +250,7 @@ int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
 void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log);
+int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn);
 #ifdef __cplusplus
 }
 #endif
