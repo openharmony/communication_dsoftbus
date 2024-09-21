@@ -43,7 +43,7 @@ namespace OHOS {
         }
 
         SetAceessTokenPermission("busCenterTest");
-        int ret = GetAllNodeDeviceInfo(reinterpret_cast<const char *>(tmp), &info, &infoNum);
+        int32_t ret = GetAllNodeDeviceInfo(reinterpret_cast<const char *>(tmp), &info, &infoNum);
         if (ret == SOFTBUS_OK && info != nullptr) {
             FreeNodeInfo(info);
         }
@@ -63,7 +63,7 @@ namespace OHOS {
 }
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::GetAllNodeDeviceInfoTest(data, size);

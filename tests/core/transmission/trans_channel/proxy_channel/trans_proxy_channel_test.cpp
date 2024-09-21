@@ -376,7 +376,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest001, TestSize.Level1)
     (void)strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
 
     TestAddTestProxyChannel();
-    int ret = TransProxyResetPeer(&info);
+    int32_t ret = TransProxyResetPeer(&info);
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
     TestDelTestProxyChannel();
 }
@@ -398,7 +398,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest002, TestSize.Level1)
     (void)strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
 
     TestAddTestProxyChannel(1);
-    int ret = TransProxyResetPeer(&info);
+    int32_t ret = TransProxyResetPeer(&info);
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
     TestDelTestProxyChannel();
 }

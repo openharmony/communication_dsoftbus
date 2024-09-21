@@ -26,7 +26,7 @@ void SessionTest(const uint8_t* data, size_t size)
     }
     Communication::SoftBus::SessionServiceImpl sessionService;
 
-    int flags = *(reinterpret_cast<const int*>(data));
+    int32_t flags = *(reinterpret_cast<const int*>(data));
     std::string sessionName(data, data + size);
     std::string peersessionName(data, data + size);
     std::string peerNetworkId(data, data + size);
@@ -36,7 +36,7 @@ void SessionTest(const uint8_t* data, size_t size)
         sessionService.OpenSession(sessionName, peersessionName, peerNetworkId, groupId, flags);
     sessionService.CloseSession(session);
 
-    int sessionId = *(reinterpret_cast<const int*>(data));
+    int32_t sessionId = *(reinterpret_cast<const int*>(data));
     sessionService.OpenSessionCallback(sessionId);
     sessionService.CloseSessionCallback(sessionId);
 }
@@ -57,7 +57,7 @@ void ReceivedCallbackTest(const uint8_t* data, size_t size)
         return;
     }
     Communication::SoftBus::SessionServiceImpl sessionService;
-    int len = *(reinterpret_cast<const int*>(data));
+    int32_t len = *(reinterpret_cast<const int*>(data));
     sessionService.BytesReceivedCallback(size,  data, len);
     sessionService.MessageReceivedCallback(size,  data, len);
 }
@@ -65,7 +65,7 @@ void ReceivedCallbackTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::SessionTest(data, size);
     OHOS::RemovePermissionTest(data, size);

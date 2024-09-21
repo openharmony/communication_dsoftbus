@@ -74,7 +74,7 @@ HWTEST_F(AdapterDsoftbusRangeTest, SoftBusBleRange001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusRangeTest, SoftBusGetBlePower001, TestSize.Level0)
 {
     int8_t power = 0;
-    int ret = SoftBusGetBlePower(nullptr);
+    int32_t ret = SoftBusGetBlePower(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = SoftBusGetBlePower(&power);
     EXPECT_EQ(0, ret);

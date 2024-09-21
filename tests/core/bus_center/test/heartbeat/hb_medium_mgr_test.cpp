@@ -247,7 +247,7 @@ HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingTest_01, TestSize.Level1)
     ON_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStopOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
-    int ret =
+    int32_t ret =
         HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, TEST_RECVTIME_LAST);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp)
@@ -317,7 +317,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     ON_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStrateMock, IsNeedAuthLimit).WillRepeatedly(Return(false));
     EXPECT_CALL(hbStrateMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
-    int ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
+    int32_t ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_CONNECTABLE);
     HbFirstSaveRecvTime(&storedInfo, &device,
         mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
@@ -487,7 +487,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
     LnnHbMediumMgrInit();
     ret = VisitHbMediumMgrSendBegin(nullptr, HEARTBEAT_TYPE_BLE_V0, reinterpret_cast<void *>(&data));
     EXPECT_FALSE(ret);
-    int id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V0);
+    int32_t id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V0);
     g_hbMeidumMgr[id] = nullptr;
     ret = VisitHbMediumMgrSendBegin(nullptr, HEARTBEAT_TYPE_BLE_V0, reinterpret_cast<void *>(&data));
     EXPECT_TRUE(ret);
@@ -538,7 +538,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     LnnHbMediumMgrInit();
-    int id = LnnConvertHbTypeToId(HB_MAX_TYPE_COUNT + 1);
+    int32_t id = LnnConvertHbTypeToId(HB_MAX_TYPE_COUNT + 1);
     ret = VisitHbMediumMgrSendEnd(nullptr, HEARTBEAT_TYPE_BLE_V0, static_cast<void *>(&num));
     EXPECT_FALSE(ret);
     id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V0);
@@ -570,7 +570,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrStop_TEST01, TestSize.Level1)
     };
     bool ret = VisitHbMediumMgrStop(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
-    int id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
+    int32_t id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
     g_hbMeidumMgr[id] = nullptr;
     ret = VisitHbMediumMgrStop(nullptr, HEARTBEAT_TYPE_BLE_V1, nullptr);
     EXPECT_TRUE(ret);
@@ -593,7 +593,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrStop_TEST01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSetParam_TEST01, TestSize.Level1)
 {
-    int id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
+    int32_t id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
     int32_t ret = LnnHbMediumMgrSetParam(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     LnnHeartbeatMediumParam param = {
@@ -615,7 +615,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSetParam_TEST01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrUpdateSendInfo_TEST01, TestSize.Level1)
 {
-    int id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
+    int32_t id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
     int32_t ret = LnnHbMediumMgrUpdateSendInfo(UPDATE_HB_NETWORK_INFO);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     LnnHeartbeatMediumMgr medMgr1 = {

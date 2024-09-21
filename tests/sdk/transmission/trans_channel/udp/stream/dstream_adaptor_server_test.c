@@ -26,12 +26,12 @@
 #define SESSION_KEY_LENGTH   32
 #define STREAM_DATA_LENGTH   10
 
-void SetStatus(int channelId, int status)
+void SetStatus(int32_t channelId, int32_t status)
 {
     printf("[server]:channelID:%d, status:%d\n", channelId, status);
 }
 
-void OnStreamReceived(int channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     printf("[server]:OnStreamReceived, len:%d, extLen:%d\n", data->bufLen, data->bufLen);
     printf("[server]:channelID:%d, streamBuf:%.*s\n", channelId, data->bufLen, data->buf);
@@ -41,7 +41,7 @@ void OnStreamReceived(int channelId, const StreamData *data, const StreamData *e
         STREAM_DATA_LENGTH,
     };
     StreamFrameInfo tmpf = {};
-    int ret = SendVtpStream(channelId, &tmpData, NULL, &tmpf);
+    int32_t ret = SendVtpStream(channelId, &tmpData, NULL, &tmpf);
     printf("[server]:DstreamSendStream ret:%d\n", ret);
 }
 
@@ -50,9 +50,9 @@ static IStreamListener g_callback = {
     .OnStreamReceived = OnStreamReceived,
 };
 
-int main()
+int32_t main()
 {
-    int ret;
+    int32_t ret;
 
     VtpStreamOpenParam p1 = {
         PKGNAME,

@@ -41,32 +41,33 @@ static SessionAttribute g_sessionAttr = {
 const char *g_testData = "TranSessionTest_GetSessionKeyTestData";
 
 // Notify that the session is set up successfully.
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("session opened,sesison id = %d\r\n", sessionId);
     return 0;
 }
 
 // Notify that the session is closed.
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("session closed, session id = %d\r\n", sessionId);
 }
 
 // Notify that the byte data is received.
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("session bytes received, session id = %d\r\n", sessionId);
 }
 
 // Notify that the message is received.
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("session msg received, session id = %d\r\n", sessionId);
 }
 
 // Notify that the stream data is received.
-static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+static void OnStreamReceived(int32_t sessionId, const StreamData *data,
+                             const StreamData *ext, const StreamFrameInfo *param)
 {
     printf("session stream received, session id = %d\r\n", sessionId);
 }
@@ -79,14 +80,14 @@ static ISessionListener g_sessionlistenerA = {
     .OnStreamReceived = OnStreamReceived,
 };
 
-int main(void)
+int32_t main(void)
 {
     /*
      * 1. Device A calls CreateSessionServer() to create a session service based on the application bundle name and
      * session name, and registers the callbacks for session opened, session closed, byte received, and message
      * received.
      */
-    int ret = CreateSessionServer(g_pkgNameA, g_sessionNameA, &g_sessionlistenerA);
+    int32_t ret = CreateSessionServer(g_pkgNameA, g_sessionNameA, &g_sessionlistenerA);
     printf("create session server result = %d\n", ret);
 
     /*
@@ -95,7 +96,7 @@ int main(void)
      * When the session is open, a callback will be invoked to notify devices A and B.
      * A session ID is returned for subsequent operations. In addition, sessionName must be DistributedFileService.
      */
-    int sessionId = OpenSession(g_sessionNameA, g_sessionNameB, g_networkidB, g_groupid, &g_sessionAttr);
+    int32_t sessionId = OpenSession(g_sessionNameA, g_sessionNameB, g_networkidB, g_groupid, &g_sessionAttr);
     printf("open session result = %d\n", sessionId);
     
     /* 3. Device A calls the APIs provided by the distributed file service to perform operations. */
@@ -104,7 +105,7 @@ int main(void)
     ret = GetSessionKey(sessionId, key, len);
     printf("get session key result = %d\n", ret);
     
-    int handle = 1;
+    int32_t handle = 1;
     ret = GetSessionHandle(sessionId, &handle);
     printf("get session handle result = %d\n", ret);
     

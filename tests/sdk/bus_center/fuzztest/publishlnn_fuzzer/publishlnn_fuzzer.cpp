@@ -26,7 +26,7 @@ namespace OHOS {
     static const int32_t MAX_SIZE_EXCHANGE_FREQ = FREQ_BUTT + 1 ;
     static const int32_t MAX_SIZE_CAPABILITYMAP = OSD_CAPABILITY_BITMAP + 1;
     
-    void OnPublishResult(int publishId, PublishResult reason)
+    void OnPublishResult(int32_t publishId, PublishResult reason)
     {
         (void)publishId;
         (void)reason;
@@ -88,7 +88,7 @@ namespace OHOS {
 }
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::DoSomethingInterestingWithMyAPI(data, size);

@@ -29,7 +29,7 @@
 using namespace testing::ext;
 
 namespace OHOS {
-static int g_publishId = 0;
+static int32_t g_publishId = 0;
 static const char *g_pkgName = "com.softbus.test";
 static const char *g_pkgName1 = "com.softbus.test1";
 static const char *g_erroPkgName1 = "ErroErroErroErroErroErroErroErroErroErroErroErroErro_Lager_Than_PKG_NAME_SIZE_MAX";
@@ -56,7 +56,7 @@ void BusCenterSdkPublish::SetUpTestCase(void)
 void BusCenterSdkPublish::TearDownTestCase(void)
 {}
 
-static int GetPublishId(void)
+static int32_t GetPublishId(void)
 {
     g_publishId++;
     return g_publishId;
@@ -84,7 +84,7 @@ static PublishInfo g_newpInfo1 = {
     .ranging = false
 };
 
-static void TestOnPublishResult(int publishId, PublishResult reason)
+static void TestOnPublishResult(int32_t publishId, PublishResult reason)
 {
     (void)publishId;
     (void)reason;
@@ -104,7 +104,7 @@ static const IPublishCb g_publishCb = {
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -150,7 +150,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -199,7 +199,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -255,7 +255,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest003, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -320,7 +320,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest005, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     
     g_newpInfo.publishId = GetPublishId();
     ret = PublishLNN(g_pkgName, &g_newpInfo, &g_publishCb);
@@ -351,7 +351,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest005, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -403,7 +403,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -455,7 +455,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest008, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -507,7 +507,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest008, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest009, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -559,7 +559,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest009, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest010, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -594,7 +594,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest010, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest011, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -629,7 +629,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest011, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest012, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -664,7 +664,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest012, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest013, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -699,7 +699,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest013, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -746,7 +746,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest015, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -793,7 +793,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest015, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest016, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -826,7 +826,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest016, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest017, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -859,7 +859,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest017, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -888,7 +888,7 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -900,7 +900,7 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level1)
         .ranging = false
     };
     
-    int testID = testInfo.publishId;
+    int32_t testID = testInfo.publishId;
     PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     testInfo.publishId = GetPublishId();
     PublishLNN(g_pkgName, &testInfo, &g_publishCb);
@@ -921,7 +921,7 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkPublish, StopPublishLNN003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,

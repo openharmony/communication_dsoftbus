@@ -1184,7 +1184,7 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest003, TestSize.Level1)
             .protocol = LNN_PROTOCOL_IP
         }
     };
-    int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_CONN_IP);
+    int32_t ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_CONN_IP);
     ASSERT_EQ(ret, EOK);
 
     ret = TransSessionMgrInit();

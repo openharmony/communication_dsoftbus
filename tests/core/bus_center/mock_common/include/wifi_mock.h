@@ -36,10 +36,10 @@ public:
     virtual WifiErrorCode RegisterWifiEvent(WifiEvent *event) = 0;
     virtual WifiErrorCode GetScanInfoList(WifiScanInfo *result, unsigned int *size) = 0;
     virtual WifiErrorCode UnRegisterWifiEvent(WifiEvent *event) = 0;
-    virtual WifiErrorCode Hid2dGetChannelListFor5G(int *chanList, int len) = 0;
+    virtual WifiErrorCode Hid2dGetChannelListFor5G(int32_t *chanList, int32_t len) = 0;
     virtual WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info) = 0;
     virtual WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo* groupInfo) = 0;
-    virtual int IsWifiActive(void) = 0;
+    virtual int32_t IsWifiActive(void) = 0;
     virtual WifiErrorCode GetWifiDetailState(WifiDetailState *state) = 0;
     virtual WifiErrorCode GetP2pEnableStatus(P2pState *state) = 0;
 };
@@ -54,7 +54,7 @@ public:
     MOCK_METHOD1(RegisterWifiEvent, WifiErrorCode(WifiEvent *));
     MOCK_METHOD2(GetScanInfoList, WifiErrorCode(WifiScanInfo *, unsigned int *));
     MOCK_METHOD1(UnRegisterWifiEvent, WifiErrorCode(WifiEvent *));
-    MOCK_METHOD2(Hid2dGetChannelListFor5G, WifiErrorCode(int *, int));
+    MOCK_METHOD2(Hid2dGetChannelListFor5G, WifiErrorCode(int32_t *, int));
     MOCK_METHOD1(GetLinkedInfo, WifiErrorCode(WifiLinkedInfo *));
     MOCK_METHOD1(GetCurrentGroup, WifiErrorCode(WifiP2pGroupInfo*));
     MOCK_METHOD0(IsWifiActive, int(void));

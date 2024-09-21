@@ -27,7 +27,7 @@ void RemoveHilogModifiers(const char *fmt, char *modifiedFmt)
 {
     std::string strTypeFmt = fmt;
     std::string::size_type pos = 0;
-    for (int i = 0; i < PERMISSION_NUM; i++) {
+    for (int32_t i = 0; i < PERMISSION_NUM; i++) {
         while ((pos = strTypeFmt.find(g_hilogPermissionList[i], pos)) != std::string::npos) {
             strTypeFmt.erase(pos, g_hilogPermissionList[i].length());
         }

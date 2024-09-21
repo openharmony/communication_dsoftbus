@@ -217,7 +217,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelOpenedTest0
     unsigned char isServer = 0;
 
     channelId = TEST_MESSAGE_CHANNEL_ID;
-    int ret = TransProxyPipelineOnChannelOpened(channelId, uuid, isServer);
+    int32_t ret = TransProxyPipelineOnChannelOpened(channelId, uuid, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyPipelineOnChannelOpened(channelId, nullptr, isServer);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_UUID, ret);

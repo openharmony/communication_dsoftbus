@@ -33,10 +33,10 @@ const char *g_groupid = "TEST_GROUP_ID";
 static SessionAttribute g_sessionAttr = {
     .dataType = TYPE_BYTES,
 };
-const int FILE_NUM = 4;
+const int32_t FILE_NUM = 4;
 static int32_t g_sessionId = INVALID_SESSION_ID;
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     return SOFTBUS_OK;
 }
@@ -63,7 +63,7 @@ void CheckPermissionTest::SetUpTestCase()
 {
     (void)TransClientInit();
     SoftbusConfigInit();
-    int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SessionParam param = {
@@ -94,7 +94,7 @@ HWTEST_F(CheckPermissionTest, CheckPermissionTest001, TestSize.Level0)
     const char *data = "testdata";
     uint32_t len = strlen(data);
 
-    int ret = SendBytes(g_sessionId, data, len);
+    int32_t ret = SendBytes(g_sessionId, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendBytes(INVALID_SESSION_ID, data, len);
@@ -112,7 +112,7 @@ HWTEST_F(CheckPermissionTest, CheckPermissionTest002, TestSize.Level0)
     const char *data = "testdata";
     uint32_t len = strlen(data);
 
-    int ret = SendMessage(g_sessionId, data, len);
+    int32_t ret = SendMessage(g_sessionId, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendMessage(INVALID_SESSION_ID, data, len);
@@ -131,7 +131,7 @@ HWTEST_F(CheckPermissionTest, CheckPermissionTest003, TestSize.Level0)
     const StreamData ext = {0};
     const StreamFrameInfo param = {0};
 
-    int ret = SendStream(g_sessionId, &streamData, &ext, &param);
+    int32_t ret = SendStream(g_sessionId, &streamData, &ext, &param);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendStream(INVALID_SESSION_ID, &streamData, &ext, &param);
@@ -152,7 +152,7 @@ HWTEST_F(CheckPermissionTest, CheckPermissionTest004, TestSize.Level0)
         "/data/richu-002.jpg",
         "/data/richu-003.jpg",
     };
-    int ret = SendFile(g_sessionId, sfileList, nullptr, FILE_NUM);
+    int32_t ret = SendFile(g_sessionId, sfileList, nullptr, FILE_NUM);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendFile(INVALID_SESSION_ID, sfileList, nullptr, FILE_NUM);

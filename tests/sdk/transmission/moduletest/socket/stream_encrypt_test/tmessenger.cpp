@@ -295,7 +295,7 @@ void TMessenger::OnRequest()
         std::this_thread::sleep_for(std::chrono::seconds(WAIT_RESP_TIME));
         std::shared_ptr<Response> resp = onQuery_();
         Message msg { *resp };
-        int ret = Send(msg);
+        int32_t ret = Send(msg);
         if (ret != SOFTBUS_OK) {
             LOGE("failed to send response");
         }

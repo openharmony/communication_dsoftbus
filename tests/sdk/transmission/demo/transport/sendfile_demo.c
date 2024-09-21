@@ -38,17 +38,17 @@ static SessionAttribute g_sessionAttr = {
     .dataType = TYPE_FILE,  // File type
 };
 const char *g_rootDir = "/data/"; // Root directory for the files on the receiver side
-const int FILE_NUM = 4;
+const int32_t FILE_NUM = 4;
 
 // Notify that the session is set up successfully.
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("session opened,sesison id = %d\r\n", sessionId);
     return 0;
 }
 
 // Notify that the session is closed.
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("session closed, session id = %d\r\n", sessionId);
 }
@@ -59,20 +59,20 @@ static ISessionListener g_sessionlistenerA = {
     .OnSessionClosed = OnSessionClosed,
 };
 
-static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+static int32_t OnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     printf("OnSendFileProcess sessionId = %d, bytesUpload = %llu, total = %llu\n",
         sessionId, bytesUpload, bytesTotal);
     return 0;
 }
 
-static int OnSendFileFinished(int sessionId, const char *firstFile)
+static int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
 {
     printf("OnSendFileFinished sessionId = %d, first file = %s\n", sessionId, firstFile);
     return 0;
 }
 
-static void OnFileTransError(int sessionId)
+static void OnFileTransError(int32_t sessionId)
 {
     printf("OnFileTransError sessionId = %d\n", sessionId);
 }
@@ -84,10 +84,10 @@ static IFileSendListener g_fileSendListener = {
     .OnFileTransError = OnFileTransError,
 };
 
-int main(void)
+int32_t main(void)
 {
     /* 1. Device A calls SetFileSendListener() to set callbacks for file sending. */
-    int ret = SetFileSendListener(g_pkgNameA, g_sessionNameA, &g_fileSendListener);
+    int32_t ret = SetFileSendListener(g_pkgNameA, g_sessionNameA, &g_fileSendListener);
     printf("set file send listener result = %d\n", ret);
 
     /*
@@ -104,7 +104,7 @@ int main(void)
      * When the session is open, a callback will be invoked to notify devices A and B.
      * A session ID is returned for subsequent file sending.
      */
-    int sessionId = OpenSession(g_sessionNameA, g_sessionNameB, g_networkidB, g_groupid, &g_sessionAttr);
+    int32_t sessionId = OpenSession(g_sessionNameA, g_sessionNameB, g_networkidB, g_groupid, &g_sessionAttr);
     printf("open session result = %d\n", sessionId);
 
     /* 4. Device A calls SendFile() to send files to device B. */
@@ -137,13 +137,13 @@ const char *g_pkgNameB = "dmsB"; // Application bundle name of device B
 const char *g_sessionNameB = "ohos.distributedschedule.dms.testB";  // Session name of device B
 const char *g_rootDirB = "/data"; // File directory of device B
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("session opened,sesison id = %d\r\n", sessionId);
     return 0;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("session closed, session id = %d\r\n", sessionId);
 }
@@ -153,25 +153,25 @@ static ISessionListener g_sessionlistenerB = {
     .OnSessionClosed = OnSessionClosed,
 };
 
-static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+static int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     printf("File receive start sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
     return 0;
 }
 
-static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+static int32_t OnReceiveFileProcess(int32_t sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     printf("File receive Process sessionId = %d, first file = %s, bytesUpload = %llu, bytesTotal = %llu\n",
         sessionId, firstFile, bytesUpload, bytesTotal);
     return 0;
 }
 
-static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+static void OnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     printf("File receive finished sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
 }
 
-static void OnFileTransError(int sessionId)
+static void OnFileTransError(int32_t sessionId)
 {
     printf("OnFileTransError sessionId = %d\n", sessionId);
 }
@@ -184,10 +184,10 @@ static IFileReceiveListener g_fileRecvListener = {
     .OnFileTransError = OnFileTransError,
 };
 
-int main(void)
+int32_t main(void)
 {
     /* 1. Device B calls SetFileReceiveListener() to set callbacks for file receiving. */
-    int ret = SetFileReceiveListener(g_pkgNameB, g_sessionNameB, &g_fileRecvListener, g_rootDirB);
+    int32_t ret = SetFileReceiveListener(g_pkgNameB, g_sessionNameB, &g_fileRecvListener, g_rootDirB);
     printf("set file receive listener result = %d\n", ret);
 
     /*

@@ -84,7 +84,7 @@ static IClientSessionCallBack g_clientSessionCb = {
 
 void ClientTransChannelManagerTest::SetUpTestCase(void)
 {
-    int ret = ClientTransAuthInit(&g_clientSessionCb);
+    int32_t ret = ClientTransAuthInit(&g_clientSessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransProxyInit(&g_clientSessionCb);
@@ -106,8 +106,8 @@ void ClientTransChannelManagerTest::TearDownTestCase(void) {}
  */
 HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseChannelTest001, TestSize.Level0)
 {
-    int channelId = 1;
-    int ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_PROXY);
+    int32_t channelId = 1;
+    int32_t ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_PROXY);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_TCP_DIRECT);
@@ -129,10 +129,10 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseChannelTest001, TestSize
  */
 HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, TestSize.Level0)
 {
-    int channelId = 1;
+    int32_t channelId = 1;
     const char *data = "test";
 
-    int ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH);
+    int32_t ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, data, 0);
@@ -159,10 +159,10 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, Test
  */
 HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, TestSize.Level0)
 {
-    int channelId = 1;
+    int32_t channelId = 1;
     const char *data = "test";
 
-    int ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH);
+    int32_t ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, nullptr, 0);
@@ -189,12 +189,12 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, Te
  */
 HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendStreamTest001, TestSize.Level0)
 {
-    int channelId = 1;
+    int32_t channelId = 1;
     const StreamData data = {0};
     const StreamData ext = {0};
     const StreamFrameInfo param = {0};
 
-    int ret = ClientTransChannelSendStream(channelId, CHANNEL_TYPE_UDP, nullptr, &ext, &param);
+    int32_t ret = ClientTransChannelSendStream(channelId, CHANNEL_TYPE_UDP, nullptr, &ext, &param);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransChannelSendStream(channelId, CHANNEL_TYPE_UDP, &data, nullptr, &param);
@@ -218,11 +218,11 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendStreamTest001, Tes
  */
 HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendFileTest001, TestSize.Level0)
 {
-    int channelId = 1;
-    int fileCnt = 1;
+    int32_t channelId = 1;
+    int32_t fileCnt = 1;
     const char *sFileList[] = { "/data/test.txt" };
     const char *dFileList[] = { "/data/test.txt" };
-    int ret = ClientTransChannelSendFile(channelId, CHANNEL_TYPE_UDP, sFileList, dFileList, fileCnt);
+    int32_t ret = ClientTransChannelSendFile(channelId, CHANNEL_TYPE_UDP, sFileList, dFileList, fileCnt);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     ret = ClientTransChannelSendFile(channelId, CHANNEL_TYPE_PROXY, sFileList, dFileList, fileCnt);

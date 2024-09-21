@@ -92,8 +92,8 @@ HWTEST_F(WifiDirectUtilsTest, ToBinaryTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, ChannelToFrequencyTest, TestSize.Level1)
 {
-    int channel = 36;
-    int frequency = 5180;
+    int32_t channel = 36;
+    int32_t frequency = 5180;
     auto ret = WifiDirectUtils::ChannelToFrequency(channel);
     EXPECT_EQ(ret, frequency);
 
@@ -243,7 +243,7 @@ HWTEST_F(WifiDirectUtilsTest, IsInChannelListTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, StringToChannelListTest, TestSize.Level1)
 {
-    int channel = 36;
+    int32_t channel = 36;
     std::vector<int> channelArray = { 35, 36, 37 };
     auto ret = WifiDirectUtils::IsInChannelList(channel, channelArray);
     EXPECT_EQ(ret, true);
@@ -350,7 +350,7 @@ HWTEST_F(WifiDirectUtilsTest, SyncLnnInfoForP2pTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, DurationStatisticEndTest, TestSize.Level1)
 {
-    int requestid = 0;
+    int32_t requestid = 0;
     DurationStatistic::GetInstance().End(requestid);
 
     DurationStatistic::GetInstance().calculators_[requestid] =

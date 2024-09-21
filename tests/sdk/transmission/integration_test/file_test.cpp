@@ -33,10 +33,10 @@ public:
     void TearDown() {};
 };
 
-int g_sessionId = -1;
+int32_t g_sessionId = -1;
 bool g_sessionEnabled = false;
 
-static inline int WaitConnectionReady(int sessionId, uint32_t timeout)
+static inline int32_t WaitConnectionReady(int32_t sessionId, uint32_t timeout)
 {
     while (!g_sessionEnabled && (timeout--) > 0) {
         sleep(1);
@@ -49,22 +49,22 @@ static inline int WaitConnectionReady(int sessionId, uint32_t timeout)
     return 0;
 }
 
-static int FtOnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+static int32_t FtOnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     LOG("%s:sessionId=%d,bytesUpload=%" PRIu64 ", bytesTotal=%" PRIu64, __func__, sessionId, bytesUpload, bytesTotal);
     return 0;
 }
-static int FtOnSendFileFinished(int sessionId, const char *firstFile)
+static int32_t FtOnSendFileFinished(int32_t sessionId, const char *firstFile)
 {
     LOG("%s:sessionId=%d,firstfile=%s", __func__, sessionId, firstFile);
     return 0;
 }
-static void FtOnFileTransError(int sessionId)
+static void FtOnFileTransError(int32_t sessionId)
 {
     LOG("%s:sessionId=%d", __func__, sessionId);
 }
 
-static int EsOnSessionOpened(int sessionId, int result)
+static int32_t EsOnSessionOpened(int32_t sessionId, int32_t result)
 {
     LOG("%s:enter, sessionId=%d, result=%d", __func__, sessionId, result);
     if (sessionId == g_sessionId && result == 0) {
@@ -72,7 +72,7 @@ static int EsOnSessionOpened(int sessionId, int result)
     }
     return 0;
 }
-static void EsOnSessionClosed(int sessionId)
+static void EsOnSessionClosed(int32_t sessionId)
 {
     LOG("%s:enter", __func__);
     if (sessionId == g_sessionId) {
