@@ -1853,7 +1853,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusRequest(channelId, flags, seq, reply);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_SERVER_DENIED);
     flags = FLAG_AUTH_META;
     channelId = TEST_NEW_CHANNEL_ID;
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));

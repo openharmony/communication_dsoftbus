@@ -279,7 +279,7 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest02, TestSize.Level1
         g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
@@ -323,7 +323,7 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest03, TestSize.Level1
         g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 

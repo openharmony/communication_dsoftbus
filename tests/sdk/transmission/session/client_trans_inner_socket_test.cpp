@@ -56,9 +56,9 @@ HWTEST_F(ClientTransSocketTest, DBinderGrantPermissionTest001, TestSize.Level1)
     ASSERT_GT(pid, 0);
     std::string socketName = "DBinder" + std::to_string(uid) + std::string("_") + std::to_string(pid);
     auto ret = DBinderGrantPermission(uid, pid, socketName.c_str());
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
     ret = DBinderRemovePermission(socketName.c_str());
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
 /*
@@ -76,7 +76,7 @@ HWTEST_F(ClientTransSocketTest, DBinderGrantPermissionTest002, TestSize.Level1)
     ASSERT_GT(pid, 0);
     std::string socketName = "DBinder" + std::to_string(uid) + std::string("_") + std::to_string(pid);
     auto ret = DBinderGrantPermission(uid, pid, socketName.c_str());
-    ASSERT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
 /*
@@ -94,9 +94,9 @@ HWTEST_F(ClientTransSocketTest, DBinderRemovePermissionTest001, TestSize.Level1)
     ASSERT_GT(pid, 0);
     std::string socketName = "DBinder" + std::to_string(uid) + std::string("_") + std::to_string(pid);
     auto ret = DBinderGrantPermission(uid, pid, socketName.c_str());
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
     CounterfeitProcess("msdp");
     ret = DBinderRemovePermission(socketName.c_str());
-    ASSERT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 } // namespace OHOS

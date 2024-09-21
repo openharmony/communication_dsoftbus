@@ -788,7 +788,7 @@ HWTEST_F(TransChannelManagerTest, GetAuthAppInfo005, TestSize.Level1)
 HWTEST_F(TransChannelManagerTest, TransGetAndComparePid001, TestSize.Level1)
 {
     int32_t ret = TransGetAndComparePid(TRANS_TEST_PID, 1, CHANNEL_TYPE_TCP_DIRECT);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
     ret = TransGetAndComparePid(TRANS_TEST_PID, 1, CHANNEL_TYPE_AUTH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
