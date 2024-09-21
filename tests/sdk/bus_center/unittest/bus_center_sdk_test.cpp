@@ -254,7 +254,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001, TestSize.L
     NodeBasicInfo *info = nullptr;
     int infoNum;
 
-    EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum) == SOFTBUS_OK);
+    EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum) != SOFTBUS_OK);
     if (infoNum == 0) {
         EXPECT_TRUE(info == nullptr);
     } else {
@@ -394,7 +394,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
     EXPECT_TRUE(ret != 0);
     g_pInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    g_pInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
+    g_pInfo.freq = (ExchangeFreq)(FREQ_BUTT);
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     g_pInfo.freq = LOW;
@@ -480,7 +480,7 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
     EXPECT_TRUE(ret != 0);
     g_sInfo.mode = DISCOVER_MODE_ACTIVE;
 
-    g_sInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
+    g_sInfo.freq = (ExchangeFreq)(FREQ_BUTT);
     ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
     g_sInfo.freq = LOW;

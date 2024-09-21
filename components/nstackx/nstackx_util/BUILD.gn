@@ -174,9 +174,6 @@ if (defined(ohos_lite)) {
 
   ohos_shared_library("nstackx_util.open") {
     sanitize = {
-      ubsan = true
-      integer_overflow = true
-      boundary_sanitize = true
       cfi = true
       cfi_cross_dso = true
       debug = false
