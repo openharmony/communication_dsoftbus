@@ -75,7 +75,6 @@ public:
 
 void TransTcpDirectMessageAppendTest::SetUpTestCase(void)
 {
-
     // list will free when go to TransSrvDataListDeinit
     SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_TRUE(list != nullptr);
