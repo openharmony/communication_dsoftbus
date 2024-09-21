@@ -54,6 +54,8 @@ void LnnDeinitDriverMonitorImpl(void);
 
 void LnnDeInitNetlinkMonitorImpl(void);
 
+bool LnnQueryLocalScreenStatusOnce(bool notify);
+
 #ifdef __cplusplus
 }
 #endif

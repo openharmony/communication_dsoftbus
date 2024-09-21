@@ -48,6 +48,7 @@ typedef struct {
     uint64_t feature;
     uint64_t connSubFeature;
     uint32_t authCapacity;
+    uint32_t heartbeatCapacity;
     int32_t osType;
     char osVersion[OS_VERSION_BUF_LEN];
     int32_t stateVersion;

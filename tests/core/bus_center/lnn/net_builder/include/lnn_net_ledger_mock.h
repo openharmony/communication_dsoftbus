@@ -105,6 +105,7 @@ public:
     virtual int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid) = 0;
     virtual int32_t LnnSetDLDeviceBroadcastCipherKey(const char *udid, const void *cipherKey) = 0;
     virtual int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv) = 0;
+    virtual int32_t LnnUpdateLocalScreenStatus(bool isScreenOn) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -181,6 +182,7 @@ public:
     MOCK_METHOD2(LnnUpdateDistributedNodeInfo, int32_t (NodeInfo *, const char *));
     MOCK_METHOD2(LnnSetDLDeviceBroadcastCipherKey, int32_t (const char *, const void *));
     MOCK_METHOD2(LnnSetDLDeviceBroadcastCipherIv, int32_t (const char *, const void *));
+    MOCK_METHOD1(LnnUpdateLocalScreenStatus, int32_t(bool));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
