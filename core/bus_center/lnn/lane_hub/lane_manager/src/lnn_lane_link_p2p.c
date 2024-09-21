@@ -1161,6 +1161,21 @@ static void HandleActionTriggerError(uint32_t p2pRequestId)
     }
 }
 
+static bool IsGuideChannelRetryErrcode(int32_t reason)
+{
+    if (reason == SOFTBUS_CONN_ACTION_SEND_DATA_FAIL ||
+        reason == SOFTBUS_CONN_ACTION_STATUS_NO_ACK ||
+        reason == SOFTBUS_CONN_ACTION_STATUS_CHBA_SYNC ||
+        reason == SOFTBUS_CONN_AUTH_POST_DATA_FAILED ||
+        reason == SOFTBUS_CONN_HV2_SEND_TRIGGER_MSG_FAILED ||
+        reason == SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT ||
+        reason == SOFTBUS_CONN_PV2_WAIT_CONNECT_RESPONSE_TIMEOUT ||
+        reason == SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED) {
+        return true;
+    }
+    return false;
+}
+
 static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "wifidirect conn fail, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
@@ -1179,9 +1194,7 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
         int32_t ret = LnnSyncPtk(reqInfo.laneRequestInfo.networkId);
         LNN_LOGI(LNN_LANE, "syncptk done, ret=%{public}d", ret);
     }
-    if (reason == SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED || reason == SOFTBUS_CONN_POST_DATA_FAILED ||
-        reason == SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT ||
-        reason == SOFTBUS_CONN_PV2_WAIT_CONNECT_RESPONSE_TIMEOUT) {
+    if (IsGuideChannelRetryErrcode(reason)) {
         LNN_LOGI(LNN_LANE, "guide channel retry, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
         HandleGuideChannelAsyncFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
         return;
@@ -2652,7 +2665,9 @@ int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
         return SOFTBUS_STRCPY_ERR;
     }
     LinkUnlock();
-    if (linkType == LANE_HML_RAW || OpenAuthToDisconnP2p(networkId, linkId) != SOFTBUS_OK) {
+    enum WifiDirectLinkType type = (linkType == LANE_P2P) ? WIFI_DIRECT_LINK_TYPE_P2P : WIFI_DIRECT_LINK_TYPE_HML;
+    if (linkType == LANE_HML_RAW || !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, type) ||
+        OpenAuthToDisconnP2p(networkId, linkId) != SOFTBUS_OK) {
         int32_t errCode = DisconnectP2pWithoutAuthConn(pid, mac, linkId);
         if (errCode != SOFTBUS_OK) {
             DelP2pLinkedByLinkId(linkId);

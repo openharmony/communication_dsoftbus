@@ -119,6 +119,11 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
+static bool IsNegotiateChannelNeededTrue(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
+{
+    return true;
+}
+
 static uint32_t GetRequestId(void)
 {
     return 1;
@@ -1160,6 +1165,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillOnce(linkMock.ActionOfConnOpenFailed)
         .WillRepeatedly(Return(SOFTBUS_OK));
+    g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeededTrue;
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1170,6 +1176,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();
+    g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
 }
 
 /*
