@@ -670,7 +670,7 @@ static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
     (void)memset_s(&mode, sizeof(GearMode), 0, sizeof(GearMode));
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
 
-    if (msgPara->hbType != HEARTBEAT_TYPE_BLE_V0 || msgPara->strategyType != STRATEGY_HB_SEND_ADJUSTABLE_PERIOD) {
+    if ((msgPara->hbType & HEARTBEAT_TYPE_BLE_V0) == 0 || msgPara->strategyType != STRATEGY_HB_SEND_ADJUSTABLE_PERIOD) {
         LNN_LOGE(LNN_HEART_BEAT, "HB adjustable send get invaild strategy");
         return SOFTBUS_INVALID_PARAM;
     }
