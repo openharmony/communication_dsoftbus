@@ -220,7 +220,7 @@ static void NewBrBleDiscovered(const NodeInfo *oldInfo, NodeInfo *newInfo)
         LNN_LOGE(LNN_LEDGER, "LnnGetWiFiIp Fail!");
         return;
     }
-    if (strcmp(ipAddr, DEFAULT_IP) == 0) {
+    if (strcmp(ipAddr, DEFAULT_IP) == 0 || strcmp(ipAddr, LOCAL_IP) == 0) {
         LnnSetWiFiIp(newInfo, LnnGetWiFiIp(oldInfo));
     }
 
