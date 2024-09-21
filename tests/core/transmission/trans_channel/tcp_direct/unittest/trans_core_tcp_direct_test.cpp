@@ -304,6 +304,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransSrvDelDataBufNode(channeId);
+    TransSrvDataListDeinit();
 }
 
 /**
