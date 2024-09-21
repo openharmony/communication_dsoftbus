@@ -447,7 +447,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
 
     SendListenerInfo *sendListenerInfo;
     ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID, 0);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
     int32_t channelId = 1;
     int32_t osType = TEST_OS_TYPE;
@@ -477,8 +477,6 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
 
     FileRecipientInfo *result = CreateNewRecipient(sessionId, channelId, osType);
     EXPECT_EQ(nullptr, result);
-
-    (void)TransClientDeinit();
 }
 
 /**

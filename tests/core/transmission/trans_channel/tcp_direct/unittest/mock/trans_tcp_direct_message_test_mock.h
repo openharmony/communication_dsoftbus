@@ -55,7 +55,6 @@ public:
     virtual int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo) = 0;
     virtual int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo) = 0;
     virtual int32_t GetRemoteUuidByIp(const char *remoteIp, char *localIp, int32_t localIpSize) = 0;
-    virtual cJSON* cJSON_Parse(const char *value) = 0;
     virtual int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle) = 0;
     virtual int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
@@ -106,7 +105,6 @@ public:
     MOCK_METHOD2(UnpackRequest, int32_t (const cJSON *msg, AppInfo *appInfo));
     MOCK_METHOD2(GetAppInfoById, int32_t (int32_t channelId, AppInfo *appInfo));
     MOCK_METHOD3(GetRemoteUuidByIp, int32_t (const char *remoteIp, char *localIp, int32_t localIpSize));
-    MOCK_METHOD1(cJSON_Parse, cJSON * (const char *value));
     MOCK_METHOD2(SetAuthHandleByChanId, int32_t (int32_t channelId, AuthHandle *authHandle));
     MOCK_METHOD5(AuthDecrypt, int32_t (AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen));
