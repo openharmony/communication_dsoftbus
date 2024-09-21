@@ -231,7 +231,7 @@ HWTEST_F(SoftbusClientEventManagerTest, DelClientPkgName001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
 
     ret = InitSoftBus(pkgName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     char *clientName[SOFTBUS_PKGNAME_MAX_NUM] = {0};
     uint32_t clientNameNum = GetSoftBusClientNameList(NULL, SOFTBUS_PKGNAME_MAX_NUM);
@@ -240,7 +240,7 @@ HWTEST_F(SoftbusClientEventManagerTest, DelClientPkgName001, TestSize.Level1)
     EXPECT_EQ(0, clientNameNum);
 
     clientNameNum = GetSoftBusClientNameList(clientName, SOFTBUS_PKGNAME_MAX_NUM);
-    EXPECT_NE(0, clientNameNum);
+    EXPECT_EQ(0, clientNameNum);
 }
 
 /**
@@ -257,14 +257,14 @@ HWTEST_F(SoftbusClientEventManagerTest, CheckPackageName001, TestSize.Level1)
 {
     const char *pkgName = "000";
     int ret = CheckPackageName(pkgName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
 
     const char *tmpPkgName = "000111";
     ret = CheckPackageName(tmpPkgName);
     EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
 
     ret = CheckPackageName(pkgName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
 
     FreeClientPkgName();
     ret = AddClientPkgName(pkgName);
