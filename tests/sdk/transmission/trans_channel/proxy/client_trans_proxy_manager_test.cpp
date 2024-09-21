@@ -68,38 +68,45 @@ char g_sessionKey[32] = "1234567812345678123456781234567";
 
 int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
+    std::cout << "111111111111" << std::endl;
     return SOFTBUS_OK;
 }
 
 int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
+    std::cout << "22222222222" << std::endl;
     return SOFTBUS_OK;
 }
 
 int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
+    std::cout << "3333333333333" << std::endl;
     return SOFTBUS_OK;
 }
 
 int32_t TransOnBytesReceived(int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, SessionPktType type)
 {
+    std::cout << "4444444444444" << std::endl;
     return SOFTBUS_OK;
 }
 
 int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
+    std::cout << "55555555555555" << std::endl;
     return SOFTBUS_OK;
 }
 
 int32_t TransOnGetSessionId(int32_t channelId, int32_t channelType, int32_t *sessionId)
 {
+    std::cout << "66666666666666" << std::endl;
     return SOFTBUS_OK;
 }
 int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
     int32_t tvCount, const QosTv *tvList)
 {
+    std::cout << "7777777777777777" << std::endl;
     return SOFTBUS_OK;
 }
 

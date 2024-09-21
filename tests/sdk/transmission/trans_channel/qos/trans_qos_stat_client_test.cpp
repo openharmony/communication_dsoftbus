@@ -113,7 +113,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level0)
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -160,7 +160,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -209,7 +209,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -263,7 +263,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -324,7 +324,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;

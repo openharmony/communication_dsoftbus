@@ -310,7 +310,7 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest02, TestSiz
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId, isClosing);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = QosReport(sessionId, APP_TYPE_AUTH, QOS_IMPROVE);
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret,  SOFTBUS_ACCESS_TOKEN_DENIED);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(sessionParam);
