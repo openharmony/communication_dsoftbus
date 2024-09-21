@@ -304,16 +304,17 @@ static int32_t HbHandleLeaveLnn(void)
 static void HbDelaySetNormalScanParam(void *para)
 {
     (void)para;
-
-    if (g_hbConditionState.screenState == SOFTBUS_SCREEN_OFF) {
-        LNN_LOGD(LNN_HEART_BEAT, "screen off, no need handle");
-        return;
+    LnnHeartbeatMediumParam param;
+    (void)memset_s(&param, sizeof(LnnHeartbeatMediumParam), 0, sizeof(LnnHeartbeatMediumParam));
+    if (g_hbConditionState.screenState == SOFTBUS_SCREEN_OFF && !LnnIsLocalSupportBurstFeature()) {
+        param.type = HEARTBEAT_TYPE_BLE_V1;
+        param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
+        param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
+    } else {
+        param.type = HEARTBEAT_TYPE_BLE_V1;
+        param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
+        param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
     }
-    LnnHeartbeatMediumParam param = {
-        .type = HEARTBEAT_TYPE_BLE_V1,
-        .info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10,
-        .info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10,
-    };
     LNN_LOGI(LNN_HEART_BEAT, "scanInterval=%{public}d, scanWindow=%{public}d", param.info.ble.scanInterval,
         param.info.ble.scanWindow);
     if (LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK) {
