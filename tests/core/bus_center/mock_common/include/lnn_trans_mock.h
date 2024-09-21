@@ -27,7 +27,7 @@ public:
     LnnTransInterface() {};
     virtual ~LnnTransInterface() {};
 
-    virtual int TransRegisterNetworkingChannelListener(const INetworkingListener *listener) = 0;
+    virtual int32_t TransRegisterNetworkingChannelListener(const INetworkingListener *listener) = 0;
     virtual int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId) = 0;
     virtual int32_t TransSendNetworkingMessage(
         int32_t channelId, const char *data, uint32_t dataLen, int32_t priority) = 0;

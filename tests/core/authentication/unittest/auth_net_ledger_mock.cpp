@@ -27,7 +27,7 @@ static const std::string DATA_TAG = "TEData";
 static const std::string DEVICE_ID_TAG = "TEDeviceId";
 static const std::string DATA_BUF_SIZE_TAG = "DataBufSize";
 static const std::string SOFT_BUS_VERSION_TAG = "softbusVersion";
-static const int PACKET_SIZE = (64 * 1024);
+static const int32_t PACKET_SIZE = (64 * 1024);
 
 using namespace testing;
 using namespace testing::ext;

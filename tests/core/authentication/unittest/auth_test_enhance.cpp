@@ -60,7 +60,7 @@ const AuthConnCallback g_connCallback = {
     .onConnOpened = LnnConnectInterfaceMock::onConnOpened,
     .onConnOpenFailed = LnnConnectInterfaceMock::onConnOpenFailed,
 };
-static const int MILLIS = 15;
+static const int32_t MILLIS = 15;
 
 class AuthEnhanceMockTest : public testing::Test {
 public:

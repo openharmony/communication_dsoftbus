@@ -27,7 +27,7 @@
 constexpr char PKG_NAME[] = "com.softbus.test";
 constexpr char NETWORK_ID[] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 constexpr uint16_t DATA_CHANGE_FLAG = 65535;
-constexpr int DATA_CHANGE_FLAG_BUF_NUM = 2;
+constexpr int32_t DATA_CHANGE_FLAG_BUF_NUM = 2;
 
 namespace OHOS {
 using namespace testing::ext;

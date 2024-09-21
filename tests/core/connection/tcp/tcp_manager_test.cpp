@@ -47,7 +47,7 @@
 #define KEEPALIVE_INTERVAL 2
 #define KEEPALIVE_COUNT 5
 
-static const int MAXLNE = 50;
+static const int32_t MAXLNE = 50;
 
 using namespace testing::ext;
 
@@ -60,8 +60,8 @@ static uint32_t g_connectionId = 0;
 static ConnectFuncInterface *g_interface = nullptr;
 static ConnectResult g_result;
 static ConnectCallback g_cb;
-static int g_receivedDatalength = 0;
-static int g_connServerInit = 0;
+static int32_t g_receivedDatalength = 0;
+static int32_t g_connServerInit = 0;
 
 void TcpOnConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
@@ -73,7 +73,7 @@ void TcpOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     printf("TcpOnDisConnect %08x\n", connectionId);
 }
 
-void TcpDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int length)
+void TcpDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t length)
 {
     g_receivedDatalength = length;
     printf("nDataReceived with length:%d\n", length);
@@ -129,11 +129,11 @@ void TcpManagerTest::TearDown(void)
 
 void CreateServer(void *arg)
 {
-    int listenfd, connfd, n;
+    int32_t listenfd, connfd, n;
     struct sockaddr_in servaddr;
     char buff[MAXLNE];
     unsigned int port = SERVERPORT;
-    int defaultListen = 5;
+    int32_t defaultListen = 5;
 
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         printf("create socket error: %s(errno: %d)\n", strerror(errno), errno);
@@ -196,14 +196,14 @@ HWTEST_F(TcpManagerTest, testTcpManager001, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager002, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BR;
     option.socketOption.port = port;
     option.socketOption.moduleId = PROXY;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
-    int ret;
+    int32_t ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TcpConnectDevice(&option, requestId, nullptr);
@@ -245,7 +245,7 @@ HWTEST_F(TcpManagerTest, testTcpManager004, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager005, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -272,7 +272,7 @@ HWTEST_F(TcpManagerTest, testTcpManager005, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager006, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -307,8 +307,8 @@ HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
 {
     pthread_t pid;
 
-    int clientPort = CLIENTPORT;
-    int serverPort = SERVERPORT;
+    int32_t clientPort = CLIENTPORT;
+    int32_t serverPort = SERVERPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = clientPort;
@@ -332,7 +332,7 @@ HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     sleep(1);
     EXPECT_EQ(1, TcpGetConnNum());
-    for (int i = 0; i < 3; i++) {
+    for (int32_t i = 0; i < 3; i++) {
         char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
         if (data == nullptr) {
             continue;
@@ -360,7 +360,7 @@ HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager008, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -404,7 +404,7 @@ HWTEST_F(TcpManagerTest, testTcpManager008, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -419,7 +419,7 @@ HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
     option.socketOption.moduleId = PROXY;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
-    int maxDataLen;
+    int32_t maxDataLen;
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH,
         (unsigned char*)&maxDataLen, sizeof(maxDataLen)) != SOFTBUS_OK) {
         CONN_LOGE(CONN_TEST, "get maxDataLen fail");
@@ -457,7 +457,7 @@ HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager010, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BLE;
@@ -465,7 +465,7 @@ HWTEST_F(TcpManagerTest, testTcpManager010, TestSize.Level1)
     option.socketOption.moduleId = PROXY;
     option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
-    int ret;
+    int32_t ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TcpConnectDevice(&option, requestId, nullptr);
@@ -501,7 +501,7 @@ HWTEST_F(TcpManagerTest, testTcpManager010, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager011, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BLE;
@@ -509,7 +509,7 @@ HWTEST_F(TcpManagerTest, testTcpManager011, TestSize.Level1)
     option.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
     option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
-    int ret;
+    int32_t ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TcpConnectDevice(&option, requestId, nullptr);
@@ -544,7 +544,7 @@ HWTEST_F(TcpManagerTest, testTcpManager011, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager012, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_P2P;
@@ -552,7 +552,7 @@ HWTEST_F(TcpManagerTest, testTcpManager012, TestSize.Level1)
     option.socketOption.moduleId = PROXY;
     option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
-    int ret;
+    int32_t ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TcpConnectDevice(&option, requestId, nullptr);
@@ -588,7 +588,7 @@ HWTEST_F(TcpManagerTest, testTcpManager012, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager013, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_P2P;
@@ -596,7 +596,7 @@ HWTEST_F(TcpManagerTest, testTcpManager013, TestSize.Level1)
     option.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
     option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
-    int ret;
+    int32_t ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TcpConnectDevice(&option, requestId, nullptr);
@@ -631,7 +631,7 @@ HWTEST_F(TcpManagerTest, testTcpManager013, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager014, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -659,7 +659,7 @@ HWTEST_F(TcpManagerTest, testTcpManager014, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager015, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -688,7 +688,7 @@ HWTEST_F(TcpManagerTest, testTcpManager015, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager016, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -716,7 +716,7 @@ HWTEST_F(TcpManagerTest, testTcpManager016, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager017, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -744,7 +744,7 @@ HWTEST_F(TcpManagerTest, testTcpManager017, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager018, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -772,7 +772,7 @@ HWTEST_F(TcpManagerTest, testTcpManager018, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager019, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -801,7 +801,7 @@ HWTEST_F(TcpManagerTest, testTcpManager019, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager020, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -829,7 +829,7 @@ HWTEST_F(TcpManagerTest, testTcpManager020, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager021, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -860,9 +860,9 @@ HWTEST_F(TcpManagerTest, testTcpManager022, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
-    int fd = -1;
-    int port = tcp->GetSockPort(fd);
-    int ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t fd = -1;
+    int32_t port = tcp->GetSockPort(fd);
+    int32_t ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     LocalListenerInfo option = {
@@ -906,9 +906,9 @@ HWTEST_F(TcpManagerTest, testTcpManager023, TestSize.Level1)
         }
     };
 
-    int fd =  tcp->OpenClientSocket(&option, "127.0.0.1", true);
-    int tos = 1;
-    int ret = SetIpTos(fd, tos);
+    int32_t fd =  tcp->OpenClientSocket(&option, "127.0.0.1", true);
+    int32_t tos = 1;
+    int32_t ret = SetIpTos(fd, tos);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     fd = -1;
@@ -939,7 +939,7 @@ HWTEST_F(TcpManagerTest, testTcpManager024, TestSize.Level1)
             .protocol = LNN_PROTOCOL_IP
         }
     };
-    int fd = -1;
+    int32_t fd = -1;
     bool isNonBlock = true;
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ConnToggleNonBlockMode(fd, isNonBlock));
 
@@ -973,7 +973,7 @@ HWTEST_F(TcpManagerTest, testTcpManager025, TestSize.Level1)
 
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
-    int clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", false);
+    int32_t clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", false);
     ssize_t bytes = ConnSendSocketData(clientfd, "Hello world", 11, 0);
     EXPECT_EQ(bytes, -1);
     ConnShutdownSocket(clientfd);
@@ -1009,11 +1009,11 @@ HWTEST_F(TcpManagerTest, testTcpManager026, TestSize.Level1)
 
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
-    int clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
-    int ret = (clientfd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
+    int32_t ret = (clientfd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    int bytes = ConnSendSocketData(clientfd, nullptr, 10, 0);
+    int32_t bytes = ConnSendSocketData(clientfd, nullptr, 10, 0);
     EXPECT_EQ(bytes, -1);
 
     bytes = ConnSendSocketData(clientfd, "hello world!", 0, 0);
@@ -1049,8 +1049,8 @@ HWTEST_F(TcpManagerTest, testTcpManager027, TestSize.Level1)
 
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
-    int clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
-    int ret = (clientfd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
+    int32_t ret = (clientfd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_TRUE(ConnGetSocketError(clientfd) != 0);
     ConnCloseSocket(clientfd);
@@ -1066,7 +1066,7 @@ HWTEST_F(TcpManagerTest, testTcpManager027, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager028, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -1094,7 +1094,7 @@ HWTEST_F(TcpManagerTest, testTcpManager028, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager029, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -1122,7 +1122,7 @@ HWTEST_F(TcpManagerTest, testTcpManager029, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager030, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -1150,7 +1150,7 @@ HWTEST_F(TcpManagerTest, testTcpManager030, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager031, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1179,7 +1179,7 @@ HWTEST_F(TcpManagerTest, testTcpManager031, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager032, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1207,7 +1207,7 @@ HWTEST_F(TcpManagerTest, testTcpManager032, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager033, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1236,7 +1236,7 @@ HWTEST_F(TcpManagerTest, testTcpManager033, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager034, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1264,7 +1264,7 @@ HWTEST_F(TcpManagerTest, testTcpManager034, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager035, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1292,7 +1292,7 @@ HWTEST_F(TcpManagerTest, testTcpManager035, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager036, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1323,16 +1323,16 @@ HWTEST_F(TcpManagerTest, testTcpManager037, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
     uint32_t tos = 65535;
-    int rc = SetIpTos(fd, tos);
+    int32_t rc = SetIpTos(fd, tos);
     EXPECT_EQ(rc, SOFTBUS_OK);
 };
 
@@ -1349,7 +1349,7 @@ HWTEST_F(TcpManagerTest, testTcpManager038, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = SERVERPORT;
+    int32_t port = SERVERPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1383,7 +1383,7 @@ HWTEST_F(TcpManagerTest, testTcpManager039, TestSize.Level1)
     };
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
 
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
     EXPECT_EQ(SetIpTos(fd, 65535), SOFTBUS_OK);
 
     ConnectOption option = {
@@ -1412,14 +1412,14 @@ HWTEST_F(TcpManagerTest, testTcpManager040, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
     EXPECT_TRUE(fd > 0);
     EXPECT_EQ(SetIpTos(fd, 65535), SOFTBUS_OK);
     EXPECT_TRUE(ConnToggleNonBlockMode(fd, true) == 0);
@@ -1438,14 +1438,14 @@ HWTEST_F(TcpManagerTest, testTcpManager041, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
     EXPECT_TRUE(tcp->GetSockPort(fd) > 0);
 };
 
@@ -1473,7 +1473,7 @@ HWTEST_F(TcpManagerTest, testTcpManager042, TestSize.Level1)
     };
 
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
-    int fd = tcp->OpenClientSocket(&option, option.socketOption.addr, false);
+    int32_t fd = tcp->OpenClientSocket(&option, option.socketOption.addr, false);
     const char * buf = "SendDataTest";
     EXPECT_EQ(ConnSendSocketData(fd, buf, 13, 0), -1);
 };
@@ -1491,14 +1491,14 @@ HWTEST_F(TcpManagerTest, testTcpManager043, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
     ConnCloseSocket(fd);
     EXPECT_TRUE(fd >= 0);
 };
@@ -1527,7 +1527,7 @@ HWTEST_F(TcpManagerTest, testTcpManager044, TestSize.Level1)
     };
 
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
-    int fd = tcp->OpenClientSocket(&option, option.socketOption.addr, false);
+    int32_t fd = tcp->OpenClientSocket(&option, option.socketOption.addr, false);
     const char * buf = "SendDataTest";
     EXPECT_EQ(ConnSendSocketData(fd, buf, 13, 0xffff), -1);
 };
@@ -1545,14 +1545,14 @@ HWTEST_F(TcpManagerTest, testTcpManager045, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
     ConnShutdownSocket(fd);
     EXPECT_TRUE(fd >= 0);
 };
@@ -1567,7 +1567,7 @@ HWTEST_F(TcpManagerTest, testTcpManager045, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager046, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1591,14 +1591,14 @@ HWTEST_F(TcpManagerTest, testTcpManager047, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
     EXPECT_EQ(ConnSetTcpKeepalive(fd, KEEPALIVE_IDLE, KEEPALIVE_INTERVAL, KEEPALIVE_COUNT), SOFTBUS_OK);
 };
 
@@ -1626,7 +1626,7 @@ HWTEST_F(TcpManagerTest, testTcpManager048, TestSize.Level1)
     };
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ipv6);
 
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
     EXPECT_EQ(SetIpTos(fd, 65535), SOFTBUS_OK);
 
     ConnectOption option = {
@@ -1650,7 +1650,7 @@ HWTEST_F(TcpManagerTest, testTcpManager048, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager049, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -1676,7 +1676,7 @@ HWTEST_F(TcpManagerTest, testTcpManager049, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpManager050, TestSize.Level1)
 {
-    int port = CLIENTPORT;
+    int32_t port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1714,9 +1714,9 @@ HWTEST_F(TcpManagerTest, testTcpManager051, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
-    int fd = -1;
-    int port = tcp->GetSockPort(fd);
-    int ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t fd = -1;
+    int32_t port = tcp->GetSockPort(fd);
+    int32_t ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     LocalListenerInfo option = {
@@ -1760,7 +1760,7 @@ HWTEST_F(TcpManagerTest, testTcpManager052, TestSize.Level1)
         }
     };
 
-    int fd = tcp->OpenClientSocket(&option, "::1%lo", true);
+    int32_t fd = tcp->OpenClientSocket(&option, "::1%lo", true);
     EXPECT_EQ(SetIpTos(fd, 2), SOFTBUS_OK);
     ConnCloseSocket(fd);
 };
@@ -1773,7 +1773,7 @@ HWTEST_F(TcpManagerTest, testTcpManager052, TestSize.Level1)
 */
 HWTEST_F(TcpManagerTest, testTcpDisconnectDeviceNow001, TestSize.Level1)
 {
-    int ret = TcpDisconnectDeviceNow(nullptr);
+    int32_t ret = TcpDisconnectDeviceNow(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 }

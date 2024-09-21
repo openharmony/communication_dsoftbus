@@ -262,7 +262,7 @@ private:
     std::map<int32_t, bool> sessionIdMap_;
 };
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     LOGI(">> OnSessionOpenedServer {sessionId:%d, result=%d", sessionId, result);
     if (sessionId <= 0 || result != SOFTBUS_OK) {
@@ -274,7 +274,7 @@ static int OnSessionOpened(int sessionId, int result)
     return SOFTBUS_OK;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     LOGI(">> OnSessionClosedServer {sessionId:%d", sessionId);
     SessionStateManager::GetInstance().EnableSessionId(sessionId);

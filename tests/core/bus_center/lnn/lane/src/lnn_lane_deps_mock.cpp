@@ -218,7 +218,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
     return GetLaneDepsInterface()->AuthOpenConn(info, requestId, callback, isMeta);
 }
 
-int SoftBusFrequencyToChannel(int frequency)
+int32_t SoftBusFrequencyToChannel(int32_t frequency)
 {
     return GetLaneDepsInterface()->SoftBusFrequencyToChannel(frequency);
 }
@@ -426,7 +426,7 @@ void DeleteNetworkResourceByLaneId(uint64_t laneId)
     GetLaneDepsInterface()->DeleteNetworkResourceByLaneId(laneId);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetLaneDepsInterface()->SoftBusGetBtState();
 }

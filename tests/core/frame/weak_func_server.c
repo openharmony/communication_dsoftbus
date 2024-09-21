@@ -16,7 +16,7 @@
 #include "softbus_interface.h"
 #include "comm_log.h"
 
-int StartDiscoveryWeak(const char *pkgName, const void *info)
+int32_t StartDiscoveryWeak(const char *pkgName, const void *info)
 {
     COMM_LOGI(COMM_INIT, "StartDiscovery Strong pkgName=%{public}s", pkgName);
     GetClientProvideInterface()->onChannelOpened(pkgName, NULL);
