@@ -630,13 +630,15 @@ void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
     TRANS_LOGD(TRANS_SDK, "ok");
 }
 
-void ClientCheckWaitTimeOut(SessionInfo *sessionNode, int32_t waitOutSocket[], uint32_t capacity, uint32_t *num)
+void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode,
+    int32_t waitOutSocket[], uint32_t capacity, uint32_t *num)
 {
     if (sessionNode == NULL || waitOutSocket == NULL || num == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return;
     }
-    if (sessionNode->enableStatus == ENABLE_STATUS_SUCCESS) {
+    if (sessionNode->enableStatus == ENABLE_STATUS_SUCCESS &&
+        strcmp(serverNode->sessionName, ISHARE_AUTH_SESSION) != 0) {
         return;
     }
 
@@ -660,6 +662,26 @@ void ClientCheckWaitTimeOut(SessionInfo *sessionNode, int32_t waitOutSocket[], u
     *num = tmpNum + 1;
 }
 
+static bool CleanUpTimeoutAuthSession(int32_t sessionId)
+{
+    SocketLifecycleData lifecycle;
+    (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = GetSocketLifecycleAndSessionNameBySessionId(sessionId, sessionName, &lifecycle);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get sessionId=%{public}d name failed, ret=%{public}d", sessionId, ret);
+        return false;
+    }
+
+    if (strcmp(sessionName, ISHARE_AUTH_SESSION) != 0) {
+        return false;
+    }
+
+    TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d is idle timeout.", sessionId);
+    CloseSession(sessionId);
+    return true;
+}
+
 void ClientCleanUpWaitTimeoutSocket(int32_t waitOutSocket[], uint32_t waitOutNum)
 {
     if (waitOutSocket == NULL) {
@@ -672,7 +694,14 @@ void ClientCleanUpWaitTimeoutSocket(int32_t waitOutSocket[], uint32_t waitOutNum
         TRANS_LOGI(TRANS_SDK, "time out shutdown socket=%{public}d", waitOutSocket[i]);
         SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
         int32_t ret = ClientGetChannelBySessionId(waitOutSocket[i], NULL, NULL, &enableStatus);
-        if (ret != SOFTBUS_OK || enableStatus == ENABLE_STATUS_SUCCESS) {
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGI(TRANS_SDK, "socket get channel failed, socket=%{public}d", waitOutSocket[i]);
+            continue;
+        }
+        if (enableStatus == ENABLE_STATUS_SUCCESS) {
+            if (CleanUpTimeoutAuthSession(waitOutSocket[i])) {
+                continue;
+            }
             TRANS_LOGI(TRANS_SDK, "socket has enabled, need not shutdown, socket=%{public}d", waitOutSocket[i]);
             continue;
         }
