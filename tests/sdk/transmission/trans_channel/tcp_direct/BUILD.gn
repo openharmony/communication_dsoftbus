@@ -20,9 +20,9 @@ softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
 
 ohos_unittest("TransSdkTcpDirectTest") {
   sanitize = {
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
   }
   module_out_path = module_output_path
   sources = [ "trans_sdk_tcp_direct_test.cpp" ]
