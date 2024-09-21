@@ -19,9 +19,9 @@ module_output_path = "dsoftbus/transmission"
 
 ohos_unittest("SoftBusFrameStandardTest") {
   sanitize = {
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
   }
   module_out_path = module_output_path
   sources = [ "softbus_frame_standard_test.cpp" ]

@@ -101,9 +101,9 @@ ohos_unittest("TransServerTcpDirectTest") {
 
 ohos_unittest("TransCoreTcpDirectTest") {
   sanitize = {
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
   }
   module_out_path = module_output_path
   sources = [ "unittest/trans_core_tcp_direct_test.cpp" ]
