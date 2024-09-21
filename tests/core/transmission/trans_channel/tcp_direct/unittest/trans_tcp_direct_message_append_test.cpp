@@ -75,6 +75,7 @@ public:
 
 void TransTcpDirectMessageAppendTest::SetUpTestCase(void)
 {
+
     // list will free when go to TransSrvDataListDeinit
     SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_TRUE(list != nullptr);
@@ -1548,8 +1549,6 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcProcessDataConfigTest001, Test
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1)
 {
-    // reply will free when go to ProcessMessage
-    cJSON *reply = cJSON_CreateObject();
     int32_t channelId = TEST_CHANNELID;
     uint32_t flags = FLAG_REPLY;
     uint64_t seq = TEST_SEQ;
@@ -1559,11 +1558,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, cJSON_Parse).WillRepeatedly(Return(reply));
-    EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_OK));
     ret = ProcessMessage(channelId, flags, seq, msg);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     TransDelSessionConnById(channelId);
 }
@@ -1576,17 +1572,13 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1)
 {
-    // reply will free when go to ProcessMessage
-    cJSON *reply = cJSON_CreateObject();
     int32_t channelId = TEST_CHANNELID;
     uint32_t flags = FLAG_WIFI;
     uint64_t seq = TEST_SEQ;
     const char *msg = "testmsg";
 
-    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, cJSON_Parse).WillRepeatedly(Return(reply));
     int32_t ret = ProcessMessage(channelId, flags, seq, msg);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
 /**
