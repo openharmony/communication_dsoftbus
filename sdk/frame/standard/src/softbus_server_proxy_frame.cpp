@@ -154,15 +154,15 @@ static RestartEventCallback g_restartAuthParaCallback = nullptr;
 static void RestartAuthParaNotify(void)
 {
     if (g_restartAuthParaCallback == nullptr) {
-        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used!");
+        COMM_LOGI(COMM_SDK, "Restart AuthPara notify is not used!\n");
         return;
     }
     if (g_restartAuthParaCallback() != SOFTBUS_OK) {
         RestartAuthParaCallbackUnregister();
-        COMM_LOGE(COMM_SDK, "Restart AuthPara notify failed!");
+        COMM_LOGE(COMM_SDK, "Restart AuthPara notify failed!\n");\
         return;
     }
-    COMM_LOGI(COMM_SDK, "Restart AuthPara notify success!");
+    COMM_LOGI(COMM_SDK, "Restart AuthPara notify success!\n");
 }
 
 void ClientDeathProcTask(void)
@@ -198,22 +198,11 @@ void ClientDeathProcTask(void)
     TransServerProxyInit();
     BusCenterServerProxyInit();
     InnerRegisterService(&sessionServerInfoList);
+    RestartAuthParaNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
     RestartRegDataLevelChange();
-    RestartAuthParaNotify();
-}
-
-int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
-{
-    if (callback == nullptr) {
-        COMM_LOGE(COMM_SDK, "Restart OpenAuthSessionWithPara callback register param is invalid!");
-        return SOFTBUS_ERR;
-    }
-    g_restartAuthParaCallback = callback;
-    COMM_LOGI(COMM_SDK, "Restart event callback register success!");
-    return SOFTBUS_OK;
 }
 
 void RestartAuthParaCallbackUnregister(void)
@@ -221,11 +210,21 @@ void RestartAuthParaCallbackUnregister(void)
     g_restartAuthParaCallback = nullptr;
 }
 
+int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
+{
+    if (callback == nullptr) {
+        COMM_LOGE(COMM_SDK, "Restart OpenAuthSessionWithPara callback register param is invalid!\n");
+        return SOFTBUS_ERR;
+    }
+    g_restartAuthParaCallback = callback;
+    COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
+    return SOFTBUS_OK;
+}
 
 int32_t ClientStubInit(void)
 {
     if (ServerProxyInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "ServerProxyInit failed");
+        COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
         return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
@@ -247,6 +246,6 @@ int ClientRegisterService(const char *pkgName)
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
     }
 
-    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s", pkgName);
+    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
     return SOFTBUS_OK;
 }
