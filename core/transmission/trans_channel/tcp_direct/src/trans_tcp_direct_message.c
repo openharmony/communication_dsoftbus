@@ -825,14 +825,28 @@ static void ReportTransEventExtra(
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, *extra);
 }
 
+static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
+{
+    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
+        ret = (char *)"Server check acl failed";
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    }
+
+    if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
+        ret = (char *)"Server check session name failed";
+        return SOFTBUS_PERMISSION_SERVER_DENIED;
+    }
+
+    return SOFTBUS_OK;
+}
+
 static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t channelId, char *errDesc)
 {
     char *ret = NULL;
     int32_t errCode = SOFTBUS_OK;
-    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
-        errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
-        ret = (char *)"Server check acl failed";
+    errCode = CheckServerPermission(appInfo, ret);
+    if (errCode != SOFTBUS_OK) {
         goto ERR_EXIT;
     }
 
