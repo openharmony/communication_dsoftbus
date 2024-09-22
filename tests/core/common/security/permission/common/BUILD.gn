@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
@@ -69,9 +70,43 @@ ohos_unittest("PermissionEntryStaticTest") {
   ]
 }
 
+ohos_unittest("PermissionEntryMockTest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "$dsoftbus_root_path/adapter/common/kernel/posix/softbus_adapter_mem.c",
+    "$dsoftbus_root_path/adapter/common/kernel/posix/softbus_adapter_thread.c",
+    "$dsoftbus_root_path/core/common/json_utils/softbus_json_utils.c",
+    "$dsoftbus_root_path/core/common/security/permission/common/permission_entry.c",
+    "$dsoftbus_root_path/core/common/security/permission/standard/permission_utils.cpp",
+    "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
+    "unittest/permission_entry_mock_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
+    ":PermissionEntryMockTest",
     ":PermissionEntryStaticTest",
     ":PermissionEntryTest",
   ]
