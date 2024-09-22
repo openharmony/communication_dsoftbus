@@ -82,10 +82,6 @@ typedef struct {
     char *apiName;
 }ApiNameIdMap;
 static ApiNameIdMap g_apiNameIdMapTbl[] = {
-    {SERVER_START_DISCOVERY, "StartDiscovery"},
-    {SERVER_STOP_DISCOVERY, "StopDiscovery"},
-    {SERVER_PUBLISH_SERVICE, "PublishService"},
-    {SERVER_UNPUBLISH_SERVICE, "UnPublishService"},
     {MANAGE_REGISTER_SERVICE, "SoftbusRegisterService"},
     {SERVER_CREATE_SESSION_SERVER, "CreateSessionServer"},
     {SERVER_REMOVE_SESSION_SERVER, "RemoveSessionServer"},
