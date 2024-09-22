@@ -36,34 +36,6 @@ sptr<IRemoteObject> SoftBusServerProxyFrame::GetRemoteInstance()
     return clientCallbackStub_;
 }
 
-int32_t SoftBusServerProxyFrame::StartDiscovery(const char *pkgName, const SubscribeInfo *info)
-{
-    (void)pkgName;
-    (void)info;
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerProxyFrame::StopDiscovery(const char *pkgName, int subscribeId)
-{
-    (void)pkgName;
-    (void)subscribeId;
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerProxyFrame::PublishService(const char *pkgName, const PublishInfo *info)
-{
-    (void)pkgName;
-    (void)info;
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerProxyFrame::UnPublishService(const char *pkgName, int publishId)
-{
-    (void)pkgName;
-    (void)publishId;
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject>& object)
 {
     sptr<IRemoteObject> remote = Remote();

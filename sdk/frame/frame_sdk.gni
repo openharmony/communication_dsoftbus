@@ -34,7 +34,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk/frame/common/src/softbus_client_event_manager.c",
       "$dsoftbus_root_path/sdk/frame/common/src/softbus_client_frame_manager.c",
       "$dsoftbus_root_path/sdk/frame/small/src/bus_center_client_stub.c",
-      "$dsoftbus_root_path/sdk/frame/small/src/disc_client_stub.c",
       "$dsoftbus_root_path/sdk/frame/small/src/softbus_client_context_manager.c",
       "$dsoftbus_root_path/sdk/frame/small/src/softbus_client_stub.c",
       "$dsoftbus_root_path/sdk/frame/small/src/softbus_server_proxy.c",

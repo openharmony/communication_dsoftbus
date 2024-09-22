@@ -20,42 +20,6 @@ import("../../../utils/utils.gni")
 
 module_output_path = "dsoftbus/discovery"
 
-ohos_unittest("DiscClientProxyTest") {
-  module_out_path = module_output_path
-  sources = [
-    "$dsoftbus_core_path/discovery/ipc/standard/src/disc_client_proxy.cpp",
-    "$dsoftbus_core_path/discovery/ipc/standard/src/disc_client_proxy_standard.cpp",
-    "$dsoftbus_root_path/sdk/frame/standard/src/if_softbus_client.cpp",
-    "client_info_manager_mock.cpp",
-    "disc_client_proxy_test.cpp",
-    "remote_object_mock.cpp",
-  ]
-  sources += test_utils_src
-
-  include_dirs = [
-    "$dsoftbus_core_path/discovery/ipc/include",
-    "$dsoftbus_core_path/discovery/ipc/standard/include",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/sdk/frame/standard/include/",
-    "$dsoftbus_core_path/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
-    "$dsoftbus_core_path/frame/standard/client_manager/include",
-    "$softbus_adapter_common/include",
-  ]
-  include_dirs += test_utils_inc
-
-  deps = [
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = [
-    "c_utils:utils",
-    "ipc:ipc_core",
-  ]
-}
-
 ohos_unittest("DiscClientOnDeviceFoundTest") {
   module_out_path = module_output_path
   sources = [
@@ -102,8 +66,5 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":DiscClientOnDeviceFoundTest",
-    ":DiscClientProxyTest",
-  ]
+  deps = [ ":DiscClientOnDeviceFoundTest" ]
 }

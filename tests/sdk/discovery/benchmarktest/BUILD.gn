@@ -23,8 +23,6 @@ ohos_benchmarktest("DiscoveryTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/sdk/discovery/include",
-    "$dsoftbus_root_path/sdk/discovery/manager/include",
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",
     "//base/security/access_token/interfaces/innerkits/nativetoken/include",
     "//base/security/access_token/interfaces/innerkits/accesstoken/include",

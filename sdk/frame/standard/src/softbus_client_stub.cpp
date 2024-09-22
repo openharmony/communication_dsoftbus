@@ -18,7 +18,6 @@
 #include <string>
 
 #include "client_bus_center_manager.h"
-#include "client_disc_manager.h"
 #include "client_trans_channel_callback.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
@@ -36,11 +35,6 @@
 namespace OHOS {
 SoftBusClientStub::SoftBusClientStub()
 {
-    memberFuncMap_[CLIENT_DISCOVERY_DEVICE_FOUND] = &SoftBusClientStub::OnDeviceFoundInner;
-    memberFuncMap_[CLIENT_DISCOVERY_SUCC] = &SoftBusClientStub::OnDiscoverySuccessInner;
-    memberFuncMap_[CLIENT_DISCOVERY_FAIL] = &SoftBusClientStub::OnDiscoverFailedInner;
-    memberFuncMap_[CLIENT_PUBLISH_SUCC] = &SoftBusClientStub::OnPublishSuccessInner;
-    memberFuncMap_[CLIENT_PUBLISH_FAIL] = &SoftBusClientStub::OnPublishFailInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_OPENED] = &SoftBusClientStub::OnChannelOpenedInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_OPENFAILED] = &SoftBusClientStub::OnChannelOpenFailedInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_LINKDOWN] = &SoftBusClientStub::OnChannelLinkDownInner;
@@ -97,50 +91,6 @@ int32_t SoftBusClientStub::OnClientPermissonChangeInner(MessageParcel &data, Mes
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusClientStub::OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply)
-{
-    const unsigned char *info = data.ReadBuffer(sizeof(DeviceInfo));
-    if (info == nullptr) {
-        return SOFTBUS_TRANS_PROXY_READBUFFER_FAILED;
-    }
-    DeviceInfo deviceInfo;
-    if (memcpy_s(&deviceInfo, sizeof(DeviceInfo), info, sizeof(DeviceInfo)) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    OnDeviceFound(&deviceInfo);
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnDiscoverFailedInner(MessageParcel &data, MessageParcel &reply)
-{
-    int subscribeId = data.ReadInt32();
-    int failReason = data.ReadInt32();
-    OnDiscoverFailed(subscribeId, failReason);
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnDiscoverySuccessInner(MessageParcel &data, MessageParcel &reply)
-{
-    int subscribeId = data.ReadInt32();
-    OnDiscoverySuccess(subscribeId);
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnPublishSuccessInner(MessageParcel &data, MessageParcel &reply)
-{
-    int publishId = data.ReadInt32();
-    OnPublishSuccess(publishId);
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnPublishFailInner(MessageParcel &data, MessageParcel &reply)
-{
-    int publishId = data.ReadInt32();
-    int failReason = data.ReadInt32();
-    OnPublishFail(publishId, failReason);
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusClientStub::OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t channelId;
@@ -161,31 +111,6 @@ int32_t SoftBusClientStub::OnClientTransLimitChangeInner(MessageParcel &data, Me
 int32_t SoftBusClientStub::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
 {
     return TransLimitChange(channelId, tos);
-}
-
-void SoftBusClientStub::OnDeviceFound(const DeviceInfo *device)
-{
-    DiscClientOnDeviceFound(device);
-}
-
-void SoftBusClientStub::OnDiscoverFailed(int subscribeId, int failReason)
-{
-    DiscClientOnDiscoverFailed(subscribeId, (DiscoveryFailReason)failReason);
-}
-
-void SoftBusClientStub::OnDiscoverySuccess(int subscribeId)
-{
-    DiscClientOnDiscoverySuccess(subscribeId);
-}
-
-void SoftBusClientStub::OnPublishSuccess(int publishId)
-{
-    DiscClientOnPublishSuccess(publishId);
-}
-
-void SoftBusClientStub::OnPublishFail(int publishId, int reason)
-{
-    DiscClientOnPublishFail(publishId, (PublishFailReason)reason);
 }
 
 int32_t SoftBusClientStub::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
