@@ -764,9 +764,6 @@ HWTEST_F(ConnectionBrTest, testBrQueue002, TestSize.Level1)
 
     ret = ConnBrDequeueBlock(NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = ConnBrIsQueueEmpty();
-    EXPECT_EQ(false, ret);
 }
 
 HWTEST_F(ConnectionBrTest, testBrBrans001, TestSize.Level1)

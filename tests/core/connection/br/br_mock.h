@@ -56,6 +56,7 @@ public:
     virtual void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq) = 0;
     virtual int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data) = 0;
     virtual int32_t ConnBrInnerQueueInit(void) = 0;
+    virtual void ConnBrInnerQueueDeinit(void) = 0;
     virtual int32_t ConnBrInitBrPendingPacket(void) = 0;
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
     virtual int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time) = 0;
@@ -84,6 +85,7 @@ public:
     MOCK_METHOD2(ConnBrDelBrPendingPacket, void(uint32_t, int64_t));
     MOCK_METHOD4(ConnBrGetBrPendingPacket, int32_t(uint32_t, int64_t, uint32_t, void **));
     MOCK_METHOD0(ConnBrInnerQueueInit, int32_t());
+    MOCK_METHOD0(ConnBrInnerQueueDeinit, void());
     MOCK_METHOD0(ConnBrInitBrPendingPacket, int32_t());
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
     MOCK_METHOD3(ConnBleKeepAlive, int32_t(uint32_t, uint32_t, uint32_t));
