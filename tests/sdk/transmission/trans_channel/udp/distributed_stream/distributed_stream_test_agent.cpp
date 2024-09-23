@@ -38,7 +38,7 @@ using namespace OHOS::DistributeSystemTest;
 static bool g_isTerminal = false;
 namespace OHOS {
 
-void SetNumebrInStreamData(char *streamData, int i)
+void SetNumebrInStreamData(char *streamData, int32_t i)
 {
     string strI = std::to_string(i);
     char len = strI.length();
@@ -46,7 +46,7 @@ void SetNumebrInStreamData(char *streamData, int i)
     (void)memcpy_s(streamData + 1, len, strI.c_str(), len);
 }
 
-int GetNumebrInStreamData(const char *streamData)
+int32_t GetNumebrInStreamData(const char *streamData)
 {
     char len = streamData[0];
     string str(streamData + 1, len);
@@ -59,37 +59,37 @@ public:
     virtual bool SetUp();
     virtual bool TearDown();
 
-    static int OnsessionOpened(int sessionId, int result);
-    static int OnCtrlsessionOpened(int sessionId, int result);
-    static void OnSessionClosed(int sessionId);
-    static void OnStreamReceived(int sessionId, const StreamData *data,
+    static int32_t OnsessionOpened(int32_t sessionId, int32_t result);
+    static int32_t OnCtrlsessionOpened(int32_t sessionId, int32_t result);
+    static void OnSessionClosed(int32_t sessionId);
+    static void OnStreamReceived(int32_t sessionId, const StreamData *data,
         const StreamData *ext, const StreamFrameInfo *param);
-    static void OnBytesReceived(int sessionId, const void *data, unsigned int dataLen);
+    static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int dataLen);
 
-    virtual int OnProcessMsg(const string &msg, int len, string &strReturnValue, int returnValueLen);
-    int CreateTestSessionServer(string &strReturnValue);
-    int RemoverTestSessionServer(string &strReturnValue);
-    int TerminalServer(string &strReturnValue);
+    virtual int32_t OnProcessMsg(const string &msg, int32_t len, string &strReturnValue, int32_t returnValueLen);
+    int32_t CreateTestSessionServer(string &strReturnValue);
+    int32_t RemoverTestSessionServer(string &strReturnValue);
+    int32_t TerminalServer(string &strReturnValue);
 
-    static int contrlSessionId_;
+    static int32_t contrlSessionId_;
     static char sendBytes[BYTES_SIZE];
 
-    using MsgFunc = int (DistributeStreamTestAgent::*)(string &);
+    using MsgFunc = int32_t (DistributeStreamTestAgent::*)(string &);
     static map<string, MsgFunc> msgFunMap;
 };
 
-int DistributeStreamTestAgent::contrlSessionId_ = 0;
+int32_t DistributeStreamTestAgent::contrlSessionId_ = 0;
 char DistributeStreamTestAgent::sendBytes[BYTES_SIZE];
 map<string, DistributeStreamTestAgent::MsgFunc> DistributeStreamTestAgent::msgFunMap;
 
-int DistributeStreamTestAgent::OnsessionOpened(int sessionId, int result)
+int32_t DistributeStreamTestAgent::OnsessionOpened(int32_t sessionId, int32_t result)
 {
     EXPECT_EQ(result, 0);
 
     return 0;
 }
 
-int DistributeStreamTestAgent::OnCtrlsessionOpened(int sessionId, int result)
+int32_t DistributeStreamTestAgent::OnCtrlsessionOpened(int32_t sessionId, int32_t result)
 {
     EXPECT_EQ(result, 0);
     if (result == 0) {
@@ -99,23 +99,23 @@ int DistributeStreamTestAgent::OnCtrlsessionOpened(int sessionId, int result)
     return 0;
 }
 
-void DistributeStreamTestAgent::OnSessionClosed(int sessionId)
+void DistributeStreamTestAgent::OnSessionClosed(int32_t sessionId)
 {
 }
 
-void DistributeStreamTestAgent::OnStreamReceived(int sessionId, const StreamData *data,
+void DistributeStreamTestAgent::OnStreamReceived(int32_t sessionId, const StreamData *data,
     const StreamData *ext, const StreamFrameInfo *param)
 {
-    int i = GetNumebrInStreamData((const char*)data->buf);
+    int32_t i = GetNumebrInStreamData((const char*)data->buf);
     if (i < 0) {
         return;
     }
     SetNumebrInStreamData(sendBytes, i);
-    int ret = SendBytes(contrlSessionId_, sendBytes, BYTES_SIZE);
+    int32_t ret = SendBytes(contrlSessionId_, sendBytes, BYTES_SIZE);
     EXPECT_EQ(ret, 0);
 }
 
-void DistributeStreamTestAgent::OnBytesReceived(int sessionId, const void *data, unsigned int dataLen)
+void DistributeStreamTestAgent::OnBytesReceived(int32_t sessionId, const void *data, unsigned int dataLen)
 {
 }
 
@@ -150,9 +150,9 @@ bool DistributeStreamTestAgent::TearDown()
     return true;
 }
 
-int DistributeStreamTestAgent::CreateTestSessionServer(string &strReturnValue)
+int32_t DistributeStreamTestAgent::CreateTestSessionServer(string &strReturnValue)
 {
-    int ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
+    int32_t ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
     EXPECT_EQ(ret, 0);
     cout << "pkgName : " << TEST_PKG_NAME << ", sessionName : " << STREAM_SESSION_NAME << endl;
 
@@ -164,9 +164,9 @@ int DistributeStreamTestAgent::CreateTestSessionServer(string &strReturnValue)
     return strReturnValue.length();
 }
 
-int DistributeStreamTestAgent::RemoverTestSessionServer(string &strReturnValue)
+int32_t DistributeStreamTestAgent::RemoverTestSessionServer(string &strReturnValue)
 {
-    int ret = RemoveSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str());
+    int32_t ret = RemoveSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str());
     EXPECT_EQ(ret, 0);
 
     ret = RemoveSessionServer(TEST_PKG_NAME.c_str(), CONTRL_SESSION_NAME.c_str());
@@ -176,14 +176,15 @@ int DistributeStreamTestAgent::RemoverTestSessionServer(string &strReturnValue)
     return strReturnValue.length();
 }
 
-int DistributeStreamTestAgent::TerminalServer(string &strReturnValue)
+int32_t DistributeStreamTestAgent::TerminalServer(string &strReturnValue)
 {
     g_isTerminal = true;
     strReturnValue = "ok";
     return strReturnValue.length();
 }
 
-int DistributeStreamTestAgent::OnProcessMsg(const string &msg, int len, string &strReturnValue, int returnValueLen)
+int32_t DistributeStreamTestAgent::OnProcessMsg(const string &msg, int32_t len,
+                                                string &strReturnValue, int32_t returnValueLen)
 {
     cout << "receive message: " << msg <<endl;
     map<string, MsgFunc>::iterator it = msgFunMap.find(msg);
@@ -196,7 +197,7 @@ int DistributeStreamTestAgent::OnProcessMsg(const string &msg, int len, string &
 }
 }
 
-int main()
+int32_t main()
 {
     OHOS::DistributeStreamTestAgent obj;
     if (obj.SetUp()) {

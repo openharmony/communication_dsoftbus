@@ -125,7 +125,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
     EXPECT_CALL(ledgerMock, LnnSetLocalNum64Info).WillOnce(Return(SOFTBUS_ERR)).
         WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = LnnInitNetworkManager();
+    int32_t ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -180,7 +180,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = LnnRegistProtocol(nullptr);
+    int32_t ret = LnnRegistProtocol(nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     LnnProtocolManager protocolMgr;
@@ -233,7 +233,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
 */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level1)
 {
-    int len = 0;
+    int32_t len = 0;
     char buf[] = "nullptr";
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -246,7 +246,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
     EXPECT_TRUE(ret == false);
 
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
-    int res = LnnInitManagerByConfig();
+    int32_t res = LnnInitManagerByConfig();
     EXPECT_TRUE(res != SOFTBUS_OK);
 
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));

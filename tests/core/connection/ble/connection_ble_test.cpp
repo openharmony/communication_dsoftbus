@@ -41,7 +41,7 @@ void ConnectedCB(unsigned int connectionId, const ConnectionInfo *info)
     }
 }
 void DisConnectedCB(unsigned int connectionId, const ConnectionInfo *info) {}
-void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len) {}
+void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len) {}
 class ConnectionBleTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -243,7 +243,7 @@ HWTEST_F(ConnectionBleTest, QueueTest002, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleTest, ManagerTest001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ret = ConnTypeIsSupport(CONNECT_BLE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -256,7 +256,7 @@ HWTEST_F(ConnectionBleTest, ManagerTest001, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleTest, ManagerTest002, TestSize.Level1)
 {
-    int ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
+    int32_t ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
     ret = ConnConnectDevice(nullptr, 0, nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
@@ -283,7 +283,7 @@ HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectedCB;
     connCb.OnDataReceived = DataReceivedCB;
-    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    int32_t ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     NiceMock<ConnectionBleInterfaceMock> bleMock;

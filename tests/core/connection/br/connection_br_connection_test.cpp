@@ -486,18 +486,30 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager001, TestSize.Level1)
     DfxRecordBrConnectFail(reqId, pId, device, &statistics, reason);
 }
 
+/*
+* @tc.name: testBrManager002
+* @tc.desc: test DfxRecordBrConnectSuccess when NotifyDeviceConnectResult
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(ConnectionBrConnectionTest, testBrManager002, TestSize.Level1)
 {
-    uint32_t pId = 0;
     ConnBrConnection *connection = static_cast<ConnBrConnection *>(SoftBusMalloc(sizeof(ConnBrConnection)));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
 
-    ConnectStatistics statistics;
-    (void)memset_s(&statistics, sizeof(statistics), 0, sizeof(statistics));
-
-    DfxRecordBrConnectSuccess(pId, connection, nullptr);
-    DfxRecordBrConnectSuccess(pId, connection, &statistics);
+    ConnBrDevice device;
+    ConnBrRequest request;
+    request.requestId = 0;
+    request.result.OnConnectSuccessed = OnConnectSuccessed;
+    (void)strcpy_s(device.addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
+    ListInit(&device.requests);
+    ListAdd(&device.requests, &request.node);
+    NotifyDeviceConnectResult(&device, connection, true, 1);
+    ConnBrRequest *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &device.requests, ConnBrRequest, node) {
+        EXPECT_EQ(it->statistics.reuse, true);
+    }
     SoftBusFree(connection);
 }
 
@@ -552,14 +564,15 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager005, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager006, TestSize.Level1)
 {
-    SoftBusBtAddr addr;
-    const char *addrress = "123";
-
-    (void)strcpy_s((char *)(addr.addr), BT_ADDR_LEN, addrress);
+    const char *addrress = "42:AD:54:6A:06:EC";
+    BrPending pending;
+    ConnBrPendInfo pendInfo;
     ListInit(&(g_brManager.pendings->list));
-    (void)strcpy_s((char *)(addr.addr), BT_ADDR_LEN, addrress);
-    EXPECT_NE(g_brManager.pendings->list.next, nullptr);
-    EXPECT_NE(g_brManager.pendings->list.prev, nullptr);
+    (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
+    pending.pendInfo = &pendInfo;
+    ListAdd(&(g_brManager.pendings->list), &(pending.node));
+    bool ret = CheckPending(addrress);
+    EXPECT_EQ(false, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager007, TestSize.Level1)

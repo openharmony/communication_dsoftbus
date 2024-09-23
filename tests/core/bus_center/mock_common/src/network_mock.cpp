@@ -83,12 +83,12 @@ void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
     return GetNetworkInterface()->LnnNotifyBtAclStateChangeEvent(btMac, state);
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     return GetNetworkInterface()->SoftBusAddBtStateListener(listener);
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetNetworkInterface()->SoftbusGetConfig(type, val, len);
 }

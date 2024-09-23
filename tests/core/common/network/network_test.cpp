@@ -51,8 +51,8 @@ void CommonCoreNetworkTest::TearDownTestCase(void) {}
  */
 HWTEST_F(CommonCoreNetworkTest, SoftBusChannelToFrequencyTest001, TestSize.Level0)
 {
-    int channel = -1;
-    int ret = SoftBusChannelToFrequency(channel);
+    int32_t channel = -1;
+    int32_t ret = SoftBusChannelToFrequency(channel);
     EXPECT_NE(SOFTBUS_ERR, ret);
 
     channel = TEST_2G_CHANNEL;
@@ -72,8 +72,8 @@ HWTEST_F(CommonCoreNetworkTest, SoftBusChannelToFrequencyTest001, TestSize.Level
  */
 HWTEST_F(CommonCoreNetworkTest, SoftBusFrequencyToChannelTest001, TestSize.Level0)
 {
-    int frequency = -1;
-    int ret = SoftBusFrequencyToChannel(frequency);
+    int32_t frequency = -1;
+    int32_t ret = SoftBusFrequencyToChannel(frequency);
     EXPECT_NE(SOFTBUS_ERR, ret);
 
     frequency = TEST_2G_FREQUENCY;
@@ -93,7 +93,7 @@ HWTEST_F(CommonCoreNetworkTest, SoftBusFrequencyToChannelTest001, TestSize.Level
  */
 HWTEST_F(CommonCoreNetworkTest, SoftBusBandCheckTest001, TestSize.Level0)
 {
-    int frequency = -1;
+    int32_t frequency = -1;
     bool result = SoftBusIs5GBand(frequency);
     EXPECT_NE(true, result);
 

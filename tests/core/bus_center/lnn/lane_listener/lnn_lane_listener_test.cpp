@@ -40,7 +40,7 @@ constexpr char PEER_IP_HML[] = "127.30.0.1";
 constexpr char PEER_IP_P2P[] = "127.31.0.1";
 constexpr uint64_t LANE_ID_P2P = 0x1000000000000001;
 constexpr uint64_t LANE_ID_HML = 0x1000000000000002;
-constexpr int CHANNEL_ID = 10;
+constexpr int32_t CHANNEL_ID = 10;
 constexpr char MAC_TEST[] = "testMac";
 
 class LNNLaneListenerTest : public testing::Test {

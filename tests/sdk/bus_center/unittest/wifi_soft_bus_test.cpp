@@ -49,13 +49,13 @@ void WifiSoftBusTest::TearDown()
 {
 }
 
-static void OnWifiScanStateChangedHandler(int state, int size);
+static void OnWifiScanStateChangedHandler(int32_t state, int32_t size);
 static bool g_stateScanSuccess = false;
 
 constexpr int32_t DEF_TIMEOUT = 5;
 constexpr int32_t ONE_SECOND = 1;
 
-static void OnWifiScanStateChangedHandler(int state, int size)
+static void OnWifiScanStateChangedHandler(int32_t state, int32_t size)
 {
     if (size > 0) {
         g_stateScanSuccess = true;
@@ -69,7 +69,7 @@ static ISoftBusScanResult g_scanResultCb = {
 
 static void WaitSacnResult(void)
 {
-    int scanTimeout = DEF_TIMEOUT;
+    int32_t scanTimeout = DEF_TIMEOUT;
     while (scanTimeout > 0) {
         sleep(ONE_SECOND);
         scanTimeout--;

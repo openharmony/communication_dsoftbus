@@ -57,7 +57,7 @@ public:
     virtual ~OsAccountManager() = default;
 
     virtual OHOS::ErrCode QueryActiveOsAccountIds(std::vector<int32_t> &ids);
-    virtual OHOS::ErrCode IsOsAccountVerified(const int id, bool &isVerified);
+    virtual OHOS::ErrCode IsOsAccountVerified(const int32_t id, bool &isVerified);
 };
 
 class OsAccountManagerMock : public AccountSA::OsAccountManager {
@@ -65,7 +65,7 @@ public:
     OsAccountManagerMock();
     ~OsAccountManagerMock() override;
     MOCK_METHOD1(QueryActiveOsAccountIds, OHOS::ErrCode(std::vector<int32_t> &ids));
-    MOCK_METHOD2(IsOsAccountVerified, OHOS::ErrCode(const int id, bool &isVerified));
+    MOCK_METHOD2(IsOsAccountVerified, OHOS::ErrCode(const int32_t id, bool &isVerified));
 
     static OsAccountManagerMock *GetMock()
     {

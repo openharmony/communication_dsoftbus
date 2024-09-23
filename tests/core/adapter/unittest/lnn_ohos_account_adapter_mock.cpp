@@ -74,7 +74,7 @@ OHOS::ErrCode OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(std::ve
     return mock->QueryActiveOsAccountIds(ids);
 }
 
-OHOS::ErrCode OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(const int id, bool &isVerified)
+OHOS::ErrCode OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(const int32_t id, bool &isVerified)
 {
     auto mock = OHOS::AccountSA::OsAccountManagerMock::GetMock();
     if (mock == nullptr) {

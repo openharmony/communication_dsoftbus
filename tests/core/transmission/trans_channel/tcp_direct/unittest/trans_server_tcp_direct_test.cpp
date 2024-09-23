@@ -329,7 +329,7 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent001, TestSize.Level1)
             .protocol = LNN_PROTOCOL_IP
         }
     };
-    int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
+    int32_t ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
     ASSERT_EQ(ret, EOK);
 
     ret = TestAddSessionConn(true);
@@ -361,7 +361,7 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent002, TestSize.Level1)
             .protocol = LNN_PROTOCOL_IP
         }
     };
-    int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
+    int32_t ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
     ASSERT_EQ(ret, EOK);
 
     ret = TestAddSessionConn(false);

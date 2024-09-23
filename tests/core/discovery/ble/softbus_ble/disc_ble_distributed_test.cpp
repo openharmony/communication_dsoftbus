@@ -73,7 +73,7 @@ HWTEST_F(DiscDistributedBleTest, TestGetNeedUpdateAdvertiser001, TestSize.Level1
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
     int32_t adv = NON_ADV_ID;
-    int ret = GetNeedUpdateAdvertiser(adv);
+    int32_t ret = GetNeedUpdateAdvertiser(adv);
     EXPECT_EQ(ret, false);
     UpdateInfoManager(adv, true);
     ret = GetNeedUpdateAdvertiser(adv);
