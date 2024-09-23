@@ -108,7 +108,7 @@ static PublishInfo g_pInfo = {
     .dataLen = strlen(CAPABILITY_4)
 };
 
-static void TestPublishResult(int publishId, PublishResult reason)
+static void TestPublishResult(int32_t publishId, PublishResult reason)
 {}
 
 static IPublishCb g_publishCb = {
@@ -154,7 +154,7 @@ BENCHMARK_F(BusCenterTest, RegNodeDeviceStateCbTestCase)(benchmark::State &state
 {
     while (state.KeepRunning()) {
         state.ResumeTiming();
-        int ret = RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb);
+        int32_t ret = RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb);
         if (ret != 0) {
             state.SkipWithError("RegNodeDeviceStateCbTestCase failed.");
         }
@@ -176,7 +176,7 @@ BENCHMARK_F(BusCenterTest, UnregNodeDeviceStateCbTestCase)(benchmark::State &sta
         state.PauseTiming();
         RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb);
         state.ResumeTiming();
-        int ret = UnregNodeDeviceStateCb(&g_nodeStateCb);
+        int32_t ret = UnregNodeDeviceStateCb(&g_nodeStateCb);
         if (ret != 0) {
             state.SkipWithError("UnregNodeDeviceStateCbTestCase failed.");
         }
@@ -194,9 +194,9 @@ BENCHMARK_F(BusCenterTest, GetAllNodeDeviceInfoTestCase)(benchmark::State &state
 {
     while (state.KeepRunning()) {
         NodeBasicInfo *info = nullptr;
-        int infoNum;
+        int32_t infoNum;
 
-        int ret = GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum);
+        int32_t ret = GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum);
         if (ret != 0) {
             state.SkipWithError("GetAllNodeDeviceInfoTestCase failed.");
         }
@@ -214,7 +214,7 @@ BENCHMARK_REGISTER_F(BusCenterTest, GetAllNodeDeviceInfoTestCase);
 BENCHMARK_F(BusCenterTest, GetLocalNodeDeviceInfoTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
+        int32_t ret;
         NodeBasicInfo localNode;
 
         ret = GetLocalNodeDeviceInfo(TEST_PKG_NAME, &localNode);
@@ -234,7 +234,7 @@ BENCHMARK_REGISTER_F(BusCenterTest, GetLocalNodeDeviceInfoTestCase);
 BENCHMARK_F(BusCenterTest, GetNodeKeyInfoTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
+        int32_t ret;
         NodeBasicInfo info;
         char udid[UDID_BUF_LEN] = {0};
         (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
@@ -259,7 +259,7 @@ BENCHMARK_REGISTER_F(BusCenterTest, GetNodeKeyInfoTestCase);
 BENCHMARK_F(BusCenterTest, PublishLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
+        int32_t ret;
         g_pInfo.publishId = GetPublishId();
         state.ResumeTiming();
         ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
@@ -281,7 +281,7 @@ BENCHMARK_REGISTER_F(BusCenterTest, PublishLNNTestCase);
 BENCHMARK_F(BusCenterTest, StopPublishLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
+        int32_t ret;
         g_pInfo.publishId = GetPublishId();
 
         state.PauseTiming();
@@ -304,7 +304,7 @@ BENCHMARK_REGISTER_F(BusCenterTest, StopPublishLNNTestCase);
 BENCHMARK_F(BusCenterTest, RefreshLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
+        int32_t ret;
         g_sInfo.subscribeId = GetSubscribeId();
         
         state.ResumeTiming();
@@ -327,7 +327,7 @@ BENCHMARK_REGISTER_F(BusCenterTest, RefreshLNNTestCase);
 BENCHMARK_F(BusCenterTest, StopRefreshLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
+        int32_t ret;
         g_sInfo.subscribeId = GetSubscribeId();
 
         state.PauseTiming();

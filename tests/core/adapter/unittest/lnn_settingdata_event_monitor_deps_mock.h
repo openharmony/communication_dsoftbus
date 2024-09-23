@@ -29,7 +29,7 @@ public:
     SettingDataEventMonitorDepsInterface() {};
     virtual ~SettingDataEventMonitorDepsInterface() {};
 
-    virtual SoftBusLooper *GetLooper(int looper) = 0;
+    virtual SoftBusLooper *GetLooper(int32_t looper) = 0;
     virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual void UpdateDeviceName(void *p) = 0;

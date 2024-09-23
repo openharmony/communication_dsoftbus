@@ -284,7 +284,7 @@ HWTEST_F(WifiDirectManagerCppTest, GetLocalAndRemoteMacByLocalIpTest, TestSize.L
     std::string uuid("0123456789ABCDE9");
     std::string uuid2("0123456789ABCDE8");
     std::string localIp("172.30.1.2");
-    int macLen = 18;
+    int32_t macLen = 18;
     char localMac[macLen];
     char remoteMac[macLen];
 
@@ -400,11 +400,11 @@ HWTEST_F(WifiDirectManagerCppTest, NotifyPtkSyncResultTest, TestSize.Level1)
 {
     bool beCalled = false;
     std::string remoteUuid("0123456789ABCDEF");
-    int result = 0;
+    int32_t result = 0;
     NotifyPtkSyncResult(remoteUuid.c_str(), result);
     EXPECT_EQ(beCalled, false);
 
-    g_syncPtkListener = [](const char *remoteDeviceId, int result) {};
+    g_syncPtkListener = [](const char *remoteDeviceId, int32_t result) {};
     beCalled = true;
     NotifyPtkSyncResult(remoteUuid.c_str(), result);
     EXPECT_EQ(beCalled, true);

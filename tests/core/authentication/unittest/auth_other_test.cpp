@@ -639,7 +639,7 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEIVED_TEST_001, TestSize.Level1)
     ConnModule moduleId = MODULE_DEVICE_AUTH;
     int64_t seq = 0;
     char *data = reinterpret_cast<char *>(malloc(1024));
-    const int SEND_DATA_SIZE_1KB = 1024;
+    const int32_t SEND_DATA_SIZE_1KB = 1024;
     ASSERT_NE(data, nullptr);
     const char *testData = "{\"data\":\"open session test!!!\"}";
     int32_t len = 2;
@@ -705,7 +705,7 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
     ASSERT_NE(data, nullptr);
     OnCommDataReceived(connectionId, moduleId, seq, data, len);
 
-    const int SEND_DATA_SIZE_1KB = 1024;
+    const int32_t SEND_DATA_SIZE_1KB = 1024;
     const char *testData = "{\"data\":\"open session test!!!\"}";
     len = 2;
     moduleId = MODULE_CONNECTION;

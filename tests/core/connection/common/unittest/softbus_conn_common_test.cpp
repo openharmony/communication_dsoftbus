@@ -27,11 +27,11 @@
 
 using namespace testing::ext;
 
-static const int INVALID_FD = -1;
-static const int TEST_FD = 1;
+static const int32_t INVALID_FD = -1;
+static const int32_t TEST_FD = 1;
 static pthread_mutex_t g_isInitedLock;
-static int g_count = 0;
-static int g_port = 6666;
+static int32_t g_count = 0;
+static int32_t g_port = 6666;
 
 namespace OHOS {
 class SoftbusConnCommonTest : public testing::Test {
@@ -46,7 +46,7 @@ public:
     void TearDown();
 };
 
-int ThreadPoolTask(void* arg)
+int32_t ThreadPoolTask(void* arg)
 {
     pthread_mutex_lock(&g_isInitedLock);
     g_count++;
@@ -101,8 +101,8 @@ SocketAddr g_socketAddr = {
 */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener002, TestSize.Level1)
 {
-    int i;
-    int port = 6666;
+    int32_t i;
+    int32_t port = 6666;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
@@ -132,9 +132,9 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener002, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener006, TestSize.Level1)
 {
-    int module;
-    int triggerType;
-    int fd = 1;
+    int32_t module;
+    int32_t triggerType;
+    int32_t fd = 1;
     for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, AddTrigger(UNUSE_BUTT, fd, static_cast<TriggerType>(triggerType)));
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, DelTrigger(UNUSE_BUTT, fd, static_cast<TriggerType>(triggerType)));
@@ -157,9 +157,9 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener006, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener007, TestSize.Level1)
 {
-    int module;
-    int triggerType;
-    int fd = 1;
+    int32_t module;
+    int32_t triggerType;
+    int32_t fd = 1;
     for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
             EXPECT_EQ(SOFTBUS_CONN_FAIL, AddTrigger(static_cast<ListenerModule>(module),
@@ -178,10 +178,10 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener007, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
 {
-    int module;
-    int triggerType;
-    int fd = 1;
-    int port = 6666;
+    int32_t module;
+    int32_t triggerType;
+    int32_t fd = 1;
+    int32_t port = 6666;
 
     for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         SoftbusBaseListener* listener = (SoftbusBaseListener*)malloc(sizeof(SoftbusBaseListener));
@@ -220,8 +220,8 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
 {
-    int i;
-    int port = 6666;
+    int32_t i;
+    int32_t port = 6666;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
@@ -272,7 +272,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener017, TestSize.Level1)
     ASSERT_TRUE(listener != nullptr);
     listener->onConnectEvent = ConnectEvent;
     listener->onDataEvent = DataEvent;
-    int i;
+    int32_t i;
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i), listener));
     }
@@ -300,7 +300,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener021, TestSize.Level1)
                          .moduleId = PROXY,
                          .protocol = LNN_PROTOCOL_IP}
     };
-    int i;
+    int32_t i;
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         info.socketOption.moduleId = static_cast<ListenerModule>(i);
         EXPECT_EQ(SOFTBUS_CONN_LISTENER_NOT_IDLE, StartBaseListener(&info, listener));
@@ -329,7 +329,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener022, TestSize.Level1)
                          .moduleId = PROXY,
                          .protocol = LNN_PROTOCOL_IP}
     };
-    int i;
+    int32_t i;
     for (i = PROXY; i <= LISTENER_MODULE_DYNAMIC_START; i++) {
         info.socketOption.moduleId = static_cast<ListenerModule>(i);
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(&info, listener));
@@ -361,7 +361,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener026, TestSize.Level1)
  */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener027, TestSize.Level1)
 {
-    int i;
+    int32_t i;
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
     }
@@ -389,10 +389,10 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket001, TestSize.Level1)
         }
     };
 
-    int fd = tcp->OpenServerSocket(&info);
-    int ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t fd = tcp->OpenServerSocket(&info);
+    int32_t ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    int port = tcp->GetSockPort(fd);
+    int32_t port = tcp->GetSockPort(fd);
     EXPECT_EQ(port, g_port);
     ConnCloseSocket(fd);
 
@@ -429,8 +429,8 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket002, TestSize.Level1)
         }
     };
 
-    int fd = tcp->OpenClientSocket(nullptr, "127.0.0.1", false);
-    int ret = (fd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t fd = tcp->OpenClientSocket(nullptr, "127.0.0.1", false);
+    int32_t ret = (fd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ConnCloseSocket(fd);
     fd = tcp->OpenClientSocket(nullptr, nullptr, false);
@@ -455,9 +455,9 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket003, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
-    int invalidFd = 1;
-    int port = tcp->GetSockPort(invalidFd);
-    int ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t invalidFd = 1;
+    int32_t port = tcp->GetSockPort(invalidFd);
+    int32_t ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 };
 
@@ -472,8 +472,8 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket004, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int clientFd = tcp->OpenClientSocket(nullptr, "127.5.0.1", false);
-    int ret = (clientFd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t clientFd = tcp->OpenClientSocket(nullptr, "127.5.0.1", false);
+    int32_t ret = (clientFd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ssize_t bytes = ConnSendSocketData(clientFd, "Hello world", 11, 0);
     EXPECT_EQ(bytes, -1);
@@ -501,10 +501,10 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket006, TestSize.Level1)
         }
     };
 
-    int fd = tcp->OpenServerSocket(&info);
-    int ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    int32_t fd = tcp->OpenServerSocket(&info);
+    int32_t ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    int port = tcp->GetSockPort(fd);
+    int32_t port = tcp->GetSockPort(fd);
     EXPECT_EQ(port, g_port);
     ConnCloseSocket(fd);
 
@@ -528,7 +528,7 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket006, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnCommonTest, testSocket001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ret = ConnGetLocalSocketPort(INVALID_FD);
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 
@@ -544,7 +544,7 @@ HWTEST_F(SoftbusConnCommonTest, testSocket001, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnCommonTest, testSocket002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ret = ConnGetPeerSocketAddr(INVALID_FD, &g_socketAddr);
     EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 
@@ -567,7 +567,7 @@ HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut001, TestSize.Level1)
 {
     int32_t fd = -1;
     uint32_t millSec= 1;
-    int ret = ConnSetTcpUserTimeOut(fd, millSec);
+    int32_t ret = ConnSetTcpUserTimeOut(fd, millSec);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -583,7 +583,7 @@ HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut002, TestSize.Level1)
 {
     int32_t fd = 1;
     uint32_t millSec= 321;
-    int ret = ConnSetTcpUserTimeOut(fd, millSec);
+    int32_t ret = ConnSetTcpUserTimeOut(fd, millSec);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -595,7 +595,7 @@ HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut002, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnCommonTest, testSocket003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SocketAddr socketAddr;
     ret = ConnGetPeerSocketAddr(INVALID_FD, &socketAddr);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -609,7 +609,7 @@ HWTEST_F(SoftbusConnCommonTest, testSocket003, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnCommonTest, testSocket004, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ret = ConnGetLocalSocketPort(INVALID_FD);
     EXPECT_NE(SOFTBUS_OK, ret);
 }

@@ -36,7 +36,7 @@ static TransLaneCommonTestInterface *GetTransLaneCommonTestInterface()
 }
 
 extern "C" {
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetTransLaneCommonTestInterface()->SoftbusGetConfig(type, val, len);
 }

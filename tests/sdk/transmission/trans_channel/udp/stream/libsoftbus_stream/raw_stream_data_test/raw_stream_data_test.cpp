@@ -173,7 +173,7 @@ HWTEST_F(RawStreamDataTest, MakeRawStream001, TestSize.Level1)
 HWTEST_F(RawStreamDataTest, MakeRawStream002, TestSize.Level1)
 {
     std::shared_ptr<IStream> iStream;
-    int scene = UNKNOWN_SCENE;
+    int32_t scene = UNKNOWN_SCENE;
 
     std::unique_ptr<IStream> tmpIStream = nullptr;
     std::shared_ptr<StreamAdaptor> adaptor = nullptr;
@@ -224,7 +224,7 @@ HWTEST_F(RawStreamDataTest, InitStreamData001, TestSize.Level1)
     ssize_t extLen = 33;
     auto extBuffer = std::make_unique<char[]>(extLen + RawStreamData::FRAME_HEADER_LEN);
 
-    int ret = rawStreamData->InitStreamData(std::move(buffer), bufLen, std::move(extBuffer), extLen);
+    int32_t ret = rawStreamData->InitStreamData(std::move(buffer), bufLen, std::move(extBuffer), extLen);
     EXPECT_EQ(0, ret);
 }
 
@@ -255,8 +255,8 @@ HWTEST_F(RawStreamDataTest, GetBufferLen001, TestSize.Level1)
     ssize_t bufLen = 1;
     auto buffer = std::make_unique<char[]>(bufLen + RawStreamData::FRAME_HEADER_LEN);
     ASSERT_TRUE(buffer != nullptr);
-    int num = 3;
-    int length = 1;;
+    int32_t num = 3;
+    int32_t length = 1;;
 
     rawStreamData->InsertBufferLength(num, length, reinterpret_cast<uint8_t *>(buffer.get()));
 }

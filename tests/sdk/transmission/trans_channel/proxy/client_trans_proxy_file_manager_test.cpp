@@ -68,7 +68,7 @@ const char *g_peerNetworkId = "1234567789";
 const char *g_groupId = "123";
 FILE *g_fileTest = NULL;
 FILE *g_fileSs = NULL;
-int g_fd = 0;
+int32_t g_fd = 0;
 char g_writeData[128] = "test111111111111111111111111111111111111111111111111111111111111";
 const char *g_rootDir = "/data";
 const char *g_destFile = "test.txt";
@@ -103,20 +103,20 @@ const char *g_fileList[] = {
     "111111111111111111111111111111111111111111111111111",
 };
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     return SOFTBUS_OK;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
 }
 
@@ -127,31 +127,31 @@ static ISessionListener g_sessionlistener = {
     .OnMessageReceived = OnMessageReceived,
 };
 
-static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+static int32_t OnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     return SOFTBUS_OK;
 }
 
-static int OnSendFileFinished(int sessionId, const char *firstFile)
+static int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
 {
     return SOFTBUS_OK;
 }
 
-void OnFileTransError(int sessionId)
+void OnFileTransError(int32_t sessionId)
 {
     return;
 }
 
-static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+static int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     return SOFTBUS_OK;
 }
 
-static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+static int32_t OnReceiveFileProcess(int32_t sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     return SOFTBUS_OK;
 }
-static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+static void OnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     return;
 }
@@ -187,7 +187,7 @@ void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 
     g_fileSs = fopen(g_testProxyFileList[1], "w+");
     EXPECT_NE(g_fileSs, nullptr);
-    int ret = fprintf(g_fileSs, "%s", "Hello world!\n");
+    int32_t ret = fprintf(g_fileSs, "%s", "Hello world!\n");
     EXPECT_LT(0, ret);
     g_fd = open(TEST_FILE_PATH, O_RDWR | O_CREAT, S_IRWXU);
     EXPECT_NE(g_fd, -1);
@@ -197,7 +197,7 @@ void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 
 void ClientTransProxyFileManagerTest::TearDownTestCase(void)
 {
-    int ret = fclose(g_fileTest);
+    int32_t ret = fclose(g_fileTest);
     EXPECT_EQ(ret, 0);
     g_fileTest = NULL;
     ret = fclose(g_fileSs);
@@ -226,7 +226,7 @@ void ClientTransProxyFileManagerTest::TearDownTestCase(void)
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendFileTest001, TestSize.Level0)
 {
     int32_t channelId = 1;
-    int ret = ProxyChannelSendFile(channelId, g_testProxyFileList, g_testProxyFileList, 0);
+    int32_t ret = ProxyChannelSendFile(channelId, g_testProxyFileList, g_testProxyFileList, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ProxyChannelSendFile(channelId, nullptr, g_testProxyFileList, TEST_FILE_CNT);
@@ -278,7 +278,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
 {
     int32_t channelId = 1;
     int32_t sessionId = 1;
-    int ret = ProcessRecvFileFrameData(sessionId, channelId, nullptr);
+    int32_t ret = ProcessRecvFileFrameData(sessionId, channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ChannelInfo *channel = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
@@ -436,7 +436,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfoTest001, TestSize.Level0)
 {
-    int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+    int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
     int32_t sessionId = 1;
@@ -489,7 +489,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAndCheckFileSizeTes
 {
     uint64_t fileSize = 0;
     uint64_t frameNum = 0;
-    int ret =
+    int32_t ret =
         GetAndCheckFileSize(nullptr, &fileSize, &frameNum, APP_INFO_FILE_FEATURES_SUPPORT, PROXY_BLE_MAX_PACKET_SIZE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
@@ -519,7 +519,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest001, T
         .frameType = TRANS_SESSION_BYTES,
         .data = nullptr,
     };
-    int ret = SendOneFrame(nullptr, &fileFrame);
+    int32_t ret = SendOneFrame(nullptr, &fileFrame);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = SendOneFrame(&info, &fileFrame);
@@ -582,7 +582,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest002, T
     infoRear->sessionId = 1;
     infoRear->channelId = 1;
     infoRear->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
-    int ret = SendOneFrameRear(nullptr, TRANS_SESSION_BYTES);
+    int32_t ret = SendOneFrameRear(nullptr, TRANS_SESSION_BYTES);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendOneFrameRear(infoRear, TRANS_SESSION_BYTES);
@@ -650,7 +650,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
     int32_t channelId = 1;
     uint32_t startSeq = TEST_SEQ;
     uint32_t value = 0;
-    int ret = SendFileAckReqAndResData(channelId, startSeq, value, CHANNEL_TYPE_PROXY);
+    int32_t ret = SendFileAckReqAndResData(channelId, startSeq, value, CHANNEL_TYPE_PROXY);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
     FileFrame frame;
@@ -743,7 +743,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataFrameTest0
     };
 
     uint32_t fileDataLen = 0;
-    int ret = UnpackFileDataFrame(&info, &fileFrame, &fileDataLen);
+    int32_t ret = UnpackFileDataFrame(&info, &fileFrame, &fileDataLen);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     fileFrame.frameLength = TEST_HEADER_LENGTH;
@@ -776,7 +776,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest00
         .frameNum = 1,
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
     };
-    int ret = RetransFileFrameBySeq(nullptr, TEST_SEQ);
+    int32_t ret = RetransFileFrameBySeq(nullptr, TEST_SEQ);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = RetransFileFrameBySeq(&info, TEST_SEQ);
@@ -804,7 +804,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyAckResponseDataHandleT
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
     };
     uint32_t len = 0;
-    int ret = AckResponseDataHandle(&info, nullptr, len);
+    int32_t ret = AckResponseDataHandle(&info, nullptr, len);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     const char *data = "test_data";
@@ -868,7 +868,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFullRecvPathTest001
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetDirPathTest001, TestSize.Level0)
 {
-    int ret = GetDirPath(nullptr, nullptr, 0);
+    int32_t ret = GetDirPath(nullptr, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     const char *fullPath1 = "";
@@ -896,7 +896,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetDirPathTest001, Tes
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAbsFullPathTest001, TestSize.Level0)
 {
-    int ret = GetAbsFullPath(nullptr, nullptr, 0);
+    int32_t ret = GetAbsFullPath(nullptr, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     char recvAbsPath[TEST_PATH_SIZE];
@@ -929,7 +929,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest00
     info->sessionId = 1;
     info->crc = 1;
     info->channelId = 1;
-    int ret = AddSendListenerInfo(info);
+    int32_t ret = AddSendListenerInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     int32_t sessionId = 1;
@@ -951,7 +951,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest00
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileTransStartInfoTest001, TestSize.Level0)
 {
-    int ret = PackFileTransStartInfo(nullptr, nullptr, TEST_FILE_TEST_TXT_FILE, nullptr);
+    int32_t ret = PackFileTransStartInfo(nullptr, nullptr, TEST_FILE_TEST_TXT_FILE, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     uint32_t dataTest = TEST_DATA_LENGTH;
@@ -983,7 +983,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileTransStartInfoTest
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUnFileTransStartInfoTest001, TestSize.Level0)
 {
     uint32_t packetSize = TEST_PACKET_SIZE;
-    int ret = UnpackFileTransStartInfo(nullptr, nullptr, nullptr, packetSize);
+    int32_t ret = UnpackFileTransStartInfo(nullptr, nullptr, nullptr, packetSize);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     uint32_t dataTest = TEST_DATA_LENGTH;
@@ -1030,7 +1030,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUnFileTransStartInfoTe
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileCrcCheckSumTest001, TestSize.Level0)
 {
-    int ret = SendFileCrcCheckSum(nullptr);
+    int32_t ret = SendFileCrcCheckSum(nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SendListenerInfo info;
@@ -1073,7 +1073,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest001, Te
     info.crc = 1;
     info.channelId = 1;
 
-    int ret = SendSingleFile(&info, nullptr, g_testProxyFileList[0]);
+    int32_t ret = SendSingleFile(&info, nullptr, g_testProxyFileList[0]);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = FileToFrameAndSendFile(nullptr, g_testProxyFileList[0], g_testProxyFileList[0]);
@@ -1112,7 +1112,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest002, Te
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
     };
 
-    int ret = FileToFrameAndSendFile(&sendInfo, g_testProxyFileList[0], g_destFile);
+    int32_t ret = FileToFrameAndSendFile(&sendInfo, g_testProxyFileList[0], g_destFile);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 
     ret = FileToFrame(&sendInfo, TEST_FRAME_NUMBER, g_destFile, TEST_FILE_TEST_TXT_FILE);
@@ -1137,7 +1137,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyStartSendFileTest001, 
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
     };
 
-    int ret = ProxyStartSendFile(&sendInfo, g_testProxyFileList, g_testProxyFileList, TEST_FILE_CNT);
+    int32_t ret = ProxyStartSendFile(&sendInfo, g_testProxyFileList, g_testProxyFileList, TEST_FILE_CNT);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
@@ -1164,7 +1164,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckFileTest001, Test
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPutToRcvListTest001, TestSize.Level0)
 {
-    int ret = PutToRecvFileList(nullptr, nullptr);
+    int32_t ret = PutToRecvFileList(nullptr, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     FileRecipientInfo recipient = {
@@ -1198,7 +1198,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRecvRecipientInfoListT
 
     uint32_t seq = 0;
     int32_t res = 0;
-    int ret = ProcessFileSendResult(sessionId, seq, res);
+    int32_t ret = ProcessFileSendResult(sessionId, seq, res);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     sessionId = -1;
@@ -1255,7 +1255,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetRecipientInfoListTe
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteEmptyFrameTest001, TestSize.Level0)
 {
     int32_t cnt = 0;
-    int ret = WriteEmptyFrame(nullptr, cnt);
+    int32_t ret = WriteEmptyFrame(nullptr, cnt);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SingleFileInfo info = {0};
@@ -1286,7 +1286,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteEmptyFrameTest001
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameCRCTest001, TestSize.Level0)
 {
     uint32_t dataLen = 0;
-    int ret = ProcessOneFrameCRC(nullptr, dataLen, nullptr);
+    int32_t ret = ProcessOneFrameCRC(nullptr, dataLen, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     uint8_t *emptyBuff = (uint8_t *)SoftBusCalloc(TEST_FILE_SIZE);
@@ -1357,7 +1357,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameTest001
         .startSeq = 0,
         .preStartSeq = 0,
     };
-    int ret = ProcessOneFrame(&frame, dataLen, crc, &fileInfo, osType);
+    int32_t ret = ProcessOneFrame(&frame, dataLen, crc, &fileInfo, osType);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     fileInfo.fileStatus = NODE_IDLE;
@@ -1383,7 +1383,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCrcCheckTest001, TestS
     };
     int32_t sessionId = -1;
 
-    int ret = ProcessCrcCheckSumData(sessionId, nullptr);
+    int32_t ret = ProcessCrcCheckSumData(sessionId, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = ProcessCrcCheckSumData(sessionId, &frame);
@@ -1413,7 +1413,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckRequestTest001,
     };
     int32_t sessionId = -1;
 
-    int ret = ProcessFileAckRequest(sessionId, nullptr);
+    int32_t ret = ProcessFileAckRequest(sessionId, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = ProcessFileAckRequest(sessionId, &frame);
@@ -1445,7 +1445,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckResponseTest001
     };
     int32_t sessionId = -1;
 
-    int ret = ProcessFileAckResponse(sessionId, nullptr);
+    int32_t ret = ProcessFileAckResponse(sessionId, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = ProcessFileAckResponse(sessionId, &frame);
@@ -1490,7 +1490,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckParameterTest001,
     EXPECT_EQ(false, result);
 
     int32_t sessionId = 1;
-    int ret = ProcessFileTransResult(sessionId, nullptr);
+    int32_t ret = ProcessFileTransResult(sessionId, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -1507,7 +1507,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessFileListDataTes
         .frameLength = TEST_FILE_SIZE,
         .data = (uint8_t *)"00010010datatest,"
     };
-    int ret = ProcessFileListData(sessionId, &frame);
+    int32_t ret = ProcessFileListData(sessionId, &frame);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -1529,7 +1529,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileInfoTest001, Te
     info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
     SingleFileInfo file;
     uint32_t packetSize = TEST_PACKET_SIZE;
-    int ret = GetFileInfoByStartFrame(nullptr, nullptr, nullptr, packetSize);
+    int32_t ret = GetFileInfoByStartFrame(nullptr, nullptr, nullptr, packetSize);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = GetFileInfoByStartFrame(&frame, &info, &file, packetSize);
@@ -1559,7 +1559,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteFrameTest001, Tes
         .frameLength = 0,
         .data = (uint8_t *)"00010010datatest.txt",
     };
-    int ret = WriteFrameToFile(sessionId, &frame);
+    int32_t ret = WriteFrameToFile(sessionId, &frame);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     frame.frameLength = TEST_DATA_LENGTH;
@@ -1580,7 +1580,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxyChannelSendFileStreamTest001, Tes
     uint32_t len = TEST_HEADER_LENGTH;
     int32_t type = 1;
 
-    int ret = ProxyChannelSendFileStream(channelId, data, len, type);
+    int32_t ret = ProxyChannelSendFileStream(channelId, data, len, type);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
@@ -1597,7 +1597,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxySendFileTransResultTest001, TestS
     int32_t result = 0;
     uint32_t side = 0;
     
-    int ret = SendFileTransResult(channelId, seq, result, side);
+    int32_t ret = SendFileTransResult(channelId, seq, result, side);
     EXPECT_NE(SOFTBUS_MALLOC_ERR, ret);
 }
 
@@ -1616,7 +1616,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxyUnpackFileTransResultFrame001, Te
     const uint8_t *data1 = (const uint8_t *)&data;
     uint32_t len = TEST_HEADER_LENGTH;
 
-    int ret = UnpackFileTransResultFrame(data1, len, nullptr, &result, &side);
+    int32_t ret = UnpackFileTransResultFrame(data1, len, nullptr, &result, &side);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     ret = UnpackFileTransResultFrame(data1, len, &seq, nullptr, &side);
@@ -1647,7 +1647,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
     int32_t channelId = 1;
     uint32_t startSeq = TEST_SEQ;
     uint32_t value = 0;
-    int ret = SendFileAckReqAndResData(channelId, startSeq, value, CHANNEL_TYPE_PROXY);
+    int32_t ret = SendFileAckReqAndResData(channelId, startSeq, value, CHANNEL_TYPE_PROXY);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
     FileFrame frame;
@@ -1745,7 +1745,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest00
     };
     int32_t seq = 0;
 
-    int ret = RetransFileFrameBySeq(nullptr, TEST_SEQ);
+    int32_t ret = RetransFileFrameBySeq(nullptr, TEST_SEQ);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     ret = RetransFileFrameBySeq(&info, seq);
@@ -1799,7 +1799,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileSizeTest001, Te
     };
     ClearSendInfo(&info);
 
-    int ret = CalcAllFilesInfo(&totalInfo, fileList, fileCnt);
+    int32_t ret = CalcAllFilesInfo(&totalInfo, fileList, fileCnt);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
@@ -1815,7 +1815,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathT
     FileListener *fileListener = (FileListener *)SoftBusCalloc(sizeof(FileListener));
 
     fileListener->socketRecvCallback = NULL;
-    int ret = UpdateFileReceivePath(sessionId, fileListener);
+    int32_t ret = UpdateFileReceivePath(sessionId, fileListener);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = UpdateFileReceivePath(sessionId, fileListener);
@@ -1844,7 +1844,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateFileFromFrameTes
         .fileData = &data,
     };
 
-    int ret = CreateFileFromFrame(sessionId, channelId, &fileFrame, osType, packetSize);
+    int32_t ret = CreateFileFromFrame(sessionId, channelId, &fileFrame, osType, packetSize);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     const char *dataFile = "TEST_FILE_DATA";
@@ -1880,7 +1880,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyChannelSendFileTest001
 
     GenerateRemoteFiles(sFileList, fileCnt);
 
-    int ret = TransProxyChannelSendFile(channelId, nullptr, dFileList, fileCnt);
+    int32_t ret = TransProxyChannelSendFile(channelId, nullptr, dFileList, fileCnt);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     fileCnt = 0;

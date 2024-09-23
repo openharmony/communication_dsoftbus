@@ -49,8 +49,8 @@ void TransSdkStreamTest::TearDownTestCase(void)
  */
 HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level0)
 {
-    int ret;
-    int sessionId = 1;
+    int32_t ret;
+    int32_t sessionId = 1;
     const StreamData streamData = {0};
     const StreamData ext = {0};
     const StreamFrameInfo param = {0};

@@ -75,7 +75,7 @@ static SoftBusList *TestCreateSessionList()
 
     SoftBusMutexAttr mutexAttr;
     mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-    int ret = SoftBusMutexInit(&list->lock, &mutexAttr);
+    int32_t ret = SoftBusMutexInit(&list->lock, &mutexAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ListInit(&list->list);
     return list;

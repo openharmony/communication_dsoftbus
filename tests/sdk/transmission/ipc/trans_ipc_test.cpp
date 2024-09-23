@@ -99,8 +99,8 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
     uint32_t addrTypeLen = 1;
     void *info = nullptr;
     uint32_t infoTypeLen = 1;
-    int infoNum = 1;
-    int key = 1;
+    int32_t infoNum = 1;
+    int32_t key = 1;
     unsigned char *buf = nullptr;
     uint16_t dataChangeFlag = 1;
     int32_t accuracy = 1;
@@ -704,8 +704,8 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRippleStatsTest001, TestSize.Level0)
  */
 HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level0)
 {
-    int uid = 1;
-    int pid = 1;
+    int32_t uid = 1;
+    int32_t pid = 1;
     int32_t ret = ServerIpcGrantPermission(uid, pid, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
