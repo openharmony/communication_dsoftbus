@@ -58,8 +58,8 @@ static const ConnModule MODULE_ID = MODULE_DEVICE_AUTH;
 static const uint8_t DEVICE_INFO[5] = { 0x10, 0x2, 0x14, 0x08, 0x06 };
 uint8_t g_sessionKey[SESSION_KEY_LENGTH];
 static const int32_t TEST_DATA_LEN = 600;
-static const int OPER_CODE = 0;
-static const int DELAY_TIME = 15;
+static const int32_t OPER_CODE = 0;
+static const int32_t DELAY_TIME = 15;
 static const char *g_retData = nullptr;
 static uint64_t g_connId = 8590065691;
 const AuthConnInfo g_connInfo = {
@@ -203,7 +203,7 @@ bool WaitForSignal()
         return false;
     }
     if (!AuthNetLedgertInterfaceMock::isRuned) {
-        int ret = SoftBusCondWait(&LnnHichainInterfaceMock::cond, &LnnHichainInterfaceMock::mutex, &tv);
+        int32_t ret = SoftBusCondWait(&LnnHichainInterfaceMock::cond, &LnnHichainInterfaceMock::mutex, &tv);
         (void)SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
         return (ret == SOFTBUS_OK);
     } else {

@@ -92,7 +92,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest002, TestSize.Level1)
 {
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(NULL));
-    int ret = LnnInitLnnLooper();
+    int32_t ret = LnnInitLnnLooper();
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -106,7 +106,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest003, TestSize.Level1)
 {
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(NULL));
-    int ret = BusCenterServerInit();
+    int32_t ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -132,7 +132,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
     EXPECT_CALL(BusCenterManagerMock, IsActiveOsAccountUnlocked()).WillOnce(Return(false));
     EXPECT_CALL(BusCenterManagerMock,  SoftBusRunPeriodicalTask(_, _, _, _)).WillOnce(Return());
     EXPECT_CALL(BusCenterManagerMock, LnnInitLaneHub()).WillOnce(Return(SOFTBUS_ERR));
-    int ret = BusCenterServerInit();
+    int32_t ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -148,7 +148,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
     SoftBusLooper loop;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));
     EXPECT_CALL(BusCenterManagerMock, LnnInitNetLedger()).WillOnce(Return(SOFTBUS_ERR));
-    int ret = BusCenterServerInit();
+    int32_t ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(BusCenterManagerMock, LnnInitNetLedger()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillOnce(Return(SOFTBUS_ERR));
@@ -208,7 +208,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
         .WillRepeatedly(Return());
     EXPECT_CALL(BusCenterManagerMock, LnnInitLaneHub()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillOnce(Return(SOFTBUS_ERR));
-    int ret = BusCenterServerInit();
+    int32_t ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));

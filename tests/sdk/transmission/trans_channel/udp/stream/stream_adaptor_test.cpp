@@ -44,7 +44,7 @@ void StreamAdaptorTest::SetUpTestCase(void)
 void StreamAdaptorTest::TearDownTestCase(void)
 {}
 
-void SetStatus(int channelId, int status)
+void SetStatus(int32_t channelId, int32_t status)
 {
     std::cout << "[server]:channelID:" << channelId << ", status:" << status << std::endl;
 }

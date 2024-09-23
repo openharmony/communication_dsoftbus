@@ -533,7 +533,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
     ListenerModule moduleType = GetModuleByHmlIp(g_ip);
     EXPECT_EQ(moduleType, UNUSE_BUTT);
 
-    for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
+    for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
         DelHmlListenerByMoudle((ListenerModule)i);
     }
 }

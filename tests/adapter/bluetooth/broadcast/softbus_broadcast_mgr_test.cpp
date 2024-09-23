@@ -99,7 +99,7 @@ static BcScanFilter *GetBcScanFilter(void)
 {
     unsigned char serviceData[] = {0x04, 0x05, 0x90};
     unsigned char serviceDataMask[] = {0xFF, 0xFF, 0xFF};
-    int serviceDataLength = sizeof(serviceData);
+    int32_t serviceDataLength = sizeof(serviceData);
 
     BcScanFilter *filter = static_cast<BcScanFilter *>(SoftBusCalloc(sizeof(BcScanFilter)));
     DISC_CHECK_AND_RETURN_RET_LOGW(filter != nullptr, nullptr, DISC_TEST, "malloc filter failed");
@@ -128,41 +128,41 @@ EXIT:
     return nullptr;
 }
 
-static void BleBcEnableCallback(int channel, int status)
+static void BleBcEnableCallback(int32_t channel, int32_t status)
 {
     DISC_LOGI(DISC_TEST, "channel=%{public}d, status=%{public}d", channel, status);
 }
 
-static void BleBcDisableCallback(int channel, int status)
+static void BleBcDisableCallback(int32_t channel, int32_t status)
 {
     DISC_LOGI(DISC_TEST, "channel=%{public}d, status=%{public}d", channel, status);
 }
 
-static void BleBcUpdateCallback(int channel, int status)
+static void BleBcUpdateCallback(int32_t channel, int32_t status)
 {
     DISC_LOGI(DISC_TEST, "channel=%{public}d, status=%{public}d", channel, status);
 }
 
-static void BleBcDataCallback(int channel, int status)
+static void BleBcDataCallback(int32_t channel, int32_t status)
 {
     DISC_LOGI(DISC_TEST, "channel=%{public}d, status=%{public}d", channel, status);
 }
 
-static void BleOnScanStart(int listenerId, int status)
+static void BleOnScanStart(int32_t listenerId, int32_t status)
 {
     (void)listenerId;
     (void)status;
     DISC_LOGI(DISC_TEST, "BleOnScanStart");
 }
 
-static void BleOnScanStop(int listenerId, int status)
+static void BleOnScanStop(int32_t listenerId, int32_t status)
 {
     (void)listenerId;
     (void)status;
     DISC_LOGI(DISC_TEST, "BleOnScanStop");
 }
 
-static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *reportInfo)
+static void BleScanResultCallback(int32_t listenerId, const BroadcastReportInfo *reportInfo)
 {
     (void)listenerId;
 }

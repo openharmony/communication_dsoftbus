@@ -167,7 +167,7 @@ static void TestDiscoverResult(int32_t refreshId, RefreshResult reason)
     printf("[client]TestDiscoverResult:%d\n", reason);
 }
 
-static void TestPublishResult(int publishId, PublishResult reason)
+static void TestPublishResult(int32_t publishId, PublishResult reason)
 {
     printf("[client]TestPublishResult:%d\n", reason);
 }
@@ -233,7 +233,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_001, TestSize.Level0)
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_002, TestSize.Level0)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i <= DEFAULT_NODE_STATE_CB_NUM; ++i) {
         EXPECT_TRUE(RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb) == SOFTBUS_OK);
@@ -252,7 +252,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_002, TestSize.Level0)
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001, TestSize.Level0)
 {
     NodeBasicInfo *info = nullptr;
-    int infoNum;
+    int32_t infoNum;
 
     EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum) == SOFTBUS_OK);
     if (infoNum == 0) {
@@ -292,7 +292,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
 {
     NodeBasicInfo info;
     NodeBasicInfo *remoteNodeInfo = nullptr;
-    int infoNum = 0;
+    int32_t infoNum = 0;
     char uuid[UUID_BUF_LEN] = {0};
     char udid[UDID_BUF_LEN] = {0};
     char brMac[BT_MAC_LEN] = {0};
@@ -321,7 +321,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
         (uint8_t *)&netType, LNN_COMMON_LEN) == SOFTBUS_OK);
 
     EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
-    for (int i = 0; i < infoNum; i++) {
+    for (int32_t i = 0; i < infoNum; i++) {
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_BR_MAC,
             (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_IP_ADDRESS,
@@ -441,9 +441,9 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
 HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
 {
     int32_t ret;
-    int tmpId1 = GetPublishId();
-    int tmpId2 = GetPublishId();
-    int tmpId3 = GetPublishId();
+    int32_t tmpId1 = GetPublishId();
+    int32_t tmpId2 = GetPublishId();
+    int32_t tmpId3 = GetPublishId();
     NodeBasicInfo info;
     char localIp[IP_LEN] = {0};
     char loopBackIpAddr[] = "127.0.0.1";
@@ -481,7 +481,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
  */
 HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
 {
-    int ret;
+    int32_t ret;
 
     ret = RefreshLNN(nullptr, &g_sInfo, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
@@ -527,9 +527,9 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
 HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
 {
     int32_t ret;
-    int tmpId1 = GetSubscribeId();
-    int tmpId2 = GetSubscribeId();
-    int tmpId3 = GetSubscribeId();
+    int32_t tmpId1 = GetSubscribeId();
+    int32_t tmpId2 = GetSubscribeId();
+    int32_t tmpId3 = GetSubscribeId();
     NodeBasicInfo info;
     char localIp[IP_LEN] = {0};
     char loopBackIpAddr[] = "127.0.0.1";

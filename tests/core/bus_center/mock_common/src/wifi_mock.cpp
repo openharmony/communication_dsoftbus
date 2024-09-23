@@ -68,7 +68,7 @@ WifiErrorCode UnRegisterWifiEvent(WifiEvent *event)
     return GetWifiInterface()->UnRegisterWifiEvent(event);
 }
 
-WifiErrorCode Hid2dGetChannelListFor5G(int *chanList, int len)
+WifiErrorCode Hid2dGetChannelListFor5G(int32_t *chanList, int32_t len)
 {
     return GetWifiInterface()->Hid2dGetChannelListFor5G(chanList, len);
 }
@@ -83,7 +83,7 @@ WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo* groupInfo)
     return GetWifiInterface()->GetCurrentGroup(groupInfo);
 }
 
-int IsWifiActive(void)
+int32_t IsWifiActive(void)
 {
     return GetWifiInterface()->IsWifiActive();
 }

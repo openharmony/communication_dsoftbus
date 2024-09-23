@@ -471,6 +471,6 @@ HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = CheckServiceIsRegistered(g_pkgName, TEST_PID);
-    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

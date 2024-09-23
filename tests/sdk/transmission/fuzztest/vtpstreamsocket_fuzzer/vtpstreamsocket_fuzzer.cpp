@@ -31,7 +31,7 @@ namespace OHOS {
             return;
         }
 
-        int streamType = *(reinterpret_cast<const int*>(data));
+        int32_t streamType = *(reinterpret_cast<const int*>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
 
@@ -45,7 +45,7 @@ namespace OHOS {
             return;
         }
 
-        int streamType = *(reinterpret_cast<const int*>(data));
+        int32_t streamType = *(reinterpret_cast<const int*>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
 
@@ -77,7 +77,7 @@ namespace OHOS {
             return;
         }
 
-        int type = *(reinterpret_cast<const int*>(data));
+        int32_t type = *(reinterpret_cast<const int*>(data));
         Communication::SoftBus::StreamAttr tmp;
 
         vtpStreamSocket.SetOption(type, tmp);
@@ -89,7 +89,7 @@ namespace OHOS {
             return;
         }
 
-        int type = *(reinterpret_cast<const int*>(data));
+        int32_t type = *(reinterpret_cast<const int*>(data));
 
         vtpStreamSocket.GetOption(type);
     }
@@ -134,7 +134,7 @@ namespace OHOS {
 }
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::VtpCreateServerTest(data, size);

@@ -81,9 +81,10 @@ HWTEST_F(StreamManagerTest, CreateStreamClientChannel001, TestSize.Level1)
     remote->port = 1002;
 
     std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
-    int streamType = 12;
-    int ret = streamSocketListener->CreateStreamClientChannel(*local, *remote, Communication::SoftBus::VTP, streamType,
-        sessionKey);
+    int32_t streamType = 12;
+    int32_t ret = streamSocketListener->CreateStreamClientChannel(*local, *remote,
+                                                                  Communication::SoftBus::VTP,
+                                                                  streamType, sessionKey);
     EXPECT_EQ(0, ret);
 
     ret = streamSocketListener->CreateStreamClientChannel(*local, *remote, Communication::SoftBus::TCP, streamType,
@@ -115,8 +116,8 @@ HWTEST_F(StreamManagerTest, CreateStreamServerChannel001, TestSize.Level1)
 
 
     std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
-    int streamType = 12;
-    int ret = streamSocketListener->CreateStreamServerChannel(*local, *protocol, streamType, sessionKey);
+    int32_t streamType = 12;
+    int32_t ret = streamSocketListener->CreateStreamServerChannel(*local, *protocol, streamType, sessionKey);
     EXPECT_EQ(-1, ret);
 
     (void)memset_s(protocol, sizeof(Communication::SoftBus::Proto), 1, sizeof(Communication::SoftBus::Proto));
@@ -165,7 +166,7 @@ HWTEST_F(StreamManagerTest, SetOption001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::IStreamManagerListener> streamListener;
     auto streamSocketListener = std::make_shared<Communication::SoftBus::StreamManager>(streamListener);
 
-    int type = 1;
+    int32_t type = 1;
     Communication::SoftBus::StreamAttr *value =
         (Communication::SoftBus::StreamAttr*)SoftBusMalloc(sizeof(Communication::SoftBus::StreamAttr));
     (void)memset_s(value, sizeof(Communication::SoftBus::StreamAttr), 0, sizeof(Communication::SoftBus::StreamAttr));
@@ -197,7 +198,7 @@ HWTEST_F(StreamManagerTest, SetMultiLayer001, TestSize.Level1)
     auto streamSocketListener = std::make_shared<Communication::SoftBus::StreamManager>(streamListener);
     ASSERT_TRUE(streamSocketListener != nullptr);
 
-    int para = 0;
+    int32_t para = 0;
     int32_t ret = streamSocketListener->SetMultiLayer((void *)&para);
     EXPECT_NE(SOFTBUS_OK, ret);
 }

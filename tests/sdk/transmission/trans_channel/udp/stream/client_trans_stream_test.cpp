@@ -112,9 +112,9 @@ HWTEST_F(ClientTransStreamTest, OnQosEvent001, TestSize.Level0)
     QosTv *tvList = (QosTv*)SoftBusMalloc(sizeof(QosTv));
     ASSERT_TRUE(tvList != nullptr);
     (void)memset_s(tvList, sizeof(QosTv), 0, sizeof(QosTv));
-    int channelId = 12;
-    int eventId = 21;
-    int tvCount = 3;
+    int32_t channelId = 12;
+    int32_t eventId = 21;
+    int32_t tvCount = 3;
 
     OnQosEvent(channelId, eventId, tvCount, tvList);
 
@@ -147,7 +147,7 @@ HWTEST_F(ClientTransStreamTest, OnFrameStats001, TestSize.Level0)
     UdpChannelMgrCb *streamCb = (UdpChannelMgrCb*)SoftBusMalloc(sizeof(UdpChannelMgrCb));
     ASSERT_TRUE(streamCb != nullptr);
     (void)memset_s(streamCb, sizeof(UdpChannelMgrCb), 0, sizeof(UdpChannelMgrCb));
-    int channelId = 12;
+    int32_t channelId = 12;
 
     OnFrameStats(channelId, dataStreamSendStats);
     OnRippleStats(channelId, dataTrafficStats);
@@ -194,7 +194,7 @@ HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level0)
     (void)memset_s(paramStreamFrameInfo, sizeof(StreamFrameInfo), 0, sizeof(StreamFrameInfo));
 
     int32_t channelId = 12;
-    int ret = TransSendStream(channelId, dataStreamData, extStreamData, paramStreamFrameInfo);
+    int32_t ret = TransSendStream(channelId, dataStreamData, extStreamData, paramStreamFrameInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     if (dataStreamData != nullptr) {
@@ -218,7 +218,7 @@ HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level0)
  */
 HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
 {
-    int ret = TransClientInit();
+    int32_t ret = TransClientInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ChannelInfo *channel = (ChannelInfo*)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channel != nullptr);
@@ -268,7 +268,7 @@ HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
 HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level0)
 {
     int32_t channelId = -1;
-    int ret = TransCloseStreamChannel(channelId);
+    int32_t ret = TransCloseStreamChannel(channelId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = 1;

@@ -25,7 +25,7 @@
 #include "softbus_adapter_mem.h"
 
 namespace OHOS {
-const int PROTOCOL_MAXLEN = 100;
+const int32_t PROTOCOL_MAXLEN = 100;
 
 struct SocketProtocol {
     unsigned int cmd;
@@ -160,7 +160,7 @@ void SoftBusSocketSendToFuzzTest(const uint8_t* data, size_t size)
 }
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::SoftBusSocketRecvFuzzTest(data, size);
