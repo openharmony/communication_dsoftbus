@@ -533,7 +533,7 @@ static int32_t CheckPidAndUidDynamic(const SoftBusPermissionEntry *pe, const Sof
         }
     }
     if (appInfo == NULL) {
-        return SOFTBUS_TRANS_SESSION_INFO_NOT_FIND;
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
     char *tmpName = NULL;
     Anonymize(pe->sessionName, &tmpName);
