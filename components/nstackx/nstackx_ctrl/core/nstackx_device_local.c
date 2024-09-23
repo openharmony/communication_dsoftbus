@@ -438,12 +438,6 @@ static int CopyDeviceInfoV2(const NSTACKX_LocalDeviceInfoV2 *devInfo)
         }
     }
 
-    if (strcpy_s(g_localDevice.deviceInfo.version, sizeof(g_localDevice.deviceInfo.version),
-        devInfo->version) != EOK) {
-        DFINDER_LOGE(TAG, "copy version %s failed", devInfo->version);
-        return NSTACKX_EFAILED;
-    }
-
     g_localDevice.deviceInfo.deviceType = devInfo->deviceType;
     g_localDevice.deviceInfo.businessType = devInfo->businessType;
     if (devInfo->hasDeviceHash) {

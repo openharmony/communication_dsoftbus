@@ -52,7 +52,7 @@ void VtpInstanceTest::TearDownTestCase(void)
  */
 HWTEST_F(VtpInstanceTest, UpdateVtpLogLevel001, TestSize.Level1)
 {
-    int ret = Communication::SoftBus::UpdateVtpLogLevel();
+    int32_t ret = Communication::SoftBus::UpdateVtpLogLevel();
     EXPECT_EQ(FILLP_DBG_LVL_DEBUG, ret);
 }
 
@@ -82,7 +82,7 @@ HWTEST_F(VtpInstanceTest, CryptoRand001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
         std::make_shared<Communication::SoftBus::VtpInstance>();
 
-    int res = (int)vtpInstance->CryptoRand();
+    int32_t res = (int)vtpInstance->CryptoRand();
     EXPECT_NE(0, res);
 }
 
@@ -122,7 +122,7 @@ HWTEST_F(VtpInstanceTest, WaitForDestroy001, TestSize.Level1)
     vtpInstance->PreSetFillpCoreParams();
 
     std::string pkgName = "0111test";
-    const int delayTimes =  1;
+    const int32_t delayTimes =  1;
 
     vtpInstance->WaitForDestroy(delayTimes);
     EXPECT_TRUE(vtpInstance->isDestroyed_);

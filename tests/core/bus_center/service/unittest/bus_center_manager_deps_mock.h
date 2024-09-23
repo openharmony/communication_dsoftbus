@@ -29,7 +29,7 @@ public:
     virtual ~BusCenterManagerDepsInterface() {};
 
     virtual bool GetWatchdogFlag(void) = 0;
-    virtual SoftBusLooper *GetLooper(int looper);
+    virtual SoftBusLooper *GetLooper(int32_t looper);
     virtual SoftBusLooper *CreateNewLooper(const char *name);
     virtual int32_t LnnInitNetLedger(void);
     virtual int32_t LnnInitDecisionCenter(uint32_t version);

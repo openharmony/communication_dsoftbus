@@ -41,8 +41,8 @@ public:
         Reset();
     }
 
-    bool Update(int id, int st, SoftBusGattcNotify *param);
-    testing::AssertionResult Expect(int id, int st, SoftBusGattcNotify *param);
+    bool Update(int32_t id, int32_t st, SoftBusGattcNotify *param);
+    testing::AssertionResult Expect(int32_t id, int32_t st, SoftBusGattcNotify *param);
 private:
     SoftBusGattcNotify notify;
     void Reset();
@@ -61,15 +61,15 @@ public:
 
 static SoftBusGattcCallback *GetStubGattcCallback();
 
-int ActionBleGattcRegister(BtUuid appUuid)
+int32_t ActionBleGattcRegister(BtUuid appUuid)
 {
     (void)appUuid;
-    static int idGenerator = 0;
+    static int32_t idGenerator = 0;
     return ++idGenerator;
 }
 
-int ActionBleGattcConnect(
-    int clientId, BtGattClientCallbacks *func, const BdAddr *bdAddr, bool isAutoConnect, BtTransportType transport)
+int32_t ActionBleGattcConnect(
+    int32_t clientId, BtGattClientCallbacks *func, const BdAddr *bdAddr, bool isAutoConnect, BtTransportType transport)
 {
     (void)clientId;
     (void)bdAddr;
@@ -352,7 +352,7 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle1, TestSize.Level3)
     gattClientCallback->registerNotificationCb(clientId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(registNotificationCtx.Expect(clientId, OHOS_BT_STATUS_SUCCESS));
 
-    int mtu = 512;
+    int32_t mtu = 512;
     ASSERT_EQ(SoftbusGattcConfigureMtuSize(clientId, mtu), SOFTBUS_OK);
     gattClientCallback->configureMtuSizeCb(clientId, mtu, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(configureMtuSizeCtx.Expect(clientId, OHOS_BT_STATUS_SUCCESS, mtu));
@@ -476,7 +476,7 @@ void GattcNotifyRecordCtx::Reset()
     (void)memset_s(&notify, sizeof(SoftBusGattcNotify), 0, sizeof(SoftBusGattcNotify));
 }
 
-bool GattcNotifyRecordCtx::Update(int id, int st, SoftBusGattcNotify *param)
+bool GattcNotifyRecordCtx::Update(int32_t id, int32_t st, SoftBusGattcNotify *param)
 {
     if (!StRecordCtx::Update(id, st)) {
         return false;
@@ -503,7 +503,7 @@ bool GattcNotifyRecordCtx::Update(int id, int st, SoftBusGattcNotify *param)
     return true;
 }
 
-testing::AssertionResult GattcNotifyRecordCtx::Expect(int id, int st, SoftBusGattcNotify *param)
+testing::AssertionResult GattcNotifyRecordCtx::Expect(int32_t id, int32_t st, SoftBusGattcNotify *param)
 {
     auto result = StRecordCtx::Expect(id, st);
     if (!result) {
@@ -543,7 +543,7 @@ void StubServiceCompleteCallback(int32_t clientId, int32_t status)
     AdapterBleGattClientTest::serviceCompleteStateCtx.Update(clientId, status);
 }
 
-void StubRegistNotificationCallback(int32_t clientId, int status)
+void StubRegistNotificationCallback(int32_t clientId, int32_t status)
 {
     AdapterBleGattClientTest::registNotificationCtx.Update(clientId, status);
 }
@@ -553,7 +553,7 @@ void StubNotificationReceiveCallback(int32_t clientId, SoftBusGattcNotify *param
     AdapterBleGattClientTest::notificationReceiveCtx.Update(clientId, status, param);
 }
 
-void StubConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
+void StubConfigureMtuSizeCallback(int32_t clientId, int32_t mtuSize, int32_t status)
 {
     AdapterBleGattClientTest::configureMtuSizeCtx.Update(clientId, status, mtuSize);
 }

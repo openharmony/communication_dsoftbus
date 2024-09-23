@@ -46,7 +46,7 @@ void ClientTransUdpStreamInterfaceTest::SetUpTestCase(void)
 void ClientTransUdpStreamInterfaceTest::TearDownTestCase(void)
 {}
 
-void ClientSetStatus(int channelId, int status)
+void ClientSetStatus(int32_t channelId, int32_t status)
 {
     std::cout << "[server]:channelID:" << channelId << ", status:" << status << std::endl;
 }
@@ -164,7 +164,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest001, TestSize.Level
     };
     const StreamData extData = {0};
     const StreamFrameInfo frameInfo = {0};
-    int ret = SendVtpStream(channelId, nullptr, &extData, &frameInfo);
+    int32_t ret = SendVtpStream(channelId, nullptr, &extData, &frameInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = SendVtpStream(channelId, &streamData, &extData, &frameInfo);

@@ -47,7 +47,7 @@ public:
     void TearDown() override
     {}
 
-    static int TestOnNetworkChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer);
+    static int32_t TestOnNetworkChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer);
     static void TestOnNetworkChannelOpenFailed(int32_t channelId, const char *uuid);
     static void TestOnNetworkChannelClosed(int32_t channelId);
     static void TestOnNetworkMessageReceived(int32_t channelId, const char *data, uint32_t len);
@@ -94,7 +94,7 @@ void SoftbusProxyNetworkTest::TearDownTestCase(void)
 {
 }
 
-int SoftbusProxyNetworkTest::TestOnNetworkChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer)
+int32_t SoftbusProxyNetworkTest::TestOnNetworkChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer)
 {
     (void)channelId;
     (void)uuid;

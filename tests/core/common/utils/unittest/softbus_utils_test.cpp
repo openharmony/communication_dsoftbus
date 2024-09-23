@@ -182,7 +182,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_002, TestSiz
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     const unsigned char expect[5] = "ABCD";
-    for (int i = 0; i < 5; i++) {
+    for (int32_t i = 0; i < 5; i++) {
         EXPECT_EQ(expect[i], outBuf[i]);
     }
 }

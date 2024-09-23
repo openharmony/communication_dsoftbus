@@ -37,7 +37,7 @@ class SessionMockTest : public testing::Test {
 void SessionMockTest::SetUpTestCase(void) { }
 
 void SessionMockTest::TearDownTestCase(void) { }
-constexpr int INVALID_ID = -1;
+constexpr int32_t INVALID_ID = -1;
 /*
  * @tc.name: SessionMockTest
  * @tc.desc: SessionMock functions test.
@@ -61,7 +61,7 @@ HWTEST_F(SessionMockTest, SessionMockTest001, TestSize.Level1)
     ret = GetMySessionNameInner(sessionId, data, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    int *pData = NULL;
+    int32_t *pData = NULL;
     ret = GetPeerPidInner(sessionId, pData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -79,7 +79,7 @@ HWTEST_F(SessionMockTest, SessionMockTest002, TestSize.Level1)
 {
     const char *name = NULL;
     unsigned int timeout = 0; // timeout initializes to 0
-    int ret = SetTimer(name, timeout);
+    int32_t ret = SetTimer(name, timeout);
     EXPECT_EQ(ret, INVALID_ID);
 }
 }

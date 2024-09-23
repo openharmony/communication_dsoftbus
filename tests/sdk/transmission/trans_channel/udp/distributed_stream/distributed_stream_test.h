@@ -36,7 +36,7 @@ namespace OHOS {
 inline time_t GetCurrent(void)
 {
     struct timespec time;
-    int ret = clock_gettime(CLOCK_MONOTONIC, &time);
+    int32_t ret = clock_gettime(CLOCK_MONOTONIC, &time);
     if (ret != 0) {
         std::cout <<"get time failed!" << std::endl;
     }

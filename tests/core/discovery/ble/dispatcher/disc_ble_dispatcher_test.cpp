@@ -382,7 +382,7 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 {
     printf("testDiscPublish001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -435,7 +435,7 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery001, TestSize.Level1)
 {
     printf("testDiscovery001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -488,7 +488,7 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 {
     printf("testDiscPublish002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -541,7 +541,7 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery002, TestSize.Level1)
 {
     printf("testDiscovery002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -594,7 +594,7 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 {
     printf("testDiscDispatcher003\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -647,7 +647,7 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery003, TestSize.Level1)
 {
     printf("testDiscovery003\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
-    int ret;
+    int32_t ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;

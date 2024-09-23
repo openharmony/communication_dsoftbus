@@ -50,9 +50,9 @@ const std::string FILE_TEST_PKG_NAME_DEMO = "com.huawei.plrdtest.dsoftbus1";
 const std::string FILE_SESSION_NAME = "com.huawei.plrdtest.dsoftbus.JtSendFile_10";
 const std::string FILE_SESSION_NAME_DEMO = "com.huawei.plrdtest.dsoftbus.JtSendFile_demo";
 
-const int SEND_DATA_SIZE_1K = 1024;
-const int SEND_DATA_SIZE_4K = 4 * 1024;
-const int SEND_DATA_SIZE_1M = 1024 * 1024;
+const int32_t SEND_DATA_SIZE_1K = 1024;
+const int32_t SEND_DATA_SIZE_4K = 4 * 1024;
+const int32_t SEND_DATA_SIZE_1M = 1024 * 1024;
 const char *g_testData = "{\"data\":\"open session test!!!\"}";
 
 const char *SFILE_NAME_ERR = "/data/errFileName";
@@ -69,17 +69,17 @@ const char *DFILE_NAME_5M_3 = "file5M_3.tar";
 const char *DFILE_NAME_5M1 = "file5M1.tar";
 const char *RECV_ROOT_PATH = "/data/recv/";
 
-const int OPEN_SESSION_SEM_WAIT_TIME = 10;
+const int32_t OPEN_SESSION_SEM_WAIT_TIME = 10;
 
-const int WSLEEP_SEC_TYPE = 1;
-const int WSLEEP_SEC_UNIT = 1;
-const int WSLEEP_COMM_TIME = 2;
-const int WSLEEP_SEM_WAIT_TIME = 4;
+const int32_t WSLEEP_SEC_TYPE = 1;
+const int32_t WSLEEP_SEC_UNIT = 1;
+const int32_t WSLEEP_COMM_TIME = 2;
+const int32_t WSLEEP_SEM_WAIT_TIME = 4;
 
-const int WSLEEP_MSEC_TYPE = 2;
-const int WSLEEP_MSEC_UNIT = 1000;
-const int WSLEEP_SEND_BYTES_TIME = 10;
-const int WSLEEP_PTHREAD_SEND_FILE_WAIT_TIME = 500;
+const int32_t WSLEEP_MSEC_TYPE = 2;
+const int32_t WSLEEP_MSEC_UNIT = 1000;
+const int32_t WSLEEP_SEND_BYTES_TIME = 10;
+const int32_t WSLEEP_PTHREAD_SEND_FILE_WAIT_TIME = 500;
 const uint32_t TEST_SEND_FILE_COUNT = 2;
 
 struct TransTestInfo {
@@ -99,8 +99,8 @@ sem_t localSem_;
 int32_t openSessionSuccessCnt_ = 0;
 const SoftbusTestEntry *testEntryArgs_ = nullptr;
 
-const int WAIT_ONLINE_TIME = 5;
-const int GET_LNN_RETRY_COUNT = 5;
+const int32_t WAIT_ONLINE_TIME = 5;
+const int32_t GET_LNN_RETRY_COUNT = 5;
 int32_t WaitDeviceOnline(const char *pkgName)
 {
     int32_t onlineRetryCount = 0;
@@ -129,7 +129,7 @@ int32_t WaitDeviceOnline(const char *pkgName)
     return SOFTBUS_TIMOUT;
 }
 
-int OnSessionOpened(int sessionId, int result)
+int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     cout << "session opened, sesison id = " << sessionId << ", result = " << result << endl;
     if (result == SOFTBUS_OK) {
@@ -140,13 +140,13 @@ int OnSessionOpened(int sessionId, int result)
     return SOFTBUS_OK;
 }
 
-void OnSessionClosed(int sessionId)
+void OnSessionClosed(int32_t sessionId)
 {
     cout << "session closed, sesison id = " << sessionId << endl;
     sessionSet_.erase(sessionId);
 }
 
-void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+void OnStreamReceived(int32_t sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     if (data == nullptr) {
         printf("StreamData is null, stream received fail\n");
@@ -160,7 +160,7 @@ void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *e
     printf("stream received, sessionid[%d], extdata = %.*s\n", sessionId, ext->bufLen, ext->buf);
 }
 
-void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     if (testEntryArgs_->testSide_ == PASSIVE_OPENSESSION_WAY) {
         SendBytes(sessionId, "{\"received ok\"}", strlen("{\"received ok\"}"));
@@ -168,7 +168,7 @@ void OnBytesReceived(int sessionId, const void *data, unsigned int len)
     printf("bytes received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
 }
 
-void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("msg received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
 }
@@ -181,19 +181,19 @@ static ISessionListener g_listener = {
     .OnMessageReceived = OnMessageReceived
 };
 
-int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     cout << "send process id = " << sessionId << ", upload = " << bytesUpload << ", total = " << bytesTotal << endl;
     return 0;
 }
 
-int OnSendFileFinished(int sessionId, const char *firstFile)
+int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
 {
     printf("send finished id = %d, first file = %s\n", sessionId, firstFile);
     return 0;
 }
 
-void OnFileTransError(int sessionId)
+void OnFileTransError(int32_t sessionId)
 {
     printf("OnFileTransError sessionId = %d\n", sessionId);
 }
@@ -204,18 +204,18 @@ static IFileSendListener g_fileSendListener = {
     .OnFileTransError = OnFileTransError,
 };
 
-int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     printf("File receive start sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
     return 0;
 }
 
-void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+void OnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     printf("File receive finished sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
 }
 
-int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnReceiveFileProcess(int32_t sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     printf("File receive process sessionId = %d, first file = %s, upload = %" PRIu64 ", total = %" PRIu64 "\n",
         sessionId, firstFile, bytesUpload, bytesTotal);

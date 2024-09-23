@@ -61,23 +61,23 @@ public:
     {}
 };
 
-static int OnServerSessionOpened(int sessionId, int result)
+static int32_t OnServerSessionOpened(int32_t sessionId, int32_t result)
 {
     TRANS_LOGI(TRANS_TEST, "session opened, sesisonId=%{public}d\r\n", sessionId);
     return SOFTBUS_OK;
 }
 
-static void OnServerSessionClosed(int sessionId)
+static void OnServerSessionClosed(int32_t sessionId)
 {
     TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d\r\n", sessionId);
 }
 
-static void OnServerBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnServerBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%{public}d\r\n", sessionId);
 }
 
-static void OnServerMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnServerMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d\r\n", sessionId);
 }
@@ -247,7 +247,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetSessionKeyTest003, TestSize.Level0)
 HWTEST_F(TransSdkTcpDirectTest, TransTdcGetHandleTest004, TestSize.Level0)
 {
     int32_t channelId = 1;
-    int handle = 0;
+    int32_t handle = 0;
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
 

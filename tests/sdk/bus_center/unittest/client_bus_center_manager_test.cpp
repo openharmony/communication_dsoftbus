@@ -37,8 +37,8 @@ constexpr char NODE1_NETWORK_ID[] = "235689BNHFCF";
 constexpr int32_t NODE1_SESSION_ID = 100;
 constexpr int32_t NODE1_CHANNEL_ID = 100;
 constexpr int32_t NODE1_SESSION_TYPE = 100;
-constexpr int LNN_PUBLISH_ID = 0;
-constexpr int LNN_SUBSCRIBE_ID = 0;
+constexpr int32_t LNN_PUBLISH_ID = 0;
+constexpr int32_t LNN_SUBSCRIBE_ID = 0;
 constexpr char CAPABILITY[] = "ddmpCapabilityTest";
 constexpr unsigned char CAPABILITY_DATA[] = "ddmpCapabilityTest";
 constexpr uint32_t EVENT = 15;
@@ -315,7 +315,7 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_002, TestSize.Level
     BusCenterClientDeinit();
 }
 
-static void OnPublishResultCb(int publishId, PublishResult reason)
+static void OnPublishResultCb(int32_t publishId, PublishResult reason)
 {
     (void)publishId;
     (void)reason;

@@ -2155,7 +2155,7 @@ HWTEST_F(AuthTest, AUTH_SET_TCP_KEEPALIVE_OPTION_Test_003, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = CLIENT_PORT;
+    int32_t port = CLIENT_PORT;
     char ipAddress[] = "127.0.0.1";
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
@@ -2163,7 +2163,7 @@ HWTEST_F(AuthTest, AUTH_SET_TCP_KEEPALIVE_OPTION_Test_003, TestSize.Level1)
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ipAddress);
-    int fd = tcp->OpenServerSocket(&info);
+    int32_t fd = tcp->OpenServerSocket(&info);
 
     int32_t ret = AuthSetTcpKeepaliveOption(fd, HIGH_FREQ_CYCLE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
