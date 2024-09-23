@@ -97,7 +97,7 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
     return SOFTBUS_OK;
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;

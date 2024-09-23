@@ -372,7 +372,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest15, TestSize.Level1)
 {
     int32_t ret = TransSessionMgrInit();
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    for (int i = 0; i < MAX_SESSION_SERVER_NUM - 1; ++i) {
+    for (int32_t i = 0; i < MAX_SESSION_SERVER_NUM - 1; ++i) {
         char sessionNme[SESSION_NAME_SIZE_MAX] = {0};
         char pkgName[PKG_NAME_SIZE_MAX] = {0};
         ret = sprintf_s(sessionNme, SESSION_NAME_SIZE_MAX, "%s%d", g_sessionName, i);
@@ -401,7 +401,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest15, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_NUM);
     SoftBusFree(sessionServer);
 
-    for (int i = 0; i < MAX_SESSION_SERVER_NUM - 1; ++i) {
+    for (int32_t i = 0; i < MAX_SESSION_SERVER_NUM - 1; ++i) {
         char sessionNme[SESSION_NAME_SIZE_MAX] = {0};
         ret = sprintf_s(sessionNme, SESSION_NAME_SIZE_MAX, "%s%d", g_sessionName, i);
         EXPECT_GT(ret, 0);

@@ -61,7 +61,7 @@ int32_t LnnStartDiscovery(void)
     return GetNetworkManagerInterface()->LnnStartDiscovery();
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetNetworkManagerInterface()->SoftbusGetConfig(type, val, len);
 }
@@ -126,6 +126,15 @@ void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
 {
     return GetNetworkManagerInterface()->LnnNotifyAccountStateChangeEvent(state);
+}
+
+void LnnDeinitPhysicalSubnetManager(void)
+{
+    return GetNetworkManagerInterface()->LnnDeinitPhysicalSubnetManager();
+}
+void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    return GetNetworkManagerInterface()->LnnUnregisterEventHandler(event, handler);
 }
 }
 }

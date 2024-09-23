@@ -75,7 +75,7 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
     return SOFTBUS_OK;
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     return SOFTBUS_OK;
 }
@@ -509,6 +509,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback001, TestSize.Level1)
         .charaUuid.uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
     param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_SERVICE_UUID);
     EXPECT_EQ(EOK, ret);
 
@@ -521,6 +522,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback001, TestSize.Level1)
 
     param.charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID);
     param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLECONN_UUID);
     EXPECT_EQ(EOK, ret);
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
@@ -531,6 +533,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback001, TestSize.Level1)
     param.charaUuid.uuid = nullptr;
     param.charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID);
     param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);
     SoftBusSleepMs(500);

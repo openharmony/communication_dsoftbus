@@ -38,8 +38,8 @@ class BtUuidRecordCtx : public StRecordCtx {
 public:
     explicit BtUuidRecordCtx(const char *identifier);
     ~BtUuidRecordCtx();
-    bool Update(int id, int st, SoftBusBtUuid *param);
-    testing::AssertionResult Expect(int id, int st, SoftBusBtUuid *param);
+    bool Update(int32_t id, int32_t st, SoftBusBtUuid *param);
+    testing::AssertionResult Expect(int32_t id, int32_t st, SoftBusBtUuid *param);
 private:
     SoftBusBtUuid uuid;
     void Reset();
@@ -48,10 +48,10 @@ private:
 class BtGattRecordCtx : public BtUuidRecordCtx {
 public:
     explicit BtGattRecordCtx(const char *identifier);
-    bool Update(int id, int st, int handle, SoftBusBtUuid *param);
-    testing::AssertionResult Expect(int id, int st, int handle, SoftBusBtUuid *param);
+    bool Update(int32_t id, int32_t st, int32_t handle, SoftBusBtUuid *param);
+    testing::AssertionResult Expect(int32_t id, int32_t st, int32_t handle, SoftBusBtUuid *param);
 private:
-    int handle;
+    int32_t handle;
 };
 
 class AdapterBleGattServerTest : public testing::Test {
@@ -76,14 +76,14 @@ static SoftBusGattsCallback *GetStubGattsCallback();
 static testing::AssertionResult ExpectGattReadRequest(SoftBusGattReadRequest actual, SoftBusGattReadRequest want);
 static testing::AssertionResult ExpectGattWriteRequest(SoftBusGattWriteRequest actual, SoftBusGattWriteRequest want);
 
-int ActionBleGattsRegisterCallbacks(BtGattServerCallbacks *func)
+int32_t ActionBleGattsRegisterCallbacks(BtGattServerCallbacks *func)
 {
     AdapterBleGattServerTest::gattServerCallback = func;
     return OHOS_BT_STATUS_SUCCESS;
 }
 
 // 回绕到注册通知中
-int ActionBleGattsRegister(BtUuid appUuid)
+int32_t ActionBleGattsRegister(BtUuid appUuid)
 {
     AdapterBleGattServerTest::gattServerCallback->registerServerCb(0, MOCK_GATT_SERVER_HANDLE, &appUuid);
     return OHOS_BT_STATUS_SUCCESS;
@@ -218,10 +218,10 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic, TestSize.Level
         .uuidLen = 0,
         .uuid = nullptr,
     };
-    int properties = SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
+    int32_t properties = SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE;
-    int permissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
+    int32_t permissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
     ASSERT_EQ(
         SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, permissions),
         SOFTBUS_INVALID_PARAM);
@@ -260,7 +260,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddDescriptor, TestSize.Level3)
         .uuidLen = 0,
         .uuid = nullptr,
     };
-    int permissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
+    int32_t permissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
     ASSERT_EQ(SoftBusGattsAddDescriptor(MOCK_GATT_SERVICE_HANDLE, desciptor, permissions), SOFTBUS_INVALID_PARAM);
 
     const char *connDesciptor = "00002902-0000-1000-8000-00805F9B34FB";
@@ -363,7 +363,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDisconnect, TestSize.Level3)
     MockAll(mocker);
     ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service), SOFTBUS_OK);
 
-    int connId = 1;
+    int32_t connId = 1;
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
@@ -456,10 +456,10 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle1, TestSize.Level3)
         .uuidLen = strlen(netCharacteristic),
         .uuid = (char *)netCharacteristic,
     };
-    int properties = SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
+    int32_t properties = SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE;
-    int charaPermissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
+    int32_t charaPermissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
     ASSERT_EQ(SoftBusGattsAddCharacteristic(MOCK_GATT_SERVICE_HANDLE, characteristic, properties, charaPermissions),
         SOFTBUS_OK);
     BtUuid btCharacteristic = {
@@ -491,7 +491,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle2, TestSize.Level3)
 
     // 注册desciptor
     const char *connDesciptor = "00002902-0000-1000-8000-00805F9B34FB";
-    int descriptorPermissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
+    int32_t descriptorPermissions = SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE;
     SoftBusBtUuid descriptor = {
         .uuidLen = strlen(connDesciptor),
         .uuid = (char *)connDesciptor,
@@ -642,7 +642,7 @@ void BtUuidRecordCtx::Reset()
     uuid.uuidLen = 0;
 }
 
-bool BtUuidRecordCtx::Update(int id, int st, SoftBusBtUuid *param)
+bool BtUuidRecordCtx::Update(int32_t id, int32_t st, SoftBusBtUuid *param)
 {
     if (!StRecordCtx::Update(id, st)) {
         return false;
@@ -658,7 +658,7 @@ bool BtUuidRecordCtx::Update(int id, int st, SoftBusBtUuid *param)
     return true;
 }
 
-testing::AssertionResult BtUuidRecordCtx::Expect(int id, int st, SoftBusBtUuid *param)
+testing::AssertionResult BtUuidRecordCtx::Expect(int32_t id, int32_t st, SoftBusBtUuid *param)
 {
     auto result = StRecordCtx::Expect(id, st);
     if (!result) {
@@ -679,7 +679,7 @@ BtGattRecordCtx::BtGattRecordCtx(const char *identifier) : BtUuidRecordCtx(ident
     handle = -1;
 }
 
-bool BtGattRecordCtx::Update(int id, int st, int handleParam, SoftBusBtUuid *param)
+bool BtGattRecordCtx::Update(int32_t id, int32_t st, int32_t handleParam, SoftBusBtUuid *param)
 {
     if (!BtUuidRecordCtx::Update(id, st, param)) {
         return false;
@@ -688,7 +688,7 @@ bool BtGattRecordCtx::Update(int id, int st, int handleParam, SoftBusBtUuid *par
     return true;
 }
 
-testing::AssertionResult BtGattRecordCtx::Expect(int id, int st, int handleParam, SoftBusBtUuid *param)
+testing::AssertionResult BtGattRecordCtx::Expect(int32_t id, int32_t st, int32_t handleParam, SoftBusBtUuid *param)
 {
     auto result = BtUuidRecordCtx::Expect(id, st, param);
     if (!result) {
@@ -720,42 +720,43 @@ StRecordCtx AdapterBleGattServerTest::responseConfirmationCtx("ResponseConfirmat
 StRecordCtx AdapterBleGattServerTest::notifySentCtx("NotifySentCallback");
 StRecordCtx AdapterBleGattServerTest::mtuChangeCtx("MtuChangeCallback");
 
-static void StubServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle)
+static void StubServiceAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t srvcHandle)
 {
     AdapterBleGattServerTest::serviceAddCtx.Update(srvcHandle, status, uuid);
 }
 
-static void StubCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle, int characteristicHandle)
+static void StubCharacteristicAddCallback(int32_t status, SoftBusBtUuid *uuid,
+                                          int32_t srvcHandle, int32_t characteristicHandle)
 {
     AdapterBleGattServerTest::characteristicAddCtx.Update(srvcHandle, status, characteristicHandle, uuid);
 }
 
-static void StubDescriptorAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle, int descriptorHandle)
+static void StubDescriptorAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t srvcHandle, int32_t descriptorHandle)
 {
     AdapterBleGattServerTest::descriptorAddCtx.Update(srvcHandle, status, descriptorHandle, uuid);
 }
 
-static void StubServiceStartCallback(int status, int srvcHandle)
+static void StubServiceStartCallback(int32_t status, int32_t srvcHandle)
 {
     AdapterBleGattServerTest::serviceStartCtx.Update(srvcHandle, status);
 }
 
-static void StubServiceStopCallback(int status, int srvcHandle)
+static void StubServiceStopCallback(int32_t status, int32_t srvcHandle)
 {
     AdapterBleGattServerTest::serviceStopCtx.Update(srvcHandle, status);
 }
 
-static void StubServiceDeleteCallback(int status, int srvcHandle)
+static void StubServiceDeleteCallback(int32_t status, int32_t srvcHandle)
 {
     AdapterBleGattServerTest::serviceDeleteCtx.Update(srvcHandle, status);
 }
 
-static void StubConnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
+static void StubConnectServerCallback(int32_t connId, const SoftBusBtAddr *btAddr)
 {
     AdapterBleGattServerTest::connectServerCtx.Update(connId, btAddr);
 }
 
-static void StubDisconnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
+static void StubDisconnectServerCallback(int32_t connId, const SoftBusBtAddr *btAddr)
 {
     AdapterBleGattServerTest::disconnectServerCtx.Update(connId, btAddr);
 }
@@ -770,15 +771,15 @@ static void StubRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     AdapterBleGattServerTest::requestWriteCtx = writeCbPara;
 }
 
-static void StubResponseConfirmationCallback(int status, int handle)
+static void StubResponseConfirmationCallback(int32_t status, int32_t handle)
 {
     AdapterBleGattServerTest::responseConfirmationCtx.Update(handle, status);
 }
-static void StubNotifySentCallback(int connId, int status)
+static void StubNotifySentCallback(int32_t connId, int32_t status)
 {
     AdapterBleGattServerTest::notifySentCtx.Update(connId, status);
 }
-static void StubMtuChangeCallback(int connId, int mtu)
+static void StubMtuChangeCallback(int32_t connId, int32_t mtu)
 {
     AdapterBleGattServerTest::mtuChangeCtx.Update(connId, mtu);
 }

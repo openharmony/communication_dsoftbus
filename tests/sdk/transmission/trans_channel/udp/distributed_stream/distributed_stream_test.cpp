@@ -44,7 +44,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 
-void SetNumebrInStreamData(char *streamData, int i)
+void SetNumebrInStreamData(char *streamData, int32_t i)
 {
     string strI = std::to_string(i);
     char len = strI.length();
@@ -52,7 +52,7 @@ void SetNumebrInStreamData(char *streamData, int i)
     (void)memcpy_s(streamData + 1, len, strI.c_str(), len);
 }
 
-int GetNumebrInStreamData(const char *streamData)
+int32_t GetNumebrInStreamData(const char *streamData)
 {
     char len = streamData[0];
     string str(streamData + 1, len);
@@ -67,17 +67,17 @@ public:
     void SetUp();
     void TearDown();
 
-    static int OnsessionOpened(int sessionId, int result);
-    static int OnCtrlsessionOpened(int sessionId, int result);
-    static void OnSessionClosed(int sessionId);
-    static void OnStreamReceived(int sessionId, const StreamData *data,
+    static int32_t OnsessionOpened(int32_t sessionId, int32_t result);
+    static int32_t OnCtrlsessionOpened(int32_t sessionId, int32_t result);
+    static void OnSessionClosed(int32_t sessionId);
+    static void OnStreamReceived(int32_t sessionId, const StreamData *data,
         const StreamData *ext, const StreamFrameInfo *param);
-    static void OnBytesReceived(int sessionId, const void *data, unsigned int dataLen);
+    static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int dataLen);
 
-    void P2pTransTest(bool isRawStream, bool isP2P, int sendCnt, const string &mySessionName,
+    void P2pTransTest(bool isRawStream, bool isP2P, int32_t sendCnt, const string &mySessionName,
         const string &peerSessionName);
-    void TestSendCommonStream(int sendCnt);
-    void TestSendStream(int sendCnt);
+    void TestSendCommonStream(int32_t sendCnt);
+    void TestSendStream(int32_t sendCnt);
     void CloseAllSession(void);
     void OpenAllSession(bool isRawStream, bool isP2P, const string &mySessionName, const string &peerSessionName);
     void OpenCtrlSession(const string &mySessionName, const string &peerSessionName);
@@ -86,7 +86,7 @@ public:
     void SendRemoveSessionServerMessage();
 
     static unordered_set<string> networkIdSet_;
-    static int contrlSessionId_;
+    static int32_t contrlSessionId_;
     static unordered_set<int> sessionSet_;
     static sem_t localSem_;
 
@@ -96,14 +96,14 @@ public:
 };
 
 unordered_set<string> DistributeStreamTest::networkIdSet_;
-int DistributeStreamTest::contrlSessionId_ = 0;
+int32_t DistributeStreamTest::contrlSessionId_ = 0;
 unordered_set<int> DistributeStreamTest::sessionSet_;
 sem_t DistributeStreamTest::localSem_;
 time_t DistributeStreamTest::startTime[MAX_SEND_CNT];
 time_t DistributeStreamTest::endTime[MAX_SEND_CNT];
 char DistributeStreamTest::sendBytes[BYTES_SIZE];
 
-void Wsleep(int count, int usl)
+void Wsleep(int32_t count, int32_t usl)
 {
     while (count) {
         if (usl == SLEEP_SEC) {
@@ -115,41 +115,41 @@ void Wsleep(int count, int usl)
     }
 }
 
-int DistributeStreamTest::OnsessionOpened(int sessionId, int result)
+int32_t DistributeStreamTest::OnsessionOpened(int32_t sessionId, int32_t result)
 {
     EXPECT_EQ(result, 0);
     if (result == 0) {
         sessionSet_.insert(sessionId);
     }
-    int ret = sem_post(&localSem_);
+    int32_t ret = sem_post(&localSem_);
     EXPECT_EQ(ret, 0);
     return 0;
 }
 
-int DistributeStreamTest::OnCtrlsessionOpened(int sessionId, int result)
+int32_t DistributeStreamTest::OnCtrlsessionOpened(int32_t sessionId, int32_t result)
 {
     EXPECT_EQ(result, 0);
     if (result == 0) {
         contrlSessionId_ = sessionId;
     }
-    int ret = sem_post(&localSem_);
+    int32_t ret = sem_post(&localSem_);
     EXPECT_EQ(ret, 0);
     return 0;
 }
 
-void DistributeStreamTest::OnSessionClosed(int sessionId)
+void DistributeStreamTest::OnSessionClosed(int32_t sessionId)
 {
     sessionSet_.erase(sessionId);
 }
 
-void DistributeStreamTest::OnStreamReceived(int sessionId, const StreamData *data,
+void DistributeStreamTest::OnStreamReceived(int32_t sessionId, const StreamData *data,
     const StreamData *ext, const StreamFrameInfo *param)
 {
 }
 
-void DistributeStreamTest::OnBytesReceived(int sessionId, const void *data, unsigned int dataLen)
+void DistributeStreamTest::OnBytesReceived(int32_t sessionId, const void *data, unsigned int dataLen)
 {
-    int i = GetNumebrInStreamData(static_cast<const char*>(data));
+    int32_t i = GetNumebrInStreamData(static_cast<const char*>(data));
     if (i < 0) {
         return;
     }
@@ -189,11 +189,11 @@ void DistributeStreamTest::SetUpTestCase()
     // 获取在线设备
     NodeBasicInfo *onlineDevices = nullptr;
     int32_t onlineNum;
-    int ret = GetAllNodeDeviceInfo(TEST_PKG_NAME.c_str(), &onlineDevices, &onlineNum);
+    int32_t ret = GetAllNodeDeviceInfo(TEST_PKG_NAME.c_str(), &onlineDevices, &onlineNum);
     ASSERT_EQ(ret, 0);
     ASSERT_GT(onlineNum, 0);
     cout << "online devices num : " <<  onlineNum << endl;
-    for (int i = 0; i < onlineNum; i++) {
+    for (int32_t i = 0; i < onlineNum; i++) {
         networkIdSet_.insert(string(onlineDevices[i].networkId));
         cout << "online index " << i << " : " << string(onlineDevices[i].networkId) << endl;
     }
@@ -205,7 +205,7 @@ void DistributeStreamTest::SetUpTestCase()
 
 void DistributeStreamTest::TearDownTestCase()
 {
-    int ret;
+    int32_t ret;
     sessionSet_.clear();
 
     ret = sem_destroy(&localSem_);
@@ -214,7 +214,7 @@ void DistributeStreamTest::TearDownTestCase()
     Wsleep(WAIT_S, SLEEP_SEC);
 }
 
-void DistributeStreamTest::TestSendStream(int sendCnt)
+void DistributeStreamTest::TestSendStream(int32_t sendCnt)
 {
     if (sendCnt >= MAX_SEND_CNT) {
         return;
@@ -238,10 +238,10 @@ void DistributeStreamTest::TestSendStream(int sendCnt)
         }
 
         cout << "send stream, session id = " << session << endl;
-        for (int i = 0; i < sendCnt; i++) {
+        for (int32_t i = 0; i < sendCnt; i++) {
             startTime[i] = GetCurrent();
             SetNumebrInStreamData(sendData, i);
-            int ret = SendStream(session, &streamData, &extStreamData, &frame);
+            int32_t ret = SendStream(session, &streamData, &extStreamData, &frame);
             EXPECT_EQ(ret, 0);
 
             Wsleep(WAIT_MS, SLEEP_MS);
@@ -252,7 +252,7 @@ void DistributeStreamTest::TestSendStream(int sendCnt)
     sendData = nullptr;
 }
 
-void DistributeStreamTest::TestSendCommonStream(int sendCnt)
+void DistributeStreamTest::TestSendCommonStream(int32_t sendCnt)
 {
     char *sendIFrame = static_cast<char*>(malloc(I_FRAME_SIZE));
     if (sendIFrame == nullptr) {
@@ -288,11 +288,11 @@ void DistributeStreamTest::TestSendCommonStream(int sendCnt)
         while (sendCnt > 0) {
             startTime[0] = GetCurrent();
             SetNumebrInStreamData(sendIFrame, 0);
-            int ret = SendStream(session, &streamIData, &extStreamData, &iFrame);
+            int32_t ret = SendStream(session, &streamIData, &extStreamData, &iFrame);
             EXPECT_EQ(ret, 0);
 
             Wsleep(WAIT_MS, SLEEP_MS);
-            for (int i = 1; i < FPS; i++) {
+            for (int32_t i = 1; i < FPS; i++) {
                 startTime[i] = GetCurrent();
                 SetNumebrInStreamData(sendPFrame, i);
                 ret = SendStream(session, &streamPData, &extStreamData, &pFrame);
@@ -332,7 +332,7 @@ void DistributeStreamTest::OpenAllSession(bool isRawStream, bool isP2P,
 
         cout << "streamType === " << attribute.attr.streamAttr.streamType << endl;
 
-        int ret = OpenSession(mySessionName.c_str(), peerSessionName.c_str(), networkId.c_str(), "", &attribute);
+        int32_t ret = OpenSession(mySessionName.c_str(), peerSessionName.c_str(), networkId.c_str(), "", &attribute);
         ASSERT_GT(ret, 0);
 
         struct timespec timeout;
@@ -358,7 +358,7 @@ void DistributeStreamTest::OpenCtrlSession(const string &mySessionName, const st
         attribute.linkTypeNum = 0;
         attribute.linkType[0] = LINK_TYPE_WIFI_WLAN_5G;
 
-        int ret = OpenSession(mySessionName.c_str(), peerSessionName.c_str(), networkId.c_str(), "", &attribute);
+        int32_t ret = OpenSession(mySessionName.c_str(), peerSessionName.c_str(), networkId.c_str(), "", &attribute);
         ASSERT_GT(ret, 0);
 
         struct timespec timeout;
@@ -377,11 +377,11 @@ void DistributeStreamTest::OpenCtrlSession(const string &mySessionName, const st
 void DistributeStreamTest::SendCreateSessionServerMessage()
 {
     string msgbuf = "createSessionServer";
-    int ret = SendMessage(DistributeSystemTest::AGENT_NO::ONE, msgbuf, msgbuf.length(),
-        [&](const string &returnBuf, int rlen)->bool {
+    int32_t ret = SendMessage(DistributeSystemTest::AGENT_NO::ONE, msgbuf, msgbuf.length(),
+        [&](const string &returnBuf, int32_t rlen)->bool {
             cout << "receive reply message :" << returnBuf << endl;
             EXPECT_TRUE("ok" == returnBuf);
-            int ret = sem_post(&localSem_);
+            int32_t ret = sem_post(&localSem_);
             EXPECT_EQ(ret, 0);
             return true;
         });
@@ -403,11 +403,11 @@ void DistributeStreamTest::SendCreateSessionServerMessage()
 void DistributeStreamTest::SendRemoveSessionServerMessage()
 {
     string msgbuf = "removeSessionServer";
-    int ret = SendMessage(DistributeSystemTest::AGENT_NO::ONE, msgbuf, msgbuf.length(),
-        [&](const string &returnBuf, int rlen)->bool {
+    int32_t ret = SendMessage(DistributeSystemTest::AGENT_NO::ONE, msgbuf, msgbuf.length(),
+        [&](const string &returnBuf, int32_t rlen)->bool {
             cout << "receive reply message :" << returnBuf << endl;
             EXPECT_TRUE("ok" == returnBuf);
-            int ret = sem_post(&localSem_);
+            int32_t ret = sem_post(&localSem_);
             EXPECT_EQ(ret, 0);
             return true;
         });
@@ -427,7 +427,7 @@ void DistributeStreamTest::SendRemoveSessionServerMessage()
 }
 
 void DistributeStreamTest::P2pTransTest(bool isRawStream, bool isP2P,
-    int sendCnt, const string &mySessionName, const string &peerSessionName)
+    int32_t sendCnt, const string &mySessionName, const string &peerSessionName)
 {
     OpenAllSession(isRawStream, isP2P, mySessionName, peerSessionName);
     if (isRawStream) {
@@ -445,7 +445,7 @@ void DistributeStreamTest::P2pTransTest(bool isRawStream, bool isP2P,
 */
 HWTEST_F(DistributeStreamTest, stream_p2p_trans_test_001, TestSize.Level4)
 {
-    int ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
+    int32_t ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
     ASSERT_EQ(ret, 0);
     cout << "pkgName : " << TEST_PKG_NAME << ", sessionName : " << STREAM_SESSION_NAME << endl;
 
@@ -477,7 +477,7 @@ HWTEST_F(DistributeStreamTest, stream_p2p_trans_test_001, TestSize.Level4)
 */
 HWTEST_F(DistributeStreamTest, stream_p2p_trans_test_002, TestSize.Level4)
 {
-    int ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
+    int32_t ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
     ASSERT_EQ(ret, 0);
     cout << "pkgName : " << TEST_PKG_NAME << ", sessionName : " << STREAM_SESSION_NAME << endl;
 
@@ -509,7 +509,7 @@ HWTEST_F(DistributeStreamTest, stream_p2p_trans_test_002, TestSize.Level4)
 */
 HWTEST_F(DistributeStreamTest, stream_p2p_trans_test_003, TestSize.Level4)
 {
-    int ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
+    int32_t ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
     ASSERT_EQ(ret, 0);
     cout << "pkgName : " << TEST_PKG_NAME << ", sessionName : " << STREAM_SESSION_NAME << endl;
 
@@ -541,7 +541,7 @@ HWTEST_F(DistributeStreamTest, stream_p2p_trans_test_003, TestSize.Level4)
 */
 HWTEST_F(DistributeStreamTest, stream_p2p_trans_test_004, TestSize.Level4)
 {
-    int ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
+    int32_t ret = CreateSessionServer(TEST_PKG_NAME.c_str(), STREAM_SESSION_NAME.c_str(), &g_listener);
     ASSERT_EQ(ret, 0);
     cout << "pkgName : " << TEST_PKG_NAME << ", sessionName : " << STREAM_SESSION_NAME << endl;
 
@@ -566,7 +566,7 @@ HWTEST_F(DistributeStreamTest, stream_p2p_trans_test_004, TestSize.Level4)
 }
 }
 
-int main(int argc, char *argv[])
+int32_t main(int32_t argc, char *argv[])
 {
     OHOS::DistributeSystemTest::g_pDistributetestEnv =
         new OHOS::DistributeSystemTest::DistributeTestEnvironment("major.desc");

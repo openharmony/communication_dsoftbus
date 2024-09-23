@@ -15,7 +15,7 @@
 
 #include "comm_log.h"
 
-int OnStartDiscoveryWeak(const char *pkgName, const void *info)
+int32_t OnStartDiscoveryWeak(const char *pkgName, const void *info)
 {
     COMM_LOGI(COMM_INIT, "client OnStartDiscovery Strong pkgName=%{public}s", pkgName);
     (void)info;

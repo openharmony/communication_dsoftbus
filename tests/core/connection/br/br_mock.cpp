@@ -54,7 +54,7 @@ int32_t ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2(ConfigType type, un
 }
 
 extern "C" {
-int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     return GetConnectionBrInterface()->SoftBusGetBtMacAddr(mac);
 }
@@ -64,7 +64,7 @@ void LnnDCReportConnectException(const ConnectOption *option, int32_t errorCode)
     return GetConnectionBrInterface()->LnnDCReportConnectException(option, errorCode);
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetConnectionBrInterface()->SoftbusGetConfig(type, val, len);
 }
@@ -74,7 +74,7 @@ SppSocketDriver *InitSppSocketDriver()
     return GetConnectionBrInterface()->InitSppSocketDriver();
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     return GetConnectionBrInterface()->SoftBusAddBtStateListener(listener);
 }

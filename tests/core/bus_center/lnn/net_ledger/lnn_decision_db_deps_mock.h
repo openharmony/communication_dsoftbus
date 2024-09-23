@@ -55,7 +55,8 @@ public:
     virtual int32_t GetRecordNumByKey(DbContext *ctx, TableNameID id, uint8_t *data);
     virtual int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len);
     virtual int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len);
-    virtual int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t **replyInfo, int infoNum);
+    virtual int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data,
+                                     uint8_t **replyInfo, int32_t infoNum);
     virtual int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len);
     virtual int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen);
     virtual int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len);

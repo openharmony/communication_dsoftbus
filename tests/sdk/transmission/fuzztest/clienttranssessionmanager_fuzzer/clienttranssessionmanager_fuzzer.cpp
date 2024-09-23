@@ -21,15 +21,15 @@
 #include "softbus_trans_def.h"
 
 namespace OHOS {
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     return 0;
 }
-static void OnSessionClosed(int sessionId) {}
+static void OnSessionClosed(int32_t sessionId) {}
 
-static void OnBytesReceived(int sessionId, const void* data, unsigned int len) {}
+static void OnBytesReceived(int32_t sessionId, const void* data, unsigned int len) {}
 
-static void OnMessageReceived(int sessionId, const void* data, unsigned int len) {}
+static void OnMessageReceived(int32_t sessionId, const void* data, unsigned int len) {}
 
 static ISessionListener g_sessionlistener = {
     .OnSessionOpened = OnSessionOpened,
@@ -171,7 +171,7 @@ void ClientEnableSessionByChannelIdTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::ClientAddNewSessionTest(data, size);
     OHOS::ClientAddAuthSessionTest(data, size);

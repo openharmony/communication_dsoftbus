@@ -45,9 +45,9 @@ const char *g_pkgName = "com.objectstore.foundation";
 const char *g_sessionName = "objectstore";
 const char *g_testData = "{\"data\":\"open auth session test!!!\"}";
 bool g_state = false;
-int g_sessionId = -1;
-int g_testCount = 0;
-int g_testTimes = 0;
+int32_t g_sessionId = -1;
+int32_t g_testCount = 0;
+int32_t g_testTimes = 0;
 static void Wait(void);
 static void Start(void);
 
@@ -110,7 +110,7 @@ static PublishInfo g_pInfo = {
     .dataLen = sizeof("capdata4")
 };
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("[test]session opened,sesison id = %d\r\n", sessionId);
     EXPECT_TRUE(g_sessionId == sessionId);
@@ -120,7 +120,7 @@ static int OnSessionOpened(int sessionId, int result)
     return 0;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("[test]session closed, session id = %d\r\n", sessionId);
     EXPECT_TRUE(g_testCount == TEST_DATARECEIVE);
@@ -128,7 +128,7 @@ static void OnSessionClosed(int sessionId)
     Start();
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("[test]session bytes received, session id = %d data =%s\r\n", sessionId, data);
     if (g_testWay == PASSIVE_OPENAUTHSESSION_WAY) {
@@ -139,7 +139,7 @@ static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
     Start();
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("[test]session msg received, session id = %d data =%s\r\n", sessionId, data);
 }
@@ -232,7 +232,7 @@ HWTEST_F(BleAuthChannelTest, ProcessActive001, TestSize.Level0)
     ret = TestCreateSessionServer();
     EXPECT_TRUE(ret == 0);
     EXPECT_TRUE(g_testCount == TEST_DEVICEFOUND);
-    for (int i = 0; i < g_testTimes; i++) {
+    for (int32_t i = 0; i < g_testTimes; i++) {
         g_testCount = TEST_DEVICEFOUND;
         g_sessionId = TestOpenSession();
         EXPECT_TRUE(g_sessionId >= 0);
@@ -269,7 +269,7 @@ HWTEST_F(BleAuthChannelTest, ProcessPassive001, TestSize.Level0)
     int32_t ret;
     ret = TestCreateSessionServer();
     EXPECT_TRUE(ret == 0);
-    for (int i = 0; i < g_testTimes; i++) {
+    for (int32_t i = 0; i < g_testTimes; i++) {
         g_testCount = TEST_DEVICEFOUND;
         printf("[test][times:%d],Waiting for session opening...\r\n", i);
         Wait();

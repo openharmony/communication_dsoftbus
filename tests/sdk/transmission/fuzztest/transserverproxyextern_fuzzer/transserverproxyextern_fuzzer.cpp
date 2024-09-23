@@ -208,8 +208,8 @@ void ServerIpcRippleStatsTest(const uint8_t *data, size_t size)
 
 void ServerIpcGrantPermissionTest(const uint8_t *data, size_t size)
 {
-    int uid = *(reinterpret_cast<const int *>(data));
-    int pid = *(reinterpret_cast<const int *>(data));
+    int32_t uid = *(reinterpret_cast<const int32_t *>(data));
+    int32_t pid = *(reinterpret_cast<const int32_t *>(data));
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(data));
 
     (void)ServerIpcGrantPermission(uid, pid, sessionName);
@@ -240,7 +240,7 @@ void ServerIpcEvaluateQosTest(const uint8_t *data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
         return 0;

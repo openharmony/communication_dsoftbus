@@ -57,7 +57,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
 
-    int tmp = TEST_INVALID;
+    int32_t tmp = TEST_INVALID;
 
     void *addr = nullptr;
     uint32_t addrTypeLen = TEST_INVALID;

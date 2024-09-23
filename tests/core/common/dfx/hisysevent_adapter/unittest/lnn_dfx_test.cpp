@@ -72,7 +72,7 @@ void LnnDfxTest::TearDown(void)
  */
 HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusRecordDiscoveryResult_001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     ret = SoftBusRecordDiscoveryResult(START_DISCOVERY, NULL);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusRecordDiscoveryResult(SEND_BROADCAST, NULL);
@@ -111,7 +111,7 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusRecordDiscoveryResult_001, TestSize.Level
 
 HWTEST_F(LnnDfxTest, SoftBusRecordDevOnlineDurResult001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     ret = SoftBusRecordDevOnlineDurResult(11);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusRecordDevOnlineDurResult(31);
@@ -138,7 +138,7 @@ HWTEST_F(LnnDfxTest, SoftBusRecordDevOnlineDurResult001, TestSize.Level0)
 
 HWTEST_F(LnnDfxTest, SoftBusRecordBusCenterResult001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     ret = SoftBusRecordBusCenterResult(SOFTBUS_HISYSEVT_LINK_TYPE_BR, 900);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusRecordBusCenterResult(SOFTBUS_HISYSEVT_LINK_TYPE_BLE, 1100);
@@ -165,7 +165,7 @@ HWTEST_F(LnnDfxTest, SoftBusRecordBusCenterResult001, TestSize.Level0)
 
 HWTEST_F(LnnDfxTest, SoftBusRecordAuthResult001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_BR, 0, 2100, AUTH_STAGE_BUTT);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_BLE, 1, 2100, AUTH_CONNECT_STAGE);
@@ -194,7 +194,7 @@ HWTEST_F(LnnDfxTest, SoftBusRecordAuthResult001, TestSize.Level0)
 
 HWTEST_F(LnnDfxTest, SoftBusReportBusCenterFaultEvt001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     SoftBusFaultEvtInfo info = {0};
     info.moduleType = MODULE_TYPE_DISCOVERY;
     info.linkType = SOFTBUS_HISYSEVT_LINK_TYPE_BLE;
@@ -231,7 +231,7 @@ HWTEST_F(LnnDfxTest, SoftBusReportBusCenterFaultEvt001, TestSize.Level0)
 
 HWTEST_F(LnnDfxTest, SoftBusReportDevOnlineEvt001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     OnlineDeviceInfo devInfo = {0};
     devInfo.onlineDevNum = 10;
     devInfo.btOnlineDevNum = 10;
@@ -261,7 +261,7 @@ HWTEST_F(LnnDfxTest, SoftBusReportDevOnlineEvt001, TestSize.Level0)
 
 HWTEST_F(LnnDfxTest, InitBusCenterDfx001, TestSize.Level0)
 {
-    int ret = InitBusCenterDfx();
+    int32_t ret = InitBusCenterDfx();
     EXPECT_EQ(SOFTBUS_OK, ret);
     DeinitBusCenterDfx();
 }

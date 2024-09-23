@@ -304,16 +304,17 @@ static int32_t HbHandleLeaveLnn(void)
 static void HbDelaySetNormalScanParam(void *para)
 {
     (void)para;
-
-    if (g_hbConditionState.screenState == SOFTBUS_SCREEN_OFF) {
-        LNN_LOGD(LNN_HEART_BEAT, "screen off, no need handle");
-        return;
+    LnnHeartbeatMediumParam param;
+    (void)memset_s(&param, sizeof(LnnHeartbeatMediumParam), 0, sizeof(LnnHeartbeatMediumParam));
+    if (g_hbConditionState.screenState == SOFTBUS_SCREEN_OFF && !LnnIsLocalSupportBurstFeature()) {
+        param.type = HEARTBEAT_TYPE_BLE_V1;
+        param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
+        param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
+    } else {
+        param.type = HEARTBEAT_TYPE_BLE_V1;
+        param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
+        param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
     }
-    LnnHeartbeatMediumParam param = {
-        .type = HEARTBEAT_TYPE_BLE_V1,
-        .info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10,
-        .info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10,
-    };
     LNN_LOGI(LNN_HEART_BEAT, "scanInterval=%{public}hu, scanWindow=%{public}hu", param.info.ble.scanInterval,
         param.info.ble.scanWindow);
     if (LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK) {
@@ -562,6 +563,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     nowTime = time.sec * HB_TIME_FACTOR + time.usec / HB_TIME_FACTOR;
     HbScreenOnOnceTryCloudSync();
     if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON && oldstate != SOFTBUS_SCREEN_ON) {
+        (void)LnnUpdateLocalScreenStatus(true);
         HbScreenOnChangeEventHandler(nowTime);
         return;
     }
@@ -569,10 +571,11 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_OFF");
         g_lastScreenOffTime = nowTime;
         (void)LnnUpdateLocalScreenStatus(false);
-        if (LnnStartHbByTypeAndStrategy(
-            HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed");
-            return;
+        if (!LnnIsLocalSupportBurstFeature()) {
+            if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed");
+                return;
+            }
         }
         if (LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "ctrl disable ble heartbeat failed");
@@ -752,18 +755,24 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusOOBEState state = (SoftBusOOBEState)event->status;
+    LNN_LOGI(
+        LNN_HEART_BEAT, "HB handle oobe state=%{public}d, g_state=%{public}d", state, g_hbConditionState.OOBEState);
     switch (state) {
         case SOFTBUS_OOBE_RUNNING:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_OOBE_RUNNING");
-            g_hbConditionState.OOBEState = state;
-            HbConditionChanged(false);
+            if (g_hbConditionState.OOBEState != SOFTBUS_FACK_OOBE_END) {
+                g_hbConditionState.OOBEState = state;
+                HbConditionChanged(false);
+            }
             break;
-        case SOFTBUS_OOBE_END:
-            __attribute__((fallthrough));
         case SOFTBUS_FACK_OOBE_END:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle oobe state=%{public}d", state);
             if (g_hbConditionState.OOBEState != SOFTBUS_OOBE_END &&
                 g_hbConditionState.OOBEState != SOFTBUS_FACK_OOBE_END) {
+                g_hbConditionState.OOBEState = state;
+                HbConditionChanged(false);
+            }
+            break;
+        case SOFTBUS_OOBE_END:
+            if (g_hbConditionState.OOBEState != SOFTBUS_OOBE_END) {
                 g_hbConditionState.OOBEState = state;
                 HbConditionChanged(false);
             }

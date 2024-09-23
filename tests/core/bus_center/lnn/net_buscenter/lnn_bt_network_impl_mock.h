@@ -33,8 +33,8 @@ public:
     virtual ~LnnBtNetworkImplInterface() {};
     virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
-    virtual int SoftBusGetBtState(void) = 0;
-    virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
+    virtual int32_t SoftBusGetBtState(void) = 0;
+    virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
     virtual int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen) = 0;
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type) = 0;
@@ -49,8 +49,8 @@ public:
     ~LnnBtNetworkImplInterfaceMock() override;
     MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t (const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t (const bool *, uint32_t));
-    MOCK_METHOD0(SoftBusGetBtState, int (void));
-    MOCK_METHOD1(SoftBusGetBtMacAddr, int (SoftBusBtAddr *));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
+    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t (SoftBusBtAddr *));
     MOCK_METHOD4(ConvertBtMacToStr, int32_t (char *, uint32_t, const uint8_t *, uint32_t));
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));
     MOCK_METHOD2(LnnGetNetIfTypeByName, int32_t (const char *, LnnNetIfType *));

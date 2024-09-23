@@ -140,7 +140,7 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
 HWTEST_F(AuthHichainTest, ON_REQUEST_TEST_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    int operationCode = 0;
+    int32_t operationCode = 0;
     const char *reqParams = "testdata";
 
     char *msgStr = OnRequest(authSeq, operationCode, reqParams);
