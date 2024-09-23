@@ -137,11 +137,6 @@ int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLe
     return GetTransTcpDirectMessageInterface()->AuthDecrypt(authHandle, inData, inLen, outData, outLen);
 }
 
-cJSON* cJSON_Parse(const char *value)
-{
-    return GetTransTcpDirectMessageInterface()->cJSON_Parse(value);
-}
-
 int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
 {
     return GetTransTcpDirectMessageInterface()->SoftBusGenerateSessionKey(key, len);

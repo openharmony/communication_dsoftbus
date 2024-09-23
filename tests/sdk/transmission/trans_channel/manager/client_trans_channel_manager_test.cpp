@@ -139,7 +139,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, Test
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH);
-    EXPECT_EQ(SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 
     ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
@@ -169,7 +169,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, Te
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH);
-    EXPECT_EQ(SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 
     ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
