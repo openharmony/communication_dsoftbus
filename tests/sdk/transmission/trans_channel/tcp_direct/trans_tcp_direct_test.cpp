@@ -365,7 +365,7 @@ HWTEST_F(TransTcpDirectTest, TransClientGetTdcDataBufByChannelTest001, TestSize.
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransClientGetTdcDataBufByChannel(channelId, &fd, &len);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, ret);
 
     ret = TransDataListInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
