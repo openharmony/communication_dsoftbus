@@ -26,12 +26,12 @@ static int32_t g_advId = 0;
 static int32_t g_listenerId = 0;
 static void ActionOfSoftbusBleAdapterInit(void);
 
-int ActionOfSoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t ActionOfSoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     return SOFTBUS_OK;
 }
 
-int ActionOfSoftBusRemoveBtStateListener(int listenerId)
+int32_t ActionOfSoftBusRemoveBtStateListener(int32_t listenerId)
 {
     return SOFTBUS_OK;
 }
@@ -69,12 +69,12 @@ static int32_t MockDeInit(void)
     return SOFTBUS_OK;
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     return ManagerMock::GetMock()->SoftBusAddBtStateListener(listener);
 }
 
-int SoftBusRemoveBtStateListener(int listenerId)
+int32_t SoftBusRemoveBtStateListener(int32_t listenerId)
 {
     return ManagerMock::GetMock()->SoftBusRemoveBtStateListener(listenerId);
 }

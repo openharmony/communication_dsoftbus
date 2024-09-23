@@ -53,7 +53,7 @@ public:
     static StRecordCtx advDisableCtx;
     static StRecordCtx advDataCtx;
     static StRecordCtx advUpdateCtx;
-    static int btInnerAdvId;
+    static int32_t btInnerAdvId;
 
     static void SetUpTestCase(void);
 };
@@ -64,7 +64,7 @@ StRecordCtx SoftbusBleGattTest::advEnableCtx("AdvEnableCallback");
 StRecordCtx SoftbusBleGattTest::advDisableCtx("AdvDisableCallback");
 StRecordCtx SoftbusBleGattTest::advDataCtx("AdvDataCallback");
 StRecordCtx SoftbusBleGattTest::advUpdateCtx("AdvUpdateCallback");
-int SoftbusBleGattTest::btInnerAdvId = -1;
+int32_t SoftbusBleGattTest::btInnerAdvId = -1;
 
 void SoftbusBleGattTest::SetUpTestCase()
 {
@@ -89,22 +89,22 @@ static SoftbusScanCallback *GetStubScanListener()
     return &listener;
 }
 
-static void StubAdvEnableCallback(int advId, int status)
+static void StubAdvEnableCallback(int32_t advId, int32_t status)
 {
     SoftbusBleGattTest::advEnableCtx.Update(advId, status);
 }
 
-static void StubAdvDisableCallback(int advId, int status)
+static void StubAdvDisableCallback(int32_t advId, int32_t status)
 {
     SoftbusBleGattTest::advDisableCtx.Update(advId, status);
 }
 
-static void StubAdvUpdateCallback(int advId, int status)
+static void StubAdvUpdateCallback(int32_t advId, int32_t status)
 {
     SoftbusBleGattTest::advUpdateCtx.Update(advId, status);
 }
 
-static void StubAdvDataCallback(int advId, int status)
+static void StubAdvDataCallback(int32_t advId, int32_t status)
 {
     SoftbusBleGattTest::advDataCtx.Update(advId, status);
 }
@@ -120,7 +120,7 @@ SoftbusBroadcastCallback *GetStubAdvCallback()
     return &callback;
 }
 
-static testing::AssertionResult PrepareScanListener(int *scannerId)
+static testing::AssertionResult PrepareScanListener(int32_t *scannerId)
 {
     int32_t ret = MockBluetooth::interface->RegisterScanListener(scannerId, GetStubScanListener());
     if (ret != SOFTBUS_OK) {
@@ -135,7 +135,7 @@ static testing::AssertionResult PrepareScanListener(int *scannerId)
 static SoftBusBcScanFilter *CreateScanFilter()
 {
     unsigned char serviceData[] = {0xE, 0xE, 0xF, 0xF, 0x04, 0x05};
-    int len = sizeof(serviceData);
+    int32_t len = sizeof(serviceData);
 
     SoftBusBcScanFilter *filter = static_cast<SoftBusBcScanFilter *>(SoftBusCalloc(sizeof(SoftBusBcScanFilter)));
     unsigned char *serviceDataPtr = static_cast<unsigned char *>(SoftBusCalloc(len));
@@ -1122,7 +1122,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetLpParam, TestSize.Level1)
 HWTEST_F(SoftbusBleGattTest, RegisterScanListener, TestSize.Level3)
 {
     MockBluetooth mocker;
-    int scannerId = -1;
+    int32_t scannerId = -1;
     ASSERT_EQ(MockBluetooth::interface->RegisterScanListener(&scannerId, nullptr), SOFTBUS_INVALID_PARAM);
     int32_t scanListerIds[GATT_SCAN_MAX_NUM] = {};
     int32_t ret = SOFTBUS_ERR;
@@ -1148,7 +1148,7 @@ HWTEST_F(SoftbusBleGattTest, RegisterScanListener, TestSize.Level3)
 HWTEST_F(SoftbusBleGattTest, UnRegisterScanListener, TestSize.Level3)
 {
     MockBluetooth mocker;
-    int scannerId = -1;
+    int32_t scannerId = -1;
     auto result = PrepareScanListener(&scannerId);
 
     ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(-1), SOFTBUS_INVALID_PARAM);
@@ -1165,7 +1165,7 @@ HWTEST_F(SoftbusBleGattTest, UnRegisterScanListener, TestSize.Level3)
 HWTEST_F(SoftbusBleGattTest, ScanLifecycle, TestSize.Level3)
 {
     MockBluetooth mocker;
-    int scannerId = -1;
+    int32_t scannerId = -1;
     auto result = PrepareScanListener(&scannerId);
 
     auto filter = CreateScanFilter();
@@ -1197,7 +1197,7 @@ HWTEST_F(SoftbusBleGattTest, ScanLifecycle, TestSize.Level3)
 HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
 {
     MockBluetooth mocker;
-    int scannerId = -1;
+    int32_t scannerId = -1;
     auto result = PrepareScanListener(&scannerId);
 
     auto filter = CreateScanFilter();
@@ -1252,9 +1252,9 @@ HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
  */
 HWTEST_F(SoftbusBleGattTest, RegisterBroadcaster, TestSize.Level3)
 {
-    int advId = -1;
+    int32_t advId = -1;
     ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advId, nullptr), SOFTBUS_INVALID_PARAM);
-    int advIds[GATT_ADV_MAX_NUM];
+    int32_t advIds[GATT_ADV_MAX_NUM];
     for (size_t i = 0; i < GATT_ADV_MAX_NUM; i++) {
         ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advIds[i], GetStubAdvCallback()), SOFTBUS_LOCK_ERR);
     }
@@ -1282,7 +1282,7 @@ void ScanResultCtx::Reset()
     scanResult.data.rspData.payload = nullptr;
 }
 
-bool ScanResultCtx::Update(int id, const SoftBusBcScanResult *scanResult)
+bool ScanResultCtx::Update(int32_t id, const SoftBusBcScanResult *scanResult)
 {
     if (!RecordCtx::Update(id)) {
         return false;
@@ -1304,7 +1304,7 @@ bool ScanResultCtx::Update(int id, const SoftBusBcScanResult *scanResult)
     return true;
 }
 
-testing::AssertionResult ScanResultCtx::Expect(int id, const SoftBusBcScanResult *scanResultParam)
+testing::AssertionResult ScanResultCtx::Expect(int32_t id, const SoftBusBcScanResult *scanResultParam)
 {
     auto result = RecordCtx::Expect(id);
     if (!result) {

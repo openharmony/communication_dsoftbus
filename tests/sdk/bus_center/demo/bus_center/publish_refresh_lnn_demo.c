@@ -27,9 +27,9 @@
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 
-static int g_publishId = 0;
-static int g_refreshId = 0;
-static void OnPublishDone(int publishId, PublishResult reason)
+static int32_t g_publishId = 0;
+static int32_t g_refreshId = 0;
+static void OnPublishDone(int32_t publishId, PublishResult reason)
 {
     printf("[demo]OnPublishDone publishId = %d, publish result = %d", publishId, reason);
     if (reason == 0) {
@@ -81,14 +81,14 @@ static IRefreshCallback g_refreshCB = {
     .OnDiscoverResult = OnDiscoverResultTest
 };
 
-int main(void)
+int32_t main(void)
 {
     const char *pkgNameA = "pkgNameA.demo";
     /*
      * 1. Device A calls PublishLNN() to publishes a specified service,
      * it will returns 0 if the service is successfully published.
      */
-    int ret = PublishLNN(pkgNameA, &g_pubInfo, &g_publishCB);
+    int32_t ret = PublishLNN(pkgNameA, &g_pubInfo, &g_publishCB);
     if (ret == 0) {
         printf("[demo]PublishLNN sucess\n");
     } else {
@@ -111,7 +111,7 @@ int main(void)
     return ret;
 }
 
-int main(void)
+int32_t main(void)
 {
     const char *pkgNameB = "pkgNameB.demo";
 
@@ -119,7 +119,7 @@ int main(void)
      * 1. Device B calls RefreshLNN() to Subscribes to a specified service,
      * it will returns 0 if the service subscription is successful.
      */
-    int ret = RefreshLNN(pkgNameB, &g_subInfo, &g_refreshCB);
+    int32_t ret = RefreshLNN(pkgNameB, &g_subInfo, &g_refreshCB);
     if (ret == 0) {
         printf("[demo]RefreshLNN sucess\n");
     } else {

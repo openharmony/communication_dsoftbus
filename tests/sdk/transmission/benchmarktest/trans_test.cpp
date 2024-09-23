@@ -58,17 +58,17 @@ static void AddPermission()
     }
 }
 
-int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     return 0;
 }
 
-int OnSendFileFinished(int sessionId, const char *firstFile)
+int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
 {
     return 0;
 }
 
-void OnFileTransError(int sessionId)
+void OnFileTransError(int32_t sessionId)
 {}
 
 static IFileSendListener g_fileSendListener = {
@@ -77,15 +77,15 @@ static IFileSendListener g_fileSendListener = {
     .OnFileTransError = OnFileTransError,
 };
 
-int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     return 0;
 }
 
-void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+void OnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
 {}
 
-int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnReceiveFileProcess(int32_t sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     return 0;
 }
@@ -123,18 +123,18 @@ void TransTest::SetUpTestCase(void)
 void TransTest::TearDownTestCase(void)
 {}
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     return 0;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {}
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {}
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {}
 
 static ISessionListener g_sessionlistener = {
@@ -154,7 +154,7 @@ static ISessionListener g_sessionlistener = {
 BENCHMARK_F(TransTest, CreateSessionServerTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+        int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
         if (ret != 0) {
             state.SkipWithError("CreateSessionServerTestCase failed.");
         }
@@ -175,7 +175,7 @@ BENCHMARK_F(TransTest, RemoveSessionServerTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
         state.PauseTiming();
-        int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+        int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
         state.ResumeTiming();
         ret = RemoveSessionServer(g_pkgName, g_sessionName);
         if (ret != 0) {
@@ -195,7 +195,7 @@ BENCHMARK_F(TransTest, SetFileReceiveListenerTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
         state.PauseTiming();
-        int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+        int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
         state.ResumeTiming();
         ret = SetFileReceiveListener(g_pkgName, g_sessionName,  &g_fileRecvListener, RECV_ROOT_PATH);
         if (ret != 0) {
@@ -217,7 +217,7 @@ BENCHMARK_F(TransTest, SetFileSendListenerTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
         state.PauseTiming();
-        int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+        int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
         state.ResumeTiming();
         ret = SetFileSendListener(g_pkgName, g_sessionName,  &g_fileSendListener);
         if (ret != 0) {

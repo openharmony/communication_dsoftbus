@@ -56,7 +56,7 @@ void TransQosTest::TearDownTestCase(void)
  */
 HWTEST_F(TransQosTest, QosReportTest001, TestSize.Level0)
 {
-    int ret;
+    int32_t ret;
     ret = QosReport(G_INVALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE);
     EXPECT_NE(ret, SOFTBUS_OK);
 

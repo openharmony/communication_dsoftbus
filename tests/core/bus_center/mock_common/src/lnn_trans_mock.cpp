@@ -39,7 +39,7 @@ static LnnTransInterfaceMock *GetTransInterface()
 }
 
 extern "C" {
-int TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
+int32_t TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
 {
     return GetTransInterface()->TransRegisterNetworkingChannelListener(listener);
 }

@@ -22,7 +22,7 @@
 namespace OHOS {
 void SendBytesTest(const uint8_t* data, size_t size)
 {
-    int sessionId = -1;
+    int32_t sessionId = -1;
     if ((data == nullptr) || (size == 0)) {
         return;
     }
@@ -32,7 +32,7 @@ void SendBytesTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::SendBytesTest(data, size);
 

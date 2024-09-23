@@ -116,7 +116,7 @@ int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
     return GetDecisionDbDepsInterface()->UpdateDbPassword(ctx, password, len);
 }
 
-int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t **replyInfo, int infoNum)
+int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t **replyInfo, int32_t infoNum)
 {
     return GetDecisionDbDepsInterface()->QueryRecordByKey(ctx, id, data, replyInfo, infoNum);
 }

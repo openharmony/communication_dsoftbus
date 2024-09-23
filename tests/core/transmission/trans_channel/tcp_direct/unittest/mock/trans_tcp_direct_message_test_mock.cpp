@@ -92,12 +92,12 @@ int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)
     return GetTransTcpDirectMessageInterface()->UnpackReplyErrCode(msg, errCode);
 }
 
-int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
+int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
 {
     return GetTransTcpDirectMessageInterface()->UnpackReply(msg, appInfo, fastDataSize);
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetTransTcpDirectMessageInterface()->SoftbusGetConfig(type, val, len);
 }
@@ -209,7 +209,7 @@ int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *inpu
     return GetTransTcpDirectMessageInterface()->SoftBusEncryptData(cipherKey, input, inLen, encryptData, encryptLen);
 }
 
-int32_t SetIpTos(int fd, uint32_t tos)
+int32_t SetIpTos(int32_t fd, uint32_t tos)
 {
     return GetTransTcpDirectMessageInterface()->SetIpTos(fd, tos);
 }

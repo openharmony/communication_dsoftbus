@@ -25,8 +25,8 @@ using namespace testing::ext;
 namespace OHOS {
 using Communication::SoftBus::ISessionService;
 
-int g_permUid = 0;
-int g_permPid = 0;
+int32_t g_permUid = 0;
+int32_t g_permPid = 0;
 std::string g_permSessionName;
 
 class TransDynamicPermissionTest : public testing::Test {
@@ -69,7 +69,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest001, TestSize.Level0)
     std::shared_ptr<ISessionService> softbusManager = ISessionService::GetInstance();
     ASSERT_NE(softbusManager, nullptr);
 
-    int ret = softbusManager->GrantPermission(g_permUid, g_permPid, g_permSessionName);
+    int32_t ret = softbusManager->GrantPermission(g_permUid, g_permPid, g_permSessionName);
     ASSERT_NE(ret, SOFTBUS_OK);
 }
 
@@ -84,7 +84,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest002, TestSize.Level0)
     std::shared_ptr<ISessionService> softbusManager = ISessionService::GetInstance();
     ASSERT_NE(softbusManager, nullptr);
 
-    int ret = softbusManager->RemovePermission(g_permSessionName);
+    int32_t ret = softbusManager->RemovePermission(g_permSessionName);
     ASSERT_NE(ret, SOFTBUS_OK);
 }
 
@@ -96,7 +96,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest002, TestSize.Level0)
  */
 HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest003, TestSize.Level0)
 {
-    int ret = AddDynamicPermission(g_permUid, g_permPid, g_permSessionName.c_str());
+    int32_t ret = AddDynamicPermission(g_permUid, g_permPid, g_permSessionName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -108,7 +108,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest003, TestSize.Level0)
  */
 HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest004, TestSize.Level0)
 {
-    int ret = DeleteDynamicPermission(g_permSessionName.c_str());
+    int32_t ret = DeleteDynamicPermission(g_permSessionName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -120,16 +120,16 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest004, TestSize.Level0)
  */
 HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level0)
 {
-    int testPid = 10000;
-    int ret = 0;
-    int expectRet = SOFTBUS_OK;
-    int testNum = 99;
+    int32_t testPid = 10000;
+    int32_t ret = 0;
+    int32_t expectRet = SOFTBUS_OK;
+    int32_t testNum = 99;
 
     std::string sessionName = "DBinder" + std::to_string(g_permUid) + std::string("_") + std::to_string(g_permPid);
     ret = AddDynamicPermission(g_permUid, g_permPid, sessionName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    for (int i = 0; i < testNum; i++) {
+    for (int32_t i = 0; i < testNum; i++) {
         sessionName = "DBinder" + std::to_string(g_permUid) + std::string("_") + std::to_string(testPid);
         ret = AddDynamicPermission(g_permUid, testPid, sessionName.c_str());
         ASSERT_EQ(ret, expectRet);
@@ -137,7 +137,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level0)
     }
 
     expectRet = SOFTBUS_NO_ENOUGH_DATA;
-    for (int i = 0; i < testNum; i++) {
+    for (int32_t i = 0; i < testNum; i++) {
         sessionName = "DBinder" + std::to_string(g_permUid) + std::string("_") + std::to_string(testPid);
         ret = AddDynamicPermission(g_permUid, testPid, sessionName.c_str());
         ASSERT_EQ(ret, expectRet);
@@ -154,7 +154,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level0)
     ret = DeleteDynamicPermission(sessionName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
     testPid--;
-    for (int i = 0; i < testNum; i++) {
+    for (int32_t i = 0; i < testNum; i++) {
         sessionName = "DBinder" + std::to_string(g_permUid) + std::string("_") + std::to_string(testPid);
         testPid--;
         ret = DeleteDynamicPermission(sessionName.c_str());
@@ -170,11 +170,11 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level0)
  */
 HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest006, TestSize.Level0)
 {
-    int testPid = 10000;
-    int ret = 0;
-    int testNum = 100;
+    int32_t testPid = 10000;
+    int32_t ret = 0;
+    int32_t testNum = 100;
 
-    for (int i = 0; i < testNum; i++) {
+    for (int32_t i = 0; i < testNum; i++) {
         std::string sessionName = "DBinder" + std::to_string(g_permUid) + std::string("_") + std::to_string(testPid);
         ret = CheckTransPermission(g_permUid, testPid, "DBinderBus", sessionName.c_str(), ACTION_OPEN);
         ASSERT_NE(ret, SOFTBUS_OK);
@@ -189,7 +189,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest006, TestSize.Level0)
         testPid++;
     }
     testPid--;
-    for (int i = 0; i < testNum; i++) {
+    for (int32_t i = 0; i < testNum; i++) {
         std::string sessionName = "DBinder" + std::to_string(g_permUid) + std::string("_") + std::to_string(testPid);
         ret = DeleteDynamicPermission(sessionName.c_str());
         ASSERT_EQ(ret, SOFTBUS_OK);
@@ -209,12 +209,12 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest006, TestSize.Level0)
  */
 HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest007, TestSize.Level0)
 {
-    int testPid = 17258;
-    int ret = 0;
-    int testNum = 100;
+    int32_t testPid = 17258;
+    int32_t ret = 0;
+    int32_t testNum = 100;
     std::string sessionName = "DBinder" + std::to_string(g_permUid) + std::string("_") + std::to_string(testPid);
 
-    for (int i = 0; i < testNum; i++) {
+    for (int32_t i = 0; i < testNum; i++) {
         ret = CheckTransPermission(g_permUid, testPid, "DBinderBus", sessionName.c_str(), ACTION_OPEN);
         ASSERT_NE(ret, SOFTBUS_OK);
         ret = AddDynamicPermission(g_permUid, testPid, sessionName.c_str());
