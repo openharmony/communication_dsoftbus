@@ -301,7 +301,6 @@ static int32_t UnpackLogToStr(DeviceInfo *dev, char *msg, uint32_t size)
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "deviceId: %s ", anonyDevId);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "devicename: %s, ", dev->deviceName);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "type: %u, ", dev->deviceType);
-    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "hicomversion: %s, ", dev->version);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "mode: %s, ", GetModeTypeStr(dev->mode));
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size,
         "bType: %s, ", GetBusinessTypeStr(dev->businessType));
