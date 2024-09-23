@@ -26,7 +26,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 
-int main(void)
+int32_t main(void)
 {
     const char *pkgName = "pkgName.demo";
     const char *callerId = "1";

@@ -54,8 +54,8 @@ sptr<RemoteObjectMock> RemoteObjectMock::Get()
     return instance_;
 }
 
-bool RemoteObjectMock::GetResult(uint32_t code, const DeviceInfo *deviceInfo, int publishId, int subscribeId,
-                                 int reason)
+bool RemoteObjectMock::GetResult(uint32_t code, const DeviceInfo *deviceInfo, int32_t publishId, int32_t subscribeId,
+                                 int32_t reason)
 {
     if (descriptor_ != ISoftBusClient::GetDescriptor()) {
         DISC_LOGE(DISC_TEST, "descriptor mismatch");

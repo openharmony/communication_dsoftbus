@@ -18,7 +18,7 @@
 #include <string>
 #include "anonymizer.h"
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     std::string str(reinterpret_cast<const char *>(data), size);
 

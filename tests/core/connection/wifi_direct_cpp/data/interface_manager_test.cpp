@@ -37,19 +37,19 @@ public:
 
 static bool g_enabledFlag = false;
 
-static int updateInterfaceInfoTrue(InterfaceInfo &info)
+static int32_t updateInterfaceInfoTrue(InterfaceInfo &info)
 {
     info.SetIsEnable(true);
     return SOFTBUS_OK;
 }
 
-static int updateInterfaceInfoFalse(InterfaceInfo &info)
+static int32_t updateInterfaceInfoFalse(InterfaceInfo &info)
 {
     info.SetIsEnable(false);
     return SOFTBUS_OK;
 }
 
-static int readInterfaceInfo(InterfaceInfo &info)
+static int32_t readInterfaceInfo(InterfaceInfo &info)
 {
     g_enabledFlag = info.IsEnable();
     return SOFTBUS_OK;
@@ -72,12 +72,12 @@ HWTEST_F(InterfaceManagerTest, InitInterfaceManagerTest, TestSize.Level1)
     interfaceManager.InitInterface(InterfaceInfo::InterfaceType::HML);
     interfaceManager.InitInterface(InterfaceInfo::InterfaceType::P2P);
     interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::HML, updateInterfaceInfoTrue);
-    int hmlResult = interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::HML, readInterfaceInfo);
+    int32_t hmlResult = interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::HML, readInterfaceInfo);
     EXPECT_EQ(hmlResult, SOFTBUS_OK);
     EXPECT_EQ(g_enabledFlag, true);
 
     interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::P2P, updateInterfaceInfoFalse);
-    int p2pResult = interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::P2P, readInterfaceInfo);
+    int32_t p2pResult = interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::P2P, readInterfaceInfo);
     EXPECT_EQ(p2pResult, SOFTBUS_OK);
     EXPECT_EQ(g_enabledFlag, false);
 }

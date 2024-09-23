@@ -29,7 +29,7 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        int result = SOFTBUS_OK;
+        int32_t result = SOFTBUS_OK;
 
         InnerOnSessionOpened(size, result);
     }
@@ -48,7 +48,7 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        int sessionId = SESSION_ID;
+        int32_t sessionId = SESSION_ID;
 
         InnerOnBytesReceived(sessionId, data, size);
     }
@@ -58,14 +58,14 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        int sessionId = SESSION_ID;
+        int32_t sessionId = SESSION_ID;
 
         InnerOnMessageReceived(sessionId, data, size);
     }
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::InnerOnSessionOpenedTest(data, size);

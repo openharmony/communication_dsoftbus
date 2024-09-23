@@ -468,7 +468,7 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
     return GetNetLedgerInterface()->LnnSetLocalNum64Info(key, info);
 }
 
-int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
+int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
 {
     return GetNetLedgerInterface()->LnnGetNodeKeyInfo(networkId, key, info, infoLen);
 }

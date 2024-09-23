@@ -31,14 +31,14 @@
 #define LOOP_COUNT 10
 #define NETWORKIDSIZE 100
 
-static int g_succTestCount = 0;
-static int g_failTestCount = 0;
+static int32_t g_succTestCount = 0;
+static int32_t g_failTestCount = 0;
 
 static char const *g_pkgName = "com.communication.demo";
 static char g_networkId[NETWORKIDSIZE];
-static int g_sessionId = 0;
+static int32_t g_sessionId = 0;
 static char *g_contcx = NULL;
-static int g_testCount = 0;
+static int32_t g_testCount = 0;
 char const *g_sessionName = "com.ctrlbustest.JtCreateSessionServerLimit";
 char const *g_groupid = "TEST_GROUP_ID";
 static bool g_state = true;
@@ -57,7 +57,7 @@ static SessionAttribute g_sessionAttr = {
 void Wait();
 void Start();
 
-static void OnJoinLNNDone(const ConnectionAddr *addr, const char *networkId, int retCode)
+static void OnJoinLNNDone(const ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     if (addr == NULL) {
         TRANS_LOGI(TRANS_TEST, "[test]OnJoinLNNDone error");
@@ -74,7 +74,7 @@ static void OnJoinLNNDone(const ConnectionAddr *addr, const char *networkId, int
     Start();
 }
 
-static void OnLeaveLNNDone(const char *networkId, int retCode)
+static void OnLeaveLNNDone(const char *networkId, int32_t retCode)
 {
     if (retCode == 0) {
         TRANS_LOGI(TRANS_TEST,
@@ -101,7 +101,7 @@ static INodeStateCb g_nodeStateCallback = {
     .onNodeOffline = OnNodeOffline,
 };
 
-static int JoinNetwork()
+static int32_t JoinNetwork()
 {
     Wait();
     TRANS_LOGI(TRANS_TEST, "[test]enter JoinNetwork");
@@ -121,11 +121,11 @@ static int JoinNetwork()
     return 0;
 }
 
-static int LeaveNetWork()
+static int32_t LeaveNetWork()
 {
     Wait();
     NodeBasicInfo info1;
-    int ret = GetLocalNodeDeviceInfo(g_pkgName, &info1);
+    int32_t ret = GetLocalNodeDeviceInfo(g_pkgName, &info1);
     if (ret != 0) {
         TRANS_LOGI(TRANS_TEST, "[test]GetLocalNodeDeviceInfo error!");
         return -1;
@@ -145,7 +145,7 @@ static int LeaveNetWork()
     return 0;
 }
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     TRANS_LOGI(TRANS_TEST, "[test]session opened, sesisonId=%{public}d", sessionId);
     g_sessionId = sessionId;
@@ -155,12 +155,12 @@ static int OnSessionOpened(int sessionId, int result)
     return 0;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     TRANS_LOGI(TRANS_TEST, "[test]session closed, sessionId=%{public}d", sessionId);
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_TEST, "[test]session bytes received, sessionId=%{public}d, data=%{public}s", sessionId, data);
     TEST_ASSERT_TRUE(g_testCount == 2);
@@ -168,7 +168,7 @@ static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
     Start();
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_TEST, "[test]session msg received, sessionId=%{public}d", sessionId);
     Start();
@@ -181,9 +181,9 @@ static ISessionListener g_sessionlistener = {
     .OnMessageReceived = OnMessageReceived
 };
 
-static int CreateSsAndOpenSession()
+static int32_t CreateSsAndOpenSession()
 {
-    int ret;
+    int32_t ret;
     Wait();
     g_testCount = 0;
     TRANS_LOGI(TRANS_TEST, "enter CreateSessionServer");
@@ -203,9 +203,9 @@ static int CreateSsAndOpenSession()
     return ret;
 }
 
-static int RemoveSession()
+static int32_t RemoveSession()
 {
-    int ret;
+    int32_t ret;
     Wait();
     TEST_ASSERT_TRUE(g_testCount == 3);
     ret = RemoveSessionServer(g_pkgName, g_sessionName);
@@ -214,9 +214,9 @@ static int RemoveSession()
     return ret;
 }
 
-static int DataSend(int size, int type)
+static int32_t DataSend(int32_t size, int32_t type)
 {
-    int ret;
+    int32_t ret;
     g_contcx = (char *)calloc(1, size * sizeof(char));
     if (g_contcx == NULL) {
         return SOFTBUS_MALLOC_ERR;
@@ -259,7 +259,7 @@ void Start()
 void SetUpTestCase()
 {
     TRANS_LOGI(TRANS_TEST, "[Test]SetUp begin");
-    int ret;
+    int32_t ret;
     ret = JoinNetwork();
     TEST_ASSERT_TRUE(ret == 0);
     TRANS_LOGI(TRANS_TEST, "[Test]SetUp end");
@@ -268,7 +268,7 @@ void SetUpTestCase()
 void TearDownTestCase()
 {
     TRANS_LOGI(TRANS_TEST, "[Test]TearDown begin");
-    int ret;
+    int32_t ret;
     ret = LeaveNetWork();
     TEST_ASSERT_TRUE(ret == 0);
     TRANS_LOGI(TRANS_TEST, "[Test]TearDown end");
@@ -282,8 +282,8 @@ void TearDownTestCase()
  */
 void TransFuncTest001(void)
 {
-    int ret;
-    int size = 1;
+    int32_t ret;
+    int32_t size = 1;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -301,8 +301,8 @@ void TransFuncTest001(void)
  */
 void TransFuncTest002(void)
 {
-    int ret;
-    int size = TRANS_SIZE_NUM * TRANS_UINIT_SIZE;
+    int32_t ret;
+    int32_t size = TRANS_SIZE_NUM * TRANS_UINIT_SIZE;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -320,8 +320,8 @@ void TransFuncTest002(void)
  */
 void TransFuncTest003(void)
 {
-    int ret;
-    int size = TRANS_SIZE_NUM_DOUBLE * TRANS_UINIT_SIZE;
+    int32_t ret;
+    int32_t size = TRANS_SIZE_NUM_DOUBLE * TRANS_UINIT_SIZE;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -339,8 +339,8 @@ void TransFuncTest003(void)
  */
 void TransFuncTest004(void)
 {
-    int ret;
-    int size = 1;
+    int32_t ret;
+    int32_t size = 1;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -358,8 +358,8 @@ void TransFuncTest004(void)
  */
 void TransFuncTest005(void)
 {
-    int ret;
-    int size = TRANS_UINIT_SIZE;
+    int32_t ret;
+    int32_t size = TRANS_UINIT_SIZE;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -377,25 +377,25 @@ void TransFuncTest005(void)
  */
 void TransFuncTest006(void)
 {
-    int ret;
+    int32_t ret;
     char sessionNames[8][65] = {"1", "2", "3", "4", "5", "6", "7", "8"};
-    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[0]); i++) {
+    for (int32_t i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[0]); i++) {
         ret = CreateSessionServer(g_pkgName, sessionNames[i], &g_sessionlistener);
         TEST_ASSERT_TRUE(ret == 0);
     }
-    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[0]); i++) {
+    for (int32_t i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[0]); i++) {
         ret = RemoveSessionServer(g_pkgName, sessionNames[i]);
         TEST_ASSERT_TRUE(ret == 0);
     }
 }
 
-int main(void)
+int32_t main(void)
 {
     if (scanf_s("%s", g_networkId, NETWORKIDSIZE) < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_TEST, "g_networkId=%{public}s", g_networkId);
-    for (int i = 0; i < LOOP_COUNT; i++) {
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
         TransFuncTest001();
     }
 

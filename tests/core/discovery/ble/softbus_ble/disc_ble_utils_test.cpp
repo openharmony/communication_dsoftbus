@@ -161,7 +161,7 @@ HWTEST_F(DiscBleUtilsTest, SetCapBitMapPosTest_001, TestSize.Level1)
     uint32_t pos = info.capabilityBitmapNum * INT32_MAX_BIT_NUM;
     SetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
 
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         EXPECT_EQ(info.capabilityBitmap[i], 0x0);
     }
 
@@ -183,7 +183,7 @@ HWTEST_F(DiscBleUtilsTest, SetCapBitMapPosTest_002, TestSize.Level1)
     uint32_t pos = INT32_MAX_BIT_NUM;
 
     SetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         if (i == (pos / INT32_MAX_BIT_NUM)) {
             EXPECT_EQ(info.capabilityBitmap[i], 0x1);
         } else {
@@ -209,7 +209,7 @@ HWTEST_F(DiscBleUtilsTest, UnsetCapBitMapPosTest_001, TestSize.Level1)
     uint32_t pos = info.capabilityBitmapNum * INT32_MAX_BIT_NUM;
 
     UnsetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         EXPECT_EQ(info.capabilityBitmap[i], 0x0);
     }
 
@@ -232,7 +232,7 @@ HWTEST_F(DiscBleUtilsTest, UnsetCapBitMapPosTest_002, TestSize.Level1)
     uint32_t pos = INT32_MAX_BIT_NUM;
 
     SetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         if (i == (pos / INT32_MAX_BIT_NUM)) {
             EXPECT_EQ(info.capabilityBitmap[i], 0x1);
         } else {
@@ -240,7 +240,7 @@ HWTEST_F(DiscBleUtilsTest, UnsetCapBitMapPosTest_002, TestSize.Level1)
         }
     }
     UnsetCapBitMapPos(info.capabilityBitmapNum, info.capabilityBitmap, pos);
-    for (int i = 0; i < info.capabilityBitmapNum; i++) {
+    for (int32_t i = 0; i < info.capabilityBitmapNum; i++) {
         EXPECT_EQ(info.capabilityBitmap[i], 0x0);
     }
 

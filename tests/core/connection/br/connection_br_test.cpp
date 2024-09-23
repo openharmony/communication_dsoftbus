@@ -60,7 +60,7 @@ void DisConnectCB(unsigned int connectionId, const ConnectionInfo *info)
     return;
 }
 
-void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len)
+void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     printf("DconDataReceived moduleId %d %s %d\r\n", moduleId, data, len);
     return;
@@ -79,7 +79,7 @@ void SecondConnectSuccessedCB(unsigned int requestId, unsigned int connectionId,
     return;
 }
 
-void ConnectFailedCB(unsigned int requestId, int reason)
+void ConnectFailedCB(unsigned int requestId, int32_t reason)
 {
     (void)requestId;
     (void)reason;
@@ -131,7 +131,7 @@ int32_t GetBrConnStateByConnectionId(uint32_t connectId)
 */
 HWTEST_F(ConnectionBrTest, testConnmanger001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     printf("testConnmanger001\r\n");
 
     ret = ConnTypeIsSupport(CONNECT_BR);
@@ -149,7 +149,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger001, TestSize.Level1)
 HWTEST_F(ConnectionBrTest, testConnmanger002, TestSize.Level1)
 {
     printf("test begin testConnmanger002 \r\n");
-    int ret;
+    int32_t ret;
     ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
     ret = ConnConnectDevice(nullptr, 0, nullptr);
@@ -170,8 +170,8 @@ HWTEST_F(ConnectionBrTest, testConnmanger002, TestSize.Level1)
 */
 HWTEST_F(ConnectionBrTest, testConnmanger003, TestSize.Level1)
 {
-    int ret;
-    int reqId;
+    int32_t ret;
+    int32_t reqId;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -225,7 +225,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger003, TestSize.Level1)
 HWTEST_F(ConnectionBrTest, testConnmanger004, TestSize.Level1)
 {
     printf("test begin ConnManagerTest004 \r\n");
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     LocalListenerInfo info;
 
@@ -251,8 +251,8 @@ HWTEST_F(ConnectionBrTest, testConnmanger004, TestSize.Level1)
 */
 HWTEST_F(ConnectionBrTest, testConnmanger005, TestSize.Level1)
 {
-    int reqId = 1;
-    int ret;
+    int32_t reqId = 1;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
     ConnectionInfo info;
@@ -295,7 +295,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger005, TestSize.Level1)
 */
 HWTEST_F(ConnectionBrTest, testConnmanger006, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
 
     connCb.OnConnected = ConnectedCB;
@@ -318,8 +318,8 @@ HWTEST_F(ConnectionBrTest, testConnmanger006, TestSize.Level1)
 */
 HWTEST_F(ConnectionBrTest, testConnmanger007, TestSize.Level1)
 {
-    int ret;
-    int reqId;
+    int32_t ret;
+    int32_t reqId;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -370,7 +370,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger007, TestSize.Level1)
 */
 HWTEST_F(ConnectionBrTest, testConnmanger008, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
     ConnectionInfo info;
@@ -387,12 +387,12 @@ HWTEST_F(ConnectionBrTest, testConnmanger008, TestSize.Level1)
     (void)memcpy_s(optionInfo.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
 
     connRet2.OnConnectFailed = ConnectFailedCB;
     connRet2.OnConnectSuccessed = SecondConnectSuccessedCB;
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId2, &connRet2);
     EXPECT_EQ(SOFTBUS_OK, ret);
     sleep(1);
@@ -420,7 +420,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger008, TestSize.Level1)
 */
 HWTEST_F(ConnectionBrTest, testConnmanger009, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -437,9 +437,9 @@ HWTEST_F(ConnectionBrTest, testConnmanger009, TestSize.Level1)
     printf("brMac: %s\n", info.brOption.brMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId1, &connRet);
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
@@ -477,7 +477,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger009, TestSize.Level1)
 */
 HWTEST_F(ConnectionBrTest, testConnmanger010, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -494,10 +494,10 @@ HWTEST_F(ConnectionBrTest, testConnmanger010, TestSize.Level1)
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
 
-    int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId1, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    int32_t reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -528,7 +528,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger010, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrPendingPacket001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectOption info;
     uint32_t time = 1;
 
@@ -551,7 +551,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket001, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrPendingPacket002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectOption info;
     uint32_t time = 1;
 
@@ -592,7 +592,7 @@ HWTEST_F(ConnectionBrTest, CheckActiveConnection002, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrPendingPacket004, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     uint32_t id = 1;
     ConnectionInfo info;
 
@@ -606,7 +606,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket004, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrPendingPacket005, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     uint32_t id = 0x20000;
     ConnectOption info;
 
@@ -625,7 +625,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket005, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrPendingPacket006, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     uint32_t id = 1;
     int64_t seq = 1000;
     uint32_t waitMillis = 1000;
@@ -662,7 +662,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket006, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrPendingPacket007, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnBrConnection connection;
 
     NiceMock<ConnectionBrInterfaceMock> brMock;
@@ -693,7 +693,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket007, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrPendingPacket008, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     uint32_t id = 1;
     int64_t seq = 1000;
     void *data = NULL;
@@ -715,7 +715,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket008, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrQueue001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SendBrQueueNode queueNode;
 
     ret = ConnBrInnerQueueInit();
@@ -747,7 +747,7 @@ HWTEST_F(ConnectionBrTest, testBrQueue001, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrQueue002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     void *msg = NULL;
     SendBrQueueNode queueNode;
 
@@ -771,7 +771,7 @@ HWTEST_F(ConnectionBrTest, testBrQueue002, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrBrans001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     uint32_t connectionId;
     int32_t socketHandle = 0;
     LimitedBuffer buffer;
@@ -799,7 +799,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans001, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrBrans002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     uint32_t connectionId;
     int32_t socketHandle = 0;
     LimitedBuffer buffer;
@@ -818,7 +818,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans002, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrBrans003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     uint32_t connectionId;
     int32_t socketHandle = 0;
     LimitedBuffer buffer;
@@ -883,7 +883,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans004, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, testBrBrans005, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     uint32_t connectionId = 1;
     uint8_t *data = NULL;
     uint32_t len = 0;
@@ -897,11 +897,13 @@ HWTEST_F(ConnectionBrTest, testBrBrans005, TestSize.Level1)
 
     len = MAX_DATA_LEN + 1;
     data = (uint8_t *)SoftBusCalloc(len);
+    ASSERT_NE(nullptr, data);
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     len = MAX_DATA_LEN;
     data = (uint8_t *)SoftBusCalloc(len);
+    ASSERT_NE(nullptr, data);
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
 }

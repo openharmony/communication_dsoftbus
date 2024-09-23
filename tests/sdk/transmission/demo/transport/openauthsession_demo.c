@@ -33,26 +33,26 @@ const char *g_pkgNameA = "dms"; // Application bundle name of device A
 const char *g_sessionNameA = "ohos.distributedschedule.dms.test";  // Session name of device A
 
 // Notify that the session is set up successfully.
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("session opened,sesison id = %d\r\n", sessionId);
     return 0;
 }
 
 // Notify that the session is closed.
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("session closed, session id = %d\r\n", sessionId);
 }
 
 // Notify that byte data is received.
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("session bytes received, session id = %d\r\n", sessionId);
 }
 
 // Notify that the message is received.
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("session msg received, session id = %d\r\n", sessionId);
 }
@@ -64,21 +64,21 @@ static ISessionListener g_sessionlistenerA = {
     .OnMessageReceived = OnMessageReceived,
 };
 
-int main(void)
+int32_t main(void)
 {
     /*
      * 1. Device A calls CreateSessionServer() to create a session server based on
      * the application bundle name and session name, and registers the callbacks for session opened, session closed,
      * byte received, and message received.
      */
-    int ret = CreateSessionServer(g_pkgNameA, g_sessionNameA, &g_sessionlistenerA);
+    int32_t ret = CreateSessionServer(g_pkgNameA, g_sessionNameA, &g_sessionlistenerA);
     printf("create session server result = %d\n", ret);
 
     /*
      * 2. Device A calls OpenAuthSession() to create a raw channel for identity negotiation based on the session name
      * and connection information before networking.
      */
-    int sessionId = OpenAuthSession(g_sessionNameA, &(g_addrInfo), 1, NULL);
+    int32_t sessionId = OpenAuthSession(g_sessionNameA, &(g_addrInfo), 1, NULL);
     printf("open auth session result = %d\n", sessionId);
 
     /*
@@ -101,23 +101,23 @@ int main(void)
 const char *g_pkgNameB = "dmsB"; // Application bundle name of device B
 const char *g_sessionNameB = "ohos.distributedschedule.dms.testB";  // Session name of device B
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("session opened,sesison id = %d\r\n", sessionId);
     return 0;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("session closed, session id = %d\r\n", sessionId);
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("session bytes received, session id = %d\r\n", sessionId);
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("session msg received, session id = %d\r\n", sessionId);
 }
@@ -129,13 +129,13 @@ static ISessionListener g_sessionlistenerB = {
     .OnMessageReceived = OnMessageReceived,
 };
 
-int main(void)
+int32_t main(void)
 {
     /*
      * 1. Device B calls CreateSessionServer to create a session server based on
      * the application bundle name and session name, and registers the callbacks for session opened and session closed.
      */
-    int ret = CreateSessionServer(g_pkgNameB, g_sessionNameB, &g_sessionlistenerB);
+    int32_t ret = CreateSessionServer(g_pkgNameB, g_sessionNameB, &g_sessionlistenerB);
     printf("create session server result = %d\n", ret);
 
     /*

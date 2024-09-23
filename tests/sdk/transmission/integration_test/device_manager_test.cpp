@@ -43,7 +43,7 @@ void DeviceManager::WaitNetworkSizeMoreThan(uint32_t count)
     NodeBasicInfo *nodeInfo = nullptr;
     int32_t infoNum = 0;
     do {
-        int ret = GetAllNodeDeviceInfo(ECHO_SERVICE_PKGNAME, &nodeInfo, &infoNum);
+        int32_t ret = GetAllNodeDeviceInfo(ECHO_SERVICE_PKGNAME, &nodeInfo, &infoNum);
         if (ret == 0) {
             if (infoNum >= count) {
                 break;

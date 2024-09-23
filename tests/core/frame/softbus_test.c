@@ -16,11 +16,11 @@
 #include "softbus_client_frame_manager.h"
 #include "softbus_interface.h"
 
-int main()
+int32_t main()
 {
     const char* pkgName = "SoftbusKit";
     (void)InitSoftBus(pkgName);
-    int ret = GetServerProvideInterface()->startDiscovery(pkgName, NULL);
+    int32_t ret = GetServerProvideInterface()->startDiscovery(pkgName, NULL);
     while (1) {}
     return ret;
 }

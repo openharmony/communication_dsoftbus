@@ -23,10 +23,17 @@
 #endif
 
 #ifdef BUILD_FOR_WINDOWS
+#if (defined(_MSC_VER) && !defined(__clang__)) || \
+    ((defined(__GNUC__) || defined(__clang__)) && defined(__AES__) && defined(__PCLMUL__))
 #if defined(__GNC__)
 #include <cpuid.h>
 #elif define(_MSC_VER)
 #include <intrin.h>
+#endif
+#include <immintrin.h>
+
+#define WINDOWS_AESNI_SUPPORT
+#define WIN_AESNI_ECI_IDX 2
 #endif
 
 #ifndef bit_AES
@@ -260,20 +267,13 @@ static uint8_t CheckAesCapability(void)
 uint8_t IsSupportHardwareAesNi(void)
 {
 #if defined(_WIN32) || defined(_WIN64)
-#if defined(__GNUC__) || defined(_MSC_VER)
-#if defined(__i386__) || defined(_x86_64__)
-    uint32_t eax = 0;
-    uint32_t ebx = 0;
-    uint32_t ecx = 0;
-    uint32_t edx = 0;
-    __get_cpuid(1, &eax, &ebx, &ecx, &edx);
-    return (ecx & bit_AES) > 0;
+#if defined(WINDOWS_AESNI_SUPPORT)
+    int32_t cpuInfo[] = {0, 0, 0, 0};
+    __cpuid(cpuInfo, 1);
+    return (cpuInfo[WIN_AESNI_ECI_IDX] & bit_AES) != 0;
 #else
-    return NSTACKX_FALSE;
-#endif // defined(__i386__) || defined(_x86_64__)
-#else
-    return NSTACKX_FALSE;
-#endif defined(__GNUC__) || defined(_MSC_VER)
+    return NSTACKX_TRUE;
+#endif // defined(WINDOWS_AESNI_SUPPORT)
 
 #else // linux
 

@@ -17,6 +17,11 @@ import("../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 
 ohos_unittest("TransIpcStandardTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   sources = [ "trans_ipc_test.cpp" ]
