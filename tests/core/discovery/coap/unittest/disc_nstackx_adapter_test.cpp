@@ -75,7 +75,6 @@ static NSTACKX_DeviceInfo g_testNstackxInfo = {
     .networkName = "wlan0",
     .discoveryType = NSTACKX_DISCOVERY_TYPE_ACTIVE,
     .businessType = NSTACKX_BUSINESS_TYPE_NULL,
-    .version = "hm1.0.0",
     .reservedInfo = "reserved"
 };
 
