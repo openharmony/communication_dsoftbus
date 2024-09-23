@@ -667,15 +667,17 @@ HWTEST_F(LNNDisctributedLedgerTest, ADD_CNN_CODE_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = AddCnnCode(&cnnCode, uuid, type, authSeqNum);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-}
 
-HWTEST_F(LNNDisctributedLedgerTest, REMOVE_CNN_CODE_Test_001, TestSize.Level1)
-{
-    Map cnnCode;
-    const char *uuid = "softBus";
-    DiscoveryType type = DISCOVERY_TYPE_WIFI;
+    char *key = CreateCnnCodeKey(uuid, type);
+    EXPECT_NE(key, nullptr);
+    short* code = (short *)LnnMapGet(&cnnCode, key);
+    EXPECT_NE(code, nullptr);
+
     (void)RemoveCnnCode(&cnnCode, nullptr, type);
     (void)RemoveCnnCode(&cnnCode, uuid, type);
+
+    code = (short *)LnnMapGet(&cnnCode, key);
+    EXPECT_EQ(code, nullptr);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, NOTIFY_MIGRATE_UPGRADE_Test_001, TestSize.Level1)
@@ -804,21 +806,6 @@ HWTEST_F(LNNDisctributedLedgerTest, SOFTBUS_DUMPBUSCENTER_Test_001, TestSize.Lev
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-HWTEST_F(LNNDisctributedLedgerTest, REFRESH_DEVICEONLINE_STATEINFO_Test_001, TestSize.Level1)
-{
-    DeviceInfo device;
-    memset_s(device.devId, sizeof(device.devId), '\0', sizeof(device.devId));
-    InnerDeviceInfoAddtions additions;
-    additions.medium = COAP;
-    (void)RefreshDeviceOnlineStateInfo(&device, &additions);
-    additions.medium = BLE;
-    (void)RefreshDeviceOnlineStateInfo(&device, &additions);
-    (void)LnnRemoveNode(nullptr);
-    NodeInfo info;
-    (void)OnlinePreventBrConnection(&info);
-    (void)UpdateNetworkInfo(nullptr);
-}
-
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_BOOLINFO_Test_001, TestSize.Level1)
 {
     const char *networkId = "softBus";
@@ -865,6 +852,17 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_REFRESH_DEVICEONLINE_ANDINFO_Test_001, T
     DeviceInfo device;
     InnerDeviceInfoAddtions additions;
     (void)LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &additions);
+
+    (void)memset_s(device.devId, sizeof(device.devId), '\0', sizeof(device.devId));
+    additions.medium = COAP;
+    device.isOnline = true;
+    (void)LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &additions);
+    EXPECT_TRUE(device.isOnline == false);
+
+    additions.medium = BLE;
+    device.isOnline = true;
+    (void)LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &additions);
+    EXPECT_TRUE(device.isOnline == false);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)
