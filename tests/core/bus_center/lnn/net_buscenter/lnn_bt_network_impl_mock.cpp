@@ -59,12 +59,12 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     return GetLnnBtNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetLnnBtNetworkImplInterface()->SoftBusGetBtState();
 }
 
-int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     return GetLnnBtNetworkImplInterface()->SoftBusGetBtMacAddr(mac);
 }

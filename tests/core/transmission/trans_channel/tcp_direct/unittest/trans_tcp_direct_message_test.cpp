@@ -594,7 +594,7 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetChannelIdsByAuthIdAndStatus001, Test
     ret = TransTdcAddSessionConn(con3);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    int count = 0;
+    int32_t count = 0;
     int32_t *channelId = GetChannelIdsByAuthIdAndStatus(&count, &authHandle, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
     EXPECT_EQ(count, 2);
     EXPECT_EQ(channelId[0], 1);

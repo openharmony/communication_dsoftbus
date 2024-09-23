@@ -54,8 +54,8 @@ public:
     virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para) = 0;
     virtual void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state) = 0;
     virtual int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen) = 0;
-    virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
-    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
 };
 class NetworkInterfaceMock : public NetworkInterface {

@@ -106,72 +106,73 @@ void TransClientSessionTest::TearDownTestCase(void)
     TransServerDeinit();
 }
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d", sessionId);
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%{public}d", sessionId);
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
 }
 
-static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+static void OnStreamReceived(int32_t sessionId, const StreamData *data,
+                             const StreamData *ext, const StreamFrameInfo *param)
 {
     TRANS_LOGI(TRANS_TEST, "session stream received, sessionId=%{public}d", sessionId);
 }
 
-static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
+static void OnQosEvent(int32_t sessionId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     TRANS_LOGI(TRANS_TEST, "session Qos event emit, sessionId=%{public}d", sessionId);
 }
 
-static int OnSessionOpenedErr(int sessionId, int result)
+static int32_t OnSessionOpenedErr(int32_t sessionId, int32_t result)
 {
     TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
     return SOFTBUS_NOT_FIND;
 }
 
-static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+static int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     TRANS_LOGI(TRANS_TEST, "receive file start, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
-static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+static int32_t OnReceiveFileProcess(int32_t sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     TRANS_LOGI(TRANS_TEST, "receive file process, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
-static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+static void OnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     TRANS_LOGI(TRANS_TEST, "receive file finished, sessionId=%{public}d", sessionId);
 }
 
-void OnFileTransError(int sessionId)
+void OnFileTransError(int32_t sessionId)
 {
     TRANS_LOGI(TRANS_TEST, "file transmission error, sessionId=%{public}d", sessionId);
 }
 
-int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     TRANS_LOGI(TRANS_TEST, "send file process, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
-int OnSendFileFinished(int sessionId, const char *firstFile)
+int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
 {
     TRANS_LOGI(TRANS_TEST, "send file finished, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
@@ -357,7 +358,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest02, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest03, TestSize.Level1)
 {
     const char *pkgName = "package.test";
-    int ret = CreateSessionServer(pkgName, g_sessionName, &g_sessionlistener);
+    int32_t ret = CreateSessionServer(pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -375,7 +376,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest03, TestSize.Level1)
  */
 HWTEST_F(TransClientSessionTest, TransClientSessionTest04, TestSize.Level1)
 {
-    int ret = RemoveSessionServer(g_pkgName, g_sessionName);
+    int32_t ret = RemoveSessionServer(g_pkgName, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -393,7 +394,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level1)
 {
     int32_t sessionId = 0;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
-    int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+    int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -474,7 +475,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest07, TestSize.Level1)
         {.type = CONNECTION_ADDR_MAX},
         {.type = CONNECTION_ADDR_MAX}
     };
-    int ret = IsValidAddrInfoArr(addrInfoArr, TRANS_TEST_ADDR_INFO_NUM);
+    int32_t ret = IsValidAddrInfoArr(addrInfoArr, TRANS_TEST_ADDR_INFO_NUM);
     EXPECT_EQ(ret, -1);
 }
 
@@ -494,7 +495,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level1)
     bool res = AddStringToJsonObject(msg, "BLE_MAC", TRANS_TEST_BR_MAC);
     ASSERT_TRUE(res);
     char *data = cJSON_PrintUnformatted(msg);
-    int ret = OpenAuthSession(g_sessionName, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
+    int32_t ret = OpenAuthSession(g_sessionName, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED);
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -534,7 +535,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest09, TestSize.Level1)
     int32_t sessionId = 0;
     bool isClosing = false;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
-    int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+    int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != NULL);
@@ -570,7 +571,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
 {
     int32_t sessionId = 0;
     bool isClosing = false;
-    int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+    int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != NULL);
@@ -604,7 +605,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest11, TestSize.Level1)
 {
     int32_t sessionId = 0;
     bool isClosing = false;
-    int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+    int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     CloseSession(TRANS_TEST_INVALID_SESSION_ID);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
@@ -646,7 +647,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest11, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest12, TestSize.Level1)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
-    int ret = GetMySessionName(TRANS_TEST_INVALID_SESSION_ID, sessionName, SESSION_NAME_SIZE_MAX);
+    int32_t ret = GetMySessionName(TRANS_TEST_INVALID_SESSION_ID, sessionName, SESSION_NAME_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetMySessionName(TRANS_TEST_SESSION_ID, NULL, SESSION_NAME_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -663,7 +664,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest12, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest13, TestSize.Level1)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
-    int ret = GetPeerSessionName(TRANS_TEST_INVALID_SESSION_ID, sessionName, SESSION_NAME_SIZE_MAX);
+    int32_t ret = GetPeerSessionName(TRANS_TEST_INVALID_SESSION_ID, sessionName, SESSION_NAME_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetPeerSessionName(TRANS_TEST_SESSION_ID, NULL, SESSION_NAME_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -689,7 +690,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest13, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest14, TestSize.Level1)
 {
     char networkId[DEVICE_ID_SIZE_MAX] = {0};
-    int ret = GetPeerDeviceId(TRANS_TEST_INVALID_SESSION_ID, networkId, DEVICE_ID_SIZE_MAX);
+    int32_t ret = GetPeerDeviceId(TRANS_TEST_INVALID_SESSION_ID, networkId, DEVICE_ID_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetPeerDeviceId(TRANS_TEST_SESSION_ID, NULL, DEVICE_ID_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -742,7 +743,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest16, TestSize.Level1)
     memset_s(pkgName, PKG_NAME_SIZE_MAX + 2, 'B', PKG_NAME_SIZE_MAX + 1);
     char rootDir[FILE_RECV_ROOT_DIR_SIZE_MAX + 2] = {0};
     memset_s(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX + 2, 'C', FILE_RECV_ROOT_DIR_SIZE_MAX + 1);
-    int ret = SetFileReceiveListener(pkgName, g_sessionName, &g_fileRecvListener, g_rootDir);
+    int32_t ret = SetFileReceiveListener(pkgName, g_sessionName, &g_fileRecvListener, g_rootDir);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = SetFileReceiveListener(g_pkgName, sessionName, &g_fileRecvListener, g_rootDir);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -768,7 +769,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest17, TestSize.Level1)
     memset_s(pkgName, PKG_NAME_SIZE_MAX + 2, 'B', PKG_NAME_SIZE_MAX + 1);
     char rootDir[FILE_RECV_ROOT_DIR_SIZE_MAX + 2] = {0};
     memset_s(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX + 2, 'C', FILE_RECV_ROOT_DIR_SIZE_MAX + 1);
-    int ret = SetFileSendListener(pkgName, g_sessionName, &g_fileSendListener);
+    int32_t ret = SetFileSendListener(pkgName, g_sessionName, &g_fileSendListener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = SetFileSendListener(g_pkgName, sessionName, &g_fileSendListener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -835,7 +836,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest20, TestSize.Level1)
     const char *dfsSessionName = "DistributedFileService";
     int32_t sessionId = AddSessionServerAndSession(dfsSessionName, CHANNEL_TYPE_TCP_DIRECT, false);
     ASSERT_GT(sessionId, 0);
-    int handle = 0;
+    int32_t handle = 0;
     int32_t ret = GetSessionHandle(sessionId, &handle);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
     DeleteSessionServerAndSession(dfsSessionName, sessionId);
@@ -866,7 +867,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest21, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest22, TestSize.Level1)
 {
     uint32_t value = 0;
-    int ret = ReadMaxSendBytesSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT,
+    int32_t ret = ReadMaxSendBytesSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT,
                                    &value, TRANS_TEST_INVALID_VALUE_SIZE);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ReadMaxSendBytesSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &value, sizeof(value));
@@ -882,7 +883,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest22, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest23, TestSize.Level1)
 {
     uint32_t value = 0;
-    int ret = ReadMaxSendMessageSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT,
+    int32_t ret = ReadMaxSendMessageSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT,
                                      &value, TRANS_TEST_INVALID_VALUE_SIZE);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ReadMaxSendMessageSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &value, sizeof(value));
@@ -898,7 +899,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest23, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest24, TestSize.Level1)
 {
     uint32_t optionValue = 0;
-    int ret = GetSessionOption(TRANS_TEST_SESSION_ID, SESSION_OPTION_BUTT,
+    int32_t ret = GetSessionOption(TRANS_TEST_SESSION_ID, SESSION_OPTION_BUTT,
                                &optionValue, sizeof(optionValue));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetSessionOption(TRANS_TEST_SESSION_ID, SESSION_OPTION_MAX_SENDBYTES_SIZE,
@@ -932,7 +933,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest25, TestSize.Level1)
 
     NodeBasicInfo info;
     memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-    int ret = strcpy_s(info.networkId, sizeof(info.networkId), g_networkId);
+    int32_t ret = strcpy_s(info.networkId, sizeof(info.networkId), g_networkId);
     ASSERT_EQ(ret, EOK);
     ret = strcpy_s(info.deviceName, sizeof(info.deviceName), g_deviceName);
     ASSERT_EQ(ret, EOK);
@@ -1072,7 +1073,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest30, TestSize.Level1)
     SessionInfo *session = GetExistSession(sessionParam);
     ASSERT_TRUE(session != NULL);
 
-    int ret = strcmp(session->info.peerSessionName, sessionParam->peerSessionName);
+    int32_t ret = strcmp(session->info.peerSessionName, sessionParam->peerSessionName);
     EXPECT_EQ(ret, EOK);
     ret = strcmp(session->info.peerDeviceId, sessionParam->peerDeviceId);
     EXPECT_EQ(ret, EOK);

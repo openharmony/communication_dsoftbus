@@ -65,13 +65,13 @@ void TransSessionTest::SetUpTestCase(void)
 void TransSessionTest::TearDownTestCase(void)
 {
 }
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     TRANS_LOGI(TRANS_TEST, "session opened, sesisonId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d", sessionId);
 }
@@ -134,7 +134,7 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level0)
 {
     int32_t ret;
     int32_t sessionId = 1;
-    int handle = 1;
+    int32_t handle = 1;
 
     ret = GetSessionHandle(-1, &handle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -153,7 +153,7 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest002, TestSize.Level0)
 {
     int32_t ret;
     int32_t sessionId = 1;
-    int handle = 1;
+    int32_t handle = 1;
 
     ret = GetSessionHandle(sessionId, &handle);
     EXPECT_EQ(SOFTBUS_TRANS_FUNC_NOT_SUPPORT, ret);
@@ -196,7 +196,7 @@ HWTEST_F(TransSessionTest, DisableSessionListenerTest002, TestSize.Level0)
  */
 HWTEST_F(TransSessionTest, OpenAuthSessionTest001, TestSize.Level0)
 {
-    int ret;
+    int32_t ret;
 
     ret = OpenAuthSession(NULL, &(g_addrInfo), 1, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -216,7 +216,7 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest001, TestSize.Level0)
  */
 HWTEST_F(TransSessionTest, OpenAuthSessionTest002, TestSize.Level0)
 {
-    int ret;
+    int32_t ret;
 
     ret = OpenAuthSession(g_testSessionName, &(g_addrInfo), 1, NULL);
     EXPECT_GE(SOFTBUS_OK, ret);

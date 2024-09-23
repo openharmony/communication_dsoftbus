@@ -51,27 +51,28 @@ void TransQosStatServerTest::SetUpTestCase(void)
 void TransQosStatServerTest::TearDownTestCase(void)
 {}
 
-static int OnSessionOpend(int sessionId, int result)
+static int32_t OnSessionOpend(int32_t sessionId, int32_t result)
 {
     printf("on session opened[sessionId = %d, result = %d]\n", sessionId, result);
     return 0;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("on session closed[sessionId = %d]\n", sessionId);
 }
 
-static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+static void OnStreamReceived(int32_t sessionId, const StreamData *data,
+                             const StreamData *ext, const StreamFrameInfo *param)
 {}
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int dataLen)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int dataLen)
 {}
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int dataLen)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int dataLen)
 {}
 
-static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
+static void OnQosEvent(int32_t sessionId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     printf("on QoS metric retrieved [sessionId = %d] [eventId=%d]!!!!!!\n", sessionId, eventId);
     printf("pktNum:%u\n", tvList->info.appStatistics.pktNum);

@@ -66,7 +66,7 @@ void DiscConnDfxTest::TearDown(void)
  */
 HWTEST_F(DiscConnDfxTest, SoftbusRecordFirstDiscTime_001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
 
     ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, 1000);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -100,7 +100,7 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordFirstDiscTime_001, TestSize.Level0)
 
 HWTEST_F(DiscConnDfxTest, SoftbusRecordBleDiscDetails_001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
 
     ret = SoftbusRecordBleDiscDetails(const_cast<char *>(g_moduleNameOne), 1000, 3, 2, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -130,7 +130,7 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordBleDiscDetails_001, TestSize.Level0)
 
 HWTEST_F(DiscConnDfxTest, SoftbusRecordDiscBleRssi_001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
 
     ret = SoftbusRecordDiscBleRssi(-30);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -154,7 +154,7 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordDiscBleRssi_001, TestSize.Level0)
  */
 HWTEST_F(DiscConnDfxTest, SoftbusRecordConnResult_001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
 
     ret = SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_SUCC,
                             1000, SOFTBUS_HISYSEVT_CONN_OK);
@@ -193,7 +193,7 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordConnResult_001, TestSize.Level0)
  */
 HWTEST_F(DiscConnDfxTest, SoftbusRecordProccessDuration_001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     ProcessStepTime processStepTime = {
         .totalTime = 3000,
         .negotiationTime = 1000,
@@ -217,7 +217,7 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordProccessDuration_001, TestSize.Level0)
  */
 HWTEST_F(DiscConnDfxTest, SoftbusReportDiscFault_001, TestSize.Level0)
 {
-    int ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     ret = SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, -100);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -234,7 +234,7 @@ HWTEST_F(DiscConnDfxTest, SoftbusReportDiscFault_001, TestSize.Level0)
 
 HWTEST_F(DiscConnDfxTest, InitDiscConnDfx001, TestSize.Level0)
 {
-    int ret = InitConnStatisticSysEvt();
+    int32_t ret = InitConnStatisticSysEvt();
     EXPECT_EQ(SOFTBUS_OK, ret);
     DeinitConnStatisticSysEvt();
 

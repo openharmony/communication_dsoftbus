@@ -57,7 +57,7 @@ extern "C" {
         return SOFTBUS_OK;
     }
 
-    void TransSrvDelDataBufNode(int channelId)
+    void TransSrvDelDataBufNode(int32_t channelId)
     {
         return;
     }

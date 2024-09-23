@@ -45,9 +45,9 @@ using namespace testing::ext;
 using namespace std;
 namespace OHOS {
 
-const int SEND_DATA_SIZE_1K = 1024;
-const int SEND_DATA_SIZE_4K = 4 * 1024;
-const int SEND_DATA_SIZE_1M = 1024 * 1024;
+const int32_t SEND_DATA_SIZE_1K = 1024;
+const int32_t SEND_DATA_SIZE_4K = 4 * 1024;
+const int32_t SEND_DATA_SIZE_1M = 1024 * 1024;
 const char *g_testData = "{\"data\":\"open session test!!!\"}";
 
 const char *SFILE_NAME_1K = "/data/file1K.tar";
@@ -103,7 +103,7 @@ int32_t WaitDeviceOnline(const char *pkgName)
     return SOFTBUS_TIMOUT;
 }
 
-int OnSessionOpened(int sessionId, int result)
+int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     cout << "session opened, sesison id = " << sessionId << ", result = " << result << endl;
     if (result == SOFTBUS_OK) {
@@ -114,13 +114,13 @@ int OnSessionOpened(int sessionId, int result)
     return SOFTBUS_OK;
 }
 
-void OnSessionClosed(int sessionId)
+void OnSessionClosed(int32_t sessionId)
 {
     cout << "session closed, sesison id = " << sessionId << endl;
     sessionSet_.erase(sessionId);
 }
 
-void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+void OnStreamReceived(int32_t sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     if (data == nullptr) {
         printf("StreamData is null, stream received fail\n");
@@ -134,7 +134,7 @@ void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *e
     printf("stream received, sessionid[%d], extdata = %.*s\n", sessionId, ext->bufLen, ext->buf);
 }
 
-void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     if (testEntryArgs_->testSide_ == PASSIVE_OPENSESSION_WAY) {
         SendBytes(sessionId, "{\"received ok\"}", strlen("{\"received ok\"}"));
@@ -142,7 +142,7 @@ void OnBytesReceived(int sessionId, const void *data, unsigned int len)
     printf("bytes received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
 }
 
-void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("msg received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
 }
@@ -155,20 +155,20 @@ static ISessionListener g_listener = {
     .OnMessageReceived = OnMessageReceived
 };
 
-int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     cout << "OnSendFileProcess sessionId = " << sessionId << ", bytesUpload = " <<
         bytesUpload << ", total = " << bytesTotal << endl;
     return 0;
 }
 
-int OnSendFileFinished(int sessionId, const char *firstFile)
+int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
 {
     printf("OnSendFileFinished sessionId = %d, first file = %s\n", sessionId, firstFile);
     return 0;
 }
 
-void OnFileTransError(int sessionId)
+void OnFileTransError(int32_t sessionId)
 {
     printf("OnFileTransError sessionId = %d\n", sessionId);
 }
@@ -179,18 +179,18 @@ static IFileSendListener g_fileSendListener = {
     .OnFileTransError = OnFileTransError,
 };
 
-int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     printf("File receive start sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
     return 0;
 }
 
-void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+void OnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     printf("File receive finished sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
 }
 
-int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnReceiveFileProcess(int32_t sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     printf("File receive process sessionId = %d, first file = %s, upload = %" PRIu64 ", total = %" PRIu64 "\n",
         sessionId, firstFile, bytesUpload, bytesTotal);

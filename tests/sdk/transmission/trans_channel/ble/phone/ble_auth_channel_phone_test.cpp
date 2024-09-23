@@ -39,9 +39,9 @@ const char *g_pkgName = "com.plrdtest";
 const char *g_sessionName = "com.plrdtest.dsoftbus";
 const char *g_testData = "{\"data\":\"open auth session test!!!\"}";
 bool g_state = false;
-int g_sessionId = -1;
-int g_testCount = 0;
-int g_testTimes = 0;
+int32_t g_sessionId = -1;
+int32_t g_testCount = 0;
+int32_t g_testTimes = 0;
 static void Wait(void);
 static void Start(void);
 
@@ -85,7 +85,7 @@ static SubscribeInfo g_sInfo = {
     .isWakeRemote = false
 };
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("[test]session opened,sesison id = %d\r\n", sessionId);
     EXPECT_TRUE(g_sessionId == sessionId);
@@ -95,17 +95,17 @@ static int OnSessionOpened(int sessionId, int result)
     return 0;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("[test]session closed, session id = %d\r\n", sessionId);
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("[test]session bytes received, session id = %d data =%s\r\n", sessionId, data);
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("[test]session msg received, session id = %d data =%s\r\n", sessionId, data);
 }
@@ -193,7 +193,7 @@ HWTEST_F(BleAuthChannelPhoneTest, ProcessPhoneActive001, TestSize.Level0)
     ret = TestCreateSessionServer();
     EXPECT_TRUE(ret == 0);
     EXPECT_TRUE(g_testCount == TEST_DEVICEFOUND);
-    for (int i = 0; i < g_testTimes; i++) {
+    for (int32_t i = 0; i < g_testTimes; i++) {
         g_testCount = TEST_DEVICEFOUND;
         g_sessionId = TestOpenSession();
         EXPECT_TRUE(g_sessionId >= 0);

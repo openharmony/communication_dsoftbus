@@ -85,7 +85,7 @@ HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
     JSON_AddStringToObject(json, FAST_AUTH, "jsontest");
     OptString(json, DEVICE_ID, target, 10, "");
     OptString(json, FAST_AUTH, target, 10, "");
-    int val = 0;
+    int32_t val = 0;
     OptInt(json, P2P_ROLE, &val, 0);
     JSON_AddInt32ToObject(json, SOFTBUS_VERSION_TAG, 123);
     OptInt(json, SOFTBUS_VERSION_TAG, &val, 0);

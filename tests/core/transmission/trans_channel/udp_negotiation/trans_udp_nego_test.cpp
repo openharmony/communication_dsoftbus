@@ -138,7 +138,7 @@ static void GenerateAppInfo(AppInfo *appInfo)
         EXPECT_TRUE(appInfo != NULL);
         memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     }
-    int res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), g_sessionKey);
+    int32_t res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), g_sessionKey);
     EXPECT_EQ(res, EOK);
     res = strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), TEST_SOCKET_ADDR);
     EXPECT_EQ(res, EOK);

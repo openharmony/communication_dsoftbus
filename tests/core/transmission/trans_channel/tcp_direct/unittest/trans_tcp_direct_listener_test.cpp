@@ -115,7 +115,7 @@ HWTEST_F(TransTcpDirectListenerTest, CreateSessionConnNodeTest001, TestSize.Leve
     ASSERT_TRUE(clientAddr != nullptr);
 
     ListenerModule module = UNUSE_BUTT;
-    int fd = NORMAL_FD;
+    int32_t fd = NORMAL_FD;
     int32_t chanId = CHANID;
 
     int32_t ret = CreateSessionConnNode(module, fd, chanId, clientAddr);
@@ -135,7 +135,7 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnConnectEventTest001, TestSize.Level1)
     ASSERT_TRUE(clientAddr != nullptr);
 
     ListenerModule module = UNUSE_BUTT;
-    int cfd = NORMAL_FD;
+    int32_t cfd = NORMAL_FD;
 
     int32_t ret = TdcOnConnectEvent(module, cfd, clientAddr);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -154,7 +154,7 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnConnectEventTest002, TestSize.Level1)
     ASSERT_TRUE(clientAddr != nullptr);
 
     ListenerModule module = UNUSE_BUTT;
-    int cfd = INVALID_FD;
+    int32_t cfd = INVALID_FD;
 
     int32_t ret = TdcOnConnectEvent(module, cfd, clientAddr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -168,9 +168,9 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnConnectEventTest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectListenerTest, TdcOnDataEventTest001, TestSize.Level1)
 {
-    int fd = NORMAL_FD;
+    int32_t fd = NORMAL_FD;
     ListenerModule module = UNUSE_BUTT;
-    int events = EVENTS;
+    int32_t events = EVENTS;
 
     int32_t ret = TdcOnDataEvent(module, events, fd);
     EXPECT_EQ(SOFTBUS_INVALID_FD, ret);
@@ -208,7 +208,7 @@ HWTEST_F(TransTcpDirectListenerTest, ProcessSocketInEvent001, TestSize.Level1)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
-    int fd = 0; // test value
+    int32_t fd = 0; // test value
     int32_t ret = ProcessSocketInEvent(conn, fd);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
 

@@ -71,7 +71,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_001, TestSize.Level1
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     EXPECT_CALL(btMock, LnnRegisterEventHandler(_, _)).WillOnce(Return(SOFTBUS_ERR)).
         WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = LnnInitBtProtocol(nullptr);
+    int32_t ret = LnnInitBtProtocol(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnInitBtProtocol(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -149,7 +149,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_004, TestSize.Level1
     LnnNetIfMgr netifMgr = {
         .ifName = "name",
     };
-    int ret = LnnEnableBtProtocol(&self, nullptr);
+    int32_t ret = LnnEnableBtProtocol(&self, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnEnableBtProtocol(&self, &netifMgr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -227,7 +227,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_007, TestSize.Level1
     EXPECT_CALL(btMock, SoftBusGetBtMacAddr).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(btMock, ConvertBtMacToStr).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
    
-    int ret = GetAvailableBtMac(macStr, NETWORK_ID_BUF_LEN);
+    int32_t ret = GetAvailableBtMac(macStr, NETWORK_ID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     ret = GetAvailableBtMac(macStr, BT_MAC_LEN);

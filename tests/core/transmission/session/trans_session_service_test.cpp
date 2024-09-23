@@ -200,7 +200,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest06, TestSize.Level1)
 {
     TransServerDeathCallback(g_pkgName, TRANS_TEST_INVALID_PID);
-    int ret = TransServerInit();
+    int32_t ret = TransServerInit();
     EXPECT_EQ(ret, SOFTBUS_CONN_INTERNAL_ERR);
     TransServerDeinit();
 }

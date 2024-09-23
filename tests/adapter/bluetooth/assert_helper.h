@@ -33,13 +33,13 @@ public:
         this->identifier = identifier;
     }
 
-    bool Update(int idParam)
+    bool Update(int32_t idParam)
     {
         this->id = idParam;
         return true;
     }
 
-    testing::AssertionResult Expect(int idParam)
+    testing::AssertionResult Expect(int32_t idParam)
     {
         testing::AssertionResult result = testing::AssertionSuccess();
         if (this->id != idParam) {
@@ -53,14 +53,14 @@ protected:
     // static c string
     const char *identifier;
 private:
-    int id;
+    int32_t id;
 };
 
 class StRecordCtx : public RecordCtx {
 public:
     explicit StRecordCtx(const char *identifier) : RecordCtx(identifier), st(-1) {}
 
-    bool Update(int id, int stParam)
+    bool Update(int32_t id, int32_t stParam)
     {
         if (!RecordCtx::Update(id)) {
             return false;
@@ -69,7 +69,7 @@ public:
         return true;
     }
 
-    testing::AssertionResult Expect(int id, int stParam)
+    testing::AssertionResult Expect(int32_t id, int32_t stParam)
     {
         auto result = RecordCtx::Expect(id);
         if (!result) {
@@ -86,7 +86,7 @@ public:
         return result;
     }
 private:
-    int st;
+    int32_t st;
 };
 
 class BtAddrRecordCtx : public StRecordCtx {
@@ -96,7 +96,7 @@ public:
         Reset();
     }
 
-    bool Update(int id, const SoftBusBtAddr *addr, int st = 0)
+    bool Update(int32_t id, const SoftBusBtAddr *addr, int32_t st = 0)
     {
         if (!StRecordCtx::Update(id, st)) {
             return false;
@@ -105,7 +105,7 @@ public:
         return true;
     }
 
-    testing::AssertionResult Expect(int id, SoftBusBtAddr *addrParam, int st = 0)
+    testing::AssertionResult Expect(int32_t id, SoftBusBtAddr *addrParam, int32_t st = 0)
     {
         auto result = StRecordCtx::Expect(id, st);
         if (!result) {
@@ -132,7 +132,7 @@ class IntRecordCtx : public StRecordCtx {
 public:
     explicit IntRecordCtx(const char *identifier) : StRecordCtx(identifier), val(-1) {}
 
-    bool Update(int id, int st, int valParam)
+    bool Update(int32_t id, int32_t st, int32_t valParam)
     {
         if (!StRecordCtx::Update(id, st)) {
             return false;
@@ -141,14 +141,14 @@ public:
         return true;
     }
 
-    testing::AssertionResult Expect(int id, int st, int valParam)
+    testing::AssertionResult Expect(int32_t id, int32_t st, int32_t valParam)
     {
         auto result = StRecordCtx::Expect(id, st);
         if (!result) {
             goto ClEANUP;
         }
         if (this->val != valParam) {
-            result = testing::AssertionFailure() << identifier << " is call by unexpectedly int value,"
+            result = testing::AssertionFailure() << identifier << " is call by unexpectedly int32_t value,"
                                                  << "want: " << valParam << ", actual: " << this->val;
         } else {
             result = testing::AssertionSuccess();
@@ -158,7 +158,7 @@ public:
         return result;
     }
 private:
-    int val;
+    int32_t val;
 };
 
 #endif
