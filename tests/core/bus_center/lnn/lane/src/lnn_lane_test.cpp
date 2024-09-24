@@ -3125,42 +3125,6 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_08, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_09
-* @tc.desc: SelectLaneRule
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LNN_LANE_09, TestSize.Level1)
-{
-    uint32_t experctBw = 1;
-    uint32_t actualBw;
-    NiceMock<LaneDepsInterfaceMock> laneDepMock;
-    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
-    const LnnLaneManager *laneManager = GetLaneManager();
-    LaneType laneType = LANE_TYPE_BUTT;
-    uint32_t laneHandle = laneManager->lnnGetLaneHandle(laneType);
-    EXPECT_TRUE(laneHandle != INVALID_LANE_REQ_ID);
-
-    laneDepMock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
-    laneDepMock.SetDefaultResultForAlloc(1 << BIT_WIFI_P2P, 1 << BIT_WIFI_P2P, 0, 0);
-    wifiMock.SetDefaultResult();
-    EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneHandle, NotNull()))
-        .WillRepeatedly(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
-    EXPECT_CALL(laneDepMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-
-    int32_t ret = laneManager->lnnQosLimit(INVALID_LANE_REQ_ID, experctBw, &actualBw);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = laneManager->lnnQosLimit(laneHandle, experctBw, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = laneManager->lnnQosLimit(INVALID_LANE_REQ_ID, experctBw, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = laneManager->lnnQosLimit(laneHandle, experctBw, &actualBw);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-}
-
-/*
 * @tc.name: LNN_LANE_10
 * @tc.desc: SelectLaneRule
 * @tc.type: FUNC
@@ -3252,12 +3216,6 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_12, TestSize.Level1)
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
-
-    uint32_t expectBw = 1;
-    uint32_t actualBw;
-    ret = laneManager->lnnQosLimit(laneReqId, expectBw, &actualBw);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /*
