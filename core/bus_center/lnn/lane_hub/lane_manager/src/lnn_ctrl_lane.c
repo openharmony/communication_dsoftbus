@@ -320,6 +320,7 @@ static int32_t CtrlTriggerLink(uint32_t laneHandle)
     do {
         ret = CreateLinkRequestNode(&reqInfo->allocInfo, &requestInfo);
         if (ret != SOFTBUS_OK) {
+            Unlock();
             LNN_LOGE(LNN_LANE, "Create LinkRequestNode fail.");
             break;
         }
@@ -339,7 +340,6 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
 {
     AuthLinkTypeList authList;
     if (memset_s(&authList, sizeof(AuthLinkTypeList), 0, sizeof(AuthLinkTypeList)) != EOK) {
-        LNN_LOGE(LNN_LANE, "memset_s authList fail");
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = GetAuthLinkTypeList(allocInfo->networkId, &authList);
@@ -347,7 +347,6 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
         LNN_LOGE(LNN_LANE, "get authList fail");
         return ret;
     }
-
     LanePreferredLinkList request;
     if (memset_s(&request, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList)) != EOK) {
         LNN_LOGE(LNN_LANE, "memset_s request fail");
@@ -382,6 +381,7 @@ static int32_t AllocCtrlLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo
     ret = CtrlTriggerLink(laneHandle);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
+        DeleteCtrlRequestNode(laneHandle);
         LNN_LOGE(LNN_LANE, "trigger link fail, laneHandle=%{public}u", laneHandle);
         return ret;
     }

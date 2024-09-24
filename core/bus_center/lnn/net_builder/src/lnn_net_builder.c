@@ -766,15 +766,11 @@ int32_t ConifgLocalLedger(void)
     if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local irk fail");
     }
+
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
     (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
-
-    // irk fail should not cause softbus init fail
-    if (LnnUpdateLinkFinderInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "sync rpa info to linkfinder fail.");
-    }
     return SOFTBUS_OK;
 }
 
