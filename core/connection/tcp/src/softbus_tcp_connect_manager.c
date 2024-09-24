@@ -55,10 +55,10 @@ typedef struct {
 typedef struct TcpConnInfoNode {
     ListNode node;
     uint32_t connectionId;
-    ConnectionInfo info;
     ConnectResult result;
     uint32_t requestId;
     ConnectStatistics statistics;
+    ConnectionInfo info;
 } TcpConnInfoNode;
 
 static SoftBusList *g_tcpConnInfoList = NULL;
