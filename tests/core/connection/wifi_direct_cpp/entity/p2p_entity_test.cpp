@@ -34,6 +34,8 @@ class P2pEntityTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
+        WifiDirectInterfaceMock mock;
+        EXPECT_CALL(mock, GetP2pEnableStatus).WillOnce(Return(WIFI_SUCCESS));
         P2pEntity::Init();
     }
     static void TearDownTestCase() {}
