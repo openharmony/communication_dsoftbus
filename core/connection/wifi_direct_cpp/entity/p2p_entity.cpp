@@ -76,6 +76,10 @@ void P2pEntity::Init()
         actions, ARRAY_SIZE(actions), "P2pEntity", ListenerPriority::LISTENER_PRIORITY_HIGH, P2pEntity::Listener);
     RegisterP2pStateChangedCallback(P2pStateChangeCallback);
     RegisterP2pConnectionChangedCallback(P2pConnectionChangeCallback);
+
+    /* The P2P may report the event through callback early, and softbus register the callback later.
+     * Therefore, after theregistration is successful, check wethere the P2P is enable. */
+    InterfaceManager::GetInstance().InitInterface(InterfaceInfo::InterfaceType::P2P);
 }
 
 P2pEntity::P2pEntity() : timer_("P2pEntity")
