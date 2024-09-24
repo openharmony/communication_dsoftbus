@@ -35,11 +35,6 @@ public:
     SoftBusClientStub();
     virtual ~SoftBusClientStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void OnDeviceFound(const DeviceInfo *device) override;
-    void OnDiscoverFailed(int subscribeId, int failReason) override;
-    void OnDiscoverySuccess(int subscribeId) override;
-    void OnPublishSuccess(int publishId) override;
-    void OnPublishFail(int publishId, int reason) override;
     int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *info) override;
     int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode) override;
     int32_t OnChannelLinkDown(const char *networkId, int32_t routeType) override;
@@ -64,11 +59,6 @@ public:
     int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
 
 private:
-    int32_t OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnDiscoverFailedInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnDiscoverySuccessInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnPublishSuccessInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnPublishFailInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOpenFailedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelLinkDownInner(MessageParcel &data, MessageParcel &reply);

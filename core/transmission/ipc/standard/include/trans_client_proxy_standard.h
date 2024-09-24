@@ -25,11 +25,6 @@ public:
         : IRemoteProxy<ISoftBusClient>(impl) {}
     virtual ~TransClientProxy() = default;
 
-    void OnDeviceFound(const DeviceInfo *device) override;
-    void OnDiscoverFailed(int subscribeId, int failReason) override;
-    void OnDiscoverySuccess(int subscribeId) override;
-    void OnPublishSuccess(int publishId) override;
-    void OnPublishFail(int publishId, int reason) override;
     int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel) override;
     int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
     int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode) override;
