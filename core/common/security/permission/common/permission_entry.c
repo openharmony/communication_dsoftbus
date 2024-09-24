@@ -533,6 +533,7 @@ static int32_t CheckPidAndUidDynamic(const SoftBusPermissionEntry *pe, const Sof
         }
     }
     if (appInfo == NULL) {
+        COMM_LOGE(COMM_PERM, "Linked list is empty");
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
     char *tmpName = NULL;
