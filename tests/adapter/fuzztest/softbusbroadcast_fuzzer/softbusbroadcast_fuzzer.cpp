@@ -160,25 +160,25 @@ static LpScanParam BuildLpScanParam(const uint8_t* data, size_t size)
     return lpScanParam;
 }
 
-static void BleAdvEnableCallback(int channel, int status)
+static void BleAdvEnableCallback(int32_t channel, int32_t status)
 {
     (void)channel;
     (void)status;
 }
 
-static void BleAdvDisableCallback(int channel, int status)
+static void BleAdvDisableCallback(int32_t channel, int32_t status)
 {
     (void)channel;
     (void)status;
 }
 
-static void BleAdvDataCallback(int channel, int status)
+static void BleAdvDataCallback(int32_t channel, int32_t status)
 {
     (void)channel;
     (void)status;
 }
 
-static void BleAdvUpdateCallback(int channel, int status)
+static void BleAdvUpdateCallback(int32_t channel, int32_t status)
 {
     (void)channel;
     (void)status;
@@ -191,19 +191,19 @@ static BroadcastCallback g_advCallback = {
     .OnSetBroadcastingCallback = BleAdvDataCallback,
 };
 
-static void BleOnScanStart(int listenerId, int status)
+static void BleOnScanStart(int32_t listenerId, int32_t status)
 {
     (void)listenerId;
     (void)status;
 }
 
-static void BleOnScanStop(int listenerId, int status)
+static void BleOnScanStop(int32_t listenerId, int32_t status)
 {
     (void)listenerId;
     (void)status;
 }
 
-static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *reportInfo)
+static void BleScanResultCallback(int32_t listenerId, const BroadcastReportInfo *reportInfo)
 {
     (void)listenerId;
     (void)reportInfo;
@@ -306,7 +306,7 @@ void BroadcastSetLpAdvParamFuzzTest()
 
 } // OHOS namespace
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     if (size < MIN_DATA_LEN) {
         return 0;

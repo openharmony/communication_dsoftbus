@@ -339,14 +339,6 @@ static int32_t UpdateDeviceInfoInner(DeviceInfo *curInfo, const DeviceInfo *newI
         *updated = NSTACKX_TRUE;
     }
 
-    if (strlen(newInfo->version) > 0 && strcmp(curInfo->version, newInfo->version) != 0) {
-        if (strcpy_s(curInfo->version, sizeof(curInfo->version), newInfo->version) != EOK) {
-            DFINDER_LOGE(TAG, "hicom version copy error");
-            return NSTACKX_EFAILED;
-        }
-        *updated = NSTACKX_TRUE;
-    }
-
     if (UpdateCapabilityBitmap(curInfo, newInfo, updated) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "UpdateCapabilityBitmap fails");
         return NSTACKX_EFAILED;

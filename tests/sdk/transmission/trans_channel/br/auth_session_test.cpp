@@ -40,16 +40,16 @@ enum TEST_WAY {
     ACTIVE_OPENAUTHSESSION_WAY
 };
 
-const int CONN_SINGLE_WAIT_TIMEOUT = 5;
-const int CONN_SLEEP_TIME = 1;
-const int CLOSE_DELAY_TIME = 500;
-const int INPUT_ERR = (-1);
+const int32_t CONN_SINGLE_WAIT_TIMEOUT = 5;
+const int32_t CONN_SLEEP_TIME = 1;
+const int32_t CLOSE_DELAY_TIME = 500;
+const int32_t INPUT_ERR = (-1);
 
-const int SEND_DATA_SIZE_1K = 1024;
-const int SEND_DATA_SIZE_4K = 4 * 1024;
-const int SEND_DATA_SIZE_40K = 40 * 1000 - 8;
+const int32_t SEND_DATA_SIZE_1K = 1024;
+const int32_t SEND_DATA_SIZE_4K = 4 * 1024;
+const int32_t SEND_DATA_SIZE_40K = 40 * 1000 - 8;
 
-const int CONN_ADDR_INFO_COUNT = 5;
+const int32_t CONN_ADDR_INFO_COUNT = 5;
 ConnectionAddr g_addrInfo[CONN_ADDR_INFO_COUNT];
 
 ISessionListener g_sessionlistener;
@@ -129,7 +129,7 @@ int32_t TestSendData(int32_t sessionId, const char *data, int32_t len)
     return SOFTBUS_OK;
 }
 
-int OnSessionOpened(int sessionId, int result)
+int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("############# session opened,sesison id[%d] result[%d]\n", sessionId, result);
     if (result == SOFTBUS_OK) {
@@ -142,14 +142,14 @@ int OnSessionOpened(int sessionId, int result)
     return result;
 }
 
-void OnSessionClosed(int sessionId)
+void OnSessionClosed(int32_t sessionId)
 {
     printf("############# session closed, session id = %d\n", sessionId);
     g_sessionId = -1;
     g_successFlag = false;
 }
 
-void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     if (g_testWay == PASSIVE_OPENAUTHSESSION_WAY) {
         SendBytes(sessionId, "{\"received ok\"}", strlen("{\"received ok\"}"));
@@ -157,7 +157,7 @@ void OnBytesReceived(int sessionId, const void *data, unsigned int len)
     printf("bytes received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
 }
 
-void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len)
 {
     printf("msg received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
 }

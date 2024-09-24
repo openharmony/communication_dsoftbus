@@ -34,7 +34,7 @@ public:
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual bool LnnIsLSANode(const NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
-    virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen) = 0;
+    virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
     virtual int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag) = 0;
     virtual int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
         TimeSyncAccuracy accuracy, TimeSyncPeriod period) = 0;

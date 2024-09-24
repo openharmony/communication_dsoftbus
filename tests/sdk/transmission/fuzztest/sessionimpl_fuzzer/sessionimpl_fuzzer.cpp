@@ -25,7 +25,7 @@ void SessionTest(const uint8_t* data, size_t size)
     }
     Communication::SoftBus::SessionImpl session;
 
-    int sessionId = *(reinterpret_cast<const int*>(data));
+    int32_t sessionId = *(reinterpret_cast<const int*>(data));
     session.SetSessionId(sessionId);
     session.GetSessionId();
 
@@ -64,7 +64,7 @@ void SendBytesTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::SessionTest(data, size);
     OHOS::SetOpeTest(data, size);

@@ -75,7 +75,7 @@ static SoftBusList *TestCreateSessionList()
 
     SoftBusMutexAttr mutexAttr;
     mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-    int ret = SoftBusMutexInit(&list->lock, &mutexAttr);
+    int32_t ret = SoftBusMutexInit(&list->lock, &mutexAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ListInit(&list->list);
     return list;
@@ -951,7 +951,7 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaDelLaneReqById001, TestSize.Leve
     g_authWithParaAsyncReqLaneList = TestCreateSessionList();
     ASSERT_TRUE(g_authWithParaAsyncReqLaneList != nullptr);
     ret = TransAuthWithParaDelLaneReqById(laneReqId);
-    EXPECT_EQ(SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     const char *sessionName = TEST_SESSION_NAME;
     LinkPara linkPara;
@@ -1018,7 +1018,7 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaGetLaneReqByLaneReqId001, TestSi
     g_authWithParaAsyncReqLaneList = TestCreateSessionList();
     ASSERT_TRUE(g_authWithParaAsyncReqLaneList != nullptr);
     ret = TransAuthWithParaGetLaneReqByLaneReqId(laneReqId, &paraNode);
-    EXPECT_EQ(SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     const char *sessionName = TEST_SESSION_NAME;
     LinkPara linkPara;

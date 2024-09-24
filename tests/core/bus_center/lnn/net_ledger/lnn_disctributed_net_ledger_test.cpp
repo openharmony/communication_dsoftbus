@@ -570,20 +570,16 @@ HWTEST_F(LNNDisctributedLedgerTest, IS_META_NODE_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == true);
 }
 
-HWTEST_F(LNNDisctributedLedgerTest, POST_ONLINE_NODESTOCB_Test_001, TestSize.Level1)
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NODEINFO_BYID_Test_001, TestSize.Level1)
 {
     INodeStateCb callBack;
+    IdCategory type = CATEGORY_UDID;
+    NodeInfo *ret = LnnGetNodeInfoById(nullptr, type);
+    EXPECT_TRUE(ret == nullptr);
     callBack.onNodeOnline = nullptr;
     (void)PostOnlineNodesToCb(&callBack);
     callBack.onNodeOnline = TestFunc;
     (void)PostOnlineNodesToCb(&callBack);
-}
-
-HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NODEINFO_BYID_Test_001, TestSize.Level1)
-{
-    IdCategory type = CATEGORY_UDID;
-    NodeInfo *ret = LnnGetNodeInfoById(nullptr, type);
-    EXPECT_TRUE(ret == nullptr);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NODE_Test_001, TestSize.Level1)

@@ -66,6 +66,7 @@
         "TransUnRegistFileSchema";
         "SendEvent";
         "StopEvent";
+        "RegisterEventListener";
         "UnregisterEventListener";
         "SendLinkEvent";
         "StopLinkEvent";
@@ -79,6 +80,7 @@
         "CloseAuthMetaSocket";
         "SendMetaData";
         "Socket";
+        "SetActionAddr";
         "Bind";
         "BindAsync";
         "Listen";
@@ -88,6 +90,7 @@
         "DBinderGrantPermission";
         "DBinderRemovePermission";
         "DfsBind";
+        "SetSoftbusConfig";
         "SoftBusFtInit";
         "SoftBusFtDestroyNonblock";
         "SoftBusFtDestroy";

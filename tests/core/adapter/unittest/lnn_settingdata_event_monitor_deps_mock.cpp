@@ -37,7 +37,7 @@ static SettingDataEventMonitorDepsInterface *GetSettingDataEventMonitorDepsInter
 }
 
 extern "C" {
-SoftBusLooper *GetLooper(int looper)
+SoftBusLooper *GetLooper(int32_t looper)
 {
     return GetSettingDataEventMonitorDepsInterface()->GetLooper(looper);
 }

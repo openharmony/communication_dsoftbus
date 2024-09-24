@@ -41,7 +41,7 @@ void LnnNotifyDeviceVerified(const char *udid)
     return GetLnnConnInterface()->LnnNotifyDeviceVerified(udid);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetLnnConnInterface()->SoftBusGetBtState();
 }

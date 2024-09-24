@@ -399,9 +399,13 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
 
     UnlockClientSessionServerList();
     char *tmpName = NULL;
-    Anonymize(server->sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", tmpName, server->pkgName);
+    char *tmpPkgName = NULL;
+    Anonymize(pkgName, &tmpPkgName);
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s",
+        AnonymizeWrapper(tmpName), AnonymizeWrapper(tmpPkgName));
     AnonymizeFree(tmpName);
+    AnonymizeFree(tmpPkgName);
     return SOFTBUS_OK;
 }
 
@@ -2414,7 +2418,8 @@ int32_t ClientCancelAuthSessionTimer(int32_t sessionId)
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->sessionId != sessionId || sessionNode->channelType != CHANNEL_TYPE_AUTH) {
+            if (sessionNode->sessionId != sessionId ||
+                (sessionNode->channelType != CHANNEL_TYPE_PROXY && sessionNode->channelType != CHANNEL_TYPE_AUTH)) {
                 continue;
             }
             ret = ClientUpdateAuthSessionTimer(sessionNode, sessionId);

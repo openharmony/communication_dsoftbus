@@ -144,7 +144,7 @@ HWTEST_F(VtpStreamSocketTest, CreateServer001, TestSize.Level1)
         (Communication::SoftBus::IpAndPort*)SoftBusMalloc(sizeof(Communication::SoftBus::IpAndPort));
     ASSERT_TRUE(local != nullptr);
     (void)memset_s(local, sizeof(Communication::SoftBus::IpAndPort), 0, sizeof(Communication::SoftBus::IpAndPort));
-    int streamType = 1;
+    int32_t streamType = 1;
     std::pair<uint8_t*, uint32_t> sessionKey;
 
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
@@ -214,7 +214,7 @@ HWTEST_F(VtpStreamSocketTest, Connect001, TestSize.Level1)
  */
 HWTEST_F(VtpStreamSocketTest, GetOption001, TestSize.Level1)
 {
-    int type = 12;
+    int32_t type = 12;
     StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
@@ -247,7 +247,7 @@ HWTEST_F(VtpStreamSocketTest, GetOption001, TestSize.Level1)
  */
 HWTEST_F(VtpStreamSocketTest, SetOption001, TestSize.Level1)
 {
-    int type = 12;
+    int32_t type = 12;
     StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
@@ -295,7 +295,7 @@ HWTEST_F(VtpStreamSocketTest, SetOption001, TestSize.Level1)
  */
 HWTEST_F(VtpStreamSocketTest, GetOption002, TestSize.Level1)
 {
-    int type = 1001;
+    int32_t type = 1001;
     StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
@@ -304,7 +304,7 @@ HWTEST_F(VtpStreamSocketTest, GetOption002, TestSize.Level1)
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
     *value = vtpStreamSocket->GetOption(type);
-    int ret = value->GetIntValue();
+    int32_t ret = value->GetIntValue();
     if (value != NULL) {
         ret = true;
     }
@@ -369,7 +369,7 @@ HWTEST_F(VtpStreamSocketTest, GetIpType001, TestSize.Level1)
     StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
-    int type = IP_TYPE + 2;
+    int32_t type = IP_TYPE + 2;
 
     *value = vtpStreamSocket->GetIpType(type);
     EXPECT_TRUE(value != NULL);
@@ -398,9 +398,9 @@ HWTEST_F(VtpStreamSocketTest, GetRemoteScopeId001, TestSize.Level1)
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
 
-    int type = REMOTE_SCOPE_ID + 2;
+    int32_t type = REMOTE_SCOPE_ID + 2;
     *value = vtpStreamSocket->GetRemoteScopeId(type);
-    int ret = ret = value->intVal_;
+    int32_t ret = ret = value->intVal_;
     EXPECT_EQ(-1, ret);
 
     type = REMOTE_SCOPE_ID;
@@ -428,7 +428,7 @@ HWTEST_F(VtpStreamSocketTest, IsServer001, TestSize.Level1)
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
 
-    int type = IS_SERVER + 2;
+    int32_t type = IS_SERVER + 2;
     *value = vtpStreamSocket->IsServer(type);
     EXPECT_TRUE(value != NULL);
 
@@ -455,7 +455,7 @@ HWTEST_F(VtpStreamSocketTest, SetStreamScene001, TestSize.Level1)
     StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
-    int type = IS_SERVER + 2;
+    int32_t type = IS_SERVER + 2;
     bool ret = vtpStreamSocket->SetStreamScene(type, *value);
     EXPECT_EQ(false, ret);
 
@@ -484,7 +484,7 @@ HWTEST_F(VtpStreamSocketTest, SetStreamHeaderSize001, TestSize.Level1)
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
 
-    int type = IS_SERVER + 2;
+    int32_t type = IS_SERVER + 2;
     bool ret = vtpStreamSocket->SetStreamHeaderSize(type, *value);
     EXPECT_EQ(false, ret);
 
@@ -519,7 +519,7 @@ HWTEST_F(VtpStreamSocketTest, NotifyStreamListener001, TestSize.Level1)
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
     bool isServer = false;
-    int type = IS_SERVER + 2;
+    int32_t type = IS_SERVER + 2;
     vtpStreamSocket->NotifyStreamListener();
     bool ret = vtpStreamSocket->EnableBwEstimationAlgo(type, isServer);
     EXPECT_EQ(true, ret);
@@ -536,7 +536,7 @@ HWTEST_F(VtpStreamSocketTest, EnableJitterDetectionAlgo001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
-    int type = IS_SERVER + 2;
+    int32_t type = IS_SERVER + 2;
     bool ret = vtpStreamSocket->EnableJitterDetectionAlgo(type);
     EXPECT_EQ(true, ret);
 }
@@ -552,7 +552,7 @@ HWTEST_F(VtpStreamSocketTest, EnableDirectlySend001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
-    int type = IS_SERVER + 2;
+    int32_t type = IS_SERVER + 2;
     bool ret = vtpStreamSocket->EnableDirectlySend(type);
     EXPECT_EQ(false, ret);
     ret = vtpStreamSocket->EnableDirectlySend(type);
@@ -570,7 +570,7 @@ HWTEST_F(VtpStreamSocketTest, EnableSemiReliable001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
-    int type = IS_SERVER + 2;
+    int32_t type = IS_SERVER + 2;
     bool ret = vtpStreamSocket->EnableSemiReliable(type);
     EXPECT_EQ(false, ret);
     ret = vtpStreamSocket->EnableSemiReliable(type);
@@ -594,8 +594,8 @@ HWTEST_F(VtpStreamSocketTest, FillpStatistics001, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
     (void)memset_s(info, sizeof(FtEventCbkInfo), 0, sizeof(FtEventCbkInfo));
 
-    int fd = 2;
-    int ret = vtpStreamSocket->FillpStatistics(fd, nullptr);
+    int32_t fd = 2;
+    int32_t ret = vtpStreamSocket->FillpStatistics(fd, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     info->evt = FT_EVT_FRAME_STATS;
@@ -632,7 +632,7 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback001, TestSize.Level1)
     bool isServer = false;
     vtpStreamSocket->RegisterMetricCallback(isServer);
 
-    int fd = 3;
+    int32_t fd = 3;
     std::mutex streamSocketLock_;
 
     std::shared_ptr<VtpStreamSocket> streamreceiver;
@@ -649,7 +649,7 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback001, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
     (void)memset_s(info, sizeof(FtEventCbkInfo), 0, sizeof(FtEventCbkInfo));
 
-    int ret = vtpStreamSocket->HandleFillpFrameStats(fd, nullptr);
+    int32_t ret = vtpStreamSocket->HandleFillpFrameStats(fd, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = vtpStreamSocket->HandleFillpFrameStats(fd, info);
     EXPECT_EQ(0, ret);
@@ -679,7 +679,7 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback002, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
-    int fd = 1;
+    int32_t fd = 1;
     std::mutex streamSocketLock_;
     auto self = vtpStreamSocket->GetSelf();
     EXPECT_TRUE(self != nullptr);
@@ -691,7 +691,7 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback002, TestSize.Level1)
     vtpStreamSocket->g_streamSocketMap[2] = self;
     vtpStreamSocket->g_streamSocketMap[3] = self;
 
-    int tmpFd = 1;
+    int32_t tmpFd = 1;
     ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
 
     vtpStreamSocket->AddStreamSocketLock(tmpFd, streamSocketLock_);
@@ -736,9 +736,9 @@ HWTEST_F(VtpStreamSocketTest, EpollTimeout001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
-    int fd = 2;
-    int timeout = 5;
-    int ret = vtpStreamSocket->EpollTimeout(fd, timeout);
+    int32_t fd = 2;
+    int32_t timeout = 5;
+    int32_t ret = vtpStreamSocket->EpollTimeout(fd, timeout);
     EXPECT_NE(0, ret);
 }
 
@@ -755,8 +755,8 @@ HWTEST_F(VtpStreamSocketTest, MakeStreamData001, TestSize.Level1)
 
     std::unique_ptr<char[]> dataBuffer = nullptr;
     std::unique_ptr<char[]> extBuffer = nullptr;
-    int dataLength = 2;
-    int extLen = 0;
+    int32_t dataLength = 2;
+    int32_t extLen = 0;
     dataBuffer = vtpStreamSocket->RecvStream(dataLength);
     Communication::SoftBus::StreamData data = { std::move(dataBuffer), dataLength, std::move(extBuffer), extLen };
     Communication::SoftBus::StreamFrameInfo info = {};
@@ -837,7 +837,7 @@ HWTEST_F(VtpStreamSocketTest, GetVtpStackConfig001, TestSize.Level1)
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
 
-    int type = STREAM_TYPE_INT + 1;
+    int32_t type = STREAM_TYPE_INT + 1;
     *value = vtpStreamSocket->GetVtpStackConfig(type);
     value->GetIntValue();
     EXPECT_TRUE(value != NULL);
@@ -866,7 +866,7 @@ HWTEST_F(VtpStreamSocketTest, GetStreamType001, TestSize.Level1)
     ASSERT_TRUE(value != nullptr);
     (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
 
-    int type = STREAM_TYPE_INT + 1;
+    int32_t type = STREAM_TYPE_INT + 1;
     *value = vtpStreamSocket->GetStreamType(type);
     value->GetIntValue();
     EXPECT_TRUE(value != NULL);
@@ -902,7 +902,7 @@ HWTEST_F(VtpStreamSocketTest, GetStreamType001, TestSize.Level1)
     value->GetIntValue();
     EXPECT_TRUE(value != NULL);
 
-    int fd = 2;
+    int32_t fd = 2;
     *value = vtpStreamSocket->GetNonBlockMode(fd);
     value->GetIntValue();
     EXPECT_TRUE(value != NULL);
@@ -937,13 +937,13 @@ HWTEST_F(VtpStreamSocketTest, DoStreamRecv001, TestSize.Level1)
     vtpStreamSocket->isStreamRecv_ = true;
     vtpStreamSocket->DoStreamRecv();
 
-    int ret  = vtpStreamSocket->RecvStreamLen();
+    int32_t ret  = vtpStreamSocket->RecvStreamLen();
     vtpStreamSocket->streamType_ = 0;
     vtpStreamSocket->scene_ = 1;
     ret  = vtpStreamSocket->RecvStreamLen();
     EXPECT_EQ(-1, ret);
 
-    int fd = 2;
+    int32_t fd = 2;
     vtpStreamSocket->SetDefaultConfig(fd);
 
     StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
@@ -955,7 +955,7 @@ HWTEST_F(VtpStreamSocketTest, DoStreamRecv001, TestSize.Level1)
     StreamAttr *values = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
     ASSERT_TRUE(values != nullptr);
     (void)memset_s(values, sizeof(StreamAttr), 0, sizeof(StreamAttr));
-    int type = 2;
+    int32_t type = 2;
     *values = vtpStreamSocket->GetIpTos(type);
     EXPECT_TRUE(values != nullptr);
 
@@ -999,13 +999,13 @@ HWTEST_F(VtpStreamSocketTest, HandleRipplePolicy001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
-    int fd = 1;
+    int32_t fd = 1;
     FtEventCbkInfo *info = (FtEventCbkInfo*)SoftBusMalloc(sizeof(FtEventCbkInfo));
     ASSERT_TRUE(info != nullptr);
     (void)memset_s(info, sizeof(FtEventCbkInfo), 0, sizeof(FtEventCbkInfo));
 
     ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
-    int ret = vtpStreamSocket->HandleRipplePolicy(fd, nullptr);
+    int32_t ret = vtpStreamSocket->HandleRipplePolicy(fd, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = vtpStreamSocket->HandleRipplePolicy(fd, info);
     EXPECT_EQ(0, ret);
@@ -1032,12 +1032,12 @@ HWTEST_F(VtpStreamSocketTest, HandleFillpFrameEvt001, TestSize.Level1)
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
     ASSERT_TRUE(vtpStreamSocket != nullptr);
 
-    int fd = 1;
+    int32_t fd = 1;
     FtEventCbkInfo *info = (FtEventCbkInfo*)SoftBusCalloc(sizeof(FtEventCbkInfo));
     ASSERT_TRUE(info != nullptr);
 
     ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
-    int ret = vtpStreamSocket->HandleFillpFrameEvt(fd, nullptr);
+    int32_t ret = vtpStreamSocket->HandleFillpFrameEvt(fd, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = vtpStreamSocket->HandleFillpFrameEvt(fd, info);
     EXPECT_EQ(0, ret);
@@ -1064,14 +1064,14 @@ HWTEST_F(VtpStreamSocketTest, InsertBufferLength001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
-    int fd = 2;
+    int32_t fd = 2;
     vtpStreamSocket->epollFd_ = 2;
     ASSERT_TRUE(vtpStreamSocket != nullptr);
-    int ret = vtpStreamSocket->SetSocketEpollMode(fd);
+    int32_t ret = vtpStreamSocket->SetSocketEpollMode(fd);
     EXPECT_EQ(-1, ret);
 
-    int num = 2;
-    int length = 2;
+    int32_t num = 2;
+    int32_t length = 2;
     ASSERT_TRUE(vtpStreamSocket != nullptr);
     std::unique_ptr<char[]> data = nullptr;
     data = std::make_unique<char[]>(length);
@@ -1094,9 +1094,9 @@ HWTEST_F(VtpStreamSocketTest, SetSocketEpollMode001, TestSize.Level1)
 {
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-    int fd = 2;
-    int timeout = 10;
-    int ret  = vtpStreamSocket->EpollTimeout(fd, timeout);
+    int32_t fd = 2;
+    int32_t timeout = 10;
+    int32_t ret  = vtpStreamSocket->EpollTimeout(fd, timeout);
     EXPECT_NE(0, ret);
 
     ret  = vtpStreamSocket->SetSocketEpollMode(fd);

@@ -25,30 +25,31 @@
 
 namespace OHOS {
 
-    static int OnReceiveFileStarted(int sessionId, const char* files, int fileCnt)
+    static int32_t OnReceiveFileStarted(int32_t sessionId, const char* files, int32_t fileCnt)
     {
         return 0;
     }
 
-    static void OnReceiveFileFinished(int sessionId, const char* files, int fileCnt)
+    static void OnReceiveFileFinished(int32_t sessionId, const char* files, int32_t fileCnt)
     {}
 
-    static int OnReceiveFileProcess(int sessionId, const char* firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+    static int32_t OnReceiveFileProcess(int32_t sessionId, const char* firstFile,
+                                        uint64_t bytesUpload, uint64_t bytesTotal)
     {
         return 0;
     }
 
-    static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+    static int32_t OnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
     {
         return 0;
     }
 
-    static int OnSendFileFinished(int sessionId, const char* firstFile)
+    static int32_t OnSendFileFinished(int32_t sessionId, const char* firstFile)
     {
         return 0;
     }
 
-    static void OnFileTransError(int sessionId)
+    static void OnFileTransError(int32_t sessionId)
     {}
 
     void TransOnFileChannelOpenedTest(const uint8_t* data, size_t size)
@@ -128,7 +129,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::TransOnFileChannelOpenedTest(data, size);

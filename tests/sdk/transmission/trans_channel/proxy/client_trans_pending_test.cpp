@@ -45,7 +45,7 @@ public:
 
 void ClientTransPendingTest::SetUpTestCase(void)
 {
-    int ret = InitPendingPacket();
+    int32_t ret = InitPendingPacket();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransClientInit();
@@ -64,7 +64,7 @@ HWTEST_F(ClientTransPendingTest, TransPendingTest, TestSize.Level0)
     uint32_t id = 1;
     uint64_t seq = 0;
 
-    int ret = CreatePendingPacket(id, seq);
+    int32_t ret = CreatePendingPacket(id, seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = CreatePendingPacket(TEST_SESSION_ID, seq);

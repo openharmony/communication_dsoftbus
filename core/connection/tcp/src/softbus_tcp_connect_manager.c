@@ -113,14 +113,6 @@ static void DfxRecordTcpConnectSuccess(uint32_t pId, TcpConnInfoNode *tcpInfo, C
                             SOFTBUS_HISYSEVT_CONN_OK);
 }
 
-uint32_t TcpGetConnNum(void)
-{
-    if (g_tcpConnInfoList == NULL) {
-        return 0;
-    }
-    return g_tcpConnInfoList->cnt;
-}
-
 int32_t AddTcpConnInfo(TcpConnInfoNode *item)
 {
     if (item == NULL || g_tcpConnInfoList == NULL) {
