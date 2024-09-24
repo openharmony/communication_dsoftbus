@@ -1670,7 +1670,7 @@ ERR_EXIT:
 
 int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId)
 {
-    TRANS_LOGD(TRANS_SVC, "TransAuthWithParaDelLaneReqById laneReqId=%{public}u", laneReqId);
+    TRANS_LOGD(TRANS_SVC, "TransAuthWithParaDelLaneReqById laneReqId=%{public}u,", laneReqId);
     if (g_authWithParaAsyncReqLaneList == NULL) {
         TRANS_LOGE(TRANS_SVC, "TransAuthWithParaDelLaneReqById: g_authWithParaAsyncReqLaneList no init.");
         return SOFTBUS_NO_INIT;
@@ -1690,7 +1690,7 @@ int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId)
             SoftBusFree(laneItem->sessionName);
             laneItem->sessionName = NULL;
             SoftBusFree(laneItem);
-            laneItem = NULL;
+            laneItem =NULL;
             (void)SoftBusMutexUnlock(&(g_authWithParaAsyncReqLaneList->lock));
             return SOFTBUS_OK;
         }
