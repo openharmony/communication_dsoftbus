@@ -1164,6 +1164,8 @@ static void *SelectTask(void *arg)
         }
         SoftBusSocketFdSet(selectState->ctrlRfd, &readSet);
         int32_t maxFd = maxFdOrStatus > selectState->ctrlRfd ? maxFdOrStatus : selectState->ctrlRfd;
+        CONN_LOGI(CONN_COMMON, "select is waking up, maxFd=%{public}d, ctrlRfd=%{public}d",
+            maxFd, selectState->ctrlRfd);
         int32_t nEvents = SoftBusSocketSelect(maxFd + 1, &readSet, &writeSet, &exceptSet, NULL);
         int32_t wakeupTraceId = ++wakeupTraceIdGenerator;
         if (nEvents == 0) {
