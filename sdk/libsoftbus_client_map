@@ -104,6 +104,7 @@
         "TransUnRegistFileSchema";
         "SendEvent";
         "StopEvent";
+        "RegisterEventListener";
         "UnregisterEventListener";
         "ClientTransOnScanResultCallback";
         "ClientAddEventListener";
@@ -123,6 +124,7 @@
         "CloseAuthMetaSocket";
         "SendMetaData";
         "Socket";
+        "SetActionAddr";
         "Bind";
         "BindAsync";
         "Listen";
@@ -139,6 +141,7 @@
         "DiscRecoveryPolicy";
         "RestartRegDataLevelChange";
         "LnnOnDataLevelChanged";
+        "SetSoftbusConfig";
         "SoftBusFtInit";
         "SoftBusFtDestroyNonblock";
         "SoftBusFtDestroy";
