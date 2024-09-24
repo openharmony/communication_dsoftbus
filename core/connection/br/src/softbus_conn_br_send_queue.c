@@ -78,20 +78,6 @@ static int32_t GetPriority(int32_t flag)
     }
 }
 
-bool ConnBrIsQueueEmpty(void)
-{
-    uint32_t queueCount = 0;
-    for (uint32_t i = 0; i < QUEUE_NUM_PER_PID; i++) {
-        if (QueueCountGet(g_innerQueue->queue[i], &queueCount) != 0) {
-            continue;
-        }
-        if (queueCount > 0) {
-            return false;
-        }
-    }
-    return IsListEmpty(&g_brQueueList);
-}
-
 int32_t ConnBrEnqueueNonBlock(const void *msg)
 {
     if (msg == NULL) {
