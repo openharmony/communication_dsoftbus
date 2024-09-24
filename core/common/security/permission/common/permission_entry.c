@@ -507,6 +507,7 @@ void DeinitPermissionJson(void)
     }
     SoftBusMutexUnlock(&g_permissionEntryList->lock);
     DestroySoftBusList(g_permissionEntryList);
+    g_permissionEntryList = NULL;
 }
 
 SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
