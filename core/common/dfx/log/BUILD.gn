@@ -59,6 +59,7 @@ if (defined(ohos_lite)) {
       cfi_cross_dso = true
       debug = false
     }
+    branch_protector_ret = "pac_ret"
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
