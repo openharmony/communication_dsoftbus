@@ -295,17 +295,18 @@ static bool IsDeviceOnline(const char *remoteMac)
 static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIpSize)
 {
     bool found = false;
-    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
-        if (innerLink.GetRemoteDeviceId() == uuid &&
-            innerLink.GetState() == OHOS::SoftBus::InnerLink::LinkState::CONNECTED) {
-            found = true;
-            if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv4().c_str()) != EOK) {
-                found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
+        [&found, &localIp, localIpSize, uuid](const OHOS::SoftBus::InnerLink &innerLink) {
+            if (innerLink.GetRemoteDeviceId() == uuid &&
+                innerLink.GetState() == OHOS::SoftBus::InnerLink::LinkState::CONNECTED) {
+                found = true;
+                if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv4().c_str()) != EOK) {
+                    found = false;
+                }
+                return true;
             }
-            return true;
-        }
-        return false;
-    });
+            return false;
+        });
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeDeviceId(uuid).c_str());
@@ -320,23 +321,24 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
 static int32_t GetLocalIpByRemoteIpOnce(const char *remoteIp, char *localIp, int32_t localIpSize)
 {
     bool found = false;
-    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
-        if (innerLink.GetRemoteIpv4() == remoteIp) {
-            found = true;
-            if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv4().c_str()) != EOK) {
-                found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
+        [&found, &localIp, localIpSize, remoteIp](const OHOS::SoftBus::InnerLink &innerLink) {
+            if (innerLink.GetRemoteIpv4() == remoteIp) {
+                found = true;
+                if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv4().c_str()) != EOK) {
+                    found = false;
+                }
+                return true;
             }
-            return true;
-        }
-        if (innerLink.GetRemoteIpv6() == remoteIp) {
-            found = true;
-            if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv6().c_str()) != EOK) {
-                found = false;
+            if (innerLink.GetRemoteIpv6() == remoteIp) {
+                found = true;
+                if (strcpy_s(localIp, localIpSize, innerLink.GetLocalIpv6().c_str()) != EOK) {
+                    found = false;
+                }
+                return true;
             }
-            return true;
-        }
-        return false;
-    });
+            return false;
+        });
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
@@ -368,16 +370,17 @@ static int32_t GetLocalIpByRemoteIp(const char *remoteIp, char *localIp, int32_t
 static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidSize)
 {
     bool found = false;
-    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
-        if (innerLink.GetRemoteIpv4() == remoteIp || innerLink.GetRemoteIpv6() == remoteIp) {
-            found = true;
-            if (strcpy_s(uuid, uuidSize, innerLink.GetRemoteDeviceId().c_str()) != EOK) {
-                found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
+        [&found, &uuid, uuidSize, remoteIp](const OHOS::SoftBus::InnerLink &innerLink) {
+            if (innerLink.GetRemoteIpv4() == remoteIp || innerLink.GetRemoteIpv6() == remoteIp) {
+                found = true;
+                if (strcpy_s(uuid, uuidSize, innerLink.GetRemoteDeviceId().c_str()) != EOK) {
+                    found = false;
+                }
+                return true;
             }
-            return true;
-        }
-        return false;
-    });
+            return false;
+        });
 
     if (!found) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
@@ -393,19 +396,21 @@ static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp, char *localMac
     size_t remoteMacSize)
 {
     bool found = false;
-    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
-        if (innerLink.GetLocalIpv4() == localIp || innerLink.GetLocalIpv6() == localIp) {
-            found = true;
-            if (strcpy_s(localMac, localMacSize, innerLink.GetLocalDynamicMac().c_str()) != EOK) {
-                found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
+        [&localMac, localMacSize, &remoteMac, remoteMacSize, &found, localIp](
+            const OHOS::SoftBus::InnerLink &innerLink) {
+            if (innerLink.GetLocalIpv4() == localIp || innerLink.GetLocalIpv6() == localIp) {
+                found = true;
+                if (strcpy_s(localMac, localMacSize, innerLink.GetLocalDynamicMac().c_str()) != EOK) {
+                    found = false;
+                }
+                if (strcpy_s(remoteMac, remoteMacSize, innerLink.GetRemoteDynamicMac().c_str()) != EOK) {
+                    found = false;
+                }
+                return true;
+            } else {
+                return false;
             }
-            if (strcpy_s(remoteMac, remoteMacSize, innerLink.GetRemoteDynamicMac().c_str()) != EOK) {
-                found = false;
-            }
-            return true;
-        } else {
-            return false;
-        }
     });
 
     if (!found) {
@@ -532,7 +537,7 @@ static void RegisterEnhanceManager(WifiDirectEnhanceManager *manager)
 static bool IsHmlConnected()
 {
     bool ret = false;
-    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&ret] (const OHOS::SoftBus::InnerLink &innerLink) {
         if (innerLink.GetLinkType() == OHOS::SoftBus::InnerLink::LinkType::HML) {
             ret = true;
             return true;
