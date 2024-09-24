@@ -36,6 +36,7 @@
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
+#define CONVERSION_BASE 1000LL
 #define CAST_SESSION "CastPlusSessionName"
 static void ClientTransSessionTimerProc(void);
 
@@ -2237,6 +2238,7 @@ static int32_t CheckSessionEnableStatus(int32_t socket, SoftBusCond *callbackCon
 
 int32_t ClientWaitSyncBind(int32_t socket)
 {
+#define EXTRA_WAIT_TIME 5 // 5s, ensure that the timeout here occurs after ClientCheckWaitTimeOut
     if (socket <= 0) {
         TRANS_LOGE(TRANS_SDK, "invalid param sessionId =%{public}d", socket);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
@@ -2263,7 +2265,16 @@ int32_t ClientWaitSyncBind(int32_t socket)
     }
     SoftBusCond *callbackCond = &(sessionNode->lifecycle.callbackCond);
     sessionNode->lifecycle.condIsWaiting = true;
-    ret = SoftBusCondWait(callbackCond, &(g_clientSessionServerList->lock), NULL);
+    SoftBusSysTime *timePtr = NULL;
+    SoftBusSysTime absTime = { 0 };
+    if (sessionNode->lifecycle.maxWaitTime != 0) {
+        ret = SoftBusGetTime(&absTime);
+        if (ret == SOFTBUS_OK) {
+            absTime.sec += ((sessionNode->lifecycle.maxWaitTime / CONVERSION_BASE) + EXTRA_WAIT_TIME);
+            timePtr = &absTime;
+        }
+    }
+    ret = SoftBusCondWait(callbackCond, &(g_clientSessionServerList->lock), timePtr);
     if (ret != SOFTBUS_OK) {
         UnlockClientSessionServerList();
         TRANS_LOGE(TRANS_SDK, "cond wait failed, socket=%{public}d", socket);
