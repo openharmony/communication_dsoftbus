@@ -98,7 +98,7 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
     return GetNetBuilderDepsInterface()->AuthHandleLeaveLNN(authHandle);
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetNetBuilderDepsInterface()->SoftbusGetConfig(type, val, len);
 }
@@ -178,7 +178,7 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
     return GetNetBuilderDepsInterface()->AddStringToJsonObject(json, string, value);
 }
 
-bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
+bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
 {
     return GetNetBuilderDepsInterface()->AddNumberToJsonObject(json, string, num);
 }
@@ -286,7 +286,7 @@ int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc 
     return GetNetBuilderDepsInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
 
-SoftBusLooper *GetLooper(int looper)
+SoftBusLooper *GetLooper(int32_t looper)
 {
     return GetNetBuilderDepsInterface()->GetLooper(looper);
 }

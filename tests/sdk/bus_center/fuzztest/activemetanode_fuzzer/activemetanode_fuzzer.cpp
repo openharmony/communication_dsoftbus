@@ -52,7 +52,7 @@ namespace OHOS {
         }
 
         SetAceessTokenPermission("busCenterTest");
-        int ret = ActiveMetaNode(reinterpret_cast<const char *>(tmp), &meta, metaNodeId);
+        int32_t ret = ActiveMetaNode(reinterpret_cast<const char *>(tmp), &meta, metaNodeId);
         if (ret == SOFTBUS_OK) {
             DeactiveMetaNode(reinterpret_cast<const char *>(tmp), metaNodeId);
         }
@@ -62,7 +62,7 @@ namespace OHOS {
 }
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::DoSomethingInterestingWithMyAPI(data, size);

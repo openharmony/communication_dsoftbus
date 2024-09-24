@@ -56,6 +56,10 @@ public:
     virtual bool LnnVisitNetif(VisitNetifCallback callback, void *data) = 0;
     virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
     virtual int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len) = 0;
+    virtual int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr) = 0;
+    virtual int32_t GetWlanIpv4Addr(char *ip, uint32_t size) = 0;
+    virtual int32_t ConnCoapStartServerListen(void) = 0;
+    virtual void ConnCoapStopServerListen(void) = 0;
 };
 
 class LnnIpNetworkImplInterfaceMock : public LnnIpNetworkImplInterface {
@@ -84,6 +88,10 @@ public:
     MOCK_METHOD2(LnnVisitNetif, bool (VisitNetifCallback, void *));
     MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t (const bool *, uint32_t));
     MOCK_METHOD4(GetNetworkIpByIfName, int32_t (const char *, char *, char *, uint32_t));
+    MOCK_METHOD1(LnnRegistProtocol, int32_t(LnnProtocolManager *));
+    MOCK_METHOD2(GetWlanIpv4Addr, int32_t(char *, uint32_t));
+    MOCK_METHOD0(ConnCoapStartServerListen, int32_t(void));
+    MOCK_METHOD0(ConnCoapStopServerListen, void(void));
     static int32_t ActionOfGetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len);
 };
 } // namespace OHOS

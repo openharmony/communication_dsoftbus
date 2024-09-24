@@ -40,7 +40,7 @@ public:
     LnnConnFsmInterface() {};
     virtual ~LnnConnFsmInterface() {};
     virtual void LnnNotifyDeviceVerified(const char *udid) = 0;
-    virtual int SoftBusGetBtState(void) = 0;
+    virtual int32_t SoftBusGetBtState(void) = 0;
     virtual int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen) = 0;
     virtual void DeleteFromProfile(const char *udid) = 0;
     virtual void SendDeviceStateToMlps(void *para) = 0;
@@ -69,7 +69,7 @@ public:
     LnnConnFsmInterfaceMock();
     ~LnnConnFsmInterfaceMock() override;
     MOCK_METHOD1(LnnNotifyDeviceVerified, void (const char *));
-    MOCK_METHOD0(SoftBusGetBtState, int (void));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
     MOCK_METHOD4(LnnGenerateBtMacHash, int32_t (const char *, int32_t, char *, int32_t));
     MOCK_METHOD1(DeleteFromProfile, void (const char *));
     MOCK_METHOD1(SendDeviceStateToMlps, void (void *));

@@ -62,7 +62,7 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
     return BusCenterIpcInterfaceInstance()->LnnGetLocalDeviceInfo(info);
 }
 
-int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
+int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
 {
     return BusCenterIpcInterfaceInstance()->LnnGetNodeKeyInfo(networkId, key, info, infoLen);
 }

@@ -157,10 +157,10 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
                 "update exist request. pkgName=%{public}s, "
                 "accuracy:%{public}d->%{public}d, period:%{public}d->%{public}d",
                 AnonymizeWrapper(anonyPkgName), item->accuracy, startReq->accuracy, item->period, startReq->period);
-            AnonymizeFree(anonyPkgName);
             item->accuracy = startReq->accuracy;
             item->period = startReq->period;
         }
+        AnonymizeFree(anonyPkgName);
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_CLOCK, "add start time sync request. pkgName=%{public}s, accuracy=%{public}d, period=%{public}d",

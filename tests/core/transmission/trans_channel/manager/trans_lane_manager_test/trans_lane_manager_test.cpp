@@ -118,7 +118,7 @@ HWTEST_F(TransLaneManagerTest, TransChannelInit001, TestSize.Level1)
  */
 HWTEST_F(TransLaneManagerTest, TransLaneChannelForEachShowInfo001, TestSize.Level1)
 {
-    int fd = 1;
+    int32_t fd = 1;
     TransLaneMgrDeinit();
     TransLaneChannelForEachShowInfo(fd);
 
@@ -359,7 +359,7 @@ HWTEST_F(TransLaneManagerTest, TransGetChannelType001, TestSize.Level1)
     SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     ASSERT_TRUE(param != nullptr);
 
-    int tmp = 0;
+    int32_t tmp = 0;
     param->attr = &g_sessionAttr[tmp];
 
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));

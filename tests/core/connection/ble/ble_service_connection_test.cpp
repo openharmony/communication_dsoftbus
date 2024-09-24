@@ -46,7 +46,7 @@ namespace OHOS {
 SoftBusGattsCallback *g_callback = nullptr;
 
 extern "C" {
-int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid serviceUuid)
+int32_t SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid serviceUuid)
 {
     (void)serviceUuid;
     g_callback = callback;
@@ -423,6 +423,7 @@ HWTEST_F(ServiceConnectionTest, ServiceStopCallback001, TestSize.Level1)
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
     uuid.uuid = (char *)SoftBusCalloc(uuid.uuidLen+1);
+    ASSERT_NE(nullptr, uuid.uuid);
     int32_t ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);
     g_callback->serviceAddCallback(SOFTBUS_OK, &uuid, 10);

@@ -263,12 +263,12 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, DataBusNativeVirtual001, TestSize.Level0)
 {
-    int channelId = 0;
+    int32_t channelId = 0;
     int32_t ret = NotifyNearByUpdateMigrateOption(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     const char *peerDeviceId = NULL;
-    int routeType = 0;
+    int32_t routeType = 0;
     bool isUpgrade = true;
     ret = NotifyNearByOnMigrateEvents(peerDeviceId, routeType, isUpgrade);
     EXPECT_EQ(SOFTBUS_OK, ret);

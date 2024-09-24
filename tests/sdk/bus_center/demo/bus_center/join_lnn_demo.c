@@ -56,7 +56,7 @@ static void OnLeaveLnnDone(const char *networkId, int32_t retCode)
     }
 }
 
-int main(void)
+int32_t main(void)
 {
     const char *pkgName = "pkgName.demo";
     // Device B is found by coap or ble, we can get it's addr info before join lnn.
@@ -70,7 +70,7 @@ int main(void)
     /*
      * 1. Device A calls JoinLNN() to Join Lnn with B.
      */
-    int ret = JoinLNN(pkgName, &addr, OnJoinLnnDone);
+    int32_t ret = JoinLNN(pkgName, &addr, OnJoinLnnDone);
     printf("[demo]join lnn result = %d\n", ret);
 
     /*
