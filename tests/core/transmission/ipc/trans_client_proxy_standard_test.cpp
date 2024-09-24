@@ -60,7 +60,6 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
 {
     #define TEST_INVALID 0
     int32_t ret;
-    DeviceInfo device;
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -69,16 +68,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
 
-    clientProxy->OnDeviceFound(&device);
-
     int tmp = TEST_INVALID;
-    clientProxy->OnDiscoverFailed(tmp, tmp);
-
-    clientProxy->OnDiscoverySuccess(tmp);
-
-    clientProxy->OnPublishSuccess(tmp);
-
-    clientProxy->OnPublishFail(tmp, tmp);
 
     void *addr = nullptr;
     uint32_t addrTypeLen = TEST_INVALID;

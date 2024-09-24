@@ -18,30 +18,6 @@
 #include "softbus_error_code.h"
 
 namespace OHOS {
-void ISoftBusClient::OnDeviceFound(const DeviceInfo *device)
-{
-    COMM_LOGI(COMM_EVENT, "ipc default impl");
-}
-
-void ISoftBusClient::OnDiscoverFailed(int subscribeId, int failReason)
-{
-    COMM_LOGI(COMM_EVENT, "ipc default impl");
-}
-
-void ISoftBusClient::OnDiscoverySuccess(int subscribeId)
-{
-    COMM_LOGI(COMM_EVENT, "ipc default impl");
-}
-void ISoftBusClient::OnPublishSuccess(int publishId)
-{
-    COMM_LOGI(COMM_EVENT, "ipc default impl");
-}
-
-void ISoftBusClient::OnPublishFail(int publishId, int reason)
-{
-    COMM_LOGI(COMM_EVENT, "ipc default impl");
-}
-
 int32_t ISoftBusClient::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");

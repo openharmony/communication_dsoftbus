@@ -17,27 +17,17 @@
 #define INTERFACES_INNERKITS_SOFTBUS_CLIENT_H_
 
 #include "data_level_inner.h"
-#include "discovery_service.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "session.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 
 namespace OHOS {
 class ISoftBusClient : public IRemoteBroker {
 public:
     ~ISoftBusClient() override = default;
-
-    virtual void OnDeviceFound(const DeviceInfo *device);
-
-    virtual void OnDiscoverFailed(int subscribeId, int failReason);
-
-    virtual void OnDiscoverySuccess(int subscribeId);
-
-    virtual void OnPublishSuccess(int publishId);
-
-    virtual void OnPublishFail(int publishId, int reason);
 
     virtual int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel);
 
