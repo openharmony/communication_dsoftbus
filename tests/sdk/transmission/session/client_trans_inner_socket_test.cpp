@@ -58,7 +58,7 @@ HWTEST_F(ClientTransSocketTest, DBinderGrantPermissionTest001, TestSize.Level1)
     auto ret = DBinderGrantPermission(uid, pid, socketName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = DBinderRemovePermission(socketName.c_str());
-    ASSERT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
