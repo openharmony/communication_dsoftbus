@@ -146,7 +146,7 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         if (strcmp(pos->sessionName, newNode->sessionName) == 0) {
             Anonymize(newNode->sessionName, &tmpName);
             if ((pos->uid == newNode->uid) && (pos->pid == newNode->pid)) {
-                TRANS_LOGI(TRANS_CTRL, "session server is exist, sessionName=%{public}s",AnonymizeWrapper(tmpName));
+                TRANS_LOGI(TRANS_CTRL, "session server is exist, sessionName=%{public}s", AnonymizeWrapper(tmpName));
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_REPEATED;
