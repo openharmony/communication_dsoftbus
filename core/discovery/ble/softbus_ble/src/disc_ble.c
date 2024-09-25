@@ -1734,11 +1734,16 @@ static int32_t BleAdvertiserDump(int fd)
         SOFTBUS_DPRINTF(fd, "BleAdvertiser channel                   : %d\n", g_bleAdvertiser[i].channel);
         SOFTBUS_DPRINTF(fd, "BleAdvertiser isAdvertising             : %d\n", g_bleAdvertiser[i].isAdvertising);
         SOFTBUS_DPRINTF(fd, "DeviceInfo                              : \n");
-        SOFTBUS_DPRINTF(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
-        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n",
-            g_bleAdvertiser[i].deviceInfo.accountHash);
+        char anonyId[DISC_MAX_DEVICE_ID_LEN] = {0};
+        (void)memcpy_s(anonyId, DISC_MAX_DEVICE_ID_LEN, g_bleAdvertiser[i].deviceInfo.devId, DISC_MAX_DEVICE_ID_LEN);
+        SOFTBUS_DPRINTF(fd, "devId                                   : %s\n", AnonymizesUDID(anonyId));
+        (void)memset_s(anonyId, DISC_MAX_DEVICE_ID_LEN, 0, DISC_MAX_DEVICE_ID_LEN);
+        char anonyHash[MAX_ACCOUNT_HASH_LEN] = {0};
+        (void)memcpy_s(anonyHash, MAX_ACCOUNT_HASH_LEN,
+            g_bleAdvertiser[i].deviceInfo.accountHash, MAX_ACCOUNT_HASH_LEN);
+        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n", AnonymizesUDID(anonyHash));
+        (void)memset_s(anonyHash, MAX_ACCOUNT_HASH_LEN, 0, MAX_ACCOUNT_HASH_LEN);
         SOFTBUS_DPRINTF(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
-        SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
         SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
         SOFTBUS_DPRINTF(fd, "addr type                               : %u\n",
             g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
