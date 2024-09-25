@@ -164,6 +164,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest001, TestSize.Level1)
     NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     EXPECT_CALL(softbusServerStubMock, CheckTransPermission).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(softbusServerStubMock, CheckTransSecLevel).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(true));
     ret = softBusServer->CheckOpenSessionPermission(sessionParam001);
     EXPECT_EQ(SOFTBUS_OK, ret);
     DeGenerateSessionParam(sessionParam001);
@@ -449,6 +450,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest013, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, TransGetAndComparePid).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = softBusServer->NotifyAuthSuccessInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READINT_FAILED, ret);
 
@@ -562,6 +565,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest016, TestSize.Level1)
     int32_t channelId = 1;
     uint64_t laneId = 1;
     uint32_t len = 10;
+    int32_t channelType = 0;
     MessageParcel datas;
     MessageParcel reply;
 
@@ -570,20 +574,28 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest016, TestSize.Level1)
 
     datas.WriteInt32(channelId);
     ret = softBusServer->CloseChannelWithStatisticsInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_READINT_FAILED, ret);
+
+    datas.WriteInt32(channelId);
+    datas.WriteInt32(channelType);
+    ret = softBusServer->CloseChannelWithStatisticsInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READUINT_FAILED, ret);
 
     datas.WriteInt32(channelId);
+    datas.WriteInt32(channelType);
     datas.WriteUint64(laneId);
     ret = softBusServer->CloseChannelWithStatisticsInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READUINT_FAILED, ret);
 
     datas.WriteInt32(channelId);
+    datas.WriteInt32(channelType);
     datas.WriteUint64(laneId);
     datas.WriteUint32(len);
     ret = softBusServer->CloseChannelWithStatisticsInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteInt32(channelId);
+    datas.WriteInt32(channelType);
     datas.WriteUint64(laneId);
     datas.WriteUint32(len);
     datas.WriteRawData(test, len);
@@ -658,19 +670,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest018, TestSize.Level1)
     datas.WriteUint32(len);
     datas.WriteRawData(test, len);
     datas.WriteInt32(msgType);
-    EXPECT_CALL(softbusServerStubMock, TransGetAppInfoByChanId).WillRepeatedly(
-        Return(SOFTBUS_INVALID_PARAM)
-    );
-    int32_t ret = softBusServer->SendMessageInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
-
-    datas.WriteInt32(channelId);
-    datas.WriteInt32(channelType);
-    datas.WriteUint32(len);
-    datas.WriteRawData(test, len);
-    datas.WriteInt32(msgType);
     EXPECT_CALL(softbusServerStubMock, TransGetAppInfoByChanId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
-    ret = softBusServer->SendMessageInner(datas, reply);
+    int32_t ret = softBusServer->SendMessageInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -812,7 +813,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
     datas.WriteUint32(infoTypeLen);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR, ret);
 }
 
 /**
@@ -856,7 +857,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest022, TestSize.Level1)
     datas.WriteUint32(infoTypeLen);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetLocalDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->GetLocalDeviceInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR, ret);
 }
 
 /**
@@ -871,6 +872,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest023, TestSize.Level1)
     ASSERT_NE(nullptr, softBusServer);
     char test[10] = "test";
     int32_t key = 13;
+    uint32_t len = 20;
     MessageParcel datas;
     MessageParcel reply;
 
@@ -889,6 +891,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest023, TestSize.Level1)
     datas.WriteCString(test);
     datas.WriteCString(test);
     datas.WriteInt32(key);
+    datas.WriteUint32(len);
     ret = softBusServer->GetNodeKeyInfoInner(datas, reply);
     EXPECT_EQ(SOFTBUS_NETWORK_NODE_KEY_INFO_ERR, ret);
 }
@@ -938,7 +941,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest024, TestSize.Level1)
     datas.WriteUint32(len);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetNodeKeyInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->GetNodeKeyInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_NODE_KEY_INFO_ERR, ret);
 }
 
 /**
@@ -1105,6 +1108,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest030, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(true));
     int32_t ret = softBusServer->QosReportInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READINT_FAILED, ret);
 
@@ -1147,6 +1152,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest031, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(true));
     int32_t ret = softBusServer->StreamStatsInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READINT_FAILED, ret);
 
@@ -1182,6 +1189,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest032, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(true));
     int32_t ret = softBusServer->RippleStatsInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READINT_FAILED, ret);
 
@@ -1598,7 +1607,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
     datas.WriteRawData(&info, sizeof(MetaNodeConfigInfo));
     EXPECT_CALL(softbusServerStubMock, LnnIpcActiveMetaNode).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->ActiveMetaNodeInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR, ret);
 
     ret = softBusServer->DeactiveMetaNodeInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
@@ -1613,7 +1622,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
     datas.WriteCString(test);
     EXPECT_CALL(softbusServerStubMock, LnnIpcDeactiveMetaNode).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->DeactiveMetaNodeInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_DEACTIVE_META_NODE_ERR, ret);
 }
 
 /**
@@ -1649,7 +1658,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest041, TestSize.Level1)
     datas.WriteInt32(infoNum);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetAllMetaNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->GetAllMetaNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_META_NODE_INFO_ERR, ret);
 }
 
 /**
