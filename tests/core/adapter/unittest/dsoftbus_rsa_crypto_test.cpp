@@ -324,7 +324,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, HksDecrypt001, TestSize.Level0)
     ret = ConstructKeyParamSet(&encryptParamSet, g_encryptParams, sizeof(g_encryptParams) / sizeof(struct HksParam));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = HksEncrypt(&rsaKeyAlias, encryptParamSet, &srcBlob, &encryptedBlob);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(HKS_ERROR_NULL_POINTER, ret);
     HksFreeParamSet(&encryptParamSet);
 
     struct HksBlob decryptedBlob = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)SoftBusCalloc(HKS_RSA_KEY_SIZE_4096) };

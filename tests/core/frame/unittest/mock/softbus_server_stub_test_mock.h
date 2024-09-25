@@ -51,6 +51,7 @@ public:
     virtual int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId) = 0;
     virtual int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) = 0;
     virtual int32_t TransReleaseUdpResources(int32_t channelId) = 0;
+    virtual bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid) = 0;
 };
 class SoftbusServerStubTestInterfaceMock : public SoftbusServerStubTestInterface {
 public:
@@ -74,6 +75,7 @@ public:
     MOCK_METHOD1(LnnIpcDeactiveMetaNode, int32_t (const char *metaNodeId));
     MOCK_METHOD2(LnnIpcGetAllMetaNodeInfo, int32_t (MetaNodeInfo *infos, int32_t *infoNum));
     MOCK_METHOD1(TransReleaseUdpResources, int32_t (int32_t channelId));
+    MOCK_METHOD3(CheckUidAndPid, bool (const char *sessionName, pid_t callingUid, pid_t callingPid));
 };
 }
 
