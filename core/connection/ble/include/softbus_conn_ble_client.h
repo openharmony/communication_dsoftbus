@@ -21,8 +21,8 @@
 #include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
 
-/* in fastest connect mode, underlayer connect timeout is 3000ms and 100ms for notify delay */
-#define BLE_FAST_CONNECT_TIMEOUT 3100
+/* In the fastest connection mode, the underlying connection timeout and notifications is set to 3500 milliseconds */
+#define BLE_FAST_CONNECT_TIMEOUT 3500
 
 #ifdef __cplusplus
 extern "C" {
