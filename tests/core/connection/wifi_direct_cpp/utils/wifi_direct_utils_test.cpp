@@ -542,10 +542,10 @@ HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizeSsidTest, TestSize.Level1)
 HWTEST_F(WifiDirectUtilsTest, WifiDirectAnonymizePskTest, TestSize.Level1)
 {
     std::string psk = "";
-    ConnectInfo conInfo{};
+    WifiDirectConnectInfo conInfo{};
     ConnEventExtra conEventExtra = { 0 };
     WifiDirectInterfaceMock mock;
-    conInfo.info_.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
+    conInfo.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
     DurationStatistic::GetInstance().Record(1, TOTAL_START);
     DurationStatistic::GetInstance().Record(1, TOTAL_END);
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
