@@ -91,7 +91,7 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     char uuid[UUID_BUF_LEN] = { 0 };
     if ((LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) == SOFTBUS_OK) && (strcmp(uuid, info->uuid) != 0)) {
         Anonymize(info->uuid, &anonyNewUuid);
-        LNN_LOGW(LNN_LEDGER, "uuid change, new=%{public}s", anonyNewUuid);
+        LNN_LOGW(LNN_LEDGER, "uuid change, new=%{public}s", AnonymizeWrapper(anonyNewUuid));
         AnonymizeFree(anonyNewUuid);
         return true;
     }
@@ -501,7 +501,7 @@ static int32_t SoftbusDumpPrintAccountId(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyAccountHash = NULL;
     Anonymize(accountHashStr, &anonyAccountHash);
-    SOFTBUS_DPRINTF(fd, "AccountHash->%s\n", anonyAccountHash);
+    SOFTBUS_DPRINTF(fd, "AccountHash->%s\n", AnonymizeWrapper(anonyAccountHash));
     AnonymizeFree(anonyAccountHash);
     return SOFTBUS_OK;
 }
@@ -522,7 +522,7 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyUdid = NULL;
     Anonymize((char *)udid, &anonyUdid);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Udid", anonyUdid);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Udid", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }
@@ -543,7 +543,7 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyUuid = NULL;
     Anonymize((char *)uuid, &anonyUuid);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Uuid", anonyUuid);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "Uuid", AnonymizeWrapper(anonyUuid));
     AnonymizeFree(anonyUuid);
     return SOFTBUS_OK;
 }
@@ -675,7 +675,7 @@ static int32_t SoftbusDumpPrintIrk(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyIrk = NULL;
     Anonymize(peerIrkStr, &anonyIrk);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IRK", anonyIrk);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IRK", AnonymizeWrapper(anonyIrk));
     AnonymizeFree(anonyIrk);
     (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
     (void)memset_s(peerIrkStr, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
@@ -703,7 +703,7 @@ static int32_t SoftbusDumpPrintBroadcastCipher(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyBroadcastCipher = NULL;
     Anonymize((char *)broadcastCipherStr, &anonyBroadcastCipher);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BroadcastCipher", anonyBroadcastCipher);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BroadcastCipher", AnonymizeWrapper(anonyBroadcastCipher));
     AnonymizeFree(anonyBroadcastCipher);
     (void)memset_s(broadcastCipher, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
     (void)memset_s(broadcastCipherStr, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
@@ -731,7 +731,7 @@ static int32_t SoftbusDumpPrintRemotePtk(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyRemotePtk = NULL;
     Anonymize(remotePtkStr, &anonyRemotePtk);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "RemotePtk", anonyRemotePtk);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "RemotePtk", AnonymizeWrapper(anonyRemotePtk));
     AnonymizeFree(anonyRemotePtk);
     (void)memset_s(remotePtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     (void)memset_s(remotePtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
@@ -763,7 +763,7 @@ static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyLocalPtk = NULL;
     Anonymize(localPtkStr, &anonyLocalPtk);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "LocalPtk", anonyLocalPtk);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "LocalPtk", AnonymizeWrapper(anonyLocalPtk));
     AnonymizeFree(anonyLocalPtk);
     (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     (void)memset_s(localPtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
@@ -779,7 +779,7 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyNetworkId = NULL;
     Anonymize(nodeInfo->networkId, &anonyNetworkId);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "NetworkId", anonyNetworkId);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "NetworkId", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUdid failed");
@@ -845,7 +845,7 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     char *anonyDeviceName = NULL;
     Anonymize(nodeInfo->deviceName, &anonyDeviceName);
-    SOFTBUS_DPRINTF(fd, "DeviceName->%s\n", anonyDeviceName);
+    SOFTBUS_DPRINTF(fd, "DeviceName->%s\n", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
     SoftbusDumpPrintAccountId(fd, nodeInfo);
     SoftbusDumpDeviceInfo(fd, nodeInfo);

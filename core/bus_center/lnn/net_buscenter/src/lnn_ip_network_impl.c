@@ -154,7 +154,7 @@ static int32_t OpenAuthPort(void)
     }
     char *anonyIp = NULL;
     Anonymize(localIp, &anonyIp);
-    LNN_LOGI(LNN_BUILDER, "open auth port listening on ip=%{public}s", anonyIp);
+    LNN_LOGI(LNN_BUILDER, "open auth port listening on ip=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     if (authPort == 0) {
         return LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, port);

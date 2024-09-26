@@ -774,13 +774,15 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
     }
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGI(LNN_HEART_BEAT, "process dev lost is offline, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_HEART_BEAT, "process dev lost is offline, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
     if (LnnHasActiveConnection(networkId, addrType)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGD(LNN_HEART_BEAT, "process dev lost in next period, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGD(LNN_HEART_BEAT, "process dev lost in next period, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         if (LnnOfflineTimingByHeartbeat(networkId, addrType) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "process dev lost start new offline timing err");
@@ -798,7 +800,7 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
     Anonymize(udidHash, &anonyUdidHash);
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT, "process dev lost, udidHash=%{public}s, networkId=%{public}s",
-        anonyUdidHash, anonyNetworkId);
+        AnonymizeWrapper(anonyUdidHash), AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyUdidHash);
     if (LnnRequestLeaveSpecific(networkId, addrType) != SOFTBUS_OK) {
@@ -856,13 +858,13 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_HEART_BEAT,
             "check dev status node doesn't have discType. networkId=%{public}s, discType=%{public}d",
-            anonyNetworkId, discType);
+            AnonymizeWrapper(anonyNetworkId), discType);
         AnonymizeFree(anonyNetworkId);
         return;
     }
     if (LnnGetDLHeartbeatTimestamp(networkId, &oldTimeStamp) != SOFTBUS_OK) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_HEART_BEAT, "check dev status get timestamp err, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_HEART_BEAT, "get timestamp err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return;
     }
@@ -870,21 +872,21 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
     if (!IsTimestampExceedLimit(nowTime, oldTimeStamp, hbType, msgPara->checkDelay)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGD(LNN_HEART_BEAT, "check dev status receive heartbeat in time, networkId=%{public}s, "
-            "nowTime=%{public}" PRIu64 ", oldTimeStamp=%{public}" PRIu64, anonyNetworkId, nowTime, oldTimeStamp);
+        LNN_LOGD(LNN_HEART_BEAT, "receive heartbeat in time, networkId=%{public}s, nowTime=%{public}" PRIu64 ", "
+            "oldTimeStamp=%{public}" PRIu64, AnonymizeWrapper(anonyNetworkId), nowTime, oldTimeStamp);
         AnonymizeFree(anonyNetworkId);
         return;
     }
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT, "notify node lost heartbeat, networkId=%{public}s, oldTimeStamp=%{public}" PRIu64 ", "
-                             "nowTime=%{public}" PRIu64, anonyNetworkId, oldTimeStamp, nowTime);
+        "nowTime=%{public}" PRIu64, AnonymizeWrapper(anonyNetworkId), oldTimeStamp, nowTime);
     if (LnnStopOfflineTimingStrategy(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "check dev status stop offline timing fail");
         AnonymizeFree(anonyNetworkId);
         return;
     }
     if (ProcessLostHeartbeat(networkId, hbType, msgPara->isWakeUp) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "process dev lost err, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_HEART_BEAT, "process dev lost err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     }
     AnonymizeFree(anonyNetworkId);
 }
@@ -897,7 +899,8 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
     char *anonyNetworkId = NULL;
     if (LnnHasActiveConnection(networkId, LnnConvertHbTypeToConnAddrType(hbType))) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGD(LNN_HEART_BEAT, "process screen off dev lost in next period, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGD(LNN_HEART_BEAT, "process screen off dev lost in next period, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         if (LnnStartScreenChangeOfflineTiming(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "process screen off dev lost start new offline timing err");
         }
@@ -918,9 +921,10 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
     }
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGW(LNN_HEART_BEAT, "the screen has been closed for more than 2 cycles, will offline, networkId=%{public}s",
-        anonyNetworkId);
+        AnonymizeWrapper(anonyNetworkId));
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
-        LNN_LOGI(LNN_HEART_BEAT, "process dev lost is offline, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_HEART_BEAT, "process dev lost is offline, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return;
     }
