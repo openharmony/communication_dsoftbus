@@ -624,7 +624,7 @@ HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 
     (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
     int32_t ret = PackAuthData(&head, data, buf, len);
-    EXPECT_TRUE(ret == SOFTBUS_NO_ENOUGH_DATA);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
