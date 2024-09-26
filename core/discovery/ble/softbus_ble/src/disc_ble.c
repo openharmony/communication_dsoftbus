@@ -96,8 +96,8 @@ typedef enum {
 } DiscBleMessage;
 
 typedef struct {
-    int32_t channel;
     bool isAdvertising;
+    int32_t channel;
     DeviceInfo deviceInfo;
     int32_t (*GetDeviceInfo)(DeviceInfo *info);
 } DiscBleAdvertiser;
@@ -105,8 +105,8 @@ typedef struct {
 typedef struct {
     bool needUpdate;
     bool needUpdateCap;
-    uint32_t capBitMap[CAPABILITY_NUM];
     int16_t capCount[CAPABILITY_MAX_BITNUM];
+    uint32_t capBitMap[CAPABILITY_NUM];
     uint8_t *capabilityData[CAPABILITY_MAX_BITNUM];
     uint32_t capDataLen[CAPABILITY_MAX_BITNUM];
     bool isSameAccount[CAPABILITY_MAX_BITNUM];

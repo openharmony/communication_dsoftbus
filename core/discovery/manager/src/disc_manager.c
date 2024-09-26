@@ -80,10 +80,10 @@ typedef struct {
     int32_t id;
     DiscoverMode mode;
     ExchangeMedium medium;
-    InnerOption option;
     ListNode capNode;
     DiscItem *item;
     DiscoveryStatistics statistics;
+    InnerOption option;
 } DiscInfo;
 
 typedef struct {
