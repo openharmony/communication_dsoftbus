@@ -109,9 +109,13 @@ static void WrapperAdvEnableCb(int advId, int status)
             advChannel->advId = -1;
         }
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
+        SoftbusBroadcastCallback callback;
+        if (advChannel->advCallback != NULL) {
+            callback = *(advChannel->advCallback);
+        }
         SoftBusMutexUnlock(&g_advLock);
-        if (advChannel->advCallback != NULL && advChannel->advCallback->OnStartBroadcastingCallback != NULL) {
-            advChannel->advCallback->OnStartBroadcastingCallback(channelId, ret);
+        if (callback.OnStartBroadcastingCallback != NULL) {
+            callback.OnStartBroadcastingCallback(channelId, ret);
         }
         break;
     }
@@ -133,9 +137,13 @@ static void WrapperAdvDisableCb(int advId, int status)
         advChannel->isAdvertising = false;
         advChannel->advId = -1;
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
+        SoftbusBroadcastCallback callback;
+        if (advChannel->advCallback != NULL) {
+            callback = *(advChannel->advCallback);
+        }
         SoftBusMutexUnlock(&g_advLock);
-        if (advChannel->advCallback != NULL && advChannel->advCallback->OnStopBroadcastingCallback != NULL) {
-            advChannel->advCallback->OnStopBroadcastingCallback(channelId, ret);
+        if (callback.OnStopBroadcastingCallback != NULL) {
+            callback.OnStopBroadcastingCallback(channelId, ret);
         }
         break;
     }
@@ -155,9 +163,13 @@ static void WrapperAdvSetDataCb(int advId, int status)
             continue;
         }
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
+        SoftbusBroadcastCallback callback;
+        if (advChannel->advCallback != NULL) {
+            callback = *(advChannel->advCallback);
+        }
         SoftBusMutexUnlock(&g_advLock);
-        if (advChannel->advCallback != NULL && advChannel->advCallback->OnSetBroadcastingCallback != NULL) {
-            advChannel->advCallback->OnSetBroadcastingCallback(channelId, ret);
+        if (callback.OnSetBroadcastingCallback != NULL) {
+            callback.OnSetBroadcastingCallback(channelId, ret);
         }
         break;
     }
@@ -177,9 +189,13 @@ static void WrapperAdvUpdateDataCb(int advId, int status)
             continue;
         }
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
+        SoftbusBroadcastCallback callback;
+        if (advChannel->advCallback != NULL) {
+            callback = *(advChannel->advCallback);
+        }
         SoftBusMutexUnlock(&g_advLock);
-        if (advChannel->advCallback != NULL && advChannel->advCallback->OnUpdateBroadcastingCallback != NULL) {
-            advChannel->advCallback->OnUpdateBroadcastingCallback(channelId, ret);
+        if (callback.OnUpdateBroadcastingCallback != NULL) {
+            callback.OnUpdateBroadcastingCallback(channelId, ret);
         }
         break;
     }
@@ -280,9 +296,13 @@ static void WrapperScanResultCb(uint8_t channelId, BtScanResultData *data)
         SoftBusMutexUnlock(&g_scannerLock);
         return;
     }
+    SoftbusScanCallback callback;
+    if (scanChannel->scanCallback != NULL) {
+        callback = *(scanChannel->scanCallback);
+    }
     SoftBusMutexUnlock(&g_scannerLock);
-    if (scanChannel->scanCallback != NULL && scanChannel->scanCallback->OnReportScanDataCallback != NULL) {
-        scanChannel->scanCallback->OnReportScanDataCallback(channelId, &scanResult);
+    if (callback.OnReportScanDataCallback != NULL) {
+        callback.OnReportScanDataCallback(channelId, &scanResult);
     }
     SoftBusFree(scanResult.data.bcData.payload);
     SoftBusFree(scanResult.data.rspData.payload);
@@ -304,9 +324,13 @@ static void WrapperScanStateChangeCb(uint8_t channelId, int32_t resultCode, bool
     DISC_LOGD(DISC_BLE_ADAPTER,
         "scannerId=%{public}d, bt-scannerId=%{public}d, resultCode=%{public}d, isStartScan=%{public}d", channelId,
         scanChannel->scannerId, resultCode, isStartScan);
+    SoftbusScanCallback callback;
+    if (scanChannel->scanCallback != NULL) {
+        callback = *(scanChannel->scanCallback);
+    }
     SoftBusMutexUnlock(&g_scannerLock);
-    if (scanChannel->scanCallback != NULL && scanChannel->scanCallback->OnScanStateChanged != NULL) {
-        scanChannel->scanCallback->OnScanStateChanged(resultCode, isStartScan);
+    if (callback.OnScanStateChanged != NULL) {
+        callback.OnScanStateChanged(resultCode, isStartScan);
     }
 }
 
@@ -323,12 +347,16 @@ static void WrapperLpDeviceInfoCb(uint8_t channelId, BtUuid *uuid, int32_t type,
         SoftBusMutexUnlock(&g_scannerLock);
         return;
     }
+    SoftbusScanCallback callback;
+    if (scanChannel->scanCallback != NULL) {
+        callback = *(scanChannel->scanCallback);
+    }
     SoftBusMutexUnlock(&g_scannerLock);
-    if (scanChannel->scanCallback != NULL && scanChannel->scanCallback->OnLpDeviceInfoCallback != NULL) {
+    if (callback.OnLpDeviceInfoCallback != NULL) {
         SoftbusBroadcastUuid bcUuid;
         bcUuid.uuid = (uint8_t *)uuid->uuid;
         bcUuid.uuidLen = (uint8_t)uuid->uuidLen;
-        scanChannel->scanCallback->OnLpDeviceInfoCallback(&bcUuid, type, data, dataSize);
+        callback.OnLpDeviceInfoCallback(&bcUuid, type, data, dataSize);
     }
 }
 
