@@ -106,7 +106,7 @@ TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirect
         if (item->channelId == channelId) {
             (void)memcpy_s(info, sizeof(TcpDirectChannelInfo), item, sizeof(TcpDirectChannelInfo));
             item->detail.sequence++;
-            item->detail.fdInUse = true;
+            item->detail.fdRefCnt++;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             return item;
         }
@@ -153,12 +153,13 @@ void TransTdcCloseChannel(int32_t channelId)
             continue;
         }
         TransTdcReleaseFd(item->detail.fd);
-        ListDelete(&item->node);
-        if (!item->detail.fdInUse) {
+        item->detail.needRelease = true;
+        if (item->detail.fdRefCnt <= 0) {
             SoftBusMutexDestroy(&(item->detail.fdLock));
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            item = NULL;
         }
-        SoftBusFree(item);
-        item = NULL;
         (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
         DelPendingPacket(channelId, PENDING_TYPE_DIRECT);
         TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
@@ -451,7 +452,7 @@ int32_t TransDisableSessionListener(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-void TransUpdateFdState(int32_t channelId, bool fdInUse)
+void TransUpdateFdState(int32_t channelId)
 {
     if (g_tcpDirectChannelInfoList == NULL) {
         TRANS_LOGE(TRANS_SDK, "g_tcpDirectChannelInfoList is NULL, channelId=%{public}d", channelId);
@@ -465,7 +466,14 @@ void TransUpdateFdState(int32_t channelId, bool fdInUse)
     TcpDirectChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
-            item->detail.fdInUse = fdInUse;
+            item->detail.fdRefCnt--;
+            if (item->detail.needRelease && item->detail.fdRefCnt <= 0) {
+                SoftBusMutexDestroy(&(item->detail.fdLock));
+                ListDelete(&item->node);
+                SoftBusFree(item);
+                item = NULL;
+                TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
+            }
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             return;
         }
