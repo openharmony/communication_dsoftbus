@@ -731,7 +731,7 @@ int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const c
                 LaneUnlock();
                 return SOFTBUS_STRCPY_ERR;
             }
-            LNN_LOGI(LNN_LANE, "find and refresh oldLaneId=%{public}" PRIu64 "newLaneId=%{public}" PRIu64,
+            LNN_LOGI(LNN_LANE, "find and refresh oldLaneId=%{public}" PRIu64 ", newLaneId=%{public}" PRIu64,
                 oldLaneId, newLaneId);
             LaneUnlock();
             return SOFTBUS_OK;
