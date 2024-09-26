@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "if_system_ablity_manager.h"
+#include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_info_manager.h"
