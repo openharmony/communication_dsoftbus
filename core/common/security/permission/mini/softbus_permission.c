@@ -56,3 +56,22 @@ bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
     (void)pkgName;
     return true;
 }
+
+uint32_t TransACLGetFirstTokenID()
+{
+    return SOFTBUS_OK;
+}
+
+int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
+{
+    (void)firstCallingId;
+    return SOFTBUS_OK;
+}
+
+int32_t CompareString(const char *src, const char *dest, bool regexp)
+{
+    (void)src;
+    (void)dest;
+    (void)regexp;
+    return SOFTBUS_OK;
+}
