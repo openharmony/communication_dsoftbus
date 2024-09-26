@@ -1044,6 +1044,9 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
 
+    if (CheckSecLevelPublic(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) != SOFTBUS_OK) {
+        return SOFTBUS_PERMISSION_SERVER_DENIED;
+    }
     ret = TransProxyGetLocalInfo(chan);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "TransProxyGetLocalInfo fail. ret=%{public}d.", ret);
