@@ -343,6 +343,10 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
     int32_t localRc = connection->connectionRc;
     if (localRc <= 0) {
         connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
+    } else if (connection->state == BLE_CONNECTION_STATE_NEGOTIATION_CLOSING) {
+        ConnRemoveMsgFromLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
+            connection->connectionId, 0, NULL);
+        connection->state = BLE_CONNECTION_STATE_CONNECTED;
     }
     (void)SoftBusMutexUnlock(&connection->lock);
     ConnEventExtra extra = {
