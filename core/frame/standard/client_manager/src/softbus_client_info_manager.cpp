@@ -98,10 +98,19 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
     return SOFTBUS_OK;
 }
 
-ISessionListener SoftbusClientInfoManager::GetSoftbusInnerObject(const std::string &pkgName)
+int32_t SoftbusClientInfoManager::GetSoftbusInnerObject(const std::string &pkgName, ISessionListener *listener)
 {
+    if (listener == nullptr) {
+        COMM_LOGE(COMM_SVC, "listener is nullptr\n");
+        return SOFTBUS_INVALID_PARAM;
+    }
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
-    return innerObjectMap_[pkgName];
+    if (innerObjectMap_.find(pkgName) == innerObjectMap_.end()) {
+        COMM_LOGE(COMM_SVC, "no find pkgname = %{public}s in map", pkgName.c_str());
+        return SOFTBUS_NOT_FIND;
+    }
+    *listener = innerObjectMap_[pkgName];
+    return SOFTBUS_OK;
 }
 
 sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::string &pkgName)
