@@ -94,3 +94,10 @@ int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tv
     (void)tvList;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *udpChannel)
+{
+    (void)channelId;
+    (void)udpChannel;
+    return SOFTBUS_ERR;
+}
