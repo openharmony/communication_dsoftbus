@@ -170,8 +170,8 @@ void LnnDCProcessOnlineState(bool isOnline, const NodeBasicInfo *info)
     LNN_CHECK_AND_RETURN_LOGW(info != NULL, LNN_STATE, " info is NULL");
     char *anonyNetworkId = NULL;
     Anonymize(info->networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_STATE,
-        "onlineState=%{public}s, networkId=%{public}s", (isOnline ? "online" : "offline"), anonyNetworkId);
+    LNN_LOGI(LNN_STATE, "onlineState=%{public}s, networkId=%{public}s",
+        (isOnline ? "online" : "offline"), AnonymizeWrapper(anonyNetworkId));
     if (isOnline) {
         LNN_LOGD(LNN_LEDGER, "ignore for online");
         AnonymizeFree(anonyNetworkId);
@@ -180,7 +180,8 @@ void LnnDCProcessOnlineState(bool isOnline, const NodeBasicInfo *info)
 
     NodeInfo nodeInfo = { 0 };
     if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "can not get remote nodeinfo. networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_STATE, "can not get remote nodeinfo. networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return;
     }

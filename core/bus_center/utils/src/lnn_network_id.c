@@ -221,7 +221,7 @@ int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
     }
     char *anonyIrk = NULL;
     Anonymize(irkStr, &anonyIrk);
-    LNN_LOGI(LNN_STATE, "get irk success:irk=%{public}s", anonyIrk);
+    LNN_LOGI(LNN_STATE, "get irk success:irk=%{public}s", AnonymizeWrapper(anonyIrk));
     AnonymizeFree(anonyIrk);
     (void)memset_s(locaIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
     (void)memset_s(irkStr, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);

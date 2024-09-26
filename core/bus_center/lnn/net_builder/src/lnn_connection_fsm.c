@@ -1067,7 +1067,7 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
         (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
-    LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", anonyUdidHash);
+    LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     if (ret == SOFTBUS_OK) {
         if ((dupOk || LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK) &&
@@ -1280,7 +1280,8 @@ static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *
         char *oldNetworkId = NULL;
         Anonymize(newNodeInfo->networkId, &newNetworkId);
         Anonymize(oldNodeInfo->networkId, &oldNetworkId);
-        LNN_LOGI(LNN_BUILDER, "networkId changed %{public}s -> %{public}s", oldNetworkId, newNetworkId);
+        LNN_LOGI(LNN_BUILDER, "networkId changed %{public}s -> %{public}s",
+            AnonymizeWrapper(oldNetworkId), AnonymizeWrapper(newNetworkId));
         AnonymizeFree(newNetworkId);
         AnonymizeFree(oldNetworkId);
         if (isUpdate) {
@@ -1293,7 +1294,8 @@ static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *
         char *oldUuid = NULL;
         Anonymize(newNodeInfo->uuid, &newUuid);
         Anonymize(oldNodeInfo->uuid, &oldUuid);
-        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s", oldUuid, newUuid);
+        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s",
+            AnonymizeWrapper(oldUuid), AnonymizeWrapper(newUuid));
         AnonymizeFree(newUuid);
         AnonymizeFree(oldUuid);
         return true;
@@ -1303,7 +1305,8 @@ static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *
         char *oldSoftBusVersion = NULL;
         Anonymize(newNodeInfo->softBusVersion, &newSoftBusVersion);
         Anonymize(oldNodeInfo->softBusVersion, &oldSoftBusVersion);
-        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s", oldSoftBusVersion, newSoftBusVersion);
+        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s",
+            AnonymizeWrapper(oldSoftBusVersion), AnonymizeWrapper(newSoftBusVersion));
         AnonymizeFree(newSoftBusVersion);
         AnonymizeFree(oldSoftBusVersion);
     }
@@ -1321,7 +1324,8 @@ static bool IsWifiConnectInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo
         char *oldIp = NULL;
         Anonymize(newNodeInfo->connectInfo.deviceIp, &newIp);
         Anonymize(oldNodeInfo->connectInfo.deviceIp, &oldIp);
-        LNN_LOGI(LNN_BUILDER, "peer ip changed %{public}s -> %{public}s", oldIp, newIp);
+        LNN_LOGI(LNN_BUILDER, "peer ip changed %{public}s -> %{public}s",
+            AnonymizeWrapper(oldIp), AnonymizeWrapper(newIp));
         AnonymizeFree(newIp);
         AnonymizeFree(oldIp);
         return true;
@@ -1466,8 +1470,9 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     LNN_LOGI(LNN_BUILDER,
         "online state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, "
         "uuid=%{public}s, deviceName=%{public}s, peer%{public}s",
-        connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "", isNodeInfoValid ? anonyUuid : "",
-        isNodeInfoValid ? anonyDeviceName : "",
+        connFsm->id, anonyNetworkId, isNodeInfoValid ? AnonymizeWrapper(anonyUdid) : "",
+        isNodeInfoValid ? AnonymizeWrapper(anonyUuid) : "",
+        isNodeInfoValid ? AnonymizeWrapper(anonyDeviceName) : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     if (isNodeInfoValid) {
         AnonymizeFree(anonyUdid);
@@ -1582,8 +1587,8 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     LNN_LOGI(LNN_BUILDER,
         "leaving state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
         "peer%{public}s",
-        connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "",
-        isNodeInfoValid ? anonyDeviceName : "",
+        connFsm->id, anonyNetworkId, isNodeInfoValid ? AnonymizeWrapper(anonyUdid) : "",
+        isNodeInfoValid ? AnonymizeWrapper(anonyDeviceName) : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     if (isNodeInfoValid) {
         AnonymizeFree(anonyUdid);

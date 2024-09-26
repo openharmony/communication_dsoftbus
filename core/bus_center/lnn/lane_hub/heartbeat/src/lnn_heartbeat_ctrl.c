@@ -448,7 +448,8 @@ static void HbRemoveCheckOffLineMessage(LnnHeartbeatType hbType)
         if (LnnStopScreenChangeOfflineTiming(info[i].networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
             char *anonyNetworkId = NULL;
             Anonymize(info[i].networkId, &anonyNetworkId);
-            LNN_LOGE(LNN_HEART_BEAT, "stop check offline target msg failed, networkId=%{public}s", anonyNetworkId);
+            LNN_LOGE(LNN_HEART_BEAT, "stop check offline target msg failed, networkId=%{public}s",
+                AnonymizeWrapper(anonyNetworkId));
             AnonymizeFree(anonyNetworkId);
         }
     }
@@ -920,7 +921,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT, "heartbeat(HB) start offline countdown, networkId=%{public}s, timeStamp=%{public}" PRIu64,
-        anonyNetworkId, timeStamp);
+        AnonymizeWrapper(anonyNetworkId), timeStamp);
     AnonymizeFree(anonyNetworkId);
     if (SoftBusGetBtState() == BLE_ENABLE) {
         g_hbConditionState.btState = SOFTBUS_BLE_TURN_ON;
@@ -941,7 +942,8 @@ void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType a
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGD(LNN_HEART_BEAT, "heartbeat(HB) stop offline timing, networkId:%{public}s", anonyNetworkId);
+    LNN_LOGD(LNN_HEART_BEAT, "heartbeat(HB) stop offline timing, networkId:%{public}s",
+        AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     (void)LnnStopScreenChangeOfflineTiming(networkId, addrType);
     (void)LnnStopOfflineTimingStrategy(networkId, addrType);
@@ -971,13 +973,13 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     }
     Anonymize(targetNetworkId, &anonyNetworkId);
     if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
-        LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     }
     LNN_LOGD(LNN_HEART_BEAT,
         "shift lnn gear mode, callerId=%{public}s, networkId=%{public}s, cycle=%{public}d, "
         "duration=%{public}d, wakeupFlag=%{public}d, action=%{public}d",
-        callerId, targetNetworkId != NULL ? anonyNetworkId : "", mode->cycle, mode->duration, mode->wakeupFlag,
-        mode->action);
+        callerId, targetNetworkId != NULL ? AnonymizeWrapper(anonyNetworkId) : "", mode->cycle, mode->duration,
+        mode->wakeupFlag, mode->action);
     AnonymizeFree(anonyNetworkId);
     char uuid[UUID_BUF_LEN] = { 0 };
     if (targetNetworkId != NULL) {
@@ -1053,7 +1055,8 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
         if (AuthFlushDevice(uuid) != SOFTBUS_OK) {
             char *anonyUuid = NULL;
             Anonymize(uuid, &anonyUuid);
-            LNN_LOGE(LNN_HEART_BEAT, "tcp flush failed, wifi will offline, uuid=%{public}s", anonyUuid);
+            LNN_LOGE(LNN_HEART_BEAT, "tcp flush failed, wifi will offline, uuid=%{public}s",
+                AnonymizeWrapper(anonyUuid));
             AnonymizeFree(anonyUuid);
             LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_WLAN);
         }
