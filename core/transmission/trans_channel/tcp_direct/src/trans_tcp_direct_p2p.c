@@ -232,8 +232,9 @@ void ClearHmlListenerByUuid(const char *peerUuid)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
+            int32_t module = item->moudleType; // item will free in StopHmlListener
             StopHmlListener(item->moudleType);
-            TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", item->moudleType);
+            TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", module);
         }
     }
     (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
