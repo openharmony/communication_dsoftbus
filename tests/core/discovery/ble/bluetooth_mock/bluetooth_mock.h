@@ -37,7 +37,7 @@ public:
     virtual bool EnableBr() = 0;
     virtual bool DisableBr() = 0;
     virtual int32_t GetBtState() = 0;
-    virtual bool GetLocalAddr(unsigned char *mac, unsigned int len) = 0;
+    virtual bool GetLocalAddr(unsigned char *mac, uint32_t len) = 0;
     virtual bool SetLocalName(unsigned char *localName, unsigned char length) = 0;
     virtual int32_t GapRegisterCallbacks(BtGapCallBacks *func) = 0;
     virtual bool PairRequestReply(const BdAddr *bdAddr, int32_t transport, bool accept) = 0;
@@ -81,7 +81,7 @@ public:
     MOCK_METHOD(bool, EnableBr, (), (override));
     MOCK_METHOD(bool, DisableBr, (), (override));
     MOCK_METHOD(int32_t, GetBtState, (), (override));
-    MOCK_METHOD(bool, GetLocalAddr, (unsigned char *mac, unsigned int len), (override));
+    MOCK_METHOD(bool, GetLocalAddr, (unsigned char *mac, uint32_t len), (override));
     MOCK_METHOD(bool, SetLocalName, (unsigned char *localName, unsigned char length), (override));
     MOCK_METHOD(int32_t, GapRegisterCallbacks, (BtGapCallBacks *func), (override));
     MOCK_METHOD(bool, PairRequestReply, (const BdAddr *bdAddr, int32_t transport, bool accept), (override));
@@ -120,7 +120,7 @@ public:
     static int32_t ActionBleDeregisterScanCallbacks(int32_t scannerId);
     static int32_t ActionBleStartAdvEx(int32_t *advId, const StartAdvRawData rawData, BleAdvParams advParam);
     static int32_t ActionBleStopAdv(int32_t advId);
-    static bool ActionGetLocalAddr(unsigned char *mac, unsigned int len);
+    static bool ActionGetLocalAddr(unsigned char *mac, uint32_t len);
     static void CallbackAdvEnable();
     static void CallbackScanResult(const std::string &hexStr);
     static void ConvertBtState(BtState newBtState);

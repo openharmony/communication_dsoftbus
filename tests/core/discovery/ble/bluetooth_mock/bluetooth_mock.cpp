@@ -243,7 +243,7 @@ int32_t BluetoothMock::ActionBleDeregisterScanCallbacks(int32_t scannerId)
     return OHOS_BT_STATUS_SUCCESS;
 }
 
-bool BluetoothMock::ActionGetLocalAddr(unsigned char *mac, unsigned int len)
+bool BluetoothMock::ActionGetLocalAddr(unsigned char *mac, uint32_t len)
 {
     if (mac == nullptr || len < OHOS_BD_ADDR_LEN) {
         return false;
@@ -401,7 +401,7 @@ int32_t GetBtState()
     return BluetoothMock::GetMock()->GetBtState();
 }
 
-bool GetLocalAddr(unsigned char *mac, unsigned int len)
+bool GetLocalAddr(unsigned char *mac, uint32_t len)
 {
     LOG("%s", __func__);
     return BluetoothMock::GetMock()->GetLocalAddr(mac, len);

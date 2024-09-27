@@ -51,7 +51,7 @@ public:
     static void Destroy();
     static void SetupStub(const sptr<RemoteObjectMock>& self);
 
-    MOCK_METHOD(int, SendRequest, (uint32_t, MessageParcel&, MessageParcel&, MessageOption &), (override));
+    MOCK_METHOD(int32_t, SendRequest, (uint32_t, MessageParcel&, MessageParcel&, MessageOption &), (override));
 
     bool GetResult(uint32_t code, const DeviceInfo *deviceInfo = nullptr,
                    int32_t publishId = 0, int32_t subscribeId = 0,
