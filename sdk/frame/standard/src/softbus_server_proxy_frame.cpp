@@ -242,7 +242,7 @@ int ClientRegisterService(const char *pkgName)
         COMM_LOGE(COMM_SDK, "serverProxyFrame is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
-    int sleepCnt = 0;
+    uint32_t sleepCnt = 0;
     while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) != SOFTBUS_OK) {
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
         sleepCnt++;
