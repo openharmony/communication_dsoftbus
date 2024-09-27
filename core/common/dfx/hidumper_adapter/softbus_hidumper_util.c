@@ -947,6 +947,8 @@ void FreeSoftBusStatsResult(SoftBusStatsResult* result)
 int32_t SoftBusQueryStatsInfo(int time, SoftBusStatsResult* result)
 {
     COMM_LOGI(COMM_DFX, "SoftBusQueryStatsInfo start");
+    COMM_CHECK_AND_RETURN_RET_LOGE(result != NULL, SOFTBUS_INVALID_PARAM,
+        COMM_DFX, "SoftBusQueryStatsInfo fail, result is null");
     if (time <= SOFTBUS_ZERO || time > SEVEN_DAY_MINUTE) {
         COMM_LOGE(COMM_DFX, "SoftBusQueryStatsInfo fail, time=%{public}d", time);
         return SOFTBUS_INVALID_PARAM;
@@ -970,6 +972,8 @@ int32_t SoftBusQueryStatsInfo(int time, SoftBusStatsResult* result)
 int32_t SoftBusQueryAlarmInfo(int time, int type, SoftBusAlarmEvtResult* result)
 {
     COMM_LOGI(COMM_DFX, "SoftBusQueryAlarmInfo start");
+    COMM_CHECK_AND_RETURN_RET_LOGE(result != NULL, SOFTBUS_INVALID_PARAM,
+        COMM_DFX, "QueryAlarmInfo fail, result is null");
     if (time <= SOFTBUS_ZERO || time > SEVEN_DAY_MINUTE) {
         COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, time=%{public}d", time);
         return SOFTBUS_INVALID_PARAM;
