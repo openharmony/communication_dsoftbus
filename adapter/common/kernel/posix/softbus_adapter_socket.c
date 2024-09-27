@@ -100,7 +100,7 @@ int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int3
     }
     int32_t ret = socket(domain, type, protocol);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "socket errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "socket errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     } else {
         *socketFd = ret;
@@ -112,7 +112,7 @@ int32_t SoftBusSocketSetOpt(int32_t socketFd, int32_t level, int32_t optName, co
 {
     int32_t ret = setsockopt(socketFd, level, optName, optVal, (socklen_t)optLen);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "setsockopt errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "setsockopt errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
 
@@ -123,7 +123,7 @@ int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName, vo
 {
     int32_t ret = getsockopt(socketFd, level, optName, optVal, (socklen_t *)optLen);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "getsockopt errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "getsockopt errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
     return SOFTBUS_ADAPTER_OK;
@@ -135,7 +135,7 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
     socklen_t errSize = sizeof(err);
     int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, &errSize);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "getsockopt fd=%{public}d, errno=%{public}d", socketFd, errno);
+        COMM_LOGE(COMM_ADAPTER, "getsockopt fd=%{public}d, errno=%{public}d, ret=%{public}d", socketFd, errno, ret);
         return SockOptErrorToSoftBusError(errno);
     }
     if (err != 0) {
@@ -154,7 +154,7 @@ int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr)
     uint32_t len = sizeof(*addr);
     int32_t ret = getsockname(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "getsockname errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "getsockname errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
     return SOFTBUS_ADAPTER_OK;
@@ -170,7 +170,7 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr)
     uint32_t len = sizeof(*addr);
     int32_t ret = getpeername(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "getpeername errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "getpeername errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
     return SOFTBUS_ADAPTER_OK;
@@ -185,7 +185,8 @@ int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrL
 
     int32_t ret = bind(socketFd, (struct sockaddr *)addr, (socklen_t)addrLen);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "bind strerror=%{public}s, errno=%{public}d", strerror(errno), errno);
+        COMM_LOGE(COMM_ADAPTER, "bind strerror=%{public}s, errno=%{public}d, ret=%{public}d",
+            strerror(errno), errno, ret);
         return GetErrorCode();
     }
 
@@ -196,7 +197,8 @@ int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog)
 {
     int32_t ret = listen(socketFd, backLog);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "listen strerror=%{public}s, errno=%{public}d", strerror(errno), errno);
+        COMM_LOGE(COMM_ADAPTER, "listen strerror=%{public}s, errno=%{public}d, ret=%{public}d",
+            strerror(errno), errno, ret);
         DfxReportAdapterSocket(EVENT_SCENE_SOCKET_LISTEN, SOFTBUS_TCPCONNECTION_SOCKET_ERR, socketFd, 0);
         return SOFTBUS_ADAPTER_ERR;
     }
@@ -215,7 +217,8 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ac
     uint32_t len = sizeof(*addr);
     int32_t ret = accept(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret < 0) {
-        COMM_LOGD(COMM_ADAPTER, "accept strerror=%{public}s, errno=%{public}d", strerror(errno), errno);
+        COMM_LOGD(COMM_ADAPTER, "accept strerror=%{public}s, errno=%{public}d, ret=%{public}d",
+            strerror(errno), errno, ret);
         DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_TCPCONNECTION_SOCKET_ERR, socketFd, 0);
         return GetErrorCode();
     }
@@ -232,7 +235,7 @@ int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int3
     }
     int32_t ret = connect(socketFd, (struct sockaddr *)addr, (socklen_t)addrLen);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "connect=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "connect=%{public}s, ret=%{public}d", strerror(errno), ret);
         int32_t result = GetErrorCode();
         if (result == SOFTBUS_ADAPTER_SOCKET_EINPROGRESS || result == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
             DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_OK, socketFd, 0);
@@ -329,7 +332,7 @@ int32_t SoftBusSocketSelect(
 #endif
     int32_t ret = select(nfds, tempReadSet, tempWriteSet, tempExceptSet, timeoutPtr);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "select errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "select errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return GetErrorCode();
     }
 
@@ -340,7 +343,7 @@ int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp)
 {
     int32_t ret = ioctl(socketFd, cmd, argp);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "ioctl errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "ioctl errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
 
@@ -351,7 +354,7 @@ int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag)
 {
     int32_t ret = fcntl(socketFd, cmd, flag);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "fcntl errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "fcntl errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
 
@@ -363,7 +366,7 @@ int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, uint3
     int32_t wrapperFlag = flags | MSG_NOSIGNAL;
     int32_t ret = send(socketFd, buf, len, wrapperFlag);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "send errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "send errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return GetErrorCode();
     }
 
@@ -379,7 +382,7 @@ int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int
     }
     int32_t ret = sendto(socketFd, buf, len, flags, (struct sockaddr *)toAddr, toAddrLen);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "sendto errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "sendto errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
 
@@ -390,7 +393,8 @@ int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t fla
 {
     int32_t ret = recv(socketFd, buf, len, flags);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "recv socketFd=%{public}d, errno=%{public}s", socketFd, strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "recv socketFd=%{public}d, errno=%{public}s, ret=%{public}d",
+            socketFd, strerror(errno), ret);
         return GetErrorCode();
     }
 
@@ -407,7 +411,7 @@ int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t
 
     int32_t ret = recvfrom(socketFd, buf, len, flags, (struct sockaddr *)fromAddr, (socklen_t *)fromAddrLen);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "recvfrom errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "recvfrom errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
 
@@ -418,7 +422,7 @@ int32_t SoftBusSocketShutDown(int32_t socketFd, int32_t how)
 {
     int32_t ret = shutdown(socketFd, how);
     if (ret != 0) {
-        COMM_LOGD(COMM_ADAPTER, "shutdown=%{public}s", strerror(errno));
+        COMM_LOGD(COMM_ADAPTER, "shutdown=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
 
@@ -429,7 +433,7 @@ int32_t SoftBusSocketClose(int32_t socketFd)
 {
     int32_t ret = close(socketFd);
     if (ret != 0) {
-        COMM_LOGD(COMM_ADAPTER, "close errno=%{public}s", strerror(errno));
+        COMM_LOGD(COMM_ADAPTER, "close errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ADAPTER_ERR;
     }
 
@@ -446,10 +450,10 @@ int32_t SoftBusInetPtoN(int32_t af, const char *src, void *dst)
     if (ret == 1) {
         return SOFTBUS_ADAPTER_OK;
     } else if (ret == 0) {
-        COMM_LOGE(COMM_ADAPTER, "invalid str input fromat");
+        COMM_LOGE(COMM_ADAPTER, "invalid str input fromat, ret=%{public}d", ret);
         return SOFTBUS_ADAPTER_INVALID_PARAM;
     } else {
-        COMM_LOGE(COMM_ADAPTER, "inet_pton failed");
+        COMM_LOGE(COMM_ADAPTER, "inet_pton failed, ret=%{public}d", ret);
         return SOFTBUS_ADAPTER_ERR;
     }
 }
