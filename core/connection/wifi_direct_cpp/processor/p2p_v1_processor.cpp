@@ -188,6 +188,9 @@ void P2pV1Processor::WaitingReqResponseState()
         })
         .Handle<std::shared_ptr<TimeoutEvent>>([this](std::shared_ptr<TimeoutEvent> &event) {
             OnWaitReqResponseTimeoutEvent();
+        })
+        .Handle<std::shared_ptr<AuthExceptionEvent>>([this](std::shared_ptr<AuthExceptionEvent> &event) {
+            ProcessAuthExceptionEvent(event);
         });
 }
 
@@ -594,6 +597,17 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
         if (!active_) {
             GetWifiDirectManager()->notifyConnectedForSink(&sinkLink);
         }
+    }
+    Terminate();
+}
+
+void P2pV1Processor::ProcessAuthExceptionEvent(const std::shared_ptr<AuthExceptionEvent> &event)
+{
+    CONN_LOGE(CONN_WIFI_DIRECT, "AuthExceptionEvent error=%{public}d", event->error_);
+    if (connectCommand_ != nullptr) {
+        CleanupIfNeed(event->error_, connectCommand_->GetRemoteDeviceId());
+        connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(event->error_));
+        connectCommand_ = nullptr;
     }
     Terminate();
 }
