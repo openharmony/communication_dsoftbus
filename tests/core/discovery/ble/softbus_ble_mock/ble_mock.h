@@ -67,8 +67,8 @@ public:
     BleMock();
     ~BleMock();
 
-    MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
-    MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
+    MOCK_METHOD(int32_t, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int32_t, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
     MOCK_METHOD(int32_t, InitBroadcastMgr, (), (override));
     MOCK_METHOD(int32_t, DeInitBroadcastMgr, (), (override));
     MOCK_METHOD(
@@ -87,9 +87,9 @@ public:
     MOCK_METHOD(int32_t, SetBroadcastingData, (int32_t bcId, const BroadcastPacket *packet), (override));
     MOCK_METHOD(int32_t, UpdateBroadcasting, (int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet),
         (override));
-    MOCK_METHOD(int, SoftBusGetBtMacAddr, (SoftBusBtAddr * mac), (override));
-    MOCK_METHOD(int, SoftBusGetBtState, (), (override));
-    MOCK_METHOD(int, SoftBusGetBrState, (), (override));
+    MOCK_METHOD(int32_t, SoftBusGetBtMacAddr, (SoftBusBtAddr * mac), (override));
+    MOCK_METHOD(int32_t, SoftBusGetBtState, (), (override));
+    MOCK_METHOD(int32_t, SoftBusGetBrState, (), (override));
 
     void SetupSuccessStub();
     void AsyncAdvertiseDone();
