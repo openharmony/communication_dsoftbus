@@ -52,6 +52,7 @@ static int32_t g_port = 6000;
 static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
+static const char *g_uuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 static IServerChannelCallBack g_testChannelCallBack;
 class TransTcpDirectP2pTest : public testing::Test {
 public:
@@ -245,13 +246,13 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
 HWTEST_F(TransTcpDirectP2pTest, StartP2pListenerTest001, TestSize.Level1)
 {
     StopP2pSessionListener();
-    int32_t ret = StartP2pListener(nullptr, &g_port);
+    int32_t ret = StartP2pListener(nullptr, &g_port, g_uuid);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = StartP2pListener(g_ip, &g_port);
+    ret = StartP2pListener(g_ip, &g_port, g_uuid);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
-    ret = StartP2pListener(g_ip, &g_port);
+    ret = StartP2pListener(g_ip, &g_port, g_uuid);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     int32_t channelId = 1;
