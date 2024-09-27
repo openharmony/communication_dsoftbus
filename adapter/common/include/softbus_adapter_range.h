@@ -34,12 +34,12 @@ extern "C" {
 #define SOFTBUS_NEW_MODEL_ID_LEN (HEXIFY_LEN(4))
 
 typedef struct {
-    int32_t rssi;
     int8_t power;
     char identity[SOFTBUS_DEV_IDENTITY_LEN];
     char modelId[SOFTBUS_MODEL_ID_LEN];
     char subModelId[SOFTBUS_SUB_MODEL_ID_LEN];
     char newModelId[SOFTBUS_NEW_MODEL_ID_LEN];
+    int32_t rssi;
 } SoftBusRangeParam;
 
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range);

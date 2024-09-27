@@ -74,24 +74,24 @@ typedef enum {
 } SoftBusGattAttrPermission;
 
 typedef struct {
+    bool isLong;
     int connId;
     int transId;
-    SoftBusBtAddr *btAddr;
     int attrHandle;
     int offset;
-    bool isLong;
+    SoftBusBtAddr *btAddr;
 } SoftBusGattReadRequest;
 
 typedef struct {
+    bool needRsp;
+    bool isPrep;
     int connId;
     int transId;
-    SoftBusBtAddr *btAddr;
     int attrHandle;
     int offset;
     int length;
-    bool needRsp;
-    bool isPrep;
     unsigned char *value;
+    SoftBusBtAddr *btAddr;
 } SoftBusGattWriteRequest;
 
 
