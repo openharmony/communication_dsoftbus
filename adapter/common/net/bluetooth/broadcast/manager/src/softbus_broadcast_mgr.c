@@ -48,14 +48,14 @@ static volatile bool g_isLpScanCbReg = false;
 static int32_t RegisterInfoDump(int fd);
 
 typedef struct {
-    BaseServiceType srvType;
-    int32_t adapterBcId;
     bool isUsed;
     bool isAdvertising;
     bool isStarted;
-    int64_t time;
+    BaseServiceType srvType;
+    int32_t adapterBcId;
     SoftBusCond cond;
     BroadcastCallback *bcCallback;
+    int64_t time;
 } BroadcastManager;
 
 typedef enum {
@@ -71,15 +71,15 @@ typedef enum {
 } ScanFreq;
 
 typedef struct {
-    BaseServiceType srvType;
-    int32_t adapterScanId;
     bool isUsed;
     bool isNeedReset;
     bool isScanning;
+    uint8_t filterSize;
+    BaseServiceType srvType;
+    int32_t adapterScanId;
     BcScanParams param;
     ScanFreq freq;
     BcScanFilter *filter;
-    uint8_t filterSize;
     ScanCallback *scanCallback;
 } ScanManager;
 

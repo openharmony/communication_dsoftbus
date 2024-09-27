@@ -40,16 +40,16 @@ static SoftBusMutex g_scannerLock = { 0 };
 static int32_t g_adapterBtStateListenerId = -1;
 
 typedef struct {
-    int32_t advId;
     bool isUsed;
     bool isAdvertising;
+    int32_t advId;
     SoftbusBroadcastCallback *advCallback;
 } AdvChannel;
 
 typedef struct {
-    int32_t scannerId;
     bool isUsed;
     bool isScanning;
+    int32_t scannerId;
     SoftbusScanCallback *scanCallback;
 } ScanChannel;
 
