@@ -106,7 +106,8 @@ static int32_t AddForceDownInfo(const ForceDownInfo *forceDownInfo)
     Anonymize(forceDownInfo->forceDownDevId, &anonyNetworkId);
     LNN_LOGI(LNN_LANE, "add new forceDownInfo success, p2pRequestId=%{public}u, forceDownDevId=%{public}s, "
         "forceDownReqId=%{public}u, forceDownLink=%{public}d, forceDownType=%{public}d", forceDownInfo->p2pRequestId,
-        anonyNetworkId, forceDownInfo->forceDownReqId, forceDownInfo->forceDownLink, forceDownInfo->downType);
+        AnonymizeWrapper(anonyNetworkId), forceDownInfo->forceDownReqId,
+        forceDownInfo->forceDownLink, forceDownInfo->downType);
     AnonymizeFree(anonyNetworkId);
     return SOFTBUS_OK;
 }
