@@ -38,8 +38,8 @@ public:
     ~ManagerMock();
 
     MOCK_METHOD(void, SoftbusBleAdapterInit, (), (override));
-    MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
-    MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
+    MOCK_METHOD(int32_t, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int32_t, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
 
     static const SoftbusBroadcastCallback *broadcastCallback;
     static const SoftbusScanCallback *scanCallback;
