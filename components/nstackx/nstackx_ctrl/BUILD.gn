@@ -83,7 +83,10 @@ if (!defined(ohos_lite) ||
     "core/nstackx_smartgenius.c",
   ]
   standard_small_diff_include_dirs = [ "include/coap_discover" ]
-  cflags += [ "-DDFINDER_MGT_MSG_LOG", "-DNSTACKX_DFINDER_HIDUMP", ]
+  cflags += [
+    "-DDFINDER_MGT_MSG_LOG",
+    "-DNSTACKX_DFINDER_HIDUMP",
+  ]
 }
 
 config("nstackx_ctrl_interface") {
@@ -163,7 +166,10 @@ if (defined(ohos_lite)) {
     }
     branch_protector_ret = "pac_ret"
 
-    cflags += [ "-DDFINDER_MGT_MSG_LOG", "-DNSTACKX_DFINDER_HIDUMP", ]
+    cflags += [
+      "-DDFINDER_MGT_MSG_LOG",
+      "-DNSTACKX_DFINDER_HIDUMP",
+    ]
     cflags_cc = cflags
     sources = base_src
     sources += standard_small_diff_src

@@ -99,5 +99,5 @@ int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *udpChannel)
 {
     (void)channelId;
     (void)udpChannel;
-    return SOFTBUS_ERR;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
