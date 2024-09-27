@@ -39,6 +39,7 @@
 #define FDARR_EXPAND_BASE 2
 #define SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS (3 * 1000)
 #define SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS (3 * 10) /* wait retry time for an abnotmal event by select*/
+#define SOFTBUS_LISTENER_SELECT_TIMEOUT_SEC (6 * 60 * 60)
 
 enum BaseListenerStatus {
     LISTENER_IDLE = 0,
@@ -1163,10 +1164,12 @@ static void *SelectTask(void *arg)
             continue;
         }
         SoftBusSocketFdSet(selectState->ctrlRfd, &readSet);
+        SoftBusSockTimeOut timeout = {0};
+        timeout.sec = SOFTBUS_LISTENER_SELECT_TIMEOUT_SEC;
         int32_t maxFd = maxFdOrStatus > selectState->ctrlRfd ? maxFdOrStatus : selectState->ctrlRfd;
         CONN_LOGI(CONN_COMMON, "select is waking up, maxFd=%{public}d, ctrlRfd=%{public}d",
             maxFd, selectState->ctrlRfd);
-        int32_t nEvents = SoftBusSocketSelect(maxFd + 1, &readSet, &writeSet, &exceptSet, NULL);
+        int32_t nEvents = SoftBusSocketSelect(maxFd + 1, &readSet, &writeSet, &exceptSet, &timeout);
         int32_t wakeupTraceId = ++wakeupTraceIdGenerator;
         if (nEvents == 0) {
             continue;
