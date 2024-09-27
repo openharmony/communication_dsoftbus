@@ -65,9 +65,9 @@ typedef struct {
 } CoapBuffer;
 
 typedef struct {
-    uint16_t num;
     const uint8_t *optionBuf;
     uint32_t len;
+    uint16_t num;
 } CoapOption;
 
 typedef struct {

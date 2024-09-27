@@ -36,14 +36,14 @@ typedef struct DFileConfig {
 } DFileConfig;
 
 typedef struct DFileTransConfig {
-    uint32_t maxRtt;
     uint8_t maxAckCnt; /* Sender wait for number of "maxAckCnt" ACK before timeout */
     uint8_t maxCtrlFrameRetryCnt; /* Max retry count for control frame */
+    uint8_t maxRecvIdleCnt; /* Max successive idle count before receiver timeout */
+    uint32_t maxRtt;
     uint32_t maxCtrlFrameTimeout; /* Max timeout value for control frame */
     uint32_t maxFileHeaderConfirmFrameTimeout; /* Max timeout value for wait file header confirm frame */
     uint32_t maxFileWriteTimeout; /* Max timeout value for writing all file data */
     uint32_t initialRecvIdleTimeout; /* Initial idle timeout value for receiver */
-    uint8_t maxRecvIdleCnt; /* Max successive idle count before receiver timeout */
     uint32_t initialAckInterval; /* Initial ACK interval during normal stage */
     uint32_t recvLimitAckInterval; /* Adjusted ACK interval after receiving 90% frames */
     uint32_t lastFrameAckInterval; /* Adjusted ACK interval after receiving last frame of last file */

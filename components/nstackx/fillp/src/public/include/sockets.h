@@ -94,21 +94,21 @@ struct FtSocket {
     /* These following members are used for connection and referenced by FtNetconn */
     FILLP_INT coreErrType[MAX_SPUNGE_TYPE_NUM];
 
-    struct HlistNode listenNode;
-    FILLP_INT listenBacklog;
-    SYS_ARCH_SEM acceptSem;
-    FillpQueue *acceptBox;
-
     void *recvPktBuf;
     struct SpungeInstance *inst;
     void *traceHandle; /* Handle provided by FillpTrace callback */
 
+    struct HlistNode listenNode;
+    SYS_ARCH_SEM acceptSem;
+    FillpQueue *acceptBox;
+    FILLP_INT listenBacklog;
+
+    FILLP_UINT32 errEvent;
     struct EventPoll *eventEpoll;
     SysArchAtomic rcvEvent;
     SysArchAtomic sendEvent;
     SysArchAtomic sendEventCount;
     SysArchAtomic epollWaiting;
-    FILLP_UINT32 errEvent;
 
     struct Hlist epTaskList;
     SYS_ARCH_SEM epollTaskListLock;
@@ -126,22 +126,22 @@ struct FtSocket {
     FILLP_LLONG jitter;
     FILLP_LLONG transmit;
 
+    FILLP_UINT16 flags;
     FILLP_UINT16 sockAddrType;
     FILLP_INT socketType;     // get from SockSocket
     FILLP_INT socketProtocol; // get from SockSocket
-    FILLP_UINT16 flags;
 
     FILLP_BOOL isListenSock;
-
+    FILLP_BOOL isSockBind;
+    FILLP_BOOL lingering;
     FILLP_UINT8 traceFlag; /* Flag for enable indication User/Network */
     FILLP_INT freeTimeCount;
-    FILLP_BOOL isSockBind;
+    FILLP_INT err;
+
     SYS_ARCH_SEM connBlockSem;     /* Used when do connect */
     SYS_ARCH_RW_SEM sockConnSem;   /* Used to protect socket resource not freed */
     SYS_ARCH_SEM sockCloseProtect; /* To make sure that only one close message posted to fillp thread */
-    FILLP_INT err;
     struct GlobalAppResource resConf; /* Total size is 15 * sizeof uint32 */
-    FILLP_BOOL lingering;
     struct linger fillpLinger;
     FILLP_INT directlySend; /* directly send packet in the app thread instead of in the main thread */
 };

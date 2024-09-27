@@ -96,9 +96,9 @@ typedef void (*DFileTransMsgReceiver)(struct DFileTrans *dFileTrans, DFileTransM
 
 typedef struct {
     uint16_t lastRetranFileId;
-    uint32_t lastRetranFileSequence;
-    uint32_t sameRetraLostBlocks;
     uint8_t lastRetranLevel;
+    uint32_t sameRetraLostBlocks;
+    uint32_t lastRetranFileSequence;
 } RetranFileRecord;
 
 typedef struct DFileTrans {
@@ -108,23 +108,22 @@ typedef struct DFileTrans {
     DFileSendState sendState;
     DFileReceiveState recvState;
     /* members for sending file */
-    int32_t lastSentHeaderFileId;
     uint8_t headerRetryCnt;
     uint8_t lostAckCnt;
     uint8_t fileTransferReqReceived; /* Flag: Receive File Transfer REQ frame */
     uint8_t fileTransferDoneReceived; /* Flag: Receive File Transfer Done frame */
+    int32_t lastSentHeaderFileId;
     uint8_t *remainDataFrame;
-
     /* members for receiving file */
+    struct timespec retryAllPacketTs;
+    struct timespec heartBeatTs;
     uint16_t lastAckedHeaderFileId;
     uint16_t lastFileDataRecvFileId;
     uint32_t lastFileDataSequence;
     uint16_t prefileId;
-    uint32_t preSequence;
     uint16_t haveRetransFilefileId;
+    uint32_t preSequence;
     uint32_t haveRetransFilepreSequence;
-    struct timespec retryAllPacketTs;
-    struct timespec heartBeatTs;
     uint8_t headerAckRetryCnt;
     uint8_t idleTimeoutCnt;
     uint8_t allFileNameReceived;
@@ -142,53 +141,54 @@ typedef struct DFileTrans {
     uint32_t allRetrySendCount;
     uint32_t shouldSendAck;
     uint32_t shouldSendAckDividor;
-#if DFILE_SHOW_RECEIVE_TIME
-    struct timespec startTs;
-#endif
 
-    uint64_t totalDataFrameCnt;
-    uint64_t receivedDataFrameCnt;
-    uint64_t adjustAckIntervalLimit;
     uint32_t ackInterval;
     uint32_t transRetryCount;
     uint32_t notInsertCount;
+#if DFILE_SHOW_RECEIVE_TIME
+    struct timespec startTs;
+#endif
+    uint64_t totalDataFrameCnt;
+    uint64_t receivedDataFrameCnt;
+    uint64_t adjustAckIntervalLimit;
+    uint8_t fileManagerTaskStarted;
+    uint8_t isRecvSucMsgNotified;
+    uint8_t isAckSend;
+    uint8_t recvLastFramePrint;
+    uint8_t adjustAckIntervalLimitPrint;
+    uint8_t adjustToLastFrameAckInterval;
+    uint8_t sendRetransFileCount;
+    uint8_t ioWriteFinishFlag;
 
     uint16_t connType;
+    uint16_t mtu;
     DFileTransConfig config;
     DFileTransErrorCode errorCode;
-    struct timespec ts;
     uint32_t timeout;
-    uint8_t fileManagerTaskStarted;
+    struct timespec ts;
     uint8_t sendBuffer[NSTACKX_MAX_FRAME_SIZE];
     size_t sendBufferLength;
-    uint16_t mtu;
     FileList *fileList;
     FileManager *fileManager;
     DFileTransWriteHandle writeHandle;
     DFileTransMsgReceiver msgReceiver;
     void *context;
     DFileSession *session;
-    uint8_t isRecvSucMsgNotified;
+
     uint64_t bytesTransferredLastRecord; /* just usefully for receiver */
     uint64_t bytesTransferred; /* just usefully for receiver */
     uint64_t totalBytes;  /* just usefully for receiver */
-    uint8_t isAckSend;
-    uint8_t recvLastFramePrint;
-    uint8_t adjustAckIntervalLimitPrint;
     uint64_t recvBlockListFullTimes;
-    uint8_t adjustToLastFrameAckInterval;
     OnDFileRenameFile onRenameFile;
     uint32_t recvCount;
-    uint8_t sendRetransFileCount;
-    uint8_t ioWriteFinishFlag;
     uint32_t backPressureBypassCnt;
 } DFileTrans;
 
 typedef struct {
     uint8_t isSender;
     uint16_t transId;
-    FileManager *fileManager;
     ConnectType connType;
+    FileManager *fileManager;
     DFileTransWriteHandle writeHandle;
     DFileTransMsgReceiver msgReceiver;
     void *context;
@@ -205,19 +205,19 @@ typedef struct PeerInfo {
     List list;
     struct sockaddr_in dstAddr;
     char localInterfaceName[IFNAMSIZ];
+    DFileSession *session;
+    Timer *settingTimer;
+    struct PeerInfo *brotherPeer;
+    uint64_t overRun;
     uint16_t localMtu;
     uint16_t mtu;
     uint16_t mtuInuse;
     uint16_t dataFrameSize;
     uint16_t connType;
-    SettingState state;
-    DFileSession *session;
-    Timer *settingTimer;
     uint8_t settingTimeoutCnt;
     uint8_t socketIndex;
     int32_t remoteSessionId;
-    uint64_t overRun;
-    struct PeerInfo *brotherPeer;
+    SettingState state;
 
     /* congestion control info */
     WifiStationInfo rxWifiStationInfo; /* save the bitrate of the server endian to calculate the sendrate */
@@ -241,7 +241,8 @@ typedef struct PeerInfo {
     uint32_t intervalSendCount;
     int32_t amendSendRate;
     uint8_t decreaseStatus;
-
+    uint8_t gotWifiRate;
+    uint16_t sendAckNum;
     uint32_t eAgainCount;
     struct timespec measureBefore;
     struct timespec ackDropTimer;
@@ -259,9 +260,7 @@ typedef struct PeerInfo {
     uint16_t locationHistoryData;
     uint16_t ackInterval;
     uint32_t rateStateInterval;
-    uint16_t sendAckNum;
     uint32_t remoteDFileVersion;
-    uint8_t gotWifiRate;
     uint32_t linkSequence;
     uint32_t lastMaxSeq;
     uint32_t lastTimes;
