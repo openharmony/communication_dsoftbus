@@ -295,7 +295,7 @@ static void LnnSetP2pNetCapability(uint32_t *capability)
 
 static void GetApCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
 {
-    switch (wifiState) 
+    switch (wifiState) {
         case SOFTBUS_AP_ENABLED:
             g_isApEnable = true;
             LnnSetNetworkCapability(capability);
