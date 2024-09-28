@@ -251,7 +251,7 @@ void BleMock::HexDump(const uint8_t *data, uint32_t len)
     std::stringstream ss;
     for (uint32_t i = 0; i < len; i++) {
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(BYTE_DUMP_LEN)
-            << static_cast<uint32_t>(data[i]) << " ";
+           << static_cast<uint32_t>(data[i]) << " ";
     }
     DISC_LOGI(DISC_TEST, "ss=%{public}s", ss.str().c_str());
     std::cout << ss.str() << std::endl;

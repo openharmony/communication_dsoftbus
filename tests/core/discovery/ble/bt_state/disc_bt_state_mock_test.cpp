@@ -16,10 +16,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <string>
-#include <sstream>
 #include <cstdio>
 #include <cstdlib>
+#include <sstream>
+#include <string>
 
 #include "bluetooth_mock.h"
 #include "disc_ble.h"
@@ -42,7 +42,7 @@ const std::string CAST_REFRESH_CAPA_DATA = R"({"castPlus":"AA00"})";
 constexpr int32_t CAST_CAPABILITY = 1 << CASTPLUS_CAPABILITY_BITMAP;
 const PublishOption g_publishOption = {
     .freq = MID,
-    .capabilityBitmap = {CAST_CAPABILITY},
+    .capabilityBitmap = { CAST_CAPABILITY },
     .capabilityData = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(CAST_PUBLISH_CAPA_DATA.c_str())),
     .dataLen = static_cast<uint32_t>(CAST_PUBLISH_CAPA_DATA.length()),
 };
@@ -50,7 +50,7 @@ const SubscribeOption g_subscribeOption = {
     .freq = MID,
     .isSameAccount = false,
     .isWakeRemote = false,
-    .capabilityBitmap = {CAST_CAPABILITY},
+    .capabilityBitmap = { CAST_CAPABILITY },
     .capabilityData = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(CAST_REFRESH_CAPA_DATA.c_str())),
     .dataLen = static_cast<uint32_t>(CAST_REFRESH_CAPA_DATA.length()),
 };
@@ -102,13 +102,9 @@ using CMD = ExpectWrapper::ExpectCommand;
 
 class DiscBtStateTest : public testing::Test {
 public:
-    static void SetUpTestCase()
-    {
-    }
+    static void SetUpTestCase() { }
 
-    static void TearDownTestCase()
-    {
-    }
+    static void TearDownTestCase() { }
 
     void SetUp() override
     {
