@@ -339,6 +339,11 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             }
             *needSync = true;
             break;
+        case SOFTBUS_WIFI_SEMI_ACTIVE:
+            g_isWifiEnable = true;
+            (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+            *needSync = true;
+            break;
         default:
             break;
     }
@@ -360,7 +365,7 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     bool needSync = false;
     uint32_t netCapability = oldNetCap;
     GetNetworkCapability(wifiState, &netCapability, &needSync);
-    LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{publc}u->%{publc}u, needSync=%{public}d",
+    LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{public}u->%{public}u, needSync=%{public}d",
         wifiState, oldNetCap, netCapability, needSync);
     WifiStateProcess(netCapability, needSync);
 }

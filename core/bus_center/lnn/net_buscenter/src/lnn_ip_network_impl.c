@@ -586,7 +586,6 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
         return;
     }
     const LnnMonitorAddressChangedEvent *event = (const LnnMonitorAddressChangedEvent *)info;
-    LNN_LOGI(LNN_BUILDER, "ifName len=%{public}d", (int32_t)strlen(event->ifName));
     if (strlen(event->ifName) != 0) {
         LnnNotifyPhysicalSubnetStatusChanged(event->ifName, LNN_PROTOCOL_IP, NULL);
     }
