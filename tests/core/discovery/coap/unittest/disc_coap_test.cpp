@@ -33,25 +33,19 @@ static DiscoveryFuncInterface *g_discCoapFuncInterface = nullptr;
 
 class DiscCoapTest : public testing::Test {
 public:
-    DiscCoapTest()
-    {}
-    ~DiscCoapTest()
-    {}
+    DiscCoapTest() { }
+    ~DiscCoapTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void DiscCoapTest::SetUpTestCase(void)
-{}
+void DiscCoapTest::SetUpTestCase(void) { }
 
-void DiscCoapTest::TearDownTestCase(void)
-{}
+void DiscCoapTest::TearDownTestCase(void) { }
 
-static DiscInnerCallback g_discInnerCb = {
-    .OnDeviceFound = nullptr
-};
+static DiscInnerCallback g_discInnerCb = { .OnDeviceFound = nullptr };
 
 static PublishOption g_testPubOption = {
     .freq = LOW,
@@ -61,14 +55,12 @@ static PublishOption g_testPubOption = {
     .ranging = false
 };
 
-static SubscribeOption g_testSubOption = {
-    .freq = LOW,
+static SubscribeOption g_testSubOption = { .freq = LOW,
     .isSameAccount = false,
     .isWakeRemote = false,
-    .capabilityBitmap = {OSD_CAPABILITY},
+    .capabilityBitmap = { OSD_CAPABILITY },
     .capabilityData = nullptr,
-    .dataLen = 0
-};
+    .dataLen = 0 };
 
 /*
  * @tc.name: TestCoapPublish001
