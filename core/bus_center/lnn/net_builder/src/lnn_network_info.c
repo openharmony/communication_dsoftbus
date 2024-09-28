@@ -293,6 +293,29 @@ static void LnnSetP2pNetCapability(uint32_t *capability)
     }
 }
 
+static void GetApCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
+{
+    switch (wifiState) 
+        case SOFTBUS_AP_ENABLED:
+            g_isApEnable = true;
+            LnnSetNetworkCapability(capability);
+            if (IsP2pAvailable(true)) {
+                (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+            }
+            *needSync = true;
+            break;
+        case SOFTBUS_AP_DISABLED:
+            g_isApEnable = false;
+            if (IsP2pAvailable(false)) {
+                (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+            }
+            *needSync = true;
+            break;
+        default:
+            break;
+    }
+}
+
 static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
 {
     switch (wifiState) {
@@ -325,19 +348,8 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             *needSync = true;
             break;
         case SOFTBUS_AP_ENABLED:
-            g_isApEnable = true;
-            LnnSetNetworkCapability(capability);
-            if (IsP2pAvailable(true)) {
-                (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            }
-            *needSync = true;
-            break;
         case SOFTBUS_AP_DISABLED:
-            g_isApEnable = false;
-            if (IsP2pAvailable(false)) {
-                (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            }
-            *needSync = true;
+            GetApCapability(wifiState, capability, needSync);
             break;
         case SOFTBUS_WIFI_SEMI_ACTIVE:
             g_isWifiEnable = true;
