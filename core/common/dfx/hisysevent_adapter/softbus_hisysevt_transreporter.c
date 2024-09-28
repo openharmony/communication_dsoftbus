@@ -909,10 +909,18 @@ void SoftbusReportTransInfoEvt(const char *infoMsg)
     }
 }
 
+static void DeinitOpenSessionEvtMutexLock(void)
+{
+    SoftBusMutexDestroy(&g_openSessionCnt.lock);
+    SoftBusMutexDestroy(&g_openSessionTime.lock);
+    SoftBusMutexDestroy(&g_openSessionKpi.lock);
+}
+
 int32_t InitTransStatisticSysEvt(void)
 {
     if (InitOpenSessionEvtMutexLock() != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "Trans Statistic Evt Lock Init Fail!");
+        DeinitOpenSessionEvtMutexLock();
         return SOFTBUS_DFX_INIT_FAILED;
     }
 
