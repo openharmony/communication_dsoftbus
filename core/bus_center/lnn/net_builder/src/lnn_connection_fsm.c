@@ -109,6 +109,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm);
 static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static void LeavingStateEnter(FsmStateMachine *fsm);
 static bool LeavingStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
+static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *newNodeInfo, bool isUpdate);
 
 static FsmState g_states[STATE_NUM_MAX] = {
     [STATE_AUTH_INDEX] = {
@@ -1164,6 +1165,23 @@ static bool IsSupportBrDupBle(uint32_t feature, AuthCapability capaBit)
     return ((feature & (1 << (uint32_t)capaBit)) != 0);
 }
 
+static bool CheckBasicInfoChange(const NodeInfo *newNodeInfo)
+{
+    if (newNodeInfo == NULL) {
+        return false;
+    }
+    NodeInfo oldNodeInfo;
+    if (memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "memset fail");
+        return false;
+    }
+    if (LnnGetRemoteNodeInfoById(newNodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get remote node info fail");
+        return false;
+    }
+    return IsBasicNodeInfoChanged(&oldNodeInfo, newNodeInfo, false);
+}
+
 static void ProcessBleOnline(const LnnConntionInfo *connInfo)
 {
     NodeInfo remoteInfo;
@@ -1172,7 +1190,8 @@ static void ProcessBleOnline(const LnnConntionInfo *connInfo)
         return;
     }
     if (LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID,
-        &remoteInfo) == SOFTBUS_OK && LnnHasDiscoveryType(&remoteInfo, DISCOVERY_TYPE_BLE)) {
+        &remoteInfo) == SOFTBUS_OK && LnnHasDiscoveryType(&remoteInfo, DISCOVERY_TYPE_BLE) &&
+        !CheckBasicInfoChange(connInfo->nodeInfo)) {
         LNN_LOGI(LNN_BUILDER, "ble has online, no need to go online");
         return;
     }
