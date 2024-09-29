@@ -1843,12 +1843,21 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
 
     char animizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(animizeAddress, BT_MAC_LEN, option->bleOption.bleMac, BT_MAC_LEN);
-    CONN_LOGI(CONN_BLE, "ble disconnect device now, addr=%{public}s", animizeAddress);
+    char hashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
+    if (ConvertBytesToHexString(hashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN),
+        (unsigned char *)option->bleOption.deviceIdHash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "convert bytes to array failed");
+    }
+    char anomizeUdid[UDID_BUF_LEN] = { 0 };
+    ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, hashStr);
+    CONN_LOGI(CONN_BLE, "ble disconnect device now, addr=%{public}s, udid=%{public}s", animizeAddress, anomizeUdid);
 
-    ConnBleConnection *connection =
-        ConnBleGetConnectionByAddr(option->bleOption.bleMac, CONN_SIDE_ANY, option->bleOption.protocol);
-    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
-        "ble disconnect device now failed: connection is not exist");
+    ConnBleConnection *connection = ConnBleGetConnectionByUdid(NULL, hashStr, BLE_PROTOCOL_ANY);
+    if (connection == NULL) {
+        connection = ConnBleGetConnectionByAddr(option->bleOption.bleMac, CONN_SIDE_ANY, option->bleOption.protocol);
+        CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
+            "ble disconnect device now failed: connection is not exist");
+    }
 
     int32_t status = ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_FORCELY);
     ConnBleReturnConnection(&connection);
