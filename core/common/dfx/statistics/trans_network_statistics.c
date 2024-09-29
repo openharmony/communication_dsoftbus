@@ -273,7 +273,7 @@ static int32_t PackNetworkStatistics(cJSON *json, NetworkStatisticsInfo *info)
     }
  
     char laneId[MAX_LANE_ID_LEN] = { 0 };
-    if (sprintf_s(laneId, sizeof(laneId), "%"PRIu64"", info->resource.laneId) < 0) {
+    if (sprintf_s(laneId, sizeof(laneId), "%" PRIu64, info->resource.laneId) < 0) {
         COMM_LOGE(COMM_DFX, "sprintf lane id fail");
         return SOFTBUS_MEM_ERR;
     }
