@@ -516,7 +516,7 @@ static int32_t GetWifiDirectMacInfo(char *localIp, LnnMacInfo *macInfo)
     char *anonyIp = NULL;
     Anonymize(localIp, &anonyIp);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "localIp=%{public}s get Mac fail, ret=%{public}d", anonyIp, ret);
+        LNN_LOGE(LNN_LANE, "localIp=%{public}s get Mac fail, ret=%{public}d", AnonymizeWrapper(anonyIp), ret);
         AnonymizeFree(anonyIp);
         return ret;
     }
@@ -531,7 +531,7 @@ static int32_t GetWifiDirectMacInfo(char *localIp, LnnMacInfo *macInfo)
     Anonymize(macInfo->localMac, &anonyLocalMac);
     Anonymize(macInfo->remoteMac, &anonyRemoteMac);
     LNN_LOGI(LNN_LANE, "get mac by ip done, localMac=%{public}s, remoteMac=%{public}s, localIp=%{public}s",
-        anonyLocalMac, anonyRemoteMac, anonyIp);
+        AnonymizeWrapper(anonyLocalMac), AnonymizeWrapper(anonyRemoteMac), AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyLocalMac);
     AnonymizeFree(anonyRemoteMac);
     AnonymizeFree(anonyIp);
@@ -574,7 +574,8 @@ int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosI
     if (!LnnGetOnlineStateById(queryInfo->networkId, CATEGORY_NETWORK_ID)) {
         char *anonyNetworkId = NULL;
         Anonymize(queryInfo->networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "device not online, cancel query peerNetworkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel query peerNetworkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
