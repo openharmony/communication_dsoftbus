@@ -23,6 +23,7 @@
 
 #include "nstackx.h"
 
+#include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "disc_coap_capability.h"
 #include "disc_coap_parser.h"
@@ -161,8 +162,11 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         DISC_CHECK_AND_RETURN_LOGE(nstackxDeviceInfo, DISC_COAP, "device count from nstackx is invalid");
 
         if ((nstackxDeviceInfo->update & 0x1) == 0) {
+            char *anonymizedName = NULL;
+            Anonymize(nstackxDeviceInfo->deviceName, &anonymizedName);
             DISC_LOGI(DISC_COAP, "duplicate device do not need report. deviceName=%{public}s",
-                nstackxDeviceInfo->deviceName);
+                AnonymizeWrapper(anonymizedName));
+            AnonymizeFree(anonymizedName);
             continue;
         }
         (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -519,7 +523,10 @@ void DiscCoapUpdateDevName(void)
         return;
     }
     localDevName[truncateLen] = '\0';
-    DISC_LOGI(DISC_COAP, "register new local device name. localDevName=%{public}s", localDevName);
+    char *anonymizedName = NULL;
+    Anonymize(localDevName, &anonymizedName);
+    DISC_LOGI(DISC_COAP, "register new local device name. localDevName=%{public}s", AnonymizeWrapper(anonymizedName));
+    AnonymizeFree(anonymizedName);
     ret = NSTACKX_RegisterDeviceName(localDevName);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device name failed, ret=%{public}d.", ret);
 }
