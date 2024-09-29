@@ -135,7 +135,8 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
     socklen_t errSize = sizeof(err);
     int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, &errSize);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "getsockopt fd=%{public}d, errno=%{public}d, ret=%{public}d", socketFd, errno, ret);
+        COMM_LOGE(COMM_ADAPTER, "getsockopt fd=%{public}d, errno=%{public}s, ret=%{public}d",
+            socketFd, strerror(errno), ret);
         return SockOptErrorToSoftBusError(errno);
     }
     if (err != 0) {
