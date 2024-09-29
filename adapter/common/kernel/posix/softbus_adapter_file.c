@@ -255,7 +255,7 @@ int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
 
     int32_t ret = access(pathName, mode);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "softbus access path fail. errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus access path fail, ret=%{public}d, errno=%{public}s", ret, strerror(errno));
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
