@@ -315,7 +315,7 @@ static void HbDelaySetNormalScanParam(void *para)
         param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
         param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
     }
-    LNN_LOGI(LNN_HEART_BEAT, "scanInterval=%{public}d, scanWindow=%{public}d", param.info.ble.scanInterval,
+    LNN_LOGI(LNN_HEART_BEAT, "scanInterval=%{public}hu, scanWindow=%{public}hu", param.info.ble.scanInterval,
         param.info.ble.scanWindow);
     if (LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl reset ble scan medium param fail");
@@ -335,7 +335,7 @@ static void HbDelaySetHighScanParam(void *para)
         .info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P25,
         .info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P25,
     };
-    LNN_LOGI(LNN_HEART_BEAT, "scanInterval=%{public}d, scanWindow=%{public}d", param.info.ble.scanInterval,
+    LNN_LOGI(LNN_HEART_BEAT, "scanInterval=%{public}hu, scanWindow=%{public}hu", param.info.ble.scanInterval,
         param.info.ble.scanWindow);
     if (LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl reset ble scan medium param fail");
