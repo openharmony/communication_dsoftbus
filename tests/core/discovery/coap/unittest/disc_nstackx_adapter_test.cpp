@@ -18,8 +18,8 @@
 #include <unistd.h>
 
 #include "bus_center_info_key.h"
-#include "disc_manager.h"
 #include "disc_log.h"
+#include "disc_manager.h"
 #include "disc_nstackx_adapter.c"
 #include "disc_nstackx_adapter.h"
 #include "lnn_local_net_ledger.h"
@@ -34,19 +34,15 @@ namespace OHOS {
 static bool isDeviceFound = false;
 class DiscNstackxAdapterTest : public testing::Test {
 public:
-    DiscNstackxAdapterTest()
-    {}
-    ~DiscNstackxAdapterTest()
-    {}
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-    void SetUp() override {}
-    void TearDown() override {}
+    DiscNstackxAdapterTest() { }
+    ~DiscNstackxAdapterTest() { }
+    static void SetUpTestCase() { }
+    static void TearDownTestCase() { }
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-static InnerDeviceInfoAddtions g_testAddtions = {
-    .medium = AUTO
-};
+static InnerDeviceInfoAddtions g_testAddtions = { .medium = AUTO };
 
 static void OnDeviceFoundTest(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
@@ -57,17 +53,14 @@ static void OnDeviceFoundTest(const DeviceInfo *device, const InnerDeviceInfoAdd
     g_testAddtions.medium = additions->medium;
 }
 
-static DiscInnerCallback g_discInnerCb = {
-    .OnDeviceFound = OnDeviceFoundTest
-};
+static DiscInnerCallback g_discInnerCb = { .OnDeviceFound = OnDeviceFoundTest };
 
 static constexpr uint32_t OSD_CAPABILITY = 128;
 
-static NSTACKX_DeviceInfo g_testNstackxInfo = {
-    .deviceId = "{UDID:123456789012345}",
+static NSTACKX_DeviceInfo g_testNstackxInfo = { .deviceId = "{UDID:123456789012345}",
     .deviceName = "OpenHarmonyDevice",
     .capabilityBitmapNum = 1,
-    .capabilityBitmap = {OSD_CAPABILITY},
+    .capabilityBitmap = { OSD_CAPABILITY },
     .deviceType = 0,
     .mode = DISCOVER_MODE,
     .update = 1,
@@ -75,8 +68,7 @@ static NSTACKX_DeviceInfo g_testNstackxInfo = {
     .networkName = "wlan0",
     .discoveryType = NSTACKX_DISCOVERY_TYPE_ACTIVE,
     .businessType = NSTACKX_BUSINESS_TYPE_NULL,
-    .reservedInfo = "reserved"
-};
+    .reservedInfo = "reserved" };
 
 /*
  * @tc.name: TestDiscCoapAdapterInit001
@@ -127,7 +119,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegCapa001, TestSize.Level1)
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    uint32_t capaBitmap[] = {128};
+    uint32_t capaBitmap[] = { 128 };
     uint32_t bitmapCount = 1;
     uint32_t invalidCount = 3;
     ret = DiscCoapRegisterCapability(0, capaBitmap);
@@ -154,7 +146,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterSetFilter001, TestSize.Level
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    uint32_t capaBitmap[] = {128};
+    uint32_t capaBitmap[] = { 128 };
     uint32_t bitmapCount = 1;
     uint32_t invalidCount = 3;
     ret = DiscCoapSetFilterCapability(0, capaBitmap);
@@ -264,7 +256,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    DiscCoapOption testOption = {0};
+    DiscCoapOption testOption = { 0 };
     testOption.freq = LOW;
     testOption.mode = ACTIVE_PUBLISH;
 
