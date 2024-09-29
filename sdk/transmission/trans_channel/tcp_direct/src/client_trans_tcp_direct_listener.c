@@ -49,6 +49,13 @@ static void TdcLockInit(void)
         atomic_store_explicit(&(g_lock.lockInit), true, memory_order_release);
     }
 }
+
+void TdcLockDeinit(void)
+{
+    g_lock.lockInit = false;
+    (void)SoftBusMutexDestroy(&g_lock.lock);
+}
+
 static int32_t ClientTdcOnConnectEvent(ListenerModule module, int cfd,
     const ConnectOption *clientAddr)
 {
