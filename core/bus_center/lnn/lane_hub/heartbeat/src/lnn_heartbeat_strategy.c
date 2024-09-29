@@ -36,6 +36,7 @@
 #define HB_GEARMODE_MAX_SET_CNT        100
 #define HB_GEARMODE_LIFETIME_PERMANENT (-1)
 #define HB_DEFAULT_CALLER_ID           "HEARTBEAT_DEFAULT_CALLER_ID"
+#define HB_SUPER_DEVICE_CALLER_ID      "hmos.collaborationfwk.deviceDetect"
 
 typedef struct {
     const char *callerId;
@@ -109,10 +110,11 @@ static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeLis
     }
 }
 
-static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearModeList, int32_t *gearModeCnt)
+static int32_t GetGearModeFromSettingList(GearMode *mode, char *callerId, const ListNode *gearModeList,
+    int32_t *gearModeCnt)
 {
     int64_t nowTime;
-    const char *callerId = NULL;
+    const char *tmpCallerId = NULL;
     SoftBusSysTime times;
     GearModeStorageInfo *info = NULL;
     GearModeStorageInfo *nextInfo = NULL;
@@ -143,12 +145,15 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
             LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode from setting list memcpy_s err");
             return SOFTBUS_MEM_ERR;
         }
-        callerId = info->callerId;
+        tmpCallerId = info->callerId;
     }
-    if (callerId != NULL) {
+    if (tmpCallerId != NULL) {
+        if (callerId != NULL && strcpy_s(callerId, PKG_NAME_SIZE_MAX, tmpCallerId) != EOK) {
+            LNN_LOGE(LNN_HEART_BEAT, "strcpy callerId fail");
+        }
         LNN_LOGD(LNN_HEART_BEAT,
             "HB get Gearmode from list, id=%{public}s, cycle=%{public}d, duration=%{public}d, wakeupFlag=%{public}d",
-            callerId, mode->cycle, mode->duration, mode->wakeupFlag);
+            tmpCallerId, mode->cycle, mode->duration, mode->wakeupFlag);
     }
     return SOFTBUS_OK;
 }
@@ -165,7 +170,7 @@ static LnnHeartbeatParamManager *GetParamMgrByTypeLocked(LnnHeartbeatType type)
     return g_hbParamMgr[id];
 }
 
-int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
+int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbeatType type)
 {
     LnnHeartbeatParamManager *paramMgr = NULL;
 
@@ -192,7 +197,7 @@ int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST;
     }
-    int32_t ret = GetGearModeFromSettingList(mode, &paramMgr->gearModeList, &paramMgr->gearModeCnt);
+    int32_t ret = GetGearModeFromSettingList(mode, callerId, &paramMgr->gearModeList, &paramMgr->gearModeCnt);
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode from setting list err");
     }
@@ -523,6 +528,9 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
     if (registedHbType == HEARTBEAT_TYPE_BLE_V1) {
         return RelayHeartbeatV1Split(hbFsm, msgPara, wakeupFlag, registedHbType);
     }
+    if (strlen(msgPara->callerId) != 0 && strcmp(msgPara->callerId, HB_SUPER_DEVICE_CALLER_ID) == 0) {
+        return RelayHeartbeatV1Split(hbFsm, msgPara, wakeupFlag, registedHbType);
+    }
     return OtherHeartbeatSplit(hbFsm, msgPara, wakeupFlag, registedHbType);
 }
 
@@ -675,7 +683,7 @@ static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
         return SOFTBUS_INVALID_PARAM;
     }
     LnnRemoveProcessSendOnceMsg(hbFsm, msgPara->hbType, msgPara->strategyType);
-    ret = LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V0);
+    ret = LnnGetGearModeBySpecificType(&mode, msgPara->callerId, HEARTBEAT_TYPE_BLE_V0);
     if (ret == SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST) {
         LNN_LOGD(LNN_HEART_BEAT, "HB adjustable period strategy is end");
         return SOFTBUS_OK;
@@ -950,7 +958,7 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
     msgPara.addrType = addrType;
     msgPara.hasNetworkId = true;
     msgPara.hbType = LnnConvertConnAddrTypeToHbType(addrType);
-    if (LnnGetGearModeBySpecificType(&mode, msgPara.hbType) != SOFTBUS_OK) {
+    if (LnnGetGearModeBySpecificType(&mode, NULL, msgPara.hbType) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     uint64_t delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_NOTIFY_DEV_LOST_DELAY_LEN;
