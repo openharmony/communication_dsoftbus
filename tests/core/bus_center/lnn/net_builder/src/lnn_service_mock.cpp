@@ -138,6 +138,11 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     return GetServiceInterface()->AuthGetDeviceUuid(authId, uuid, size);
 }
 
+int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle)
+{
+    return GetServiceInterface()->LnnSubscribeAccountBootEvent(handle);
+}
+
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
