@@ -131,8 +131,7 @@ NO_SANITIZE("cfi") static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceLis
             continue;
         }
 
-        DLOGI("Disc device found, devName=%s, localNetIfName=%s", discDeviceInfo->devName,
-            nstackxDeviceInfo->networkName);
+        DLOGI("Disc device found, localNetIfName=%s", nstackxDeviceInfo->networkName);
         if (g_discCoapInnerCb != NULL && g_discCoapInnerCb->OnDeviceFound != NULL) {
             g_discCoapInnerCb->OnDeviceFound(discDeviceInfo, &addtions);
         }
@@ -356,7 +355,7 @@ NO_SANITIZE("cfi") void DiscCoapUpdateDevName(void)
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
     DISC_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "get local device name failed, ret=%d.", ret);
 
-    DLOGI("register new local device name: %s", localDevName);
+    DLOGI("register new local device name.");
     ret = NSTACKX_RegisterDeviceName(localDevName);
     DISC_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "register local device name failed, ret=%d.", ret);
 }
