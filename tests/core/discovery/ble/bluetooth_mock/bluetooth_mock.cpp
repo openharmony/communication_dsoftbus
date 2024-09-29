@@ -74,14 +74,11 @@ const std::function<void(void)> BT_STATE_FSM[BtState::BT_STATE_BUTT][BtState::BT
         // BT_STATE_RESTRICT -> BT_STATE_OFF
         []() {
             DisableBle();
-        },
-        // BT_STATE_RESTRICT -> BT_STATE_ON
+        }, // BT_STATE_RESTRICT -> BT_STATE_ON
         []() {
             EnableBr();
-        },
-        // BT_STATE_RESTRICT -> BT_STATE_RESTRICT
-        nullptr,
-    },
+        }, // BT_STATE_RESTRICT -> BT_STATE_RESTRICT
+        nullptr, },
 };
 } // anonymous namespace
 
@@ -355,8 +352,8 @@ void BluetoothMock::CallbackScanResult(const std::string &hexStr)
 void DumpBleAdvRawData(const StartAdvRawData &rawData)
 {
     constexpr uint32_t BUFF_LEN = 200;
-    char advData[BUFF_LEN] = {0};
-    char rspData[BUFF_LEN] = {0};
+    char advData[BUFF_LEN] = { 0 };
+    char rspData[BUFF_LEN] = { 0 };
     if (ConvertBytesToUpperCaseHexString(advData, BUFF_LEN, rawData.advData, rawData.advDataLen) == SOFTBUS_OK &&
         ConvertBytesToUpperCaseHexString(rspData, BUFF_LEN, rawData.rspData, rawData.rspDataLen) == SOFTBUS_OK) {
         LOG("%s adv=%s, rsp=%s", __func__, advData, rspData);

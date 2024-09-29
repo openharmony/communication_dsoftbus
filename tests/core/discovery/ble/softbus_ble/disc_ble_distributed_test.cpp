@@ -26,14 +26,12 @@ using namespace testing::ext;
 namespace OHOS {
 class DiscDistributedBleTest : public testing::Test {
 public:
-    DiscDistributedBleTest()
-    {}
-    ~DiscDistributedBleTest()
-    {}
+    DiscDistributedBleTest() { }
+    ~DiscDistributedBleTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 void DiscDistributedBleTest::SetUpTestCase(void)
@@ -137,7 +135,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
-    BroadcastReportInfo reportInfo = {0};
+    BroadcastReportInfo reportInfo = { 0 };
 
     reportInfo.dataStatus = SOFTBUS_BC_DATA_INCOMPLETE_MORE_TO_COME;
     int32_t ret = ScanFilter(&reportInfo);
@@ -149,7 +147,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 
     // when not advLen >= POS_TLV
-    uint8_t payload[POS_TLV] = {0};
+    uint8_t payload[POS_TLV] = { 0 };
     reportInfo.packet.bcData.payload = &payload[0];
     reportInfo.packet.bcData.payloadLen = POS_TLV - 1;
     ret = ScanFilter(&reportInfo);
@@ -182,7 +180,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter002, TestSize.Level1)
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
-    uint8_t payload[POS_TLV] = {0};
+    uint8_t payload[POS_TLV] = { 0 };
     BroadcastReportInfo reportInfo = {
         .dataStatus = SOFTBUS_BC_DATA_COMPLETE,
         .packet = {
@@ -242,7 +240,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter003, TestSize.Level1)
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
-    uint8_t payload[POS_TLV] = {0};
+    uint8_t payload[POS_TLV] = { 0 };
     BroadcastReportInfo reportInfo = {
         .dataStatus = SOFTBUS_BC_DATA_COMPLETE,
         .packet = {
@@ -284,7 +282,7 @@ HWTEST_F(DiscDistributedBleTest, TestProcessHwHashAccout001, TestSize.Level1)
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
-    DeviceInfo testFoundInfo = {{0}};
+    DeviceInfo testFoundInfo = { { 0 } };
     testFoundInfo.capabilityBitmap[0] = 0x1;
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[0] = false;
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].isSameAccount[0] = false;
@@ -313,9 +311,7 @@ HWTEST_F(DiscDistributedBleTest, TestRangeDevice001, TestSize.Level1)
     constexpr int8_t validAdvPower = -13;
     constexpr int32_t invalidRange = -1;
 
-    DeviceInfo foundInfoTest = {
-        .range = 0
-    };
+    DeviceInfo foundInfoTest = { .range = 0 };
     int32_t ret = RangeDevice(&foundInfoTest, validRssi, validAdvPower);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NE(foundInfoTest.range, invalidRange);

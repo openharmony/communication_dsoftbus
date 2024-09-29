@@ -17,13 +17,12 @@
 #include <cstring>
 #include "disc_log.h"
 #include "if_softbus_client.h"
-#include "softbus_server_ipc_interface_code.h"
 #include "securec.h"
+#include "softbus_server_ipc_interface_code.h"
 
 using testing::_;
 namespace OHOS {
-RemoteObjectMock::RemoteObjectMock()
-    : IRemoteObject(std::u16string())
+RemoteObjectMock::RemoteObjectMock() : IRemoteObject(std::u16string())
 {
     DISC_LOGI(DISC_TEST, "construct");
 }
