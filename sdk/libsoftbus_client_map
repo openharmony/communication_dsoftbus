@@ -506,6 +506,7 @@
         "TransOnChannelBind";
         "OpenAuthSessionWithPara";
         "ResourceConflictCheck";
+        "RegisterConflictListener";
         "ClientTransTdcIfChannelForSocket";
         "SetFileRenameHook";
         "CtrlLNNBleHb";

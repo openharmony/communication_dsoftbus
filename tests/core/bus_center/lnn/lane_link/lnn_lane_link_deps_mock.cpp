@@ -153,5 +153,10 @@ void RemoveDelayDestroyMessage(uint64_t laneId)
 {
     GetLaneLinkDepsInterface()->RemoveDelayDestroyMessage(laneId);
 }
+
+void DelLogicAndLaneRelationship(uint64_t laneId)
+{
+    GetLaneLinkDepsInterface()->DelLogicAndLaneRelationship(laneId);
+}
 }
 } // namespace OHOS

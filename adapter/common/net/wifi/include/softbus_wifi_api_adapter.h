@@ -161,6 +161,7 @@ bool SoftBusHasWifiDirectCapability(void);
 bool SoftBusIsWifiTripleMode(void);
 char* SoftBusGetWifiInterfaceCoexistCap(void);
 bool SoftBusIsWifiActive(void);
+bool SoftBusIsHotspotActive(void);
 SoftBusWifiDetailState SoftBusGetWifiState(void);
 bool SoftBusIsWifiP2pEnabled(void);
 
