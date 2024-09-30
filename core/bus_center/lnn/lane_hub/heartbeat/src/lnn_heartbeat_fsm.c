@@ -690,7 +690,7 @@ static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
     uint64_t delayMillis;
     GearMode mode;
     (void)memset_s(&mode, sizeof(GearMode), 0, sizeof(GearMode));
-    if (LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
+    if (LnnGetGearModeBySpecificType(&mode, NULL, HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "try as master node get gearmode fail");
         return;
     }
@@ -821,7 +821,7 @@ static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnH
             }
             break;
         case HEARTBEAT_TYPE_BLE_V1:
-            if (LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
+            if (LnnGetGearModeBySpecificType(&mode, NULL, HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_HEART_BEAT, "is timestamp exceed limit get Gearmode err");
                 return false;
             }

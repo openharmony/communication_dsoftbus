@@ -973,7 +973,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
         LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", anonyNetworkId);
     }
-    LNN_LOGD(LNN_HEART_BEAT,
+    LNN_LOGI(LNN_HEART_BEAT,
         "shift lnn gear mode, callerId=%{public}s, networkId=%{public}s, cycle=%{public}d, "
         "duration=%{public}d, wakeupFlag=%{public}d, action=%{public}d",
         callerId, targetNetworkId != NULL ? anonyNetworkId : "", mode->cycle, mode->duration, mode->wakeupFlag,
