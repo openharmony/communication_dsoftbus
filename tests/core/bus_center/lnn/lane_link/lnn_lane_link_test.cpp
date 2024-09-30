@@ -154,9 +154,9 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     return SOFTBUS_OK;
 }
 
-static int32_t ConnectDeviceForCancle(struct WifiDirectConnectInfo *info, struct WifiDirectConnectCallback *callback)
+static int32_t ConnectDeviceForCancel(struct WifiDirectConnectInfo *info, struct WifiDirectConnectCallback *callback)
 {
-    GTEST_LOG_(INFO) << "ConnectDeviceForCancle enter";
+    GTEST_LOG_(INFO) << "ConnectDeviceForCancel enter";
     (void)info;
     (void)callback;
     return SOFTBUS_OK;
@@ -1363,7 +1363,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_004, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
-        .WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(DoAll(SetArrayArgument<LANE_MOCK_PARAM3>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillOnce(Return(false)).WillRepeatedly(Return(true));
@@ -1493,7 +1493,7 @@ HWTEST_F(LNNLaneLinkTest, LnnCancelWifiDirect_001, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(laneLinkMock, TransProxyPipelineCloseChannelDelay).WillRepeatedly(Return(SOFTBUS_OK));
     g_laneLinkResult = SOFTBUS_INVALID_PARAM;
-    g_manager.connectDevice = ConnectDeviceForCancle;
+    g_manager.connectDevice = ConnectDeviceForCancel;
     g_manager.cancelConnectDevice = nullptr;
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
@@ -1552,7 +1552,7 @@ HWTEST_F(LNNLaneLinkTest, LnnCancelWifiDirect_002, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(laneLinkMock, TransProxyPipelineCloseChannelDelay).WillRepeatedly(Return(SOFTBUS_OK));
     g_laneLinkResult = SOFTBUS_INVALID_PARAM;
-    g_manager.connectDevice = ConnectDeviceForCancle;
+    g_manager.connectDevice = ConnectDeviceForCancel;
     g_manager.cancelConnectDevice = CancelConnectDevice;
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
@@ -1600,7 +1600,7 @@ static void SetCommonFunction(uint32_t laneReqId, LaneLinkType linkType, struct 
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
     EXPECT_CALL(laneLinkMock, TransProxyPipelineCloseChannelDelay).WillRepeatedly(Return(SOFTBUS_OK));
     g_laneLinkResult = SOFTBUS_INVALID_PARAM;
-    g_manager.connectDevice = ConnectDeviceForCancle;
+    g_manager.connectDevice = ConnectDeviceForCancel;
     g_manager.cancelConnectDevice = CancelConnectDevice;
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
 

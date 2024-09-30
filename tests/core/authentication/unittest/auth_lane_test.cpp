@@ -560,10 +560,9 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     AuthOnLaneAllocFail(laneReqId, SOFTBUS_ERR);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
 }
 } // namespace OHOS
-
