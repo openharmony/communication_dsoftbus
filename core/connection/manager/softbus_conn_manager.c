@@ -48,9 +48,9 @@ typedef struct TagConnListenerNode {
 } ConnListenerNode;
 
 typedef struct TagConnTimeNode {
+    uint32_t startTime;
     ListNode node;
     ConnectionInfo info;
-    uint32_t startTime;
 } ConnTimeNode;
 
 static int32_t AddConnTimeNode(const ConnectionInfo *info, ConnTimeNode *timeNode)

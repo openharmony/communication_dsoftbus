@@ -57,11 +57,11 @@ typedef struct {
     uint32_t waitEventFdsLen;
 
     ModeType modeType;
-    LocalListenerInfo listenerInfo;
     int32_t listenFd;
     int32_t listenPort;
 
     enum BaseListenerStatus status;
+    LocalListenerInfo listenerInfo;
 } SoftbusBaseListenerInfo;
 
 typedef struct {
@@ -78,9 +78,9 @@ typedef struct {
     // pipe fds, to wakeup select thread in time
     int32_t ctrlRfd;
     int32_t ctrlWfd;
+    int32_t referenceCount;
 
     SoftBusMutex lock;
-    int32_t referenceCount;
 } SelectThreadState;
 
 static int32_t ShutdownBaseListener(SoftbusListenerNode *node);
