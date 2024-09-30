@@ -450,7 +450,7 @@ static void MsgHandler(SoftBusMessage *msg)
 
 static int32_t InitLinkConflictLooper(void)
 {
-    g_linkConflictLoopHandler.name = "linkConflictLooper";
+    g_linkConflictLoopHandler.name = (char *)"linkConflictLooper";
     g_linkConflictLoopHandler.HandleMessage = MsgHandler;
     g_linkConflictLoopHandler.looper = GetLooper(LOOP_TYPE_LNN);
     if (g_linkConflictLoopHandler.looper == NULL) {
