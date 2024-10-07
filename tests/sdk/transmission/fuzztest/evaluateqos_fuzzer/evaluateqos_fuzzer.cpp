@@ -30,10 +30,6 @@ void EvaluateQosTestWithNetworkId(const uint8_t *data, size_t size)
 
     const size_t bufSize = size + 1;
     std::unique_ptr<char[]> peerNetworkId = std::make_unique<char[]>(bufSize);
-    if (peerNetworkId == nullptr) {
-        return;
-    }
-
     if (memset_s(peerNetworkId.get(), bufSize, 0, bufSize) != EOK) {
         return;
     }
@@ -84,10 +80,6 @@ void EvaluateQosTestWithQosInfo(const uint8_t *data, size_t size)
     }
 
     std::unique_ptr<QosTV[]> qosInfo = std::make_unique<QosTV[]>(count);
-    if (qosInfo == nullptr) {
-        return;
-    }
-
     if (memcpy_s(qosInfo.get(), sizeof(QosTV) * count, data, sizeof(QosTV) * count) != EOK) {
         return;
     }

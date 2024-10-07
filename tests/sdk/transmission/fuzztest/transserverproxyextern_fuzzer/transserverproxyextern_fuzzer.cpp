@@ -40,7 +40,7 @@ public:
         TransServerProxyDeInit();
     }
 
-    bool IsInited(void)
+    bool IsInited(void) const
     {
         return isInited_;
     }
