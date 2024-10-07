@@ -557,6 +557,7 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   ]
 
   deps = [
@@ -641,6 +642,7 @@ ohos_unittest("BusCenterDecisionCenterTest") {
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/core/connection/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   ]
 
   deps = [
