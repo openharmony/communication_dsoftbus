@@ -1795,12 +1795,11 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
         if (oldAggregateCap != newAggregateCap) {
             UpdateInfoManager(NON_ADV_ID, true);
         }
-        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     } else {
-        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
         RemoveTimeout(recvMsg->key);
     }
     StartTimeout(recvMsg->key);
+    SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     DfxRecordAddRecvMsgEnd(capBitMap, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
@@ -2007,7 +2006,10 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
     ListInit(&g_recvMessageInfo.node);
     g_discBleInnerCb = callback;
 
-    if (SoftBusMutexInit(&g_recvMessageInfo.lock, NULL) != SOFTBUS_OK ||
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_RECURSIVE,
+    };
+    if (SoftBusMutexInit(&g_recvMessageInfo.lock, &mutexAttr) != SOFTBUS_OK ||
         SoftBusMutexInit(&g_bleInfoLock, NULL) != SOFTBUS_OK) {
         DISC_LOGE(DISC_INIT, "init ble lock failed");
         return NULL;
