@@ -476,12 +476,18 @@ static int32_t SelectRttLinks(const char *networkId, LaneLinkType *resList, uint
     optionalLink[optLinkNum++] = LANE_P2P;
     optionalLink[optLinkNum++] = LANE_WLAN_5G;
     optionalLink[optLinkNum++] = LANE_WLAN_2P4G;
+    LanePreferredLinkList recommendList = {0};
+    int32_t ret = FinalDecideLinkType(networkId, optionalLink, optLinkNum, &recommendList);
+    if (recommendList.linkTypeNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used, reason=%{public}d", ret);
+        return ret;
+    }
     *resNum = 0;
-    for (uint32_t i = 0; i < optLinkNum; i++) {
-        if (LaneCapCheck(networkId, optionalLink[i]) != SOFTBUS_OK) {
+    for (uint32_t i = 0; i < recommendList.linkTypeNum; i++) {
+        if (LaneCapCheck(networkId, recommendList.linkType[i]) != SOFTBUS_OK) {
             continue;
         }
-        resList[(*resNum)++] = optionalLink[i];
+        resList[(*resNum)++] = recommendList.linkType[i];
     }
     if (*resNum == 0) {
         LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
