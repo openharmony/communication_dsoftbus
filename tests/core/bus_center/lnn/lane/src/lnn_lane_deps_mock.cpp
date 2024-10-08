@@ -445,5 +445,10 @@ int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout)
 {
     return GetLaneDepsInterface()->LnnRequestCheckOnlineStatus(networkId, timeout);
 }
+
+int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
+{
+    return GetLaneDepsInterface()->AuthCheckMetaExist(connInfo, isExist);
+}
 }
 } // namespace OHOS
