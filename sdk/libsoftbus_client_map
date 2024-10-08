@@ -79,6 +79,7 @@
         "OpenAuthMetaSocket";
         "CloseAuthMetaSocket";
         "SendMetaData";
+        "SendMetaCtrlData";
         "Socket";
         "SetActionAddr";
         "Bind";
