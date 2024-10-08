@@ -1529,6 +1529,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_async_callback_mock.cpp",
   ]
 
   if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
@@ -1572,6 +1573,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
   ]
 
   deps = [
@@ -2079,6 +2081,7 @@ ohos_unittest("LNNLaneLinkWifiDirectTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_wifi_direct_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_async_callback_mock.cpp",
   ]
 
   if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
@@ -2119,6 +2122,7 @@ ohos_unittest("LNNLaneLinkWifiDirectTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
   ]
 
   deps = [
