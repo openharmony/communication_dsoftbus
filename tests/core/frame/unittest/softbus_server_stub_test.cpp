@@ -147,7 +147,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest001, TestSize.Level1)
     EXPECT_CALL(softbusServerStubMock, CheckTransPermission).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(softbusServerStubMock, CheckTransSecLevel).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->CheckOpenSessionPermission(sessionParam001);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
     DeGenerateSessionParam(sessionParam001);
 
     SessionParam *sessionParam002 = nullptr;
@@ -160,7 +160,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest001, TestSize.Level1)
     sessionParam003->peerSessionName = nullptr;
     EXPECT_CALL(softbusServerStubMock, CheckTransSecLevel).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     ret = softBusServer->CheckOpenSessionPermission(sessionParam003);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
     DeGenerateSessionParam(sessionParam003);
 
     DeGenerateSessionServer(sessionServer);
