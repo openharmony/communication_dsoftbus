@@ -337,9 +337,21 @@ void ClearHmlListenerByUuid(const char *peerUuid)
     return;
 }
 
+static void AnonymizeLogHmlListenerInfo(const char *ip, const char *peerUuid)
+{
+    char *tmpIp = NULL;
+    char *tmpUuid = NULL;
+    Anonymize(ip, &tmpIp);
+    Anonymize(peerUuid, &tmpUuid);
+    TRANS_LOGI(TRANS_CTRL,
+        "StartHmlListener: ip=%{public}s, peerUuid=%{public}s.", AnonymizeWrapper(tmpIp), AnonymizeWrapper(tmpUuid));
+    AnonymizeFree(tmpIp);
+    AnonymizeFree(tmpUuid);
+}
+
 static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerUuid)
 {
-    TRANS_LOGI(TRANS_CTRL, "port=%{public}d", *port);
+    AnonymizeLogHmlListenerInfo(ip, peerUuid);
     if (g_hmlListenerList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "hmlListenerList not init");
         return SOFTBUS_NO_INIT;
@@ -351,7 +363,7 @@ static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerU
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
-        if (strncmp(item->myIp, ip, IP_LEN) == 0) {
+        if (strncmp(item->myIp, ip, IP_LEN) == 0 && strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
             *port = item->myPort;
             (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
             TRANS_LOGI(TRANS_CTRL, "succ, port=%{public}d", *port);
