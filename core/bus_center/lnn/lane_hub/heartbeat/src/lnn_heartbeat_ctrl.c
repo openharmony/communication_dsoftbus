@@ -792,7 +792,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
     SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
     switch (userSwitchState) {
         case SOFTBUS_USER_SWITCHED:
-            LNN_LOGI(LNN_HEART_BEAT, "HB SOFTBUS_USER_SWITCHED");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_SWITCHED");
             LnnUpdateOhosAccount(true);
             HbConditionChanged(false);
             if (IsHeartbeatEnable()) {
