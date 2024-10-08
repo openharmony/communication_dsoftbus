@@ -26,7 +26,7 @@ ohos_unittest("TransNetworkStatisticsTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/transmission/common/include",
-    "dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/statistics",
     "$dsoftbus_root_path/core/common/dfx/statistics/include",
