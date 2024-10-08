@@ -141,6 +141,27 @@ int BleStopScan(int scannerId)
     return MockBluetooth::GetMocker()->BleStopScan(scannerId);
 }
 
+int GetAdvHandle(int32_t btAdvId, int32_t *bcHandle)
+{
+    return OHOS_BT_STATUS_SUCCESS;
+}
+
+int EnableSyncDataToLpDevice()
+{
+    return OHOS_BT_STATUS_SUCCESS;
+}
+
+int DisableSyncDataToLpDevice()
+{
+    return OHOS_BT_STATUS_SUCCESS;
+}
+
+int SetLpDeviceAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
+    int32_t interval, int32_t bcHandle)
+{
+    return OHOS_BT_STATUS_SUCCESS;
+}
+
 int BleStartAdvEx(int *advId, const StartAdvRawData rawData, BleAdvParams advParam)
 {
     return MockBluetooth::GetMocker()->BleStartAdvEx(advId, rawData, advParam);
