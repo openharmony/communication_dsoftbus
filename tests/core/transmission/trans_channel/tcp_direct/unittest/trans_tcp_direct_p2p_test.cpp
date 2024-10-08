@@ -238,6 +238,18 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
 }
 
 /**
+ * @tc.name: P2pDirectChannelInitTest001
+ * @tc.desc: P2pDirectChannelInit, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, P2pDirectChannelInitTest001, TestSize.Level1)
+{
+    int32_t ret = CreateP2pListenerList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
  * @tc.name: StartP2pListenerTest001
  * @tc.desc: StartP2pListener, use the wrong parameter.
  * @tc.type: FUNC
@@ -250,10 +262,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartP2pListenerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = StartP2pListener(g_ip, &g_port, g_uuid);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
     ret = StartP2pListener(g_ip, &g_port, g_uuid);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
