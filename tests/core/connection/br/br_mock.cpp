@@ -139,6 +139,11 @@ int32_t ConnBrInnerQueueInit(void)
     return GetConnectionBrInterface()->ConnBrInnerQueueInit();
 }
 
+void ConnBrInnerQueueDeinit(void)
+{
+    return GetConnectionBrInterface()->ConnBrInnerQueueDeinit();
+}
+
 int32_t ConnBrInitBrPendingPacket(void)
 {
     return GetConnectionBrInterface()->ConnBrInitBrPendingPacket();
