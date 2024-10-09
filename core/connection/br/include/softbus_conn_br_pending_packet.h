@@ -26,7 +26,6 @@ extern "C" {
 #endif
 
 int32_t ConnBrInitBrPendingPacket(void);
-void ConnBrDestroyBrPendingPacket(void);
 int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq);
 void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq);
 
