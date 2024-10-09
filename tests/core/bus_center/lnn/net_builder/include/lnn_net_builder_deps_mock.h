@@ -199,6 +199,7 @@ public:
     virtual bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit) = 0;
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual void RegisterOOBEMonitor(void *p);
+    virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -339,6 +340,7 @@ public:
     MOCK_METHOD1(RegisterOOBEMonitor, void (void *p));
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
+    MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool (const NodeInfo *));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H
