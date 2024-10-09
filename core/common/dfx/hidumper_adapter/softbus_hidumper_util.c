@@ -1095,103 +1095,6 @@ static void InitSoftBusQueryEventParam(void)
     controlParam->dataSize = MAX_NUM_OF_EVENT_RESULT;
 }
 
-static void QueryStatisticInfo(SoftBusMessage* param)
-{
-    (void)param;
-    SoftBusStatsResult* result = MallocSoftBusStatsResult(sizeof(SoftBusStatsResult));
-    if (result == NULL) {
-        COMM_LOGI(COMM_DFX, "create SoftBusStatsResult failed");
-        return;
-    }
-    
-    if (SoftBusQueryStatsInfo(DAY_MINUTE, result) != SOFTBUS_OK) {
-        COMM_LOGI(COMM_DFX, "QueryStatisticInfo query fail!\n");
-        FreeSoftBusStatsResult(result);
-        return;
-    }
-
-    StatsEventExtra extra = {
-        .btFlow = result->btFlow,
-        .successRate = (int32_t)(result->successRate * RATE_HUNDRED),
-        .maxParaSessionNum = result->maxParaSessionNum,
-        .sessionSuccessDuration = result->sessionSuccessDuration,
-        .deviceOnlineNum = result->deviceOnlineNum,
-        .deviceOnlineTimes = result->deviceOnlineTimes,
-        .deviceOfflineTimes = result->deviceOfflineTimes,
-        .laneScoreOverTimes = result->laneScoreOverTimes,
-        .activationRate = (int32_t)(result->activityRate * RATE_HUNDRED),
-        .detectionTimes = result->detectionTimes,
-        .successRateDetail = result->successRateDetail,
-        .result = EVENT_STAGE_RESULT_OK
-    };
-    DSOFTBUS_STATS(EVENT_SCENE_STATS, extra);
-    COMM_LOGI(COMM_DFX, "QueryStatisticInfo query success!\n");
-    FreeSoftBusStatsResult(result);
-}
-
-static inline SoftBusHandler* CreateHandler(SoftBusLooper* looper, HandleMessageFunc callback)
-{
-    SoftBusHandler* handler = SoftBusMalloc(sizeof(SoftBusHandler));
-    if (handler == NULL) {
-        COMM_LOGI(COMM_DFX, "create handler failed");
-        return NULL;
-    }
-    handler->looper = looper;
-    handler->name = "softbusHidumperHandler";
-    handler->HandleMessage = callback;
-
-    return handler;
-}
-
-static void FreeMessageFunc(SoftBusMessage* msg)
-{
-    if (msg == NULL) {
-        return;
-    }
-
-    if (msg->handler != NULL) {
-        SoftBusFree(msg->handler);
-    }
-    SoftBusFree(msg);
-}
-
-static SoftBusMessage* CreateMessage(SoftBusLooper* looper, HandleMessageFunc callback)
-{
-    SoftBusMessage* msg = SoftBusMalloc(sizeof(SoftBusMessage));
-    if (msg == NULL) {
-        COMM_LOGI(COMM_DFX, "malloc softbus message failed");
-        return NULL;
-    }
-
-    SoftBusHandler* handler = CreateHandler(looper, callback);
-    msg->what = MSG_STATISTIC_QUERY_REPORT;
-    msg->obj = NULL;
-    msg->handler = handler;
-    msg->FreeMessage = FreeMessageFunc;
-    return msg;
-}
-
-static int32_t CreateAndQueryMsgDelay(SoftBusLooper* looper, HandleMessageFunc callback, uint64_t delayMillis)
-{
-    if ((looper == NULL) || (callback == NULL)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    SoftBusMessage* message = CreateMessage(looper, callback);
-    if (message == NULL) {
-        return SOFTBUS_MEM_ERR;
-    }
-
-    looper->PostMessageDelay(looper, message, delayMillis);
-    return SOFTBUS_OK;
-}
-
-static void QueryStatisticInfoPeriod(SoftBusMessage* msg)
-{
-    QueryStatisticInfo(msg);
-    CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME);
-}
-
 int32_t SoftBusHidumperUtilInit(void)
 {
     if (g_isDumperInit) {
@@ -1209,9 +1112,6 @@ int32_t SoftBusHidumperUtilInit(void)
     }
     InitSoftBusQueryEventParam();
     g_isDumperInit = true;
-    if (CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "CreateAndQueryMsgDelay fail");
-    }
     return SOFTBUS_OK;
 }
 
