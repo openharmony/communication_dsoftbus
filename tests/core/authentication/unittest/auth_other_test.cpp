@@ -1024,12 +1024,12 @@ HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
 {
     const char *networkId = "testudid";
-    int32_t ret = GetPeerUdidByNetworkId(networkId, NULL);
+    int32_t ret = GetPeerUdidByNetworkId(networkId, nullptr, UDID_BUF_LEN);
     char udid[UDID_BUF_LEN] = {0};
-    ret = GetPeerUdidByNetworkId(NULL, udid);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = GetPeerUdidByNetworkId(networkId, udid);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = GetPeerUdidByNetworkId(nullptr, udid, UDID_BUF_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetPeerUdidByNetworkId(networkId, udid, UDID_BUF_LEN);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /*

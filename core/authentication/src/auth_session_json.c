@@ -936,7 +936,7 @@ static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType
     char peerUdid[UDID_BUF_LEN] = {0};
     bool isExchangeUdid = true;
     if (idType == EXCHANGE_NETWORKID) {
-        if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
+        if (GetPeerUdidByNetworkId(info->udid, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", anonyUdid);
             info->idType = EXCHANGE_FAIL;
             (void)memset_s(info->udid, sizeof(info->udid), 0, sizeof(info->udid));

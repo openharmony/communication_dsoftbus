@@ -65,10 +65,11 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-NodeInfo *LnnRetrieveDeviceInfoByNetworkId(const char *networkId)
+int32_t LnnRetrieveDeviceInfoByNetworkId(const char *networkId, NodeInfo *info)
 {
     (void)networkId;
-    return NULL;
+    (void)info;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void LnnDeleteDeviceInfo(const char *udid)
