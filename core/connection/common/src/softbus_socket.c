@@ -186,7 +186,8 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     }
     int32_t flags = fcntl(fd, F_GETFL, 0);
     if (flags < 0) {
-        CONN_LOGE(CONN_COMMON, "fcntl get flag failed, fd=%{public}d, errno=%{public}d", fd, errno);
+        CONN_LOGE(CONN_COMMON, "fcntl get flag failed, fd=%{public}d, errno=%{public}d(%{public}s)",
+            fd, errno, strerror(errno));
         return SOFTBUS_CONN_SOCKET_FCNTL_ERR;
     }
     if (isNonBlock && ((uint32_t)flags & O_NONBLOCK) == 0) {
@@ -227,7 +228,8 @@ ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t time
             if (bytes == 0) {
                 bytes = -1;
             }
-            CONN_LOGE(CONN_COMMON, "tcp send fail. rc=%{public}zd, errno=%{public}d", rc, errno);
+            CONN_LOGE(CONN_COMMON, "tcp send fail. rc=%{public}zd, errno=%{public}d(%{public}s)",
+                rc, errno, strerror(errno));
             break;
         }
         bytes += rc;
@@ -272,7 +274,8 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
         CONN_LOGE(CONN_COMMON, "recv data fail, peer close connection, fd=%{public}d", fd);
         rc = -1;
     } else if (rc < 0) {
-        CONN_LOGE(CONN_COMMON, "recv data fail fd=%{public}d, errno=%{public}d, rc=%{public}zd", fd, errno, rc);
+        CONN_LOGE(CONN_COMMON, "recv data fail fd=%{public}d, errno=%{public}d(%{public}s), rc=%{public}zd",
+            fd, errno, strerror(errno), rc);
         rc = -1;
     }
     return rc;
@@ -449,7 +452,7 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
     if (ifName != NULL) {
         addrIn6->sin6ScopeId = SoftBusIfNameToIndex(ifName);
         if (addrIn6->sin6ScopeId == 0) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "nameToIndex failed, errno=%{public}d, %{public}s", errno, strerror(errno));
+            CONN_LOGE(CONN_WIFI_DIRECT, "nameToIndex failed, errno=%{public}d(%{public}s)", errno, strerror(errno));
             return SOFTBUS_SOCKET_ADDR_ERR;
         }
     }
@@ -502,7 +505,8 @@ static int32_t GetIfNameByIp(const char *myIp, int32_t domain, char *ifName, int
 
     int32_t ret = getifaddrs(&ifList);
     if (ret != 0) {
-        COMM_LOGE(CONN_COMMON, "ip=%{public}s getifaddrs ifList failed, ret=%{public}d", animizedIp, ret);
+        COMM_LOGE(CONN_COMMON, "ip=%{public}s getifaddrs ifList failed, ret=%{public}d, errno=%{public}d(%{public}s)",
+            animizedIp, ret, errno, strerror(errno));
         return SOFTBUS_SOCKET_ADDR_ERR;
     }
     if (inet_aton(myIp, &inAddr) == 0) {
