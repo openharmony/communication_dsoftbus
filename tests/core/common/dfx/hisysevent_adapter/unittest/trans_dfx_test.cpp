@@ -148,8 +148,7 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler_001, TestSize.Level1)
  */
 HWTEST_F(TransDfxTest, SoftBusTransDumpHandler002, TestSize.Level0)
 {
-    int32_t ret = SOFTBUS_ERR;
-    ret = SoftBusRegTransVarDump("registed_sessionlist", TransRegisterSessionTest1);
+    int32_t ret = SoftBusRegTransVarDump("registed_sessionlist", TransRegisterSessionTest1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusRegTransVarDump("concurrent_sessionlist", TransRunningSessionInfo1);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -171,8 +170,7 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler002, TestSize.Level0)
  */
 HWTEST_F(TransDfxTest, SoftBusTransDumpHandler003, TestSize.Level0)
 {
-    int32_t ret = SOFTBUS_ERR;
-    ret = SoftBusRegTransVarDump("registed_sessionlist", TransRegisterSessionTest2);
+    int32_t ret = SoftBusRegTransVarDump("registed_sessionlist", TransRegisterSessionTest2);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusRegTransVarDump("concurrent_sessionlist", TransRunningSessionInfo2);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -203,15 +201,15 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler004, TestSize.Level0)
     for (int32_t i = 0; i < TRANS_DUMP_PROCESS_TEST_NUM; i++) {
         ret = SoftBusTransDumpHandler(testInValidTransCmdArray[i].fd, testInValidTransCmdArray[i].argc,
             testInValidTransCmdArray[i].argv);
-        EXPECT_EQ(SOFTBUS_ERR, ret);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     }
     ret = SoftBusTransDumpHandler(TEST_FD, TEST_ARGC_ONE, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
  * @tc.name: SoftBusRegTransVarDump001
- * @tc.desc: Verify SoftBusRegTransVarDump function, use hidumperHandler use valid param, return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusRegTransVarDump function, use hidumperHandler use valid param, return SOFTBUS_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -219,17 +217,18 @@ HWTEST_F(TransDfxTest, SoftBusRegTransVarDump001, TestSize.Level0)
 {
     int32_t ret = SOFTBUS_OK;
     ret = SoftBusRegTransVarDump("registed_sessionlist", nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = SoftBusRegTransVarDump(nullptr, TransRegisterSessionTest1);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = SoftBusRegTransVarDump("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", TransRegisterSessionTest1);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
  * @tc.name: SoftBusTransDumpRegisterSession001
- * @tc.desc: Verify SoftBusTransDumpRegisterSession function, use hidumperHandler use valid param, return SOFTBUS_ERR.
+ * @tc.desc: Verify SoftBusTransDumpRegisterSession function, use hidumperHandler use valid param, return
+ *           SOFTBUS_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -239,31 +238,31 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpRegisterSession001, TestSize.Level0)
     SoftBusTransDumpRunningSession(ERR_FD, DUMPER_LANE_BR, &g_testAppInfo);
 
     int32_t ret = SoftBusTransDumpHandler(TEST_FD, TEST_ARGC_ONE, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusTransDumpRegisterSession(TEST_FD, nullptr, g_testSessionName, TEST_TRANS_UID, TEST_TRANS_PID);
     SoftBusTransDumpRunningSession(TEST_FD, g_errLinkType, &g_testAppInfo);
 
     ret = SoftBusTransDumpHandler(TEST_FD, TEST_ARGC_ONE, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusTransDumpRegisterSession(TEST_FD, g_testPkgName, nullptr, TEST_TRANS_UID, TEST_TRANS_PID);
     SoftBusTransDumpRunningSession(TEST_FD, DUMPER_LANE_LINK_TYPE_BUTT, &g_testAppInfo);
 
     ret = SoftBusTransDumpHandler(TEST_FD, TEST_ARGC_ONE, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusTransDumpRegisterSession(TEST_FD, g_testPkgName, g_testSessionName, ERR_TRANS_UID, TEST_TRANS_PID);
     SoftBusTransDumpRunningSession(TEST_FD, DUMPER_LANE_WLAN, nullptr);
 
     ret = SoftBusTransDumpHandler(TEST_FD, TEST_ARGC_ONE, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusTransDumpRegisterSession(TEST_FD, g_testPkgName, g_testSessionName, TEST_TRANS_UID, ERR_TRANS_PID);
     SoftBusTransDumpRunningSession(TEST_FD, DUMPER_LANE_WLAN, &g_testAppInfo);
 
     ret = SoftBusTransDumpHandler(TEST_FD, TEST_ARGC_ONE, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusTransDumpRegisterSession(TEST_FD, g_testPkgName, g_testSessionName, TEST_TRANS_UID, TEST_TRANS_PID);
     SoftBusTransDumpRunningSession(TEST_FD, DUMPER_LANE_WLAN, &g_testAppInfo);
