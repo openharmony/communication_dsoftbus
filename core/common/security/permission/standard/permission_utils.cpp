@@ -22,7 +22,7 @@ extern "C" int32_t IsValidPkgName(int32_t uid, const char *pkgName)
 {
     if (pkgName == NULL) {
         COMM_LOGI(COMM_PERM, "pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
