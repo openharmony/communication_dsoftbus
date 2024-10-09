@@ -1165,7 +1165,7 @@ static bool IsSupportBrDupBle(uint32_t feature, AuthCapability capaBit)
     return ((feature & (1 << (uint32_t)capaBit)) != 0);
 }
 
-static bool CheckBasicInfoChange(const NodeInfo *newNodeInfo)
+bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
 {
     if (newNodeInfo == NULL) {
         return false;
@@ -1191,7 +1191,7 @@ static void ProcessBleOnline(const LnnConntionInfo *connInfo)
     }
     if (LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID,
         &remoteInfo) == SOFTBUS_OK && LnnHasDiscoveryType(&remoteInfo, DISCOVERY_TYPE_BLE) &&
-        !CheckBasicInfoChange(connInfo->nodeInfo)) {
+        !CheckRemoteBasicInfoChanged(connInfo->nodeInfo)) {
         LNN_LOGI(LNN_BUILDER, "ble has online, no need to go online");
         return;
     }
