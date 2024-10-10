@@ -50,6 +50,7 @@
 #define DEFAULT_CONN_SUB_FEATURE 1
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
+#define DEFAULT_DEVICE_NAME "OpenHarmony"
 
 typedef struct {
     NodeInfo localInfo;
@@ -380,9 +381,17 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "get device name fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s((char *)buf, len, deviceName, strlen(deviceName)) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
-        return SOFTBUS_MEM_ERR;
+    if (strlen(deviceName) != 0) {
+        if (strncpy_s((char *)buf, len, deviceName, strlen(deviceName)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        LNN_LOGI(LNN_LEDGER, "device name not inited, user default value");
+        if (strncpy_s((char *)buf, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+            return SOFTBUS_MEM_ERR;
+        }
     }
     return SOFTBUS_OK;
 }
@@ -585,6 +594,21 @@ static int32_t LlGetProxyPort(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static bool IsLocalLedgerReady(void)
+{
+    bool accountIdInited = (g_localNetLedger.localInfo.accountId != 0);
+    bool deviceNameInited = (strlen(g_localNetLedger.localInfo.deviceInfo.deviceName) != 0);
+    bool networkIdInited = (strlen(g_localNetLedger.localInfo.networkId) != 0);
+    bool btMacInited = (strlen(g_localNetLedger.localInfo.connectInfo.macAddr) != 0);
+    if (accountIdInited & deviceNameInited & networkIdInited & btMacInited) {
+        return true;
+    }
+    LNN_LOGI(LNN_LEDGER, "no need upload to cloud. stateVersion=%{public}d, accountIdInited=%{public}d, "
+        "deviceNameInited=%{public}d, networkIdInited=%{public}d, btMacInited=%{public}d",
+        g_localNetLedger.localInfo.stateVersion, accountIdInited, deviceNameInited, networkIdInited, btMacInited);
+    return false;
+}
+
 static int32_t UpdateStateVersion(const void *buf)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -599,8 +623,7 @@ static int32_t UpdateStateVersion(const void *buf)
         return SOFTBUS_OK;
     }
     info->stateVersion = *(int32_t *)buf;
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud, stateVersion=%{public}d", info->stateVersion);
+    if (!IsLocalLedgerReady()) {
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_LEDGER, "stateVersion is changed, stateVersion=%{public}d", info->stateVersion);
@@ -1057,8 +1080,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
             return SOFTBUS_OK;
         }
         UpdateStateVersionAndStore(UPDATE_DEV_NAME);
-        if (g_localNetLedger.localInfo.accountId == 0) {
-            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        if (!IsLocalLedgerReady()) {
             return SOFTBUS_OK;
         }
         NodeInfo nodeInfo = {};
@@ -1091,8 +1113,7 @@ static int32_t UpdateUnifiedName(const void *name)
             return SOFTBUS_OK;
         }
         UpdateStateVersionAndStore(UPDATE_DEV_UNIFIED_NAME);
-        if (g_localNetLedger.localInfo.accountId == 0) {
-            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        if (!IsLocalLedgerReady()) {
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "unified device name is changed");
@@ -1126,8 +1147,7 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
             return SOFTBUS_OK;
         }
         UpdateStateVersionAndStore(UPDATE_DEV_UNIFIED_DEFAULT_NAME);
-        if (g_localNetLedger.localInfo.accountId == 0) {
-            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        if (!IsLocalLedgerReady()) {
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "device unified default name is changed");
@@ -1160,8 +1180,7 @@ static int32_t UpdateNickName(const void *name)
             return SOFTBUS_OK;
         }
         UpdateStateVersionAndStore(UPDATE_DEV_NICK_NAME);
-        if (g_localNetLedger.localInfo.accountId == 0) {
-            LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+        if (!IsLocalLedgerReady()) {
             return SOFTBUS_OK;
         }
         LNN_LOGI(LNN_LEDGER, "device nick name is changed");
@@ -1207,8 +1226,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
     UpdateStateVersionAndStore(UPDATE_NETWORKID);
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyOldNetworkId);
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+    if (!IsLocalLedgerReady()) {
         return SOFTBUS_OK;
     }
     NodeInfo nodeInfo =  {};
@@ -1338,8 +1356,7 @@ static int32_t UpdateLocalBtMac(const void *mac)
     } else {
         LNN_LOGE(LNN_LEDGER, "get local device info fail");
     }
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+    if (!IsLocalLedgerReady()) {
         return SOFTBUS_OK;
     }
     LNN_LOGI(LNN_LEDGER, "device bt mac is changed");
@@ -1503,8 +1520,7 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
 void LnnUpdateStateVersion(StateVersionChangeReason reason)
 {
     UpdateStateVersionAndStore(reason);
-    if (g_localNetLedger.localInfo.accountId == 0) {
-        LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
+    if (!IsLocalLedgerReady()) {
         return;
     }
     NodeInfo nodeInfo = {};

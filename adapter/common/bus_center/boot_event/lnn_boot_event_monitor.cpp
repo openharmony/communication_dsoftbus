@@ -25,8 +25,6 @@
 #include "softbus_error_code.h"
 #include "parameter.h"
 
-#define BOOTEVENT_ACCOUNT_READY "bootevent.account.ready"
-
 static void ProcessBootEvent(void *para)
 {
     (void)para;
@@ -53,7 +51,16 @@ static void AccountBootEventCb(const char *key, const char *value, void *context
 
 int32_t LnnInitBootEventMonitorImpl(void)
 {
-    int32_t ret = WatchParameter("bootevent.account.ready", AccountBootEventCb, NULL);
+    int32_t ret = WatchParameter(BOOTEVENT_ACCOUNT_READY, AccountBootEventCb, NULL);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "watch account server fail");
+    }
+    return ret;
+}
+
+int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle)
+{
+    int32_t ret = WatchParameter(BOOTEVENT_ACCOUNT_READY, handle, NULL);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "watch account server fail");
     }

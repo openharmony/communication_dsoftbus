@@ -286,6 +286,12 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_001, TestSize.L
     ret = LnnRegisterCommonEvent();
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_USER_SWITCHED), _))
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = LnnRegisterCommonEvent();
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
     ret = LnnRegisterCommonEvent();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
