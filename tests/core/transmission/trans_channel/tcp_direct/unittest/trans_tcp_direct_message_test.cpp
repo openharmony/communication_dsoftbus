@@ -106,6 +106,19 @@ AppInfo *TestSetAppInfo()
     appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     return appInfo;
 }
+
+/**
+ * @tc.name: P2pDirectChannelInitTest001
+ * @tc.desc: P2pDirectChannelInit, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageTest, P2pDirectChannelInitTest001, TestSize.Level1)
+{
+    int32_t ret = P2pDirectChannelInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
 /**
  * @tc.name: OpenP2pDirectChannelTest001
  * @tc.desc: OpenP2pDirectChannel, use the wrong parameter.
@@ -153,18 +166,6 @@ HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1
     StopP2pSessionListener();
     SoftBusFree(appInfo);
     SoftBusFree(connInfo);
-}
-
-/**
- * @tc.name: P2pDirectChannelInitTest002
- * @tc.desc: P2pDirectChannelInit, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageTest, P2pDirectChannelInitTest002, TestSize.Level1)
-{
-    int32_t ret = P2pDirectChannelInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
