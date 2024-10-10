@@ -48,7 +48,7 @@ int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc 
 {
     if (type < SOFTBUS_STATISTIC_EVT_START || type >= SOFTBUS_STATISTIC_EVT_BUTT || func == NULL) {
         COMM_LOGE(COMM_EVENT, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     g_statisticEvtReportFunc[type] = func;
@@ -146,22 +146,24 @@ int32_t InitSoftbusSysEvt(void)
 {
     InitStatisticEvtReportFunc();
 
-    if (InitTransStatisticSysEvt() != SOFTBUS_OK) {
+    int32_t ret = InitTransStatisticSysEvt();
+    if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init trans statistic sys evt fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (InitBusCenterDfx() != SOFTBUS_OK) {
+    ret = InitBusCenterDfx();
+    if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init bus center dfx fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (InitDiscStatisticSysEvt() != SOFTBUS_OK) {
+    ret = InitDiscStatisticSysEvt();
+    if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init disc statistic fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
-
-    if (InitConnStatisticSysEvt() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    ret = InitConnStatisticSysEvt();
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
 #ifdef FILLP_ENHANCED
     NstackInitHiEvent();
