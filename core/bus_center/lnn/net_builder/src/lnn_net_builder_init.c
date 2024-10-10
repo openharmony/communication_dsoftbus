@@ -166,7 +166,7 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
     if (connFsm == NULL) {
         connFsm = FindConnectionFsmByAddr(&para->addr, false);
     }
-    if (connFsm == NULL || connFsm->isDead) {
+    if (connFsm == NULL || connFsm->isDead || CheckRemoteBasicInfoChanged(para->dupInfo)) {
         connFsm = StartNewConnectionFsm(&para->addr, para->pkgName, para->isNeedConnect);
         if (connFsm != NULL) {
             connFsm->connInfo.dupInfo = (para->dupInfo == NULL) ? NULL : DupNodeInfo(para->dupInfo);

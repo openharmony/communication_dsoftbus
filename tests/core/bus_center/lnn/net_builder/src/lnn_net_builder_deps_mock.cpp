@@ -722,6 +722,11 @@ void RegisterOOBEMonitor(void *p)
     return GetNetBuilderDepsInterface()->RegisterOOBEMonitor(p);
 }
 
+bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
+{
+    return GetNetBuilderDepsInterface()->CheckRemoteBasicInfoChanged(newNodeInfo);
+}
+
 int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
 {
     return GetNetBuilderDepsInterface()->CheckAuthChannelIsExit(connInfo);
