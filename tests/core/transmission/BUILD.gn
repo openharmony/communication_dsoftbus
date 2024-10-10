@@ -39,9 +39,13 @@ group("unittest") {
     "trans_channel/udp_negotiation:unittest",
   ]
   if (has_enhance_test) {
-    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/trans_channel:unittest" ]
-    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/session:unittest" ]
-    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/spe:unittest" ]
+    deps += [
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/ipc:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/manager:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/session:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/spe:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/trans_channel:unittest",
+    ]
   }
 }
 
