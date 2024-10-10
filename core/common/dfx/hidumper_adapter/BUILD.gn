@@ -43,7 +43,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$hilog_lite_include_path",
-      "//third_party/cJSON",
     ]
     sources = [
       "softbus_hidumper.c",
