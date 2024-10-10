@@ -114,7 +114,7 @@ static int32_t GetDeviceNameFromDataShareHelper(std::shared_ptr<DataShare::DataS
     }
     char *anonyDeviceName = NULL;
     Anonymize(deviceName, &anonyDeviceName);
-    LNN_LOGI(LNN_STATE, "deviceName=%{public}s.", anonyDeviceName);
+    LNN_LOGI(LNN_STATE, "deviceName=%{public}s.", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
     resultSet->Close();
     return SOFTBUS_OK;

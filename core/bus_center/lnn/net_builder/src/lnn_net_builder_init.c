@@ -414,7 +414,7 @@ void TryElectAsMasterState(const char *networkId, bool isOnline)
     if (peerUdid == NULL) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_BUILDER, "get invalid peerUdid, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "get invalid peerUdid, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return;
     }
@@ -424,7 +424,7 @@ void TryElectAsMasterState(const char *networkId, bool isOnline)
         Anonymize(peerUdid, &anonyPeerUdid);
         Anonymize(masterUdid, &anonyMasterUdid);
         LNN_LOGD(LNN_BUILDER, "offline node is not master node. peerUdid=%{public}s, masterUdid=%{public}s",
-            anonyPeerUdid, anonyMasterUdid);
+            AnonymizeWrapper(anonyPeerUdid), AnonymizeWrapper(anonyMasterUdid));
         AnonymizeFree(anonyPeerUdid);
         AnonymizeFree(anonyMasterUdid);
         return;

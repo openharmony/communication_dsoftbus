@@ -87,7 +87,7 @@ AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
     char *anonyUuid = NULL;
     Anonymize(auth->uuid, &anonyUuid);
     AUTH_LOGI(AUTH_FSM, "create auth manager, uuid=%{public}s, side=%{public}s, authId=%{public}" PRId64,
-        anonyUuid, GetAuthSideStr(auth->isServer), auth->authId);
+        AnonymizeWrapper(anonyUuid), GetAuthSideStr(auth->isServer), auth->authId);
     AnonymizeFree(anonyUuid);
     return auth;
 }
@@ -140,13 +140,14 @@ void DelAuthManager(AuthManager *auth, int32_t type)
             }
             ClearSessionkeyByAuthLinkType(auth->authId, &auth->sessionKeyList, (AuthLinkType)type);
             AUTH_LOGI(AUTH_FSM, "only clear connInfo, udid=%{public}s, side=%{public}s, type=%{public}d,"
-                " authId=%{public}" PRId64, anonyUdid, GetAuthSideStr(auth->isServer), type, auth->authId);
+                " authId=%{public}" PRId64, AnonymizeWrapper(anonyUdid),
+                GetAuthSideStr(auth->isServer), type, auth->authId);
             AnonymizeFree(anonyUdid);
             return;
         }
     }
-    AUTH_LOGI(AUTH_FSM, "delete auth manager, udid=%{public}s, side=%{public}s, authId=%{public}" PRId64, anonyUdid,
-        GetAuthSideStr(auth->isServer), auth->authId);
+    AUTH_LOGI(AUTH_FSM, "delete auth manager, udid=%{public}s, side=%{public}s, authId=%{public}" PRId64,
+        AnonymizeWrapper(anonyUdid), GetAuthSideStr(auth->isServer), auth->authId);
     AnonymizeFree(anonyUdid);
     ListDelete(&auth->node);
     CancelUpdateSessionKey(auth->authId);
@@ -399,7 +400,8 @@ int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthConnInfo 
     char *anonyUuid = NULL;
     Anonymize(uuid, &anonyUuid);
     if (auth == NULL) {
-        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s",
+            type, AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
@@ -422,13 +424,15 @@ static int32_t GetAvailableAuthConnInfoByUuid(const char *uuid, AuthLinkType typ
     char *anonyUuid = NULL;
     Anonymize(uuid, &anonyUuid);
     if (auth == NULL) {
-        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s",
+            type, AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     if (GetLatestAvailableSessionKeyTime(&auth->sessionKeyList, type) == 0) {
-        AUTH_LOGI(AUTH_FSM, "not available session key, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AUTH_LOGI(AUTH_FSM, "not available session key, connType=%{public}d, uuid=%{public}s",
+            type, AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_SESSION_KEY_INVALID;
@@ -621,7 +625,7 @@ static AuthManager *GetExistAuthManager(int64_t authSeq, const AuthSessionInfo *
     if (strcpy_s(auth->uuid, UUID_BUF_LEN, info->uuid) != EOK) {
         char *anonyUuid = NULL;
         Anonymize(info->uuid, &anonyUuid);
-        AUTH_LOGE(AUTH_FSM, "str copy uuid fail, uuid=%{public}s", anonyUuid);
+        AUTH_LOGE(AUTH_FSM, "str copy uuid fail, uuid=%{public}s", AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
     }
     if (memcpy_s(&auth->connInfo[info->connInfo.type], sizeof(AuthConnInfo),
@@ -655,7 +659,8 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
         }
         char *anonyUuid = NULL;
         Anonymize(auth->uuid, &anonyUuid);
-        AUTH_LOGI(AUTH_FSM, "uuid=%{public}s, authId=%{public}" PRId64, anonyUuid, auth->authId);
+        AUTH_LOGI(AUTH_FSM, "uuid=%{public}s, authId=%{public}" PRId64,
+            AnonymizeWrapper(anonyUuid), auth->authId);
         AnonymizeFree(anonyUuid);
     } else {
         auth = GetExistAuthManager(authSeq, info);
@@ -1836,7 +1841,7 @@ int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t nu
         ReleaseAuthLock();
         char *anonyUdid = NULL;
         Anonymize(udid, &anonyUdid);
-        AUTH_LOGE(AUTH_CONN, "not found active authManager, udid=%{public}s", anonyUdid);
+        AUTH_LOGE(AUTH_CONN, "not found active authManager, udid=%{public}s", AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
         return SOFTBUS_AUTH_NOT_FOUND;
     }
@@ -1957,7 +1962,7 @@ void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle
     AUTH_LOGI(AUTH_CONN,
         "latest auth manager found, latestAuthId=%{public}" PRId64 ", lastVerifyTime=%{public}" PRIu64
         ", uuid=%{public}s, type=%{public}d",
-        authHandle->authId, latestVerifyTime, anonyUuid, authHandle->type);
+        authHandle->authId, latestVerifyTime, AnonymizeWrapper(anonyUuid), authHandle->type);
     AnonymizeFree(anonyUuid);
 }
 
@@ -1987,7 +1992,7 @@ int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer
         char *anoyUuid = NULL;
         Anonymize(uuid, &anoyUuid);
         AUTH_LOGE(AUTH_CONN, "not found auth manager, uuid=%{public}s, connType=%{public}d, side=%{public}s",
-            anoyUuid, type, GetAuthSideStr(isServer));
+            AnonymizeWrapper(anoyUuid), type, GetAuthSideStr(isServer));
         AnonymizeFree(anoyUuid);
         return AUTH_INVALID_ID;
     }
