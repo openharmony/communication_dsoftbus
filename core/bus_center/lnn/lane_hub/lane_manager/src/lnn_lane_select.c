@@ -264,7 +264,7 @@ static int32_t GetListScore(const char *networkId, uint32_t expectedBw, const La
         }
         LinkAttribute *linkAttr = GetLinkAttrByLinkType(resList[i]);
         resListScore[resList[i]] = linkAttr->getLinkScore(networkId, expectedBw);
-        LNN_LOGI(LNN_LANE, "LaneLinkType=%{public}d, Score=%{public}d",
+        LNN_LOGD(LNN_LANE, "LaneLinkType=%{public}d, Score=%{public}d",
             resList[i], resListScore[resList[i]]);
     }
     return SOFTBUS_OK;

@@ -122,7 +122,7 @@ static int32_t RemoveConflictInfoTimeliness(const SoftBusMessage *msg, void *dat
     }
     if (srcInfo->conflictType == dstInfo->conflictType &&
         memcmp(&srcInfo->identifyInfo, &dstInfo->identifyInfo, sizeof(DevIdentifyInfo)) == 0) {
-        LNN_LOGI(LNN_LANE, "remove conflict info timeliness message success");
+        LNN_LOGI(LNN_LANE, "remove timeliness msg succ");
         SoftBusFree(srcInfo);
         return SOFTBUS_OK;
     }
@@ -138,8 +138,8 @@ void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConfl
     char *anonyDevInfo = NULL;
     Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
         inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
-    LNN_LOGI(LNN_LANE, "remove conflict info timeliness msg, identifyType=%{public}d, devInfo=%{public}s,"
-        " conflictType=%{public}d", inputInfo->type, AnonymizeWrapper(anonyDevInfo), conflictType);
+    LNN_LOGI(LNN_LANE, "remove timeliness msg, identifyType=%{public}d, devInfo=%{public}s, conflictType=%{public}d",
+        inputInfo->type, AnonymizeWrapper(anonyDevInfo), conflictType);
     AnonymizeFree(anonyDevInfo);
     LinkConflictInfo conflictItem;
     (void)memset_s(&conflictItem, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
@@ -330,7 +330,7 @@ int32_t AddLinkConflictInfo(const LinkConflictInfo *inputInfo)
     }
     int32_t ret = UpdateExistsLinkConflictInfo(inputInfo);
     if (ret == SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "update exists link conflict info success, update conflict info timeliness");
+        LNN_LOGE(LNN_LANE, "update link conflict info succ");
         RemoveConflictInfoTimelinessMsg(&inputInfo->identifyInfo, inputInfo->conflictType);
         ret = PostConflictInfoTimelinessMsg(&inputInfo->identifyInfo, inputInfo->conflictType);
         if (ret != SOFTBUS_OK) {
@@ -357,19 +357,21 @@ int32_t AddLinkConflictInfo(const LinkConflictInfo *inputInfo)
 static void GenerateConflictInfoWithDevIdHash(const DevIdentifyInfo *inputInfo, DevIdentifyInfo *outputInfo)
 {
     char peerUdid[UDID_BUF_LEN] = {0};
-    if (LnnGetRemoteStrInfo(inputInfo->devInfo.peerDevId, STRING_KEY_DEV_UDID,
-        peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get udid error");
+    int32_t ret = LnnGetRemoteStrInfo(inputInfo->devInfo.peerDevId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error, ret=%{public}d", ret);
         return;
     }
     uint8_t udidHash[UDID_HASH_LEN] = {0};
-    if (SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), udidHash) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "generate udidHash fail");
+    ret = SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), udidHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "generate udidHash fail, ret=%{public}d", ret);
         return;
     }
-    if (ConvertBytesToHexString(outputInfo->devInfo.udidHash, CONFLICT_UDIDHASH_STR_LEN + 1, udidHash,
-        CONFLICT_SHORT_HASH_LEN_TMP) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "convert bytes to string fail");
+    ret = ConvertBytesToHexString(outputInfo->devInfo.udidHash, CONFLICT_UDIDHASH_STR_LEN + 1, udidHash,
+        CONFLICT_SHORT_HASH_LEN_TMP);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "convert bytes to string fail, ret=%{public}d", ret);
         return;
     }
 }
