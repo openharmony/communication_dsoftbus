@@ -397,7 +397,7 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_BUILDER,
         "channelId=%{public}d, networkId=%{public}s, server=%{public}u",
-        channelId, anonyNetworkId, isServer);
+        channelId, AnonymizeWrapper(anonyNetworkId), isServer);
     AnonymizeFree(anonyNetworkId);
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL) {
@@ -461,7 +461,7 @@ static void OnChannelOpenFailed(int32_t channelId, const char *peerUuid)
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_BUILDER,
         "open channel fail. channelId=%{public}d, networkId=%{public}s",
-        channelId, anonyNetworkId);
+        channelId, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL || (info->clientChannelId != channelId && info->serverChannelId != channelId)) {
@@ -603,7 +603,8 @@ static int32_t CheckPeerAuthSeq(const char *uuid, int64_t peerAuthSeq)
     Anonymize(udid, &anonyUdid);
     if (peerAuthSeq == 0 || (peerAuthSeq != localAuthSeq[0] && peerAuthSeq != localAuthSeq[1])) {
         LNN_LOGE(LNN_BUILDER, "authSeq is invalid, udid:%{public}s, local:%{public}" PRId64 ", %{public}"
-            PRId64 "peer:%{public}" PRId64 "", anonyUdid, localAuthSeq[0], localAuthSeq[1], peerAuthSeq);
+            PRId64 "peer:%{public}" PRId64 "", AnonymizeWrapper(anonyUdid),
+            localAuthSeq[0], localAuthSeq[1], peerAuthSeq);
         AnonymizeFree(anonyUdid);
         return SOFTBUS_ERR;
     }
@@ -637,7 +638,8 @@ static void BleOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
         CheckPeerAuthSeq(uuid, peerAuthSeq) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(uuid, &anonyUuid);
-        LNN_LOGW(LNN_BUILDER, "device has offline or get authId/authSeq fail, uuid:%{public}s", anonyUuid);
+        LNN_LOGW(LNN_BUILDER, "device has offline or get authId/authSeq fail, uuid:%{public}s",
+            AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         return;
     }
@@ -645,9 +647,11 @@ static void BleOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
     Anonymize(networkId, &anonyNetworkId);
     (void)LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN);
     if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "request leave specific fail, networkId:%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "request leave specific fail, networkId:%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
     } else {
-        LNN_LOGD(LNN_BUILDER, "offline ble by p2p succ, networkId:%{public}s", anonyNetworkId);
+        LNN_LOGD(LNN_BUILDER, "offline ble by p2p succ, networkId:%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
     }
     AnonymizeFree(anonyNetworkId);
 }
@@ -661,23 +665,23 @@ static bool CheckWifiOfflineMsgResult(const char *networkId, int32_t authPort, c
     Anonymize(networkId, &anonyNetworkId);
 
     if (LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &port) != 0) {
-        LNN_LOGE(LNN_BUILDER, "get remote port fail, neteorkId:%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "get remote port fail, neteorkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return false;
     }
     if (LnnGetNodeKeyInfo(networkId, NODE_KEY_BLE_OFFLINE_CODE, remoteOfflineCode, WIFI_OFFLINE_CODE_LEN) != 0) {
-        LNN_LOGE(LNN_BUILDER, "get remote offlinecode fail, neteorkId:%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "get remote offlinecode fail, neteorkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return false;
     }
     if (ConvertBytesToHexString(convertOfflineCode, WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1,
         (unsigned char *)remoteOfflineCode, WIFI_OFFLINE_CODE_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "coonvert offlinecode fail, neteorkId:%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "coonvert offlinecode fail, neteorkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return false;
     }
     if (strcmp(convertOfflineCode, offlineCode) != 0 || port != authPort) {
-        LNN_LOGE(LNN_BUILDER, "check offline msg info fail, neteorkId:%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "check offline msg info fail, neteorkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return false;
     }
@@ -708,7 +712,8 @@ static void WlanOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
     if (AuthGetDeviceUuid(authHandle.authId, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(uuid, &anonyUuid);
-        LNN_LOGW(LNN_BUILDER, "device has offline or get authId/authSeq fail, uuid:%{public}s", anonyUuid);
+        LNN_LOGW(LNN_BUILDER, "device has offline or get authId/authSeq fail, uuid:%{public}s",
+            AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         return;
     }
@@ -719,9 +724,9 @@ static void WlanOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
     if (CheckWifiOfflineMsgResult(networkId, authPort, convertOfflineCode)) {
         Anonymize(networkId, &anonyNetworkId);
         if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "wifi fast offline failed, networkId:%{public}s", anonyNetworkId);
+            LNN_LOGE(LNN_BUILDER, "wifi fast offline failed, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         } else {
-            LNN_LOGI(LNN_BUILDER, "wifi fast offline success networkId:%{public}s", anonyNetworkId);
+            LNN_LOGI(LNN_BUILDER, "wifi fast offline success networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         }
         AnonymizeFree(anonyNetworkId);
     }
@@ -816,7 +821,7 @@ static void OnWifiDirectSyncMsgRecv(AuthHandle authHandle, const AuthTransData *
     }
     char *anonyUdid = NULL;
     Anonymize(auth->udid, &anonyUdid);
-    LNN_LOGI(LNN_BUILDER, "udid=%{public}s", anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     if (LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetNetworkIdByUdid fail");
@@ -980,7 +985,7 @@ static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_BUILDER,
         "open sync info. channelId=%{public}d, networkId=%{public}s",
-        info->clientChannelId, anonyNetworkId);
+        info->clientChannelId, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     SoftBusGetTime(&info->accessTime);
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
@@ -1026,7 +1031,7 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_BUILDER,
         "send sync info by alread exists channel. channelId=%{public}d, networkId=%{public}s",
-        info->clientChannelId, anonyNetworkId);
+        info->clientChannelId, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     ListTailInsert(&info->syncMsgList, &msg->node);
     if (info->isClientOpened) {
@@ -1049,7 +1054,8 @@ static int32_t GetWifiDirectAuthByNetworkId(const char *networkId, AuthHandle *a
     (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
     AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, authHandle);
     if (authHandle->authId != AUTH_INVALID_ID) {
-        LNN_LOGI(LNN_BUILDER, "find wifidirect authHandle, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_BUILDER, "find wifidirect authHandle, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
@@ -1065,7 +1071,7 @@ static int32_t TrySendSyncInfoMsgByAuth(const char *networkId, SyncInfoMsg *msg)
         .authId = AUTH_INVALID_ID
     };
     if (GetWifiDirectAuthByNetworkId(networkId, &authHandle) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get authHandle fail, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "get authHandle fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
@@ -1192,13 +1198,13 @@ static int32_t GetAuthHandleByNetworkId(const char *networkId, AuthHandle *authH
     (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
     AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_P2P, authHandle);
     if (authHandle->authId != AUTH_INVALID_ID) {
-        LNN_LOGI(LNN_BUILDER, "find p2p authHandle, networkId:%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_BUILDER, "find p2p authHandle, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
     AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, authHandle);
     if (authHandle->authId != AUTH_INVALID_ID) {
-        LNN_LOGI(LNN_BUILDER, "find hml authHandle, networkId:%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_BUILDER, "find hml authHandle, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
@@ -1216,7 +1222,7 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
     Anonymize(networkId, &anonyNetworkId);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     if (GetAuthHandleByNetworkId(networkId, &authHandle) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get authHandle fail, networkId:%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "get authHandle fail, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
@@ -1233,7 +1239,7 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
     char *msg = PackBleOfflineMsg((int64_t)netCapability, DISCOVERY_TYPE_BLE,
         authVerifyTime[0] > authVerifyTime[1] ? authSeq[0] : authSeq[1]);
     if (msg == NULL) {
-        LNN_LOGE(LNN_BUILDER, "pack p2p networking msg fail, networkId:%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "pack p2p networking msg fail, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
@@ -1248,9 +1254,10 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
     if (AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "send p2p sync info msg to networkId:%{public}s, netCap:%{public}u, seq:%{public}"
             PRId64 ", [%{public}" PRId64 "/%{public}" PRId64 ", %{public}" PRIu64 "/%{public}" PRId64 "]",
-            anonyNetworkId, netCapability, dataInfo.seq, authVerifyTime[0], authSeq[0], authVerifyTime[1], authSeq[1]);
+            AnonymizeWrapper(anonyNetworkId), netCapability, dataInfo.seq,
+            authVerifyTime[0], authSeq[0], authVerifyTime[1], authSeq[1]);
     } else {
-        LNN_LOGE(LNN_BUILDER, "post trans data fail, networkId:%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_BUILDER, "post trans data fail, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
     }
     AnonymizeFree(anonyNetworkId);
     cJSON_free(msg);
@@ -1294,7 +1301,7 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
     for (int32_t i = 0; i < num; i++) {
         if (AuthPostTransData(authHandle[i], &dataInfo) == SOFTBUS_OK) {
             LNN_LOGI(LNN_BUILDER, "send wifi offline msg sucess, authPort:%{public}d, offlineCode:%{public}s,"
-                "authId:%{public}" PRId64, authPort, anonyOfflineCode, authHandle->authId);
+                "authId:%{public}" PRId64, authPort, AnonymizeWrapper(anonyOfflineCode), authHandle->authId);
         } else {
             LNN_LOGE(LNN_BUILDER, "post trans data fail, authId:%{public}" PRId64, authHandle->authId);
         }

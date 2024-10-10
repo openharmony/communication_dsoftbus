@@ -534,12 +534,12 @@ void PrintAuthConnInfo(const AuthConnInfo *connInfo)
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI:
             Anonymize(connInfo->info.ipInfo.ip, &anonyIp);
-            AUTH_LOGD(AUTH_CONN, "print AuthConninfo ip=*.*.*%{public}s", anonyIp);
+            AUTH_LOGD(AUTH_CONN, "print AuthConninfo ip=*.*.*%{public}s", AnonymizeWrapper(anonyIp));
             AnonymizeFree(anonyIp);
             break;
         case AUTH_LINK_TYPE_BR:
             Anonymize(connInfo->info.brInfo.brMac, &anonyMac);
-            AUTH_LOGD(AUTH_CONN, "print AuthConninfo brMac=**:**:**:**:%{public}s", anonyMac);
+            AUTH_LOGD(AUTH_CONN, "print AuthConninfo brMac=**:**:**:**:%{public}s", AnonymizeWrapper(anonyMac));
             AnonymizeFree(anonyMac);
             break;
         case AUTH_LINK_TYPE_BLE:
@@ -550,8 +550,8 @@ void PrintAuthConnInfo(const AuthConnInfo *connInfo)
             }
             Anonymize(udidHash, &anonyUdidHash);
             Anonymize(connInfo->info.bleInfo.bleMac, &anonyMac);
-            AUTH_LOGD(AUTH_CONN, "print AuthConninfo bleMac=**:**:**:**:%{public}s, udidhash=%{public}s", anonyMac,
-                anonyUdidHash);
+            AUTH_LOGD(AUTH_CONN, "print AuthConninfo bleMac=**:**:**:**:%{public}s, udidhash=%{public}s",
+                AnonymizeWrapper(anonyMac), AnonymizeWrapper(anonyUdidHash));
             AnonymizeFree(anonyMac);
             AnonymizeFree(anonyUdidHash);
             break;

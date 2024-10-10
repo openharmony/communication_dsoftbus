@@ -120,7 +120,8 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_BUILDER, "recv capability change=%{public}d, networkId=%{public}s", capability, anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "recv capability change=%{public}d, networkId=%{public}s",
+        capability, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     // update ledger
     NodeInfo info;
@@ -186,7 +187,8 @@ static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *
         char *anonyNetworkId = NULL;
         Anonymize(netInfo.networkId, &anonyNetworkId);
         LNN_LOGE(LNN_BUILDER,
-            "sync cap info ret=%{public}d, peerNetworkId=%{public}s, type=%{public}u.", ret, anonyNetworkId, type);
+            "sync cap info ret=%{public}d, peerNetworkId=%{public}s, type=%{public}u.",
+            ret, AnonymizeWrapper(anonyNetworkId), type);
         AnonymizeFree(anonyNetworkId);
     } else if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
         LnnSendP2pSyncInfoMsg(netInfo.networkId, netCapability);

@@ -33,7 +33,7 @@ extern "C" {
     do {                                                                              \
         char *anonyKey = NULL;                                                        \
         Anonymize(key, &anonyKey);                                                    \
-        LNN_LOGE(LNN_LEDGER, log, anonyKey);                                          \
+        LNN_LOGE(LNN_LEDGER, log, AnonymizeWrapper(anonyKey));                                          \
         AnonymizeFree(anonyKey);                                                      \
     } while (0)                                                                       \
 

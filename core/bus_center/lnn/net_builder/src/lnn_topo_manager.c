@@ -204,7 +204,7 @@ static void ClearTopoTable(void)
                 Anonymize(item->udid, &anonyUdid);
                 Anonymize(info->peerUdid, &anonyPeerUdid);
                 LNN_LOGI(LNN_BUILDER, "delete topo info, local=%{public}s, peer=%{public}s",
-                    anonyUdid, anonyPeerUdid);
+                    AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyPeerUdid));
                 AnonymizeFree(anonyUdid);
                 AnonymizeFree(anonyPeerUdid);
                 ListDelete(&info->node);
@@ -347,8 +347,9 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
 {
     TopoTableItem *topoItem = NULL;
     TopoInfo *topoInfo = NULL;
+    char *anonyUdid = NULL;
+    char *anonyPeerUdid = NULL;
     bool hasRelation = HasRelation(relation, len);
-
     if (FindTopoInfo(udid, peerUdid, &topoItem, &topoInfo) != SOFTBUS_OK) {
         if (!hasRelation) {
             LNN_LOGE(LNN_BUILDER, "topo info not exist when delete");
@@ -358,11 +359,10 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
             LNN_LOGE(LNN_BUILDER, "add topo info fail");
             return SOFTBUS_MEM_ERR;
         }
-        char *anonyUdid = NULL;
-        char *anonyPeerUdid = NULL;
         Anonymize(udid, &anonyUdid);
         Anonymize(peerUdid, &anonyPeerUdid);
-        LNN_LOGI(LNN_BUILDER, "add topo info: local=%{public}s peer=%{public}s", anonyUdid, anonyPeerUdid);
+        LNN_LOGI(LNN_BUILDER, "add topo info: local=%{public}s peer=%{public}s",
+            AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyPeerUdid));
         AnonymizeFree(anonyUdid);
         AnonymizeFree(anonyPeerUdid);
     } else {
@@ -375,11 +375,10 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
             return SOFTBUS_MEM_ERR;
         }
         if (!hasRelation) {
-            char *anonyUdid = NULL;
-            char *anonyPeerUdid = NULL;
             Anonymize(topoItem->udid, &anonyUdid);
             Anonymize(topoInfo->peerUdid, &anonyPeerUdid);
-            LNN_LOGI(LNN_BUILDER, "delete topo info: local=%{public}s peer=%{public}s", anonyUdid, anonyPeerUdid);
+            LNN_LOGI(LNN_BUILDER, "delete topo info: local=%{public}s peer=%{public}s",
+                AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyPeerUdid));
             AnonymizeFree(anonyUdid);
             AnonymizeFree(anonyPeerUdid);
             ListDelete(&topoInfo->node);
