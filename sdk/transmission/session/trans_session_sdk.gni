@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -59,9 +59,11 @@ if (defined(ohos_lite)) {
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.hiviewdfx_hicollie)) {
-    trans_session_sdk_src += [ "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_set_timer.cpp" ]
+    trans_session_sdk_src += [
+      "$dsoftbus_sdk_path/transmission/session/cpp/src/session_set_timer.cpp",
+    ]
   } else {
-    trans_session_sdk_src += [ "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_set_timer_virtual.c" ]
+    trans_session_sdk_src += [ "$dsoftbus_sdk_path/transmission/session/cpp/src/session_set_timer_virtual.c" ]
   }
 
   broadcast_dep_dir = "dsoftbus_enhance/core/broadcast/notification_message"

@@ -57,6 +57,8 @@ public:
 
     virtual int32_t OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type);
 
+    virtual int32_t OnNodeStatusChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type);
+
     virtual int32_t OnLocalNetworkIdChanged(const char *pkgName);
 
     virtual int32_t OnNodeDeviceNotTrusted(const char *pkgName, const char *msg);
