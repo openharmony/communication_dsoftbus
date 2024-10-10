@@ -27,6 +27,12 @@
 typedef struct {
     ListNode node;
     int32_t channelId;
+    int32_t channelType;
+} ChannelDfxInfo;
+
+typedef struct {
+    ListNode node;
+    int32_t channelId;
     char *channelInfo;
     uint32_t len;
 } ChannelStatisticsInfo;
@@ -40,6 +46,49 @@ typedef struct {
 } NetworkStatisticsInfo;
 
 static SoftBusList *g_networkResourceList = NULL;
+
+static SoftBusList *g_channelDfxInfoList = NULL;
+
+void AddChannelStatisticsInfo(int32_t channelId, int32_t channelType)
+{
+    if (channelId < 0) {
+        COMM_LOGE(COMM_DFX, "invalid param");
+        return;
+    }
+    if (g_channelDfxInfoList == NULL) {
+        COMM_LOGE(COMM_DFX, "channel info list init failed, channelId=%{public}d", channelId);
+        return;
+    }
+    if (SoftBusMutexLock(&g_channelDfxInfoList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_DFX, "channel info list lock failed, channelId=%{public}d", channelId);
+        return;
+    }
+    if ((int32_t)g_channelDfxInfoList->cnt >= MAX_CHANNEL_INFO_NUM) {
+        COMM_LOGE(COMM_DFX, "channel info list out of max num, channelId=%{public}d", channelId);
+        (void)SoftBusMutexUnlock(&g_channelDfxInfoList->lock);
+        return;
+    }
+
+    ChannelDfxInfo *temp = NULL;
+    LIST_FOR_EACH_ENTRY(temp, &g_channelDfxInfoList->list, ChannelDfxInfo, node) {
+        if (temp->channelId == channelId && temp->channelType == channelType) {
+            COMM_LOGE(COMM_DFX, "channel info already in channel info list, channelId=%{public}d", channelId);
+            (void)SoftBusMutexUnlock(&g_channelDfxInfoList->lock);
+            return;
+        }
+    }
+    ChannelDfxInfo *channelInfo = (ChannelDfxInfo *)SoftBusCalloc(sizeof(ChannelDfxInfo));
+    if (channelInfo == NULL) {
+        COMM_LOGE(COMM_DFX, "channel info calloc failed, channelId=%{public}d", channelId);
+        (void)SoftBusMutexUnlock(&g_channelDfxInfoList->lock);
+        return;
+    }
+    channelInfo->channelId = channelId;
+    channelInfo->channelType = channelType;
+    ListAdd(&g_channelDfxInfoList->list, &channelInfo->node);
+    g_channelDfxInfoList->cnt++;
+    (void)SoftBusMutexUnlock(&g_channelDfxInfoList->lock);
+}
 
 void AddNetworkResource(NetworkResource *networkResource)
 {
@@ -89,14 +138,97 @@ void AddNetworkResource(NetworkResource *networkResource)
     (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
 }
 
-void UpdateNetworkResourceByLaneId(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+static bool IsChannelDfxInfoValid(int32_t channelId, int32_t channelType)
 {
-    if (dataInfo == NULL || g_networkResourceList == NULL) {
-        COMM_LOGE(COMM_DFX, "invalid param or g_networkResourceList init fail");
+    if (channelId < 0) {
+        COMM_LOGE(COMM_DFX, "invalid param");
+        return false;
+    }
+    if (g_channelDfxInfoList == NULL) {
+        COMM_LOGE(COMM_DFX, "channel info list init failed, channelId=%{public}d", channelId);
+        return false;
+    }
+    if (SoftBusMutexLock(&g_channelDfxInfoList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_DFX, "channel info list lock failed, channelId=%{public}d", channelId);
+        return false;
+    }
+
+    bool ret = false;
+    ChannelDfxInfo *temp = NULL;
+    LIST_FOR_EACH_ENTRY(temp, &g_channelDfxInfoList->list, ChannelDfxInfo, node) {
+        if (temp->channelId == channelId && temp->channelType == channelType) {
+            ret = true;
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_channelDfxInfoList->lock);
+    return ret;
+}
+
+static void RemoveChannelDfxInfo(int32_t channelId, int32_t channelType)
+{
+    if (channelId < 0) {
+        COMM_LOGE(COMM_DFX, "invalid param");
+        return;
+    }
+    if (g_channelDfxInfoList == NULL) {
+        COMM_LOGE(COMM_DFX, "channel info list init failed, channelId=%{public}d", channelId);
+        return;
+    }
+    if (SoftBusMutexLock(&g_channelDfxInfoList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_DFX, "channel info list lock failed, channelId=%{public}d", channelId);
+        return;
+    }
+
+    ChannelDfxInfo *temp = NULL;
+    ChannelDfxInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(temp, next, &(g_channelDfxInfoList->list), ChannelDfxInfo, node) {
+        if (temp->channelId == channelId && temp->channelType == channelType) {
+            ListDelete(&temp->node);
+            g_channelDfxInfoList->cnt--;
+            SoftBusFree(temp);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_channelDfxInfoList->lock);
+}
+
+static int32_t SetChannelStatisticsInfo(ChannelStatisticsInfo *info, int32_t channelId, const void *dataInfo,
+    uint32_t len)
+{
+    if (info == NULL || dataInfo == NULL || len > MAX_SOCKET_RESOURCE_LEN) {
+        COMM_LOGE(COMM_DFX, "invalid param, channelId=%{public}d", channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    info->channelInfo = (char *)SoftBusMalloc(len);
+    if (info->channelInfo == NULL) {
+        COMM_LOGE(COMM_DFX, "channel info mallloc fail, channelId=%{public}d", channelId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(info->channelInfo, len, (char *)dataInfo, len) != EOK) {
+        COMM_LOGE(COMM_DFX, "channel info memcpy fail, channelId=%{public}d", channelId);
+        SoftBusFree(info->channelInfo);
+        return SOFTBUS_MEM_ERR;
+    }
+    info->channelId = channelId;
+    info->len = len;
+    return SOFTBUS_OK;
+}
+
+void UpdateNetworkResourceByLaneId(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
+{
+    if (dataInfo == NULL || len > MAX_SOCKET_RESOURCE_LEN || !IsChannelDfxInfoValid(channelId, channelType)) {
+        COMM_LOGE(COMM_DFX, "invalid param, channelId=%{public}d", channelId);
+        return;
+    }
+    RemoveChannelDfxInfo(channelId, channelType);
+    if (g_networkResourceList == NULL) {
+        COMM_LOGE(COMM_DFX, "network resource list init fail, channelId=%{public}d", channelId);
         return;
     }
     if (SoftBusMutexLock(&g_networkResourceList->lock) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "lock failed");
+        COMM_LOGE(COMM_DFX, "lock failed, channelId=%{public}d", channelId);
         return;
     }
 
@@ -108,24 +240,24 @@ void UpdateNetworkResourceByLaneId(int32_t channelId, uint64_t laneId, const voi
         ChannelStatisticsInfo *item = NULL;
         LIST_FOR_EACH_ENTRY(item, &temp->channels, ChannelStatisticsInfo, node) {
             if (item->channelId == channelId) {
-                COMM_LOGE(COMM_DFX, "channelId already in channels");
+                COMM_LOGE(COMM_DFX, "channelId already in channels, channelId=%{public}d", channelId);
                 (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
                 return;
             }
         }
         ChannelStatisticsInfo *info = (ChannelStatisticsInfo *)SoftBusCalloc(sizeof(ChannelStatisticsInfo));
         if (info == NULL) {
-            COMM_LOGE(COMM_DFX, "channel statistics info SoftBusCalloc fail");
+            COMM_LOGE(COMM_DFX, "channel statistics info SoftBusCalloc fail, channelId=%{public}d", channelId);
             (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
             return;
         }
-        ListInit(&info->node);
-        info->channelId = channelId;
-        info->len = len;
-        info->channelInfo = (char *)SoftBusMalloc(len);
-        if (info->channelInfo == NULL || memcpy_s(info->channelInfo, len, (char *)dataInfo, len) != EOK) {
-            COMM_LOGE(COMM_DFX, "channel info is null or channel info memcpy fail");
+        if (SetChannelStatisticsInfo(info, channelId, dataInfo, len) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_DFX, "channel statistics info set fail, channelId=%{public}d", channelId);
+            (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
+            SoftBusFree(info);
+            return;
         }
+        ListInit(&info->node);
         ListAdd(&temp->channels, &info->node);
         (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
         return;
@@ -231,22 +363,31 @@ void DeleteNetworkResourceByLaneId(uint64_t laneId)
 int32_t TransNetworkStatisticsInit(void)
 {
     if (g_networkResourceList != NULL) {
-        COMM_LOGI(COMM_DFX, "network statistics has init");
+        COMM_LOGE(COMM_DFX, "network statistics has init");
         return SOFTBUS_OK;
     }
-
     g_networkResourceList = CreateSoftBusList();
     if (g_networkResourceList == NULL) {
-        COMM_LOGI(COMM_DFX, "network statistics init fail");
+        COMM_LOGE(COMM_DFX, "network statistics init fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    if (g_channelDfxInfoList != NULL) {
+        COMM_LOGE(COMM_DFX, "channel statistics has init");
+        return SOFTBUS_OK;
+    }
+    g_channelDfxInfoList = CreateSoftBusList();
+    if (g_channelDfxInfoList == NULL) {
+        COMM_LOGE(COMM_DFX, "channel statistics init fail");
         return SOFTBUS_MALLOC_ERR;
     }
     return SOFTBUS_OK;
 }
 
-void TransNetworkStatisticsDeinit(void)
+static void TransNetworkResourceDeinit(void)
 {
     if (g_networkResourceList == NULL) {
-        COMM_LOGI(COMM_DFX, "network statistics has deinit");
+        COMM_LOGE(COMM_DFX, "network statistics has deinit");
         return;
     }
 
@@ -273,4 +414,33 @@ void TransNetworkStatisticsDeinit(void)
     (void)SoftBusMutexUnlock(&g_networkResourceList->lock);
     DestroySoftBusList(g_networkResourceList);
     g_networkResourceList = NULL;
+}
+
+static void TransChannelStatisticsDeinit(void)
+{
+    if (g_channelDfxInfoList == NULL) {
+        COMM_LOGE(COMM_DFX, "channel statistics has deinit");
+        return;
+    }
+
+    if (SoftBusMutexLock(&g_channelDfxInfoList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_DFX, "channel statistics lock failed");
+        return;
+    }
+    ChannelDfxInfo *item = NULL;
+    ChannelDfxInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_channelDfxInfoList->list), ChannelDfxInfo, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    g_channelDfxInfoList->cnt = 0;
+    (void)SoftBusMutexUnlock(&g_channelDfxInfoList->lock);
+    DestroySoftBusList(g_channelDfxInfoList);
+    g_channelDfxInfoList = NULL;
+}
+
+void TransNetworkStatisticsDeinit(void)
+{
+    TransNetworkResourceDeinit();
+    TransChannelStatisticsDeinit();
 }
