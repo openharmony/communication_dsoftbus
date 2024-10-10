@@ -89,7 +89,6 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
 HWTEST_F(LNNBatteryInfoTest, ON_RECEIVE_BATTERY_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnSetDLBatteryInfo).WillOnce(Return(SOFTBUS_OK));
     const char *networkId = NETWORKID;
     OnReceiveBatteryInfo(LNN_INFO_TYPE_DEVICE_NAME, nullptr, nullptr, TEST_VALID_UDID_LEN);
     OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, nullptr, nullptr, TEST_VALID_UDID_LEN);
