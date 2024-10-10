@@ -243,14 +243,16 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
 
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth)
 {
-    if (len <= PROXY_CHANNEL_HEAD_LEN) {
-        TRANS_LOGE(TRANS_CTRL, "parseMessage: invalid message len=%{public}d", len);
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(len > PROXY_CHANNEL_HEAD_LEN,
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "parseMessage: invalid message len!");
     int32_t ret = TransProxyParseMessageHead(data, len, msg);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
 
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
+        if (msg->dateLen < sizeof(uint32_t)) {
+            TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
+            return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+        }
         if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
             TRANS_LOGD(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
             ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, auth,
