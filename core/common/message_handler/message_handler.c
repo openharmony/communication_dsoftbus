@@ -158,16 +158,18 @@ static void *LoopTask(void *arg)
             continue;
         }
         context->currentMsg = msg;
-        (void)SoftBusMutexUnlock(&context->lock);
         if (looper->dumpable) {
             COMM_LOGD(COMM_UTILS,
                 "LoopTask HandleMessage message. name=%{public}s, handle=%{public}s, what=%{public}" PRId32,
                 context->name, msg->handler ? msg->handler->name : "null", msg->what);
         }
+        (void)SoftBusMutexUnlock(&context->lock);
 
         if (msg->handler != NULL && msg->handler->HandleMessage != NULL) {
             msg->handler->HandleMessage(msg);
         }
+
+        (void)SoftBusMutexLock(&context->lock);
         if (looper->dumpable) {
             // Don`t print msg->handler, msg->handler->HandleMessage() may remove handler,
             // so msg->handler maybe invalid pointer
@@ -176,7 +178,6 @@ static void *LoopTask(void *arg)
                 "name=%{public}s, what=%{public}" PRId32 ", arg1=%{public}" PRIu64,
                 context->name, msg->what, msg->arg1);
         }
-        (void)SoftBusMutexLock(&context->lock);
         FreeSoftBusMsg(msg);
         context->currentMsg = NULL;
         (void)SoftBusMutexUnlock(&context->lock);
@@ -261,14 +262,19 @@ void DumpLooper(const SoftBusLooper *looper)
 
 static int32_t PostMessageAtTimeParamVerify(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
-    if (msgPost == NULL) {
+    if (msgPost == NULL || msgPost->handler == NULL) {
         COMM_LOGE(COMM_UTILS, "the msgPost param is null.");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (looper == NULL) {
+    if (looper == NULL || looper->context == NULL) {
         COMM_LOGE(COMM_UTILS, "the looper param is null.");
         return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&looper->context->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "lock looper context failed.");
+        return SOFTBUS_LOCK_ERR;
     }
 
     if (looper->dumpable) {
@@ -276,11 +282,7 @@ static int32_t PostMessageAtTimeParamVerify(const SoftBusLooper *looper, SoftBus
             looper->context->name, msgPost->what, msgPost->time);
     }
 
-    if (msgPost->handler == NULL) {
-        COMM_LOGE(COMM_UTILS, "[%s] msg handler is null", looper->context->name);
-        return SOFTBUS_ERR;
-    }
-
+    (void)SoftBusMutexUnlock(&looper->context->lock);
     return SOFTBUS_OK;
 }
 
@@ -409,13 +411,20 @@ static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandle
     LoopRemoveMessageCustom(looper, handler, WhatRemoveFunc, (void*)(intptr_t)what);
 }
 
-void SetLooperDumpable(SoftBusLooper *loop, bool dumpable)
+void SetLooperDumpable(SoftBusLooper *looper, bool dumpable)
 {
-    if (loop == NULL) {
-        COMM_LOGE(COMM_UTILS, "loop is null");
+    if (looper == NULL || looper->context == NULL) {
+        COMM_LOGE(COMM_UTILS, "looper param is invalid");
         return;
     }
-    loop->dumpable = dumpable;
+
+    if (SoftBusMutexLock(&looper->context->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "lock looper context failed.");
+        return;
+    }
+
+    looper->dumpable = dumpable;
+    (void)SoftBusMutexUnlock(&looper->context->lock);
 }
 
 SoftBusLooper *CreateNewLooper(const char *name)
