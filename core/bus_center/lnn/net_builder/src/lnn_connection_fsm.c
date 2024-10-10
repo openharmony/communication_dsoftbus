@@ -1128,6 +1128,10 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 
 static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
+    if (connInfo->nodeInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "nodeInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     bool isAuthServer = false;
     SoftBusVersion version;
     NodeInfo *nodeInfo = connInfo->nodeInfo;
