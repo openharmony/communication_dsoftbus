@@ -83,6 +83,11 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
             LNN_LOGE(LNN_STATE, "copy ble mac to addr fail");
             return false;
         }
+        if (memcpy_s((int8_t *)option->bleOption.deviceIdHash, UDID_HASH_LEN, addr->info.ble.udidHash,
+            UDID_HASH_LEN) != EOK) {
+            LNN_LOGE(LNN_STATE, "copy ble deviceIdHash to addr fail");
+            return false;
+        }
         return true;
     }
     if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN) {
