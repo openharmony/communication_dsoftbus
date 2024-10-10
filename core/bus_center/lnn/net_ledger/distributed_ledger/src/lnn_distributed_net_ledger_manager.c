@@ -341,20 +341,22 @@ bool LnnSetRemoteScreenStatusInfo(const char *networkId, bool isScreenOn)
     Anonymize(networkId, &anonyNetworkId);
     NodeInfo *info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (info == NULL) {
-        LNN_LOGE(LNN_LEDGER, "networkId=%{public}s, get node info fail.", anonyNetworkId);
+        LNN_LOGE(LNN_LEDGER, "networkId=%{public}s, get node info fail.", AnonymizeWrapper(anonyNetworkId));
         SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         AnonymizeFree(anonyNetworkId);
         return false;
     }
     if (IsNodeInfoScreenStatusSupport(info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "networkId=%{public}s, node screen status is not supported", anonyNetworkId);
+        LNN_LOGE(LNN_LEDGER, "networkId=%{public}s, node screen status is not supported",
+            AnonymizeWrapper(anonyNetworkId));
         SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         AnonymizeFree(anonyNetworkId);
         return false;
     }
     
     info->isScreenOn = isScreenOn;
-    LNN_LOGI(LNN_LEDGER, "set %{public}s screen status to %{public}s", anonyNetworkId, isScreenOn ? "on" : "off");
+    LNN_LOGI(LNN_LEDGER, "set %{public}s screen status to %{public}s",
+        AnonymizeWrapper(anonyNetworkId), isScreenOn ? "on" : "off");
     SoftBusMutexUnlock(&LnnGetDistributedNetLedger()->lock);
     AnonymizeFree(anonyNetworkId);
     return true;
@@ -682,12 +684,12 @@ static int32_t DlGetNodeScreenOnFlag(const char *networkId, bool checkOnline, vo
     Anonymize(networkId, &anonyNetworkId);
     int32_t ret = IsNodeInfoScreenStatusSupport(info);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LEDGER, "%{public}s get node screen not support", anonyNetworkId);
+        LNN_LOGI(LNN_LEDGER, "%{public}s get node screen not support", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return ret;
     }
     if (checkOnline && !LnnIsNodeOnline(info) && !IsMetaNode(info)) {
-        LNN_LOGE(LNN_LEDGER, "%{public}s node is offline", anonyNetworkId);
+        LNN_LOGE(LNN_LEDGER, "%{public}s node is offline", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }

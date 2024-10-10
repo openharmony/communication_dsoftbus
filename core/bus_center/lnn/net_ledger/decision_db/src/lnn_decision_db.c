@@ -338,7 +338,7 @@ static void InsertTrustedDevInfoRecord(void *param)
         }
         char *anonyUdid = NULL;
         Anonymize(udid, &anonyUdid);
-        LNN_LOGI(LNN_LEDGER, "insert udid to trusted dev info table. udid=%{public}s", anonyUdid);
+        LNN_LOGI(LNN_LEDGER, "insert udid to trusted dev info table. udid=%{public}s", AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
         if (InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
             (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
@@ -395,7 +395,7 @@ static void RemoveTrustedDevInfoRecord(void *param)
     DbUnlock();
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
-    LNN_LOGI(LNN_LEDGER, "remove udid from trusted dev info table. udid=%{public}s", anonyUdid);
+    LNN_LOGI(LNN_LEDGER, "remove udid from trusted dev info table. udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     SoftBusFree(udid);
 }
@@ -413,7 +413,7 @@ static void DeleteDeviceFromList(TrustedDevInfoRecord *record)
             strcmp(item->infoRecord.udid, record->udid) == 0) {
             char *anonyUdid = NULL;
             Anonymize(record->udid, &anonyUdid);
-            LNN_LOGI(LNN_LEDGER, "delete device db from list. udid=%{public}s", anonyUdid);
+            LNN_LOGI(LNN_LEDGER, "delete device db from list. udid=%{public}s", AnonymizeWrapper(anonyUdid));
             AnonymizeFree(anonyUdid);
             ListDelete(&item->node);
             SoftBusFree(item);

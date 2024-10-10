@@ -83,6 +83,11 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
             LNN_LOGE(LNN_STATE, "copy ble mac to addr fail");
             return false;
         }
+        if (memcpy_s((int8_t *)option->bleOption.deviceIdHash, UDID_HASH_LEN, addr->info.ble.udidHash,
+            UDID_HASH_LEN) != EOK) {
+            LNN_LOGE(LNN_STATE, "copy ble deviceIdHash to addr fail");
+            return false;
+        }
         return true;
     }
     if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN) {
@@ -312,19 +317,19 @@ const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
         case CONNECTION_ADDR_ETH:
             Anonymize(addr->info.ip.ip, &anonyIp);
             ret = sprintf_s(g_printAddr, sizeof(g_printAddr),
-                "Ip=%s", anonyIp);
+                "Ip=%s", AnonymizeWrapper(anonyIp));
             AnonymizeFree(anonyIp);
             break;
         case CONNECTION_ADDR_BR:
             Anonymize(addr->info.br.brMac, &anonyMac);
             ret = sprintf_s(g_printAddr, sizeof(g_printAddr),
-                "BrMac=%s", anonyMac);
+                "BrMac=%s", AnonymizeWrapper(anonyMac));
             AnonymizeFree(anonyMac);
             break;
         case CONNECTION_ADDR_BLE:
             Anonymize(addr->info.ble.bleMac, &anonyMac);
             ret = sprintf_s(g_printAddr, sizeof(g_printAddr),
-                "BleMac=%s", anonyMac);
+                "BleMac=%s", AnonymizeWrapper(anonyMac));
             AnonymizeFree(anonyMac);
             break;
         default:

@@ -726,5 +726,10 @@ bool CheckRemoteBasicInfoChanged(const NodeInfo *newNodeInfo)
 {
     return GetNetBuilderDepsInterface()->CheckRemoteBasicInfoChanged(newNodeInfo);
 }
+
+int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
+{
+    return GetNetBuilderDepsInterface()->CheckAuthChannelIsExit(connInfo);
+}
 } // extern "C"
 } // namespace OHOS

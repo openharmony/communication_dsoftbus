@@ -124,7 +124,7 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
     char *anonyDeviceName = NULL;
     Anonymize(deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_BUILDER, "recv device name changed. deviceName=%{public}s, networkId=%{public}s",
-        anonyDeviceName, anonyNetworkId);
+        AnonymizeWrapper(anonyDeviceName), AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyDeviceName);
     if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
@@ -185,7 +185,7 @@ static void SetDisplayName(char *displayName, const char *nickName, const NodeIn
     }
     char *anonyDeviceName = NULL;
     Anonymize(displayName, &anonyDeviceName);
-    LNN_LOGI(LNN_BUILDER, "peer deviceName=%{public}s", anonyDeviceName);
+    LNN_LOGI(LNN_BUILDER, "peer deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
 }
 
@@ -195,7 +195,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
     LNN_CHECK_AND_RETURN_LOGE(localNodeInfo != NULL, LNN_BUILDER, "local devinfo nullptr");
     char *anonyNickName = NULL;
     Anonymize(nickName, &anonyNickName);
-    LNN_LOGI(LNN_BUILDER, "nickName is=%{public}s", anonyNickName);
+    LNN_LOGI(LNN_BUILDER, "nickName is=%{public}s", AnonymizeWrapper(anonyNickName));
     AnonymizeFree(anonyNickName);
     char displayName[DEVICE_NAME_BUF_LEN] = {0};
     NodeInfo peerNodeInfo;
@@ -223,7 +223,8 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
     Anonymize(peerNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_BUILDER, "peer unifiedDefaultName=%{public}s, nickName=%{public}s, "
         "unifiedName=%{public}s, deviceName=%{public}s",
-        anonyUnifiedDefaultName, anonyNickName, anonyUnifiedName, anonyDeviceName);
+        AnonymizeWrapper(anonyUnifiedDefaultName), AnonymizeWrapper(anonyNickName),
+        AnonymizeWrapper(anonyUnifiedName), AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyUnifiedDefaultName);
     AnonymizeFree(anonyNickName);
     AnonymizeFree(anonyUnifiedName);
@@ -422,6 +423,27 @@ static void AccountBootEventHandle(const char *key, const char *value, void *con
     }
 }
 
+static void DumpLocalExtendDeviceName(const char *deviceName, const char *unifiedName, const char *unifiedDefaultName,
+    const char *nickName)
+{
+    char *anonyDeviceName = NULL;
+    Anonymize(deviceName, &anonyDeviceName);
+    char *anonyUnifiedName = NULL;
+    Anonymize(unifiedName, &anonyUnifiedName);
+    char *anonyUnifiedDefaultName = NULL;
+    Anonymize(unifiedDefaultName, &anonyUnifiedDefaultName);
+    char *anonyNickName = NULL;
+    Anonymize(nickName, &anonyNickName);
+    LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
+        "unifiedDefaultName=%{public}s, nickName=%{public}s",
+        AnonymizeWrapper(anonyDeviceName), AnonymizeWrapper(anonyUnifiedName),
+        AnonymizeWrapper(anonyUnifiedDefaultName), AnonymizeWrapper(anonyNickName));
+    AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyUnifiedName);
+    AnonymizeFree(anonyUnifiedDefaultName);
+    AnonymizeFree(anonyNickName);
+}
+
 static void UpdataLocalFromSetting(void *p)
 {
     (void)p;
@@ -464,21 +486,7 @@ static void UpdataLocalFromSetting(void *p)
     RegisterNameMonitor();
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
     LnnNotifyLocalNetworkIdChanged();
-    char *anonyDeviceName = NULL;
-    Anonymize(deviceName, &anonyDeviceName);
-    char *anonyUnifiedName = NULL;
-    Anonymize(unifiedName, &anonyUnifiedName);
-    char *anonyUnifiedDefaultName = NULL;
-    Anonymize(unifiedDefaultName, &anonyUnifiedDefaultName);
-    char *anonyNickName = NULL;
-    Anonymize(nickName, &anonyNickName);
-    LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
-        "unifiedDefaultName=%{public}s, nickName=%{public}s",
-        anonyDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
-    AnonymizeFree(anonyDeviceName);
-    AnonymizeFree(anonyUnifiedName);
-    AnonymizeFree(anonyUnifiedDefaultName);
-    AnonymizeFree(anonyNickName);
+    DumpLocalExtendDeviceName(deviceName, unifiedName, unifiedDefaultName, nickName);
 }
 
 static void RegisterDeviceNameHandle(void)

@@ -52,6 +52,7 @@ int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer);
 int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer);
 int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo);
 int32_t TransDelConnByReqId(uint32_t requestId);
+int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo);
 
 #ifdef __cplusplus
 }

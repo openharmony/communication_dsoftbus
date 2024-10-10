@@ -97,7 +97,8 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
         }
         char *anonyUdid = nullptr;
         Anonymize(trustDevice.GetTrustDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", anonyUdid, anonyDeviceIdHash);
+        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s",
+            AnonymizeWrapper(anonyUdid), anonyDeviceIdHash);
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};
@@ -145,7 +146,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     }
     InsertNotTrustDevice(deviceIdHash);
     LNN_LOGI(LNN_STATE, "device is not trusted in dp, deviceIdHash=%{public}s, callCount=%{public}u",
-        anonyDeviceIdHash, callCount++);
+        AnonymizeWrapper(anonyDeviceIdHash), callCount++);
     AnonymizeFree(anonyDeviceIdHash);
     return false;
 }
@@ -228,7 +229,7 @@ static void InsertDpSameAccount(const std::string udid)
     }
     char *anonyUdid = nullptr;
     Anonymize(udid.c_str(), &anonyUdid);
-    LNN_LOGI(LNN_STATE, "insert dp same account succ, udid=%{public}s", anonyUdid);
+    LNN_LOGI(LNN_STATE, "insert dp same account succ, udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
 }
 

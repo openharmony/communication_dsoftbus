@@ -34,7 +34,7 @@ static uint32_t GetSameRequestNum(char *udidHash)
     NormalizeRequest *item = NULL;
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
-    AUTH_LOGI(AUTH_HICHAIN, "udidHash=%{public}s", anonyUdidHash);
+    AUTH_LOGI(AUTH_HICHAIN, "udidHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     LIST_FOR_EACH_ENTRY(item, &g_normalizeRequestList, NormalizeRequest, node) {
         if (strncmp(item->udidHash, udidHash, UDID_SHORT_HASH_STR) != 0) {

@@ -273,7 +273,7 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
 {
     char *anonyKey = nullptr;
     Anonymize(key.c_str(), &anonyKey);
-    LNN_LOGI(LNN_LEDGER, "Get data by key: %{public}s", anonyKey);
+    LNN_LOGI(LNN_LEDGER, "Get data by key: %{public}s", AnonymizeWrapper(anonyKey));
     AnonymizeFree(anonyKey);
     DistributedKv::Key kvKey(key);
     DistributedKv::Value kvValue;
@@ -289,7 +289,7 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
     if (status != DistributedKv::Status::SUCCESS) {
         anonyKey = nullptr;
         Anonymize(key.c_str(), &anonyKey);
-        LNN_LOGE(LNN_LEDGER, "Get data from kv failed, key=%{public}s", anonyKey);
+        LNN_LOGE(LNN_LEDGER, "Get data from kv failed, key=%{public}s", AnonymizeWrapper(anonyKey));
         AnonymizeFree(anonyKey);
         return SOFTBUS_KV_GET_DB_FAIL;
     }
