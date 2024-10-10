@@ -29,7 +29,6 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy.h"
 #include "trans_client_stub.h"
-#include "disc_server_proxy.h"
 #include "trans_server_proxy.h"
 #include "bus_center_server_proxy.h"
 #include "client_trans_session_manager.h"
@@ -132,7 +131,6 @@ static void *DeathProcTask(void *arg)
     CLIENT_NotifyObserver(EVENT_SERVER_DEATH, NULL, 0);
 
     ServerProxyDeInit();
-    DiscServerProxyDeInit();
     TransServerProxyDeInit();
     BusCenterServerProxyDeInit();
 
@@ -160,7 +158,6 @@ static void *DeathProcTask(void *arg)
         return NULL;
     }
 
-    DiscServerProxyInit();
     TransServerProxyInit();
     BusCenterServerProxyInit();
     DiscRecoveryPublish();
