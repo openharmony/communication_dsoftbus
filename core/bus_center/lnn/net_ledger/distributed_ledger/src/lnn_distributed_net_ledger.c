@@ -84,7 +84,7 @@ static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
     char *anonyDeviceName = NULL;
     Anonymize(basic.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.",
-        anonyOldDeviceName, anonyDeviceName);
+        AnonymizeWrapper(anonyOldDeviceName), AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyOldDeviceName);
     AnonymizeFree(anonyDeviceName);
     LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
@@ -477,7 +477,8 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         char *anonyId = NULL;
         Anonymize(id, &anonyId);
-        LNN_LOGI(LNN_LEDGER, "can not find target node, id=%{public}s, type=%{public}d", anonyId, type);
+        LNN_LOGI(LNN_LEDGER, "can not find target node, id=%{public}s, type=%{public}d",
+            AnonymizeWrapper(anonyId), type);
         AnonymizeFree(anonyId);
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
@@ -994,7 +995,8 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
         char *anonyNetworkId = NULL;
         Anonymize(deviceInfo.networkId, &anonyDevNetworkId);
         Anonymize(info->networkId, &anonyNetworkId);
-        LNN_LOGI(LNN_LEDGER, "oldNetworkId=%{public}s, newNetworkid=%{public}s", anonyDevNetworkId, anonyNetworkId);
+        LNN_LOGI(LNN_LEDGER, "oldNetworkId=%{public}s, newNetworkid=%{public}s",
+            AnonymizeWrapper(anonyDevNetworkId), AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyDevNetworkId);
         AnonymizeFree(anonyNetworkId);
         GetAndSaveRemoteDeviceInfo(&deviceInfo, info);
@@ -1042,7 +1044,7 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
         char *anonyUuid = NULL;
         Anonymize(oldInfo->uuid, &anonyUuid);
-        LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node, uuid=%{public}s", anonyUuid);
+        LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node, uuid=%{public}s", AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         infoAbility->isOffline = false;
         infoAbility->isChanged = IsNetworkIdChanged(info, oldInfo);
@@ -1738,7 +1740,7 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
             Anonymize(nodeInfo->deviceInfo.deviceUdid, &anoyUdid);
             Anonymize((const char *)shortUdidHash, &anoyUdidHash);
             LNN_LOGI(LNN_LEDGER, "node is online. nodeUdid=%{public}s, shortUdidHash=%{public}s",
-                anoyUdid, anoyUdidHash);
+                AnonymizeWrapper(anoyUdid), AnonymizeWrapper(anoyUdidHash));
             AnonymizeFree(anoyUdid);
             AnonymizeFree(anoyUdidHash);
             SoftBusFree(info);
@@ -1765,7 +1767,7 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
         char *anoyUdidHash = NULL;
         Anonymize(device->devId, &anoyUdidHash);
         LNN_LOGI(LNN_LEDGER, "device found. medium=%{public}d, udidhash=%{public}s, onlineStatus=%{public}d",
-            additions->medium, anoyUdidHash, device->isOnline);
+            additions->medium, AnonymizeWrapper(anoyUdidHash), device->isOnline);
         AnonymizeFree(anoyUdidHash);
     }
 }
@@ -1785,7 +1787,7 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LEDGER, "get info by networkId=%{public}s failed", anonyNetworkId);
+        LNN_LOGE(LNN_LEDGER, "get info by networkId=%{public}s failed", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NOT_FIND;
     }

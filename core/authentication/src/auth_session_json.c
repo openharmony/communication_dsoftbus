@@ -404,7 +404,7 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info)
     }
     char *anonyUdidHash = NULL;
     Anonymize(udidHashHexStr, &anonyUdidHash);
-    AUTH_LOGI(AUTH_FSM, "udidHashHexStr=%{public}s", anonyUdidHash);
+    AUTH_LOGI(AUTH_FSM, "udidHashHexStr=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
         !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, false)) {
@@ -759,7 +759,8 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
         }
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, networkid=%{public}s", info->idType, anonyNetworkId);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, networkid=%{public}s",
+            info->idType, AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
     } else {
         if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
@@ -768,7 +769,8 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
         }
         char *anonyUdid = NULL;
         Anonymize(udid, &anonyUdid);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, udid=%{public}s", info->idType, anonyUdid);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, udid=%{public}s",
+            info->idType, AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
     }
 
@@ -936,7 +938,7 @@ static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType
     char peerUdid[UDID_BUF_LEN] = {0};
     bool isExchangeUdid = true;
     if (idType == EXCHANGE_NETWORKID) {
-        if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
+        if (GetPeerUdidByNetworkId(info->udid, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", anonyUdid);
             info->idType = EXCHANGE_FAIL;
             (void)memset_s(info->udid, sizeof(info->udid), 0, sizeof(info->udid));
@@ -975,7 +977,8 @@ static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
     char *anonyUdid = NULL;
     Anonymize(info->udid, &anonyUdid);
     AUTH_LOGI(AUTH_FSM,
-        "oldIdType=%{public}d, exchangeIdType=%{public}d, deviceId=%{public}s", info->idType, idType, anonyUdid);
+        "oldIdType=%{public}d, exchangeIdType=%{public}d, deviceId=%{public}s",
+        info->idType, idType, AnonymizeWrapper(anonyUdid));
     if (idType == EXCHANGE_UDID) {
         info->idType = EXCHANGE_UDID;
         AnonymizeFree(anonyUdid);
@@ -1175,7 +1178,7 @@ static void AuthPrintBase64Ptk(const char *ptk)
 {
     char *anonyPtk = NULL;
     Anonymize(ptk, &anonyPtk);
-    AUTH_LOGD(AUTH_FSM, "base Ptk=%{public}s", anonyPtk);
+    AUTH_LOGD(AUTH_FSM, "base Ptk=%{public}s", AnonymizeWrapper(anonyPtk));
     AnonymizeFree(anonyPtk);
 }
 
@@ -1255,7 +1258,7 @@ static void DumpRpaCipherKey(char *cipherKey, char *cipherIv, const char *peerIr
     Anonymize(cipherIv, &anonyCipherIv);
     Anonymize(peerIrk, &anonyIrk);
     AUTH_LOGI(AUTH_FSM, "log=%{public}s, cipherKey=%{public}s, cipherIv=%{public}s, peerIrk=%{public}s", log,
-        anonyCipherKey, anonyCipherIv, anonyIrk);
+        AnonymizeWrapper(anonyCipherKey), AnonymizeWrapper(anonyCipherIv), AnonymizeWrapper(anonyIrk));
     AnonymizeFree(anonyCipherKey);
     AnonymizeFree(anonyCipherIv);
     AnonymizeFree(anonyIrk);
@@ -1959,7 +1962,7 @@ static void UpdateLocalNetBrMac(void)
         }
         char *anonyMac = NULL;
         Anonymize(brMac, &anonyMac);
-        AUTH_LOGI(AUTH_FSM, "update local brmac=%{public}s", anonyMac);
+        AUTH_LOGI(AUTH_FSM, "update local brmac=%{public}s", AnonymizeWrapper(anonyMac));
         AnonymizeFree(anonyMac);
     }
 }
@@ -2042,7 +2045,9 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
     AUTH_LOGD(AUTH_FSM,
         "peer tmpDeviceName=%{public}s, deviceName=%{public}s, unifiedName=%{public}s, "
         "unifiedDefaultName=%{public}s, nickName=%{public}s",
-        anonyDeviceName, anonyPeerDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
+        AnonymizeWrapper(anonyDeviceName), AnonymizeWrapper(anonyPeerDeviceName),
+        AnonymizeWrapper(anonyUnifiedName), AnonymizeWrapper(anonyUnifiedDefaultName),
+        AnonymizeWrapper(anonyNickName));
     AnonymizeFree(anonyDeviceName);
     AnonymizeFree(anonyPeerDeviceName);
     AnonymizeFree(anonyUnifiedName);

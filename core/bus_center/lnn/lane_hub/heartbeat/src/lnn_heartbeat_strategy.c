@@ -947,7 +947,8 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
     char *anonyNetworkId = NULL;
     if (LnnIsSupportBurstFeature(networkId)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGD(LNN_HEART_BEAT, "%{public}s support burst, dont't need post offline info", anonyNetworkId);
+        LNN_LOGD(LNN_HEART_BEAT, "%{public}s support burst, dont't need post offline info",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
