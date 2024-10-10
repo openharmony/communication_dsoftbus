@@ -430,6 +430,16 @@ int32_t TransClientProxy::OnNodeBasicInfoChanged(const char *pkgName, void *info
     return SOFTBUS_OK;
 }
 
+int32_t TransClientProxy::OnNodeStatusChanged(const char *pkgName, void *info,
+    uint32_t infoTypeLen, int32_t type)
+{
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
+    (void)type;
+    return SOFTBUS_OK;
+}
+
 int32_t TransClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     (void)info;
