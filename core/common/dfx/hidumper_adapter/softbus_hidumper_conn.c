@@ -30,7 +30,7 @@ int32_t SoftBusRegConnVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         COMM_LOGE(COMM_DFX, "SoftBusRegConnVarDump invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_conn_var_list);
 }
@@ -38,7 +38,7 @@ int32_t SoftBusRegConnVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 static int32_t SoftBusConnDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (argc == 0 || ((argc == 1) && (strcmp(argv[0], "-h") == 0))) {

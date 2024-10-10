@@ -54,7 +54,7 @@ HWTEST_F(SoftbusPermissionTest, IsValidPkgNameTest001, TestSize.Level0)
     int32_t ret;
 
     ret = IsValidPkgName(0, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = IsValidPkgName(0, g_pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
