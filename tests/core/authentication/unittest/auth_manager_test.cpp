@@ -23,6 +23,7 @@
 #include "auth_manager.h"
 #include "auth_manager.c"
 #include "auth_request.h"
+#include "auth_session_key.c"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -183,8 +184,13 @@ static int32_t MyUpdateFuncReturnOk(AuthManager *auth1, const AuthManager *auth2
  */
 HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
 {
+    AuthHandle authHandle;
     EXPECT_TRUE(FindAuthManagerByAuthId(AUTH_SEQ) != nullptr);
+    authHandle.authId = AUTH_SEQ;
+    HandleUpdateSessionKeyEvent(&authHandle);
     EXPECT_TRUE(FindAuthManagerByAuthId(AUTH_SEQ_2) == nullptr);
+    authHandle.authId = AUTH_SEQ_2;
+    HandleUpdateSessionKeyEvent(&authHandle);
     EXPECT_TRUE(FindAuthManagerByConnId(CONN_ID, false) != nullptr);
     AuthManager *auth = FindAuthManagerByConnId(CONN_ID, true);
     EXPECT_TRUE(auth == nullptr);
@@ -199,8 +205,8 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     type = 9;
     EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, (AuthLinkType)type, &connInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo), SOFTBUS_OK);
-    AuthHandle authHandle = { .authId = AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI, };
-    AuthHandleLeaveLNN(authHandle);
+    AuthHandle authHandle2 = { .authId = AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI, };
+    AuthHandleLeaveLNN(authHandle2);
 }
 
 /*
