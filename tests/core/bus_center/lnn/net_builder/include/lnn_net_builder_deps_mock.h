@@ -199,6 +199,7 @@ public:
     virtual bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit) = 0;
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual void RegisterOOBEMonitor(void *p);
+    virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -337,6 +338,7 @@ public:
     MOCK_METHOD2(IsSupportFeatureByCapaBit, bool (uint32_t, AuthCapability));
     MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t (const char *, NodeInfo *));
     MOCK_METHOD1(RegisterOOBEMonitor, void (void *p));
+    MOCK_METHOD1(CheckAuthChannelIsExit, int32_t (ConnectOption *connInfo));
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
 };
