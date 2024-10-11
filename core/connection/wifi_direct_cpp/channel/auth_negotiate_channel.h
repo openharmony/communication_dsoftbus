@@ -65,6 +65,7 @@ public:
     ~AuthNegotiateChannel() override;
 
     bool operator==(const AuthNegotiateChannel &other) const;
+    bool operator==(const AuthHandle &otherHandle) const;
     bool IsMeta() const;
     void SetClose();
 
