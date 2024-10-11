@@ -603,12 +603,16 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
 
 void P2pV1Processor::ProcessAuthExceptionEvent(const std::shared_ptr<AuthExceptionEvent> &event)
 {
+    CONN_CHECK_AND_RETURN_LOGE(connectCommand_ != nullptr, CONN_WIFI_DIRECT, "connect command is nullptr");
     CONN_LOGE(CONN_WIFI_DIRECT, "AuthExceptionEvent error=%{public}d", event->error_);
-    if (connectCommand_ != nullptr) {
-        CleanupIfNeed(event->error_, connectCommand_->GetRemoteDeviceId());
-        connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(event->error_));
-        connectCommand_ = nullptr;
-    }
+    auto negotiateChannel = connectCommand_->GetConnectInfo().channel_;
+    CONN_CHECK_AND_RETURN_LOGE(negotiateChannel != nullptr, CONN_WIFI_DIRECT, "auth negotiate channel is nullptr");
+    auto authChannel = std::dynamic_pointer_cast<AuthNegotiateChannel>(negotiateChannel);
+    CONN_CHECK_AND_RETURN_LOGE(authChannel != nullptr && *authChannel == event->handle_,
+        CONN_WIFI_DIRECT, "other auth exception ignore");
+    CleanupIfNeed(event->error_, connectCommand_->GetRemoteDeviceId());
+    connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(event->error_));
+    connectCommand_ = nullptr;
     Terminate();
 }
 
