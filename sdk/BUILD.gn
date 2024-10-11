@@ -115,9 +115,6 @@ target(build_type, "softbus_client") {
     ldflags = [ "-lstdc++" ]
   } else {
     sanitize = {
-      ubsan = true
-      integer_overflow = true
-      boundary_sanitize = true
       cfi = true
       cfi_cross_dso = true
       debug = false
