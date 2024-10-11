@@ -182,7 +182,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_SET_P2P_INFO_FAIL));
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_ERR);
 }
 
@@ -409,7 +409,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
         GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_))
         .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_SET_P2P_INFO_FAIL));
     ret = LnnInitLocalNodeInfo(nodeInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnInitLocalNodeInfo(nodeInfo);
@@ -508,7 +508,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_008, TestSize.Level1)
         GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_))
         .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_SET_P2P_INFO_FAIL));
     EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
     EXPECT_EQ(LnnUpdateLocalScreenStatus(true), SOFTBUS_OK);
     EXPECT_EQ(LnnUpdateLocalScreenStatus(false), SOFTBUS_OK);

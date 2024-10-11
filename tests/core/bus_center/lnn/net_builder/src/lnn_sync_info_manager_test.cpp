@@ -119,7 +119,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_ROUTE_LSU, NETWORKID, MSG, LENGTH, Complete);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_MEM_ERR);
 }
 
 /*

@@ -247,11 +247,11 @@ HWTEST_F(LNNTopoManagerTest, PACK_COMMON_TOPO_MSG_TEST_001, TestSize.Level1)
     unsigned char *randStr2 = reinterpret_cast<unsigned char *>(const_cast<char *>(RAND_STR2));
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, SoftBusGenerateRandomArray)
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL))
         .WillOnce(DoAll(SetArgPointee<0>(*randStr1), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<0>(*randStr2), Return(SOFTBUS_OK)));
     int32_t ret = PackCommonTopoMsg(&json, &info);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL);
     ret = PackCommonTopoMsg(&json, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = PackCommonTopoMsg(&json, &info);
@@ -273,9 +273,9 @@ HWTEST_F(LNNTopoManagerTest, PACK_TOPO_INFO_TEST_001, TestSize.Level1)
     ret = PackTopoInfo(&info, UDID, PEER_UDID, OLD_RELATION, INVALID_RELATION_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = PackTopoInfo(&info, nullptr, PEER_UDID, OLD_RELATION, CONNECTION_ADDR_MAX);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ADD_INFO_TO_JSON_FAIL);
     ret = PackTopoInfo(&info, UDID, nullptr, OLD_RELATION, CONNECTION_ADDR_MAX);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ADD_INFO_TO_JSON_FAIL);
 }
 
 /*
