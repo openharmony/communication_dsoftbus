@@ -34,6 +34,7 @@ enum FirstTokenType {
 };
 
 int32_t TransCheckClientAccessControl(const char *peerNetworkId);
+int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionName);
 int32_t TransCheckServerAccessControl(uint32_t callingTokenId);
 uint32_t TransACLGetFirstTokenID(void);
 uint32_t TransACLGetCallingTokenID(void);
