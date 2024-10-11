@@ -174,7 +174,7 @@ static DiscBleListener g_bleListener = {
     .scanListenerId = -1
 };
 
-//g_conncernCapabilityMask support capability of this ble discovery
+// g_conncernCapabilityMask support capability of this ble discovery
 static uint32_t g_concernCapabilityMask =
     1 << CASTPLUS_CAPABILITY_BITMAP |
     1 << DVKIT_CAPABILITY_BITMAP |
@@ -339,8 +339,8 @@ static void BleAdvUpdateCallback(int channel, int status)
 static int32_t GetScannerFilterType(void)
 {
     int32_t type = 0;
-    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
     uint32_t conScanCapBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
     uint32_t nonScanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
@@ -561,8 +561,8 @@ static void ProcessDistributePacket(const BroadcastReportInfo *reportInfo)
 static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *reportInfo)
 {
     (void)listenerId;
-    DISC_CHECK_AND_RETURN_LOGW(listenerId == g_bleListener.scanListenerId, DISC_BLE, "listenerId not match");
-    DISC_CHECK_AND_RETURN_LOGW(reportInfo != NULL, DISC_BLE, "scan result is null");
+    DISC_CHECK_AND_RETURN_LOGE(listenerId == g_bleListener.scanListenerId, DISC_BLE, "listenerId not match");
+    DISC_CHECK_AND_RETURN_LOGE(reportInfo != NULL, DISC_BLE, "scan result is null");
     DISC_CHECK_AND_RETURN_LOGD(ScanFilter(reportInfo) == SOFTBUS_OK, DISC_BLE, "scan filter failed");
 
     uint8_t *advData = reportInfo->packet.bcData.payload;
@@ -600,11 +600,11 @@ static void BtOnStateChanged(int32_t listenerId, int32_t state)
     SoftBusMessage *msg = NULL;
     switch (state) {
         case SOFTBUS_BLE_STATE_TURN_ON:
-            DISC_LOGI(DISC_CONTROL, "bt turn on");
+            DISC_LOGI(DISC_CONTROL, "ble turn on");
             msg = CreateBleHandlerMsg(RECOVERY, 0, 0, NULL);
             break;
         case SOFTBUS_BLE_STATE_TURN_OFF:
-            DISC_LOGI(DISC_CONTROL, "bt turn off");
+            DISC_LOGI(DISC_CONTROL, "ble turn off");
             msg = CreateBleHandlerMsg(TURN_OFF, 0, 0, NULL);
             break;
         case SOFTBUS_BR_STATE_TURN_ON:
@@ -1838,7 +1838,7 @@ static void DiscBleSetScanFilter(int32_t listenerId, int32_t type)
 {
     DISC_CHECK_AND_RETURN_LOGW(type != 0, DISC_BLE, "not disc capblity, not set filter");
     BcScanFilter *filter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter));
-    DISC_CHECK_AND_RETURN_LOGW(filter != NULL, DISC_BLE, "malloc filter failed");
+    DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BLE, "malloc filter failed");
 
     filter->serviceData = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
     filter->serviceDataMask = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
