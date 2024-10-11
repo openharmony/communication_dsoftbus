@@ -153,8 +153,8 @@ static void ClearP2pSessionInfo(void)
     (void)memset_s(
         g_p2pSessionInfo.p2pSessionIp, sizeof(g_p2pSessionInfo.p2pSessionIp), 0, sizeof(g_p2pSessionInfo.p2pSessionIp));
 
-    P2pListenerInfo *item;
-    P2pListenerInfo *nextItem;
+    P2pListenerInfo *item = NULL;
+    P2pListenerInfo *nextItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_p2pSessionInfo.peerDeviceInfoList->list, P2pListenerInfo, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
@@ -425,7 +425,7 @@ static void CheckAndAddPeerDeviceInfo(const char *peerUuid)
     P2pListenerInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_p2pSessionInfo.peerDeviceInfoList->list, P2pListenerInfo, node) {
         if (strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
-            TRANS_LOGD(TRANS_CTRL, "exit peerUuid=%{public}s", anonymizePeerUuid);
+            TRANS_LOGD(TRANS_CTRL, "exit p2pListener with peerUuid=%{public}s", anonymizePeerUuid);
             AnonymizeFree(anonymizePeerUuid);
             return;
         }
