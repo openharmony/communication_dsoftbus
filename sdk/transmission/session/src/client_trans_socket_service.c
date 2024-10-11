@@ -14,6 +14,7 @@
  */
 
 #include "string.h"
+#include <securec.h>
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "client_trans_session_manager.h"
@@ -25,8 +26,10 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "session_ipc_adapter.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
+#include "client_trans_session_service.h"
 
 static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
 {
@@ -92,13 +95,24 @@ int32_t Socket(SocketInfo info)
     }
 
     int32_t socketFd = INVALID_SESSION_ID;
+    char newSessionName[SESSION_NAME_SIZE_MAX + 1] = {0};
+    if (CheckIsNormalApp(info.name)) {
+        if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, info.name, strlen(info.name)) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy session name failed");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        if (!RemoveAppIdFromSessionName(info.name, newSessionName)) {
+            TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
+            return SOFTBUS_TRANS_NOT_FIND_APPID;
+        }
+        info.name = newSessionName;
+    }
     ret = ClientAddSocket(&info, &socketFd);
     SocketServerStateUpdate(info.name);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);
         return ret;
     }
-
     TRANS_LOGD(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
     return socketFd;
 }
