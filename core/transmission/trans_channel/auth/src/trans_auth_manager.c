@@ -1244,7 +1244,7 @@ int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
 
 int32_t CheckIsWifiAuthChannel(ConnectOption *connInfo)
 {
-    if (connInfo == NULL || connInfo->socketOption.moduleId == AUTH) {
+    if (connInfo == NULL || connInfo->socketOption.moduleId != AUTH) {
         TRANS_LOGE(
             TRANS_SVC, "invalid param, moduleId=%{public}d", connInfo == NULL ? -1 : connInfo->socketOption.moduleId);
         return SOFTBUS_INVALID_PARAM;

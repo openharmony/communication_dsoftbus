@@ -962,12 +962,12 @@ int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo)
             sizeof(connInfo->bleOption.bleMac)) == 0 ||
             memcmp(item->connInfo.bleOption.deviceIdHash, connInfo->bleOption.deviceIdHash,
             SHORT_UDID_HASH_LEN) == 0) {
-            TRANS_LOGE(TRANS_CTRL, "auth channel type is ble");
+            TRANS_LOGI(TRANS_CTRL, "auth channel type is ble");
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_OK;
         } else if (memcmp(item->connInfo.brOption.brMac, connInfo->brOption.brMac,
             sizeof(connInfo->brOption.brMac)) == 0) {
-            TRANS_LOGE(TRANS_CTRL, "auth channel type is br");
+            TRANS_LOGI(TRANS_CTRL, "auth channel type is br");
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_OK;
         }
