@@ -385,9 +385,10 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     SyncChannelInfo *info = NULL;
 
-    if (LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+    int32_t ret = LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "peer device not online");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
         LNN_LOGE(LNN_BUILDER, "sync channel opened lock fail");
@@ -401,7 +402,7 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
     AnonymizeFree(anonyNetworkId);
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL) {
-        int32_t ret = AddChannelInfoNode((char *)networkId, channelId, isServer);
+        ret = AddChannelInfoNode((char *)networkId, channelId, isServer);
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return ret;
     }
@@ -591,13 +592,15 @@ static int32_t CheckPeerAuthSeq(const char *uuid, int64_t peerAuthSeq)
     uint64_t authVerifyTime[2] = {0};
     char udid[UDID_BUF_LEN] = {0};
 
-    if (LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+    int32_t ret = LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_UDID, udid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "convert uuid fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (AuthGetLatestAuthSeqListByType(udid, localAuthSeq, authVerifyTime, DISCOVERY_TYPE_BLE) != SOFTBUS_OK) {
+    ret = AuthGetLatestAuthSeqListByType(udid, localAuthSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get authseq fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
@@ -606,7 +609,7 @@ static int32_t CheckPeerAuthSeq(const char *uuid, int64_t peerAuthSeq)
             PRId64 "peer:%{public}" PRId64 "", AnonymizeWrapper(anonyUdid),
             localAuthSeq[0], localAuthSeq[1], peerAuthSeq);
         AnonymizeFree(anonyUdid);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
@@ -866,17 +869,18 @@ int32_t LnnInitSyncInfoManager(void)
         .onDisconnected = OnWifiDirectSyncAuthClose,
         .onException = NULL,
     };
-    if (RegAuthTransListener(MODULE_AUTH_SYNC_INFO, &wifiDirectSyncCb) != SOFTBUS_OK) {
+    int32_t ret = RegAuthTransListener(MODULE_AUTH_SYNC_INFO, &wifiDirectSyncCb);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "reg auth lister fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "reg online lister fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (TransRegisterNetworkingChannelListener(CHANNEL_NAME, &g_networkListener) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "reg proxy channel lister fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_REGISTER_LISTENER_FAILED;
     }
     if (SoftBusMutexInit(&g_syncInfoManager.lock, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "sync info manager mutex init fail");
@@ -887,9 +891,10 @@ int32_t LnnInitSyncInfoManager(void)
         .onDisconnected = NULL,
         .onException = NULL,
     };
-    if (RegAuthTransListener(MODULE_P2P_NETWORKING_SYNC, &p2pNetworkingCb) != SOFTBUS_OK) {
+    ret = RegAuthTransListener(MODULE_P2P_NETWORKING_SYNC, &p2pNetworkingCb);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "p2p networking sync set cb fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -979,7 +984,7 @@ static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
     if (info->clientChannelId == INVALID_CHANNEL_ID) {
         LNN_LOGE(LNN_BUILDER, "open sync info channel fail");
         SoftBusFree(info);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
@@ -1060,7 +1065,7 @@ static int32_t GetWifiDirectAuthByNetworkId(const char *networkId, AuthHandle *a
         return SOFTBUS_OK;
     }
     AnonymizeFree(anonyNetworkId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_INVALID_PARAM;
 }
 
 static int32_t TrySendSyncInfoMsgByAuth(const char *networkId, SyncInfoMsg *msg)
@@ -1073,7 +1078,7 @@ static int32_t TrySendSyncInfoMsgByAuth(const char *networkId, SyncInfoMsg *msg)
     if (GetWifiDirectAuthByNetworkId(networkId, &authHandle) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get authHandle fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     AnonymizeFree(anonyNetworkId);
     LNN_LOGI(LNN_BUILDER, "send sync info, authId=%{public}" PRId64 ", datalen=%{public}u",
@@ -1085,9 +1090,10 @@ static int32_t TrySendSyncInfoMsgByAuth(const char *networkId, SyncInfoMsg *msg)
         .len = msg->dataLen,
         .data = msg->data,
     };
-    if (AuthPostTransData(authHandle, &dataInfo) != SOFTBUS_OK) {
+    int32_t ret = AuthPostTransData(authHandle, &dataInfo);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth post data fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (msg->complete != NULL) {
         msg->complete((LnnSyncInfoType)(*(uint32_t *)msg->data), networkId, &msg->data[MSG_HEAD_LEN],
@@ -1101,12 +1107,12 @@ static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *r
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
     if (ret != SOFTBUS_OK || *local == 0) {
         LNN_LOGE(LNN_BUILDER, "get local cap fail, ret=%{public}d, local=%{public}" PRIu64, ret, *local);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
     if (ret != SOFTBUS_OK || *remote == 0) {
         LNN_LOGE(LNN_BUILDER, "get remote cap fail, ret=%{public}d, remote=%{public}" PRIu64, ret, *remote);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1165,7 +1171,7 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     }
     syncMsg = CreateSyncInfoMsg(type, msg, len, complete);
     if (syncMsg == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (IsNeedSyncByAuth(networkId)) {
         rc = TrySendSyncInfoMsgByAuth(networkId, syncMsg);
@@ -1209,7 +1215,7 @@ static int32_t GetAuthHandleByNetworkId(const char *networkId, AuthHandle *authH
         return SOFTBUS_OK;
     }
     AnonymizeFree(anonyNetworkId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
@@ -1224,7 +1230,7 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
     if (GetAuthHandleByNetworkId(networkId, &authHandle) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get authHandle fail, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     int64_t authSeq[2] = {0};
     uint64_t authVerifyTime[2] = {0};
@@ -1234,14 +1240,14 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
         (authSeq[0] == 0 && authSeq[1] == 0)) {
         LNN_LOGE(LNN_BUILDER, "seqErr, ble authSeq:%{public}" PRId64 ", %{public}" PRId64 "", authSeq[0], authSeq[1]);
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     char *msg = PackBleOfflineMsg((int64_t)netCapability, DISCOVERY_TYPE_BLE,
         authVerifyTime[0] > authVerifyTime[1] ? authSeq[0] : authSeq[1]);
     if (msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "pack p2p networking msg fail, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_PACK_DATA_FAILED;
     }
     AuthTransData dataInfo = {0};
     FillAuthdataInfo(&dataInfo, msg);
@@ -1249,7 +1255,7 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
         LNN_LOGE(LNN_BUILDER, "generate seq fail");
         AnonymizeFree(anonyNetworkId);
         cJSON_free(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
     }
     if (AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "send p2p sync info msg to networkId:%{public}s, netCap:%{public}u, seq:%{public}"
@@ -1270,22 +1276,22 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
     char localOfflineCode[WIFI_OFFLINE_CODE_LEN] = {0};
     if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local authPort fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_OFFLINE_CODE, localOfflineCode, WIFI_OFFLINE_CODE_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local offlinecode fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     char convertOfflineCode[WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1] = {0};
     if (ConvertBytesToHexString(convertOfflineCode, WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1,
         (unsigned char *)localOfflineCode, WIFI_OFFLINE_CODE_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "coonvert offlinecode fail");
-        return SOFTBUS_ERR;
+        LNN_LOGE(LNN_BUILDER, "convert offlinecode fail");
+        return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *msg = PackWifiOfflineMsg(authPort, convertOfflineCode);
     if (msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "pack p2p networking msg fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_PACK_DATA_FAILED;
     }
     AuthTransData dataInfo = {0};
     FillAuthdataInfo(&dataInfo, msg);
@@ -1294,7 +1300,7 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
     if (GetHmlOrP2pAuthHandle(&authHandle, &num) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get authHandle fail");
         cJSON_free(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     char *anonyOfflineCode = NULL;
     Anonymize(convertOfflineCode, &anonyOfflineCode);
