@@ -1903,6 +1903,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_SELECT_01, TestSize.Level1)
     LaneSelectParam request = {};
     request.qosRequire.minBW = MESH_MAGIC_NUMBER;
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &request, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
 }
@@ -1920,6 +1921,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_SELECT_02, TestSize.Level1)
     LaneSelectParam request = {};
     request.qosRequire.minBW = DB_MAGIC_NUMBER;
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &request, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
@@ -1938,6 +1940,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_SELECT_03, TestSize.Level1)
     LaneSelectParam request = {};
     request.qosRequire.minBW = DB_MAGIC_NUMBER;
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t osType = OH_OS_TYPE;
     EXPECT_CALL(mock, LnnGetOsTypeByNetworkId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(osType), Return(SOFTBUS_OK)));
@@ -1958,6 +1961,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_SELECT_04, TestSize.Level1)
     LaneSelectParam request = {};
     request.qosRequire.minBW = DB_MAGIC_NUMBER;
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t osType = OH_OS_TYPE + 1;
     EXPECT_CALL(mock, LnnGetOsTypeByNetworkId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(osType), Return(SOFTBUS_OK)));
@@ -1980,6 +1984,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_SELECT_05, TestSize.Level1)
     LaneSelectParam request = {};
     request.qosRequire.minBW = DB_MAGIC_NUMBER;
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t osType = OH_OS_TYPE + 1;
     EXPECT_CALL(mock, LnnGetOsTypeByNetworkId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(osType), Return(SOFTBUS_OK)));
