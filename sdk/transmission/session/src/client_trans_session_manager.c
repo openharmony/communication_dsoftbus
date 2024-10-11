@@ -2270,7 +2270,7 @@ int32_t ClientWaitSyncBind(int32_t socket)
     if (sessionNode->lifecycle.maxWaitTime != 0) {
         ret = SoftBusGetTime(&absTime);
         if (ret == SOFTBUS_OK) {
-            absTime.sec += ((sessionNode->lifecycle.maxWaitTime / CONVERSION_BASE) + EXTRA_WAIT_TIME);
+            absTime.sec += (int64_t)((sessionNode->lifecycle.maxWaitTime / CONVERSION_BASE) + EXTRA_WAIT_TIME);
             timePtr = &absTime;
         }
     }
