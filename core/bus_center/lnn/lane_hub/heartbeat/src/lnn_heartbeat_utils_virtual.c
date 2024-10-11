@@ -47,3 +47,12 @@ int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32
     LNN_LOGI(LNN_HEART_BEAT, "heartbeat generate hex string hash");
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+bool LnnIsSupportHeartbeatCap(uint32_t hbCapacity, HeartbeatCapability capaBit)
+{
+    (void)hbCapacity;
+    (void)capaBit;
+    LNN_LOGI(LNN_HEART_BEAT, "no support heartbeat cap");
+    return false;
+}
+
