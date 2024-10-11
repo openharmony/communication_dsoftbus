@@ -397,9 +397,13 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
 
     UnlockClientSessionServerList();
     char *tmpName = NULL;
-    Anonymize(server->sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", tmpName, server->pkgName);
+    char *tmpPkgName = NULL;
+    Anonymize(pkgName, &tmpPkgName);
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s",
+        AnonymizeWrapper(tmpName), AnonymizeWrapper(tmpPkgName));
     AnonymizeFree(tmpName);
+    AnonymizeFree(tmpPkgName);
     return SOFTBUS_OK;
 }
 
@@ -1370,7 +1374,13 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     g_clientSessionServerList->cnt++;
 
     UnlockClientSessionServerList();
-    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", server->sessionName, server->pkgName);
+    char *anonymizePkgName = NULL;
+    char *tmpName = NULL;
+    Anonymize(pkgName, &anonymizePkgName);
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", tmpName, anonymizePkgName);
+    AnonymizeFree(anonymizePkgName);
+    AnonymizeFree(tmpName);
     return SOFTBUS_OK;
 }
 
@@ -1635,7 +1645,7 @@ int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAct
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
     if (action == TIMER_ACTION_START) {
-        TRANS_LOGE(TRANS_SDK,
+        TRANS_LOGI(TRANS_SDK,
             "socket=%{public}d, inputMaxWaitTime=%{public}u, maxWaitTime=%{public}u, enableStatus=%{public}d",
             socket, maxWaitTime, sessionNode->lifecycle.maxWaitTime, sessionNode->enableStatus);
         bool binding = (sessionNode->lifecycle.maxWaitTime != 0);

@@ -30,19 +30,19 @@ extern "C" {
 typedef enum {
     PARA_ACTION = 1,
     PARA_BUTT,
-}ParaType;
+} ParaType;
 
 typedef struct {
     uint32_t actionId;
-}ActionAddr;
+} ActionAddr;
 
 typedef struct {
-    ParaType tyoe;
+    ParaType type;
     union {
         ActionAddr action;
     };
     bool enable160M;
-}LinkPara;
+} LinkPara;
 typedef struct {
     ListNode node;
     int32_t errCode;
@@ -70,6 +70,7 @@ int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneCon
 int32_t TransGetLaneInfoByQos(const LaneAllocInfo *allocInfo, LaneConnInfo *connInfo, uint32_t *laneHandle);
 bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
 int32_t TransCancelLaneItemCondByLaneHandle(uint32_t laneHandle, bool bSucc, bool isAsync, int32_t errCode);
+int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync);
 int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync);
 int32_t TransAuthWithParaReqLanePendingInit(void);
 void TransAuthWithParaReqLanePendingDeinit(void);
@@ -80,7 +81,7 @@ int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWith
 int32_t TransUpdateAuthWithParaLaneConnInfo(uint32_t laneHandle, bool bSucc, const LaneConnInfo *connInfo,
     int32_t errCode);
 
-int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync);
+int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

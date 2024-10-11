@@ -47,8 +47,6 @@
         }                                                       \
     } while (false)                                             \
 
-using namespace OHOS::Security::AccessToken;
-
 namespace OHOS {
 constexpr int32_t JUDG_CNT = 1;
 
@@ -105,13 +103,13 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
 static int32_t CheckAndRecordAccessToken(const char *permission)
 {
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
-    int32_t ret = AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
+    int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
 
-    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenCaller);
-    int32_t successCnt = (int32_t)(ret == PERMISSION_GRANTED);
+    Security::AccessToken::ATokenTypeEnum type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenCaller);
+    int32_t successCnt = (int32_t)(ret == Security::AccessToken::PERMISSION_GRANTED);
     int32_t failCnt = JUDG_CNT - successCnt;
-    if (type == TOKEN_HAP) {
-        PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
+    if (type == Security::AccessToken::TOKEN_HAP) {
+        Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
     }
     return ret;
 }
@@ -172,7 +170,7 @@ void SoftBusServerStub::InitMemberFuncMap()
 
 void SoftBusServerStub::InitMemberPermissionMap()
 {
-    memberPermissionMap_[MANAGE_REGISTER_SERVICE] = nullptr;
+    memberPermissionMap_[MANAGE_REGISTER_SERVICE] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_CREATE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_REMOVE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_RELEASE_RESOURCES] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
@@ -195,10 +193,10 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_SET_DATA_LEVEL] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_START_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_STOP_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_QOS_REPORT] = nullptr;
-    memberPermissionMap_[SERVER_STREAM_STATS] = nullptr;
-    memberPermissionMap_[SERVER_GRANT_PERMISSION] = nullptr;
-    memberPermissionMap_[SERVER_REMOVE_PERMISSION] = nullptr;
+    memberPermissionMap_[SERVER_QOS_REPORT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_STREAM_STATS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GRANT_PERMISSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_REMOVE_PERMISSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PUBLISH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_STOP_PUBLISH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_REFRESH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
@@ -207,9 +205,10 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_DEACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_RIPPLE_STATS] = nullptr;
+    memberPermissionMap_[SERVER_RIPPLE_STATS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -231,7 +230,8 @@ int32_t SoftBusServerStub::OnRemoteRequest(
     auto itPerm = memberPermissionMap_.find(code);
     if (itPerm != memberPermissionMap_.end()) {
         const char *permission = itPerm->second;
-        if ((permission != nullptr) && (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
+        if ((permission != nullptr) &&
+            (CheckAndRecordAccessToken(permission) != Security::AccessToken::PERMISSION_GRANTED)) {
             SoftbusReportPermissionFaultEvt(code);
             COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
@@ -659,14 +659,14 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
         }
         int32_t ret = TransGetAndComparePidBySession(callingPid, sessionName, channelId);
         if (ret != SOFTBUS_OK) {
-            COMM_LOGE(COMM_SVC, "Pid can not close channel, pid = %{public}d, sessionId = %{public}d, ret = %{public}d",
+            COMM_LOGE(COMM_SVC, "Pid can not close channel, pid=%{public}d, sessionId=%{public}d, ret=%{public}d",
                 callingPid, channelId, ret);
             return ret;
         }
     } else {
         int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
         if (ret != SOFTBUS_OK) {
-            COMM_LOGE(COMM_SVC, "Pid can not close channel, pid = %{public}d, channelId = %{public}d, ret = %{public}d",
+            COMM_LOGE(COMM_SVC, "Pid can not close channel, pid=%{public}d, channelId=%{public}d, ret=%{public}d",
                 callingPid, channelId, ret);
             return ret;
         }
@@ -1151,7 +1151,13 @@ int32_t SoftBusServerStub::QosReportInner(MessageParcel &data, MessageParcel &re
         COMM_LOGE(COMM_SVC, "QosReportInner read quality failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
-
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "Pid can not get qos report, pid=%{public}d, channelId=%{public}d, ret=%{public}d",
+            callingPid, channelId, ret);
+        return ret;
+    }
     int32_t retReply = QosReport(channelId, channelType, appType, quality);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "QosReportInner write reply failed!");
@@ -1178,6 +1184,13 @@ int32_t SoftBusServerStub::StreamStatsInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "read StreamSendStats fail, stats is nullptr");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
     }
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "Pid can not get stream stats, pid=%{public}d, channelId=%{public}d, ret=%{public}d",
+            callingPid, channelId, ret);
+        return ret;
+    }
     int32_t retReply = StreamStats(channelId, channelType, stats);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "StreamStatsInner write reply fail");
@@ -1203,6 +1216,13 @@ int32_t SoftBusServerStub::RippleStatsInner(MessageParcel &data, MessageParcel &
     if (stats == nullptr) {
         COMM_LOGE(COMM_SVC, "read rippleStats fail, stats is nullptr");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "Pid can not get pipple stats, pid=%{public}d, channelId=%{public}d, ret=%{public}d",
+            callingPid, channelId, ret);
+        return ret;
     }
     int32_t retReply = RippleStats(channelId, channelType, stats);
     if (!reply.WriteInt32(retReply)) {
