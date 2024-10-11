@@ -279,7 +279,7 @@ int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len)
     }
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get local accountHash fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
     if (memcpy_s(accountHash, len, localAccountHash, len) != EOK) {
         LNN_LOGI(LNN_HEART_BEAT, "HB get accountHash memcpy_s fail");
@@ -293,11 +293,11 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
 {
     if (btMac == NULL || brMacHash == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "null point");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (brMacLen != BT_MAC_LEN || hashLen != BT_MAC_HASH_STR_LEN) {
         LNN_LOGE(LNN_HEART_BEAT, "invaild len");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     uint8_t btMacBin[BT_ADDR_LEN] = { 0 };
     char btMacStr[BT_MAC_NO_COLON_LEN] = { 0 };
@@ -305,16 +305,16 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
     char hash[BT_MAC_HASH_LEN] = { 0 };
     if (ConvertBtMacToBinary(btMac, BT_MAC_LEN, btMacBin, BT_ADDR_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "convert br mac to bin fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAC_TO_BIN_ERR;
     }
     if (ConvertBtMacToStrNoColon(btMacStr, BT_MAC_NO_COLON_LEN, btMacBin, BT_ADDR_LEN)) {
         LNN_LOGE(LNN_HEART_BEAT, "convert br mac to str fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_MAC_TO_STR_ERR;
     }
     char brMacUpper[BT_MAC_NO_COLON_LEN] = { 0 };
     if (StringToUpperCase(btMacStr, brMacUpper, BT_MAC_NO_COLON_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "bt mac to upperCase fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_STR_TO_UPPER_ERR;
     }
     char *anonyMac = NULL;
     Anonymize(brMacUpper, &anonyMac);
@@ -322,15 +322,15 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
     AnonymizeFree(anonyMac);
     if (SoftBusGenerateStrHash((const unsigned char *)brMacUpper, strlen(brMacUpper), (unsigned char *)hash)) {
         LNN_LOGE(LNN_HEART_BEAT, "Generate brMac hash fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     if (ConvertBytesToHexString(hashLower, BT_MAC_HASH_STR_LEN, (const uint8_t *)hash, BT_MAC_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ConvertBytesToHexString failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     if (StringToUpperCase(hashLower, brMacHash, BT_MAC_HASH_STR_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "bt mac to upperCase fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_STR_TO_UPPER_ERR;
     }
     char *anonyUdid = NULL;
     Anonymize(brMacHash, &anonyUdid);
@@ -577,11 +577,11 @@ static int32_t GetOnlineInfoNum(int32_t *nums)
     NodeBasicInfo *netInfo = NULL;
     if (LnnGetAllOnlineNodeInfo(&netInfo, &infoNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get all online node info fail.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     if (netInfo == NULL || infoNum == 0) {
         LNN_LOGI(LNN_BUILDER, "online device num is 0, not need to send network info");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_ONLINE_DEVICE;
     }
     *nums = infoNum;
     LNN_LOGD(LNN_HEART_BEAT, "online nums=%{public}d", infoNum);

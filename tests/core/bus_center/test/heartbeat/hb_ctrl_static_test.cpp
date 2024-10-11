@@ -67,28 +67,28 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_HANDLE_LEAVE_LNN_TEST_001, TestSize.Level1)
     NodeBasicInfo *info = nullptr;
     int32_t infoNum = 0;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
-        SetArgPointee<1>(infoNum), Return(SOFTBUS_ERR)));
+        SetArgPointee<1>(infoNum), Return(SOFTBUS_INVALID_PARAM)));
     int32_t ret = HbHandleLeaveLnn();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info),
         SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     ret = HbHandleLeaveLnn();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
 
     NodeBasicInfo *info1 = nullptr;
     int32_t infoNum1 = 1;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info1),
-        SetArgPointee<1>(infoNum1), Return(SOFTBUS_ERR)));
+        SetArgPointee<1>(infoNum1), Return(SOFTBUS_INVALID_PARAM)));
     ret = HbHandleLeaveLnn();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 
     NodeBasicInfo *info2 = nullptr;
     int32_t infoNum2 = 0;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(DoAll(SetArgPointee<0>(info2),
         SetArgPointee<1>(infoNum2), Return(SOFTBUS_OK)));
     ret = HbHandleLeaveLnn();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
 }
 
 /*
@@ -104,7 +104,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_HANDLE_LEAVE_LNN_TEST_002, TestSize.Level1)
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = HbHandleLeaveLnn();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
@@ -160,40 +160,40 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_HEART_BEAT_TEST_001, TestSize.Lev
 {
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_NODE_MASTER_STATE_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnRegisterHeartbeatEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_HOME_GROUP_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnRegisterHeartbeatEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_ACCOUNT_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnRegisterHeartbeatEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnRegisterHeartbeatEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_USER_STATE_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnRegisterHeartbeatEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_LP_EVENT_REPORT), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnRegisterHeartbeatEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     ret = LnnRegisterHeartbeatEvent();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -209,12 +209,16 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_SEND_CHECK_OFFLINE_MESSAGE_TEST_001, TestSi
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     LnnHeartbeatType hbType;
     (void)memset_s(&hbType, sizeof(LnnHeartbeatType), 0, sizeof(LnnHeartbeatType));
     HbSendCheckOffLineMessage(hbType);
 
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     InitHbSpecificConditionState();
     InitHbSpecificConditionState();
 
@@ -225,7 +229,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_SEND_CHECK_OFFLINE_MESSAGE_TEST_001, TestSi
     EXPECT_CALL(hbStaticMock, LnnEnableHeartbeatByType(Eq(HEARTBEAT_TYPE_TCP_FLUSH), false))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnEnableHeartbeatByType(Eq(HEARTBEAT_TYPE_TCP_FLUSH), true))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_LOCK_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     HbIpAddrChangeEventHandler(&info);
     HbIpAddrChangeEventHandler(&info);
@@ -253,12 +257,12 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_TRY_CLOUD_SYNC_TEST_001, TestSize.Level1)
 
     EXPECT_CALL(hbStaticMock, LnnLedgerAllDataSyncToDB)
         .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = HbTryCloudSync();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = HbTryCloudSync();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -306,22 +310,22 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_NETWORK_EVENT_TEST_001, TestSize.
 {
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_IP_ADDR_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnRegisterNetworkEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_BT_STATE_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnRegisterNetworkEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_LANE_VAP_CHANGE), _))
-        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnRegisterNetworkEvent();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
     ret = LnnRegisterNetworkEvent();
     EXPECT_EQ(ret, SOFTBUS_OK);
