@@ -114,6 +114,8 @@ ohos_static_library("softbus_client_static") {
     if (is_standard_system) {
       external_deps += [
         "access_token:libaccesstoken_sdk",
+        "access_token:libprivacy_sdk",
+        "access_token:libtokenid_sdk",
         "c_utils:utils",
         "hilog:libhilog",
         "ipc:ipc_single",
