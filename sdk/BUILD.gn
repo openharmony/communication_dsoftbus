@@ -53,7 +53,10 @@ if (defined(ohos_lite)) {
   } else {
     build_type = "ohos_static_library"
   }
-  common_client_ext_deps += [ "bounds_checking_function:libsec_shared" ]
+  common_client_ext_deps += [
+    "access_token:libaccesstoken_sdk",
+    "bounds_checking_function:libsec_shared",
+  ]
 }
 
 config("dsoftbus_sdk_interface") {
