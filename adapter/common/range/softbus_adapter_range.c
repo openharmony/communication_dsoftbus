@@ -14,6 +14,7 @@
  */
 
 #include <math.h>
+
 #include "comm_log.h"
 #include "softbus_adapter_range.h"
 #include "softbus_errcode.h"
