@@ -18,7 +18,6 @@
 #include "client_bus_center_manager.h"
 #include "client_trans_session_manager.h"
 #include "comm_log.h"
-
 #include "disc_client_stub.h"
 #include "iproxy_client.h"
 #include "ipc_skeleton.h"
