@@ -31,13 +31,10 @@ ohos_unittest("CommonCoreQueueTest") {
     "$dsoftbus_root_path/core/common/include",
   ]
 
-  deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
 
   external_deps = [
-    "c_utils:utils",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 }
