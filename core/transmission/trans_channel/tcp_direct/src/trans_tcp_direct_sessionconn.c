@@ -595,7 +595,7 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
 
 int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHandle, uint32_t status)
 {
-    if (num == NULL) {
+    if (num == NULL || authHandle == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invaild param");
         return NULL;
     }
