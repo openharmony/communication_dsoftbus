@@ -45,11 +45,6 @@ int32_t ConnBrInitBrPendingPacket(void)
     return SOFTBUS_OK;
 }
 
-void ConnBrDestroyBrPendingPacket(void)
-{
-    (void)SoftBusMutexDestroy(&g_pendingLock);
-}
-
 int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {

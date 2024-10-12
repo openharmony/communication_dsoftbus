@@ -409,13 +409,13 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStartSessionListenerTest0012, TestSize.
     }
     info.type = CONNECT_TCP;
     int32_t ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, &info);
-    EXPECT_EQ(ret, SOFTBUS_CONN_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_BIND_ERR);
 
     ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransTdcStartSessionListener((ListenerModule)ERRMOUDLE, &info);
-    EXPECT_EQ(ret, SOFTBUS_CONN_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_BIND_ERR);
 
     ret = TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_P2P);
     EXPECT_EQ(ret, SOFTBUS_OK);

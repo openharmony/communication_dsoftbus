@@ -17,7 +17,6 @@
 
 #include <securec.h>
 #include "bus_center_server_proxy.h"
-#include "discovery_service.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -76,26 +75,6 @@ void BusCenterServerProxy::BusCenterServerProxyStandardDeInit(void)
     g_remoteProxy.clear();
 }
 
-int32_t BusCenterServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t BusCenterServerProxy::StopDiscovery(const char *pkgName, int32_t subscribeId)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t BusCenterServerProxy::PublishService(const char *pkgName, const PublishInfo *pubInfo)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t BusCenterServerProxy::UnPublishService(const char *pkgName, int32_t publishId)
-{
-    return SOFTBUS_OK;
-}
-
 int32_t BusCenterServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject>& object)
 {
     return SOFTBUS_OK;
@@ -142,10 +121,11 @@ int32_t BusCenterServerProxy::CloseChannel(const char *sessionName, int32_t chan
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-    uint32_t len)
+int32_t BusCenterServerProxy::CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
     (void)channelId;
+    (void)channelType;
     (void)laneId;
     (void)dataInfo;
     (void)len;

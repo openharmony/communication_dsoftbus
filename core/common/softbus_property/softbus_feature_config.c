@@ -358,11 +358,11 @@ int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
     if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (val == NULL) ||
         (len > g_configItems[type].len) || (type != g_configItems[type].type)) {
         COMM_LOGW(COMM_DFX, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(g_configItems[type].val, g_configItems[type].len, val, len) != EOK) {
         COMM_LOGW(COMM_DFX, "memcpy_s fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -372,11 +372,11 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (val == NULL) ||
         (len != g_configItems[type].len) || (type != g_configItems[type].type)) {
         COMM_LOGW(COMM_DFX, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {
         COMM_LOGW(COMM_DFX, "memcpy_s fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }

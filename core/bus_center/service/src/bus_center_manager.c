@@ -22,7 +22,6 @@
 #include "bus_center_event.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_coap_discovery_impl.h"
-#include "lnn_decision_center.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
@@ -179,10 +178,6 @@ static int32_t BusCenterServerInitFirstStep(void)
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "start decision center init fail");
-        return SOFTBUS_ERR;
-    }
     if (LnnInitBusCenterEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init bus center event fail");
         return SOFTBUS_ERR;
@@ -237,10 +232,6 @@ static int32_t BusCenterServerInitSecondStep(void)
         LNN_LOGE(LNN_INIT, "initDecisionCenter fail");
         return SOFTBUS_ERR;
     }
-    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init bus center decision center fail");
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 
@@ -286,7 +277,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitNetworkManager();
     LnnDeinitEventMonitor();
     LnnDeinitBusCenterEvent();
-    LnnDeinitDecisionCenter();
     LnnDeinitNetLedger();
     DeinitDecisionCenter();
     LnnDeinitMetaNode();

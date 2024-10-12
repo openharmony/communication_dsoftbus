@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef DISC_SERVER_STUB_H
-
-#include <stdint.h>
-#include "serializer.h"
+#ifndef SOFTBUS_SESSION_IPC_ADAPTER
+#define SOFTBUS_SESSION_IPC_ADAPTER
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-int32_t ServerPublishService(IpcIo *req, IpcIo *reply);
-int32_t ServerUnPublishService(IpcIo *req, IpcIo *reply);
-int32_t ServerStartDiscovery(IpcIo *req, IpcIo *reply);
-int32_t ServerStopDiscovery(IpcIo *req, IpcIo *reply);
+bool CheckIsSystemService();
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,4 +30,4 @@ int32_t ServerStopDiscovery(IpcIo *req, IpcIo *reply);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif // !DISC_SERVER_STUB_H
+#endif /* SOFTBUS_SESSION_IPC_ADAPTER */

@@ -192,15 +192,17 @@ static int32_t GetAllListener(ConnListenerNode **node)
         return cnt;
     }
 
-    if (g_listenerList->cnt == 0) {
-        CONN_LOGE(CONN_COMMON, "listener cnt is null");
-        return cnt;
-    }
-
     if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
         CONN_LOGE(CONN_COMMON, "lock mutex failed");
         return 0;
     }
+
+    if (g_listenerList->cnt == 0) {
+        CONN_LOGE(CONN_COMMON, "listener cnt is null");
+        (void)SoftBusMutexUnlock(&g_listenerList->lock);
+        return cnt;
+    }
+
     *node = SoftBusCalloc(g_listenerList->cnt * sizeof(ConnListenerNode));
     if (*node == NULL) {
         CONN_LOGE(CONN_COMMON, "malloc failed");

@@ -26,10 +26,6 @@ public:
         : IRemoteProxy<ISoftBusServer>(impl) {}
     virtual ~BusCenterServerProxy() = default;
 
-    int32_t StartDiscovery(const char *pkgName, const SubscribeInfo *info) override;
-    int32_t StopDiscovery(const char *pkgName, int subscribeId) override;
-    int32_t PublishService(const char *pkgName, const PublishInfo *info) override;
-    int32_t UnPublishService(const char *pkgName, int publishId) override;
     int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
 
     int32_t CreateSessionServer(const char *pkgName, const char *sessionName) override;
@@ -39,7 +35,7 @@ public:
     int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) override;
     int32_t ReleaseResources(int32_t channelId) override;
     int32_t CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType) override;
-    int32_t CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
+    int32_t CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId, const void *dataInfo,
         uint32_t len) override;
     int32_t SendMessage(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t msgType) override;

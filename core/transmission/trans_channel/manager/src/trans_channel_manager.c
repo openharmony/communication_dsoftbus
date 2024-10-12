@@ -316,6 +316,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
+    AddChannelStatisticsInfo(transInfo->channelId, transInfo->channelType);
     TransFreeAppInfo(appInfo);
     TRANS_LOGI(TRANS_CTRL,
         "server TransOpenChannel ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d, "
@@ -590,9 +591,10 @@ int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t ch
     return ret;
 }
 
-int32_t TransCloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo, uint32_t len)
+int32_t TransCloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
-    (void)UpdateNetworkResourceByLaneId(channelId, laneId, dataInfo, len);
+    UpdateNetworkResourceByLaneId(channelId, channelType, laneId, dataInfo, len);
     return SOFTBUS_OK;
 }
 

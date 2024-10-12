@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,13 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
 
-#include "trans_client_proxy.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "iservice_registry.h"
 #include "if_system_ability_manager.h"
-#include "iremote_object.h"
-#include "softbus_server_death_recipient.h"
-#include "softbus_client_info_manager.h"
-#include "ipc_skeleton.h"
-#include "softbus_trans_def.h"
-#include "session.h"
+#include "iservice_registry.h"
 #include "softbus_adapter_mem.h"
-
+#include "softbus_client_info_manager.h"
+#include "softbus_server_death_recipient.h"
+#include "trans_client_proxy.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -314,6 +306,171 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientIpcOnChannelQosEvent(g_pkgName, &param);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClientIpcOnChannelBindTest001
+ * @tc.desc: ClientIpcOnChannelBind test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level0)
+{
+    ChannelMsg *data = nullptr;
+    int32_t ret = ClientIpcOnChannelBind(data);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    data = (ChannelMsg *)SoftBusCalloc(sizeof(ChannelMsg));
+    ASSERT_NE(nullptr, data);
+    data->msgPid = TEST_PID;
+    ret = ClientIpcOnChannelBind(data);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: ClientIpcOnChannelOpenFailedTest002
+ * @tc.desc: ClientIpcOnChannelOpenFailed test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest002, TestSize.Level0)
+{
+    ChannelMsg *data = nullptr;
+    int32_t errCode = 0;
+    int32_t ret = ClientIpcOnChannelOpenFailed(data, errCode);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    data = (ChannelMsg *)SoftBusCalloc(sizeof(ChannelMsg));
+    ASSERT_NE(nullptr, data);
+    data->msgPid = TEST_PID;
+    ret = ClientIpcOnChannelOpenFailed(data, errCode);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: ClientIpcOnChannelLinkDownTest002
+ * @tc.desc: ClientIpcOnChannelLinkDown test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest002, TestSize.Level0)
+{
+    const char *peerIp = "1234"; // test value
+    int32_t routeType = TEST_REMOTE_TYPE;
+    int32_t ret = ClientIpcOnChannelLinkDown(nullptr, nullptr, peerIp, routeType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *networkId = "1234"; // test value
+    ChannelMsg *data = (ChannelMsg *)SoftBusCalloc(sizeof(ChannelMsg));
+    ASSERT_NE(nullptr, data);
+    ret = ClientIpcOnChannelLinkDown(data, networkId, peerIp, routeType);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+    SoftBusFree(data);
+    data = nullptr;
+}
+
+/**
+ * @tc.name: ClientIpcOnChannelClosedTest002
+ * @tc.desc: ClientIpcOnChannelClosed test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest002, TestSize.Level0)
+{
+    ChannelMsg *data = nullptr;
+    int32_t ret = ClientIpcOnChannelClosed(data);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    data = (ChannelMsg *)SoftBusCalloc(sizeof(ChannelMsg));
+    ASSERT_NE(nullptr, data);
+    data->msgPid = TEST_PID;
+    ret = ClientIpcOnChannelClosed(data);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: ClientIpcSetChannelInfoTest001
+ * @tc.desc: ClientIpcSetChannelInfo test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level0)
+{
+    int32_t sessionId = TEST_PID;
+    int32_t pid = TEST_PID;
+    int32_t ret = ClientIpcSetChannelInfo(nullptr, nullptr, sessionId, nullptr, pid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
+    ASSERT_NE(nullptr, transInfo);
+    transInfo->channelId = TEST_CHANNELID;
+    transInfo->channelType = TEST_CHANNELTYPE;
+    ret = ClientIpcSetChannelInfo("iShare", "HWiShare", sessionId, transInfo, pid);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
+    SoftBusFree(transInfo);
+}
+
+/**
+ * @tc.name: ClientIpcOnChannelMsgReceivedTest002
+ * @tc.desc: ClientIpcOnChannelMsgReceived test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest002, TestSize.Level0)
+{
+    int32_t ret = ClientIpcOnChannelMsgReceived(nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ChannelMsg *data = (ChannelMsg *)SoftBusCalloc(sizeof(ChannelMsg));
+    ASSERT_NE(nullptr, data);
+    data->msgChannelId = TEST_CHANNELID;
+    data->msgChannelType = TEST_CHANNELTYPE;
+    data->msgPkgName = "iShare";
+    data->msgPid = TEST_PID;
+    data->msgMessageType = TEST_CHANNELTYPE;
+
+    TransReceiveData *receiveData = (TransReceiveData *)SoftBusCalloc(sizeof(TransReceiveData));
+    ASSERT_NE(nullptr, receiveData);
+    receiveData->dataLen = TEST_LEN;
+    receiveData->dataType = TEST_DATA_TYPE;
+    ret = ClientIpcOnChannelMsgReceived(data, receiveData);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(data);
+    SoftBusFree(receiveData);
+}
+
+/**
+ * @tc.name: ClientIpcOnTransLimitChangeTest001
+ * @tc.desc: ClientIpcOnTransLimitChange test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Level0)
+{
+    uint8_t tos = 0;
+    int32_t ret = ClientIpcOnTransLimitChange(nullptr, TEST_PID, TEST_CHANNELID, tos);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcOnTransLimitChange(g_pkgName, TEST_PID, TEST_CHANNELID, tos);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: CheckServiceIsRegisteredTest001
+ * @tc.desc: CheckServiceIsRegistered test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level0)
+{
+    int32_t ret = CheckServiceIsRegistered(nullptr, TEST_PID);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = CheckServiceIsRegistered(g_pkgName, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

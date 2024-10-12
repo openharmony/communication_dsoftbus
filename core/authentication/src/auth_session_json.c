@@ -1107,6 +1107,14 @@ static void GetAndSetLocalUnifiedName(JsonObj *json)
 
 static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
 {
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret == SOFTBUS_OK) {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, localDevName);
+    } else {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo));
+    }
+
     if (strlen(info->deviceInfo.unifiedName) == 0) {
         GetAndSetLocalUnifiedName(json);
     } else {
@@ -1115,7 +1123,6 @@ static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMet
     (void)JSON_AddStringToObject(json, UNIFIED_DEFAULT_DEVICE_NAME, info->deviceInfo.unifiedDefaultName);
     (void)JSON_AddStringToObject(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName);
     if (!JSON_AddStringToObject(json, NETWORK_ID, info->networkId) ||
-        !JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !JSON_AddStringToObject(json, DEVICE_UDID, LnnGetDeviceUdid(info))) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
@@ -1783,8 +1790,14 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
         AUTH_LOGI(AUTH_FSM, "add packdevice mac info fail ");
         return SOFTBUS_AUTH_REG_DATA_FAIL;
     }
-    if (!JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
-        !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret == SOFTBUS_OK) {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, localDevName);
+    } else {
+        (void)JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo));
+    }
+    if (!JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !JSON_AddStringToObject(json, DEVICE_VERSION_TYPE, info->versionType) ||
         !JSON_AddStringToObject(json, UUID, info->uuid) ||
         !JSON_AddStringToObject(json, SW_VERSION, info->softBusVersion) ||

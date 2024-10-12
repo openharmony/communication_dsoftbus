@@ -28,7 +28,6 @@
 #include "lnn_ble_heartbeat.h"
 #include "lnn_common_utils.h"
 #include "lnn_data_cloud_sync.h"
-#include "lnn_decision_center.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
@@ -73,7 +72,6 @@ static int64_t g_lastScreenOnTime = 0;
 static int64_t g_lastScreenOffTime = 0;
 static atomic_bool g_enableState = false;
 static bool g_isScreenOnOnce = false;
-static DcTask g_dcTask;
 
 static void InitHbConditionState(void)
 {
@@ -765,6 +763,32 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
+        LNN_LOGW(LNN_HEART_BEAT, "invalid param");
+        return;
+    }
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
+    SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
+    switch (userSwitchState) {
+        case SOFTBUS_USER_SWITCHED:
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_SWITCHED");
+            LnnUpdateOhosAccount(true);
+            HbConditionChanged(false);
+            if (IsHeartbeatEnable()) {
+                if (LnnStartHbByTypeAndStrategy(
+                    HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+                    LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
+                }
+            }
+            RestartCoapDiscovery();
+            break;
+        default:
+            return;
+    }
+}
+
 static void HbLpEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_LP_EVENT_REPORT) {
@@ -1069,37 +1093,19 @@ void LnnHbOnTrustedRelationReduced(void)
     }
 }
 
-static int32_t LnnHbSubscribeTask(void)
-{
-    (void)memset_s(&g_dcTask, sizeof(DcTask), 0, sizeof(DcTask));
-    g_dcTask.preferredSystem = TASK_RULE_SYSTEM;
-    g_dcTask.optimizeStrategy = LnnHbMediumMgrSetParam;
-    return LnnDcSubscribe(&g_dcTask);
-}
-
-static void LnnHbUnsubscribeTask(void)
-{
-    LnnDcUnsubscribe(&g_dcTask);
-}
-
 static int32_t LnnRegisterCommonEvent(void)
 {
-    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist screen state change evt handler fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, HbScreenLockChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist screen lock state change evt handler fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist night mode state evt handler fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist OOBE state evt handler fail");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret;
+    ret = LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist screen state change evt handler fail");
+    ret = LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, HbScreenLockChangeEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist screen lock state change evt handler fai");
+    ret = LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist night mode state evt handler fail");
+    ret = LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist OOBE state evt handler fail");
+    ret = LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist user switch evt handler fail");
     return SOFTBUS_OK;
 }
 
@@ -1169,17 +1175,12 @@ int32_t LnnInitHeartbeat(void)
     }
     InitHbConditionState();
     InitHbSpecificConditionState();
-    if (LnnHbSubscribeTask() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "subscribe task fail");
-        return SOFTBUS_ERR;
-    }
     LNN_LOGI(LNN_INIT, "heartbeat(HB) init success");
     return SOFTBUS_OK;
 }
 
 void LnnDeinitHeartbeat(void)
 {
-    LnnHbUnsubscribeTask();
     LnnHbStrategyDeinit();
     LnnHbMediumMgrDeinit();
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler);

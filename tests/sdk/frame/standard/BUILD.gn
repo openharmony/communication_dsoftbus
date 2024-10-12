@@ -28,8 +28,6 @@ ohos_unittest("SoftBusFrameStandardTest") {
     "${dsoftbus_root_path}/interfaces/kits/discovery",
     "${dsoftbus_root_path}/sdk/bus_center/manager/include",
     "${dsoftbus_root_path}/sdk/bus_center/ipc/include",
-    "${dsoftbus_root_path}/sdk/discovery/manager/include",
-    "${dsoftbus_root_path}/sdk/discovery/ipc/include",
     "${dsoftbus_root_path}/sdk/frame/common/include",
     "${dsoftbus_root_path}/sdk/frame/standard/include",
     "${dsoftbus_root_path}/sdk/frame/standard/src",

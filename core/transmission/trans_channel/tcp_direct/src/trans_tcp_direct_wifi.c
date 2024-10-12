@@ -156,7 +156,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
     }
 
-    int32_t fd = ConnOpenClientSocket(connInfo, BIND_ADDR_ALL, true);
+    int32_t fd = ConnOpenClientSocket(connInfo, newConn->appInfo.myData.addr, true);
     if (fd < 0) {
         FreeFastTransData(&(newConn->appInfo));
         SoftBusFree(newConn);

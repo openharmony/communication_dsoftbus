@@ -105,7 +105,7 @@ int32_t UpdateLaneBusinessInfoItem(uint64_t oldLaneId, uint64_t newLaneId)
     LaneBusinessInfo *item = GetLaneBusinessInfoWithoutLock(&laneBusinessInfo);
     if (item != NULL) {
         item->laneId = newLaneId;
-        LNN_LOGI(LNN_LANE, "update laneId succ, oldLaneId=%{public}" PRIu64 " newLaneId=%{public}" PRIu64,
+        LNN_LOGI(LNN_LANE, "update laneId succ, oldLaneId=%{public}" PRIu64 "newLaneId=%{public}" PRIu64,
             oldLaneId, newLaneId);
         LaneListenerUnlock();
         return SOFTBUS_OK;
@@ -314,6 +314,11 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
         if (laneLinkInfo->type == LANE_HML) {
             RemoveDelayDestroyMessage(resourceItem.laneId);
         }
+        DelLogicAndLaneRelationship(resourceItem.laneId);
+        ClearLaneResourceByLaneId(resourceItem.laneId);
+    }
+    if (laneLinkInfo->type == LANE_HML &&
+        FindLaneResourceByLinkType(peerUdid, LANE_HML_RAW, &resourceItem) == SOFTBUS_OK) {
         DelLogicAndLaneRelationship(resourceItem.laneId);
         ClearLaneResourceByLaneId(resourceItem.laneId);
     }
