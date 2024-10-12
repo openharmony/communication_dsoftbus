@@ -35,6 +35,7 @@
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
 static const std::string COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
+static const int32_t WIFI_UID = 1010;
 
 namespace OHOS {
 namespace EventFwk {
@@ -193,6 +194,7 @@ int32_t SubscribeEvent::SubscribeWifiSemiStateEvent()
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(COMMON_EVENT_WIFI_SEMI_STATE);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    subscriberInfo.SetPublisherUid(WIFI_UID);
     std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
         return SOFTBUS_ERR;
