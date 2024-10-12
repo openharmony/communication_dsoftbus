@@ -16,7 +16,4 @@ import("../../dsoftbus.gni")
 test_utils_src =
     [ "$dsoftbus_root_path/tests/utils/exception_branch_checker.cpp" ]
 
-test_utils_inc = [
-  "$dsoftbus_root_path/tests/utils",
-  "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-]
+test_utils_inc = [ "$dsoftbus_root_path/tests/utils" ]

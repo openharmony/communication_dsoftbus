@@ -52,27 +52,17 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "//commonlibrary/c_utils/base/include",
     ]
 
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "//third_party/googletest:gtest_main",
-      "//third_party/sqlite:sqlite",
     ]
-
-    if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
-    } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
-    }
+    external_deps = [
+      "googletest:gtest_main",
+      "hilog:libhilog",
+      "sqlite:sqlite",
+    ]
   }
 
   group("unittest") {
