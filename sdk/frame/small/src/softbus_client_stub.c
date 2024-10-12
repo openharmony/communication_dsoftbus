@@ -35,11 +35,11 @@
 #include "trans_server_proxy.h"
 
 #define INVALID_CB_ID 0xFF
+#define CYCLE_NUM_MAX 100
 
 static int RegisterServerDeathCb(void);
 static unsigned int g_deathCbId = INVALID_CB_ID;
 static SvcIdentity g_svcIdentity = {0};
-static int32_t CYCLE_NUMBER_MAX = 100;
 
 struct SoftBusIpcClientCmd {
     enum SoftBusFuncId code;
@@ -139,7 +139,7 @@ static void *DeathProcTask(void *arg)
     ClientCleanAllSessionWhenServerDeath(&sessionServerInfoList);
 
     int32_t cnt = 0;
-    for (cnt = 0; cnt < CYCLE_NUMBER_MAX; cnt++) {
+    for (cnt = 0; cnt < CYCLE_NUM_MAX; cnt++) {
         if (ServerProxyInit() == SOFTBUS_OK) {
             COMM_LOGI(COMM_SDK, "proxy init wait sucess");
             break;
@@ -148,7 +148,7 @@ static void *DeathProcTask(void *arg)
         COMM_LOGI(COMM_SDK, "proxy init wait");
     }
 
-    if (cnt == CYCLE_NUMBER_MAX) {
+    if (cnt == CYCLE_NUM_MAX) {
         COMM_LOGE(COMM_SDK, "server proxy init reached the maximum count=%{public}d", cnt);
         return NULL;
     }
