@@ -14,7 +14,11 @@
  */
 
 #include "bus_center_client_stub.h"
+#include "bus_center_server_proxy.h"
+#include "client_bus_center_manager.h"
+#include "client_trans_session_manager.h"
 #include "comm_log.h"
+
 #include "disc_client_stub.h"
 #include "iproxy_client.h"
 #include "ipc_skeleton.h"
@@ -30,9 +34,6 @@
 #include "softbus_server_proxy.h"
 #include "trans_client_stub.h"
 #include "trans_server_proxy.h"
-#include "bus_center_server_proxy.h"
-#include "client_trans_session_manager.h"
-#include "client_bus_center_manager.h"
 
 #define INVALID_CB_ID 0xFF
 
