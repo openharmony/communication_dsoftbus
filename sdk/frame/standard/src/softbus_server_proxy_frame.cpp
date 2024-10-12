@@ -139,7 +139,7 @@ static int32_t ServerProxyInit(void)
             OHOS::sptr<OHOS::IRemoteObject::DeathRecipient>(new (std::nothrow) OHOS::SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
             COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr");
-            return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
+            return SOFTBUS_TRANS_DEATH_RECIPIENT_INVAILD;
         }
         if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
             COMM_LOGE(COMM_SDK, "AddDeathRecipient failed");
