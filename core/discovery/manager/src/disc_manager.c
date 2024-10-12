@@ -133,7 +133,7 @@ static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *de
     }
 
     char *deviceType = SoftBusCalloc(DEVICE_TYPE_SIZE_MAX + 1);
-    DISC_CHECK_AND_RETURN_LOGE(deviceType != NULL, DISC_CONTROL, "SoftBusMalloc failed");
+    DISC_CHECK_AND_RETURN_LOGE(deviceType != NULL, DISC_CONTROL, "SoftBusCalloc failed");
     if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_MAX + 1, DEVICE_TYPE_SIZE_MAX, "%03X", device->devType) >= 0) {
         extra->peerDeviceType = deviceType;
     }
