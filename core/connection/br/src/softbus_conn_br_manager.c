@@ -790,6 +790,12 @@ static void ClientConnectTimeoutOnConnectingState(uint32_t connectionId, const c
 
 static void DataReceived(ConnBrDataReceivedContext *ctx)
 {
+    if (ctx->dataLen < sizeof(ConnPktHead)) {
+        CONN_LOGE(CONN_BR, "dataLength(=%{public}u) is less than header size, connId=%{public}u",
+            ctx->dataLen, ctx->connectionId);
+        SoftBusFree(ctx->data);
+        return;
+    }
     ConnPktHead *head = (ConnPktHead *)ctx->data;
     ConnBrConnection *connection = ConnBrGetConnectionById(ctx->connectionId);
     if (connection == NULL) {
@@ -1069,6 +1075,7 @@ static void ConnectRequestFunc(SoftBusMessage *msg)
     if (g_brManager.state->connectRequest == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ConnBrConnectRequestContext *ctx = (ConnBrConnectRequestContext *)msg->obj;
     g_brManager.state->connectRequest(ctx);
 }
@@ -1083,6 +1090,7 @@ static void ClientConnectedFunc(SoftBusMessage *msg)
 
 static void ClientConnectTimeoutFunc(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     if (g_brManager.state->clientConnectTimeout != NULL) {
         g_brManager.state->clientConnectTimeout((uint32_t)msg->arg1, (char *)msg->obj);
         return;
@@ -1094,6 +1102,7 @@ static void ClientConnectFailedFunc(SoftBusMessage *msg)
     if (g_brManager.state->clientConnectFailed == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ErrorContext *ctx = (ErrorContext *)(msg->obj);
     g_brManager.state->clientConnectFailed(ctx->connectionId, ctx->error);
 }
@@ -1108,10 +1117,13 @@ static void ServerAcceptedFunc(SoftBusMessage *msg)
 
 static void DataReceivedFunc(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
+    ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)msg->obj;
     if (g_brManager.state->dataReceived == NULL) {
+        SoftBusFree(ctx->data);
         return;
     }
-    ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)msg->obj;
+
     g_brManager.state->dataReceived(ctx);
 }
 
@@ -1120,6 +1132,7 @@ static void ConnectionExceptionFunc(SoftBusMessage *msg)
     if (g_brManager.state->connectionException == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ErrorContext *ctx = (ErrorContext *)(msg->obj);
     g_brManager.state->connectionException(ctx->connectionId, ctx->error);
 }
@@ -1142,6 +1155,7 @@ static void DisconnectRequestFunc(SoftBusMessage *msg)
 
 static void UnpendFunc(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     if (g_brManager.state->unpend != NULL) {
         g_brManager.state->unpend((const char *)msg->obj);
         return;
@@ -1153,6 +1167,7 @@ static void ResetFunc(SoftBusMessage *msg)
     if (g_brManager.state->reset == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ErrorContext *ctx = (ErrorContext *)(msg->obj);
     g_brManager.state->reset(ctx->error);
 }
