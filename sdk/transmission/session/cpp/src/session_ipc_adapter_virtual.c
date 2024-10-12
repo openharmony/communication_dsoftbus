@@ -12,28 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DATA_LEVEL_INNER_H
-#define DATA_LEVEL_INNER_H
 
-#include  <stdint.h>
+#include <stdbool.h>
+#include "session_ipc_adapter.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-typedef struct {
-    uint16_t dynamicLevel;
-    uint16_t staticLevel;
-    uint32_t switchLevel;
-    uint16_t switchLength;
-} DataLevelInfo;
-
-#ifdef __cplusplus
-#if __cplusplus
+bool CheckIsSystemService()
+{
+    return false;
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif /* DATA_LEVEL_INNER_H */
-

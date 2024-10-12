@@ -12,28 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DATA_LEVEL_INNER_H
-#define DATA_LEVEL_INNER_H
 
-#include  <stdint.h>
+#include "accesstoken_kit.h"
+#include "ipc_skeleton.h"
+#include "session_ipc_adapter.h"
+#include "trans_log.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-typedef struct {
-    uint16_t dynamicLevel;
-    uint16_t staticLevel;
-    uint32_t switchLevel;
-    uint16_t switchLength;
-} DataLevelInfo;
-
-#ifdef __cplusplus
-#if __cplusplus
+bool CheckIsSystemService()
+{
+    uint32_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
+    auto type = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    TRANS_LOGD(TRANS_SDK, "system level=%{public}d", type);
+    if (type == OHOS::Security::AccessToken::TOKEN_NATIVE) {
+        return true;
+    }
+    return false;
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif /* DATA_LEVEL_INNER_H */
-

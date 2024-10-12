@@ -12,28 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DATA_LEVEL_INNER_H
-#define DATA_LEVEL_INNER_H
 
-#include  <stdint.h>
+#ifndef SOFTBUS_SESSION_IPC_ADAPTER
+#define SOFTBUS_SESSION_IPC_ADAPTER
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-typedef struct {
-    uint16_t dynamicLevel;
-    uint16_t staticLevel;
-    uint32_t switchLevel;
-    uint16_t switchLength;
-} DataLevelInfo;
+bool CheckIsSystemService();
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif /* DATA_LEVEL_INNER_H */
 
+#endif /* SOFTBUS_SESSION_IPC_ADAPTER */
