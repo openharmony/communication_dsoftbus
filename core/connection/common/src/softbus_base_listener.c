@@ -1218,7 +1218,8 @@ static int32_t StartSelectThread(void)
         rc = pipe2(fds, O_CLOEXEC | O_NONBLOCK);
 #endif
         if (rc != 0) {
-            CONN_LOGE(CONN_COMMON, "create ctrl pipe failed, error=%{public}s", strerror(errno));
+            CONN_LOGE(CONN_COMMON, "create ctrl pipe failed, rc=%{public}d, error=%{public}d(%{public}s)",
+                rc, errno, strerror(errno));
             SoftBusFree(state);
             status = SOFTBUS_INVALID_NUM;
             break;
@@ -1293,6 +1294,11 @@ static void WakeupSelectThread(void)
         }
         int32_t ctrlTraceId = selectWakeupTraceIdGenerator++;
         ssize_t len = write(g_selectThreadState->ctrlWfd, &ctrlTraceId, sizeof(ctrlTraceId));
+        if (len == -1) {
+            COMM_LOGE(COMM_ADAPTER, "write message fail, len=%{public}zd, ctrlTraceId=%{public}d, "
+                "errno=%{public}d(%{public}s)", len, ctrlTraceId, errno, strerror(errno));
+                break;
+        }
         CONN_LOGI(CONN_COMMON, "wakeup ctrl message sent, writeLength=%{public}zd, ctrlTraceId=%{public}d",
             len, ctrlTraceId);
     } while (false);
