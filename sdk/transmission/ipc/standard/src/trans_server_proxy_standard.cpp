@@ -60,34 +60,6 @@ static sptr<IRemoteObject> GetSystemAbility()
     return reply.ReadRemoteObject();
 }
 
-int32_t TransServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
-{
-    (void)pkgName;
-    (void)subInfo;
-    return SOFTBUS_OK;
-}
-
-int32_t TransServerProxy::StopDiscovery(const char *pkgName, int32_t subscribeId)
-{
-    (void)pkgName;
-    (void)subscribeId;
-    return SOFTBUS_OK;
-}
-
-int32_t TransServerProxy::PublishService(const char *pkgName, const PublishInfo *pubInfo)
-{
-    (void)pkgName;
-    (void)pubInfo;
-    return SOFTBUS_OK;
-}
-
-int32_t TransServerProxy::UnPublishService(const char *pkgName, int32_t publishId)
-{
-    (void)pkgName;
-    (void)publishId;
-    return SOFTBUS_OK;
-}
-
 int32_t TransServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
 {
     (void)clientPkgName;
@@ -454,9 +426,13 @@ int32_t TransServerProxy::CloseChannel(const char *sessionName, int32_t channelI
     return serverRet;
 }
 
-int32_t TransServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-    uint32_t len)
+int32_t TransServerProxy::CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
+    if (dataInfo == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
@@ -469,6 +445,10 @@ int32_t TransServerProxy::CloseChannelWithStatistics(int32_t channelId, uint64_t
     }
     if (!data.WriteInt32(channelId)) {
         TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write channel id failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteInt32(channelType)) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannelWithStatistics write channel type failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     if (!data.WriteUint64(laneId)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef DISCOVERYSERVICE_FUZZER_H
-#define DISCOVERYSERVICE_FUZZER_H
+#include "accesstoken_kit.h"
+#include "ipc_skeleton.h"
+#include "session_ipc_adapter.h"
+#include "trans_log.h"
 
-#define FUZZ_PROJECT_NAME "discoveryservice_fuzzer"
-
-#endif // DISCOVERYSERVICE_FUZZER_H
+bool CheckIsSystemService()
+{
+    uint32_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
+    auto type = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    TRANS_LOGD(TRANS_SDK, "system level=%{public}d", type);
+    if (type == OHOS::Security::AccessToken::TOKEN_NATIVE) {
+        return true;
+    }
+    return false;
+}

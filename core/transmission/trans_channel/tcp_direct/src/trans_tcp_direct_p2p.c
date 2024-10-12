@@ -232,8 +232,9 @@ void ClearHmlListenerByUuid(const char *peerUuid)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
+            int32_t moudle = item->moudleType; // item will free in StopHmlListener
             StopHmlListener(item->moudleType);
-            TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", item->moudleType);
+            TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", moudle);
         }
     }
     (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
@@ -642,7 +643,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     return SOFTBUS_OK;
 }
 
-static int32_t ConnectTcpDirectPeer(const char *addr, int port)
+static int32_t ConnectTcpDirectPeer(const char *addr, int port, const char *myIp)
 {
     ConnectOption options;
     if (IsHmlIpAddr(addr)) {
@@ -661,7 +662,7 @@ static int32_t ConnectTcpDirectPeer(const char *addr, int port)
         return SOFTBUS_STRCPY_ERR;
     }
 
-    return ConnOpenClientSocket(&options, BIND_ADDR_ALL, true);
+    return ConnOpenClientSocket(&options, myIp, true);
 }
 
 static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq)
@@ -745,7 +746,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     }
     TRANS_LOGI(TRANS_CTRL, "peer wifi: peerPort=%{public}d", conn->appInfo.peerData.port);
 
-    fd = ConnectTcpDirectPeer(conn->appInfo.peerData.addr, conn->appInfo.peerData.port);
+    fd = ConnectTcpDirectPeer(conn->appInfo.peerData.addr, conn->appInfo.peerData.port, conn->appInfo.myData.addr);
     if (fd <= 0) {
         ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "conn fail: fd=%{public}d", fd);

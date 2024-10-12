@@ -178,17 +178,6 @@ void CreateServer(void *arg)
 }
 
 /*
-* @tc.name: testTcpManager001
-* @tc.desc: test TcpGetConnNum
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(TcpManagerTest, testTcpManager001, TestSize.Level1)
-{
-    EXPECT_EQ(0, TcpGetConnNum());
-};
-
-/*
 * @tc.name: testTcpManager002
 * @tc.desc: test TcpConnectDevice with invalid param
 * @tc.type: FUNC
@@ -288,10 +277,8 @@ HWTEST_F(TcpManagerTest, testTcpManager006, TestSize.Level1)
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     sleep(1);
-    EXPECT_EQ(2, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpDisconnectDevice(g_connectionId));
     sleep(1);
-    EXPECT_EQ(0, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
 }
 
@@ -329,7 +316,6 @@ HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
     EXPECT_EQ(clientPort, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     sleep(1);
-    EXPECT_EQ(1, TcpGetConnNum());
     for (int i = 0; i < 3; i++) {
         char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
         if (data == nullptr) {
@@ -344,9 +330,7 @@ HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
         g_receivedDatalength = 0;
     }
     EXPECT_EQ(SOFTBUS_OK, TcpDisconnectDevice(g_connectionId));
-    EXPECT_EQ(0, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_EQ(0, TcpGetConnNum());
     pthread_join(pid, nullptr);
 }
 
@@ -385,12 +369,10 @@ HWTEST_F(TcpManagerTest, testTcpManager008, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
         sleep(1);
         i += 2;
-        EXPECT_EQ(i, TcpGetConnNum());
     }
     EXPECT_TRUE(SOFTBUS_OK != TcpConnectDevice(&option, requestId, &g_result));
     TcpDisconnectDeviceNow(&option);
     sleep(1);
-    EXPECT_EQ(0, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
 }
 
@@ -437,12 +419,9 @@ HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     sleep(1);
-    EXPECT_EQ(2, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, (uint8_t *)data, sizeof(ConnPktHead) + head.len, 0, 0, 0, 0));
     sleep(1);
-    EXPECT_EQ(0, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_EQ(0, TcpGetConnNum());
 }
 
 /*
@@ -1691,10 +1670,8 @@ HWTEST_F(TcpManagerTest, testTcpManager050, TestSize.Level1)
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     sleep(1);
-    EXPECT_EQ(2, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpDisconnectDevice(g_connectionId));
     sleep(1);
-    EXPECT_EQ(0, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
 }
 

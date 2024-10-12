@@ -71,7 +71,6 @@ if (defined(ohos_lite)) {
       "core/frame:fuzztest",
       "core/transmission:fuzztest",
       "sdk/bus_center:fuzztest",
-      "sdk/discovery:fuzztest",
       "sdk/frame:fuzztest",
       "sdk/transmission:fuzztest",
     ]

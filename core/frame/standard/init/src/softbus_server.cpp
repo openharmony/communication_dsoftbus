@@ -57,26 +57,6 @@ SoftBusServer::SoftBusServer(int32_t saId, bool runOnCreate) : SystemAbility(saI
 {
 }
 
-int32_t SoftBusServer::StartDiscovery(const char *pkgName, const SubscribeInfo *info)
-{
-    return DiscIpcStartDiscovery(pkgName, info);
-}
-
-int32_t SoftBusServer::StopDiscovery(const char *pkgName, int subscribeId)
-{
-    return DiscIpcStopDiscovery(pkgName, subscribeId);
-}
-
-int32_t SoftBusServer::PublishService(const char *pkgName, const PublishInfo *info)
-{
-    return DiscIpcPublishService(pkgName, (PublishInfo *)(info));
-}
-
-int32_t SoftBusServer::UnPublishService(const char *pkgName, int publishId)
-{
-    return DiscIpcUnPublishService(pkgName, publishId);
-}
-
 int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
 {
     if (clientPkgName == nullptr || object == nullptr) {
@@ -186,10 +166,10 @@ int32_t SoftBusServer::CloseChannel(const char *sessionName, int32_t channelId, 
     return TransCloseChannel(sessionName, channelId, channelType);
 }
 
-int32_t SoftBusServer::CloseChannelWithStatistics(int32_t channelId, uint64_t laneId, const void *dataInfo,
-    uint32_t len)
+int32_t SoftBusServer::CloseChannelWithStatistics(int32_t channelId, int32_t channelType, uint64_t laneId,
+    const void *dataInfo, uint32_t len)
 {
-    return TransCloseChannelWithStatistics(channelId, laneId, dataInfo, len);
+    return TransCloseChannelWithStatistics(channelId, channelType, laneId, dataInfo, len);
 }
 
 int32_t SoftBusServer::SendMessage(int32_t channelId, int32_t channelType, const void *data,

@@ -42,10 +42,6 @@
 #define SIZE_NUM_FIVE 5
 
 namespace OHOS {
-constexpr int32_t SOFTBUS_FUZZ_TEST_START_DISCOVERY_SUB_SCRIBE_ID = 5;
-constexpr int32_t SOFTBUS_FUZZ_TEST_START_DISCOVERY_MODE = 6;
-constexpr int32_t SOFTBUS_FUZZ_TEST_START_DISCOVERY_MEDIUM = 7;
-constexpr int32_t SOFTBUS_FUZZ_TEST_START_DISCOVERY_FREQ = 8;
 constexpr int32_t SOFTBUS_FUZZ_TEST_ADDR_TYPE_LEN = 160;
 
 const std::u16string SOFTBUS_SERVER_STUB_INTERFACE_TOKEN = u"OHOS.ISoftBusServer";
@@ -53,9 +49,7 @@ const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 
 enum SoftBusFuncId {
     MANAGE_REGISTER_SERVICE = 0,
-    SERVER_PUBLISH_SERVICE = 128,
-    SERVER_UNPUBLISH_SERVICE,
-    SERVER_CREATE_SESSION_SERVER,
+    SERVER_CREATE_SESSION_SERVER = 128,
     SERVER_REMOVE_SESSION_SERVER,
     SERVER_OPEN_SESSION,
     SERVER_OPEN_AUTH_SESSION,
@@ -67,8 +61,6 @@ enum SoftBusFuncId {
     SERVER_REMOVE_PERMISSION,
     SERVER_STREAM_STATS,
     SERVER_GET_SOFTBUS_SPEC_OBJECT,
-    SERVER_START_DISCOVERY,
-    SERVER_STOP_DISCOVERY,
     SERVER_JOIN_LNN,
     SERVER_JOIN_METANODE,
     SERVER_LEAVE_LNN,
@@ -114,94 +106,6 @@ static bool SendRequestByCommand(const uint8_t *data, size_t size, uint32_t comm
     MessageOption option;
     SetAceessTokenPermission("SoftBusServerStubTest");
     return object->SendRequest(command, datas, reply, option) == ERR_NONE;
-}
-
-static void PublishInfoProc(const uint8_t *data, MessageParcel &datas)
-{
-    uint32_t offset = 0;
-    char pkgName[INPUT_NAME_SIZE_MAX] = "distribdata_test";
-    if (memcpy_s(pkgName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
-        return;
-    }
-    pkgName[INPUT_NAME_SIZE_MAX - 1] = '\0';
-    offset = INPUT_NAME_SIZE_MAX;
-    int32_t publishId = *reinterpret_cast<const int32_t *>(data + offset);
-    offset += sizeof(int32_t);
-    int32_t mode = *reinterpret_cast<const int32_t *>(data + offset);
-    offset += sizeof(int32_t);
-    int32_t medium = *reinterpret_cast<const int32_t *>(data + offset);
-    offset += sizeof(int32_t);
-    int32_t freq = *reinterpret_cast<const int32_t *>(data + offset);
-    offset += sizeof(int32_t);
-
-    char capability[INPUT_NAME_SIZE_MAX] = "";
-    if (memcpy_s(capability, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data),
-        INPUT_NAME_SIZE_MAX - 1) != EOK) {
-        return;
-    }
-    capability[INPUT_NAME_SIZE_MAX - 1] = '\0';
-    uint32_t dataLen = *reinterpret_cast<const uint32_t *>(data + offset);
-    offset += sizeof(uint32_t);
-    char capabilityData[INPUT_NAME_SIZE_MAX] = "";
-    if (memcpy_s(capabilityData, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data),
-        INPUT_NAME_SIZE_MAX) != EOK) {
-        return;
-    }
-    capabilityData[INPUT_NAME_SIZE_MAX - 1] = '\0';
-    datas.WriteCString(pkgName);
-    datas.WriteInt32(publishId);
-    datas.WriteInt32(mode);
-    datas.WriteInt32(medium);
-    datas.WriteInt32(freq);
-    datas.WriteCString(capability);
-    datas.WriteUint32(dataLen);
-    datas.WriteCString(capabilityData);
-}
-
-bool PublishServiceFuzzTest(const uint8_t *data, size_t size)
-{
-    sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX * SIZE_NUM_THREE +
-        sizeof(int32_t) * SIZE_NUM_FOUR + sizeof(uint32_t)) {
-        return false;
-    }
-
-    MessageParcel datas;
-    PublishInfoProc(data, datas);
-    MessageParcel reply;
-    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    if (SoftBusServer == nullptr) {
-        return false;
-    }
-    SoftBusServer->PublishServiceInner(datas, reply);
-    return true;
-}
-
-bool UnPublishServiceFuzzTest(const uint8_t *data, size_t size)
-{
-    sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || data == nullptr || size < INPUT_NAME_SIZE_MAX + sizeof(int32_t)) {
-        return false;
-    }
-    uint32_t offset = 0;
-    char pkgName[INPUT_NAME_SIZE_MAX] = "distribdata_test";
-    if (memcpy_s(pkgName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) != EOK) {
-        return false;
-    }
-    pkgName[INPUT_NAME_SIZE_MAX - 1] = '\0';
-    offset = INPUT_NAME_SIZE_MAX;
-    int32_t publishId = *reinterpret_cast<const int32_t *>(data + offset);
-
-    MessageParcel datas;
-    datas.WriteCString(pkgName);
-    datas.WriteInt32(publishId);
-    MessageParcel reply;
-    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    if (SoftBusServer == nullptr) {
-        return false;
-    }
-    SoftBusServer->UnpublishServiceInner(datas, reply);
-    return true;
 }
 
 bool CreateSessionServerFuzzTest(const uint8_t *data, size_t size)
@@ -565,62 +469,6 @@ bool StreamStatsFuzzTest(const uint8_t *data, size_t size)
 bool GetSoftbusSpecObjectFuzzTest(const uint8_t *data, size_t size)
 {
     return SendRequestByCommand(data, size, SERVER_GET_SOFTBUS_SPEC_OBJECT);
-}
-
-bool StartDiscoveryFuzzTest(const uint8_t *data, size_t size)
-{
-    sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr) {
-        return false;
-    }
-    int32_t subscribeId = SOFTBUS_FUZZ_TEST_START_DISCOVERY_SUB_SCRIBE_ID;
-    int32_t mode = SOFTBUS_FUZZ_TEST_START_DISCOVERY_MODE;
-    int32_t medium = SOFTBUS_FUZZ_TEST_START_DISCOVERY_MEDIUM;
-    int32_t freq = SOFTBUS_FUZZ_TEST_START_DISCOVERY_FREQ;
-    bool boolNum = true;
-    MessageParcel datas;
-    datas.WriteBuffer(data, size);
-    datas.WriteInt32(subscribeId);
-    datas.WriteInt32(mode);
-    datas.WriteInt32(medium);
-    datas.WriteInt32(freq);
-    datas.WriteBool(boolNum);
-    datas.WriteInt32(freq);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    if (SoftBusServer == nullptr) {
-        return false;
-    }
-    SoftBusServer->StartDiscoveryInner(datas, reply);
-    return true;
-}
-
-bool StopDiscoveryFuzzTest(const uint8_t *data, size_t size)
-{
-    sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr) {
-        return false;
-    }
-    char pkgName[INPUT_NAME_SIZE_MAX] = "";
-    uint32_t offset = 0;
-    if (memcpy_s(pkgName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data),
-        INPUT_NAME_SIZE_MAX - 1) != EOK) {
-        return false;
-    }
-    pkgName[INPUT_NAME_SIZE_MAX - 1] = '\0';
-    offset += INPUT_NAME_SIZE_MAX;
-    int32_t publishId = *reinterpret_cast<const int32_t *>(data + offset);
-    MessageParcel datas;
-    datas.WriteCString(pkgName);
-    datas.WriteInt32(publishId);
-    MessageParcel reply;
-    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    if (SoftBusServer == nullptr) {
-        return false;
-    }
-    SoftBusServer->StopDiscoveryInner(datas, reply);
-    return true;
 }
 
 bool JoinLNNFuzzTest(const uint8_t *data, size_t size)
@@ -1460,8 +1308,6 @@ bool RunFuzzTestCase(const uint8_t *data, size_t size)
     OHOS::RemovePermissionFuzzTest(data, size);
     OHOS::StreamStatsFuzzTest(data, size);
     OHOS::GetSoftbusSpecObjectFuzzTest(data, size);
-    OHOS::StartDiscoveryFuzzTest(data, size);
-    OHOS::StopDiscoveryFuzzTest(data, size);
     OHOS::JoinLNNFuzzTest(data, size);
     OHOS::JoinMetaNodeFuzzTest(data, size);
     OHOS::LeaveLNNFuzzTest(data, size);
@@ -1481,8 +1327,6 @@ bool RunFuzzTestCase(const uint8_t *data, size_t size)
     OHOS::GetAllMetaNodeInfoFuzzTest(data, size);
     OHOS::ShiftLNNGearFuzzTest(data, size);
     OHOS::RippleStatsFuzzTest(data, size);
-    OHOS::PublishServiceFuzzTest(data, size);
-    OHOS::UnPublishServiceFuzzTest(data, size);
     OHOS::SoftbusRegisterServiceFuzzTest(data, size);
     OHOS::CheckOpenSessionPermissionFuzzTest(data, size);
     OHOS::EvaLuateQosInnerFuzzTest(data, size);

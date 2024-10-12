@@ -26,7 +26,6 @@
 #include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
-#include "discovery_service.h"
 #include "lnn_device_info.h"
 #include "lnn_ohos_account.h"
 #include "message_handler.h"
@@ -249,10 +248,7 @@ static void DeConvertBitMap(unsigned int *dstCap, unsigned int *srcCap, int nums
 static void UpdateInfoManager(int adv, bool needUpdate)
 {
     DISC_LOGI(DISC_CONTROL, "enter");
-    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (adv == NON_ADV_ID) {
         g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate = needUpdate;
         g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdate = needUpdate;
@@ -277,10 +273,7 @@ static int32_t GetNeedUpdateAdvertiser(int32_t adv)
 static void UpdateScannerInfoManager(int32_t type, bool needUpdate)
 {
     DISC_LOGI(DISC_BLE, "enter");
-    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (type == CON_FILTER_TYPE) {
         g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap = needUpdate;
     } else if (type == NON_FILTER_TYPE) {
@@ -346,8 +339,8 @@ static void BleAdvUpdateCallback(int channel, int status)
 static int32_t GetScannerFilterType(void)
 {
     int32_t type = 0;
-    DISC_CHECK_AND_RETURN_RET_LOGE(
-        SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
     uint32_t conScanCapBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
     uint32_t nonScanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
@@ -365,10 +358,8 @@ static int32_t GetScannerFilterType(void)
 
 static bool CheckScanner(void)
 {
-    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return false;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        false, DISC_BLE, "lock failed");
     uint32_t scanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
@@ -422,14 +413,8 @@ static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInf
         .power = SOFTBUS_ILLEGAL_BLE_POWER
     };
     int32_t ret = GetDeviceInfoFromDisAdvData(&device, (uint8_t *)reportInfo, sizeof(BroadcastReportInfo));
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "GetDeviceInfoFromDisAdvData failed, ret=%{public}d", ret);
-        return;
-    }
-    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "GetDeviceInfoFromDisAdvData failed, ret=%{public}d", ret);
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if ((foundInfo->capabilityBitmap[0] & g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0]) == 0x0) {
         DISC_LOGI(DISC_BLE, "don't match passive publish capBitMap, callCount=%{public}u", callCount++);
         (void)SoftBusMutexUnlock(&g_bleInfoLock);
@@ -437,12 +422,9 @@ static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInf
     }
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
     char key[SHA_HASH_LEN];
-    ret = SoftBusGenerateStrHash(reportInfo->packet.bcData.payload, reportInfo->packet.bcData.payloadLen,
-        (uint8_t *)key);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "GenerateStrHash failed, ret=%{public}d", ret);
-        return;
-    }
+    ret = SoftBusGenerateStrHash(reportInfo->packet.bcData.payload,
+        reportInfo->packet.bcData.payloadLen, (uint8_t *)key);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "GenerateStrHash failed, ret=%{public}d", ret);
     if (AddRecvMessage(key, foundInfo->capabilityBitmap, true) == SOFTBUS_OK) {
         ReplyPassiveNonBroadcast();
     }
@@ -461,14 +443,10 @@ static bool ProcessHashAccount(DeviceInfo *foundInfo)
         }
         uint8_t accountIdHash[SHORT_USER_ID_HASH_LEN] = {0};
         ret = DiscBleGetShortUserIdHash(accountIdHash, SHORT_USER_ID_HASH_LEN);
-        if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "DiscBleGetShortUserIdHash error, ret=%{public}d", ret);
-            return false;
-        }
-        if (LnnIsDefaultOhosAccount()) {
-            DISC_LOGE(DISC_BLE, "LnnIsDefaultOhosAccount, not the same account.");
-            return false;
-        }
+        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false,
+            DISC_BLE, "DiscBleGetShortUserIdHash error, ret=%{public}d", ret);
+        DISC_CHECK_AND_RETURN_RET_LOGE(!LnnIsDefaultOhosAccount(), false,
+            DISC_BLE, "LnnIsDefaultOhosAccount, not the same account.");
         if (memcmp(accountIdHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
             return true;
         }
@@ -483,21 +461,11 @@ static int32_t ConvertBleAddr(DeviceInfo *foundInfo)
     // convert ble bin mac to string mac before report
     char bleMac[BT_MAC_LEN] = {0};
     int32_t ret = ConvertBtMacToStr(bleMac, BT_MAC_LEN, (uint8_t *)foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "convert ble mac to string failed");
-        return ret;
-    }
-
-    if (memset_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, 0, BT_MAC_LEN) != EOK) {
-        DISC_LOGE(DISC_BLE, "memset ble mac failed");
-        return SOFTBUS_MEM_ERR;
-    }
-
-    if (memcpy_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, bleMac, BT_MAC_LEN) != EOK) {
-        DISC_LOGE(DISC_BLE, "memcopy ble mac failed");
-        return SOFTBUS_MEM_ERR;
-    }
-
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "convert ble mac to string failed");
+    errno_t retMem = memset_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, 0, BT_MAC_LEN);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memset ble mac failed");
+    retMem = memcpy_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, bleMac, BT_MAC_LEN);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memcopy ble mac failed");
     return SOFTBUS_OK;
 }
 
@@ -510,11 +478,9 @@ static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
             .power = power,
             .identity = {0}
         };
-
-        if (memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN, device->addr[0].info.ble.bleMac, BT_MAC_LEN) != EOK) {
-            DISC_LOGE(DISC_BLE, "memcpy failed");
-            return SOFTBUS_MEM_ERR;
-        }
+        errno_t retMem = memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN,
+            device->addr[0].info.ble.bleMac, BT_MAC_LEN);
+        DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memcpy failed");
 
         int ret = SoftBusBleRange(&param, &range);
         if (ret != SOFTBUS_OK) {
@@ -535,10 +501,7 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
         .power = SOFTBUS_ILLEGAL_BLE_POWER
     };
     int32_t ret = GetDeviceInfoFromDisAdvData(&device, (uint8_t *)reportInfo, sizeof(BroadcastReportInfo));
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "GetDeviceInfoFromDisAdvData failed, ret=%{public}d", ret);
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "GetDeviceInfoFromDisAdvData failed, ret=%{public}d", ret);
     (void)SoftBusMutexLock(&g_bleInfoLock);
     uint32_t subscribeCap = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
@@ -550,15 +513,9 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
     foundInfo->capabilityBitmap[0] = subscribeCap & foundInfo->capabilityBitmap[0];
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
     ret = ConvertBleAddr(foundInfo);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "convert ble address failed, ret=%{public}d", ret);
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "convert ble address failed, ret=%{public}d", ret);
     ret = RangeDevice(foundInfo, rssi, device.power);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "range device failed, ret=%{public}d", ret);
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "range device failed, ret=%{public}d", ret);
 
     InnerDeviceInfoAddtions add;
     add.medium = BLE;
@@ -569,11 +526,8 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
             foundInfo->capabilityBitmap[0], callCount++);
         uint32_t tempCap = 0;
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
-        if (tempCap == 0) {
-            DISC_LOGE(DISC_BLE, "unsupported ble capability. capabilityBitmap=%{public}d",
-                foundInfo->capabilityBitmap[0]);
-            return;
-        }
+        DISC_CHECK_AND_RETURN_LOGE(tempCap != 0, DISC_BLE, "unsupported ble capability. capabilityBitmap=%{public}d",
+            foundInfo->capabilityBitmap[0]);
         foundInfo->capabilityBitmap[0] = tempCap;
         foundInfo->capabilityBitmapNum = 1;
         g_discBleInnerCb->OnDeviceFound(foundInfo, &add);
@@ -587,17 +541,13 @@ static void ProcessDistributePacket(const BroadcastReportInfo *reportInfo)
     uint8_t *advData = reportInfo->packet.bcData.payload;
     DeviceInfo foundInfo;
 
-    if (advData == NULL || advLen <= POS_BUSINESS_EXTENSION) {
-        DISC_LOGE(DISC_BLE, "scan report data null, len=%{public}d", advLen);
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(advData != NULL && advLen > POS_BUSINESS_EXTENSION,
+        DISC_BLE, "scan report data null, len=%{public}d", advLen);
     (void)memset_s(&foundInfo, sizeof(foundInfo), 0, sizeof(foundInfo));
     foundInfo.addrNum = 1;
     foundInfo.addr[0].type = CONNECTION_ADDR_BLE;
-    if (memcpy_s(foundInfo.addr[0].info.ble.bleMac, BT_ADDR_LEN, reportInfo->addr.addr, BC_ADDR_MAC_LEN) != EOK) {
-        DISC_LOGE(DISC_BLE, "memcpy_s failed");
-        return;
-    }
+    errno_t retMem = memcpy_s(foundInfo.addr[0].info.ble.bleMac, BT_ADDR_LEN, reportInfo->addr.addr, BC_ADDR_MAC_LEN);
+    DISC_CHECK_AND_RETURN_LOGE(retMem == EOK, DISC_BLE, "memcpy_s failed");
     if ((advData[POS_BUSINESS_EXTENSION] & BIT_HEART_BIT) != 0) {
         return;
     }
@@ -746,10 +696,8 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
 {
     (void)memset_s(info, sizeof(DeviceInfo), 0x0, sizeof(DeviceInfo));
     uint32_t infoIndex = BLE_SUBSCRIBE | BLE_ACTIVE;
-    if (CheckBitMapEmpty(CAPABILITY_NUM, g_bleInfoManager[infoIndex].capBitMap)) {
-        DISC_LOGE(DISC_BLE, "all capbit is zero");
-        return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(!CheckBitMapEmpty(CAPABILITY_NUM, g_bleInfoManager[infoIndex].capBitMap),
+        SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL, DISC_BLE, "all capbit is zero");
     if (DiscBleGetDeviceIdHash((uint8_t *)info->devId, DISC_MAX_DEVICE_ID_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId failed");
     }
@@ -789,11 +737,10 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
     }
     info->devType = (DeviceType)DiscBleGetDeviceType();
     uint32_t passiveCapBitMap[CAPABILITY_NUM] = {0};
-    if (MatchRecvMessage(g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap,
-        passiveCapBitMap, CAPABILITY_NUM) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "MatchRecvMessage failed");
-        return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL;
-    }
+    int32_t ret = MatchRecvMessage(g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap,
+        passiveCapBitMap, CAPABILITY_NUM);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL,
+        DISC_BLE, "MatchRecvMessage failed");
     for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
         info->capabilityBitmap[pos] =
         g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].capBitMap[pos] | passiveCapBitMap[pos];
@@ -806,10 +753,8 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
     int32_t passiveCnt = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].rangingRefCnt;
     info->range = activeCnt + passiveCnt;
 
-    if (CheckBitMapEmpty(CAPABILITY_NUM, info->capabilityBitmap)) {
-        DISC_LOGE(DISC_BLE, "all capbit is zero");
-        return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(!CheckBitMapEmpty(CAPABILITY_NUM, info->capabilityBitmap),
+        SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL, DISC_BLE, "all capbit is zero");
     return SOFTBUS_OK;
 }
 
@@ -827,10 +772,8 @@ static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastDat
         DestroyBleConfigAdvData(packet);
     }
     packet->bcData.payload = (uint8_t *)SoftBusCalloc(ADV_DATA_MAX_LEN);
-    if (packet->bcData.payload == NULL) {
-        DISC_LOGE(DISC_BLE, "malloc serviceData failed");
-        return SOFTBUS_MALLOC_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(packet->bcData.payload != NULL, SOFTBUS_MALLOC_ERR,
+        DISC_BLE, "malloc serviceData failed");
 
     packet->isSupportFlag = true;
     packet->flag = FLAG_AD_DATA;
@@ -889,10 +832,7 @@ static void AssembleCustData(DeviceInfo *info, BroadcastData *broadcastData)
 
 static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastData)
 {
-    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (g_recvMessageInfo.numNeedBrMac > 0) {
         SoftBusBtAddr addr;
         if (SoftBusGetBrState() == BR_ENABLE && SoftBusGetBtMacAddr(&addr) == SOFTBUS_OK) {
@@ -916,10 +856,8 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
 static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
 {
     bool isWakeRemote = GetWakeRemote();
-    if (memset_s(broadcastData->data.data, BROADCAST_MAX_LEN, 0x0, BROADCAST_MAX_LEN) != EOK) {
-        DISC_LOGE(DISC_BLE, "memset failed");
-        return SOFTBUS_MEM_ERR;
-    }
+    errno_t retMem = memset_s(broadcastData->data.data, BROADCAST_MAX_LEN, 0x0, BROADCAST_MAX_LEN);
+    DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memset failed");
     broadcastData->data.data[POS_VERSION] = BLE_VERSION & BYTE_MASK;
     broadcastData->data.data[POS_BUSINESS] = DISTRIBUTE_BUSINESS & BYTE_MASK;
     broadcastData->data.data[POS_BUSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
@@ -928,11 +866,9 @@ static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastD
         if (isWakeRemote) {
             broadcastData->data.data[POS_BUSINESS_EXTENSION] |= BIT_WAKE_UP;
         }
-        if (memcpy_s(&broadcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN,
-            info->accountHash, SHORT_USER_ID_HASH_LEN) != EOK) {
-            DISC_LOGE(DISC_BLE, "memcpy failed");
-            return SOFTBUS_MEM_ERR;
-        }
+        retMem = memcpy_s(&broadcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN,
+            info->accountHash, SHORT_USER_ID_HASH_LEN);
+        DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memcpy failed");
     } else {
         DiscBleGetShortUserIdHash(&broadcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
     }
@@ -945,10 +881,8 @@ static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastD
 static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
 {
     int32_t ret = AssembleBroadcastData(info, advId, broadcastData);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "assemble broadcast failed, ret=%{public}d", ret);
-        return ret;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        ret, DISC_BLE, "assemble broadcast failed, ret=%{public}d", ret);
     char deviceIdHash[SHORT_DEVICE_ID_HASH_LENGTH + 1] = {0};
     if (DiscBleGetDeviceIdHash((uint8_t *)deviceIdHash, SHORT_DEVICE_ID_HASH_LENGTH + 1) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId Hash failed");
@@ -1016,22 +950,17 @@ static int32_t StartAdvertiser(int32_t adv)
         }
     }
     int32_t ret = advertiser->GetDeviceInfo(&advertiser->deviceInfo);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "advertiser GetConDeviceInfo failed. adv=%{public}d", adv);
-        return StopAdvertiser(adv);
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, StopAdvertiser(adv),
+        DISC_BLE, "advertiser GetConDeviceInfo failed. adv=%{public}d", adv);
     BroadcastData broadcastData;
     (void)memset_s(&broadcastData, sizeof(BroadcastData), 0, sizeof(BroadcastData));
-    if (GetBroadcastData(&advertiser->deviceInfo, adv, &broadcastData) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "get broadcast data failed");
-        return SOFTBUS_DISCOVER_BLE_GET_BROADCAST_DATA_FAIL;
-    }
+    ret = GetBroadcastData(&advertiser->deviceInfo, adv, &broadcastData);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_GET_BROADCAST_DATA_FAIL,
+        DISC_BLE, "get broadcast data failed");
     BroadcastPacket packet = {};
     ret = BuildBleConfigAdvData(&packet, &broadcastData);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "BuildBleConfigAdvData failed, ret=%{public}d", ret);
-        return SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL,
+        DISC_BLE, "BuildBleConfigAdvData failed, ret=%{public}d", ret);
     BroadcastParam advParam = {};
     BuildAdvParam(&advParam);
 
@@ -1063,10 +992,8 @@ static int32_t StopAdvertiser(int32_t adv)
         DISC_LOGE(DISC_BLE, "stop advertiser failed. advId=%{public}d, ret=%{public}d", adv, ret);
     }
     if (adv == NON_ADV_ID) {
-        if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "Lock failed");
-            return SOFTBUS_LOCK_ERR;
-        }
+        DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK,
+            SOFTBUS_LOCK_ERR, DISC_BLE, "Lock failed");
         ClearRecvMessage();
         (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     }
@@ -1077,21 +1004,16 @@ static int32_t UpdateAdvertiser(int32_t adv)
 {
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
     int32_t ret = advertiser->GetDeviceInfo(&advertiser->deviceInfo);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "advertiser adv GetConDeviceInfo failed. adv=%{public}d", adv);
-        return StopAdvertiser(adv);
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, StopAdvertiser(adv),
+        DISC_BLE, "advertiser adv GetConDeviceInfo failed. adv=%{public}d", adv);
     BroadcastData broadcastData = {};
-    if (GetBroadcastData(&advertiser->deviceInfo, adv, &broadcastData) != SOFTBUS_OK) {
-        return SOFTBUS_DISCOVER_BLE_GET_BROADCAST_DATA_FAIL;
-    }
-
+    ret = GetBroadcastData(&advertiser->deviceInfo, adv, &broadcastData);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,  SOFTBUS_DISCOVER_BLE_GET_BROADCAST_DATA_FAIL,
+        DISC_BLE, "GetBroadcastData failed, ret=%{public}d", ret);
     BroadcastPacket packet = {};
     ret = BuildBleConfigAdvData(&packet, &broadcastData);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "BuildBleConfigAdvData failed, ret=%{public}d", ret);
-        return SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL,
+        DISC_BLE, "BuildBleConfigAdvData failed, ret=%{public}d", ret);
     BroadcastParam advParam = {0};
     BuildAdvParam(&advParam);
     ret = SchedulerUpdateBroadcast(advertiser->channel, &advParam, &packet);
@@ -1134,10 +1056,7 @@ static void UpdateScannerFilter(bool isStopScan)
 {
     if (isStopScan) {
         int32_t ret = SchedulerStopScan(g_bleListener.scanListenerId);
-        if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "StopScaner failed, ret=%{public}d", ret);
-            return;
-        }
+        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "StopScaner failed, ret=%{public}d", ret);
     }
     int32_t type = GetScannerFilterType();
     DISC_LOGI(DISC_BLE, "Set filter type=%{public}d", type);
@@ -1146,10 +1065,8 @@ static void UpdateScannerFilter(bool isStopScan)
 
 static void StartScaner(int32_t type)
 {
-    if (type <= 0 || type > (CON_FILTER_TYPE | NON_FILTER_TYPE)) {
-        DISC_LOGE(DISC_BLE, "start scanner type invaild");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(type > 0 && type <= (CON_FILTER_TYPE | NON_FILTER_TYPE),
+        DISC_BLE, "start scanner type invaild");
     if (!CheckScanner()) {
         DISC_LOGI(DISC_BLE, "no need to start scanner");
         (void)StopScaner();
@@ -1173,11 +1090,9 @@ static void StartScaner(int32_t type)
 
     BcScanParams scanParam;
     int32_t maxFreq = GetMaxExchangeFreq();
-    if (GetScannerParam(maxFreq, &scanParam) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "GetScannerParam failed");
-        return;
-    }
-    int32_t ret = SchedulerStartScan(g_bleListener.scanListenerId, &scanParam);
+    int32_t ret = GetScannerParam(maxFreq, &scanParam);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "GetScannerParam failed");
+    ret = SchedulerStartScan(g_bleListener.scanListenerId, &scanParam);
     if (ret != SOFTBUS_OK) {
         DfxRecordScanEnd(ret);
         DISC_LOGE(DISC_BLE, "start scan failed");
@@ -1195,10 +1110,8 @@ static int32_t StopScaner(void)
         return SOFTBUS_OK;
     }
     int32_t ret = SchedulerStopScan(g_bleListener.scanListenerId);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGI(DISC_BLE, "StopScaner failed, ret=%{public}d", ret);
-        return SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL, DISC_BLE, "StopScaner failed, ret=%{public}d", ret);
     DISC_LOGI(DISC_BLE, "success");
     return SOFTBUS_OK;
 }
@@ -1325,10 +1238,8 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
         regOption.subscribeOption = (SubscribeOption *)option;
     }
     uint8_t index = publishFlags | activeFlags;
-    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed.");
-        return SOFTBUS_LOCK_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
     uint32_t oldCap = g_bleInfoManager[index].capBitMap[0];
     int32_t oldRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     if (isStart) {
@@ -1360,10 +1271,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
 static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t arg2, void *obj)
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
-    if (msg == NULL) {
-        DISC_LOGE(DISC_BLE, "ble create handler msg failed");
-        return NULL;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(msg != NULL, NULL, DISC_BLE, "ble create handler msg failed");
     msg->what = what;
     msg->arg1 = arg1;
     msg->arg2 = arg2;
@@ -1502,10 +1410,9 @@ static int32_t UpdateAdvertiserDeviceInfo(int32_t adv)
 static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     (void)type;
-    if (UpdateAdvertiserDeviceInfo(NON_ADV_ID) != SOFTBUS_OK || UpdateAdvertiserDeviceInfo(CON_ADV_ID) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "update failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(
+        UpdateAdvertiserDeviceInfo(NON_ADV_ID) == SOFTBUS_OK && UpdateAdvertiserDeviceInfo(CON_ADV_ID) == SOFTBUS_OK,
+        DISC_BLE, "update failed");
     DISC_LOGI(DISC_BLE, "update success");
 }
 
@@ -1680,10 +1587,8 @@ static RecvMessage *GetRecvMessage(const char *key)
 
 static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBitMap, uint32_t len)
 {
-    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return SOFTBUS_LOCK_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
     RecvMessage *msg = NULL;
     DISC_LOGI(DISC_BLE, "recv message cnt=%{public}d", g_recvMessageInfo.numNeedResp);
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
@@ -1698,10 +1603,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
 static void StartTimeout(const char *key)
 {
     DISC_LOGD(DISC_BLE, "enter");
-    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (GetRecvMessage(key) == NULL) {
         DISC_LOGE(DISC_BLE, "key is not exists");
         SoftBusMutexUnlock(&g_recvMessageInfo.lock);
@@ -1709,20 +1611,14 @@ static void StartTimeout(const char *key)
     }
     SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     SoftBusMessage *msg = CreateBleHandlerMsg(PROCESS_TIME_OUT, (uintptr_t)key, 0, NULL);
-    if (msg == NULL) {
-        DISC_LOGE(DISC_BLE, "malloc msg failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BLE, "malloc msg failed");
     g_discBleHandler.looper->PostMessageDelay(g_discBleHandler.looper, msg, BLE_MSG_TIME_OUT);
 }
 
 static void RemoveTimeout(const char *key)
 {
     DISC_LOGD(DISC_BLE, "enter");
-    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (GetRecvMessage(key) == NULL) {
         DISC_LOGI(DISC_BLE, "key is not in recv message");
         SoftBusMutexUnlock(&g_recvMessageInfo.lock);
@@ -1796,12 +1692,11 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
         if (oldAggregateCap != newAggregateCap) {
             UpdateInfoManager(NON_ADV_ID, true);
         }
-        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     } else {
-        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
         RemoveTimeout(recvMsg->key);
     }
     StartTimeout(recvMsg->key);
+    SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     DfxRecordAddRecvMsgEnd(capBitMap, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
@@ -1809,10 +1704,7 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
 static void RemoveRecvMessage(uint64_t key)
 {
     DISC_LOGD(DISC_BLE, "enter");
-    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK, DISC_BLE, "lock failed");
 
     RecvMessage *msg = GetRecvMessage((char *)(uintptr_t)key);
     if (msg == NULL) {
@@ -1862,8 +1754,7 @@ static void OnBrStateChanged(SoftBusMessage *msg)
     (void)msg;
     DISC_LOGD(DISC_BLE, "enter");
     if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
-        int32_t ret = SoftBusMutexLock(&g_recvMessageInfo.lock);
-        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "lock failed");
+        DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK, DISC_BLE, "lock failed");
         uint32_t numNeedBrMac = g_recvMessageInfo.numNeedBrMac;
         SoftBusMutexUnlock(&g_recvMessageInfo.lock);
 
@@ -1926,10 +1817,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
 static int32_t DiscBleLooperInit(void)
 {
     g_discBleHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (g_discBleHandler.looper == NULL) {
-        DISC_LOGE(DISC_INIT, "get looper fail");
-        return SOFTBUS_LOOPER_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_discBleHandler.looper != NULL, SOFTBUS_LOOPER_ERR, DISC_INIT, "get looper fail");
 
     g_discBleHandler.name = (char *)"ble_disc_handler";
     g_discBleHandler.HandleMessage = DiscBleMsgHandler;
@@ -2000,16 +1888,18 @@ static int32_t InitBleListener(void)
 DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 {
     DISC_LOGI(DISC_INIT, "enter");
-    if (callback == NULL || callback->OnDeviceFound == NULL) {
-        DISC_LOGE(DISC_INIT, "callback invalid.");
-        return NULL;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(callback != NULL && callback->OnDeviceFound != NULL, NULL,
+        DISC_INIT, "callback invalid.");
 
     ListInit(&g_recvMessageInfo.node);
     g_discBleInnerCb = callback;
 
-    if (SoftBusMutexInit(&g_recvMessageInfo.lock, NULL) != SOFTBUS_OK ||
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_RECURSIVE,
+    };
+    if (SoftBusMutexInit(&g_recvMessageInfo.lock, &mutexAttr) != SOFTBUS_OK ||
         SoftBusMutexInit(&g_bleInfoLock, NULL) != SOFTBUS_OK) {
+        DiscSoftBusBleDeinit();
         DISC_LOGE(DISC_INIT, "init ble lock failed");
         return NULL;
     }
@@ -2018,6 +1908,7 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
     DiscBleInitSubscribe();
     InitScanner();
     if (SchedulerInitBroadcast() != SOFTBUS_OK) {
+        DiscSoftBusBleDeinit();
         DISC_LOGE(DISC_INIT, "init broadcast scheduler failed");
         return NULL;
     }
@@ -2074,6 +1965,9 @@ static void DiscBleInfoDeinit(void)
     for (uint32_t index = 0; index < BLE_INFO_COUNT; index++) {
         (void)memset_s(&g_bleInfoManager[index], sizeof(DiscBleInfo), 0x0, sizeof(DiscBleInfo));
     }
+    if (CheckLockInit(&g_bleInfoLock)) {
+        (void)SoftBusMutexDestroy(&g_bleInfoLock);
+    }
 }
 
 void DiscSoftBusBleDeinit(void)
@@ -2091,10 +1985,8 @@ void DiscSoftBusBleDeinit(void)
 
 static int32_t BleInfoDump(int fd)
 {
-    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed.");
-        return SOFTBUS_LOCK_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
     SOFTBUS_DPRINTF(fd, "-----------------BleInfoManager Info-------------------\n");
     for (int i = 0; i < BLE_INFO_COUNT; i++) {
         SOFTBUS_DPRINTF(fd, "BleInfo needUpdate                      : %d\n", g_bleInfoManager[i].needUpdate);
@@ -2156,10 +2048,8 @@ static int32_t BleAdvertiserDump(int fd)
 
 static int32_t RecvMessageInfoDump(int fd)
 {
-    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "lock failed");
-        return SOFTBUS_LOCK_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
     ListNode *item = NULL;
     SOFTBUS_DPRINTF(fd, "\n-----------------RecvMessage Info-------------------\n");
     SOFTBUS_DPRINTF(fd, "RecvMessageInfo numNeedBrMac           : %u\n", g_recvMessageInfo.numNeedBrMac);
