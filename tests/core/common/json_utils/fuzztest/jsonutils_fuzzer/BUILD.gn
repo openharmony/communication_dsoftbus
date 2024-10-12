@@ -27,7 +27,6 @@ ohos_fuzztest("JsonUtilsFuzzTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
-    "//commonlibrary/c_utils/base/include",
   ]
   cflags = [
     "-g",
@@ -44,15 +43,5 @@ ohos_fuzztest("JsonUtilsFuzzTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
+  external_deps = [ "hilog:libhilog" ]
 }

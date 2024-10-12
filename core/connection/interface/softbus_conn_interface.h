@@ -71,6 +71,7 @@ typedef enum {
 #define CONN_INVALID_LISTENER_MODULE_ID    0xffff
 #define CONN_DYNAMIC_LISTENER_MODULE_COUNT 32
 #define DEVID_BUFF_LEN                     65
+#define NETIF_NAME_LEN                     16
 
 #define BT_LINK_TYPE_BR  1
 #define BT_LINK_TYPE_BLE 2
@@ -187,6 +188,7 @@ struct SocketOption {
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
     int32_t keepAlive;
+    char ifName[NETIF_NAME_LEN];
 };
 
 typedef struct {
@@ -219,6 +221,7 @@ struct ListenerSocketOption {
     int32_t port;
     ListenerModule moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
+    char ifName[NETIF_NAME_LEN];
 };
 
 typedef struct {

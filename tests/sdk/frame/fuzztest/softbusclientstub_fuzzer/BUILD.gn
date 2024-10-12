@@ -94,6 +94,7 @@ ohos_static_library("softbus_client_static") {
     cflags_cc = [ "-std=c++14" ]
     if (is_standard_system) {
       external_deps += [
+        "access_token:libaccesstoken_sdk",
         "c_utils:utils",
         "hilog:libhilog",
         "ipc:ipc_single",

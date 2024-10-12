@@ -32,6 +32,7 @@
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
+#include "session_ipc_adapter.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
@@ -1263,7 +1264,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (strcmp(CAST_SESSION, serverNode->sessionName) == 0) {
+        if (strcmp(CAST_SESSION, serverNode->sessionName) == 0 && CheckIsSystemService()) {
             TRANS_LOGD(TRANS_SDK, "cast plus sessionname is different");
             continue;
         }
@@ -1805,7 +1806,6 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
     Anonymize(sessionName, &tmpName);
     TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
-    TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%{public}s", sessionName);
     return SOFTBUS_NOT_FIND;
 }
 
