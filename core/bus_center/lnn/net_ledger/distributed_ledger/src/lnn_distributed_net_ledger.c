@@ -74,6 +74,7 @@ static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
     NodeBasicInfo basic;
     if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memset_s basic fail!");
+        return;
     }
     if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetBasicInfoByUdid fail.");

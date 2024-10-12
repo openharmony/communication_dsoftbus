@@ -571,7 +571,8 @@ int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOu
             auth[i] = NULL;
             continue;
         }
-        if ((currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD) && judgeTimeOut) {
+        if (judgeTimeOut && (currentTime > auth[i]->lastActiveTime)
+            && (currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD)) {
             AUTH_LOGI(AUTH_CONN, "auth manager timeout. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
         }
