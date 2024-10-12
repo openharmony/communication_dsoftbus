@@ -26,7 +26,6 @@ ohos_fuzztest("StopTimeSyncInnerFuzzTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//commonlibrary/c_utils/base/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/sdk/bus_center/service/include",
     "$dsoftbus_root_path/sdk/bus_center/manager/include",
