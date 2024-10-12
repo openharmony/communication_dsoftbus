@@ -35,7 +35,6 @@ ohos_fuzztest("UnpackAuthDataFuzzTest") {
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
-    "//third_party/cJSON",
   ]
 
   cflags = [
@@ -53,6 +52,7 @@ ohos_fuzztest("UnpackAuthDataFuzzTest") {
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
     "hilog:libhilog",
   ]

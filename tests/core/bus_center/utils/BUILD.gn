@@ -59,18 +59,20 @@ ohos_unittest("LNNConnAddrUtilsTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest_main",
       "hilog:libhilog",
       "huks:libhukssdk",
     ]
