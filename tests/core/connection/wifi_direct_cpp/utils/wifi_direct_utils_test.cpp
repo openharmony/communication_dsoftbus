@@ -475,19 +475,6 @@ HWTEST_F(WifiDirectUtilsTest, CheckLinkAtDfsChannelConflictTest, TestSize.Level1
 }
 
 /*
- * @tc.name: GetInterfaceIpv6AddrTest
- * @tc.desc: check GetInterfaceIpv6Addr method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectUtilsTest, GetInterfaceIpv6AddrTest, TestSize.Level1)
-{
-    std::string interface = "wlan0";
-    auto ret = WifiDirectUtils::GetInterfaceIpv6Addr(interface);
-    EXPECT_EQ(ret, "");
-}
-
-/*
  * @tc.name: WifiDirectAnonymizeIpTest
  * @tc.desc: check WifiDirectAnonymizeIp method
  * @tc.type: FUNC

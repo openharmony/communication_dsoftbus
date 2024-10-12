@@ -56,7 +56,6 @@ ohos_unittest("AuthNegotiateChannelTest") {
 
   sources = [
     "$dsoftbus_root_path/core/common/dfx/anonymize/src/anonymizer.c",
-    "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "$wifi_direct_path/adapter/p2p_adapter.cpp",
@@ -167,7 +166,6 @@ ohos_unittest("ProxyNegotiateChannelTest") {
 
   sources = [
     "$dsoftbus_root_path/core/common/dfx/anonymize/src/anonymizer.c",
-    "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "$wifi_direct_path/adapter/p2p_adapter.cpp",
