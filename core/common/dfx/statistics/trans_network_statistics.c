@@ -295,7 +295,7 @@ static int32_t PackNetworkStatistics(cJSON *json, NetworkStatisticsInfo *info)
     ChannelStatisticsInfo *temp = NULL;
     LIST_FOR_EACH_ENTRY(temp, &info->channels, ChannelStatisticsInfo, node) {
         if (temp->channelInfo != NULL) {
-            cJSON_AddItemToArray(channelStatsObj, cJSON_Parse(temp->channelInfo));
+            cJSON_AddItemToArray(channelStatsObj, cJSON_ParseWithLength(temp->channelInfo, temp->len));
         }
     }
     return SOFTBUS_OK;
