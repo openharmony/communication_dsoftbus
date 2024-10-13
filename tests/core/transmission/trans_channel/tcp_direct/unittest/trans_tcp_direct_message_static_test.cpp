@@ -254,11 +254,12 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessMessage0006, TestSize.Level1)
     uint32_t flagRequst = FLAG_REQUEST;
     uint64_t seq = 1;
     char *dataTmp = reinterpret_cast<char *>(data);
+    uint32_t dataLen = 0;
 
-    ret = ProcessMessage(channelId, flagReply, seq, dataTmp);
+    ret = ProcessMessage(channelId, flagReply, seq, dataTmp, dataLen);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = ProcessMessage(channelId, flagRequst, seq, dataTmp);
+    ret = ProcessMessage(channelId, flagRequst, seq, dataTmp, dataLen);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
