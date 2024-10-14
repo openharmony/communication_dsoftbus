@@ -58,6 +58,7 @@ typedef enum {
 typedef struct {
     SessionState sessionState;
     SoftBusCond callbackCond;
+    bool condIsWaiting;
     int32_t bindErrCode;
     uint32_t maxWaitTime; // 0 means no check time out, for Bind end
     uint32_t waitTime;
@@ -127,17 +128,17 @@ typedef enum {
     KEY_ACTION_ID,
 } SessionKey;
 
-typedef enum {
-    TIMER_ACTION_START,
-    TIMER_ACTION_STOP,
-    TIMER_ACTION_BUTT
-} TimerAction;
-
 typedef struct {
     ListNode node;
     char pkgName[PKG_NAME_SIZE_MAX];
     char sessionName[SESSION_NAME_SIZE_MAX];
 } SessionServerInfo;
+
+typedef enum {
+    TIMER_ACTION_START,
+    TIMER_ACTION_STOP,
+    TIMER_ACTION_BUTT
+} TimerAction;
 
 typedef struct {
     ListNode node;
@@ -176,6 +177,8 @@ int32_t ClientGetChannelBySessionId(
 int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
 
 int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *businessType);
+
+int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType, SessionState *sessionState);
 
 int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *data);
 
@@ -251,14 +254,14 @@ int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, in
 
 void DelSessionStateClosing(void);
 
+void AddSessionStateClosing(void);
+
 int32_t ClientHandleBindWaitTimer(int32_t socket, uint32_t maxWaitTime, TimerAction action);
 
 inline bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
 {
     return (qos == NULL) ? (qosCount == 0) : (qosCount <= QOS_TYPE_BUTT);
 }
-
-void AddSessionStateClosing(void);
 
 int32_t SetSessionInitInfoById(int32_t sessionId);
 
