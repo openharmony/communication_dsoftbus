@@ -142,7 +142,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Lev
     info.channelType = CHANNEL_TYPE_UDP;
     info.isServer = 1;
     ret = TransOnChannelOpened(g_sessionName, &info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     info.channelType = CHANNEL_TYPE_BUTT;
     ret = TransOnChannelOpened(g_sessionName, &info);

@@ -728,6 +728,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     extra.peerUdid = appInfo->peerUdid;
     extra.peerDevVer = appInfo->peerVersion;
     extra.deviceState = TransGetDeviceState(param.peerDeviceId);
+    extra.osType = appInfo->osType;
     TransBuildTransOpenChannelEndEvent(&extra, &transInfo, appInfo->timeStart, reason);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransFreeAppInfo(appInfo);
