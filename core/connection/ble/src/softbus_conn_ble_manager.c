@@ -948,12 +948,17 @@ static void BleDataReceived(ConnBleDataReceivedContext *ctx)
             break;
         }
 
+        if (ctx->dataLen < sizeof(ConnPktHead)) {
+            CONN_LOGE(CONN_BLE, "dataLength(=%{public}u) is less than header size, connId=%{public}u",
+                ctx->dataLen, ctx->connectionId);
+            break;
+        }
+
         ConnPktHead *head = (ConnPktHead *)ctx->data;
         UnpackConnPktHead(head);
-        CONN_LOGI(CONN_BLE,
-            "ble dispatch receive data, connId=%{public}u, "
-            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
-            connection->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
+        CONN_LOGI(CONN_BLE, "ble dispatch receive data, connId=%{public}u, Len=%{public}u, Flg=%{public}d, "
+            "Module=%{public}d, Seq=%{public}" PRId64 "", connection->connectionId, ctx->dataLen, head->flag,
+            head->module, head->seq);
         uint32_t pktHeadLen = ConnGetHeadSize();
         if (head->module == MODULE_CONNECTION) {
             ReceivedControlData(connection, ctx->data + pktHeadLen, ctx->dataLen - pktHeadLen);
@@ -1540,6 +1545,7 @@ static void ConnectRequestFunc(SoftBusMessage *msg)
     if (g_bleManager.state->connectRequest == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     ConnBleConnectRequestContext *ctx = (ConnBleConnectRequestContext *)msg->obj;
     g_bleManager.state->connectRequest(ctx);
 }
@@ -1565,6 +1571,7 @@ static void ClientConnectFailedFunc(SoftBusMessage *msg)
     if (g_bleManager.state->clientConnectFailed == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
     g_bleManager.state->clientConnectFailed(ctx->connectionId, ctx->status);
 }
@@ -1579,10 +1586,12 @@ static void ServerAcceptedFunc(SoftBusMessage *msg)
 
 static void DataReceivedFunc(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
+    ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)msg->obj;
     if (g_bleManager.state->dataReceived == NULL) {
+        SoftBusFree(ctx->data);
         return;
     }
-    ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)msg->obj;
     g_bleManager.state->dataReceived(ctx);
 }
 
@@ -1591,6 +1600,7 @@ static void ConnectionClosedFunc(SoftBusMessage *msg)
     if (g_bleManager.state->connectionClosed == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
     g_bleManager.state->connectionClosed(ctx->connectionId, ctx->status);
 }
@@ -1613,6 +1623,7 @@ static void DisconnectRequestFunc(SoftBusMessage *msg)
 
 static void PreventTimeoutFunc(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     if (g_bleManager.state->preventTimeout != NULL) {
         char *udid = (char *)msg->obj;
         g_bleManager.state->preventTimeout(udid);
@@ -1625,6 +1636,7 @@ static void ResetFunc(SoftBusMessage *msg)
     if (g_bleManager.state->reset == NULL) {
         return;
     }
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BLE, "obj is null");
     BleStatusContext *ctx = (BleStatusContext *)(msg->obj);
     g_bleManager.state->reset(ctx->status);
 }
