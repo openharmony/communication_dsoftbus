@@ -192,8 +192,8 @@ void TransChannelDeinit(void)
     TransAsyncReqLanePendingDeinit();
     TransNetworkStatisticsDeinit();
     TransReqAuthPendingDeinit();
-    TransFreeLanePendingDeinit();
     TransAuthWithParaReqLanePendingDeinit();
+    TransFreeLanePendingDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
@@ -215,6 +215,15 @@ static bool IsLaneModuleError(int32_t errcode)
     return false;
 }
 
+static void TransFreeLaneInner(uint32_t laneHandle, bool isQosLane, bool isAsync)
+{
+    if (isQosLane) {
+        TransFreeLaneByLaneHandle(laneHandle, isAsync);
+    } else {
+        LnnFreeLane(laneHandle);
+    }
+}
+
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     if (param == NULL || transInfo == NULL) {
@@ -230,9 +239,6 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     int32_t ret = INVALID_CHANNEL_ID;
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
     CoreSessionState state = CORE_SESSION_STATE_INIT;
-    ret = TransAddSocketChannelInfo(
-        param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Add socket channel record failed.");
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc appInfo failed.");
     ret = TransCommonGetAppInfo(param, appInfo);
@@ -241,9 +247,17 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         TransFreeAppInfo(appInfo);
         return ret;
     }
+    ret = TransAddSocketChannelInfo(
+        param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Add socket channel record failed.");
+        TransFreeAppInfo(appInfo);
+        return ret;
+    }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
+    appInfo->osType = nodeInfo.deviceInfo.osType;
     TransEventExtra extra;
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
@@ -258,7 +272,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
                 tmpName, param->sessionId);
             AnonymizeFree(tmpName);
             if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
-                TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
+                TransFreeLaneInner(laneHandle, param->isQosLane, param->isAsync);
             }
             (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
         }
@@ -331,8 +345,8 @@ EXIT_ERR:
     TransBuildTransAlarmEvent(&extraAlarm, appInfo, ret);
     TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
     TransFreeAppInfo(appInfo);
-    if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
-        TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
+    if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL || laneHandle != INVALID_LANE_REQ_ID) {
+        TransFreeLaneInner(laneHandle, param->isQosLane, param->isAsync);
     }
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, socket=%{public}d, ret=%{public}d", param->sessionId, ret);
@@ -341,7 +355,7 @@ EXIT_CANCEL:
     TransBuildTransOpenChannelCancelEvent(&extra, transInfo, appInfo->timeStart, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransFreeAppInfo(appInfo);
-    TransFreeLane(laneHandle, param->isQosLane, param->isAsync);
+    TransFreeLaneInner(laneHandle, param->isQosLane, param->isAsync);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server open channel cancel, socket=%{public}d", param->sessionId);
     return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;

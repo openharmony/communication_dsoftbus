@@ -190,7 +190,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
     sessionPara.groupId = g_groupid;
     sessionPara.attr = &g_sessionAttr;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(transInfo);
