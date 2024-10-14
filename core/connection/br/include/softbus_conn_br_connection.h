@@ -35,9 +35,6 @@ extern "C" {
 #define WAIT_BR_NEGOTIATION_CLOSING_TIMEOUT_MILLIS (3 * 1000)
 #define RETRY_NOTIFY_REFERENCE_DELAY_MILLIS        (1 * 1000)
 
-#define WAIT_TIMEOUT_OCCUPY                        (3 * 1000)
-#define WAIT_TIMEOUT_TRY_AGAIN                     (1 * 1000)
-
 #define MAX_RETRY_COUNT                            (2)
 
 enum ConnBrConnectionState {
@@ -98,7 +95,6 @@ int32_t ConnBrStartServer(void);
 int32_t ConnBrStopServer(void);
 
 void ConnBrOccupy(ConnBrConnection *connection);
-
 int32_t ConnBrConnectionMuduleInit(SoftBusLooper *looper, SppSocketDriver *sppDriver, ConnBrEventListener *listener);
 
 #ifdef __cplusplus

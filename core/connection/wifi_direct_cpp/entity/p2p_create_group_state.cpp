@@ -28,7 +28,7 @@ P2pCreateGroupState *P2pCreateGroupState::Instance()
     return &instance;
 }
 
-P2pCreateGroupState::P2pCreateGroupState() : timer_("P2pCreateGroup") { }
+P2pCreateGroupState::P2pCreateGroupState() : timer_("P2pCreateGroup", TIMER_TIMEOUT) { }
 
 void P2pCreateGroupState::Enter(const std::shared_ptr<P2pOperation> &operation)
 {
@@ -36,20 +36,15 @@ void P2pCreateGroupState::Enter(const std::shared_ptr<P2pOperation> &operation)
     operation_ = operation;
     operation_->timerId_ = timer_.Register(
         [this]() {
-            CONN_LOGE(CONN_WIFI_DIRECT, "timeout");
-            P2pOperationResult result {};
-            P2pEntity::GetInstance().currentFrequency_ = 0;
-            result.errorCode_ = SOFTBUS_TIMOUT;
-            operation_->promise_.set_value(result);
-            ChangeState(P2pAvailableState::Instance(), nullptr);
+            std::thread thread(&P2pCreateGroupState::OnTimeout, this);
+            thread.detach();
         },
         CREATE_GROUP_TIMEOUT_MS, true);
 }
 
 void P2pCreateGroupState::Exit()
 {
-    timer_.Shutdown(false);
-    operation_ = nullptr;
+    timer_.Shutdown();
 }
 
 int P2pCreateGroupState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation)
@@ -96,8 +91,10 @@ void P2pCreateGroupState::OnP2pStateChangeEvent(P2pState state)
 void P2pCreateGroupState::OnP2pConnectionChangeEvent(
     const WifiP2pLinkedInfo &info, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo)
 {
+    P2pEntity::GetInstance().Lock();
     if (operation_ == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
+        P2pEntity::GetInstance().Unlock();
         return;
     }
     timer_.Unregister(operation_->timerId_);
@@ -109,7 +106,24 @@ void P2pCreateGroupState::OnP2pConnectionChangeEvent(
         P2pEntity::GetInstance().currentFrequency_ = groupInfo->frequency;
         result.errorCode_ = SOFTBUS_OK;
     }
-    operation_->promise_.set_value(result);
     ChangeState(P2pAvailableState::Instance(), nullptr);
+    operation_->promise_.set_value(result);
+    operation_ = nullptr;
+    P2pEntity::GetInstance().Unlock();
+}
+
+void P2pCreateGroupState::OnTimeout()
+{
+    P2pEntity::GetInstance().Lock();
+    CONN_LOGE(CONN_WIFI_DIRECT, "timeout");
+    if (operation_ == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "operation is nullptr");
+        P2pEntity::GetInstance().Unlock();
+        return;
+    }
+    ChangeState(P2pAvailableState::Instance(), nullptr);
+    operation_->promise_.set_value(P2pOperationResult(static_cast<int>(SOFTBUS_CONN_CREATE_GROUP_TIMEOUT)));
+    operation_ = nullptr;
+    P2pEntity::GetInstance().Unlock();
 }
 } // namespace OHOS::SoftBus

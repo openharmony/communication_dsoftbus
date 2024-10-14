@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include "conn_log.h"
 #include "kits/c/wifi_p2p.h"
 
 #include "adapter/p2p_adapter.h"
@@ -89,6 +90,17 @@ public:
     void UpdateInterfaceManagerWhenStateChanged(P2pState state);
     static void Listener(BroadcastReceiverAction action, const struct BroadcastParam &param);
 
+    void Lock()
+    {
+        CONN_LOGD(CONN_WIFI_DIRECT, "lock");
+        operationLock_.lock();
+    }
+    void Unlock()
+    {
+        CONN_LOGD(CONN_WIFI_DIRECT, "unlock");
+        operationLock_.unlock();
+    }
+
 private:
     P2pEntity();
 
@@ -108,7 +120,7 @@ private:
     std::recursive_mutex operationLock_;
     P2pEntityState *state_;
     int currentFrequency_ = 0;
-    std::mutex pendingOperationLock_;
+    std::recursive_mutex pendingOperationLock_;
     std::queue<std::shared_ptr<P2pOperation>> pendingOperations_;
 
     OHOS::Utils::Timer timer_;

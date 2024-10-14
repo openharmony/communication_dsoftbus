@@ -46,6 +46,8 @@ public:
         const WifiP2pLinkedInfo &info, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo) = 0;
 
 protected:
+    static constexpr int TIMER_TIMEOUT = 50;
+
     static void ChangeState(P2pEntityState *state, const std::shared_ptr<P2pOperation> &operation);
 };
 }

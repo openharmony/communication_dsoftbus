@@ -16,7 +16,6 @@ import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection"
 dsoftbus_root_path = "../../../.."
-softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 config("softbus_connection_ble_test_config") {
   include_dirs = [
@@ -53,6 +52,7 @@ config("softbus_connection_ble_test_config") {
 
 ohos_unittest("ConnectionBleTest") {
   module_out_path = module_output_path
+
   public_configs = [ ":softbus_connection_ble_test_config" ]
   sources = [
     "$dsoftbus_root_path/tests/core/connection/ble/mock/connection_ble_mock.cpp",
@@ -120,7 +120,7 @@ ohos_unittest("BleConnectionServiceTest") {
 ohos_unittest("BleConnectionManagerTest") {
   module_out_path = module_output_path
   include_dirs = [
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "//foundation/communication/bluetooth/interfaces/inner_api/include",
     "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",

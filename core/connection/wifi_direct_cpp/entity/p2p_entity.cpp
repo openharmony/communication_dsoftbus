@@ -363,7 +363,11 @@ bool P2pEntity::HasPendingOperation()
 
 void P2pEntity::ClearPendingOperation()
 {
+    std::lock_guard lock(pendingOperationLock_);
+    P2pOperationResult result;
+    result.errorCode_ = SOFTBUS_CONN_ENTITY_UNAVAILABLE;
     while (!pendingOperations_.empty()) {
+        pendingOperations_.front()->promise_.set_value(result);
         pendingOperations_.pop();
     }
 }
