@@ -1201,6 +1201,8 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     ret = TransProxyProcessHandshake(chan, msg);
     if (ret != SOFTBUS_OK) {
+        ReleaseProxyChannelId(chan->channelId);
+        ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
