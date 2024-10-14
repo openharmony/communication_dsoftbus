@@ -127,7 +127,7 @@ static void ShowSessionServer(void)
 int32_t TransSessionServerAddItem(SessionServer *newNode)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param invalid");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionServerList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "no init");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionServerList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "not init");
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return SOFTBUS_LOCK_ERR;
@@ -160,7 +160,7 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
                 return SOFTBUS_SERVER_NAME_USED;
             }
             pos->pid = newNode->pid;
-            TRANS_LOGI(TRANS_CTRL, "sessionName=%{public}s is exist. old pid=%{pulic}d, new pid=%{public}d",
+            TRANS_LOGI(TRANS_CTRL, "sessionName=%{public}s is exist. old pid=%{public}d, new pid=%{public}d",
                 AnonymizeWrapper(tmpName), pos->pid, newNode->pid);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             AnonymizeFree(tmpName);
