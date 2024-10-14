@@ -32,6 +32,7 @@
 #include "distributed_device_profile_enums.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "permission_entry.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -98,6 +99,30 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
         return ret;
     }
     return TransCheckAccessControl(callingTokenId, deviceId);
+}
+
+int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionName)
+{
+    if (mySessionName == nullptr || peerSessionName == nullptr) {
+        COMM_LOGE(COMM_PERM, "param is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (strlen(peerSessionName) == 0) {
+        return SOFTBUS_OK;
+    }
+
+    if (strcmp(mySessionName, peerSessionName) != 0) {
+        if (!PermIsSecLevelPublic(mySessionName)) {
+            char *tmpName = nullptr;
+            Anonymize(mySessionName, &tmpName);
+            COMM_LOGE(COMM_PERM, "SecLevel mismatch, sessionName=%{public}s", AnonymizeWrapper(tmpName));
+            AnonymizeFree(tmpName);
+            return SOFTBUS_PERMISSION_DENIED;
+        }
+    }
+
+    return SOFTBUS_OK;
 }
 
 int32_t TransCheckServerAccessControl(uint32_t callingTokenId)

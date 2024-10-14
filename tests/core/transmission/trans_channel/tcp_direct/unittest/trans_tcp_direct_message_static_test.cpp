@@ -277,7 +277,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReply0007, TestSize.
     AppInfo *appInfo = TestSetAppInfo();
 
     ret = OpenDataBusRequestReply(appInfo, channelId, seq, flags);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -479,7 +479,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelClosedTest001, TestSize.L
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = NotifyChannelClosed(appInfo, 1);
-    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
     SoftBusFree(appInfo);
 }
 
