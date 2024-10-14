@@ -277,11 +277,13 @@ std::vector<uint8_t> WifiDirectUtils::GetInterfaceMacAddr(const std::string &int
     int ret = strcpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), interface.c_str());
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, macArray, CONN_WIFI_DIRECT, "copy interface name failed");
     int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
-    CONN_CHECK_AND_RETURN_RET_LOGW(fd > 0, macArray, CONN_WIFI_DIRECT, "open socket failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(fd > 0, macArray, CONN_WIFI_DIRECT,
+        "open socket failed, fd=%{public}d, errno=%{public}d(%{public}s)", fd, errno, strerror(errno));
     ret = ioctl(fd, SIOCGIFHWADDR, &ifr);
     close(fd);
 
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == 0, macArray, CONN_WIFI_DIRECT, "get hw addr failed ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == 0, macArray, CONN_WIFI_DIRECT,
+        "get hw addr failed ret=%{public}d, errno=%{public}d(%{public}s)", ret, errno, strerror(errno));
     macArray.insert(macArray.end(), ifr.ifr_hwaddr.sa_data, ifr.ifr_hwaddr.sa_data + MAC_ADDR_ARRAY_SIZE);
     return macArray;
 }
@@ -290,7 +292,8 @@ std::string WifiDirectUtils::GetInterfaceIpv6Addr(const std::string &name)
 {
     struct ifaddrs *allAddr = nullptr;
     auto ret = getifaddrs(&allAddr);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, "", CONN_WIFI_DIRECT, "getifaddrs failed, errno=%{public}d", errno);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, "", CONN_WIFI_DIRECT,
+        "getifaddrs failed, ret=%{public}d, errno=%{public}d(%{public}s)", ret, errno, strerror(errno));
 
     for (struct ifaddrs *ifa = allAddr; ifa != nullptr; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET6 || ifa->ifa_netmask == nullptr ||
@@ -312,7 +315,7 @@ std::vector<Ipv4Info> WifiDirectUtils::GetLocalIpv4Infos()
     std::vector<Ipv4Info> ipv4Infos;
     struct ifaddrs *ifAddr = nullptr;
     if (getifaddrs(&ifAddr) == -1) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "getifaddrs failed, errno=%{public}d", errno);
+        CONN_LOGE(CONN_WIFI_DIRECT, "getifaddrs failed, errno=%{public}d(%{public}s)", errno, strerror(errno));
         return ipv4Infos;
     }
 
@@ -362,8 +365,8 @@ int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std:
     CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s", interface.c_str());
 
     int32_t socketFd = socket(AF_INET, SOCK_DGRAM, 0);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        socketFd >= 0, SOFTBUS_CONN_OPEN_SOCKET_FAILED, CONN_WIFI_DIRECT, "open socket failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(socketFd >= 0, SOFTBUS_CONN_OPEN_SOCKET_FAILED, CONN_WIFI_DIRECT,
+        "open socket failed, socketFd=%{public}d, errno=%{public}d(%{public}s)", socketFd, errno, strerror(errno));
 
     struct ifreq request { };
     (void)memset_s(&request, sizeof(request), 0, sizeof(request));
@@ -376,8 +379,8 @@ int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std:
 
     ret = ioctl(socketFd, SIOCGIFADDR, &request);
     close(socketFd);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret >= 0, SOFTBUS_CONN_GET_IFR_CONF_FAILED, CONN_WIFI_DIRECT, "get ifr conf failed ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret >= 0, SOFTBUS_CONN_GET_IFR_CONF_FAILED, CONN_WIFI_DIRECT,
+        "get ifr conf failed ret=%{public}d, errno=%{public}d(%{public}s)", ret, errno, strerror(errno));
 
     auto *sockAddrIn = (struct sockaddr_in *)&request.ifr_addr;
     char ipString[IP_LEN] = { 0 };
