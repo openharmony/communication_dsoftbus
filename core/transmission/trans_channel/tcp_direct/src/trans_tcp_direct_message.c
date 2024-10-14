@@ -261,7 +261,13 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         TRANS_LOGE(TRANS_BYTES, "Invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t bufferLen = AuthGetEncryptSize(packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    AuthHandle authHandle = { 0 };
+    if (GetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK ||
+        authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_BYTES, "get auth id fail, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
+    }
+    uint32_t bufferLen = AuthGetEncryptSize(authHandle.authId, packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = (char *)SoftBusCalloc(bufferLen);
     if (buffer == NULL) {
         TRANS_LOGE(TRANS_BYTES, "buffer malloc error.");
@@ -388,7 +394,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     int32_t ret = conn.serverSide ? GetServerSideIpInfo(&conn.appInfo, myIp, IP_LEN)
                                   : GetClientSideIpInfo(&conn.appInfo, myIp, IP_LEN);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get ip failed, ret=%{public}d.", ret);
+        TRANS_LOGE(TRANS_CTRL, "get ip failed, ret = %{public}d.", ret);
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         return ret;
     }
@@ -447,8 +453,10 @@ static int32_t NotifyChannelBind(int32_t channelId)
 
 static int32_t NotifyChannelClosed(const AppInfo *appInfo, int32_t channelId)
 {
-    AppInfoData myData = appInfo->myData;
-    int32_t ret = TransTdcOnChannelClosed(myData.pkgName, myData.pid, channelId);
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = TransTdcGetPkgName(appInfo->myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
+    ret = TransTdcOnChannelClosed(pkgName, appInfo->myData.pid, channelId);
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
@@ -825,14 +833,28 @@ static void ReportTransEventExtra(
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, *extra);
 }
 
+static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
+{
+    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
+        ret = (char *)"Server check acl failed";
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    }
+
+    if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
+        ret = (char *)"Server check session name failed";
+        return SOFTBUS_PERMISSION_SERVER_DENIED;
+    }
+
+    return SOFTBUS_OK;
+}
+
 static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t channelId, char *errDesc)
 {
     char *ret = NULL;
     int32_t errCode = SOFTBUS_OK;
-    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
-        errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
-        ret = (char *)"Server check acl failed";
+    errCode = CheckServerPermission(appInfo, ret);
+    if (errCode != SOFTBUS_OK) {
         goto ERR_EXIT;
     }
 

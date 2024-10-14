@@ -42,6 +42,13 @@ typedef struct {
     uint8_t tos;
 } UdpChannelInfo;
 
+typedef struct {
+    ListNode node;
+    int64_t channelId;
+    int pid;
+    char pkgName[PKG_NAME_SIZE_MAX];
+} UdpChannelNotifyInfo;
+
 SoftBusList *GetUdpChannelMgrHead(void);
 
 int32_t TransUdpChannelMgrInit(void);

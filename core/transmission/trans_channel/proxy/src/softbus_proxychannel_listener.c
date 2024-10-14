@@ -349,6 +349,9 @@ int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, con
 static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNetworkId, AppInfo *appInfo)
 {
     int ret = SOFTBUS_TRANS_GET_APP_INFO_FAILED;
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(peerNetworkId, &osType);
+    appInfo->osType = osType;
     appInfo->appType = APP_TYPE_INNER;
     appInfo->myData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;

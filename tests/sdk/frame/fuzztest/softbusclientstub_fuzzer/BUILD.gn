@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -73,7 +73,6 @@ ohos_static_library("softbus_client_static") {
   include_dirs = common_client_inc
   deps = common_client_deps
   external_deps = common_client_ex_deps
-  all_dependent_configs = [ ":dsoftbus_sdk_interface" ]
   public_configs = [ ":dsoftbus_sdk_interface" ]
   defines += TRANS_SDK_DEFINES
 

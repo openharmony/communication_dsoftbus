@@ -68,6 +68,7 @@ const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF
 const char *g_groupId = "TEST_GROUP_ID";
 const char *g_deviceName = "rk3568test";
 const char *g_rootDir = "/data";
+const char *NEW_SESSION_NAME = "ohos.test.distributedschedule.dms.test";
 static SessionAttribute g_sessionAttr = {
     .dataType = TYPE_BYTES,
 };
@@ -492,10 +493,12 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level1)
     bool res = AddStringToJsonObject(msg, "BLE_MAC", TRANS_TEST_BR_MAC);
     ASSERT_TRUE(res);
     char *data = cJSON_PrintUnformatted(msg);
-    int ret = OpenAuthSession(g_sessionName, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
+    int32_t ret = OpenAuthSession(g_sessionName, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED);
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = CreateSessionServer(g_pkgName, NEW_SESSION_NAME, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
     ret = OpenAuthSession(g_sessionName, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
     ret = ClientDeleteSession(ret);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -507,12 +510,14 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level1)
     res = AddNumberToJsonObject(msg, "WIFI_PORT", TRANS_TEST_AUTH_PORT);
     ASSERT_TRUE(res);
     data = cJSON_PrintUnformatted(msg);
-    ret = OpenAuthSession(g_sessionName, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SET_CHANNEL_FAILED);
+    ret = OpenAuthSession(NEW_SESSION_NAME, addrInfoArr, TRANS_TEST_ADDR_INFO_NUM, data);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED);
     ret = ClientDeleteSession(ret);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
     ret = RemoveSessionServer(g_pkgName, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = RemoveSessionServer(g_pkgName, NEW_SESSION_NAME);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
     cJSON_free(data);
     cJSON_Delete(msg);
 }

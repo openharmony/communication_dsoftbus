@@ -55,7 +55,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
     }
 
     AddSocketResource(sessionName, channel);
-    if (channel->channelType == CHANNEL_TYPE_UDP && channel->isServer) {
+    if (channel->channelType == CHANNEL_TYPE_UDP && channel->isServer && udpPort > 0) {
         return udpPort;
     }
 
