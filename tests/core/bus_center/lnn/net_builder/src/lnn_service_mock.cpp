@@ -158,6 +158,11 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
     return GetServiceInterface()->LnnDiscTypeToConnAddrType(type);
 }
 
+bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr)
+{
+    return GetServiceInterface()->LnnIsConnectionAddrInvalid(addr);
+}
+
 void UpdateProfile(const NodeInfo *info)
 {
     return GetServiceInterface()->UpdateProfile(info);
