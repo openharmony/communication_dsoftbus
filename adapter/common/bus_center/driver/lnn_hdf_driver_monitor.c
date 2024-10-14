@@ -38,8 +38,8 @@ typedef struct {
 } HdfDriverEventCtrl;
 
 typedef struct {
-    uint32_t event;
     char ifName[NETIF_NAME_LENGTH];
+    uint32_t event;
     union ExtInfo {
         int32_t status;
     } extInfo;

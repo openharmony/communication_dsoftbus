@@ -94,11 +94,11 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    SoftbusBroadcastPayload bcData;
-    SoftbusBroadcastPayload rspData;
     // By default, the flag behavior is supported. If the flag behavior is not supported, the value must be set to false
     bool isSupportFlag;
     uint8_t flag;
+    SoftbusBroadcastPayload bcData;
+    SoftbusBroadcastPayload rspData;
 } SoftbusBroadcastData;
 
 /**
@@ -132,8 +132,8 @@ typedef struct {
     int8_t rssi;
     uint8_t addrType;
     SoftbusMacAddr addr;
-    int8_t *deviceName;
     uint8_t localName[SOFTBUS_LOCAL_NAME_LEN_MAX];
+    int8_t *deviceName;
     SoftbusBroadcastData data;
 } SoftBusBcScanResult;
 
@@ -144,20 +144,20 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    int32_t minInterval;
-    int32_t maxInterval;
     uint8_t advType;
     uint8_t advFilterPolicy;
     uint8_t ownAddrType;
     uint8_t peerAddrType;
-    SoftbusMacAddr peerAddr;
-    int32_t channelMap;
-    int32_t duration;
     int8_t txPower;
     bool isSupportRpa;
     uint8_t ownIrk[SOFTBUS_IRK_LEN];
     uint8_t ownUdidHash[SOFTBUS_UDID_HASH_LEN];
+    SoftbusMacAddr peerAddr;
     SoftbusMacAddr localAddr;
+    int32_t minInterval;
+    int32_t maxInterval;
+    int32_t channelMap;
+    int32_t duration;
 } SoftbusBroadcastParam;
 
 /**
@@ -167,17 +167,17 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    int8_t *address;
-    int8_t *deviceName;
+    bool advIndReport;
     uint16_t serviceUuid;
     uint32_t serviceDataLength;
-    uint8_t *serviceData;
-    uint8_t *serviceDataMask;
     uint16_t manufactureId;
     uint32_t manufactureDataLength;
+    int8_t *address;
+    int8_t *deviceName;
+    uint8_t *serviceData;
+    uint8_t *serviceDataMask;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
-    bool advIndReport;
 } SoftBusBcScanFilter;
 
 /**
@@ -187,11 +187,11 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    uint16_t scanInterval;
-    uint16_t scanWindow;
     uint8_t scanType;
     uint8_t scanPhy;
     uint8_t scanFilterPolicy;
+    uint16_t scanInterval;
+    uint16_t scanWindow;
 } SoftBusBcScanParams;
 
 typedef struct {
@@ -201,9 +201,9 @@ typedef struct {
 } SoftBusLpBroadcastParam;
 
 typedef struct {
+    uint8_t filterSize;
     SoftBusBcScanParams scanParam;
     SoftBusBcScanFilter *filter;
-    uint8_t filterSize;
 } SoftBusLpScanParam;
 
 #ifdef __cplusplus
