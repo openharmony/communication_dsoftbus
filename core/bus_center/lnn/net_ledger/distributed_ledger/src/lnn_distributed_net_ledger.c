@@ -825,7 +825,7 @@ int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);
     }
-    LNN_LOGI(LNN_LEDGER, "LnnDeleteMetaInfo success");
+    LNN_LOGI(LNN_LEDGER, "LnnDeleteMetaInfo success, discType=%{public}d", discType);
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
