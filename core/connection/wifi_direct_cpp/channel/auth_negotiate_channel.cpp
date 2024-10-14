@@ -58,6 +58,11 @@ bool AuthNegotiateChannel::operator==(const AuthNegotiateChannel &other) const
     return handle_.authId == other.handle_.authId && handle_.type == other.handle_.type;
 }
 
+bool AuthNegotiateChannel::operator==(const AuthHandle &otherHandle) const
+{
+    return handle_.authId == otherHandle.authId && handle_.type == otherHandle.type;
+}
+
 bool AuthNegotiateChannel::IsMeta() const
 {
     bool isMeta = false;
