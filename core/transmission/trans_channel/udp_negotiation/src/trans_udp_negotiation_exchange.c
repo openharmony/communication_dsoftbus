@@ -76,6 +76,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
     (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
     (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int*)&(appInfo->businessType));
+    (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
 
     int code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
@@ -239,6 +240,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddNumberToJsonObject(msg, "PID", appInfo->myData.pid);
     (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", appInfo->businessType);
     (void)AddNumberToJsonObject(msg, "STREAM_TYPE", appInfo->streamType);
+    (void)AddNumberToJsonObject(msg, "API_VERSION", (int32_t)appInfo->myData.apiVersion);
 
     return SOFTBUS_OK;
 }
