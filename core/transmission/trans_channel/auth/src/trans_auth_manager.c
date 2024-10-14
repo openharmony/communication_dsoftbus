@@ -16,6 +16,7 @@
 #include "trans_auth_manager.h"
 
 #include "auth_channel.h"
+#include "auth_meta_manager.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_connection_addr_utils.h"
@@ -43,6 +44,7 @@
 
 #define AUTH_GROUP_ID "auth group id"
 #define AUTH_SESSION_KEY "auth session key"
+#define ISHARE_AUTH_SESSION "IShareAuthSession"
 
 typedef struct {
     int32_t channelType;
@@ -609,6 +611,10 @@ static void OnDisconnect(int32_t authId)
         return;
     }
     TRANS_LOGI(TRANS_SVC, "recv channel disconnect event. authId=%{public}d", authId);
+    // If it is an ishare session, clean up the auth manager
+    if (strcmp(dstInfo.appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
+        DelAuthMetaManagerByConnectionId(authId);
+    }
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
     (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
         (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);
@@ -1115,6 +1121,10 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         ListDelete(&channel->node);
         TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d, authId=%{public}d", channelId, channel->authId);
         g_authChannelList->cnt--;
+        // If it is an ishare session, clean up the auth manager
+        if (strcmp(channel->appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
+            DelAuthMetaManagerByConnectionId(channel->authId);
+        }
         TransAuthCloseChannel(channel->authId, channel->appInfo.linkType, channel->isClient);
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
         SoftBusFree(channel);
