@@ -417,7 +417,7 @@ static int32_t BleOnReferenceRequest(ConnBleConnection *connection, BleReference
     (void)SoftBusMutexUnlock(&connection->lock);
 
     RcPackCtlMsgPara rcMsgPara = {
-        .delta = delta,
+        .delta = 0,
         .localRc = localRc,
         .challengeCode = challengeCode,
         .connId = connection->connectionId,
