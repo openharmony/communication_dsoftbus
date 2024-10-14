@@ -184,3 +184,8 @@ void AuthMetaCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
     (void)connInfo;
     (void)isExist;
 }
+
+void DelAuthMetaManagerByConnectionId(uint32_t connectionId)
+{
+    (void)connectionId;
+}
