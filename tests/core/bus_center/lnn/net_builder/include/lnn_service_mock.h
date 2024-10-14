@@ -68,6 +68,7 @@ public:
     virtual int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig) = 0;
     virtual int32_t SoftBusDisconnectDevice(void) = 0;
     virtual ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type) = 0;
+    virtual bool LnnIsConnectionAddrInvalid(const ConnectionAddr *addr) = 0;
     virtual void UpdateProfile(const NodeInfo *info) = 0;
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategy(
@@ -122,6 +123,7 @@ public:
     MOCK_METHOD1(SoftBusConnectToDevice, int32_t (const SoftBusWifiDevConf *));
     MOCK_METHOD0(SoftBusDisconnectDevice, int32_t ());
     MOCK_METHOD1(LnnDiscTypeToConnAddrType, ConnectionAddrType (DiscoveryType));
+    MOCK_METHOD1(LnnIsConnectionAddrInvalid, bool (const ConnectionAddr *addr));
     MOCK_METHOD1(UpdateProfile, void (const NodeInfo *));
     MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t (LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
