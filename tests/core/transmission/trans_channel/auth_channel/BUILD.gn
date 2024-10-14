@@ -28,6 +28,7 @@ ohos_unittest("TransAuthChannelTest") {
 
     "$dsoftbus_core_path/adapter/bus_center/include",
 
+    "$dsoftbus_core_path/authentication/include",
     "$dsoftbus_core_path/authentication/interface",
 
     "$dsoftbus_core_path/bus_center/interface",
