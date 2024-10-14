@@ -48,11 +48,11 @@ typedef enum {
 } SoftBusThreadPriority;
 
 typedef struct {
-    const char *taskName;
     int32_t policy;
     int32_t detachState;
-    uint64_t stackSize;
     SoftBusThreadPriority prior;
+    const char *taskName;
+    uint64_t stackSize;
 } SoftBusThreadAttr;
 
 typedef enum {
