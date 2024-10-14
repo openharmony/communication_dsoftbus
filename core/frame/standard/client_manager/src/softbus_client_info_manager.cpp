@@ -94,7 +94,7 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
             break;
         }
     }
-    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%{public}d, pkgname=%{public}s", (*pid), pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%{public}d, pkgName=%{public}s", (*pid), pkgName.c_str());
     return SOFTBUS_OK;
 }
 

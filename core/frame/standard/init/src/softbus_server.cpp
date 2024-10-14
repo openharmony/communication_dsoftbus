@@ -33,6 +33,7 @@
 #include "lnn_lane_interface.h"
 
 #define SOFTBUS_IPC_THREAD_NUM 32
+#define OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS (15 * 1000)
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -71,7 +72,7 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     if (abilityDeath == nullptr) {
         COMM_LOGE(COMM_SVC, "DeathRecipient object is nullptr");
-        return SOFTBUS_TRANS_DEATH_RECIPIENT_IS_NULL;
+        return SOFTBUS_TRANS_DEATH_RECIPIENT_INVAILD;
     }
     bool ret = object->AddDeathRecipient(abilityDeath);
     if (!ret) {
