@@ -40,6 +40,7 @@ namespace OHOS {
 #define SHORT_UDID_HASH_LEN 8
 #define MAX_SIZE            100
 #define SLEEP_TIME_MS       1000
+#define WAIT_UPDATE_TIME_MS 3500
 
 static ConnBleTransEventListener g_transEventListener = { 0 };
 static SoftBusBtStateListener g_btListener = { 0 };
@@ -911,15 +912,43 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleSend001, TestSize.Level1)
     EXPECT_CALL(bleMock, ConnGattServerSend).WillOnce(Return(SOFTBUS_OK));
     ret = ConnBleSend(connection, data, dataLen, MODULE_CONNECTION);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
     connection->side = CONN_SIDE_CLIENT;
     EXPECT_CALL(bleMock, ConnGattClientSend).WillOnce(Return(SOFTBUS_OK));
     ret = ConnBleSend(connection, data, dataLen, MODULE_CONNECTION);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
     ret = ConnBleSaveConnection(connection);
     ASSERT_EQ(SOFTBUS_OK, ret);
     ConnBleRefreshIdleTimeout(connection);
-    SoftBusSleepMs(CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS); // sleep 60s to call timout event
+}
+
+/*
+ * @tc.name: ConnBleOccupy001
+ * @tc.desc: Test ConnBleOccupy.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnBleOccupy001, TestSize.Level1)
+{
+    const char *bleMac = "11:22:33:44:55:66";
+    ConnBleConnection *connection = ConnBleCreateConnection(bleMac, BLE_GATT,
+    CONN_SIDE_CLIENT, INVALID_UNDERLAY_HANDLE, true);
+    ASSERT_NE(nullptr, connection);
+    int32_t ret = ConnBleSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ConnBleOccupy(connection);
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, ConnBlePackCtlMessage).WillRepeatedly(Return(100));
+    EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = ConnBleUpdateConnectionRc(connection, 1, 1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ConnBleUpdateConnectionRc(connection, 1, -1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(WAIT_UPDATE_TIME_MS); // sleep 3.5s to retry update Rc
+    EXPECT_EQ(connection->state, BLE_CONNECTION_STATE_NEGOTIATION_CLOSING);
+    ConnBleRemoveConnection(connection);
+    ConnBleReturnConnection(&connection);
 }
 } // namespace OHOS

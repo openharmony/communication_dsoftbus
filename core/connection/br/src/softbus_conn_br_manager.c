@@ -227,6 +227,7 @@ static int32_t ConvertCtxToDevice(ConnBrDevice **outDevice, const ConnBrConnectR
         return status;
     }
     device->connectionId = ctx->connectionId;
+    device->waitTimeoutDelay = ctx->waitTimeoutDelay;
     ListAdd(&device->requests, &request->node);
     *outDevice = device;
     return SOFTBUS_OK;
@@ -349,9 +350,7 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
     CONN_LOGI(CONN_BR, "schedule connect request, addr=%{public}s", anomizeAddress);
     int32_t status = SOFTBUS_OK;
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
-    if (connection == NULL) {
-        return SOFTBUS_CONN_BR_INTERNAL_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_BR, "connection is null");
     char *address = NULL;
     KeepAliveBleIfSameAddress(device);
     do {
@@ -371,8 +370,17 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
             break;
         }
         g_brManager.connecting = device;
+        uint32_t waitTimeoutDelay = 0;
+        if (device->waitTimeoutDelay < BR_CONNECT_TIMEOUT_MIN_MILLIS) {
+            waitTimeoutDelay = BR_CONNECT_TIMEOUT_MIN_MILLIS;
+        } else if (device->waitTimeoutDelay > BR_CONNECT_TIMEOUT_MAX_MILLIS) {
+            waitTimeoutDelay = BR_CONNECT_TIMEOUT_MAX_MILLIS;
+        } else {
+            waitTimeoutDelay = device->waitTimeoutDelay;
+        }
+        CONN_LOGI(CONN_BR, "delay=%{public}d, device delay=%{public}d", waitTimeoutDelay, device->waitTimeoutDelay);
         ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_TIMEOUT, connection->connectionId, 0, address,
-            BR_CONNECT_TIMEOUT_MILLIS);
+            waitTimeoutDelay);
         TransitionToState(BR_STATE_CONNECTING);
     } while (false);
 
@@ -665,8 +673,17 @@ static void ClientConnected(uint32_t connectionId)
     ConnBrReturnConnection(&connection);
 }
 
-static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection *connection, int32_t error)
+static bool IsNeedWaitCallbackError(uint32_t connectionId, int32_t *error)
 {
+    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, false, CONN_BR,
+        "get conntion failed, connId=%{public}d", connectionId);
+
+    if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "lock failed, connId=%{public}u", connectionId);
+        ConnBrReturnConnection(&connection);
+        return false;
+    }
     int32_t result = 0;
     BrUnderlayerStatus *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
@@ -675,10 +692,13 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
             result = it->result;
         }
     }
-    if (result != 0) {
-        error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
+    (void)SoftBusMutexUnlock(&connection->lock);
+    ConnBrReturnConnection(&connection);
+    if (result != 0 && result <= CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED) {
+        *error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
+        return false;
     }
-    NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
+    return true;
 }
 
 static int32_t AuthenticationFailedAndRetry(ConnBrConnection *connection, ConnBrDevice *connectingDevice,
@@ -759,7 +779,7 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
         if (AuthenticationFailedAndRetry(connection, connectingDevice, anomizeAddress) == SOFTBUS_OK) {
             break;
         }
-        ProcessConnectError(connectingDevice, connection, error);
+        NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
     } while (false);
     ConnBrRemoveConnection(connection);
     ConnBrReturnConnection(&connection);
@@ -790,12 +810,6 @@ static void ClientConnectTimeoutOnConnectingState(uint32_t connectionId, const c
 
 static void DataReceived(ConnBrDataReceivedContext *ctx)
 {
-    if (ctx->dataLen < sizeof(ConnPktHead)) {
-        CONN_LOGE(CONN_BR, "dataLength(=%{public}u) is less than header size, connId=%{public}u",
-            ctx->dataLen, ctx->connectionId);
-        SoftBusFree(ctx->data);
-        return;
-    }
     ConnPktHead *head = (ConnPktHead *)ctx->data;
     ConnBrConnection *connection = ConnBrGetConnectionById(ctx->connectionId);
     if (connection == NULL) {
@@ -1075,7 +1089,6 @@ static void ConnectRequestFunc(SoftBusMessage *msg)
     if (g_brManager.state->connectRequest == NULL) {
         return;
     }
-    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ConnBrConnectRequestContext *ctx = (ConnBrConnectRequestContext *)msg->obj;
     g_brManager.state->connectRequest(ctx);
 }
@@ -1090,7 +1103,6 @@ static void ClientConnectedFunc(SoftBusMessage *msg)
 
 static void ClientConnectTimeoutFunc(SoftBusMessage *msg)
 {
-    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     if (g_brManager.state->clientConnectTimeout != NULL) {
         g_brManager.state->clientConnectTimeout((uint32_t)msg->arg1, (char *)msg->obj);
         return;
@@ -1102,7 +1114,6 @@ static void ClientConnectFailedFunc(SoftBusMessage *msg)
     if (g_brManager.state->clientConnectFailed == NULL) {
         return;
     }
-    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ErrorContext *ctx = (ErrorContext *)(msg->obj);
     g_brManager.state->clientConnectFailed(ctx->connectionId, ctx->error);
 }
@@ -1117,13 +1128,10 @@ static void ServerAcceptedFunc(SoftBusMessage *msg)
 
 static void DataReceivedFunc(SoftBusMessage *msg)
 {
-    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
-    ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)msg->obj;
     if (g_brManager.state->dataReceived == NULL) {
-        SoftBusFree(ctx->data);
         return;
     }
-
+    ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)msg->obj;
     g_brManager.state->dataReceived(ctx);
 }
 
@@ -1132,7 +1140,6 @@ static void ConnectionExceptionFunc(SoftBusMessage *msg)
     if (g_brManager.state->connectionException == NULL) {
         return;
     }
-    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ErrorContext *ctx = (ErrorContext *)(msg->obj);
     g_brManager.state->connectionException(ctx->connectionId, ctx->error);
 }
@@ -1155,7 +1162,6 @@ static void DisconnectRequestFunc(SoftBusMessage *msg)
 
 static void UnpendFunc(SoftBusMessage *msg)
 {
-    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     if (g_brManager.state->unpend != NULL) {
         g_brManager.state->unpend((const char *)msg->obj);
         return;
@@ -1167,7 +1173,6 @@ static void ResetFunc(SoftBusMessage *msg)
     if (g_brManager.state->reset == NULL) {
         return;
     }
-    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_BR, "obj is null");
     ErrorContext *ctx = (ErrorContext *)(msg->obj);
     g_brManager.state->reset(ctx->error);
 }
@@ -1251,9 +1256,12 @@ static void OnClientConnectFailed(uint32_t connectionId, int32_t error)
     ErrorContext *ctx = (ErrorContext *)SoftBusCalloc(sizeof(ErrorContext));
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BR,
         "OnClientConnectFailed: calloc ctx failed, connId=%{public}u, error=%{public}d", connectionId, error);
+    bool needWait = IsNeedWaitCallbackError(connectionId, &error);
     ctx->connectionId = connectionId;
     ctx->error = error;
-    if (ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_FAIL, connectionId, 0, ctx, 0) != SOFTBUS_OK) {
+    uint32_t timeoutDelay = needWait ? BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS : 0;
+    if (ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_FAIL, connectionId,
+        0, ctx, timeoutDelay) != SOFTBUS_OK) {
         SoftBusFree(ctx);
     }
 }
@@ -1490,6 +1498,7 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
     }
     ctx->result = *result;
     ctx->connectionId = option->brOption.connectionId;
+    ctx->waitTimeoutDelay = option->brOption.waitTimeoutDelay;
     int32_t status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "post msg to looper failed, requestId=%{public}u, addr=%{public}s, error=%{public}d",

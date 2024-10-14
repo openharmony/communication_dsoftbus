@@ -35,8 +35,8 @@ struct AuthOpenEvent {
 };
 
 struct AuthExceptionEvent {
-    int32_t error;
-    AuthHandle handle;
+    int32_t error_;
+    AuthHandle handle_;
 };
 
 class AuthNegotiateChannel : public NegotiateChannel, public std::enable_shared_from_this<AuthNegotiateChannel> {

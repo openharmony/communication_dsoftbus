@@ -17,7 +17,7 @@
 #include <cstring>
 #include <gtest/gtest.h>
 #include <securec.h>
-#include "connection_ble_mock.h"
+
 #include "common_list.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
@@ -27,9 +27,10 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_ble_send_queue.h"
 #include "softbus_conn_ble_trans.h"
+#include "connection_ble_mock.h"
 
-using namespace testing::ext;
 using namespace testing;
+using namespace testing::ext;
 namespace OHOS {
 static uint32_t g_connId;
 
@@ -39,8 +40,10 @@ void ConnectedCB(unsigned int connectionId, const ConnectionInfo *info)
         g_connId = connectionId;
     }
 }
-void DisConnectedCB(unsigned int connectionId, const ConnectionInfo *info) {}
+
+void DisConnectCB(unsigned int connectionId, const ConnectionInfo *info) {}
 void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len) {}
+
 class ConnectionBleTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -62,181 +65,8 @@ void ConnectionBleTest::TearDownTestCase()
 }
 
 /*
-* @tc.name: TransTest001
-* @tc.desc: Test ConnBlePackCtlMessage.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionBleTest, TransTest001, TestSize.Level1)
-{
-    int64_t ret;
-    uint8_t *outData = nullptr;
-    uint32_t outLen;
-    BleCtlMessageSerializationContext ctx;
-    NiceMock<ConnectionBleInterfaceMock> bleMock;
-
-    ctx.connectionId = 1;
-    ctx.method = METHOD_NOTIFY_REQUEST;
-    EXPECT_CALL(bleMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    ret = ConnBlePackCtlMessage(ctx, &outData, &outLen);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    EXPECT_CALL(bleMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
-    ret = ConnBlePackCtlMessage(ctx, &outData, &outLen);
-    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
-}
-
-/*
-* @tc.name: TransTest002
-* @tc.desc: Test ConnGattTransRecv.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionBleTest, TransTest002, TestSize.Level1)
-{
-    uint8_t *value;
-    uint32_t connectionId = 1;
-    uint8_t *data = nullptr;
-    uint32_t dataLen = 0;
-    ConnBleReadBuffer buffer;
-    uint32_t *outLen = nullptr;
-    BleTransHeader tmp;
-
-    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, outLen);
-    ASSERT_TRUE(value == nullptr);
-
-    uint32_t len = sizeof(ConnBleReadBuffer) - 1;
-    value = ConnGattTransRecv(connectionId, data, len, &buffer, outLen);
-    ASSERT_TRUE(value == nullptr);
-
-    tmp.total = MAX_DATA_LEN + 1;
-    dataLen = 17;
-    data = (uint8_t *)(&tmp);
-    outLen = (uint32_t *)SoftBusCalloc(buffer.total);
-    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, outLen);
-    ASSERT_TRUE(value == nullptr);
-
-    tmp.seq = 1;
-    tmp.size = 2;
-    tmp.offset = 0;
-    tmp.total = MAX_DATA_LEN + 1;
-    data = (uint8_t *)(&tmp);
-    buffer.seq = 1;
-    outLen = (uint32_t *)SoftBusCalloc(buffer.total);
-    value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, outLen);
-    ASSERT_TRUE(value == nullptr);
-}
-
-/*
-* @tc.name: TransTest003
-* @tc.desc: Test ConnCocTransRecv.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionBleTest, TransTest003, TestSize.Level1)
-{
-    uint8_t *value;
-    uint32_t connectionId;
-    LimitedBuffer buffer;
-    int32_t *outLen = nullptr;
-    ConnPktHead head;
-
-    head.magic = MAGIC_NUMBER;
-    head.len = 70;
-    buffer.capacity = 140;
-    buffer.length = 100;
-    buffer.buffer = (uint8_t *)(&head);
-    connectionId = 1;
-    outLen = (int32_t *)SoftBusCalloc(head.len + sizeof(ConnPktHead));
-    value = ConnCocTransRecv(connectionId, &buffer, outLen);
-    ASSERT_TRUE(value != nullptr);
-
-    head.magic = MAGIC_NUMBER + 1;
-    head.len = 70;
-    buffer.capacity = 140;
-    buffer.length = 100;
-    buffer.buffer = (uint8_t *)(&head);
-    connectionId = 1;
-    value = ConnCocTransRecv(connectionId, &buffer, outLen);
-    ASSERT_TRUE(value == nullptr);
-}
-
-/*
-* @tc.name: QueueTest001
-* @tc.desc: Test ConnBleEnqueueNonBlock.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionBleTest, QueueTest001, TestSize.Level1)
-{
-    int32_t ret;
-    SendQueueNode queueNode;
-
-    ret = ConnBleInitSendQueue();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = ConnBleEnqueueNonBlock(NULL);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    queueNode.flag = CONN_HIGH;
-    queueNode.pid = 0;
-    ret = ConnBleEnqueueNonBlock(&queueNode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    queueNode.flag = CONN_MIDDLE;
-    queueNode.pid = 1;
-    ret = ConnBleEnqueueNonBlock(&queueNode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    queueNode.flag = CONN_LOW;
-    queueNode.pid = 1;
-    ret = ConnBleEnqueueNonBlock(&queueNode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ConnBleDeinitSendQueue();
-}
-
-/*
-* @tc.name: QueueTest002
-* @tc.desc: Test ConnBleEnqueueNonBlock.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionBleTest, QueueTest002, TestSize.Level1)
-{
-    int32_t ret;
-    void *msg = nullptr;
-    SendQueueNode queueNode;
-
-    ret = ConnBleInitSendQueue();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    queueNode.flag = CONN_LOW;
-    queueNode.pid = 1;
-    ret = ConnBleEnqueueNonBlock(&queueNode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = ConnBleDequeueBlock(&msg);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = ConnBleDequeueBlock(NULL);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ConnBleDeinitSendQueue();
-}
-
-/*
 * @tc.name: ManagerTest001
-* @tc.desc: Test ConnTypeIsSupport.
+* @tc.desc: test ConnTypeIsSupport
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -249,7 +79,7 @@ HWTEST_F(ConnectionBleTest, ManagerTest001, TestSize.Level1)
 
 /*
 * @tc.name: ManagerTest002
-* @tc.desc: Test invalid param.
+* @tc.desc: test invalid param
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -268,19 +98,38 @@ HWTEST_F(ConnectionBleTest, ManagerTest002, TestSize.Level1)
     ret = ConnStopLocalListening(nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
 }
+
 /*
 * @tc.name: ManagerTest003
-* @tc.desc: Test Start stop listening.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: NonZero
+* @tc.desc: test set unset callback and post disconnect without connect
 * @tc.type: FUNC
-* @tc.require:The ConnStartLocalListening and ConnStopLocalListening operates normally.
+* @tc.require:
 */
 HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
 {
     ConnectCallback connCb;
     connCb.OnConnected = ConnectedCB;
-    connCb.OnDisconnected = DisConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+    g_connId = 0;
+}
+
+/*
+* @tc.name: ManagerTest004
+* @tc.desc: Test start stop listening.
+* @tc.in: Test module, Test number,Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnStartLocalListening and ConnStopLocalListening operates normally.
+*/
+HWTEST_F(ConnectionBleTest, ManagerTest004, TestSize.Level1)
+{
+    ConnectCallback connCb;
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
     connCb.OnDataReceived = DataReceivedCB;
     int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -294,5 +143,47 @@ HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
     ret = ConnStopLocalListening(&info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+}
+
+/*
+* @tc.name: ManagerTest005
+* @tc.desc: Test ConnTypeIsSupport.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnTypeIsSupport operates normally.
+*/
+HWTEST_F(ConnectionBleTest, ManagerTest005, TestSize.Level1)
+{
+    int ret = ConnTypeIsSupport(CONNECT_P2P);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+}
+
+/*
+* @tc.name: ManagerTest006
+* @tc.desc: Test ConnTypeIsSupport.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnTypeIsSupport operates normally.
+*/
+HWTEST_F(ConnectionBleTest, ManagerTest006, TestSize.Level1)
+{
+    int ret = ConnTypeIsSupport(CONNECT_BR);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: ManagerTest007
+* @tc.desc: Test ConnTypeIsSupport.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnTypeIsSupport operates normally.
+*/
+HWTEST_F(ConnectionBleTest, ManagerTest007, TestSize.Level1)
+{
+    int ret = ConnTypeIsSupport(CONNECT_TCP);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }

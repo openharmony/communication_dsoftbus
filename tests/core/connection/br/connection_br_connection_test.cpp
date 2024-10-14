@@ -105,7 +105,7 @@ void RvMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
     return;
 }
 
-void handlePendingRequest(void)
+void HandlePendingRequest(void)
 {
     return;
 }
@@ -172,7 +172,7 @@ void Unpend(const char *addr)
     return;
 }
 
-void reset(int32_t reason)
+void Reset(int32_t reason)
 {
     (void)reason;
     return;
@@ -709,7 +709,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager016, TestSize.Level1)
     (void)strcpy_s(connectingDevice->addr, BT_MAC_LEN, "abcde");
     ListInit(&connectingDevice->requests);
     g_brManager.connecting = connectingDevice;
+    SoftBusList *list = CreateSoftBusList();
+    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
+    connection->connectProcessStatus = list;
     ClientConnectFailed(connectionId, error);
+    ConnBrReturnConnection(&connection);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager017, TestSize.Level1)
@@ -936,7 +940,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager028, TestSize.Level1)
     SoftBusMessage msg;
     ErrorContext obj;
 
-    g_brManager.state->handlePendingRequest = handlePendingRequest;
+    g_brManager.state->handlePendingRequest = HandlePendingRequest;
     g_brManager.state->connectRequest = connectRequest;
     g_brManager.state->clientConnected = clientConnected;
     g_brManager.state->clientConnectTimeout = clientConnectTimeout;
@@ -947,7 +951,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager028, TestSize.Level1)
     g_brManager.state->connectionResume = connectionResume;
     g_brManager.state->disconnectRequest = disconnectRequest;
     g_brManager.state->unpend = Unpend;
-    g_brManager.state->reset = reset;
+    g_brManager.state->reset = Reset;
 
     obj.connectionId = 0;
     obj.error = 0;
@@ -1214,5 +1218,36 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager039, TestSize.Level1)
 
     state = SOFTBUS_BR_STATE_TURN_OFF;
     OnBtStateChanged(listenerId, state);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager040, TestSize.Level1)
+{
+    const char *addr = "11:22:33:44:55:66";
+    InitBrManager();
+    ConnBrConnection *connection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, -1);
+    ASSERT_TRUE(connection != NULL);
+    int32_t ret = ConnBrSaveConnection(connection);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t error = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
+    bool isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(true, isWait);
+
+    BrUnderlayerStatus *callbackStatus = (BrUnderlayerStatus *)SoftBusCalloc(sizeof(BrUnderlayerStatus));
+    ASSERT_TRUE(callbackStatus != NULL);
+    ListInit(&callbackStatus->node);
+    callbackStatus->status = 0;
+    callbackStatus->result = 4;
+    ListAdd(&connection->connectProcessStatus->list, &callbackStatus->node);
+    isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(false, isWait);
+
+    BrUnderlayerStatus *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
+        if (it->result == 4) {
+            it->result = CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED + 1;
+        }
+    }
+    isWait = IsNeedWaitCallbackError(connection->connectionId, &error);
+    EXPECT_EQ(true, isWait);
 }
 } // namespace OHOS

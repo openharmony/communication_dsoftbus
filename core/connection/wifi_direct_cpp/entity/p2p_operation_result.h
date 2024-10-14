@@ -19,6 +19,8 @@
 
 namespace OHOS::SoftBus {
 struct P2pOperationResult {
+    P2pOperationResult() = default;
+    explicit P2pOperationResult(int code) : errorCode_(code) {}
     int errorCode_ {};
 };
 }
