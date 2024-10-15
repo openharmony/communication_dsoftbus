@@ -170,6 +170,7 @@ ConnectFuncInterface *g_connectFuncInterface = NULL;
 
 ConnectFuncInterface *ConnInit(void)
 {
+    LooperInit();
     ConnectCallback callback = {
         .OnConnected = OnConnected,
         .OnDisconnected = OnDisconnected,

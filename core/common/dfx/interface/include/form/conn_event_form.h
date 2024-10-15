@@ -103,6 +103,9 @@ typedef struct {
     int32_t isReuse;            // IS_REUSE
     uint64_t negotiateTime;     // NEGOTIATE_TIME_COSUMING
     uint64_t linkTime;          // LINK_TIME_COSUMING
+    int32_t osType;             // OS_TYPE
+    const char *localDeviceType;   // LOCAL_DEVICE_TYPE
+    const char *remoteDeviceType;  //REMOTE_DEVICE_TYPE
 } ConnEventExtra;
 
 typedef enum {
@@ -164,6 +167,7 @@ typedef struct {
     const char *localDeviceName; // LOCAL_DEV_NAME
     const char *peerIp;          // PEER_IP
     const char *localIp;         // LOCAL_IP
+    const char *extra;           // EXTRA
     const char *callerPkg;       // HOST_PKG
     const char *calleePkg;       // TO_CALL_PKG
     const char *peerPort;        // PEER_PORT

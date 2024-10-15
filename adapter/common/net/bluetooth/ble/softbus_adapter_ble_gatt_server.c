@@ -33,6 +33,8 @@
 
 #define WAIT_HAL_REG_TIME 5 // ms
 #define WAIT_HAL_REG_RETRY 3
+#define SOFTBUS_MTU_SIZE 512
+#define NEARBY_MTU_SIZE 503
 
 static const char SOFTBUS_APP_UUID[BT_UUID_LEN] = {
     0x00, 0x00, 0xFE, 0x36, 0x00, 0x00, 0x10, 0x00,
@@ -320,10 +322,10 @@ static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdA
 
     CONN_LOGI(CONN_BLE, "ConnectServerCallback is coming, connId=%{public}d, serverId=%{public}d", connId, serverId);
     if (serverId != g_halServerId) {
-        CONN_LOGE(CONN_BLE, "invalid serverId, halserverId=%{public}d", g_halServerId);
+        CONN_LOGI(CONN_BLE, "invalid serverId, halserverId=%{public}d", g_halServerId);
         return;
     }
-    (void)SetConnIdAndAddr(connId, serverId, (SoftBusBtAddr *)bdAddr);
+    SetConnIdAndAddr(connId, serverId, (SoftBusBtAddr *)bdAddr);
 }
 
 static void RemoveConnId(int32_t connId)
@@ -423,7 +425,7 @@ static void BleDescriptorAddCallback(int status, int serverId, BtUuid *uuid, int
 
 static void BleServiceStartCallback(int status, int serverId, int srvcHandle)
 {
-    CONN_LOGI(CONN_BLE, "BleServiceStartCallback serverId=%{public}d, srvcHandle=%{public}d\n", serverId, srvcHandle);
+    CONN_LOGI(CONN_BLE, "ServiceStartCallback serverId=%{public}d, srvcHandle=%{public}d\n", serverId, srvcHandle);
     if (serverId != g_halServerId) {
         return;
     }
@@ -454,7 +456,7 @@ static void BleServiceStopCallback(int status, int serverId, int srvcHandle)
 
 static void BleServiceDeleteCallback(int status, int serverId, int srvcHandle)
 {
-    CONN_LOGI(CONN_BLE, "BleServiceDeleteCallback serverId=%{public}d,srvcHandle=%{public}d\n", serverId, srvcHandle);
+    CONN_LOGI(CONN_BLE, "ServiceDeleteCallback serverId=%{public}d,srvcHandle=%{public}d\n", serverId, srvcHandle);
     if (serverId != g_halServerId) {
         return;
     }
@@ -663,13 +665,15 @@ static int32_t SetConnIdAndAddr(int connId, int serverId, const SoftBusBtAddr *b
         CONN_BLE, "try to lock failed, connId=%{public}d", connId);
     ServerConnection *it = NULL;
     ServerConnection *target =  NULL;
+    bool isExist = false;
     LIST_FOR_EACH_ENTRY(it, &g_softBusGattsManager.connections, ServerConnection, node) {
         if (it->connId == connId) {
             target = it;
+            isExist = true;
             break;
         }
     }
-    if (target == NULL) {
+    if (!isExist) {
         target = (ServerConnection *)SoftBusCalloc(sizeof(ServerConnection));
         if (target == NULL) {
             CONN_LOGE(CONN_BLE, "calloc serverConnection failed");

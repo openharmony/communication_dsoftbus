@@ -38,6 +38,7 @@
 #define DEFAULT_BACKLOG   4
 #define FDARR_EXPAND_BASE 2
 #define SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS (3 * 1000)
+#define SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS (3 * 10) /* wait retry time for an abnotmal event by select*/
 #define SOFTBUS_LISTENER_SELECT_TIMEOUT_SEC (6 * 60 * 60)
 
 enum BaseListenerStatus {
@@ -603,7 +604,12 @@ static bool IsValidTriggerType(TriggerType trigger)
 bool IsListenerNodeExist(ListenerModule module)
 {
     SoftbusListenerNode *node = GetListenerNode(module);
-    return node != NULL;
+    bool exist = false;
+    if (node != NULL) {
+        exist = true;
+        ReturnListenerNode(&node);
+    }
+    return exist;
 }
 
 int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
@@ -1158,12 +1164,8 @@ static void *SelectTask(void *arg)
             continue;
         }
         SoftBusSocketFdSet(selectState->ctrlRfd, &readSet);
-        SoftBusSockTimeOut timeout = {0};
-        timeout.sec = SOFTBUS_LISTENER_SELECT_TIMEOUT_SEC;
         int32_t maxFd = maxFdOrStatus > selectState->ctrlRfd ? maxFdOrStatus : selectState->ctrlRfd;
-        CONN_LOGI(CONN_COMMON, "select is waking up, maxFd=%{public}d, ctrlRfd=%{public}d",
-            maxFd, selectState->ctrlRfd);
-        int32_t nEvents = SoftBusSocketSelect(maxFd + 1, &readSet, &writeSet, &exceptSet, &timeout);
+        int32_t nEvents = SoftBusSocketSelect(maxFd + 1, &readSet, &writeSet, &exceptSet, NULL);
         int32_t wakeupTraceId = ++wakeupTraceIdGenerator;
         if (nEvents == 0) {
             continue;
@@ -1171,8 +1173,8 @@ static void *SelectTask(void *arg)
         if (nEvents < 0) {
             CONN_LOGE(CONN_COMMON, "unexpect wakeup, retry after some times. "
                                    "waitDelay=%{public}dms, wakeupTraceId=%{public}d, events=%{public}d",
-                SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
-            SoftBusSleepMs(SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS);
+                SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
+            SoftBusSleepMs(SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }
         CONN_LOGI(CONN_COMMON, "select task, wakeup from select, selectTrace=%{public}d, wakeupTraceId=%{public}d, "
@@ -1223,8 +1225,7 @@ static int32_t StartSelectThread(void)
         rc = pipe2(fds, O_CLOEXEC | O_NONBLOCK);
 #endif
         if (rc != 0) {
-            CONN_LOGE(CONN_COMMON, "create ctrl pipe failed, rc=%{public}d, error=%{public}d(%{public}s)",
-                rc, errno, strerror(errno));
+            CONN_LOGE(CONN_COMMON, "create ctrl pipe failed, error=%{public}s", strerror(errno));
             SoftBusFree(state);
             status = SOFTBUS_INVALID_NUM;
             break;
@@ -1299,11 +1300,6 @@ static void WakeupSelectThread(void)
         }
         int32_t ctrlTraceId = selectWakeupTraceIdGenerator++;
         ssize_t len = write(g_selectThreadState->ctrlWfd, &ctrlTraceId, sizeof(ctrlTraceId));
-        if (len == -1) {
-            COMM_LOGE(COMM_ADAPTER, "write message fail, len=%{public}zd, ctrlTraceId=%{public}d, "
-                "errno=%{public}d(%{public}s)", len, ctrlTraceId, errno, strerror(errno));
-                break;
-        }
         CONN_LOGI(CONN_COMMON, "wakeup ctrl message sent, writeLength=%{public}zd, ctrlTraceId=%{public}d",
             len, ctrlTraceId);
     } while (false);

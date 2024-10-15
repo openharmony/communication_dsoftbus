@@ -36,6 +36,7 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
     auto command = CommandFactory::GetInstance().CreateConnectCommand(info, callback);
     command->SetRetried(markRetried);
     std::shared_ptr<WifiDirectExecutor> executor;
+    std::lock_guard executorLock(executorLock_);
     auto ret = ScheduleActiveCommand(command, executor);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
     if (executor != nullptr) {
@@ -75,6 +76,7 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
               WifiDirectAnonymizeDeviceId(command->GetRemoteDeviceId()).c_str());
 
     std::shared_ptr<WifiDirectExecutor> executor;
+    std::lock_guard executorLock(executorLock_);
     auto ret = ScheduleActiveCommand(command, executor);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
     if (executor != nullptr) {
@@ -94,6 +96,7 @@ int WifiDirectScheduler::ForceDisconnectDevice(
               WifiDirectAnonymizeDeviceId(WifiDirectUtils::UuidToNetworkId(command->GetRemoteDeviceId())).c_str(),
               WifiDirectAnonymizeDeviceId(command->GetRemoteDeviceId()).c_str(), info.linkType);
     std::shared_ptr<WifiDirectExecutor> executor;
+    std::lock_guard executorLock(executorLock_);
     auto ret = ScheduleActiveCommand(command, executor);
     CONN_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed, ret=%{public}d", ret);

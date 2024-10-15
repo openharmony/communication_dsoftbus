@@ -291,9 +291,7 @@ bool IsValidString(const char *input, uint32_t maxLen)
 int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac,
     uint32_t binMacLen)
 {
-    const char *invalidAddr = "00:00:00:00:00:00";
-    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN ||
-        strncmp(strMac, invalidAddr, BT_MAC_LEN) == 0) {
+    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
         COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

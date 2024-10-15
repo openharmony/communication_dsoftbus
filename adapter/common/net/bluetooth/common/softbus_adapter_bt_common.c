@@ -19,12 +19,14 @@
 
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gap.h"
+#include "c_header/ohos_bt_gatt.h"
 #include "comm_log.h"
 #include "securec.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
-#define STATE_LISTENER_MAX_NUM 18
+#define STATE_LISTENER_MAX_NUM 16
 #define BR_STATE_CB_TRANSPORT 1
 
 typedef struct {
@@ -275,10 +277,6 @@ int SoftBusGetBtName(unsigned char *name, unsigned int *len)
 
 int SoftBusSetBtName(const char *name)
 {
-    if (name == NULL) {
-        COMM_LOGE(COMM_ADAPTER, "invalid parameter");
-        return SOFTBUS_ERR;
-    }
     if (SetLocalName((unsigned char *)name, strlen(name))) {
         return SOFTBUS_OK;
     }
