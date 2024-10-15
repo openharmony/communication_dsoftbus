@@ -94,14 +94,14 @@ static int32_t NodeStateCheck(const char *networkId)
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "get remote node info fail, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "get remote node info fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "wlan not online, anonyNetworkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "wlan not online, anonyNetworkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_LANE_WIFI_NOT_ONLINE;
     }
@@ -114,7 +114,7 @@ static int32_t Wlan2P4GCapCheck(const char *networkId)
     if (ret != SOFTBUS_OK) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "peer device wifi not online, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "peer device wifi not online, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return ret;
     }
@@ -122,7 +122,7 @@ static int32_t Wlan2P4GCapCheck(const char *networkId)
     if (band != BAND_24G && band != BAND_UNKNOWN) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "band isn't 2.4G or unknown, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "band isn't 2.4G or unknown, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_LANE_WIFI_BAND_ERR;
     }
@@ -148,7 +148,7 @@ static int32_t Wlan5GCapCheck(const char *networkId)
     if (ret != SOFTBUS_OK) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "peer device wifi not online, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "peer device wifi not online, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return ret;
     }
@@ -156,7 +156,7 @@ static int32_t Wlan5GCapCheck(const char *networkId)
     if (band != BAND_5G && band != BAND_UNKNOWN) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "band isn't 5G or unknown, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "band isn't 5G or unknown, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_LANE_WIFI_BAND_ERR;
     }
