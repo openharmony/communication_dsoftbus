@@ -21,8 +21,8 @@
 
 typedef struct {
     unsigned int handle;
-    unsigned int token;
-    unsigned int cookie;
+    uintptr_t token;
+    uintptr_t cookie;
 } SoftBusClientContext;
 
 static SoftBusClientContext *g_clientCtx = NULL;
@@ -50,7 +50,7 @@ void ClientContextDeinit(void)
     g_clientCtx = NULL;
 }
 
-void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int cookie)
+void SetClientIdentity(unsigned int handle, uintptr_t token, uintptr_t cookie)
 {
     if (g_clientCtx == NULL) {
         COMM_LOGE(COMM_SDK, "client ctx not init");
@@ -62,7 +62,7 @@ void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int coo
     g_clientCtx->cookie = cookie;
 }
 
-int GetClientIdentity(unsigned int *handle, unsigned int *token, unsigned int *cookie)
+int GetClientIdentity(unsigned int *handle, uintptr_t *token, uintptr_t *cookie)
 {
     if (handle == NULL || token == NULL || cookie == NULL) {
         COMM_LOGE(COMM_SDK, "invalid param");
