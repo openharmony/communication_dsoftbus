@@ -257,6 +257,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalStrInfo(STRING_KEY_P2P_IP, (char *)info, infoLen);
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, (bool*)info, NODE_SCREEN_STATUS_LEN);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -294,6 +296,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_IP, (char *)info, infoLen);
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return LnnGetRemoteBoolInfo(networkId, BOOL_KEY_SCREEN_STATUS, (bool*)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -409,6 +413,8 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return IP_LEN;
         case NODE_KEY_DEVICE_SECURITY_LEVEL:
             return LNN_COMMON_LEN;
+        case NODE_KEY_DEVICE_SCREEN_STATUS:
+            return DATA_DEVICE_SCREEN_STATUS_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -531,6 +537,22 @@ int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
+static int32_t SoftbusDumpPrintScreenStatus(int fd, NodeBasicInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    bool isScreenOn = false;
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, NODE_KEY_DEVICE_SCREEN_STATUS, (uint8_t *)&isScreenOn,
+        DATA_DEVICE_SCREEN_STATUS_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo isScreenOn failed");
+        return SOFTBUS_NOT_FIND;
+    }
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "isScreenOn", isScreenOn ? "on" : "off");
+    return SOFTBUS_OK;
+}
+
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
 {
     if (fd <= 0 || nodeInfo == NULL) {
@@ -567,6 +589,10 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintNetType(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetType failed");
+        return;
+    }
+    if (SoftbusDumpPrintScreenStatus(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintScreenStatus failed");
         return;
     }
 }

@@ -625,3 +625,14 @@ void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log)
     AnonymizeFree(anonyDeviceName);
     AnonymizeFree(anonyBtMac);
 }
+
+int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->isScreenOn = isScreenOn;
+    LNN_LOGI(LNN_LEDGER, "set local screen status to %{public}s", isScreenOn ? "on" : "off");
+    return SOFTBUS_OK;
+}

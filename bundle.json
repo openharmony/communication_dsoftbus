@@ -82,7 +82,8 @@
         "cJSON",
         "libcoap",
         "openssl",
-        "zlib"
+        "zlib",
+        "power_manager"
       ],
       "third_party": [
         "bounds_checking_function",

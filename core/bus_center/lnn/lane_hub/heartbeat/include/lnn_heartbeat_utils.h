@@ -125,6 +125,11 @@ typedef struct {
     uint8_t shortUuid[HB_SHORT_UUID_LEN];
 } HbRespData;
 
+typedef enum {
+    BIT_SUPPORT_DIRECT_TRIGGER = 0,
+    BIT_SUPPORT_SCREEN_STATUS = 1,
+} HeartbeatCapability;
+
 #define STATE_VERSION_INVALID (-1)
 #define ENABLE_COC_CAP        (1 << 0)
 #define P2P_GO                (1 << 1)
@@ -154,6 +159,7 @@ void LnnDumpLocalBasicInfo(void);
 void LnnDumpOnlineDeviceInfo(void);
 uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax);
 bool LnnIsMultiDeviceOnline(void);
+bool LnnIsSupportHeartbeatCap(uint32_t hbCapacity, HeartbeatCapability capaBit);
 
 #ifdef __cplusplus
 }
