@@ -694,7 +694,7 @@ static bool IsNeedWaitCallbackError(uint32_t connectionId, int32_t *error)
     }
     (void)SoftBusMutexUnlock(&connection->lock);
     ConnBrReturnConnection(&connection);
-    if (result != 0 && result <= CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED) {
+    if (result > 0 && result <= CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED) {
         *error = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
         return false;
     }
