@@ -77,7 +77,7 @@ bool P2pAdapter::IsWifiP2pEnabled()
     enum P2pState state;
     auto ret = GetP2pEnableStatus(&state);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, false, CONN_WIFI_DIRECT, "get p2p enable status failed");
-
+    CONN_LOGI(CONN_WIFI_DIRECT, "P2pEnableStatus=%{public}d", static_cast<int>(state));
     return state == P2P_STATE_STARTED;
 }
 
