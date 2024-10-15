@@ -381,7 +381,7 @@ void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wak
 
     *isRemoved = true;
     LnnRemoveSendEndMsgPara msgPara = {
-        .hbType = type,
+        .hbType = type & (~HEARTBEAT_TYPE_BLE_V3),
         .wakeupFlag = wakeupFlag,
         .isRelay = isRelay,
         .isRemoved = isRemoved,

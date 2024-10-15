@@ -176,6 +176,7 @@ typedef enum {
     NODE_KEY_NODE_ADDRESS,           /**< Node address in string format */
     NODE_KEY_P2P_IP_ADDRESS,         /**< P2P IP address in string format */
     NODE_KEY_DEVICE_SECURITY_LEVEL,  /**< device security level in number format */
+    NODE_KEY_DEVICE_SCREEN_STATUS,   /**< device screen status in bool format */
 } NodeDeviceInfoKey;
 
 /**
@@ -275,7 +276,7 @@ typedef enum {
 } NodeBasicInfoType;
 
 /**
- * @brief Defines the running status about a device.
+ * @brief Defines the running status about a device. see {@link INodeStateCb.onNodeStatusChanged}
  *
  * @since 1.0
  * @version 1.0
@@ -297,8 +298,9 @@ typedef struct {
 typedef enum {
     TYPE_AUTH_STATUS = 2,     /**< Certify status change */
     TYPE_DATABASE_STATUS = 3, /**< Database  change */
-    TYPE_MESH_TYPE = 4,       /**< Lnn mesh typechange */
-    TYPE_STATUS_MAX = 5,      /**< Max num */
+    TYPE_MESH_TYPE = 4,       /**< Lnn mesh type change */
+    TYPE_SCREEN_STATUS = 5,   /**< Screen status change */
+    TYPE_STATUS_MAX = 6,      /**< Max num */
 } NodeStatusType;
 
 /**

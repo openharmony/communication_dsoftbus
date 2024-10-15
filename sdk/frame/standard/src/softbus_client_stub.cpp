@@ -476,7 +476,7 @@ int32_t SoftBusClientStub::OnNodeStatusChangedInner(MessageParcel &data, Message
         COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read type failed!");
         return SOFTBUS_NETWORK_READINT32_FAILED;
     }
-    COMM_LOGD(COMM_SDK, "OnNodeStatusChangedInner type. type=%{public}d", type);
+    COMM_LOGD(COMM_SDK, "OnNodeStatusChangedInner type=%{public}d", type);
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeStatus)) {
         COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read failed! infoTypeLen=%{public}d", infoTypeLen);
@@ -484,7 +484,7 @@ int32_t SoftBusClientStub::OnNodeStatusChangedInner(MessageParcel &data, Message
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
     if (info == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read basic info failed!");
+        COMM_LOGE(COMM_SDK, "OnNodeStatusChangedInner read node status failed!");
         return SOFTBUS_NETWORK_READRAWDATA_FAILED;
     }
     int32_t retReply = OnNodeStatusChanged(pkgName, info, infoTypeLen, type);

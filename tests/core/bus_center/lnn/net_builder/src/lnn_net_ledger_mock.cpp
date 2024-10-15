@@ -578,5 +578,10 @@ bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
 {
     return GetNetLedgerInterface()->LnnSetDLDeviceInfoName(udid, name);
 }
+
+int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
+{
+    return GetNetLedgerInterface()->LnnUpdateLocalScreenStatus(isScreenOn);
+}
 }
 }

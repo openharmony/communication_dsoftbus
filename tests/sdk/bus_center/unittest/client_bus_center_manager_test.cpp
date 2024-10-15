@@ -583,6 +583,35 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_BASICINFO_CHANGED_Test_001, TestS
     BusCenterClientDeinit();
 }
 
+/*
+* @tc.name: LNN_ON_NODE_STATUS_CHANGED_Test_001
+* @tc.desc: lnn on node status changed test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_STATUS_CHANGED_Test_001, TestSize.Level1)
+{
+    INodeStateCb callBcak;
+    (void)memset_s(&callBcak, sizeof(INodeStateCb), 0, sizeof(INodeStateCb));
+    callBcak.events = EVENT_NODE_STATUS_CHANGED;
+    callBcak.onNodeStatusChanged = OnNodeStatusChangedCb;
+    NodeStatus info;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(LnnOnNodeStatusChanged(nullptr, reinterpret_cast<void *>(&info), TYPE_SCREEN_STATUS) ==
+        SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnOnNodeStatusChanged("", nullptr, TYPE_STATUS_MAX + 1) == SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+    EXPECT_TRUE(RegNodeDeviceStateCbInner(nullptr, &callBcak) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(RegNodeDeviceStateCbInner(PKGNAME, &callBcak) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnOnNodeStatusChanged("", reinterpret_cast<void *>(&info), TYPE_STATUS_MAX + 1) ==
+        SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnOnNodeStatusChanged("", reinterpret_cast<void *>(&info), TYPE_SCREEN_STATUS) == SOFTBUS_OK);
+    BusCenterClientDeinit();
+}
+
 static void OnTimeSyncResultCb(const TimeSyncResultInfo *info, int32_t retCode)
 {
     (void)info;

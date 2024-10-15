@@ -59,6 +59,7 @@ void LnnDeInitNetlinkMonitorImpl(void);
 
 int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle);
 
+bool LnnQueryLocalScreenStatusOnce(bool notify);
 #ifdef __cplusplus
 }
 #endif
