@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
 #include "auth_common.h"
-#include "gtest/gtest.h"
-#include "softbus_app_info.h"
+#include "bus_center_event.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_qos.h"
-#include "trans_channel_manager.h"
 #include "trans_session_manager.h"
-#include "trans_log.h"
-#include "trans_udp_channel_manager.c"
+#include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.c"
 #include "trans_udp_negotiation_exchange.c"
 

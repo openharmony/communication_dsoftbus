@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,20 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
-#include "gtest/gtest.h"
-#include "softbus_app_info.h"
-#include "softbus_errcode.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_server_frame.h"
-#include "trans_log.h"
-#include "trans_udp_channel_manager.h"
-#include "trans_udp_negotiation.h"
-#include "client_trans_session_service.h"
-#include "softbus_access_token_test.h"
-#include "softbus_feature_config.h"
-#include "softbus_conn_interface.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
-#include "trans_session_service.h"
-#include "trans_channel_manager.h"
 #include "disc_event_manager.h"
-#include "softbus_conn_ble_direct.h"
-#include "message_handler.h"
 #include "lnn_lane_interface.h"
+#include "message_handler.h"
+#include "softbus_access_token_test.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_feature_config.h"
+#include "trans_session_service.h"
+#include "trans_udp_channel_manager.h"
+#include "trans_udp_negotiation.h"
 
 using namespace testing::ext;
 
@@ -92,12 +84,10 @@ void TransUdpNegotiationTest::TearDownTestCase(void)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest01, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    ConnectOption *connOpt = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
+    ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
     EXPECT_TRUE(connOpt != NULL);
-    memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t channelId = 0;
     int32_t ret = TransOpenUdpChannel(NULL, connOpt, &channelId);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
@@ -116,12 +106,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest01, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest02, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    ConnectOption *connOpt = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
+    ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
     EXPECT_TRUE(connOpt != NULL);
-    memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     connOpt->socketOption.port = TEST_SOCKET_PORT;
     connOpt->type = CONNECT_TYPE_MAX;
     int32_t channelId = 0;
@@ -139,22 +127,19 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest02, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest03, TestSize.Level1)
 {
-    UdpChannelInfo *newChannel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
+    UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     EXPECT_TRUE(newChannel != NULL);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 1;
     newChannel->info.myData.channelId = TEST_CHANNEL_ID;
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = TEST_CHANNEL_ID;
     appInfo->linkType = LANE_BLE;
     strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_sessionName);
-    ConnectOption *connOpt = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
+    ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
     EXPECT_TRUE(connOpt != NULL);
-    memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     connOpt->type = CONNECT_TYPE_MAX;
     connOpt->socketOption.port = TEST_SOCKET_PORT;
     int32_t channelId = 0;
@@ -174,13 +159,11 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest03, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest04, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = TEST_CHANNEL_ID;
-    ConnectOption *connOpt = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
+    ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
     EXPECT_TRUE(connOpt != NULL);
-    memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     connOpt->type = CONNECT_TCP;
     connOpt->socketOption.port = TEST_SOCKET_PORT;
     int32_t channelId = 0;
@@ -200,9 +183,8 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest05, TestSize.Level1)
 {
     int32_t ret = TransCloseUdpChannel(TEST_CHANNEL_ID);
     EXPECT_NE(ret,  SOFTBUS_OK);
-    UdpChannelInfo *newChannel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
+    UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     EXPECT_TRUE(newChannel != NULL);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 1;
     newChannel->info.myData.channelId = TEST_CHANNEL_ID;
     ret = TransAddUdpChannel(newChannel);
@@ -221,9 +203,8 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest05, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest06, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int res = strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), g_pkgName);
     EXPECT_EQ(res, EOK);
     appInfo->myData.pid = INVALID_PID;
@@ -241,13 +222,15 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest06, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest07, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = nullptr;
+    int32_t ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_TRANS_INVALID_SESSION_NAME);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                        g_sessionName);
     EXPECT_EQ(res, EOK);
-    int32_t ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_TRANS_INVALID_SESSION_NAME);
+    ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_TRANS_INVALID_SESSION_NAME);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(appInfo);
 }
@@ -260,9 +243,8 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest07, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest08, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                    g_sessionName);
     EXPECT_EQ(res, EOK);
@@ -281,9 +263,8 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest08, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest09, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                        g_sessionName);
     EXPECT_EQ(res, EOK);
@@ -300,9 +281,8 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest09, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest10, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                    g_sessionName);
     EXPECT_EQ(res, EOK);
@@ -320,9 +300,8 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest10, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest11, TestSize.Level1)
 {
-    UdpChannelInfo *newChannel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
+    UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     EXPECT_TRUE(newChannel != NULL);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 1;
     newChannel->info.myData.channelId = TEST_CHANNEL_ID;
     int32_t ret = TransAddUdpChannel(newChannel);
@@ -340,9 +319,8 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest11, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest12, TestSize.Level1)
 {
-    UdpChannelInfo *newChannel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
+    UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     EXPECT_TRUE(newChannel != NULL);
-    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 1;
     newChannel->info.myData.channelId = TEST_CHANNEL_ID;
     int res = strcpy_s(newChannel->info.myData.pkgName, sizeof(newChannel->info.myData.pkgName),
