@@ -838,6 +838,12 @@ static void BleDataReceived(ConnBleDataReceivedContext *ctx)
             break;
         }
 
+        if (ctx->dataLen < sizeof(ConnPktHead)) {
+            CLOGE("dataLength(=%{public}u) is less than header size, connId=%{public}u",
+                ctx->dataLen, ctx->connectionId);
+            break;
+        }
+
         ConnPktHead *head = (ConnPktHead *)ctx->data;
         UnpackConnPktHead(head);
         CLOGI("ble dispatch receive data, connection id=%u, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
@@ -1330,6 +1336,7 @@ static void TransitionToState(enum BleMgrState target)
 
 static void BleManagerMsgHandler(SoftBusMessage *msg)
 {
+    CONN_CHECK_AND_RETURN_LOG(msg != NULL, "msg is null");
     CLOGI("ble manager looper recieve msg %d, current state is '%s'", msg->what, g_bleManager.state->name());
     switch (msg->what) {
         case BLE_MGR_MSG_NEXT_CMD: {
@@ -1340,6 +1347,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_CONNECT_REQUEST: {
+            CONN_CHECK_AND_RETURN_LOG(msg->obj != NULL, "obj is null");
             ConnBleConnectRequestContext *ctx = msg->obj;
             if (g_bleManager.state->connectRequest != NULL) {
                 g_bleManager.state->connectRequest(ctx);
@@ -1355,6 +1363,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_CONNECT_TIMEOUT: {
+            CONN_CHECK_AND_RETURN_LOG(msg->obj != NULL, "obj is null");
             if (g_bleManager.state->clientConnectTimeout != NULL) {
                 g_bleManager.state->clientConnectTimeout((uint32_t)msg->arg1, (char *)msg->obj);
                 return;
@@ -1377,14 +1386,17 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_DATA_RECEIVED: {
+            CONN_CHECK_AND_RETURN_LOG(msg->obj != NULL, "obj is null");
             ConnBleDataReceivedContext *ctx = msg->obj;
             if (g_bleManager.state->dataReceived != NULL) {
                 g_bleManager.state->dataReceived(ctx);
                 return;
             }
+            SoftBusFree(ctx->data);
             break;
         }
         case BLE_MGR_MSG_CONNECTION_CLOSED: {
+            CONN_CHECK_AND_RETURN_LOG(msg->obj != NULL, "obj is null");
             BleStatusContext *ctx = msg->obj;
             if (g_bleManager.state->connectionClosed != NULL) {
                 g_bleManager.state->connectionClosed(ctx->connectionId, ctx->status);
@@ -1407,6 +1419,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_REUSE_CONNECTION_REQUEST: {
+            CONN_CHECK_AND_RETURN_LOG(msg->obj != NULL, "obj is null");
             ConnBleReuseConnectionContext *ctx = msg->obj;
             if (g_bleManager.state->reuseConnectionRequest != NULL) {
                 g_bleManager.state->reuseConnectionRequest(ctx);
@@ -1415,6 +1428,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_PREVENT_TIMEOUT: {
+            CONN_CHECK_AND_RETURN_LOG(msg->obj != NULL, "obj is null");
             char *udid = msg->obj;
             if (g_bleManager.state->preventTimeout != NULL) {
                 g_bleManager.state->preventTimeout(udid);
@@ -1423,6 +1437,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_RESET: {
+            CONN_CHECK_AND_RETURN_LOG(msg->obj != NULL, "obj is null");
             BleStatusContext *ctx = msg->obj;
             if (g_bleManager.state->reset != NULL) {
                 g_bleManager.state->reset(ctx->status);
