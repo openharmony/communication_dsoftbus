@@ -46,7 +46,6 @@ bus_center_sdk_test_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
   "$dsoftbus_root_path/core/frame:softbus_server",
   "$dsoftbus_root_path/sdk:softbus_client",
-  "../../../../sdk:softbus_client",
 ]
 
 if (dsoftbus_feature_lnn_meta_node) {
@@ -116,7 +115,10 @@ if (defined(ohos_lite)) {
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
-    deps += [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
     if (is_standard_system) {
       external_deps = [ "hilog:libhilog" ]
     } else {
@@ -136,7 +138,10 @@ if (defined(ohos_lite)) {
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
-    deps += [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
     if (is_standard_system) {
       external_deps = [ "hilog:libhilog" ]
     } else {
@@ -156,7 +161,10 @@ if (defined(ohos_lite)) {
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
-    deps += [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
     if (is_standard_system) {
       external_deps = [ "hilog:libhilog" ]
     } else {
@@ -176,7 +184,10 @@ if (defined(ohos_lite)) {
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
-    deps += [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
     if (is_standard_system) {
       external_deps = [ "hilog:libhilog" ]
     } else {
@@ -196,7 +207,10 @@ if (defined(ohos_lite)) {
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
-    deps += [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
     if (is_standard_system) {
       external_deps = [ "hilog:libhilog" ]
     } else {
@@ -275,7 +289,10 @@ if (defined(ohos_lite)) {
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [ "unittest/common/" ]
     deps = bus_center_sdk_test_deps
-    deps += [ "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test" ]
+    deps += [
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
     if (is_standard_system) {
       external_deps = [ "hilog:libhilog" ]
     } else {
