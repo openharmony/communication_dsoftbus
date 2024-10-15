@@ -188,7 +188,7 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
     if (ret == SOFTBUS_OK) {
         char *anonyDeviceName = NULL;
         Anonymize(deviceName, &anonyDeviceName);
-        LNN_LOGI(LNN_STATE, "get user defined deviceName=%{public}s", anonyDeviceName);
+        LNN_LOGI(LNN_STATE, "get user defined deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
         dataShareHelper->Release();
         return SOFTBUS_OK;
@@ -196,7 +196,7 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
     ret = OHOS::BusCenter::GetDefaultDeviceName(dataShareHelper, deviceName, len);
     char *anonyDeviceName = NULL;
     Anonymize(deviceName, &anonyDeviceName);
-    LNN_LOGI(LNN_STATE, "get default deviceName=%{public}s, ret=%{public}d", anonyDeviceName, ret);
+    LNN_LOGI(LNN_STATE, "get default deviceName=%{public}s, ret=%{public}d", AnonymizeWrapper(anonyDeviceName), ret);
     AnonymizeFree(anonyDeviceName);
     dataShareHelper->Release();
     return ret;
