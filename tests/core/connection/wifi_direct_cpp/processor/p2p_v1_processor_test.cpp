@@ -78,6 +78,8 @@ protected:
     void InjectCommonMock(WifiDirectInterfaceMock &mock);
     void InjectEntityMock(P2pEntity &mock);
     void PrepareConnectParameter(WifiDirectConnectInfo &info, WifiDirectConnectCallback &callback);
+    void PrepareDisconnectParameter(WifiDirectDisconnectInfo &info, WifiDirectForceDisconnectInfo &forceInfo,
+        WifiDirectDisconnectCallback &callback);
     void InjectChannel(WifiDirectInterfaceMock &mock);
 
     WifiDirectTestContext<TestContextKey> context_;
@@ -117,6 +119,8 @@ void P2pV1ProcessorTest::PrepareContext()
 
     context_.Set(TestContextKey::SWITCH_INJECT_LOCAL_INNER_LINK, false);
     context_.Set(TestContextKey::SWITCH_INJECT_REMOTE_INNER_LINK, false);
+
+    context_.Set(TestContextKey::INTERFACE_ROLE, LinkInfo::LinkMode::NONE);
 }
 
 void P2pV1ProcessorTest::InjectData(WifiDirectInterfaceMock &mock)
@@ -158,8 +162,10 @@ void P2pV1ProcessorTest::InjectData(WifiDirectInterfaceMock &mock)
         });
 
     InterfaceManager::GetInstance().InitInterface(InterfaceInfo::InterfaceType::P2P);
-    InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [](InterfaceInfo &interface) {
+    InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [this](InterfaceInfo &interface) {
         interface.SetReuseCount(0);
+        auto role = context_.Get(TestContextKey::INTERFACE_ROLE, LinkInfo::LinkMode::NONE);
+        interface.SetRole(role);
         return SOFTBUS_OK;
     });
 
@@ -268,6 +274,10 @@ void P2pV1ProcessorTest::InjectCommonMock(WifiDirectInterfaceMock &mock)
     EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly([](uint64_t feature, FeatureCapability capaBit) {
         return ((feature & (1 << (uint64_t)capaBit)) != 0);
     });
+    EXPECT_CALL(mock, AuthCloseConn(_)).WillRepeatedly([](AuthHandle authHandle) {});
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
 }
 
 void P2pV1ProcessorTest::PrepareConnectParameter(WifiDirectConnectInfo &info, WifiDirectConnectCallback &callback)
@@ -293,6 +303,26 @@ void P2pV1ProcessorTest::PrepareConnectParameter(WifiDirectConnectInfo &info, Wi
     WifiDirectInterfaceMock::InjectWifiDirectConnectCallbackMock(callback);
 }
 
+void P2pV1ProcessorTest::PrepareDisconnectParameter(
+    WifiDirectDisconnectInfo &info, WifiDirectForceDisconnectInfo &forceInfo, WifiDirectDisconnectCallback &callback)
+{
+    info.requestId = context_.Get(TestContextKey::CONNECT_REQUEST_ID, uint32_t(0));
+    info.pid = 222;
+    info.linkId = 1;
+    info.negoChannel.type = NEGO_CHANNEL_COC;
+    info.negoChannel.handle.channelId = context_.Get(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(0));
+
+    forceInfo.requestId = info.requestId;
+    forceInfo.pid = info.pid;
+    auto uuid = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    (void)strcpy_s(forceInfo.remoteUuid, sizeof(forceInfo.remoteUuid), uuid.c_str());
+    forceInfo.linkType = WifiDirectLinkType::WIFI_DIRECT_LINK_TYPE_P2P;
+    forceInfo.negoChannel.type = info.negoChannel.type;
+    forceInfo.negoChannel.handle.channelId = info.negoChannel.handle.channelId;
+
+    WifiDirectInterfaceMock::InjectWifiDirectDisconnectCallbackMock(callback);
+}
+
 void P2pV1ProcessorTest::InjectChannel(WifiDirectInterfaceMock &mock)
 {
     auto channelId = context_.Get(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(0));
@@ -303,6 +333,52 @@ void P2pV1ProcessorTest::InjectChannel(WifiDirectInterfaceMock &mock)
     EXPECT_CALL(mock, ProxyNegotiateChannelSendMessage(channelId, _)).WillRepeatedly(Return(ret));
 
     EXPECT_CALL(mock, AuthStartListeningForWifiDirect(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+}
+
+/*
+ * @tc.name: ErrorCodeConverter
+ * @tc.desc: static method test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, ErrorCodeConverter, TestSize.Level1)
+{
+    struct {
+        int softbusErrorCode;
+        int protocolErrorCode;
+    } caseTable[] = {
+        {SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE,                     V1_ERROR_IF_NOT_AVAILABLE - V1_ERROR_START    },
+        { SOFTBUS_CONN_PV1_BOTH_GO_ERR,                         V1_ERROR_BOTH_GO - V1_ERROR_START             },
+        { SOFTBUS_CONN_PV1_REUSE_FAIL,                          V1_ERROR_REUSE_FAILED - V1_ERROR_START        },
+        { SOFTBUS_CONN_PV1_CONNECT_GROUP_FAIL,                  V1_ERROR_CONNECT_GROUP_FAILED - V1_ERROR_START},
+        { SOFTBUS_CONN_PV1_BUSY_ERR,                            V1_ERROR_BUSY - V1_ERROR_START                },
+        { SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE,
+         V1_ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE - V1_ERROR_START                                        },
+    };
+
+    for (const auto &ct : caseTable) {
+        auto code = P2pV1Processor::ErrorCodeToV1ProtocolCode(ct.softbusErrorCode);
+        ASSERT_EQ(code, ct.protocolErrorCode);
+
+        code = P2pV1Processor::ErrorCodeFromV1ProtocolCode(ct.protocolErrorCode);
+        ASSERT_EQ(code, ct.softbusErrorCode);
+    }
+
+    // match but not p2pv1 error case
+    auto code = P2pV1Processor::ErrorCodeToV1ProtocolCode(SOFTBUS_CONN_PV1_APPLY_GC_IP_FAIL);
+    ASSERT_EQ(code, ERROR_P2P_APPLY_GC_IP_FAIL);
+
+    // not match case
+    code = P2pV1Processor::ErrorCodeToV1ProtocolCode(SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(code, SOFTBUS_INVALID_PARAM);
+
+    // p2pv1 error but not match case
+    code = P2pV1Processor::ErrorCodeFromV1ProtocolCode(V1_ERROR_UNKNOWN - V1_ERROR_START);
+    ASSERT_EQ(code, V1_ERROR_UNKNOWN);
+
+    // not match case
+    code = P2pV1Processor::ErrorCodeFromV1ProtocolCode(SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(code, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -511,6 +587,96 @@ HWTEST_F(P2pV1ProcessorTest, CreateWhenNoneAsGo, TestSize.Level1)
 }
 
 /*
+ * @tc.name: CreateWhenGoTimeout
+ * @tc.desc: create link when go,
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, CreateWhenGoTimeout, TestSize.Level1)
+{
+    context_.Set(TestContextKey::CONNECT_REQUEST_ID, uint32_t(1));
+    context_.Set(TestContextKey::INTERFACE_ROLE, LinkInfo::LinkMode::GO);
+
+    WifiDirectInterfaceMock mock;
+    InjectCommonMock(mock);
+    InjectData(mock);
+    P2pEntity entityMock;
+    InjectEntityMock(entityMock);
+    InjectChannel(mock);
+
+    EXPECT_CALL(entityMock, NotifyNewClientJoining(_)).WillRepeatedly([this](const std::string &remoteMac) {
+        auto remoteDeviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+        ClientJoinEvent event { SOFTBUS_CONN_PV1_CONNECT_GROUP_TIMEOUT, remoteDeviceId, remoteMac };
+        WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
+    });
+
+    WifiDirectConnectInfo info = { 0 };
+    WifiDirectConnectCallback callback { 0 };
+    PrepareConnectParameter(info, callback);
+    std::promise<int32_t> result;
+    EXPECT_CALL(mock, OnConnectFailure(context_.Get(TestContextKey::CONNECT_REQUEST_ID, uint32_t(0)), _))
+        .Times(1)
+        .WillOnce<>([&result](uint32_t requestId, int32_t reason) {
+            result.set_value(reason);
+        });
+
+    WifiDirectScheduler &scheduler = WifiDirectSchedulerFactory::GetInstance().GetScheduler();
+    auto ret = scheduler.ConnectDevice(info, callback);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    auto future = result.get_future();
+    auto status = future.wait_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(status, std::future_status::ready);
+    auto value = future.get();
+    ASSERT_EQ(value, SOFTBUS_CONN_PV1_CONNECT_GROUP_TIMEOUT);
+
+    // ugly way (sleep 1s) to wait processor terminate, as mock environment will be cleanup before processor terminate.
+    sleep(1);
+}
+
+/*
+ * @tc.name: CreateWhenGc
+ * @tc.desc: create link when gc,
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, CreateWhenGc, TestSize.Level1)
+{
+    context_.Set(TestContextKey::CONNECT_REQUEST_ID, uint32_t(2));
+    context_.Set(TestContextKey::INTERFACE_ROLE, LinkInfo::LinkMode::GC);
+
+    WifiDirectInterfaceMock mock;
+    InjectCommonMock(mock);
+    InjectData(mock);
+    P2pEntity entityMock;
+    InjectEntityMock(entityMock);
+    InjectChannel(mock);
+
+    WifiDirectConnectInfo info = { 0 };
+    WifiDirectConnectCallback callback { 0 };
+    PrepareConnectParameter(info, callback);
+    std::promise<int32_t> result;
+    EXPECT_CALL(mock, OnConnectFailure(context_.Get(TestContextKey::CONNECT_REQUEST_ID, uint32_t(0)), _))
+        .Times(1)
+        .WillOnce<>([&result](uint32_t requestId, int32_t reason) {
+            result.set_value(reason);
+        });
+
+    WifiDirectScheduler &scheduler = WifiDirectSchedulerFactory::GetInstance().GetScheduler();
+    auto ret = scheduler.ConnectDevice(info, callback);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    auto future = result.get_future();
+    auto status = future.wait_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(status, std::future_status::ready);
+    auto value = future.get();
+    ASSERT_EQ(value, SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE);
+
+    // ugly way (sleep 1s) to wait processor terminate, as mock environment will be cleanup before processor terminate.
+    sleep(1);
+}
+
+/*
  * @tc.name: ReuseLocalLinkSuccess
  * @tc.desc: reuse local link success
  * @tc.type: FUNC
@@ -666,8 +832,8 @@ static bool InspectProcessorState(const std::string &remoteDeviceId, uint32_t ti
 }
 
 /*
- * @tc.name: PassiveConnectTimeout
- * @tc.desc: passive connect timeout
+ * @tc.name: PassiveConnectTimeoutWhenNone
+ * @tc.desc: passive connect timeout when none
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -693,6 +859,41 @@ HWTEST_F(P2pV1ProcessorTest, PassiveConnectTimeoutWhenNone, TestSize.Level1)
 
     auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
     ASSERT_TRUE(InspectProcessorState(deviceId, P2pV1Processor::P2P_V1_WAITING_REQUEST_TIME_MS + 1000, 200));
+}
+
+/*
+ * @tc.name: PassiveConnectTimeoutWhenGo
+ * @tc.desc: passive connect timeout when go
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, PassiveConnectTimeoutWhenGo, TestSize.Level1)
+{
+    context_.Set(TestContextKey::REMOTE_MAC, std::string("42:dc:a5:f3:4c:14"));
+    context_.Set(TestContextKey::INTERFACE_ROLE, LinkInfo::LinkMode::GO);
+
+    WifiDirectInterfaceMock mock;
+    InjectCommonMock(mock);
+    InjectData(mock);
+    P2pEntity entityMock;
+    InjectEntityMock(entityMock);
+    InjectChannel(mock);
+
+    EXPECT_CALL(entityMock, NotifyNewClientJoining(_)).WillRepeatedly([this](const std::string &remoteMac) {
+        // sleep 100ms to make sure processor state can be inspected by InspectProcessorState
+        SoftBusSleepMs(100);
+        auto remoteDeviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+        ClientJoinEvent event { SOFTBUS_CONN_PV1_CONNECT_GROUP_TIMEOUT, remoteDeviceId, remoteMac };
+        WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
+    });
+
+    auto channelId = context_.Get(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(0));
+    std::string message =
+        R"({"KEY_BRIDGE_SUPPORTED":false,"KEY_COMMAND_TYPE":8,"KEY_CONTENT_TYPE":2,"KEY_EXPECTED_ROLE":1,"KEY_GC_CHANNEL_LIST":"36##40##44##48##149##153##157##161##165","KEY_GC_MAC":"42:dc:a5:f3:4c:14","KEY_GO_MAC":"","KEY_MAC":"42:dc:a5:f3:4c:14","KEY_ROLE":5,"KEY_SELF_WIFI_CONFIG":"","KEY_STATION_FREQUENCY":5180,"KEY_VERSION":2,"KEY_WIDE_BAND_SUPPORTED":false})";
+    CoCProxyNegotiateChannel::InjectReceiveData(channelId, message);
+
+    auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    ASSERT_TRUE(InspectProcessorState(deviceId, 2000, 10));
 }
 
 /*
@@ -750,6 +951,49 @@ HWTEST_F(P2pV1ProcessorTest, PassiveConnectSuccessWhenNone, TestSize.Level1)
 }
 
 /*
+ * @tc.name: DisconnectWhenLocalUsing
+ * @tc.desc: disconnect link when local using
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, DisconnectWhenLocalUsing, TestSize.Level1)
+{
+    context_.Set(TestContextKey::REMOTE_MAC, std::string("42:dc:a5:f3:4c:14"));
+    context_.Set(TestContextKey::SWITCH_INJECT_LOCAL_INNER_LINK, true);
+    context_.Set(TestContextKey::SWITCH_INJECT_REMOTE_INNER_LINK, false);
+
+    WifiDirectInterfaceMock mock;
+    InjectCommonMock(mock);
+    InjectData(mock);
+    P2pEntity entityMock;
+    InjectEntityMock(entityMock);
+    InjectChannel(mock);
+
+    WifiDirectDisconnectInfo info = { 0 };
+    WifiDirectDisconnectCallback callback { 0 };
+    WifiDirectForceDisconnectInfo ignore { 0 };
+    PrepareDisconnectParameter(info, ignore, callback);
+    std::promise<bool> result;
+    EXPECT_CALL(mock, OnDisconnectSuccess(context_.Get(TestContextKey::CONNECT_REQUEST_ID, uint32_t(0))))
+        .Times(1)
+        .WillOnce<>([&result](uint32_t requestId) {
+            result.set_value(true);
+        });
+
+    WifiDirectScheduler &scheduler = WifiDirectSchedulerFactory::GetInstance().GetScheduler();
+    auto ret = scheduler.DisconnectDevice(info, callback);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    auto future = result.get_future();
+    auto status = future.wait_for(std::chrono::milliseconds(P2pV1Processor::DISCONNECT_WAIT_POST_REQUEST_MS + 1000));
+    ASSERT_EQ(status, std::future_status::ready);
+    auto value = future.get();
+    ASSERT_EQ(value, true);
+    // ugly way (sleep 1s) to wait processor terminate, as mock environment will be cleanup before processor terminate.
+    sleep(1);
+}
+
+/*
  * @tc.name: PassiveDisconnectWhenLocalUsing
  * @tc.desc: passive disconnect link when local using
  * @tc.type: FUNC
@@ -797,8 +1041,95 @@ HWTEST_F(P2pV1ProcessorTest, PassiveDisconnectWhenLocalUsing, TestSize.Level1)
 }
 
 /*
- * @tc.name: PassiveDisconnectWhenLocalReusing
- * @tc.desc: passive disconnect link when local using
+ * @tc.name: ForceDisconnectWhenLocalUsing
+ * @tc.desc: force disconnect link when local using
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, ForceDisconnectWhenLocalUsing, TestSize.Level1)
+{
+    context_.Set(TestContextKey::REMOTE_MAC, std::string("42:dc:a5:f3:4c:14"));
+    context_.Set(TestContextKey::SWITCH_INJECT_LOCAL_INNER_LINK, true);
+    context_.Set(TestContextKey::SWITCH_INJECT_REMOTE_INNER_LINK, false);
+
+    WifiDirectInterfaceMock mock;
+    InjectCommonMock(mock);
+    InjectData(mock);
+    P2pEntity entityMock;
+    InjectEntityMock(entityMock);
+    InjectChannel(mock);
+
+    WifiDirectDisconnectInfo ignore = { 0 };
+    WifiDirectForceDisconnectInfo info = { 0 };
+    WifiDirectDisconnectCallback callback { 0 };
+    PrepareDisconnectParameter(ignore, info, callback);
+    std::promise<bool> result;
+    EXPECT_CALL(mock, OnDisconnectSuccess(context_.Get(TestContextKey::CONNECT_REQUEST_ID, uint32_t(0))))
+        .Times(1)
+        .WillOnce<>([&result](uint32_t requestId) {
+            result.set_value(true);
+        });
+
+    WifiDirectScheduler &scheduler = WifiDirectSchedulerFactory::GetInstance().GetScheduler();
+    auto ret = scheduler.ForceDisconnectDevice(info, callback);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    auto future = result.get_future();
+    auto status = future.wait_for(std::chrono::milliseconds(P2pV1Processor::DISCONNECT_WAIT_POST_REQUEST_MS + 1000));
+    ASSERT_EQ(status, std::future_status::ready);
+    auto value = future.get();
+    ASSERT_EQ(value, true);
+    // ugly way (sleep 1s) to wait processor terminate, as mock environment will be cleanup before processor terminate.
+    sleep(1);
+}
+
+/*
+ * @tc.name: PassiveForceDisconnectWhenLocalUsing
+ * @tc.desc: passive force disconnect link when local using
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, PassiveForceDisconnectWhenLocalUsing, TestSize.Level1)
+{
+    context_.Set(TestContextKey::REMOTE_MAC, std::string("42:dc:a5:f3:4c:14"));
+    context_.Set(TestContextKey::SWITCH_INJECT_LOCAL_INNER_LINK, true);
+    context_.Set(TestContextKey::SWITCH_INJECT_REMOTE_INNER_LINK, false);
+
+    WifiDirectInterfaceMock mock;
+    InjectCommonMock(mock);
+    InjectData(mock);
+    P2pEntity entityMock;
+    InjectEntityMock(entityMock);
+    InjectChannel(mock);
+
+    EXPECT_CALL(entityMock, DestroyGroup(_)).WillRepeatedly([](const P2pDestroyGroupParam &param) {
+        // sleep 100ms to make sure processor state can be inspected by InspectProcessorState
+        SoftBusSleepMs(100);
+        P2pOperationResult result {};
+        result.errorCode_ = SOFTBUS_OK;
+        return result;
+    });
+
+    auto channelId = context_.Get(TestContextKey::CONNECT_NEGO_CHANNEL_ID, int32_t(0));
+    std::string message = R"({"KEY_COMMAND_TYPE":32,"KEY_MAC":"42:dc:a5:f3:4c:14"})";
+    CoCProxyNegotiateChannel::InjectReceiveData(channelId, message);
+
+    auto deviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
+    ASSERT_TRUE(InspectProcessorState(deviceId, 2000, 10));
+
+    LinkManager::GetInstance().ForEach([&deviceId](InnerLink &link) {
+        if (link.GetLinkType() == InnerLink::LinkType::P2P && link.GetRemoteDeviceId() == deviceId) {
+            ADD_FAILURE() << "p2p link is not empty after force disconnect";
+        }
+        return false;
+    });
+    // ugly way (sleep 1s) to wait processor terminate, as mock environment will be cleanup before processor terminate.
+    sleep(1);
+}
+
+/*
+ * @tc.name: PassiveReuse
+ * @tc.desc: passive reuse link
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -831,9 +1162,10 @@ HWTEST_F(P2pV1ProcessorTest, PassiveReuse, TestSize.Level1)
     ASSERT_TRUE(InspectProcessorState(deviceId, 2000, 10));
 
     bool beingUsedByRemote = false;
-    LinkManager::GetInstance().ProcessIfPresent(InnerLink::LinkType::P2P, deviceId, [&beingUsedByRemote](InnerLink &link) {
-        beingUsedByRemote = link.IsBeingUsedByRemote();
-    });
+    LinkManager::GetInstance().ProcessIfPresent(
+        InnerLink::LinkType::P2P, deviceId, [&beingUsedByRemote](InnerLink &link) {
+            beingUsedByRemote = link.IsBeingUsedByRemote();
+        });
     ASSERT_TRUE(beingUsedByRemote);
     // ugly way (sleep 1s) to wait processor terminate, as mock environment will be cleanup before processor terminate.
     sleep(1);

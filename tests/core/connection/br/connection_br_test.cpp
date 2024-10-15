@@ -629,7 +629,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket006, TestSize.Level1)
     uint32_t id = 1;
     int64_t seq = 1000;
     uint32_t waitMillis = 1000;
-    void *data = NULL;
+    void *data = nullptr;
 
     ret = ConnBrInitBrPendingPacket();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -696,7 +696,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket008, TestSize.Level1)
     int ret;
     uint32_t id = 1;
     int64_t seq = 1000;
-    void *data = NULL;
+    void *data = nullptr;
     ConnBrConnection connection;
 
     NiceMock<ConnectionBrInterfaceMock> brMock;
@@ -748,7 +748,7 @@ HWTEST_F(ConnectionBrTest, testBrQueue001, TestSize.Level1)
 HWTEST_F(ConnectionBrTest, testBrQueue002, TestSize.Level1)
 {
     int ret;
-    void *msg = NULL;
+    void *msg = nullptr;
     SendBrQueueNode queueNode;
 
     ret = ConnBrInnerQueueInit();
@@ -772,7 +772,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans001, TestSize.Level1)
     uint32_t connectionId;
     int32_t socketHandle = 0;
     LimitedBuffer buffer;
-    uint8_t *outData = NULL;
+    uint8_t *outData = nullptr;
     ConnPktHead head;
 
     head.magic = MAGIC_NUMBER;
@@ -800,7 +800,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans002, TestSize.Level1)
     uint32_t connectionId;
     int32_t socketHandle = 0;
     LimitedBuffer buffer;
-    uint8_t *outData = NULL;
+    uint8_t *outData = nullptr;
     ConnPktHead head;
 
     head.magic = MAGIC_NUMBER;
@@ -819,7 +819,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans003, TestSize.Level1)
     uint32_t connectionId;
     int32_t socketHandle = 0;
     LimitedBuffer buffer;
-    uint8_t *outData = NULL;
+    uint8_t *outData = nullptr;
     ConnPktHead head;
 
     head.magic = MAGIC_NUMBER;
@@ -836,7 +836,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans004, TestSize.Level1)
 {
     int64_t ret;
     BrCtlMessageSerializationContext ctx;
-    uint8_t *outData = NULL;
+    uint8_t *outData = nullptr;
     uint32_t outDataLen;
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
@@ -882,7 +882,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans005, TestSize.Level1)
 {
     int ret;
     uint32_t connectionId = 1;
-    uint8_t *data = NULL;
+    uint8_t *data = nullptr;
     uint32_t len = 0;
     int32_t pid = 0;
     int32_t flag = 0;
@@ -893,12 +893,13 @@ HWTEST_F(ConnectionBrTest, testBrBrans005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     len = MAX_DATA_LEN + 1;
-    data = (uint8_t *)SoftBusCalloc(len);
+    data = static_cast<uint8_t *>(SoftBusCalloc(len));
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     len = MAX_DATA_LEN;
-    data = (uint8_t *)SoftBusCalloc(len);
+    data = static_cast<uint8_t *>(SoftBusCalloc(len));
+    connectionId = 0x20005;
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
 }

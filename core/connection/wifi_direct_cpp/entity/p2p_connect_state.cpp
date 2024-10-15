@@ -34,7 +34,7 @@ P2pConnectState *P2pConnectState::Instance()
     return &instance;
 }
 
-P2pConnectState::P2pConnectState() : timer_("P2pConnect") { }
+P2pConnectState::P2pConnectState() : timer_("P2pConnect", TIMER_TIMEOUT) { }
 
 void P2pConnectState::Enter(const std::shared_ptr<P2pOperation> &operation)
 {
@@ -47,19 +47,15 @@ void P2pConnectState::Enter(const std::shared_ptr<P2pOperation> &operation)
     }
     operation_->timerId_ = timer_.Register(
         [this]() {
-            CONN_LOGE(CONN_WIFI_DIRECT, "timeout");
-            P2pOperationResult result {};
-            result.errorCode_ = SOFTBUS_TIMOUT;
-            operation_->promise_.set_value(result);
-            ChangeState(P2pAvailableState::Instance(), nullptr);
+            std::thread thread(&P2pConnectState::OnTimeout, this);
+            thread.detach();
         },
         outTime, true);
 }
 
 void P2pConnectState::Exit()
 {
-    timer_.Shutdown(false);
-    operation_ = nullptr;
+    timer_.Shutdown();
 }
 
 int P2pConnectState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2pCreateGroupParam>> &operation)
@@ -131,7 +127,14 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
         CONN_LOGE(CONN_WIFI_DIRECT, "group info is null, skip config ip");
         return;
     }
+    P2pEntity::GetInstance().Lock();
+    if (operation_ == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
+        P2pEntity::GetInstance().Unlock();
+        return;
+    }
     auto operation = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    P2pEntity::GetInstance().Unlock();
     if (operation->content_.isNeedDhcp) {
         std::string localIpStr;
         (void)P2pAdapter::GetIpAddress(localIpStr);
@@ -150,10 +153,12 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
 void P2pConnectState::OnP2pConnectionChangeEvent(
     const WifiP2pLinkedInfo &info, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo)
 {
+    P2pEntity::GetInstance().Lock();
     P2pAdapter::WifiDirectP2pGroupInfo ignore {};
     auto ret = P2pAdapter::GetGroupInfo(ignore);
     if (operation_ == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
+        P2pEntity::GetInstance().Unlock();
         return;
     }
     timer_.Unregister(operation_->timerId_);
@@ -162,10 +167,26 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
         result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
         CONN_LOGE(CONN_WIFI_DIRECT, "connect call event failed, error=%d", result.errorCode_);
     } else {
-        auto connectOp = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
         result.errorCode_ = SOFTBUS_OK;
     }
-    operation_->promise_.set_value(result);
     ChangeState(P2pAvailableState::Instance(), nullptr);
+    operation_->promise_.set_value(result);
+    operation_ = nullptr;
+    P2pEntity::GetInstance().Unlock();
+}
+
+void P2pConnectState::OnTimeout()
+{
+    P2pEntity::GetInstance().Lock();
+    CONN_LOGE(CONN_WIFI_DIRECT, "timeout");
+    if (operation_ == nullptr) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "operation is nullptr");
+        P2pEntity::GetInstance().Unlock();
+        return;
+    }
+    ChangeState(P2pAvailableState::Instance(), nullptr);
+    operation_->promise_.set_value(P2pOperationResult(static_cast<int>(SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT)));
+    operation_ = nullptr;
+    P2pEntity::GetInstance().Unlock();
 }
 } // namespace OHOS::SoftBus

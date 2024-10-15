@@ -15,7 +15,7 @@
 
 #include "softbus_conn_ble_client.h"
 
-#include <securec.h>
+#include "securec.h"
 
 #include "conn_log.h"
 #include "message_handler.h"
@@ -348,7 +348,7 @@ static void BleGattcSearchServiceCallback(int32_t underlayerHandle, int32_t stat
     CONN_LOGI(CONN_BLE,
         "gatt client callback, service searched, handle=%{public}d, status=%{public}d", underlayerHandle, status);
 
-    CommonStatusContext *ctx = SoftBusCalloc(sizeof(CommonStatusContext));
+    CommonStatusContext *ctx = (CommonStatusContext *)SoftBusCalloc(sizeof(CommonStatusContext));
     if (ctx == NULL) {
         CONN_LOGE(CONN_BLE, "service searched handle failed: calloc failed, handle=%{public}d, status=%{public}d",
             underlayerHandle, status);
@@ -448,7 +448,7 @@ static void BleGattcRegisterNotificationCallback(int32_t underlayerHandle, int32
     CONN_LOGI(CONN_BLE, "gatt client callback, notification registered, handle=%{public}d, status=%{public}d",
         underlayerHandle, status);
 
-    CommonStatusContext *ctx = SoftBusCalloc(sizeof(CommonStatusContext));
+    CommonStatusContext *ctx = (CommonStatusContext *)SoftBusCalloc(sizeof(CommonStatusContext));
     if (ctx == NULL) {
         CONN_LOGE(CONN_BLE, "calloc failed, handle=%{public}d, status=%{public}d", underlayerHandle, status);
         return;
@@ -590,7 +590,7 @@ static void BleGattcConfigureMtuSizeCallback(int32_t underlayerHandle, int32_t m
 {
     CONN_LOGI(CONN_BLE, "gatt client callback, MTU configured, handle=%{public}d, mtu=%{public}d, status=%{public}d",
         underlayerHandle, mtuSize, status);
-    MtuConfiguredContext *ctx = SoftBusCalloc(sizeof(MtuConfiguredContext));
+    MtuConfiguredContext *ctx = (MtuConfiguredContext *)SoftBusCalloc(sizeof(MtuConfiguredContext));
     if (ctx == NULL) {
         CONN_LOGE(CONN_BLE, "calloc mtu failed, handle=%{public}d, mtu=%{public}d, status=%{public}d", underlayerHandle,
             mtuSize, status);

@@ -99,6 +99,9 @@ public:
     static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
     static bool IsDfsChannel(const int &frequency);
     static bool CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type);
+    static int32_t GetOsType(const char *networkId);
+    static int32_t GetDeviceType(const char *networkId);
+    static int32_t GetDeviceType();
 
 private:
     static inline std::mutex serialParallelLock_;

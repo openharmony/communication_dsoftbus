@@ -27,6 +27,7 @@
 #include "softbus_adapter_ble_gatt_client.h"
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_conn_common.h"
 #include "softbus_common.h"
 #include "softbus_config_type.h"
 #include "softbus_conn_ble_connection.h"

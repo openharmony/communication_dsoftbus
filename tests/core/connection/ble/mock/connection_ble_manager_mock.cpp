@@ -40,7 +40,7 @@ bool ConnectionBleManagerInterfaceMock::ActionOfGetdelta(
 {
     (void)json;
     (void)str;
-    if (target != NULL) {
+    if (target != nullptr) {
         *target = -1;
     }
     return true;
@@ -51,7 +51,7 @@ bool ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc1(
 {
     (void)json;
     (void)str;
-    if (target != NULL) {
+    if (target != nullptr) {
         *target = 1;
     }
     return true;
@@ -62,7 +62,7 @@ bool ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc0(
 {
     (void)json;
     (void)str;
-    if (target != NULL) {
+    if (target != nullptr) {
         *target = 0;
     }
     return true;

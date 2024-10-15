@@ -144,7 +144,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
 
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
-    OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
+    OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TOTAL_START);
 
     ConnEventExtra extra;
     SetElementTypeExtra(info, &extra);
@@ -499,17 +499,17 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     return false;
 }
 
-static bool IsWifiP2pEnabled(void)
-{
-    return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
-}
-
-static bool SupportHmlTwo(void)
+static bool SupportHmlTwo()
 {
     return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
 }
 
-static int GetStationFrequency(void)
+static bool IsWifiP2pEnabled()
+{
+    return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
+}
+
+static int GetStationFrequency()
 {
     return OHOS::SoftBus::P2pAdapter::GetStationFrequency();
 }
@@ -518,6 +518,19 @@ static void RegisterEnhanceManager(WifiDirectEnhanceManager *manager)
 {
     CONN_CHECK_AND_RETURN_LOGE(manager != nullptr, CONN_WIFI_DIRECT, "manager is null");
     g_enhanceManager = *manager;
+}
+
+static bool IsHmlConnected()
+{
+    bool ret = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&] (const OHOS::SoftBus::InnerLink &innerLink) {
+        if (innerLink.GetLinkType() == OHOS::SoftBus::InnerLink::LinkType::HML) {
+            ret = true;
+            return true;
+        }
+        return false;
+    });
+    return ret;
 }
 
 static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
@@ -564,6 +577,7 @@ static struct WifiDirectManager g_manager = {
     .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
+    .isHmlConnected = IsHmlConnected,
 
     .init = Init,
     .notifyOnline = NotifyOnline,

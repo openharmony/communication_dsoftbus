@@ -25,7 +25,7 @@
 namespace OHOS::SoftBus {
 enum class ConnectCommandRetryReason {
     RETRY_FOR_NOTHING = 0,
-    RETRY_FOR_PASSIVE_SWTICH_CHANNEL,
+    RETRY_FOR_PASSIVE_SWITCH_CHANNEL,
 };
 
 struct ConnectInfo {
@@ -60,7 +60,7 @@ public:
 
     void OnSuccess(const WifiDirectLink &link) const;
     void OnFailure(int32_t reason) const;
-    bool IsSameCommand(const WifiDirectConnectInfo &info);
+    bool IsSameCommand(const WifiDirectConnectInfo &info) const;
 
 protected:
     ConnectInfo info_;

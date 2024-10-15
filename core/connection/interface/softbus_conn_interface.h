@@ -49,7 +49,7 @@ typedef enum {
     MODULE_META_AUTH = 21,
     MODULE_P2P_NEGO = 22,
     MODULE_AUTH_SYNC_INFO = 23,
-    MODULE_PTK_VERIFY = 24,
+        MODULE_PTK_VERIFY = 24,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
     MODULE_NIP_BR_CHANNEL = 201,
@@ -75,8 +75,8 @@ typedef enum {
 
 #define BT_LINK_TYPE_BR  1
 #define BT_LINK_TYPE_BLE 2
-#define HML_INDEX 3
-#define AUTH_ENHANCED_P2P_NUM 4
+#define HML_NUM 8
+#define AUTH_ENHANCED_P2P_NUM 8
 
 typedef enum {
     PROXY = 0,
@@ -88,7 +88,7 @@ typedef enum {
     DIRECT_CHANNEL_CLIENT,
     DIRECT_CHANNEL_SERVER_WIFI,
     DIRECT_CHANNEL_SERVER_HML_START,
-    DIRECT_CHANNEL_SERVER_HML_END = DIRECT_CHANNEL_SERVER_HML_START + HML_INDEX,
+    DIRECT_CHANNEL_SERVER_HML_END = DIRECT_CHANNEL_SERVER_HML_START + HML_NUM - 1,
     LANE,
     NETLINK,
     AUTH_RAW_P2P_SERVER,
@@ -166,6 +166,7 @@ struct BrOption {
     uint32_t connectionId;
     char brMac[BT_MAC_LEN];
     ConnSideType sideType;
+    uint32_t waitTimeoutDelay;
 };
 
 struct BleOption {
