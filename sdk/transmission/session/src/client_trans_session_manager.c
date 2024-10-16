@@ -26,6 +26,7 @@
 #include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
+#include "session_ipc_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
@@ -1464,7 +1465,6 @@ int32_t ClientAddSocketSession(
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
@@ -1840,39 +1840,6 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
-}
-
-static int32_t CheckSessionEnableStatus(int32_t socket, SoftBusCond *callbackCond)
-{
-    int32_t ret = LockClientSessionServerList();
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed socket=%{public}d", socket);
-        return ret;
-    }
-
-    ClientSessionServer *serverNode = NULL;
-    SessionInfo *sessionNode = NULL;
-    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
-        UnlockClientSessionServerList();
-        (void)SoftBusCondDestroy(callbackCond);
-        TRANS_LOGE(TRANS_SDK, "socket=%{public}d not found, destroy condition", socket);
-        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
-    }
-    sessionNode->lifecycle.condIsWaiting = false;
-    ret = sessionNode->lifecycle.bindErrCode;
-    if (sessionNode->enableStatus != ENABLE_STATUS_SUCCESS) {
-        UnlockClientSessionServerList();
-        // enableStatus=false and ret=SOFTBUS_OK, is an unexpected state
-        if (ret == SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "invalid bindErrCode, socket=%{public}d, ret=%{public}d", socket, ret);
-            return SOFTBUS_TRANS_SESSION_NO_ENABLE;
-        }
-        TRANS_LOGE(TRANS_SDK, "Bind fail, socket=%{public}d, ret=%{public}d", socket, ret);
-        return ret;
-    }
-    UnlockClientSessionServerList();
-    TRANS_LOGI(TRANS_SDK, "socket=%{public}d is enable, ret=%{public}d", socket, ret);
-    return ret;
 }
 
 int32_t ClientGetPeerSocketInfoById(int32_t socket, PeerSocketInfo *peerSocketInfo)
@@ -2256,6 +2223,39 @@ int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState,
     }
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
+}
+
+static int32_t CheckSessionEnableStatus(int32_t socket, SoftBusCond *callbackCond)
+{
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed socket=%{public}d", socket);
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        (void)SoftBusCondDestroy(callbackCond);
+        TRANS_LOGE(TRANS_SDK, "socket=%{public}d not found, destroy condition", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    sessionNode->lifecycle.condIsWaiting = false;
+    ret = sessionNode->lifecycle.bindErrCode;
+    if (sessionNode->enableStatus != ENABLE_STATUS_SUCCESS) {
+        UnlockClientSessionServerList();
+        // enableStatus=false and ret=SOFTBUS_OK, is an unexpected state
+        if (ret == SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "invalid bindErrCode, socket=%{public}d, ret=%{public}d", socket, ret);
+            return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+        }
+        TRANS_LOGE(TRANS_SDK, "Bind fail, socket=%{public}d, ret=%{public}d", socket, ret);
+        return ret;
+    }
+    UnlockClientSessionServerList();
+    TRANS_LOGI(TRANS_SDK, "socket=%{public}d is enable, ret=%{public}d", socket, ret);
+    return ret;
 }
 
 int32_t ClientWaitSyncBind(int32_t socket)

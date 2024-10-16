@@ -122,6 +122,9 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Lev
     int ret = TransOnChannelOpened(nullptr, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
+    ret = TransOnChannelOpened(g_sessionName, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
     info.channelType = CHANNEL_TYPE_AUTH;
     ret = TransOnChannelOpened(g_sessionName, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -170,6 +173,9 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSi
     ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_UDP, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
+    ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_UNDEFINED, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_BUTT, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
@@ -203,14 +209,32 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.L
     int ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH, messageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH, udpMessageType, SHUTDOWN_REASON_UNKNOWN);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_PROXY, messageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_PROXY, udpMessageType, SHUTDOWN_REASON_UNKNOWN);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_UDP, udpMessageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_UDP, messageType, SHUTDOWN_REASON_UNKNOWN);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
+
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, messageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, udpMessageType, SHUTDOWN_REASON_UNKNOWN);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_BUTT, messageType, SHUTDOWN_REASON_UNKNOWN);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, MESSAGE_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
 }
 
 /**
@@ -223,11 +247,18 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelMsgReceivedTest001, TestS
 {
     int channelId = 1;
     const void *data = (const void *)"test";
-    int ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
+
+    int ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
+
+    ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_TCP_DIRECT, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_BUTT, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
@@ -247,7 +278,11 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelQosEventTest001, TestSize
     const QosTv tvList = {
         .type = WIFI_CHANNEL_QUALITY,
     };
-    int ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, &tvList);
+
+    int ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, &tvList);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_BUTT, eventId, tvCount, &tvList);
