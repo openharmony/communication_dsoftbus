@@ -269,8 +269,12 @@ static void HandleDetectWifiDirectApply(PowerControlInfo *powerInfo,  WifiDirect
     if (powerInfo->isDisableLowPower) {
         DisablePowerControl(wifiDirectInfo);
         SetLanePowerStatus(false);
-    } else if ((powerInfo->activeHml == 1) && (powerInfo->passiveHml == 0) && (powerInfo->rawHml == 0)
+    } else if ((powerInfo->activeHml >= 1) && (powerInfo->passiveHml == 0) && (powerInfo->rawHml == 0)
          && (!g_enabledLowPower)) {
+        if (powerInfo->transType == LANE_T_BYTE || powerInfo->transType == LANE_T_MSG) {
+            LNN_LOGE(LNN_LANE, "low-power unsupported transType = %{public}d", powerInfo->transType);
+            return;
+        }
         int32_t ret = EnablePowerControl(wifiDirectInfo);
         SetLanePowerStatus(true);
         if (ret != SOFTBUS_OK) {
@@ -322,10 +326,11 @@ void DetectDisableWifiDirectApply(void)
     HandleDetectWifiDirectApply(&powerInfo, &wifiDirectInfo);
 }
 
-static void DetectEnableWifiDirectApply(void)
+static void DetectEnableWifiDirectApply(const LaneLinkInfo *linkInfo, int32_t powerNum)
 {
     PowerControlInfo powerInfo;
     (void)memset_s(&powerInfo, sizeof(powerInfo), 0, sizeof(powerInfo));
+    powerInfo.transType = linkInfo->transType;
     WifiDirectLinkInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     if (LaneLock() != SOFTBUS_OK) {
@@ -352,7 +357,7 @@ static void DetectEnableWifiDirectApply(void)
             powerInfo.rawHml++;
         }
     }
-    if (powerInfo.activeHml > 1) {
+    if (powerInfo.activeHml > powerNum) {
         powerInfo.isDisableLowPower = true;
     }
     if (((powerInfo.activeHml == 0) || (powerInfo.passiveHml > 0) || (powerInfo.rawHml > 0)) && g_enabledLowPower) {
@@ -453,6 +458,7 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
         LNN_LOGE(LNN_LANE, "linkInfo is nullptr or invalid laneId");
         return SOFTBUS_INVALID_PARAM;
     }
+    int32_t powerNum = 1;
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -462,6 +468,10 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     if (resourceItem != NULL) {
         addResult = UpdateExistLaneResource(resourceItem, isServerSide);
         LaneUnlock();
+        if (linkInfo->type == LANE_HML && IsPowerControlEnabled()) {
+            powerNum++;
+            DetectEnableWifiDirectApply(linkInfo, powerNum);
+        }
         return addResult;
     }
     LaneUnlock();
@@ -474,7 +484,7 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
         AddNetworkResourceInner(linkInfo, laneId);
     }
     if (linkInfo->type == LANE_HML && IsPowerControlEnabled()) {
-        DetectEnableWifiDirectApply();
+        DetectEnableWifiDirectApply(linkInfo, powerNum);
     }
     return SOFTBUS_OK;
 }

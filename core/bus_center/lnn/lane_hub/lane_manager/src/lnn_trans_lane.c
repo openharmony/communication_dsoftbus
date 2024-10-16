@@ -1292,6 +1292,7 @@ static int32_t GetLaneLinkInfo(uint32_t laneReqId, LaneLinkType *type, LaneLinkI
                 return SOFTBUS_MEM_ERR;
             }
             *type = linkType;
+            info->transType = nodeInfo->transType;
             Unlock();
             return SOFTBUS_OK;
         }
