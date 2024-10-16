@@ -702,7 +702,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
 
     UpdateNewNodeAccountHash(newInfo);
-    UpdateDpSameAccount(newInfo->accountHash, newInfo->deviceInfo.deviceUdid);
+    UpdateDpSameAccount(newInfo->accountId, newInfo->deviceInfo.deviceUdid);
     udid = LnnGetDeviceUdid(newInfo);
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
@@ -1179,7 +1179,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
-    UpdateDpSameAccount(info->accountHash, info->deviceInfo.deviceUdid);
+    UpdateDpSameAccount(info->accountId, info->deviceInfo.deviceUdid);
     if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }
