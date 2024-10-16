@@ -1,6 +1,6 @@
 [
   {
-    "SESSION_NAME": "^DistributedFileService.*",
+    "SESSION_NAME": "DistributedFileService.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "APP_INFO": [
@@ -38,7 +38,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^ohos.distributedschedule.dms.*",
+    "SESSION_NAME": "ohos.distributedschedule.dms.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "SEC_LEVEL": "public",
@@ -51,7 +51,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^com.huawei.dmsdp.*",
+    "SESSION_NAME": "com.huawei.dmsdp.*",
     "REGEXP": "true",
     "DEVID": "UDID",
     "APP_INFO": [
@@ -87,7 +87,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^ohos.dhardware.*",
+    "SESSION_NAME": "ohos.dhardware.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -139,7 +139,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^ohos.dhardware.daudio.*",
+    "SESSION_NAME": "ohos.dhardware.daudio.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -163,7 +163,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^device.security.level*",
+    "SESSION_NAME": "device.security.level*",
     "REGEXP": "true",
     "DEVID": "UDID",
     "APP_INFO": [
@@ -176,7 +176,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^ohos.security.atm_channel.*",
+    "SESSION_NAME": "ohos.security.atm_channel.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -227,7 +227,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^DeviceCollaboration.*",
+    "SESSION_NAME": "DeviceCollaboration.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "APP_INFO": [
@@ -239,7 +239,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^com.huawei.pcassistant.*",
+    "SESSION_NAME": "com.huawei.pcassistant.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "APP_INFO": [
@@ -288,7 +288,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^ohos.msdp.device_status.*",
+    "SESSION_NAME": "ohos.msdp.device_status.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -414,7 +414,7 @@
     ]
   },
   {
-    "SESSION_NAME": "^ohos.dstb.tee.*",
+    "SESSION_NAME": "ohos.dstb.tee.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
@@ -475,24 +475,24 @@
     ]
   },
   {
-    "SESSION_NAME": "hiview_distributed_network_softbus",
+    "SESSION_NAME": "ohos.telephony.callmanager.*",
     "DEVID": "NETWORKID",
     "APP_INFO": [
       {
-        "PKG_NAME": "com.huawei.hmos.hiviewcare",
+        "PKG_NAME": "ohos.telephony.callmanager",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }
     ]
   },
   {
-    "SESSION_NAME": "^ohos.telephony.callmanager.*",
+    "SESSION_NAME": "hiview_distributed_network_softbus",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "APP_INFO": [
       {
-        "PKG_NAME": "ohos.telephony.callmanager",
-        "TYPE": "native_app",
+        "PKG_NAME": "com.huawei.hmos.hiviewcare",
+        "TYPE": "normal_app",
         "ACTIONS": "create,open"
       }
     ]
