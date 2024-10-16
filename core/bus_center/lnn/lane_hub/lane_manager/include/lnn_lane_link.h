@@ -41,6 +41,7 @@ typedef struct {
     int32_t passiveHml;
     int32_t rawHml;
     bool isDisableLowPower;
+    LaneTransType transType;
 } PowerControlInfo;
 
 typedef struct {
@@ -95,6 +96,7 @@ typedef struct {
     char peerUdid[UDID_BUF_LEN];
     char netifName[NET_IF_NAME_LEN];
     LaneLinkType type;
+    LaneTransType transType;
     union {
         WlanLinkInfo wlan;
         P2pLinkInfo p2p;
