@@ -115,7 +115,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
             NodeInfo nodeInfo;
             (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
             (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
-            UpdateDpSameAccount(nodeInfo.accountHash, nodeInfo.deviceInfo.deviceUdid);
+            UpdateDpSameAccount(nodeInfo.accountId, nodeInfo.deviceInfo.deviceUdid);
         }
     } else {
         connFsm = StartNewConnectionFsm(&addr, DEFAULT_PKG_NAME, true);
