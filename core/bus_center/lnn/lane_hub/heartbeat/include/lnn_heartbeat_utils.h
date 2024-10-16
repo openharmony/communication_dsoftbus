@@ -126,6 +126,7 @@ typedef struct {
     int32_t preferChannel;
     uint8_t shortUuid[HB_SHORT_UUID_LEN];
     uint8_t hbVersion;
+    bool isScreenOn;
 } HbRespData;
 
 typedef enum {
