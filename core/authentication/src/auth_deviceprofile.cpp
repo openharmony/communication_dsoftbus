@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,13 @@
 
 #include "auth_deviceprofile.h"
 
-#include <cstdint>
 #include <cstring>
 #include <set>
 #include <mutex>
 #include <string>
 #include <vector>
+
+#include <securec.h>
 
 #include "access_control_profile.h"
 #include "anonymizer.h"
@@ -41,9 +42,9 @@
 #include "trust_device_profile.h"
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
-static constexpr uint32_t ACCOUNT_HASH_SHORT_LEN = 2;
 static std::set<std::string> g_notTrustedDevices;
 static std::mutex g_mutex;
+static constexpr const int32_t LONG_TO_STRING_MAX_LEN = 21;
 
 static bool IsNotTrustDevice(std::string deviceIdHash)
 {
@@ -150,20 +151,42 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     AnonymizeFree(anonyDeviceIdHash);
     return false;
 }
-
-static bool IsSameAccount(const std::string accountHashStr)
+static void DumpAccountId(int64_t localAccountId, int64_t peerAccountId)
 {
-    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
-    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "get local accountHash fail");
+    char localAccountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(localAccountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, localAccountId) == -1) {
+        LNN_LOGE(LNN_STATE, "long to string fail");
+        return;
+    }
+
+    char peerAccountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(peerAccountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, peerAccountId) == -1) {
+        LNN_LOGE(LNN_STATE, "long to string fail");
+        return;
+    }
+
+    char *anonyLocalAccountId = nullptr;
+    char *anonyPeerAccountId = nullptr;
+    Anonymize(localAccountString, &anonyLocalAccountId);
+    Anonymize(peerAccountString, &anonyPeerAccountId);
+    LNN_LOGI(LNN_STATE, "localAccountId=%{public}s, peerAccountId=%{public}s",
+        AnonymizeWrapper(anonyLocalAccountId), AnonymizeWrapper(anonyPeerAccountId));
+    AnonymizeFree(anonyLocalAccountId);
+    AnonymizeFree(anonyPeerAccountId);
+}
+
+static bool IsSameAccount(int64_t accountId)
+{
+    int64_t localAccountId = 0;
+    int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &localAccountId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get local accountId fail");
         return false;
     }
-    if (memcmp(localAccountHash, accountHashStr.c_str(), ACCOUNT_HASH_SHORT_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
-        LNN_LOGI(LNN_STATE, "accountHash=%{public}02x%{public}02x is same", localAccountHash[0], localAccountHash[1]);
+    DumpAccountId(localAccountId, accountId);
+    if (localAccountId == accountId && !LnnIsDefaultOhosAccount()) {
         return true;
     }
-    LNN_LOGI(LNN_STATE, "localAccountHash=%{public}02x%{public}02x, peeraccountHash=%{public}02x%{public}02x",
-        localAccountHash[0], localAccountHash[1], accountHashStr[0], accountHashStr[1]);
     return false;
 }
 
@@ -233,15 +256,14 @@ static void InsertDpSameAccount(const std::string udid)
     AnonymizeFree(anonyUdid);
 }
 
-void UpdateDpSameAccount(const char *accountHash, const char *deviceId)
+void UpdateDpSameAccount(int64_t accountId, const char *deviceId)
 {
-    if (accountHash == nullptr || deviceId == nullptr) {
-        LNN_LOGE(LNN_STATE, "accountHash or deviceId is null");
+    if (deviceId == nullptr) {
+        LNN_LOGE(LNN_STATE, "deviceId is null");
         return;
     }
-    std::string accountHashStr(accountHash);
     std::string udid(deviceId);
-    if (IsSameAccount(accountHashStr)) {
+    if (IsSameAccount(accountId)) {
         InsertDpSameAccount(udid);
     }
 }
