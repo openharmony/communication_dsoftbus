@@ -351,10 +351,9 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
     int32_t status = SOFTBUS_OK;
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
     CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_CONN_BR_INTERNAL_ERR, CONN_BR, "connection is null");
-    char *address = NULL;
     KeepAliveBleIfSameAddress(device);
+    char *address = (char *)SoftBusCalloc(BT_MAC_LEN);
     do {
-        address = (char *)SoftBusCalloc(BT_MAC_LEN);
         if (address == NULL || strcpy_s(address, BT_MAC_LEN, device->addr) != EOK) {
             CONN_LOGW(CONN_BR, "copy br address failed, addr=%{public}s", anomizeAddress);
             status = SOFTBUS_MEM_ERR;
@@ -378,9 +377,12 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         } else {
             waitTimeoutDelay = device->waitTimeoutDelay;
         }
-        CONN_LOGI(CONN_BR, "delay=%{public}d, device delay=%{public}d", waitTimeoutDelay, device->waitTimeoutDelay);
-        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_TIMEOUT, connection->connectionId, 0, address,
-            waitTimeoutDelay);
+
+        status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_TIMEOUT, connection->connectionId, 0,
+            address, waitTimeoutDelay);
+        if (status != SOFTBUS_OK) {
+            break;
+        }
         TransitionToState(BR_STATE_CONNECTING);
     } while (false);
 
@@ -1646,8 +1648,12 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
         if (target != NULL) {
             CONN_LOGD(CONN_BR, "br pend connection, address pending, refresh timeout only, addr=%s", animizeAddress);
             ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr);
-            ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr,
+            status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr,
                 (time < BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS ? time : BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS));
+            if (status != SOFTBUS_OK) {
+                CONN_LOGE(CONN_BR, "post msg failed, addr=%{public}s, error=%{public}d", animizeAddress, status);
+                SoftBusFree(copyAddr);
+            }
             break;
         }
 
@@ -1666,8 +1672,14 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
         }
         ListAdd(&g_brManager.pendings->list, &pending->node);
         g_brManager.pendings->cnt += 1;
-        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr,
+        status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr,
             (time < BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS ? time : BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS));
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "post msg to looper failed, addr=%{public}s, error=%{public}d", animizeAddress, status);
+            SoftBusFree(copyAddr);
+            SoftBusFree(pending);
+            break;
+        }
         CONN_LOGD(CONN_BR, "br pend connection success, address=%{public}s", animizeAddress);
     } while (false);
     SoftBusMutexUnlock(&g_brManager.pendings->lock);
