@@ -732,6 +732,19 @@ static int32_t ClientTransProxyFirstSliceProcess(
     return SOFTBUS_OK;
 }
 
+static bool IsValidCheckoutProcess(int32_t channelId)
+{
+    ChannelSliceProcessor *processor = NULL;
+    LIST_FOR_EACH_ENTRY(processor, &g_channelSliceProcessorList->list, ChannelSliceProcessor, head) {
+        if (processor->channelId == channelId) {
+            return true;
+        }
+    }
+
+    TRANS_LOGE(TRANS_SDK, "Process not exist.");
+    return false;
+}
+
 static int32_t ClientTransProxyLastSliceProcess(
     SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t channelId)
 {
@@ -752,7 +765,11 @@ static int32_t ClientTransProxyLastSliceProcess(
         TRANS_LOGE(TRANS_SDK, "process packets err");
         return ret;
     }
-    ClientTransProxyClearProcessor(processor);
+
+    if (IsValidCheckoutProcess(channelId)) {
+        ClientTransProxyClearProcessor(processor);
+    }
+
     TRANS_LOGI(TRANS_SDK, "LastSliceProcess ok");
     return ret;
 }
@@ -821,7 +838,7 @@ static int32_t ClientTransProxySliceProc(int32_t channelId, const char *data, ui
 
     SliceHead headSlice = *(SliceHead *)data;
     ClientUnPackSliceHead(&headSlice);
-    if (ClientTransProxyCheckSliceHead(&headSlice)) {
+    if (ClientTransProxyCheckSliceHead(&headSlice) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "invalid slihead");
         return SOFTBUS_TRANS_PROXY_INVALID_SLICE_HEAD;
     }
