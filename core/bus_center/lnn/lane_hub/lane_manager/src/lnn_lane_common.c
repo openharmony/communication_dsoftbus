@@ -93,7 +93,6 @@ static int32_t HmlRawInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connIn
     connInfo->type = LANE_HML_RAW;
     if (memcpy_s(&connInfo->connInfo.rawWifiDirect, sizeof(RawWifiDirectConnInfo),
         &linkInfo->linkInfo.rawWifiDirect, sizeof(RawWifiDirectConnInfo)) != EOK) {
-        LNN_LOGE(LNN_LANE, "memcpy raw wifidirect fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
