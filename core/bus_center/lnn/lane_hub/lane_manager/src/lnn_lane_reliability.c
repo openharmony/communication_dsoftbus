@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include <string.h>
+#include "bus_center_manager.h"
 #include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_trans_lane.h"
@@ -86,7 +87,14 @@ static int32_t ClientConnectTcp(LaneDetectInfo *infoItem)
         infoItem->link.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
-    int32_t fd = ConnOpenClientSocket(&option, BIND_ADDR_ALL, true);
+    char localIp[IP_LEN] = {0};
+    int32_t fd = SOFTBUS_INVALID_FD;
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get local ip fail");
+        fd = ConnOpenClientSocket(&option, BIND_ADDR_ALL, true);
+    } else {
+        fd = ConnOpenClientSocket(&option, localIp, true);
+    }
     if (fd < 0) {
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
