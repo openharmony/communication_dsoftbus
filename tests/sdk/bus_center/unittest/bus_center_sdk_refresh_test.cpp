@@ -25,7 +25,7 @@
 using namespace testing::ext;
 
 namespace OHOS {
-static int g_subscribeId = 0;
+static int32_t g_subscribeId = 0;
 static const char *g_pkgName = "com.softbus.test";
 static const char *g_pkgName1 = "com.softbus.test1";
 static const char *g_erroPkgName = "ErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroEErroE";
@@ -54,7 +54,7 @@ void BusCenterSdkRefresh::SetUpTestCase(void)
 void BusCenterSdkRefresh::TearDownTestCase(void)
 {}
 
-static int GetSubscribeId(void)
+static int32_t GetSubscribeId(void)
 {
     g_subscribeId++;
     return g_subscribeId;
@@ -119,7 +119,7 @@ static IRefreshCallback g_refreshCb2 = {
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     g_sInfo2.subscribeId = GetSubscribeId();
     ret = RefreshLNN(g_pkgName, &g_sInfo2, &g_refreshCb1);
     EXPECT_TRUE(ret == 0);
@@ -146,7 +146,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
 */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -199,7 +199,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
 */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -252,7 +252,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -280,7 +280,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -308,7 +308,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
 
     g_sInfo2.subscribeId = GetSubscribeId();
     ret = RefreshLNN(g_pkgName, &g_sInfo2, &g_refreshCb1);
@@ -336,7 +336,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
 */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -389,7 +389,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
 */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -442,7 +442,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -499,7 +499,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest010, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -533,7 +533,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest010, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest011, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -567,7 +567,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest011, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest012, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -595,7 +595,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest012, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest013, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -623,7 +623,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest013, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest014, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -651,7 +651,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest014, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest015, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -679,7 +679,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest015, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest016, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -707,7 +707,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest016, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest017, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
 
     g_sInfo2.subscribeId = GetSubscribeId();
     ret = RefreshLNN(g_pkgName, &g_sInfo2, &g_refreshCb1);
@@ -735,7 +735,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest017, TestSize.Level1)
 */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest018, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,
@@ -783,7 +783,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest018, TestSize.Level1)
 */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest019, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_PASSIVE,
@@ -831,7 +831,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest019, TestSize.Level1)
  */
 HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest020, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
         .mode = DISCOVER_MODE_ACTIVE,

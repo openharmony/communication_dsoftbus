@@ -494,7 +494,7 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
     }
     char *anonyIp = NULL;
     Anonymize(ip, &anonyIp);
-    LNN_LOGD(LNN_LEDGER, "get LocalIp=%{public}s", anonyIp);
+    LNN_LOGD(LNN_LEDGER, "get LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     if (strncpy_s((char *)buf, len, ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
@@ -1076,8 +1076,8 @@ static int32_t UpdateLocalDeviceName(const void *name)
     Anonymize((char *)name, &anonyName);
     char *anonyDeviceName = NULL;
     Anonymize(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
-    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s", anonyBeforeName, anonyName,
-        anonyDeviceName);
+    LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s",
+        AnonymizeWrapper(anonyBeforeName), AnonymizeWrapper(anonyName), AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyBeforeName);
     AnonymizeFree(anonyName);
     AnonymizeFree(anonyDeviceName);
@@ -1233,7 +1233,8 @@ static int32_t UpdateLocalNetworkId(const void *id)
     Anonymize(g_localNetLedger.localInfo.lastNetworkId, &anonyOldNetworkId);
     g_localNetLedger.localInfo.networkIdTimestamp = (int64_t)SoftBusGetSysTimeMs();
     LNN_LOGI(LNN_LEDGER, "networkId change %{public}s -> %{public}s, networkIdTimestamp=%{public}" PRId64,
-        anonyOldNetworkId, anonyNetworkId, g_localNetLedger.localInfo.networkIdTimestamp);
+        AnonymizeWrapper(anonyOldNetworkId), AnonymizeWrapper(anonyNetworkId),
+        g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore(UPDATE_NETWORKID);
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyOldNetworkId);
@@ -1349,7 +1350,7 @@ static int32_t UpdateLocalDeviceIp(const void *ip)
     LnnSetWiFiIp(&g_localNetLedger.localInfo, (char *)ip);
     char *anonyIp = NULL;
     Anonymize((char *)ip, &anonyIp);
-    LNN_LOGI(LNN_LEDGER, "set LocalIp=%{public}s", anonyIp);
+    LNN_LOGI(LNN_LEDGER, "set LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     return SOFTBUS_OK;
 }

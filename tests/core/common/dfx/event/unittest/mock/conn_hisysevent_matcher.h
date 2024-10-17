@@ -18,8 +18,8 @@
 
 #include <gmock/gmock.h>
 
-#include "convert/conn_event_converter.h"
 #include "convert/conn_audit_converter.h"
+#include "convert/conn_event_converter.h"
 #include "hisysevent_c.h"
 #include "softbus_event.h"
 

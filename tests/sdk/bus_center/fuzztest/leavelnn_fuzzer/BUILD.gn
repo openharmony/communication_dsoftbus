@@ -38,7 +38,7 @@ ohos_fuzztest("LeaveLNNFuzzTest") {
   ]
   sources = [ "leavelnn_fuzzer.cpp" ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "c_utils:utils",

@@ -24,7 +24,7 @@ ohos_benchmarktest("DiscoveryTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",

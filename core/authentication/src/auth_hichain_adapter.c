@@ -58,6 +58,8 @@ static const GroupAuthManager *InitHichain(void)
 
 int32_t RegChangeListener(const char *appId, DataChangeListener *listener)
 {
+    AUTH_CHECK_AND_RETURN_RET_LOGE(appId != NULL, SOFTBUS_ERR, AUTH_HICHAIN,
+        "appId is null");
     AUTH_CHECK_AND_RETURN_RET_LOGE(listener != NULL, SOFTBUS_ERR, AUTH_HICHAIN,
         "listener is null");
     if (g_hichain == NULL) {
@@ -251,6 +253,10 @@ bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId
 {
     (void)idType;
     (void)isPrecise;
+    if (deviceId == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "deviceId is null");
+        return false;
+    }
     const DeviceGroupManager *gmInstance = GetGmInstance();
     if (gmInstance == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain GetGmInstance failed");

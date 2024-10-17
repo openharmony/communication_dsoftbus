@@ -274,7 +274,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest002, TestSize.Lev
     packetHead.magicNumber = 10;
     packetHead.module = 10;
     int64_t authId = TEST_AUTHID;
-    int bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    int32_t bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
         .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
@@ -427,7 +427,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest001, TestSize.L
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t type = 0;
-    int ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI), channelId, type);
+    int32_t ret = TransTdcSrvRecvData(ListenerModule(DIRECT_CHANNEL_SERVER_WIFI), channelId, type);
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
@@ -559,7 +559,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest006, TestSize.L
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSize.Level1)
 {
-    int errCode = SOFTBUS_OK;
+    int32_t errCode = SOFTBUS_OK;
     int32_t channelId = TEST_CHANNELID;
 
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
@@ -574,7 +574,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSi
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest002, TestSize.Level1)
 {
-    int errCode = SOFTBUS_OK;
+    int32_t errCode = SOFTBUS_OK;
     int32_t channelId = TEST_CHANNELID;
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
@@ -597,7 +597,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest002, TestSi
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest003, TestSize.Level1)
 {
-    int errCode = SOFTBUS_OK;
+    int32_t errCode = SOFTBUS_OK;
     int32_t channelId = TEST_CHANNELID;
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
@@ -620,7 +620,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest003, TestSi
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest004, TestSize.Level1)
 {
-    int errCode = SOFTBUS_OK;
+    int32_t errCode = SOFTBUS_OK;
     int32_t channelId = TEST_CHANNELID;
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
@@ -1393,7 +1393,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest001, TestSize.Level1)
     packetHead.module = 10;
     connInfo.appInfo.fd = TEST_FD;
     int64_t authId = TEST_AUTHID;
-    int bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    int32_t bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -1427,7 +1427,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest002, TestSize.Level1)
     packetHead.module = 10;
     connInfo.appInfo.fd = TEST_FD;
     int64_t authId = TEST_AUTHID;
-    int bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    int32_t bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -1461,7 +1461,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest003, TestSize.Level1)
     packetHead.module = 10;
     connInfo.appInfo.fd = TEST_FD;
     int64_t authId = TEST_AUTHID;
-    int bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    int32_t bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -1548,22 +1548,18 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcProcessDataConfigTest001, Test
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1)
 {
-    // reply will free when go to ProcessMessage
-    cJSON *reply = cJSON_CreateObject();
     int32_t channelId = TEST_CHANNELID;
     uint32_t flags = FLAG_REPLY;
     uint64_t seq = TEST_SEQ;
     const char *msg = "testmsg";
+    uint32_t dataLen = 0;
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, cJSON_Parse).WillRepeatedly(Return(reply));
-    EXPECT_CALL(TcpMessageMock, UnpackReplyErrCode).WillOnce(Return(SOFTBUS_OK));
-    ret = ProcessMessage(channelId, flags, seq, msg);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     TransDelSessionConnById(channelId);
 }
@@ -1576,17 +1572,14 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
  */
 HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1)
 {
-    // reply will free when go to ProcessMessage
-    cJSON *reply = cJSON_CreateObject();
     int32_t channelId = TEST_CHANNELID;
     uint32_t flags = FLAG_WIFI;
     uint64_t seq = TEST_SEQ;
     const char *msg = "testmsg";
+    uint32_t dataLen = 0;
 
-    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, cJSON_Parse).WillRepeatedly(Return(reply));
-    int32_t ret = ProcessMessage(channelId, flags, seq, msg);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    int32_t ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
 /**
@@ -1670,7 +1663,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, CreateSessionConnNode001, TestSize.Lev
     ASSERT_TRUE(clientAddr != nullptr);
 
     ListenerModule module = UNUSE_BUTT;
-    int fd = NORMAL_FD;
+    int32_t fd = NORMAL_FD;
     int32_t channelId = TEST_CHANNELID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
@@ -1853,7 +1846,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusRequest(channelId, flags, seq, reply);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_SERVER_DENIED);
     flags = FLAG_AUTH_META;
     channelId = TEST_NEW_CHANNEL_ID;
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));

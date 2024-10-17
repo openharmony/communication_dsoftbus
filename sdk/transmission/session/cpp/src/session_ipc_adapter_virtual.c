@@ -20,3 +20,8 @@ bool CheckIsSystemService(void)
 {
     return false;
 }
+
+bool CheckIsNormalApp(const char *sessionName)
+{
+    return false;
+}

@@ -981,10 +981,10 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     return errCode;
 }
 
-static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, const char *msg)
+static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, const char *msg, uint32_t dataLen)
 {
     int32_t ret;
-    cJSON *json = cJSON_Parse(msg);
+    cJSON *json = cJSON_ParseWithLength(msg, dataLen);
     if (json == NULL) {
         TRANS_LOGE(TRANS_CTRL, "json parse failed.");
         return SOFTBUS_PARSE_JSON_ERR;
@@ -1151,7 +1151,7 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
     node->w = node->w - sizeof(TdcPacketHead) - pktHead->dataLen;
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
 
-    int32_t ret = ProcessMessage(channelId, flags, seq, (char *)data);
+    int32_t ret = ProcessMessage(channelId, flags, seq, (char *)data, dataLen);
     SoftBusFree(data);
     return ret;
 }

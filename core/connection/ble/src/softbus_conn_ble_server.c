@@ -59,22 +59,22 @@ typedef struct {
 
 typedef struct {
     int32_t status;
-    SoftBusBtUuid uuid;
     int32_t srvcHandle;
+    SoftBusBtUuid uuid;
 } ServiceAddMsgContext;
 
 typedef struct {
     int32_t status;
-    SoftBusBtUuid uuid;
     int32_t srvcHandle;
     int32_t characteristicHandle;
+    SoftBusBtUuid uuid;
 } CharacteristicAddMsgContext;
 
 typedef struct {
     int32_t status;
-    SoftBusBtUuid uuid;
     int32_t srvcHandle;
     int32_t descriptorHandle;
+    SoftBusBtUuid uuid;
 } DescriptorAddMsgContext;
 
 typedef struct {

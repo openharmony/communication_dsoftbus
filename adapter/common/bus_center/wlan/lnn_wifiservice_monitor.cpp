@@ -34,6 +34,8 @@
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
+static const std::string COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
+static const int32_t WIFI_UID = 1010;
 
 namespace OHOS {
 namespace EventFwk {
@@ -96,6 +98,19 @@ static void SetSoftBusWifiHotSpotState(const int code, SoftBusWifiState *state)
         }
     }
 }
+
+static void SetSoftBusWifiSemiState(const int code, SoftBusWifiState *state)
+{
+    switch (code) {
+        case int(OHOS::Wifi::WifiDetailState::STATE_SEMI_ACTIVE):
+            *state = SOFTBUS_WIFI_SEMI_ACTIVE;
+            break;
+        default: {
+            break;
+        }
+    }
+}
+
 void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     int code = data.GetCode();
@@ -110,6 +125,9 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     }
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_HOTSPOT_STATE) {
         SetSoftBusWifiHotSpotState(code, &state);
+    }
+    if (action == COMMON_EVENT_WIFI_SEMI_STATE) {
+        SetSoftBusWifiSemiState(code, &state);
     }
     if (state != SOFTBUS_WIFI_UNKNOWN) {
         SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
@@ -132,6 +150,7 @@ public:
     int32_t SubscribeWifiConnStateEvent();
     int32_t SubscribeWifiPowerStateEvent();
     int32_t SubscribeAPConnStateEvent();
+    int32_t SubscribeWifiSemiStateEvent();
 };
 
 int32_t SubscribeEvent::SubscribeAPConnStateEvent()
@@ -163,6 +182,19 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
+    if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SubscribeEvent::SubscribeWifiSemiStateEvent()
+{
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(COMMON_EVENT_WIFI_SEMI_STATE);
+    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    subscriberInfo.SetPublisherUid(WIFI_UID);
     std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
         return SOFTBUS_ERR;
@@ -235,7 +267,8 @@ static void LnnSubscribeWifiService(void *para)
     }
     if (subscriberPtr->SubscribeWifiConnStateEvent() == SOFTBUS_OK &&
         subscriberPtr->SubscribeWifiPowerStateEvent() == SOFTBUS_OK &&
-        subscriberPtr->SubscribeAPConnStateEvent() == SOFTBUS_OK) {
+        subscriberPtr->SubscribeAPConnStateEvent() == SOFTBUS_OK &&
+        subscriberPtr->SubscribeWifiSemiStateEvent() == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "subscribe wifiservice conn and power state success");
         UpdateLocalWifiActiveCapability();
         UpdateLocalWifiConnCapability();

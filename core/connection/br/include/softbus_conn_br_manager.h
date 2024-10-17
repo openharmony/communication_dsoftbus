@@ -54,41 +54,41 @@ typedef struct {
     enum ConnBrDeviceState state;
     ListNode requests;
     uint32_t connectionId;
+    uint32_t waitTimeoutDelay;
     struct {
         uint32_t keepAliveBleRequestId;
         uint32_t keepAliveBleConnectionId;
     } bleKeepAliveInfo;
-    uint32_t waitTimeoutDelay;
 } ConnBrDevice;
 
 typedef struct {
     ListNode node;
-    uint32_t requestId;
     ConnectResult result;
+    uint32_t requestId;
     ConnectStatistics statistics;
 } ConnBrRequest;
 
 typedef struct {
+    ConnectStatistics statistics;
+    char addr[BT_MAC_LEN];
+    uint32_t waitTimeoutDelay;
     uint32_t requestId;
     uint32_t connectionId;
-    char addr[BT_MAC_LEN];
     ConnectResult result;
-    ConnectStatistics statistics;
-    uint32_t waitTimeoutDelay;
 } ConnBrConnectRequestContext;
 
 typedef struct {
     uint32_t connectionId;
-    uint8_t *data;
     uint32_t dataLen;
+    uint8_t *data;
 } ConnBrDataReceivedContext;
 
 typedef struct {
     char addr[BT_MAC_LEN];
-    uint64_t firstStartTimestamp;
     uint32_t firstDuration;
-    uint64_t startTimestamp;
     uint32_t duration;
+    uint64_t firstStartTimestamp;
+    uint64_t startTimestamp;
 } ConnBrPendInfo;
 
 typedef struct {

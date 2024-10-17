@@ -26,7 +26,7 @@
 #include "softbus_hisysevt_transreporter.h"
 
 namespace OHOS {
-static constexpr int BUFF_MAX_LEN = 65;
+static constexpr int32_t BUFF_MAX_LEN = 65;
 int32_t ReportStatisticEvt()
 {
     return 0;
@@ -127,7 +127,7 @@ void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t *data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(uint64_t)) {
         return 0;

@@ -246,7 +246,8 @@ static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *r
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
@@ -263,7 +264,7 @@ static int32_t GetListScore(const char *networkId, uint32_t expectedBw, const La
         }
         LinkAttribute *linkAttr = GetLinkAttrByLinkType(resList[i]);
         resListScore[resList[i]] = linkAttr->getLinkScore(networkId, expectedBw);
-        LNN_LOGI(LNN_LANE, "LaneLinkType=%{public}d, Score=%{public}d",
+        LNN_LOGD(LNN_LANE, "LaneLinkType=%{public}d, Score=%{public}d",
             resList[i], resListScore[resList[i]]);
     }
     return SOFTBUS_OK;
@@ -290,7 +291,7 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGI(LNN_LANE, "linklist does not require any changes, networkId=%{public}s, resNum=%{public}u",
-            anonyNetworkId, resNum);
+            AnonymizeWrapper(anonyNetworkId), resNum);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
@@ -359,10 +360,10 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     uint32_t resNum = 0;
     (void)memset_s(resList, sizeof(resList), -1, sizeof(resList));
     if ((request->list.linkTypeNum > 0) && (request->list.linkTypeNum <= LANE_LINK_TYPE_BUTT)) {
-        LNN_LOGI(LNN_LANE, "Select lane by preferred linklist, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_LANE, "Select lane by preferred linklist, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         ret = SelectByPreferredLink(networkId, request, resList, &resNum);
     } else {
-        LNN_LOGI(LNN_LANE, "Select lane by default linklist, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_LANE, "Select lane by default linklist, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         ret = SelectByDefaultLink(networkId, request, resList, &resNum);
     }
     AnonymizeFree(anonyNetworkId);
@@ -505,7 +506,8 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }

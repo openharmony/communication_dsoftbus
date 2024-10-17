@@ -48,7 +48,7 @@ void TransPendingPktTest::TearDownTestCase(void)
  */
 HWTEST_F(TransPendingPktTest, PendingInit001, TestSize.Level1)
 {
-    int type = -88;
+    int32_t type = -88;
     int32_t ret = PendingInit(type);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
@@ -69,7 +69,7 @@ HWTEST_F(TransPendingPktTest, PendingInit001, TestSize.Level1)
  */
 HWTEST_F(TransPendingPktTest, PendingDeinit001, TestSize.Level1)
 {
-    int type = -21;
+    int32_t type = -21;
     PendingDeinit(type);
 
     type = 999;
@@ -110,7 +110,7 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket001, TestSize.Level1)
 {
     int32_t seqNum = 1111;
     int32_t channelId = 222;
-    int type = PENDING_TYPE_BUTT + 1;
+    int32_t type = PENDING_TYPE_BUTT + 1;
     int32_t ret = ProcPendingPacket(channelId, seqNum, type);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     type = PENDING_TYPE_PROXY - 1;
@@ -132,7 +132,7 @@ HWTEST_F(TransPendingPktTest, SetPendingPacket001, TestSize.Level1)
 {
     int32_t channelId = 1111;
     int32_t seqNum = 222;
-    int type = PENDING_TYPE_BUTT + 1;
+    int32_t type = PENDING_TYPE_BUTT + 1;
     int32_t ret = SetPendingPacket(channelId, seqNum, type);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     type = PENDING_TYPE_PROXY - 1;
@@ -154,7 +154,7 @@ HWTEST_F(TransPendingPktTest, SetPendingPacket001, TestSize.Level1)
 HWTEST_F(TransPendingPktTest, DelPendingPacket001, TestSize.Level1)
 {
     int32_t channelId = 1111;
-    int type = PENDING_TYPE_BUTT + 1;
+    int32_t type = PENDING_TYPE_BUTT + 1;
     int32_t ret = DelPendingPacket(channelId, type);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     type = PENDING_TYPE_PROXY - 1;
@@ -177,7 +177,7 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t seqNum = 0;
-    int type = 1;
+    int32_t type = 1;
 
     int32_t ret = ProcPendingPacket(channelId, seqNum, type);
     EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
@@ -220,7 +220,7 @@ HWTEST_F(TransPendingPktTest, SetPendingPacket002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t seqNum = 0;
-    int type = 1;
+    int32_t type = 1;
 
     int32_t ret = PendingInit(type);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -240,10 +240,10 @@ HWTEST_F(TransPendingPktTest, SetPendingPacket002, TestSize.Level1)
 HWTEST_F(TransPendingPktTest, DelPendingPacket002, TestSize.Level1)
 {
     int32_t channelId = 1;
-    int type = 1;
+    int32_t type = 1;
     int32_t seqNum = 0;
 
-    int ret = PendingInit(type);
+    int32_t ret = PendingInit(type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ProcPendingPacket(channelId, seqNum, type);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);

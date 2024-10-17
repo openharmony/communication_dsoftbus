@@ -302,14 +302,10 @@ static void AddInfoNodeToList(bool isAppDiff, const char *appName, char *apiName
 
 void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
 {
-    if (g_calledApiInfoList == NULL) {
-        COMM_LOGE(COMM_EVENT, "g_calledApiInfoList is null");
-        return;
-    }
-    if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "SoftbusRecordCalledApiInfo lock fail");
-        return;
-    }
+    COMM_CHECK_AND_RETURN_LOGE(appName != NULL, COMM_EVENT, "app name is null");
+    COMM_CHECK_AND_RETURN_LOGE(g_calledApiInfoList != NULL, COMM_EVENT, "g_calledApiInfoList is null");
+    COMM_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_calledApiInfoList->lock) == SOFTBUS_OK,
+        COMM_EVENT, "SoftbusRecordCalledApiInfo lock fail");
     char *apiName = GetApiNameByCode(code);
     if (apiName == NULL) {
         (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
@@ -394,9 +390,8 @@ void SoftbusRecordCalledApiCnt(uint32_t code)
 
 void SoftbusRecordOpenSessionKpi(const char *pkgName, int32_t linkType, SoftBusOpenSessionStatus isSucc, int64_t time)
 {
-    if (SoftBusMutexLock(&g_openSessionKpi.lock) != SOFTBUS_OK) {
-        return;
-    }
+    COMM_CHECK_AND_RETURN_LOGE(pkgName != NULL, COMM_EVENT, "pkg name is null");
+    COMM_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_openSessionKpi.lock) == SOFTBUS_OK, COMM_EVENT, "lock fail");
     g_openSessionKpi.linkType = linkType;
 
     g_openSessionKpi.failTotalCnt += (isSucc != SOFTBUS_EVT_OPEN_SESSION_SUCC);
@@ -909,10 +904,18 @@ void SoftbusReportTransInfoEvt(const char *infoMsg)
     }
 }
 
+static void DeinitOpenSessionEvtMutexLock(void)
+{
+    SoftBusMutexDestroy(&g_openSessionCnt.lock);
+    SoftBusMutexDestroy(&g_openSessionTime.lock);
+    SoftBusMutexDestroy(&g_openSessionKpi.lock);
+}
+
 int32_t InitTransStatisticSysEvt(void)
 {
     if (InitOpenSessionEvtMutexLock() != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "Trans Statistic Evt Lock Init Fail!");
+        DeinitOpenSessionEvtMutexLock();
         return SOFTBUS_DFX_INIT_FAILED;
     }
 

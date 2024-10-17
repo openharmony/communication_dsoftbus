@@ -28,9 +28,9 @@ typedef struct {
 } WlanChannelInfo;
 
 typedef struct {
-    int32_t *buff;
     uint32_t num;
     uint32_t measNum;
+    int32_t *buff;
 } ChannelList;
 
 typedef struct {

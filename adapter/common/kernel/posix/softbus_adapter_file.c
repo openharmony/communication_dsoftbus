@@ -85,29 +85,29 @@ static int32_t ReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
 
     int32_t fd = open(fileName, O_RDONLY, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        COMM_LOGE(COMM_ADAPTER, "ReadFile open file fail");
+        COMM_LOGE(COMM_ADAPTER, "ReadFile open file fail, errno=%{public}s", strerror(errno));
         return SOFTBUS_FILE_ERR;
     }
     int32_t fileLen = lseek(fd, 0, SEEK_END);
     if (fileLen <= 0) {
-        COMM_LOGE(COMM_ADAPTER, "ReadFile len error");
+        COMM_LOGE(COMM_ADAPTER, "ReadFile len error, fileLen=%{public}d, errno=%{public}s", fileLen, strerror(errno));
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     if (fileLen > (int32_t)maxLen) {
-        COMM_LOGE(COMM_ADAPTER, "ReadFile over max len, fileLen=%{public}d, maxLen=%{public}d", fileLen, maxLen);
+        COMM_LOGE(COMM_ADAPTER, "ReadFile over max len, fileLen=%{public}d, maxLen=%{public}u", fileLen, maxLen);
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     int32_t ret = lseek(fd, 0, SEEK_SET);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "ReadFile lseek file fail");
+        COMM_LOGE(COMM_ADAPTER, "ReadFile lseek file fail, ret=%{public}d, errno=%{public}s", ret, strerror(errno));
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     ret = read(fd, readBuf, fileLen);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "ReadFile read fail, ret=%{public}d", ret);
+        COMM_LOGE(COMM_ADAPTER, "ReadFile read fail, ret=%{public}d, errno=%{public}s", ret, strerror(errno));
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -139,12 +139,13 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
     }
     int32_t fd = open(fileName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        COMM_LOGE(COMM_ADAPTER, "WriteFile open file fail");
+        COMM_LOGE(COMM_ADAPTER, "WriteFile open file fail errno=%{public}s", strerror(errno));
         return SOFTBUS_FILE_ERR;
     }
     int32_t ret = write(fd, writeBuf, len);
     if (len > INT32_MAX || ret != (int32_t)len) {
-        COMM_LOGE(COMM_ADAPTER, "WriteFile write fail");
+        COMM_LOGE(COMM_ADAPTER, "WriteFile write fail, len=%{public}u, ret=%{public}d, errno=%{public}s",
+            len, ret, strerror(errno));
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -161,7 +162,8 @@ int32_t SoftBusWriteFileFd(int32_t fd, const char *writeBuf, uint32_t len)
     }
     int32_t ret = write(fd, writeBuf, len);
     if (ret != (int32_t)len) {
-        COMM_LOGE(COMM_ADAPTER, "WriteFileFd write fail");
+        COMM_LOGE(COMM_ADAPTER, "WriteFileFd write fail, len=%{public}u, ret=%{public}d, errno=%{public}s",
+            len, ret, strerror(errno));
     }
     return ret;
 }
@@ -253,7 +255,7 @@ int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
 
     int32_t ret = access(pathName, mode);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "softbus access path fail. errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus access path fail, ret=%{public}d, errno=%{public}s", ret, strerror(errno));
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

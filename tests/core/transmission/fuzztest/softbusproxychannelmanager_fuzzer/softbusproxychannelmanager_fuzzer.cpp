@@ -213,7 +213,7 @@ void TransProxyCreateChanInfoTest(const uint8_t *data, size_t size)
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(data, size, &appInfo);
 
-    ProxyChannelInfo *proxyChannelInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     // proxyChannelInfo will be free at function TransProxyDelChanByChanId
@@ -355,7 +355,7 @@ void ProxyChannelListLockTest(const uint8_t *data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
         return 0;

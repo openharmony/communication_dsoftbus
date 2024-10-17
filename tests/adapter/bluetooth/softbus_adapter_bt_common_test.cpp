@@ -111,7 +111,7 @@ HWTEST(AdapterBtCommonTest, SoftBusSetBtName, TestSize.Level3)
     EXPECT_EQ(SoftBusSetBtName(name), SOFTBUS_COMM_BLUETOOTH_UNDERLAY_SET_NAME_ERR);
 }
 
-static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, int *outlistenerId)
+static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, int32_t *outlistenerId)
 {
     EXPECT_CALL(mocker, BleStopScan).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
     auto listenerId = SoftBusAddBtStateListener(GetMockBtStateListener());
@@ -137,7 +137,7 @@ static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, in
  */
 HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
 {
-    int listenerId = -1;
+    int32_t listenerId = -1;
     MockBluetooth mocker;
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
@@ -186,7 +186,7 @@ HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
  */
 HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
 {
-    int listenerId = -1;
+    int32_t listenerId = -1;
     MockBluetooth mocker;
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
@@ -240,7 +240,7 @@ HWTEST(AdapterBtCommonTest, PairRequestedCallback, TestSize.Level3)
         .WillOnce(Return(false))
         .WillOnce(Return(true));
 
-    int listenerId = -1;
+    int32_t listenerId = -1;
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
 
@@ -266,7 +266,7 @@ HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
         .Times(AtLeast(2))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    int listenerId = -1;
+    int32_t listenerId = -1;
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
 

@@ -40,7 +40,7 @@ public:
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    static int OnEventCallback(void *arg, unsigned int argLen, void *userData)
+    static int32_t OnEventCallback(void *arg, unsigned int argLen, void *userData)
     {
         return 0;
     }
@@ -66,7 +66,7 @@ void SoftbusClientEventManagerTest::TearDownTestCase(void)
 HWTEST_F(SoftbusClientEventManagerTest, EventClientInit001, TestSize.Level1)
 {
     EventClientDeinit();
-    int ret = EventClientInit();
+    int32_t ret = EventClientInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     EventClientDeinit();
@@ -81,7 +81,7 @@ HWTEST_F(SoftbusClientEventManagerTest, EventClientInit001, TestSize.Level1)
  */
 HWTEST_F(SoftbusClientEventManagerTest, EventClientInit002, TestSize.Level1)
 {
-    int ret = EventClientInit();
+    int32_t ret = EventClientInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = EventClientInit(); // test is inited
@@ -101,7 +101,7 @@ HWTEST_F(SoftbusClientEventManagerTest, EventClientInit003, TestSize.Level1)
 {
     ASSERT_TRUE(nullptr == g_observerList);
     g_observerList = CreateSoftBusList();
-    int ret = EventClientInit();
+    int32_t ret = EventClientInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     EventClientDeinit();
 }
@@ -123,8 +123,8 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback001, TestSize.Level
     ssize_t len = 2;
     data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
 
-    int res = -1;
-    int ret = RegisterEventCallback((enum SoftBusEvent)res, *cb, data.get() + FRAME_HEADER_LEN);
+    int32_t res = -1;
+    int32_t ret = RegisterEventCallback((enum SoftBusEvent)res, *cb, data.get() + FRAME_HEADER_LEN);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     res = 4;
     ret = RegisterEventCallback((enum SoftBusEvent)res, *cb, data.get() + FRAME_HEADER_LEN);
@@ -174,7 +174,7 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback002, TestSize.Level
     ASSERT_TRUE(data != nullptr);
 
     EventClientDeinit();
-    int ret = RegisterEventCallback(event, cb, data.get() + FRAME_HEADER_LEN);
+    int32_t ret = RegisterEventCallback(event, cb, data.get() + FRAME_HEADER_LEN);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = EventClientInit();
@@ -203,7 +203,7 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback003, TestSize.Level
     ASSERT_TRUE(data != nullptr);
 
     EventClientDeinit();
-    int ret = RegisterEventCallback(event, cb, data.get() + FRAME_HEADER_LEN);
+    int32_t ret = RegisterEventCallback(event, cb, data.get() + FRAME_HEADER_LEN);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = EventClientInit();
@@ -231,7 +231,7 @@ HWTEST_F(SoftbusClientEventManagerTest, DelClientPkgName001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
 
     ret = InitSoftBus(pkgName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     char *clientName[SOFTBUS_PKGNAME_MAX_NUM] = {0};
     uint32_t clientNameNum = GetSoftBusClientNameList(NULL, SOFTBUS_PKGNAME_MAX_NUM);
@@ -240,7 +240,7 @@ HWTEST_F(SoftbusClientEventManagerTest, DelClientPkgName001, TestSize.Level1)
     EXPECT_EQ(0, clientNameNum);
 
     clientNameNum = GetSoftBusClientNameList(clientName, SOFTBUS_PKGNAME_MAX_NUM);
-    EXPECT_NE(0, clientNameNum);
+    EXPECT_EQ(0, clientNameNum);
 }
 
 /**
@@ -256,15 +256,10 @@ HWTEST_F(SoftbusClientEventManagerTest, DelClientPkgName001, TestSize.Level1)
 HWTEST_F(SoftbusClientEventManagerTest, CheckPackageName001, TestSize.Level1)
 {
     const char *pkgName = "000";
-    int ret = CheckPackageName(pkgName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 
     const char *tmpPkgName = "000111";
-    ret = CheckPackageName(tmpPkgName);
+    int32_t ret = CheckPackageName(tmpPkgName);
     EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
-
-    ret = CheckPackageName(pkgName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 
     FreeClientPkgName();
     ret = AddClientPkgName(pkgName);

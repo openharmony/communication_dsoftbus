@@ -143,12 +143,12 @@ int32_t GetDeviceSecurityLevel(int32_t *level)
     return GetLocalLedgerDepsInterface()->GetDeviceSecurityLevel(level);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetLocalLedgerDepsInterface()->SoftBusGetBtState();
 }
 
-int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     return GetLocalLedgerDepsInterface()->SoftBusGetBtMacAddr(mac);
 }

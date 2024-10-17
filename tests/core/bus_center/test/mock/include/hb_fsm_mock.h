@@ -44,7 +44,7 @@ public:
     virtual void LnnDumpHbMgrRecvList(void) = 0;
     virtual void LnnDumpHbOnlineNodeList(void) = 0;
     virtual bool LnnIsHeartbeatEnable(LnnHeartbeatType type) = 0;
-    virtual int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type) = 0;
+    virtual int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbeatType type) = 0;
     virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type) = 0;
     virtual int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
@@ -77,7 +77,7 @@ public:
     MOCK_METHOD0(LnnDumpHbMgrRecvList, void(void));
     MOCK_METHOD0(LnnDumpHbOnlineNodeList, void(void));
     MOCK_METHOD1(LnnIsHeartbeatEnable, bool(LnnHeartbeatType));
-    MOCK_METHOD2(LnnGetGearModeBySpecificType, int32_t(GearMode *, LnnHeartbeatType));
+    MOCK_METHOD3(LnnGetGearModeBySpecificType, int32_t(GearMode *, char *, LnnHeartbeatType));
     MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType(ConnectionAddrType));
     MOCK_METHOD2(LnnOfflineTimingByHeartbeat, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));

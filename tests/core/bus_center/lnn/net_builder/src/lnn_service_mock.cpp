@@ -250,7 +250,7 @@ int32_t LnnGetSettingNickName(const char *defaultName, const char *unifiedName, 
     return GetServiceInterface()->LnnGetSettingNickName(defaultName, unifiedName, nickName, len);
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetServiceInterface()->SoftbusGetConfig(type, val, len);
 }

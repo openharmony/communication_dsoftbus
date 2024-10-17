@@ -31,11 +31,13 @@ using namespace testing;
 using ::testing::_;
 using ::testing::Invoke;
 namespace OHOS::SoftBus {
-static constexpr int CHANNEL_ARRAY_NUM_MAX = 256;
+static constexpr int32_t CHANNEL_ARRAY_NUM_MAX = 256;
 class P2pAdapterTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
+        WifiDirectInterfaceMock mock;
+        EXPECT_CALL(mock, GetP2pEnableStatus).WillOnce(Return(WIFI_SUCCESS));
         P2pEntity::Init();
     }
     static void TearDownTestCase() {}
@@ -123,10 +125,10 @@ HWTEST_F(P2pAdapterTest, GetStationFrequencyWithFilterTest, TestSize.Level1)
     EXPECT_CALL(mock, Hid2dGetChannelListFor5G).WillOnce(Return(ERROR_WIFI_UNKNOWN));
     int32_t result = P2pAdapter::GetStationFrequencyWithFilter();
     EXPECT_EQ(result, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
-    int size = CHANNEL_ARRAY_NUM_MAX;
+    int32_t size = CHANNEL_ARRAY_NUM_MAX;
     std::vector<int> array(CHANNEL_ARRAY_NUM_MAX, 34);
     EXPECT_CALL(mock, Hid2dGetChannelListFor5G(_, _)).WillOnce(
-        [&array, size](int *chanList, int len) {
+        [&array, size](int32_t *chanList, int32_t len) {
         array[0] = 34;
         chanList[0] = array[0];
         len = size;

@@ -27,7 +27,7 @@ using testing::_;
 using testing::NotNull;
 
 /* implement related global function of BLE */
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     return BleMock::GetMock()->SoftBusAddBtStateListener(listener);
 }
@@ -67,7 +67,7 @@ int32_t StopScan(int32_t listenerId)
     return BleMock::GetMock()->StopScan(listenerId);
 }
 
-int SoftBusRemoveBtStateListener(int listenerId)
+int32_t SoftBusRemoveBtStateListener(int32_t listenerId)
 {
     return BleMock::GetMock()->SoftBusRemoveBtStateListener(listenerId);
 }
@@ -102,17 +102,17 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     return BleMock::GetMock()->StartBroadcasting(bcId, param, packet);
 }
 
-int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     return BleMock::GetMock()->SoftBusGetBtMacAddr(mac);
 }
 
-int SoftBusGetBtState()
+int32_t SoftBusGetBtState()
 {
     return BleMock::GetMock()->SoftBusGetBtState();
 }
 
-int SoftBusGetBrState()
+int32_t SoftBusGetBrState()
 {
     return BleMock::GetMock()->SoftBusGetBrState();
 }
@@ -145,7 +145,7 @@ int32_t BleMock::ActionOfAddBtStateListener(const SoftBusBtStateListener *listen
     return BT_STATE_LISTENER_ID;
 }
 
-int32_t BleMock::ActionOfRemoveBtStateListener(int listenerId)
+int32_t BleMock::ActionOfRemoveBtStateListener(int32_t listenerId)
 {
     btStateListener = nullptr;
     return SOFTBUS_OK;
@@ -251,7 +251,7 @@ void BleMock::HexDump(const uint8_t *data, uint32_t len)
     std::stringstream ss;
     for (uint32_t i = 0; i < len; i++) {
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(BYTE_DUMP_LEN)
-            << static_cast<uint32_t>(data[i]) << " ";
+           << static_cast<uint32_t>(data[i]) << " ";
     }
     DISC_LOGI(DISC_TEST, "ss=%{public}s", ss.str().c_str());
     std::cout << ss.str() << std::endl;

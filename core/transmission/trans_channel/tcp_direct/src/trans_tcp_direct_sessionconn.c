@@ -408,11 +408,12 @@ int32_t TransAddTcpChannelInfo(TcpChannelInfo *info)
         TRANS_LOGE(TRANS_CTRL, "lock error.");
         return SOFTBUS_LOCK_ERR;
     }
+    int32_t channelId = info->channelId;
     ListInit(&info->node);
     ListAdd(&g_tcpChannelInfoList->list, &(info->node));
     g_tcpChannelInfoList->cnt++;
     (void)SoftBusMutexUnlock(&g_tcpChannelInfoList->lock);
-    TRANS_LOGI(TRANS_CTRL, "TcpChannelInfo add success, channelId=%{public}d.", info->channelId);
+    TRANS_LOGI(TRANS_CTRL, "TcpChannelInfo add success, channelId=%{public}d.", channelId);
     return SOFTBUS_OK;
 }
 
@@ -594,7 +595,7 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
 
 int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, const AuthHandle *authHandle, uint32_t status)
 {
-    if (num == NULL) {
+    if (num == NULL || authHandle == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invaild param");
         return NULL;
     }

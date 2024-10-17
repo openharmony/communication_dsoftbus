@@ -59,7 +59,7 @@ static void GenerateAppInfo(AppInfo *appInfo)
         EXPECT_TRUE(appInfo != NULL);
         memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     }
-    int res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), g_sessionKey);
+    int32_t res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), g_sessionKey);
     EXPECT_EQ(res, EOK);
     res = strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), TEST_SOCKET_ADDR);
     EXPECT_EQ(res, EOK);
@@ -247,7 +247,7 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest005, Te
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest006, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
-    int errCode = TEST_ERROR_CODE;
+    int32_t errCode = TEST_ERROR_CODE;
     int32_t ret = TransPackReplyErrInfo(msg, errCode, NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransUnpackReplyErrInfo(NULL, &errCode);
@@ -269,10 +269,10 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest007, Te
 {
     cJSON *msg = cJSON_CreateObject();
     EXPECT_TRUE(msg != NULL);
-    int errCode = TEST_ERROR_CODE;
+    int32_t errCode = TEST_ERROR_CODE;
     int32_t ret = TransPackReplyErrInfo(msg, errCode, "error descriptor test");
     EXPECT_EQ(ret, SOFTBUS_OK);
-    int recvErrcode = 0;
+    int32_t recvErrcode = 0;
     ret = TransUnpackReplyErrInfo(msg, &recvErrcode);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(errCode, recvErrcode);

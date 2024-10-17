@@ -44,9 +44,9 @@ static SoftBusList *g_softBusGattcManager = NULL;
 static SoftBusList *g_btAddrs = NULL;
 static SoftBusBleSendSignal g_clientSendSignal = {0};
 typedef struct {
-    ListNode node;
     char addr[BT_MAC_LEN];
     int32_t clientId;
+    ListNode node;
 } BleConnMac;
 
 static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)

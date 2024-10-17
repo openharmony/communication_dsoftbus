@@ -52,6 +52,7 @@ static int32_t g_port = 6000;
 static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
+static const char *g_uuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 static IServerChannelCallBack g_testChannelCallBack;
 class TransTcpDirectP2pTest : public testing::Test {
 public:
@@ -237,6 +238,18 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
 }
 
 /**
+ * @tc.name: P2pDirectChannelInitTest001
+ * @tc.desc: P2pDirectChannelInit, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, P2pDirectChannelInitTest001, TestSize.Level1)
+{
+    int32_t ret = CreateP2pListenerList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
  * @tc.name: StartP2pListenerTest001
  * @tc.desc: StartP2pListener, use the wrong parameter.
  * @tc.type: FUNC
@@ -245,14 +258,14 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
 HWTEST_F(TransTcpDirectP2pTest, StartP2pListenerTest001, TestSize.Level1)
 {
     StopP2pSessionListener();
-    int32_t ret = StartP2pListener(nullptr, &g_port);
+    int32_t ret = StartP2pListener(nullptr, &g_port, g_uuid);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = StartP2pListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    ret = StartP2pListener(g_ip, &g_port, g_uuid);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
-    ret = StartP2pListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    ret = StartP2pListener(g_ip, &g_port, g_uuid);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
@@ -533,7 +546,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
     ListenerModule moduleType = GetModuleByHmlIp(g_ip);
     EXPECT_EQ(moduleType, UNUSE_BUTT);
 
-    for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
+    for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
         DelHmlListenerByMoudle((ListenerModule)i);
     }
 }

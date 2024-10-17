@@ -66,7 +66,7 @@ void OnShutdownServer(int32_t socket, ShutdownReason reason)
     LOGI(">> OnOnShutdown {socket:%d, reason:%d}", socket, reason);
 }
 
-static void OnStreamReceived(int sessionId, const char *testCaseName, const StreamData *data)
+static void OnStreamReceived(int32_t sessionId, const char *testCaseName, const StreamData *data)
 {
     if (sessionId <= 0) {
         LOGI(">> OnStreamReceived, invalid sessionId=%d", sessionId);
@@ -276,7 +276,7 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer003, TestSize.Level1)
     Shutdown(socket);
 }
 
-static int OnSessionOpenedServer(int sessionId, int result)
+static int32_t OnSessionOpenedServer(int32_t sessionId, int32_t result)
 {
     LOGI(">> OnSessionOpenedServer {sessionId:%d, result=%d", sessionId, result);
     if (sessionId <= 0 || result != SOFTBUS_OK) {
@@ -285,7 +285,7 @@ static int OnSessionOpenedServer(int sessionId, int result)
     return SOFTBUS_OK;
 }
 
-static void OnSessionClosedServer(int sessionId)
+static void OnSessionClosedServer(int32_t sessionId)
 {
     LOGI(">> OnSessionClosedServer {sessionId:%d", sessionId);
 }

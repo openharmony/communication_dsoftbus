@@ -188,6 +188,9 @@ void P2pV1Processor::WaitingReqResponseState()
         })
         .Handle<std::shared_ptr<TimeoutEvent>>([this](std::shared_ptr<TimeoutEvent> &event) {
             OnWaitReqResponseTimeoutEvent();
+        })
+        .Handle<std::shared_ptr<AuthExceptionEvent>>([this](std::shared_ptr<AuthExceptionEvent> &event) {
+            ProcessAuthExceptionEvent(event);
         });
 }
 
@@ -598,6 +601,21 @@ void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
     Terminate();
 }
 
+void P2pV1Processor::ProcessAuthExceptionEvent(const std::shared_ptr<AuthExceptionEvent> &event)
+{
+    CONN_CHECK_AND_RETURN_LOGE(connectCommand_ != nullptr, CONN_WIFI_DIRECT, "connect command is nullptr");
+    CONN_LOGE(CONN_WIFI_DIRECT, "AuthExceptionEvent error=%{public}d", event->error_);
+    auto negotiateChannel = connectCommand_->GetConnectInfo().channel_;
+    CONN_CHECK_AND_RETURN_LOGE(negotiateChannel != nullptr, CONN_WIFI_DIRECT, "auth negotiate channel is nullptr");
+    auto authChannel = std::dynamic_pointer_cast<AuthNegotiateChannel>(negotiateChannel);
+    CONN_CHECK_AND_RETURN_LOGE(authChannel != nullptr && *authChannel == event->handle_,
+        CONN_WIFI_DIRECT, "other auth exception ignore");
+    CleanupIfNeed(event->error_, connectCommand_->GetRemoteDeviceId());
+    connectCommand_->OnFailure(static_cast<WifiDirectErrorCode>(event->error_));
+    connectCommand_ = nullptr;
+    Terminate();
+}
+
 void P2pV1Processor::OnWaitReqResponseTimeoutEvent()
 {
     CONN_LOGE(CONN_WIFI_DIRECT, "wait connect response timeout");
@@ -748,6 +766,7 @@ int P2pV1Processor::CreateLinkAsGo()
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "save remote ip failed");
 
+    clientJoiningMac_ = remoteMac;
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
 
     connectCommand_->PreferNegotiateChannel();
@@ -856,6 +875,7 @@ int P2pV1Processor::ProcessConnectRequestAsGo(std::shared_ptr<NegotiateCommand> 
             success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
     }
 
+    clientJoiningMac_ = remoteMac;
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
     auto ret = SendConnectResponseAsGo(*command->GetNegotiateChannel(), remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGW(
@@ -949,11 +969,11 @@ int P2pV1Processor::ProcessConnectRequestAsGc(std::shared_ptr<NegotiateCommand> 
 
 int P2pV1Processor::SendConnectResponseAsNone(const NegotiateChannel &channel, const std::string &remoteMac)
 {
-    std::vector<int> frequencyList;
-    auto ret = P2pAdapter::GetFrequency5GListIntArray(frequencyList);
+    std::vector<int> channels;
+    auto ret = P2pAdapter::GetChannel5GListIntArray(channels);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g channels failed, error=%{public}d", ret);
-    auto channelString = WifiDirectUtils::ChannelListToString(frequencyList);
+    auto channelString = WifiDirectUtils::ChannelListToString(channels);
 
     std::string selfWifiConfig;
     ret = P2pAdapter::GetSelfWifiConfigInfo(selfWifiConfig);
@@ -1293,11 +1313,11 @@ int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand
 
 int P2pV1Processor::SendConnectRequestAsNone(const NegotiateChannel &channel, WifiDirectRole expectedRole)
 {
-    std::vector<int> frequencyList;
-    int32_t ret = P2pAdapter::GetFrequency5GListIntArray(frequencyList);
+    std::vector<int> channels;
+    int32_t ret = P2pAdapter::GetChannel5GListIntArray(channels);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g frequencyList failed, error=%{public}d", ret);
-    auto channelString = WifiDirectUtils::ChannelListToString(frequencyList);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get 5g channels failed, error=%{public}d", ret);
+    auto channelString = WifiDirectUtils::ChannelListToString(channels);
 
     std::string selfWifiConfig;
     ret = P2pAdapter::GetSelfWifiConfigInfo(selfWifiConfig);
@@ -1584,6 +1604,7 @@ int P2pV1Processor::UpdateWhenCreateSuccess(const NegotiateMessage &msg)
     CONN_CHECK_AND_RETURN_RET_LOGW(
         success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
 
+    clientJoiningMac_ = remoteMac;
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac);
     return StartAuthListening(localIp);
 }
@@ -1717,12 +1738,12 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
         }
     }
 
-    std::vector<int> goFrequencyList;
-    int32_t ret = P2pAdapter::GetFrequency5GListIntArray(goFrequencyList);
+    std::vector<int> goChannels;
+    int32_t ret = P2pAdapter::GetChannel5GListIntArray(goChannels);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local goFrequencyList list failed, error=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local Channels list failed, error=%{public}d", ret);
 
-    for (auto goChannel : goFrequencyList) {
+    for (auto goChannel : goChannels) {
         if (std::find(gcChannels.begin(), gcChannels.end(), goChannel) != gcChannels.end()) {
             return WifiDirectUtils::ChannelToFrequency(goChannel);
         }

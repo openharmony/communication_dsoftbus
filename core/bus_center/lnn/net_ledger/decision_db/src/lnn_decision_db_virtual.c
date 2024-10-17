@@ -62,6 +62,12 @@ int32_t UpdateRecoveryDeviceInfoFromDb(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnCheckGenerateSoftBusKeyByHuks(void)
+{
+    LNN_LOGI(LNN_INIT, "check generate softbus key by huks not implemented");
+    return SOFTBUS_OK;
+}
+
 int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len)
 {
     (void)level;

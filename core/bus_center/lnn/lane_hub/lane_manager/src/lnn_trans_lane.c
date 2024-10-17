@@ -816,6 +816,10 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
     if (FindLaneResourceByLaneId(laneId, &resourceItem) != SOFTBUS_OK) {
         return PostNotifyFreeLaneResult(laneReqId, SOFTBUS_OK, 0);
     }
+    if (resourceItem.link.type == LANE_HML_RAW) {
+        LNN_LOGI(LNN_LANE, "del flag for raw hml laneReqId=%{public}u", laneReqId);
+        (void)RemoveAuthSessionServer(resourceItem.link.linkInfo.rawWifiDirect.peerIp);
+    }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUdid(resourceItem.link.peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         if (resourceItem.link.type == LANE_HML_RAW) {
@@ -975,24 +979,6 @@ static int32_t Free(uint32_t laneReqId)
     LNN_LOGI(LNN_LANE, "no find lane need free, laneReqId=%{public}u", laneReqId);
     FreeLaneReqId(laneReqId);
     return SOFTBUS_LANE_NOT_FOUND;
-}
-
-static int32_t QosLimit(uint32_t laneReqId, uint32_t expectBw, uint32_t *actualBw)
-{
-    if (laneReqId == INVALID_LANE_REQ_ID || actualBw == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    TransReqInfo reqInfo;
-    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
-    int32_t ret = GetTransReqInfoByLaneReqId(laneReqId, &reqInfo);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get lane reqInfo fail");
-        return ret;
-    }
-    *actualBw = expectBw;
-    LNN_LOGI(LNN_LANE, "qos limit lane succ, laneReqId=%{public}u, minBW=%{public}u, actualBw=%{public}u",
-        laneReqId, reqInfo.allocInfo.qosRequire.minBW, *actualBw);
-    return SOFTBUS_OK;
 }
 
 static void UpdateReqInfoWithLaneReqId(uint32_t laneReqId, uint64_t laneId)
@@ -1774,7 +1760,6 @@ static LaneInterface g_transLaneObject = {
     .allocTargetLane = AllocTargetLane,
     .cancelLane = CancelLane,
     .freeLane = Free,
-    .qosLimit = QosLimit,
 };
 
 LaneInterface *TransLaneGetInstance(void)

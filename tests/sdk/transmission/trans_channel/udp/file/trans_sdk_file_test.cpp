@@ -123,36 +123,36 @@ void TransSdkFileTest::TearDownTestCase(void)
     TransFileDeinit();
 }
 
-void OnFileTransErrorTest(int sessionId)
+void OnFileTransErrorTest(int32_t sessionId)
 {
     std::cout << "OnFileTransError sessionId = %d\n" << sessionId << std::endl;
 }
 
-int OnReceiveFileStartedTest(int sessionId, const char *files, int fileCnt)
+int32_t OnReceiveFileStartedTest(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     std::cout << "File receive start sessionId = %d" << sessionId << std::endl;
     return 0;
 }
 
-void OnReceiveFileFinishedTest(int sessionId, const char *files, int fileCnt)
+void OnReceiveFileFinishedTest(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     std::cout << "File receive finished sessionId = %d\n" << sessionId << std::endl;
 }
 
-int OnReceiveFileProcessTest(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnReceiveFileProcessTest(int32_t sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     std::cout << "File receive process sessionId = %d\n" << sessionId << std::endl;
     return 0;
 }
 
-int OnSendFileProcessTest(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+int32_t OnSendFileProcessTest(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     std::cout << "send process id = " << sessionId << " upload = "
         << bytesUpload << ", total = " << bytesTotal << std::endl;
     return 0;
 }
 
-int OnSendFileFinishedTest(int sessionId, const char *firstFile)
+int32_t OnSendFileFinishedTest(int32_t sessionId, const char *firstFile)
 {
     std::cout << "send finished id = %d," << sessionId << "first file = %s." << firstFile << std::endl;
     return 0;
@@ -651,9 +651,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
 {
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    int on = 65536;
-    int ret = SetReuseAddr(fd, on);
+    int32_t fd = socket(AF_INET, SOCK_STREAM, 0);
+    int32_t on = 65536;
+    int32_t ret = SetReuseAddr(fd, on);
     EXPECT_EQ(ret, SOFTBUS_OK);
     
     ret = SetReuseAddr(0, on);
@@ -668,9 +668,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
 {
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    int on = 65536;
-    int ret = SetReusePort(fd, on);
+    int32_t fd = socket(AF_INET, SOCK_STREAM, 0);
+    int32_t on = 65536;
+    int32_t ret = SetReusePort(fd, on);
     EXPECT_EQ(ret, SOFTBUS_OK);
     
     ret = SetReusePort(0, on);
@@ -685,8 +685,8 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
 {
-    int port = 5683;
-    int ret = CreateServerSocketByIpv4("127.0.0.1", port);
+    int32_t port = 5683;
+    int32_t ret = CreateServerSocketByIpv4("127.0.0.1", port);
     EXPECT_TRUE(ret);
 
     ret = CreateServerSocketByIpv4("280567565", port);

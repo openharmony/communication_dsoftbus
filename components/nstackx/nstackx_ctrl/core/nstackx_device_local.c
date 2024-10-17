@@ -41,11 +41,10 @@ struct LocalIface {
 
     uint8_t type;
     uint8_t state;
+    uint8_t createCount;
     struct timespec updateTime;
 
     Timer *timer;
-    uint8_t createCount;
-
     CoapCtxType *ctx;
 };
 
@@ -436,12 +435,6 @@ static int CopyDeviceInfoV2(const NSTACKX_LocalDeviceInfoV2 *devInfo)
             DFINDER_LOGE(TAG, "copy device name %s failed", devInfo->name);
             return NSTACKX_EFAILED;
         }
-    }
-
-    if (strcpy_s(g_localDevice.deviceInfo.version, sizeof(g_localDevice.deviceInfo.version),
-        devInfo->version) != EOK) {
-        DFINDER_LOGE(TAG, "copy version %s failed", devInfo->version);
-        return NSTACKX_EFAILED;
     }
 
     g_localDevice.deviceInfo.deviceType = devInfo->deviceType;

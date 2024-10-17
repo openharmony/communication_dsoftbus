@@ -149,9 +149,8 @@ void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *s
 
 void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status)
 {
-    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock start, currTime=%{public}" PRIu64, SoftBusGetSysTimeMs());
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, DoNotifyStatusChange(ifName, protocolType, status));
-    LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock end, currTime=%{public}" PRIu64, SoftBusGetSysTimeMs());
+    LNN_LOGI(LNN_BUILDER, "success");
 }
 
 static void EnableResetingSubnetByType(ProtocolType protocolType)
@@ -169,9 +168,8 @@ static void EnableResetingSubnetByType(ProtocolType protocolType)
 void LnnNotifyAllTypeOffline(ConnectionAddrType type)
 {
     if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_MAX) {
-        LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock start, currTime=%{public}" PRIu64, SoftBusGetSysTimeMs());
         CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, EnableResetingSubnetByType(LNN_PROTOCOL_IP));
-        LNN_LOGI(LNN_BUILDER, "get g_physicalSubnetsLock end, currTime=%{public}" PRIu64, SoftBusGetSysTimeMs());
+        LNN_LOGI(LNN_BUILDER, "success");
     }
 }
 

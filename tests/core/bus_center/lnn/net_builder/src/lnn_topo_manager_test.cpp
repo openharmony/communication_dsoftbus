@@ -132,7 +132,7 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
 HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
 {
     uint8_t relation[CONNECTION_ADDR_MAX + 1] = { 0 };
-    int ret = LnnGetRelation(UDID, PEER_UDID, relation, CONNECTION_ADDR_MAX + 1);
+    int32_t ret = LnnGetRelation(UDID, PEER_UDID, relation, CONNECTION_ADDR_MAX + 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGetRelation(nullptr, PEER_UDID, relation, CONNECTION_ADDR_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);

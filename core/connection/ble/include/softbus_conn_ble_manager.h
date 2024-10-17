@@ -67,11 +67,11 @@ typedef struct {
 } ConnBleRequest;
 
 typedef struct {
-    BleProtocolType protocol;
-    uint32_t requestId;
     char addr[BT_MAC_LEN];
     char udid[UDID_BUF_LEN];
     bool fastestConnectEnable;
+    BleProtocolType protocol;
+    uint32_t requestId;
     uint32_t psm;
     uint16_t challengeCode; /* for ble direct */
     ConnectResult result;
