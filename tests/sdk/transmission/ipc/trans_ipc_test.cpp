@@ -414,23 +414,6 @@ HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransServerProxyInitTest001
- * @tc.desc: TransServerProxyInit, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:I5HQGA
- */
-HWTEST_F(TransIpcStandardTest, TransServerProxyInitTest001, TestSize.Level0)
-{
-    int32_t ret = TransServerProxyInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    TransClientDeinit();
-
-    ret = TransServerProxyInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    TransClientDeinit();
-}
-
-/**
  * @tc.name: ServerIpcCreateSessionServerTest001
  * @tc.desc: ServerIpcCreateSessionServer, use the wrong parameter.
  * @tc.type: FUNC

@@ -32,11 +32,11 @@ typedef struct {
 } Observer;
 
 static SoftBusList *g_observerList = NULL;
-static bool g_isInited = false;
+static bool g_isInit = false;
 
 int EventClientInit(void)
 {
-    if (g_isInited) {
+    if (g_isInit) {
         return SOFTBUS_OK;
     }
 
@@ -49,13 +49,13 @@ int EventClientInit(void)
         return SOFTBUS_MALLOC_ERR;
     }
 
-    g_isInited = true;
+    g_isInit = true;
     return SOFTBUS_OK;
 }
 
 void EventClientDeinit(void)
 {
-    if (!g_isInited) {
+    if (!g_isInit) {
         COMM_LOGE(COMM_SDK, "event client not init");
         return;
     }
@@ -64,7 +64,7 @@ void EventClientDeinit(void)
         g_observerList = NULL;
     }
 
-    g_isInited = false;
+    g_isInit = false;
 }
 
 static bool IsEventValid(enum SoftBusEvent event)
@@ -82,7 +82,7 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (g_isInited != true) {
+    if (g_isInit != true) {
         COMM_LOGE(COMM_SDK, "event manager not init");
         return SOFTBUS_NO_INIT;
     }
@@ -98,7 +98,7 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
         return SOFTBUS_TRANS_OBSERVER_EXCEED_LIMIT;
     }
 
-    Observer *observer = SoftBusCalloc(sizeof(Observer));
+    Observer *observer = (Observer *)SoftBusCalloc(sizeof(Observer));
     if (observer == NULL) {
         COMM_LOGE(COMM_SDK, "malloc observer failed");
         (void)SoftBusMutexUnlock(&g_observerList->lock);
@@ -107,7 +107,7 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
 
     observer->event = event;
     observer->callback = cb;
-    observer->userData = userData;
+    observer->userData = (char *)userData;
 
     ListInit(&observer->node);
     ListAdd(&g_observerList->list, &observer->node);
@@ -123,7 +123,7 @@ void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argL
         return;
     }
 
-    if (g_isInited != true) {
+    if (g_isInit != true) {
         COMM_LOGE(COMM_SDK, "event manager not init");
         return;
     }

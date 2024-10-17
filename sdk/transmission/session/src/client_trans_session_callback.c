@@ -245,11 +245,7 @@ static int32_t HandleSyncBindSuccess(int32_t sessionId, const SocketLifecycleDat
         return ret;
     }
 
-    ret = SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED, 0);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "sync set session state failed, ret=%{public}d", ret);
-        return ret;
-    }
+    (void)SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED, 0);
     return SOFTBUS_OK;
 }
 
@@ -379,7 +375,6 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
         } else { // sync bind
             (void)ClientSignalSyncBind(sessionId, errCode);
         }
-
         TRANS_LOGI(TRANS_SDK, "ok, sessionid=%{public}d", sessionId);
         return SOFTBUS_OK;
     }

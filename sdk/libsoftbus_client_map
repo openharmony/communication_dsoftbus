@@ -405,6 +405,10 @@
         "RestartRegDataLevelChange";
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
+        "SetSocketOpt";
+        "GetSocketOpt";
+        "SetExtSocketOpt";
+        "GetExtSocketOpt";
         "LnnOnDataLevelChanged";
         "SoftBusFtInit";
         "SoftBusFtDestroyNonblock";
@@ -453,10 +457,7 @@
         "SoftBusFtApiEventInfoGet";
         "SoftBusFtSetDfxEventCb";
         "SoftBusFtDfxHiDumper";
-        "SetSocketOpt";
-        "GetSocketOpt";
-        "SetExtSocketOpt";
-        "GetExtSocketOpt";
+        "LnnOnDataLevelChanged";
         "SetSoftbusConfig";
         "ClientEmitFileEvent";
         "SoftBusDFileServer";
@@ -500,6 +501,9 @@
         "RegisterConflictListener";
         "ClientTransTdcIfChannelForSocket";
         "SetFileRenameHook";
+        "RegisterFileSchema";
+        "UnRegisterFileSchema";
+        "SoftBusDFileSetSessionOpt";
         "CtrlLNNBleHb";
         extern "C++" {
             OHOS::StreamAdaptor*;
