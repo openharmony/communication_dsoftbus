@@ -43,7 +43,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
         char *anonySessionName = NULL;
         Anonymize(info->peerName, &anonySessionName);
         TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
-            anonySessionName, strlen(info->peerName));
+            AnonymizeWrapper(anonySessionName), strlen(info->peerName));
         AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -52,7 +52,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
         char *anonyNetworkId = NULL;
         Anonymize(info->peerNetworkId, &anonyNetworkId);
         TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId failed, peerNetworkId=%{public}s, peerNetworkIdLen=%{public}zu",
-            anonyNetworkId, strlen(info->peerNetworkId));
+            AnonymizeWrapper(anonyNetworkId), strlen(info->peerNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -71,8 +71,8 @@ static void PrintSocketInfo(const SocketInfo *info)
     Anonymize(info->pkgName, &tmpPkgName);
     TRANS_LOGI(TRANS_SDK,
         "Socket: mySessionName=%{public}s, peerSessionName=%{public}s, peerNetworkId=%{public}s, "
-        "pkgName=%{public}s, dataType=%{public}d",
-        tmpMyName, tmpPeerName, tmpPeerNetworkId, tmpPkgName, info->dataType);
+        "pkgName=%{public}s, dataType=%{public}d", AnonymizeWrapper(tmpMyName), AnonymizeWrapper(tmpPeerName),
+        AnonymizeWrapper(tmpPeerNetworkId), AnonymizeWrapper(tmpPkgName), info->dataType);
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
     AnonymizeFree(tmpPeerNetworkId);
