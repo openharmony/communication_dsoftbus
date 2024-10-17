@@ -1296,6 +1296,51 @@ int32_t LnnOnNodeDeviceTrustedChange(const char *pkgName, int32_t type, const ch
     return SOFTBUS_OK;
 }
 
+int32_t LnnOnHichainProofException(
+    const char *pkgName, const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    (void)deviceId;
+    (void)deviceIdLen;
+    NodeStateCallbackItem *item = NULL;
+    ListNode dupList;
+
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock auth restrict cb list in notify");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&dupList);
+    DuplicateNodeStateCbList(&dupList);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "unlock auth restrict cb list in notify");
+    }
+    char *anonyPkgName = NULL;
+    char *anonyDeviceId = NULL;
+    Anonymize(pkgName, &anonyPkgName);
+    Anonymize(deviceId, &anonyDeviceId);
+    LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
+        if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+            (item->cb.onHichainProofException) != NULL) {
+            item->cb.onHichainProofException(deviceTypeId, errCode);
+            LNN_LOGI(LNN_STATE,
+                "onHichainProofException, pkgName=%{public}s, deviceId=%{public}s, errCode=%{public}d, "
+                "type=%{public}hu",
+                AnonymizeWrapper(anonyPkgName), AnonymizeWrapper(anonyDeviceId), errCode, deviceTypeId);
+        }
+    }
+    AnonymizeFree(anonyPkgName);
+    AnonymizeFree(anonyDeviceId);
+    ClearNodeStateCbList(&dupList);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode)
 {
     TimeSyncCallbackItem *item = NULL;

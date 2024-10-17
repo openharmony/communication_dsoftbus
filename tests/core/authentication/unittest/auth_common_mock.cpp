@@ -126,5 +126,20 @@ int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     return GetCommonInterface()->SoftBusGetBtMacAddr(mac);
 }
+
+int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count)
+{
+    return GetCommonInterface()->GetNodeFromPcRestrictMap(udidHash, count);
+}
+
+void DeleteNodeFromPcRestrictMap(const char *udidHash)
+{
+    return GetCommonInterface()->DeleteNodeFromPcRestrictMap(udidHash);
+}
+
+LnnConnectionFsm *FindConnectionFsmByRequestId(uint32_t requestId)
+{
+    return GetCommonInterface()->FindConnectionFsmByRequestId(requestId);
+}
 }
 } // namespace OHOS
