@@ -2252,7 +2252,7 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
     }
     *linksNum = 0;
     if ((request->linkType == LANE_HML || request->linkType == LANE_HML_RAW) && request->actionAddr > 0) {
-        LNN_LOGI(LNN_LANE, "actionAddr is valid, value=%{public}u, linkType=%{public}d, add action Trigger",
+        LNN_LOGI(LNN_LANE, "actionAddr is valid, value=%{public}u, linkType=%{public}d, add actionTrigger",
             request->actionAddr, request->linkType);
         guideList[(*linksNum)++] = LANE_ACTION_TRIGGER;
         return SOFTBUS_OK;
