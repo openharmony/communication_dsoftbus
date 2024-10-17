@@ -246,7 +246,7 @@ static void SendFailToFlushDevice(SessionConn *conn)
     if (conn->appInfo.routeType == WIFI_STA) {
         char *tmpId = NULL;
         Anonymize(conn->appInfo.peerData.deviceId, &tmpId);
-        TRANS_LOGE(TRANS_CTRL, "send data fail, do Authflushdevice deviceId=%{public}s", tmpId);
+        TRANS_LOGE(TRANS_CTRL, "send data fail, do Authflushdevice deviceId=%{public}s", AnonymizeWrapper(tmpId));
         AnonymizeFree(tmpId);
         if (AuthFlushDevice(conn->appInfo.peerData.deviceId) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "tcp flush failed, wifi will offline");
@@ -716,7 +716,7 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
     Anonymize(mySessionName, &tmpMyName);
     Anonymize(peerSessionName, &tmpPeerName);
     TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: mySessionName=%{public}s, peerSessionName=%{public}s",
-        tmpMyName, tmpPeerName);
+        AnonymizeWrapper(tmpMyName), AnonymizeWrapper(tmpPeerName));
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
 }
@@ -943,7 +943,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         char *tmpName = NULL;
         Anonymize(conn->appInfo.myData.sessionName, &tmpName);
         TRANS_LOGI(TRANS_CTRL,
-            "Request denied: session is not a meta session. sessionName=%{public}s", tmpName);
+            "Request denied: session is not a meta session. sessionName=%{public}s", AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
         ReleaseSessionConn(conn);
@@ -1003,7 +1003,7 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
     Anonymize(appInfo.peerNetWorkId, &tmpNetWorkId);
     Anonymize(appInfo.peerUdid, &tmpUdid);
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, peerNetWorkId=%{public}s, peerUdid=%{public}s, ret=%{public}d",
-        channelId, tmpNetWorkId, tmpUdid, ret);
+        channelId, AnonymizeWrapper(tmpNetWorkId), AnonymizeWrapper(tmpUdid), ret);
     AnonymizeFree(tmpNetWorkId);
     AnonymizeFree(tmpUdid);
     return ret;
@@ -1057,7 +1057,8 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
         }
         char *tmpPeerIp = NULL;
         Anonymize(appInfo.peerData.addr, &tmpPeerIp);
-        TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d get remote uuid by Ip=%{public}s failed", channelId, tmpPeerIp);
+        TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d get remote uuid by Ip=%{public}s failed",
+            channelId, AnonymizeWrapper(tmpPeerIp));
         AnonymizeFree(tmpPeerIp);
         authHandle->type = connInfo.type;
         authHandle->authId = AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);

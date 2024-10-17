@@ -280,7 +280,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid appInfo");
     char *tmpId = NULL;
     Anonymize(param->peerDeviceId, &tmpId);
-    TRANS_LOGI(TRANS_CTRL, "GetAppInfo, deviceId=%{public}s", tmpId);
+    TRANS_LOGI(TRANS_CTRL, "GetAppInfo, deviceId=%{public}s", AnonymizeWrapper(tmpId));
     AnonymizeFree(tmpId);
     appInfo->appType = APP_TYPE_NORMAL;
     appInfo->myData.apiVersion = API_V2;
