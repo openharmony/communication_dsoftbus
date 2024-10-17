@@ -139,8 +139,8 @@ typedef struct {
 
 typedef struct {
     List list;
-    uint32_t sendLen;
     FileDataFrame *fileDataFrame;
+    uint32_t sendLen;
     uint8_t socketIndex;
 } BlockFrame;
 
@@ -169,21 +169,18 @@ typedef struct {
     List list;
     uint16_t transId;
     uint16_t fileNum;
+    int32_t errCode;
     FileInfo fileInfo[NSTACKX_DFILE_MAX_FILE_NUM];
     sem_t semStop;
-    uint32_t runStatus;
     TaskStopType stopType;
-    uint8_t isOccupied;
-    int32_t errCode;
+    uint32_t runStatus;
+    uint32_t innerRecvSize;
     uint16_t sendFileProcessed;
+    uint16_t recvFileProcessed;
     SendFilesOutSet newReadOutSet;
     MutexList sendRetranList; /* DATA:SendRetranBlock */
     MutexList recvBlockList; /* DATA:BlockFrame */
     List innerRecvBlockHead; /* DATA:BlockFrame */
-    uint32_t innerRecvSize;
-    uint16_t recvFileProcessed;
-    uint8_t isRecvEmptyFilesCreated;
-    uint8_t socketIndex;
     EpollDesc epollfd;
     List *eventNodeChain;
     FileListMsgReceiver msgReceiver;
@@ -191,20 +188,23 @@ typedef struct {
     CryptPara cryptPara;
     uint64_t bytesTransferredLastRecord;
     uint64_t totalBytes;
-    uint8_t hasUnInsetFrame;
     const char *storagePath; /* only useful for receiver */
+    const char *tarFile;
+    FILE *tarFd;
+    FileDataFrame *tarFrame;
+    FileInfo tarFileInfo;
+    uint8_t isOccupied;
+    uint8_t isRecvEmptyFilesCreated;
+    uint8_t socketIndex;
+    uint8_t allFileDataReceived;
+    uint8_t hasUnInsetFrame;
     uint8_t tarFlag;
     uint8_t smallFlag;
     uint8_t noSyncFlag;
     uint8_t tarFinished;
-    const char *tarFile;
-    FILE *tarFd;
     uint16_t blockOffset;
-    FileDataFrame *tarFrame;
-    FileInfo tarFileInfo;
-    uint32_t bindedSendBlockListIdx;
     uint16_t maxFrameLength;
-    uint8_t allFileDataReceived;
+    uint32_t bindedSendBlockListIdx;
     uint32_t dataWriteTimeoutCnt;
     uint64_t bytesTransferred; /* only useful for non-tar sender */
 } FileListTask;
@@ -227,11 +227,13 @@ typedef struct {
     uint32_t runStatus;
     int32_t errCode;
     uint8_t isSender;
+    uint8_t transFlag;
+    uint8_t recvListOverIo;
     uint16_t maxFrameLength;
+    uint16_t typedPathNum;
     sem_t semTaskListNotEmpty;
     char *commonStoragePath;
     TypedStoragePath pathList[NSTACKX_MAX_STORAGE_PATH_NUM];
-    uint16_t typedPathNum;
     MutexList taskList; /* DATA:FileListTask */
     pthread_t fileManagerTid[NSTACKX_FILE_MANAGER_THREAD_NUM];
     EpollDesc epollfd;
@@ -245,9 +247,9 @@ typedef struct {
     uint64_t stoppedTasksBytesTransferred;
     uint64_t bytesTransferredLastRecord;
     atomic_t bytesTransferredInCurPeriod;
+    uint16_t sendFrameListNum;
     SendBlockFrameListPara sendBlockFrameListPara[NSTACKX_MAX_CLIENT_SEND_THREAD_NUM];
     uint32_t maxSendBlockListSize;
-    uint16_t sendFrameListNum;
     uint32_t maxRecvBlockListSize;
     uint64_t iorBytes;
     uint64_t iowBytes;
@@ -255,9 +257,7 @@ typedef struct {
     uint32_t iowRate;
     uint32_t iowMaxRate;
     uint32_t sendListFullTimes;
-    uint8_t transFlag;
     uint64_t iowCount; /* io write count in NSTACKX_WLAN_MAX_CONTROL_FRAME_TIMEOUT second */
-    uint8_t recvListOverIo;
 } FileManager;
 
 typedef struct {

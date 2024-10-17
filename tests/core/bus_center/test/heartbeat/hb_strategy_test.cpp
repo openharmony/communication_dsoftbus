@@ -308,9 +308,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_GEAR_MODE_BY_SPECIFIC_TYPE_TEST_01, Test
     ON_CALL(hbMock, LnnConvertHbTypeToId).WillByDefault(Return(1));
     int32_t ret = LnnHbStrategyInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnGetGearModeBySpecificType(nullptr, LNN_HB_TYPE);
+    ret = LnnGetGearModeBySpecificType(nullptr, nullptr, LNN_HB_TYPE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnGetGearModeBySpecificType(&mode, LNN_HB_TYPE);
+    ret = LnnGetGearModeBySpecificType(&mode, nullptr, LNN_HB_TYPE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     LnnHbStrategyDeinit();
 }

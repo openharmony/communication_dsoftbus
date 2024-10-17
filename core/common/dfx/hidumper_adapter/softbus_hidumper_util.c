@@ -947,6 +947,8 @@ void FreeSoftBusStatsResult(SoftBusStatsResult* result)
 int32_t SoftBusQueryStatsInfo(int time, SoftBusStatsResult* result)
 {
     COMM_LOGI(COMM_DFX, "SoftBusQueryStatsInfo start");
+    COMM_CHECK_AND_RETURN_RET_LOGE(result != NULL, SOFTBUS_INVALID_PARAM,
+        COMM_DFX, "SoftBusQueryStatsInfo fail, result is null");
     if (time <= SOFTBUS_ZERO || time > SEVEN_DAY_MINUTE) {
         COMM_LOGE(COMM_DFX, "SoftBusQueryStatsInfo fail, time=%{public}d", time);
         return SOFTBUS_INVALID_PARAM;
@@ -970,6 +972,8 @@ int32_t SoftBusQueryStatsInfo(int time, SoftBusStatsResult* result)
 int32_t SoftBusQueryAlarmInfo(int time, int type, SoftBusAlarmEvtResult* result)
 {
     COMM_LOGI(COMM_DFX, "SoftBusQueryAlarmInfo start");
+    COMM_CHECK_AND_RETURN_RET_LOGE(result != NULL, SOFTBUS_INVALID_PARAM,
+        COMM_DFX, "QueryAlarmInfo fail, result is null");
     if (time <= SOFTBUS_ZERO || time > SEVEN_DAY_MINUTE) {
         COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, time=%{public}d", time);
         return SOFTBUS_INVALID_PARAM;
@@ -1002,47 +1006,26 @@ int32_t SoftBusQueryAlarmInfo(int time, int type, SoftBusAlarmEvtResult* result)
 static int32_t InitDumperUtilMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
-    if (SoftBusMutexInit(&g_statsQueryLock, &mutexAttr) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "init statistic lock fail");
-        (void)SoftBusMutexDestroy(&g_statsQueryLock);
-        return SOFTBUS_LOCK_ERR;
-    }
+    int32_t ret = SoftBusMutexInit(&g_statsQueryLock, &mutexAttr);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_DFX, "init statistic lock fail");
 
-    if (SoftBusMutexInit(&g_alarmQueryLock, &mutexAttr) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "init alarm lock fail");
-        (void)SoftBusMutexDestroy(&g_alarmQueryLock);
-        return SOFTBUS_LOCK_ERR;
-    }
+    ret = SoftBusMutexInit(&g_alarmQueryLock, &mutexAttr);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_DFX, "init alarm lock fail");
 
-    if (SoftBusMutexInit(&g_discOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "init disc onQuery lock fail");
-        (void)SoftBusMutexDestroy(&g_discOnQueryLock);
-        return SOFTBUS_LOCK_ERR;
-    }
+    ret = SoftBusMutexInit(&g_discOnQueryLock, &mutexAttr);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_DFX, "init disc onQuery lock fail");
 
-    if (SoftBusMutexInit(&g_connOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "init conn onQuery lock fail");
-        (void)SoftBusMutexDestroy(&g_connOnQueryLock);
-        return SOFTBUS_LOCK_ERR;
-    }
+    ret = SoftBusMutexInit(&g_connOnQueryLock, &mutexAttr);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_DFX, "init conn onQuery lock fail");
 
-    if (SoftBusMutexInit(&g_lnnOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "init lnn onQuery lock fail");
-        (void)SoftBusMutexDestroy(&g_lnnOnQueryLock);
-        return SOFTBUS_LOCK_ERR;
-    }
+    ret = SoftBusMutexInit(&g_lnnOnQueryLock, &mutexAttr);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_DFX, "init lnn onQuery lock fail");
 
-    if (SoftBusMutexInit(&g_transOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "init trans onQuery lock fail");
-        (void)SoftBusMutexDestroy(&g_transOnQueryLock);
-        return SOFTBUS_LOCK_ERR;
-    }
+    ret = SoftBusMutexInit(&g_transOnQueryLock, &mutexAttr);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_DFX, "init trans onQuery lock fail");
 
-    if (SoftBusMutexInit(&g_alarmOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "init alarm onQuery lock fail");
-        (void)SoftBusMutexDestroy(&g_alarmOnQueryLock);
-        return SOFTBUS_LOCK_ERR;
-    }
+    ret = SoftBusMutexInit(&g_alarmOnQueryLock, &mutexAttr);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_DFX, "init alarm onQuery lock fail");
     return SOFTBUS_OK;
 }
 
@@ -1099,6 +1082,17 @@ static void InitSoftBusQueryEventParam(void)
     controlParam->dataSize = MAX_NUM_OF_EVENT_RESULT;
 }
 
+static void DeinitDumperUtilMutexLock(void)
+{
+    SoftBusMutexDestroy(&g_statsQueryLock);
+    SoftBusMutexDestroy(&g_alarmQueryLock);
+    SoftBusMutexDestroy(&g_discOnQueryLock);
+    SoftBusMutexDestroy(&g_connOnQueryLock);
+    SoftBusMutexDestroy(&g_lnnOnQueryLock);
+    SoftBusMutexDestroy(&g_transOnQueryLock);
+    SoftBusMutexDestroy(&g_alarmOnQueryLock);
+}
+
 int32_t SoftBusHidumperUtilInit(void)
 {
     if (g_isDumperInit) {
@@ -1106,12 +1100,14 @@ int32_t SoftBusHidumperUtilInit(void)
     }
     if (InitDumperUtilMutexLock() != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init dump util lock fail");
+        DeinitDumperUtilMutexLock();
         return SOFTBUS_LOCK_ERR;
     }
 
     g_alarmEvtResult.records = SoftBusMalloc(sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT);
     if (g_alarmEvtResult.records == NULL) {
         COMM_LOGE(COMM_DFX, "init alarm record fail");
+        DeinitDumperUtilMutexLock();
         return SOFTBUS_MALLOC_ERR;
     }
     InitSoftBusQueryEventParam();
@@ -1133,13 +1129,7 @@ void SoftBusHidumperUtilDeInit(void)
     SoftBusMutexDestroy(&g_transMapLock);
     g_isTransMapInit = false;
 
-    SoftBusMutexDestroy(&g_statsQueryLock);
-    SoftBusMutexDestroy(&g_alarmQueryLock);
-    SoftBusMutexDestroy(&g_discOnQueryLock);
-    SoftBusMutexDestroy(&g_connOnQueryLock);
-    SoftBusMutexDestroy(&g_lnnOnQueryLock);
-    SoftBusMutexDestroy(&g_transOnQueryLock);
-    SoftBusMutexDestroy(&g_alarmOnQueryLock);
+    DeinitDumperUtilMutexLock();
     SoftBusFree(g_alarmEvtResult.records);
     g_isDumperInit = false;
 }

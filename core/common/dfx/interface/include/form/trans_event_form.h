@@ -99,6 +99,8 @@ typedef struct {
     const char *trafficStats;  // TRAFFIC_STATS
     int32_t  osType;           // OS_TYPE
     int32_t  deviceState;      // DEVICE_STATE
+    int32_t businessId;        // BUSSINESS_ID
+    int32_t businessType;      // BUSINESS_TYPE
 } TransEventExtra;
 
 typedef enum {

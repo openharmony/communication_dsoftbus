@@ -16,6 +16,7 @@
 #include "trans_auth_manager.h"
 
 #include "auth_channel.h"
+#include "auth_meta_manager.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_connection_addr_utils.h"
@@ -43,6 +44,7 @@
 
 #define AUTH_GROUP_ID "auth group id"
 #define AUTH_SESSION_KEY "auth session key"
+#define ISHARE_AUTH_SESSION "IShareAuthSession"
 
 typedef struct {
     int32_t channelType;
@@ -609,6 +611,10 @@ static void OnDisconnect(int32_t authId)
         return;
     }
     TRANS_LOGI(TRANS_SVC, "recv channel disconnect event. authId=%{public}d", authId);
+    // If it is an ishare session, clean up the auth manager
+    if (strcmp(dstInfo.appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
+        DelAuthMetaManagerByConnectionId(authId);
+    }
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
     (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
         (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);
@@ -1025,7 +1031,7 @@ int32_t TransOpenAuthMsgChannelWithPara(const char *sessionName, const LaneConnI
     if (TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "TransPostAuthRequest failed");
         DelAuthChannelInfoByChanId(*channelId);
-        TransAuthCloseChannel(channel->authId, LANE_HML_RAW, true);
+        TransAuthCloseChannel(authId, LANE_HML_RAW, true);
         return SOFTBUS_TRANS_AUTH_POST_CHANMSG_FAIL;
     }
 
@@ -1115,6 +1121,10 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         ListDelete(&channel->node);
         TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d, authId=%{public}d", channelId, channel->authId);
         g_authChannelList->cnt--;
+        // If it is an ishare session, clean up the auth manager
+        if (strcmp(channel->appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
+            DelAuthMetaManagerByConnectionId(channel->authId);
+        }
         TransAuthCloseChannel(channel->authId, channel->appInfo.linkType, channel->isClient);
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
         SoftBusFree(channel);
@@ -1239,5 +1249,35 @@ int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
     }
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     TRANS_LOGE(TRANS_SVC, "get connid failed");
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
+}
+
+int32_t CheckIsWifiAuthChannel(ConnectOption *connInfo)
+{
+    if (connInfo == NULL || connInfo->socketOption.moduleId != AUTH) {
+        TRANS_LOGE(
+            TRANS_SVC, "invalid param, moduleId=%{public}d", connInfo == NULL ? -1 : connInfo->socketOption.moduleId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_authChannelList == NULL) {
+        TRANS_LOGE(TRANS_SVC, "not init auth channel");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get mutex lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
+        if (info->connOpt.socketOption.port == connInfo->socketOption.port &&
+            memcmp(info->connOpt.socketOption.addr, connInfo->socketOption.addr,
+            strlen(connInfo->socketOption.addr)) == 0) {
+            TRANS_LOGI(TRANS_SVC, "auth channel type is wifi");
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+    TRANS_LOGE(TRANS_SVC, "auth channel is not exit");
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }

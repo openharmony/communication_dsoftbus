@@ -32,7 +32,6 @@ extern "C" {
 #define JSON_DEVICE_WLAN_IP "wlanIp"
 #define JSON_DEVICE_TYPE "type"
 #define JSON_DEVICE_TYPE_EXTERN "typeEx"
-#define JSON_HICOM_VERSION "hicomversion"
 #define JSON_REQUEST_MODE "mode"
 #define JSON_DEVICE_HASH "deviceHash"
 #define JSON_SERVICE_DATA "serviceData"

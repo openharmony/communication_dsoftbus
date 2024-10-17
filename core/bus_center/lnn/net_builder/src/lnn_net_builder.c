@@ -171,7 +171,8 @@ int32_t SyncElectMessage(const char *networkId)
     if (!IsNeedSyncElectMsg(networkId)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGW(LNN_BUILDER, "no ip networking, dont sync elect msg, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGW(LNN_BUILDER, "no ip networking, dont sync elect msg, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
@@ -237,7 +238,7 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     DfxRecordLnnServerjoinStart(&para->addr, para->pkgName, needReportFailure);
     isShort = para->isNeedConnect ? false : true;
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&para->addr, isShort);
-    if (connFsm == NULL || connFsm->isDead) {
+    if (connFsm == NULL || connFsm->isDead || CheckRemoteBasicInfoChanged(para->dupInfo)) {
         if (TryPendingJoinRequest(para, needReportFailure)) {
             LNN_LOGI(LNN_BUILDER, "join request is pending, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
             FreeJoinLnnMsgPara(para);
@@ -378,7 +379,8 @@ bool IsNeedWifiReauth(const char *networkId, const char *newAccountHash, int32_t
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_BUILDER, "peer networkId=%{public}s, accountHash:%{public}02x%{public}02x->%{public}02x%{public}02x",
-        anonyNetworkId, info.accountHash[0], info.accountHash[1], newAccountHash[0], newAccountHash[1]);
+        AnonymizeWrapper(anonyNetworkId), info.accountHash[0], info.accountHash[1],
+        newAccountHash[0], newAccountHash[1]);
     AnonymizeFree(anonyNetworkId);
     uint8_t defaultAccountHash[SHA_256_HASH_LEN] = {0};
     const char *defaultUserId = "0";
@@ -517,7 +519,8 @@ void OnLnnProcessNotTrustedMsgDelay(void *para)
         if (authSeq[type] == info->authSeq[type] && authSeq[type] != 0 && info->authSeq[type] != 0) {
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
-            LNN_LOGI(LNN_BUILDER, "networkId=%{public}s, LnnRequestLeaveSpecificType=%{public}d", anonyNetworkId, type);
+            LNN_LOGI(LNN_BUILDER, "networkId=%{public}s, LnnRequestLeaveSpecificType=%{public}d",
+                AnonymizeWrapper(anonyNetworkId), type);
             AnonymizeFree(anonyNetworkId);
             LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type));
             continue;
@@ -563,7 +566,8 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
             }
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
-            LNN_LOGI(LNN_BUILDER, "networkId=%{public}s, LnnRequestLeaveSpecificType=%{public}d", anonyNetworkId, type);
+            LNN_LOGI(LNN_BUILDER, "networkId=%{public}s, LnnRequestLeaveSpecificType=%{public}d",
+                AnonymizeWrapper(anonyNetworkId), type);
             AnonymizeFree(anonyNetworkId);
             LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type));
             continue;
@@ -604,18 +608,18 @@ const char *SelectUseUdid(const char *peerUdid, const char *lowerUdid)
     char *anonyPeerUdid = NULL;
     Anonymize(peerUdid, &anonyPeerUdid);
     if (LnnGetOnlineStateById(peerUdid, CATEGORY_UDID)) {
-        LNN_LOGD(LNN_BUILDER, "not trusted device online! peerUdid=%{public}s", anonyPeerUdid);
+        LNN_LOGD(LNN_BUILDER, "not trusted device online! peerUdid=%{public}s", AnonymizeWrapper(anonyPeerUdid));
         AnonymizeFree(anonyPeerUdid);
         return peerUdid;
     } else if (LnnGetOnlineStateById(lowerUdid, CATEGORY_UDID)) {
         char *anonyLowerUdid = NULL;
         Anonymize(peerUdid, &anonyLowerUdid);
-        LNN_LOGD(LNN_BUILDER, "not trusted device online! peerUdid=%{public}s", anonyLowerUdid);
+        LNN_LOGD(LNN_BUILDER, "not trusted device online! peerUdid=%{public}s", AnonymizeWrapper(anonyLowerUdid));
         AnonymizeFree(anonyLowerUdid);
         AnonymizeFree(anonyPeerUdid);
         return lowerUdid;
     } else {
-        LNN_LOGW(LNN_BUILDER, "not trusted device not online! peerUdid=%{public}s", anonyPeerUdid);
+        LNN_LOGW(LNN_BUILDER, "not trusted device not online! peerUdid=%{public}s", AnonymizeWrapper(anonyPeerUdid));
         AnonymizeFree(anonyPeerUdid);
         return NULL;
     }
@@ -766,14 +770,11 @@ int32_t ConifgLocalLedger(void)
     if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local irk fail");
     }
+
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
-
-    // irk fail should not cause softbus init fail
-    if (LnnUpdateLinkFinderInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "sync rpa info to linkfinder fail.");
-    }
+    (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
     return SOFTBUS_OK;
 }
 
@@ -851,7 +852,7 @@ void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, co
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_BUILDER, "networkId=%{public}s", anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
 
     LnnNodeAddr addr;
@@ -1412,7 +1413,7 @@ bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExt
     }
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
-    LNN_LOGI(LNN_BUILDER, "device report node is exist, udidHash=%{public}s", anonyUdidHash);
+    LNN_LOGI(LNN_BUILDER, "device report node is exist, udidHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     return true;
 }
@@ -1484,7 +1485,7 @@ void AddNodeToPcRestrictMap(const char *udidHash)
     (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
     char *anonyUdid = NULL;
     Anonymize(udidHash, &anonyUdid);
-    LNN_LOGI(LNN_BUILDER, "add %{public}s to map succ", anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "add %{public}s to map succ", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
 }
 
@@ -1521,7 +1522,7 @@ void DeleteNodeFromPcRestrictMap(const char *udidHash)
     (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
     char *anonyUdid = NULL;
     Anonymize(udidHash, &anonyUdid);
-    LNN_LOGI(LNN_BUILDER, "delete %{public}s from map succ", anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "delete %{public}s from map succ", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
 }
 
@@ -1564,7 +1565,7 @@ int32_t UpdateNodeFromPcRestrictMap(const char *udidHash)
     (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
     char *anonyUdid = NULL;
     Anonymize(udidHash, &anonyUdid);
-    LNN_LOGI(LNN_BUILDER, "update %{public}s succ count=%{public}u", anonyUdid, *tempCount);
+    LNN_LOGI(LNN_BUILDER, "update %{public}s succ count=%{public}u", AnonymizeWrapper(anonyUdid), *tempCount);
     AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }

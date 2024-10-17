@@ -254,11 +254,12 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessMessage0006, TestSize.Level1)
     uint32_t flagRequst = FLAG_REQUEST;
     uint64_t seq = 1;
     char *dataTmp = reinterpret_cast<char *>(data);
+    uint32_t dataLen = 0;
 
-    ret = ProcessMessage(channelId, flagReply, seq, dataTmp);
+    ret = ProcessMessage(channelId, flagReply, seq, dataTmp, dataLen);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = ProcessMessage(channelId, flagRequst, seq, dataTmp);
+    ret = ProcessMessage(channelId, flagRequst, seq, dataTmp, dataLen);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
@@ -636,19 +637,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestErrorTest001, TestSi
 }
 
 /**
- * @tc.name: OpenDataBusRequestOutSessionNameTest001
- * @tc.desc: OpenDataBusRequestOutSessionName
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestOutSessionNameTest001, TestSize.Level1)
-{
-    char *mySessionName = nullptr;
-    char *peerSessionName = nullptr;
-    OpenDataBusRequestOutSessionName(mySessionName, peerSessionName);
-}
-
-/**
  * @tc.name: NotifyFastDataRecvTest001
  * @tc.desc: NotifyFastDataRecv
  * @tc.type: FUNC
@@ -661,6 +649,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyFastDataRecvTest001, TestSize.Le
 
     int32_t channelId = 1;
     NotifyFastDataRecv(conn, channelId);
+
+    char *mySessionName = nullptr;
+    char *peerSessionName = nullptr;
+    OpenDataBusRequestOutSessionName(mySessionName, peerSessionName);
 
     SoftBusFree(conn);
 }

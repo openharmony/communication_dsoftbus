@@ -115,6 +115,7 @@ typedef struct {
     char peerIp[IP_LEN];
     int32_t port;
     bool isReuse;
+    int32_t pid;
 } RawWifiDirectConnInfo;
 
 typedef struct {
@@ -264,7 +265,6 @@ typedef struct {
         const LaneAllocListener *listener);
     int32_t (*lnnCancelLane)(uint32_t laneHandle);
     int32_t (*lnnFreeLane)(uint32_t laneHandle);
-    int32_t (*lnnQosLimit)(uint32_t laneHandle, uint32_t expectBw, uint32_t *actualBw);
     int32_t (*registerLaneListener)(LaneType type, const LaneStatusListener *listener);
     int32_t (*unRegisterLaneListener)(LaneType type);
 } LnnLaneManager;

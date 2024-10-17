@@ -80,7 +80,7 @@ public:
     virtual void LnnRemoveNode(const char *udid) = 0;
     virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
     virtual int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info) = 0;
-    virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen) = 0;
+    virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;

@@ -69,7 +69,7 @@ public:
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target,
         const char *pkgName, bool isNeedConnect);
-    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
+    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info);
     virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info);
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
@@ -86,7 +86,7 @@ public:
     virtual bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr,
         const AuthConnInfo *connInfo, ConnectionAddrType hintType);
     virtual bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
-    virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int num);
+    virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num);
     virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
         const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
@@ -112,7 +112,7 @@ public:
         LnnSyncInfoMsgComplete complete);
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis);
-    virtual SoftBusLooper *GetLooper(int looper);
+    virtual SoftBusLooper *GetLooper(int32_t looper);
     virtual int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option);
     virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
     virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
@@ -203,7 +203,7 @@ public:
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD0(LnnSetUnlockState, void ());
     MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
-    MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
+    MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
     MOCK_METHOD2(LnnSetLocalNumInfo, int32_t (InfoKey, int32_t));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char *, uint32_t));

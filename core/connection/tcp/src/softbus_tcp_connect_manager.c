@@ -55,10 +55,10 @@ typedef struct {
 typedef struct TcpConnInfoNode {
     ListNode node;
     uint32_t connectionId;
-    ConnectionInfo info;
     ConnectResult result;
     uint32_t requestId;
     ConnectStatistics statistics;
+    ConnectionInfo info;
 } TcpConnInfoNode;
 
 static SoftBusList *g_tcpConnInfoList = NULL;
@@ -111,14 +111,6 @@ static void DfxRecordTcpConnectSuccess(uint32_t pId, TcpConnInfoNode *tcpInfo, C
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_TCP, SOFTBUS_EVT_CONN_SUCC, costTime,
                             SOFTBUS_HISYSEVT_CONN_OK);
-}
-
-uint32_t TcpGetConnNum(void)
-{
-    if (g_tcpConnInfoList == NULL) {
-        return 0;
-    }
-    return g_tcpConnInfoList->cnt;
 }
 
 int32_t AddTcpConnInfo(TcpConnInfoNode *item)
@@ -186,13 +178,7 @@ static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t
     CONN_LOGE(CONN_COMMON,
         "delete tcp conn failed. connId not found. connId=%{public}u, module=%{public}d, fd=%{public}d",
         connectionId, module, fd);
-    if (module >= UNUSE_BUTT || module < 0 || fd < 0) {
-        return;
-    }
-    status = DelTrigger(module, fd, RW_TRIGGER);
-    if (status != SOFTBUS_TCPFD_NOT_IN_TRIGGER) {
-        ConnShutdownSocket(fd);
-    }
+    (void)DelTrigger(module, fd, RW_TRIGGER);
 }
 
 static void DelTcpConnNode(uint32_t connectionId)

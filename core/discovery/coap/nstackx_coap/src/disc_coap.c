@@ -34,10 +34,10 @@
 #define COAP_SUBSCRIBE_INFO "coapSubscribeInfo"
 
 typedef struct {
-    uint32_t allCap[CAPABILITY_NUM];
-    int16_t capCount[MAX_CAP_NUM];
     bool isUpdate;
     bool isEmpty;
+    int16_t capCount[MAX_CAP_NUM];
+    uint32_t allCap[CAPABILITY_NUM];
     SoftBusMutex lock;
 } DiscCoapInfo;
 

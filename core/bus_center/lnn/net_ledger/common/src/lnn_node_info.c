@@ -597,11 +597,12 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
     char *anonyOldPtk = NULL;
     Anonymize(ptkStr, &anonyPtk);
     Anonymize(oldPtkStr, &anonyOldPtk);
-    LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{public}s, oldPtk=%{public}s", log, anonyPtk, anonyOldPtk);
+    LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{public}s, oldPtk=%{public}s",
+        log, AnonymizeWrapper(anonyPtk), AnonymizeWrapper(anonyOldPtk));
     AnonymizeFree(anonyPtk);
     AnonymizeFree(anonyOldPtk);
-    (void)memset_s(&ptkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
-    (void)memset_s(&oldPtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
+    (void)memset_s(ptkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
+    (void)memset_s(oldPtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
 }
 
 void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log)
@@ -616,7 +617,8 @@ void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log)
     Anonymize(deviceInfo->connectInfo.macAddr, &anonyBtMac);
     LNN_LOGI(LNN_LEDGER, "log=%{public}s, stateVersion=%{public}d, networkId=%{public}s, udid=%{public}s, "
         "deviceName=%{public}s, btMac=%{public}s, networkIdTimestamp=%{public}" PRId64, log, deviceInfo->stateVersion,
-        anonyNetworkId, anonyUdid, anonyDeviceName, anonyBtMac, deviceInfo->networkIdTimestamp);
+        AnonymizeWrapper(anonyNetworkId), AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyDeviceName),
+        AnonymizeWrapper(anonyBtMac), deviceInfo->networkIdTimestamp);
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyUdid);
     AnonymizeFree(anonyDeviceName);

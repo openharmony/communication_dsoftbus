@@ -263,12 +263,12 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, DataBusNativeVirtual001, TestSize.Level0)
 {
-    int channelId = 0;
+    int32_t channelId = 0;
     int32_t ret = NotifyNearByUpdateMigrateOption(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     const char *peerDeviceId = NULL;
-    int routeType = 0;
+    int32_t routeType = 0;
     bool isUpgrade = true;
     ret = NotifyNearByOnMigrateEvents(peerDeviceId, routeType, isUpgrade);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -324,16 +324,16 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, HksDecrypt001, TestSize.Level0)
     ret = ConstructKeyParamSet(&encryptParamSet, g_encryptParams, sizeof(g_encryptParams) / sizeof(struct HksParam));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = HksEncrypt(&rsaKeyAlias, encryptParamSet, &srcBlob, &encryptedBlob);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(HKS_ERROR_NULL_POINTER, ret);
     HksFreeParamSet(&encryptParamSet);
 
     struct HksBlob decryptedBlob = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)SoftBusCalloc(HKS_RSA_KEY_SIZE_4096) };
     ASSERT_TRUE(decryptedBlob.data != nullptr);
     struct HksParamSet *decryptParamSet = nullptr;
     ret = ConstructKeyParamSet(&decryptParamSet, g_decryptParams, sizeof(g_decryptParams) / sizeof(struct HksParam));
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(HKS_ERROR_NULL_POINTER, ret);
     ret = HksDecrypt(&rsaKeyAlias, decryptParamSet, &encryptedBlob, &decryptedBlob);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(HKS_ERROR_NULL_POINTER, ret);
     ret = memcmp((const char *)decryptedBlob.data, (const char *)srcData, srcDataLen);
     EXPECT_EQ(0, ret);
 

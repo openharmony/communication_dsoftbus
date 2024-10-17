@@ -25,6 +25,7 @@ ohos_fuzztest("SoftBusClientManagerFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/bus_center/fuzztest/softbusclientmanager_fuzzer"
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/sdk/bus_center/manager/include",
   ]
   cflags = [
@@ -35,7 +36,7 @@ ohos_fuzztest("SoftBusClientManagerFuzzTest") {
   ]
   sources = [ "softbusclientmanager_fuzzer.cpp" ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 
   external_deps = [
     "c_utils:utils",

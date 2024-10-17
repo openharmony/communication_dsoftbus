@@ -30,6 +30,7 @@
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
+#include "softbus_proxychannel_transceiver.h"
 #include "softbus_qos.h"
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
@@ -740,5 +741,22 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* co
             channelId, channelType);
     }
 
+    return ret;
+}
+
+int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
+{
+    if (connInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    
+    int32_t ret = SOFTBUS_TRANS_NOT_MATCH;
+    if (connInfo->type == CONNECT_TCP) {
+        ret = CheckIsWifiAuthChannel(connInfo);
+    } else if (connInfo->type == CONNECT_BR || connInfo->type == CONNECT_BLE) {
+        ret = CheckIsProxyAuthChannel(connInfo);
+    }
+    TRANS_LOGW(TRANS_CTRL, "connInfo type=%{public}d, ret=%{public}d", connInfo->type, ret);
     return ret;
 }

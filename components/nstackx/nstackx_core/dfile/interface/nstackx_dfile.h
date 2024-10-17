@@ -149,12 +149,12 @@ typedef struct {
         uint32_t fileNum;
         const DFileFileInfo *fileInfo;
     } clearPolicyFileList;
-    int32_t errorCode;
     struct {
         uint16_t transId;
         uint64_t totalBytes;
         uint64_t bytesTransferred;
     } transferUpdate;
+    int32_t errorCode;
     uint32_t rate;
     struct sockaddr_in sockAddr[NSTACKX_MULTI_PATH_NUM];
 } DFileMsg;
@@ -162,8 +162,8 @@ typedef struct {
 typedef struct {
     const char *files[NSTACKX_DFILE_MAX_FILE_NUM];
     const char *remotePath[NSTACKX_DFILE_MAX_FILE_NUM];
-    uint32_t fileNum;
     const char *userData;
+    uint32_t fileNum;
     uint16_t pathType;
     uint8_t tarFlag : 1;
     uint8_t smallFlag : 1;

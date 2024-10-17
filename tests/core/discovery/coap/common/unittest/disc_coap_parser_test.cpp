@@ -28,19 +28,17 @@ namespace OHOS {
 
 class DiscCoapParserTest : public testing::Test {
 public:
-    DiscCoapParserTest()
-    {}
-    ~DiscCoapParserTest()
-    {}
+    DiscCoapParserTest() { }
+    ~DiscCoapParserTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void DiscCoapParserTest::SetUpTestCase(void) {}
+void DiscCoapParserTest::SetUpTestCase(void) { }
 
-void DiscCoapParserTest::TearDownTestCase(void) {}
+void DiscCoapParserTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: DiscCoapParseDeviceUdid001
@@ -96,7 +94,7 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseDeviceUdid002, TestSize.Level1)
 HWTEST_F(DiscCoapParserTest, DiscCoapParseWifiIpAddr001, TestSize.Level1)
 {
     std::string dataStr = R"({"wifiIpAddr":"0.0.0.0"})";
-    cJSON *dataJson  = cJSON_Parse(dataStr.c_str());
+    cJSON *dataJson = cJSON_Parse(dataStr.c_str());
     DeviceInfo deviceInfo;
 
     DiscCoapParseWifiIpAddr(dataJson, &deviceInfo);
@@ -113,7 +111,7 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseWifiIpAddr001, TestSize.Level1)
 HWTEST_F(DiscCoapParserTest, DiscCoapParseKeyValueStr001, TestSize.Level1)
 {
     std::string srcTest(DISC_MAX_CUST_DATA_LEN, 'a');
-    char outValueTest[MAX_PORT_STR_LEN] = {0};
+    char outValueTest[MAX_PORT_STR_LEN] = { 0 };
 
     int32_t ret = DiscCoapParseKeyValueStr(nullptr, SERVICE_DATA_PORT, outValueTest, MAX_PORT_STR_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -141,7 +139,7 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseKeyValueStr001, TestSize.Level1)
 HWTEST_F(DiscCoapParserTest, DiscCoapParseKeyValueStr002, TestSize.Level1)
 {
     std::string srcTest;
-    char outValue[MAX_PORT_STR_LEN] = {0};
+    char outValue[MAX_PORT_STR_LEN] = { 0 };
 
     srcTest = "port:1234";
     int32_t ret = DiscCoapParseKeyValueStr(srcTest.c_str(), SERVICE_DATA_PORT, outValue, MAX_PORT_STR_LEN);
@@ -158,7 +156,7 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseKeyValueStr002, TestSize.Level1)
 HWTEST_F(DiscCoapParserTest, DiscCoapParseServiceData001, TestSize.Level1)
 {
     std::string dataStr = R"({"key":"value"})";
-    cJSON *dataJson  = cJSON_Parse(dataStr.c_str());
+    cJSON *dataJson = cJSON_Parse(dataStr.c_str());
     cJSON cjsonTest;
     DeviceInfo deviceInfo;
 
@@ -172,12 +170,12 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseServiceData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     dataStr = R"({"serviceData":"serviceDataTest"})";
-    dataJson  = cJSON_Parse(dataStr.c_str());
+    dataJson = cJSON_Parse(dataStr.c_str());
     ret = DiscCoapParseServiceData(dataJson, &deviceInfo);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL);
 
     dataStr = R"({"serviceData":"port:0"})";
-    dataJson  = cJSON_Parse(dataStr.c_str());
+    dataJson = cJSON_Parse(dataStr.c_str());
     ret = DiscCoapParseServiceData(dataJson, &deviceInfo);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL);
 }
@@ -191,11 +189,11 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseServiceData001, TestSize.Level1)
 HWTEST_F(DiscCoapParserTest, DiscCoapParseServiceData002, TestSize.Level1)
 {
     std::string dataStr;
-    cJSON *dataJson  = cJSON_Parse(dataStr.c_str());
+    cJSON *dataJson = cJSON_Parse(dataStr.c_str());
     DeviceInfo deviceInfo;
 
     dataStr = R"({"serviceData":"port:1234"})";
-    dataJson  = cJSON_Parse(dataStr.c_str());
+    dataJson = cJSON_Parse(dataStr.c_str());
     int32_t ret = DiscCoapParseServiceData(dataJson, &deviceInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(deviceInfo.addr[0].info.ip.port, 1234);

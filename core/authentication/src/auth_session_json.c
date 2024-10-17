@@ -346,6 +346,10 @@ static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info
         return SOFTBUS_ERR;
     }
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
+    if (auth == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get AuthManager fail");
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
     int32_t index;
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
@@ -404,7 +408,7 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info)
     }
     char *anonyUdidHash = NULL;
     Anonymize(udidHashHexStr, &anonyUdidHash);
-    AUTH_LOGI(AUTH_FSM, "udidHashHexStr=%{public}s", anonyUdidHash);
+    AUTH_LOGI(AUTH_FSM, "udidHashHexStr=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
         !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, false)) {
@@ -759,7 +763,8 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
         }
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, networkid=%{public}s", info->idType, anonyNetworkId);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, networkid=%{public}s",
+            info->idType, AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
     } else {
         if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
@@ -768,7 +773,8 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
         }
         char *anonyUdid = NULL;
         Anonymize(udid, &anonyUdid);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, udid=%{public}s", info->idType, anonyUdid);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, udid=%{public}s",
+            info->idType, AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
     }
 
@@ -936,7 +942,7 @@ static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType
     char peerUdid[UDID_BUF_LEN] = {0};
     bool isExchangeUdid = true;
     if (idType == EXCHANGE_NETWORKID) {
-        if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
+        if (GetPeerUdidByNetworkId(info->udid, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", anonyUdid);
             info->idType = EXCHANGE_FAIL;
             (void)memset_s(info->udid, sizeof(info->udid), 0, sizeof(info->udid));
@@ -975,7 +981,8 @@ static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
     char *anonyUdid = NULL;
     Anonymize(info->udid, &anonyUdid);
     AUTH_LOGI(AUTH_FSM,
-        "oldIdType=%{public}d, exchangeIdType=%{public}d, deviceId=%{public}s", info->idType, idType, anonyUdid);
+        "oldIdType=%{public}d, exchangeIdType=%{public}d, deviceId=%{public}s",
+        info->idType, idType, AnonymizeWrapper(anonyUdid));
     if (idType == EXCHANGE_UDID) {
         info->idType = EXCHANGE_UDID;
         AnonymizeFree(anonyUdid);
@@ -1175,7 +1182,7 @@ static void AuthPrintBase64Ptk(const char *ptk)
 {
     char *anonyPtk = NULL;
     Anonymize(ptk, &anonyPtk);
-    AUTH_LOGD(AUTH_FSM, "base Ptk=%{public}s", anonyPtk);
+    AUTH_LOGD(AUTH_FSM, "base Ptk=%{public}s", AnonymizeWrapper(anonyPtk));
     AnonymizeFree(anonyPtk);
 }
 
@@ -1192,10 +1199,6 @@ static void PackWifiDirectInfo(
             return;
         }
     } else {
-        if (remoteUuid == NULL) {
-            AUTH_LOGE(AUTH_FSM, "invalid uuid");
-            return;
-        }
         if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
             return;
@@ -1206,13 +1209,17 @@ static void PackWifiDirectInfo(
     if (SoftBusBase64Encode(encodePtk, PTK_ENCODE_LEN, &keyLen, (unsigned char *)localPtk,
         PTK_DEFAULT_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "encode ptk fail");
+        (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
         return;
     }
+    (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     AuthPrintBase64Ptk((const char *)encodePtk);
     if (!JSON_AddStringToObject(json, PTK, (char *)encodePtk)) {
         AUTH_LOGE(AUTH_FSM, "add ptk string to json fail");
+        (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
         return;
     }
+    (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
     if (!JSON_AddInt32ToObject(json, STATIC_CAP_LENGTH, info->staticCapLen)) {
         AUTH_LOGE(AUTH_FSM, "add static cap len fail");
         return;
@@ -1255,7 +1262,7 @@ static void DumpRpaCipherKey(char *cipherKey, char *cipherIv, const char *peerIr
     Anonymize(cipherIv, &anonyCipherIv);
     Anonymize(peerIrk, &anonyIrk);
     AUTH_LOGI(AUTH_FSM, "log=%{public}s, cipherKey=%{public}s, cipherIv=%{public}s, peerIrk=%{public}s", log,
-        anonyCipherKey, anonyCipherIv, anonyIrk);
+        AnonymizeWrapper(anonyCipherKey), AnonymizeWrapper(anonyCipherIv), AnonymizeWrapper(anonyIrk));
     AnonymizeFree(anonyCipherKey);
     AnonymizeFree(anonyCipherIv);
     AnonymizeFree(anonyIrk);
@@ -1276,23 +1283,29 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
     if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN,
         info->cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert cipher iv to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN,
         info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert peerIrk to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN,
         info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert publicAddress to string fail.");
+        (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+        (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
         return SOFTBUS_ERR;
     }
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_KEY, cipherKey);
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, cipherIv);
     (void)JSON_AddStringToObject(json, IRK, peerIrk);
     (void)JSON_AddStringToObject(json, PUB_MAC, pubMac);
-    AUTH_LOGI(AUTH_FSM, "pack cipher and rpa info success!");
+    DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
+    (void)memset_s(cipherKey, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+    (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
 
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
@@ -1305,7 +1318,6 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
         (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         return SOFTBUS_ERR;
     }
-    DumpRpaCipherKey(cipherKey, cipherIv, peerIrk, "pack broadcast cipher key");
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     return SOFTBUS_OK;
 }
@@ -1504,6 +1516,7 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMet
     } else {
         UnpackPtk(info->remotePtk, encodePtk);
     }
+    (void)memset_s(encodePtk, PTK_ENCODE_LEN, 0, PTK_ENCODE_LEN);
 }
 
 static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMetaAuth)
@@ -1953,7 +1966,7 @@ static void UpdateLocalNetBrMac(void)
         }
         char *anonyMac = NULL;
         Anonymize(brMac, &anonyMac);
-        AUTH_LOGI(AUTH_FSM, "update local brmac=%{public}s", anonyMac);
+        AUTH_LOGI(AUTH_FSM, "update local brmac=%{public}s", AnonymizeWrapper(anonyMac));
         AnonymizeFree(anonyMac);
     }
 }
@@ -2036,7 +2049,9 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
     AUTH_LOGD(AUTH_FSM,
         "peer tmpDeviceName=%{public}s, deviceName=%{public}s, unifiedName=%{public}s, "
         "unifiedDefaultName=%{public}s, nickName=%{public}s",
-        anonyDeviceName, anonyPeerDeviceName, anonyUnifiedName, anonyUnifiedDefaultName, anonyNickName);
+        AnonymizeWrapper(anonyDeviceName), AnonymizeWrapper(anonyPeerDeviceName),
+        AnonymizeWrapper(anonyUnifiedName), AnonymizeWrapper(anonyUnifiedDefaultName),
+        AnonymizeWrapper(anonyNickName));
     AnonymizeFree(anonyDeviceName);
     AnonymizeFree(anonyPeerDeviceName);
     AnonymizeFree(anonyUnifiedName);

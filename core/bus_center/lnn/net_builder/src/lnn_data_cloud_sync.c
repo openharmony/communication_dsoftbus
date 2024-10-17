@@ -91,7 +91,7 @@ static int32_t DBDeviceNameInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
         }
         char *anonyDeviceName = NULL;
         Anonymize(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
-        LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", anonyDeviceName);
+        LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
     } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
         if (strcpy_s(cacheInfo->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, value) != EOK) {
@@ -124,7 +124,7 @@ static int32_t DBDeviceBasicInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName
         }
         char *anonyUdid = NULL;
         Anonymize(cacheInfo->deviceInfo.deviceUdid, &anonyUdid);
-        LNN_LOGI(LNN_BUILDER, "success, udid=%{public}s", anonyUdid);
+        LNN_LOGI(LNN_BUILDER, "success, udid=%{public}s", AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
     } else if (strcmp(fieldName, DEVICE_INFO_DEVICE_TYPE) == 0) {
         cacheInfo->deviceInfo.deviceTypeId = atoi(value);
@@ -142,7 +142,7 @@ static int32_t DBDeviceBasicInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName
         }
         char *anoyUuid = NULL;
         Anonymize(cacheInfo->uuid, &anoyUuid);
-        LNN_LOGI(LNN_BUILDER, "success, uuid=%{public}s", anoyUuid);
+        LNN_LOGI(LNN_BUILDER, "success, uuid=%{public}s", AnonymizeWrapper(anoyUuid));
         AnonymizeFree(anoyUuid);
     } else if (DBDeviceNameInfoSyncToCache(cacheInfo, fieldName, value, valueLength) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:DB device name info sync to cache fail");
@@ -222,7 +222,7 @@ static int32_t DBConnectInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, co
         }
         char *anonyNetworkId = NULL;
         Anonymize(cacheInfo->networkId, &anonyNetworkId);
-        LNN_LOGI(LNN_BUILDER, "success. networkId=%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_BUILDER, "success. networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
     } else if (strcmp(fieldName, DEVICE_INFO_PKG_VERSION) == 0 && valueLength < VERSION_MAX_LEN) {
         if (strcpy_s(cacheInfo->pkgVersion, VERSION_MAX_LEN, value) != EOK) {
@@ -627,7 +627,7 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
     Anonymize(trueValue, &anonyTrueValue);
     LNN_LOGI(LNN_BUILDER,
         "deviceUdid=%{public}s, fieldName=%{public}s update to %{public}s success, stateVersion=%{public}d",
-        anonyDeviceUdid, fieldName, anonyTrueValue, parseValue.stateVersion);
+        AnonymizeWrapper(anonyDeviceUdid), fieldName, AnonymizeWrapper(anonyTrueValue), parseValue.stateVersion);
     AnonymizeFree(anonyDeviceUdid);
     AnonymizeFree(anonyTrueValue);
     (void)memset_s(trueValue, strlen(trueValue), 0, strlen(trueValue));
@@ -726,7 +726,8 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
     Anonymize(cacheInfo.deviceInfo.deviceUdid, &anonyUdid);
     LNN_LOGI(LNN_BUILDER,
         "success. udid=%{public}s, stateVersion=%{public}d, localStateVersion=%{public}d, updateTimestamp=%{public}"
-        "" PRIu64, anonyUdid, cacheInfo.stateVersion, cacheInfo.localStateVersion, cacheInfo.updateTimestamp);
+        "" PRIu64, AnonymizeWrapper(anonyUdid), cacheInfo.stateVersion, cacheInfo.localStateVersion,
+        cacheInfo.updateTimestamp);
     AnonymizeFree(anonyUdid);
     if (LnnUpdateDistributedNodeInfo(&cacheInfo, cacheInfo.deviceInfo.deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:Cache info add sync to Ledger fail");
@@ -771,12 +772,14 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
         "BROADCAST_CIPHER_IV=%{public}02x, IRK=%{public}02x, PUB_MAC=%{public}02x, PTK=%{public}02x, "
         "DEVICE_VERSION=%{public}s",
         cacheInfo->wifiVersion, cacheInfo->bleVersion, AnonymizeWrapper(anonyAccountId), cacheInfo->supportedProtocols,
-        cacheInfo->feature, cacheInfo->connSubFeature, cacheInfo->updateTimestamp, anonyP2pMac, cacheInfo->pkgVersion,
-        anonyDeviceName, cacheInfo->authCapacity, cacheInfo->heartbeatCapacity, cacheInfo->deviceInfo.osType,
-        cacheInfo->deviceInfo.osVersion, cacheInfo->isBleP2p, anonyMacAddr, cacheInfo->deviceInfo.deviceTypeId,
-        cacheInfo->softBusVersion, anonyUdid, anonyUuid, anonyNetworkId, cacheInfo->stateVersion,
-        *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv, *cacheInfo->rpaInfo.peerIrk,
-        *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk, anonyDeviceVersion);
+        cacheInfo->feature, cacheInfo->connSubFeature, cacheInfo->updateTimestamp, AnonymizeWrapper(anonyP2pMac),
+        cacheInfo->pkgVersion, AnonymizeWrapper(anonyDeviceName), cacheInfo->authCapacity,
+        cacheInfo->heartbeatCapacity, cacheInfo->deviceInfo.osType, cacheInfo->deviceInfo.osVersion,
+        cacheInfo->isBleP2p, AnonymizeWrapper(anonyMacAddr), cacheInfo->deviceInfo.deviceTypeId,
+        cacheInfo->softBusVersion, AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyUuid),
+        AnonymizeWrapper(anonyNetworkId), cacheInfo->stateVersion, *cacheInfo->cipherInfo.key,
+        *cacheInfo->cipherInfo.iv, *cacheInfo->rpaInfo.peerIrk, *cacheInfo->rpaInfo.publicAddress,
+        *cacheInfo->remotePtk, AnonymizeWrapper(anonyDeviceVersion));
     AnonymizeFree(anonyAccountId);
     AnonymizeFree(anonyP2pMac);
     AnonymizeFree(anonyMacAddr);
@@ -912,7 +915,8 @@ static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *ol
     Anonymize(cacheInfo->deviceInfo.deviceUdid, &anonyUdid);
     LNN_LOGI(LNN_BUILDER,
         "success. udid=%{public}s, stateVersion=%{public}d, localStateVersion=%{public}d, updateTimestamp=%{public}"
-        "" PRIu64, anonyUdid, cacheInfo->stateVersion, cacheInfo->localStateVersion, cacheInfo->updateTimestamp);
+        "" PRIu64, AnonymizeWrapper(anonyUdid), cacheInfo->stateVersion,
+        cacheInfo->localStateVersion, cacheInfo->updateTimestamp);
     AnonymizeFree(anonyUdid);
     if (LnnUpdateDistributedNodeInfo(cacheInfo, cacheInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:Cache info sync to Ledger fail");
@@ -1173,7 +1177,7 @@ int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId)
     }
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
-    LNN_LOGI(LNN_BUILDER, "delete udid=%{public}s success.", anonyUdid);
+    LNN_LOGI(LNN_BUILDER, "delete udid=%{public}s success.", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }

@@ -36,13 +36,13 @@ class ConnectionBrInterface {
 public:
     ConnectionBrInterface() {};
     virtual ~ConnectionBrInterface() {};
-    virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
+    virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
     virtual void LnnDCReportConnectException(const ConnectOption *option, int32_t errorCode) = 0;
     virtual int32_t SoftBusThreadCreate(
         SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *), void *arg) = 0;
-    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual SppSocketDriver *InitSppSocketDriver() = 0;
-    virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json) = 0;
     virtual int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json) = 0;
@@ -56,6 +56,7 @@ public:
     virtual void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq) = 0;
     virtual int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data) = 0;
     virtual int32_t ConnBrInnerQueueInit(void) = 0;
+    virtual void ConnBrInnerQueueDeinit(void) = 0;
     virtual int32_t ConnBrInitBrPendingPacket(void) = 0;
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
     virtual int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time) = 0;
@@ -66,7 +67,7 @@ class ConnectionBrInterfaceMock : public ConnectionBrInterface {
 public:
     ConnectionBrInterfaceMock();
     ~ConnectionBrInterfaceMock() override;
-    MOCK_METHOD1(SoftBusGetBtMacAddr, int (SoftBusBtAddr *));
+    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t (SoftBusBtAddr *));
     MOCK_METHOD2(LnnDCReportConnectException, void(const ConnectOption*, int32_t));
     MOCK_METHOD4(SoftBusThreadCreate, int32_t(SoftBusThread *, SoftBusThreadAttr *, void *(void *), void *));
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType, unsigned char *, uint32_t));
@@ -84,6 +85,7 @@ public:
     MOCK_METHOD2(ConnBrDelBrPendingPacket, void(uint32_t, int64_t));
     MOCK_METHOD4(ConnBrGetBrPendingPacket, int32_t(uint32_t, int64_t, uint32_t, void **));
     MOCK_METHOD0(ConnBrInnerQueueInit, int32_t());
+    MOCK_METHOD0(ConnBrInnerQueueDeinit, void());
     MOCK_METHOD0(ConnBrInitBrPendingPacket, int32_t());
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
     MOCK_METHOD3(ConnBleKeepAlive, int32_t(uint32_t, uint32_t, uint32_t));

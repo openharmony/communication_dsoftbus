@@ -29,9 +29,9 @@
 #include "softbus_error_code.h"
 
 volatile bool g_sessionEnabled = false;
-int g_sessionId = -1;
+int32_t g_sessionId = -1;
 
-static int EsOnSessionOpened(int sessionId, int result)
+static int32_t EsOnSessionOpened(int32_t sessionId, int32_t result)
 {
     LOG("%s:enter", __func__);
     if (result != SOFTBUS_OK) {
@@ -46,7 +46,7 @@ static int EsOnSessionOpened(int sessionId, int result)
     return 0;
 }
 
-static void EsOnSessionClosed(int sessionId)
+static void EsOnSessionClosed(int32_t sessionId)
 {
     LOG("%s:enter", __func__);
     if (sessionId == g_sessionId) {
@@ -55,28 +55,29 @@ static void EsOnSessionClosed(int sessionId)
     }
 }
 
-static int TsOnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+static int32_t TsOnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     LOG("%s:session=%d, files=%s, count=%d", __func__, sessionId, files, fileCnt);
     return 0;
 }
 
-static int TsOnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+static int32_t TsOnReceiveFileProcess(int32_t sessionId, const char *firstFile,
+                                      uint64_t bytesUpload, uint64_t bytesTotal)
 {
     LOG("%s:session=%d, firstFile=%s, bytesUpload=%" PRIu64 ", bytesTotal=%" PRIu64, __func__, sessionId, firstFile,
         bytesUpload, bytesTotal);
     return 0;
 }
-static void TsOnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+static void TsOnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     LOG("%s:session=%d, files=%s, count=%d", __func__, sessionId, files, fileCnt);
 }
-static void TsOnFileTransError(int sessionId)
+static void TsOnFileTransError(int32_t sessionId)
 {
     LOG("%s:session=%d", __func__, sessionId);
 }
 
-static int ExecTestSuite(void)
+static int32_t ExecTestSuite(void)
 {
     static ISessionListener listener = {.OnSessionOpened = EsOnSessionOpened,
         .OnSessionClosed = EsOnSessionClosed,
@@ -85,7 +86,7 @@ static int ExecTestSuite(void)
         .OnStreamReceived = EsOnStreamReceived,
         .OnQosEvent = EsOnQosEvent};
 
-    int ret = CreateSessionServer(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME, &listener);
+    int32_t ret = CreateSessionServer(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME, &listener);
     if (ret != SOFTBUS_OK) {
         LOG("%s:create session server failed!ret=%d", __func__, ret);
         return ret;
@@ -119,11 +120,11 @@ static int ExecTestSuite(void)
     return ret;
 }
 
-int main(int argc, char * const *argv)
+int32_t main(int32_t argc, char * const *argv)
 {
     LOG("%s:started", __func__);
 
-    int ret = ExecTestSuite();
+    int32_t ret = ExecTestSuite();
     if (ret != SOFTBUS_OK) {
         LOG("%s:test failed!ret=%d", __func__, ret);
     }

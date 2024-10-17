@@ -139,6 +139,19 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusGetRealTime(SoftBusSysTime *sysTime)
+{
+    if (sysTime == NULL) {
+        COMM_LOGW(COMM_ADAPTER, "sysTime is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    struct timespec time = {0};
+    (void)clock_gettime(CLOCK_BOOTTIME, &time);
+    sysTime->sec = time.tv_sec;
+    sysTime->usec = time.tv_nsec / NS_PER_USECOND;
+    return SOFTBUS_OK;
+}
+
 uint64_t SoftBusGetSysTimeMs(void)
 {
     struct timeval time;
@@ -172,7 +185,7 @@ const char *SoftBusFormatTimestamp(uint64_t timestamp)
         formatedDateTime.tm_year + BASE_YEAR, formatedDateTime.tm_mon + BASE_MONTH, formatedDateTime.tm_mday,
         formatedDateTime.tm_hour, formatedDateTime.tm_min, formatedDateTime.tm_sec, milliseconds);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "sprintf failed");
+        COMM_LOGE(COMM_ADAPTER, "sprintf failed, ret=%{public}d", ret);
         return NULL;
     }
 

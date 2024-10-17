@@ -138,7 +138,7 @@ static int32_t HbSaveRecvTimeToRemoveRepeat(
     if (ret != SOFTBUS_OK) {
         char *anonyUdid = NULL;
         Anonymize(device->devId, &anonyUdid);
-        LNN_LOGE(LNN_HEART_BEAT, "save recv time fail, udidHash=%{public}s", anonyUdid);
+        LNN_LOGE(LNN_HEART_BEAT, "save recv time fail, udidHash=%{public}s", AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
     }
     return ret;
@@ -204,8 +204,8 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_HEART_BEAT, "networkId=%{public}s capability change:%{public}u->%{public}u", anonyNetworkId,
-        oldNetCapa, nodeInfo.netCapacity);
+    LNN_LOGI(LNN_HEART_BEAT, "networkId=%{public}s capability change:%{public}u->%{public}u",
+        AnonymizeWrapper(anonyNetworkId), oldNetCapa, nodeInfo.netCapacity);
     AnonymizeFree(anonyNetworkId);
 }
 
@@ -215,15 +215,11 @@ static int32_t HbGetOnlineNodeByRecvInfo(
     int32_t infoNum = 0;
     NodeBasicInfo *info = NULL;
     char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
-
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get all online node info fail");
-        return SOFTBUS_ERR;
-    }
-    if (info == NULL || infoNum == 0) {
-        LNN_LOGD(LNN_HEART_BEAT, "none online node");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = LnnGetAllOnlineNodeInfo(&info, &infoNum);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR, LNN_HEART_BEAT,
+        "get all online node info fail");
+    LNN_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_NO_ONLINE_DEVICE, LNN_HEART_BEAT, "none online node");
+    LNN_CHECK_AND_RETURN_RET_LOGE(infoNum != 0, SOFTBUS_NO_ONLINE_DEVICE, LNN_HEART_BEAT, "none online node");
     DiscoveryType discType = LnnConvAddrTypeToDiscType(recvAddrType);
     for (int32_t i = 0; i < infoNum; ++i) {
         if (LnnIsLSANode(&info[i])) {
@@ -237,7 +233,7 @@ static int32_t HbGetOnlineNodeByRecvInfo(
             char *anonyNetworkId = NULL;
             Anonymize(info[i].networkId, &anonyNetworkId);
             LNN_LOGD(LNN_HEART_BEAT, "node online not have discType. networkId=%{public}s, discType=%{public}d",
-                anonyNetworkId, discType);
+                AnonymizeWrapper(anonyNetworkId), discType);
             AnonymizeFree(anonyNetworkId);
             continue;
         }
@@ -250,8 +246,8 @@ static int32_t HbGetOnlineNodeByRecvInfo(
             char *anonyUdid = NULL;
             Anonymize(udidHash, &anonyUdid);
             Anonymize(info[i].networkId, &anonyNetworkId);
-            LNN_LOGD(
-                LNN_HEART_BEAT, "node is online. udidHash=%{public}s, networkId=%{public}s", anonyUdid, anonyNetworkId);
+            LNN_LOGD(LNN_HEART_BEAT, "node is online. udidHash=%{public}s, networkId=%{public}s",
+                AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyNetworkId));
             AnonymizeFree(anonyNetworkId);
             AnonymizeFree(anonyUdid);
             UpdateOnlineInfoNoConnection(info[i].networkId, hbResp);
@@ -270,32 +266,32 @@ static int32_t HbUpdateOfflineTimingByRecvInfo(
     char *anonyNetworkId = NULL;
     if (LnnGetDLHeartbeatTimestamp(networkId, &oldTimestamp) != SOFTBUS_OK) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_HEART_BEAT, "get timestamp err, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_HEART_BEAT, "get timestamp err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     if (LnnSetDLHeartbeatTimestamp(networkId, updateTime) != SOFTBUS_OK) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_HEART_BEAT, "update timestamp err, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_HEART_BEAT, "update timestamp err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT,
         "recv to update timestamp, networkId=%{public}s, timestamp:%{public}" PRIu64 "->%{public}" PRIu64,
-        anonyNetworkId, oldTimestamp, updateTime);
+        AnonymizeWrapper(anonyNetworkId), oldTimestamp, updateTime);
     if (hbType != HEARTBEAT_TYPE_BLE_V1 && hbType != HEARTBEAT_TYPE_BLE_V0) {
         LNN_LOGD(LNN_HEART_BEAT, "only BLE_V1 and BLE_V0 support offline timing");
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     if (LnnStopOfflineTimingStrategy(networkId, type) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "remove offline check err, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_HEART_BEAT, "remove offline check err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     if (LnnStartOfflineTimingStrategy(networkId, type) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "set new offline check err, networkId=%{public}s", anonyNetworkId);
+        LNN_LOGE(LNN_HEART_BEAT, "set new offline check err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
@@ -356,8 +352,9 @@ static bool HbIsNeedReAuth(const NodeInfo *nodeInfo, const char *newAccountHash)
     char *anonyNetworkId = NULL;
     Anonymize(nodeInfo->networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT,
-        "peer networkId=%{public}s, accountHash:%{public}02X%{public}02X->%{public}02X%{public}02X", anonyNetworkId,
-        nodeInfo->accountHash[0], nodeInfo->accountHash[1], newAccountHash[0], newAccountHash[1]);
+        "peer networkId=%{public}s, accountHash:%{public}02X%{public}02X->%{public}02X%{public}02X",
+        AnonymizeWrapper(anonyNetworkId), nodeInfo->accountHash[0], nodeInfo->accountHash[1],
+        newAccountHash[0], newAccountHash[1]);
     AnonymizeFree(anonyNetworkId);
     return memcmp(nodeInfo->accountHash, newAccountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
 }
@@ -372,7 +369,8 @@ static void HbDumpRecvDeviceInfo(
         "heartbeat(HB) OnTock, udidHash=%{public}s, accountHash=%{public}02X%{public}02X, hbType=%{public}d, "
         "devTypeStr=%{public}s, peerWeight=%{public}d, masterWeight=%{public}d, devTypeHex=%{public}02X, "
         "ConnectionAddrType=%{public}d, nowTime=%{public}" PRIu64,
-        anonyUdid, device->accountHash[0], device->accountHash[1], hbType, devTypeStr != NULL ? devTypeStr : "", weight,
+        AnonymizeWrapper(anonyUdid), device->accountHash[0], device->accountHash[1],
+        hbType, devTypeStr != NULL ? devTypeStr : "", weight,
         masterWeight, device->devType, device->addr[0].type, nowTime);
     AnonymizeFree(anonyUdid);
 }
@@ -565,7 +563,8 @@ static bool HbIsValidJoinLnnRequest(DeviceInfo *device, HbRespData *hbResp)
     if ((nodeInfo.feature & (1 << BIT_SUPPORT_THREE_STATE)) == 0 && SoftBusGetBrState() == BR_DISABLE) {
         char *anonyUdid = NULL;
         Anonymize(device->devId, &anonyUdid);
-        LNN_LOGI(LNN_HEART_BEAT, "peer udidHash=%{public}s don't support three state and local br off", anonyUdid);
+        LNN_LOGI(LNN_HEART_BEAT, "peer udidHash=%{public}s don't support three state and local br off",
+            AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
         return false;
     }
@@ -692,8 +691,8 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, HbRespData *hbResp,
     Anonymize(device->devId, &anonyUdid);
     LNN_LOGI(LNN_HEART_BEAT,
         "heartbeat(HB) find device, udidHash=%{public}s, ConnectionAddrType=%{public}02X, isConnect=%{public}d, "
-        "connectReason=%{public}u",
-        anonyUdid, device->addr[0].type, connectCondition->isConnect, connectCondition->connectReason);
+        "connectReason=%{public}u", AnonymizeWrapper(anonyUdid),
+        device->addr[0].type, connectCondition->isConnect, connectCondition->connectReason);
     AnonymizeFree(anonyUdid);
 
     LnnDfxDeviceInfoReport info;
@@ -781,7 +780,7 @@ static int32_t HbSuspendReAuth(DeviceInfo *device)
             char *anonyUdidHash = NULL;
             Anonymize(udidHash, &anonyUdidHash);
             LNN_LOGI(LNN_HEART_BEAT, "current device need delay authentication, type=%{public}d, udidHash=%{public}s",
-                device->addr[0].type, anonyUdidHash);
+                device->addr[0].type, AnonymizeWrapper(anonyUdidHash));
             AnonymizeFree(anonyUdidHash);
             return SOFTBUS_NETWORK_BLE_CONNECT_SUSPEND;
         }
@@ -957,7 +956,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeig
         Anonymize(device->devId, &anonyUdid);
         LNN_LOGW(LNN_HEART_BEAT,
             ">> heartbeat(HB) OnTock is not potential trusted, udid=%{public}s, accountHash=%{public}02X%{public}02X",
-            anonyUdid, device->accountHash[0], device->accountHash[1]);
+            AnonymizeWrapper(anonyUdid), device->accountHash[0], device->accountHash[1]);
         AnonymizeFree(anonyUdid);
         return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
     }
@@ -980,7 +979,8 @@ static int32_t HbMediumMgrRecvHigherWeight(
     if (HbGetOnlineNodeByRecvInfo(udidHash, type, &nodeInfo, NULL) != SOFTBUS_OK) {
         char *anonyUdid = NULL;
         Anonymize(udidHash, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "recv higher weight is not online yet. udidhash=%{public}s", anonyUdid);
+        LNN_LOGD(LNN_HEART_BEAT, "recv higher weight is not online yet. udidhash=%{public}s",
+            AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
         return SOFTBUS_OK;
     }
@@ -1002,7 +1002,7 @@ static int32_t HbMediumMgrRecvHigherWeight(
     char *anonyMasterUdid = NULL;
     Anonymize(masterUdid, &anonyMasterUdid);
     LNN_LOGI(LNN_HEART_BEAT, "recv higher weight udidHash=%{public}s, weight=%{public}d, masterUdid=%{public}s",
-        anonyUdid, weight, anonyMasterUdid);
+        AnonymizeWrapper(anonyUdid), weight, AnonymizeWrapper(anonyMasterUdid));
     AnonymizeFree(anonyUdid);
     AnonymizeFree(anonyMasterUdid);
     return SOFTBUS_OK;
@@ -1025,7 +1025,8 @@ static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType typ
     }
     char *anonyUdid = NULL;
     Anonymize(udidHash, &anonyUdid);
-    LNN_LOGD(LNN_HEART_BEAT, "mgr relay process, udidhash=%{public}s, hbType=%{public}d", anonyUdid, hbType);
+    LNN_LOGD(LNN_HEART_BEAT, "mgr relay process, udidhash=%{public}s, hbType=%{public}d",
+        AnonymizeWrapper(anonyUdid), hbType);
     AnonymizeFree(anonyUdid);
     if (LnnStartHbByTypeAndStrategy(hbType | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr relay process fail");
@@ -1115,7 +1116,7 @@ void LnnDumpHbMgrRecvList(void)
         deviceType = LnnConvertIdToDeviceType((uint16_t)item->device->devType);
         if (deviceType == NULL) {
             Anonymize(item->device->devId, &anonyUdid);
-            LNN_LOGE(LNN_HEART_BEAT, "get deviceType fail, udidHash=%{public}s", anonyUdid);
+            LNN_LOGE(LNN_HEART_BEAT, "get deviceType fail, udidHash=%{public}s", AnonymizeWrapper(anonyUdid));
             AnonymizeFree(anonyUdid);
             continue;
         }
@@ -1123,8 +1124,8 @@ void LnnDumpHbMgrRecvList(void)
         LNN_LOGD(LNN_HEART_BEAT,
             "DumpRecvList count=%{public}d, i=%{public}d, udidHash=%{public}s, deviceType=%{public}s, "
             "ConnectionAddrType=%{public}02X, weight=%{public}d, masterWeight=%{public}d, "
-            "lastRecvTime=%{public}" PRIu64,
-            g_hbRecvList->cnt, dumpCount, anonyUdid, deviceType, item->device->addr[0].type, item->weight,
+            "lastRecvTime=%{public}" PRIu64, g_hbRecvList->cnt, dumpCount,
+            AnonymizeWrapper(anonyUdid), deviceType, item->device->addr[0].type, item->weight,
             item->masterWeight, item->lastRecvTime);
         AnonymizeFree(anonyUdid);
     }
@@ -1166,7 +1167,7 @@ void LnnDumpHbOnlineNodeList(void)
             "DumpOnlineNodeList count=%{public}d, i=%{public}d, deviceName=%{public}s, deviceTypeId=%{public}d, "
             "deviceTypeStr=%{public}s, masterWeight=%{public}d, discoveryType=%{public}d, "
             "oldTimestamp=%{public}" PRIu64 "",
-            infoNum, i + 1, anonyDeviceName, nodeInfo.deviceInfo.deviceTypeId,
+            infoNum, i + 1, AnonymizeWrapper(anonyDeviceName), nodeInfo.deviceInfo.deviceTypeId,
             deviceTypeStr != NULL ? deviceTypeStr : "", nodeInfo.masterWeight, nodeInfo.discoveryType, oldTimestamp);
         AnonymizeFree(anonyDeviceName);
     }

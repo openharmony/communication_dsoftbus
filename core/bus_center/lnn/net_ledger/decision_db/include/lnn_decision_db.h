@@ -36,6 +36,7 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
 bool LnnIsPotentialHomeGroup(const char *udid);
 int32_t UpdateRecoveryDeviceInfoFromDb(void);
 
+int32_t LnnCheckGenerateSoftBusKeyByHuks(void);
 int32_t LnnInitDecisionDbDelay(void);
 int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
 int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);

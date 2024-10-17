@@ -39,6 +39,7 @@ trans_channel_src += [
 ]
 trans_channel_inc += [
   "$dsoftbus_root_path/core/adapter/transmission/include",
+  "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/common/include",

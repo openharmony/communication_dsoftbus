@@ -39,7 +39,7 @@ public:
 HWTEST_F(LinkManagerTest, AllocateLinkId, TestSize.Level1)
 {
     std::set<int> ids;
-    for (int i = 0; i < 100; ++i) {
+    for (int32_t i = 0; i < 100; ++i) {
         auto id = LinkManager::GetInstance().AllocateLinkId();
         EXPECT_TRUE(ids.find(id) == ids.end());
         ids.insert(id);
@@ -123,7 +123,7 @@ HWTEST_F(LinkManagerTest, AllocateLinkIdTest, TestSize.Level1)
 {
     LinkManager linkManager;
     linkManager.currentLinkId_ = -1;
-    int newId = linkManager.AllocateLinkId();
+    int32_t newId = linkManager.AllocateLinkId();
     EXPECT_EQ(newId, 0);
     linkManager.currentLinkId_ = 1;
     newId = linkManager.AllocateLinkId();
@@ -140,7 +140,7 @@ HWTEST_F(LinkManagerTest, GetAllLinksBasicInfo, TestSize.Level1)
 {
     LinkManager linkManager;
     std::string remoteDeviceId("C86C******58BC");
-    int result = LinkManager::GetInstance().ProcessIfAbsent(
+    int32_t result = LinkManager::GetInstance().ProcessIfAbsent(
         InnerLink::LinkType::HML, remoteDeviceId, [remoteDeviceId](InnerLink &innerLink) {
             innerLink.SetRemoteDeviceId(remoteDeviceId);
         });
@@ -162,7 +162,7 @@ HWTEST_F(LinkManagerTest, GetReuseLink, TestSize.Level1)
     auto reuseResult = linkManager.GetReuseLink(remoteMac);
     EXPECT_EQ(reuseResult, nullptr);
 
-    int result = LinkManager::GetInstance().ProcessIfAbsent(remoteMac, [remoteMac](InnerLink &innerLink) {
+    int32_t result = LinkManager::GetInstance().ProcessIfAbsent(remoteMac, [remoteMac](InnerLink &innerLink) {
         innerLink.SetRemoteBaseMac(remoteMac);
     });
     EXPECT_NE(result, false);
@@ -183,7 +183,7 @@ HWTEST_F(LinkManagerTest, RefreshRelationShip, TestSize.Level1)
     std::string remoteMac("127.0.0.93");
     linkManager.RefreshRelationShip(remoteDeviceId, remoteMac);
 
-    int result = LinkManager::GetInstance().ProcessIfAbsent(remoteMac, [remoteMac](InnerLink &innerLink) {
+    int32_t result = LinkManager::GetInstance().ProcessIfAbsent(remoteMac, [remoteMac](InnerLink &innerLink) {
         innerLink.SetLinkType(InnerLink::LinkType::HML);
         innerLink.SetRemoteBaseMac(remoteMac);
     });

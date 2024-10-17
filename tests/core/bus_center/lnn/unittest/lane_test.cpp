@@ -110,7 +110,7 @@ static void ConstructRemoteNode(void)
     LnnSetNetCapability(&cap, BIT_WIFI_24G);
     LnnSetNetCapability(&cap, BIT_WIFI_5G);
     g_nodeInfo.netCapacity = cap;
-    int ret = strncpy_s(g_nodeInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    int32_t ret = strncpy_s(g_nodeInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
     EXPECT_TRUE(ret == EOK);
     ret = LnnSetDeviceUdid(&g_nodeInfo, NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);

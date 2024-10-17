@@ -163,33 +163,33 @@ typedef struct {
 } ConnectResult;
 
 struct BrOption {
-    uint32_t connectionId;
     char brMac[BT_MAC_LEN];
+    uint32_t connectionId;
     ConnSideType sideType;
     uint32_t waitTimeoutDelay;
 };
 
 struct BleOption {
-    BleProtocolType protocol;
     char bleMac[BT_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
     bool fastestConnectEnable;
-    uint32_t psm;
     uint16_t challengeCode;
+    uint32_t psm;
+    BleProtocolType protocol;
 };
 
 struct BleDirectOption {
-    BleProtocolType protoType;
     char networkId[NETWORK_ID_BUF_LEN];
+    BleProtocolType protoType;
 };
 
 struct SocketOption {
+    char ifName[NETIF_NAME_LEN];
     char addr[IP_LEN]; /* ipv6 addr format: ip%ifname */
     int32_t port;
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
     int32_t keepAlive;
-    char ifName[NETIF_NAME_LEN];
 };
 
 typedef struct {
@@ -233,8 +233,8 @@ typedef struct {
 } LocalListenerInfo;
 
 typedef struct {
-    ConnectType type;
     bool active;
+    ConnectType type;
     int32_t windowInMillis;
     int32_t quotaInBytes;
 } LimitConfiguration;

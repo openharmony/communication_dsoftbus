@@ -17,7 +17,6 @@ import("$DSOFTBUS_ROOT_PATH/dsoftbus.gni")
 # basic compilation options
 cflags = [
   "-DENABLE_USER_LOG",
-  "-DNSTACKX_DFINDER_HIDUMP",
   "-DNSTACKX_EXTEND_BUSINESSDATA",
   "-DDFINDER_SAVE_DEVICE_LIST",
   "-DDFINDER_SUPPORT_SET_SCREEN_STATUS",
@@ -54,6 +53,8 @@ if (defined(ohos_lite) && ohos_kernel_type == "liteos_m") {
     "core/mini_discover/coap_adapter.c",
     "core/mini_discover/coap_app.c",
     "core/mini_discover/coap_discover.c",
+    "core/nstackx_statistics.c",
+    "core/nstackx_dfinder_hievent.c",
   ]
   mini_diff_include_dirs = [
     "include/mini_discover",
@@ -82,7 +83,10 @@ if (!defined(ohos_lite) ||
     "core/nstackx_smartgenius.c",
   ]
   standard_small_diff_include_dirs = [ "include/coap_discover" ]
-  cflags += [ "-DDFINDER_MGT_MSG_LOG" ]
+  cflags += [
+    "-DDFINDER_MGT_MSG_LOG",
+    "-DNSTACKX_DFINDER_HIDUMP",
+  ]
 }
 
 config("nstackx_ctrl_interface") {
@@ -139,6 +143,7 @@ if (defined(ohos_lite)) {
       cflags += [
         "-fPIC",
         "-std=c99",
+        "-DNSTACKX_DFINDER_HIDUMP",
       ]
       cflags_cc = cflags
       ldflags = [
@@ -161,7 +166,10 @@ if (defined(ohos_lite)) {
     }
     branch_protector_ret = "pac_ret"
 
-    cflags += [ "-DDFINDER_MGT_MSG_LOG" ]
+    cflags += [
+      "-DDFINDER_MGT_MSG_LOG",
+      "-DNSTACKX_DFINDER_HIDUMP",
+    ]
     cflags_cc = cflags
     sources = base_src
     sources += standard_small_diff_src
