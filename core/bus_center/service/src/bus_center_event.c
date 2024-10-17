@@ -459,6 +459,15 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
     (void)LnnIpcNotifyDeviceTrustedChange(type, msg, msgLen);
 }
 
+void LnnNotifyHichainProofException(const char *deviceId, uint32_t deviceIdLen, uint16_t deviceTypeId, int32_t errCode)
+{
+    if (deviceId == NULL || deviceIdLen != UDID_BUF_LEN) {
+        LNN_LOGE(LNN_EVENT, "deviceId is invalid");
+        return;
+    }
+    (void)LnnIpcNotifyHichainProofException(deviceId, deviceIdLen, deviceTypeId, errCode);
+}
+
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     if (addr == NULL) {

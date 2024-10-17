@@ -78,8 +78,7 @@ typedef enum {
 
 #define CONN_CODE_SHIFT 16
 #define PC_DEV_TYPE "00C"
-#define SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP \
-    (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((AUTH_SUB_MODULE_CODE) << 16) | (0x0504)))
+
 typedef enum {
     FSM_MSG_TYPE_JOIN_LNN,
     FSM_MSG_TYPE_AUTH_DONE,
@@ -767,6 +766,22 @@ static void GetConnectOnlineReason(LnnConntionInfo *connInfo, uint32_t *connOnli
         *connOnlineReason, connectReason, peerReason, localReason);
 }
 
+static void NotifyProofExceptionEvent(const LnnConntionInfo *connInfo, int32_t reason, const char *peerDeviceType)
+{
+    if ((reason == SOFTBUS_AUTH_HICHAIN_NO_CANDIDATE_GROUP || reason == SOFTBUS_AUTH_HICHAIN_PROOF_MISMATCH) &&
+        (strncmp(peerDeviceType, PC_DEV_TYPE, strlen(PC_DEV_TYPE)) == 0)) {
+        LnnNotifyHichainProofException(
+            connInfo->infoReport.peerUdid, UDID_BUF_LEN, (uint16_t)connInfo->infoReport.type, reason);
+
+        char *anonyUdid = NULL;
+        Anonymize(connInfo->infoReport.peerUdid, &anonyUdid);
+        LNN_LOGE(LNN_BUILDER,
+            "notify hichain proof exception event, udid=%{public}s, reason=%{public}d, type=%{public}hu",
+            AnonymizeWrapper(anonyUdid), reason, (uint16_t)connInfo->infoReport.type);
+        AnonymizeFree(anonyUdid);
+    }
+}
+
 static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onlineNum, int32_t lnnType, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
@@ -793,6 +808,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(LnnConntionInfo *connInfo, int32_t onli
     extra.localDeviceType = dfxConnectInfo.localDeviceType;
     extra.peerDeviceType = dfxConnectInfo.peerDeviceType;
     extra.connOnlineReason = connOnlineReason;
+    NotifyProofExceptionEvent(connInfo, reason, extra.peerDeviceType);
     if (connInfo->nodeInfo == NULL) {
         DfxReportOnlineEvent(connInfo, reason, extra);
         return;
