@@ -19,9 +19,15 @@ dsoftbus_root_path = "../../../.."
 softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
 
 ohos_unittest("TransIpcStandardTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [ "trans_ipc_test.cpp" ]
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/core/common/inner_communication",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -40,7 +46,7 @@ ohos_unittest("TransIpcStandardTest") {
   ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 

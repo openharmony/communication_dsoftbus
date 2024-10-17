@@ -115,6 +115,16 @@ int32_t TransTdcCreateListener(int32_t fd)
     return AddTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
 }
 
+void TransTdcCloseFd(int32_t fd)
+{
+    if (fd < 0) {
+        TRANS_LOGI(TRANS_SDK, "fd less than zero");
+        return;
+    }
+    DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
+    ConnCloseSocket(fd);
+}
+
 void TransTdcReleaseFd(int32_t fd)
 {
     if (fd < 0) {

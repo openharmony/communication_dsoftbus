@@ -60,7 +60,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info);
 static void DelAuthChannelInfoByChanId(int32_t channelId);
 static void DelAuthChannelInfoByAuthId(int32_t authId);
 static int32_t AddAuthChannelInfoInner(AuthChannelInfo *info);
-static void StopCustomListen();
+static void StopCustomListen(void);
 
 SoftBusList *GetAuthChannelListHead(void)
 {
@@ -368,7 +368,7 @@ static int32_t TransAuthFillDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static bool IsRawAuthServerExist()
+static bool IsRawAuthServerExist(void)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetAuthChannelLock() == SOFTBUS_OK, 0, TRANS_SVC, "get authChannelLock failed.");
     AuthChannelInfo *info = NULL;
@@ -382,7 +382,7 @@ static bool IsRawAuthServerExist()
     return false;
 }
 
-static void StopCustomListen()
+static void StopCustomListen(void)
 {
     if (!IsRawAuthServerExist()) {
         struct WifiDirectManager *wdMgr = GetWifiDirectManager();
