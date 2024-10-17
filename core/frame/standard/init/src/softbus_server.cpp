@@ -144,6 +144,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
                 COMM_LOGE(COMM_SVC, "connect BR memory error");
                 return SOFTBUS_MEM_ERR;
             }
+            connOpt.brOption.waitTimeoutDelay = OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS;
             break;
         default:
             COMM_LOGE(COMM_SVC, "connect type error");
