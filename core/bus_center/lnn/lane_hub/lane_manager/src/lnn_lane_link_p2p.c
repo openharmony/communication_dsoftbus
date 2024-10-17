@@ -165,7 +165,7 @@ static SoftBusMutex g_rawLinkLock;
 #define INVALID_P2P_REQUEST_ID         (-1)
 #define LANE_REQ_ID_TYPE_SHIFT         28
 #define SHORT_RANGE_PTK_NOT_MATCH_CODE 4
-#define BLE_TRIGGER_TIMEOUT            3000
+#define BLE_TRIGGER_TIMEOUT            5000
 #define SOFTBUS_LNN_PTK_NOT_MATCH  (SOFTBUS_ERRNO(SHORT_DISTANCE_MAPPING_MODULE_CODE) + SHORT_RANGE_PTK_NOT_MATCH_CODE)
 #define RAW_LINK_CHECK_DELAY (200)
 #define RAW_LINK_CHECK_NUM (10)
@@ -1347,7 +1347,8 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
         HandleGuideChannelAsyncFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
         return;
     }
-    if (reason == SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT || reason == SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT) {
+    if (reason == SOFTBUS_CONN_HV3_WAIT_CONNECTION_TIMEOUT ||
+        reason == SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT) {
         HandleActionTriggerError(p2pRequestId);
     }
     LinkConflictType conflictType = GetConflictTypeWithErrcode(reason);
