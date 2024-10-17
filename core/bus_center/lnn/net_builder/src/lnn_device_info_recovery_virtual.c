@@ -33,6 +33,13 @@ int32_t LnnSaveLocalDeviceInfo(const NodeInfo *deviceInfo)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums)
+{
+    (void)info;
+    (void)nums;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo)
 {
     (void)deviceInfo;
@@ -58,10 +65,11 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-NodeInfo *LnnRetrieveDeviceInfoByNetworkId(const char *networkId)
+int32_t LnnRetrieveDeviceInfoByNetworkId(const char *networkId, NodeInfo *info)
 {
     (void)networkId;
-    return NULL;
+    (void)info;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void LnnDeleteDeviceInfo(const char *udid)

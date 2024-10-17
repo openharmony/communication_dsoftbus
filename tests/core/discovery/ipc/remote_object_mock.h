@@ -42,7 +42,7 @@ public:
         return true;
     }
 
-    int Dump(int fd, const std::vector<std::u16string> &args) override
+    int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override
     {
         return 0;
     }
@@ -51,18 +51,19 @@ public:
     static void Destroy();
     static void SetupStub(const sptr<RemoteObjectMock>& self);
 
-    MOCK_METHOD(int, SendRequest, (uint32_t, MessageParcel&, MessageParcel&, MessageOption &), (override));
+    MOCK_METHOD(int32_t, SendRequest, (uint32_t, MessageParcel&, MessageParcel&, MessageOption &), (override));
 
-    bool GetResult(uint32_t code, const DeviceInfo *deviceInfo = nullptr, int publishId = 0, int subscribeId = 0,
-                   int reason = 0);
+    bool GetResult(uint32_t code, const DeviceInfo *deviceInfo = nullptr,
+                   int32_t publishId = 0, int32_t subscribeId = 0,
+                   int32_t reason = 0);
 
 private:
     std::u16string descriptor_;
     uint32_t code_ {};
     DeviceInfo deviceInfo_ {};
-    int publishId_ {};
-    int subscribeId_ {};
-    int reason_ {};
+    int32_t publishId_ {};
+    int32_t subscribeId_ {};
+    int32_t reason_ {};
 
     static inline sptr<RemoteObjectMock> instance_;
 };

@@ -639,12 +639,12 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
             TRANS_LOGE(TRANS_STREAM, "streamFrameInfo is null");
             return false;
         }
-        if (!EncryptStreamPacket(std::move(stream), data, len)) {
-            return false;
-        }
 
         FrameInfo frameInfo;
         ConvertStreamFrameInfo2FrameInfo(&frameInfo, streamFrameInfo);
+        if (!EncryptStreamPacket(std::move(stream), data, len)) {
+            return false;
+        }
         ret = FtSendFrame(streamFd_, data.get(), len, 0, &frameInfo);
     }
 

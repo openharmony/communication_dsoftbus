@@ -578,7 +578,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_001, TestSize.Level0)
     EXPECT_EQ(CheckTableExist(ctxPtr, TABLE_TRUSTED_DEV_INFO, isExist), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(OpenDatabase(&ctxPtr), SOFTBUS_OK);
     isExist = nullptr;
-    int testid = CheckTableExist(ctxPtr, TABLE_TRUSTED_DEV_INFO, isExist);
+    int32_t testid = CheckTableExist(ctxPtr, TABLE_TRUSTED_DEV_INFO, isExist);
     EXPECT_EQ(testid, SOFTBUS_INVALID_PARAM);
 }
 
@@ -594,7 +594,7 @@ HWTEST_F(Sqlite3UtilsTest, Insert_Record_Test_001, TestSize.Level0)
     uint8_t *g_record = NULL;
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, g_record), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
-    int testid = InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, g_record);
+    int32_t testid = InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, g_record);
     EXPECT_EQ(testid, SOFTBUS_INVALID_PARAM);
 }
 
@@ -629,7 +629,7 @@ HWTEST_F(Sqlite3UtilsTest, Db_Password_Test_001, TestSize.Level0)
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
     EXPECT_EQ(EncryptedDb(ctx, password, len), SOFTBUS_INVALID_PARAM);
-    int testid = EncryptedDb(ctx, PASSWORD1, len);
+    int32_t testid = EncryptedDb(ctx, PASSWORD1, len);
     EXPECT_EQ(testid, SOFTBUS_ERR);
     
     ctx = nullptr;

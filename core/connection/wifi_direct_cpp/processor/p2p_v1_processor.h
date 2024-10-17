@@ -76,6 +76,7 @@ private:
     int ProcessNegotiateCommandCommon(std::shared_ptr<NegotiateCommand> &command);
 
     void ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event);
+    void ProcessAuthExceptionEvent(const std::shared_ptr<AuthExceptionEvent> &event);
 
     void OnWaitReqResponseTimeoutEvent();
     void OnWaitReuseResponseTimeoutEvent();

@@ -131,18 +131,18 @@ typedef struct SoftBusWifiP2pDevice {
 } SoftBusWifiP2pDevice;
 
 typedef struct SoftBusWifiP2pGroupInfo {
-    SoftBusWifiP2pDevice owner;
-    int32_t isP2pGroupOwner; /* 0: false, 1: true */
     char passphrase[WIFI_PASSPHRASE_LENGTH]; /* the value ranges from 8 to 63. */
     char interface[WIFI_INTERFACE_LENGTH];
     char groupName[WIFI_P2P_NAME_LENGTH];
+    char goIpAddress[WIFI_IP_ADDR_STR_LEN];
+    SoftBusP2pGroupStatus groupStatus;
     int32_t networkId;
     int32_t frequency; /* for example : freq=2412 to select 2.4 GHz channel 1.(Based on 2.4 GHz or 5 GHz) */
     int32_t isP2pPersistent; /* 0: false, 1: true */
-    SoftBusP2pGroupStatus groupStatus;
-    SoftBusWifiP2pDevice clientDevices[WIFI_MAX_DEVICES_NUM];
+    int32_t isP2pGroupOwner; /* 0: false, 1: true */
     int32_t clientDevicesSize; /* the true size of clientDevices array */
-    char goIpAddress[WIFI_IP_ADDR_STR_LEN];
+    SoftBusWifiP2pDevice clientDevices[WIFI_MAX_DEVICES_NUM];
+    SoftBusWifiP2pDevice owner;
 } SoftBusWifiP2pGroupInfo;
 
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num);

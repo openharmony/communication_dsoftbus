@@ -218,7 +218,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
     return GetLaneDepsInterface()->AuthOpenConn(info, requestId, callback, isMeta);
 }
 
-int SoftBusFrequencyToChannel(int frequency)
+int32_t SoftBusFrequencyToChannel(int32_t frequency)
 {
     return GetLaneDepsInterface()->SoftBusFrequencyToChannel(frequency);
 }
@@ -426,7 +426,7 @@ void DeleteNetworkResourceByLaneId(uint64_t laneId)
     GetLaneDepsInterface()->DeleteNetworkResourceByLaneId(laneId);
 }
 
-int SoftBusGetBtState(void)
+int32_t SoftBusGetBtState(void)
 {
     return GetLaneDepsInterface()->SoftBusGetBtState();
 }
@@ -444,6 +444,11 @@ void AddNetworkResource(NetworkResource *networkResource)
 int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout)
 {
     return GetLaneDepsInterface()->LnnRequestCheckOnlineStatus(networkId, timeout);
+}
+
+int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
+{
+    return GetLaneDepsInterface()->AuthCheckMetaExist(connInfo, isExist);
 }
 }
 } // namespace OHOS

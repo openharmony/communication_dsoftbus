@@ -210,6 +210,10 @@ uint32_t GetAuthDataSize(uint32_t len)
 int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
     uint8_t *buf, uint32_t size)
 {
+    if (head == NULL || data == NULL || buf == NULL) {
+        AUTH_LOGE(AUTH_CONN, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (size < GetAuthDataSize(head->len)) {
         return SOFTBUS_NO_ENOUGH_DATA;
     }
@@ -482,6 +486,10 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
 void HandleRepeatDeviceIdDataDelay(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
     const AuthDataHead *head, const uint8_t *data)
 {
+    if (connInfo == NULL || head == NULL || data == NULL) {
+        AUTH_LOGE(AUTH_CONN, "param error");
+        return;
+    }
     RepeatDeviceIdData *request = (RepeatDeviceIdData *)SoftBusCalloc(sizeof(RepeatDeviceIdData) + head->len);
     if (request == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc RepeatDeviceIdData fail");

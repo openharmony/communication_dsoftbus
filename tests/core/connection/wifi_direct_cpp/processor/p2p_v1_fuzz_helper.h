@@ -25,7 +25,7 @@ namespace OHOS::SoftBus {
 class P2pV1FuzzHelper {
 public:
     using FuzzInjector = void (*)(NegotiateMessage &message);
-    static int FuzzCommonEnum(int max, int overflow)
+    static int32_t FuzzCommonEnum(int32_t max, int32_t overflow)
     {
         int32_t value = 0;
         GenerateInt32(value);
@@ -89,14 +89,14 @@ public:
 
     static void FuzzStationFrequency(NegotiateMessage &message)
     {
-        int value;
+        int32_t value;
         GenerateInt32(value);
         message.SetLegacyP2pStationFrequency(value);
     }
 
     static void FuzzVersion(NegotiateMessage &message)
     {
-        int value;
+        int32_t value;
         GenerateInt32(value);
         message.SetLegacyP2pVersion(value);
     }

@@ -27,6 +27,7 @@ extern "C" {
 void *SoftBusMalloc(unsigned int size);
 void *SoftBusCalloc(unsigned int size);
 void SoftBusFree(void *pt);
+void SoftBusClearFree(void *pt, unsigned int size);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -217,7 +217,7 @@ static void ProcessSyncP2pInfo(void *para)
             LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
             char *anonyDeviceName = NULL;
             Anonymize(info[i].deviceName, &anonyDeviceName);
-            LNN_LOGE(LNN_BUILDER, "sync p2p info fail. deviceName=%{public}s", anonyDeviceName);
+            LNN_LOGE(LNN_BUILDER, "sync p2p info fail. deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
             AnonymizeFree(anonyDeviceName);
         }
     }
@@ -266,7 +266,8 @@ static void ProcessSyncWifiDirectAddr(void *para)
             != SOFTBUS_OK) {
             char *anonyNetworkId = NULL;
             Anonymize(info[i].networkId, &anonyNetworkId);
-            LNN_LOGE(LNN_BUILDER, "sync wifidirect addr fail. anonyNetworkId=%{public}s", anonyNetworkId);
+            LNN_LOGE(LNN_BUILDER, "sync wifidirect addr fail. anonyNetworkId=%{public}s",
+                AnonymizeWrapper(anonyNetworkId));
             AnonymizeFree(anonyNetworkId);
         }
     }

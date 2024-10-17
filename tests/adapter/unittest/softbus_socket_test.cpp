@@ -25,16 +25,16 @@ using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
-const int PROTOCOL_MAXLEN = 100;
-const int TEST_BUF_SIZE = 10;
-const int TEST_PORT = 8888;
-const int TEST_IPV6_PORT = 8089;
-const int LOCAL_HOST_VALUE = 16777343;
-const int CMD_EXIT = 0x11001100;
-const int CMD_RECV = 0x22002200;
-const int CMD_REPLY = 0x33003300;
-const int SET_SIZE = 100;
-const int WLAN_INDEX = 4;
+const int32_t PROTOCOL_MAXLEN = 100;
+const int32_t TEST_BUF_SIZE = 10;
+const int32_t TEST_PORT = 8888;
+const int32_t TEST_IPV6_PORT = 8089;
+const int32_t LOCAL_HOST_VALUE = 16777343;
+const int32_t CMD_EXIT = 0x11001100;
+const int32_t CMD_RECV = 0x22002200;
+const int32_t CMD_REPLY = 0x33003300;
+const int32_t SET_SIZE = 100;
+const int32_t WLAN_INDEX = 4;
 
 SoftBusSockAddrIn g_serAddr = {
     .sinFamily = SOFTBUS_AF_INET,
@@ -73,13 +73,13 @@ void AdapterDsoftbusSocketTest::TearDown()
 {
 }
 
-static void SocketServiceStart(int localFlag)
+static void SocketServiceStart(int32_t localFlag)
 {
     int32_t socketFd = -1;
     int32_t optVal = 1;
     int32_t backLog = 2;
     SoftBusSockAddrIn cliAddr = {0};
-    int acceptFd = -1;
+    int32_t acceptFd = -1;
     struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
@@ -135,7 +135,7 @@ static void SocketIpv6ServiceStart(int localFlag)
     int32_t optVal = 1;
     int32_t backLog = 2;
     SoftBusSockAddrIn cliAddr = {0};
-    int acceptFd = -1;
+    int32_t acceptFd = -1;
     struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
@@ -335,11 +335,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest001, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest002, TestSize.Level0)
 {
-    int socketFd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t socketFd;
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
-    int optVal = 1;
-    int optValLen = sizeof(int);
+    int32_t optVal = 1;
+    int32_t optValLen = sizeof(int);
     ret = SoftBusSocketSetOpt(socketFd, SOFTBUS_IPPROTO_IP, SOFTBUS_IP_TOS, &optVal, optValLen);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
 
@@ -355,12 +355,12 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest002, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest003, TestSize.Level0)
 {
-    int socketFd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t socketFd;
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
 
-    int optVal = 1;
-    int optValLen = sizeof(int);
+    int32_t optVal = 1;
+    int32_t optValLen = sizeof(int);
     ret = SoftBusSocketSetOpt(socketFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &optVal, optValLen);
     EXPECT_EQ(0, ret);
 
@@ -376,9 +376,9 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest003, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest004, TestSize.Level0)
 {
-    int optVal = 1;
-    int optValLen = sizeof(int);
-    int ret = SoftBusSocketSetOpt(-1, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &optVal, optValLen);
+    int32_t optVal = 1;
+    int32_t optValLen = sizeof(int);
+    int32_t ret = SoftBusSocketSetOpt(-1, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &optVal, optValLen);
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
 
@@ -390,11 +390,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest004, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest005, TestSize.Level0)
 {
-    int socketFd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t socketFd;
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
-    int optVal = 10;
-    int optValLen = sizeof(int);
+    int32_t optVal = 10;
+    int32_t optValLen = sizeof(int);
     ret = SoftBusSocketSetOpt(socketFd, SOFTBUS_IPPROTO_IP, -1, &optVal, optValLen);
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 
@@ -410,10 +410,10 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest005, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest006, TestSize.Level0)
 {
-    int socketFd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t socketFd;
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
-    int optValLen = sizeof(int);
+    int32_t optValLen = sizeof(int);
     ret = SoftBusSocketSetOpt(socketFd, SOFTBUS_IPPROTO_IP, SOFTBUS_IP_TOS, NULL, optValLen);
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 
@@ -430,10 +430,10 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest006, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest007, TestSize.Level0)
 {
-    int socketFd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t socketFd;
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
-    int optVal = 1;
+    int32_t optVal = 1;
     ret = SoftBusSocketSetOpt(socketFd, SOFTBUS_IPPROTO_IP, SOFTBUS_IP_TOS, &optVal, -1);
     EXPECT_EQ(-1, ret);
 
@@ -450,10 +450,10 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSetOptTest007, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetOptTest001, TestSize.Level0)
 {
-    int socketFd;
-    int on = 1;
-    int onLen = sizeof(on);
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t socketFd;
+    int32_t on = 1;
+    int32_t onLen = sizeof(on);
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
     ret = SoftBusSocketGetOpt(socketFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, &onLen);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
@@ -469,9 +469,9 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetOptTest001, TestSize.Level0)
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetOptTest002, TestSize.Level0)
 {
-    int on = 1;
-    int onLen = sizeof(on);
-    int rc = SoftBusSocketGetOpt(-1, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, &onLen);
+    int32_t on = 1;
+    int32_t onLen = sizeof(on);
+    int32_t rc = SoftBusSocketGetOpt(-1, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, &onLen);
     EXPECT_TRUE(rc == -1);
 }
 
@@ -484,7 +484,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetOptTest002, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest001, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(1);
         return;
@@ -521,7 +521,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest002, TestSize.L
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest003, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -547,7 +547,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest003, TestSize.L
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest004, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -573,8 +573,8 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest004, TestSize.L
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest005, TestSize.Level0)
 {
-    int socketFd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t socketFd;
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
     SoftBusSockAddrIn clientAddr;
     ret = SoftBusSocketGetLocalName(socketFd, (SoftBusSockAddr *)&clientAddr);
@@ -607,7 +607,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest006, TestSize.L
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest007, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketIpv6ServiceStart(0);
         return;
@@ -634,7 +634,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest007, TestSize.L
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest001, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -666,7 +666,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest001, TestSize.Le
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest002, TestSize.Level0)
 {
     SoftBusSockAddr addr;
-    int rc = SoftBusSocketGetPeerName(-1, &addr);
+    int32_t rc = SoftBusSocketGetPeerName(-1, &addr);
     EXPECT_TRUE(rc == -1);
 }
 
@@ -679,7 +679,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest002, TestSize.Le
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest003, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -705,7 +705,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest003, TestSize.Le
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest004, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -732,8 +732,8 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest004, TestSize.Le
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest005, TestSize.Level0)
 {
-    int socketFd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t socketFd;
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
     SoftBusSockAddrIn serviceAddr;
     ret = SoftBusSocketGetPeerName(socketFd, (SoftBusSockAddr *)&serviceAddr);
@@ -752,7 +752,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest005, TestSize.Le
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest006, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketIpv6ServiceStart(0);
         return;
@@ -976,7 +976,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen004, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept001, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1052,7 +1052,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect001, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(1);
         return;
@@ -1219,7 +1219,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest001, TestSize.Level0
 {
     SoftBusFdSet set;
     SoftBusSocketFdSet(1, &set);
-    int ret = SoftBusSocketFdIsset(1, &set);
+    int32_t ret = SoftBusSocketFdIsset(1, &set);
     EXPECT_TRUE(ret == 1);
 }
 
@@ -1233,7 +1233,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest002, TestSize.Level0
 {
     SoftBusFdSet set = {0};
     SoftBusSocketFdClr(1, &set);
-    int ret = SoftBusSocketFdIsset(1, &set);
+    int32_t ret = SoftBusSocketFdIsset(1, &set);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -1245,7 +1245,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest002, TestSize.Level0
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdIssetTest003, TestSize.Level0)
 {
-    int ret = SoftBusSocketFdIsset(1, NULL);
+    int32_t ret = SoftBusSocketFdIsset(1, NULL);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -1482,7 +1482,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest002, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1520,7 +1520,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest002, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1560,7 +1560,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest004, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1604,7 +1604,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest002, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1634,7 +1634,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest002, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest003, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1662,7 +1662,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest004, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1687,7 +1687,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest004, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest005, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1716,7 +1716,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest005, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest006, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketServiceStart(0);
         return;
@@ -1744,7 +1744,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest006, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest007, TestSize.Level0)
 {
     sleep(1);
-    int pid = -1;
+    int32_t pid = -1;
     if ((pid = fork()) == 0) {
         SocketIpv6ServiceStart(0);
         return;

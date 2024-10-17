@@ -128,7 +128,7 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     (void)memset_s(param, sizeof(SessionParam), 0, sizeof(SessionParam));
     param->sessionName = TEST_SESSION_NAME;
     param->sessionId = 1;
-    int tmp = 0;
+    int32_t tmp = 0;
     param->attr = &g_sessionAttr[tmp];
 
     TransManagerInterfaceMock mock;
@@ -137,7 +137,7 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(transInfo != nullptr);
     (void)memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
-    int ret = TransOpenChannel(param, transInfo);
+    int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
     SoftBusFree(param);
     SoftBusFree(transInfo);
@@ -153,12 +153,12 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel002, TestSize.Level1)
 {
     SessionParam param;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
-    int tmp = 0;
+    int32_t tmp = 0;
     param.attr = &g_sessionAttr[tmp];
     TransInfo transInfo;
     (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
 
-    int ret = TransOpenChannel(nullptr, &transInfo);
+    int32_t ret = TransOpenChannel(nullptr, &transInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransOpenChannel(&param, nullptr);
@@ -584,7 +584,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel003, TestSize.Level1)
     ASSERT_TRUE(param != nullptr);
     param->sessionName = TEST_SESSION_NAME;
     param->sessionId = 1;
-    int tmp = 0;
+    int32_t tmp = 0;
     param->attr = &g_sessionAttr[tmp];
     param->isQosLane = true;
 
@@ -615,7 +615,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel004, TestSize.Level1)
     ASSERT_TRUE(param != nullptr);
     param->sessionName = TEST_SESSION_NAME;
     param->sessionId = 1;
-    int tmp = 0;
+    int32_t tmp = 0;
     param->attr = &g_sessionAttr[tmp];
     param->isQosLane = false;
 
@@ -649,7 +649,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel005, TestSize.Level1)
     ASSERT_TRUE(param != nullptr);
     param->sessionName = TEST_SESSION_NAME;
     param->sessionId = 1;
-    int tmp = 0;
+    int32_t tmp = 0;
     param->attr = &g_sessionAttr[tmp];
     param->isQosLane = true;
 
@@ -680,7 +680,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel006, TestSize.Level1)
     ASSERT_TRUE(param != nullptr);
     param->sessionName = TEST_SESSION_NAME;
     param->sessionId = 1;
-    int tmp = 0;
+    int32_t tmp = 0;
     param->attr = &g_sessionAttr[tmp];
     param->isQosLane = false;
 
@@ -788,7 +788,7 @@ HWTEST_F(TransChannelManagerTest, GetAuthAppInfo005, TestSize.Level1)
 HWTEST_F(TransChannelManagerTest, TransGetAndComparePid001, TestSize.Level1)
 {
     int32_t ret = TransGetAndComparePid(TRANS_TEST_PID, 1, CHANNEL_TYPE_TCP_DIRECT);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
     ret = TransGetAndComparePid(TRANS_TEST_PID, 1, CHANNEL_TYPE_AUTH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }

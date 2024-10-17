@@ -39,7 +39,7 @@ public:
     virtual int32_t SoftbusGattcSearchServices(int32_t clientId) = 0;
     virtual int32_t SoftbusGattcRegisterNotification(int32_t clientId,
         SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid, SoftBusBtUuid *descriptorUuid) = 0;
-    virtual int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize) = 0;
+    virtual int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int32_t mtuSize) = 0;
     virtual int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt) = 0;
     virtual int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData) = 0;
     virtual int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr,

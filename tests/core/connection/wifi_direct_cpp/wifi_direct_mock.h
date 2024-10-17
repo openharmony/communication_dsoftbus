@@ -41,7 +41,7 @@ public:
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
     virtual int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener) = 0;
-    virtual WifiErrorCode Hid2dGetChannelListFor5G(int *chanList, int len) = 0;
+    virtual WifiErrorCode Hid2dGetChannelListFor5G(int32_t *chanList, int32_t len) = 0;
     virtual WifiErrorCode GetP2pEnableStatus(P2pState* state) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info) = 0;
@@ -83,18 +83,18 @@ public:
     virtual int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen,
         const unsigned char *src, size_t slen) = 0;
     virtual WifiErrorCode Hid2dSetPeerWifiCfgInfo(PeerCfgType cfgType, char cfgData[CFG_DATA_MAX_BYTES],
-        int setDataValidLen) = 0;
+        int32_t setDataValidLen) = 0;
     virtual WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo* groupInfo) = 0;
     virtual WifiErrorCode Hid2dRequestGcIp(const unsigned char gcMac[MAC_LEN],
         unsigned int ipAddr[IPV4_ARRAY_LEN]) = 0;
     virtual WifiErrorCode Hid2dConfigIPAddr(const char ifName[IF_NAME_LEN], const IpAddrInfo *ipInfo) = 0;
-    virtual WifiErrorCode Hid2dCreateGroup(const int frequency, FreqType type) = 0;
+    virtual WifiErrorCode Hid2dCreateGroup(const int32_t frequency, FreqType type) = 0;
     virtual WifiErrorCode Hid2dConnect(const Hid2dConnectConfig *config) = 0;
     virtual WifiErrorCode Hid2dSharedlinkIncrease(void) = 0;
     virtual WifiErrorCode Hid2dSharedlinkDecrease(void) = 0;
     virtual WifiErrorCode RemoveGroup() = 0;
     virtual WifiErrorCode Hid2dRemoveGcGroup(const char gcIfName[IF_NAME_LEN]) = 0;
-    virtual int Hid2dIsWideBandwidthSupported() = 0;
+    virtual int32_t Hid2dIsWideBandwidthSupported() = 0;
 
     virtual int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type,
         const ITransProxyPipelineListener *listener) = 0;
@@ -109,7 +109,7 @@ public:
     virtual void OnDisconnectSuccess(uint32_t requestId) = 0;
     virtual void OnDisconnectFailure(uint32_t requestId, int32_t reason) = 0;
     // proxy negotiate channel mock stub
-    virtual int ProxyNegotiateChannelSendMessage(int32_t channelId, const NegotiateMessage &msg) const = 0;
+    virtual int32_t ProxyNegotiateChannelSendMessage(int32_t channelId, const NegotiateMessage &msg) const = 0;
     virtual std::string ProxyNegotiateChannelGetRemoteDeviceId(int32_t channelId) const = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual int32_t GetInterfaceIpString(const std::string &interface, std::string &ip) = 0;
@@ -130,7 +130,7 @@ public:
     MOCK_METHOD(int32_t, AuthGetDeviceUuid, (int64_t authId, char *uuid, uint16_t size), (override));
     MOCK_METHOD(int32_t, AuthPostTransData, (AuthHandle authHandle, const AuthTransData *dataInfo), (override));
     MOCK_METHOD(int32_t, RegAuthTransListener, (int32_t module, const AuthTransListener *listener), (override));
-    MOCK_METHOD(WifiErrorCode, Hid2dGetChannelListFor5G, (int *chanList, int len), (override));
+    MOCK_METHOD(WifiErrorCode, Hid2dGetChannelListFor5G, (int32_t *chanList, int32_t len), (override));
     MOCK_METHOD(WifiErrorCode, GetP2pEnableStatus, (P2pState* state), (override));
     MOCK_METHOD(int32_t, LnnGetLocalStrInfo, (InfoKey, char*, uint32_t), (override));
     MOCK_METHOD(int32_t, LnnGetRemoteStrInfo, (const std::string &networkId, InfoKey key, char *info, uint32_t len),
@@ -207,9 +207,9 @@ public:
     static WifiErrorCode RegisterP2pStateChangedCallback(const P2pStateChangedCallback callback);
     static WifiErrorCode RegisterP2pConnectionChangedCallback(const P2pConnectionChangedCallback callback);
 
-    static WifiErrorCode CreateGroupSuccessAction(const int frequency, FreqType type);
-    static WifiErrorCode CreateGroupFailureAction(const int frequency, FreqType type);
-    static WifiErrorCode CreateGroupTimeOutAction(const int frequency, FreqType type);
+    static WifiErrorCode CreateGroupSuccessAction(const int32_t frequency, FreqType type);
+    static WifiErrorCode CreateGroupFailureAction(const int32_t frequency, FreqType type);
+    static WifiErrorCode CreateGroupTimeOutAction(const int32_t frequency, FreqType type);
 
     static WifiErrorCode ConnectSuccessAction(const Hid2dConnectConfig *config);
     static WifiErrorCode ConnectFailureAction(const Hid2dConnectConfig *config);

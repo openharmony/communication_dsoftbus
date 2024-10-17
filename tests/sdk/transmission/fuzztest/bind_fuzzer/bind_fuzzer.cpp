@@ -127,10 +127,6 @@ void BindTestWithQosInfo(const uint8_t *data, size_t size)
     }
 
     std::unique_ptr<QosTV[]> qosInfo = std::make_unique<QosTV[]>(count);
-    if (qosInfo == nullptr) {
-        return;
-    }
-
     if (memcpy_s(qosInfo.get(), sizeof(QosTV) * count, data, sizeof(QosTV) * count) != EOK) {
         return;
     }
@@ -152,7 +148,7 @@ void BindTestWithQosInfo(const uint8_t *data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::BindTestWithSocketId(data, size);
     OHOS::BindTestWithQosInfo(data, size);

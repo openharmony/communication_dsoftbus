@@ -80,7 +80,7 @@ std::vector<DistributedKv::Entry> KvDataChangeListener::ConvertCloudChangeDataTo
         if (LnnGetDBData(dbId, key.c_str(), key.length(), &value) != SOFTBUS_OK) {
             anonyKey = nullptr;
             Anonymize(key.c_str(), &anonyKey);
-            LNN_LOGE(LNN_LEDGER, "get value failed, key = %{public}s", anonyKey);
+            LNN_LOGE(LNN_LEDGER, "get value failed, key = %{public}s", AnonymizeWrapper(anonyKey));
             AnonymizeFree(anonyKey);
             continue;
         }

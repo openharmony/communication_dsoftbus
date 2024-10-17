@@ -120,7 +120,8 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_BUILDER, "recv capability change=%{public}d, networkId=%{public}s", capability, anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "recv capability change=%{public}d, networkId=%{public}s",
+        capability, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     // update ledger
     NodeInfo info;
@@ -186,7 +187,8 @@ static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *
         char *anonyNetworkId = NULL;
         Anonymize(netInfo.networkId, &anonyNetworkId);
         LNN_LOGE(LNN_BUILDER,
-            "sync cap info ret=%{public}d, peerNetworkId=%{public}s, type=%{public}u.", ret, anonyNetworkId, type);
+            "sync cap info ret=%{public}d, peerNetworkId=%{public}s, type=%{public}u.",
+            ret, AnonymizeWrapper(anonyNetworkId), type);
         AnonymizeFree(anonyNetworkId);
     } else if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
         LnnSendP2pSyncInfoMsg(netInfo.networkId, netCapability);
@@ -293,6 +295,25 @@ static void LnnSetP2pNetCapability(uint32_t *capability)
     }
 }
 
+static void ProcessApEnabled(uint32_t *capability, bool *needSync)
+{
+    g_isApEnable = true;
+    LnnSetNetworkCapability(capability);
+    if (IsP2pAvailable(true)) {
+        (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+    }
+    *needSync = true;
+}
+
+static void ProcessApDisabled(uint32_t *capability, bool *needSync)
+{
+    g_isApEnable = false;
+    if (IsP2pAvailable(false)) {
+        (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+    }
+    *needSync = true;
+}
+
 static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
 {
     switch (wifiState) {
@@ -325,18 +346,14 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             *needSync = true;
             break;
         case SOFTBUS_AP_ENABLED:
-            g_isApEnable = true;
-            LnnSetNetworkCapability(capability);
-            if (IsP2pAvailable(true)) {
-                (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            }
-            *needSync = true;
+            ProcessApEnabled(capability, needSync);
             break;
         case SOFTBUS_AP_DISABLED:
-            g_isApEnable = false;
-            if (IsP2pAvailable(false)) {
-                (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            }
+            ProcessApDisabled(capability, needSync);
+            break;
+        case SOFTBUS_WIFI_SEMI_ACTIVE:
+            g_isWifiEnable = true;
+            (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
             *needSync = true;
             break;
         default:
@@ -360,7 +377,7 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     bool needSync = false;
     uint32_t netCapability = oldNetCap;
     GetNetworkCapability(wifiState, &netCapability, &needSync);
-    LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{publc}u->%{publc}u, needSync=%{public}d",
+    LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{public}u->%{public}u, needSync=%{public}d",
         wifiState, oldNetCap, netCapability, needSync);
     WifiStateProcess(netCapability, needSync);
 }

@@ -35,6 +35,8 @@ class P2pEntityTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
+        WifiDirectInterfaceMock mock;
+        EXPECT_CALL(mock, GetP2pEnableStatus).WillOnce(Return(WIFI_SUCCESS));
         P2pEntity::Init();
     }
     static void TearDownTestCase() {}
@@ -108,7 +110,7 @@ HWTEST_F(P2pEntityTest, CreateGroupTest003, TestSize.Level1)
         return SOFTBUS_OK;
     });
     std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> destroyGroupParam;
-    int result = P2pCreateGroupState::Instance()->RemoveLink(destroyGroupParam);
+    int32_t result = P2pCreateGroupState::Instance()->RemoveLink(destroyGroupParam);
     EXPECT_EQ(result, SOFTBUS_CONN_NOT_SUPPORT_FAILED);
 
     P2pConnectParam param{"123\n01:02:03:04:05:06\n555\n16\n1", false, false};
@@ -200,7 +202,7 @@ HWTEST_F(P2pEntityTest, ConnectTest003, TestSize.Level1)
         return SOFTBUS_OK;
     });
     std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> destroyGroupParam;
-    int result = P2pConnectState::Instance()->RemoveLink(destroyGroupParam);
+    int32_t result = P2pConnectState::Instance()->RemoveLink(destroyGroupParam);
     EXPECT_EQ(result, SOFTBUS_CONN_NOT_SUPPORT_FAILED);
 
     result = P2pConnectState::Instance()->DestroyGroup(destroyGroupParam);
@@ -305,7 +307,7 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest003, TestSize.Level1)
         return SOFTBUS_OK;
     });
     std::shared_ptr<P2pOperationWrapper<P2pDestroyGroupParam>> destroyGroupParam;
-    int result = P2pDestroyGroupState::Instance()->RemoveLink(destroyGroupParam);
+    int32_t result = P2pDestroyGroupState::Instance()->RemoveLink(destroyGroupParam);
     EXPECT_EQ(result, SOFTBUS_CONN_NOT_SUPPORT_FAILED);
 
     P2pConnectParam param{"123\n01:02:03:04:05:06\n555\n16\n1", false, false};
@@ -438,7 +440,7 @@ HWTEST_F(P2pEntityTest, PushOperation001, TestSize.Level1)
     EXPECT_CALL(mock, Hid2dRemoveGcGroup).WillOnce(WifiDirectInterfaceMock::DestroyGroupFailureAction);
     P2pEntity::GetInstance().PushOperation(destroyGroupOp);
     P2pEntity::GetInstance().ExecuteNextOperation();
-    int ret = destroyGroupOp->promise_.get_future().get().errorCode_;
+    int32_t ret = destroyGroupOp->promise_.get_future().get().errorCode_;
     EXPECT_EQ(ret, SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED);
 
 

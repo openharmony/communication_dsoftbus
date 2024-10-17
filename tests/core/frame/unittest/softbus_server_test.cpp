@@ -102,7 +102,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest003, TestSize.Level1)
 {
     sptr<OHOS::SoftBusServer> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
-    int fd = -1;
+    int32_t fd = -1;
     std::vector<std::u16string> args;
 
     int32_t ret = softBusServer->Dump(fd, args);

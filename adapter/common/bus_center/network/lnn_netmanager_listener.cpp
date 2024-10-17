@@ -127,7 +127,7 @@ int32_t LnnNetManagerListener::OnInterfaceAddressUpdated(
 {
     char *anonyAddr = NULL;
     Anonymize(addr.c_str(), &anonyAddr);
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), anonyAddr);
+    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
     if (strstr(ifName.c_str(), "eth") == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -166,7 +166,7 @@ int32_t LnnNetManagerListener::OnInterfaceAddressRemoved(
 {
     char *anonyAddr = NULL;
     Anonymize(addr.c_str(), &anonyAddr);
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), anonyAddr);
+    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
     return SOFTBUS_OK;
 }

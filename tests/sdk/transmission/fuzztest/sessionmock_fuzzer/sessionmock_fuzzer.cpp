@@ -63,7 +63,7 @@ void CloseSessionInnerTest(const uint8_t *data, size_t size)
         return;
     }
 
-    int sessionId = *(reinterpret_cast<const int32_t *>(data));
+    int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
     CloseSessionInner(sessionId);
 }
 
@@ -73,8 +73,8 @@ void GrantPermissionInnerTest(const uint8_t *data, size_t size)
         return;
     }
 
-    int uid = *(reinterpret_cast<const int32_t *>(data));
-    int pid = *(reinterpret_cast<const int32_t *>(data));
+    int32_t uid = *(reinterpret_cast<const int32_t *>(data));
+    int32_t pid = *(reinterpret_cast<const int32_t *>(data));
     GrantPermissionInner(uid, pid, nullptr);
 }
 
@@ -105,7 +105,7 @@ void GetPeerUidInnerTest(const uint8_t *data, size_t size)
     }
 
     int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
-    int *tmp = const_cast<int *>(reinterpret_cast<const int *>(data));
+    int32_t *tmp = const_cast<int32_t *>(reinterpret_cast<const int32_t *>(data));
     GetPeerUidInner(sessionId, tmp);
 }
 
@@ -116,7 +116,7 @@ void GetPeerPidInnerTest(const uint8_t *data, size_t size)
     }
 
     int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
-    int *tmp = const_cast<int *>(reinterpret_cast<const int *>(data));
+    int32_t *tmp = const_cast<int32_t *>(reinterpret_cast<const int32_t *>(data));
     GetPeerPidInner(sessionId, tmp);
 }
 
@@ -127,7 +127,7 @@ void IsServerSideInnerTest(const uint8_t *data, size_t size)
     }
 
     int32_t sessionId = *(reinterpret_cast<const int32_t *>(data));
-    int *tmp = const_cast<int *>(reinterpret_cast<const int *>(data));
+    int32_t *tmp = const_cast<int32_t *>(reinterpret_cast<const int32_t *>(data));
     IsServerSideInner(sessionId, tmp);
 }
 
@@ -177,7 +177,7 @@ void GetPkgNameInnerTest(const uint8_t *data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::CreateSessionServerInnerTest(data, size);

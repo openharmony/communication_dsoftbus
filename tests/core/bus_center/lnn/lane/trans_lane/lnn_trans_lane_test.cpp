@@ -497,34 +497,8 @@ HWTEST_F(LNNTransLaneMockTest, ALLOC_RAW_LANE_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = UpdateReqListLaneId(LANE_REQ_ID, NEW_LANE_REQ_ID);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-    uint32_t actualBw = 0;
-    ret = transObj->qosLimit(NEW_LANE_REQ_ID, LANE_REQ_ID, &actualBw);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     NotifyFreeLaneResult(LANE_REQ_ID, SOFTBUS_ERR);
     NotifyFreeLaneResult(NEW_LANE_REQ_ID, SOFTBUS_ERR);
-    transObj->deinit();
-}
-
-/*
-* @tc.name: QOS_LIMIT_TEST_001
-* @tc.desc: QosLimit test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNTransLaneMockTest, QOS_LIMIT_TEST_001, TestSize.Level1)
-{
-    LaneDepsInterfaceMock mock;
-    EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
-    LaneInterface *transObj = TransLaneGetInstance();
-    EXPECT_TRUE(transObj != nullptr);
-    transObj->init(nullptr);
-    uint32_t actualBw = 0;
-    int32_t ret = transObj->qosLimit(LANE_REQ_ID, LANE_REQ_ID, &actualBw);
-    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
-    ret = transObj->qosLimit(INVALID_LANE_REQ_ID, LANE_REQ_ID, &actualBw);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = transObj->qosLimit(LANE_REQ_ID, LANE_REQ_ID, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     transObj->deinit();
 }
 } // namespace OHOS

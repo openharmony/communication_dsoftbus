@@ -52,11 +52,11 @@ const SubscribeInfo g_subscribeInfoOsd = {
 };
 const DeviceInfo g_deviceInfoCast = {
     .capabilityBitmapNum = 1,
-    .capabilityBitmap = {CAPABILITY_CASTPLUS},
+    .capabilityBitmap = { CAPABILITY_CASTPLUS },
 };
 const DeviceInfo g_deviceInfoOsd = {
     .capabilityBitmapNum = 1,
-    .capabilityBitmap = {CAPABILITY_OSD},
+    .capabilityBitmap = { CAPABILITY_OSD },
 };
 const InnerDeviceInfoAddtions g_additions = {};
 
@@ -146,15 +146,15 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
     return BusCenterMock::GetMock()->LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, device, additions);
 }
 } // extern "C"
-} // anonymize namespace
+} // namespace
 
 namespace OHOS {
 class DiscClientOnDeviceFoundTest : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-    void SetUp() override {}
-    void TearDown() override {}
+    static void SetUpTestCase() { }
+    static void TearDownTestCase() { }
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 MATCHER_P(EqStr, expect, "string not equal")

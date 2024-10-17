@@ -58,6 +58,11 @@ bool AuthNegotiateChannel::operator==(const AuthNegotiateChannel &other) const
     return handle_.authId == other.handle_.authId && handle_.type == other.handle_.type;
 }
 
+bool AuthNegotiateChannel::operator==(const AuthHandle &otherHandle) const
+{
+    return handle_.authId == otherHandle.authId && handle_.type == otherHandle.type;
+}
+
 bool AuthNegotiateChannel::IsMeta() const
 {
     bool isMeta = false;
@@ -193,6 +198,8 @@ static bool CheckSameAccount(const NegotiateMessage &msg)
         case NegotiateMessageType::CMD_V3_CUSTOM_PORT_RSP:
         case NegotiateMessageType::CMD_AUTH_HAND_SHAKE:
         case NegotiateMessageType::CMD_AUTH_HAND_SHAKE_RSP:
+        case NegotiateMessageType::CMD_CONN_V2_REQ_3:
+        case NegotiateMessageType::CMD_CONN_V2_RESP_3:
             ret = msg.GetExtraData().empty() || msg.GetExtraData().front();
             break;
         default:

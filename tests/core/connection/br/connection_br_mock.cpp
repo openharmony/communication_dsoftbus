@@ -36,7 +36,7 @@ static ConnectionBrInterface *GetConnectionBrInterface()
 }
 
 extern "C" {
-bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target)
+bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int32_t *target)
 {
     return GetConnectionBrInterface()->GetJsonObjectSignedNumberItem(json, string, target);
 }
@@ -46,7 +46,7 @@ bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int
     return GetConnectionBrInterface()->GetJsonObjectNumber64Item(json, string, target);
 }
 
-bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
+bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
 {
     return GetConnectionBrInterface()->AddNumberToJsonObject(json, string, num);
 }
@@ -61,12 +61,12 @@ cJSON *cJSON_ParseWithLength(const char *value, size_t buffer_length)
     return GetConnectionBrInterface()->cJSON_ParseWithLength(value, buffer_length);
 }
 
-bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target)
+bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32_t *target)
 {
     return GetConnectionBrInterface()->GetJsonObjectNumberItem(json, string, target);
 }
 
-int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     return GetConnectionBrInterface()->SoftBusGetBtMacAddr(mac);
 }

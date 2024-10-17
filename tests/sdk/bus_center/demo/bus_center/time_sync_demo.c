@@ -37,7 +37,7 @@ static ITimeSyncCb g_timeSyncCB = {
     .onTimeSyncResult = onTimeSyncDone,
 };
 
-int main(void)
+int32_t main(void)
 {
     const char *pkgName = "pkgName.demo";
     const char *networkId = "765432101234567898765432123456789876543210123654789876543210123";
@@ -47,7 +47,7 @@ int main(void)
     /*
      * 1. Device A calls StartTimeSync() to start the time synchronize with specific target node.
      */
-    int ret = StartTimeSync(pkgName, networkId, accuracy, period, &g_timeSyncCB);
+    int32_t ret = StartTimeSync(pkgName, networkId, accuracy, period, &g_timeSyncCB);
     if (ret != 0) {
         printf("[demo]StartTimeSync fail");
         return ret;

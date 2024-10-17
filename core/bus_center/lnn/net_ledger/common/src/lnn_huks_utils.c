@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "lnn_decision_db.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
@@ -344,6 +345,9 @@ int32_t LnnInitHuksInterface(void)
         LNN_LOGE(LNN_LEDGER, "huks init ce param set fail");
         return SOFTBUS_ERR;
     }
+    if (LnnCheckGenerateSoftBusKeyByHuks() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "check generate huks key failed");
+    }
     return SOFTBUS_OK;
 }
 
@@ -408,7 +412,7 @@ static int32_t GenerateCeKeyByHuks(struct HksBlob *keyAlias)
         return SOFTBUS_HUKS_ERR;
     }
     if (HksKeyExist(keyAlias, paramSet) == HKS_SUCCESS) {
-        LNN_LOGD(LNN_LEDGER, "huks ce key has generated");
+        LNN_LOGI(LNN_LEDGER, "huks ce key has generated");
         HksFreeParamSet(&paramSet);
         return SOFTBUS_OK;
     }
@@ -418,6 +422,7 @@ static int32_t GenerateCeKeyByHuks(struct HksBlob *keyAlias)
         LNN_LOGE(LNN_LEDGER, "huks generate ce key fail, errcode=%{public}d", ret);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LEDGER, "huks generate new ce key");
     return SOFTBUS_OK;
 }
 
@@ -433,7 +438,7 @@ static int32_t GenerateDeKeyByHuks(struct HksBlob *keyAlias)
         return SOFTBUS_HUKS_ERR;
     }
     if (HksKeyExist(keyAlias, paramSet) == HKS_SUCCESS) {
-        LNN_LOGD(LNN_LEDGER, "huks de key has generated");
+        LNN_LOGI(LNN_LEDGER, "huks de key has generated");
         HksFreeParamSet(&paramSet);
         return SOFTBUS_OK;
     }
@@ -443,6 +448,7 @@ static int32_t GenerateDeKeyByHuks(struct HksBlob *keyAlias)
         LNN_LOGE(LNN_LEDGER, "huks generate de key fail, errcode=%{public}d", ret);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LEDGER, "huks generate new de key");
     return SOFTBUS_OK;
 }
 

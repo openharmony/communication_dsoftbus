@@ -37,7 +37,7 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t size;
+    size_t size;
     const char *pkgName = (const char*)ReadString(req, &size);
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ServerCreateSessionServer pkgName is null");
@@ -67,7 +67,7 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t size;
+    size_t size;
     const char *pkgName = (const char*)ReadString(req, &size);
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer pkgName is null");
@@ -154,6 +154,50 @@ static void ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
     }
 }
 
+static bool ReadQosInfo(IpcIo *req, SessionParam *param)
+{
+    if (req == NULL || param == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param or req is NULL");
+        return false;
+    }
+
+    if (!ReadBool(req, &param->isQosLane)) {
+        TRANS_LOGE(TRANS_SDK, "read qos flag failed!");
+        return false;
+    }
+
+    if (!param->isQosLane) {
+        return true;
+    }
+
+    if (!ReadUint32(req, &param->qosCount)) {
+        TRANS_LOGE(TRANS_SDK, "read count of qos failed!");
+        return false;
+    }
+    
+    if (param->qosCount == 0) {
+        return true;
+    }
+
+    if (param->qosCount > QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "read invalid qosCount=%{public}" PRIu32, param->qosCount);
+        return false;
+    }
+
+    const QosTV *qosInfo = (QosTV *)ReadBuffer(req, sizeof(QosTV) * param->qosCount);
+    if (qosInfo == NULL) {
+        COMM_LOGE(COMM_SVC, "failed to read qos data");
+        return false;
+    }
+
+    if (memcpy_s(param->qos, sizeof(QosTV) * QOS_TYPE_BUTT, qosInfo, sizeof(QosTV) * param->qosCount) != EOK) {
+        COMM_LOGE(COMM_SVC, "failed memcpy qos info");
+        return false;
+    }
+
+    return true;
+}
+
 int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
 {
     TRANS_LOGI(TRANS_CTRL, "ipc server pop");
@@ -163,7 +207,7 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     }
 
     int32_t ret;
-    uint32_t size;
+    size_t size;
     SessionParam param;
     SessionAttribute getAttr;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -179,6 +223,10 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     ReadInt32(req, &param.sessionId);
     ServerReadSessionAttrs(req, &getAttr);
     param.attr = &getAttr;
+    if (!ReadQosInfo(req, &param)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read qos info");
+        return SOFTBUS_IPC_ERR;
+    }
 
     ret = CheckOpenSessionPremission(param.sessionName, param.peerSessionName);
     if (ret != SOFTBUS_OK) {
@@ -209,7 +257,7 @@ int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret;
-    uint32_t size;
+    size_t size;
     ConnectOption connOpt;
     const char *sessionName = (const char*)ReadString(req, &size);
     ConnectionAddr *addr = (ConnectionAddr *)ReadRawData(req, sizeof(ConnectionAddr));

@@ -287,6 +287,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
         .WillOnce(Return(REPORT_CHANGE))
         .WillRepeatedly(Return(REPORT_ONLINE));
 
+    OnlineStateEnter(nullptr);
     OnlineStateEnter(&connFsm->fsm);
     connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
@@ -396,6 +397,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1
 
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
+    LeavingStateEnter(nullptr);
     LeavingStateEnter(&connFsm->fsm);
 
     LnnDestroyConnectionFsm(connFsm);

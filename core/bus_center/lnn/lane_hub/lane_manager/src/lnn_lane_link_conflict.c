@@ -86,7 +86,7 @@ static int32_t PostConflictInfoTimelinessMsg(const DevIdentifyInfo *info, LinkCo
     Anonymize(info->type == IDENTIFY_TYPE_UDID_HASH ? info->devInfo.udidHash : info->devInfo.peerDevId,
         &anonyDevInfo);
     LNN_LOGI(LNN_LANE, "post conflict info timeliness msg, identifyType=%{public}d, devInfo=%{public}s,"
-        " conflictType=%{public}d", info->type, anonyDevInfo, conflictType);
+        " conflictType=%{public}d", info->type, AnonymizeWrapper(anonyDevInfo), conflictType);
     AnonymizeFree(anonyDevInfo);
     LinkConflictInfo *conflictItem = (LinkConflictInfo *)SoftBusCalloc(sizeof(LinkConflictInfo));
     if (conflictItem == NULL) {
@@ -122,7 +122,7 @@ static int32_t RemoveConflictInfoTimeliness(const SoftBusMessage *msg, void *dat
     }
     if (srcInfo->conflictType == dstInfo->conflictType &&
         memcmp(&srcInfo->identifyInfo, &dstInfo->identifyInfo, sizeof(DevIdentifyInfo)) == 0) {
-        LNN_LOGI(LNN_LANE, "remove conflict info timeliness message success");
+        LNN_LOGI(LNN_LANE, "remove timeliness msg succ");
         SoftBusFree(srcInfo);
         return SOFTBUS_OK;
     }
@@ -138,8 +138,8 @@ void RemoveConflictInfoTimelinessMsg(const DevIdentifyInfo *inputInfo, LinkConfl
     char *anonyDevInfo = NULL;
     Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
         inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
-    LNN_LOGI(LNN_LANE, "remove conflict info timeliness msg, identifyType=%{public}d, devInfo=%{public}s,"
-        " conflictType=%{public}d", inputInfo->type, anonyDevInfo, conflictType);
+    LNN_LOGI(LNN_LANE, "remove timeliness msg, identifyType=%{public}d, devInfo=%{public}s, conflictType=%{public}d",
+        inputInfo->type, AnonymizeWrapper(anonyDevInfo), conflictType);
     AnonymizeFree(anonyDevInfo);
     LinkConflictInfo conflictItem;
     (void)memset_s(&conflictItem, sizeof(LinkConflictInfo), 0, sizeof(LinkConflictInfo));
@@ -275,7 +275,7 @@ static int32_t CreateNewLinkConflictInfo(const LinkConflictInfo *inputInfo)
     Anonymize(inputInfo->identifyInfo.type == IDENTIFY_TYPE_UDID_HASH ?
         inputInfo->identifyInfo.devInfo.udidHash : inputInfo->identifyInfo.devInfo.peerDevId, &anonyDevInfo);
     LNN_LOGI(LNN_LANE, "create new conflict link success, identifyType=%{public}d, devInfo=%{public}s, "
-        "conflictType=%{public}d, releaseLink=%{public}d", inputInfo->identifyInfo.type, anonyDevInfo,
+        "conflictType=%{public}d, releaseLink=%{public}d", inputInfo->identifyInfo.type, AnonymizeWrapper(anonyDevInfo),
         inputInfo->conflictType, inputInfo->releaseLink);
     AnonymizeFree(anonyDevInfo);
     return SOFTBUS_OK;
@@ -295,7 +295,7 @@ int32_t DelLinkConflictInfo(const DevIdentifyInfo *inputInfo, LinkConflictType c
     Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
         inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
     LNN_LOGI(LNN_LANE, "start to del link conflict info by identifyType=%{public}d, devInfo=%{public}s,"
-        " conflictType=%{public}d", inputInfo->type, anonyDevInfo, conflictType);
+        " conflictType=%{public}d", inputInfo->type, AnonymizeWrapper(anonyDevInfo), conflictType);
     AnonymizeFree(anonyDevInfo);
     LinkConflictInfo *item = NULL;
     LinkConflictInfo *next = NULL;
@@ -330,7 +330,7 @@ int32_t AddLinkConflictInfo(const LinkConflictInfo *inputInfo)
     }
     int32_t ret = UpdateExistsLinkConflictInfo(inputInfo);
     if (ret == SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "update exists link conflict info success, update conflict info timeliness");
+        LNN_LOGE(LNN_LANE, "update link conflict info succ");
         RemoveConflictInfoTimelinessMsg(&inputInfo->identifyInfo, inputInfo->conflictType);
         ret = PostConflictInfoTimelinessMsg(&inputInfo->identifyInfo, inputInfo->conflictType);
         if (ret != SOFTBUS_OK) {
@@ -357,19 +357,21 @@ int32_t AddLinkConflictInfo(const LinkConflictInfo *inputInfo)
 static void GenerateConflictInfoWithDevIdHash(const DevIdentifyInfo *inputInfo, DevIdentifyInfo *outputInfo)
 {
     char peerUdid[UDID_BUF_LEN] = {0};
-    if (LnnGetRemoteStrInfo(inputInfo->devInfo.peerDevId, STRING_KEY_DEV_UDID,
-        peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get udid error");
+    int32_t ret = LnnGetRemoteStrInfo(inputInfo->devInfo.peerDevId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error, ret=%{public}d", ret);
         return;
     }
     uint8_t udidHash[UDID_HASH_LEN] = {0};
-    if (SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), udidHash) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "generate udidHash fail");
+    ret = SoftBusGenerateStrHash((const unsigned char*)peerUdid, strlen(peerUdid), udidHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "generate udidHash fail, ret=%{public}d", ret);
         return;
     }
-    if (ConvertBytesToHexString(outputInfo->devInfo.udidHash, CONFLICT_UDIDHASH_STR_LEN + 1, udidHash,
-        CONFLICT_SHORT_HASH_LEN_TMP) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "convert bytes to string fail");
+    ret = ConvertBytesToHexString(outputInfo->devInfo.udidHash, CONFLICT_UDIDHASH_STR_LEN + 1, udidHash,
+        CONFLICT_SHORT_HASH_LEN_TMP);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "convert bytes to string fail, ret=%{public}d", ret);
         return;
     }
 }
@@ -412,7 +414,7 @@ int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConfli
     Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
         inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
     LNN_LOGE(LNN_LANE, "not found link conflict info by identifyType=%{public}d, devInfo=%{public}s,"
-        " conflictType=%{public}d", inputInfo->type, anonyDevInfo, conflictType);
+        " conflictType=%{public}d", inputInfo->type, AnonymizeWrapper(anonyDevInfo), conflictType);
     AnonymizeFree(anonyDevInfo);
     return SOFTBUS_LANE_NOT_FOUND;
 }
@@ -450,7 +452,7 @@ static void MsgHandler(SoftBusMessage *msg)
 
 static int32_t InitLinkConflictLooper(void)
 {
-    g_linkConflictLoopHandler.name = "linkConflictLooper";
+    g_linkConflictLoopHandler.name = (char *)"linkConflictLooper";
     g_linkConflictLoopHandler.HandleMessage = MsgHandler;
     g_linkConflictLoopHandler.looper = GetLooper(LOOP_TYPE_LNN);
     if (g_linkConflictLoopHandler.looper == NULL) {

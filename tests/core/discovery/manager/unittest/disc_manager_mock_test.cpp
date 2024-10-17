@@ -14,8 +14,8 @@
  */
 
 #include <csignal>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <thread>
 
 #include "ble_mock.h"
@@ -39,22 +39,18 @@ void SignalHandler(int32_t sig, siginfo_t *info, void *context)
     (void)context;
     g_segmentFaultCount++;
 }
-} //anonymize namespace
+} // namespace
 
 namespace OHOS {
 class DiscManagerMockTest : public testing::Test {
 public:
-    static void SetUpTestCase()
-    {}
+    static void SetUpTestCase() { }
 
-    static void TearDownTestCase()
-    {}
+    static void TearDownTestCase() { }
 
-    void SetUp() override
-    {}
+    void SetUp() override { }
 
-    void TearDown() override
-    {}
+    void TearDown() override { }
 
     static void OnDeviceFoundInner(const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
     {
@@ -95,16 +91,15 @@ public:
     static inline std::string callbackPackageName_;
     static inline const char *packageName_ = "TestPackage";
     static inline const char *packageName1_ = "TestPackage1";
-    static inline const char *largePackageName_ =
-        "aaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaaabbbbbbbbccccccccdddddddde";
+    static inline const char *largePackageName_ = "aaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaaabbbbbbbbccccccccdddddddde";
 };
 
 /*
-* @tc.name: DiscManagerInit001
-* @tc.desc: discovery manager init failed
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscManagerInit001
+ * @tc.desc: discovery manager init failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscManagerInit001 begin ----");
@@ -120,11 +115,11 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscManagerInit002
-* @tc.desc: discovery manager init success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscManagerInit002
+ * @tc.desc: discovery manager init success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscManagerInit002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscManagerInit002 begin ----");
@@ -138,11 +133,11 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit002, TestSize.Level1)
 }
 
 /*
-* @tc.name: ClientDeathCallback001
-* @tc.desc: client death callback
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ClientDeathCallback001
+ * @tc.desc: client death callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, ClientDeathCallback001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "ClientDeathCallback001 begin ----");
@@ -160,11 +155,11 @@ HWTEST_F(DiscManagerMockTest, ClientDeathCallback001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscSetDiscoverCallback001
-* @tc.desc: set discovery callback
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscSetDiscoverCallback001
+ * @tc.desc: set discovery callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscSetDiscoverCallback001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscSetDiscoverCallback001 begin ----");
@@ -176,11 +171,11 @@ HWTEST_F(DiscManagerMockTest, DiscSetDiscoverCallback001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscPublish001
-* @tc.desc: invalid parameters
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscPublish001
+ * @tc.desc: invalid parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscPublish001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscPublish001 begin ----");
@@ -215,11 +210,11 @@ HWTEST_F(DiscManagerMockTest, DiscPublish001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscPublish002
-* @tc.desc: inner active publish
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscPublish002
+ * @tc.desc: inner active publish
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscPublish002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscPublish002 begin ----");
@@ -265,11 +260,11 @@ HWTEST_F(DiscManagerMockTest, DiscPublish002, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscStartScan001
-* @tc.desc: invalid parameters
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscStartScan001
+ * @tc.desc: invalid parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscStartScan001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscStartScan001 begin ----");
@@ -304,11 +299,11 @@ HWTEST_F(DiscManagerMockTest, DiscStartScan001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscStartScan002
-* @tc.desc: inner passive publish
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscStartScan002
+ * @tc.desc: inner passive publish
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscStartScan002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscStartScan002 begin ----");
@@ -355,11 +350,11 @@ HWTEST_F(DiscManagerMockTest, DiscStartScan002, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscUnpublish001
-* @tc.desc: cancel publish
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscUnpublish001
+ * @tc.desc: cancel publish
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscUnpublish001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscUnpublish001 begin ----");
@@ -392,11 +387,11 @@ HWTEST_F(DiscManagerMockTest, DiscUnpublish001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscStartAdvertise001
-* @tc.desc: inner active subscribe
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscStartAdvertise001
+ * @tc.desc: inner active subscribe
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscStartAdvertise001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscStartAdvertise001 begin ----");
@@ -431,11 +426,11 @@ HWTEST_F(DiscManagerMockTest, DiscStartAdvertise001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscStartAdvertise002
-* @tc.desc: inner active subscribe
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscStartAdvertise002
+ * @tc.desc: inner active subscribe
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscStartAdvertise002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscStartAdvertise002 begin ----");
@@ -481,11 +476,11 @@ HWTEST_F(DiscManagerMockTest, DiscStartAdvertise002, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscSubscribe001
-* @tc.desc: invalid parameters
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscSubscribe001
+ * @tc.desc: invalid parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscSubscribe001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscSubscribe001 begin ----");
@@ -520,11 +515,11 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscSubscribe002
-* @tc.desc: inner passive subscribe
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscSubscribe002
+ * @tc.desc: inner passive subscribe
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscSubscribe002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscSubscribe002 begin ----");
@@ -571,11 +566,11 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe002, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscStopAdvertise001
-* @tc.desc: stop advertise
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscStopAdvertise001
+ * @tc.desc: stop advertise
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscStopAdvertise001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscStopAdvertise001 begin ----");
@@ -604,11 +599,11 @@ HWTEST_F(DiscManagerMockTest, DiscStopAdvertise001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscPublishService001
-* @tc.desc: active publish
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscPublishService001
+ * @tc.desc: active publish
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscPublishService001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscPublishService001 begin ----");
@@ -644,11 +639,11 @@ HWTEST_F(DiscManagerMockTest, DiscPublishService001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscUnPublishService001
-* @tc.desc: cancel publish
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscUnPublishService001
+ * @tc.desc: cancel publish
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscUnPublishService001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscUnPublishService001 begin ----");
@@ -684,11 +679,11 @@ HWTEST_F(DiscManagerMockTest, DiscUnPublishService001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscStartDiscovery001
-* @tc.desc: start active discovery
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscStartDiscovery001
+ * @tc.desc: start active discovery
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscStartDiscovery001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscPublishService001 begin ----");
@@ -726,11 +721,11 @@ HWTEST_F(DiscManagerMockTest, DiscStartDiscovery001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscStopDiscovery001
-* @tc.desc: stop discovery
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscStopDiscovery001
+ * @tc.desc: stop discovery
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscStopDiscovery001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscStopDiscovery001 begin ----");
@@ -768,11 +763,11 @@ HWTEST_F(DiscManagerMockTest, DiscStopDiscovery001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscConcurrentRequests001
-* @tc.desc: test with concurrent requests
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscConcurrentRequests001
+ * @tc.desc: test with concurrent requests
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscConcurrentRequests001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscConcurrentRequests001 begin ----");
@@ -822,11 +817,11 @@ HWTEST_F(DiscManagerMockTest, DiscConcurrentRequests001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscMgrDeathCallback001
-* @tc.desc: client death handler
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscMgrDeathCallback001
+ * @tc.desc: client death handler
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscMgrDeathCallback001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscMgrDeathCallback001 begin ----");
@@ -860,11 +855,11 @@ HWTEST_F(DiscManagerMockTest, DiscMgrDeathCallback001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscManagerDeinit001
-* @tc.desc: discovery manager init success
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DiscManagerDeinit001
+ * @tc.desc: discovery manager init success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscManagerMockTest, DiscManagerDeinit001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscManagerDeinit001 begin ----");
@@ -878,4 +873,4 @@ HWTEST_F(DiscManagerMockTest, DiscManagerDeinit001, TestSize.Level1)
     EXPECT_EQ(checker.GetResult(), true);
     DISC_LOGI(DISC_TEST, "DiscManagerDeinit001 end ----");
 }
-}
+} // namespace OHOS
